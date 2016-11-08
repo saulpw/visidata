@@ -6,34 +6,32 @@ A console spreadsheet tool for discovering and arranging data
 
 Great for immediate exploration of datasets to find out what is relevant and what isn't.
 Usable via remote shell with Python3.
-Download a 50k standalone script onto a system with Python3 and start exploring within seconds.
+Download a 50kb standalone script onto a system with Python3 and start exploring within seconds.
+
+## Features
 
 - explore .csv, .json, .h5 files
-    - rows are loaded on demand, so 100GB .csv files can be browsed instantly
+    - can load 1k-1m rows slice of larger datasets
+    - slices are loaded on demand, so 100GB .csv files can be browsed instantly
     - same for remote datasets like bigquery/redshift or via sqlalchemy to RDBMS
-- select rows by regex or python expression
+- select and unselect rows by regex or python expression
 - sort rows by one or more columns
 - inner/outer/cross/diff join rows from multiple sheets by matching key columns
 - aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
-
-- convenient sheets like frequency tables and column stats
-
-- save sheet as .csv/tsv, .json, or into .h5 table
+- instantly create derived sheets for frequency tables and column stats
+- save any sheet arrangement as .csv/tsv, .json, or into .h5 table
 - save layout for future instances
-
 - custom sheet arrangements in Python3 scripts for repeated use on similar datasets that:
    - preprocess the data
    - coloring rows by matching regex or expression
    - \<Enter\> will 'dive' into cells by pushing a parameterized sheet onto the stack
    - add other actions
    - add computed columns
-
 - all edits and transforms added to a changelog
 
-
 ## Requirements
-- Python 3.2
-- h5py (if reading/writing HDF5)
+- Python 3.x
+- h5py (if reading/writing HDF5 files)
 
 ## Usage
 
@@ -44,7 +42,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **F1** or **?**   | modal window with screen-specific keybindings | modal window with global keybindings |
 |   **^R**     | reload this sheet from source (maintaining cursor position) | reload all sheets |
 |   **^S**     | save current sheet to new file | save all sheets to new .h5 file |
-|   **q**      | close current window/sheet | exit program |
+|   **q**      | close current window/sheet | exit program (save all sheets) |
+| **^C**        | cancel current long-running action |
 |
 |   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
 | **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
@@ -63,7 +62,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **-**      | Hide current column |
 |    **_**      | Expand current column to fit all column values on screen |
 |    **+**      | Expand all columns to fit all elements on screen |
-|    **.**      | "pin" this column as a 'key' column |
+|    **.**      | "pin" this column (make key column and sticky on the left)
 |
 |    **=**      | Add derivative column from expression |
 |
@@ -78,6 +77,15 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **\|**     | select/unselect by regex if this column matches | select row if any column matches |
 |    **\\**     | ignore by regex or expression in this column | unselect row if any column matches | |
 |    **,**      | select rows which match the current column value | select rows which have any column which matches the current column value |
-| **v**/**V**   | show/hide unselected rows |
+| **v**/**V**   | hide/show unselected rows |
 |
-| **z**/**Z**   | group/ungroup by current column locally |
+| **z**  | toggle group/ungroup by sequences in current column | group/ungroup by item in current column |
+
+
+### Sheet list ('S')
+Joins implicit omit 'keys matched
+| Keybinding | Action | with 'g' prefix |
+| ---: | --- | --- |
+| **&** | Inner Join of selected sheets. rows with unmatched keys are not present |
+| **X** | Full Join of selected sheets. all rows in both sheets are present |
+| **|** | Outer Join of selected sheets. all rows in first sheet are present; rows from other sheets with unmatched keys are not |
