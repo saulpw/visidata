@@ -11,9 +11,6 @@ Download a 50kb standalone script onto a system with Python3 and start exploring
 ## Features
 
 - explore .csv, .json, .h5 files
-    - can load 1k-1m rows slice of larger datasets
-    - slices are loaded on demand, so 100GB .csv files can be browsed instantly
-    - same for remote datasets like bigquery/redshift or via sqlalchemy to RDBMS
 - select and unselect rows by regex or python expression
 - sort rows by one or more columns
 - inner/outer/cross/diff join rows from multiple sheets by matching key columns
@@ -29,6 +26,11 @@ Download a 50kb standalone script onto a system with Python3 and start exploring
    - add computed columns
 - all edits and transforms added to a changelog
 
+- loads 100k row slices of larger datasets
+    - slices are loaded on demand, so 100GB .csv files can be browsed instantly
+    - same for remote datasets like bigquery/redshift or via sqlalchemy to RDBMS
+    - background task has progress bar, can be interrupted
+
 ## Requirements
 - Python 3.x
 - h5py (if reading/writing HDF5 files)
@@ -42,7 +44,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **F1** or **?**   | modal window with screen-specific keybindings | modal window with global keybindings |
 |   **^R**     | reload this sheet from source (maintaining cursor position) | reload all sheets |
 |   **^S**     | save current sheet to new file | save all sheets to new .h5 file |
-|   **q**      | close current window/sheet | exit program (save all sheets) |
+|   **q**      | close current window/sheet | exit program (close all sheets) |
 | **^C**        | cancel current long-running action |
 |
 |   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
@@ -72,10 +74,10 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **E**      | view last full error (e.g. stack trace) |
 |
 |    **R**      | view select list for this sheet |
-|    **\<Space\>**  | add current row to selected rows (g selects all rows) |
+|    **\<Space\>**  | add current row to selected rows | select all rows |
 |    \*/**u**   | select/unselect all rows | select/unselect across all sheets |
-|    **\|**     | select/unselect by regex if this column matches | select row if any column matches |
-|    **\\**     | ignore by regex or expression in this column | unselect row if any column matches | |
+|    **\|**     | select by regex if this column matches | select row if any column matches |
+|    **\\**     | unselect by regex or expression in this column | unselect row if any column matches | |
 |    **,**      | select rows which match the current column value | select rows which have any column which matches the current column value |
 | **v**/**V**   | hide/show unselected rows |
 |
@@ -87,5 +89,12 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
 | **&** | Inner Join of selected sheets. rows with unmatched keys are not present |
-| **X** | Full Join of selected sheets. all rows in both sheets are present |
-| **|** | Outer Join of selected sheets. all rows in first sheet are present; rows from other sheets with unmatched keys are not |
+| **\*** | Full Join of selected sheets. all rows in both sheets are present |
+| **\|** | Outer Join of selected sheets. all rows in first sheet are present; rows from other sheets with unmatched keys are not |
+
+
+## References
+
+[BurntSushi/gxd]
+[sc]
+[teapot]
