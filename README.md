@@ -83,7 +83,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 
 
 ### Sheet list ('S')
-Joins implicit omit 'keys matched
+
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
 | **&** | Inner Join of selected sheets. rows with unmatched keys are not present |
