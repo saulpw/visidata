@@ -71,7 +71,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **ctrl-^**    | toggle to previous sheet |
 |    **S**      | view current sheet stack | view list of all sheets |
 |    **F**      | build frequency table for current column |
-|    **E**      | view last full error (e.g. stack trace) |
+|    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
 |
 |    **R**      | view select list for this sheet |
 |    **\<Space\>**  | add current row to selected rows | select all rows |

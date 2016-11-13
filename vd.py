@@ -3,8 +3,9 @@
 'VisiData: curses tabular data exploration tool'
 
 __author__ = 'saul.pw'
-__version__ = 0.11
+__version__ = 0.12
 
+import string
 import os.path
 
 import curses
@@ -18,26 +19,38 @@ g_winHeight = None
 
 Inverses = {}  # inverse colors
 
-'''Movement Keys:
-    hjkl    (or arrows) move cell cursor left/down/up/right (g to go all the way)
-'''
+
+def ctrl(ch):
+    return ord(ch) & 31  # convert from 'a' to ^A keycode
+
+
+# when done with 'g' prefix
 global_commands = {
-            curses.KEY_LEFT:  'self.moveCursorRight(-1)',
-            curses.KEY_DOWN:  'self.moveCursorDown(+1)',
-            curses.KEY_UP:    'self.moveCursorDown(-1)',
-            curses.KEY_RIGHT: 'self.moveCursorRight(+1)',
-            curses.KEY_NPAGE: 'self.moveCursorDown(g_winHeight-1)',
-            curses.KEY_PPAGE: 'self.moveCursorDown(-g_winHeight+1)',
-            curses.KEY_HOME:  'self.topRowIndex = self.cursorRowIndex = 0',
-            curses.KEY_END:   'self.cursorRowIndex = len(self.rows)-1',
+}
 
-            ord('h'): 'self.moveCursorRight(-1)',
-            ord('j'): 'self.moveCursorDown(+1)',
-            ord('k'): 'self.moveCursorDown(-1)',
-            ord('l'): 'self.moveCursorRight(+1)',
 
-            ord('E'): 'vd.lastError(self.lastError)',
-        }
+base_commands = {
+    curses.KEY_LEFT:  'self.moveCursorRight(-1)',
+    curses.KEY_DOWN:  'self.moveCursorDown(+1)',
+    curses.KEY_UP:    'self.moveCursorDown(-1)',
+    curses.KEY_RIGHT: 'self.moveCursorRight(+1)',
+    curses.KEY_NPAGE: 'self.moveCursorDown(g_winHeight-1)',
+    curses.KEY_PPAGE: 'self.moveCursorDown(-g_winHeight+1)',
+    curses.KEY_HOME:  'self.topRowIndex = self.cursorRowIndex = 0',
+    curses.KEY_END:   'self.cursorRowIndex = len(self.rows)-1',
+
+    ctrl('g'): 'vd.status("%s/%s   %s" % (self.cursorRowIndex, len(self.rows), self.name))',
+    ord('h'): 'self.moveCursorRight(-1)',
+    ord('j'): 'self.moveCursorDown(+1)',
+    ord('k'): 'self.moveCursorDown(-1)',
+    ord('l'): 'self.moveCursorRight(+1)',
+    ctrl('h'): 'self.leftColIndex -= 1',
+    ctrl('j'): 'self.topRowIndex += 1',
+    ctrl('k'): 'self.topRowIndex -= 1',
+    ctrl('l'): 'self.leftColIndex += 1',
+
+    ord('E'): 'vd.lastError(self.lastError)',
+}
 
 
 class VException(Exception):
@@ -50,9 +63,10 @@ def open_xlsx(fn):
 
     for sheetname in workbook.sheetnames:
         sheet = workbook.get_sheet_by_name(sheetname)
-        vs = VSheet()
+        vs = VSheet('%s:%s' % (fn, sheetname))
 
-        vs.columns = [VColumn('', None, lambda_slice(colnum, None)) for colnum in range(0, sheet.max_column)]
+        defaultColNames = string.ascii_uppercase
+        vs.columns = [VColumn(defaultColNames[colnum], None, lambda_slice(colnum, None)) for colnum in range(0, sheet.max_column)]
 
         for row in sheet.iter_rows():
             vs.rows.append([cell.value for cell in row])
@@ -62,9 +76,9 @@ def open_xlsx(fn):
 
 def open_tsv(fn):
     fetcher = TsvFetcher(fn)
-    vs = VSheet()
+    vs = VSheet(fn)
     vs.rows = fetcher.getRows(0, 10000)
-    vs.columns = [VColumn(name, fetcher.getMaxWidth(colnum), lambda_slice(colnum, None)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
+    vs.columns = [VColumn(name, None, lambda_slice(colnum, None)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
     yield vs
 
 
@@ -79,10 +93,6 @@ class TsvFetcher:
     def getColumnNames(self):
         return self.columnNames
 
-    def getMaxWidth(self, colnum):
-        maxvalwidth = max(len(row[colnum]) for row in self.rows)
-        return max(maxvalwidth, len(self.columnNames[colnum]))
-
     def getRows(self, startrownum, endrownum):
         return self.rows[startrownum:endrownum]
 
@@ -90,17 +100,16 @@ class TsvFetcher:
 class Visidata:
     def __init__(self):
         self.sheets = []
+        self._status = ''
+
+    def signal(signum, frame):
+        self.status('SIGNAL %d' % signum)
+
+    def status(self, s):
+        self._status = s
 
     def run(self):
         return self.sheets[0].run()
-
-    def status(self, s):
-        self.clipdraw(g_winHeight-1, 0, s)
-        scr.clrtoeol()
-
-    def error(self, s):
-        self.clipdraw(g_winHeight-2, 0, s)
-        scr.clrtoeol()
 
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
         if w is None:
@@ -113,17 +122,19 @@ class Visidata:
             scr.addstr(y, x, s[:w-1] + '…', attr)
         else:
             scr.addstr(y, x, s, attr)
+            if len(s) < w:
+                scr.addstr(y, x+len(s), ' '*(w-len(s)), attr)
 
     def lastError(self, errlines):
         if not errlines:
-            self.status("No last error")
+            self.status('No last error')
             return
 
         if g_nextCmdIsGlobal:
             g_args.debug = True
             raise Exception('\n'.join(errlines))
 
-        errsheet = VSheet()
+        errsheet = VSheet('last_error')
         errsheet.rows = [[L] for L in errlines]
         errsheet.columns = [ VColumn("error") ]
         errsheet.run()
@@ -144,13 +155,16 @@ def lambda_slice(b,e):
 
 
 class VSheet:
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.rows = []
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorColIndex = 0  # absolute index of cursor into self.columns
+        self.pinnedRows = []
 
-        self.topRowIndex = 0   # cursorRowIndex of topmost row
-        self.leftColIndex = 0  # cursorColIndex of leftmost column
+        self.topRowIndex = 0     # cursorRowIndex of topmost row
+        self.leftColIndex = 0    # cursorColIndex of leftmost column
+        self.rightColIndex = 0   # cursorColIndex of rightmost column
 
         # all columns in display order
         self.columns = None
@@ -167,64 +181,78 @@ class VSheet:
         self.cursorColIndex += n
 
     def checkCursor(self):
-
         # keep cursor within actual available rowset
         if self.cursorRowIndex <= 0:
             self.cursorRowIndex = 0
         elif self.cursorRowIndex >= len(self.rows):
-            # TODO: fetch more if available
             self.cursorRowIndex = len(self.rows)-1
+
+        if self.cursorColIndex <= 0:
+            self.cursorColIndex = 0
+        elif self.cursorColIndex >= len(self.columns):
+            self.cursorColIndex = len(self.columns)-1
 
         # (x,y) is relative cell within screen viewport
         x = self.cursorColIndex - self.leftColIndex
         y = self.cursorRowIndex - self.topRowIndex + 1  # header
 
-        # check bounds
-        if y > g_winHeight:
-            y = g_winHeight
+        # check bounds, scroll if necessary
+        if y < 1:
+            self.topRowIndex -= 1
+        elif y > g_winHeight-2:
+            self.topRowIndex += 1
 
         if x < 0:
-            x = 0
-#        elif x >= len(self.visibleCols):
-#            self.columns
+            self.leftColIndex -= 1
+        elif x > self.rightColIndex:
+            self.leftColIndex += 1
 
     def run(self):
         global g_nextCmdIsGlobal, g_winHeight, g_winWidth
         while True:
             g_winHeight, g_winWidth = scr.getmaxyx()
-            self.checkCursor()
 
             try:
                 self.draw()
             except Exception as e:
                 import traceback
                 self.lastError = [x for x in traceback.format_exc().strip().split('\n')]
-                vd.error(self.lastError[-1])
+                vd.status(self.lastError[-1])
                 if g_args.debug:
                     raise
 
+            scr.move(g_winHeight-1, g_winWidth-1)
             curses.doupdate()
 
             ch = scr.getch()
             if ch == ord('q'):
                 return "QUIT"
-            if ch == ord('g'):
+            elif g_nextCmdIsGlobal:
+                if ch in global_commands:
+                    exec(global_commands[ch])
+                else:
+                    vd.status("no global version of command for key '%s' (%d)" % (chr(ch), ch))
+                g_nextCmdIsGlobal = False
+            elif ch == ord('g'):
                 g_nextCmdIsGlobal = True
-            elif ch in global_commands:
-                exec(global_commands[ch])
-                g_nextCmdIsGlobal = False
+            elif ch in base_commands:
+                exec(base_commands[ch])
             else:
-                self.error('key "%s" (%d) unsupported' % (chr(ch), ch))
-                g_nextCmdIsGlobal = False
+                vd.status("no command for key '%s' (%d)" % (chr(ch), ch))
+
+            self.checkCursor()
 
     def draw(self):
         scr.erase()  # clear screen before every re-draw
 
         x = 0
-        visibleRows = self.rows[self.topRowIndex:self.topRowIndex+g_winHeight-4]
+
         for colidx in range(self.leftColIndex, len(self.columns)):
-            if colidx == self.cursorColIndex:  # at this column
-                attr = curses.A_REVERSE
+
+            # draw header
+            #   choose attribute to highlight column header
+            if colidx == self.cursorColIndex:  # cursor is at this column
+                attr = curses.A_BOLD
             else:
                 attr = curses.A_NORMAL
 
@@ -236,17 +264,17 @@ class VSheet:
             else:
                 colwidth = col.width or self.getMaxWidth(colidx)
 
-            # always draw column header line on first row
+#            if self.drawColHeader:
             vd.clipdraw(0, x, col.name, attr, colwidth)
 
             y = 1
-            for rowidx in range(0, len(visibleRows)):
-                if rowidx == self.cursorRowIndex:  # cursor at this row
-                    attr = curses.A_UNDERLINE
+            for rowidx in range(0, g_winHeight-2):
+                if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
+                    attr = curses.A_REVERSE
                 else:
                     attr = curses.A_NORMAL
 
-                row = visibleRows[rowidx]
+                row = self.rows[self.topRowIndex + rowidx]
                 cellval = row[colidx]
 
                 if cellval is None:
@@ -256,9 +284,13 @@ class VSheet:
                 y += 1
 
             x += colwidth+1
-            if x > g_winWidth:
+            if x >= g_winWidth:
+                self.rightColIndex = colidx
                 break
 
+        # draw status on last line
+        if vd._status:
+            vd.clipdraw(g_winHeight-1, 0, vd._status)
 
 def sheet_from_file(fqpn):
     fn, ext = os.path.splitext(fqpn)
@@ -340,6 +372,9 @@ def curses_main(_scr):
     global scr
     scr = _scr
 
+    # get control keys instead of signals
+    curses.raw()
+
     result = "DONTQUIT"
     while result and result != "QUIT":
         result = vd.run()
@@ -354,66 +389,3 @@ def wrapper(f, *args):
 
 if __name__ == "__main__":
     terminal_main()
-
-notimplyet = '''
-    ^HJKL    (or ctrl-arrows) move column/row left/down/up/right (changes data ordering) (g to 'throw' it all the way)
-    ^F/^B   page forward/backward
-            go to row number
-    ^G      show sheet status line
-
-    /       Search forward by regex
-    ?       Search backward by regex
-    n       Go to next search match in same direction
-
-    s S     save current/every sheet to new file
-    ^R      reload files (keep position)
-
-Prefixes
-    g       selects all columns or other global context for the next command only
-
-Sheet setup and meta-sheets
-    $       view sheet list
-    ^       toggle to previous sheet
-
-    %       column chooser
-    -       Hide current column
-    _       Expand current column to fit all column values on screen
-    +       Expand all columns to fit all elements on screen
-    =       Add derivative column from expression
-
-    E       view last full error (e.g. stack trace)
-
-    F       build frequency table for current column (g for all columns)
-
-    SPACE   mark current row
-    0       clear all marked items
-    m       add regex to mark list
-            add eval expression to mark list
-
-    M       view mark list for this sheet
-            mark all visible rows
-            mark all rows
-            hide marked rows
-            only show marked rows
-            mark all hidden rows and unhide
-
-    D       remove marked rows (or current row?)
-    T       transform column by expression
-
-row filter (WHERE)
-    |       filter by regex in this column (add to include list)
-    \       ignore by regex in this column (add to exclude list)
-    ,       filter the current column by its value in the current row
-    *       Show all items (clear include/exclude lists)
-    { }     Sort primarily by current column (asc/desc)
-    [ ]     Toggle current column as additional sort key (asc/desc)
-            Remove all sort keys (does not change current ordering)
-
-aggregation (GROUP BY)
-            group by current column locally (g to make global groups)
-            ungroup current column (g to ungroup all columns)
-
-    ^R      refresh current sheet from sources
-'''
-
-
