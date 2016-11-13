@@ -2,8 +2,8 @@
 
 'VisiData: curses tabular data exploration tool'
 
-__author__ = 'saul.pw'
-__version__ = 0.12
+__author__ = 'Saul Pwanson <vd@saul.pw>'
+__version__ = 0.14
 
 import string
 import os.path
@@ -19,6 +19,13 @@ g_winHeight = None
 
 Inverses = {}  # inverse colors
 
+def gettext(k):
+    _gettext = {
+        'VisibleNone': '',
+        'ColumnFiller': ' ',
+        'Ellipsis': '…',
+    }
+    return _gettext[k]
 
 def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
@@ -26,6 +33,10 @@ def ctrl(ch):
 
 # when done with 'g' prefix
 global_commands = {
+    ord('h'): 'self.cursorColIndex = self.leftColIndex = 0',
+    ord('k'): 'self.cursorRowIndex = self.topRowIndex = 0',
+    ord('j'): 'self.cursorRowIndex = len(self.rows); self.topRowIndex = self.cursorRowIndex - self.nVisibleRows',
+    ord('l'): 'self.cursorColIndex = self.leftColIndex = len(self.columns)',
 }
 
 
@@ -34,8 +45,8 @@ base_commands = {
     curses.KEY_DOWN:  'self.moveCursorDown(+1)',
     curses.KEY_UP:    'self.moveCursorDown(-1)',
     curses.KEY_RIGHT: 'self.moveCursorRight(+1)',
-    curses.KEY_NPAGE: 'self.moveCursorDown(g_winHeight-1)',
-    curses.KEY_PPAGE: 'self.moveCursorDown(-g_winHeight+1)',
+    curses.KEY_NPAGE: 'self.moveCursorDown(self.nVisibleRows); self.topRowIndex += self.nVisibleRows',
+    curses.KEY_PPAGE: 'self.moveCursorDown(-self.nVisibleRows); self.topRowIndex -= self.nVisibleRows',
     curses.KEY_HOME:  'self.topRowIndex = self.cursorRowIndex = 0',
     curses.KEY_END:   'self.cursorRowIndex = len(self.rows)-1',
 
@@ -44,6 +55,9 @@ base_commands = {
     ord('j'): 'self.moveCursorDown(+1)',
     ord('k'): 'self.moveCursorDown(-1)',
     ord('l'): 'self.moveCursorRight(+1)',
+    ord('H'): 'self.cursorRowIndex = self.topRowIndex',
+    ord('M'): 'self.cursorRowIndex = self.topRowIndex+self.nVisibleRows/2',
+    ord('L'): 'self.cursorRowIndex = self.topRowIndex+self.nVisibleRows',
     ctrl('h'): 'self.leftColIndex -= 1',
     ctrl('j'): 'self.topRowIndex += 1',
     ctrl('k'): 'self.topRowIndex -= 1',
@@ -100,10 +114,7 @@ class TsvFetcher:
 class Visidata:
     def __init__(self):
         self.sheets = []
-        self._status = ''
-
-    def signal(signum, frame):
-        self.status('SIGNAL %d' % signum)
+        self._status = 'saul.pw/visidata ' + str(__version__)
 
     def status(self, s):
         self._status = s
@@ -112,18 +123,21 @@ class Visidata:
         return self.sheets[0].run()
 
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
-        if w is None:
-            w = g_winWidth
-        w = min(w, g_winWidth-x)
+        try:
+            if w is None:
+                w = g_winWidth
+            w = min(w, g_winWidth-x)
 
-        # convert to string just before drawing
-        s = str(s)
-        if len(s) > w:
-            scr.addstr(y, x, s[:w-1] + '…', attr)
-        else:
-            scr.addstr(y, x, s, attr)
-            if len(s) < w:
-                scr.addstr(y, x+len(s), ' '*(w-len(s)), attr)
+            # convert to string just before drawing
+            s = str(s)
+            if len(s) > w:
+                scr.addstr(y, x, s[:w-1] + gettext('Ellipsis'), attr)
+            else:
+                scr.addstr(y, x, s, attr)
+                if len(s) < w:
+                    scr.addstr(y, x+len(s), gettext('ColumnFiller')*(w-len(s)-1), attr)
+        except Exception as e:
+            self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
 
     def lastError(self, errlines):
         if not errlines:
@@ -136,7 +150,7 @@ class Visidata:
 
         errsheet = VSheet('last_error')
         errsheet.rows = [[L] for L in errlines]
-        errsheet.columns = [ VColumn("error") ]
+        errsheet.columns = [ VColumn('last_error') ]
         errsheet.run()
 
 
@@ -171,6 +185,10 @@ class VSheet:
 
         self.lastError = None
 
+    def __getattr__(self, k):
+        if k == 'nVisibleRows':
+            return g_winHeight-2
+
     def getMaxWidth(self, colnum):
         return max(len(row[colnum] or '') for row in self.rows)
 
@@ -198,9 +216,9 @@ class VSheet:
 
         # check bounds, scroll if necessary
         if y < 1:
-            self.topRowIndex -= 1
+            self.topRowIndex = self.cursorRowIndex
         elif y > g_winHeight-2:
-            self.topRowIndex += 1
+            self.topRowIndex = self.cursorRowIndex-g_winHeight+3
 
         if x < 0:
             self.leftColIndex -= 1
@@ -221,12 +239,19 @@ class VSheet:
                 if g_args.debug:
                     raise
 
-            scr.move(g_winHeight-1, g_winWidth-1)
+            # draw status on last line
+            if vd._status:
+                vd.clipdraw(g_winHeight-1, 0, vd._status)
+                vd._status = ''
+
+            scr.move(g_winHeight-1, g_winWidth-2)
             curses.doupdate()
 
             ch = scr.getch()
             if ch == ord('q'):
                 return "QUIT"
+            elif ch == curses.KEY_RESIZE:
+                g_winHeight, g_winWidth = scr.getmaxyx()
             elif g_nextCmdIsGlobal:
                 if ch in global_commands:
                     exec(global_commands[ch])
@@ -269,16 +294,22 @@ class VSheet:
 
             y = 1
             for rowidx in range(0, g_winHeight-2):
-                if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
-                    attr = curses.A_REVERSE
+                if self.topRowIndex + rowidx >= len(self.rows):
+                    break
+
+                if colidx == self.cursorColIndex:  # cursor is at this column
+                    attr = curses.A_BOLD
                 else:
                     attr = curses.A_NORMAL
+
+                if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
+                    attr = curses.A_REVERSE
 
                 row = self.rows[self.topRowIndex + rowidx]
                 cellval = row[colidx]
 
                 if cellval is None:
-                    cellval = ''
+                    cellval = gettext('VisibleNone')
 
                 vd.clipdraw(y, x, cellval, attr, colwidth)
                 y += 1
@@ -288,9 +319,6 @@ class VSheet:
                 self.rightColIndex = colidx
                 break
 
-        # draw status on last line
-        if vd._status:
-            vd.clipdraw(g_winHeight-1, 0, vd._status)
 
 def sheet_from_file(fqpn):
     fn, ext = os.path.splitext(fqpn)
@@ -348,11 +376,11 @@ def setupcolors(stdscr, f, *args):
 
 
 def terminal_main():
-    'Parse arguments and initialize Visidata instance'
+    'Parse arguments and initialize VisiData instance'
     import argparse
 
     global g_args, vd
-    parser = argparse.ArgumentParser(description='Visidata ' + str(__version__) + ' by saul.pw')
+    parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('inputs', nargs='*', help='initial sheets')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='abort on exception')

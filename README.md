@@ -1,16 +1,32 @@
-# VisiData
+# VisiData v0.14
 
 The Swiss Army Knife for Data Exploration
 
 A console spreadsheet tool for discovering and arranging data
 
-Great for immediate exploration of datasets to find out what is relevant and what isn't.
-Usable via remote shell with Python3.
-Download a 50kb standalone script onto a system with Python3 and start exploring within seconds.
+Immediately explore datasets to find out what is relevant and how it's structured.
+
+Usable via any remote shell with Python3.
 
 ## Features
 
-- explore .csv, .json, .h5 files
+- can view data from .tsv and .xlsx files
+
+### Working keys
+
+The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) for the next command only.
+
+| Keybinding | Action | with 'g' prefix |
+| ---: | --- | --- |
+|   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
+| **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
+|   **H**/**M**/**L**   | move cursor to top/middle/bottom of screen |
+|
+|    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
+
+# Features for v1.0 (coming soon)
+
+- source tabular data in many common formats (.csv, .json, .h5, .xlsx)
 - select and unselect rows by regex or python expression
 - sort rows by one or more columns
 - inner/outer/cross/diff join rows from multiple sheets by matching key columns
@@ -26,14 +42,15 @@ Download a 50kb standalone script onto a system with Python3 and start exploring
    - add computed columns
 - all edits and transforms added to a changelog
 
-- loads 100k row slices of larger datasets
+- incrementally loads row slices of larger datasets
     - slices are loaded on demand, so 100GB .csv files can be browsed instantly
     - same for remote datasets like bigquery/redshift or via sqlalchemy to RDBMS
     - background task has progress bar, can be interrupted
 
 ## Requirements
-- Python 3.x
+- Python 3.?
 - h5py (if reading/writing HDF5 files)
+- openpyxl (if reading xlsx files)
 
 ## Usage
 
@@ -47,9 +64,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **q**      | close current window/sheet | exit program (close all sheets) |
 | **^C**        | cancel current long-running action |
 |
-|   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
-| **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
-|   **H**/**M**/**L**   | move cursor to top/middle/bottom of screen |
 |   **J**/**K**     | skip down/up to next value in column |
 |  **/**    | Search by regex or Python expression |
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
@@ -71,7 +85,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **ctrl-^**    | toggle to previous sheet |
 |    **S**      | view current sheet stack | view list of all sheets |
 |    **F**      | build frequency table for current column |
-|    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
 |
 |    **R**      | view select list for this sheet |
 |    **\<Space\>**  | add current row to selected rows | select all rows |
@@ -95,6 +108,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 
 ## References
 
-[BurntSushi/gxd]
+[BurntSushi/xsv]
 [sc]
 [teapot]
