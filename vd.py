@@ -3,164 +3,272 @@
 'VisiData: curses tabular data exploration tool'
 
 __author__ = 'saul.pw'
-__version__ = 0.10
+__version__ = 0.11
+
+import os.path
 
 import curses
 import codecs
+
+vd = None    # toplevel VisiData, contains all sheets
+scr = None   # toplevel curses screen
+g_nextCmdIsGlobal = False  # 'g' prefix sets to True
+g_winWidth = None
+g_winHeight = None
+
+Inverses = {}  # inverse colors
+
+'''Movement Keys:
+    hjkl    (or arrows) move cell cursor left/down/up/right (g to go all the way)
+'''
+global_commands = {
+            curses.KEY_LEFT:  'self.moveCursorRight(-1)',
+            curses.KEY_DOWN:  'self.moveCursorDown(+1)',
+            curses.KEY_UP:    'self.moveCursorDown(-1)',
+            curses.KEY_RIGHT: 'self.moveCursorRight(+1)',
+            curses.KEY_NPAGE: 'self.moveCursorDown(g_winHeight-1)',
+            curses.KEY_PPAGE: 'self.moveCursorDown(-g_winHeight+1)',
+            curses.KEY_HOME:  'self.topRowIndex = self.cursorRowIndex = 0',
+            curses.KEY_END:   'self.cursorRowIndex = len(self.rows)-1',
+
+            ord('h'): 'self.moveCursorRight(-1)',
+            ord('j'): 'self.moveCursorDown(+1)',
+            ord('k'): 'self.moveCursorDown(-1)',
+            ord('l'): 'self.moveCursorRight(+1)',
+
+            ord('E'): 'vd.lastError(self.lastError)',
+        }
 
 
 class VException(Exception):
     pass
 
 
-'''Movement Keys:
-    hjkl    (or arrows) move cell cursor left/down/up/right (g to go all the way)
-'''
+def open_xlsx(fn):
+    import openpyxl
+    workbook = openpyxl.load_workbook(fn, data_only=True, read_only=True)
+
+    for sheetname in workbook.sheetnames:
+        sheet = workbook.get_sheet_by_name(sheetname)
+        vs = VSheet()
+
+        vs.columns = [VColumn('', None, lambda_slice(colnum, None)) for colnum in range(0, sheet.max_column)]
+
+        for row in sheet.iter_rows():
+            vs.rows.append([cell.value for cell in row])
+
+        yield vs
 
 
-Inverses = {}
+def open_tsv(fn):
+    fetcher = TsvFetcher(fn)
+    vs = VSheet()
+    vs.rows = fetcher.getRows(0, 10000)
+    vs.columns = [VColumn(name, fetcher.getMaxWidth(colnum), lambda_slice(colnum, None)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
+    yield vs
+
 
 class TsvFetcher:
     def __init__(self, fntsv):
         self.fp = codecs.open(fntsv, 'r')
         self.rowIndex = { }  # byte offsets of each line for random access
         lines = self.fp.read().splitlines()
-        self.rows = dict((n, lines[n+1].split('\t')) for n in range(0, len(lines)-1))  # [rownum] -> [ field ... ]
         self.columnNames = lines[0].split('\t')
+        self.rows = [L.split('\t') for L in lines[1:]]  # [rownum] -> [ field, ... ]
 
     def getColumnNames(self):
         return self.columnNames
 
     def getMaxWidth(self, colnum):
-        maxvalwidth = max(len(row[colnum]) for row in self.rows.values())
+        maxvalwidth = max(len(row[colnum]) for row in self.rows)
         return max(maxvalwidth, len(self.columnNames[colnum]))
 
     def getRows(self, startrownum, endrownum):
-        r = []
-        for rownum in range(startrownum, endrownum+1):
-            if rownum not in self.rows:
-                self.rows[rownum] = self.fetchRow(rownum)
-            r.append(self.rows[rownum])
-        return r
+        return self.rows[startrownum:endrownum]
 
 
 class Visidata:
     def __init__(self):
         self.sheets = []
 
-    def run(self, scr):
-        return self.sheets[0].run(scr)
+    def run(self):
+        return self.sheets[0].run()
+
+    def status(self, s):
+        self.clipdraw(g_winHeight-1, 0, s)
+        scr.clrtoeol()
+
+    def error(self, s):
+        self.clipdraw(g_winHeight-2, 0, s)
+        scr.clrtoeol()
+
+    def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
+        if w is None:
+            w = g_winWidth
+        w = min(w, g_winWidth-x)
+
+        # convert to string just before drawing
+        s = str(s)
+        if len(s) > w:
+            scr.addstr(y, x, s[:w-1] + '…', attr)
+        else:
+            scr.addstr(y, x, s, attr)
+
+    def lastError(self, errlines):
+        if not errlines:
+            self.status("No last error")
+            return
+
+        if g_nextCmdIsGlobal:
+            g_args.debug = True
+            raise Exception('\n'.join(errlines))
+
+        errsheet = VSheet()
+        errsheet.rows = [[L] for L in errlines]
+        errsheet.columns = [ VColumn("error") ]
+        errsheet.run()
+
 
 class VColumn:
-    def __init__(self, name, width=None):
+    def __init__(self, name, width=None, func=lambda r: r, eval_context=None):
         self.name = name
-        self.width = width or len(name)
+        self.width = width
+        self.func = func
+
+    def getValue(self, row):
+        return self.func(row)
+
+
+def lambda_slice(b,e):
+    return lambda r: r[b:e]
+
 
 class VSheet:
-    def __init__(self, fetcher):
-        self.fetcher = fetcher
-        self.rowIndex = 0  # absolute index of cursor into self.rows
-        self.colIndex = 0  # absolute index of cursor into self.columns
+    def __init__(self):
+        self.rows = []
+        self.cursorRowIndex = 0  # absolute index of cursor into self.rows
+        self.cursorColIndex = 0  # absolute index of cursor into self.columns
 
-        self.firstDisplayRow = 0  # rowIndex of topmost row
-        self.firstDisplayCol = 0  # colIndex of leftmost column
+        self.topRowIndex = 0   # cursorRowIndex of topmost row
+        self.leftColIndex = 0  # cursorColIndex of leftmost column
 
-        self.columns = [VColumn(name, fetcher.getMaxWidth(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
-        self.commands = {
-            ord('h'): 'self.moveCursor(0, -1)',
-            ord('j'): 'self.moveCursor(+1, 0)',
-            ord('k'): 'self.moveCursor(-1, 0)',
-            ord('l'): 'self.moveCursor(0, +1)',
-        }
-        self.scr = None
+        # all columns in display order
+        self.columns = None
 
-    def moveCursor(self, dy, dx):
-        y = self.rowIndex + dy
-        x = self.colIndex + dx
+        self.lastError = None
+
+    def getMaxWidth(self, colnum):
+        return max(len(row[colnum] or '') for row in self.rows)
+
+    def moveCursorDown(self, n):
+        self.cursorRowIndex += n
+
+    def moveCursorRight(self, n):
+        self.cursorColIndex += n
+
+    def checkCursor(self):
+
+        # keep cursor within actual available rowset
+        if self.cursorRowIndex <= 0:
+            self.cursorRowIndex = 0
+        elif self.cursorRowIndex >= len(self.rows):
+            # TODO: fetch more if available
+            self.cursorRowIndex = len(self.rows)-1
+
+        # (x,y) is relative cell within screen viewport
+        x = self.cursorColIndex - self.leftColIndex
+        y = self.cursorRowIndex - self.topRowIndex + 1  # header
 
         # check bounds
-        if y < 0:
-            y = 0
-        elif y > self.winHeight:
-            y = self.winHeight
+        if y > g_winHeight:
+            y = g_winHeight
 
-        self.rowIndex = y
-        self.colIndex = x
+        if x < 0:
+            x = 0
+#        elif x >= len(self.visibleCols):
+#            self.columns
 
-    def run(self, scr):
-        self.scr = scr
-
+    def run(self):
+        global g_nextCmdIsGlobal, g_winHeight, g_winWidth
         while True:
+            g_winHeight, g_winWidth = scr.getmaxyx()
+            self.checkCursor()
+
             try:
                 self.draw()
             except Exception as e:
-                self.lastError = [str(e)]
-                self.error(self.lastError[0])
+                import traceback
+                self.lastError = [x for x in traceback.format_exc().strip().split('\n')]
+                vd.error(self.lastError[-1])
+                if g_args.debug:
+                    raise
 
             curses.doupdate()
 
             ch = scr.getch()
             if ch == ord('q'):
                 return "QUIT"
-            elif ch in self.commands:
-                exec(self.commands[ch])
+            if ch == ord('g'):
+                g_nextCmdIsGlobal = True
+            elif ch in global_commands:
+                exec(global_commands[ch])
+                g_nextCmdIsGlobal = False
             else:
                 self.error('key "%s" (%d) unsupported' % (chr(ch), ch))
+                g_nextCmdIsGlobal = False
 
     def draw(self):
-        scr = self.scr
-        self.winHeight, self.winWidth = scr.getmaxyx()
+        scr.erase()  # clear screen before every re-draw
+
         x = 0
-        visibleRows = self.fetcher.getRows(self.firstDisplayRow, self.firstDisplayRow+self.winHeight-4)
-        for colidx in range(self.firstDisplayCol, len(self.columns)):
-            if colidx == self.colIndex:  # at this column
+        visibleRows = self.rows[self.topRowIndex:self.topRowIndex+g_winHeight-4]
+        for colidx in range(self.leftColIndex, len(self.columns)):
+            if colidx == self.cursorColIndex:  # at this column
                 attr = curses.A_REVERSE
             else:
                 attr = curses.A_NORMAL
+
             col = self.columns[colidx]
+
+            # last column should use entire rest of screen width
+            if colidx == len(self.columns)-1:
+                colwidth = g_winWidth - x
+            else:
+                colwidth = col.width or self.getMaxWidth(colidx)
+
             # always draw column header line on first row
-            self.clipdraw(0, x, col.name, attr, col.width)
+            vd.clipdraw(0, x, col.name, attr, colwidth)
 
             y = 1
             for rowidx in range(0, len(visibleRows)):
-                if rowidx == self.rowIndex:  # cursor at this row
+                if rowidx == self.cursorRowIndex:  # cursor at this row
                     attr = curses.A_UNDERLINE
                 else:
                     attr = curses.A_NORMAL
 
                 row = visibleRows[rowidx]
-                self.clipdraw(y, x, row[colidx], attr, col.width)
+                cellval = row[colidx]
+
+                if cellval is None:
+                    cellval = ''
+
+                vd.clipdraw(y, x, cellval, attr, colwidth)
                 y += 1
 
-            x += col.width+1
-            if x > self.winWidth:
+            x += colwidth+1
+            if x > g_winWidth:
                 break
 
-    def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
-        if w is None:
-            w = self.winWidth
-        w = min(w, self.winWidth-x)
-        if len(s) > w:
-            self.scr.addstr(y, x, s[:w-3] + '...', attr)
-        else:
-            self.scr.addstr(y, x, s, attr)
 
-    def status(self, s):
-        self.clipdraw(self.winHeight-1, 0, s)
-        self.scr.clrtoeol()
+def sheet_from_file(fqpn):
+    fn, ext = os.path.splitext(fqpn)
+    ext = ext[1:]  # remove leading '.'
 
-    def error(self, s):
-        self.clipdraw(self.winHeight-2, 0, s)
-        self.scr.clrtoeol()
+    funcname = "open_" + ext
+    if funcname not in globals():
+        raise VException('%s: No parser available for %s' % (fqpn, ext))
 
-
-def sheet_from_file(fn):
-    if fn.endswith('.tsv'):
-        fetcher = TsvFetcher(fn)
-    else:
-        raise VException('No parser available for %s' % fn)
-    vs = VSheet(fetcher)
-    return vs
+    return globals()[funcname](fqpn)
 
 
 nextColorPair = 1
@@ -211,7 +319,7 @@ def terminal_main():
     'Parse arguments and initialize Visidata instance'
     import argparse
 
-    global g_args
+    global g_args, vd
     parser = argparse.ArgumentParser(description='Visidata ' + str(__version__) + ' by saul.pw')
 
     parser.add_argument('inputs', nargs='*', help='initial sheets')
@@ -219,15 +327,22 @@ def terminal_main():
     g_args = parser.parse_args()
 
     vd = Visidata()
-    vd.sheets = [sheet_from_file(fn) for fn in g_args.inputs] or sheet_from_file('.')
+    inputs = g_args.inputs or ['.']
 
-    wrapper(curses_main, vd)
+    for fn in inputs:
+        for vs in sheet_from_file(fn):
+            vd.sheets.append(vs)
+
+    wrapper(curses_main)
 
 
-def curses_main(scr, sheet):
+def curses_main(_scr):
+    global scr
+    scr = _scr
+
     result = "DONTQUIT"
     while result and result != "QUIT":
-        result = sheet.run(scr)
+        result = vd.run()
 
     return result
 
