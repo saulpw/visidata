@@ -4,13 +4,29 @@ The Swiss Army Knife for Data Exploration
 
 A console spreadsheet tool for discovering and arranging data
 
-Immediately explore datasets to find out what is relevant and how it's structured.
+Immediately explore datasets to find out what is relevant and how they're structured.
 
 Usable via any remote shell with Python3.
 
 ## Features
 
 - can view data from .tsv and .xlsx files
+
+## Installation
+
+- Copy the vd.py script to a bin/ directory in PATH and make it executable.
+- Install any required dependencies:
+
+### Dependencies
+
+- Python 3.?
+- openpyxl (if reading xlsx files)
+
+## Usage
+
+        $ vd.py <input-file>
+
+where `<input-file>` is a one of the supported file formats.
 
 ### Working keys
 
@@ -23,6 +39,21 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **H**/**M**/**L**   | move cursor to top/middle/bottom of screen |
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
+
+## Contributions
+
+Created by Saul Pwanson `<vd@saul.pw>`.
+
+VisiData is currently under active development (as of Nov 2016).
+Please contact me at the email address above if you would like to contribute.
+
+## Inspirations
+
+- [BurntSushi/xsv](https://github.com/BurntSushi/xsv)
+- [andmarti1424/sc-im](https://github.com/andmarti1424/sc-im)
+- [teapot](https://www.syntax-k.de/projekte/teapot/)
+
+---
 
 # Features for v1.0 (coming soon)
 
@@ -47,12 +78,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
     - same for remote datasets like bigquery/redshift or via sqlalchemy to RDBMS
     - background task has progress bar, can be interrupted
 
-## Requirements
-- Python 3.?
-- h5py (if reading/writing HDF5 files)
-- openpyxl (if reading xlsx files)
 
-## Usage
+## Keybindings
 
 The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) for the next command only.
 
@@ -106,8 +133,3 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **\|** | Outer Join of selected sheets. all rows in first sheet are present; rows from other sheets with unmatched keys are not |
 
 
-## References
-
-[BurntSushi/xsv]
-[sc]
-[teapot]
