@@ -6,6 +6,7 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __version__ = 0.15
 
 import string
+import collections
 import os.path
 
 import curses
@@ -33,42 +34,75 @@ def ctrl(ch):
 
 # when done with 'g' prefix
 global_commands = {
-    ord('h'): 'self.cursorColIndex = self.leftColIndex = 0',
-    ord('k'): 'self.cursorRowIndex = self.topRowIndex = 0',
-    ord('j'): 'self.cursorRowIndex = len(self.rows); self.topRowIndex = self.cursorRowIndex - self.nVisibleRows',
-    ord('l'): 'self.cursorColIndex = self.leftColIndex = len(self.columns)',
+    ord('q'): 'vd.sheets = []',
+
+    ord('h'): 'sheet.cursorColIndex = sheet.leftColIndex = 0',
+    ord('k'): 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
+    ord('j'): 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex - sheet.nVisibleRows',
+    ord('l'): 'sheet.cursorColIndex = sheet.leftColIndex = len(sheet.columns)',
+
+    ord('E'): 'g_args.debug = True; raise VException(sheet.lastError)',
 }
 
 
 base_commands = {
-    curses.KEY_LEFT:  'self.moveCursorRight(-1)',
-    curses.KEY_DOWN:  'self.moveCursorDown(+1)',
-    curses.KEY_UP:    'self.moveCursorDown(-1)',
-    curses.KEY_RIGHT: 'self.moveCursorRight(+1)',
-    curses.KEY_NPAGE: 'self.moveCursorDown(self.nVisibleRows); self.topRowIndex += self.nVisibleRows',
-    curses.KEY_PPAGE: 'self.moveCursorDown(-self.nVisibleRows); self.topRowIndex -= self.nVisibleRows',
-    curses.KEY_HOME:  'self.topRowIndex = self.cursorRowIndex = 0',
-    curses.KEY_END:   'self.cursorRowIndex = len(self.rows)-1',
+    ord('q'): 'del vd.sheets[0]',
 
-    ctrl('g'): 'vd.status("%s/%s   %s" % (self.cursorRowIndex, len(self.rows), self.name))',
-    ord('h'): 'self.moveCursorRight(-1)',
-    ord('j'): 'self.moveCursorDown(+1)',
-    ord('k'): 'self.moveCursorDown(-1)',
-    ord('l'): 'self.moveCursorRight(+1)',
-    ord('H'): 'self.cursorRowIndex = self.topRowIndex',
-    ord('M'): 'self.cursorRowIndex = self.topRowIndex+self.nVisibleRows/2',
-    ord('L'): 'self.cursorRowIndex = self.topRowIndex+self.nVisibleRows',
-    ctrl('h'): 'self.leftColIndex -= 1',
-    ctrl('j'): 'self.topRowIndex += 1',
-    ctrl('k'): 'self.topRowIndex -= 1',
-    ctrl('l'): 'self.leftColIndex += 1',
+    curses.KEY_LEFT:  'sheet.moveCursorRight(-1)',
+    curses.KEY_DOWN:  'sheet.moveCursorDown(+1)',
+    curses.KEY_UP:    'sheet.moveCursorDown(-1)',
+    curses.KEY_RIGHT: 'sheet.moveCursorRight(+1)',
+    curses.KEY_NPAGE: 'sheet.moveCursorDown(sheet.nVisibleRows); sheet.topRowIndex += sheet.nVisibleRows',
+    curses.KEY_PPAGE: 'sheet.moveCursorDown(-sheet.nVisibleRows); sheet.topRowIndex -= sheet.nVisibleRows',
+    curses.KEY_HOME:  'sheet.topRowIndex = sheet.cursorRowIndex = 0',
+    curses.KEY_END:   'sheet.cursorRowIndex = len(sheet.rows)-1',
 
-    ord('E'): 'vd.lastError(self.lastError)',
+    ord('h'): 'sheet.moveCursorRight(-1)',
+    ord('j'): 'sheet.moveCursorDown(+1)',
+    ord('k'): 'sheet.moveCursorDown(-1)',
+    ord('l'): 'sheet.moveCursorRight(+1)',
+    ord('H'): 'sheet.cursorRowIndex = sheet.topRowIndex',
+    ord('M'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows/2',
+    ord('L'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows',
+
+    ctrl('h'): 'sheet.leftColIndex -= 1',
+    ctrl('j'): 'sheet.topRowIndex += 1',
+    ctrl('k'): 'sheet.topRowIndex -= 1',
+    ctrl('l'): 'sheet.leftColIndex += 1',
+
+    ctrl('g'): 'vd.status("%s/%s   %s" % (sheet.cursorRowIndex, len(sheet.rows), sheet.name))',
+
+    ord('E'): 'vd.pushSheet(createTextViewer("last_error", sheet.lastError))',
+    ord('F'): 'vd.pushSheet(createFreqTable(sheet, sheet.cursorCol))',
 }
+
+
+def createTextViewer(name, text):
+    viewer = VSheet(name)
+    viewer.rows = text.split('\n')
+    viewer.columns = [ VColumn(name, None, lambda r: r) ]
+    return viewer
+
+
+def createFreqTable(sheet, col):
+    values = collections.defaultdict(int)
+    for r in sheet.rows:
+        values[str(col.getValue(r))] += 1
+    freqtbl = VSheet('Frequency of values in %s$%s' % (sheet.name, col.name))
+    freqtbl.rows = list(values.items())
+    freqtbl.columns = [ VColumn(col.name + "_value", None, lambda_col(0)), VColumn('num_instances', None, lambda_col(1)) ]
+    return freqtbl
 
 
 class VException(Exception):
     pass
+
+def exceptionCaught(sheet):
+    import traceback
+    sheet.lastError = traceback.format_exc().strip()
+    vd.status(sheet.lastError.splitlines()[-1])
+    if g_args.debug:
+        raise
 
 
 def open_xlsx(fn):
@@ -80,7 +114,7 @@ def open_xlsx(fn):
         vs = VSheet('%s:%s' % (fn, sheetname))
 
         defaultColNames = string.ascii_uppercase
-        vs.columns = [VColumn(defaultColNames[colnum], None, lambda_slice(colnum, None)) for colnum in range(0, sheet.max_column)]
+        vs.columns = [VColumn(defaultColNames[colnum], None, lambda_col(colnum)) for colnum in range(0, sheet.max_column)]
 
         for row in sheet.iter_rows():
             vs.rows.append([cell.value for cell in row])
@@ -92,7 +126,7 @@ def open_tsv(fn):
     fetcher = TsvFetcher(fn)
     vs = VSheet(fn)
     vs.rows = fetcher.getRows(0, 10000)
-    vs.columns = [VColumn(name, None, lambda_slice(colnum, None)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
+    vs.columns = [VColumn(name, None, lambda_col(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
     yield vs
 
 
@@ -111,7 +145,7 @@ class TsvFetcher:
         return self.rows[startrownum:endrownum]
 
 
-class Visidata:
+class VisiData:
     def __init__(self):
         self.sheets = []
         self._status = 'saul.pw/visidata ' + str(__version__)
@@ -120,7 +154,55 @@ class Visidata:
         self._status = s
 
     def run(self):
-        return self.sheets[0].run()
+        global g_nextCmdIsGlobal, g_winHeight, g_winWidth
+        g_winHeight, g_winWidth = scr.getmaxyx()
+
+        while True:
+            if not self.sheets:
+                # if no more sheets, exit
+                return
+
+            sheet = self.sheets[0]
+
+            try:
+                sheet.draw()
+            except Exception as e:
+                exceptionCaught(sheet)
+
+            # draw status on last line
+            if self._status:
+                self.clipdraw(g_winHeight-1, 0, self._status)
+                self._status = ''
+
+            scr.move(g_winHeight-1, g_winWidth-2)
+            curses.doupdate()
+
+            ch = scr.getch()
+            if ch == curses.KEY_RESIZE:
+                g_winHeight, g_winWidth = scr.getmaxyx()
+            elif g_nextCmdIsGlobal:
+                if ch in global_commands:
+                    try:
+                        exec(global_commands[ch])
+                    except Exception:
+                        exceptionCaught(sheet)
+                else:
+                    self.status("no global version of command for key '%s' (%d)" % (chr(ch), ch))
+                g_nextCmdIsGlobal = False
+            elif ch == ord('g'):
+                g_nextCmdIsGlobal = True
+            elif ch in base_commands:
+                try:
+                    exec(base_commands[ch])
+                except Exception:
+                    exceptionCaught(sheet)
+            else:
+                self.status("no command for key '%s' (%d)" % (chr(ch), ch))
+
+            sheet.checkCursor()
+
+    def pushSheet(self, sheet):
+        self.sheets.insert(0, sheet)
 
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
         try:
@@ -139,20 +221,6 @@ class Visidata:
         except Exception as e:
             self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
 
-    def lastError(self, errlines):
-        if not errlines:
-            self.status('No last error')
-            return
-
-        if g_nextCmdIsGlobal:
-            g_args.debug = True
-            raise Exception('\n'.join(errlines))
-
-        errsheet = VSheet('last_error')
-        errsheet.rows = [[L] for L in errlines]
-        errsheet.columns = [ VColumn('last_error') ]
-        errsheet.run()
-
 
 class VColumn:
     def __init__(self, name, width=None, func=lambda r: r, eval_context=None):
@@ -164,8 +232,8 @@ class VColumn:
         return self.func(row)
 
 
-def lambda_slice(b,e):
-    return lambda r: r[b:e]
+def lambda_col(b):
+    return lambda r: r[b]
 
 
 class VSheet:
@@ -183,11 +251,13 @@ class VSheet:
         # all columns in display order
         self.columns = None
 
-        self.lastError = None
+        self.lastError = 'No error'
 
     def __getattr__(self, k):
         if k == 'nVisibleRows':
             return g_winHeight-2
+        elif k == 'cursorCol':
+            return self.columns[self.cursorColIndex]
 
     def getMaxWidth(self, colnum):
         return max(len(row[colnum] or '') for row in self.rows)
@@ -230,48 +300,6 @@ class VSheet:
         elif x > self.rightColIndex:
             self.leftColIndex += 1
 
-    def run(self):
-        global g_nextCmdIsGlobal, g_winHeight, g_winWidth
-        while True:
-            g_winHeight, g_winWidth = scr.getmaxyx()
-
-            try:
-                self.draw()
-            except Exception as e:
-                import traceback
-                self.lastError = [x for x in traceback.format_exc().strip().split('\n')]
-                vd.status(self.lastError[-1])
-                if g_args.debug:
-                    raise
-
-            # draw status on last line
-            if vd._status:
-                vd.clipdraw(g_winHeight-1, 0, vd._status)
-                vd._status = ''
-
-            scr.move(g_winHeight-1, g_winWidth-2)
-            curses.doupdate()
-
-            ch = scr.getch()
-            if ch == ord('q'):
-                return "QUIT"
-            elif ch == curses.KEY_RESIZE:
-                g_winHeight, g_winWidth = scr.getmaxyx()
-            elif g_nextCmdIsGlobal:
-                if ch in global_commands:
-                    exec(global_commands[ch])
-                else:
-                    vd.status("no global version of command for key '%s' (%d)" % (chr(ch), ch))
-                g_nextCmdIsGlobal = False
-            elif ch == ord('g'):
-                g_nextCmdIsGlobal = True
-            elif ch in base_commands:
-                exec(base_commands[ch])
-            else:
-                vd.status("no command for key '%s' (%d)" % (chr(ch), ch))
-
-            self.checkCursor()
-
     def draw(self):
         scr.erase()  # clear screen before every re-draw
 
@@ -311,7 +339,7 @@ class VSheet:
                     attr = curses.A_REVERSE
 
                 row = self.rows[self.topRowIndex + rowidx]
-                cellval = row[colidx]
+                cellval = self.columns[colidx].getValue(row)
 
                 if cellval is None:
                     cellval = gettext('VisibleNone')
@@ -391,14 +419,16 @@ def terminal_main():
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='abort on exception')
     g_args = parser.parse_args()
 
-    vd = Visidata()
+    vd = VisiData()
     inputs = g_args.inputs or ['.']
 
     for fn in inputs:
         for vs in sheet_from_file(fn):
             vd.sheets.append(vs)
 
-    wrapper(curses_main)
+    ret = wrapper(curses_main)
+    if ret:
+        print(ret)
 
 
 def curses_main(_scr):
@@ -408,11 +438,10 @@ def curses_main(_scr):
     # get control keys instead of signals
     curses.raw()
 
-    result = "DONTQUIT"
-    while result and result != "QUIT":
-        result = vd.run()
-
-    return result
+    try:
+        return vd.run()
+    except Exception as e:
+        return 'Exception: ' + str(e)
 
 
 def wrapper(f, *args):

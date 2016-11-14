@@ -11,6 +11,7 @@ Usable via any remote shell with Python3.
 ## Features
 
 - can view data from .tsv and .xlsx files
+- instantly create frequency table for column
 
 ## Installation
 
@@ -37,8 +38,12 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
 | **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
 |   **H**/**M**/**L**   | move cursor to top/middle/bottom of screen |
+|   **^G**      | show sheet status on statusline |
+|
+|    **F**      | build frequency table for current column |
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
+
 
 ## Contributions
 
@@ -62,7 +67,6 @@ Please contact me at the email address above if you would like to contribute.
 - sort rows by one or more columns
 - inner/outer/cross/diff join rows from multiple sheets by matching key columns
 - aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
-- instantly create derived sheets for frequency tables and column stats
 - save any sheet arrangement as .csv/tsv, .json, or into .h5 table
 - save layout for future instances
 - custom sheet arrangements in Python3 scripts for repeated use on similar datasets that:
@@ -111,7 +115,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |
 | **ctrl-^**    | toggle to previous sheet |
 |    **S**      | view current sheet stack | view list of all sheets |
-|    **F**      | build frequency table for current column |
 |
 |    **R**      | view select list for this sheet |
 |    **\<Space\>**  | add current row to selected rows | select all rows |
