@@ -95,15 +95,13 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **F1** or **?**   | modal window with screen-specific keybindings | modal window with global keybindings |
 |   **^R**     | reload this sheet from source (maintaining cursor position) | reload all sheets |
 |   **^S**     | save current sheet to new file | save all sheets to new .h5 file |
-|   **q**      | close current window/sheet | exit program (close all sheets) |
 | **^C**        | cancel current long-running action |
 |
 |  **/**    | Search by regex or Python expression |
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
-| **^G**  | show sheet status line |
 |
 |**^H**/**^J**/**^K**/**^L** (or ctrl-arrows) | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
-|    **{**/**}**    | Sort primarily by current column (asc/desc) |
+|    **{**/**}**    | Secondary sort by current column (asc/desc) |
 |    **r**      | Remove all sort keys (does not change current ordering) |
 |
 |    **C**      | column arrangement screen.  Columns can be renamed, reordered, hidden/unhidden. shows stats (distinct/min/max/mean/stddev); whether pinned, in sort order, grouped by |
@@ -112,7 +110,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |
 |    **=**      | Add derivative column from expression |
 |
-| **ctrl-^**    | toggle to previous sheet |
 |    **S**      | view current sheet stack | view list of all sheets |
 |
 |    **R**      | view select list for this sheet |
@@ -120,7 +117,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    \*/**u**   | select/unselect all rows | select/unselect across all sheets |
 |    **\|**     | select by regex if this column matches | select row if any column matches |
 |    **\\**     | unselect by regex or expression in this column | unselect row if any column matches | |
-|    **,**      | select rows which match the current column value | select rows which have any column which matches the current column value |
+|    ** **      | select rows which match the current column value | select rows which have any column which matches the current column value |
 | **v**/**V**   | hide/show unselected rows |
 |
 | **z**  | toggle group/ungroup by sequences in current column | group/ungroup by item in current column |
