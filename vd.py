@@ -42,6 +42,7 @@ global_commands = {
     ord('l'): 'sheet.cursorColIndex = sheet.leftColIndex = len(sheet.columns)',
 
     ord('E'): 'g_args.debug = True; raise VException(sheet.lastError)',
+    ord('_'): 'for c in sheet.columns: c.width = getMaxWidth(c, sheet.visibleRows)',
 }
 
 
@@ -74,6 +75,8 @@ base_commands = {
 
     ord('E'): 'vd.pushSheet(createTextViewer("last_error", sheet.lastError))',
     ord('F'): 'vd.pushSheet(createFreqTable(sheet, sheet.cursorCol))',
+
+    ord('_'): 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)',
 }
 
 
@@ -88,9 +91,11 @@ def createFreqTable(sheet, col):
     values = collections.defaultdict(int)
     for r in sheet.rows:
         values[str(col.getValue(r))] += 1
-    freqtbl = VSheet('Frequency of values in %s$%s' % (sheet.name, col.name))
+
+    fqcolname = '%s_%s' % (sheet.name, col.name)
+    freqtbl = VSheet('freq_' + fqcolname)
     freqtbl.rows = list(values.items())
-    freqtbl.columns = [ VColumn(col.name + "_value", None, lambda_col(0)), VColumn('num_instances', None, lambda_col(1)) ]
+    freqtbl.columns = [ VColumn(fqcolname, None, lambda_col(0)), VColumn('num_instances', None, lambda_col(1)) ]
     return freqtbl
 
 
@@ -107,11 +112,12 @@ def exceptionCaught(sheet):
 
 def open_xlsx(fn):
     import openpyxl
+    basename, ext = os.path.splitext(fn)
     workbook = openpyxl.load_workbook(fn, data_only=True, read_only=True)
 
     for sheetname in workbook.sheetnames:
         sheet = workbook.get_sheet_by_name(sheetname)
-        vs = VSheet('%s:%s' % (fn, sheetname))
+        vs = VSheet('%s:%s' % (basename, sheetname))
 
         defaultColNames = string.ascii_uppercase
         vs.columns = [VColumn(defaultColNames[colnum], None, lambda_col(colnum)) for colnum in range(0, sheet.max_column)]
@@ -123,8 +129,9 @@ def open_xlsx(fn):
 
 
 def open_tsv(fn):
+    basename, ext = os.path.splitext(fn)
     fetcher = TsvFetcher(fn)
-    vs = VSheet(fn)
+    vs = VSheet(basename)
     vs.rows = fetcher.getRows(0, 10000)
     vs.columns = [VColumn(name, None, lambda_col(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
     yield vs
@@ -143,6 +150,10 @@ class TsvFetcher:
 
     def getRows(self, startrownum, endrownum):
         return self.rows[startrownum:endrownum]
+
+
+def getMaxWidth(col, rows):
+    return max(max(len(col.getValue(r) or '') for r in rows), len(col.name))
 
 
 class VisiData:
@@ -258,9 +269,10 @@ class VSheet:
             return g_winHeight-2
         elif k == 'cursorCol':
             return self.columns[self.cursorColIndex]
-
-    def getMaxWidth(self, colnum):
-        return max(len(row[colnum] or '') for row in self.rows)
+        elif k == 'visibleRows':
+            return self.rows[self.topRowIndex:self.topRowIndex + g_winHeight-2]
+        else:
+            raise AttributeError(k)
 
     def moveCursorDown(self, n):
         self.cursorRowIndex += n
@@ -320,7 +332,7 @@ class VSheet:
             if colidx == len(self.columns)-1:
                 colwidth = g_winWidth - x - 1
             else:
-                colwidth = col.width or self.getMaxWidth(colidx)
+                colwidth = col.width or getMaxWidth(col, self.rows)
 
 #            if self.drawColHeader:
             vd.clipdraw(0, x, col.name, attr, colwidth)

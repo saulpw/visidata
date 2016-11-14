@@ -43,6 +43,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **F**      | build frequency table for current column |
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
+|    **_**      | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
 
 
 ## Contributions
@@ -107,8 +108,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |
 |    **C**      | column arrangement screen.  Columns can be renamed, reordered, hidden/unhidden. shows stats (distinct/min/max/mean/stddev); whether pinned, in sort order, grouped by |
 |    **-**      | Hide current column |
-|    **_**      | Expand current column to fit all column values on screen |
-|    **+**      | Expand all columns to fit all elements on screen |
 |    **.**      | "pin" this column (make key column and sticky on the left)
 |
 |    **=**      | Add derivative column from expression |
