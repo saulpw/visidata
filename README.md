@@ -1,4 +1,4 @@
-# VisiData v0.14
+# VisiData v0.15
 
 The Swiss Army Knife for Data Exploration
 
@@ -44,6 +44,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
 |    **_**      | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
+|    **[**/**]**    | Sort by current column (asc/desc) |
+|   **J**/**K**     | skip down/up to next value in column |
 
 
 ## Contributions
@@ -96,14 +98,12 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **q**      | close current window/sheet | exit program (close all sheets) |
 | **^C**        | cancel current long-running action |
 |
-|   **J**/**K**     | skip down/up to next value in column |
 |  **/**    | Search by regex or Python expression |
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
 | **^G**  | show sheet status line |
 |
 |**^H**/**^J**/**^K**/**^L** (or ctrl-arrows) | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
 |    **{**/**}**    | Sort primarily by current column (asc/desc) |
-|    **[**/**]**    | Toggle current column as additional sort key (asc/desc) |
 |    **r**      | Remove all sort keys (does not change current ordering) |
 |
 |    **C**      | column arrangement screen.  Columns can be renamed, reordered, hidden/unhidden. shows stats (distinct/min/max/mean/stddev); whether pinned, in sort order, grouped by |

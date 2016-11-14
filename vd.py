@@ -2,15 +2,14 @@
 
 'VisiData: curses interface for exploration of tabular data'
 
-__author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.15
-
+import os.path
 import string
 import collections
-import os.path
-
 import curses
 import codecs
+
+__author__ = 'Saul Pwanson <vd@saul.pw>'
+__version__ = 0.15
 
 vd = None    # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
@@ -32,23 +31,11 @@ def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
 
 
-# when done with 'g' prefix
-global_commands = {
-    ord('q'): 'vd.sheets = []',
-
-    ord('h'): 'sheet.cursorColIndex = sheet.leftColIndex = 0',
-    ord('k'): 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
-    ord('j'): 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex - sheet.nVisibleRows',
-    ord('l'): 'sheet.cursorColIndex = sheet.leftColIndex = len(sheet.columns)',
-
-    ord('E'): 'g_args.debug = True; raise VException(sheet.lastError)',
-    ord('_'): 'for c in sheet.columns: c.width = getMaxWidth(c, sheet.visibleRows)',
-}
-
-
 base_commands = {
+    # pop current sheet off the sheet stack
     ord('q'): 'del vd.sheets[0]',
 
+    # standard movement with arrow keys
     curses.KEY_LEFT:  'sheet.moveCursorRight(-1)',
     curses.KEY_DOWN:  'sheet.moveCursorDown(+1)',
     curses.KEY_UP:    'sheet.moveCursorDown(-1)',
@@ -58,25 +45,50 @@ base_commands = {
     curses.KEY_HOME:  'sheet.topRowIndex = sheet.cursorRowIndex = 0',
     curses.KEY_END:   'sheet.cursorRowIndex = len(sheet.rows)-1',
 
+    # move cursor with vi keys
     ord('h'): 'sheet.moveCursorRight(-1)',
     ord('j'): 'sheet.moveCursorDown(+1)',
     ord('k'): 'sheet.moveCursorDown(-1)',
     ord('l'): 'sheet.moveCursorRight(+1)',
+
+    # H/M/L jump to top/middle/bottom of screen
     ord('H'): 'sheet.cursorRowIndex = sheet.topRowIndex',
     ord('M'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows/2',
     ord('L'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows',
 
+    # ^h/j/k/l scroll manually
     ctrl('h'): 'sheet.leftColIndex -= 1',
     ctrl('j'): 'sheet.topRowIndex += 1',
     ctrl('k'): 'sheet.topRowIndex -= 1',
     ctrl('l'): 'sheet.leftColIndex += 1',
 
-    ctrl('g'): 'vd.status("%s/%s   %s" % (sheet.cursorRowIndex, len(sheet.rows), sheet.name))',
+    # ^g sheet status
+    ctrl('g'): 'vd.status(sheet.statusLine)',
 
     ord('E'): 'vd.pushSheet(createTextViewer("last_error", sheet.lastError))',
     ord('F'): 'vd.pushSheet(createFreqTable(sheet, sheet.cursorCol))',
 
+    # _ resets column width
     ord('_'): 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)',
+
+    ord('['): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue)',
+    ord(']'): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue, reverse=True)',
+
+    ord('J'): 'sheet.skipDown()',
+    ord('K'): 'sheet.skipUp()',
+}
+
+# when used with 'g' prefix
+global_commands = {
+    ord('q'): 'vd.sheets = []',
+
+    ord('h'): 'sheet.cursorColIndex = sheet.leftColIndex = 0',
+    ord('k'): 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
+    ord('j'): 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex - sheet.nVisibleRows',
+    ord('l'): 'sheet.cursorColIndex = sheet.leftColIndex = len(sheet.columns)-1',
+
+    ord('E'): 'g_args.debug = True; raise VException(sheet.lastError)',
+    ord('_'): 'for c in sheet.columns: c.width = getMaxWidth(c, sheet.visibleRows)',
 }
 
 
@@ -95,19 +107,12 @@ def createFreqTable(sheet, col):
     fqcolname = '%s_%s' % (sheet.name, col.name)
     freqtbl = VSheet('freq_' + fqcolname)
     freqtbl.rows = list(values.items())
-    freqtbl.columns = [ VColumn(fqcolname, None, lambda_col(0)), VColumn('num_instances', None, lambda_col(1)) ]
+    freqtbl.columns = [ VColumn(fqcolname, None, lambda_col(0)), VColumn('num', None, lambda_col(1)) ]
     return freqtbl
 
 
 class VException(Exception):
     pass
-
-def exceptionCaught(sheet):
-    import traceback
-    sheet.lastError = traceback.format_exc().strip()
-    vd.status(sheet.lastError.splitlines()[-1])
-    if g_args.debug:
-        raise
 
 
 def open_xlsx(fn):
@@ -132,7 +137,7 @@ def open_tsv(fn):
     basename, ext = os.path.splitext(fn)
     fetcher = TsvFetcher(fn)
     vs = VSheet(basename)
-    vs.rows = fetcher.getRows(0, 10000)
+    vs.rows = fetcher.getRows(0, None)
     vs.columns = [VColumn(name, None, lambda_col(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
     yield vs
 
@@ -153,16 +158,17 @@ class TsvFetcher:
 
 
 def getMaxWidth(col, rows):
-    return max(max(len(col.getValue(r) or '') for r in rows), len(col.name))
+    return max(max(len(col.getValue(r)) for r in rows), len(col.name))
 
 
 class VisiData:
     def __init__(self):
         self.sheets = []
-        self._status = 'saul.pw/visidata ' + str(__version__)
+        self._status = []
+        self.status('saul.pw/visidata v' + str(__version__))
 
     def status(self, s):
-        self._status = s
+        self._status.append(s)
 
     def run(self):
         global g_nextCmdIsGlobal, g_winHeight, g_winWidth
@@ -178,12 +184,12 @@ class VisiData:
             try:
                 sheet.draw()
             except Exception as e:
-                exceptionCaught(sheet)
+                sheet.exceptionCaught()
 
             # draw status on last line
             if self._status:
-                self.clipdraw(g_winHeight-1, 0, self._status)
-                self._status = ''
+                self.clipdraw(g_winHeight-1, 0, " | ".join(self._status))
+                self._status = []
 
             scr.move(g_winHeight-1, g_winWidth-2)
             curses.doupdate()
@@ -196,7 +202,7 @@ class VisiData:
                     try:
                         exec(global_commands[ch])
                     except Exception:
-                        exceptionCaught(sheet)
+                        sheet.exceptionCaught()
                 else:
                     self.status("no global version of command for key '%s' (%d)" % (chr(ch), ch))
                 g_nextCmdIsGlobal = False
@@ -206,7 +212,7 @@ class VisiData:
                 try:
                     exec(base_commands[ch])
                 except Exception:
-                    exceptionCaught(sheet)
+                    sheet.exceptionCaught()
             else:
                 self.status("no command for key '%s' (%d)" % (chr(ch), ch))
 
@@ -242,6 +248,13 @@ class VColumn:
     def getValue(self, row):
         return self.func(row)
 
+    def getDisplayValue(self, row):
+        cellval = self.getValue(row)
+        if cellval is None:
+            cellval = gettext('VisibleNone')
+        return str(cellval)
+
+
 
 def lambda_col(b):
     return lambda r: r[b]
@@ -270,7 +283,11 @@ class VSheet:
         elif k == 'cursorCol':
             return self.columns[self.cursorColIndex]
         elif k == 'visibleRows':
-            return self.rows[self.topRowIndex:self.topRowIndex + g_winHeight-2]
+            return self.rows[self.topRowIndex:self.topRowIndex+g_winHeight-2]
+        elif k == 'cursorValue':
+            return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
+        elif k == 'statusLine':
+            return "%s/%s   %s" % (sheet.cursorRowIndex, len(sheet.rows), sheet.name)
         else:
             raise AttributeError(k)
 
@@ -279,6 +296,27 @@ class VSheet:
 
     def moveCursorRight(self, n):
         self.cursorColIndex += n
+
+    def cellValue(self, rownum, colnum):
+        return self.columns[colnum].getValue(self.rows[rownum])
+
+    def skipDown(self):
+        pv = self.cursorValue
+        for i in range(self.cursorRowIndex+1, len(self.rows)):
+            if self.cellValue(i, self.cursorColIndex) != pv:
+                self.cursorRowIndex = i
+                return
+
+        vd.status('no different value down this column')
+
+    def skipUp(self):
+        pv = self.cursorValue
+        for i in range(self.cursorRowIndex, -1, -1):
+            if self.cellValue(i, self.cursorColIndex) != pv:
+                self.cursorRowIndex = i
+                return
+
+        vd.status('no different value up this column')
 
     def checkCursor(self):
         # keep cursor within actual available rowset
@@ -322,7 +360,7 @@ class VSheet:
             # draw header
             #   choose attribute to highlight column header
             if colidx == self.cursorColIndex:  # cursor is at this column
-                attr = curses.A_BOLD
+                attr = curses.A_REVERSE
             else:
                 attr = curses.A_NORMAL
 
@@ -351,10 +389,7 @@ class VSheet:
                     attr = curses.A_REVERSE
 
                 row = self.rows[self.topRowIndex + rowidx]
-                cellval = self.columns[colidx].getValue(row)
-
-                if cellval is None:
-                    cellval = gettext('VisibleNone')
+                cellval = self.columns[colidx].getDisplayValue(row)
 
                 vd.clipdraw(y, x, cellval, attr, colwidth)
                 y += 1
@@ -363,6 +398,13 @@ class VSheet:
             if x >= g_winWidth:
                 self.rightColIndex = colidx
                 break
+
+    def exceptionCaught(self):
+        import traceback
+        self.lastError = traceback.format_exc().strip()
+        vd.status(self.lastError.splitlines()[-1])
+        if g_args.debug:
+            raise
 
 
 def sheet_from_file(fqpn):
