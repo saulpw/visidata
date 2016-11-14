@@ -138,6 +138,43 @@ class ChangeCommandSet(VException):
         self.commands = commands
         self.mode = mode
 
+
+def open_h5(fn):
+    import h5py
+    f = h5py.File(fn, 'r')
+    hs = createHDF5Sheet(f)
+    hs.name = fn
+    yield hs
+
+open_hdf5 = open_h5
+
+def createHDF5Sheet(hobj):
+    import h5py
+    vs = VSheet(hobj.name)
+
+    if isinstance(hobj, h5py.Group):
+        vs.rows = [ hobj[objname] for objname in hobj.keys() ]
+        vs.columns = [
+            VColumn(hobj.name, None, lambda r: r.name.split('/')[-1]),
+            VColumn('type', None, lambda r: type(r).__name__),
+            VColumn('nItems', None, lambda r: len(r)),
+        ]
+
+        vs.commands = {
+            ctrl('j'): 'vd.pushSheet(createHDF5Sheet(sheet.cursorRow))',
+#            ord('A'): 'vd.pushSheet(createDictSheet(sheet.cursorRow.attrs))',
+        }
+    elif isinstance(hobj, h5py.Dataset):
+        if len(hobj.shape) == 1:
+            vs.rows = hobj[:]
+            vs.columns = [VColumn(colname, None, lambda_colname(colname)) for colname in hobj.dtype.names]
+        elif len(hobj.shape) == 2:  # matrix
+            vs.rows = hobj[:]
+            defaultColNames = string.ascii_uppercase
+            vs.columns = [VColumn(defaultColNames[colnum], None, lambda_col(colnum)) for colnum in range(0, hobj.shape[1])]
+    return vs
+
+
 def open_xlsx(fn):
     import openpyxl
     basename, ext = os.path.splitext(fn)
@@ -217,7 +254,7 @@ class VisiData:
             try:
                 sheet.draw()
             except Exception as e:
-                sheet.exceptionCaught()
+                self.exceptionCaught()
 
             # draw status on last line
             if self._status:
@@ -230,9 +267,10 @@ class VisiData:
             ch = scr.getch()
             if ch == curses.KEY_RESIZE:
                 g_winHeight, g_winWidth = scr.getmaxyx()
-            elif ch in commands:
+            elif ch in sheet.commands or ch in commands:
+                cmdstr = sheet.commands.get(ch) or commands.get(ch)
                 try:
-                    exec(commands[ch])
+                    exec(cmdstr)
 
                     commands = base_commands
                 except ChangeCommandSet as e:
@@ -241,7 +279,7 @@ class VisiData:
                     self.status(e.mode)
                 except Exception:
                     self.exceptionCaught()
-                    self.status(commands[ch])
+                    self.status(cmdstr)
             else:
                 self.status("no command for key '%s' (%d)" % (chr(ch), ch))
 
@@ -286,6 +324,9 @@ class VColumn:
 
 
 
+def lambda_colname(colname):
+    return lambda r: r[colname]
+
 def lambda_col(b):
     return lambda r: r[b]
 
@@ -304,6 +345,9 @@ class VSheet:
 
         # all columns in display order
         self.columns = None
+
+        # specialized sheet keys
+        self.commands = {}
 
     def __getattr__(self, k):
         if k == 'nVisibleRows':

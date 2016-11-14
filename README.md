@@ -10,7 +10,7 @@ Usable via any remote shell with Python3.
 
 ## Features
 
-- can view data from .tsv and .xlsx files
+- can view data in .tsv, .xlsx, .hdf5 files
 - instantly create frequency table for column
 
 ## Installation
@@ -22,6 +22,8 @@ Usable via any remote shell with Python3.
 
 - Python 3.?
 - openpyxl (if reading xlsx files)
+- h5py (if reading HDF5 files)
+- numpy (h5py dependency, and general usefulness)
 
 ## Usage
 
@@ -47,6 +49,12 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **[**/**]**    | Sort by current column (asc/desc) |
 |   **J**/**K**     | skip down/up to next value in column |
 
+### HDF5 sheets
+
+| Keybinding | Action | with 'g' prefix |
+| ---: | --- | --- |
+|  **<Enter>** | open the group or dataset under the cursor |
+|  **A**   | view attributes of currently selected object | view attributes of current sheet |
 
 ## Contributions
 
@@ -128,7 +136,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
 | **&** | Inner Join of selected sheets. rows with unmatched keys are not present |
-| **\*** | Full Join of selected sheets. all rows in both sheets are present |
+| ** \* ** | Full Join of selected sheets. all rows in both sheets are present |
 | **\|** | Outer Join of selected sheets. all rows in first sheet are present; rows from other sheets with unmatched keys are not |
-
 
