@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-'VisiData: curses tabular data exploration tool'
+'VisiData: curses interface for exploration of tabular data'
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.14
+__version__ = 0.15
 
 import string
 import os.path
@@ -135,7 +135,7 @@ class Visidata:
             else:
                 scr.addstr(y, x, s, attr)
                 if len(s) < w:
-                    scr.addstr(y, x+len(s), gettext('ColumnFiller')*(w-len(s)-1), attr)
+                    scr.addstr(y, x+len(s), gettext('ColumnFiller')*(w-len(s)), attr)
         except Exception as e:
             self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
 
@@ -209,6 +209,11 @@ class VSheet:
             self.cursorColIndex = 0
         elif self.cursorColIndex >= len(self.columns):
             self.cursorColIndex = len(self.columns)-1
+
+        if self.topRowIndex <= 0:
+            self.topRowIndex = 0
+        elif self.topRowIndex > len(self.rows):
+            self.topRowIndex = len(self.rows)-1
 
         # (x,y) is relative cell within screen viewport
         x = self.cursorColIndex - self.leftColIndex
@@ -285,7 +290,7 @@ class VSheet:
 
             # last column should use entire rest of screen width
             if colidx == len(self.columns)-1:
-                colwidth = g_winWidth - x
+                colwidth = g_winWidth - x - 1
             else:
                 colwidth = col.width or self.getMaxWidth(colidx)
 
