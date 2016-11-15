@@ -9,7 +9,7 @@ import curses
 import codecs
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.15
+__version__ = 0.16
 
 vd = None    # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
@@ -142,7 +142,23 @@ class ChangeCommandSet(VException):
         self.mode = mode
 
 
-def open_json(fn):
+def open_zip(fn, fp):
+    import zipfile
+    vs = VSheet(fn)
+    vs.zfp = zipfile.ZipFile(fn, 'r')
+    vs.rows = vs.zfp.infolist()
+    vs.columns = [VColumn(k, lambda_getattr(k)) for k in dir(vs.rows[0]) if not k.startswith('_') and not callable(getattr(vs.rows[0], k))]
+    vs.commands = {
+        ctrl('j'): 'for s in sheet_from_file(sheet.cursorRow.filename, sheet.zfp.open(sheet.cursorRow)): vd.pushSheet(s)',
+    }
+    yield vs
+
+
+def open_txt(fn, fp):
+    contents = codecs.decode(fp.read(), 'ascii', 'surrogateescape')
+    yield createTextViewer(fn, contents)
+
+def open_json(fn, fp):
     import json
     obj = json.load(codecs.open(fn, 'r'))
     if isinstance(obj, dict):
@@ -150,7 +166,7 @@ def open_json(fn):
     else:
         raise Exception(obj)
 
-def open_h5(fn):
+def open_h5(fn, fp):
     import h5py
     f = h5py.File(fn, 'r')
     hs = createHDF5Sheet(f)
@@ -215,7 +231,7 @@ def createDictSheet(name, mapping):
     return vs
 
 
-def open_xlsx(fn):
+def open_xlsx(fn, fp):
     import openpyxl
     basename, ext = os.path.splitext(fn)
     workbook = openpyxl.load_workbook(fn, data_only=True, read_only=True)
@@ -233,7 +249,7 @@ def open_xlsx(fn):
         yield vs
 
 
-def open_tsv(fn):
+def open_tsv(fn, fp):
     basename, ext = os.path.splitext(fn)
     fetcher = TsvFetcher(fn)
     vs = VSheet(basename)
@@ -377,6 +393,8 @@ def lambda_colname(colname):
 def lambda_col(b):
     return lambda r: r[b]
 
+def lambda_getattr(b):
+    return lambda r: getattr(r, b)
 
 class VSheet:
     def __init__(self, name):
@@ -521,7 +539,7 @@ class VSheet:
                 break
 
 
-def sheet_from_file(fqpn):
+def sheet_from_file(fqpn, fp=None):
     fn, ext = os.path.splitext(fqpn)
     ext = ext[1:]  # remove leading '.'
 
@@ -529,7 +547,7 @@ def sheet_from_file(fqpn):
     if funcname not in globals():
         raise VException('%s: No parser available for %s' % (fqpn, ext))
 
-    return globals()[funcname](fqpn)
+    return globals()[funcname](fqpn, fp)
 
 
 nextColorPair = 1

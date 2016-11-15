@@ -1,4 +1,4 @@
-# VisiData v0.15
+# VisiData v0.16
 
 The Swiss Army Knife for Data Exploration
 
@@ -10,7 +10,7 @@ Usable via any remote shell with Python3.
 
 ## Features
 
-- can view data in .tsv, .xlsx, .json, .hdf5 files
+- can browse data in .tsv, .xlsx, .json, .hdf5, .zip files
 - instantly create frequency table for column
 
 ## Installation
