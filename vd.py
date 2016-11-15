@@ -215,6 +215,11 @@ def createListSheet(name, iterable):
         vs.columns = [VColumn(k, lambda_colname(k)) for k in iterable[0].keys()]
     else:
         vs.columns = [VColumn(name)]
+
+    # push sheet and set the new cursor row to the current cursor col
+    vs.commands = {
+        ctrl('j'): 'vd.pushSheet(createPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow)).cursorRowIndex = sheet.cursorColIndex',
+    }
     return vs
 
 
@@ -225,6 +230,7 @@ def createDictSheet(name, mapping):
         VColumn("Key", lambda_col(0)),
         VColumn("Value", lambda_col(1))
     ]
+
     vs.commands = {
         ctrl('j'): 'vd.pushSheet(createPyObjSheet(sheet.cursorRow[0], sheet.cursorRow[1]))',
     }
@@ -347,9 +353,9 @@ class VisiData:
     def pushSheet(self, sheet):
         if len(sheet.rows) == 0:
             self.status('no rows in %s' % sheet.name)
-            return
-
-        self.sheets.insert(0, sheet)
+        else:
+            self.sheets.insert(0, sheet)
+        return sheet
 
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
         try:
@@ -426,7 +432,7 @@ class VSheet:
         elif k == 'cursorValue':
             return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
         elif k == 'statusLine':
-            return "%s/%s   %s" % (sheet.cursorRowIndex, len(sheet.rows), sheet.name)
+            return "%s/%s   %s" % (self.cursorRowIndex, len(self.rows), self.name)
         else:
             raise AttributeError(k)
 
