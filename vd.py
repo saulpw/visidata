@@ -90,7 +90,13 @@ base_commands = {
 
     # g = global mode
     ord('g'): 'raise ChangeCommandSet(global_commands, "global")',
+
+    ord('S'): 'vd.pushSheet(createListSheet("SheetList", vd.sheets))',
 }
+
+
+#name #rows #cols cursor
+#sheet.name, len(sheet.rows), len(sheet.columns), sheet.cursorValue
 
 # when used with 'g' prefix
 global_commands = {
@@ -100,7 +106,7 @@ global_commands = {
     # go all the way to the left/down/up/right
     ord('h'): 'sheet.cursorColIndex = sheet.leftColIndex = 0',
     ord('k'): 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
-    ord('j'): 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex - sheet.nVisibleRows',
+    ord('j'): 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows',
     ord('l'): 'sheet.cursorColIndex = sheet.leftColIndex = len(sheet.columns)-1',
 
     # resize all columns (alternately: resize this column according to all rows)
