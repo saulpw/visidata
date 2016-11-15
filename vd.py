@@ -142,6 +142,14 @@ class ChangeCommandSet(VException):
         self.mode = mode
 
 
+def open_json(fn):
+    import json
+    obj = json.load(codecs.open(fn, 'r'))
+    if isinstance(obj, dict):
+        yield createDictSheet(fn, obj)
+    else:
+        raise Exception(obj)
+
 def open_h5(fn):
     import h5py
     f = h5py.File(fn, 'r')
@@ -177,6 +185,23 @@ def createHDF5Sheet(hobj):
             vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, hobj.shape[1])]
     return vs
 
+def createPyObjSheet(name, pyobj):
+    if isinstance(pyobj, dict):
+        return createDictSheet(name, pyobj)
+    elif isinstance(pyobj, list):
+        return createListSheet(name, pyobj)
+
+def createListSheet(name, iterable):
+    vs = VSheet(name)
+    vs.rows = iterable
+
+    if isinstance(iterable[0], dict):  # list of dict
+        vs.columns = [VColumn(k, lambda_colname(k)) for k in iterable[0].keys()]
+    else:
+        vs.columns = [VColumn(name)]
+    return vs
+
+
 def createDictSheet(name, mapping):
     vs = VSheet(name)
     vs.rows = list(mapping.items())
@@ -184,6 +209,9 @@ def createDictSheet(name, mapping):
         VColumn("Key", lambda_col(0)),
         VColumn("Value", lambda_col(1))
     ]
+    vs.commands = {
+        ctrl('j'): 'vd.pushSheet(createPyObjSheet(sheet.cursorRow[0], sheet.cursorRow[1]))',
+    }
     return vs
 
 

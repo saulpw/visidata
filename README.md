@@ -10,7 +10,7 @@ Usable via any remote shell with Python3.
 
 ## Features
 
-- can view data in .tsv, .xlsx, .hdf5 files
+- can view data in .tsv, .xlsx, .json, .hdf5 files
 - instantly create frequency table for column
 
 ## Installation
