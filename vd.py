@@ -75,8 +75,11 @@ base_commands = {
     ord('['): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue)',
     ord(']'): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue, reverse=True)',
 
+    # quit and print error sheet to terminal (in case error sheet itself is broken)
+    ctrl('E'): 'g_args.debug = True; raise VException(vd.lastErrors[-1])',
+
     # other capital letters are new sheets
-    ord('E'): 'vd.pushSheet(createTextViewer("last_error", vd.lastError))',
+    ord('E'): 'vd.pushSheet(createTextViewer("last_error", vd.lastErrors[-1]))',
     ord('F'): 'vd.pushSheet(createFreqTable(sheet, sheet.cursorCol))',
 
     # take this cell for header names
@@ -106,15 +109,15 @@ global_commands = {
     # column header name change
     ord(','): 'for c in sheet.columns: c.name = c.getDisplayValue(sheet.cursorRow)',
 
-    # quit print error sheet to terminal (in case error sheet itself is broken)
-    ord('E'): 'g_args.debug = True; raise VException(vd.lastError)',
+    # all previous errors sheet
+    ord('E'): 'vd.pushSheet(createTextViewer("last_error", "\n\n".join(vd.lastErrors)))',
 }
 
 
 def createTextViewer(name, text):
     viewer = VSheet(name)
     viewer.rows = text.split('\n')
-    viewer.columns = [ VColumn(name, None, lambda r: r) ]
+    viewer.columns = [ VColumn(name, lambda r: r) ]
     return viewer
 
 
@@ -126,7 +129,7 @@ def createFreqTable(sheet, col):
     fqcolname = '%s_%s' % (sheet.name, col.name)
     freqtbl = VSheet('freq_' + fqcolname)
     freqtbl.rows = list(values.items())
-    freqtbl.columns = [ VColumn(fqcolname, None, lambda_col(0)), VColumn('num', None, lambda_col(1)) ]
+    freqtbl.columns = [ VColumn(fqcolname, lambda_col(0)), VColumn('num', lambda_col(1)) ]
     return freqtbl
 
 
@@ -155,23 +158,32 @@ def createHDF5Sheet(hobj):
     if isinstance(hobj, h5py.Group):
         vs.rows = [ hobj[objname] for objname in hobj.keys() ]
         vs.columns = [
-            VColumn(hobj.name, None, lambda r: r.name.split('/')[-1]),
-            VColumn('type', None, lambda r: type(r).__name__),
-            VColumn('nItems', None, lambda r: len(r)),
+            VColumn(hobj.name, lambda r: r.name.split('/')[-1]),
+            VColumn('type', lambda r: type(r).__name__),
+            VColumn('nItems', lambda r: len(r)),
         ]
 
         vs.commands = {
             ctrl('j'): 'vd.pushSheet(createHDF5Sheet(sheet.cursorRow))',
-#            ord('A'): 'vd.pushSheet(createDictSheet(sheet.cursorRow.attrs))',
+            ord('A'): 'vd.pushSheet(createDictSheet(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs))',
         }
     elif isinstance(hobj, h5py.Dataset):
         if len(hobj.shape) == 1:
             vs.rows = hobj[:]
-            vs.columns = [VColumn(colname, None, lambda_colname(colname)) for colname in hobj.dtype.names]
+            vs.columns = [VColumn(colname, lambda_colname(colname)) for colname in hobj.dtype.names]
         elif len(hobj.shape) == 2:  # matrix
             vs.rows = hobj[:]
             defaultColNames = string.ascii_uppercase
-            vs.columns = [VColumn(defaultColNames[colnum], None, lambda_col(colnum)) for colnum in range(0, hobj.shape[1])]
+            vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, hobj.shape[1])]
+    return vs
+
+def createDictSheet(name, mapping):
+    vs = VSheet(name)
+    vs.rows = list(mapping.items())
+    vs.columns = [
+        VColumn("Key", lambda_col(0)),
+        VColumn("Value", lambda_col(1))
+    ]
     return vs
 
 
@@ -185,7 +197,7 @@ def open_xlsx(fn):
         vs = VSheet('%s:%s' % (basename, sheetname))
 
         defaultColNames = string.ascii_uppercase
-        vs.columns = [VColumn(defaultColNames[colnum], None, lambda_col(colnum)) for colnum in range(0, sheet.max_column)]
+        vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, sheet.max_column)]
 
         for row in sheet.iter_rows():
             vs.rows.append([cell.value for cell in row])
@@ -198,7 +210,7 @@ def open_tsv(fn):
     fetcher = TsvFetcher(fn)
     vs = VSheet(basename)
     vs.rows = fetcher.getRows(0, None)
-    vs.columns = [VColumn(name, None, lambda_col(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
+    vs.columns = [VColumn(name, lambda_col(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
     yield vs
 
 
@@ -218,6 +230,9 @@ class TsvFetcher:
 
 
 def getMaxWidth(col, rows):
+    if len(rows) == 0:
+        return 0
+
     return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)), int(g_winWidth/2))
 
 
@@ -227,15 +242,15 @@ class VisiData:
         self._status = []
         self.status('saul.pw/visidata v' + str(__version__))
 
-        self.lastError = ''
+        self.lastErrors = []
 
     def status(self, s):
         self._status.append(s)
 
     def exceptionCaught(self):
         import traceback
-        self.lastError += traceback.format_exc().strip()
-        self.status(self.lastError.splitlines()[-1])
+        self.lastErrors.append(traceback.format_exc().strip())
+        self.status(self.lastErrors[-1].splitlines()[-1])
         if g_args.debug:
             raise
 
@@ -286,6 +301,10 @@ class VisiData:
             sheet.checkCursor()
 
     def pushSheet(self, sheet):
+        if len(sheet.rows) == 0:
+            self.status('no rows in %s' % sheet.name)
+            return
+
         self.sheets.insert(0, sheet)
 
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
@@ -308,10 +327,10 @@ class VisiData:
 
 
 class VColumn:
-    def __init__(self, name, width=None, func=lambda r: r, eval_context=None):
+    def __init__(self, name, func=lambda r: r, eval_context=None, width=None):
         self.name = name
-        self.width = width
         self.func = func
+        self.width = width
 
     def getValue(self, row):
         return self.func(row)
