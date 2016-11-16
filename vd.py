@@ -9,16 +9,17 @@ import functools
 import codecs
 import statistics
 import curses
+import re
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.17
+__version__ = 0.18
 
 vd = None    # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
 sheet = None # current sheet
 g_winWidth = None
 g_winHeight = None
-SepWidth = 2 # chars between columns
+SepChars = '  ' # chars between columns
 HeaderAttr = curses.A_BOLD
 CurColHdrAttr = curses.A_REVERSE
 RowHighlightAttr = curses.A_REVERSE
@@ -112,7 +113,20 @@ base_commands = {
     ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue".split())',
 
     ord('C'): 'createColumnSummary(sheet)',
+
+    # search this column via regex
+    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), column=sheet.cursorCol)',
+    ord('?'): 'sheet.searchRegex(inputLine(prompt="/"), column=sheet.cursorCol, backward=True)',
+    ord('n'): 'sheet.searchRegex(column=sheet.cursorCol)',
+    ord('p'): 'sheet.searchRegex(column=sheet.cursorCol, backward=True)',
 }
+
+def inputLine(prompt=''):
+    scr.addstr(g_winHeight-1, 0, "%-*s" % (g_winWidth-1, prompt))
+    curses.echo()
+    line = scr.getstr(g_winHeight-1, len(prompt))
+    curses.noecho()
+    return line
 
 sheet_specific_commands = {
     ("sheets", ENTER): 'vd.sheets[0] = vd.sheets.pop(sheet.cursorRowIndex)',  # replace the sheet list itself
@@ -138,6 +152,25 @@ global_commands = {
     # all previous errors sheet
     ord('E'): 'createTextViewer("last_error", "\n\n".join(vd.lastErrors))',
 }
+
+def PyobjColumns(exampleRow):
+    return [VColumn(k, lambda_getattr(k)) for k in dir(exampleRow) if not k.startswith('_') and not callable(getattr(exampleRow, k))]
+
+def createDirBrowser(fqpn):
+    vs = vd.newSheet(fqpn)
+    vs.dirname = fqpn
+    vs.rows = []
+    for dirpath, dirnames, filenames in os.walk(fqpn):
+        for dn in dirnames:
+            vs.rows.append(os.stat(os.path.join(dirpath, dn)))
+        for fn in filenames:
+            vs.rows.append(os.stat(os.path.join(dirpath, fn)))
+
+    vs.columns = PyobjColumns(vs.rows[0])
+    vs.commands = {
+        ENTER: 'createSheetsFromFile(sheet.cursorRow.filename)'
+    }
+    return vs
 
 
 def createTextViewer(name, text):
@@ -185,7 +218,7 @@ def open_zip(fn, fp):
     vs = vd.newSheet(fn)
     vs.zfp = zipfile.ZipFile(fn, 'r')
     vs.rows = vs.zfp.infolist()
-    vs.columns = [VColumn(k, lambda_getattr(k)) for k in dir(vs.rows[0]) if not k.startswith('_') and not callable(getattr(vs.rows[0], k))]
+    vs.columns = PyobjColumns(vs.rows[0])
     vs.commands = {
         ENTER: 'createSheetsFromFile(sheet.cursorRow.filename, sheet.zfp.open(sheet.cursorRow))',
     }
@@ -417,7 +450,7 @@ class VisiData:
             else:
                 scr.addstr(y, x, s, attr)
                 if len(s) < w:
-                    scr.addstr(y, x+len(s), gettext('ColumnFiller')*(w-len(s)-1), attr)
+                    scr.addstr(y, x+len(s), gettext('ColumnFiller')*(w-len(s)), attr)
         except Exception as e:
             self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
             self.exceptionCaught()
@@ -468,13 +501,18 @@ class VSheet:
         # all columns in display order
         self.columns = None
 
+        # current regex
+        self.currentRegex = None
+
         # specialized sheet keys
         self.commands = {}
 
+    @property
+    def nVisibleRows(self):
+        return g_winHeight-2
+
     def __getattr__(self, k):
-        if k == 'nVisibleRows':
-            return g_winHeight-2
-        elif k == 'cursorCol':
+        if k == 'cursorCol':
             return self.columns[self.cursorColIndex]
         elif k == 'cursorRow':
             return self.rows[self.cursorRowIndex]
@@ -560,6 +598,35 @@ class VSheet:
         elif x > self.rightColIndex:
             self.leftColIndex += 1
 
+    def searchRegex(self, regex=None, column=None, backward=False, firstOnly=True):
+        'returns row index if firstOnly; otherwise returns list of row indexes'
+        if regex:
+            self.currentRegex = re.compile(regex, re.IGNORECASE)
+
+        if not self.currentRegex:
+            vd.status('no search term')
+            return
+
+        columns = [column] if column else self.columns
+
+        if backward:
+            rng = range(self.cursorRowIndex-1, -1, -1)
+        else:
+            rng = range(self.cursorRowIndex+1, self.nRows)
+
+        matchingRowIndexes = []
+
+        for i in rng:
+            for c in columns:
+                m = self.currentRegex.search(c.getDisplayValue(self.rows[i]))
+                if m:
+                    matchingRowIndexes.append(i)
+                    if firstOnly:
+                        return i
+
+        return matchingRowIndexes
+
+
     def draw(self):
         scr.erase()  # clear screen before every re-draw
 
@@ -598,11 +665,11 @@ class VSheet:
                 row = self.rows[self.topRowIndex + rowidx]
                 cellval = self.columns[colidx].getDisplayValue(row)
 
-                scr.addstr(y, x, ' '*(colwidth+SepWidth), attr)
+                scr.addstr(y, x+colwidth, SepChars, attr)
                 vd.clipdraw(y, x, cellval, attr, colwidth)
                 y += 1
 
-            x += colwidth+SepWidth
+            x += colwidth+len(SepChars)
             if x >= g_winWidth:
                 break
         
@@ -614,10 +681,13 @@ def createSheetsFromFile(fqpn, fp=None):
     ext = ext[1:]  # remove leading '.'
 
     funcname = "open_" + ext
-    if funcname not in globals():
-        raise VException('%s: No parser available for %s' % (fqpn, ext))
+    if funcname in globals():
+        return globals()[funcname](fqpn, fp)
 
-    return globals()[funcname](fqpn, fp)
+    if os.path.isdir(fqpn):
+        return createDirBrowser(fqpn)
+
+    return createTextViewer(fqpn, open(fqpn).read())
 
 
 nextColorPair = 1

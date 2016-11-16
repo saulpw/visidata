@@ -1,4 +1,4 @@
-# VisiData v0.16
+# VisiData v0.18
 
 The Swiss Army Knife for Data Exploration
 
