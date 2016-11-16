@@ -9,7 +9,7 @@ import curses
 import codecs
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.16
+__version__ = 0.17
 
 vd = None    # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
@@ -18,6 +18,7 @@ g_winHeight = None
 
 Inverses = {}  # inverse colors
 
+
 def gettext(k):
     _gettext = {
         'VisibleNone': '',
@@ -25,6 +26,7 @@ def gettext(k):
         'Ellipsis': '…',
     }
     return _gettext[k]
+
 
 def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
@@ -79,8 +81,8 @@ base_commands = {
     ctrl('E'): 'g_args.debug = True; raise VException(vd.lastErrors[-1])',
 
     # other capital letters are new sheets
-    ord('E'): 'vd.pushSheet(createTextViewer("last_error", vd.lastErrors[-1]))',
-    ord('F'): 'vd.pushSheet(createFreqTable(sheet, sheet.cursorCol))',
+    ord('E'): 'createTextViewer("last_error", vd.lastErrors[-1])',
+    ord('F'): 'createFreqTable(sheet, sheet.cursorCol)',
 
     # take this cell for header names
     ord(','): 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)',
@@ -91,12 +93,8 @@ base_commands = {
     # g = global mode
     ord('g'): 'raise ChangeCommandSet(global_commands, "global")',
 
-    ord('S'): 'vd.pushSheet(createListSheet("SheetList", vd.sheets))',
+    ord('S'): 'createListSheet("SheetList", vd.sheets, "name nRows nCols cursorValue".split())',
 }
-
-
-#name #rows #cols cursor
-#sheet.name, len(sheet.rows), len(sheet.columns), sheet.cursorValue
 
 # when used with 'g' prefix
 global_commands = {
@@ -116,12 +114,12 @@ global_commands = {
     ord(','): 'for c in sheet.columns: c.name = c.getDisplayValue(sheet.cursorRow)',
 
     # all previous errors sheet
-    ord('E'): 'vd.pushSheet(createTextViewer("last_error", "\n\n".join(vd.lastErrors)))',
+    ord('E'): 'createTextViewer("last_error", "\n\n".join(vd.lastErrors))',
 }
 
 
 def createTextViewer(name, text):
-    viewer = VSheet(name)
+    viewer = vd.newSheet(name)
     viewer.rows = text.split('\n')
     viewer.columns = [ VColumn(name, lambda r: r) ]
     return viewer
@@ -133,7 +131,7 @@ def createFreqTable(sheet, col):
         values[str(col.getValue(r))] += 1
 
     fqcolname = '%s_%s' % (sheet.name, col.name)
-    freqtbl = VSheet('freq_' + fqcolname)
+    freqtbl = vd.newSheet('freq_' + fqcolname)
     freqtbl.rows = list(values.items())
     freqtbl.columns = [ VColumn(fqcolname, lambda_col(0)), VColumn('num', lambda_col(1)) ]
     return freqtbl
@@ -150,25 +148,25 @@ class ChangeCommandSet(VException):
 
 def open_zip(fn, fp):
     import zipfile
-    vs = VSheet(fn)
+    vs = vd.newSheet(fn)
     vs.zfp = zipfile.ZipFile(fn, 'r')
     vs.rows = vs.zfp.infolist()
     vs.columns = [VColumn(k, lambda_getattr(k)) for k in dir(vs.rows[0]) if not k.startswith('_') and not callable(getattr(vs.rows[0], k))]
     vs.commands = {
-        ctrl('j'): 'for s in sheet_from_file(sheet.cursorRow.filename, sheet.zfp.open(sheet.cursorRow)): vd.pushSheet(s)',
+        ctrl('j'): 'createSheetsFromFile(sheet.cursorRow.filename, sheet.zfp.open(sheet.cursorRow))',
     }
-    yield vs
+    return vs
 
 
 def open_txt(fn, fp):
     contents = codecs.decode(fp.read(), 'ascii', 'surrogateescape')
-    yield createTextViewer(fn, contents)
+    return createTextViewer(fn, contents)
 
 def open_json(fn, fp):
     import json
     obj = json.load(codecs.open(fn, 'r'))
     if isinstance(obj, dict):
-        yield createDictSheet(fn, obj)
+        return createDictSheet(fn, obj)
     else:
         raise Exception(obj)
 
@@ -177,13 +175,13 @@ def open_h5(fn, fp):
     f = h5py.File(fn, 'r')
     hs = createHDF5Sheet(f)
     hs.name = fn
-    yield hs
+	return hs
 
 open_hdf5 = open_h5
 
 def createHDF5Sheet(hobj):
     import h5py
-    vs = VSheet(hobj.name)
+    vs = vd.newSheet(hobj.name)
 
     if isinstance(hobj, h5py.Group):
         vs.rows = [ hobj[objname] for objname in hobj.keys() ]
@@ -194,8 +192,8 @@ def createHDF5Sheet(hobj):
         ]
 
         vs.commands = {
-            ctrl('j'): 'vd.pushSheet(createHDF5Sheet(sheet.cursorRow))',
-            ord('A'): 'vd.pushSheet(createDictSheet(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs))',
+            ctrl('j'): 'createHDF5Sheet(sheet.cursorRow)',
+            ord('A'): 'createDictSheet(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs)',
         }
     elif isinstance(hobj, h5py.Dataset):
         if len(hobj.shape) == 1:
@@ -207,30 +205,35 @@ def createHDF5Sheet(hobj):
             vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, hobj.shape[1])]
     return vs
 
+
 def createPyObjSheet(name, pyobj):
     if isinstance(pyobj, dict):
         return createDictSheet(name, pyobj)
     elif isinstance(pyobj, list):
         return createListSheet(name, pyobj)
 
-def createListSheet(name, iterable):
-    vs = VSheet(name)
+
+def createListSheet(name, iterable, columns=None):
+    'columns is a list of strings naming attributes on the objects within the iterable'
+    vs = vd.newSheet(name)
     vs.rows = iterable
 
-    if isinstance(iterable[0], dict):  # list of dict
+    if columns:
+        vs.columns = [VColumn(colname, lambda_getattr(colname)) for colname in columns]
+    elif isinstance(iterable[0], dict):  # list of dict
         vs.columns = [VColumn(k, lambda_colname(k)) for k in iterable[0].keys()]
     else:
         vs.columns = [VColumn(name)]
 
     # push sheet and set the new cursor row to the current cursor col
     vs.commands = {
-        ctrl('j'): 'vd.pushSheet(createPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow)).cursorRowIndex = sheet.cursorColIndex',
+        ctrl('j'): 'createPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex',
     }
     return vs
 
 
 def createDictSheet(name, mapping):
-    vs = VSheet(name)
+    vs = vd.newSheet(name)
     vs.rows = list(mapping.items())
     vs.columns = [
         VColumn("Key", lambda_col(0)),
@@ -238,7 +241,7 @@ def createDictSheet(name, mapping):
     ]
 
     vs.commands = {
-        ctrl('j'): 'vd.pushSheet(createPyObjSheet(sheet.cursorRow[0], sheet.cursorRow[1]))',
+        ctrl('j'): 'createPyObjSheet(sheet.cursorRow[0], sheet.cursorRow[1])',
     }
     return vs
 
@@ -250,7 +253,7 @@ def open_xlsx(fn, fp):
 
     for sheetname in workbook.sheetnames:
         sheet = workbook.get_sheet_by_name(sheetname)
-        vs = VSheet('%s:%s' % (basename, sheetname))
+        vs = vd.newSheet('%s:%s' % (basename, sheetname))
 
         defaultColNames = string.ascii_uppercase
         vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, sheet.max_column)]
@@ -258,22 +261,22 @@ def open_xlsx(fn, fp):
         for row in sheet.iter_rows():
             vs.rows.append([cell.value for cell in row])
 
-        yield vs
+    return vs  # return the last one
 
 
 def open_tsv(fn, fp):
     basename, ext = os.path.splitext(fn)
     fetcher = TsvFetcher(fn)
-    vs = VSheet(basename)
+    vs = vd.newSheet(basename)
     vs.rows = fetcher.getRows(0, None)
     vs.columns = [VColumn(name, lambda_col(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
-    yield vs
+    return vs
 
 
 class TsvFetcher:
     def __init__(self, fntsv):
         self.fp = codecs.open(fntsv, 'r')
-        self.rowIndex = { }  # byte offsets of each line for random access
+        self.rowIndex = {}  # byte offsets of each line for random access
         lines = self.fp.read().splitlines()
         self.columnNames = lines[0].split('\t')
         self.rows = [L.split('\t') for L in lines[1:]]  # [rownum] -> [ field, ... ]
@@ -356,12 +359,10 @@ class VisiData:
 
             sheet.checkCursor()
 
-    def pushSheet(self, sheet):
-        if len(sheet.rows) == 0:
-            self.status('no rows in %s' % sheet.name)
-        else:
-            self.sheets.insert(0, sheet)
-        return sheet
+    def newSheet(self, name):
+        vs = VSheet(name)
+        self.sheets.insert(0, vs)
+        return vs
 
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
         try:
@@ -439,6 +440,10 @@ class VSheet:
             return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
         elif k == 'statusLine':
             return "%s/%s   %s" % (self.cursorRowIndex, len(self.rows), self.name)
+        elif k == 'nRows':
+            return len(self.rows)
+        elif k == 'nCols':
+            return len(self.columns)
         else:
             raise AttributeError(k)
 
@@ -551,7 +556,7 @@ class VSheet:
                 break
 
 
-def sheet_from_file(fqpn, fp=None):
+def createSheetsFromFile(fqpn, fp=None):
     fn, ext = os.path.splitext(fqpn)
     ext = ext[1:]  # remove leading '.'
 
@@ -621,8 +626,7 @@ def terminal_main():
     inputs = g_args.inputs or ['.']
 
     for fn in inputs:
-        for vs in sheet_from_file(fn):
-            vd.sheets.append(vs)
+        createSheetsFromFile(fn)
 
     ret = wrapper(curses_main)
     if ret:

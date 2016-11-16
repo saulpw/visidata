@@ -42,6 +42,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **H**/**M**/**L**   | move cursor to top/middle/bottom of screen |
 |   **^G**      | show sheet status on statusline |
 |
+|    **S**      | view current sheet stack |
+|
 |    **F**      | build frequency table for current column |
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
@@ -73,7 +75,6 @@ Please contact me at the email address above if you would like to contribute.
 
 # Features for v1.0 (coming soon)
 
-- source tabular data in many common formats (.csv, .json, .h5, .xlsx)
 - select and unselect rows by regex or python expression
 - sort rows by one or more columns
 - inner/outer/cross/diff join rows from multiple sheets by matching key columns
@@ -118,8 +119,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |
 |    **=**      | Add derivative column from expression |
 |
-|    **S**      | view current sheet stack | view list of all sheets |
-|
 |    **R**      | view select list for this sheet |
 |    **\<Space\>**  | add current row to selected rows | select all rows |
 |    \*/**u**   | select/unselect all rows | select/unselect across all sheets |
@@ -131,7 +130,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **z**  | toggle group/ungroup by sequences in current column | group/ungroup by item in current column |
 
 
-### Sheet list ('S')
+### Sheet List ('S')
 
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
