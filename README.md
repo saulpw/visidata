@@ -43,6 +43,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **^G**      | show sheet status on statusline |
 |
 |    **S**      | view current sheet stack |
+|    **C**      | build column summary.   shows stats (min/median/mean/max/stddev) |
 |
 |    **F**      | build frequency table for current column |
 |

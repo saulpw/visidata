@@ -5,18 +5,35 @@
 import os.path
 import string
 import collections
-import curses
+import functools
 import codecs
+import statistics
+import curses
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __version__ = 0.17
 
 vd = None    # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
+sheet = None # current sheet
 g_winWidth = None
 g_winHeight = None
+SepWidth = 2 # chars between columns
+HeaderAttr = curses.A_BOLD
+CurColHdrAttr = curses.A_REVERSE
+RowHighlightAttr = curses.A_REVERSE
+ColumnHighlightAttr = curses.A_BOLD
+StatusLineAttr = curses.A_BOLD
 
 Inverses = {}  # inverse colors
+
+class VException(Exception):
+    pass
+
+class ChangeCommandSet(VException):
+    def __init__(self, commands, mode):
+        self.commands = commands
+        self.mode = mode
 
 
 def gettext(k):
@@ -24,6 +41,10 @@ def gettext(k):
         'VisibleNone': '',
         'ColumnFiller': ' ',
         'Ellipsis': '…',
+        'SubsheetSep': '~',
+        'SheetNameFmt': '%s| ',
+        'FunctionError': '¿',
+        'HistogramChar': '*',
     }
     return _gettext[k]
 
@@ -31,6 +52,7 @@ def gettext(k):
 def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
 
+ENTER = ctrl('j')
 
 base_commands = {
     # pop current sheet off the sheet stack
@@ -52,12 +74,6 @@ base_commands = {
     ord('k'): 'sheet.moveCursorDown(-1)',
     ord('l'): 'sheet.moveCursorRight(+1)',
 
-    # ^h/j/k/l scroll manually
-    ctrl('h'): 'sheet.leftColIndex -= 1',
-    ctrl('j'): 'sheet.topRowIndex += 1',
-    ctrl('k'): 'sheet.topRowIndex -= 1',
-    ctrl('l'): 'sheet.leftColIndex += 1',
-
     # ^g sheet status
     ctrl('g'): 'vd.status(sheet.statusLine)',
 
@@ -78,10 +94,10 @@ base_commands = {
     ord(']'): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue, reverse=True)',
 
     # quit and print error sheet to terminal (in case error sheet itself is broken)
-    ctrl('E'): 'g_args.debug = True; raise VException(vd.lastErrors[-1])',
+    ctrl('e'): 'g_args.debug = True; raise VException(vd.lastErrors[-1])',
 
     # other capital letters are new sheets
-    ord('E'): 'createTextViewer("last_error", vd.lastErrors[-1])',
+    ord('E'): 'if vd.lastErrors: createTextViewer("last_error", vd.lastErrors[-1])',
     ord('F'): 'createFreqTable(sheet, sheet.cursorCol)',
 
     # take this cell for header names
@@ -93,7 +109,13 @@ base_commands = {
     # g = global mode
     ord('g'): 'raise ChangeCommandSet(global_commands, "global")',
 
-    ord('S'): 'createListSheet("SheetList", vd.sheets, "name nRows nCols cursorValue".split())',
+    ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue".split())',
+
+    ord('C'): 'createColumnSummary(sheet)',
+}
+
+sheet_specific_commands = {
+    ("sheets", ENTER): 'vd.sheets[0] = vd.sheets.pop(sheet.cursorRowIndex)',  # replace the sheet list itself
 }
 
 # when used with 'g' prefix
@@ -133,17 +155,29 @@ def createFreqTable(sheet, col):
     fqcolname = '%s_%s' % (sheet.name, col.name)
     freqtbl = vd.newSheet('freq_' + fqcolname)
     freqtbl.rows = list(values.items())
-    freqtbl.columns = [ VColumn(fqcolname, lambda_col(0)), VColumn('num', lambda_col(1)) ]
+    freqtbl.total = max(values.values())+1
+    
+    freqtbl.columns = [
+        VColumn(fqcolname, lambda_col(0)),
+        VColumn('num', lambda_col(1)),
+        VColumn('histogram', lambda r,s=freqtbl: gettext('HistogramChar')*int(r[1]*80/s.total))
+    ]
     return freqtbl
 
 
-class VException(Exception):
-    pass
-
-class ChangeCommandSet(VException):
-    def __init__(self, commands, mode):
-        self.commands = commands
-        self.mode = mode
+def createColumnSummary(sheet):
+    vs = vd.newSheet(sheet.name + "_columns")
+    vs.rows = sheet.columns
+    vs.columns = [
+        VColumn('column', lambda_getattr('name')),
+        VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
+        VColumn('min',    lambda c: min(sheet.columnValues(c))),
+        VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
+        VColumn('mean',   lambda c: statistics.mean(sheet.columnValues(c))),
+        VColumn('max',    lambda c: max(sheet.columnValues(c))),
+        VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
+    ]
+    return vs
 
 
 def open_zip(fn, fp):
@@ -153,7 +187,7 @@ def open_zip(fn, fp):
     vs.rows = vs.zfp.infolist()
     vs.columns = [VColumn(k, lambda_getattr(k)) for k in dir(vs.rows[0]) if not k.startswith('_') and not callable(getattr(vs.rows[0], k))]
     vs.commands = {
-        ctrl('j'): 'createSheetsFromFile(sheet.cursorRow.filename, sheet.zfp.open(sheet.cursorRow))',
+        ENTER: 'createSheetsFromFile(sheet.cursorRow.filename, sheet.zfp.open(sheet.cursorRow))',
     }
     return vs
 
@@ -175,7 +209,7 @@ def open_h5(fn, fp):
     f = h5py.File(fn, 'r')
     hs = createHDF5Sheet(f)
     hs.name = fn
-	return hs
+    return hs
 
 open_hdf5 = open_h5
 
@@ -192,7 +226,7 @@ def createHDF5Sheet(hobj):
         ]
 
         vs.commands = {
-            ctrl('j'): 'createHDF5Sheet(sheet.cursorRow)',
+            ENTER: 'createHDF5Sheet(sheet.cursorRow)',
             ord('A'): 'createDictSheet(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs)',
         }
     elif isinstance(hobj, h5py.Dataset):
@@ -227,7 +261,7 @@ def createListSheet(name, iterable, columns=None):
 
     # push sheet and set the new cursor row to the current cursor col
     vs.commands = {
-        ctrl('j'): 'createPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex',
+        ENTER: 'createPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex',
     }
     return vs
 
@@ -241,7 +275,7 @@ def createDictSheet(name, mapping):
     ]
 
     vs.commands = {
-        ctrl('j'): 'createPyObjSheet(sheet.cursorRow[0], sheet.cursorRow[1])',
+        ENTER: 'createPyObjSheet(sheet.name + gettext("SubsheetSep") + sheet.cursorRow[0], sheet.cursorRow[1])',
     }
     return vs
 
@@ -299,21 +333,24 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self._status = []
-        self.status('saul.pw/visidata v' + str(__version__))
+        self.status('  saul.pw/visidata v' + str(__version__))
 
         self.lastErrors = []
 
     def status(self, s):
         self._status.append(s)
 
-    def exceptionCaught(self):
+    def exceptionCaught(self, status=True):
         import traceback
         self.lastErrors.append(traceback.format_exc().strip())
-        self.status(self.lastErrors[-1].splitlines()[-1])
+        self.lastErrors = self.lastErrors[-10:]  # only keep 10 most recent
+        if status:
+            self.status(self.lastErrors[-1].splitlines()[-1])
         if g_args.debug:
             raise
 
     def run(self):
+        global sheet
         global g_winHeight, g_winWidth
         g_winHeight, g_winWidth = scr.getmaxyx()
 
@@ -324,6 +361,8 @@ class VisiData:
                 return
 
             sheet = self.sheets[0]
+            if sheet.nRows == 0:
+                self.status('no rows')
 
             try:
                 sheet.draw()
@@ -331,9 +370,10 @@ class VisiData:
                 self.exceptionCaught()
 
             # draw status on last line
-            if self._status:
-                self.clipdraw(g_winHeight-1, 0, " | ".join(self._status))
-                self._status = []
+            attr = StatusLineAttr
+            statusstr = gettext('SheetNameFmt') % sheet.name + " | ".join(self._status)
+            self.clipdraw(g_winHeight-1, 0, statusstr, attr, g_winWidth)
+            self._status = []
 
             scr.move(g_winHeight-1, g_winWidth-2)
             curses.doupdate()
@@ -342,7 +382,7 @@ class VisiData:
             if ch == curses.KEY_RESIZE:
                 g_winHeight, g_winWidth = scr.getmaxyx()
             elif ch in sheet.commands or ch in commands:
-                cmdstr = sheet.commands.get(ch) or commands.get(ch)
+                cmdstr = sheet_specific_commands.get((sheet.name, ch)) or sheet.commands.get(ch) or commands.get(ch)
                 try:
                     exec(cmdstr)
 
@@ -390,7 +430,11 @@ class VColumn:
         self.width = width
 
     def getValue(self, row):
-        return self.func(row)
+        try:
+            return self.func(row)
+        except Exception as e:
+            vd.exceptionCaught(status=False)
+            return gettext('FunctionError')
 
     def getDisplayValue(self, row):
         cellval = self.getValue(row)
@@ -439,7 +483,7 @@ class VSheet:
         elif k == 'cursorValue':
             return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
         elif k == 'statusLine':
-            return "%s/%s   %s" % (self.cursorRowIndex, len(self.rows), self.name)
+            return 'row %s/%s' % (self.cursorRowIndex, len(self.rows))
         elif k == 'nRows':
             return len(self.rows)
         elif k == 'nCols':
@@ -453,8 +497,18 @@ class VSheet:
     def moveCursorRight(self, n):
         self.cursorColIndex += n
 
-    def cellValue(self, rownum, colnum):
-        return self.columns[colnum].getValue(self.rows[rownum])
+    def cellValue(self, rownum, col):
+        if not isinstance(col, VColumn):
+            # assume it's the column number
+            col = self.columns[col]
+        return col.getValue(self.rows[rownum])
+
+    @functools.lru_cache()
+    def columnValues(self, col):
+        if not isinstance(col, VColumn):
+            # assume it's the column number
+            col = self.columns[col]
+        return [col.getValue(r) for r in self.rows]
 
     def skipDown(self):
         pv = self.cursorValue
@@ -516,19 +570,16 @@ class VSheet:
             # draw header
             #   choose attribute to highlight column header
             if colidx == self.cursorColIndex:  # cursor is at this column
-                attr = curses.A_REVERSE
+                attr = CurColHdrAttr
             else:
-                attr = curses.A_NORMAL
+                attr = HeaderAttr
 
             col = self.columns[colidx]
 
-            # last column should use entire rest of screen width
-            if colidx == len(self.columns)-1:
-                colwidth = g_winWidth - x - 1
-            else:
-                colwidth = col.width or getMaxWidth(col, self.rows)
+            col.width = col.width or getMaxWidth(col, self.visibleRows)
 
-#            if self.drawColHeader:
+            colwidth = min(col.width, g_winWidth-x)
+
             vd.clipdraw(0, x, col.name, attr, colwidth)
 
             y = 1
@@ -537,23 +588,25 @@ class VSheet:
                     break
 
                 if colidx == self.cursorColIndex:  # cursor is at this column
-                    attr = curses.A_BOLD
+                    attr = ColumnHighlightAttr
                 else:
                     attr = curses.A_NORMAL
 
                 if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
-                    attr = curses.A_REVERSE
+                    attr = RowHighlightAttr
 
                 row = self.rows[self.topRowIndex + rowidx]
                 cellval = self.columns[colidx].getDisplayValue(row)
 
+                scr.addstr(y, x, ' '*(colwidth+SepWidth), attr)
                 vd.clipdraw(y, x, cellval, attr, colwidth)
                 y += 1
 
-            x += colwidth+1
+            x += colwidth+SepWidth
             if x >= g_winWidth:
-                self.rightColIndex = colidx
                 break
+        
+        self.rightColIndex = colidx
 
 
 def createSheetsFromFile(fqpn, fp=None):
