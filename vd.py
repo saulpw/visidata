@@ -166,7 +166,7 @@ def datestr(t):
     return iso8601(datetime.datetime.fromtimestamp(t))
 
 sheet_specific_commands = {
-    ("sheets", ENTER): 'vd.sheets[0] = vd.sheets.pop(sheet.cursorRowIndex)',  # replace the sheet list itself
+    ("sheets", ENTER): 'del vd.sheets[0]; moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
 }
 
 # when used with 'g' prefix
@@ -732,6 +732,7 @@ class VSheet:
 
     def draw(self):
         scr.erase()  # clear screen before every re-draw
+        sepchars = options.columnsep
 
         x = 0
         colidx = None
@@ -769,7 +770,6 @@ class VSheet:
                 row = self.rows[self.topRowIndex + rowidx]
                 cellval = self.columns[colidx].getDisplayValue(row)
 
-                sepchars = options.columnsep
                 if x+colwidth+len(sepchars) <= g_winWidth:
                     scr.addstr(y, x+colwidth, sepchars, attr)
                 vd.clipdraw(y, x, cellval, attr, colwidth)
