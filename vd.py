@@ -13,7 +13,7 @@ import curses
 import re
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.19
+__version__ = 0.20
 
 default_options = {
     'csv_dialect': 'excel',
@@ -23,22 +23,21 @@ default_options = {
     'encoding': 'utf-8',
     'encoding_errors': 'surrogateescape',
 
-    'columnsep': '  ',  # chars between columns
-
     'VisibleNone': '',   # visible contents of a cell whose value was None
     'ColumnFiller': ' ',
+    'ColumnSep': '  ',  # chars between columns
     'Ellipsis': '…',
     'SubsheetSep': '~',
-    'SheetNameFmt': '%s| ',
-    'FunctionError': '¿',
+    'SheetNameFmt': '%s| ',  # before status line
+    'FunctionError': '¿',    # when computation fails due to exception
     'HistogramChar': '*',
 
     # color scheme
     'c_default': 'normal',
     'c_Header': 'bold',
     'c_CurHdr': 'reverse',
-    'c_RowHighlight': 'reverse',
-    'c_ColumnHighlight': 'bold',
+    'c_CurRow': 'reverse',
+    'c_CurCol': 'bold',
     'c_StatusLine': 'bold',
     'c_SelectedRow': 'green',
 }
@@ -60,10 +59,7 @@ class attrdict(object):
     def __init__(self, d):
         self.__dict__ = d
 
-
 options = attrdict(default_options)
-defaultColNames = string.ascii_uppercase
-
 
 class VException(Exception):
     pass
@@ -113,8 +109,8 @@ base_commands = {
     ord('b'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows-1',
 
     # </> skip up/down current column to next value
-    ord('<'): 'sheet.skipDown()',
-    ord('>'): 'sheet.skipUp()',
+    ord('<'): 'sheet.skipUp()',
+    ord('>'): 'sheet.skipDown()',
 
     # _ resets column width
     ord('_'): 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)',
@@ -130,7 +126,7 @@ base_commands = {
     ord('E'): 'if vd.lastErrors: createTextViewer("last_error", vd.lastErrors[-1])',
     ord('F'): 'createFreqTable(sheet, sheet.cursorCol)',
 
-    # take this cell for header names
+    # take this cell for header name
     ord('^'): 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)',
 
     # delete current row
@@ -529,7 +525,7 @@ class VSheet:
 
     def draw(self):
         scr.erase()  # clear screen before every re-draw
-        sepchars = options.columnsep
+        sepchars = options.ColumnSep
 
         x = 0
         colidx = None
@@ -557,14 +553,14 @@ class VSheet:
                     break
 
                 if colidx == self.cursorColIndex:  # cursor is at this column
-                    attr = colors[options.c_ColumnHighlight]
+                    attr = colors[options.c_CurCol]
                 else:
                     attr = colors[options.c_default]
 
                 row = self.rows[self.topRowIndex + rowidx]
 
                 if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
-                    attr = colors[options.c_RowHighlight]
+                    attr = colors[options.c_CurRow]
                
                 if row in self.selectedRows:
                     attr |= colors[options.c_SelectedRow]
@@ -602,6 +598,7 @@ def PyobjColumns(exampleRow):
 
 def ArrayColumns(n):
     'columns that display r[0]..r[n]'
+    defaultColNames = string.ascii_uppercase
     return [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(n)]
 
 def AttrColumns(colnames):
@@ -691,7 +688,6 @@ def createColumnSummary(sheet):
         VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
     ]
     return vs
-
 
 
 ### input source formats
@@ -819,7 +815,7 @@ def createHDF5Sheet(hobj):
             vs.columns = [VColumn(colname, lambda_colname(colname)) for colname in hobj.dtype.names]
         elif len(hobj.shape) == 2:  # matrix
             vs.rows = hobj[:]
-            vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, hobj.shape[1])]
+            vs.columns = ArrayColumns(hobj.shape[1])
     return vs
 
 
@@ -846,7 +842,7 @@ def open_xlsx(fn, fp):
         sheet = workbook.get_sheet_by_name(sheetname)
         vs = vd.newSheet('%s:%s' % (basename, sheetname))
 
-        vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, sheet.max_column)]
+        vs.columns = ArrayColumns(sheet.max_column)
 
         for row in sheet.iter_rows():
             vs.rows.append([cell.value for cell in row])

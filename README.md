@@ -1,4 +1,4 @@
-# VisiData v0.19
+# VisiData v0.20
 
 The Swiss Army Knife for Data Exploration
 
@@ -53,9 +53,14 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **^**      | Set name of current column | Set name of all columns to the values in the current row |
 |    **[**/**]**    | Sort by current column (asc/desc) |
 |   **<**/**>**     | skip up/down to next value in column |
-
+|
 |  **/** **?**    | Search forward/backward by regex in current column | search all columns
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
+|
+|    **\|**     | select by regex if this column matches | select row if any column matches |
+|    **\\**     | unselect by regex or expression in this column | unselect row if any column matches | |
+|    **\<Space\>/u**  | select/unselect current row | select/unselect all rows |
+|
 | **d**  | Delete current row |
 |**H**/**J**/**K**/**L** (or shift-arrows) | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
 |
@@ -84,7 +89,7 @@ Please contact me at the email address above if you would like to contribute.
 
 # Features for v1.0 (coming soon)
 
-- select and unselect rows by regex or python expression
+- select and unselect rows by python expression
 - sort rows by one or more columns
 - inner/outer/cross/diff join rows from multiple sheets by matching key columns
 - aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
@@ -115,9 +120,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **^S**     | save current sheet to new file | save all sheets to new .h5 file |
 | **^C**        | cancel current long-running action |
 |
-|  **/**    | Search by regex or Python expression |
-| **p**/**n**  | Go to previous/next search match | Go to first/last match |
-|
 |    **{**/**}**    | Secondary sort by current column (asc/desc) |
 |    **r**      | Remove all sort keys (does not change current ordering) |
 |
@@ -128,10 +130,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **=**      | Add derivative column from expression |
 |
 |    **R**      | view select list for this sheet |
-|    **\<Space\>**  | add current row to selected rows | select all rows |
 |    \*/**u**   | select/unselect all rows | select/unselect across all sheets |
-|    **\|**     | select by regex if this column matches | select row if any column matches |
-|    **\\**     | unselect by regex or expression in this column | unselect row if any column matches | |
 |    ** **      | select rows which match the current column value | select rows which have any column which matches the current column value |
 | **v**/**V**   | hide/show unselected rows |
 |
