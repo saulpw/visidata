@@ -32,6 +32,12 @@ class attrdict(object):
     def __init__(self, d):
         self.__dict__ = d
 
+def moveListItem(L, fromidx, toidx):
+    r = L.pop(fromidx)
+    L.insert(toidx, r)
+    return toidx
+
+
 options = attrdict({
     'csv_dialect': 'excel',
     'csv_delimiter': ',',
@@ -90,6 +96,12 @@ base_commands = {
     ord('j'): 'sheet.moveCursorDown(+1)',
     ord('k'): 'sheet.moveCursorDown(-1)',
     ord('l'): 'sheet.moveCursorRight(+1)',
+
+    # reorder rows/columns with shift-movement
+    ord('H'): 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, max(sheet.cursorColIndex-1, 0))',
+    ord('J'): 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, min(sheet.cursorRowIndex+1, sheet.nRows-1))',
+    ord('K'): 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))',
+    ord('L'): 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols))',
 
     # ^g sheet status
     ctrl('g'): 'vd.status(sheet.statusLine)',
@@ -167,6 +179,12 @@ global_commands = {
     ord('k'): 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
     ord('j'): 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows',
     ord('l'): 'sheet.cursorColIndex = sheet.leftColIndex = len(sheet.columns)-1',
+
+    # throw rows/columns all the way to the left/down/up/right (without moving cursor)
+    ord('H'): 'moveListItem(sheet.columns, sheet.cursorColIndex, 0)',
+    ord('J'): 'moveListItem(sheet.rows, sheet.cursorRowIndex, sheet.nRows)',
+    ord('K'): 'moveListItem(sheet.rows, sheet.cursorRowIndex, 0)',
+    ord('L'): 'moveListItem(sheet.columns, sheet.cursorColIndex, sheet.nCols)',
 
     # resize all columns (alternately: resize this column according to all rows)
     ord('_'): 'for c in sheet.columns: c.width = getMaxWidth(c, sheet.visibleRows)',

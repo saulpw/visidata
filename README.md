@@ -54,6 +54,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |  **/** **?**    | Search forward/backward by regex in current column | search all columns
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
 | **d**  | Delete current row from in-memory sheet | 
+|**H**/**J**/**K**/**L** (or shift-arrows) | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
 |
 
 ### HDF5 sheets
@@ -114,7 +115,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |  **/**    | Search by regex or Python expression |
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
 |
-|**^H**/**^J**/**^K**/**^L** (or ctrl-arrows) | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
 |    **{**/**}**    | Secondary sort by current column (asc/desc) |
 |    **r**      | Remove all sort keys (does not change current ordering) |
 |
