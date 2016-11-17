@@ -26,6 +26,15 @@ RowHighlightAttr = curses.A_REVERSE
 ColumnHighlightAttr = curses.A_BOLD
 StatusLineAttr = curses.A_BOLD
 
+defaultColNames = string.ascii_uppercase
+
+Settings = {
+    'CsvDialect': 'excel',
+    'CsvDelimiter': ',',
+    'CsvQuotechar': '"',
+}
+
+
 Inverses = {}  # inverse colors
 
 class VException(Exception):
@@ -156,6 +165,9 @@ global_commands = {
 def PyobjColumns(exampleRow):
     return [VColumn(k, lambda_getattr(k)) for k in dir(exampleRow) if not k.startswith('_') and not callable(getattr(exampleRow, k))]
 
+def ArrayColumns(n):
+    return [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(n)]
+
 def createDirBrowser(fqpn):
     vs = vd.newSheet(fqpn)
     vs.dirname = fqpn
@@ -268,7 +280,6 @@ def createHDF5Sheet(hobj):
             vs.columns = [VColumn(colname, lambda_colname(colname)) for colname in hobj.dtype.names]
         elif len(hobj.shape) == 2:  # matrix
             vs.rows = hobj[:]
-            defaultColNames = string.ascii_uppercase
             vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, hobj.shape[1])]
     return vs
 
@@ -322,7 +333,6 @@ def open_xlsx(fn, fp):
         sheet = workbook.get_sheet_by_name(sheetname)
         vs = vd.newSheet('%s:%s' % (basename, sheetname))
 
-        defaultColNames = string.ascii_uppercase
         vs.columns = [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(0, sheet.max_column)]
 
         for row in sheet.iter_rows():
@@ -330,6 +340,18 @@ def open_xlsx(fn, fp):
 
     return vs  # return the last one
 
+def open_csv(fn, fp):
+    import csv
+    if not fp:
+        fp = codecs.open(fn, encoding='utf-8', errors='surrogateescape') #newline='')
+
+    rdr = csv.reader(fp, dialect=Settings['CsvDialect'], delimiter=Settings['CsvDelimiter'], quotechar=Settings['CsvQuotechar'])
+
+    basename, ext = os.path.splitext(fn)
+    vs = vd.newSheet(basename)
+    vs.rows = [r for r in rdr]
+    vs.columns = PyobjColumns(vs.rows[0]) or ArrayColumns(len(vs.rows[0]))
+    return vs
 
 def open_tsv(fn, fp):
     basename, ext = os.path.splitext(fn)
@@ -496,7 +518,7 @@ class VSheet:
 
         self.topRowIndex = 0     # cursorRowIndex of topmost row
         self.leftColIndex = 0    # cursorColIndex of leftmost column
-        self.rightColIndex = 0   # cursorColIndex of rightmost column
+        self.rightColIndex = None   # cursorColIndex of rightmost column
 
         # all columns in display order
         self.columns = None
@@ -595,7 +617,7 @@ class VSheet:
 
         if x < 0:
             self.leftColIndex -= 1
-        elif x > self.rightColIndex:
+        elif self.rightColIndex and x > self.rightColIndex:
             self.leftColIndex += 1
 
     def searchRegex(self, regex=None, column=None, backward=False, firstOnly=True):
@@ -631,6 +653,7 @@ class VSheet:
         scr.erase()  # clear screen before every re-draw
 
         x = 0
+        colidx = None
 
         for colidx in range(self.leftColIndex, len(self.columns)):
 
@@ -665,14 +688,15 @@ class VSheet:
                 row = self.rows[self.topRowIndex + rowidx]
                 cellval = self.columns[colidx].getDisplayValue(row)
 
-                scr.addstr(y, x+colwidth, SepChars, attr)
+                if x+colwidth+len(SepChars) <= g_winWidth:
+                    scr.addstr(y, x+colwidth, SepChars, attr)
                 vd.clipdraw(y, x, cellval, attr, colwidth)
                 y += 1
 
             x += colwidth+len(SepChars)
             if x >= g_winWidth:
                 break
-        
+
         self.rightColIndex = colidx
 
 
