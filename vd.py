@@ -67,11 +67,6 @@ class ChangeCommandSet(VException):
         self.commands = commands
         self.mode = mode
 
-
-def option(k):
-    return options.__dict__[k]
-
-
 def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
 
@@ -138,11 +133,10 @@ base_commands = {
     # g = global mode
     ord('g'): 'raise ChangeCommandSet(global_commands, "global")',
 
+    # meta sheets
     ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue".split())',
-
     ord('C'): 'createColumnSummary(sheet)',
-
-    ord('O'): 'createDictSheet("options", options)',
+    ord('O'): 'createDictSheet("options", options.__dict__)',
 
     # search this column via regex
     ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), column=sheet.cursorCol, moveCursor=True)',
@@ -246,7 +240,7 @@ def createFreqTable(sheet, col):
     freqtbl.columns = [
         VColumn(fqcolname, lambda_col(0)),
         VColumn('num', lambda_col(1)),
-        VColumn('histogram', lambda r,s=freqtbl: option('HistogramChar')*int(r[1]*80/s.total))
+        VColumn('histogram', lambda r,s=freqtbl: options.HistogramChar*int(r[1]*80/s.total))
     ]
     return freqtbl
 
@@ -355,14 +349,14 @@ def createListSheet(name, iterable, columns=None):
 
 def createDictSheet(name, mapping):
     vs = vd.newSheet(name)
-    vs.rows = list(mapping.items())
+    vs.rows = sorted(list(mapping.items()))
     vs.columns = [
-        VColumn("Key", lambda_col(0)),
-        VColumn("Value", lambda_col(1))
+        VColumn(name, lambda_col(0)),
+        VColumn("value", lambda_col(1))
     ]
 
     vs.commands = {
-        ENTER: 'createPyObjSheet(sheet.name + option("SubsheetSep") + sheet.cursorRow[0], sheet.cursorRow[1])',
+        ENTER: 'createPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])',
     }
     return vs
 
@@ -392,7 +386,7 @@ def open_csv(fn, fp):
     if not fp:
         fp = codecs.open(fn, encoding='utf-8', errors='surrogateescape') #newline='')
 
-    rdr = csv.reader(fp, dialect=option('csv_dialect'), delimiter=option('csv_delimiter'), quotechar=option('csv_quotechar'))
+    rdr = csv.reader(fp, dialect=options.csv_dialect, delimiter=option.csv_delimiter, quotechar=option.csv_quotechar)
 
     basename, ext = os.path.splitext(fn)
     vs = vd.newSheet(basename)
@@ -473,7 +467,7 @@ class VisiData:
 
             # draw status on last line
             attr = StatusLineAttr
-            statusstr = option('SheetNameFmt') % sheet.name + " | ".join(self._status)
+            statusstr = options.SheetNameFmt % sheet.name + " | ".join(self._status)
             self.clipdraw(g_winHeight-1, 0, statusstr, attr, g_winWidth)
             self._status = []
 
@@ -515,11 +509,11 @@ class VisiData:
             # convert to string just before drawing
             s = str(s)
             if len(s) > w:
-                scr.addstr(y, x, s[:w-1] + option('Ellipsis'), attr)
+                scr.addstr(y, x, s[:w-1] + options.Ellipsis, attr)
             else:
                 scr.addstr(y, x, s, attr)
                 if len(s) < w:
-                    scr.addstr(y, x+len(s), option('ColumnFiller')*(w-len(s)), attr)
+                    scr.addstr(y, x+len(s), options.ColumnFiller*(w-len(s)), attr)
         except Exception as e:
             self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
             self.exceptionCaught()
@@ -536,12 +530,12 @@ class VColumn:
             return self.func(row)
         except Exception as e:
             vd.exceptionCaught(status=False)
-            return option('FunctionError')
+            return options.FunctionError
 
     def getDisplayValue(self, row):
         cellval = self.getValue(row)
         if cellval is None:
-            cellval = option('VisibleNone')
+            cellval = options.VisibleNone
         return str(cellval)
 
 

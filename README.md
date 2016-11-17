@@ -39,6 +39,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | ---: | --- | --- |
 |   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
 | **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
+|   **t**/**m**/**b**   | move cursor to top/middle/bottom row on screen |
 |   **^G**      | show sheet status on statusline |
 |
 |    **S**      | view current sheet stack |
