@@ -39,7 +39,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | ---: | --- | --- |
 |   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
 | **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
-|   **H**/**M**/**L**   | move cursor to top/middle/bottom of screen |
 |   **^G**      | show sheet status on statusline |
 |
 |    **S**      | view current sheet stack |
@@ -50,7 +49,12 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
 |    **_**      | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
 |    **[**/**]**    | Sort by current column (asc/desc) |
-|   **J**/**K**     | skip down/up to next value in column |
+|   **<**/**>**     | skip up/down to next value in column |
+
+|  **/** **?**    | Search forward/backward by regex in current column | search all columns
+| **p**/**n**  | Go to previous/next search match | Go to first/last match |
+| **d**  | Delete current row from in-memory sheet | 
+|
 
 ### HDF5 sheets
 

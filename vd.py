@@ -3,6 +3,7 @@
 'VisiData: curses interface for exploration of tabular data'
 
 import os.path
+import datetime
 import string
 import collections
 import functools
@@ -12,14 +13,13 @@ import curses
 import re
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.18
+__version__ = 0.19
 
 vd = None    # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
 sheet = None # current sheet
 g_winWidth = None
 g_winHeight = None
-SepChars = '  ' # chars between columns
 HeaderAttr = curses.A_BOLD
 CurColHdrAttr = curses.A_REVERSE
 RowHighlightAttr = curses.A_REVERSE
@@ -28,12 +28,28 @@ StatusLineAttr = curses.A_BOLD
 
 defaultColNames = string.ascii_uppercase
 
-Settings = {
-    'CsvDialect': 'excel',
-    'CsvDelimiter': ',',
-    'CsvQuotechar': '"',
-}
+class attrdict(object):
+    def __init__(self, d):
+        self.__dict__ = d
 
+options = attrdict({
+    'csv_dialect': 'excel',
+    'csv_delimiter': ',',
+    'csv_quotechar': '"',
+
+    'encoding': 'utf-8',
+    'encoding_errors': 'surrogateescape',
+
+    'columnsep': '  ',  # chars between columns
+
+    'VisibleNone': '',
+    'ColumnFiller': ' ',
+    'Ellipsis': '…',
+    'SubsheetSep': '~',
+    'SheetNameFmt': '%s| ',
+    'FunctionError': '¿',
+    'HistogramChar': '*',
+})
 
 Inverses = {}  # inverse colors
 
@@ -46,17 +62,8 @@ class ChangeCommandSet(VException):
         self.mode = mode
 
 
-def gettext(k):
-    _gettext = {
-        'VisibleNone': '',
-        'ColumnFiller': ' ',
-        'Ellipsis': '…',
-        'SubsheetSep': '~',
-        'SheetNameFmt': '%s| ',
-        'FunctionError': '¿',
-        'HistogramChar': '*',
-    }
-    return _gettext[k]
+def option(k):
+    return options.__dict__[k]
 
 
 def ctrl(ch):
@@ -87,14 +94,14 @@ base_commands = {
     # ^g sheet status
     ctrl('g'): 'vd.status(sheet.statusLine)',
 
-    # H/M/L jump to top/middle/bottom of screen
-    ord('H'): 'sheet.cursorRowIndex = sheet.topRowIndex',
-    ord('M'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows/2',
-    ord('L'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows',
+    # H/M/L could jump to top/middle/bottom of screen
+#    ord('H'): 'sheet.cursorRowIndex = sheet.topRowIndex',
+#    ord('M'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows/2',
+#    ord('L'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows',
 
-    # J/K skip down/up current column
-    ord('J'): 'sheet.skipDown()',
-    ord('K'): 'sheet.skipUp()',
+    # </> skip up/down current column to next value
+    ord('<'): 'sheet.skipDown()',
+    ord('>'): 'sheet.skipUp()',
 
     # _ resets column width
     ord('_'): 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)',
@@ -123,11 +130,14 @@ base_commands = {
 
     ord('C'): 'createColumnSummary(sheet)',
 
+    ord('O'): 'createDictSheet("options", options)',
+
+    ord('t'): 'vd.status("{%s}" % inputLine())',
     # search this column via regex
-    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), column=sheet.cursorCol)',
-    ord('?'): 'sheet.searchRegex(inputLine(prompt="/"), column=sheet.cursorCol, backward=True)',
-    ord('n'): 'sheet.searchRegex(column=sheet.cursorCol)',
-    ord('p'): 'sheet.searchRegex(column=sheet.cursorCol, backward=True)',
+    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), column=sheet.cursorCol, moveCursor=True)',
+    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), column=sheet.cursorCol, backward=True, moveCursor=True)',
+    ord('n'): 'sheet.searchRegex(column=sheet.cursorCol, moveCursor=True)',
+    ord('p'): 'sheet.searchRegex(column=sheet.cursorCol, backward=True, moveCursor=True)',
 }
 
 def inputLine(prompt=''):
@@ -135,7 +145,13 @@ def inputLine(prompt=''):
     curses.echo()
     line = scr.getstr(g_winHeight-1, len(prompt))
     curses.noecho()
-    return line
+    return line.decode('utf-8').strip()
+
+def iso8601(dt):
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
+
+def datestr(t):
+    return iso8601(datetime.datetime.fromtimestamp(t))
 
 sheet_specific_commands = {
     ("sheets", ENTER): 'vd.sheets[0] = vd.sheets.pop(sheet.cursorRowIndex)',  # replace the sheet list itself
@@ -159,7 +175,7 @@ global_commands = {
     ord(','): 'for c in sheet.columns: c.name = c.getDisplayValue(sheet.cursorRow)',
 
     # all previous errors sheet
-    ord('E'): 'createTextViewer("last_error", "\n\n".join(vd.lastErrors))',
+    ord('E'): 'createTextViewer("last_error", "\\n\\n".join(vd.lastErrors))',
 }
 
 def PyobjColumns(exampleRow):
@@ -168,21 +184,29 @@ def PyobjColumns(exampleRow):
 def ArrayColumns(n):
     return [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(n)]
 
+def AttrColumns(colnames):
+    return [VColumn(name, lambda_getattr(name)) for name in colnames]
+
 def createDirBrowser(fqpn):
     vs = vd.newSheet(fqpn)
     vs.dirname = fqpn
     vs.rows = []
     for dirpath, dirnames, filenames in os.walk(fqpn):
-        for dn in dirnames:
-            vs.rows.append(os.stat(os.path.join(dirpath, dn)))
         for fn in filenames:
-            vs.rows.append(os.stat(os.path.join(dirpath, fn)))
+            basename, ext = os.path.splitext(fn)
+            path = os.path.join(dirpath, fn)
+            st = os.stat(path)
+            vs.rows.append((dirpath, fn, ext, st.st_size, datestr(st.st_mtime), path))
 
-    vs.columns = PyobjColumns(vs.rows[0])
+    vs.columns = ColumnList('directory filename ext size mtime')
     vs.commands = {
-        ENTER: 'createSheetsFromFile(sheet.cursorRow.filename)'
+        ENTER: 'createSheetsFromFile(sheet.cursorRow[-1])'  # use hidden 'path' column
     }
     return vs
+
+
+def ColumnList(columnstr):
+    return [VColumn(colname, lambda_col(i)) for i, colname in enumerate(columnstr.split())]
 
 
 def createTextViewer(name, text):
@@ -205,7 +229,7 @@ def createFreqTable(sheet, col):
     freqtbl.columns = [
         VColumn(fqcolname, lambda_col(0)),
         VColumn('num', lambda_col(1)),
-        VColumn('histogram', lambda r,s=freqtbl: gettext('HistogramChar')*int(r[1]*80/s.total))
+        VColumn('histogram', lambda r,s=freqtbl: option('HistogramChar')*int(r[1]*80/s.total))
     ]
     return freqtbl
 
@@ -230,7 +254,7 @@ def open_zip(fn, fp):
     vs = vd.newSheet(fn)
     vs.zfp = zipfile.ZipFile(fn, 'r')
     vs.rows = vs.zfp.infolist()
-    vs.columns = PyobjColumns(vs.rows[0])
+    vs.columns = AttrColumns('filename file_size date_time'.split())
     vs.commands = {
         ENTER: 'createSheetsFromFile(sheet.cursorRow.filename, sheet.zfp.open(sheet.cursorRow))',
     }
@@ -246,8 +270,10 @@ def open_json(fn, fp):
     obj = json.load(codecs.open(fn, 'r'))
     if isinstance(obj, dict):
         return createDictSheet(fn, obj)
+    elif isinstance(obj, list):
+        return createListSheet(fn, obj)
     else:
-        raise Exception(obj)
+        raise VException(obj)
 
 def open_h5(fn, fp):
     import h5py
@@ -297,7 +323,7 @@ def createListSheet(name, iterable, columns=None):
     vs.rows = iterable
 
     if columns:
-        vs.columns = [VColumn(colname, lambda_getattr(colname)) for colname in columns]
+        vs.columns = AttrColumns(columns)
     elif isinstance(iterable[0], dict):  # list of dict
         vs.columns = [VColumn(k, lambda_colname(k)) for k in iterable[0].keys()]
     else:
@@ -319,7 +345,7 @@ def createDictSheet(name, mapping):
     ]
 
     vs.commands = {
-        ENTER: 'createPyObjSheet(sheet.name + gettext("SubsheetSep") + sheet.cursorRow[0], sheet.cursorRow[1])',
+        ENTER: 'createPyObjSheet(sheet.name + option("SubsheetSep") + sheet.cursorRow[0], sheet.cursorRow[1])',
     }
     return vs
 
@@ -327,6 +353,10 @@ def createDictSheet(name, mapping):
 def open_xlsx(fn, fp):
     import openpyxl
     basename, ext = os.path.splitext(fn)
+
+    if fp is not None:
+        fp = open(fn)
+
     workbook = openpyxl.load_workbook(fn, data_only=True, read_only=True)
 
     for sheetname in workbook.sheetnames:
@@ -345,7 +375,7 @@ def open_csv(fn, fp):
     if not fp:
         fp = codecs.open(fn, encoding='utf-8', errors='surrogateescape') #newline='')
 
-    rdr = csv.reader(fp, dialect=Settings['CsvDialect'], delimiter=Settings['CsvDelimiter'], quotechar=Settings['CsvQuotechar'])
+    rdr = csv.reader(fp, dialect=option('csv_dialect'), delimiter=option('csv_delimiter'), quotechar=option('csv_quotechar'))
 
     basename, ext = os.path.splitext(fn)
     vs = vd.newSheet(basename)
@@ -426,7 +456,7 @@ class VisiData:
 
             # draw status on last line
             attr = StatusLineAttr
-            statusstr = gettext('SheetNameFmt') % sheet.name + " | ".join(self._status)
+            statusstr = option('SheetNameFmt') % sheet.name + " | ".join(self._status)
             self.clipdraw(g_winHeight-1, 0, statusstr, attr, g_winWidth)
             self._status = []
 
@@ -462,17 +492,17 @@ class VisiData:
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
         try:
             if w is None:
-                w = g_winWidth
-            w = min(w, g_winWidth-x)
+                w = g_winWidth-1
+            w = min(w, g_winWidth-x-1)
 
             # convert to string just before drawing
             s = str(s)
             if len(s) > w:
-                scr.addstr(y, x, s[:w-1] + gettext('Ellipsis'), attr)
+                scr.addstr(y, x, s[:w-1] + option('Ellipsis'), attr)
             else:
                 scr.addstr(y, x, s, attr)
                 if len(s) < w:
-                    scr.addstr(y, x+len(s), gettext('ColumnFiller')*(w-len(s)), attr)
+                    scr.addstr(y, x+len(s), option('ColumnFiller')*(w-len(s)), attr)
         except Exception as e:
             self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
             self.exceptionCaught()
@@ -489,12 +519,12 @@ class VColumn:
             return self.func(row)
         except Exception as e:
             vd.exceptionCaught(status=False)
-            return gettext('FunctionError')
+            return option('FunctionError')
 
     def getDisplayValue(self, row):
         cellval = self.getValue(row)
         if cellval is None:
-            cellval = gettext('VisibleNone')
+            cellval = option('VisibleNone')
         return str(cellval)
 
 
@@ -588,6 +618,13 @@ class VSheet:
 
         vd.status('no different value up this column')
 
+    def columnsMatch(self, row, columns, func):
+        for c in columns:
+            m = func(c.getDisplayValue(row))
+            if m:
+                return True
+        return False
+        
     def checkCursor(self):
         # keep cursor within actual available rowset
         if self.cursorRowIndex <= 0:
@@ -620,31 +657,47 @@ class VSheet:
         elif self.rightColIndex and x > self.rightColIndex:
             self.leftColIndex += 1
 
-    def searchRegex(self, regex=None, column=None, backward=False, firstOnly=True):
-        'returns row index if firstOnly; otherwise returns list of row indexes'
+    def searchRegex(self, regex=None, column=None, backward=False, moveCursor=True):
+        'sets row index if moveCursor; otherwise returns list of row indexes'
+        if not regex and not self.currentRegex:
+            vd.status('no search term')
+            return
+
         if regex:
             self.currentRegex = re.compile(regex, re.IGNORECASE)
 
         if not self.currentRegex:
-            vd.status('no search term')
+            vd.status('no regex')
             return
 
         columns = [column] if column else self.columns
 
         if backward:
             rng = range(self.cursorRowIndex-1, -1, -1)
+            rng2 = range(self.nRows-1, self.cursorRowIndex-1, -1)
         else:
             rng = range(self.cursorRowIndex+1, self.nRows)
+            rng2 = range(0, self.cursorRowIndex+1)
 
         matchingRowIndexes = []
 
-        for i in rng:
-            for c in columns:
-                m = self.currentRegex.search(c.getDisplayValue(self.rows[i]))
-                if m:
-                    matchingRowIndexes.append(i)
-                    if firstOnly:
-                        return i
+        for r in rng:
+            if self.columnsMatch(self.rows[r], columns, self.currentRegex.search):
+                if moveCursor:
+                    self.cursorRowIndex = r
+                    return r
+                matchingRowIndexes.append(r)
+
+        for r in rng2:
+            if self.columnsMatch(self.rows[r], columns, self.currentRegex.search):
+                if moveCursor:
+                    self.cursorRowIndex = r
+                    vd.status('search wrapped')
+                    return r
+                matchingRowIndexes.append(r)
+
+        if not matchingRowIndexes:
+            vd.status('No match for /%s/' % self.searchRegex.pattern)
 
         return matchingRowIndexes
 
@@ -688,12 +741,13 @@ class VSheet:
                 row = self.rows[self.topRowIndex + rowidx]
                 cellval = self.columns[colidx].getDisplayValue(row)
 
-                if x+colwidth+len(SepChars) <= g_winWidth:
-                    scr.addstr(y, x+colwidth, SepChars, attr)
+                sepchars = options.columnsep
+                if x+colwidth+len(sepchars) <= g_winWidth:
+                    scr.addstr(y, x+colwidth, sepchars, attr)
                 vd.clipdraw(y, x, cellval, attr, colwidth)
                 y += 1
 
-            x += colwidth+len(SepChars)
+            x += colwidth+len(sepchars)
             if x >= g_winWidth:
                 break
 
@@ -711,7 +765,8 @@ def createSheetsFromFile(fqpn, fp=None):
     if os.path.isdir(fqpn):
         return createDirBrowser(fqpn)
 
-    return createTextViewer(fqpn, open(fqpn).read())
+    return createTextViewer(fqpn, 
+            codecs.open(fqpn, encoding=options.encoding, errors=options.encoding_errors).read())
 
 
 nextColorPair = 1
