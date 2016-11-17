@@ -25,7 +25,7 @@ default_options = {
 
     'columnsep': '  ',  # chars between columns
 
-    'VisibleNone': '',
+    'VisibleNone': '',   # visible contents of a cell whose value was None
     'ColumnFiller': ' ',
     'Ellipsis': '…',
     'SubsheetSep': '~',
@@ -40,6 +40,7 @@ default_options = {
     'c_RowHighlight': 'reverse',
     'c_ColumnHighlight': 'bold',
     'c_StatusLine': 'bold',
+    'c_SelectedRow': 'green',
 }
 
 vd = None    # toplevel VisiData, contains all sheets
@@ -144,10 +145,17 @@ base_commands = {
     ord('O'): 'createDictSheet("options", options.__dict__)',
 
     # search this column via regex
-    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), column=sheet.cursorCol, moveCursor=True)',
-    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), column=sheet.cursorCol, backward=True, moveCursor=True)',
+    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)',
+    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), columns=[sheet.cursorCol], backward=True, moveCursor=True)',
     ord('n'): 'sheet.searchRegex(column=sheet.cursorCol, moveCursor=True)',
     ord('p'): 'sheet.searchRegex(column=sheet.cursorCol, backward=True, moveCursor=True)',
+
+    # select/unselect rows via regex
+    ord(' '): 'sheet.toggleSelect(sheet.cursorRow); sheet.moveCursorDown(1)',
+    ord('u'): 'sheet.unselect([sheet.cursorRow]); sheet.moveCursorDown(1)',
+
+    ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))',
+    ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))',
 }
 
 sheet_specific_commands = {
@@ -183,6 +191,20 @@ global_commands = {
     # search all columns
     ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True)',
     ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True)',
+
+    # first/last match
+    ord('n'): 'sheet.cursorRowIndex = max(sheet.searchRegex())',
+    ord('p'): 'sheet.cursorRowIndex = min(sheet.searchRegex())',
+
+    # select/unselect all rows
+    ord(' '): 'sheet.selectedRows = sheet.rows.copy()',
+    ord('u'): 'sheet.selectedRows = []',
+
+    ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.columns))',
+    ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.columns))',
+
+    # delete all selected rows
+    ord('d'): 'sheet.rows = [r for r in sheet.rows if r not in sheet.selectedRows]',
 }
 
 ### VisiData core
@@ -336,6 +358,9 @@ class VSheet:
 
         # current search term
         self.currentRegex = None
+        self.currentRegexColumns = None
+
+        self.selectedRows = []
 
         # specialized sheet keys
         self.commands = {}
@@ -409,6 +434,18 @@ class VSheet:
 
         vd.status('no different value up this column')
 
+    def toggleSelect(self, r):
+        if r in self.selectedRows:
+            self.selectedRows.remove(r)
+        else:
+            self.selectedRows.append(r)
+
+    def select(self, rows):
+        self.selectedRows.extend(rows)
+
+    def unselect(self, rows):
+        self.selectedRows = [r for r in self.selectedRows if r not in rows]
+
     def columnsMatch(self, row, columns, func):
         for c in columns:
             m = func(c.getDisplayValue(row))
@@ -448,20 +485,17 @@ class VSheet:
         elif self.rightColIndex and x > self.rightColIndex:
             self.leftColIndex += 1
 
-    def searchRegex(self, regex=None, column=None, backward=False, moveCursor=True):
+    def searchRegex(self, regex=None, columns=None, backward=False, moveCursor=False):
         'sets row index if moveCursor; otherwise returns list of row indexes'
-        if not regex and not self.currentRegex:
-            vd.status('no search term')
-            return
-
         if regex:
             self.currentRegex = re.compile(regex, re.IGNORECASE)
 
         if not self.currentRegex:
             vd.status('no regex')
-            return
+            return []
 
-        columns = [column] if column else self.columns
+        if columns:
+            self.currentRegexColumns = columns
 
         if backward:
             rng = range(self.cursorRowIndex-1, -1, -1)
@@ -473,14 +507,14 @@ class VSheet:
         matchingRowIndexes = []
 
         for r in rng:
-            if self.columnsMatch(self.rows[r], columns, self.currentRegex.search):
+            if self.columnsMatch(self.rows[r], self.currentRegexColumns, self.currentRegex.search):
                 if moveCursor:
                     self.cursorRowIndex = r
                     return r
                 matchingRowIndexes.append(r)
 
         for r in rng2:
-            if self.columnsMatch(self.rows[r], columns, self.currentRegex.search):
+            if self.columnsMatch(self.rows[r], self.currentRegexColumns, self.currentRegex.search):
                 if moveCursor:
                     self.cursorRowIndex = r
                     vd.status('search wrapped')
@@ -488,7 +522,7 @@ class VSheet:
                 matchingRowIndexes.append(r)
 
         if not matchingRowIndexes:
-            vd.status('No match for /%s/' % self.searchRegex)
+            vd.status('No match for /%s/' % self.currentRegex.pattern)
 
         return matchingRowIndexes
 
@@ -527,10 +561,15 @@ class VSheet:
                 else:
                     attr = colors[options.c_default]
 
+                row = self.rows[self.topRowIndex + rowidx]
+
                 if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
                     attr = colors[options.c_RowHighlight]
+               
+                if row in self.selectedRows:
+                    attr |= colors[options.c_SelectedRow]
 
-                row = self.rows[self.topRowIndex + rowidx]
+
                 cellval = self.columns[colidx].getDisplayValue(row)
 
                 if x+colwidth+len(sepchars) <= windowWidth:
@@ -685,7 +724,9 @@ def open_zip(fn, fp):
 
 
 def open_txt(fn, fp):
-    contents = codecs.decode(fp.read(), 'ascii', 'surrogateescape')
+    if not fp:
+        fp = codecs.open(fn, encoding=options.encoding, errors=options.encoding_errors)
+    contents = fp.read()
     return createTextViewer(fn, contents)
 
 
@@ -710,7 +751,7 @@ def open_dir(fqpn):
 def open_csv(fn, fp):
     import csv
     if not fp:
-        fp = codecs.open(fn, encoding='utf-8', errors='surrogateescape') #newline='')
+        fp = codecs.open(fn, encoding=options.encoding, errors=options.encoding_errors) #newline='')
 
     rdr = csv.reader(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
 

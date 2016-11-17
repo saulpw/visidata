@@ -46,6 +46,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **C**      | build column summary.   shows stats (min/median/mean/max/stddev) |
 |
 |    **F**      | build frequency table for current column |
+|    **O**      | show options |
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
 |    **_**      | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
@@ -55,7 +56,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 
 |  **/** **?**    | Search forward/backward by regex in current column | search all columns
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
-| **d**  | Delete current row from in-memory sheet | 
+| **d**  | Delete current row |
 |**H**/**J**/**K**/**L** (or shift-arrows) | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
 |
 
