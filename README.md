@@ -1,4 +1,4 @@
-# VisiData v0.18
+# VisiData v0.19
 
 The Swiss Army Knife for Data Exploration
 
@@ -49,6 +49,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
 |    **_**      | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
+|    **^**      | Set name of current column | Set name of all columns to the values in the current row |
 |    **[**/**]**    | Sort by current column (asc/desc) |
 |   **<**/**>**     | skip up/down to next value in column |
 
