@@ -28,6 +28,7 @@ default_options = {
     'ColumnSep': '  ',  # chars between columns
     'Ellipsis': '…',
     'SubsheetSep': '~',
+    'StatusSep': ' | ',
     'SheetNameFmt': '%s| ',  # before status line
     'FunctionError': '¿',    # when computation fails due to exception
     'HistogramChar': '*',
@@ -155,7 +156,7 @@ base_commands = {
 }
 
 sheet_specific_commands = {
-    ("sheets", ENTER): 'del vd.sheets[0]; moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
+    ('sheets', ENTER): 'del vd.sheets[0]; moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
 }
 
 # when used with 'g' prefix
@@ -200,7 +201,7 @@ global_commands = {
     ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.columns))',
 
     # delete all selected rows
-    ord('d'): 'sheet.rows = [r for r in sheet.rows if r not in sheet.selectedRows]',
+    ord('d'): 'sheet.rows = [r for r in sheet.rows if r not in sheet.selectedRows]',  # maintain order
 }
 
 ### VisiData core
@@ -265,7 +266,7 @@ class VisiData:
 
             # draw status on last line
             attr = colors[options.c_StatusLine]
-            statusstr = options.SheetNameFmt % sheet.name + " | ".join(self._status)
+            statusstr = options.SheetNameFmt % sheet.name + options.StatusSep.join(self._status)
             self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
             self._status = []
 
@@ -289,7 +290,7 @@ class VisiData:
                     self.exceptionCaught()
                     self.status(cmdstr)
             else:
-                self.status("no command for key '%s' (%d)" % (chr(ch), ch))
+                self.status('no command for key "%s" (%d)' % (chr(ch), ch))
 
             sheet.checkCursor()
 
@@ -648,7 +649,7 @@ def createDictSheet(name, mapping):
     vs.rows = sorted(list(mapping.items()))
     vs.columns = [
         VColumn(name, lambda_col(0)),
-        VColumn("value", lambda_col(1))
+        VColumn('value', lambda_col(1))
     ]
 
     vs.commands = {
@@ -676,7 +677,7 @@ def createFreqTable(sheet, col):
 
 
 def createColumnSummary(sheet):
-    vs = vd.newSheet(sheet.name + "_columns")
+    vs = vd.newSheet(sheet.name + '_columns')
     vs.rows = sheet.columns
     vs.columns = [
         VColumn('column', lambda_getattr('name')),
@@ -696,7 +697,7 @@ def createSheetsFromFile(fqpn, fp=None):
     fn, ext = os.path.splitext(fqpn)
     ext = ext[1:]  # remove leading '.'
 
-    funcname = "open_" + ext
+    funcname = 'open_' + ext
     if funcname in globals():
         return globals()[funcname](fqpn, fp)
 
@@ -854,7 +855,7 @@ def open_xlsx(fn, fp):
 
 def inputLine(prompt=''):
     'move to the bottom of the screen and get a line of input from the user'
-    scr.addstr(windowHeight-1, 0, "%-*s" % (windowWidth-1, prompt))
+    scr.addstr(windowHeight-1, 0, '%-*s' % (windowWidth-1, prompt))
     curses.echo()
     line = scr.getstr(windowHeight-1, len(prompt))
     curses.noecho()
@@ -934,5 +935,5 @@ def wrapper(f, *args):
     return curses.wrapper(setupcolors, f, *args)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     terminal_main()
