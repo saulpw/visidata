@@ -106,10 +106,10 @@ base_commands = {
     # ^g sheet status
     ctrl('g'): 'vd.status(sheet.statusLine)',
 
-    # H/M/L could jump to top/middle/bottom of screen
-#    ord('H'): 'sheet.cursorRowIndex = sheet.topRowIndex',
-#    ord('M'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows/2',
-#    ord('L'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows',
+    # t/m/b jumps to top/middle/bottom of screen
+    ord('t'): 'sheet.cursorRowIndex = sheet.topRowIndex',
+    ord('m'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows/2',
+    ord('b'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows',
 
     # </> skip up/down current column to next value
     ord('<'): 'sheet.skipDown()',
@@ -144,7 +144,6 @@ base_commands = {
 
     ord('O'): 'createDictSheet("options", options)',
 
-    ord('t'): 'vd.status("{%s}" % inputLine())',
     # search this column via regex
     ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), column=sheet.cursorCol, moveCursor=True)',
     ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), column=sheet.cursorCol, backward=True, moveCursor=True)',
