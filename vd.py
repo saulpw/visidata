@@ -581,23 +581,33 @@ class VSheet:
     def nVisibleRows(self):
         return g_winHeight-2
 
-    def __getattr__(self, k):
-        if k == 'cursorCol':
-            return self.columns[self.cursorColIndex]
-        elif k == 'cursorRow':
-            return self.rows[self.cursorRowIndex]
-        elif k == 'visibleRows':
-            return self.rows[self.topRowIndex:self.topRowIndex+g_winHeight-2]
-        elif k == 'cursorValue':
-            return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
-        elif k == 'statusLine':
-            return 'row %s/%s' % (self.cursorRowIndex, len(self.rows))
-        elif k == 'nRows':
-            return len(self.rows)
-        elif k == 'nCols':
-            return len(self.columns)
-        else:
-            raise AttributeError(k)
+    @property
+    def cursorCol(self):
+        return self.columns[self.cursorColIndex]
+
+    @property
+    def cursorRow(self):
+        return self.rows[self.cursorRowIndex]
+
+    @property
+    def visibleRows(self):
+        return self.rows[self.topRowIndex:self.topRowIndex+g_winHeight-2]
+
+    @property
+    def cursorValue(self):
+        return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
+
+    @property
+    def statusLine(self):
+        return 'row %s/%s' % (self.cursorRowIndex, len(self.rows))
+
+    @property
+    def nRows(self):
+        return len(self.rows)
+
+    @property
+    def nCols(self):
+        return len(self.columns)
 
     def moveCursorDown(self, n):
         self.cursorRowIndex += n
