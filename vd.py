@@ -154,8 +154,8 @@ base_commands = {
     ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))',
     ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))',
 
-    ord('R'): 'sheet.source.type = inputLine("change type to: ")',
-    ctrl('r'): 'openSource(vd.sheets.pop(0).source)',
+    ord('R'): 'sheet.source.type = inputLine("change type to: ") or sheet.source.type',
+    ctrl('r'): 'openSource(vd.sheets.pop(0).source); vd.status("reloaded")',
 }
 
 sheet_specific_commands = {
@@ -737,6 +737,8 @@ def open_zip(src):
 def open_txt(src):
     if not src.fp:
         src.fp = codecs.open(src.ref, encoding=options.encoding, errors=options.encoding_errors)
+    else:
+        src.fp.seek(0)
     contents = src.fp.read()
     return createTextViewer(src.name, contents, src)
 
