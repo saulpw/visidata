@@ -1,4 +1,4 @@
-# VisiData v0.20
+# VisiData v0.21
 
 The Swiss Army Knife for Data Exploration
 
@@ -41,6 +41,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
 |   **t**/**m**/**b**   | move cursor to top/middle/bottom row on screen |
 |   **^G**      | show sheet status on statusline |
+|   **^R**      | reload sheet from source |
+|   **R**      | change reload type of sheet |
 |
 |    **S**      | view current sheet stack |
 |    **C**      | build column summary.   shows stats (min/median/mean/max/stddev) |
@@ -116,7 +118,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
 |   **F1** or **?**   | modal window with screen-specific keybindings | modal window with global keybindings |
-|   **^R**     | reload this sheet from source (maintaining cursor position) | reload all sheets |
 |   **^S**     | save current sheet to new file | save all sheets to new .h5 file |
 | **^C**        | cancel current long-running action |
 |

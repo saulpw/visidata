@@ -13,7 +13,7 @@ import curses
 import re
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.20
+__version__ = 0.21
 
 default_options = {
     'csv_dialect': 'excel',
@@ -153,6 +153,9 @@ base_commands = {
 
     ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))',
     ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))',
+
+    ord('R'): 'sheet.source.type = inputLine("change type to: ")',
+    ctrl('r'): 'openSource(vd.sheets.pop(0).source)',
 }
 
 sheet_specific_commands = {
@@ -294,8 +297,10 @@ class VisiData:
 
             sheet.checkCursor()
 
-    def newSheet(self, name):
-        vs = VSheet(name)
+    def newSheet(self, name, src=None):
+        if not src:
+            src = VSource('internal', name)
+        vs = VSheet(name, src)
         self.sheets.insert(0, vs)
         return vs
 
@@ -338,8 +343,22 @@ class VColumn:
         return str(cellval)
 
 
+class VSource:
+    def __init__(self, ref, name, contentType=None):
+        self.ref = ref           # full reference (url/fqpn), for refetching
+        self.name = name         # human-readable shorthand/mnemonic
+        self.fp = None
+
+        if contentType:
+            self.type = contentType  # txt/json/csv etc to determine which File_* class to use
+        else:
+            fn, ext = os.path.splitext(self.ref)
+            self.type = ext[1:]  # remove leading '.'
+
+
 class VSheet:
-    def __init__(self, name):
+    def __init__(self, name, src):
+        self.source = src
         self.name = name
         self.rows = []
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
@@ -449,7 +468,7 @@ class VSheet:
             if m:
                 return True
         return False
-        
+
     def checkCursor(self):
         # keep cursor within actual available rowset
         if self.cursorRowIndex <= 0:
@@ -562,7 +581,7 @@ class VSheet:
 
                 if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
                     attr = colors[options.c_CurRow]
-               
+
                 if row in self.selectedRows:
                     attr |= colors[options.c_SelectedRow]
 
@@ -611,8 +630,8 @@ def ColumnsFromList(columnstr):
     return [VColumn(colname, lambda_col(i)) for i, colname in enumerate(columnstr.split())]
 
 
-def createTextViewer(name, text):
-    viewer = vd.newSheet(name)
+def createTextViewer(name, text, src=None):
+    viewer = vd.newSheet(name, src)
     viewer.rows = text.split('\n')
     viewer.columns = [ VColumn(name, lambda r: r) ]
     return viewer
@@ -667,7 +686,7 @@ def createFreqTable(sheet, col):
     freqtbl = vd.newSheet('freq_' + fqcolname)
     freqtbl.rows = list(values.items())
     freqtbl.total = max(values.values())+1
-    
+
     freqtbl.columns = [
         VColumn(fqcolname, lambda_col(0)),
         VColumn('num', lambda_col(1)),
@@ -693,45 +712,39 @@ def createColumnSummary(sheet):
 
 ### input source formats
 
-def createSheetsFromFile(fqpn, fp=None):
-    fn, ext = os.path.splitext(fqpn)
-    ext = ext[1:]  # remove leading '.'
+def openSource(src):
+    if os.path.isdir(src.ref):
+        return open_dir(src)
 
-    funcname = 'open_' + ext
-    if funcname in globals():
-        return globals()[funcname](fqpn, fp)
-
-    if os.path.isdir(fqpn):
-        return open_dir(fqpn)
-
-    return createTextViewer(fqpn, 
-            codecs.open(fqpn, encoding=options.encoding, errors=options.encoding_errors).read())
+    funcname = 'open_' + src.type
+    return globals().get(funcname, open_txt)(src)
 
 
-def open_zip(fn, fp):
+def open_zip(src):
     import zipfile
-    vs = vd.newSheet(fn)
-    vs.zfp = zipfile.ZipFile(fn, 'r')
-    vs.rows = vs.zfp.infolist()
+    if not src.fp:
+        src.fp = zipfile.ZipFile(src.ref, 'r')
+
+    vs = vd.newSheet(src.name, src)
+    vs.rows = vs.fp.infolist()
     vs.columns = AttrColumns('filename file_size date_time'.split())
     vs.commands = {
-        ENTER: 'createSheetsFromFile(sheet.cursorRow.filename, sheet.zfp.open(sheet.cursorRow))',
+        ENTER: 'openSource(VSource(sheet.source.fp.open(sheet.cursorRow), sheet.cursorRow.filename))',
     }
     return vs
 
 
-def open_txt(fn, fp):
-    if not fp:
-        fp = codecs.open(fn, encoding=options.encoding, errors=options.encoding_errors)
-    contents = fp.read()
-    return createTextViewer(fn, contents)
+def open_txt(src):
+    if not src.fp:
+        src.fp = codecs.open(src.ref, encoding=options.encoding, errors=options.encoding_errors)
+    contents = src.fp.read()
+    return createTextViewer(src.name, contents, src)
 
 
-def open_dir(fqpn):
-    vs = vd.newSheet(fqpn)
-    vs.dirname = fqpn
+def open_dir(src):
+    vs = vd.newSheet(src.name, src)
     vs.rows = []
-    for dirpath, dirnames, filenames in os.walk(fqpn):
+    for dirpath, dirnames, filenames in os.walk(src.ref):
         for fn in filenames:
             basename, ext = os.path.splitext(fn)
             path = os.path.join(dirpath, fn)
@@ -740,40 +753,42 @@ def open_dir(fqpn):
 
     vs.columns = ColumnsFromList('directory filename ext size mtime')
     vs.commands = {
-        ENTER: 'createSheetsFromFile(sheet.cursorRow[-1])'  # use hidden 'path' column
+        ENTER: 'openSource(VSource(sheet.cursorRow[-1], sheet.cursorRow[1]))'  # path, filename
     }
     return vs
 
 
-def open_csv(fn, fp):
+def open_csv(src):
     import csv
-    if not fp:
-        fp = codecs.open(fn, encoding=options.encoding, errors=options.encoding_errors) #newline='')
+    if not src.fp:
+        src.fp = codecs.open(src.ref, encoding=options.encoding, errors=options.encoding_errors) #newline='')
 
-    rdr = csv.reader(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+    rdr = csv.reader(src.fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
 
     basename, ext = os.path.splitext(fn)
-    vs = vd.newSheet(basename)
+    vs = vd.newSheet(basename, src)
     vs.rows = [r for r in rdr]
     vs.columns = PyobjColumns(vs.rows[0]) or ArrayColumns(len(vs.rows[0]))
     return vs
 
 
-def open_json(fn, fp):
+def open_json(src):
     import json
-    obj = json.load(codecs.open(fn, 'r'))
+    fn = src.ref
+    if not src.fp:
+        src.fp = codecs.open(fn, 'r')
+    obj = json.load(src.fp)
     if isinstance(obj, dict):
-        return createDictSheet(fn, obj)
+        return createDictSheet(fn, obj, src)
     elif isinstance(obj, list):
-        return createListSheet(fn, obj)
+        return createListSheet(fn, obj, src)
     else:
         raise VException(obj)
 
 
-def open_tsv(fn, fp):
-    basename, ext = os.path.splitext(fn)
-    fetcher = TsvFetcher(fn)
-    vs = vd.newSheet(basename)
+def open_tsv(src):
+    fetcher = TsvFetcher(src.ref)
+    vs = vd.newSheet(src.name, src)
     vs.rows = fetcher.getRows(0, None)
     vs.columns = [VColumn(name, lambda_col(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
     return vs
@@ -794,9 +809,9 @@ class TsvFetcher:
         return self.rows[startrownum:endrownum]
 
 
-def createHDF5Sheet(hobj):
+def createHDF5Sheet(hobj, src):
     import h5py
-    vs = vd.newSheet(hobj.name)
+    vs = vd.newSheet(hobj.name, src)
 
     if isinstance(hobj, h5py.Group):
         vs.rows = [ hobj[objname] for objname in hobj.keys() ]
@@ -807,7 +822,7 @@ def createHDF5Sheet(hobj):
         ]
 
         vs.commands = {
-            ENTER: 'createHDF5Sheet(sheet.cursorRow)',
+            ENTER: 'createHDF5Sheet(sheet.cursorRow, sheet.source)',
             ord('A'): 'createDictSheet(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs)',
         }
     elif isinstance(hobj, h5py.Dataset):
@@ -820,28 +835,29 @@ def createHDF5Sheet(hobj):
     return vs
 
 
-def open_h5(fn, fp):
+def open_h5(src):
     import h5py
-    f = h5py.File(fn, 'r')
-    hs = createHDF5Sheet(f)
-    hs.name = fn
+    if not src.fp:
+        src.fp = h5py.File(fn, 'r')
+    hs = createHDF5Sheet(src.fp)
+    hs.name = src.name
     return hs
 
 open_hdf5 = open_h5
 
 
-def open_xlsx(fn, fp):
+def open_xlsx(src):
     import openpyxl
     basename, ext = os.path.splitext(fn)
 
-    if fp is not None:
-        fp = open(fn)
+    if not src.fp:
+        src.fp = open(src.ref)
 
-    workbook = openpyxl.load_workbook(fn, data_only=True, read_only=True)
+    workbook = openpyxl.load_workbook(src.fp, data_only=True, read_only=True)
 
     for sheetname in workbook.sheetnames:
         sheet = workbook.get_sheet_by_name(sheetname)
-        vs = vd.newSheet('%s:%s' % (basename, sheetname))
+        vs = vd.newSheet(basename + options.SubSheetSep + sheetname, src)
 
         vs.columns = ArrayColumns(sheet.max_column)
 
@@ -910,7 +926,7 @@ def terminal_main():
     inputs = g_args.inputs or ['.']
 
     for fn in inputs:
-        createSheetsFromFile(fn)
+        openSource(VSource(fn, fn))
 
     ret = wrapper(curses_main)
     if ret:
