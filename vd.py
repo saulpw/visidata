@@ -137,15 +137,15 @@ base_commands = {
     ord('g'): 'raise ChangeCommandSet(global_commands, "g")',
 
     # meta sheets
-    ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue".split())',
+    ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue source".split())',
     ord('C'): 'createColumnSummary(sheet)',
     ord('O'): 'createDictSheet("options", options.__dict__)',
 
     # search this column via regex
     ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)',
     ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), columns=[sheet.cursorCol], backward=True, moveCursor=True)',
-    ord('n'): 'sheet.searchRegex(column=sheet.cursorCol, moveCursor=True)',
-    ord('p'): 'sheet.searchRegex(column=sheet.cursorCol, backward=True, moveCursor=True)',
+    ord('n'): 'sheet.searchRegex(columns=[sheet.cursorCol], moveCursor=True)',
+    ord('p'): 'sheet.searchRegex(columns=[sheet.cursorCol], backward=True, moveCursor=True)',
 
     # select/unselect rows via regex
     ord(' '): 'sheet.toggleSelect(sheet.cursorRow); sheet.moveCursorDown(1)',
@@ -361,6 +361,8 @@ class VSource:
         else:
             self.type = ''
 
+    def __repr__(self):
+        return self.ref
 
 class VSheet:
     def __init__(self, name, src):
