@@ -78,30 +78,31 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 ### Configurable Options (via shift-'O')
 
 | Option | Default value | notes |
+| ---: | --- | --- |
 | `csv_dialect` | `sniff` | as passed to csv.reader |
- | `csv_delimiter` | `\|` |
- | `csv_quotechar` | `"` |
-
- | `encoding` | `utf-8`| as passed to codecs.open |
- | `encoding_errors` | `surrogateescape`|
-
- | `VisibleNone` | ``|  visible contents of a cell whose value was None |
- | `ColumnFiller` | ` `| pad chars after column value |
- | `Ellipsis` | `…`|
- | `ColumnSep` | `  `|  chars between columns |
- | `SubsheetSep` | `~`|
- | `StatusSep` | ` | `|
- | `SheetNameFmt` | `%s\| `|  status line prefix |
- | `FunctionError` | `¿`|    when computation fails due to exception |
- | `HistogramChar` | `*`|
+| `csv_delimiter` | `\|` |
+| `csv_quotechar` | `"` |
+|
+| `encoding` | `utf-8`| as passed to codecs.open |
+| `encoding_errors` | `surrogateescape`|
+|
+| `VisibleNone` | ``|  visible contents of a cell whose value was None |
+| `ColumnFiller` | ` `| pad chars after column value |
+| `Ellipsis` | `…`|
+| `ColumnSep` | `  `|  chars between columns |
+| `SubsheetSep` | `~`|
+| `StatusSep` | ` | `|
+| `SheetNameFmt` | `%s\| `|  status line prefix |
+| `FunctionError` | `¿`|    when computation fails due to exception |
+| `HistogramChar` | `*`|
 |  color scheme |
- | `c_default` | `normal`|
- | `c_Header` | `bold`|
- | `c_CurHdr` | `reverse`|
- | `c_CurRow` | `reverse`|
- | `c_CurCol` | `bold`|
- | `c_StatusLine` | `bold`|
- | `c_SelectedRow` | `green`|
+| `c_default` | `normal`|
+| `c_Header` | `bold`|
+| `c_CurHdr` | `reverse`|
+| `c_CurRow` | `reverse`|
+| `c_CurCol` | `bold`|
+| `c_StatusLine` | `bold`|
+| `c_SelectedRow` | `green`|
 
 ## Contributions
 
@@ -160,7 +161,6 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **=**      | Add derivative column from expression |
 |
 |    **R**      | view select list for this sheet |
-|    \*/**u**   | select/unselect all rows | select/unselect across all sheets |
 |    ** **      | select rows which match the current column value | select rows which have any column which matches the current column value |
 | **v**/**V**   | hide/show unselected rows |
 |
