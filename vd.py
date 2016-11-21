@@ -13,7 +13,7 @@ import curses
 import re
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.21
+__version__ = 0.22
 
 default_options = {
     'csv_dialect': 'excel',
@@ -305,6 +305,7 @@ class VisiData:
         return vs
 
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
+        s = s.replace('\n', '\\n')
         try:
             if w is None:
                 w = windowWidth-1
@@ -347,13 +348,18 @@ class VSource:
     def __init__(self, ref, name, contentType=None):
         self.ref = ref           # full reference (url/fqpn), for refetching
         self.name = name         # human-readable shorthand/mnemonic
+        self.contents = None     # cached contents
         self.fp = None
 
         if contentType:
             self.type = contentType  # txt/json/csv etc to determine which File_* class to use
-        else:
+        elif isinstance(ref, str):
             fn, ext = os.path.splitext(self.ref)
             self.type = ext[1:]  # remove leading '.'
+        elif isinstance(ref, object):
+            self.type = 'pyobj'
+        else:
+            self.type = ''
 
 
 class VSheet:
@@ -612,23 +618,26 @@ def lambda_col(b):
 def lambda_getattr(b):
     return lambda r: getattr(r, b)
 
+
+def getPublicAttrs(obj):
+    return [k for k in dir(obj) if not k.startswith('_') and not callable(getattr(obj, k))]
+
 def PyobjColumns(exampleRow):
-    'columns for each attribute on an object'
-    return [VColumn(k, lambda_getattr(k)) for k in dir(exampleRow) if not k.startswith('_') and not callable(getattr(exampleRow, k))]
+    'columns for each public attribute on an object'
+    return [VColumn(k, lambda_getattr(k)) for k in getPublicAttrs(exampleRow)]
 
 def ArrayColumns(n):
     'columns that display r[0]..r[n]'
     defaultColNames = string.ascii_uppercase
     return [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(n)]
 
-def AttrColumns(colnames):
-    'colnames is list of attribute names'
-    return [VColumn(name, lambda_getattr(name)) for name in colnames]
-
-def ColumnsFromList(columnstr):
+def ArrayNamedColumns(columnstr):
     'columnstr is a string of n column names (separated by spaces), mapping to r[0]..r[n]'
     return [VColumn(colname, lambda_col(i)) for i, colname in enumerate(columnstr.split())]
 
+def AttrColumns(colnames):
+    'colnames is list of attribute names'
+    return [VColumn(name, lambda_getattr(name)) for name in colnames]
 
 def createTextViewer(name, text, src=None):
     viewer = vd.newSheet(name, src)
@@ -638,10 +647,12 @@ def createTextViewer(name, text, src=None):
 
 
 def createPyObjSheet(name, pyobj):
-    if isinstance(pyobj, dict):
-        return createDictSheet(name, pyobj)
-    elif isinstance(pyobj, list):
+    if isinstance(pyobj, list):
         return createListSheet(name, pyobj)
+    elif isinstance(pyobj, dict):
+        return createDictSheet(name, pyobj)
+    elif isinstance(pyobj, object):
+        return viewPyObj(pyobj)
 
 
 def createListSheet(name, iterable, columns=None):
@@ -667,11 +678,12 @@ def createDictSheet(name, mapping):
     vs = vd.newSheet(name)
     vs.rows = sorted(list(mapping.items()))
     vs.columns = [
-        VColumn(name, lambda_col(0)),
+        VColumn('key', lambda_col(0)),
         VColumn('value', lambda_col(1))
     ]
 
     vs.commands = {
+        # pushes a sheet for the Pyobj in 'value', whatever that looks like
         ENTER: 'createPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])',
     }
     return vs
@@ -716,8 +728,42 @@ def openSource(src):
     if os.path.isdir(src.ref):
         return open_dir(src)
 
+    if '://' in src.ref and src.ref not in sourceCache:
+        return open_url(src)
+
     funcname = 'open_' + src.type
     return globals().get(funcname, open_txt)(src)
+
+
+def viewPyObj(obj):
+    vs = vd.newSheet(type(obj), VSource(obj, str(obj)))
+#    vs.rows = getPublicAttrs(obj)
+    vs.rows = [k for k in dir(obj) if not (k.startswith('_') and callable(getattr(obj, k)))]
+    vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', lambda r,sheet=vs: getattr(sheet.source.ref, r))]
+    return vs
+
+MIMEToFileType = {
+    'text/html': 'html',
+}
+
+sourceCache = {}
+
+def open_url(src):
+    if not src.ref in sourceCache:
+        import urllib.request
+        resp = urllib.request.urlopen(src.ref)
+        src.fp = resp
+        src.ref = resp.geturl()   # replace with actual url retrieved (after following redirects)
+        ctype = resp.getheader('Content-Type')
+        sourceCache[src.ref] = resp.read()
+        src.type = MIMEToFileType.get(ctype, ctype.split('/')[-1])
+
+    vs = openSource(src)
+
+    vs.commands = {
+        ord('A'): 'createDictSheet("headers:" + sheet.source.fp.geturl(), dict(sheet.source.fp.getheaders()))',
+    }
+    return vs
 
 
 def open_zip(src):
@@ -735,11 +781,17 @@ def open_zip(src):
 
 
 def open_txt(src):
-    if not src.fp:
-        src.fp = codecs.open(src.ref, encoding=options.encoding, errors=options.encoding_errors)
-    else:
-        src.fp.seek(0)
-    contents = src.fp.read()
+    if src.ref not in sourceCache:
+        if not src.fp:
+            src.fp = codecs.open(src.ref, encoding=options.encoding, errors=options.encoding_errors)
+
+        sourceCache[src.ref] = src.fp.read()
+
+    contents = sourceCache[src.ref]
+
+    if isinstance(contents, bytes):
+        contents = contents.decode(options.encoding)
+
     return createTextViewer(src.name, contents, src)
 
 
@@ -753,7 +805,7 @@ def open_dir(src):
             st = os.stat(path)
             vs.rows.append((dirpath, fn, ext, st.st_size, datestr(st.st_mtime), path))
 
-    vs.columns = ColumnsFromList('directory filename ext size mtime')
+    vs.columns = ArrayNamedColumns('directory filename ext size mtime')
     vs.commands = {
         ENTER: 'openSource(VSource(sheet.cursorRow[-1], sheet.cursorRow[1]))'  # path, filename
     }
@@ -877,7 +929,7 @@ def inputLine(prompt=''):
     curses.echo()
     line = scr.getstr(windowHeight-1, len(prompt))
     curses.noecho()
-    return line.decode('utf-8').strip()
+    return line.decode('utf-8')
 
 
 nextColorPair = 1
