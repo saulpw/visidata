@@ -13,7 +13,7 @@ import curses
 import re
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.22
+__version__ = 0.23
 
 default_options = {
     'csv_dialect': 'excel',
@@ -231,7 +231,7 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self._status = []
-        self.status('  saul.pw/visidata v' + str(__version__))
+        self.status('  saul.pw/VisiData v' + str(__version__))
 
         self.lastErrors = []
 
@@ -468,7 +468,10 @@ class VSheet:
         self.selectedRows.extend(rows)
 
     def unselect(self, rows):
+        rows = list(rows)
+        before = len(self.selectedRows)
         self.selectedRows = [r for r in self.selectedRows if r not in rows]
+        vd.status('unselected %s rows' % (before-len(self.selectedRows)))
 
     def columnsMatch(self, row, columns, func):
         for c in columns:
@@ -545,8 +548,7 @@ class VSheet:
                     return r
                 matchingRowIndexes.append(r)
 
-        if not matchingRowIndexes:
-            vd.status('No match for /%s/' % self.currentRegex.pattern)
+        vd.status('%s matches for /%s/' % (len(matchingRowIndexes), self.currentRegex.pattern))
 
         return matchingRowIndexes
 
