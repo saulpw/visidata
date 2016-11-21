@@ -28,7 +28,7 @@ default_options = {
 
     'VisibleNone': '',   # visible contents of a cell whose value was None
     'ColumnFiller': ' ',
-    'ColumnSep': '  ',  # chars between columns
+    'ColumnSep': ' | ',  # chars between columns
     'Ellipsis': '…',
     'SubsheetSep': '~',
     'StatusSep': ' | ',
@@ -44,6 +44,7 @@ default_options = {
     'c_CurCol': 'bold',
     'c_StatusLine': 'bold',
     'c_SelectedRow': 'green',
+    'c_EditCell': 'normal',
 }
 
 vd = None    # toplevel VisiData, contains all sheets
@@ -387,6 +388,10 @@ class VSheet:
         self.leftColIndex = 0    # cursorColIndex of leftmost column
         self.rightColIndex = None   # cursorColIndex of rightmost column
 
+        # as computed during draw()
+        self.rowLayout = {} # [rowidx] -> y
+        self.colLayout = {} # [colidx] -> (x, w)
+
         # all columns in display order
         self.columns = None
 
@@ -562,7 +567,6 @@ class VSheet:
 
         return matchingRowIndexes
 
-
     def draw(self):
         scr.erase()  # clear screen before every re-draw
         sepchars = options.ColumnSep
@@ -570,6 +574,8 @@ class VSheet:
         x = 0
         colidx = None
 
+        self.colLayout = {}
+        self.rowLayout = {}
         for colidx in range(self.leftColIndex, len(self.columns)):
 
             # draw header
@@ -585,12 +591,19 @@ class VSheet:
 
             colwidth = min(col.width, windowWidth-x)
 
-            vd.clipdraw(0, x, col.name, attr, colwidth)
+            self.colLayout[colidx] = (x, colwidth)
 
-            y = 1
+            y = 0
+            vd.clipdraw(y, x, col.name, attr, colwidth)
+            if x+colwidth+len(sepchars) <= windowWidth:
+                scr.addstr(y, x+colwidth, sepchars, colors[options.c_default])
+
+            y += 1
             for rowidx in range(0, windowHeight-2):
                 if self.topRowIndex + rowidx >= len(self.rows):
                     break
+
+                self.rowLayout[self.topRowIndex+rowidx] = y
 
                 if colidx == self.cursorColIndex:  # cursor is at this column
                     attr = colors[options.c_CurCol]
@@ -618,6 +631,18 @@ class VSheet:
                 break
 
         self.rightColIndex = colidx
+
+    def editCell(self, colnum=None):
+        if colnum is None:
+            colnum = self.cursorColIndex
+        x, w = self.colLayout[colnum]
+        y = self.rowLayout[self.cursorRowIndex]
+        scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
+        curses.echo()
+        inp = scr.getstr(y, x)
+        curses.noecho()
+        return inp.decode('utf-8')
+
 # end VSheet class
 
 
@@ -689,8 +714,8 @@ def createListSheet(name, iterable, columns=None, src=None):
 
 
 def createDictSheet(name, mapping):
-    vs = vd.newSheet(name)
-    vs.rows = sorted(list(mapping.items()))
+    vs = vd.newSheet(name, mapping)
+    vs.rows = sorted(list([k,v] for k,v in mapping.items()))
     vs.columns = [
         VColumn('key', lambda_col(0)),
         VColumn('value', lambda_col(1))
@@ -698,7 +723,8 @@ def createDictSheet(name, mapping):
 
     vs.commands.update({
         # pushes a sheet for the Pyobj in 'value', whatever that looks like
-        ENTER: 'createPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])',
+        ENTER: 'if sheet.cursorColIndex == 1: createPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])',
+        ord('e'): 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1) or sheet.cursorRow[1]',
     })
     return vs
 
@@ -862,6 +888,7 @@ def open_csv(src):
 
     if options.csv_dialect == 'sniff':
         headers = src.fp.read(1024)
+        headers = headers.decode(options.encoding)
         dialect = csv.Sniffer().sniff(headers)
     else:
         dialect = options.csv_dialect
@@ -970,6 +997,7 @@ def open_xlsx(src):
 
 
 ### curses, options, init
+
 
 def inputLine(prompt=''):
     'move to the bottom of the screen and get a line of input from the user'
