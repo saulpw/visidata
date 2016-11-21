@@ -80,7 +80,7 @@ ENTER = ctrl('j')
 
 base_commands = {
     # pop current sheet off the sheet stack
-    ord('q'): 'del vd.sheets[0]',
+    ord('q'): 'vd.sheets.pop(0)',
 
     # standard movement with arrow keys
     curses.KEY_LEFT:  'sheet.moveCursorRight(-1)',
@@ -134,7 +134,7 @@ base_commands = {
     ord('^'): 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)',
 
     # delete current row
-    ord('d'): 'del sheet.rows[sheet.cursorRowIndex]',
+    ord('d'): 'sheet.rows.pop(sheet.cursorRowIndex)',
 
     # g = global mode
     ord('g'): 'raise ChangeCommandSet(global_commands, "g")',
@@ -162,7 +162,7 @@ base_commands = {
 }
 
 sheet_specific_commands = {
-    ('sheets', ENTER): 'del vd.sheets[0]; moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
+    ('sheets', ENTER): 'vd.sheets.pop(0); moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
 }
 
 # when used with 'g' prefix
@@ -282,6 +282,12 @@ class VisiData:
             ch = scr.getch()
             if ch == curses.KEY_RESIZE:
                 windowHeight, windowWidth = scr.getmaxyx()
+            elif ch == curses.KEY_MOUSE:
+                try:
+                    devid, x, y, z, bstate = curses.getmouse()
+                    sheet.cursorRowIndex = sheet.topRowIndex+y-1
+                except Exception:
+                    self.exceptionCaught()
             elif ch in sheet.commands or ch in commands:
                 cmdstr = sheet_specific_commands.get((sheet.name, ch)) or sheet.commands.get(ch) or commands.get(ch)
                 try:
@@ -293,6 +299,7 @@ class VisiData:
                     commands = e.commands
                     self.status(e.mode)
                 except Exception:
+                    commands = base_commands
                     self.exceptionCaught()
                     self.status(cmdstr)
             else:
@@ -1034,6 +1041,9 @@ def curses_main(_scr):
 
     # get control keys instead of signals
     curses.raw()
+
+    # enable mouse events
+#    curses.mousemask(curses.ALL_MOUSE_EVENTS)
 
     try:
         return vd.run()
