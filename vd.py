@@ -11,12 +11,15 @@ import codecs
 import statistics
 import curses
 import re
+import html.parser
+import urllib.parse
+
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __version__ = 0.23
 
 default_options = {
-    'csv_dialect': 'excel',
+    'csv_dialect': 'sniff',
     'csv_delimiter': ',',
     'csv_quotechar': '"',
 
@@ -105,9 +108,9 @@ base_commands = {
     ctrl('g'): 'vd.status(sheet.statusLine)',
 
     # t/m/b jumps to top/middle/bottom of screen
-    ord('t'): 'sheet.cursorRowIndex = sheet.topRowIndex',
-    ord('m'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows/2',
-    ord('b'): 'sheet.cursorRowIndex = sheet.topRowIndex+sheet.nVisibleRows-1',
+    ord('t'): 'sheet.topRowIndex = sheet.cursorRowIndex',
+    ord('m'): 'sheet.topRowIndex = sheet.cursorRowIndex-int(sheet.nVisibleRows/2)',
+    ord('b'): 'sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows+1',
 
     # </> skip up/down current column to next value
     ord('<'): 'sheet.skipUp()',
@@ -341,7 +344,7 @@ class VColumn:
         cellval = self.getValue(row)
         if cellval is None:
             cellval = options.VisibleNone
-        return str(cellval)
+        return str(cellval).strip()
 
 
 class VSource:
@@ -659,9 +662,9 @@ def createPyObjSheet(name, pyobj):
         return viewPyObj(pyobj)
 
 
-def createListSheet(name, iterable, columns=None):
+def createListSheet(name, iterable, columns=None, src=None):
     'columns is a list of strings naming attributes on the objects within the iterable'
-    vs = vd.newSheet(name)
+    vs = vd.newSheet(name, src)
     vs.rows = iterable
 
     if columns:
@@ -672,9 +675,9 @@ def createListSheet(name, iterable, columns=None):
         vs.columns = [VColumn(name)]
 
     # push sheet and set the new cursor row to the current cursor col
-    vs.commands = {
+    vs.commands.update({
         ENTER: 'createPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex',
-    }
+    })
     return vs
 
 
@@ -686,10 +689,10 @@ def createDictSheet(name, mapping):
         VColumn('value', lambda_col(1))
     ]
 
-    vs.commands = {
+    vs.commands.update({
         # pushes a sheet for the Pyobj in 'value', whatever that looks like
         ENTER: 'createPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])',
-    }
+    })
     return vs
 
 
@@ -755,18 +758,50 @@ sourceCache = {}
 def open_url(src):
     if not src.ref in sourceCache:
         import urllib.request
+        import cgi
         resp = urllib.request.urlopen(src.ref)
         src.fp = resp
         src.ref = resp.geturl()   # replace with actual url retrieved (after following redirects)
-        ctype = resp.getheader('Content-Type')
-        sourceCache[src.ref] = resp.read()
+        ctype, params = cgi.parse_header(resp.getheader('Content-Type'))
         src.type = MIMEToFileType.get(ctype, ctype.split('/')[-1])
+
+        contents = resp.read()
+        if isinstance(contents, bytes):
+            contents = contents.decode(options.encoding)  # or params['charset']?
+
+        sourceCache[src.ref] = contents
 
     vs = openSource(src)
 
-    vs.commands = {
+    vs.commands.update({
         ord('A'): 'createDictSheet("headers:" + sheet.source.fp.geturl(), dict(sheet.source.fp.getheaders()))',
-    }
+    })
+    return vs
+
+
+class hrefParser(html.parser.HTMLParser):
+    def __init__(self):
+        super().__init__(self)
+        self.hrefs = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a':
+           attrdict = dict(attrs)
+           if 'href' in attrdict:
+               self.hrefs.append(attrdict)
+
+    def handle_data(self, data):
+        if self.hrefs and 'linktext' not in self.hrefs[-1]:
+            self.hrefs[-1]['linktext'] = data
+
+
+def open_html(src):
+    hp = hrefParser()
+    hp.feed(sourceCache[src.ref])
+    vs = createListSheet(src.name + options.SubsheetSep + 'hrefs', hp.hrefs, PyobjColumns(hp.hrefs[0]), src=src)
+    vs.commands.update({
+        ENTER: 'openSource(VSource(urllib.parse.urljoin(sheet.source.ref, sheet.cursorRow["href"]), sheet.cursorRow["linktext"]))',
+    })
     return vs
 
 
@@ -778,9 +813,9 @@ def open_zip(src):
     vs = vd.newSheet(src.name, src)
     vs.rows = vs.fp.infolist()
     vs.columns = AttrColumns('filename file_size date_time'.split())
-    vs.commands = {
+    vs.commands.update({
         ENTER: 'openSource(VSource(sheet.source.fp.open(sheet.cursorRow), sheet.cursorRow.filename))',
-    }
+    })
     return vs
 
 
@@ -792,9 +827,6 @@ def open_txt(src):
         sourceCache[src.ref] = src.fp.read()
 
     contents = sourceCache[src.ref]
-
-    if isinstance(contents, bytes):
-        contents = contents.decode(options.encoding)
 
     return createTextViewer(src.name, contents, src)
 
@@ -810,9 +842,9 @@ def open_dir(src):
             vs.rows.append((dirpath, fn, ext, st.st_size, datestr(st.st_mtime), path))
 
     vs.columns = ArrayNamedColumns('directory filename ext size mtime')
-    vs.commands = {
+    vs.commands.update({
         ENTER: 'openSource(VSource(sheet.cursorRow[-1], sheet.cursorRow[1]))'  # path, filename
-    }
+    })
     return vs
 
 
@@ -821,9 +853,15 @@ def open_csv(src):
     if not src.fp:
         src.fp = codecs.open(src.ref, encoding=options.encoding, errors=options.encoding_errors) #newline='')
 
-    rdr = csv.reader(src.fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+    if options.csv_dialect == 'sniff':
+        headers = src.fp.read(1024)
+        dialect = csv.Sniffer().sniff(headers)
+    else:
+        dialect = options.csv_dialect
 
-    basename, ext = os.path.splitext(fn)
+    rdr = csv.reader(src.fp, dialect=dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+
+    basename, ext = os.path.splitext(src.ref)
     vs = vd.newSheet(basename, src)
     vs.rows = [r for r in rdr]
     vs.columns = PyobjColumns(vs.rows[0]) or ArrayColumns(len(vs.rows[0]))
@@ -879,10 +917,10 @@ def createHDF5Sheet(hobj, src):
             VColumn('nItems', lambda r: len(r)),
         ]
 
-        vs.commands = {
+        vs.commands.update({
             ENTER: 'createHDF5Sheet(sheet.cursorRow, sheet.source)',
             ord('A'): 'createDictSheet(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs)',
-        }
+        })
     elif isinstance(hobj, h5py.Dataset):
         if len(hobj.shape) == 1:
             vs.rows = hobj[:]
@@ -906,16 +944,15 @@ open_hdf5 = open_h5
 
 def open_xlsx(src):
     import openpyxl
-    basename, ext = os.path.splitext(fn)
 
     if not src.fp:
-        src.fp = open(src.ref)
+        src.fp = open(src.ref, mode='rb')
 
     workbook = openpyxl.load_workbook(src.fp, data_only=True, read_only=True)
 
     for sheetname in workbook.sheetnames:
         sheet = workbook.get_sheet_by_name(sheetname)
-        vs = vd.newSheet(basename + options.SubSheetSep + sheetname, src)
+        vs = vd.newSheet(src.ref + options.SubsheetSep + sheetname, src)
 
         vs.columns = ArrayColumns(sheet.max_column)
 

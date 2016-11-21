@@ -42,7 +42,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **t**/**m**/**b**   | move cursor to top/middle/bottom row on screen |
 |   **^G**      | show sheet status on statusline |
 |   **^R**      | reload sheet from source |
-|   **R**      | change reload type of sheet |
+|   **R**      | change type of sheet (requires ^R reload to reparse) |
 |
 |    **S**      | view current sheet stack |
 |    **C**      | build column summary.   shows stats (min/median/mean/max/stddev) |
@@ -73,6 +73,35 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | ---: | --- | --- |
 |  **<Enter>** | open the group or dataset under the cursor |
 |  **A**   | view attributes of currently selected object | view attributes of current sheet |
+
+
+### Configurable Options (via shift-'O')
+
+| Option | Default value | notes |
+| `csv_dialect` | `sniff` | as passed to csv.reader |
+ | `csv_delimiter` | `\|` |
+ | `csv_quotechar` | `"` |
+
+ | `encoding` | `utf-8`| as passed to codecs.open |
+ | `encoding_errors` | `surrogateescape`|
+
+ | `VisibleNone` | ``|  visible contents of a cell whose value was None |
+ | `ColumnFiller` | ` `| pad chars after column value |
+ | `Ellipsis` | `…`|
+ | `ColumnSep` | `  `|  chars between columns |
+ | `SubsheetSep` | `~`|
+ | `StatusSep` | ` | `|
+ | `SheetNameFmt` | `%s\| `|  status line prefix |
+ | `FunctionError` | `¿`|    when computation fails due to exception |
+ | `HistogramChar` | `*`|
+|  color scheme |
+ | `c_default` | `normal`|
+ | `c_Header` | `bold`|
+ | `c_CurHdr` | `reverse`|
+ | `c_CurRow` | `reverse`|
+ | `c_CurCol` | `bold`|
+ | `c_StatusLine` | `bold`|
+ | `c_SelectedRow` | `green`|
 
 ## Contributions
 
