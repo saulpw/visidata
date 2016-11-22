@@ -201,7 +201,7 @@ global_commands = {
     ord('h'): 'sheet.cursorColIndex = sheet.leftColIndex = 0',
     ord('k'): 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
     ord('j'): 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows',
-    ord('l'): 'sheet.cursorColIndex = sheet.leftColIndex = len(sheet.columns)-1',
+    ord('l'): 'sheet.cursorColIndex = len(sheet.columns)-1',
 
     # throw rows/columns all the way to the left/down/up/right (without moving cursor)
     ord('H'): 'moveListItem(sheet.columns, sheet.cursorColIndex, 0)',
@@ -258,7 +258,7 @@ def getMaxWidth(col, rows):
     if len(rows) == 0:
         return 0
 
-    return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)), int(windowWidth/2))
+    return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)), int(windowWidth-1))
 
 
 class VisiData:
@@ -270,6 +270,7 @@ class VisiData:
         self.lastErrors = []
 
     def status(self, s):
+        s = str(s)
         self._status.append(s)
         self.statusHistory.append(s)
         self.statusHistory = self.statusHistory[-100:]  # keep most recent
@@ -353,6 +354,8 @@ class VisiData:
             if w is None:
                 w = windowWidth-1
             w = min(w, windowWidth-x-1)
+            if w == 0:  # no room anyway
+                return
 
             # convert to string just before drawing
             s = str(s)
@@ -420,7 +423,6 @@ class VSheet:
 
         self.topRowIndex = 0     # cursorRowIndex of topmost row
         self.leftColIndex = 0    # cursorColIndex of leftmost column
-        self.rightColIndex = None   # cursorColIndex of rightmost column
 
         # as computed during draw()
         self.rowLayout = {} # [rowidx] -> y
@@ -568,10 +570,15 @@ class VSheet:
         elif y > windowHeight-2:
             self.topRowIndex = self.cursorRowIndex-windowHeight+3
 
-        if x < 0:
-            self.leftColIndex -= 1
-        elif self.rightColIndex and x > self.rightColIndex:
-            self.leftColIndex += 1
+        if x <= 0:
+            self.leftColIndex = self.cursorColIndex
+        else:
+            while True:
+                x, w = self.colLayout[self.cursorColIndex]
+                if x+w-self.colLayout[self.leftColIndex][0] < windowWidth:
+                    # current columns fit entirely on screen
+                    break
+                self.leftColIndex += 1
 
     def searchRegex(self, regex=None, columns=None, backward=False, moveCursor=False):
         'sets row index if moveCursor; otherwise returns list of row indexes'
@@ -624,55 +631,51 @@ class VSheet:
         self.rowLayout = {}
         for colidx in range(self.leftColIndex, len(self.columns)):
 
-            # draw header
-            #   choose attribute to highlight column header
-            if colidx == self.cursorColIndex:  # cursor is at this column
-                attr = colors[options.c_CurHdr]
-            else:
-                attr = colors[options.c_Header]
-
             col = self.columns[colidx]
             col.width = col.width or getMaxWidth(col, self.visibleRows)
-            colwidth = min(col.width, windowWidth-x)
-            self.colLayout[colidx] = (x, colwidth)
+            self.colLayout[colidx] = (x, col.width)
 
-            y = 0
-            vd.clipdraw(y, x, col.name or defaultColNames[colidx], attr, colwidth)
-            if x+colwidth+len(sepchars) <= windowWidth:
-                scr.addstr(y, x+colwidth, sepchars, colors[options.c_ColumnSep])
-
-            y += 1
-            for rowidx in range(0, windowHeight-2):
-                if self.topRowIndex + rowidx >= len(self.rows):
-                    break
-
-                self.rowLayout[self.topRowIndex+rowidx] = y
-
-                row = self.rows[self.topRowIndex + rowidx]
-
-                if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
-                    attr = colors[options.c_CurRow]
-                else:
-                    attr = colors[options.c_default]
-
-                if row in self.selectedRows:
-                    attr |= colors[options.c_SelectedRow]
-
-                if x+colwidth+len(sepchars) <= windowWidth:
-                    scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
-
+            if x < windowWidth:  # only draw inside window
+                # choose attribute to highlight column header
                 if colidx == self.cursorColIndex:  # cursor is at this column
-                    attr |= colors[options.c_CurCol]
+                    attr = colors[options.c_CurHdr]
+                else:
+                    attr = colors[options.c_Header]
 
-                cellval = self.columns[colidx].getDisplayValue(row)
-                vd.clipdraw(y, x, cellval, attr, colwidth)
+                y = 0
+                colwidth = min(col.width, windowWidth-x)
+                vd.clipdraw(y, x, col.name or defaultColNames[colidx], attr, colwidth)
+                if x+colwidth+len(sepchars) <= windowWidth:
+                    scr.addstr(y, x+colwidth, sepchars, colors[options.c_ColumnSep])
+
                 y += 1
+                for rowidx in range(0, windowHeight-2):
+                    if self.topRowIndex + rowidx >= len(self.rows):
+                        break
 
-            x += colwidth+len(sepchars)
-            if x >= windowWidth:
-                break
+                    self.rowLayout[self.topRowIndex+rowidx] = y
 
-        self.rightColIndex = colidx
+                    row = self.rows[self.topRowIndex + rowidx]
+
+                    if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
+                        attr = colors[options.c_CurRow]
+                    else:
+                        attr = colors[options.c_default]
+
+                    if row in self.selectedRows:
+                        attr |= colors[options.c_SelectedRow]
+
+                    if x+colwidth+len(sepchars) <= windowWidth:
+                        scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
+
+                    if colidx == self.cursorColIndex:  # cursor is at this column
+                        attr |= colors[options.c_CurCol]
+
+                    cellval = self.columns[colidx].getDisplayValue(row)
+                    vd.clipdraw(y, x, cellval, attr, colwidth)
+                    y += 1
+
+            x += col.width+len(sepchars)
 
     def editCell(self, colnum=None):
         if colnum is None:
@@ -798,12 +801,12 @@ def createColumnSummary(sheet):
         VColumn('column', lambda_getattr('name')),
         VColumn('width',  lambda_getattr('width')),
         VColumn('type',   lambda_getattr('type')),
-        VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
-        VColumn('min',    lambda c: min(sheet.columnValues(c))),
-        VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
-        VColumn('mean',   lambda c: statistics.mean(sheet.columnValues(c))),
-        VColumn('max',    lambda c: max(sheet.columnValues(c))),
-        VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
+#        VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
+#        VColumn('min',    lambda c: min(sheet.columnValues(c))),
+#        VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
+#        VColumn('mean',   lambda c: statistics.mean(sheet.columnValues(c))),
+#        VColumn('max',    lambda c: max(sheet.columnValues(c))),
+#        VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
     ]
     vs.commands.update({
         ord('@'): 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)',
@@ -1138,6 +1141,8 @@ def curses_main(_scr):
     try:
         return vd.run()
     except Exception as e:
+        if g_args.debug:
+            raise
         return 'Exception: ' + str(e)
 
 
