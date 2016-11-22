@@ -19,7 +19,7 @@ import csv
 
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.25
+__version__ = 0.26
 
 default_options = {
     'csv_dialect': 'excel',
@@ -56,6 +56,8 @@ sheet = None # current sheet
 
 windowWidth = None
 windowHeight = None
+
+defaultColNames = string.ascii_uppercase
 
 colors = {
     'bold': curses.A_BOLD,
@@ -596,15 +598,12 @@ class VSheet:
                 attr = colors[options.c_Header]
 
             col = self.columns[colidx]
-
             col.width = col.width or getMaxWidth(col, self.visibleRows)
-
             colwidth = min(col.width, windowWidth-x)
-
             self.colLayout[colidx] = (x, colwidth)
 
             y = 0
-            vd.clipdraw(y, x, col.name, attr, colwidth)
+            vd.clipdraw(y, x, col.name or defaultColNames[colidx], attr, colwidth)
             if x+colwidth+len(sepchars) <= windowWidth:
                 scr.addstr(y, x+colwidth, sepchars, colors[options.c_default])
 
@@ -647,7 +646,7 @@ class VSheet:
             colnum = self.cursorColIndex
         x, w = self.colLayout[colnum]
         y = self.rowLayout[self.cursorRowIndex]
-        editText(y, x, w)
+        return editText(y, x, w)
 # end VSheet class
 
 
@@ -672,8 +671,7 @@ def PyobjColumns(exampleRow):
 
 def ArrayColumns(n):
     'columns that display r[0]..r[n]'
-    defaultColNames = string.ascii_uppercase
-    return [VColumn(defaultColNames[colnum], lambda_col(colnum)) for colnum in range(n)]
+    return [VColumn('', lambda_col(colnum)) for colnum in range(n)]
 
 def ArrayNamedColumns(columnstr):
     'columnstr is a string of n column names (separated by spaces), mapping to r[0]..r[n]'
@@ -718,9 +716,9 @@ def createListSheet(name, iterable, columns=None, src=None):
     return vs
 
 
-def createDictSheet(name, mapping, src=None):
-    vs = vd.newSheet(name, src)
-    vs.rows = sorted(list(mapping.items()))
+def createDictSheet(name, mapping):
+    vs = vd.newSheet(name, mapping)
+    vs.rows = sorted(list(list(x) for x in mapping.items()))
     vs.columns = [
         VColumn('key', lambda_col(0)),
         VColumn('value', lambda_col(1))
@@ -766,6 +764,18 @@ def createColumnSummary(sheet):
     ]
     return vs
 
+def viewPyObj(obj, src=None):
+    if src is None:
+        src = VSource(obj, str(obj))
+    vs = vd.newSheet(type(obj), src)
+#    vs.rows = getPublicAttrs(obj)
+    vs.rows = [k for k in dir(obj) if not (k.startswith('_') and callable(getattr(obj, k)))]
+    vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', lambda r,sheet=vs: getattr(sheet.source.ref, r))]
+    return vs
+
+MIMEToFileType = {
+    'text/html': 'html',
+}
 
 ### input source formats
 
@@ -784,21 +794,34 @@ def openSource(src):
 
     return vs
 
-
-def viewPyObj(obj, src=None):
-    if src is None:
-        src = VSource(obj, str(obj))
-    vs = vd.newSheet(type(obj), src)
-#    vs.rows = getPublicAttrs(obj)
-    vs.rows = [k for k in dir(obj) if not (k.startswith('_') and callable(getattr(obj, k)))]
-    vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', lambda r,sheet=vs: getattr(sheet.source.ref, r))]
-    return vs
-
-MIMEToFileType = {
-    'text/html': 'html',
-}
-
 sourceCache = {}
+
+def getContents(src):
+    if not src.ref in sourceCache:
+        sourceCache[src.ref] = getFile(src).read().decode(options.encoding, options.encoding_errors)
+
+    return sourceCache[src.ref]
+
+def getFile(src, mode='b'):  # mode may be 'b'
+    if not src.fp:
+        if hasattr(src.ref, 'read'):
+            src.fp = src.ref
+        elif isinstance(src.ref, str):
+            if '://' in src.ref:
+                import urllib.request
+                import cgi
+                resp = urllib.request.urlopen(src.ref)
+                src.fp = resp
+                src.ref = resp.geturl()   # replace with actual url retrieved (after following redirects)
+                ctype, params = cgi.parse_header(resp.getheader('Content-Type'))
+                src.type = MIMEToFileType.get(ctype, ctype.split('/')[-1])
+            else:
+                src.fp = open(src.ref, 'r' + mode)
+        else:
+            vd.status('unknown how to get file object from %s' % src)
+            return None
+
+    return src.fp
 
 class hrefParser(html.parser.HTMLParser):
     def __init__(self):
@@ -860,33 +883,6 @@ def open_dir(src):
     })
     return vs
 
-
-def getFile(src, mode='b'):  # mode may be 'b'
-    if not src.fp:
-        if hasattr(src.ref, 'read'):
-            src.fp = src.ref
-        elif isinstance(src.ref, str):
-            if '://' in src.ref:
-                import urllib.request
-                import cgi
-                resp = urllib.request.urlopen(src.ref)
-                src.fp = resp
-                src.ref = resp.geturl()   # replace with actual url retrieved (after following redirects)
-                ctype, params = cgi.parse_header(resp.getheader('Content-Type'))
-                src.type = MIMEToFileType.get(ctype, ctype.split('/')[-1])
-            else:
-                src.fp = open(src.ref, 'r' + mode)
-        else:
-            vd.status('unknown how to get file object from %s' % src)
-            return None
-
-    return src.fp
-
-def getContents(src):
-    if not src.ref in sourceCache:
-        sourceCache[src.ref] = getFile(src).read().decode(options.encoding, options.encoding_errors)
-
-    return sourceCache[src.ref]
 
 
 def open_csv(src):
@@ -987,29 +983,40 @@ def saveSheet(sheet, fn):
 
 def save_tsv(sheet, fn):
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
-        fp.write('\t'.join(col.name for col in sheet.columns) + '\n')
+        colhdr = '\t'.join(col.name for col in sheet.columns) + '\n'
+        if colhdr.strip():  # is anything but whitespace
+            fp.write(colhdr)
         for r in sheet.rows:
             fp.write('\t'.join(col.getDisplayValue(r) for col in sheet.columns) + '\n')
 
 def save_csv(sheet, fn):
     with open(fn, 'w', newline='', encoding=options.encoding, errors=options.encoding_errors) as fp:
         cw = csv.writer(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
-        cw.writerow([col.name for col in sheet.columns])
+        colnames = [col.name for col in sheet.columns]
+        if ''.join(colnames):
+            cw.writerow(colnames)
         for r in sheet.rows:
             cw.writerow([col.getDisplayValue(r) for col in sheet.columns])
 
 ### curses, options, init
 
 def editText(y, x, w, prompt=''):
-#        scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
-    scr.addstr(y, x, prompt) #'%-*s' % (windowWidth-1, prompt))
-    editwin = curses.newwin(1, w, y, x+len(prompt))
-    tb = curses.textpad.Textbox(editwin)
-    r = tb.edit()
-    return r[:-1]
+    if not prompt:
+        scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
+    else:
+        scr.addstr(y, x, prompt) #'%-*s' % (windowWidth-1, prompt))
+        x += len(prompt)
+    curses.echo()
+    inp = scr.getstr(y, x)
+    curses.noecho()
+    r = inp.decode('utf-8')
+    vd.status('"%s"' % r)
+    return r
 
 def inputLine(prompt=''):
     'move to the bottom of the screen and get a line of input from the user'
+    scr.move(windowHeight-1, 0)
+    scr.clrtoeol()
     return editText(windowHeight-1, 0, windowWidth-1, prompt)
 
 

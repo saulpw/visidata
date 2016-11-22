@@ -6,7 +6,7 @@ A console spreadsheet tool for discovering and arranging data
 
 Immediately explore datasets to find out what is relevant and how they're structured.
 
-Usable via any remote shell with Python3.
+Usable via any remote shell which has Python3 installed.
 
 ## Features
 
