@@ -14,13 +14,14 @@ import curses
 import re
 import html.parser
 import urllib.parse
+import csv
 
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __version__ = 0.23
 
 default_options = {
-    'csv_dialect': 'sniff',
+    'csv_dialect': 'excel',
     'csv_delimiter': ',',
     'csv_quotechar': '"',
 
@@ -160,6 +161,9 @@ base_commands = {
 
     ord('R'): 'sheet.source.type = inputLine("change type to: ") or sheet.source.type',
     ctrl('r'): 'openSource(vd.sheets.pop(0).source); vd.status("reloaded")',
+
+    # save sheet
+    ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))',
 }
 
 sheet_specific_commands = {
@@ -853,7 +857,6 @@ def getContents(src):
 
 
 def open_csv(src):
-    import csv
     contents = getContents(src)
 
     if options.csv_dialect == 'sniff':
@@ -942,6 +945,25 @@ def open_xlsx(src):
 
     return vs  # return the last one
 
+### Sheet savers
+
+def saveSheet(sheet, fn):
+    basename, ext = os.path.splitext(fn)
+    funcname = 'save_' + ext[1:]
+    globals().get(funcname, save_tsv)(sheet, fn)
+
+def save_tsv(sheet, fn):
+    with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
+        fp.write('\t'.join(col.name for col in sheet.columns) + '\n')
+        for r in sheet.rows:
+            fp.write('\t'.join(col.getDisplayValue(r) for col in sheet.columns) + '\n')
+
+def save_csv(sheet, fn):
+    with open(fn, 'w', newline='', encoding=options.encoding, errors=options.encoding_errors) as fp:
+        cw = csv.writer(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+        cw.writerow([col.name for col in sheet.columns])
+        for r in sheet.rows:
+            cw.writerow([col.getDisplayValue(r) for col in sheet.columns])
 
 ### curses, options, init
 
