@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 
-'VisiData: a curses interface for exploring tabular data'
+'VisiData: a curses interface for exploring and arranging tabular data'
+
+__version__ = '0.27'
+__author__ = 'Saul Pwanson <vd@saul.pw>'
+__license__ = 'GPLv3'
+__status__ = 'Development'
 
 import os.path
 import io
@@ -17,9 +22,6 @@ import html.parser
 import urllib.parse
 import csv
 
-
-__author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.26
 
 default_options = {
     'csv_dialect': 'excel',
@@ -248,8 +250,7 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self._status = []
-        self.status('  saul.pw/VisiData v' + str(__version__))
-
+        self.status('saul.pw/VisiData v' + __version__)
         self.lastErrors = []
 
     def status(self, s):
