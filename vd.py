@@ -113,8 +113,9 @@ base_commands = {
     ord('K'): 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))',
     ord('L'): 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols))',
 
-    # ^g sheet status
+    # ^g/^p sheet status and status sheet
     ctrl('g'): 'vd.status(sheet.statusLine)',
+    ctrl('p'): 'vd.status(vd.statusHistory[-1])',
 
     # t/m/b jumps to top/middle/bottom of screen
     ord('t'): 'sheet.topRowIndex = sheet.cursorRowIndex',
@@ -224,6 +225,9 @@ global_commands = {
 
     # delete all selected rows
     ord('d'): 'sheet.rows = [r for r in sheet.rows if r not in sheet.selectedRows]',  # maintain order
+
+    # ^P open sheet with all previous messages
+    ctrl('p'): 'createListSheet("statuses", vd.statusHistory[::-1])',
 }
 
 ### VisiData core
@@ -250,16 +254,19 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self._status = []
+        self.statusHistory = []
         self.status('saul.pw/VisiData v' + __version__)
         self.lastErrors = []
 
     def status(self, s):
         self._status.append(s)
+        self.statusHistory.append(s)
+        self.statusHistory = self.statusHistory[-100:]  # keep most recent
 
     def exceptionCaught(self, status=True):
         import traceback
         self.lastErrors.append(traceback.format_exc().strip())
-        self.lastErrors = self.lastErrors[-10:]  # only keep 10 most recent
+        self.lastErrors = self.lastErrors[-10:]  # keep most recent
         if status:
             self.status(self.lastErrors[-1].splitlines()[-1])
         if g_args.debug:
@@ -318,7 +325,7 @@ class VisiData:
                     self.exceptionCaught()
                     self.status(cmdstr)
             else:
-                self.status('no command for key "%s" (%d)' % (chr(ch), ch))
+                self.status('no command for key "%s" (%d) ' % (chr(ch), ch))
 
             sheet.checkCursor()
 
@@ -740,7 +747,7 @@ def createFreqTable(sheet, col):
 
     fqcolname = '%s_%s' % (sheet.name, col.name)
     freqtbl = vd.newSheet('freq_' + fqcolname)
-    freqtbl.rows = list(values.items())
+    freqtbl.rows = sorted(values.items(), key=lambda r: r[1], reverse=True)  # sort by num reverse
     freqtbl.total = max(values.values())+1
 
     freqtbl.columns = [
