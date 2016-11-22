@@ -25,9 +25,11 @@ Usable via any remote shell which has Python3 installed.
 
 ## Usage
 
-        $ vd.py <input-file>
+        $ vd.py [<input> ...]
 
-where `<input-file>` is a one of the supported file formats.
+Inputs may be paths or URLs.  If no inputs are given, starts exploring the
+current directory.  Unknown filetypes are by default viewed with a text
+browser.
 
 ### Working keys
 
@@ -65,12 +67,9 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **\<Space\>/u**  | select/unselect current row | select/unselect all rows |
 |
 | **d**  | Delete current row |
-|**H**/**J**/**K**/**L** (or shift-arrows) | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
+|**H**/**J**/**K**/**L** | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
 |
-|    **@**     | convert column to datetime |
-|    **#**     | convert column to int |
-|    **$**     | convert column to string |
-|    **%**     | convert column to float |
+|    **@**/**#**/**$**/**%**     | convert column to datetime/int/string/float |
 |
 |    **e** | edit current cell value |
 

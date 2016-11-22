@@ -170,7 +170,8 @@ base_commands = {
     ord('p'): 'sheet.searchRegex(columns=[sheet.cursorCol], backward=True, moveCursor=True)',
 
     # select/unselect rows via regex
-    ord(' '): 'sheet.toggleSelect(sheet.cursorRow); sheet.moveCursorDown(1)',
+    ord(' '): 'sheet.toggle([sheet.cursorRow]); sheet.moveCursorDown(1)',
+    ord('s'): 'sheet.select([sheet.cursorRow]); sheet.moveCursorDown(1)',
     ord('u'): 'sheet.unselect([sheet.cursorRow]); sheet.moveCursorDown(1)',
 
     ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))',
@@ -225,8 +226,9 @@ global_commands = {
     ord('n'): 'sheet.cursorRowIndex = max(sheet.searchRegex())',
     ord('p'): 'sheet.cursorRowIndex = min(sheet.searchRegex())',
 
-    # select/unselect all rows
-    ord(' '): 'sheet.selectedRows = sheet.rows.copy()',
+    # toggle/select/unselect all rows
+    ord(' '): 'sheet.toggle(sheet.rows)',
+    ord('s'): 'sheet.selectedRows = sheet.rows.copy()',
     ord('u'): 'sheet.selectedRows = []',
 
     ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.columns))',
@@ -366,7 +368,7 @@ class VisiData:
 # end VisiData class
 
 class VColumn:
-    def __init__(self, name, func=lambda r: r, eval_context=None, width=None):
+    def __init__(self, name, func=lambda r: r, width=None):
         self.name = name
         self.func = func
         self.width = width
@@ -516,11 +518,12 @@ class VSheet:
         col.type = newType
         vd.status('converted %s to %s with %s exceptions' % (col.name, newType.__name__, nErrors))
 
-    def toggleSelect(self, r):
-        if r in self.selectedRows:
-            self.selectedRows.remove(r)
-        else:
-            self.selectedRows.append(r)
+    def toggle(self, rows):
+        for r in rows:
+            if r in self.selectedRows:
+                self.selectedRows.remove(r)
+            else:
+                self.selectedRows.append(r)
 
     def select(self, rows):
         self.selectedRows.extend(rows)
