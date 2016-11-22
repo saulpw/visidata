@@ -1,4 +1,4 @@
-# VisiData v0.21
+# VisiData v0.25
 
 The Swiss Army Knife for Data Exploration
 
@@ -42,6 +42,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |   **t**/**m**/**b**   | move cursor to top/middle/bottom row on screen |
 |   **^G**      | show sheet status on statusline |
 |   **^R**      | reload sheet from source |
+|   **^S**     | save current sheet to new file (type based on extension) |
 |   **R**      | change type of sheet (requires ^R reload to reparse) |
 |
 |    **S**      | view current sheet stack |

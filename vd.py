@@ -3,6 +3,7 @@
 'VisiData: a curses interface for exploring tabular data'
 
 import os.path
+import io
 import datetime
 import string
 import collections
@@ -14,13 +15,14 @@ import curses.textpad
 import re
 import html.parser
 import urllib.parse
+import csv
 
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = 0.23
+__version__ = 0.25
 
 default_options = {
-    'csv_dialect': 'sniff',
+    'csv_dialect': 'excel',
     'csv_delimiter': ',',
     'csv_quotechar': '"',
 
@@ -165,6 +167,9 @@ base_commands = {
 
     # edit cell
     ord('e'): 'sheet.cursorRow[sheet.cursorColIndex] = sheet.editCell(sheet.cursorColIndex) or sheet.cursorRow[sheet.cursorColIndex]',
+
+    # save sheet
+    ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))',
 }
 
 sheet_specific_commands = {
@@ -685,9 +690,9 @@ def createTextViewer(name, text, src=None):
     return viewer
 
 
-def createPyObjSheet(name, pyobj):
+def createPyObjSheet(name, pyobj, src=None):
     if isinstance(pyobj, list):
-        return createListSheet(name, pyobj)
+        return createListSheet(name, pyobj, src=src)
     elif isinstance(pyobj, dict):
         return createDictSheet(name, pyobj)
     elif isinstance(pyobj, object):
@@ -713,9 +718,9 @@ def createListSheet(name, iterable, columns=None, src=None):
     return vs
 
 
-def createDictSheet(name, mapping):
-    vs = vd.newSheet(name, mapping)
-    vs.rows = sorted(list([k,v] for k,v in mapping.items()))
+def createDictSheet(name, mapping, src=None):
+    vs = vd.newSheet(name, src)
+    vs.rows = sorted(list(mapping.items()))
     vs.columns = [
         VColumn('key', lambda_col(0)),
         VColumn('value', lambda_col(1))
@@ -765,18 +770,25 @@ def createColumnSummary(sheet):
 ### input source formats
 
 def openSource(src):
-    if os.path.isdir(src.ref):
-        return open_dir(src)
-
-    if '://' in src.ref and src.ref not in sourceCache:
-        return open_url(src)
+    if isinstance(src.ref, str):
+        if os.path.isdir(src.ref):
+            return open_dir(src)
 
     funcname = 'open_' + src.type
-    return globals().get(funcname, open_txt)(src)
+    vs = globals().get(funcname, open_txt)(src)
+
+    if '://' in src.ref:
+        vs.commands.update({
+            ord('A'): 'createDictSheet("headers:" + sheet.source.fp.geturl(), dict(sheet.source.fp.getheaders()))',
+        })
+
+    return vs
 
 
-def viewPyObj(obj):
-    vs = vd.newSheet(type(obj), VSource(obj, str(obj)))
+def viewPyObj(obj, src=None):
+    if src is None:
+        src = VSource(obj, str(obj))
+    vs = vd.newSheet(type(obj), src)
 #    vs.rows = getPublicAttrs(obj)
     vs.rows = [k for k in dir(obj) if not (k.startswith('_') and callable(getattr(obj, k)))]
     vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', lambda r,sheet=vs: getattr(sheet.source.ref, r))]
@@ -787,30 +799,6 @@ MIMEToFileType = {
 }
 
 sourceCache = {}
-
-def open_url(src):
-    if not src.ref in sourceCache:
-        import urllib.request
-        import cgi
-        resp = urllib.request.urlopen(src.ref)
-        src.fp = resp
-        src.ref = resp.geturl()   # replace with actual url retrieved (after following redirects)
-        ctype, params = cgi.parse_header(resp.getheader('Content-Type'))
-        src.type = MIMEToFileType.get(ctype, ctype.split('/')[-1])
-
-        contents = resp.read()
-        if isinstance(contents, bytes):
-            contents = contents.decode(options.encoding)  # or params['charset']?
-
-        sourceCache[src.ref] = contents
-
-    vs = openSource(src)
-
-    vs.commands.update({
-        ord('A'): 'createDictSheet("headers:" + sheet.source.fp.geturl(), dict(sheet.source.fp.getheaders()))',
-    })
-    return vs
-
 
 class hrefParser(html.parser.HTMLParser):
     def __init__(self):
@@ -830,7 +818,7 @@ class hrefParser(html.parser.HTMLParser):
 
 def open_html(src):
     hp = hrefParser()
-    hp.feed(sourceCache[src.ref])
+    hp.feed(getContents(src))
     vs = createListSheet(src.name + options.SubsheetSep + 'hrefs', hp.hrefs, PyobjColumns(hp.hrefs[0]), src=src)
     vs.commands.update({
         ENTER: 'openSource(VSource(urllib.parse.urljoin(sheet.source.ref, sheet.cursorRow["href"]), sheet.cursorRow["linktext"]))',
@@ -844,7 +832,7 @@ def open_zip(src):
         src.fp = zipfile.ZipFile(src.ref, 'r')
 
     vs = vd.newSheet(src.name, src)
-    vs.rows = vs.fp.infolist()
+    vs.rows = vs.source.fp.infolist()
     vs.columns = AttrColumns('filename file_size date_time'.split())
     vs.commands.update({
         ENTER: 'openSource(VSource(sheet.source.fp.open(sheet.cursorRow), sheet.cursorRow.filename))',
@@ -853,15 +841,7 @@ def open_zip(src):
 
 
 def open_txt(src):
-    if src.ref not in sourceCache:
-        if not src.fp:
-            src.fp = codecs.open(src.ref, encoding=options.encoding, errors=options.encoding_errors)
-
-        sourceCache[src.ref] = src.fp.read()
-
-    contents = sourceCache[src.ref]
-
-    return createTextViewer(src.name, contents, src)
+    return createTextViewer(src.name, getContents(src), src)
 
 
 def open_dir(src):
@@ -881,22 +861,46 @@ def open_dir(src):
     return vs
 
 
-def open_csv(src):
-    import csv
+def getFile(src, mode='b'):  # mode may be 'b'
     if not src.fp:
-        src.fp = codecs.open(src.ref, encoding=options.encoding, errors=options.encoding_errors) #newline='')
+        if hasattr(src.ref, 'read'):
+            src.fp = src.ref
+        elif isinstance(src.ref, str):
+            if '://' in src.ref:
+                import urllib.request
+                import cgi
+                resp = urllib.request.urlopen(src.ref)
+                src.fp = resp
+                src.ref = resp.geturl()   # replace with actual url retrieved (after following redirects)
+                ctype, params = cgi.parse_header(resp.getheader('Content-Type'))
+                src.type = MIMEToFileType.get(ctype, ctype.split('/')[-1])
+            else:
+                src.fp = open(src.ref, 'r' + mode)
+        else:
+            vd.status('unknown how to get file object from %s' % src)
+            return None
+
+    return src.fp
+
+def getContents(src):
+    if not src.ref in sourceCache:
+        sourceCache[src.ref] = getFile(src).read().decode(options.encoding, options.encoding_errors)
+
+    return sourceCache[src.ref]
+
+
+def open_csv(src):
+    contents = getContents(src)
 
     if options.csv_dialect == 'sniff':
-        headers = src.fp.read(1024)
-        headers = headers.decode(options.encoding)
+        headers = contents[:1024]
         dialect = csv.Sniffer().sniff(headers)
     else:
         dialect = options.csv_dialect
 
-    rdr = csv.reader(src.fp, dialect=dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+    rdr = csv.reader(io.StringIO(contents, newline=''), dialect=dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
 
-    basename, ext = os.path.splitext(src.ref)
-    vs = vd.newSheet(basename, src)
+    vs = vd.newSheet(src.name, src)
     vs.rows = [r for r in rdr]
     vs.columns = PyobjColumns(vs.rows[0]) or ArrayColumns(len(vs.rows[0]))
     return vs
@@ -904,39 +908,18 @@ def open_csv(src):
 
 def open_json(src):
     import json
-    fn = src.ref
-    if not src.fp:
-        src.fp = codecs.open(fn, 'r')
-    obj = json.load(src.fp)
-    if isinstance(obj, dict):
-        return createDictSheet(fn, obj)
-    elif isinstance(obj, list):
-        return createListSheet(fn, obj)
-    else:
-        raise VException(obj)
+    obj = json.loads(getContents(src))
+    return createPyObjSheet(src.name, obj, src)
 
 
 def open_tsv(src):
-    fetcher = TsvFetcher(src.ref)
+    contents = getContents(src)
+    lines = contents.splitlines()
+
     vs = vd.newSheet(src.name, src)
-    vs.rows = fetcher.getRows(0, None)
-    vs.columns = [VColumn(name, lambda_col(colnum)) for colnum, name in enumerate(fetcher.columnNames)]  # list of VColumn in display order
+    vs.rows = [L.split('\t') for L in lines[1:]]  # [rownum] -> [ field, ... ]
+    vs.columns = [VColumn(name, lambda_col(colnum)) for colnum, name in enumerate(lines[0].split('\t'))]  # list of VColumn in display order
     return vs
-
-
-class TsvFetcher:
-    def __init__(self, fntsv):
-        self.fp = codecs.open(fntsv, 'r')
-        self.rowIndex = {}  # byte offsets of each line for random access
-        lines = self.fp.read().splitlines()
-        self.columnNames = lines[0].split('\t')
-        self.rows = [L.split('\t') for L in lines[1:]]  # [rownum] -> [ field, ... ]
-
-    def getColumnNames(self):
-        return self.columnNames
-
-    def getRows(self, startrownum, endrownum):
-        return self.rows[startrownum:endrownum]
 
 
 def createHDF5Sheet(hobj, src):
@@ -968,8 +951,8 @@ def createHDF5Sheet(hobj, src):
 def open_h5(src):
     import h5py
     if not src.fp:
-        src.fp = h5py.File(fn, 'r')
-    hs = createHDF5Sheet(src.fp)
+        src.fp = h5py.File(src.ref, 'r')
+    hs = createHDF5Sheet(src.fp, src)
     hs.name = src.name
     return hs
 
@@ -979,10 +962,9 @@ open_hdf5 = open_h5
 def open_xlsx(src):
     import openpyxl
 
-    if not src.fp:
-        src.fp = open(src.ref, mode='rb')
+    fp = getFile(src, mode='b')
 
-    workbook = openpyxl.load_workbook(src.fp, data_only=True, read_only=True)
+    workbook = openpyxl.load_workbook(fp, data_only=True, read_only=True)
 
     for sheetname in workbook.sheetnames:
         sheet = workbook.get_sheet_by_name(sheetname)
@@ -995,6 +977,26 @@ def open_xlsx(src):
 
     return vs  # return the last one
 
+### Sheet savers
+
+def saveSheet(sheet, fn):
+    basename, ext = os.path.splitext(fn)
+    funcname = 'save_' + ext[1:]
+    globals().get(funcname, save_tsv)(sheet, fn)
+    vd.status('saved to ' + fn)
+
+def save_tsv(sheet, fn):
+    with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
+        fp.write('\t'.join(col.name for col in sheet.columns) + '\n')
+        for r in sheet.rows:
+            fp.write('\t'.join(col.getDisplayValue(r) for col in sheet.columns) + '\n')
+
+def save_csv(sheet, fn):
+    with open(fn, 'w', newline='', encoding=options.encoding, errors=options.encoding_errors) as fp:
+        cw = csv.writer(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+        cw.writerow([col.name for col in sheet.columns])
+        for r in sheet.rows:
+            cw.writerow([col.getDisplayValue(r) for col in sheet.columns])
 
 ### curses, options, init
 
