@@ -2,7 +2,7 @@
 
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '0.27'
+__version__ = '0.28'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -129,6 +129,15 @@ base_commands = {
     # _ resets column width
     ord('_'): 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)',
 
+    # delete column
+    ord('-'): 'sheet.columns.pop(sheet.cursorColIndex)',
+
+    # retype as datetime/int/str/float
+    ord('@'): 'sheet.convertType(sheet.cursorCol, datetime)',
+    ord('#'): 'sheet.convertType(sheet.cursorCol, int)',
+    ord('$'): 'sheet.convertType(sheet.cursorCol, str)',
+    ord('%'): 'sheet.convertType(sheet.cursorCol, float)',
+
     # [/] sort asc/desc
     ord('['): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue)',
     ord(']'): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue, reverse=True)',
@@ -172,7 +181,7 @@ base_commands = {
     ctrl('r'): 'openSource(vd.sheets.pop(0).source); vd.status("reloaded")',
 
     # edit cell
-    ord('e'): 'sheet.cursorRow[sheet.cursorColIndex] = sheet.editCell(sheet.cursorColIndex) or sheet.cursorRow[sheet.cursorColIndex]',
+    ord('e'): 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex) or sheet.cursorCol.getValue(sheet.cursorRow))',
 
     # save sheet
     ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))',
@@ -375,6 +384,8 @@ class VColumn:
             cellval = options.VisibleNone
         return str(cellval).strip()
 
+    def setValue(self, row, value):
+        self.func.setter(row, value)
 
 class VSource:
     def __init__(self, ref, name, contentType=None):
@@ -493,6 +504,17 @@ class VSheet:
                 return
 
         vd.status('no different value up this column')
+
+    def convertType(self, col, newType):
+        nErrors = 0
+        for r in self.rows:
+            try:
+                col.setValue(r, newType(col.getValue(r)))
+            except Exception as e:
+                col.setValue(r, None)
+                nErrors += 1
+        col.type = newType
+        vd.status('converted %s to %s with %s exceptions' % (col.name, newType.__name__, nErrors))
 
     def toggleSelect(self, r):
         if r in self.selectedRows:
@@ -659,15 +681,23 @@ class VSheet:
 
 
 ### core sheet layouts
+def setter(r, k, v):
+    r[k] = v
 
 def lambda_colname(colname):
-    return lambda r: r[colname]
+    func = lambda r: r[colname]
+    func.setter = lambda r,v,b=colname: setter(r,b,v)
+    return func
 
 def lambda_col(b):
-    return lambda r: r[b]
+    func = lambda r: r[b]
+    func.setter = lambda r,v,b=b: setter(r,b,v)
+    return func
 
 def lambda_getattr(b):
-    return lambda r: getattr(r, b)
+    func = lambda r: getattr(r,b)
+    func.setter = lambda r,v,b=b: setattr(r,b,v)
+    return func
 
 
 def getPublicAttrs(obj):
@@ -759,10 +789,12 @@ def createFreqTable(sheet, col):
 
 
 def createColumnSummary(sheet):
-    vs = vd.newSheet(sheet.name + '_columns')
+    vs = vd.newSheet(sheet.name + '_columns', sheet)
     vs.rows = sheet.columns
     vs.columns = [
         VColumn('column', lambda_getattr('name')),
+        VColumn('width',  lambda_getattr('width')),
+        VColumn('type',   lambda_getattr('type')),
         VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
         VColumn('min',    lambda c: min(sheet.columnValues(c))),
         VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
@@ -770,15 +802,22 @@ def createColumnSummary(sheet):
         VColumn('max',    lambda c: max(sheet.columnValues(c))),
         VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
     ]
+    vs.commands.update({
+        ord('@'): 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)',
+        ord('#'): 'sheet.source.convertType(sheet.cursorRow, int); sheet.moveCursorDown(+1)',
+        ord('$'): 'sheet.source.convertType(sheet.cursorRow, str); sheet.moveCursorDown(+1)',
+        ord('%'): 'sheet.source.convertType(sheet.cursorRow, float); sheet.moveCursorDown(+1)',
+        })
     return vs
 
 def viewPyObj(obj, src=None):
     if src is None:
         src = VSource(obj, str(obj))
     vs = vd.newSheet(type(obj), src)
-#    vs.rows = getPublicAttrs(obj)
-    vs.rows = [k for k in dir(obj) if not (k.startswith('_') and callable(getattr(obj, k)))]
-    vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', lambda r,sheet=vs: getattr(sheet.source.ref, r))]
+    vs.rows = getPublicAttrs(obj)
+    valfunc = lambda r,sheet=vs: getattr(sheet.source.ref, r)
+    valfunc.setter = lambda r,v,sheet=vs: setattr(sheet.source.ref, r, v)
+    vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', valfunc)]
     return vs
 
 MIMEToFileType = {

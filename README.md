@@ -1,4 +1,4 @@
-# VisiData v0.27
+# VisiData v0.28
 
 A curses interface for exploring and arranging tabular data
 
@@ -51,7 +51,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **O**      | show options |
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
-|    **_**      | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
+|    **-** (hyphen)   | delete current column |
+|    **_** (underscore)     | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
 |    **^**      | Set name of current column | Set name of all columns to the values in the current row |
 |    **[**/**]**    | Sort by current column (asc/desc) |
 |   **<**/**>**     | skip up/down to next value in column |
@@ -66,6 +67,12 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **d**  | Delete current row |
 |**H**/**J**/**K**/**L** (or shift-arrows) | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
 |
+|    **@**     | convert column to datetime |
+|    **#**     | convert column to int |
+|    **$**     | convert column to string |
+|    **%**     | convert column to float |
+|
+|    **e** | edit current cell value |
 
 ### HDF5 sheets
 
