@@ -47,6 +47,7 @@ default_options = {
     'c_CurCol': 'bold',
     'c_StatusLine': 'bold',
     'c_SelectedRow': 'green',
+    'c_ColumnSep': 'blue',
     'c_EditCell': 'normal',
 }
 
@@ -605,7 +606,7 @@ class VSheet:
             y = 0
             vd.clipdraw(y, x, col.name or defaultColNames[colidx], attr, colwidth)
             if x+colwidth+len(sepchars) <= windowWidth:
-                scr.addstr(y, x+colwidth, sepchars, colors[options.c_default])
+                scr.addstr(y, x+colwidth, sepchars, colors[options.c_ColumnSep])
 
             y += 1
             for rowidx in range(0, windowHeight-2):
@@ -614,24 +615,23 @@ class VSheet:
 
                 self.rowLayout[self.topRowIndex+rowidx] = y
 
-                if colidx == self.cursorColIndex:  # cursor is at this column
-                    attr = colors[options.c_CurCol]
-                else:
-                    attr = colors[options.c_default]
-
                 row = self.rows[self.topRowIndex + rowidx]
 
                 if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
                     attr = colors[options.c_CurRow]
+                else:
+                    attr = colors[options.c_default]
 
                 if row in self.selectedRows:
                     attr |= colors[options.c_SelectedRow]
 
+                if x+colwidth+len(sepchars) <= windowWidth:
+                    scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
+
+                if colidx == self.cursorColIndex:  # cursor is at this column
+                    attr |= colors[options.c_CurCol]
 
                 cellval = self.columns[colidx].getDisplayValue(row)
-
-                if x+colwidth+len(sepchars) <= windowWidth:
-                    scr.addstr(y, x+colwidth, sepchars, attr)
                 vd.clipdraw(y, x, cellval, attr, colwidth)
                 y += 1
 
