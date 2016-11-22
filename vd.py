@@ -10,6 +10,7 @@ import functools
 import codecs
 import statistics
 import curses
+import curses.textpad
 import re
 import html.parser
 import urllib.parse
@@ -158,8 +159,12 @@ base_commands = {
     ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))',
     ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))',
 
+    # reload
     ord('R'): 'sheet.source.type = inputLine("change type to: ") or sheet.source.type',
     ctrl('r'): 'openSource(vd.sheets.pop(0).source); vd.status("reloaded")',
+
+    # edit cell
+    ord('e'): 'sheet.cursorRow[sheet.cursorColIndex] = sheet.editCell(sheet.cursorColIndex) or sheet.cursorRow[sheet.cursorColIndex]',
 }
 
 sheet_specific_commands = {
@@ -637,12 +642,7 @@ class VSheet:
             colnum = self.cursorColIndex
         x, w = self.colLayout[colnum]
         y = self.rowLayout[self.cursorRowIndex]
-        scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
-        curses.echo()
-        inp = scr.getstr(y, x)
-        curses.noecho()
-        return inp.decode('utf-8')
-
+        editText(y, x, w)
 # end VSheet class
 
 
@@ -724,7 +724,7 @@ def createDictSheet(name, mapping):
     vs.commands.update({
         # pushes a sheet for the Pyobj in 'value', whatever that looks like
         ENTER: 'if sheet.cursorColIndex == 1: createPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])',
-        ord('e'): 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1) or sheet.cursorRow[1]',
+        ord('e'): 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1)',
     })
     return vs
 
@@ -909,9 +909,9 @@ def open_json(src):
         src.fp = codecs.open(fn, 'r')
     obj = json.load(src.fp)
     if isinstance(obj, dict):
-        return createDictSheet(fn, obj, src)
+        return createDictSheet(fn, obj)
     elif isinstance(obj, list):
-        return createListSheet(fn, obj, src)
+        return createListSheet(fn, obj)
     else:
         raise VException(obj)
 
@@ -998,14 +998,17 @@ def open_xlsx(src):
 
 ### curses, options, init
 
+def editText(y, x, w, prompt=''):
+#        scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
+    scr.addstr(y, x, prompt) #'%-*s' % (windowWidth-1, prompt))
+    editwin = curses.newwin(1, w, y, x+len(prompt))
+    tb = curses.textpad.Textbox(editwin)
+    r = tb.edit()
+    return r[:-1]
 
 def inputLine(prompt=''):
     'move to the bottom of the screen and get a line of input from the user'
-    scr.addstr(windowHeight-1, 0, '%-*s' % (windowWidth-1, prompt))
-    curses.echo()
-    line = scr.getstr(windowHeight-1, len(prompt))
-    curses.noecho()
-    return line.decode('utf-8')
+    return editText(windowHeight-1, 0, windowWidth-1, prompt)
 
 
 nextColorPair = 1
