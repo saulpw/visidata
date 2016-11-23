@@ -71,7 +71,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |
 |    **@**/**#**/**$**/**%**     | convert column to datetime/int/string/float |
 |
-|    **e** | edit current cell value |
+|  **e** | edit current cell value |
+|  **=** | add new column by Python expression |
 
 ### HDF5 sheets
 
@@ -85,8 +86,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 
 | Option | Default value | notes |
 | ---: | --- | --- |
-| `csv_dialect` | `sniff` | as passed to csv.reader |
-| `csv_delimiter` | `\|` |
+| `csv_dialect` | `excel` | as passed to csv.reader |
+| `csv_delimiter` | `,` |
 | `csv_quotechar` | `"` |
 |
 | `encoding` | `utf-8`| as passed to codecs.open |
@@ -95,9 +96,9 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | `VisibleNone` | ``|  visible contents of a cell whose value was None |
 | `ColumnFiller` | ` `| pad chars after column value |
 | `Ellipsis` | `…`|
-| `ColumnSep` | `  `|  chars between columns |
+| `ColumnSep` | ` \| `|  chars between columns |
 | `SubsheetSep` | `~`|
-| `StatusSep` | ` | `|
+| `StatusSep` | ` \| `|
 | `SheetNameFmt` | `%s\| `|  status line prefix |
 | `FunctionError` | `¿`|    when computation fails due to exception |
 | `HistogramChar` | `*`|

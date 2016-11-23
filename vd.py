@@ -186,6 +186,9 @@ base_commands = {
 
     # save sheet
     ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))',
+
+    # add column
+    ord('='): 'sheet.columns.append(ColumnExpr(sheet, inputLine("=")))',
 }
 
 sheet_specific_commands = {
@@ -375,6 +378,7 @@ class VColumn:
         self.name = name
         self.func = func
         self.width = width
+        self.expr = None  # Python string expression if computed column
 
     def getValue(self, row):
         try:
@@ -706,6 +710,12 @@ def lambda_getattr(b):
     return func
 
 
+def ColumnExpr(sheet, expr):
+    vc = VColumn(expr)
+    vc.expr = expr
+    vc.func = lambda r,col=vc,sheet=sheet: eval(col.expr, dict((c.name, c.getValue(r)) for c in sheet.columns if c is not col))
+    return vc
+
 def getPublicAttrs(obj):
     return [k for k in dir(obj) if not k.startswith('_') and not callable(getattr(obj, k))]
 
@@ -728,7 +738,7 @@ def AttrColumns(colnames):
 def createTextViewer(name, text, src=None):
     viewer = vd.newSheet(name, src)
     viewer.rows = text.split('\n')
-    viewer.columns = [ VColumn(name, lambda r: r) ]
+    viewer.columns = [ VColumn(name) ]
     return viewer
 
 
@@ -801,6 +811,7 @@ def createColumnSummary(sheet):
         VColumn('column', lambda_getattr('name')),
         VColumn('width',  lambda_getattr('width')),
         VColumn('type',   lambda_getattr('type')),
+        VColumn('expr',   lambda_getattr('expr')),
 #        VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
 #        VColumn('min',    lambda c: min(sheet.columnValues(c))),
 #        VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
