@@ -50,9 +50,11 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |    **C**      | build column summary.   shows stats (min/median/mean/max/stddev) |
 |
 |    **F**      | build frequency table for current column |
-|    **O**      | show options |
+|    **O**      | show/edit options |
 |
 |    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
+|    **^D**     | toggle debug mode (exceptions abort program) |
+|
 |    **-** (hyphen)   | delete current column |
 |    **_** (underscore)     | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
 |    **^**      | Set name of current column | Set name of all columns to the values in the current row |

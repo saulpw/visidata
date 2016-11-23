@@ -144,6 +144,7 @@ base_commands = {
 
     # quit and print error sheet to terminal (in case error sheet itself is broken)
     ctrl('e'): 'g_args.debug = True; raise VException(vd.lastErrors[-1])',
+    ctrl('d'): 'g_args.debug = not g_args.debug; vd.status("debug " + ("ON" if g_args.debug else "OFF"))',
 
     # other capital letters are new sheets
     ord('E'): 'if vd.lastErrors: createTextViewer("last_error", vd.lastErrors[-1])',
@@ -188,7 +189,7 @@ base_commands = {
     ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))',
 
     # add column
-    ord('='): 'sheet.columns.append(ColumnExpr(sheet, inputLine("=")))',
+    ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',
 }
 
 sheet_specific_commands = {
@@ -495,6 +496,10 @@ class VSheet:
             col = self.columns[col]
         return [col.getValue(r) for r in self.rows]
 
+    def addColumn(self, col):
+        if col:
+            self.columns.append(col)
+
     def skipDown(self):
         pv = self.cursorValue
         for i in range(self.cursorRowIndex+1, len(self.rows)):
@@ -711,10 +716,11 @@ def lambda_getattr(b):
 
 
 def ColumnExpr(sheet, expr):
-    vc = VColumn(expr)
-    vc.expr = expr
-    vc.func = lambda r,col=vc,sheet=sheet: eval(col.expr, dict((c.name, c.getValue(r)) for c in sheet.columns if c is not col))
-    return vc
+    if expr:
+        vc = VColumn(expr)
+        vc.expr = expr
+        vc.func = lambda r,col=vc,sheet=sheet: eval(col.expr, dict((c.name, c.getValue(r)) for c in sheet.columns if c is not col))
+        return vc
 
 def getPublicAttrs(obj):
     return [k for k in dir(obj) if not k.startswith('_') and not callable(getattr(obj, k))]
