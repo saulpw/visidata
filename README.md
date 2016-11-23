@@ -1,4 +1,4 @@
-# VisiData v0.28
+# VisiData v0.29
 
 A curses interface for exploring and arranging tabular data
 
@@ -6,10 +6,26 @@ Usable via any remote shell which has Python3 installed.
 
 ## Features
 
-- can browse data in .csv, .tsv, .xlsx, .json, .hdf5, .zip formats
-- instantly create frequency table for column
-- search/select by regex
-- meta sheets (columns, options, even the sheets list itself)
+- inputs: .csv, .tsv, .json, .hdf5, .xlsx, .zip
+- outputs: .csv, .tsv
+- hjkl cursor movement, t/m/b scroll to position screen cursor
+- skip up/down columns by value
+- row/column reordering and deleting
+- resize column to fix max width of onscreen row
+- sort asc/desc by one column
+- 'g'lobal prefix supersizes many commands
+- 'e'dit cell contents
+- convert column to int/str/float
+- reload sheet with different format options
+- add new column by Python expression
+- 's'elect/'u'nselect rows, bulk delete with 'gd'
+- search/select by regex in column
+- 'F'requency table for current column with histogram
+- 'S'heets metasheet to manage/navigate multiple sheets,
+- 'C'olumns metasheet
+- 'O'ptions sheet to change the style or behavior
+- 'E'rror metasheet
+- 'g^P' status history sheet
 
 ## Installation
 
@@ -39,7 +55,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | ---: | --- | --- |
 |   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
 | **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
-|   **t**/**m**/**b**   | move cursor to top/middle/bottom row on screen |
+|   **t**/**m**/**b**   | scrolls cursor row to top/middle/bottom of screen |
 |   **^G**      | show sheet info on statusline |
 |   **^P**      | show last status message | open status history |
 |   **^R**      | reload sheet from source |
@@ -71,7 +87,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **d**  | Delete current row |
 |**H**/**J**/**K**/**L** | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
 |
-|    **@**/**#**/**$**/**%**     | convert column to datetime/int/string/float |
+|    **#**/**$**/**%**     | convert column to int/string/float |
 |
 |  **e** | edit current cell value |
 |  **=** | add new column by Python expression |
@@ -125,6 +141,7 @@ Please contact me at the email address above if you would like to contribute.
 - [BurntSushi/xsv](https://github.com/BurntSushi/xsv)
 - [andmarti1424/sc-im](https://github.com/andmarti1424/sc-im)
 - [teapot](https://www.syntax-k.de/projekte/teapot/)
+- and, of course, [VisiCalc](http://danbricklin.com/visicalc.htm)
 
 ## License
 

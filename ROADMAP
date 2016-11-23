@@ -1,0 +1,54 @@
+
+# Feature Roadmap
+
+A loose plan that is subject to change.
+
+## v0.3
+- inner/outer/cross/diff join rows from multiple sheets by matching key columns
+
+## v0.5
+- save all sheets to .h5 file
+- aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
+
+## v1.0
+- F1 loads help sheet
+- save sources to .zip cache
+- edit/transform log
+- sources sheet
+- save layout and options
+- regexes and Python expressions should be interchangeable (search, select, etc)
+- generic mechanism for coloring rows
+
+## v1.1
+- connect to sql dbs via sqlalchemy
+- Python3 API for import by other scripts
+
+## v1.2
+
+- use asyncio to do loading and computation in the background
+   - progress bar and ^C to abort
+- can start to browse huge and/or offline (e.g. redshift) datasets instantly
+
+## v1.3
+- bulk interface (command line, macros?)
+
+## Unscheduled
+
+- html table parsing into columns
+- datetime conversion with auto-detect/sniffer
+- popup menus for editing enum fields
+- add column by regex transform
+- secondary column sort
+- parse .xml
+- save as .json
+- url editor (parses query into editable/templatable key/values
+- better csv/tsv sniffer
+- fixed-column detector
+
+### Details
+
+- put indicator in header row to indicate more columns to the left/right
+- create rightside statusbar for status indicators like 'g' prefix and number of sheets
+- maintain original ordering with implicit/hidden line# column
+
+

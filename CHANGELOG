@@ -1,0 +1,24 @@
+# v0.28 (2016-11-22)
+
+- inputs: .csv, .tsv, .json, .hdf5, .xlsx, .zip
+- outputs: .csv, .tsv
+- hjkl cursor movement, t/m/b scroll to position screen cursor
+- skip up/down columns by value
+- row/column reordering and deleting
+- resize column to fix max width of onscreen row
+- filter/search by regex in column
+- sort asc/desc by one column
+- 'g'lobal prefix supersizes many commands
+- 'e'dit cell contents
+- convert column to int/str/float
+- reload sheet with different format options
+- add new column by Python expression
+- 's'elect/'u'nselect rows, bulk delete with 'gd'
+- 'F'requency table for current column with histogram
+- 'S'heets metasheet to manage/navigate multiple sheets,
+- 'C'olumns metasheet
+- 'O'ptions sheet to change the style or behavior
+- 'E'rror metasheet
+- 'g^P' status history sheet
+
+

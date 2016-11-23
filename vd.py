@@ -47,6 +47,7 @@ default_options = {
     'c_CurHdr': 'reverse',
     'c_CurRow': 'reverse',
     'c_CurCol': 'bold',
+    'c_KeyCols': 'brown',
     'c_StatusLine': 'bold',
     'c_SelectedRow': 'green',
     'c_ColumnSep': 'blue',
@@ -61,6 +62,7 @@ windowWidth = None
 windowHeight = None
 
 defaultColNames = string.ascii_uppercase
+initialStatus = 'saul.pw/VisiData v' + __version__
 
 colors = {
     'bold': curses.A_BOLD,
@@ -71,6 +73,11 @@ colors = {
 class attrdict(object):
     def __init__(self, d):
         self.__dict__ = d
+
+def combine_ranges(*rnglist):
+    for rng in rnglist:
+        for r in rng:
+            yield r
 
 options = attrdict(default_options)
 
@@ -113,11 +120,12 @@ base_commands = {
     ord('K'): 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))',
     ord('L'): 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols))',
 
-    # ^g/^p sheet status and status sheet
+    # ^g/^p/^v sheet status, status sheet, version status
     ctrl('g'): 'vd.status(sheet.statusLine)',
     ctrl('p'): 'vd.status(vd.statusHistory[-1])',
+    ctrl('v'): 'vd.status(initialStatus)',
 
-    # t/m/b jumps to top/middle/bottom of screen
+    # t/m/b moves cursor row to top/middle/bottom of screen
     ord('t'): 'sheet.topRowIndex = sheet.cursorRowIndex',
     ord('m'): 'sheet.topRowIndex = sheet.cursorRowIndex-int(sheet.nVisibleRows/2)',
     ord('b'): 'sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows+1',
@@ -133,7 +141,7 @@ base_commands = {
     ord('-'): 'sheet.columns.pop(sheet.cursorColIndex)',
 
     # retype as datetime/int/str/float
-    ord('@'): 'sheet.convertType(sheet.cursorCol, datetime)',
+#    ord('@'): 'sheet.convertType(sheet.cursorCol, datetime)',
     ord('#'): 'sheet.convertType(sheet.cursorCol, int)',
     ord('$'): 'sheet.convertType(sheet.cursorCol, str)',
     ord('%'): 'sheet.convertType(sheet.cursorCol, float)',
@@ -181,18 +189,19 @@ base_commands = {
     # reload
     ord('R'): 'sheet.source.type = inputLine("change type to: ") or sheet.source.type',
     ctrl('r'): 'openSource(vd.sheets.pop(0).source); vd.status("reloaded")',
+    ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))',  # save sheet
+    ord('o'): 'openSource(VSource(inputLine("open: ")))',   # open location (file or url)
+
 
     # edit cell
     ord('e'): 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex) or sheet.cursorCol.getValue(sheet.cursorRow))',
 
-    # save sheet
-    ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))',
-
-    # add column
-    ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',
+    ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',  # add column by expr
+    ord('.'): 'sheet.pinColumn(sheet.cursorColIndex)', # move to left and add to list of keys
 }
 
 sheet_specific_commands = {
+    # selecting sheets list itself should stay on sheets list
     ('sheets', ENTER): 'vd.sheets.pop(0); moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
 }
 
@@ -270,7 +279,7 @@ class VisiData:
         self.sheets = []
         self._status = []
         self.statusHistory = []
-        self.status('saul.pw/VisiData v' + __version__)
+        self.status(initialStatus)
         self.lastErrors = []
 
     def status(self, s):
@@ -379,6 +388,7 @@ class VColumn:
         self.name = name
         self.func = func
         self.width = width
+        self.type = None
         self.expr = None  # Python string expression if computed column
 
     def getValue(self, row):
@@ -398,9 +408,9 @@ class VColumn:
         self.func.setter(row, value)
 
 class VSource:
-    def __init__(self, ref, name, contentType=None):
+    def __init__(self, ref, name=None, contentType=None):
         self.ref = ref           # full reference (url/fqpn), for refetching
-        self.name = name         # human-readable shorthand/mnemonic
+        self.name = name or ref  # human-readable shorthand/mnemonic
         self.contents = None     # cached contents
         self.fp = None
 
@@ -424,7 +434,6 @@ class VSheet:
         self.rows = []
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorColIndex = 0  # absolute index of cursor into self.columns
-        self.pinnedRows = []
 
         self.topRowIndex = 0     # cursorRowIndex of topmost row
         self.leftColIndex = 0    # cursorColIndex of leftmost column
@@ -435,6 +444,7 @@ class VSheet:
 
         # all columns in display order
         self.columns = None
+        self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # current search term
         self.currentRegex = None
@@ -499,6 +509,11 @@ class VSheet:
     def addColumn(self, col):
         if col:
             self.columns.append(col)
+
+    def pinColumn(self, colidx):
+        moveListItem(self.columns, self.cursorColIndex, self.nKeys)
+        if self.cursorColIndex > self.nKeys:
+            self.nKeys += 1
 
     def skipDown(self):
         pv = self.cursorValue
@@ -632,14 +647,12 @@ class VSheet:
     def draw(self):
         scr.erase()  # clear screen before every re-draw
         sepchars = options.ColumnSep
-
         x = 0
-        colidx = None
 
         self.colLayout = {}
         self.rowLayout = {}
-        for colidx in range(self.leftColIndex, len(self.columns)):
-
+        col_indexes = set(combine_ranges(range(0, self.nKeys), range(self.leftColIndex, len(self.columns))))
+        for colidx in sorted(col_indexes):
             col = self.columns[colidx]
             col.width = col.width or getMaxWidth(col, self.visibleRows)
             self.colLayout[colidx] = (x, col.width)
@@ -647,13 +660,15 @@ class VSheet:
             if x < windowWidth:  # only draw inside window
                 # choose attribute to highlight column header
                 if colidx == self.cursorColIndex:  # cursor is at this column
-                    attr = colors[options.c_CurHdr]
+                    hdrattr = colors[options.c_CurHdr]
+                elif colidx < self.nKeys:
+                    hdrattr = colors[options.c_KeyCols]
                 else:
-                    attr = colors[options.c_Header]
+                    hdrattr = colors[options.c_Header]
 
                 y = 0
                 colwidth = min(col.width, windowWidth-x)
-                vd.clipdraw(y, x, col.name or defaultColNames[colidx], attr, colwidth)
+                vd.clipdraw(y, x, col.name or defaultColNames[colidx], hdrattr, colwidth)
                 if x+colwidth+len(sepchars) <= windowWidth:
                     scr.addstr(y, x+colwidth, sepchars, colors[options.c_ColumnSep])
 
@@ -668,6 +683,8 @@ class VSheet:
 
                     if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
                         attr = colors[options.c_CurRow]
+                    elif colidx < self.nKeys:
+                        attr = colors[options.c_KeyCols]
                     else:
                         attr = colors[options.c_default]
 
@@ -675,7 +692,7 @@ class VSheet:
                         attr |= colors[options.c_SelectedRow]
 
                     if x+colwidth+len(sepchars) <= windowWidth:
-                        scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
+                       scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
 
                     if colidx == self.cursorColIndex:  # cursor is at this column
                         attr |= colors[options.c_CurCol]
@@ -818,6 +835,7 @@ def createColumnSummary(sheet):
         VColumn('width',  lambda_getattr('width')),
         VColumn('type',   lambda_getattr('type')),
         VColumn('expr',   lambda_getattr('expr')),
+        VColumn('value', lambda c,sheet=vs: c.getValue(sheet.cursorRow)),
 #        VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
 #        VColumn('min',    lambda c: min(sheet.columnValues(c))),
 #        VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
@@ -1074,7 +1092,7 @@ def editText(y, x, w, prompt=''):
     if not prompt:
         scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
     else:
-        scr.addstr(y, x, prompt) #'%-*s' % (windowWidth-1, prompt))
+        scr.addstr(y, x, prompt)
         x += len(prompt)
     curses.echo()
     inp = scr.getstr(y, x)
@@ -1138,7 +1156,7 @@ def terminal_main():
     inputs = g_args.inputs or ['.']
 
     for fn in inputs:
-        openSource(VSource(fn, fn))
+        openSource(VSource(fn))
 
     ret = wrapper(curses_main)
     if ret:
