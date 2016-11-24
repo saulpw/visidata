@@ -256,8 +256,8 @@ global_commands = {
     ord('E'): 'createTextViewer("last_error", "\\n\\n".join(vd.lastErrors))',
 
     # search all columns
-    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True)',
-    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True)',
+    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True, columns=sheet.columns)',
+    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=sheet.columns)',
 
     # first/last match
     ord('n'): 'sheet.cursorRowIndex = max(sheet.searchRegex())',
@@ -468,9 +468,11 @@ class VSheet:
         if x <= 0:
             self.leftColIndex = self.cursorColIndex
         else:
+            # keycolwidth = sum(self.columns[i].width for i in range(0, self.nKeys))
             while True:
-                x, w = self.colLayout[self.cursorColIndex]
-                if x+w-self.colLayout[self.leftColIndex][0] < windowWidth:
+                cur_x, cur_w = self.colLayout[self.cursorColIndex]
+                left_x, left_w = self.colLayout[self.leftColIndex]
+                if cur_x+cur_w-left_x < windowWidth:
                     # current columns fit entirely on screen
                     break
                 self.leftColIndex += 1
@@ -486,6 +488,10 @@ class VSheet:
 
         if columns:
             self.currentRegexColumns = columns
+
+        if not self.currentRegexColumns:
+            vd.status('no columns given')
+            return []
 
         if backward:
             rng = range(self.cursorRowIndex-1, -1, -1)
