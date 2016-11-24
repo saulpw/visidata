@@ -1,3 +1,9 @@
+# v0.29
+
+- pin key columns to left
+- join sheets on exact key match
+- -r/--readonly mode
+
 # v0.28 (2016-11-22)
 
 - inputs: .csv, .tsv, .json, .hdf5, .xlsx, .zip

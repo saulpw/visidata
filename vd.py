@@ -45,6 +45,9 @@ default_options = {
     'csv_delimiter': ',',
     'csv_quotechar': '"',
 
+    'debug': False,
+    'readonly': False,
+
     'encoding': 'utf-8',
     'encoding_errors': 'surrogateescape',
 
@@ -165,8 +168,8 @@ base_commands = {
     ord(']'): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue, reverse=True)',
 
     # quit and print error sheet to terminal (in case error sheet itself is broken)
-    ctrl('e'): 'g_args.debug = True; raise VException(vd.lastErrors[-1])',
-    ctrl('d'): 'g_args.debug = not g_args.debug; vd.status("debug " + ("ON" if g_args.debug else "OFF"))',
+    ctrl('e'): 'options.debug = True; raise VException(vd.lastErrors[-1])',
+    ctrl('d'): 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))',
 
     # other capital letters are new sheets
     ord('E'): 'if vd.lastErrors: createTextViewer("last_error", vd.lastErrors[-1])',
@@ -315,7 +318,7 @@ class VisiData:
         self.lastErrors = self.lastErrors[-10:]  # keep most recent
         if status:
             self.status(self.lastErrors[-1].splitlines()[-1])
-        if g_args.debug:
+        if options.debug:
             raise
 
     def run(self):
@@ -426,6 +429,9 @@ class VColumn:
         return str(cellval).strip()
 
     def setValue(self, row, value):
+        if options.readonly:
+            vd.status('readonly mode')
+            return
         self.func.setter(row, value)
 
 class VSource:
@@ -570,11 +576,7 @@ class VSheet:
         vd.status('converted %s to %s with %s exceptions' % (col.name, newType.__name__, nErrors))
 
     def toggle(self, rows):
-        for r in rows:
-            if r in self.selectedRows:
-                self.selectedRows.remove(r)
-            else:
-                self.selectedRows.append(r)
+        self.selectedRows = [r for r in self.rows if r not in self.selectedRows]
 
     def select(self, rows):
         self.selectedRows.extend(rows)
@@ -1015,7 +1017,10 @@ def open_zip(src):
 
 
 def open_txt(src):
-    return createTextViewer(src.name, getContents(src), src)
+    contents = getContents(src)
+    if '\t' in contents[:32]:
+        return open_tsv(src)  # TSV often have .txt extension
+    return createTextViewer(src.name, contents, src)
 
 
 def open_dir(src):
@@ -1208,15 +1213,19 @@ def terminal_main():
     'Parse arguments and initialize VisiData instance'
     import argparse
 
-    global g_args, vd
+    global vd
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('inputs', nargs='*', help='initial sheets')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='abort on exception')
-    g_args = parser.parse_args()
+    parser.add_argument('-r', '--readonly', dest='readonly', action='store_true', default=False, help='editing disabled')
+    args = parser.parse_args()
+
+    options.debug = args.debug
+    options.readonly = args.readonly
 
     vd = VisiData()
-    inputs = g_args.inputs or ['.']
+    inputs = args.inputs or ['.']
 
     for fn in inputs:
         openSource(VSource(fn))
@@ -1239,7 +1248,7 @@ def curses_main(_scr):
     try:
         return vd.run()
     except Exception as e:
-        if g_args.debug:
+        if options.debug:
             raise
         return 'Exception: ' + str(e)
 

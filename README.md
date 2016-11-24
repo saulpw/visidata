@@ -41,7 +41,7 @@ Usable via any remote shell which has Python3 installed.
 
 ## Usage
 
-        $ vd.py [<input> ...]
+        $ vd.py [-r/--readonly] [<input> ...]
 
 Inputs may be paths or URLs.  If no inputs are given, starts exploring the
 current directory.  Unknown filetypes are by default viewed with a text
@@ -53,53 +53,52 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
-|   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
-| **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
-|   **t**/**m**/**b**   | scrolls cursor row to top/middle/bottom of screen |
-|   **^G**      | show sheet info on statusline |
-|   **^P**      | show last status message | open status history |
-|   **^R**      | reload sheet from source |
-|   **^S**     | save current sheet to new file (type based on extension) |
-|   **R**      | change type of sheet (requires ^R reload to reparse) |
-|
-|    **S**      | view current sheet stack |
-|    **C**      | build column summary.   shows stats (min/median/mean/max/stddev) |
-|
-|    **F**      | build frequency table for current column |
-|    **O**      | show/edit options |
-|
-|    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
-|    **^D**     | toggle debug mode (exceptions abort program) |
-|
-|    **-** (hyphen)   | delete current column |
-|    **_** (underscore)     | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
-|    **^**      | Set name of current column | Set name of all columns to the values in the current row |
-|    **[**/**]**    | Sort by current column (asc/desc) |
-|   **<**/**>**     | skip up/down to next value in column |
-|
-|  **/** **?**    | Search forward/backward by regex in current column | search all columns
-| **p**/**n**  | Go to previous/next search match | Go to first/last match |
-|
-|    **\|**     | select by regex if this column matches | select row if any column matches |
-|    **\\**     | unselect by regex or expression in this column | unselect row if any column matches | |
-|    **\<Space\>/u**  | select/unselect current row | select/unselect all rows |
-|
-| **d**  | Delete current row |
-|**H**/**J**/**K**/**L** | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
-|
-|    **#**/**$**/**%**     | convert column to int/string/float |
-|
-|  **e** | edit current cell value |
-|  **=** | add new column by Python expression |
+|   **h**/**j**/**k**/**l** or **\<arrows\>** | Move cell cursor left/down/up/right | Move cursor all the way to the left/bottom/top/right |
+| **PgDn**/**PgUp** | Scroll sheet one page down/up (minus stickied rows/columns) |  Go to first/last page |
+|   **t**/**m**/**b**   | Scrolls cursor row to top/middle/bottom of screen |
+|   **^G**      | Show sheet info on statusline |
+|   **^P**      | Show last status message | Open status history |
+|   **^R**      | Reload sheet from source |
+|   **^S**     | Save current sheet to new file (type based on extension) |
+|   **R**      | Change type of sheet (requires ^R reload to reparse) |
 |  **Ctrl-^** | Toggle to previous sheet |
-| **.** (period) | make current column a key (pin to left and match on join) |
+|
+|    **S**      | View current sheet stack |
+|    **C**      | Build column summary |
+|
+|    **F**      | Build frequency table for current column |
+|    **O**      | Show/edit options |
+|
+|    **E**      | View stack trace for previous exceptions | View stacktraces for last 100 exceptions |
+|    **^E**     | Abort and print last exception and stacktrace to terminal |
+|    **^D**     | Toggle debug mode (future exceptions abort program) |
+|
+|    **_** (underscore)     | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
+|    **[**/**]**    | Sort by current column (asc/desc) |
+|   **<**/**>**     | Skip up/down to next value in column |
+|
+|  **/** / **?**    | Search forward/backward by regex in current column | Search all columns
+| **p**/**n**  | Go to previous/next search match | Go to first/last match |
+| **\|**//**\\** | Select/Unselect rows by regex if this column matches | Select/Unselect rows if any column matches |
+| **s**/**u**/**\<Space\>** | Select/Unselect/Toggle current row | Select/Unselect/Toggle all rows |
+|
+| Modifying commands (disabled with -r argument or options.readonly=True)
+|
+|**H**/**J**/**K**/**L** | Move current column or row one to the left/down/up/right (changes data ordering) | "Throw" the column/row all the way to the left/bottom/top/right |
+|    **^**      | Set name of current column | Set names of all columns to the values in the current row |
+|    **-** (hyphen)   | Delete current column |
+| **d**  | Delete current row | Delete all selected rows |
+| **#**/**$**/**%** | Convert column to int/string/float |
+|  **e** | Edit current cell value |
+|  **=** | Add new column by Python expression |
+| **.** (period) | Make current column a key (pin to left and match on join) |
 
 ### HDF5 sheets
 
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
-|  **<Enter>** | open the group or dataset under the cursor |
-|  **A**   | view attributes of currently selected object | view attributes of current sheet |
+|  **<Enter>** | Open the group or dataset under the cursor |
+|  **A**   | View attributes of currently selected object | View attributes of current sheet |
 
 ### 'S'heets commands
 
@@ -109,6 +108,12 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **+** | Join all selected sheets, keeping all rows from first sheet (outer join) |
 | ** * ** (asterisk) | Join all selected sheets, keeping all rows from all sheets (full join) |
 | **~** | Join all selected sheets, keeping only rows NOT in all sheets (diff join) |
+
+
+### Notes
+
+- Edits made to a joined sheet will be reflected in the source sheets.
+
 
 
 ### Configurable Options (via shift-'O')
