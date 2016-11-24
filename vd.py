@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 'VisiData: a curses interface for exploring and arranging tabular data'
 
