@@ -298,162 +298,6 @@ def getMaxWidth(col, rows):
     return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)), int(windowWidth-1))
 
 
-class VisiData:
-    def __init__(self):
-        self.sheets = []
-        self._status = []
-        self.statusHistory = []
-        self.status(initialStatus)
-        self.lastErrors = []
-
-    def status(self, s):
-        s = str(s)
-        self._status.append(s)
-        self.statusHistory.append(s)
-        self.statusHistory = self.statusHistory[-100:]  # keep most recent
-
-    def exceptionCaught(self, status=True):
-        import traceback
-        self.lastErrors.append(traceback.format_exc().strip())
-        self.lastErrors = self.lastErrors[-10:]  # keep most recent
-        if status:
-            self.status(self.lastErrors[-1].splitlines()[-1])
-        if options.debug:
-            raise
-
-    def run(self):
-        global sheet
-        global windowHeight, windowWidth
-        windowHeight, windowWidth = scr.getmaxyx()
-
-        commands = base_commands
-        while True:
-            if not self.sheets:
-                # if no more sheets, exit
-                return
-
-            sheet = self.sheets[0]
-            if sheet.nRows == 0:
-                self.status('no rows')
-
-            try:
-                sheet.draw()
-            except Exception as e:
-                self.exceptionCaught()
-
-            # draw status on last line
-            attr = colors[options.c_StatusLine]
-            statusstr = options.SheetNameFmt % sheet.name + options.StatusSep.join(self._status)
-            self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
-            self._status = []
-
-            scr.move(windowHeight-1, windowWidth-2)
-            curses.doupdate()
-
-            ch = scr.getch()
-            if ch == curses.KEY_RESIZE:
-                windowHeight, windowWidth = scr.getmaxyx()
-            elif ch == curses.KEY_MOUSE:
-                try:
-                    devid, x, y, z, bstate = curses.getmouse()
-                    sheet.cursorRowIndex = sheet.topRowIndex+y-1
-                except Exception:
-                    self.exceptionCaught()
-            elif (sheet.name, ch) in sheet_specific_commands or ch in sheet.commands or ch in commands:
-                cmdstr = sheet_specific_commands.get((sheet.name, ch)) or sheet.commands.get(ch) or commands.get(ch)
-                try:
-                    exec(cmdstr)
-
-                    commands = base_commands
-                except ChangeCommandSet as e:
-                    # prefixes raise ChangeCommandSet exception instead
-                    commands = e.commands
-                    self.status(e.mode)
-                except Exception:
-                    commands = base_commands
-                    self.exceptionCaught()
-                    self.status(cmdstr)
-            else:
-                self.status('no command for key "%s" (%d) ' % (chr(ch), ch))
-
-            sheet.checkCursor()
-
-    def newSheet(self, name, src=None):
-        if not src:
-            src = VSource('internal', name)
-        vs = VSheet(name, src)
-        self.sheets.insert(0, vs)
-        return vs
-
-    def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
-        s = s.replace('\n', '\\n')
-        try:
-            if w is None:
-                w = windowWidth-1
-            w = min(w, windowWidth-x-1)
-            if w == 0:  # no room anyway
-                return
-
-            # convert to string just before drawing
-            s = str(s)
-            if len(s) > w:
-                scr.addstr(y, x, s[:w-1] + options.Ellipsis, attr)
-            else:
-                scr.addstr(y, x, s, attr)
-                if len(s) < w:
-                    scr.addstr(y, x+len(s), options.ColumnFiller*(w-len(s)), attr)
-        except Exception as e:
-            self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
-            self.exceptionCaught()
-# end VisiData class
-
-class VColumn:
-    def __init__(self, name, func=lambda r: r, width=None):
-        self.name = name
-        self.func = func
-        self.width = width
-        self.type = None
-        self.expr = None  # Python string expression if computed column
-
-    def getValue(self, row):
-        try:
-            return self.func(row)
-        except Exception as e:
-            vd.exceptionCaught(status=False)
-            return options.FunctionError
-
-    def getDisplayValue(self, row):
-        cellval = self.getValue(row)
-        if cellval is None:
-            cellval = options.VisibleNone
-        return str(cellval).strip()
-
-    def setValue(self, row, value):
-        if options.readonly:
-            vd.status('readonly mode')
-            return
-        self.func.setter(row, value)
-
-class VSource:
-    def __init__(self, ref, name=None, contentType=None):
-        self.ref = ref           # full reference (url/fqpn), for refetching
-        self.name = name or ref  # human-readable shorthand/mnemonic
-        self.contents = None     # cached contents
-        self.fp = None
-
-        if contentType:
-            self.type = contentType  # txt/json/csv etc to determine which File_* class to use
-        elif isinstance(ref, str):
-            fn, ext = os.path.splitext(self.ref)
-            self.type = ext[1:]  # remove leading '.'
-        elif isinstance(ref, object):
-            self.type = 'pyobj'
-        else:
-            self.type = ''
-
-    def __repr__(self):
-        return self.ref
-
 class VSheet:
     def __init__(self, name, src):
         self.source = src
@@ -737,6 +581,163 @@ class VSheet:
         y = self.rowLayout[self.cursorRowIndex]
         return editText(y, x, w)
 # end VSheet class
+
+class VisiData:
+    def __init__(self):
+        self.sheets = []
+        self._status = []
+        self.statusHistory = []
+        self.status(initialStatus)
+        self.lastErrors = []
+
+    def status(self, s):
+        s = str(s)
+        self._status.append(s)
+        self.statusHistory.append(s)
+        self.statusHistory = self.statusHistory[-100:]  # keep most recent
+
+    def exceptionCaught(self, status=True):
+        import traceback
+        self.lastErrors.append(traceback.format_exc().strip())
+        self.lastErrors = self.lastErrors[-10:]  # keep most recent
+        if status:
+            self.status(self.lastErrors[-1].splitlines()[-1])
+        if options.debug:
+            raise
+
+    def run(self):
+        global sheet
+        global windowHeight, windowWidth
+        windowHeight, windowWidth = scr.getmaxyx()
+
+        commands = base_commands
+        while True:
+            if not self.sheets:
+                # if no more sheets, exit
+                return
+
+            sheet = self.sheets[0]
+            if sheet.nRows == 0:
+                self.status('no rows')
+
+            try:
+                sheet.draw()
+            except Exception as e:
+                self.exceptionCaught()
+
+            # draw status on last line
+            attr = colors[options.c_StatusLine]
+            statusstr = options.SheetNameFmt % sheet.name + options.StatusSep.join(self._status)
+            self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
+            self._status = []
+
+            scr.move(windowHeight-1, windowWidth-2)
+            curses.doupdate()
+
+            ch = scr.getch()
+            if ch == curses.KEY_RESIZE:
+                windowHeight, windowWidth = scr.getmaxyx()
+            elif ch == curses.KEY_MOUSE:
+                try:
+                    devid, x, y, z, bstate = curses.getmouse()
+                    sheet.cursorRowIndex = sheet.topRowIndex+y-1
+                except Exception:
+                    self.exceptionCaught()
+            elif (sheet.name, ch) in sheet_specific_commands or ch in sheet.commands or ch in commands:
+                cmdstr = sheet_specific_commands.get((sheet.name, ch)) or sheet.commands.get(ch) or commands.get(ch)
+                try:
+                    exec(cmdstr)
+
+                    commands = base_commands
+                except ChangeCommandSet as e:
+                    # prefixes raise ChangeCommandSet exception instead
+                    commands = e.commands
+                    self.status(e.mode)
+                except Exception:
+                    commands = base_commands
+                    self.exceptionCaught()
+                    self.status(cmdstr)
+            else:
+                self.status('no command for key "%s" (%d) ' % (chr(ch), ch))
+
+            sheet.checkCursor()
+
+    def newSheet(self, name, src=None):
+        if not src:
+            src = VSource('internal', name)
+        vs = VSheet(name, src)
+        self.sheets.insert(0, vs)
+        return vs
+
+    def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
+        s = s.replace('\n', '\\n')
+        try:
+            if w is None:
+                w = windowWidth-1
+            w = min(w, windowWidth-x-1)
+            if w == 0:  # no room anyway
+                return
+
+            # convert to string just before drawing
+            s = str(s)
+            if len(s) > w:
+                scr.addstr(y, x, s[:w-1] + options.Ellipsis, attr)
+            else:
+                scr.addstr(y, x, s, attr)
+                if len(s) < w:
+                    scr.addstr(y, x+len(s), options.ColumnFiller*(w-len(s)), attr)
+        except Exception as e:
+            self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
+            self.exceptionCaught()
+# end VisiData class
+
+class VColumn:
+    def __init__(self, name, func=lambda r: r, width=None):
+        self.name = name
+        self.func = func
+        self.width = width
+        self.type = None
+        self.expr = None  # Python string expression if computed column
+
+    def getValue(self, row):
+        try:
+            return self.func(row)
+        except Exception as e:
+            vd.exceptionCaught(status=False)
+            return options.FunctionError
+
+    def getDisplayValue(self, row):
+        cellval = self.getValue(row)
+        if cellval is None:
+            cellval = options.VisibleNone
+        return str(cellval).strip()
+
+    def setValue(self, row, value):
+        if options.readonly:
+            vd.status('readonly mode')
+            return
+        self.func.setter(row, value)
+
+class VSource:
+    def __init__(self, ref, name=None, contentType=None):
+        self.ref = ref           # full reference (url/fqpn), for refetching
+        self.name = name or ref  # human-readable shorthand/mnemonic
+        self.contents = None     # cached contents
+        self.fp = None
+
+        if contentType:
+            self.type = contentType  # txt/json/csv etc to determine which File_* class to use
+        elif isinstance(ref, str):
+            fn, ext = os.path.splitext(self.ref)
+            self.type = ext[1:]  # remove leading '.'
+        elif isinstance(ref, object):
+            self.type = 'pyobj'
+        else:
+            self.type = ''
+
+    def __repr__(self):
+        return self.ref
+
 
 
 ### core sheet layouts
