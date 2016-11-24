@@ -182,7 +182,7 @@ base_commands = {
     ord('g'): 'raise ChangeCommandSet(global_commands, "g")',
 
     # meta sheets
-    ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue source".split())',
+    ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue nKeys source".split())',
     ord('C'): 'createColumnSummary(sheet)',
     ord('O'): 'createDictSheet("options", options.__dict__)',
 
@@ -212,11 +212,18 @@ base_commands = {
 
     ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',  # add column by expr
     ord('.'): 'sheet.pinColumn(sheet.cursorColIndex)', # move to left and add to list of keys
+    ctrl('^'): 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]',  # swap top two sheets
 }
 
 sheet_specific_commands = {
     # selecting sheets list itself should stay on sheets list
     ('sheets', ENTER): 'vd.sheets.pop(0); moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
+
+    # push new sheet joining selected sheets on key columns
+    ('sheets', ord('&')): 'joinSheets(sheet.selectedRows, jointype="&")',
+    ('sheets', ord('+')): 'joinSheets(sheet.selectedRows, jointype="+")',
+    ('sheets', ord('*')): 'joinSheets(sheet.selectedRows, jointype="*")',
+    ('sheets', ord('~')): 'joinSheets(sheet.selectedRows, jointype="~")',
 }
 
 # when used with 'g' prefix
@@ -349,7 +356,7 @@ class VisiData:
                     sheet.cursorRowIndex = sheet.topRowIndex+y-1
                 except Exception:
                     self.exceptionCaught()
-            elif ch in sheet.commands or ch in commands:
+            elif (sheet.name, ch) in sheet_specific_commands or ch in sheet.commands or ch in commands:
                 cmdstr = sheet_specific_commands.get((sheet.name, ch)) or sheet.commands.get(ch) or commands.get(ch)
                 try:
                     exec(cmdstr)
@@ -486,6 +493,10 @@ class VSheet:
         return self.rows[self.topRowIndex:self.topRowIndex+windowHeight-2]
 
     @property
+    def keyCols(self):
+        return self.columns[:self.nKeys]
+
+    @property
     def cursorValue(self):
         return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
 
@@ -526,7 +537,7 @@ class VSheet:
 
     def pinColumn(self, colidx):
         moveListItem(self.columns, self.cursorColIndex, self.nKeys)
-        if self.cursorColIndex > self.nKeys:
+        if self.cursorColIndex >= self.nKeys:
             self.nKeys += 1
 
     def skipDown(self):
@@ -858,7 +869,7 @@ def createColumnSummary(sheet):
 #        VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
     ]
     vs.commands.update({
-        ord('@'): 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)',
+#        ord('@'): 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)',
         ord('#'): 'sheet.source.convertType(sheet.cursorRow, int); sheet.moveCursorDown(+1)',
         ord('$'): 'sheet.source.convertType(sheet.cursorRow, str); sheet.moveCursorDown(+1)',
         ord('%'): 'sheet.source.convertType(sheet.cursorRow, float); sheet.moveCursorDown(+1)',
@@ -875,11 +886,49 @@ def viewPyObj(obj, src=None):
     vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', valfunc)]
     return vs
 
+
+def lambda_subrow_wrap(func, subrowidx):
+    func = lambda r,i=subrowidx,f=func: r[i] and f(r[i]) or None
+    func.setter = lambda r,v,i=subrowidx,f=func: r[i] and f.setter(r[i], v) or None
+    return func
+
+def joinSheets(sheets, jointype='&'):
+    joinsheet = vd.newSheet(jointype.join(vs.name for vs in sheets))
+    joinsheet.columns = [VColumn(sheets[0].columns[colnum].name, lambda_subrow_wrap(lambda_col(colnum), 0)) for colnum in range(sheets[0].nKeys)]
+    joinsheet.nKeys = sheets[0].nKeys
+
+    rowsBySheetKey = {}
+    rowsByKey = {}
+
+    for i, vs in enumerate(sheets):
+        rowsBySheetKey[vs] = {}
+        joinsheet.columns.extend(VColumn(c.name, lambda_subrow_wrap(c.func, i+1)) for c in vs.columns[vs.nKeys:])
+        for r in vs.rows:
+            key = tuple(c.getValue(r) for c in vs.keyCols)
+            rowsBySheetKey[vs][key] = r
+
+    for vs in sheets:
+        for r in vs.rows:
+            key = tuple(c.getValue(r) for c in vs.keyCols)
+            if key not in rowsByKey:
+                rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]
+
+    if jointype == '&':  # inner join  (only rows with matching key on all sheets)
+        joinsheet.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if all(combinedRow))
+    elif jointype == '+':  # outer join (all rows from first sheet)
+        joinsheet.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
+    elif jointype == '*':  # full join (keep all rows from all sheets)
+        joinsheet.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
+    elif jointype == '~':  # diff join (only rows without matching key on all sheets)
+        joinsheet.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if not all(combinedRow))
+
+    return joinsheet
+
+### input source formats
+
 MIMEToFileType = {
     'text/html': 'html',
 }
-
-### input source formats
 
 def openSource(src):
     if isinstance(src.ref, str):

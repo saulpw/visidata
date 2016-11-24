@@ -91,6 +91,8 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |
 |  **e** | edit current cell value |
 |  **=** | add new column by Python expression |
+|  **Ctrl-^** | Toggle to previous sheet |
+| **.** (period) | make current column a key (pin to left and match on join) |
 
 ### HDF5 sheets
 
@@ -98,6 +100,15 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | ---: | --- | --- |
 |  **<Enter>** | open the group or dataset under the cursor |
 |  **A**   | view attributes of currently selected object | view attributes of current sheet |
+
+### 'S'heets commands
+
+| Keybinding | Action | with 'g' prefix |
+| ---: | --- | --- |
+| **&** | Join all selected sheets, keeping only rows which match keys on all sheets (inner join) |
+| **+** | Join all selected sheets, keeping all rows from first sheet (outer join) |
+| ** * ** (asterisk) | Join all selected sheets, keeping all rows from all sheets (full join) |
+| **~** | Join all selected sheets, keeping only rows NOT in all sheets (diff join) |
 
 
 ### Configurable Options (via shift-'O')
