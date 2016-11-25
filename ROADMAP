@@ -7,11 +7,11 @@ A loose plan that is subject to change.
 - inner/outer/cross/diff join rows from multiple sheets by matching key columns
 
 ## v0.5
+- F1 loads help sheet
 - save all sheets to .h5 file
 - aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
 
 ## v1.0
-- F1 loads help sheet
 - save sources to .zip cache
 - edit/transform log
 - sources sheet
@@ -20,7 +20,7 @@ A loose plan that is subject to change.
 - generic mechanism for coloring rows
 
 ## v1.1
-- connect to sql dbs via sqlalchemy
+- connect to larger datasets via blaze
 - Python3 API for import by other scripts
 
 ## v1.2
@@ -33,7 +33,7 @@ A loose plan that is subject to change.
 - bulk interface (command line, macros?)
 
 ## Unscheduled
-
+- sql dbs via sqlalchemy
 - html table parsing into columns
 - datetime conversion with auto-detect/sniffer
 - popup menus for editing enum fields
@@ -41,7 +41,7 @@ A loose plan that is subject to change.
 - secondary column sort
 - parse .xml
 - save as .json
-- url editor (parses query into editable/templatable key/values
+- url editor (parses query into editable/templatable key/values)
 - better csv/tsv sniffer
 - fixed-column detector
 
