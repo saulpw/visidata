@@ -23,6 +23,7 @@ __license__ = 'GPLv3'
 __status__ = 'Development'
 
 import os.path
+import pathlib
 import io
 import datetime
 import string
@@ -44,6 +45,7 @@ default_options = {
     'csv_dialect': 'excel',
     'csv_delimiter': ',',
     'csv_quotechar': '"',
+    'csv_header': False,
 
     'debug': False,
     'readonly': False,
@@ -139,7 +141,7 @@ base_commands = {
 
     # ^g/^p/^v sheet status, status sheet, version status
     ctrl('g'): 'vd.status(sheet.statusLine)',
-    ctrl('p'): 'vd.status(vd.statusHistory[-1])',
+    ctrl('p'): 'vd.status(vd.statusHistory[0])',
     ctrl('v'): 'vd.status(initialStatus)',
 
     # t/m/b moves cursor row to top/middle/bottom of screen
@@ -185,7 +187,7 @@ base_commands = {
     ord('g'): 'raise ChangeCommandSet(global_commands, "g")',
 
     # meta sheets
-    ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue nKeys source".split())',
+    ord('S'): 'vd.addSheet(vd.sheets)',
     ord('C'): 'createColumnSummary(sheet)',
     ord('O'): 'createDictSheet("options", options.__dict__)',
 
@@ -220,19 +222,19 @@ base_commands = {
 
 sheet_specific_commands = {
     # selecting sheets list itself should stay on sheets list
-    ('sheets', ENTER): 'vd.sheets.pop(0); moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
-
-    # push new sheet joining selected sheets on key columns
-    ('sheets', ord('&')): 'joinSheets(sheet.selectedRows, jointype="&")',
-    ('sheets', ord('+')): 'joinSheets(sheet.selectedRows, jointype="+")',
-    ('sheets', ord('*')): 'joinSheets(sheet.selectedRows, jointype="*")',
-    ('sheets', ord('~')): 'joinSheets(sheet.selectedRows, jointype="~")',
+#    ('sheets', ENTER): 'vd.sheets.pop(0); moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
+#
+#    # push new sheet joining selected sheets on key columns
+#    ('sheets', ord('&')): 'joinSheets(sheet.selectedRows, jointype="&")',
+#    ('sheets', ord('+')): 'joinSheets(sheet.selectedRows, jointype="+")',
+#    ('sheets', ord('*')): 'joinSheets(sheet.selectedRows, jointype="*")',
+#    ('sheets', ord('~')): 'joinSheets(sheet.selectedRows, jointype="~")',
 }
 
 # when used with 'g' prefix
 global_commands = {
     # quit all sheets (and therefore exit)
-    ord('q'): 'vd.sheets = []',
+    ord('q'): 'vd.sheets.clear()',
 
     # go all the way to the left/down/up/right
     ord('h'): 'sheet.cursorColIndex = sheet.leftColIndex = 0',
@@ -275,7 +277,7 @@ global_commands = {
     ord('d'): 'sheet.rows = [r for r in sheet.rows if r not in sheet.selectedRows]',  # maintain order
 
     # ^P open sheet with all previous messages
-    ctrl('p'): 'createListSheet("statuses", vd.statusHistory[::-1])',
+    ctrl('p'): 'vd.addSheet(vd.statusHistory)',
 }
 
 ### VisiData core
@@ -326,6 +328,11 @@ class VSheet:
         # specialized sheet keys
         self.commands = {}
 
+    def command(self, key, cmdstr, helpstr=''):
+        if key in self.commands:
+            vd.status('overriding key %s' % key)
+        self.commands[key] = cmdstr
+
     @property
     def nVisibleRows(self):
         return windowHeight-2
@@ -345,6 +352,10 @@ class VSheet:
     @property
     def keyCols(self):
         return self.columns[:self.nKeys]
+
+    @property
+    def keyColNames(self):
+        return ' '.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
@@ -420,7 +431,11 @@ class VSheet:
         vd.status('converted %s to %s with %s exceptions' % (col.name, newType.__name__, nErrors))
 
     def toggle(self, rows):
-        self.selectedRows = [r for r in self.rows if r not in self.selectedRows]
+        for r in rows:
+            if r in self.selectedRows:
+                self.selectedRows.remove(r)
+            else:
+                self.selectedRows.append(r)
 
     def select(self, rows):
         self.selectedRows.extend(rows)
@@ -590,17 +605,17 @@ class VSheet:
 
 class VisiData:
     def __init__(self):
-        self.sheets = []
+        self.sheets = VSheet_sheets()
+        self.statusHistory = VSheet_statuses()
         self._status = []
-        self.statusHistory = []
         self.status(initialStatus)
         self.lastErrors = []
 
     def status(self, s):
         s = str(s)
         self._status.append(s)
-        self.statusHistory.append(s)
-        self.statusHistory = self.statusHistory[-100:]  # keep most recent
+        self.statusHistory.insert(0, s)
+        del self.statusHistory[100:]  # keep most recent 100 only
 
     def exceptionCaught(self, status=True):
         import traceback
@@ -668,12 +683,14 @@ class VisiData:
 
             sheet.checkCursor()
 
+    def addSheet(self, vs):
+        self.sheets.insert(0, vs)
+        return vs
+
     def newSheet(self, name, src=None):
         if not src:
             src = VSource('internal', name)
-        vs = VSheet(name, src)
-        self.sheets.insert(0, vs)
-        return vs
+        return self.addSheet(VSheet(name, src))
 
     def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
         s = s.replace('\n', '\\n')
@@ -742,9 +759,7 @@ class VSource:
             self.type = ''
 
     def __repr__(self):
-        return self.ref
-
-
+        return str(self.ref)
 
 ### core sheet layouts
 def setter(r, k, v):
@@ -944,9 +959,12 @@ MIMEToFileType = {
 }
 
 def openSource(src):
+    if isinstance(src, pathlib.Path):
+        src = VSource(str(src))
+
     if isinstance(src.ref, str):
         if os.path.isdir(src.ref):
-            return open_dir(src)
+            return vd.addSheet(VSheet_dir(src.ref))
 
     funcname = 'open_' + src.type
     vs = globals().get(funcname, open_txt)(src)
@@ -1033,24 +1051,35 @@ def open_txt(src):
         return open_tsv(src)  # TSV often have .txt extension
     return createTextViewer(src.name, contents, src)
 
+class VSheet_dir(VSheet):
+    def __init__(self, fqpn):
+        super().__init__(fqpn, VSource(pathlib.Path(fqpn)))
+        self.columns = [VColumn('filename', lambda r: r[0].name),
+                        VColumn('type', lambda r: r[0].is_dir() and '/' or r[0].suffix[1:]),
+                        VColumn('size', lambda r: r[1].st_size),
+                        VColumn('mtime', lambda r: datestr(r[1].st_mtime))]
+        self.command(ENTER, 'openSource(sheet.cursorRow[0])')  # path, filename
+        self.load()
 
-def open_dir(src):
-    vs = vd.newSheet(src.name, src)
-    vs.rows = []
-    for dirpath, dirnames, filenames in os.walk(src.ref):
-        for fn in filenames:
-            basename, ext = os.path.splitext(fn)
-            path = os.path.join(dirpath, fn)
-            st = os.stat(path)
-            vs.rows.append((dirpath, fn, ext, st.st_size, datestr(st.st_mtime), path))
+    def load(self):
+        self.rows = [(p, p.stat()) for p in self.source.ref.iterdir() if not p.name.startswith('.')]
 
-    vs.columns = ArrayNamedColumns('directory filename ext size mtime'.split())
-    vs.commands.update({
-        ENTER: 'openSource(VSource(sheet.cursorRow[-1], sheet.cursorRow[1]))'  # path, filename
-    })
-    return vs
+class VSheet_sheets(VSheet, list):
+    def __init__(self):
+        VSheet.__init__(self, 'sheets', self)
+        self.columns = AttrColumns('name nRows nCols cursorValue keyColNames source'.split())
+        self.command(ENTER,    'moveListItem(vd.sheets, sheet.cursorRowIndex, 0); vd.sheets.pop(0)')
+        self.command(ord('&'), 'joinSheets(sheet.selectedRows, jointype="&")', 'inner join')
+        self.command(ord('+'), 'joinSheets(sheet.selectedRows, jointype="+")', 'outer join')
+        self.command(ord('*'), 'joinSheets(sheet.selectedRows, jointype="*")', 'full join')
+        self.command(ord('~'), 'joinSheets(sheet.selectedRows, jointype="~")', 'diff join')
+        self.rows = self
 
-
+class VSheet_statuses(VSheet, list):
+    def __init__(self):
+        VSheet.__init__(self, 'statuses', self)
+        self.columns = [VColumn('statuses')]
+        self.rows = self
 
 def open_csv(src):
     contents = getContents(src)
@@ -1080,8 +1109,14 @@ def open_tsv(src):
     lines = contents.splitlines()
 
     vs = vd.newSheet(src.name, src)
-    vs.rows = [L.split('\t') for L in lines[1:]]  # [rownum] -> [ field, ... ]
-    vs.columns = [VColumn(name, lambda_col(colnum)) for colnum, name in enumerate(lines[0].split('\t'))]  # list of VColumn in display order
+
+    if options.csv_header:
+        vs.columns = ArrayNamedColumns(lines[0].split('\t'))
+        lines = lines[1:]
+    else:
+        vs.columns = ArrayColumns(len(lines[0].split('\t')))
+
+    vs.rows = [L.split('\t') for L in lines]  # [rownum] -> [ field, ... ]
     return vs
 
 
