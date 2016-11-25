@@ -784,9 +784,9 @@ def ArrayColumns(n):
     'columns that display r[0]..r[n]'
     return [VColumn('', lambda_col(colnum)) for colnum in range(n)]
 
-def ArrayNamedColumns(columnstr):
+def ArrayNamedColumns(columns):
     'columnstr is a string of n column names (separated by spaces), mapping to r[0]..r[n]'
-    return [VColumn(colname, lambda_col(i)) for i, colname in enumerate(columnstr.split())]
+    return [VColumn(colname, lambda_col(i)) for i, colname in enumerate(columns)]
 
 def AttrColumns(colnames):
     'colnames is list of attribute names'
@@ -888,11 +888,15 @@ def createColumnSummary(sheet):
 def viewPyObj(obj, src=None):
     if src is None:
         src = VSource(obj, str(obj))
-    vs = vd.newSheet(type(obj), src)
-    vs.rows = getPublicAttrs(obj)
-    valfunc = lambda r,sheet=vs: getattr(sheet.source.ref, r)
-    valfunc.setter = lambda r,v,sheet=vs: setattr(sheet.source.ref, r, v)
-    vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', valfunc)]
+    vs = vd.newSheet(type(obj).__name__, src)
+    vs.rows = [(k, getattr(vs.source.ref, k)) for k in getPublicAttrs(obj)]
+    valfunc = lambda_col(1)
+    valfunc.setter = lambda r,v,sheet=vs: setattr(sheet.source.ref, r[0], v)
+    vs.columns = [VColumn(type(obj).__name__ + '.attr', lambda_col(0)), VColumn('Value', valfunc)]
+    vs.commands.update({
+        # pushes a sheet for the Pyobj in 'value', whatever that looks like
+        ENTER: 'createPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])',
+    })
     return vs
 
 
@@ -1040,7 +1044,7 @@ def open_dir(src):
             st = os.stat(path)
             vs.rows.append((dirpath, fn, ext, st.st_size, datestr(st.st_mtime), path))
 
-    vs.columns = ArrayNamedColumns('directory filename ext size mtime')
+    vs.columns = ArrayNamedColumns('directory filename ext size mtime'.split())
     vs.commands.update({
         ENTER: 'openSource(VSource(sheet.cursorRow[-1], sheet.cursorRow[1]))'  # path, filename
     })
@@ -1135,6 +1139,23 @@ def open_xlsx(src):
             vs.rows.append([cell.value for cell in row])
 
     return vs  # return the last one
+
+class VSheet_blaze(VSheet):
+    def __init__(self, name, data, src):
+        super().__init__(name, src)
+        self.columns = ArrayNamedColumns(data.fields)
+        self.rows = list(data)
+
+def open_blaze(src):
+    import blaze
+    import datashape; datashape.coretypes._canonical_string_encodings.update({"utf8_unicode_ci": "U8"})
+    src.fp = blaze.data(src.ref)
+
+    for tblname in src.fp.fields:
+        tbl = getattr(src.fp, tblname)
+        vs = VSheet_blaze(tblname, tbl, src)
+        vd.sheets.append(vs)
+
 
 ### Sheet savers
 
