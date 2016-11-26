@@ -6,7 +6,7 @@ Usable via any remote shell which has Python3 installed.
 
 ## Features
 
-- inputs: .csv, .tsv, .json, .hdf5, .xlsx, .zip
+- inputs: .csv, .tsv, .json, .hdf5, .xlsx
 - outputs: .csv, .tsv
 - hjkl cursor movement, t/m/b scroll to position screen cursor
 - skip up/down columns by value

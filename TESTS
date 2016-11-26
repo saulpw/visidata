@@ -20,7 +20,6 @@
 - .txt with TSV data
 - .hdf5
 - .xlsx
-- .zip
 - .json (with deep and varied data arrangements)
 
 ### specifics
@@ -40,13 +39,14 @@
 ### specifics
 - ENTER on sheets sheet while cursor is on the sheets sheet should be no-op
 - after choosing an existing sheet, sheets sheet should not remain on next entry.
+- move around and see sheets.cursorValue change.  go to sheets.cursorValue, see ¿.  press 'E' and see reason.
 
 ## 'C'olumns sheet
 
 ### specifics
 - change column size, go back to that sheet (should be parsed as int)
 
-
----
+- open 'O'ptions sheet
+  - edit an interface option (e.g. set , see that it's reflected in the interface
 
 

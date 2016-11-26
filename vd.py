@@ -188,7 +188,7 @@ base_commands = {
     # meta sheets
     ord('S'): 'vd.push(vd.sheets)',
     ord('C'): 'vd.push(VSheetColumns(sheet))',
-    ord('O'): 'vd.push(VSheetDict("options", options.__dict__))',
+    ord('O'): 'vd.push(VSheetObject("options", options))',
 
     # search this column via regex
     ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)',
@@ -255,14 +255,14 @@ global_commands = {
 
     # toggle/select/unselect all rows
     ord(' '): 'sheet.toggle(sheet.rows)',
-    ord('s'): 'sheet.selectedRows = sheet.rows.copy()',
-    ord('u'): 'sheet.selectedRows = []',
+    ord('s'): 'sheet.select(sheet.rows)',
+    ord('u'): 'sheet._selectedRows = {}',
 
     ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.columns))',
     ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.columns))',
 
     # delete all selected rows
-    ord('d'): 'sheet.rows = [r for r in sheet.rows if r not in sheet.selectedRows]',  # maintain order
+    ord('d'): 'sheet.rows = [r for r in sheet.rows if id(r) not in sheet._selectedRows]; sheet._selectedRows = {}',  # maintain order
 
     # ^P open sheet with all previous messages
     ctrl('p'): 'vd.push(VSheetText(vd.statusHistory))',
@@ -289,7 +289,7 @@ def getMaxWidth(col, rows):
 
 
 class VSheet:
-    def __init__(self, name, src):
+    def __init__(self, name, src=None):
         self.name = name
         self.source = src
         self.rows = []
@@ -311,10 +311,16 @@ class VSheet:
         self.currentRegex = None
         self.currentRegexColumns = None
 
-        self.selectedRows = []
+        self._selectedRows = {}   # id(row) -> row
 
         # specialized sheet keys
         self.commands = {}
+
+    def __str__(self):
+        return self.name
+
+    def isSelected(self, r):
+        return id(r) in self._selectedRows
 
     def command(self, key, cmdstr, helpstr=''):
         if key in self.commands:
@@ -336,6 +342,10 @@ class VSheet:
     @property
     def visibleRows(self):
         return self.rows[self.topRowIndex:self.topRowIndex+windowHeight-2]
+
+    @property
+    def selectedRows(self):
+        return [r for r in self.rows if id(r) in self._selectedRows]
 
     @property
     def keyCols(self):
@@ -420,19 +430,22 @@ class VSheet:
 
     def toggle(self, rows):
         for r in rows:
-            if r in self.selectedRows:
-                self.selectedRows.remove(r)
+            if id(r) in self._selectedRows:
+                del self._selectedRows[id(r)]
             else:
-                self.selectedRows.append(r)
+                self._selectedRows[id(r)] = r
 
     def select(self, rows):
-        self.selectedRows.extend(rows)
+        rows = list(rows)
+        before = len(self._selectedRows)
+        self._selectedRows.update(dict((id(r), r) for r in rows))
+        vd.status('selected %s/%s rows' % (before-len(self._selectedRows), len(rows)))
 
     def unselect(self, rows):
-        rows = list(rows)
-        before = len(self.selectedRows)
-        self.selectedRows = [r for r in self.selectedRows if r not in rows]
-        vd.status('unselected %s rows' % (before-len(self.selectedRows)))
+        before = len(self._selectedRows)
+        for r in rows:
+            del self._selectedRows[id(r)]
+        vd.status('unselected %s/%s rows' % (before-len(self._selectedRows), len(rows)))
 
     def columnsMatch(self, row, columns, func):
         for c in columns:
@@ -568,7 +581,7 @@ class VSheet:
                     else:
                         attr = colors[options.c_default]
 
-                    if row in self.selectedRows:
+                    if self.isSelected(row):
                         attr |= colors[options.c_SelectedRow]
 
                     if x+colwidth+len(sepchars) <= windowWidth:
@@ -673,6 +686,8 @@ class VisiData:
 
     def push(self, vs):
         if vs:
+            if vs in self.sheets:
+                self.sheets.remove(vs)
             self.sheets.insert(0, vs)
             return vs
 
@@ -698,6 +713,7 @@ class VisiData:
             self.exceptionCaught()
 # end VisiData class
 
+## columns
 class VColumn:
     def __init__(self, name, func=lambda r: r, width=None):
         self.name = name
@@ -815,29 +831,41 @@ class VSheetDict(VSheet):
 class VSheetObject(VSheet):
     def __init__(self, name, obj):
         super().__init__(name, obj)
-        self.rows = [(k, getattr(vs.source, k)) for k in getPublicAttrs(obj)]
-        valfunc = lambda_col(1)
-        valfunc.setter = lambda r,v,sheet=vs: setattr(sheet.source, r[0], v)
-        self.columns = [
-            VColumn(type(obj).__name__ + '_attr', lambda_col(0)),
-            VColumn('value', valfunc) ]
         self.command(ENTER, 'pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
+        self.command(ord('e'), 'setattr(sheet.source, sheet.cursorRow[0], sheet.editCell(1)); sheet.reload()', 'edit this value')
+        self.reload()
+
+    def reload(self):
+        valfunc = lambda_col(1)
+        valfunc.setter = lambda r,v,obj=self.source: setattr(obj, r[0], v)
+        self.columns = [
+            VColumn(type(self.source).__name__ + '_attr', lambda_col(0)),
+            VColumn('value', valfunc) ]
+        self.rows = [(k, getattr(self.source, k)) for k in getPublicAttrs(self.source)]
 
 #### specialized meta sheets
 class VSheetSheets(VSheet, list):
     def __init__(self):
-        VSheet.__init__(self, 'sheets', self)
+        VSheet.__init__(self, 'sheets', 'VisiData.sheets')
+        self.command(ENTER,    'moveListItem(sheet, sheet.cursorRowIndex, 0); vd.sheets.pop(1)', 'go to this sheet')
+        self.command(ord('&'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="&")', 'inner join')
+        self.command(ord('+'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="+")', 'outer join')
+        self.command(ord('*'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="*")', 'full join')
+        self.command(ord('~'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="~")', 'diff join')
+        self.reload()
+    def reload(self):
         self.columns = AttrColumns('name nRows nCols cursorValue keyColNames source'.split())
-        self.command(ENTER,    'moveListItem(vd.sheets, sheet.cursorRowIndex, 0); vd.sheets.pop(0)')
-        self.command(ord('&'), 'vd.push(VSheetJoin(sheet.selectedRows, jointype="&"))', 'inner join')
-        self.command(ord('+'), 'vd.push(VSheetJoin(sheet.selectedRows, jointype="+"))', 'outer join')
-        self.command(ord('*'), 'vd.push(VSheetJoin(sheet.selectedRows, jointype="*"))', 'full join')
-        self.command(ord('~'), 'vd.push(VSheetJoin(sheet.selectedRows, jointype="~"))', 'diff join')
         self.rows = self
 
 class VSheetColumns(VSheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
+        self.command(ord('#'), 'sheet.source.convertType(sheet.cursorRow, int); sheet.moveCursorDown(+1)', 'convert column to int')
+        self.command(ord('$'), 'sheet.source.convertType(sheet.cursorRow, str); sheet.moveCursorDown(+1)', 'convert column to str')
+        self.command(ord('%'), 'sheet.source.convertType(sheet.cursorRow, float); sheet.moveCursorDown(+1)', 'convert column to float')
+#        self.command(ord('@'), 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)', 'convert to datetime')
+        self.reload()
+    def reload(self):
         self.rows = srcsheet.columns
         self.columns = [
             VColumn('column', lambda_getattr('name')),
@@ -852,15 +880,16 @@ class VSheetColumns(VSheet):
 #        VColumn('max',    lambda c: max(sheet.columnValues(c))),
 #        VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
         ]
-        self.command(ord('#'), 'sheet.source.convertType(sheet.cursorRow, int); sheet.moveCursorDown(+1)', 'convert column to int')
-        self.command(ord('$'), 'sheet.source.convertType(sheet.cursorRow, str); sheet.moveCursorDown(+1)', 'convert column to str')
-        self.command(ord('%'), 'sheet.source.convertType(sheet.cursorRow, float); sheet.moveCursorDown(+1)', 'convert column to float')
-#        self.command(ord('@'), 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)', 'convert to datetime')
 
 #### slicing and dicing
 class VSheetJoin(VSheet):
     def __init__(self, sheets, jointype='&'):
         super().__init__(jointype.join(vs.name for vs in sheets))
+        self.source = sheets
+        self.jointype = jointype
+        self.reload()
+    def reload(self):
+        sheets = self.source
         self.columns = [VColumn(sheets[0].columns[colnum].name, lambda_subrow_wrap(lambda_col(colnum), 0)) for colnum in range(sheets[0].nKeys)]
         self.nKeys = sheets[0].nKeys
 
@@ -880,13 +909,13 @@ class VSheetJoin(VSheet):
                 if key not in rowsByKey:
                     rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]
 
-        if jointype == '&':  # inner join  (only rows with matching key on all sheets)
+        if self.jointype == '&':  # inner join  (only rows with matching key on all sheets)
             self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if all(combinedRow))
-        elif jointype == '+':  # outer join (all rows from first sheet)
+        elif self.jointype == '+':  # outer join (all rows from first sheet)
             self.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
-        elif jointype == '*':  # full join (keep all rows from all sheets)
+        elif self.jointype == '*':  # full join (keep all rows from all sheets)
             self.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
-        elif jointype == '~':  # diff join (only rows without matching key on all sheets)
+        elif self.jointype == '~':  # diff join (only rows without matching key on all sheets)
             self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if not all(combinedRow))
 
 
@@ -929,6 +958,8 @@ class Path:
         return [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.fqpn)]
     def stat(self):
         return os.stat(self.fqpn)
+    def __str__(self):
+        return self.fqpn
 
 def getTextContents(p):
     if not p in sourceCache:
