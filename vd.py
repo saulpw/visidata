@@ -740,11 +740,14 @@ class VColumn:
     def setValue(self, row, value):
         if options.readonly:
             vd.status('readonly mode')
-            return
-        self.func.setter(row, value)
+        elif hasattr(self.func, 'setter'):
+            self.func.setter(row, value)
+        else:
+            vd.status('column cannot be changed')
+
 
 ### common column setups and helpers
-def setter(r, k, v):
+def setter(r, k, v):  # needed for use in lambda
     r[k] = v
 
 def lambda_colname(colname):
