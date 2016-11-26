@@ -1,3 +1,8 @@
+# v0.30
+- make all sheets subclasses of VSheet
+- remove .zip opening and url fetching
+- added options ColumnStats and csv_header
+
 # v0.29
 
 - pin key columns to left

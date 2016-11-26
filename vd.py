@@ -22,6 +22,7 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
+import itertools
 import os.path
 import io
 import datetime
@@ -38,7 +39,7 @@ import urllib.parse
 import csv
 
 initialStatus = 'saul.pw/VisiData v' + __version__
-defaultColNames = string.ascii_uppercase
+defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
 default_options = {
     'csv_dialect': 'excel',
@@ -92,11 +93,6 @@ colors = {
 class attrdict(object):
     def __init__(self, d):
         self.__dict__ = d
-
-def combine_ranges(*rnglist):
-    for rng in rnglist:
-        for r in rng:
-            yield r
 
 options = attrdict(default_options)
 
@@ -286,7 +282,7 @@ def getMaxWidth(col, rows):
     if len(rows) == 0:
         return 0
 
-    return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)), int(windowWidth-1))
+    return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)+2), int(windowWidth-1))
 
 
 class VSheet:
@@ -315,7 +311,7 @@ class VSheet:
         self._selectedRows = {}   # id(row) -> row
 
         # specialized sheet keys
-        self.commands = {}
+        self.commands = base_commands.copy()
 
     def __str__(self):
         return self.name
@@ -549,7 +545,7 @@ class VSheet:
 
         self.colLayout = {}
         self.rowLayout = {}
-        col_indexes = set(combine_ranges(range(0, self.nKeys), range(self.leftColIndex, len(self.columns))))
+        col_indexes = set(itertools.chain(range(0, self.nKeys), range(self.leftColIndex, len(self.columns))))
         for colidx in sorted(col_indexes):
             col = self.columns[colidx]
             col.width = col.width or getMaxWidth(col, self.visibleRows)
@@ -637,7 +633,7 @@ class VisiData:
         global windowHeight, windowWidth
         windowHeight, windowWidth = scr.getmaxyx()
 
-        commands = base_commands
+        command_overrides = None
         while True:
             if not self.sheets:
                 # if no more sheets, exit
@@ -670,22 +666,22 @@ class VisiData:
                     sheet.cursorRowIndex = sheet.topRowIndex+y-1
                 except Exception:
                     self.exceptionCaught()
-            elif ch in sheet.commands or ch in commands:
-                cmdstr = sheet.commands.get(ch) or commands.get(ch)
+            elif (command_overrides and ch in command_overrides) or (not command_overrides and ch in sheet.commands):
+                cmdstr = command_overrides and command_overrides.get(ch) or sheet.commands.get(ch)
                 try:
                     exec(cmdstr)
 
-                    commands = base_commands
+                    command_overrides = None
                 except ChangeCommandSet as e:
                     # prefixes raise ChangeCommandSet exception instead
-                    commands = e.commands
+                    command_overrides = e.commands
                     self.status(e.mode)
                 except Exception:
-                    commands = base_commands
+                    command_overrides = None
                     self.exceptionCaught()
                     self.status(cmdstr)
             else:
-                commands = base_commands
+                command_overrides = None
                 self.status('no command for key "%s" (%d) ' % (chr(ch), ch))
 
             sheet.checkCursor()
@@ -1055,15 +1051,17 @@ class open_xlsx(VSheet):
     def __init__(self, path):
         super().__init__(path.name, path)
         import openpyxl
-        workbook = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
-        self.rows = [workbook.get_sheet_by_name(sheetname) for sheetname in workbook.sheetnames]
+        self.workbook = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
+        self.rows = list(self.workbook.sheetnames)
+        self.columns = [VColumn('name')]
         self.command(ENTER, 'vd.push(sheet.getSheet(sheet.cursorRow))', 'open this sheet')
 
-    def getSheet(self, r):
+    def getSheet(self, sheetname):
         'create actual VSheet from xlsx sheet'
-        vs = VSheet('%s%s%s' % (self.source, options.SubsheetSep, r.name), r)
-        vs.columns = ArrayColumns(r.max_column)
-        vs.rows = [ [cell.value for cell in row] for row in r.iter_rows()]
+        worksheet = self.workbook.get_sheet_by_name(sheetname)
+        vs = VSheet('%s%s%s' % (self.source, options.SubsheetSep, sheetname), worksheet)
+        vs.columns = ArrayColumns(worksheet.max_column)
+        vs.rows = [ [cell.value for cell in row] for row in worksheet.iter_rows()]
         return vs
 
 #### .hdf5

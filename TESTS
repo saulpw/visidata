@@ -51,3 +51,4 @@
 
 
 - '.' (pin) on existing key column
+- g<ENTER> on file in directory, should be no-op...there is no "global" ENTER (yet).  but the page overrides ENTER.  it shouldn't be used.
