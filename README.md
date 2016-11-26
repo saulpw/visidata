@@ -1,4 +1,4 @@
-# VisiData v0.29
+# VisiData v0.30
 
 A curses interface for exploring and arranging tabular data
 
@@ -26,6 +26,7 @@ Usable via any remote shell which has Python3 installed.
 - 'O'ptions sheet to change the style or behavior
 - 'E'rror metasheet
 - 'g^P' status history sheet
+- inner/outer/full/diff joins on any number of sheets
 
 ## Installation
 

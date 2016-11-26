@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.29'
+__version__ = '0.30'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -61,6 +61,7 @@ default_options = {
     'SheetNameFmt': '%s| ',  # before status line
     'FunctionError': '¿',    # when computation fails due to exception
     'HistogramChar': '*',
+    'ColumnStats': False,  # whether to include mean/median/etc on 'C'olumn sheet
 
     # color scheme
     'c_default': 'normal',
@@ -395,9 +396,12 @@ class VSheet:
             self.columns.append(col)
 
     def pinColumn(self, colidx):
-        moveListItem(self.columns, self.cursorColIndex, self.nKeys)
         if self.cursorColIndex >= self.nKeys:
+            moveListItem(self.columns, self.cursorColIndex, self.nKeys)
             self.nKeys += 1
+        else:
+            self.nKeys -= 1
+            moveListItem(self.columns, self.cursorColIndex, self.nKeys)
 
     def skipDown(self):
         pv = self.cursorValue
@@ -439,9 +443,10 @@ class VSheet:
         rows = list(rows)
         before = len(self._selectedRows)
         self._selectedRows.update(dict((id(r), r) for r in rows))
-        vd.status('selected %s/%s rows' % (before-len(self._selectedRows), len(rows)))
+        vd.status('selected %s/%s rows' % (len(self._selectedRows)-before, len(rows)))
 
     def unselect(self, rows):
+        rows = list(rows)
         before = len(self._selectedRows)
         for r in rows:
             del self._selectedRows[id(r)]
@@ -680,6 +685,7 @@ class VisiData:
                     self.exceptionCaught()
                     self.status(cmdstr)
             else:
+                commands = base_commands
                 self.status('no command for key "%s" (%d) ' % (chr(ch), ch))
 
             sheet.checkCursor()
@@ -866,20 +872,23 @@ class VSheetColumns(VSheet):
 #        self.command(ord('@'), 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)', 'convert to datetime')
         self.reload()
     def reload(self):
-        self.rows = srcsheet.columns
+        self.rows = self.source.columns
         self.columns = [
             VColumn('column', lambda_getattr('name')),
             VColumn('width',  lambda_getattr('width')),
             VColumn('type',   lambda_getattr('type')),
             VColumn('expr',   lambda_getattr('expr')),
-            VColumn('value', lambda c,sheet=vs: c.getValue(sheet.cursorRow)),
-#        VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
-#        VColumn('min',    lambda c: min(sheet.columnValues(c))),
-#        VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
-#        VColumn('mean',   lambda c: statistics.mean(sheet.columnValues(c))),
-#        VColumn('max',    lambda c: max(sheet.columnValues(c))),
-#        VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
+            VColumn('value', lambda c,sheet=self: c.getValue(sheet.cursorRow)),
         ]
+        if options.ColumnStats:
+            self.columns.extend([
+                VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
+                VColumn('min',    lambda c: min(sheet.columnValues(c))),
+                VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
+                VColumn('mean',   lambda c: statistics.mean(sheet.columnValues(c))),
+                VColumn('max',    lambda c: max(sheet.columnValues(c))),
+                VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
+            ])
 
 #### slicing and dicing
 class VSheetJoin(VSheet):
@@ -934,7 +943,7 @@ class VSheetFreqTable(VSheet):
         self.columns = [
             VColumn(fqcolname, lambda_col(0)),
             VColumn('num', lambda r: len(r[1])),
-            VColumn('histogram', lambda r,s=freqtbl: options.HistogramChar*int(len(r[1])*80/s.largest), width=80)
+            VColumn('histogram', lambda r,s=self: options.HistogramChar*int(len(r[1])*80/s.largest), width=80)
         ]
         self.command(ord(' '), 'sheet.source.toggle(sheet.cursorRow[1])', 'toggle these entries')
         self.command(ord('s'), 'sheet.source.select(sheet.cursorRow[1])', 'select these entries')
