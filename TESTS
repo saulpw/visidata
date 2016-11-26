@@ -1,16 +1,31 @@
+
+## smoke tests
+- launch with no arguments, see files in the current directory
+- choose a text file (without type, or unknown type), and ENTER to view it
+- scroll all the way down and back up with j/k/pgdn/pgup/gk/gj
+- if an error is hit, use 'E' to examine the last error, or '^E' to exit as a last resort
+
 ## general movement
 - with wide csv, scroll to rightmost column with 'l' and 'gl'.  cell contents should be entirely visible.
 - cursor should never be offscreen, and rightmost column should not be truncated if cursor is on it
 
+### specifics
+- check text viewer with unicode
+- how to view line longer than width of terminal?
+
 ## formats
 
-- .csv (with and without header row, changing delimiters and other options, reloading)
 - .tsv (with and without header row)
-- .txt with TSV (with and without header row)
+- .csv (changing delimiters and other options)
+- .txt with TSV data
 - .hdf5
 - .xlsx
 - .zip
-- directory
+- .json (with deep and varied data arrangements)
+
+### specifics
+
+- change the extension on a file and watch it load as .txt.  'R' to reset the type.  and/or change parsing 'O'ptions.  either way, '^R' reload.
 
 ## Pin columns
 
@@ -30,5 +45,8 @@
 
 ### specifics
 - change column size, go back to that sheet (should be parsed as int)
+
+
+---
 
 
