@@ -59,6 +59,7 @@ default_options = {
     'Ellipsis': '…',
     'SubsheetSep': '~',
     'StatusSep': ' | ',
+    'KeySep': '/',
     'SheetNameFmt': '%s| ',  # before status line
     'FunctionError': '¿',    # when computation fails due to exception
     'HistogramChar': '*',
@@ -350,7 +351,7 @@ class VSheet:
 
     @property
     def keyColNames(self):
-        return ' '.join(c.name for c in self.keyCols)
+        return options.KeySep.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
