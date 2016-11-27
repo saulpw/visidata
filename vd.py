@@ -105,10 +105,17 @@ class ChangeCommandSet(VException):
         self.commands = commands
         self.mode = mode
 
+class VEscape(VException):
+    'raised by validator to signal which key was used to end the edit'
+    def __init__(self, ch, s=''):
+        super().__init__(s)
+        self.exit_ch = ch
+
 def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
 
 ENTER = ctrl('j')
+ESC = 27
 
 base_commands = {
     # pop current sheet off the sheet stack
@@ -156,6 +163,7 @@ base_commands = {
     # delete column
     ord('-'): 'sheet.columns.pop(sheet.cursorColIndex)',
 
+    ord('!'): 'sheet.toggleKeyColumn(sheet.cursorColIndex)',  # toggle this column as key
     # retype as datetime/int/str/float
 #    ord('@'): 'sheet.convertType(sheet.cursorCol, datetime)',
     ord('#'): 'sheet.convertType(sheet.cursorCol, int)',
@@ -213,8 +221,7 @@ base_commands = {
     ord('e'): 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex) or sheet.cursorCol.getValue(sheet.cursorRow))',
 
     ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',  # add column by expr
-    ord('.'): 'sheet.pinColumn(sheet.cursorColIndex)', # move to left and add to list of keys
-    ctrl('^'): 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]',  # swap top two sheets
+    ctrl('^'): 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]',  # swap top two sheets, like in vi
 }
 
 # when used with 'g' prefix
@@ -298,8 +305,8 @@ class VSheet:
         self.leftColIndex = 0    # cursorColIndex of leftmost column
 
         # as computed during draw()
-        self.rowLayout = {} # [rowidx] -> y
-        self.colLayout = {} # [colidx] -> (x, w)
+        self.rowLayout = {}      # [rowidx] -> y
+        self.colLayout = {}      # [colidx] -> (x, w)
 
         # all columns in display order
         self.columns = None
@@ -392,11 +399,11 @@ class VSheet:
         if col:
             self.columns.append(col)
 
-    def pinColumn(self, colidx):
-        if self.cursorColIndex >= self.nKeys:
+    def toggleKeyColumn(self, colidx):
+        if self.cursorColIndex >= self.nKeys: # if not a key, add it
             moveListItem(self.columns, self.cursorColIndex, self.nKeys)
             self.nKeys += 1
-        else:
+        else:  # otherwise move it after the last key
             self.nKeys -= 1
             moveListItem(self.columns, self.cursorColIndex, self.nKeys)
 
@@ -677,6 +684,8 @@ class VisiData:
                     # prefixes raise ChangeCommandSet exception instead
                     command_overrides = e.commands
                     self.status(e.mode)
+                except VEscape as e:  # user aborted
+                    self.status(str(e))
                 except Exception:
                     command_overrides = None
                     self.exceptionCaught()
@@ -859,6 +868,7 @@ class VSheetSheets(VSheet, list):
         self.command(ord('*'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="*")', 'full join')
         self.command(ord('~'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="~")', 'diff join')
         self.reload()
+
     def reload(self):
         self.columns = AttrColumns('name nRows nCols cursorValue keyColNames source'.split())
         self.rows = self
@@ -871,6 +881,7 @@ class VSheetColumns(VSheet):
         self.command(ord('%'), 'sheet.source.convertType(sheet.cursorRow, float); sheet.moveCursorDown(+1)', 'convert column to float')
 #        self.command(ord('@'), 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)', 'convert to datetime')
         self.reload()
+
     def reload(self):
         self.rows = self.source.columns
         self.columns = [
@@ -897,6 +908,7 @@ class VSheetJoin(VSheet):
         self.source = sheets
         self.jointype = jointype
         self.reload()
+
     def reload(self):
         sheets = self.source
         self.columns = [VColumn(sheets[0].columns[colnum].name, lambda_subrow_wrap(lambda_col(colnum), 0)) for colnum in range(sheets[0].nKeys)]
@@ -1141,16 +1153,30 @@ def save_csv(sheet, fn):
 
 ### curses, options, init
 
+def editValidate(ch, tb):
+    if ch in [ESC, ENTER, ctrl('c')]:
+        raise VEscape(ch)
+    return ch
+
 def editText(y, x, w, prompt=''):
     if not prompt:
         scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
     else:
         scr.addstr(y, x, prompt)
         x += len(prompt)
-    curses.echo()
-    inp = scr.getstr(y, x)
-    curses.noecho()
-    r = inp.decode('utf-8')
+    editwin = curses.newwin(1, w, y, x)
+
+    tb = curses.textpad.Textbox(editwin, insert_mode=True)
+    try:
+        r = tb.edit(lambda ch,tb=tb: editValidate(ch, tb))
+        exit_ch = ENTER
+    except VEscape as vesc:
+        exit_ch = vesc.exit_ch
+
+    if exit_ch in [ESC, ctrl('c')]:
+        raise VEscape(exit_ch, 'nothing changed')
+
+    r = tb.gather()
     vd.status('"%s"' % r)
     return r
 
@@ -1215,6 +1241,7 @@ def terminal_main():
     for arg in inputs:
         openFileOrUrl(arg)
 
+    os.putenv('ESCDELAY', '25')  # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     ret = wrapper(curses_main)
     if ret:
         print(ret)
