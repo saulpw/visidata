@@ -18,6 +18,7 @@ A loose plan that is subject to change.
 - save layout and options
 - regexes and Python expressions should be interchangeable (search, select, etc)
 - generic mechanism for coloring rows
+    - highlight key rows on Columns sheet same as key column
 
 ## v1.1
 - connect to larger datasets via blaze
@@ -41,7 +42,6 @@ A loose plan that is subject to change.
 - secondary column sort
 - parse .xml
 - save as .json
-- url editor (parses query into editable/templatable key/values)
 - better csv/tsv sniffer
 - fixed-column detector
 

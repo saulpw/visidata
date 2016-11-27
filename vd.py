@@ -171,8 +171,8 @@ base_commands = {
     ord('%'): 'sheet.convertType(sheet.cursorCol, float)',
 
     # [/] sort asc/desc
-    ord('['): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue)',
-    ord(']'): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue, reverse=True)',
+    ord('['): 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type())',
+    ord(']'): 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)',
 
     # quit and print error sheet to terminal (in case error sheet itself is broken)
     ctrl('e'): 'options.debug = True; raise VException(vd.lastErrors[-1])',
@@ -218,7 +218,7 @@ base_commands = {
 
 
     # edit cell
-    ord('e'): 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex) or sheet.cursorCol.getValue(sheet.cursorRow))',
+    ord('e'): 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex))',
 
     ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',  # add column by expr
     ctrl('^'): 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]',  # swap top two sheets, like in vi
@@ -270,7 +270,7 @@ global_commands = {
     ord('d'): 'sheet.rows = [r for r in sheet.rows if id(r) not in sheet._selectedRows]; sheet._selectedRows = {}',  # maintain order
 
     # ^P open sheet with all previous messages
-    ctrl('p'): 'vd.push(VSheetText(vd.statusHistory))',
+    ctrl('p'): 'vd.push(VSheetText("statuses", vd.statusHistory))',
 }
 
 ### VisiData core
@@ -495,9 +495,14 @@ class VSheet:
         else:
             # keycolwidth = sum(self.columns[i].width for i in range(0, self.nKeys))
             while True:
+                self.calcColLayout()
+                if self.cursorColIndex not in self.colLayout:  # should always be to the right
+                    assert self.cursorColIndex > self.leftColIndex
+                    self.leftColIndex += 1
+                    continue
                 cur_x, cur_w = self.colLayout[self.cursorColIndex]
                 left_x, left_w = self.colLayout[self.leftColIndex]
-                if cur_x+cur_w-left_x < windowWidth:
+                if cur_x+cur_w < windowWidth:
                     # current columns fit entirely on screen
                     break
                 self.leftColIndex += 1
@@ -546,19 +551,27 @@ class VSheet:
 
         return matchingRowIndexes
 
+    def calcColLayout(self):
+        self.colLayout = {}
+        x = 0
+        for colidx in range(0, len(self.columns)):
+            col = self.columns[colidx]
+            col.width = col.width or getMaxWidth(col, self.visibleRows)
+            if colidx < self.nKeys or colidx >= self.leftColIndex:  # visible columns
+                self.colLayout[colidx] = (x, min(col.width, windowWidth-x))
+                x += col.width+len(options.ColumnSep)
+            if x > windowWidth:
+                break
+
     def draw(self):
         scr.erase()  # clear screen before every re-draw
         sepchars = options.ColumnSep
-        x = 0
 
-        self.colLayout = {}
         self.rowLayout = {}
-        col_indexes = set(itertools.chain(range(0, self.nKeys), range(self.leftColIndex, len(self.columns))))
-        for colidx in sorted(col_indexes):
+        self.calcColLayout()
+        for colidx, colinfo in sorted(self.colLayout.items()):
+            x, colwidth = colinfo
             col = self.columns[colidx]
-            col.width = col.width or getMaxWidth(col, self.visibleRows)
-            self.colLayout[colidx] = (x, col.width)
-
             if x < windowWidth:  # only draw inside window
                 # choose attribute to highlight column header
                 if colidx == self.cursorColIndex:  # cursor is at this column
@@ -569,7 +582,6 @@ class VSheet:
                     hdrattr = colors[options.c_Header]
 
                 y = 0
-                colwidth = min(col.width, windowWidth-x)
                 vd.clipdraw(y, x, col.name or defaultColNames[colidx], hdrattr, colwidth)
                 if x+colwidth+len(sepchars) <= windowWidth:
                     scr.addstr(y, x+colwidth, sepchars, colors[options.c_ColumnSep])
@@ -603,14 +615,17 @@ class VSheet:
                     vd.clipdraw(y, x, cellval, attr, colwidth)
                     y += 1
 
-            x += col.width+len(sepchars)
-
     def editCell(self, colnum=None):
         if colnum is None:
             colnum = self.cursorColIndex
         x, w = self.colLayout[colnum]
         y = self.rowLayout[self.cursorRowIndex]
-        return editText(y, x, w)
+        r = editText(y, x, w)
+        if self.cursorCol.type:
+            return self.cursorCol.type(r)  # convert input to column type
+        else:
+            return r  # presume string is fine
+
 # end VSheet class
 
 class VisiData:
@@ -1167,6 +1182,7 @@ def editText(y, x, w, prompt=''):
     editwin = curses.newwin(1, w, y, x)
 
     tb = curses.textpad.Textbox(editwin, insert_mode=True)
+    tb.stripspaces = False
     try:
         r = tb.edit(lambda ch,tb=tb: editValidate(ch, tb))
         exit_ch = ENTER
@@ -1178,6 +1194,7 @@ def editText(y, x, w, prompt=''):
 
     r = tb.gather()
     vd.status('"%s"' % r)
+    vd.status(' '.join(('%d' % ord(i)) for i in  r))
     return r
 
 def inputLine(prompt=''):
