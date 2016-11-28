@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.30'
+__version__ = '0.31'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -117,161 +117,126 @@ def ctrl(ch):
 ENTER = ctrl('j')
 ESC = 27
 
-base_commands = {
-    # pop current sheet off the sheet stack
-    ord('q'): 'vd.sheets.pop(0)',
+base_commands = {}
+global_commands = {}
+def command(ch, cmdstr, helpstr=''):
+    base_commands[ch] = (cmdstr, helpstr)
 
-    # standard movement with arrow keys
-    curses.KEY_LEFT:  'sheet.moveCursorRight(-1)',
-    curses.KEY_DOWN:  'sheet.moveCursorDown(+1)',
-    curses.KEY_UP:    'sheet.moveCursorDown(-1)',
-    curses.KEY_RIGHT: 'sheet.moveCursorRight(+1)',
-    curses.KEY_NPAGE: 'sheet.moveCursorDown(sheet.nVisibleRows); sheet.topRowIndex += sheet.nVisibleRows',
-    curses.KEY_PPAGE: 'sheet.moveCursorDown(-sheet.nVisibleRows); sheet.topRowIndex -= sheet.nVisibleRows',
-    curses.KEY_HOME:  'sheet.topRowIndex = sheet.cursorRowIndex = 0',
-    curses.KEY_END:   'sheet.cursorRowIndex = len(sheet.rows)-1',
+def global_command(ch, cmdstr, helpstr):
+    global_commands[ch] = (cmdstr, helpstr)
 
-    # move cursor with vi keys
-    ord('h'): 'sheet.moveCursorRight(-1)',
-    ord('j'): 'sheet.moveCursorDown(+1)',
-    ord('k'): 'sheet.moveCursorDown(-1)',
-    ord('l'): 'sheet.moveCursorRight(+1)',
+command(curses.KEY_F1,    'vd.push(sheet.CommandHelp())', 'command help')
+command(ord('q'),         'vd.sheets.pop(0)', 'quit current sheet')
 
-    # reorder rows/columns with shift-movement
-    ord('H'): 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, max(sheet.cursorColIndex-1, 0))',
-    ord('J'): 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, min(sheet.cursorRowIndex+1, sheet.nRows-1))',
-    ord('K'): 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))',
-    ord('L'): 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols))',
+command(curses.KEY_LEFT,  'sheet.moveCursorRight(-1)', 'arrow keys move cursor')
+command(curses.KEY_DOWN,  'sheet.moveCursorDown(+1)')
+command(curses.KEY_UP,    'sheet.moveCursorDown(-1)')
+command(curses.KEY_RIGHT, 'sheet.moveCursorRight(+1)')
+command(curses.KEY_NPAGE, 'sheet.moveCursorDown(sheet.nVisibleRows); sheet.topRowIndex += sheet.nVisibleRows', 'scroll down one page')
+command(curses.KEY_PPAGE, 'sheet.moveCursorDown(-sheet.nVisibleRows); sheet.topRowIndex -= sheet.nVisibleRows', 'scroll up one page')
+command(curses.KEY_HOME,  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
+command(curses.KEY_END,   'sheet.cursorRowIndex = len(sheet.rows)-1', 'go to last row')
 
-    # ^g/^p/^v sheet status, status sheet, version status
-    ctrl('g'): 'vd.status(sheet.statusLine)',
-    ctrl('p'): 'vd.status(vd.statusHistory[0])',
-    ctrl('v'): 'vd.status(initialStatus)',
+command(ord('h'), 'sheet.moveCursorRight(-1)', 'hjkl keys move cursor')
+command(ord('j'), 'sheet.moveCursorDown(+1)')
+command(ord('k'), 'sheet.moveCursorDown(-1)')
+command(ord('l'), 'sheet.moveCursorRight(+1)')
 
-    # t/m/b moves cursor row to top/middle/bottom of screen
-    ord('t'): 'sheet.topRowIndex = sheet.cursorRowIndex',
-    ord('m'): 'sheet.topRowIndex = sheet.cursorRowIndex-int(sheet.nVisibleRows/2)',
-    ord('b'): 'sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows+1',
+command(ord('H'), 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, max(sheet.cursorColIndex-1, 0))', 'shift-movement reorders current row/column')
+command(ord('J'), 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, min(sheet.cursorRowIndex+1, sheet.nRows-1))')
+command(ord('K'), 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))')
+command(ord('L'), 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols))')
 
-    # </> skip up/down current column to next value
-    ord('<'): 'sheet.skipUp()',
-    ord('>'): 'sheet.skipDown()',
+command(ctrl('g'), 'vd.status(sheet.statusLine)', 'current sheet info')
+command(ctrl('p'), 'vd.status(vd.statusHistory[0])', 'show previous status line again')
+command(ctrl('v'), 'vd.status(initialStatus)', 'get version information')
 
-    # _ resets column width
-    ord('_'): 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)',
+command(ord('t'), 'sheet.topRowIndex = sheet.cursorRowIndex', 'scroll cursor row to top of screen')
+command(ord('m'), 'sheet.topRowIndex = sheet.cursorRowIndex-int(sheet.nVisibleRows/2)', 'scroll cursor row to middle of screen')
+command(ord('b'), 'sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows+1', 'scroll cursor row to bottom of screen')
 
-    # delete column
-    ord('-'): 'sheet.columns.pop(sheet.cursorColIndex)',
+command(ord('<'), 'sheet.skipUp()', 'skip up current column to previous value')
+command(ord('>'), 'sheet.skipDown()', 'skip down current column to next value')
 
-    ord('!'): 'sheet.toggleKeyColumn(sheet.cursorColIndex)',  # toggle this column as key
-    # retype as datetime/int/str/float
-#    ord('@'): 'sheet.convertType(sheet.cursorCol, datetime)',
-    ord('#'): 'sheet.convertType(sheet.cursorCol, int)',
-    ord('$'): 'sheet.convertType(sheet.cursorCol, str)',
-    ord('%'): 'sheet.convertType(sheet.cursorCol, float)',
+command(ord('_'), 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)', 'set column width to max visible cell on screen')
+command(ord('-'), 'sheet.columns.pop(sheet.cursorColIndex)', 'delete current column')
+command(ord('^'), 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)', 'set current column header to current cell value')
+command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as key')
 
-    # [/] sort asc/desc
-    ord('['): 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type())',
-    ord(']'): 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)',
+# command(ord('@'), 'sheet.convertType(sheet.cursorCol, datetime)', 'convert column to ISO8601 date')
+command(ord('#'), 'sheet.convertType(sheet.cursorCol, int)', 'convert column to integer')
+command(ord('$'), 'sheet.convertType(sheet.cursorCol, str)', 'convert column to string')
+command(ord('%'), 'sheet.convertType(sheet.cursorCol, float)', 'convert column to decimal numeric type')
+command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r, sheet.cursorCol.getValue(r) or sheet.cursorCol.type())', 'sort by current column ascending')
+command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r, sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)', 'sort by current column descending')
+command(ctrl('e'), 'options.debug = True; raise VException(vd.lastErrors[-1])', 'quit and print error to terminal')
+command(ctrl('d'), 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug option')
 
-    # quit and print error sheet to terminal (in case error sheet itself is broken)
-    ctrl('e'): 'options.debug = True; raise VException(vd.lastErrors[-1])',
-    ctrl('d'): 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))',
+command(ord('E'), 'if vd.lastErrors: vd.push(VSheetText("last_error", vd.lastErrors[-1]))', 'display stack trace for most recent exception')
+command(ord('F'), 'vd.push(VSheetFreqTable(sheet, sheet.cursorCol))', 'create frequency table from values in current column')
 
-    # other capital letters are new sheets
-    ord('E'): 'if vd.lastErrors: vd.push(VSheetText("last_error", vd.lastErrors[-1]))',
-    ord('F'): 'vd.push(VSheetFreqTable(sheet, sheet.cursorCol))',
+command(ord('d'), 'sheet.rows.pop(sheet.cursorRowIndex)', 'delete current row')
 
-    # take this cell for header name
-    ord('^'): 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)',
+command(ord('g'), 'raise ChangeCommandSet(global_commands, "g")', 'global prefix')
 
-    # delete current row
-    ord('d'): 'sheet.rows.pop(sheet.cursorRowIndex)',
+command(ord('S'), 'vd.push(vd.sheets)', 'push sheets sheet')
+command(ord('C'), 'vd.push(VSheetColumns(sheet))', 'push columns sheet')
+command(ord('O'), 'vd.push(VSheetObject("options", options))', 'push options sheet')
 
-    # g = global mode
-    ord('g'): 'raise ChangeCommandSet(global_commands, "g")',
+command(ord('/'), 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)', 'search this column forward for regex')
+command(ord('?'), 'sheet.searchRegex(inputLine(prompt="?"), columns=[sheet.cursorCol], backward=True, moveCursor=True)', 'search this column backward for regex')
+command(ord('n'), 'sheet.searchRegex(columns=[sheet.cursorCol], moveCursor=True)', 'repeat last search forward')
+command(ord('p'), 'sheet.searchRegex(columns=[sheet.cursorCol], backward=True, moveCursor=True)', 'repeat last search backward')
 
-    # meta sheets
-    ord('S'): 'vd.push(vd.sheets)',
-    ord('C'): 'vd.push(VSheetColumns(sheet))',
-    ord('O'): 'vd.push(VSheetObject("options", options))',
+command(ord(' '), 'sheet.toggle([sheet.cursorRow]); sheet.moveCursorDown(1)', 'toggle select of current row')
+command(ord('s'), 'sheet.select([sheet.cursorRow]); sheet.moveCursorDown(1)', 'select current row')
+command(ord('u'), 'sheet.unselect([sheet.cursorRow]); sheet.moveCursorDown(1)', 'unselect current row')
+command(ord('|'), 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))', 'select rows by regex in this column')
+command(ord('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))', 'unselect rows by regex in this column')
 
-    # search this column via regex
-    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)',
-    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), columns=[sheet.cursorCol], backward=True, moveCursor=True)',
-    ord('n'): 'sheet.searchRegex(columns=[sheet.cursorCol], moveCursor=True)',
-    ord('p'): 'sheet.searchRegex(columns=[sheet.cursorCol], backward=True, moveCursor=True)',
+command(ord('R'), 'sheet.source.type = inputLine("change type to, ") or sheet.source.type', 'set parsing type of current sheet')
+command(ctrl('r'), 'openFileOrUrl(vd.sheets.pop(0).source); vd.status("reloaded")', 'reload current sheet')
+command(ctrl('s'), 'saveSheet(sheet, inputLine("save to, "))', 'save sheet (type determined by ext)')
+command(ord('o'), 'openFileOrUrl(inputLine("open, "))', 'open a file or url')
 
-    # select/unselect rows via regex
-    ord(' '): 'sheet.toggle([sheet.cursorRow]); sheet.moveCursorDown(1)',
-    ord('s'): 'sheet.select([sheet.cursorRow]); sheet.moveCursorDown(1)',
-    ord('u'): 'sheet.unselect([sheet.cursorRow]); sheet.moveCursorDown(1)',
+command(ord('e'), 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex))', 'edit current cell')
 
-    ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))',
-    ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))',
-
-    # reload
-    ord('R'): 'sheet.source.type = inputLine("change type to: ") or sheet.source.type',
-    ctrl('r'): 'openFileOrUrl(vd.sheets.pop(0).source); vd.status("reloaded")',
-    ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))', # 'save sheet (type determined by ext)'
-    ord('o'): 'openFileOrUrl(inputLine("open: "))', # 'open a file or url')
-
-
-    # edit cell
-    ord('e'): 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex))',
-
-    ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',  # add column by expr
-    ctrl('^'): 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]',  # swap top two sheets, like in vi
-}
+command(ord('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))', 'add column by expr')
+command(ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'swap top two sheets (like vi)')
 
 # when used with 'g' prefix
-global_commands = {
-    # quit all sheets (and therefore exit)
-    ord('q'): 'vd.sheets.clear()',
+global_command(ord('q'), 'vd.sheets.clear()', 'quit all sheets (and therefore exit)')
 
-    # go all the way to the left/down/up/right
-    ord('h'): 'sheet.cursorColIndex = sheet.leftColIndex = 0',
-    ord('k'): 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
-    ord('j'): 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows',
-    ord('l'): 'sheet.cursorColIndex = len(sheet.columns)-1',
+global_command(ord('h'), 'sheet.cursorColIndex = sheet.leftColIndex = 0', 'move cursor to leftmost column')
+global_command(ord('k'), 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'move cursor to top row')
+global_command(ord('j'), 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows', 'move cursor to bottom row')
+global_command(ord('l'), 'sheet.cursorColIndex = len(sheet.columns)-1', 'move cursor to rightmost column')
 
-    # throw rows/columns all the way to the left/down/up/right (without moving cursor)
-    ord('H'): 'moveListItem(sheet.columns, sheet.cursorColIndex, 0)',
-    ord('J'): 'moveListItem(sheet.rows, sheet.cursorRowIndex, sheet.nRows)',
-    ord('K'): 'moveListItem(sheet.rows, sheet.cursorRowIndex, 0)',
-    ord('L'): 'moveListItem(sheet.columns, sheet.cursorColIndex, sheet.nCols)',
+global_command(ord('H'), 'moveListItem(sheet.columns, sheet.cursorColIndex, 0)', 'throw current column all the way to the left')
+global_command(ord('J'), 'moveListItem(sheet.rows, sheet.cursorRowIndex, sheet.nRows)', 'throw current row all the way to the bottom')
+global_command(ord('K'), 'moveListItem(sheet.rows, sheet.cursorRowIndex, 0)', 'throw current row all the way to the top')
+global_command(ord('L'), 'moveListItem(sheet.columns, sheet.cursorColIndex, sheet.nCols)', 'throw current column all the way to the right')
 
-    # resize all columns (alternately: resize this column according to all rows)
-    ord('_'): 'for c in sheet.columns: c.width = getMaxWidth(c, sheet.visibleRows)',
+global_command(ord('_'), 'for c in sheet.columns: c.width = getMaxWidth(c, sheet.visibleRows)', 'resize all columns to max width of visible cells on screen')
+global_command(ord('^'), 'for c in sheet.columns: c.name = c.getDisplayValue(sheet.cursorRow)', 'set all column names to values in the current row')
 
-    # column header name change
-    ord('^'): 'for c in sheet.columns: c.name = c.getDisplayValue(sheet.cursorRow)',
+global_command(ord('E'), 'vd.push(VSheetText("last_error", "\\n\\n".join(vd.lastErrors)))', 'push sheet of all previous errors')
 
-    # all previous errors sheet
-    ord('E'): 'vd.push(VSheetText("last_error", "\\n\\n".join(vd.lastErrors)))',
+global_command(ord('/'), 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True, columns=sheet.columns)', 'search regex forward in all columns')
+global_command(ord('?'), 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=sheet.columns)', 'search regex backward in all columns')
+global_command(ord('n'), 'sheet.cursorRowIndex = max(sheet.searchRegex())', 'move cursor to first match')
+global_command(ord('p'), 'sheet.cursorRowIndex = min(sheet.searchRegex())', 'move cursor to last match')
 
-    # search all columns
-    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True, columns=sheet.columns)',
-    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=sheet.columns)',
+global_command(ord(' '), 'sheet.toggle(sheet.rows)', 'toggle all rows')
+global_command(ord('s'), 'sheet.select(sheet.rows)', 'select all rows')
+global_command(ord('u'), 'sheet._selectedRows = {}', 'unselect all rows')
 
-    # first/last match
-    ord('n'): 'sheet.cursorRowIndex = max(sheet.searchRegex())',
-    ord('p'): 'sheet.cursorRowIndex = min(sheet.searchRegex())',
+global_command(ord('|'), 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.columns))', 'select rows by regex in all columns')
+global_command(ord('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.columns))', 'unselect rows by regex in all columns')
 
-    # toggle/select/unselect all rows
-    ord(' '): 'sheet.toggle(sheet.rows)',
-    ord('s'): 'sheet.select(sheet.rows)',
-    ord('u'): 'sheet._selectedRows = {}',
+global_command(ord('d'), 'sheet.rows = [r for r in sheet.rows if not sheet.isSelected(r)]; sheet._selectedRows = {}', 'delete all selected rows')
 
-    ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.columns))',
-    ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.columns))',
-
-    # delete all selected rows
-    ord('d'): 'sheet.rows = [r for r in sheet.rows if id(r) not in sheet._selectedRows]; sheet._selectedRows = {}',  # maintain order
-
-    # ^P open sheet with all previous messages
-    ctrl('p'): 'vd.push(VSheetText("statuses", vd.statusHistory))',
-}
+global_command(ctrl('p'), 'vd.push(VSheetText("statuses", vd.statusHistory))', 'open sheet with all previous messages')
 
 ### VisiData core
 
@@ -330,7 +295,7 @@ class VSheet:
     def command(self, key, cmdstr, helpstr=''):
 #        if key in self.commands:
 #            vd.status('overriding key %s' % key)
-        self.commands[key] = cmdstr
+        self.commands[key] = (cmdstr, helpstr)
 
     @property
     def nVisibleRows(self):
@@ -626,6 +591,14 @@ class VSheet:
         else:
             return r  # presume string is fine
 
+    def CommandHelp(self):
+        vs = VSheet(self.name + '_help', self)
+        vs.rows = list(self.commands.items())
+        vs.columns = [VColumn('key', lambda r: curses.keyname(r[0]).decode('utf-8')),
+                VColumn('action', lambda r: r[1][1]),
+                VColumn('global_action', lambda r: global_commands[r[0]][1])]
+        return vs
+
 # end VSheet class
 
 class VisiData:
@@ -691,7 +664,7 @@ class VisiData:
                 except Exception:
                     self.exceptionCaught()
             elif (command_overrides and ch in command_overrides) or (not command_overrides and ch in sheet.commands):
-                cmdstr = command_overrides and command_overrides.get(ch) or sheet.commands.get(ch)
+                cmdstr, helpstr = command_overrides and command_overrides.get(ch) or sheet.commands.get(ch)
                 try:
                     exec(cmdstr)
 
@@ -708,7 +681,7 @@ class VisiData:
                     self.status(cmdstr)
             else:
                 command_overrides = None
-                self.status('no command for key "%s" (%d) ' % (chr(ch), ch))
+                self.status('no command for key "%s" (%d) ' % (curses.keyname(ch).decode('utf-8'), ch))
 
             sheet.checkCursor()
 

@@ -1,4 +1,4 @@
-# VisiData v0.30
+# VisiData v0.31
 
 A curses interface for exploring and arranging tabular data
 
@@ -27,6 +27,7 @@ Usable via any remote shell which has Python3 installed.
 - 'E'rror metasheet
 - 'g^P' status history sheet
 - inner/outer/full/diff joins on any number of sheets
+- F1 lists command help
 
 ## Installation
 
@@ -54,6 +55,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
+|   **F1** | Show help screen with list of commands |
 |   **h**/**j**/**k**/**l** or **\<arrows\>** | Move cell cursor left/down/up/right | Move cursor all the way to the left/bottom/top/right |
 | **PgDn**/**PgUp** | Scroll sheet one page down/up (minus stickied rows/columns) |  Go to first/last page |
 |   **t**/**m**/**b**   | Scrolls cursor row to top/middle/bottom of screen |
