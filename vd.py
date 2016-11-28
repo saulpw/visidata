@@ -321,15 +321,15 @@ class VSheet:
         # specialized sheet keys
         self.commands = base_commands.copy()
 
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
     def isSelected(self, r):
         return id(r) in self._selectedRows
 
     def command(self, key, cmdstr, helpstr=''):
-        if key in self.commands:
-            vd.status('overriding key %s' % key)
+#        if key in self.commands:
+#            vd.status('overriding key %s' % key)
         self.commands[key] = cmdstr
 
     @property
@@ -637,10 +637,11 @@ class VisiData:
         self.lastErrors = []
 
     def status(self, s):
-        s = str(s)
-        self._status.append(s)
-        self.statusHistory.insert(0, s)
+        strs = str(s)
+        self._status.append(strs)
+        self.statusHistory.insert(0, strs)
         del self.statusHistory[100:]  # keep most recent 100 only
+        return s
 
     def exceptionCaught(self, status=True):
         import traceback
@@ -792,9 +793,9 @@ def lambda_getattr(b):
 
 def lambda_subrow_wrap(func, subrowidx):
     'wraps original func to be func(r[subrowidx])'
-    func = lambda r,i=subrowidx,f=func: r[i] and f(r[i]) or None
-    func.setter = lambda r,v,i=subrowidx,f=func: r[i] and f.setter(r[i], v) or None
-    return func
+    subrow_func = lambda r,i=subrowidx,f=func: r[i] and f(r[i]) or None
+    subrow_func.setter = lambda r,v,i=subrowidx,f=func: r[i] and f.setter(r[i], v) or None
+    return subrow_func
 
 def ColumnExpr(sheet, expr):
     if expr:
@@ -926,20 +927,22 @@ class VSheetJoin(VSheet):
 
     def reload(self):
         sheets = self.source
+        # first element in joined row is the tuple of keys
         self.columns = [VColumn(sheets[0].columns[colnum].name, lambda_subrow_wrap(lambda_col(colnum), 0)) for colnum in range(sheets[0].nKeys)]
         self.nKeys = sheets[0].nKeys
 
         rowsBySheetKey = {}
         rowsByKey = {}
 
-        for i, vs in enumerate(sheets):
+        for vs in sheets:
             rowsBySheetKey[vs] = {}
-            self.columns.extend(VColumn(c.name, lambda_subrow_wrap(c.func, i+1)) for c in vs.columns[vs.nKeys:])
             for r in vs.rows:
                 key = tuple(c.getValue(r) for c in vs.keyCols)
                 rowsBySheetKey[vs][key] = r
 
-        for vs in sheets:
+        for sheetnum, vs in enumerate(sheets):
+            # subsequent elements are the rows from each source, in order of the source sheets
+            self.columns.extend(VColumn(c.name, lambda_subrow_wrap(c.func, sheetnum+1)) for c in vs.columns[vs.nKeys:])
             for r in vs.rows:
                 key = tuple(c.getValue(r) for c in vs.keyCols)
                 if key not in rowsByKey:
@@ -1179,22 +1182,12 @@ def editText(y, x, w, prompt=''):
     else:
         scr.addstr(y, x, prompt)
         x += len(prompt)
-    editwin = curses.newwin(1, w, y, x)
 
-    tb = curses.textpad.Textbox(editwin, insert_mode=True)
-    tb.stripspaces = False
-    try:
-        r = tb.edit(lambda ch,tb=tb: editValidate(ch, tb))
-        exit_ch = ENTER
-    except VEscape as vesc:
-        exit_ch = vesc.exit_ch
-
-    if exit_ch in [ESC, ctrl('c')]:
-        raise VEscape(exit_ch, 'nothing changed')
-
-    r = tb.gather()
+    curses.echo()
+    inp = scr.getstr(y, x)
+    curses.noecho()
+    r = inp.decode('utf-8')
     vd.status('"%s"' % r)
-    vd.status(' '.join(('%d' % ord(i)) for i in  r))
     return r
 
 def inputLine(prompt=''):
