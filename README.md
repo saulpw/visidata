@@ -82,9 +82,9 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
 | **\|**//**\\** | Select/Unselect rows by regex if this column matches | Select/Unselect rows if any column matches |
 | **s**/**u**/**\<Space\>** | Select/Unselect/Toggle current row | Select/Unselect/Toggle all rows |
-|
-| Modifying commands (disabled with -r argument or options.readonly=True)
-|
+
+Modifying commands
+
 |**H**/**J**/**K**/**L** | Move current column or row one to the left/down/up/right (changes data ordering) | "Throw" the column/row all the way to the left/bottom/top/right |
 |    **^**      | Set name of current column | Set names of all columns to the values in the current row |
 |    **-** (hyphen)   | Delete current column |
@@ -92,7 +92,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **#**/**$**/**%** | Convert column to int/string/float |
 |  **e** | Edit current cell value |
 |  **=** | Add new column by Python expression |
-| **.** (period) | Make current column a key (pin to left and match on join) |
+| **!** | Make current column a key (pin to left and match on join) |
 
 ### HDF5 sheets
 

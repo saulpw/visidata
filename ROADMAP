@@ -3,7 +3,7 @@
 
 A loose plan that is subject to change.
 
-## v0.4 - column typing, usability
+## v0.4 column typing, usability
 - custom line edit function (getstr lacks ESC and textpad is worthless with spaces, and neither can edit existing content)
 - all columns should be typed (str by default)
    - put indicator in header row to indicate more columns to the left/right
@@ -18,7 +18,7 @@ A loose plan that is subject to change.
 - save/load options/command mappings (both global and per sheet--.cfg for now?)
 - save sheets layout, including generated sheets and visible columns (via replay mechanism?)
 
-## v0.6
+## v0.6 data trail
 - save sources to .zip cache
 - edit/transform log
 - save all sheets to .h5 file
