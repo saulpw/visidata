@@ -1,12 +1,28 @@
 #!/usr/bin/env python3
+#
+# VisiData: a curses interface for exploring and arranging tabular data
+#
+# Copyright (C) 2016 Saul Pwanson
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-'VisiData: a curses interface for exploring and arranging tabular data'
-
-__version__ = '0.28'
+__version__ = '0.30'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
+import itertools
 import os.path
 import io
 import datetime
@@ -22,11 +38,17 @@ import html.parser
 import urllib.parse
 import csv
 
+initialStatus = 'saul.pw/VisiData v' + __version__
+defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
 default_options = {
     'csv_dialect': 'excel',
     'csv_delimiter': ',',
     'csv_quotechar': '"',
+    'csv_header': False,
+
+    'debug': False,
+    'readonly': False,
 
     'encoding': 'utf-8',
     'encoding_errors': 'surrogateescape',
@@ -37,9 +59,11 @@ default_options = {
     'Ellipsis': '…',
     'SubsheetSep': '~',
     'StatusSep': ' | ',
+    'KeySep': '/',
     'SheetNameFmt': '%s| ',  # before status line
     'FunctionError': '¿',    # when computation fails due to exception
     'HistogramChar': '*',
+    'ColumnStats': False,  # whether to include mean/median/etc on 'C'olumn sheet
 
     # color scheme
     'c_default': 'normal',
@@ -47,6 +71,7 @@ default_options = {
     'c_CurHdr': 'reverse',
     'c_CurRow': 'reverse',
     'c_CurCol': 'bold',
+    'c_KeyCols': 'brown',
     'c_StatusLine': 'bold',
     'c_SelectedRow': 'green',
     'c_ColumnSep': 'blue',
@@ -59,8 +84,6 @@ sheet = None # current sheet
 
 windowWidth = None
 windowHeight = None
-
-defaultColNames = string.ascii_uppercase
 
 colors = {
     'bold': curses.A_BOLD,
@@ -82,10 +105,17 @@ class ChangeCommandSet(VException):
         self.commands = commands
         self.mode = mode
 
+class VEscape(VException):
+    'raised by validator to signal which key was used to end the edit'
+    def __init__(self, ch, s=''):
+        super().__init__(s)
+        self.exit_ch = ch
+
 def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
 
 ENTER = ctrl('j')
+ESC = 27
 
 base_commands = {
     # pop current sheet off the sheet stack
@@ -113,11 +143,12 @@ base_commands = {
     ord('K'): 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))',
     ord('L'): 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols))',
 
-    # ^g/^p sheet status and status sheet
+    # ^g/^p/^v sheet status, status sheet, version status
     ctrl('g'): 'vd.status(sheet.statusLine)',
-    ctrl('p'): 'vd.status(vd.statusHistory[-1])',
+    ctrl('p'): 'vd.status(vd.statusHistory[0])',
+    ctrl('v'): 'vd.status(initialStatus)',
 
-    # t/m/b jumps to top/middle/bottom of screen
+    # t/m/b moves cursor row to top/middle/bottom of screen
     ord('t'): 'sheet.topRowIndex = sheet.cursorRowIndex',
     ord('m'): 'sheet.topRowIndex = sheet.cursorRowIndex-int(sheet.nVisibleRows/2)',
     ord('b'): 'sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows+1',
@@ -132,23 +163,24 @@ base_commands = {
     # delete column
     ord('-'): 'sheet.columns.pop(sheet.cursorColIndex)',
 
+    ord('!'): 'sheet.toggleKeyColumn(sheet.cursorColIndex)',  # toggle this column as key
     # retype as datetime/int/str/float
-    ord('@'): 'sheet.convertType(sheet.cursorCol, datetime)',
+#    ord('@'): 'sheet.convertType(sheet.cursorCol, datetime)',
     ord('#'): 'sheet.convertType(sheet.cursorCol, int)',
     ord('$'): 'sheet.convertType(sheet.cursorCol, str)',
     ord('%'): 'sheet.convertType(sheet.cursorCol, float)',
 
     # [/] sort asc/desc
-    ord('['): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue)',
-    ord(']'): 'sheet.rows = sorted(sheet.rows, key=sheet.cursorCol.getValue, reverse=True)',
+    ord('['): 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type())',
+    ord(']'): 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)',
 
     # quit and print error sheet to terminal (in case error sheet itself is broken)
-    ctrl('e'): 'g_args.debug = True; raise VException(vd.lastErrors[-1])',
-    ctrl('d'): 'g_args.debug = not g_args.debug; vd.status("debug " + ("ON" if g_args.debug else "OFF"))',
+    ctrl('e'): 'options.debug = True; raise VException(vd.lastErrors[-1])',
+    ctrl('d'): 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))',
 
     # other capital letters are new sheets
-    ord('E'): 'if vd.lastErrors: createTextViewer("last_error", vd.lastErrors[-1])',
-    ord('F'): 'createFreqTable(sheet, sheet.cursorCol)',
+    ord('E'): 'if vd.lastErrors: vd.push(VSheetText("last_error", vd.lastErrors[-1]))',
+    ord('F'): 'vd.push(VSheetFreqTable(sheet, sheet.cursorCol))',
 
     # take this cell for header name
     ord('^'): 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)',
@@ -160,9 +192,9 @@ base_commands = {
     ord('g'): 'raise ChangeCommandSet(global_commands, "g")',
 
     # meta sheets
-    ord('S'): 'createListSheet("sheets", vd.sheets, "name nRows nCols cursorValue source".split())',
-    ord('C'): 'createColumnSummary(sheet)',
-    ord('O'): 'createDictSheet("options", options.__dict__)',
+    ord('S'): 'vd.push(vd.sheets)',
+    ord('C'): 'vd.push(VSheetColumns(sheet))',
+    ord('O'): 'vd.push(VSheetObject("options", options))',
 
     # search this column via regex
     ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)',
@@ -180,26 +212,22 @@ base_commands = {
 
     # reload
     ord('R'): 'sheet.source.type = inputLine("change type to: ") or sheet.source.type',
-    ctrl('r'): 'openSource(vd.sheets.pop(0).source); vd.status("reloaded")',
+    ctrl('r'): 'openFileOrUrl(vd.sheets.pop(0).source); vd.status("reloaded")',
+    ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))', # 'save sheet (type determined by ext)'
+    ord('o'): 'openFileOrUrl(inputLine("open: "))', # 'open a file or url')
+
 
     # edit cell
-    ord('e'): 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex) or sheet.cursorCol.getValue(sheet.cursorRow))',
+    ord('e'): 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex))',
 
-    # save sheet
-    ctrl('s'): 'saveSheet(sheet, inputLine("save to: "))',
-
-    # add column
-    ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',
-}
-
-sheet_specific_commands = {
-    ('sheets', ENTER): 'vd.sheets.pop(0); moveListItem(vd.sheets, sheet.cursorRowIndex-1, 0)',
+    ord('='): 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))',  # add column by expr
+    ctrl('^'): 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]',  # swap top two sheets, like in vi
 }
 
 # when used with 'g' prefix
 global_commands = {
     # quit all sheets (and therefore exit)
-    ord('q'): 'vd.sheets = []',
+    ord('q'): 'vd.sheets.clear()',
 
     # go all the way to the left/down/up/right
     ord('h'): 'sheet.cursorColIndex = sheet.leftColIndex = 0',
@@ -220,11 +248,11 @@ global_commands = {
     ord('^'): 'for c in sheet.columns: c.name = c.getDisplayValue(sheet.cursorRow)',
 
     # all previous errors sheet
-    ord('E'): 'createTextViewer("last_error", "\\n\\n".join(vd.lastErrors))',
+    ord('E'): 'vd.push(VSheetText("last_error", "\\n\\n".join(vd.lastErrors)))',
 
     # search all columns
-    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True)',
-    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True)',
+    ord('/'): 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True, columns=sheet.columns)',
+    ord('?'): 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=sheet.columns)',
 
     # first/last match
     ord('n'): 'sheet.cursorRowIndex = max(sheet.searchRegex())',
@@ -232,17 +260,17 @@ global_commands = {
 
     # toggle/select/unselect all rows
     ord(' '): 'sheet.toggle(sheet.rows)',
-    ord('s'): 'sheet.selectedRows = sheet.rows.copy()',
-    ord('u'): 'sheet.selectedRows = []',
+    ord('s'): 'sheet.select(sheet.rows)',
+    ord('u'): 'sheet._selectedRows = {}',
 
     ord('|'): 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.columns))',
     ord('\\'): 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.columns))',
 
     # delete all selected rows
-    ord('d'): 'sheet.rows = [r for r in sheet.rows if r not in sheet.selectedRows]',  # maintain order
+    ord('d'): 'sheet.rows = [r for r in sheet.rows if id(r) not in sheet._selectedRows]; sheet._selectedRows = {}',  # maintain order
 
     # ^P open sheet with all previous messages
-    ctrl('p'): 'createListSheet("statuses", vd.statusHistory[::-1])',
+    ctrl('p'): 'vd.push(VSheetText("statuses", vd.statusHistory))',
 }
 
 ### VisiData core
@@ -262,188 +290,47 @@ def getMaxWidth(col, rows):
     if len(rows) == 0:
         return 0
 
-    return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)), int(windowWidth-1))
+    return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)+2), int(windowWidth-1))
 
-
-class VisiData:
-    def __init__(self):
-        self.sheets = []
-        self._status = []
-        self.statusHistory = []
-        self.status('saul.pw/VisiData v' + __version__)
-        self.lastErrors = []
-
-    def status(self, s):
-        s = str(s)
-        self._status.append(s)
-        self.statusHistory.append(s)
-        self.statusHistory = self.statusHistory[-100:]  # keep most recent
-
-    def exceptionCaught(self, status=True):
-        import traceback
-        self.lastErrors.append(traceback.format_exc().strip())
-        self.lastErrors = self.lastErrors[-10:]  # keep most recent
-        if status:
-            self.status(self.lastErrors[-1].splitlines()[-1])
-        if g_args.debug:
-            raise
-
-    def run(self):
-        global sheet
-        global windowHeight, windowWidth
-        windowHeight, windowWidth = scr.getmaxyx()
-
-        commands = base_commands
-        while True:
-            if not self.sheets:
-                # if no more sheets, exit
-                return
-
-            sheet = self.sheets[0]
-            if sheet.nRows == 0:
-                self.status('no rows')
-
-            try:
-                sheet.draw()
-            except Exception as e:
-                self.exceptionCaught()
-
-            # draw status on last line
-            attr = colors[options.c_StatusLine]
-            statusstr = options.SheetNameFmt % sheet.name + options.StatusSep.join(self._status)
-            self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
-            self._status = []
-
-            scr.move(windowHeight-1, windowWidth-2)
-            curses.doupdate()
-
-            ch = scr.getch()
-            if ch == curses.KEY_RESIZE:
-                windowHeight, windowWidth = scr.getmaxyx()
-            elif ch == curses.KEY_MOUSE:
-                try:
-                    devid, x, y, z, bstate = curses.getmouse()
-                    sheet.cursorRowIndex = sheet.topRowIndex+y-1
-                except Exception:
-                    self.exceptionCaught()
-            elif ch in sheet.commands or ch in commands:
-                cmdstr = sheet_specific_commands.get((sheet.name, ch)) or sheet.commands.get(ch) or commands.get(ch)
-                try:
-                    exec(cmdstr)
-
-                    commands = base_commands
-                except ChangeCommandSet as e:
-                    # prefixes raise ChangeCommandSet exception instead
-                    commands = e.commands
-                    self.status(e.mode)
-                except Exception:
-                    commands = base_commands
-                    self.exceptionCaught()
-                    self.status(cmdstr)
-            else:
-                self.status('no command for key "%s" (%d) ' % (chr(ch), ch))
-
-            sheet.checkCursor()
-
-    def newSheet(self, name, src=None):
-        if not src:
-            src = VSource('internal', name)
-        vs = VSheet(name, src)
-        self.sheets.insert(0, vs)
-        return vs
-
-    def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
-        s = s.replace('\n', '\\n')
-        try:
-            if w is None:
-                w = windowWidth-1
-            w = min(w, windowWidth-x-1)
-            if w == 0:  # no room anyway
-                return
-
-            # convert to string just before drawing
-            s = str(s)
-            if len(s) > w:
-                scr.addstr(y, x, s[:w-1] + options.Ellipsis, attr)
-            else:
-                scr.addstr(y, x, s, attr)
-                if len(s) < w:
-                    scr.addstr(y, x+len(s), options.ColumnFiller*(w-len(s)), attr)
-        except Exception as e:
-            self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
-            self.exceptionCaught()
-# end VisiData class
-
-class VColumn:
-    def __init__(self, name, func=lambda r: r, width=None):
-        self.name = name
-        self.func = func
-        self.width = width
-        self.expr = None  # Python string expression if computed column
-
-    def getValue(self, row):
-        try:
-            return self.func(row)
-        except Exception as e:
-            vd.exceptionCaught(status=False)
-            return options.FunctionError
-
-    def getDisplayValue(self, row):
-        cellval = self.getValue(row)
-        if cellval is None:
-            cellval = options.VisibleNone
-        return str(cellval).strip()
-
-    def setValue(self, row, value):
-        self.func.setter(row, value)
-
-class VSource:
-    def __init__(self, ref, name, contentType=None):
-        self.ref = ref           # full reference (url/fqpn), for refetching
-        self.name = name         # human-readable shorthand/mnemonic
-        self.contents = None     # cached contents
-        self.fp = None
-
-        if contentType:
-            self.type = contentType  # txt/json/csv etc to determine which File_* class to use
-        elif isinstance(ref, str):
-            fn, ext = os.path.splitext(self.ref)
-            self.type = ext[1:]  # remove leading '.'
-        elif isinstance(ref, object):
-            self.type = 'pyobj'
-        else:
-            self.type = ''
-
-    def __repr__(self):
-        return self.ref
 
 class VSheet:
-    def __init__(self, name, src):
-        self.source = src
+    def __init__(self, name, src=None):
         self.name = name
+        self.source = src
         self.rows = []
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorColIndex = 0  # absolute index of cursor into self.columns
-        self.pinnedRows = []
 
         self.topRowIndex = 0     # cursorRowIndex of topmost row
         self.leftColIndex = 0    # cursorColIndex of leftmost column
 
         # as computed during draw()
-        self.rowLayout = {} # [rowidx] -> y
-        self.colLayout = {} # [colidx] -> (x, w)
+        self.rowLayout = {}      # [rowidx] -> y
+        self.colLayout = {}      # [colidx] -> (x, w)
 
         # all columns in display order
         self.columns = None
+        self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # current search term
         self.currentRegex = None
         self.currentRegexColumns = None
 
-        self.selectedRows = []
+        self._selectedRows = {}   # id(row) -> row
 
         # specialized sheet keys
-        self.commands = {}
+        self.commands = base_commands.copy()
+
+    def __repr__(self):
+        return self.name
+
+    def isSelected(self, r):
+        return id(r) in self._selectedRows
+
+    def command(self, key, cmdstr, helpstr=''):
+#        if key in self.commands:
+#            vd.status('overriding key %s' % key)
+        self.commands[key] = cmdstr
 
     @property
     def nVisibleRows(self):
@@ -460,6 +347,18 @@ class VSheet:
     @property
     def visibleRows(self):
         return self.rows[self.topRowIndex:self.topRowIndex+windowHeight-2]
+
+    @property
+    def selectedRows(self):
+        return [r for r in self.rows if id(r) in self._selectedRows]
+
+    @property
+    def keyCols(self):
+        return self.columns[:self.nKeys]
+
+    @property
+    def keyColNames(self):
+        return options.KeySep.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
@@ -500,6 +399,14 @@ class VSheet:
         if col:
             self.columns.append(col)
 
+    def toggleKeyColumn(self, colidx):
+        if self.cursorColIndex >= self.nKeys: # if not a key, add it
+            moveListItem(self.columns, self.cursorColIndex, self.nKeys)
+            self.nKeys += 1
+        else:  # otherwise move it after the last key
+            self.nKeys -= 1
+            moveListItem(self.columns, self.cursorColIndex, self.nKeys)
+
     def skipDown(self):
         pv = self.cursorValue
         for i in range(self.cursorRowIndex+1, len(self.rows)):
@@ -531,19 +438,23 @@ class VSheet:
 
     def toggle(self, rows):
         for r in rows:
-            if r in self.selectedRows:
-                self.selectedRows.remove(r)
+            if id(r) in self._selectedRows:
+                del self._selectedRows[id(r)]
             else:
-                self.selectedRows.append(r)
+                self._selectedRows[id(r)] = r
 
     def select(self, rows):
-        self.selectedRows.extend(rows)
+        rows = list(rows)
+        before = len(self._selectedRows)
+        self._selectedRows.update(dict((id(r), r) for r in rows))
+        vd.status('selected %s/%s rows' % (len(self._selectedRows)-before, len(rows)))
 
     def unselect(self, rows):
         rows = list(rows)
-        before = len(self.selectedRows)
-        self.selectedRows = [r for r in self.selectedRows if r not in rows]
-        vd.status('unselected %s rows' % (before-len(self.selectedRows)))
+        before = len(self._selectedRows)
+        for r in rows:
+            del self._selectedRows[id(r)]
+        vd.status('unselected %s/%s rows' % (before-len(self._selectedRows), len(rows)))
 
     def columnsMatch(self, row, columns, func):
         for c in columns:
@@ -582,9 +493,16 @@ class VSheet:
         if x <= 0:
             self.leftColIndex = self.cursorColIndex
         else:
+            # keycolwidth = sum(self.columns[i].width for i in range(0, self.nKeys))
             while True:
-                x, w = self.colLayout[self.cursorColIndex]
-                if x+w-self.colLayout[self.leftColIndex][0] < windowWidth:
+                self.calcColLayout()
+                if self.cursorColIndex not in self.colLayout:  # should always be to the right
+                    assert self.cursorColIndex > self.leftColIndex
+                    self.leftColIndex += 1
+                    continue
+                cur_x, cur_w = self.colLayout[self.cursorColIndex]
+                left_x, left_w = self.colLayout[self.leftColIndex]
+                if cur_x+cur_w < windowWidth:
                     # current columns fit entirely on screen
                     break
                 self.leftColIndex += 1
@@ -600,6 +518,10 @@ class VSheet:
 
         if columns:
             self.currentRegexColumns = columns
+
+        if not self.currentRegexColumns:
+            vd.status('no columns given')
+            return []
 
         if backward:
             rng = range(self.cursorRowIndex-1, -1, -1)
@@ -629,31 +551,38 @@ class VSheet:
 
         return matchingRowIndexes
 
+    def calcColLayout(self):
+        self.colLayout = {}
+        x = 0
+        for colidx in range(0, len(self.columns)):
+            col = self.columns[colidx]
+            col.width = col.width or getMaxWidth(col, self.visibleRows)
+            if colidx < self.nKeys or colidx >= self.leftColIndex:  # visible columns
+                self.colLayout[colidx] = (x, min(col.width, windowWidth-x))
+                x += col.width+len(options.ColumnSep)
+            if x > windowWidth:
+                break
+
     def draw(self):
         scr.erase()  # clear screen before every re-draw
         sepchars = options.ColumnSep
 
-        x = 0
-        colidx = None
-
-        self.colLayout = {}
         self.rowLayout = {}
-        for colidx in range(self.leftColIndex, len(self.columns)):
-
+        self.calcColLayout()
+        for colidx, colinfo in sorted(self.colLayout.items()):
+            x, colwidth = colinfo
             col = self.columns[colidx]
-            col.width = col.width or getMaxWidth(col, self.visibleRows)
-            self.colLayout[colidx] = (x, col.width)
-
             if x < windowWidth:  # only draw inside window
                 # choose attribute to highlight column header
                 if colidx == self.cursorColIndex:  # cursor is at this column
-                    attr = colors[options.c_CurHdr]
+                    hdrattr = colors[options.c_CurHdr]
+                elif colidx < self.nKeys:
+                    hdrattr = colors[options.c_KeyCols]
                 else:
-                    attr = colors[options.c_Header]
+                    hdrattr = colors[options.c_Header]
 
                 y = 0
-                colwidth = min(col.width, windowWidth-x)
-                vd.clipdraw(y, x, col.name or defaultColNames[colidx], attr, colwidth)
+                vd.clipdraw(y, x, col.name or defaultColNames[colidx], hdrattr, colwidth)
                 if x+colwidth+len(sepchars) <= windowWidth:
                     scr.addstr(y, x+colwidth, sepchars, colors[options.c_ColumnSep])
 
@@ -668,14 +597,16 @@ class VSheet:
 
                     if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
                         attr = colors[options.c_CurRow]
+                    elif colidx < self.nKeys:
+                        attr = colors[options.c_KeyCols]
                     else:
                         attr = colors[options.c_default]
 
-                    if row in self.selectedRows:
+                    if self.isSelected(row):
                         attr |= colors[options.c_SelectedRow]
 
                     if x+colwidth+len(sepchars) <= windowWidth:
-                        scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
+                       scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
 
                     if colidx == self.cursorColIndex:  # cursor is at this column
                         attr |= colors[options.c_CurCol]
@@ -684,19 +615,165 @@ class VSheet:
                     vd.clipdraw(y, x, cellval, attr, colwidth)
                     y += 1
 
-            x += col.width+len(sepchars)
-
     def editCell(self, colnum=None):
         if colnum is None:
             colnum = self.cursorColIndex
         x, w = self.colLayout[colnum]
         y = self.rowLayout[self.cursorRowIndex]
-        return editText(y, x, w)
+        r = editText(y, x, w)
+        if self.cursorCol.type:
+            return self.cursorCol.type(r)  # convert input to column type
+        else:
+            return r  # presume string is fine
+
 # end VSheet class
 
+class VisiData:
+    def __init__(self):
+        self.sheets = VSheetSheets()
+        self.statusHistory = []
+        self._status = []
+        self.status(initialStatus)
+        self.lastErrors = []
 
-### core sheet layouts
-def setter(r, k, v):
+    def status(self, s):
+        strs = str(s)
+        self._status.append(strs)
+        self.statusHistory.insert(0, strs)
+        del self.statusHistory[100:]  # keep most recent 100 only
+        return s
+
+    def exceptionCaught(self, status=True):
+        import traceback
+        self.lastErrors.append(traceback.format_exc().strip())
+        self.lastErrors = self.lastErrors[-10:]  # keep most recent
+        if status:
+            self.status(self.lastErrors[-1].splitlines()[-1])
+        if options.debug:
+            raise
+
+    def run(self):
+        global sheet
+        global windowHeight, windowWidth
+        windowHeight, windowWidth = scr.getmaxyx()
+
+        command_overrides = None
+        while True:
+            if not self.sheets:
+                # if no more sheets, exit
+                return
+
+            sheet = self.sheets[0]
+            if sheet.nRows == 0:
+                self.status('no rows')
+
+            try:
+                sheet.draw()
+            except Exception as e:
+                self.exceptionCaught()
+
+            # draw status on last line
+            attr = colors[options.c_StatusLine]
+            statusstr = options.SheetNameFmt % sheet.name + options.StatusSep.join(self._status)
+            self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
+            self._status = []
+
+            scr.move(windowHeight-1, windowWidth-2)
+            curses.doupdate()
+
+            ch = scr.getch()
+            if ch == curses.KEY_RESIZE:
+                windowHeight, windowWidth = scr.getmaxyx()
+            elif ch == curses.KEY_MOUSE:
+                try:
+                    devid, x, y, z, bstate = curses.getmouse()
+                    sheet.cursorRowIndex = sheet.topRowIndex+y-1
+                except Exception:
+                    self.exceptionCaught()
+            elif (command_overrides and ch in command_overrides) or (not command_overrides and ch in sheet.commands):
+                cmdstr = command_overrides and command_overrides.get(ch) or sheet.commands.get(ch)
+                try:
+                    exec(cmdstr)
+
+                    command_overrides = None
+                except ChangeCommandSet as e:
+                    # prefixes raise ChangeCommandSet exception instead
+                    command_overrides = e.commands
+                    self.status(e.mode)
+                except VEscape as e:  # user aborted
+                    self.status(str(e))
+                except Exception:
+                    command_overrides = None
+                    self.exceptionCaught()
+                    self.status(cmdstr)
+            else:
+                command_overrides = None
+                self.status('no command for key "%s" (%d) ' % (chr(ch), ch))
+
+            sheet.checkCursor()
+
+    def push(self, vs):
+        if vs:
+            if vs in self.sheets:
+                self.sheets.remove(vs)
+            self.sheets.insert(0, vs)
+            return vs
+
+    def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
+        s = s.replace('\n', '\\n')
+        try:
+            if w is None:
+                w = windowWidth-1
+            w = min(w, windowWidth-x-1)
+            if w == 0:  # no room anyway
+                return
+
+            # convert to string just before drawing
+            s = str(s)
+            if len(s) > w:
+                scr.addstr(y, x, s[:w-1] + options.Ellipsis, attr)
+            else:
+                scr.addstr(y, x, s, attr)
+                if len(s) < w:
+                    scr.addstr(y, x+len(s), options.ColumnFiller*(w-len(s)), attr)
+        except Exception as e:
+            self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
+            self.exceptionCaught()
+# end VisiData class
+
+## columns
+class VColumn:
+    def __init__(self, name, func=lambda r: r, width=None):
+        self.name = name
+        self.func = func
+        self.width = width
+        self.type = None
+        self.expr = None  # Python string expression if computed column
+
+    def getValue(self, row):
+        try:
+            return self.func(row)
+        except Exception as e:
+            vd.exceptionCaught(status=False)
+            return options.FunctionError
+
+    def getDisplayValue(self, row):
+        cellval = self.getValue(row)
+        if cellval is None:
+            cellval = options.VisibleNone
+        return str(cellval).strip()
+
+    def setValue(self, row, value):
+        if options.readonly:
+            vd.status('readonly mode')
+        elif hasattr(self.func, 'setter'):
+            self.func.setter(row, value)
+        else:
+            vd.status('column cannot be changed')
+
+
+### common column setups and helpers
+def setter(r, k, v):  # needed for use in lambda
     r[k] = v
 
 def lambda_colname(colname):
@@ -714,6 +791,11 @@ def lambda_getattr(b):
     func.setter = lambda r,v,b=b: setattr(r,b,v)
     return func
 
+def lambda_subrow_wrap(func, subrowidx):
+    'wraps original func to be func(r[subrowidx])'
+    subrow_func = lambda r,i=subrowidx,f=func: r[i] and f(r[i]) or None
+    subrow_func.setter = lambda r,v,i=subrowidx,f=func: r[i] and f.setter(r[i], v) or None
+    return subrow_func
 
 def ColumnExpr(sheet, expr):
     if expr:
@@ -733,315 +815,334 @@ def ArrayColumns(n):
     'columns that display r[0]..r[n]'
     return [VColumn('', lambda_col(colnum)) for colnum in range(n)]
 
-def ArrayNamedColumns(columnstr):
+def ArrayNamedColumns(columns):
     'columnstr is a string of n column names (separated by spaces), mapping to r[0]..r[n]'
-    return [VColumn(colname, lambda_col(i)) for i, colname in enumerate(columnstr.split())]
+    return [VColumn(colname, lambda_col(i)) for i, colname in enumerate(columns)]
 
 def AttrColumns(colnames):
     'colnames is list of attribute names'
     return [VColumn(name, lambda_getattr(name)) for name in colnames]
 
-def createTextViewer(name, text, src=None):
-    viewer = vd.newSheet(name, src)
-    viewer.rows = text.split('\n')
-    viewer.columns = [ VColumn(name) ]
-    return viewer
-
-
-def createPyObjSheet(name, pyobj, src=None):
+### sheet layouts
+#### generic list/dict/object browsing
+def pushPyObjSheet(name, pyobj, src=None):
     if isinstance(pyobj, list):
-        return createListSheet(name, pyobj, src=src)
+        return vd.push(VSheetList(name, pyobj, src=src))
     elif isinstance(pyobj, dict):
-        return createDictSheet(name, pyobj)
+        return vd.push(VSheetDict(name, pyobj))
     elif isinstance(pyobj, object):
-        return viewPyObj(pyobj)
-
-
-def createListSheet(name, iterable, columns=None, src=None):
-    'columns is a list of strings naming attributes on the objects within the iterable'
-    vs = vd.newSheet(name, src)
-    vs.rows = iterable
-
-    if columns:
-        vs.columns = AttrColumns(columns)
-    elif isinstance(iterable[0], dict):  # list of dict
-        vs.columns = [VColumn(k, lambda_colname(k)) for k in iterable[0].keys()]
+        return vd.push(VSheetObject(name, pyobj))
     else:
-        vs.columns = [VColumn(name)]
+        vd.status('unknown type ' + type(pyobj))
 
-    # push sheet and set the new cursor row to the current cursor col
-    vs.commands.update({
-        ENTER: 'createPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex',
-    })
-    return vs
+class VSheetList(VSheet):
+    def __init__(self, name, obj, columns=None, src=None):
+        'columns is a list of strings naming attributes on the objects within the obj'
+        super().__init__(name, src or obj)
+        assert isinstance(obj, list)
+        self.rows = obj
+        if columns:
+            self.columns = AttrColumns(columns)
+        elif isinstance(obj[0], dict):  # list of dict
+            self.columns = [VColumn(k, lambda_colname(k)) for k in obj[0].keys()]
+        else:
+            self.columns = [VColumn(name)]
+        self.command(ENTER, 'pushPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex', 'dive into this row')
+
+class VSheetDict(VSheet):
+    def __init__(self, name, mapping):
+        super().__init__(name, mapping)
+        self.rows = sorted(list(list(x) for x in mapping.items()))
+        self.columns = [
+            VColumn('key', lambda_col(0)),
+            VColumn('value', lambda_col(1)) ]
+        self.command(ENTER, 'if sheet.cursorColIndex == 1: pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
+        self.command(ord('e'), 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1)', 'edit this value')
+
+class VSheetObject(VSheet):
+    def __init__(self, name, obj):
+        super().__init__(name, obj)
+        self.command(ENTER, 'pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
+        self.command(ord('e'), 'setattr(sheet.source, sheet.cursorRow[0], sheet.editCell(1)); sheet.reload()', 'edit this value')
+        self.reload()
+
+    def reload(self):
+        valfunc = lambda_col(1)
+        valfunc.setter = lambda r,v,obj=self.source: setattr(obj, r[0], v)
+        self.columns = [
+            VColumn(type(self.source).__name__ + '_attr', lambda_col(0)),
+            VColumn('value', valfunc) ]
+        self.rows = [(k, getattr(self.source, k)) for k in getPublicAttrs(self.source)]
+
+#### specialized meta sheets
+class VSheetSheets(VSheet, list):
+    def __init__(self):
+        VSheet.__init__(self, 'sheets', 'VisiData.sheets')
+        self.command(ENTER,    'moveListItem(sheet, sheet.cursorRowIndex, 0); vd.sheets.pop(1)', 'go to this sheet')
+        self.command(ord('&'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="&")', 'inner join')
+        self.command(ord('+'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="+")', 'outer join')
+        self.command(ord('*'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="*")', 'full join')
+        self.command(ord('~'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="~")', 'diff join')
+        self.reload()
+
+    def reload(self):
+        self.columns = AttrColumns('name nRows nCols cursorValue keyColNames source'.split())
+        self.rows = self
+
+class VSheetColumns(VSheet):
+    def __init__(self, srcsheet):
+        super().__init__(srcsheet.name + '_columns', srcsheet)
+        self.command(ord('#'), 'sheet.source.convertType(sheet.cursorRow, int); sheet.moveCursorDown(+1)', 'convert column to int')
+        self.command(ord('$'), 'sheet.source.convertType(sheet.cursorRow, str); sheet.moveCursorDown(+1)', 'convert column to str')
+        self.command(ord('%'), 'sheet.source.convertType(sheet.cursorRow, float); sheet.moveCursorDown(+1)', 'convert column to float')
+#        self.command(ord('@'), 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)', 'convert to datetime')
+        self.reload()
+
+    def reload(self):
+        self.rows = self.source.columns
+        self.columns = [
+            VColumn('column', lambda_getattr('name')),
+            VColumn('width',  lambda_getattr('width')),
+            VColumn('type',   lambda_getattr('type')),
+            VColumn('expr',   lambda_getattr('expr')),
+            VColumn('value', lambda c,sheet=self: c.getValue(sheet.cursorRow)),
+        ]
+        if options.ColumnStats:
+            self.columns.extend([
+                VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
+                VColumn('min',    lambda c: min(sheet.columnValues(c))),
+                VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
+                VColumn('mean',   lambda c: statistics.mean(sheet.columnValues(c))),
+                VColumn('max',    lambda c: max(sheet.columnValues(c))),
+                VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
+            ])
+
+#### slicing and dicing
+class VSheetJoin(VSheet):
+    def __init__(self, sheets, jointype='&'):
+        super().__init__(jointype.join(vs.name for vs in sheets))
+        self.source = sheets
+        self.jointype = jointype
+        self.reload()
+
+    def reload(self):
+        sheets = self.source
+        # first element in joined row is the tuple of keys
+        self.columns = [VColumn(sheets[0].columns[colnum].name, lambda_subrow_wrap(lambda_col(colnum), 0)) for colnum in range(sheets[0].nKeys)]
+        self.nKeys = sheets[0].nKeys
+
+        rowsBySheetKey = {}
+        rowsByKey = {}
+
+        for vs in sheets:
+            rowsBySheetKey[vs] = {}
+            for r in vs.rows:
+                key = tuple(c.getValue(r) for c in vs.keyCols)
+                rowsBySheetKey[vs][key] = r
+
+        for sheetnum, vs in enumerate(sheets):
+            # subsequent elements are the rows from each source, in order of the source sheets
+            self.columns.extend(VColumn(c.name, lambda_subrow_wrap(c.func, sheetnum+1)) for c in vs.columns[vs.nKeys:])
+            for r in vs.rows:
+                key = tuple(c.getValue(r) for c in vs.keyCols)
+                if key not in rowsByKey:
+                    rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]
+
+        if self.jointype == '&':  # inner join  (only rows with matching key on all sheets)
+            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if all(combinedRow))
+        elif self.jointype == '+':  # outer join (all rows from first sheet)
+            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
+        elif self.jointype == '*':  # full join (keep all rows from all sheets)
+            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
+        elif self.jointype == '~':  # diff join (only rows without matching key on all sheets)
+            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if not all(combinedRow))
 
 
-def createDictSheet(name, mapping):
-    vs = vd.newSheet(name, mapping)
-    vs.rows = sorted(list(list(x) for x in mapping.items()))
-    vs.columns = [
-        VColumn('key', lambda_col(0)),
-        VColumn('value', lambda_col(1))
-    ]
+class VSheetFreqTable(VSheet):
+    def __init__(self, sheet, col):
+        fqcolname = '%s_%s_freq' % (sheet.name, col.name)
+        super().__init__(fqcolname, sheet)
 
-    vs.commands.update({
-        # pushes a sheet for the Pyobj in 'value', whatever that looks like
-        ENTER: 'if sheet.cursorColIndex == 1: createPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])',
-        ord('e'): 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1)',
-    })
-    return vs
+        values = collections.defaultdict(list)
+        for r in sheet.rows:
+            values[str(col.getValue(r))].append(r)
 
+        self.rows = sorted(values.items(), key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
+        self.largest = len(self.rows[0][1])+1
 
-def createFreqTable(sheet, col):
-    values = collections.defaultdict(int)
-    for r in sheet.rows:
-        values[str(col.getValue(r))] += 1
-
-    fqcolname = '%s_%s' % (sheet.name, col.name)
-    freqtbl = vd.newSheet('freq_' + fqcolname)
-    freqtbl.rows = sorted(values.items(), key=lambda r: r[1], reverse=True)  # sort by num reverse
-    freqtbl.total = max(values.values())+1
-
-    freqtbl.columns = [
-        VColumn(fqcolname, lambda_col(0)),
-        VColumn('num', lambda_col(1)),
-        VColumn('histogram', lambda r,s=freqtbl: options.HistogramChar*int(r[1]*80/s.total), width=80)
-    ]
-    return freqtbl
+        self.columns = [
+            VColumn(col.name, lambda_col(0)),
+            VColumn('num', lambda r: len(r[1])),
+            VColumn('histogram', lambda r,s=self: options.HistogramChar*int(len(r[1])*80/s.largest), width=80)
+        ]
+        self.command(ord(' '), 'sheet.source.toggle(sheet.cursorRow[1])', 'toggle these entries')
+        self.command(ord('s'), 'sheet.source.select(sheet.cursorRow[1])', 'select these entries')
+        self.command(ord('u'), 'sheet.source.unselect(sheet.cursorRow[1])', 'unselect these entries')
 
 
-def createColumnSummary(sheet):
-    vs = vd.newSheet(sheet.name + '_columns', sheet)
-    vs.rows = sheet.columns
-    vs.columns = [
-        VColumn('column', lambda_getattr('name')),
-        VColumn('width',  lambda_getattr('width')),
-        VColumn('type',   lambda_getattr('type')),
-        VColumn('expr',   lambda_getattr('expr')),
-#        VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
-#        VColumn('min',    lambda c: min(sheet.columnValues(c))),
-#        VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
-#        VColumn('mean',   lambda c: statistics.mean(sheet.columnValues(c))),
-#        VColumn('max',    lambda c: max(sheet.columnValues(c))),
-#        VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
-    ]
-    vs.commands.update({
-        ord('@'): 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)',
-        ord('#'): 'sheet.source.convertType(sheet.cursorRow, int); sheet.moveCursorDown(+1)',
-        ord('$'): 'sheet.source.convertType(sheet.cursorRow, str); sheet.moveCursorDown(+1)',
-        ord('%'): 'sheet.source.convertType(sheet.cursorRow, float); sheet.moveCursorDown(+1)',
-        })
-    return vs
-
-def viewPyObj(obj, src=None):
-    if src is None:
-        src = VSource(obj, str(obj))
-    vs = vd.newSheet(type(obj), src)
-    vs.rows = getPublicAttrs(obj)
-    valfunc = lambda r,sheet=vs: getattr(sheet.source.ref, r)
-    valfunc.setter = lambda r,v,sheet=vs: setattr(sheet.source.ref, r, v)
-    vs.columns = [VColumn(type(obj).__name__ + '.attr'), VColumn('Value', valfunc)]
-    return vs
-
-MIMEToFileType = {
-    'text/html': 'html',
-}
-
-### input source formats
-
-def openSource(src):
-    if isinstance(src.ref, str):
-        if os.path.isdir(src.ref):
-            return open_dir(src)
-
-    funcname = 'open_' + src.type
-    vs = globals().get(funcname, open_txt)(src)
-
-    if '://' in src.ref:
-        vs.commands.update({
-            ord('A'): 'createDictSheet("headers:" + sheet.source.fp.geturl(), dict(sheet.source.fp.getheaders()))',
-        })
-
-    return vs
+### input formats and helpers
 
 sourceCache = {}
 
-def getContents(src):
-    if not src.ref in sourceCache:
-        sourceCache[src.ref] = getFile(src).read().decode(options.encoding, options.encoding_errors)
+class Path:
+    def __init__(self, fqpn):
+        self.fqpn = fqpn
+        self.name = os.path.split(fqpn)[-1]
+        self.suffix = os.path.splitext(self.name)[1][1:]
+    def read_text(self):
+        return open(self.fqpn, encoding=options.encoding, errors=options.encoding_errors).read()
+    def is_dir(self):
+        return os.path.isdir(self.fqpn)
+    def iterdir(self):
+        return [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.fqpn)]
+    def stat(self):
+        return os.stat(self.fqpn)
+    def __str__(self):
+        return self.fqpn
 
-    return sourceCache[src.ref]
+def getTextContents(p):
+    if not p in sourceCache:
+        sourceCache[p] = p.read_text()
+    return sourceCache[p]
 
-def getFile(src, mode='b'):  # mode may be 'b'
-    if not src.fp:
-        if hasattr(src.ref, 'read'):
-            src.fp = src.ref
-        elif isinstance(src.ref, str):
-            if '://' in src.ref:
-                import urllib.request
-                import cgi
-                resp = urllib.request.urlopen(src.ref)
-                src.fp = resp
-                src.ref = resp.geturl()   # replace with actual url retrieved (after following redirects)
-                ctype, params = cgi.parse_header(resp.getheader('Content-Type'))
-                src.type = MIMEToFileType.get(ctype, ctype.split('/')[-1])
-            else:
-                src.fp = open(src.ref, 'r' + mode)
+def openFileOrUrl(p):
+    if isinstance(p, Path):
+        if p.is_dir():
+            vs = VSheetDirectory(p)
         else:
-            vd.status('unknown how to get file object from %s' % src)
-            return None
-
-    return src.fp
-
-class hrefParser(html.parser.HTMLParser):
-    def __init__(self):
-        super().__init__(self)
-        self.hrefs = []
-
-    def handle_starttag(self, tag, attrs):
-        if tag == 'a':
-           attrdict = dict(attrs)
-           if 'href' in attrdict:
-               self.hrefs.append(attrdict)
-
-    def handle_data(self, data):
-        if self.hrefs and 'linktext' not in self.hrefs[-1]:
-            self.hrefs[-1]['linktext'] = data
-
-
-def open_html(src):
-    hp = hrefParser()
-    hp.feed(getContents(src))
-    vs = createListSheet(src.name + options.SubsheetSep + 'hrefs', hp.hrefs, PyobjColumns(hp.hrefs[0]), src=src)
-    vs.commands.update({
-        ENTER: 'openSource(VSource(urllib.parse.urljoin(sheet.source.ref, sheet.cursorRow["href"]), sheet.cursorRow["linktext"]))',
-    })
-    return vs
-
-
-def open_zip(src):
-    import zipfile
-    if not src.fp:
-        src.fp = zipfile.ZipFile(src.ref, 'r')
-
-    vs = vd.newSheet(src.name, src)
-    vs.rows = vs.source.fp.infolist()
-    vs.columns = AttrColumns('filename file_size date_time'.split())
-    vs.commands.update({
-        ENTER: 'openSource(VSource(sheet.source.fp.open(sheet.cursorRow), sheet.cursorRow.filename))',
-    })
-    return vs
-
-
-def open_txt(src):
-    return createTextViewer(src.name, getContents(src), src)
-
-
-def open_dir(src):
-    vs = vd.newSheet(src.name, src)
-    vs.rows = []
-    for dirpath, dirnames, filenames in os.walk(src.ref):
-        for fn in filenames:
-            basename, ext = os.path.splitext(fn)
-            path = os.path.join(dirpath, fn)
-            st = os.stat(path)
-            vs.rows.append((dirpath, fn, ext, st.st_size, datestr(st.st_mtime), path))
-
-    vs.columns = ArrayNamedColumns('directory filename ext size mtime')
-    vs.commands.update({
-        ENTER: 'openSource(VSource(sheet.cursorRow[-1], sheet.cursorRow[1]))'  # path, filename
-    })
-    return vs
-
-
-
-def open_csv(src):
-    contents = getContents(src)
-
-    if options.csv_dialect == 'sniff':
-        headers = contents[:1024]
-        dialect = csv.Sniffer().sniff(headers)
+            vs = globals().get('open_' + p.suffix, open_txt)(p)
+    elif '://' in p:
+        vs = openUrl(p)
     else:
-        dialect = options.csv_dialect
+        return openFileOrUrl(Path(p))
+    return vd.push(vs)
 
-    rdr = csv.reader(io.StringIO(contents, newline=''), dialect=dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+class VSheetText(VSheet):
+    def __init__(self, name, content, src=None):
+        super().__init__(name, src)
+        self.columns = [VColumn(name)]
+        if isinstance(content, list):
+            self.rows = content
+        elif isinstance(content, str):
+            self.rows = content.split('\n')
+        else:
+            raise VException('unknown text type ' + str(type(content)))
 
-    vs = vd.newSheet(src.name, src)
-    vs.rows = [r for r in rdr]
-    vs.columns = PyobjColumns(vs.rows[0]) or ArrayColumns(len(vs.rows[0]))
-    return vs
+class VSheetDirectory(VSheet):
+    def __init__(self, p):
+        super().__init__(p.name, p)
+        self.columns = [VColumn('filename', lambda r: r[0].name),
+                        VColumn('type', lambda r: r[0].is_dir() and '/' or r[0].suffix),
+                        VColumn('size', lambda r: r[1].st_size),
+                        VColumn('mtime', lambda r: datestr(r[1].st_mtime))]
+        self.command(ENTER, 'openFileOrUrl(sheet.cursorRow[0])')  # path, filename
+        self.reload()
 
+    def reload(self):
+        self.rows = [(p, p.stat()) for p in self.source.iterdir() if not p.name.startswith('.')]
 
-def open_json(src):
+def open_txt(p):
+    contents = getTextContents(p)
+    if '\t' in contents[:32]:
+        return open_tsv(p)  # TSV often have .txt extension
+    return VSheetText(p.name, contents, p)
+
+class open_csv(VSheet):
+    def __init__(self, p):
+        super().__init__(p.name, p)
+        contents = getTextContents(p)
+
+        if options.csv_dialect == 'sniff':
+            headers = contents[:1024]
+            dialect = csv.Sniffer().sniff(headers)
+            vd.status('sniffed csv_dialect as %s' % dialect)
+        else:
+            dialect = options.csv_dialect
+
+        rdr = csv.reader(io.StringIO(contents, newline=''), dialect=dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+        self.rows = [r for r in rdr]
+        self.columns = PyobjColumns(self.rows[0]) or ArrayColumns(len(self.rows[0]))
+
+class open_tsv(VSheet):
+    def __init__(self, p):
+        super().__init__(p.name, p)
+        lines = getTextContents(p).splitlines()
+
+        if options.csv_header:
+            self.columns = ArrayNamedColumns(lines[0].split('\t'))
+            lines = lines[1:]
+        else:
+            self.columns = ArrayColumns(len(lines[0].split('\t')))
+
+        self.rows = [L.split('\t') for L in lines]  # [rownum] -> [ field, ... ]
+
+def open_json(p):
     import json
-    obj = json.loads(getContents(src))
-    return createPyObjSheet(src.name, obj, src)
+    pushPyObjSheet(p.name, json.loads(getTextContents(p)))
 
+#### .xlsx
+class open_xlsx(VSheet):
+    def __init__(self, path):
+        super().__init__(path.name, path)
+        import openpyxl
+        self.workbook = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
+        self.rows = list(self.workbook.sheetnames)
+        self.columns = [VColumn('name')]
+        self.command(ENTER, 'vd.push(sheet.getSheet(sheet.cursorRow))', 'open this sheet')
 
-def open_tsv(src):
-    contents = getContents(src)
-    lines = contents.splitlines()
+    def getSheet(self, sheetname):
+        'create actual VSheet from xlsx sheet'
+        worksheet = self.workbook.get_sheet_by_name(sheetname)
+        vs = VSheet('%s%s%s' % (self.source, options.SubsheetSep, sheetname), worksheet)
+        vs.columns = ArrayColumns(worksheet.max_column)
+        vs.rows = [ [cell.value for cell in row] for row in worksheet.iter_rows()]
+        return vs
 
-    vs = vd.newSheet(src.name, src)
-    vs.rows = [L.split('\t') for L in lines[1:]]  # [rownum] -> [ field, ... ]
-    vs.columns = [VColumn(name, lambda_col(colnum)) for colnum, name in enumerate(lines[0].split('\t'))]  # list of VColumn in display order
+#### .hdf5
+class VSheetH5Obj(VSheet):
+    def __init__(self, name, hobj, src):
+        super().__init__(name, src)
+        self.hobj = hobj
+        self.reload()
+
+    def reload(self):
+        if isinstance(self.hobj, h5py.Group):
+            self.rows = [ self.hobj[objname] for objname in self.hobj.keys() ]
+            self.columns = [
+                VColumn(self.hobj.name, lambda r: r.name.split('/')[-1]),
+                VColumn('type', lambda r: type(r).__name__),
+                VColumn('nItems', lambda r: len(r)),
+            ]
+            self.command(ENTER, 'vd.push(VSheetH5Obj(sheet.name+options.SubSheetSep+sheet.cursorRow.name, sheet.cursorRow, sheet.source))', 'dive into this object')
+            self.command(ord('A'), 'vd.push(VSheetDict(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs))', 'view/edit the metadata for this object')
+        elif isinstance(self.hobj, h5py.Dataset):
+            assert len(self.hobj.shape) == 1
+            self.rows = self.hobj[:]  # copy
+            self.columns = [VColumn(colname, lambda_colname(colname)) for colname in self.hobj.dtype.names]
+        elif len(self.hobj.shape) == 2:  # matrix
+            self.rows = self.hobj[:]  # copy
+            self.columns = ArrayColumns(self.hobj.shape[1])
+
+class open_hdf5(VSheetH5Obj):
+    def __init__(self, p):
+        import h5py
+        super().__init__(p.name, h5py.File(str(p), 'r'), p)
+open_h5 = open_hdf5
+
+#### databases
+class VSheetBlaze(VSheet):
+    def __init__(self, name, data, src):
+        super().__init__(name, src)
+        self.columns = ArrayNamedColumns(data.fields)
+        self.rows = list(data)
+
+def openUrl(url):
+    import blaze
+    import datashape; datashape.coretypes._canonical_string_encodings.update({"utf8_unicode_ci": "U8"})
+    fp = blaze.data(url)
+    vs = VSheetList(url, [getattr(fp, tblname) for tblname in fp.fields], url)
+    vs.command(ENTER, 'vd.push(VSheetBlaze(sheet.cursorRow.name, sheet.cursorRow, sheet))', 'dive into this table')
     return vs
-
-
-def createHDF5Sheet(hobj, src):
-    import h5py
-    vs = vd.newSheet(hobj.name, src)
-
-    if isinstance(hobj, h5py.Group):
-        vs.rows = [ hobj[objname] for objname in hobj.keys() ]
-        vs.columns = [
-            VColumn(hobj.name, lambda r: r.name.split('/')[-1]),
-            VColumn('type', lambda r: type(r).__name__),
-            VColumn('nItems', lambda r: len(r)),
-        ]
-
-        vs.commands.update({
-            ENTER: 'createHDF5Sheet(sheet.cursorRow, sheet.source)',
-            ord('A'): 'createDictSheet(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs)',
-        })
-    elif isinstance(hobj, h5py.Dataset):
-        if len(hobj.shape) == 1:
-            vs.rows = hobj[:]
-            vs.columns = [VColumn(colname, lambda_colname(colname)) for colname in hobj.dtype.names]
-        elif len(hobj.shape) == 2:  # matrix
-            vs.rows = hobj[:]
-            vs.columns = ArrayColumns(hobj.shape[1])
-    return vs
-
-
-def open_h5(src):
-    import h5py
-    if not src.fp:
-        src.fp = h5py.File(src.ref, 'r')
-    hs = createHDF5Sheet(src.fp, src)
-    hs.name = src.name
-    return hs
-
-open_hdf5 = open_h5
-
-
-def open_xlsx(src):
-    import openpyxl
-
-    fp = getFile(src, mode='b')
-
-    workbook = openpyxl.load_workbook(fp, data_only=True, read_only=True)
-
-    for sheetname in workbook.sheetnames:
-        sheet = workbook.get_sheet_by_name(sheetname)
-        vs = vd.newSheet(src.ref + options.SubsheetSep + sheetname, src)
-
-        vs.columns = ArrayColumns(sheet.max_column)
-
-        for row in sheet.iter_rows():
-            vs.rows.append([cell.value for cell in row])
-
-    return vs  # return the last one
 
 ### Sheet savers
 
@@ -1070,12 +1171,18 @@ def save_csv(sheet, fn):
 
 ### curses, options, init
 
+def editValidate(ch, tb):
+    if ch in [ESC, ENTER, ctrl('c')]:
+        raise VEscape(ch)
+    return ch
+
 def editText(y, x, w, prompt=''):
     if not prompt:
         scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
     else:
-        scr.addstr(y, x, prompt) #'%-*s' % (windowWidth-1, prompt))
+        scr.addstr(y, x, prompt)
         x += len(prompt)
+
     curses.echo()
     inp = scr.getstr(y, x)
     curses.noecho()
@@ -1127,19 +1234,24 @@ def terminal_main():
     'Parse arguments and initialize VisiData instance'
     import argparse
 
-    global g_args, vd
+    global vd
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('inputs', nargs='*', help='initial sheets')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='abort on exception')
-    g_args = parser.parse_args()
+    parser.add_argument('-r', '--readonly', dest='readonly', action='store_true', default=False, help='editing disabled')
+    args = parser.parse_args()
+
+    options.debug = args.debug
+    options.readonly = args.readonly
 
     vd = VisiData()
-    inputs = g_args.inputs or ['.']
+    inputs = args.inputs or ['.']
 
-    for fn in inputs:
-        openSource(VSource(fn, fn))
+    for arg in inputs:
+        openFileOrUrl(arg)
 
+    os.putenv('ESCDELAY', '25')  # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     ret = wrapper(curses_main)
     if ret:
         print(ret)
@@ -1158,7 +1270,7 @@ def curses_main(_scr):
     try:
         return vd.run()
     except Exception as e:
-        if g_args.debug:
+        if options.debug:
             raise
         return 'Exception: ' + str(e)
 

@@ -1,0 +1,54 @@
+
+## smoke tests
+- launch with no arguments, see files in the current directory
+- choose a text file (without type, or unknown type), and ENTER to view it
+- scroll all the way down and back up with j/k/pgdn/pgup/gk/gj
+- if an error is hit, use 'E' to examine the last error, or '^E' to exit as a last resort
+
+## general movement
+- with wide csv, scroll to rightmost column with 'l' and 'gl'.  cell contents should be entirely visible.
+- cursor should never be offscreen, and rightmost column should not be truncated if cursor is on it
+
+### specifics
+- check text viewer with unicode
+- how to view line longer than width of terminal?
+
+## formats
+
+- .tsv (with and without header row)
+- .csv (changing delimiters and other options)
+- .txt with TSV data
+- .hdf5
+- .xlsx
+- .json (with deep and varied data arrangements)
+
+### specifics
+
+- change the extension on a file and watch it load as .txt.  'R' to reset the type.  and/or change parsing 'O'ptions.  either way, '^R' reload.
+
+## Pin columns
+
+### design details
+- key column header attr like header attr -- yellow+bold.  not same as column attr (brown).
+
+## 'S'heets sheet
+
+### goals
+- never any duplicate sheet entries on the sheets sheet
+
+### specifics
+- ENTER on sheets sheet while cursor is on the sheets sheet should be no-op
+- after choosing an existing sheet, sheets sheet should not remain on next entry.
+- move around and see sheets.cursorValue change.  go to sheets.cursorValue, see ¿.  press 'E' and see reason.
+
+## 'C'olumns sheet
+
+### specifics
+- change column size, go back to that sheet (should be parsed as int)
+
+- open 'O'ptions sheet
+  - edit an interface option (e.g. set , see that it's reflected in the interface
+
+
+- '.' (pin) on existing key column
+- g<ENTER> on file in directory, should be no-op...there is no "global" ENTER (yet).  but the page overrides ENTER.  it shouldn't be used.

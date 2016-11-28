@@ -1,4 +1,4 @@
-# VisiData v0.28
+# VisiData v0.30
 
 A curses interface for exploring and arranging tabular data
 
@@ -6,10 +6,27 @@ Usable via any remote shell which has Python3 installed.
 
 ## Features
 
-- can browse data in .csv, .tsv, .xlsx, .json, .hdf5, .zip formats
-- instantly create frequency table for column
-- search/select by regex
-- meta sheets (columns, options, even the sheets list itself)
+- inputs: .csv, .tsv, .json, .hdf5, .xlsx
+- outputs: .csv, .tsv
+- hjkl cursor movement, t/m/b scroll to position screen cursor
+- skip up/down columns by value
+- row/column reordering and deleting
+- resize column to fix max width of onscreen row
+- sort asc/desc by one column
+- 'g'lobal prefix supersizes many commands
+- 'e'dit cell contents
+- convert column to int/str/float
+- reload sheet with different format options
+- add new column by Python expression
+- 's'elect/'u'nselect rows, bulk delete with 'gd'
+- search/select by regex in column
+- 'F'requency table for current column with histogram
+- 'S'heets metasheet to manage/navigate multiple sheets,
+- 'C'olumns metasheet
+- 'O'ptions sheet to change the style or behavior
+- 'E'rror metasheet
+- 'g^P' status history sheet
+- inner/outer/full/diff joins on any number of sheets
 
 ## Installation
 
@@ -25,7 +42,7 @@ Usable via any remote shell which has Python3 installed.
 
 ## Usage
 
-        $ vd.py [<input> ...]
+        $ vd.py [-r/--readonly] [<input> ...]
 
 Inputs may be paths or URLs.  If no inputs are given, starts exploring the
 current directory.  Unknown filetypes are by default viewed with a text
@@ -37,51 +54,67 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
-|   **h**/**j**/**k**/**l** or **\<arrows\>** | move cell cursor left/down/up/right | move cursor all the way to the left/bottom/top/right |
-| **PgDn**/**PgUp** | scroll sheet one page down/up (minus stickied rows/columns) |  go to first/last page |
-|   **t**/**m**/**b**   | move cursor to top/middle/bottom row on screen |
-|   **^G**      | show sheet info on statusline |
-|   **^P**      | show last status message | open status history |
-|   **^R**      | reload sheet from source |
-|   **^S**     | save current sheet to new file (type based on extension) |
-|   **R**      | change type of sheet (requires ^R reload to reparse) |
+|   **h**/**j**/**k**/**l** or **\<arrows\>** | Move cell cursor left/down/up/right | Move cursor all the way to the left/bottom/top/right |
+| **PgDn**/**PgUp** | Scroll sheet one page down/up (minus stickied rows/columns) |  Go to first/last page |
+|   **t**/**m**/**b**   | Scrolls cursor row to top/middle/bottom of screen |
+|   **^G**      | Show sheet info on statusline |
+|   **^P**      | Show last status message | Open status history |
+|   **^R**      | Reload sheet from source |
+|   **^S**     | Save current sheet to new file (type based on extension) |
+|   **R**      | Change type of sheet (requires ^R reload to reparse) |
+|  **Ctrl-^** | Toggle to previous sheet |
 |
-|    **S**      | view current sheet stack |
-|    **C**      | build column summary.   shows stats (min/median/mean/max/stddev) |
+|    **S**      | View current sheet stack |
+|    **C**      | Build column summary |
 |
-|    **F**      | build frequency table for current column |
-|    **O**      | show/edit options |
+|    **F**      | Build frequency table for current column |
+|    **O**      | Show/edit options |
 |
-|    **E**      | view stack trace for previous error | quit and print stack trace to terminal |
-|    **^D**     | toggle debug mode (exceptions abort program) |
+|    **E**      | View stack trace for previous exceptions | View stacktraces for last 100 exceptions |
+|    **^E**     | Abort and print last exception and stacktrace to terminal |
+|    **^D**     | Toggle debug mode (future exceptions abort program) |
 |
-|    **-** (hyphen)   | delete current column |
 |    **_** (underscore)     | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
-|    **^**      | Set name of current column | Set name of all columns to the values in the current row |
 |    **[**/**]**    | Sort by current column (asc/desc) |
-|   **<**/**>**     | skip up/down to next value in column |
+|   **<**/**>**     | Skip up/down to next value in column |
 |
-|  **/** **?**    | Search forward/backward by regex in current column | search all columns
+|  **/** / **?**    | Search forward/backward by regex in current column | Search all columns
 | **p**/**n**  | Go to previous/next search match | Go to first/last match |
+| **\|**//**\\** | Select/Unselect rows by regex if this column matches | Select/Unselect rows if any column matches |
+| **s**/**u**/**\<Space\>** | Select/Unselect/Toggle current row | Select/Unselect/Toggle all rows |
 |
-|    **\|**     | select by regex if this column matches | select row if any column matches |
-|    **\\**     | unselect by regex or expression in this column | unselect row if any column matches | |
-|    **\<Space\>/u**  | select/unselect current row | select/unselect all rows |
+| Modifying commands (disabled with -r argument or options.readonly=True)
 |
-| **d**  | Delete current row |
-|**H**/**J**/**K**/**L** | move current column or row one to the left/down/up/right (changes data ordering) | "throw" the column/row all the way to the left/bottom/top/right |
-|
-|    **@**/**#**/**$**/**%**     | convert column to datetime/int/string/float |
-|
-|  **e** | edit current cell value |
-|  **=** | add new column by Python expression |
+|**H**/**J**/**K**/**L** | Move current column or row one to the left/down/up/right (changes data ordering) | "Throw" the column/row all the way to the left/bottom/top/right |
+|    **^**      | Set name of current column | Set names of all columns to the values in the current row |
+|    **-** (hyphen)   | Delete current column |
+| **d**  | Delete current row | Delete all selected rows |
+| **#**/**$**/**%** | Convert column to int/string/float |
+|  **e** | Edit current cell value |
+|  **=** | Add new column by Python expression |
+| **.** (period) | Make current column a key (pin to left and match on join) |
 
 ### HDF5 sheets
 
 | Keybinding | Action | with 'g' prefix |
 | ---: | --- | --- |
-|  **<Enter>** | open the group or dataset under the cursor |
-|  **A**   | view attributes of currently selected object | view attributes of current sheet |
+|  **<Enter>** | Open the group or dataset under the cursor |
+|  **A**   | View attributes of currently selected object | View attributes of current sheet |
+
+### 'S'heets commands
+
+| Keybinding | Action | with 'g' prefix |
+| ---: | --- | --- |
+| **&** | Join all selected sheets, keeping only rows which match keys on all sheets (inner join) |
+| **+** | Join all selected sheets, keeping all rows from first sheet (outer join) |
+| ** * ** (asterisk) | Join all selected sheets, keeping all rows from all sheets (full join) |
+| **~** | Join all selected sheets, keeping only rows NOT in all sheets (diff join) |
+
+
+### Notes
+
+- Edits made to a joined sheet will be reflected in the source sheets.
+
 
 
 ### Configurable Options (via shift-'O')
@@ -125,6 +158,7 @@ Please contact me at the email address above if you would like to contribute.
 - [BurntSushi/xsv](https://github.com/BurntSushi/xsv)
 - [andmarti1424/sc-im](https://github.com/andmarti1424/sc-im)
 - [teapot](https://www.syntax-k.de/projekte/teapot/)
+- and, of course, [VisiCalc](http://danbricklin.com/visicalc.htm)
 
 ## License
 
