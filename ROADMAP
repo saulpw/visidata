@@ -3,26 +3,39 @@
 
 A loose plan that is subject to change.
 
-## v0.3
-- inner/outer/cross/diff join rows from multiple sheets by matching key columns
-
-## v0.5
+## v0.4 - column typing, usability
+- custom line edit function (getstr lacks ESC and textpad is worthless with spaces, and neither can edit existing content)
+- all columns should be typed (str by default)
+   - put indicator in header row to indicate more columns to the left/right
+   - provide autodetect command (g for all columns)
+   - treat None/Error specially and consistently
+   - indicate column type in header
 - F1 loads help sheet
+
+## v0.5 options management (loading/saving)
+- make options an OrderedDict: option, default, sheet, help
+- make sheet options override global options
+- save/load options/command mappings (both global and per sheet--.cfg for now?)
+- save sheets layout, including generated sheets and visible columns (via replay mechanism?)
+
+## v0.6
+- save sources to .zip cache
+- edit/transform log
 - save all sheets to .h5 file
 - aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
 
+## v0.7
+- sql dbs via sqlalchemy
+
 ## v1.0
-- save sources to .zip cache
-- edit/transform log
-- sources sheet
-- save layout and options
 - regexes and Python expressions should be interchangeable (search, select, etc)
 - generic mechanism for coloring rows
     - highlight key rows on Columns sheet same as key column
 
 ## v1.1
-- connect to larger datasets via blaze
+- connect to larger datasets (via blaze?)
 - Python3 API for import by other scripts
+- load new .py plugins for inputs/outputs/sheets
 
 ## v1.2
 
@@ -34,7 +47,6 @@ A loose plan that is subject to change.
 - bulk interface (command line, macros?)
 
 ## Unscheduled
-- sql dbs via sqlalchemy
 - html table parsing into columns
 - datetime conversion with auto-detect/sniffer
 - popup menus for editing enum fields
@@ -44,10 +56,10 @@ A loose plan that is subject to change.
 - save as .json
 - better csv/tsv sniffer
 - fixed-column detector
+- easy'q'uit (for easily reproducible pages) vs sheet 'Q'uit
 
 ### Details
 
-- put indicator in header row to indicate more columns to the left/right
 - create rightside statusbar for status indicators like 'g' prefix and number of sheets
 - maintain original ordering with implicit/hidden line# column
 

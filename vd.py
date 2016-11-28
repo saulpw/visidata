@@ -971,7 +971,7 @@ class VSheetFreqTable(VSheet):
         self.largest = len(self.rows[0][1])+1
 
         self.columns = [
-            VColumn(fqcolname, lambda_col(0)),
+            VColumn(col.name, lambda_col(0)),
             VColumn('num', lambda r: len(r[1])),
             VColumn('histogram', lambda r,s=self: options.HistogramChar*int(len(r[1])*80/s.largest), width=80)
         ]
