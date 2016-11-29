@@ -1,16 +1,21 @@
-# v0.30
+# VisiData release history
+
+## v0.31
+- F1 help sheet
+- ^O directly exposes eval result as sheet
+- custom editText with initial value, ESC that raises VEscape, and readline edit keys
+
+## v0.30 (2016-11-27)
 - make all sheets subclasses of VSheet
 - remove .zip opening and url fetching
 - added options ColumnStats and csv_header
 
-# v0.29
-
+## v0.29
 - pin key columns to left
 - join sheets on exact key match
 - -r/--readonly mode
 
-# v0.28 (2016-11-22)
-
+## v0.28 (2016-11-22)
 - inputs: .csv, .tsv, .json, .hdf5, .xlsx, .zip
 - outputs: .csv, .tsv
 - hjkl cursor movement, t/m/b scroll to position screen cursor

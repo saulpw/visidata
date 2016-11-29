@@ -64,6 +64,8 @@ default_options = {
     'FunctionError': '¿',    # when computation fails due to exception
     'HistogramChar': '*',
     'ColumnStats': False,  # whether to include mean/median/etc on 'C'olumn sheet
+    'EditPadChar': '_',
+    'Unprintable': '.',
 
     # color scheme
     'c_default': 'normal',
@@ -91,6 +93,10 @@ colors = {
     'normal': curses.A_NORMAL,
 }
 
+
+def keyname(ch):
+    return curses.keyname(ch).decode('utf-8')
+
 class attrdict(object):
     def __init__(self, d):
         self.__dict__ = d
@@ -100,16 +106,13 @@ options = attrdict(default_options)
 class VException(Exception):
     pass
 
+class VEscape(VException):
+    pass
+
 class ChangeCommandSet(VException):
     def __init__(self, commands, mode):
         self.commands = commands
         self.mode = mode
-
-class VEscape(VException):
-    'raised by validator to signal which key was used to end the edit'
-    def __init__(self, ch, s=''):
-        super().__init__(s)
-        self.exit_ch = ch
 
 def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
@@ -197,7 +200,8 @@ command(ord('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inpu
 command(ord('R'), 'sheet.source.type = inputLine("change type to, ") or sheet.source.type', 'set parsing type of current sheet')
 command(ctrl('r'), 'openFileOrUrl(vd.sheets.pop(0).source); vd.status("reloaded")', 'reload current sheet')
 command(ctrl('s'), 'saveSheet(sheet, inputLine("save to, "))', 'save sheet (type determined by ext)')
-command(ord('o'), 'openFileOrUrl(inputLine("open, "))', 'open a file or url')
+command(ord('o'), 'openFileOrUrl(inputLine("open: "))', 'open a file or url')
+command(ctrl('o'), 'expr = inputLine("eval: "); pushPyObjSheet(expr, eval(expr))', 'eval an expression and show the result')
 
 command(ord('e'), 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex))', 'edit current cell')
 
@@ -274,7 +278,7 @@ class VSheet:
         self.colLayout = {}      # [colidx] -> (x, w)
 
         # all columns in display order
-        self.columns = None
+        self.columns = [ ]
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # current search term
@@ -585,7 +589,11 @@ class VSheet:
             colnum = self.cursorColIndex
         x, w = self.colLayout[colnum]
         y = self.rowLayout[self.cursorRowIndex]
-        r = editText(y, x, w)
+        currentValue = self.cellValue(self.cursorRowIndex, colnum)
+        r = editText(y, x, w, value=currentValue, fillchar=options.EditPadChar)
+        if r is None:
+            vd.status('nothing changed')
+            return currentValue
         if self.cursorCol.type:
             return self.cursorCol.type(r)  # convert input to column type
         else:
@@ -594,7 +602,7 @@ class VSheet:
     def CommandHelp(self):
         vs = VSheet(self.name + '_help', self)
         vs.rows = list(self.commands.items())
-        vs.columns = [VColumn('key', lambda r: curses.keyname(r[0]).decode('utf-8')),
+        vs.columns = [VColumn('key', lambda r: keyname(r[0])),
                 VColumn('action', lambda r: r[1][1]),
                 VColumn('global_action', lambda r: global_commands[r[0]][1])]
         return vs
@@ -681,7 +689,7 @@ class VisiData:
                     self.status(cmdstr)
             else:
                 command_overrides = None
-                self.status('no command for key "%s" (%d) ' % (curses.keyname(ch).decode('utf-8'), ch))
+                self.status('no command for key "%s" (%d) ' % (keyname(ch), ch))
 
             sheet.checkCursor()
 
@@ -734,6 +742,8 @@ class VColumn:
         cellval = self.getValue(row)
         if cellval is None:
             cellval = options.VisibleNone
+        if isinstance(cellval, bytes):
+            cellval = cellval.decode(options.encoding)
         return str(cellval).strip()
 
     def setValue(self, row, value):
@@ -1148,31 +1158,59 @@ def save_csv(sheet, fn):
             cw.writerow([col.getDisplayValue(r) for col in sheet.columns])
 
 ### curses, options, init
+def editText(y, x, w, prompt='', value='', fillchar=' '):
+    def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
+        return v if i < 0 else v[:i] + s + v[i:]
+    def clean(s):
+        return ''.join(c if c.isprintable() else options.Unprintable for c in s)
+    def delchar(s, i, remove=1):
+        return s[:i] + s[i+remove:]
 
-def editValidate(ch, tb):
-    if ch in [ESC, ENTER, ctrl('c')]:
-        raise VEscape(ch)
-    return ch
-
-def editText(y, x, w, prompt=''):
-    if not prompt:
-        scr.addstr(y, x, '_' * w, colors[options.c_EditCell])
-    else:
+    if prompt:
         scr.addstr(y, x, prompt)
         x += len(prompt)
+        w -= len(prompt)
 
-    curses.echo()
-    inp = scr.getstr(y, x)
-    curses.noecho()
-    r = inp.decode('utf-8')
-    vd.status('"%s"' % r)
-    return r
+    v = value   # value under edit
+    i = 0       # index into v
+    while True:
+        dispval = clean(v)
+        dispi = i
+        if len(v) < w:
+            dispval += fillchar*(w-len(v))
+        elif i >= w:
+            dispi = w-1
+            dispval = dispval[i-w:]
+
+        scr.addstr(y, x, dispval, colors[options.c_EditCell])
+        scr.move(y, x+dispi)
+        ch = scr.getch()
+        if ch == ctrl('a') or ch == curses.KEY_HOME:        i = 0
+        elif ch == ctrl('b') or ch == curses.KEY_LEFT:      i -= 1
+        elif ch == ctrl('c') or ch == ESC:                  raise VEscape(keyname(ch))
+        elif ch == ctrl('d') or ch == curses.KEY_DC:        v = delchar(v, i)
+        elif ch == ctrl('e') or ch == curses.KEY_END:       i = len(v)
+        elif ch == ctrl('f') or ch == curses.KEY_RIGHT:     i += 1
+        elif ch == ctrl('h') or ch == curses.KEY_BACKSPACE: i -= 1 if i > 0 else 0; v = delchar(v, i)
+        elif ch == ctrl('j') or ch == ENTER:                break
+        elif ch == ctrl('k'):                               v = v[:i]
+        elif ch == ctrl('r'):                               v = value
+        elif ch == ctrl('t'):                               v = delchar(splice(v, i-2, v[i-1]), i)
+        elif ch == ctrl('u'):                               v = v[i:]; i = 0
+        elif ch == ctrl('v'):                               v = splice(v, i, chr(scr.getch())); i+= 1
+        else:
+            v = splice(v, i, chr(ch))
+            i += 1
+
+        if i < 0: i = 0
+        if i > len(v): i = len(v)
+
+    vd.status('"%s"' % v)
+    return v
 
 def inputLine(prompt=''):
     'move to the bottom of the screen and get a line of input from the user'
-    scr.move(windowHeight-1, 0)
-    scr.clrtoeol()
-    return editText(windowHeight-1, 0, windowWidth-1, prompt)
+    return editText(windowHeight-1, 0, windowWidth-1, prompt, fillchar=' ')
 
 
 nextColorPair = 1
