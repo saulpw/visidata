@@ -95,9 +95,6 @@ colors = {
 }
 
 
-def keyname(ch):
-    return curses.keyname(ch).decode('utf-8')
-
 class attrdict(object):
     def __init__(self, d):
         self.__dict__ = d
@@ -114,6 +111,9 @@ class ChangeCommandSet(VException):
     def __init__(self, commands, mode):
         self.commands = commands
         self.mode = mode
+
+def keyname(ch):
+    return curses.keyname(ch).decode('utf-8')
 
 def ctrl(ch):
     return ord(ch) & 31  # convert from 'a' to ^A keycode
@@ -594,15 +594,10 @@ class VSheet:
             colnum = self.cursorColIndex
         x, w = self.colLayout[colnum]
         y = self.rowLayout[self.cursorRowIndex]
+
         currentValue = self.cellValue(self.cursorRowIndex, colnum)
         r = editText(y, x, w, value=currentValue, fillchar=options.EditPadChar)
-        if r is None:
-            vd.status('nothing changed')
-            return currentValue
-        if self.cursorCol.type:
-            return self.cursorCol.type(r)  # convert input to column type
-        else:
-            return r  # presume string is fine
+        return self.columns[colnum].type(r)  # convert input to column type
 
     def CommandHelp(self):
         vs = VSheet(self.name + '_help', self)
@@ -891,7 +886,7 @@ class VSheetColumns(VSheet):
             VColumn('width',  lambda_getattr('width')),
             VColumn('type',   lambda_getattr('type')),
             VColumn('expr',   lambda_getattr('expr')),
-            VColumn('value', lambda c,sheet=self: c.getValue(sheet.cursorRow)),
+            VColumn('value', lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
         ]
         if options.ColumnStats:
             self.columns.extend([
