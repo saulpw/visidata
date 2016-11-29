@@ -1079,6 +1079,7 @@ class VSheetH5Obj(VSheet):
         self.reload()
 
     def reload(self):
+        import h5py
         if isinstance(self.hobj, h5py.Group):
             self.rows = [ self.hobj[objname] for objname in self.hobj.keys() ]
             self.columns = [
@@ -1086,15 +1087,19 @@ class VSheetH5Obj(VSheet):
                 VColumn('type', lambda r: type(r).__name__),
                 VColumn('nItems', lambda r: len(r)),
             ]
-            self.command(ENTER, 'vd.push(VSheetH5Obj(sheet.name+options.SubSheetSep+sheet.cursorRow.name, sheet.cursorRow, sheet.source))', 'dive into this object')
+            self.command(ENTER, 'vd.push(VSheetH5Obj(sheet.name+options.SubsheetSep+sheet.cursorRow.name, sheet.cursorRow, sheet.source))', 'dive into this object')
             self.command(ord('A'), 'vd.push(VSheetDict(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs))', 'view/edit the metadata for this object')
         elif isinstance(self.hobj, h5py.Dataset):
-            assert len(self.hobj.shape) == 1
-            self.rows = self.hobj[:]  # copy
-            self.columns = [VColumn(colname, lambda_colname(colname)) for colname in self.hobj.dtype.names]
-        elif len(self.hobj.shape) == 2:  # matrix
-            self.rows = self.hobj[:]  # copy
-            self.columns = ArrayColumns(self.hobj.shape[1])
+            if len(self.hobj.shape) == 1:
+                self.rows = self.hobj[:]  # copy
+                self.columns = [VColumn(colname, lambda_colname(colname)) for colname in self.hobj.dtype.names]
+            elif len(self.hobj.shape) == 2:  # matrix
+                self.rows = self.hobj[:]  # copy
+                self.columns = ArrayColumns(self.hobj.shape[1])
+            else:
+                vd.status('too many dimensions in shape %s' % str(self.hobj.shape))
+        else:
+            vd.status('unknown h5 object type %s' % type(self.hobj))
 
 class open_hdf5(VSheetH5Obj):
     def __init__(self, p):
