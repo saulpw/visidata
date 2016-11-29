@@ -2,7 +2,7 @@ language: python
 python:
 - '3.4'
 script:
-- touch foo
+- pip3 install .
 deploy:
   provider: pypi
   user: saulpw
