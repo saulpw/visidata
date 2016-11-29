@@ -171,8 +171,8 @@ command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this co
 command(ord('#'), 'sheet.convertType(sheet.cursorCol, int)', 'convert column to integer')
 command(ord('$'), 'sheet.convertType(sheet.cursorCol, str)', 'convert column to string')
 command(ord('%'), 'sheet.convertType(sheet.cursorCol, float)', 'convert column to decimal numeric type')
-command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r, sheet.cursorCol.getValue(r) or sheet.cursorCol.type())', 'sort by current column ascending')
-command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r, sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)', 'sort by current column descending')
+command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type())', 'sort by current column ascending')
+command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)', 'sort by current column descending')
 command(ctrl('e'), 'options.debug = True; raise VException(vd.lastErrors[-1])', 'quit and print error to terminal')
 command(ctrl('d'), 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug option')
 
