@@ -23,6 +23,7 @@ __license__ = 'GPLv3'
 __status__ = 'Development'
 
 import itertools
+import copy
 import os.path
 import io
 import datetime
@@ -199,7 +200,7 @@ command(ord('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inpu
 
 command(ord('R'), 'sheet.source.type = inputLine("change type to, ") or sheet.source.type', 'set parsing type of current sheet')
 command(ctrl('r'), 'openFileOrUrl(vd.sheets.pop(0).source); vd.status("reloaded")', 'reload current sheet')
-command(ctrl('s'), 'saveSheet(sheet, inputLine("save to, "))', 'save sheet (type determined by ext)')
+command(ctrl('s'), 'saveSheet(sheet, inputLine("save to: "))', 'save sheet (type determined by ext)')
 command(ord('o'), 'openFileOrUrl(inputLine("open: "))', 'open a file or url')
 command(ctrl('o'), 'expr = inputLine("eval: "); pushPyObjSheet(expr, eval(expr))', 'eval an expression and show the result')
 
@@ -242,6 +243,10 @@ global_command(ord('d'), 'sheet.rows = [r for r in sheet.rows if not sheet.isSel
 
 global_command(ctrl('p'), 'vd.push(VSheetText("statuses", vd.statusHistory))', 'open sheet with all previous messages')
 
+# experimental commands
+
+command(ord('a'), 'sheet.rows.append(copy.copy(sheet.cursorRow))', 'append duplicate of this row')
+
 ### VisiData core
 
 def moveListItem(L, fromidx, toidx):
@@ -278,7 +283,7 @@ class VSheet:
         self.colLayout = {}      # [colidx] -> (x, w)
 
         # all columns in display order
-        self.columns = [ ]
+        self.columns = []
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # current search term
@@ -747,9 +752,7 @@ class VColumn:
         return str(cellval).strip()
 
     def setValue(self, row, value):
-        if options.readonly:
-            vd.status('readonly mode')
-        elif hasattr(self.func, 'setter'):
+        if hasattr(self.func, 'setter'):
             self.func.setter(row, value)
         else:
             vd.status('column cannot be changed')
@@ -1135,6 +1138,9 @@ def openUrl(url):
 ### Sheet savers
 
 def saveSheet(sheet, fn):
+    if options.readonly:
+        vd.status('readonly mode')
+        return
     basename, ext = os.path.splitext(fn)
     funcname = 'save_' + ext[1:]
     globals().get(funcname, save_tsv)(sheet, fn)

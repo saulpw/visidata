@@ -4,7 +4,6 @@
 A loose plan that is subject to change.
 
 ## v0.4 column typing, usability
-- custom line edit function (getstr lacks ESC and textpad is worthless with spaces, and neither can edit existing content)
 - all columns should be typed (str by default)
    - put indicator in header row to indicate more columns to the left/right
    - provide autodetect command (g for all columns)
