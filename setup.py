@@ -8,13 +8,13 @@ except ImportError:
     pass
 
 setup(name="visidata",
-      version="0.29",
+      version="0.31",
       description="a curses interface for exploring and arranging tabular data",
       long_description=open('README.md').read(),
       author="Saul Pwanson",
       author_email="vd@saul.pw",
-      url="https://github.com/saulpw/visidata",
-      download_url="https://raw.githubusercontent.com/saulpw/visidata/master/bin/vd",
+      url="http://saul.pw/visidata",
+      download_url="http://saul.pw/vd",
       scripts=['bin/vd'],
       license="GPLv3",
       classifiers=[
