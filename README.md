@@ -109,7 +109,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | ---: | --- | --- |
 | **&** | Join all selected sheets, keeping only rows which match keys on all sheets (inner join) |
 | **+** | Join all selected sheets, keeping all rows from first sheet (outer join) |
-| ** * ** (asterisk) | Join all selected sheets, keeping all rows from all sheets (full join) |
+| * (asterisk) | Join all selected sheets, keeping all rows from all sheets (full join) |
 | **~** | Join all selected sheets, keeping only rows NOT in all sheets (diff join) |
 
 
