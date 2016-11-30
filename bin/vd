@@ -56,6 +56,8 @@ default_options = {
 
     'VisibleNone': '',   # visible contents of a cell whose value was None
     'ColumnFiller': ' ',
+    'LeftPadding': ' ',
+    'RightPadding': ' ',
     'ColumnSep': ' | ',  # chars between columns
     'Ellipsis': '…',
     'SubsheetSep': '~',
@@ -532,14 +534,32 @@ class VSheet:
         x = 0
         for colidx in range(0, len(self.columns)):
             col = self.columns[colidx]
-            col.width = col.width or getMaxWidth(col, self.visibleRows)
+            col.width = col.width or getMaxWidth(col, self.visibleRows)+len(options.LeftPadding)+len(options.RightPadding)
             if colidx < self.nKeys or colidx >= self.leftColIndex:  # visible columns
                 self.colLayout[colidx] = (x, min(col.width, windowWidth-x))
                 x += col.width+len(options.ColumnSep)
             if x > windowWidth:
                 break
 
+    def drawColHeader(self, colidx):
+        # choose attribute to highlight column header
+        if colidx == self.cursorColIndex:  # cursor is at this column
+            hdrattr = colors[options.c_CurHdr]
+        elif colidx < self.nKeys:
+            hdrattr = colors[options.c_KeyCols]
+        else:
+            hdrattr = colors[options.c_Header]
+
+        col = self.columns[colidx]
+        x, colwidth = self.colLayout[colidx]
+
+        vd.clipdraw(0, x, col.name or defaultColNames[colidx], hdrattr, colwidth)
+        if x+colwidth+len(options.ColumnSep) <= windowWidth:
+            scr.addstr(0, x+colwidth, options.ColumnSep, colors[options.c_ColumnSep])
+
+
     def draw(self):
+        numHeaderRows = 1
         scr.erase()  # clear screen before every re-draw
         sepchars = options.ColumnSep
 
@@ -547,22 +567,10 @@ class VSheet:
         self.calcColLayout()
         for colidx, colinfo in sorted(self.colLayout.items()):
             x, colwidth = colinfo
-            col = self.columns[colidx]
             if x < windowWidth:  # only draw inside window
-                # choose attribute to highlight column header
-                if colidx == self.cursorColIndex:  # cursor is at this column
-                    hdrattr = colors[options.c_CurHdr]
-                elif colidx < self.nKeys:
-                    hdrattr = colors[options.c_KeyCols]
-                else:
-                    hdrattr = colors[options.c_Header]
+                self.drawColHeader(colidx)
 
-                y = 0
-                vd.clipdraw(y, x, col.name or defaultColNames[colidx], hdrattr, colwidth)
-                if x+colwidth+len(sepchars) <= windowWidth:
-                    scr.addstr(y, x+colwidth, sepchars, colors[options.c_ColumnSep])
-
-                y += 1
+                y = numHeaderRows
                 for rowidx in range(0, windowHeight-2):
                     if self.topRowIndex + rowidx >= len(self.rows):
                         break
