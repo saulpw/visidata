@@ -46,10 +46,10 @@ default_options = {
     'csv_dialect': 'excel',
     'csv_delimiter': ',',
     'csv_quotechar': '"',
-    'csv_header': False,
+    'csv_header': '',
 
-    'debug': False,
-    'readonly': False,
+    'debug': '',
+    'readonly': '',
 
     'encoding': 'utf-8',
     'encoding_errors': 'surrogateescape',
@@ -120,6 +120,8 @@ def ctrl(ch):
 
 ENTER = ctrl('j')
 ESC = 27
+
+UnspecifiedType = lambda r=None: r
 
 base_commands = {}
 global_commands = {}
@@ -405,7 +407,7 @@ class VSheet:
             try:
                 col.setValue(r, newType(col.getValue(r)))
             except Exception as e:
-                col.setValue(r, None)
+                # col.setValue(r, None)  # leave value as is?
                 nErrors += 1
         col.type = newType
         vd.status('converted %s to %s with %s exceptions' % (col.name, newType.__name__, nErrors))
@@ -602,9 +604,9 @@ class VSheet:
     def CommandHelp(self):
         vs = VSheet(self.name + '_help', self)
         vs.rows = list(self.commands.items())
-        vs.columns = [VColumn('key', lambda r: keyname(r[0])),
-                VColumn('action', lambda r: r[1][1]),
-                VColumn('global_action', lambda r: global_commands[r[0]][1])]
+        vs.columns = [VColumn('key', str, lambda r: keyname(r[0])),
+                VColumn('action', str, lambda r: r[1][1]),
+                VColumn('global_action', str, lambda r: global_commands[r[0]][1])]
         return vs
 
 # end VSheet class
@@ -724,16 +726,20 @@ class VisiData:
 
 ## columns
 class VColumn:
-    def __init__(self, name, func=lambda r: r, width=None):
+    def __init__(self, name, type=UnspecifiedType, func=lambda r: r, width=None):
         self.name = name
         self.func = func
         self.width = width
-        self.type = None
+        self.type = type
         self.expr = None  # Python string expression if computed column
 
     def getValue(self, row):
         try:
-            return self.func(row)
+            v = self.func(row)
+            assert self.type is not None, self.type
+            if self.type is not UnspecifiedType and v:
+                assert type(v) == self.type, type(v)
+            return v
         except Exception as e:
             vd.exceptionCaught(status=False)
             return options.FunctionError
@@ -744,7 +750,7 @@ class VColumn:
             cellval = options.VisibleNone
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding)
-        return str(cellval).strip()
+        return str(cellval)
 
     def setValue(self, row, value):
         if hasattr(self.func, 'setter'):
@@ -790,15 +796,15 @@ def getPublicAttrs(obj):
 
 def PyobjColumns(exampleRow):
     'columns for each public attribute on an object'
-    return [VColumn(k, lambda_getattr(k)) for k in getPublicAttrs(exampleRow)]
+    return [VColumn(k, type(getattr(exampleRow, k)), lambda_getattr(k)) for k in getPublicAttrs(exampleRow)]
 
 def ArrayColumns(n):
     'columns that display r[0]..r[n]'
-    return [VColumn('', lambda_col(colnum)) for colnum in range(n)]
+    return [VColumn('', UnspecifiedType, lambda_col(colnum)) for colnum in range(n)]
 
 def ArrayNamedColumns(columns):
     'columnstr is a string of n column names (separated by spaces), mapping to r[0]..r[n]'
-    return [VColumn(colname, lambda_col(i)) for i, colname in enumerate(columns)]
+    return [VColumn(colname, UnspecifiedType, lambda_col(i)) for i, colname in enumerate(columns)]
 
 def AttrColumns(colnames):
     'colnames is list of attribute names'
@@ -825,7 +831,7 @@ class VSheetList(VSheet):
         if columns:
             self.columns = AttrColumns(columns)
         elif isinstance(obj[0], dict):  # list of dict
-            self.columns = [VColumn(k, lambda_colname(k)) for k in obj[0].keys()]
+            self.columns = [VColumn(k, type(obj[0][k]), lambda_colname(k)) for k in obj[0].keys()]
         else:
             self.columns = [VColumn(name)]
         self.command(ENTER, 'pushPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex', 'dive into this row')
@@ -835,8 +841,8 @@ class VSheetDict(VSheet):
         super().__init__(name, mapping)
         self.rows = sorted(list(list(x) for x in mapping.items()))
         self.columns = [
-            VColumn('key', lambda_col(0)),
-            VColumn('value', lambda_col(1)) ]
+            VColumn('key', str, lambda_col(0)),
+            VColumn('value', UnspecifiedType, lambda_col(1)) ]
         self.command(ENTER, 'if sheet.cursorColIndex == 1: pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
         self.command(ord('e'), 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1)', 'edit this value')
 
@@ -851,8 +857,8 @@ class VSheetObject(VSheet):
         valfunc = lambda_col(1)
         valfunc.setter = lambda r,v,obj=self.source: setattr(obj, r[0], v)
         self.columns = [
-            VColumn(type(self.source).__name__ + '_attr', lambda_col(0)),
-            VColumn('value', valfunc) ]
+            VColumn(type(self.source).__name__ + '_attr', str, lambda_col(0)),
+            VColumn('value', UnspecifiedType, valfunc) ]
         self.rows = [(k, getattr(self.source, k)) for k in getPublicAttrs(self.source)]
 
 #### specialized meta sheets
@@ -882,20 +888,20 @@ class VSheetColumns(VSheet):
     def reload(self):
         self.rows = self.source.columns
         self.columns = [
-            VColumn('column', lambda_getattr('name')),
-            VColumn('width',  lambda_getattr('width')),
-            VColumn('type',   lambda_getattr('type')),
-            VColumn('expr',   lambda_getattr('expr')),
-            VColumn('value', lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
+            VColumn('name',   str, lambda_getattr('name')),
+            VColumn('width',  int, lambda_getattr('width')),
+            VColumn('type',   str, lambda r: r.type.__name__),
+            VColumn('expr',   str, lambda_getattr('expr')),
+            VColumn('value',  UnspecifiedType, lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
         ]
         if options.ColumnStats:
             self.columns.extend([
-                VColumn('mode',   lambda c: statistics.mode(sheet.columnValues(c))),
-                VColumn('min',    lambda c: min(sheet.columnValues(c))),
-                VColumn('median', lambda c: statistics.median(sheet.columnValues(c))),
-                VColumn('mean',   lambda c: statistics.mean(sheet.columnValues(c))),
-                VColumn('max',    lambda c: max(sheet.columnValues(c))),
-                VColumn('stddev', lambda c: statistics.stdev(sheet.columnValues(c))),
+                VColumn('mode',   UnspecifiedType, lambda c: statistics.mode(sheet.columnValues(c))),
+                VColumn('min',    UnspecifiedType, lambda c: min(sheet.columnValues(c))),
+                VColumn('median', UnspecifiedType, lambda c: statistics.median(sheet.columnValues(c))),
+                VColumn('mean',   float, lambda c: statistics.mean(sheet.columnValues(c))),
+                VColumn('max',    UnspecifiedType, lambda c: max(sheet.columnValues(c))),
+                VColumn('stddev', float, lambda c: statistics.stdev(sheet.columnValues(c))),
             ])
 
 #### slicing and dicing
@@ -909,7 +915,7 @@ class VSheetJoin(VSheet):
     def reload(self):
         sheets = self.source
         # first element in joined row is the tuple of keys
-        self.columns = [VColumn(sheets[0].columns[colnum].name, lambda_subrow_wrap(lambda_col(colnum), 0)) for colnum in range(sheets[0].nKeys)]
+        self.columns = [VColumn(sheets[0].columns[colnum].name, UnspecifiedType, lambda_subrow_wrap(lambda_col(colnum), 0)) for colnum in range(sheets[0].nKeys)]
         self.nKeys = sheets[0].nKeys
 
         rowsBySheetKey = {}
@@ -923,7 +929,7 @@ class VSheetJoin(VSheet):
 
         for sheetnum, vs in enumerate(sheets):
             # subsequent elements are the rows from each source, in order of the source sheets
-            self.columns.extend(VColumn(c.name, lambda_subrow_wrap(c.func, sheetnum+1)) for c in vs.columns[vs.nKeys:])
+            self.columns.extend(VColumn(c.name, UnspecifiedType, lambda_subrow_wrap(c.func, sheetnum+1)) for c in vs.columns[vs.nKeys:])
             for r in vs.rows:
                 key = tuple(c.getValue(r) for c in vs.keyCols)
                 if key not in rowsByKey:
@@ -952,9 +958,9 @@ class VSheetFreqTable(VSheet):
         self.largest = len(self.rows[0][1])+1
 
         self.columns = [
-            VColumn(col.name, lambda_col(0)),
-            VColumn('num', lambda r: len(r[1])),
-            VColumn('histogram', lambda r,s=self: options.HistogramChar*int(len(r[1])*80/s.largest), width=80)
+            VColumn(col.name, str, lambda_col(0)),
+            VColumn('num', int, lambda r: len(r[1])),
+            VColumn('histogram', str, lambda r,s=self: options.HistogramChar*int(len(r[1])*80/s.largest), width=80)
         ]
         self.command(ord(' '), 'sheet.source.toggle(sheet.cursorRow[1])', 'toggle these entries')
         self.command(ord('s'), 'sheet.source.select(sheet.cursorRow[1])', 'select these entries')
@@ -1001,7 +1007,7 @@ def openFileOrUrl(p):
 class VSheetText(VSheet):
     def __init__(self, name, content, src=None):
         super().__init__(name, src)
-        self.columns = [VColumn(name)]
+        self.columns = [VColumn(name, str)]
         if isinstance(content, list):
             self.rows = content
         elif isinstance(content, str):
@@ -1012,10 +1018,10 @@ class VSheetText(VSheet):
 class VSheetDirectory(VSheet):
     def __init__(self, p):
         super().__init__(p.name, p)
-        self.columns = [VColumn('filename', lambda r: r[0].name),
-                        VColumn('type', lambda r: r[0].is_dir() and '/' or r[0].suffix),
-                        VColumn('size', lambda r: r[1].st_size),
-                        VColumn('mtime', lambda r: datestr(r[1].st_mtime))]
+        self.columns = [VColumn('filename', str, lambda r: r[0].name),
+                        VColumn('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
+                        VColumn('size', int, lambda r: r[1].st_size),
+                        VColumn('mtime', str, lambda r: datestr(r[1].st_mtime))]
         self.command(ENTER, 'openFileOrUrl(sheet.cursorRow[0])')  # path, filename
         self.reload()
 
@@ -1068,7 +1074,7 @@ class open_xlsx(VSheet):
         import openpyxl
         self.workbook = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
         self.rows = list(self.workbook.sheetnames)
-        self.columns = [VColumn('name')]
+        self.columns = [VColumn('name', str)]
         self.command(ENTER, 'vd.push(sheet.getSheet(sheet.cursorRow))', 'open this sheet')
 
     def getSheet(self, sheetname):
@@ -1091,16 +1097,16 @@ class VSheetH5Obj(VSheet):
         if isinstance(self.hobj, h5py.Group):
             self.rows = [ self.hobj[objname] for objname in self.hobj.keys() ]
             self.columns = [
-                VColumn(self.hobj.name, lambda r: r.name.split('/')[-1]),
-                VColumn('type', lambda r: type(r).__name__),
-                VColumn('nItems', lambda r: len(r)),
+                VColumn(self.hobj.name, str, lambda r: r.name.split('/')[-1]),
+                VColumn('type', str, lambda r: type(r).__name__),
+                VColumn('nItems', int, lambda r: len(r)),
             ]
             self.command(ENTER, 'vd.push(VSheetH5Obj(sheet.name+options.SubsheetSep+sheet.cursorRow.name, sheet.cursorRow, sheet.source))', 'dive into this object')
             self.command(ord('A'), 'vd.push(VSheetDict(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs))', 'view/edit the metadata for this object')
         elif isinstance(self.hobj, h5py.Dataset):
             if len(self.hobj.shape) == 1:
                 self.rows = self.hobj[:]  # copy
-                self.columns = [VColumn(colname, lambda_colname(colname)) for colname in self.hobj.dtype.names]
+                self.columns = [VColumn(colname, str, lambda_colname(colname)) for colname in self.hobj.dtype.names]
             elif len(self.hobj.shape) == 2:  # matrix
                 self.rows = self.hobj[:]  # copy
                 self.columns = ArrayColumns(self.hobj.shape[1])
@@ -1163,7 +1169,7 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
     def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
         return v if i < 0 else v[:i] + s + v[i:]
     def clean(s):
-        return ''.join(c if c.isprintable() else options.Unprintable for c in s)
+        return ''.join(c if c.isprintable() else options.Unprintable for c in str(s))
     def delchar(s, i, remove=1):
         return s[:i] + s[i+remove:]
 
@@ -1177,8 +1183,8 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
     while True:
         dispval = clean(v)
         dispi = i
-        if len(v) < w:
-            dispval += fillchar*(w-len(v))
+        if len(dispval) < w:
+            dispval += fillchar*(w-len(dispval))
         elif i >= w:
             dispi = w-1
             dispval = dispval[i-w:]
