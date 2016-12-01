@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.31'
+__version__ = '0.32'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -56,9 +56,9 @@ default_options = {
 
     'VisibleNone': '',   # visible contents of a cell whose value was None
     'ColumnFiller': ' ',
-    'LeftPadding': ' ',
-    'RightPadding': ' ',
-    'ColumnSep': ' | ',  # chars between columns
+    'LeftMore': '<',
+    'RightMore': '>',
+    'ColumnSep': '|',  # chars between columns
     'Ellipsis': '…',
     'SubsheetSep': '~',
     'StatusSep': ' | ',
@@ -114,6 +114,12 @@ class ChangeCommandSet(VException):
         self.commands = commands
         self.mode = mode
 
+def error(s):
+    raise VException(s)
+
+def escape(s):
+    raise VEscape(s)
+
 def keyname(ch):
     return curses.keyname(ch).decode('utf-8')
 
@@ -124,6 +130,7 @@ ENTER = ctrl('j')
 ESC = 27
 
 UnspecifiedType = lambda r=None: r
+UnspecifiedType.__name__ = ''
 
 base_commands = {}
 global_commands = {}
@@ -150,10 +157,10 @@ command(ord('j'), 'sheet.moveCursorDown(+1)')
 command(ord('k'), 'sheet.moveCursorDown(-1)')
 command(ord('l'), 'sheet.moveCursorRight(+1)')
 
-command(ord('H'), 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, max(sheet.cursorColIndex-1, 0))', 'shift-movement reorders current row/column')
+command(ord('H'), 'moveListItem(sheet.columns, sheet.cursorColIndex, max(sheet.cursorColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'shift-movement reorders current row/column')
 command(ord('J'), 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, min(sheet.cursorRowIndex+1, sheet.nRows-1))')
 command(ord('K'), 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))')
-command(ord('L'), 'sheet.cursorColIndex = moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols))')
+command(ord('L'), 'moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols)); sheet.cursorVisibleColIndex += 1')
 
 command(ctrl('g'), 'vd.status(sheet.statusLine)', 'current sheet info')
 command(ctrl('p'), 'vd.status(vd.statusHistory[0])', 'show previous status line again')
@@ -167,7 +174,7 @@ command(ord('<'), 'sheet.skipUp()', 'skip up current column to previous value')
 command(ord('>'), 'sheet.skipDown()', 'skip down current column to next value')
 
 command(ord('_'), 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)', 'set column width to max visible cell on screen')
-command(ord('-'), 'sheet.columns.pop(sheet.cursorColIndex)', 'delete current column')
+command(ord('-'), 'sheet.cursorCol.width = 0', 'hide current column')
 command(ord('^'), 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)', 'set current column header to current cell value')
 command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as key')
 
@@ -177,7 +184,7 @@ command(ord('$'), 'sheet.convertType(sheet.cursorCol, str)', 'convert column to 
 command(ord('%'), 'sheet.convertType(sheet.cursorCol, float)', 'convert column to decimal numeric type')
 command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type())', 'sort by current column ascending')
 command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)', 'sort by current column descending')
-command(ctrl('e'), 'options.debug = True; raise VException(vd.lastErrors[-1])', 'quit and print error to terminal')
+command(ctrl('e'), 'options.debug = True; error(vd.lastErrors[-1])', 'quit and print last error to terminal')
 command(ctrl('d'), 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug option')
 
 command(ord('E'), 'if vd.lastErrors: vd.push(VSheetText("last_error", vd.lastErrors[-1]))', 'display stack trace for most recent exception')
@@ -208,7 +215,7 @@ command(ctrl('s'), 'saveSheet(sheet, inputLine("save to: "))', 'save sheet (type
 command(ord('o'), 'openFileOrUrl(inputLine("open: "))', 'open a file or url')
 command(ctrl('o'), 'expr = inputLine("eval: "); pushPyObjSheet(expr, eval(expr))', 'eval an expression and show the result')
 
-command(ord('e'), 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorColIndex))', 'edit current cell')
+command(ord('e'), 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorVisibleColIndex))', 'edit current cell')
 
 command(ord('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))', 'add column by expr')
 command(ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'swap top two sheets (like vi)')
@@ -216,23 +223,23 @@ command(ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 's
 # when used with 'g' prefix
 global_command(ord('q'), 'vd.sheets.clear()', 'quit all sheets (and therefore exit)')
 
-global_command(ord('h'), 'sheet.cursorColIndex = sheet.leftColIndex = 0', 'move cursor to leftmost column')
+global_command(ord('h'), 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'move cursor to leftmost column')
 global_command(ord('k'), 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'move cursor to top row')
 global_command(ord('j'), 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows', 'move cursor to bottom row')
-global_command(ord('l'), 'sheet.cursorColIndex = len(sheet.columns)-1', 'move cursor to rightmost column')
+global_command(ord('l'), 'sheet.cursorVisibleColIndex = len(sheet.visibleCols)-1', 'move cursor to rightmost column')
 
 global_command(ord('H'), 'moveListItem(sheet.columns, sheet.cursorColIndex, 0)', 'throw current column all the way to the left')
 global_command(ord('J'), 'moveListItem(sheet.rows, sheet.cursorRowIndex, sheet.nRows)', 'throw current row all the way to the bottom')
 global_command(ord('K'), 'moveListItem(sheet.rows, sheet.cursorRowIndex, 0)', 'throw current row all the way to the top')
 global_command(ord('L'), 'moveListItem(sheet.columns, sheet.cursorColIndex, sheet.nCols)', 'throw current column all the way to the right')
 
-global_command(ord('_'), 'for c in sheet.columns: c.width = getMaxWidth(c, sheet.visibleRows)', 'resize all columns to max width of visible cells on screen')
-global_command(ord('^'), 'for c in sheet.columns: c.name = c.getDisplayValue(sheet.cursorRow)', 'set all column names to values in the current row')
+global_command(ord('_'), 'for c in sheet.visibleCols: c.width = getMaxWidth(c, sheet.visibleRows)', 'resize all columns to max width of visible cells on screen')
+global_command(ord('^'), 'for c in sheet.visibleCols: c.name = c.getDisplayValue(sheet.cursorRow)', 'set all column names to values in the current row')
 
 global_command(ord('E'), 'vd.push(VSheetText("last_error", "\\n\\n".join(vd.lastErrors)))', 'push sheet of all previous errors')
 
-global_command(ord('/'), 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True, columns=sheet.columns)', 'search regex forward in all columns')
-global_command(ord('?'), 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=sheet.columns)', 'search regex backward in all columns')
+global_command(ord('/'), 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True, columns=sheet.visibleCols)', 'search regex forward in all visible columns')
+global_command(ord('?'), 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=sheet.visibleCols)', 'search regex backward in all visible columns')
 global_command(ord('n'), 'sheet.cursorRowIndex = max(sheet.searchRegex())', 'move cursor to first match')
 global_command(ord('p'), 'sheet.cursorRowIndex = min(sheet.searchRegex())', 'move cursor to last match')
 
@@ -240,8 +247,8 @@ global_command(ord(' '), 'sheet.toggle(sheet.rows)', 'toggle all rows')
 global_command(ord('s'), 'sheet.select(sheet.rows)', 'select all rows')
 global_command(ord('u'), 'sheet._selectedRows = {}', 'unselect all rows')
 
-global_command(ord('|'), 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.columns))', 'select rows by regex in all columns')
-global_command(ord('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.columns))', 'unselect rows by regex in all columns')
+global_command(ord('|'), 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.visibleCols))', 'select rows by regex in all visible columns')
+global_command(ord('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.visibleCols))', 'unselect rows by regex in all visible columns')
 
 global_command(ord('d'), 'sheet.rows = [r for r in sheet.rows if not sheet.isSelected(r)]; sheet._selectedRows = {}', 'delete all selected rows')
 
@@ -277,14 +284,14 @@ class VSheet:
         self.source = src
         self.rows = []
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
-        self.cursorColIndex = 0  # absolute index of cursor into self.columns
+        self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
 
         self.topRowIndex = 0     # cursorRowIndex of topmost row
-        self.leftColIndex = 0    # cursorColIndex of leftmost column
+        self.leftVisibleColIndex = 0    # cursorVisibleColIndex of leftmost column
 
         # as computed during draw()
         self.rowLayout = {}      # [rowidx] -> y
-        self.colLayout = {}      # [colidx] -> (x, w)
+        self.visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # all columns in display order
         self.columns = []
@@ -316,15 +323,23 @@ class VSheet:
 
     @property
     def cursorCol(self):
-        return self.columns[self.cursorColIndex]
+        return self.visibleCols[self.cursorVisibleColIndex]
 
     @property
     def cursorRow(self):
         return self.rows[self.cursorRowIndex]
 
     @property
-    def visibleRows(self):
+    def visibleRows(self):  # onscreen rows
         return self.rows[self.topRowIndex:self.topRowIndex+windowHeight-2]
+
+    @property
+    def visibleCols(self):  # non-hidden cols
+        return [c for c in self.columns if not c.hidden]
+
+    @property
+    def cursorColIndex(self):
+        return self.columns.index(self.cursorCol)
 
     @property
     def selectedRows(self):
@@ -354,11 +369,15 @@ class VSheet:
     def nCols(self):
         return len(self.columns)
 
+    @property
+    def nVisibleCols(self):
+        return len(self.visibleCols)
+
     def moveCursorDown(self, n):
         self.cursorRowIndex += n
 
     def moveCursorRight(self, n):
-        self.cursorColIndex += n
+        self.cursorVisibleColIndex += n
 
     def cellValue(self, rownum, col):
         if not isinstance(col, VColumn):
@@ -368,9 +387,7 @@ class VSheet:
 
     @functools.lru_cache()
     def columnValues(self, col):
-        if not isinstance(col, VColumn):
-            # assume it's the column number
-            col = self.columns[col]
+        assert isinstance(col, VColumn)
         return [col.getValue(r) for r in self.rows]
 
     def addColumn(self, col):
@@ -409,7 +426,7 @@ class VSheet:
             try:
                 col.setValue(r, newType(col.getValue(r)))
             except Exception as e:
-                # col.setValue(r, None)  # leave value as is?
+                # col.setValue(r, None)  # leave value as-is, set to newType(), or set to None?
                 nErrors += 1
         col.type = newType
         vd.status('converted %s to %s with %s exceptions' % (col.name, newType.__name__, nErrors))
@@ -448,10 +465,10 @@ class VSheet:
         elif self.cursorRowIndex >= len(self.rows):
             self.cursorRowIndex = len(self.rows)-1
 
-        if self.cursorColIndex <= 0:
-            self.cursorColIndex = 0
-        elif self.cursorColIndex >= len(self.columns):
-            self.cursorColIndex = len(self.columns)-1
+        if self.cursorVisibleColIndex <= 0:
+            self.cursorVisibleColIndex = 0
+        elif self.cursorVisibleColIndex >= self.nVisibleCols:
+            self.cursorVisibleColIndex = self.nVisibleCols-1
 
         if self.topRowIndex <= 0:
             self.topRowIndex = 0
@@ -459,7 +476,7 @@ class VSheet:
             self.topRowIndex = len(self.rows)-1
 
         # (x,y) is relative cell within screen viewport
-        x = self.cursorColIndex - self.leftColIndex
+        x = self.cursorVisibleColIndex - self.leftVisibleColIndex
         y = self.cursorRowIndex - self.topRowIndex + 1  # header
 
         # check bounds, scroll if necessary
@@ -469,21 +486,26 @@ class VSheet:
             self.topRowIndex = self.cursorRowIndex-windowHeight+3
 
         if x <= 0:
-            self.leftColIndex = self.cursorColIndex
+            self.leftVisibleColIndex = self.cursorVisibleColIndex
         else:
-            # keycolwidth = sum(self.columns[i].width for i in range(0, self.nKeys))
+            i = 0
             while True:
+                i += 1
+                if i > 1000:
+                    error('too many iterations')
                 self.calcColLayout()
-                if self.cursorColIndex not in self.colLayout:  # should always be to the right
-                    assert self.cursorColIndex > self.leftColIndex
-                    self.leftColIndex += 1
+                if self.cursorVisibleColIndex not in self.visibleColLayout:  # should always be to the right
+                    if self.cursorVisibleColIndex > self.leftVisibleColIndex:
+                        self.leftVisibleColIndex += 1
+                    else:
+                        self.leftVisibleColIndex -= 1
                     continue
-                cur_x, cur_w = self.colLayout[self.cursorColIndex]
-                left_x, left_w = self.colLayout[self.leftColIndex]
+                cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
+                left_x, left_w = self.visibleColLayout[self.leftVisibleColIndex]
                 if cur_x+cur_w < windowWidth:
                     # current columns fit entirely on screen
                     break
-                self.leftColIndex += 1
+                self.leftVisibleColIndex += 1
 
     def searchRegex(self, regex=None, columns=None, backward=False, moveCursor=False):
         'sets row index if moveCursor; otherwise returns list of row indexes'
@@ -530,30 +552,47 @@ class VSheet:
         return matchingRowIndexes
 
     def calcColLayout(self):
-        self.colLayout = {}
+        self.visibleColLayout = {}
         x = 0
-        for colidx in range(0, len(self.columns)):
-            col = self.columns[colidx]
-            col.width = col.width or getMaxWidth(col, self.visibleRows)+len(options.LeftPadding)+len(options.RightPadding)
-            if colidx < self.nKeys or colidx >= self.leftColIndex:  # visible columns
-                self.colLayout[colidx] = (x, min(col.width, windowWidth-x))
+        for vcolidx in range(0, len(self.visibleCols)):
+            col = self.visibleCols[vcolidx]
+            if col.width is None:
+                col.width = getMaxWidth(col, self.visibleRows)+len(options.LeftMore)+len(options.RightMore)
+            if vcolidx < self.nKeys or vcolidx >= self.leftVisibleColIndex:  # visible columns
+                self.visibleColLayout[vcolidx] = (x, min(col.width, windowWidth-x))
                 x += col.width+len(options.ColumnSep)
             if x > windowWidth:
                 break
 
-    def drawColHeader(self, colidx):
+    def drawColHeader(self, vcolidx):
         # choose attribute to highlight column header
-        if colidx == self.cursorColIndex:  # cursor is at this column
+        if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
             hdrattr = colors[options.c_CurHdr]
-        elif colidx < self.nKeys:
+        elif vcolidx < self.nKeys:
             hdrattr = colors[options.c_KeyCols]
         else:
             hdrattr = colors[options.c_Header]
 
-        col = self.columns[colidx]
-        x, colwidth = self.colLayout[colidx]
+        col = self.visibleCols[vcolidx]
+        x, colwidth = self.visibleColLayout[vcolidx]
 
-        vd.clipdraw(0, x, col.name or defaultColNames[colidx], hdrattr, colwidth)
+        # ANameTC
+        A = options.LeftMore if (vcolidx > self.nKeys and vcolidx < self.leftVisibleColIndex) else ''
+        typedict = {
+                int: '#',
+                str: '$',
+                float: '%',
+                datetime.datetime: '@',
+                UnspecifiedType: ' ',
+            }
+        T = typedict.get(col.type, '?')
+        N = A + col.name or defaultColNames[vcolidx]
+        if len(N) > colwidth-1:
+            N = N[:colwidth-len(options.Ellipsis)] + options.Ellipsis
+        vd.clipdraw(0, x, N, hdrattr, colwidth)
+        vd.clipdraw(0, x+colwidth-1, T, hdrattr, 1)
+        C = options.RightMore if vcolidx+1 < self.nCols and vcolidx+1 not in self.visibleColLayout else options.ColumnSep
+
         if x+colwidth+len(options.ColumnSep) <= windowWidth:
             scr.addstr(0, x+colwidth, options.ColumnSep, colors[options.c_ColumnSep])
 
@@ -565,10 +604,10 @@ class VSheet:
 
         self.rowLayout = {}
         self.calcColLayout()
-        for colidx, colinfo in sorted(self.colLayout.items()):
+        for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
             x, colwidth = colinfo
             if x < windowWidth:  # only draw inside window
-                self.drawColHeader(colidx)
+                self.drawColHeader(vcolidx)
 
                 y = numHeaderRows
                 for rowidx in range(0, windowHeight-2):
@@ -581,7 +620,7 @@ class VSheet:
 
                     if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
                         attr = colors[options.c_CurRow]
-                    elif colidx < self.nKeys:
+                    elif vcolidx < self.nKeys:
                         attr = colors[options.c_KeyCols]
                     else:
                         attr = colors[options.c_default]
@@ -592,22 +631,22 @@ class VSheet:
                     if x+colwidth+len(sepchars) <= windowWidth:
                        scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
 
-                    if colidx == self.cursorColIndex:  # cursor is at this column
+                    if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
                         attr |= colors[options.c_CurCol]
 
-                    cellval = self.columns[colidx].getDisplayValue(row)
+                    cellval = self.visibleCols[vcolidx].getDisplayValue(row)
                     vd.clipdraw(y, x, cellval, attr, colwidth)
                     y += 1
 
-    def editCell(self, colnum=None):
-        if colnum is None:
-            colnum = self.cursorColIndex
-        x, w = self.colLayout[colnum]
+    def editCell(self, vcolidx=None):
+        if vcolidx is None:
+            vcolidx = self.cursorVisibleColIndex
+        x, w = self.visibleColLayout[vcolidx]
         y = self.rowLayout[self.cursorRowIndex]
 
-        currentValue = self.cellValue(self.cursorRowIndex, colnum)
+        currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
         r = editText(y, x, w, value=currentValue, fillchar=options.EditPadChar)
-        return self.columns[colnum].type(r)  # convert input to column type
+        return self.visibleCols[vcolidx].type(r)  # convert input to column type
 
     def CommandHelp(self):
         vs = VSheet(self.name + '_help', self)
@@ -741,6 +780,10 @@ class VColumn:
         self.type = type
         self.expr = None  # Python string expression if computed column
 
+    @property
+    def hidden(self):
+        return self.width == 0
+
     def getValue(self, row):
         try:
             v = self.func(row)
@@ -764,7 +807,7 @@ class VColumn:
         if hasattr(self.func, 'setter'):
             self.func.setter(row, value)
         else:
-            vd.status('column cannot be changed')
+            error('column cannot be changed')
 
 
 ### common column setups and helpers
@@ -816,7 +859,7 @@ def ArrayNamedColumns(columns):
 
 def AttrColumns(colnames):
     'colnames is list of attribute names'
-    return [VColumn(name, lambda_getattr(name)) for name in colnames]
+    return [VColumn(name, UnspecifiedType, lambda_getattr(name)) for name in colnames]
 
 ### sheet layouts
 #### generic list/dict/object browsing
@@ -1021,7 +1064,7 @@ class VSheetText(VSheet):
         elif isinstance(content, str):
             self.rows = content.split('\n')
         else:
-            raise VException('unknown text type ' + str(type(content)))
+            error('unknown text type ' + str(type(content)))
 
 class VSheetDirectory(VSheet):
     def __init__(self, p):
@@ -1157,20 +1200,20 @@ def saveSheet(sheet, fn):
 
 def save_tsv(sheet, fn):
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
-        colhdr = '\t'.join(col.name for col in sheet.columns) + '\n'
+        colhdr = '\t'.join(col.name for col in sheet.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
         for r in sheet.rows:
-            fp.write('\t'.join(col.getDisplayValue(r) for col in sheet.columns) + '\n')
+            fp.write('\t'.join(col.getDisplayValue(r) for col in sheet.visibleCols) + '\n')
 
 def save_csv(sheet, fn):
     with open(fn, 'w', newline='', encoding=options.encoding, errors=options.encoding_errors) as fp:
         cw = csv.writer(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
-        colnames = [col.name for col in sheet.columns]
+        colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):
             cw.writerow(colnames)
         for r in sheet.rows:
-            cw.writerow([col.getDisplayValue(r) for col in sheet.columns])
+            cw.writerow([col.getDisplayValue(r) for col in sheet.visibleCols])
 
 ### curses, options, init
 def editText(y, x, w, prompt='', value='', fillchar=' '):
@@ -1186,8 +1229,8 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
         x += len(prompt)
         w -= len(prompt)
 
-    v = value   # value under edit
-    i = 0       # index into v
+    v = str(value) # value under edit
+    i = 0          # index into v
     while True:
         dispval = clean(v)
         dispi = i
@@ -1202,7 +1245,7 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
         ch = scr.getch()
         if ch == ctrl('a') or ch == curses.KEY_HOME:        i = 0
         elif ch == ctrl('b') or ch == curses.KEY_LEFT:      i -= 1
-        elif ch == ctrl('c') or ch == ESC:                  raise VEscape(keyname(ch))
+        elif ch == ctrl('c') or ch == ESC:                  escape(keyname(ch))
         elif ch == ctrl('d') or ch == curses.KEY_DC:        v = delchar(v, i)
         elif ch == ctrl('e') or ch == curses.KEY_END:       i = len(v)
         elif ch == ctrl('f') or ch == curses.KEY_RIGHT:     i += 1
@@ -1212,7 +1255,7 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
         elif ch == ctrl('r'):                               v = value
         elif ch == ctrl('t'):                               v = delchar(splice(v, i-2, v[i-1]), i)
         elif ch == ctrl('u'):                               v = v[i:]; i = 0
-        elif ch == ctrl('v'):                               v = splice(v, i, chr(scr.getch())); i+= 1
+        elif ch == ctrl('v'):                               v = splice(v, i, chr(scr.getch())); i += 1
         else:
             v = splice(v, i, chr(ch))
             i += 1
@@ -1293,7 +1336,7 @@ def curses_main(_scr):
     scr = _scr
 
     # get control keys instead of signals
-    curses.raw()
+#    curses.raw()
 
     # enable mouse events
 #    curses.mousemask(curses.ALL_MOUSE_EVENTS)
