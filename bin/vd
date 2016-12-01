@@ -178,10 +178,10 @@ command(ord('-'), 'sheet.cursorCol.width = 0', 'hide current column')
 command(ord('^'), 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)', 'set current column header to current cell value')
 command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as key')
 
-# command(ord('@'), 'sheet.convertType(sheet.cursorCol, datetime)', 'convert column to ISO8601 date')
-command(ord('#'), 'sheet.convertType(sheet.cursorCol, int)', 'convert column to integer')
-command(ord('$'), 'sheet.convertType(sheet.cursorCol, str)', 'convert column to string')
-command(ord('%'), 'sheet.convertType(sheet.cursorCol, float)', 'convert column to decimal numeric type')
+# command(ord('@'), 'sheet.cursorCol.type = datetime', 'set column type to ISO8601 date')
+command(ord('#'), 'sheet.cursorCol.type = int', 'set column type to integer')
+command(ord('$'), 'sheet.cursorCol.type = str', 'set column type to string')
+command(ord('%'), 'sheet.cursorCol.type = float', 'set column type to decimal numeric type')
 command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type())', 'sort by current column ascending')
 command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)', 'sort by current column descending')
 command(ctrl('e'), 'options.debug = True; error(vd.lastErrors[-1])', 'quit and print last error to terminal')
@@ -419,17 +419,6 @@ class VSheet:
                 return
 
         vd.status('no different value up this column')
-
-    def convertType(self, col, newType):
-        nErrors = 0
-        for r in self.rows:
-            try:
-                col.setValue(r, newType(col.getValue(r)))
-            except Exception as e:
-                # col.setValue(r, None)  # leave value as-is, set to newType(), or set to None?
-                nErrors += 1
-        col.type = newType
-        vd.status('converted %s to %s with %s exceptions' % (col.name, newType.__name__, nErrors))
 
     def toggle(self, rows):
         for r in rows:
@@ -804,13 +793,14 @@ class VColumn:
             vd.exceptionCaught(status=False)
             return options.FunctionError
 
+        if cellval is None:
+            return options.VisibleNone
+
         try:
             cellval = self.type(cellval)  # convert type on-the-fly
         except Exception as e:
             vd.exceptionCaught(status=False)
 
-        if cellval is None:
-            cellval = options.VisibleNone
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding)
         return str(cellval)
@@ -942,10 +932,10 @@ class VSheetSheets(VSheet, list):
 class VSheetColumns(VSheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
-        self.command(ord('#'), 'sheet.source.convertType(sheet.cursorRow, int); sheet.moveCursorDown(+1)', 'convert column to int')
-        self.command(ord('$'), 'sheet.source.convertType(sheet.cursorRow, str); sheet.moveCursorDown(+1)', 'convert column to str')
-        self.command(ord('%'), 'sheet.source.convertType(sheet.cursorRow, float); sheet.moveCursorDown(+1)', 'convert column to float')
-#        self.command(ord('@'), 'sheet.source.convertType(sheet.cursorRow, datetime); sheet.moveCursorDown(+1)', 'convert to datetime')
+#        self.command(ord('@'), 'sheet.cursorCol.type = datetime.datetime; sheet.moveCursorDown(+1)', 'set column type to datetime')
+        self.command(ord('#'), 'sheet.cursorRow.type = int; sheet.moveCursorDown(+1)', 'set column type to integer')
+        self.command(ord('$'), 'sheet.cursorRow.type = str; sheet.moveCursorDown(+1)', 'set column type to string')
+        self.command(ord('%'), 'sheet.cursorRow.type = float; sheet.moveCursorDown(+1)', 'set column type to decimal numeric type')
         self.reload()
 
     def reload(self):
