@@ -787,16 +787,28 @@ class VColumn:
     def getValue(self, row):
         try:
             v = self.func(row)
-            assert self.type is not None, self.type
-            if self.type is not UnspecifiedType and v:
-                assert type(v) == self.type, type(v)
-            return v
         except Exception as e:
             vd.exceptionCaught(status=False)
             return options.FunctionError
 
+        try:
+            return self.type(v)  # convert type on-the-fly
+        except Exception as e:
+            vd.exceptionCaught(status=False)
+            return self.type()  # return a suitable value for this type
+
     def getDisplayValue(self, row):
-        cellval = self.getValue(row)
+        try:
+            cellval = self.func(row)
+        except Exception as e:
+            vd.exceptionCaught(status=False)
+            return options.FunctionError
+
+        try:
+            cellval = self.type(cellval)  # convert type on-the-fly
+        except Exception as e:
+            vd.exceptionCaught(status=False)
+
         if cellval is None:
             cellval = options.VisibleNone
         if isinstance(cellval, bytes):
@@ -1229,6 +1241,7 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
         x += len(prompt)
         w -= len(prompt)
 
+    insert_mode = False
     v = str(value) # value under edit
     i = 0          # index into v
     while True:
@@ -1243,7 +1256,8 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
         scr.addstr(y, x, dispval, colors[options.c_EditCell])
         scr.move(y, x+dispi)
         ch = scr.getch()
-        if ch == ctrl('a') or ch == curses.KEY_HOME:        i = 0
+        if ch == curses.KEY_IC:                             insert_mode = not insert_mode
+        elif ch == ctrl('a') or ch == curses.KEY_HOME:      i = 0
         elif ch == ctrl('b') or ch == curses.KEY_LEFT:      i -= 1
         elif ch == ctrl('c') or ch == ESC:                  escape(keyname(ch))
         elif ch == ctrl('d') or ch == curses.KEY_DC:        v = delchar(v, i)
@@ -1257,7 +1271,11 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
         elif ch == ctrl('u'):                               v = v[i:]; i = 0
         elif ch == ctrl('v'):                               v = splice(v, i, chr(scr.getch())); i += 1
         else:
-            v = splice(v, i, chr(ch))
+            if insert_mode:
+                v = splice(v, i, chr(ch))
+            else:
+                v = v[:i] + chr(ch) + v[i+1:]
+
             i += 1
 
         if i < 0: i = 0
