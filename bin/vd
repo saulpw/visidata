@@ -256,7 +256,7 @@ global_command(ctrl('p'), 'vd.push(VSheetText("statuses", vd.statusHistory))', '
 
 # experimental commands
 
-command(ord('a'), 'sheet.rows.append(copy.copy(sheet.cursorRow))', 'append duplicate of this row')
+command(ord('a'), 'sheet.rows.insert(sheet.cursorRowIndex, copy.copy(sheet.cursorRow))', 'insert duplicate of this row')
 
 ### VisiData core
 
@@ -550,7 +550,7 @@ class VSheet:
             if vcolidx < self.nKeys or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self.visibleColLayout[vcolidx] = (x, min(col.width, windowWidth-x))
                 x += col.width+len(options.ColumnSep)
-            if x > windowWidth:
+            if x > windowWidth-1:
                 break
 
     def drawColHeader(self, vcolidx):
@@ -566,7 +566,6 @@ class VSheet:
         x, colwidth = self.visibleColLayout[vcolidx]
 
         # ANameTC
-        A = options.LeftMore if (vcolidx > self.nKeys and vcolidx < self.leftVisibleColIndex) else ''
         typedict = {
                 int: '#',
                 str: '$',
@@ -575,15 +574,19 @@ class VSheet:
                 UnspecifiedType: ' ',
             }
         T = typedict.get(col.type, '?')
-        N = A + col.name or defaultColNames[vcolidx]
+        N = ' ' + col.name or defaultColNames[vcolidx]
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.Ellipsis)] + options.Ellipsis
         vd.clipdraw(0, x, N, hdrattr, colwidth)
         vd.clipdraw(0, x+colwidth-1, T, hdrattr, 1)
-        C = options.RightMore if vcolidx+1 < self.nCols and vcolidx+1 not in self.visibleColLayout else options.ColumnSep
 
-        if x+colwidth+len(options.ColumnSep) <= windowWidth:
-            scr.addstr(0, x+colwidth, options.ColumnSep, colors[options.c_ColumnSep])
+        if vcolidx == self.leftVisibleColIndex and vcolidx > self.nKeys:
+            A = options.LeftMore
+            scr.addstr(0, x, A, colors[options.c_ColumnSep])
+
+        C = options.ColumnSep
+        if x+colwidth+len(C) <= windowWidth:
+            scr.addstr(0, x+colwidth, C, colors[options.c_ColumnSep])
 
 
     def draw(self):
@@ -627,6 +630,9 @@ class VSheet:
                     vd.clipdraw(y, x, cellval, attr, colwidth)
                     y += 1
 
+        if vcolidx+1 < self.nVisibleCols:
+            scr.addstr(0, windowWidth-1, options.RightMore, colors[options.c_ColumnSep])
+
     def editCell(self, vcolidx=None):
         if vcolidx is None:
             vcolidx = self.cursorVisibleColIndex
@@ -642,7 +648,7 @@ class VSheet:
         vs.rows = list(self.commands.items())
         vs.columns = [VColumn('key', str, lambda r: keyname(r[0])),
                 VColumn('action', str, lambda r: r[1][1]),
-                VColumn('global_action', str, lambda r: global_commands[r[0]][1])]
+                VColumn('global_action', str, lambda r: global_commands.get(r[0], ('', '-'))[1])]
         return vs
 
 # end VSheet class
@@ -1075,7 +1081,7 @@ class VSheetDirectory(VSheet):
                         VColumn('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
                         VColumn('size', int, lambda r: r[1].st_size),
                         VColumn('mtime', str, lambda r: datestr(r[1].st_mtime))]
-        self.command(ENTER, 'openFileOrUrl(sheet.cursorRow[0])')  # path, filename
+        self.command(ENTER, 'openFileOrUrl(sheet.cursorRow[0])', 'open file')  # path, filename
         self.reload()
 
     def reload(self):
