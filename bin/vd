@@ -687,6 +687,7 @@ class VisiData:
         global sheet
         global windowHeight, windowWidth
         windowHeight, windowWidth = scr.getmaxyx()
+        ch = 32
 
         command_overrides = None
         while True:
@@ -709,7 +710,10 @@ class VisiData:
             self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
             self._status = []
 
-            scr.move(windowHeight-1, windowWidth-2)
+            ch = chr(ch)
+            if not ch.isprintable():
+                ch = ' '
+            scr.addstr(windowHeight-1, windowWidth-2, ch, attr)  # last key pressed
             curses.doupdate()
 
             ch = scr.getch()
@@ -1369,7 +1373,7 @@ def curses_main(_scr):
     scr = _scr
 
     # get control keys instead of signals
-#    curses.raw()
+    curses.raw()
 
     # enable mouse events
 #    curses.mousemask(curses.ALL_MOUSE_EVENTS)
