@@ -1,5 +1,9 @@
 # VisiData release history
 
+## v0.32
+- expose col.type in column header
+- push value conversion to time of usage/display
+
 ## v0.31
 - F1 help sheet
 - ^O directly exposes eval result as sheet

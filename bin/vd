@@ -81,6 +81,10 @@ default_options = {
     'c_SelectedRow': 'green',
     'c_ColumnSep': 'blue',
     'c_EditCell': 'normal',
+    'c_WrongType': 'magenta',
+    'c_Error': 'red',
+    'ch_WrongType': '~',
+    'ch_Error': '!',
 }
 
 vd = None    # toplevel VisiData, contains all sheets
@@ -173,7 +177,7 @@ command(ord('b'), 'sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows+1
 command(ord('<'), 'sheet.skipUp()', 'skip up current column to previous value')
 command(ord('>'), 'sheet.skipDown()', 'skip down current column to next value')
 
-command(ord('_'), 'sheet.cursorCol.width = getMaxWidth(sheet.cursorCol, sheet.visibleRows)', 'set column width to max visible cell on screen')
+command(ord('_'), 'sheet.cursorCol.width = sheet.cursorCol.getMaxWidth(sheet.visibleRows)', 'set column width to max visible cell on screen')
 command(ord('-'), 'sheet.cursorCol.width = 0', 'hide current column')
 command(ord('^'), 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)', 'set current column header to current cell value')
 command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as key')
@@ -182,8 +186,8 @@ command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this co
 command(ord('#'), 'sheet.cursorCol.type = int', 'set column type to integer')
 command(ord('$'), 'sheet.cursorCol.type = str', 'set column type to string')
 command(ord('%'), 'sheet.cursorCol.type = float', 'set column type to decimal numeric type')
-command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type())', 'sort by current column ascending')
-command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r) or sheet.cursorCol.type(), reverse=True)', 'sort by current column descending')
+command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r))', 'sort by current column ascending')
+command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r), reverse=True)', 'sort by current column descending')
 command(ctrl('e'), 'options.debug = True; error(vd.lastErrors[-1])', 'quit and print last error to terminal')
 command(ctrl('d'), 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug option')
 
@@ -209,7 +213,7 @@ command(ord('u'), 'sheet.unselect([sheet.cursorRow]); sheet.moveCursorDown(1)', 
 command(ord('|'), 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))', 'select rows by regex in this column')
 command(ord('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))', 'unselect rows by regex in this column')
 
-command(ord('R'), 'sheet.source.type = inputLine("change type to, ") or sheet.source.type', 'set parsing type of current sheet')
+command(ord('R'), 'sheet.source.type = inputLine("change type to: ", value=initialsheet.source.type)', 'set parsing type of current sheet')
 command(ctrl('r'), 'openFileOrUrl(vd.sheets.pop(0).source); vd.status("reloaded")', 'reload current sheet')
 command(ctrl('s'), 'saveSheet(sheet, inputLine("save to: "))', 'save sheet (type determined by ext)')
 command(ord('o'), 'openFileOrUrl(inputLine("open: "))', 'open a file or url')
@@ -233,7 +237,7 @@ global_command(ord('J'), 'moveListItem(sheet.rows, sheet.cursorRowIndex, sheet.n
 global_command(ord('K'), 'moveListItem(sheet.rows, sheet.cursorRowIndex, 0)', 'throw current row all the way to the top')
 global_command(ord('L'), 'moveListItem(sheet.columns, sheet.cursorColIndex, sheet.nCols)', 'throw current column all the way to the right')
 
-global_command(ord('_'), 'for c in sheet.visibleCols: c.width = getMaxWidth(c, sheet.visibleRows)', 'resize all columns to max width of visible cells on screen')
+global_command(ord('_'), 'for c in sheet.visibleCols: c.width = c.getMaxWidth(sheet.visibleRows)', 'resize all columns to max width of visible cells on screen')
 global_command(ord('^'), 'for c in sheet.visibleCols: c.name = c.getDisplayValue(sheet.cursorRow)', 'set all column names to values in the current row')
 
 global_command(ord('E'), 'vd.push(VSheetText("last_error", "\\n\\n".join(vd.lastErrors)))', 'push sheet of all previous errors')
@@ -270,12 +274,6 @@ def iso8601(dt):
 
 def datestr(t):
     return iso8601(datetime.datetime.fromtimestamp(t))
-
-def getMaxWidth(col, rows):
-    if len(rows) == 0:
-        return 0
-
-    return min(max(max(len(col.getDisplayValue(r)) for r in rows), len(col.name)+2), int(windowWidth-1))
 
 
 class VSheet:
@@ -546,7 +544,7 @@ class VSheet:
         for vcolidx in range(0, len(self.visibleCols)):
             col = self.visibleCols[vcolidx]
             if col.width is None:
-                col.width = getMaxWidth(col, self.visibleRows)+len(options.LeftMore)+len(options.RightMore)
+                col.width = col.getMaxWidth(self.visibleRows)+len(options.LeftMore)+len(options.RightMore)
             if vcolidx < self.nKeys or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self.visibleColLayout[vcolidx] = (x, min(col.width, windowWidth-x))
                 x += col.width+len(options.ColumnSep)
@@ -574,7 +572,7 @@ class VSheet:
                 UnspecifiedType: ' ',
             }
         T = typedict.get(col.type, '?')
-        N = ' ' + col.name or defaultColNames[vcolidx]
+        N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.Ellipsis)] + options.Ellipsis
         vd.clipdraw(0, x, N, hdrattr, colwidth)
@@ -620,14 +618,20 @@ class VSheet:
                     if self.isSelected(row):
                         attr |= colors[options.c_SelectedRow]
 
-                    if x+colwidth+len(sepchars) <= windowWidth:
-                       scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
-
                     if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
                         attr |= colors[options.c_CurCol]
 
                     cellval = self.visibleCols[vcolidx].getDisplayValue(row)
                     vd.clipdraw(y, x, cellval, attr, colwidth)
+
+                    if isinstance(cellval, CalcErrorStr):
+                        vd.clipdraw(y, x+colwidth-1, options.ch_Error, colors[options.c_Error])
+                    elif isinstance(cellval, WrongTypeStr):
+                        vd.clipdraw(y, x+colwidth-1, ch_WrongType, colors[options.c_WrongType])
+
+                    if x+colwidth+len(sepchars) <= windowWidth:
+                       scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
+
                     y += 1
 
         if vcolidx+1 < self.nVisibleCols:
@@ -766,6 +770,12 @@ class VisiData:
             self.exceptionCaught()
 # end VisiData class
 
+class WrongTypeStr(str):
+    pass
+
+class CalcErrorStr(str):
+    pass
+
 ## columns
 class VColumn:
     def __init__(self, name, type=UnspecifiedType, func=lambda r: r, width=None):
@@ -784,7 +794,7 @@ class VColumn:
             v = self.func(row)
         except Exception as e:
             vd.exceptionCaught(status=False)
-            return options.FunctionError
+            raise
 
         try:
             return self.type(v)  # convert type on-the-fly
@@ -797,25 +807,33 @@ class VColumn:
             cellval = self.func(row)
         except Exception as e:
             vd.exceptionCaught(status=False)
-            return options.FunctionError
+            return CalcErrorStr(options.FunctionError)
 
         if cellval is None:
             return options.VisibleNone
 
-        try:
-            cellval = self.type(cellval)  # convert type on-the-fly
-        except Exception as e:
-            vd.exceptionCaught(status=False)
-
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding)
-        return str(cellval)
+
+        try:
+            cellval = str(self.type(cellval))  # convert type on-the-fly
+        except Exception as e:
+            vd.exceptionCaught(status=False)
+            cellval = WrongTypeStr(str(cellval))
+
+        return cellval
 
     def setValue(self, row, value):
         if hasattr(self.func, 'setter'):
             self.func.setter(row, value)
         else:
             error('column cannot be changed')
+
+    def getMaxWidth(self, rows):
+        if len(rows) == 0:
+            return 0
+
+        return min(max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name)+2), int(windowWidth-1))
 
 
 ### common column setups and helpers
@@ -923,7 +941,7 @@ class VSheetObject(VSheet):
 #### specialized meta sheets
 class VSheetSheets(VSheet, list):
     def __init__(self):
-        VSheet.__init__(self, 'sheets', 'VisiData.sheets')
+        VSheet.__init__(self, 'sheets', 'vd.sheets')
         self.command(ENTER,    'moveListItem(sheet, sheet.cursorRowIndex, 0); vd.sheets.pop(1)', 'go to this sheet')
         self.command(ord('&'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="&")', 'inner join')
         self.command(ord('+'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="+")', 'outer join')
@@ -1224,18 +1242,13 @@ def save_csv(sheet, fn):
             cw.writerow([col.getDisplayValue(r) for col in sheet.visibleCols])
 
 ### curses, options, init
-def editText(y, x, w, prompt='', value='', fillchar=' '):
+def editText(y, x, w, value='', fillchar=' '):
     def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
         return v if i < 0 else v[:i] + s + v[i:]
     def clean(s):
         return ''.join(c if c.isprintable() else options.Unprintable for c in str(s))
     def delchar(s, i, remove=1):
         return s[:i] + s[i+remove:]
-
-    if prompt:
-        scr.addstr(y, x, prompt)
-        x += len(prompt)
-        w -= len(prompt)
 
     insert_mode = False
     v = str(value) # value under edit
@@ -1259,7 +1272,10 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
         elif ch == ctrl('d') or ch == curses.KEY_DC:        v = delchar(v, i)
         elif ch == ctrl('e') or ch == curses.KEY_END:       i = len(v)
         elif ch == ctrl('f') or ch == curses.KEY_RIGHT:     i += 1
-        elif ch == ctrl('h') or ch == curses.KEY_BACKSPACE: i -= 1 if i > 0 else 0; v = delchar(v, i)
+        elif ch == ctrl('h') or ch == curses.KEY_BACKSPACE or ch == curses.ascii.DEL:
+            if i > 0:
+                i -= 1
+            v = delchar(v, i)
         elif ch == ctrl('j') or ch == ENTER:                break
         elif ch == ctrl('k'):                               v = v[:i]
         elif ch == ctrl('r'):                               v = value
@@ -1280,9 +1296,10 @@ def editText(y, x, w, prompt='', value='', fillchar=' '):
     vd.status('"%s"' % v)
     return v
 
-def inputLine(prompt=''):
-    'move to the bottom of the screen and get a line of input from the user'
-    return editText(windowHeight-1, 0, windowWidth-1, prompt, fillchar=' ')
+def inputLine(prompt, value=''):
+    'add a prompt to the bottom of the screen and get a line of input from the user'
+    scr.addstr(windowHeight-1, 0, prompt)
+    return editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-1, fillchar=' ', value=value)
 
 
 nextColorPair = 1

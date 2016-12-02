@@ -4,12 +4,10 @@
 A loose plan that is subject to change.
 
 ## v0.4 column typing, usability
-- all columns should be typed (str by default)
-   - put indicator in header row to indicate more columns to the left/right
-   - provide autodetect command (g for all columns)
-   - treat None/Error specially and consistently
-   - indicate column type in header
-- F1 loads help sheet
+- datetime conversion with auto-detect/sniffer
+- secondary column sort
+- add column by regex transform
+- fixed-column detector
 
 ## v0.5 options management (loading/saving)
 - make options an OrderedDict, with columns: option, default, sheet, help
@@ -47,14 +45,10 @@ A loose plan that is subject to change.
 
 ## Unscheduled
 - html table parsing into columns
-- datetime conversion with auto-detect/sniffer
 - popup menus for editing enum fields
-- add column by regex transform
-- secondary column sort
 - parse .xml
 - save as .json
 - better csv/tsv sniffer
-- fixed-column detector
 - easy'q'uit (for easily reproducible pages) vs sheet 'Q'uit
 
 ### Details

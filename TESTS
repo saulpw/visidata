@@ -3,7 +3,8 @@
 - launch with no arguments, see files in the current directory
 - choose a text file (without type, or unknown type), and ENTER to view it
 - scroll all the way down and back up with j/k/pgdn/pgup/gk/gj
-- if an error is hit, use 'E' to examine the last error, or '^E' to exit as a last resort
+
+- go to 'S'heets, move to sheets.cursorValue (will change to ¿).  press 'E' to examine the last error (or '^E' to exit as a last resort).  There should be a (red) indicator on the right side
 
 ## general movement
 - with wide csv, scroll to rightmost column with 'l' and 'gl'.  cell contents should be entirely visible.
@@ -52,3 +53,6 @@
 
 - '.' (pin) on existing key column
 - g<ENTER> on file in directory, should be no-op...there is no "global" ENTER (yet).  but the page overrides ENTER.  it shouldn't be used.
+
+
+- define column B in terms of column A. =A*2. delete column A.  column B should still compute correctly.

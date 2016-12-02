@@ -15,7 +15,7 @@ Usable via any remote shell which has Python3 installed.
 - sort asc/desc by one column
 - 'g'lobal prefix supersizes many commands
 - 'e'dit cell contents
-- convert column to int/str/float
+- int/str/float column types
 - reload sheet with different format options
 - add new column by Python expression
 - 's'elect/'u'nselect rows, bulk delete with 'gd'
