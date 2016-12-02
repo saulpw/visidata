@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.32'
+__version__ = '0.33'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -623,13 +623,13 @@ class VSheet:
                     if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
                         attr |= colors[options.c_CurCol]
 
-                    cellval = self.visibleCols[vcolidx].getDisplayValue(row)
-                    vd.clipdraw(y, x, cellval, attr, colwidth)
+                    cellval = self.visibleCols[vcolidx].getDisplayValue(row, colwidth-1)
+                    vd.clipdraw(y, x, options.ch_ColumnFiller + cellval, attr, colwidth)
 
                     if isinstance(cellval, CalcErrorStr):
                         vd.clipdraw(y, x+colwidth-1, options.ch_Error, colors[options.c_Error])
                     elif isinstance(cellval, WrongTypeStr):
-                        vd.clipdraw(y, x+colwidth-1, ch_WrongType, colors[options.c_WrongType])
+                        vd.clipdraw(y, x+colwidth-1, options.ch_WrongType, colors[options.c_WrongType])
 
                     if x+colwidth+len(sepchars) <= windowWidth:
                        scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
@@ -790,6 +790,14 @@ class VColumn:
         self.width = width
         self.type = type
         self.expr = None  # Python string expression if computed column
+        self._fmtstr = None
+
+    @property
+    def fmtstr(self):
+        if self._fmtstr is not None: return self._fmtstr
+        elif self.type is int: return '%d'
+        elif self.type is float: return '%.02f'
+        else: return '%s'
 
     @property
     def hidden(self):
@@ -808,7 +816,7 @@ class VColumn:
             vd.exceptionCaught(status=False)
             return self.type()  # return a suitable value for this type
 
-    def getDisplayValue(self, row):
+    def getDisplayValue(self, row, width=None):
         try:
             cellval = self.func(row)
         except Exception as e:
@@ -822,7 +830,8 @@ class VColumn:
             cellval = cellval.decode(options.encoding)
 
         try:
-            cellval = str(self.type(cellval))  # convert type on-the-fly
+            cellval = self.fmtstr % self.type(cellval)  # convert type on-the-fly
+            if width and self.type in (int, float): cellval = cellval.rjust(width-1)
         except Exception as e:
             vd.exceptionCaught(status=False)
             cellval = WrongTypeStr(str(cellval))
@@ -974,6 +983,7 @@ class VSheetColumns(VSheet):
             VColumn('name',   str, lambda_getattr('name')),
             VColumn('width',  int, lambda_getattr('width')),
             VColumn('type',   str, lambda r: r.type.__name__),
+            VColumn('fmtstr', str, lambda_getattr('_fmtstr')),
             VColumn('expr',   str, lambda_getattr('expr')),
             VColumn('value',  UnspecifiedType, lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
         ]
