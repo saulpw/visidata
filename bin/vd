@@ -54,23 +54,27 @@ default_options = {
     'encoding': 'utf-8',
     'encoding_errors': 'surrogateescape',
 
-    'VisibleNone': '',   # visible contents of a cell whose value was None
-    'ColumnFiller': ' ',
-    'LeftMore': '<',
-    'RightMore': '>',
-    'ColumnSep': '|',  # chars between columns
-    'Ellipsis': '…',
-    'SubsheetSep': '~',
-    'StatusSep': ' | ',
-    'KeySep': '/',
     'SheetNameFmt': '%s| ',  # before status line
-    'FunctionError': '¿',    # when computation fails due to exception
-    'HistogramChar': '*',
     'ColumnStats': False,  # whether to include mean/median/etc on 'C'olumn sheet
-    'EditPadChar': '_',
-    'Unprintable': '.',
 
-    # color scheme
+    'SubsheetSep': '~',
+
+    # display/color scheme
+    'ch_VisibleNone': '',   # visible contents of a cell whose value was None
+    'ch_FunctionError': '¿',    # when computation fails due to exception
+    'ch_Histogram': '*',
+    'ch_ColumnFiller': ' ',
+    'ch_LeftMore': '<',
+    'ch_RightMore': '>',
+    'ch_ColumnSep': '|',  # chars between columns
+    'ch_Ellipsis': '…',
+    'ch_StatusSep': ' | ',
+    'ch_KeySep': '/',
+    'ch_EditPadChar': '_',
+    'ch_Unprintable': '.',
+    'ch_WrongType': '~',
+    'ch_Error': '!',
+
     'c_default': 'normal',
     'c_Header': 'bold',
     'c_CurHdr': 'reverse',
@@ -83,8 +87,6 @@ default_options = {
     'c_EditCell': 'normal',
     'c_WrongType': 'magenta',
     'c_Error': 'red',
-    'ch_WrongType': '~',
-    'ch_Error': '!',
 }
 
 vd = None    # toplevel VisiData, contains all sheets
@@ -349,7 +351,7 @@ class VSheet:
 
     @property
     def keyColNames(self):
-        return options.KeySep.join(c.name for c in self.keyCols)
+        return options.ch_KeySep.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
@@ -544,10 +546,10 @@ class VSheet:
         for vcolidx in range(0, len(self.visibleCols)):
             col = self.visibleCols[vcolidx]
             if col.width is None:
-                col.width = col.getMaxWidth(self.visibleRows)+len(options.LeftMore)+len(options.RightMore)
+                col.width = col.getMaxWidth(self.visibleRows)+len(options.ch_LeftMore)+len(options.ch_RightMore)
             if vcolidx < self.nKeys or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self.visibleColLayout[vcolidx] = (x, min(col.width, windowWidth-x))
-                x += col.width+len(options.ColumnSep)
+                x += col.width+len(options.ch_ColumnSep)
             if x > windowWidth-1:
                 break
 
@@ -574,15 +576,15 @@ class VSheet:
         T = typedict.get(col.type, '?')
         N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
         if len(N) > colwidth-1:
-            N = N[:colwidth-len(options.Ellipsis)] + options.Ellipsis
+            N = N[:colwidth-len(options.ch_Ellipsis)] + options.ch_Ellipsis
         vd.clipdraw(0, x, N, hdrattr, colwidth)
         vd.clipdraw(0, x+colwidth-1, T, hdrattr, 1)
 
         if vcolidx == self.leftVisibleColIndex and vcolidx > self.nKeys:
-            A = options.LeftMore
+            A = options.ch_LeftMore
             scr.addstr(0, x, A, colors[options.c_ColumnSep])
 
-        C = options.ColumnSep
+        C = options.ch_ColumnSep
         if x+colwidth+len(C) <= windowWidth:
             scr.addstr(0, x+colwidth, C, colors[options.c_ColumnSep])
 
@@ -590,7 +592,7 @@ class VSheet:
     def draw(self):
         numHeaderRows = 1
         scr.erase()  # clear screen before every re-draw
-        sepchars = options.ColumnSep
+        sepchars = options.ch_ColumnSep
 
         self.rowLayout = {}
         self.calcColLayout()
@@ -635,7 +637,7 @@ class VSheet:
                     y += 1
 
         if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(0, windowWidth-1, options.RightMore, colors[options.c_ColumnSep])
+            scr.addstr(0, windowWidth-1, options.ch_RightMore, colors[options.c_ColumnSep])
 
     def editCell(self, vcolidx=None):
         if vcolidx is None:
@@ -644,7 +646,7 @@ class VSheet:
         y = self.rowLayout[self.cursorRowIndex]
 
         currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
-        r = editText(y, x, w, value=currentValue, fillchar=options.EditPadChar)
+        r = editText(y, x, w, value=currentValue, fillchar=options.ch_EditPadChar)
         return self.visibleCols[vcolidx].type(r)  # convert input to column type
 
     def CommandHelp(self):
@@ -703,7 +705,7 @@ class VisiData:
 
             # draw status on last line
             attr = colors[options.c_StatusLine]
-            statusstr = options.SheetNameFmt % sheet.name + options.StatusSep.join(self._status)
+            statusstr = options.SheetNameFmt % sheet.name + options.ch_StatusSep.join(self._status)
             self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
             self._status = []
 
@@ -760,11 +762,11 @@ class VisiData:
             # convert to string just before drawing
             s = str(s)
             if len(s) > w:
-                scr.addstr(y, x, s[:w-1] + options.Ellipsis, attr)
+                scr.addstr(y, x, s[:w-1] + options.ch_Ellipsis, attr)
             else:
                 scr.addstr(y, x, s, attr)
                 if len(s) < w:
-                    scr.addstr(y, x+len(s), options.ColumnFiller*(w-len(s)), attr)
+                    scr.addstr(y, x+len(s), options.ch_ColumnFiller*(w-len(s)), attr)
         except Exception as e:
             self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
             self.exceptionCaught()
@@ -807,10 +809,10 @@ class VColumn:
             cellval = self.func(row)
         except Exception as e:
             vd.exceptionCaught(status=False)
-            return CalcErrorStr(options.FunctionError)
+            return CalcErrorStr(options.ch_FunctionError)
 
         if cellval is None:
-            return options.VisibleNone
+            return options.ch_VisibleNone
 
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding)
@@ -1037,7 +1039,7 @@ class VSheetFreqTable(VSheet):
         self.columns = [
             VColumn(col.name, str, lambda_col(0)),
             VColumn('num', int, lambda r: len(r[1])),
-            VColumn('histogram', str, lambda r,s=self: options.HistogramChar*int(len(r[1])*80/s.largest), width=80)
+            VColumn('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
         self.command(ord(' '), 'sheet.source.toggle(sheet.cursorRow[1])', 'toggle these entries')
         self.command(ord('s'), 'sheet.source.select(sheet.cursorRow[1])', 'select these entries')
@@ -1246,7 +1248,7 @@ def editText(y, x, w, value='', fillchar=' '):
     def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
         return v if i < 0 else v[:i] + s + v[i:]
     def clean(s):
-        return ''.join(c if c.isprintable() else options.Unprintable for c in str(s))
+        return ''.join(c if c.isprintable() else options.ch_Unprintable for c in str(s))
     def delchar(s, i, remove=1):
         return s[:i] + s[i+remove:]
 
