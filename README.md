@@ -1,39 +1,57 @@
-# VisiData v0.31
+# VisiData v0.33
 
 A curses interface for exploring and arranging tabular data
 
 Usable via any remote shell which has Python3 installed.
 
 ## Features
-
-- inputs: .csv, .tsv, .json, .hdf5, .xlsx
-- outputs: .csv, .tsv
-- hjkl cursor movement, t/m/b scroll to position screen cursor
-- skip up/down columns by value
-- row/column reordering and deleting
-- resize column to fix max width of onscreen row
-- sort asc/desc by one column
-- 'g'lobal prefix supersizes many commands
+- 'F1' for command help sheet
+- 'o'pen .csv, .tsv, .json, .hdf5, .xlsx
+- 'Ctrl-S'ave .csv, .tsv
+- hjkl cursor movement, 't'op/'m'iddle/'b'ottom scroll to position screen cursor
+- '['/']' sort asc/desc by one column
 - 'e'dit cell contents
-- int/str/float column types
-- reload sheet with different format options
-- add new column by Python expression
-- 's'elect/'u'nselect rows, bulk delete with 'gd'
-- search/select by regex in column
+- search/select/unselect by regex in column
 - 'F'requency table for current column with histogram
+- inner/outer/full/diff joins on any number of sheets, matching designated key columns
+- add new column by Python expression
+- Ctrl-O to eval an expression and browse the result as a python object
+
+### Metasheets
+
+- 'E'rror metasheet
 - 'S'heets metasheet to manage/navigate multiple sheets
 - 'C'olumns metasheet
 - 'O'ptions sheet to change the style or behavior
-- 'E'rror metasheet
-- 'g^P' status history sheet
-- inner/outer/full/diff joins on any number of sheets
-- F1 help sheet of commands
-- Ctrl-O to browse any python object
+
+### Columns
+
+On the 'C'olumns sheet, these commands apply to rows (the columns of the source sheet), instead of the columns on the Columns sheet
+
+- '-' hides column (sets width to 0)
+- '\_' maximizes column width to fit longest value
+- '!' marks column as a key column (pins to the left and matches on sheet joins)
+
+#### Column typing
+
+- columns start out untyped (unless the source data is typed)
+   - '#' sets column type to int
+   - '$' sets column type to str
+   - '%' sets column type to float
+   - '@' sets column type to date
+   - '~' autodetects column type
+- all values are stored in their original format, and only converted on demand and as needed.
+- values that can't be properly converted are flagged with '~' on the display
+- for commands like sort which require a correctly typed value, the default (0) value for that type is used
+- cell edits are rejected if they don't convert to the column type
 
 ## Installation
 
-- Copy the vd.py script to a bin/vd directory in PATH and make it executable.
-- Install any required dependencies:
+Copy the vd.py script to a bin/vd directory in PATH and make it executable.
+
+    OR
+
+        $ pip3 install visidata
 
 ### Dependencies
 
@@ -94,7 +112,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 |  **e** | Edit current cell value |
 |  **=** | Add new column by Python expression |
 | **!** | Make current column a key (pin to left and match on join) |
-
+| **~** | Autodetect this column | Autodetect all columns |
 
 ### HDF5 sheets
 

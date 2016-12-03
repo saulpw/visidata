@@ -185,9 +185,11 @@ command(ord('^'), 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.
 command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as key')
 
 # command(ord('@'), 'sheet.cursorCol.type = datetime', 'set column type to ISO8601 date')
-command(ord('#'), 'sheet.cursorCol.type = int', 'set column type to integer')
-command(ord('$'), 'sheet.cursorCol.type = str', 'set column type to string')
-command(ord('%'), 'sheet.cursorCol.type = float', 'set column type to decimal numeric type')
+command(ord('#'), 'sheet.cursorCol.type = int; sheet.moveCursorRight(+1)', 'set column type to integer')
+command(ord('$'), 'sheet.cursorCol.type = str; sheet.moveCursorRight(+1)', 'set column type to string')
+command(ord('%'), 'sheet.cursorCol.type = float; sheet.moveCursorRight(+1)', 'set column type to float')
+command(ord('~'), 'sheet.cursorCol.type = detectType(sheet.cursorValue); sheet.moveCursorRight(+1)', 'autodetect type of column by its data')
+
 command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r))', 'sort by current column ascending')
 command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r), reverse=True)', 'sort by current column descending')
 command(ctrl('e'), 'options.debug = True; error(vd.lastErrors[-1])', 'quit and print last error to terminal')
@@ -276,6 +278,17 @@ def iso8601(dt):
 
 def datestr(t):
     return iso8601(datetime.datetime.fromtimestamp(t))
+
+def detectType(v):
+    try:
+        v = int(v)
+        return int
+    except:
+        try:
+            v = float(v)
+            return float
+        except:
+            return str
 
 
 class VSheet:
@@ -861,7 +874,7 @@ def lambda_colname(colname):
     return func
 
 def lambda_col(b):
-    func = lambda r: r[b]
+    func = lambda r,b=b: r[b]
     func.setter = lambda r,v,b=b: setter(r,b,v)
     return func
 
@@ -971,31 +984,34 @@ class VSheetSheets(VSheet, list):
 class VSheetColumns(VSheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
+# on the Columns sheet, these affect the 'row' (column in the source sheet)
 #        self.command(ord('@'), 'sheet.cursorCol.type = datetime.datetime; sheet.moveCursorDown(+1)', 'set column type to datetime')
-        self.command(ord('#'), 'sheet.cursorRow.type = int; sheet.moveCursorDown(+1)', 'set column type to integer')
-        self.command(ord('$'), 'sheet.cursorRow.type = str; sheet.moveCursorDown(+1)', 'set column type to string')
-        self.command(ord('%'), 'sheet.cursorRow.type = float; sheet.moveCursorDown(+1)', 'set column type to decimal numeric type')
+        self.command(ord('#'), 'sheet.cursorRow.type = int; sheet.moveCursorDown(+1)', 'set source column type to integer')
+        self.command(ord('$'), 'sheet.cursorRow.type = str; sheet.moveCursorDown(+1)', 'set source column type to string')
+        self.command(ord('%'), 'sheet.cursorRow.type = float; sheet.moveCursorDown(+1)', 'set source column type to decimal numeric type')
+        self.command(ord('~'), 'sheet.cursorRow.type = detectType(sheet.cursorRow.getValue(sheet.source.cursorRow)); sheet.moveCursorDown(+1)', 'autodetect type of source column using its data')
+        self.command(ord('!'), 'sheet.source.toggleKeyColumn(sheet.cursorRowIndex)', 'toggle key column on source sheet')
+        self.command(ord('-'), 'sheet.cursorRow.width = 0', 'hide column on source sheet')
+        self.command(ord('_'), 'sheet.cursorRow.width = sheet.cursorRow.getMaxWidth(sheet.source.rows)', 'set source column width to max width of its rows')
         self.reload()
 
     def reload(self):
         self.rows = self.source.columns
         self.columns = [
-            VColumn('name',   str, lambda_getattr('name')),
+            VColumn('column',   str, lambda_getattr('name')),
             VColumn('width',  int, lambda_getattr('width')),
             VColumn('type',   str, lambda r: r.type.__name__),
             VColumn('fmtstr', str, lambda_getattr('_fmtstr')),
             VColumn('expr',   str, lambda_getattr('expr')),
             VColumn('value',  UnspecifiedType, lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
-        ]
-        if options.ColumnStats:
-            self.columns.extend([
-                VColumn('mode',   UnspecifiedType, lambda c: statistics.mode(sheet.columnValues(c))),
-                VColumn('min',    UnspecifiedType, lambda c: min(sheet.columnValues(c))),
-                VColumn('median', UnspecifiedType, lambda c: statistics.median(sheet.columnValues(c))),
-                VColumn('mean',   float, lambda c: statistics.mean(sheet.columnValues(c))),
-                VColumn('max',    UnspecifiedType, lambda c: max(sheet.columnValues(c))),
-                VColumn('stddev', float, lambda c: statistics.stdev(sheet.columnValues(c))),
-            ])
+
+            VColumn('mode',   UnspecifiedType, lambda c: statistics.mode(sheet.columnValues(c)), width=0),
+            VColumn('min',    UnspecifiedType, lambda c: min(sheet.columnValues(c)), width=0),
+            VColumn('median', UnspecifiedType, lambda c: statistics.median(sheet.columnValues(c)), width=0),
+            VColumn('mean',   float, lambda c: statistics.mean(sheet.columnValues(c)), width=0),
+            VColumn('max',    UnspecifiedType, lambda c: max(sheet.columnValues(c)), width=0),
+            VColumn('stddev', float, lambda c: statistics.stdev(sheet.columnValues(c)), width=0),
+            ]
 
 #### slicing and dicing
 class VSheetJoin(VSheet):

@@ -1,5 +1,8 @@
 # VisiData release history
 
+## v0.33
+- type detection with '~'
+
 ## v0.32
 - expose col.type in column header
 - push value conversion to time of usage/display
