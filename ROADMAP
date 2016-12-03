@@ -20,9 +20,12 @@ A loose plan that is subject to change.
 - edit/transform log
 - save all sheets to .h5 file
 - aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
+- undo/redo
+- '.' repeat command
 
 ## v0.7
 - sql dbs via sqlalchemy
+- break out 'g'lobal prefix into 'all [visible] columns' and 'selected rows'
 
 ## v1.0
 - regexes and Python expressions should be interchangeable (search, select, etc)

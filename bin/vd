@@ -27,6 +27,7 @@ import copy
 import os.path
 import io
 import datetime
+import dateutil.parser
 import string
 import collections
 import functools
@@ -184,7 +185,7 @@ command(ord('-'), 'sheet.cursorCol.width = 0', 'hide current column')
 command(ord('^'), 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)', 'set current column header to current cell value')
 command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as key')
 
-# command(ord('@'), 'sheet.cursorCol.type = datetime', 'set column type to ISO8601 date')
+command(ord('@'), 'sheet.cursorCol.type = date; sheet.moveCursorRight(+1)', 'set column type to ISO8601 date')
 command(ord('#'), 'sheet.cursorCol.type = int; sheet.moveCursorRight(+1)', 'set column type to integer')
 command(ord('$'), 'sheet.cursorCol.type = str; sheet.moveCursorRight(+1)', 'set column type to string')
 command(ord('%'), 'sheet.cursorCol.type = float; sheet.moveCursorRight(+1)', 'set column type to float')
@@ -279,17 +280,18 @@ def iso8601(dt):
 def datestr(t):
     return iso8601(datetime.datetime.fromtimestamp(t))
 
-def detectType(v):
-    try:
-        v = int(v)
-        return int
-    except:
-        try:
-            v = float(v)
-            return float
-        except:
-            return str
+def date(s):
+    return dateutil.parser.parse(s)
 
+def detectType(v):
+    def tryType(T, v):
+        try:
+            v = T(v)
+            return T
+        except:
+            return None
+
+    return tryType(int, v) or tryType(float, v) or tryType(date, v) or str
 
 class VSheet:
     def __init__(self, name, src=None):
@@ -583,7 +585,7 @@ class VSheet:
                 int: '#',
                 str: '$',
                 float: '%',
-                datetime.datetime: '@',
+                date: '@',
                 UnspecifiedType: ' ',
             }
         T = typedict.get(col.type, '?')
@@ -985,7 +987,7 @@ class VSheetColumns(VSheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
 # on the Columns sheet, these affect the 'row' (column in the source sheet)
-#        self.command(ord('@'), 'sheet.cursorCol.type = datetime.datetime; sheet.moveCursorDown(+1)', 'set column type to datetime')
+        self.command(ord('@'), 'sheet.cursorCol.type = date; sheet.moveCursorDown(+1)', 'set column type to date/time')
         self.command(ord('#'), 'sheet.cursorRow.type = int; sheet.moveCursorDown(+1)', 'set source column type to integer')
         self.command(ord('$'), 'sheet.cursorRow.type = str; sheet.moveCursorDown(+1)', 'set source column type to string')
         self.command(ord('%'), 'sheet.cursorRow.type = float; sheet.moveCursorDown(+1)', 'set source column type to decimal numeric type')
@@ -1042,12 +1044,12 @@ class VSheetJoin(VSheet):
             for r in vs.rows:
                 key = tuple(c.getValue(r) for c in vs.keyCols)
                 if key not in rowsByKey:
-                    rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]
+                    rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]  # combinedRow
 
         if self.jointype == '&':  # inner join  (only rows with matching key on all sheets)
             self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if all(combinedRow))
         elif self.jointype == '+':  # outer join (all rows from first sheet)
-            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
+            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if combinedRow[1])
         elif self.jointype == '*':  # full join (keep all rows from all sheets)
             self.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
         elif self.jointype == '~':  # diff join (only rows without matching key on all sheets)
