@@ -1095,13 +1095,15 @@ class Path:
         self.name = os.path.split(fqpn)[-1]
         self.suffix = os.path.splitext(self.name)[1][1:]
     def read_text(self):
-        return open(self.fqpn, encoding=options.encoding, errors=options.encoding_errors).read()
+        return open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors).read()
     def is_dir(self):
-        return os.path.isdir(self.fqpn)
+        return os.path.isdir(self.resolve())
     def iterdir(self):
-        return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.fqpn)]
+        return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
     def stat(self):
-        return os.stat(self.fqpn)
+        return os.stat(self.resolve())
+    def resolve(self):
+        return os.path.expandvars(os.path.expanduser(self.fqpn))
     @property
     def parent(self):
         return Path(self.fqpn + "/..")
