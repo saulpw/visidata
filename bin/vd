@@ -1099,9 +1099,12 @@ class Path:
     def is_dir(self):
         return os.path.isdir(self.fqpn)
     def iterdir(self):
-        return [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.fqpn)]
+        return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.fqpn)]
     def stat(self):
         return os.stat(self.fqpn)
+    @property
+    def parent(self):
+        return Path(self.fqpn + "/..")
     def __str__(self):
         return self.fqpn
 
@@ -1144,7 +1147,7 @@ class VSheetDirectory(VSheet):
         self.reload()
 
     def reload(self):
-        self.rows = [(p, p.stat()) for p in self.source.iterdir() if not p.name.startswith('.')]
+        self.rows = [(p, p.stat()) for p in self.source.iterdir()]  #  if not p.name.startswith('.')]
 
 def open_txt(p):
     contents = getTextContents(p)
