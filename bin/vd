@@ -39,47 +39,13 @@ import html.parser
 import urllib.parse
 import csv
 
+from visidata.edittext import editText
+from visidata.exceptions import VEscape, VException
+from visidata.keys import ctrl, ENTER, keyname
+from visidata.options import colors, options
+
 initialStatus = 'saul.pw/VisiData v' + __version__
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
-
-default_options = {
-    'csv_dialect': 'excel',
-    'csv_delimiter': ',',
-    'csv_quotechar': '"',
-    'csv_header': False,
-
-    'debug': False,
-    'readonly': False,
-
-    'encoding': 'utf-8',
-    'encoding_errors': 'surrogateescape',
-
-    'VisibleNone': '',   # visible contents of a cell whose value was None
-    'ColumnFiller': ' ',
-    'ColumnSep': ' | ',  # chars between columns
-    'Ellipsis': '…',
-    'SubsheetSep': '~',
-    'StatusSep': ' | ',
-    'KeySep': '/',
-    'SheetNameFmt': '%s| ',  # before status line
-    'FunctionError': '¿',    # when computation fails due to exception
-    'HistogramChar': '*',
-    'ColumnStats': False,  # whether to include mean/median/etc on 'C'olumn sheet
-    'EditPadChar': '_',
-    'Unprintable': '.',
-
-    # color scheme
-    'c_default': 'normal',
-    'c_Header': 'bold',
-    'c_CurHdr': 'reverse',
-    'c_CurRow': 'reverse',
-    'c_CurCol': 'bold',
-    'c_KeyCols': 'brown',
-    'c_StatusLine': 'bold',
-    'c_SelectedRow': 'green',
-    'c_ColumnSep': 'blue',
-    'c_EditCell': 'normal',
-}
 
 vd = None    # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
@@ -88,38 +54,10 @@ sheet = None # current sheet
 windowWidth = None
 windowHeight = None
 
-colors = {
-    'bold': curses.A_BOLD,
-    'reverse': curses.A_REVERSE,
-    'normal': curses.A_NORMAL,
-}
-
-
-def keyname(ch):
-    return curses.keyname(ch).decode('utf-8')
-
-class attrdict(object):
-    def __init__(self, d):
-        self.__dict__ = d
-
-options = attrdict(default_options)
-
-class VException(Exception):
-    pass
-
-class VEscape(VException):
-    pass
-
 class ChangeCommandSet(VException):
     def __init__(self, commands, mode):
         self.commands = commands
         self.mode = mode
-
-def ctrl(ch):
-    return ord(ch) & 31  # convert from 'a' to ^A keycode
-
-ENTER = ctrl('j')
-ESC = 27
 
 base_commands = {}
 global_commands = {}
@@ -595,7 +533,7 @@ class VSheet:
         x, w = self.colLayout[colnum]
         y = self.rowLayout[self.cursorRowIndex]
         currentValue = self.cellValue(self.cursorRowIndex, colnum)
-        r = editText(y, x, w, value=currentValue, fillchar=options.EditPadChar)
+        r = editText(vd, scr, y, x, w, value=currentValue, fillchar=options.EditPadChar)
         if r is None:
             vd.status('nothing changed')
             return currentValue
@@ -1164,59 +1102,10 @@ def save_csv(sheet, fn):
             cw.writerow([col.getDisplayValue(r) for col in sheet.columns])
 
 ### curses, options, init
-def editText(y, x, w, prompt='', value='', fillchar=' '):
-    def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
-        return v if i < 0 else v[:i] + s + v[i:]
-    def clean(s):
-        return ''.join(c if c.isprintable() else options.Unprintable for c in s)
-    def delchar(s, i, remove=1):
-        return s[:i] + s[i+remove:]
-
-    if prompt:
-        scr.addstr(y, x, prompt)
-        x += len(prompt)
-        w -= len(prompt)
-
-    v = value   # value under edit
-    i = 0       # index into v
-    while True:
-        dispval = clean(v)
-        dispi = i
-        if len(v) < w:
-            dispval += fillchar*(w-len(v))
-        elif i >= w:
-            dispi = w-1
-            dispval = dispval[i-w:]
-
-        scr.addstr(y, x, dispval, colors[options.c_EditCell])
-        scr.move(y, x+dispi)
-        ch = scr.getch()
-        if ch == ctrl('a') or ch == curses.KEY_HOME:        i = 0
-        elif ch == ctrl('b') or ch == curses.KEY_LEFT:      i -= 1
-        elif ch == ctrl('c') or ch == ESC:                  raise VEscape(keyname(ch))
-        elif ch == ctrl('d') or ch == curses.KEY_DC:        v = delchar(v, i)
-        elif ch == ctrl('e') or ch == curses.KEY_END:       i = len(v)
-        elif ch == ctrl('f') or ch == curses.KEY_RIGHT:     i += 1
-        elif ch == ctrl('h') or ch == curses.KEY_BACKSPACE: i -= 1 if i > 0 else 0; v = delchar(v, i)
-        elif ch == ctrl('j') or ch == ENTER:                break
-        elif ch == ctrl('k'):                               v = v[:i]
-        elif ch == ctrl('r'):                               v = value
-        elif ch == ctrl('t'):                               v = delchar(splice(v, i-2, v[i-1]), i)
-        elif ch == ctrl('u'):                               v = v[i:]; i = 0
-        elif ch == ctrl('v'):                               v = splice(v, i, chr(scr.getch())); i+= 1
-        else:
-            v = splice(v, i, chr(ch))
-            i += 1
-
-        if i < 0: i = 0
-        if i > len(v): i = len(v)
-
-    vd.status('"%s"' % v)
-    return v
 
 def inputLine(prompt=''):
     'move to the bottom of the screen and get a line of input from the user'
-    return editText(windowHeight-1, 0, windowWidth-1, prompt, fillchar=' ')
+    return editText(vd, scr, windowHeight-1, 0, windowWidth-1, prompt, fillchar=' ')
 
 
 nextColorPair = 1

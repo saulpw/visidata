@@ -1,2 +1,5 @@
 *.?sv
 __pycache__
+.idea/
+visidata.egg-info/
+.tox/
