@@ -204,7 +204,7 @@ command(ord('d'), 'sheet.rows.pop(sheet.cursorRowIndex)', 'delete current row')
 command(ord('g'), 'raise ChangeCommandSet(global_commands, "g")', 'global prefix')
 
 command(ord('S'), 'vd.push(vd.sheets)', 'push sheets sheet')
-command(ord('C'), 'vd.push(VSheetColumns(sheet))', 'push columns sheet')
+command(ord('C'), 'vd.push(sheet.columnsSheet)', 'push columns sheet')
 command(ord('O'), 'vd.push(VSheetObject("options", options))', 'push options sheet')
 
 command(ord('/'), 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)', 'search this column forward for regex')
@@ -311,6 +311,7 @@ class VSheet:
         # all columns in display order
         self.columns = []
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
+        self._columnsSheet = None
 
         # current search term
         self.currentRegex = None
@@ -331,6 +332,12 @@ class VSheet:
 #        if key in self.commands:
 #            vd.status('overriding key %s' % key)
         self.commands[key] = (cmdstr, helpstr)
+
+    @property
+    def columnsSheet(self):
+        if not self._columnsSheet:
+            self._columnsSheet = VSheetColumns(self)
+        return self._columnsSheet
 
     @property
     def nVisibleRows(self):
@@ -987,7 +994,7 @@ class VSheetColumns(VSheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
 # on the Columns sheet, these affect the 'row' (column in the source sheet)
-        self.command(ord('@'), 'sheet.cursorCol.type = date; sheet.moveCursorDown(+1)', 'set column type to date/time')
+        self.command(ord('@'), 'sheet.cursorRow.type = date; sheet.moveCursorDown(+1)', 'set column type to date/time')
         self.command(ord('#'), 'sheet.cursorRow.type = int; sheet.moveCursorDown(+1)', 'set source column type to integer')
         self.command(ord('$'), 'sheet.cursorRow.type = str; sheet.moveCursorDown(+1)', 'set source column type to string')
         self.command(ord('%'), 'sheet.cursorRow.type = float; sheet.moveCursorDown(+1)', 'set source column type to decimal numeric type')
