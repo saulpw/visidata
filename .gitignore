@@ -2,3 +2,4 @@
 __pycache__
 .idea/
 visidata.egg-info/
+.tox/
