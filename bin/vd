@@ -135,6 +135,7 @@ def ctrl(ch):
 
 ENTER = ctrl('j')
 ESC = 27
+TAB = 9
 
 UnspecifiedType = lambda r=None: r
 UnspecifiedType.__name__ = ''
@@ -228,6 +229,8 @@ command(ord('e'), 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(shee
 
 command(ord('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))', 'add column by expr')
 command(ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'swap top two sheets (like vi)')
+command(TAB,  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheets')
+command(curses.KEY_BTAB, 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheets')
 
 # when used with 'g' prefix
 global_command(ord('q'), 'vd.sheets.clear()', 'quit all sheets (and therefore exit)')

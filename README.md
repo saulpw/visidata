@@ -85,6 +85,7 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 | **Ctrl-O** | eval Python expression and push the result |
 |   **R**      | Change type of sheet (requires reload (Ctrl-R) to reparse) |
 |  **Ctrl-^** | Toggle to previous sheet |
+|  **TAB**/**Shift-Tab** | Cycle/reverse-cycle through sheets
 |
 |    **S**      | View current sheet stack |
 |    **C**      | Build column summary |
