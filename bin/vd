@@ -113,19 +113,17 @@ options = attrdict(default_options)
 class VException(Exception):
     pass
 
-class VEscape(VException):
+class EscapeException(VException):
     pass
 
-class ChangeCommandSet(VException):
-    def __init__(self, commands, mode):
-        self.commands = commands
-        self.mode = mode
+class CommandPrefixException(VException):
+    pass
 
 def error(s):
     raise VException(s)
 
 def escape(s):
-    raise VEscape(s)
+    raise EscapeException(s)
 
 def keyname(ch):
     return curses.keyname(ch).decode('utf-8')
@@ -140,13 +138,12 @@ TAB = 9
 UnspecifiedType = lambda r=None: r
 UnspecifiedType.__name__ = ''
 
-base_commands = {}
-global_commands = {}
+base_commands = collections.OrderedDict()
 def command(ch, cmdstr, helpstr=''):
-    base_commands[ch] = (cmdstr, helpstr)
+    base_commands[('', ch)] = (cmdstr, helpstr)
 
 def global_command(ch, cmdstr, helpstr):
-    global_commands[ch] = (cmdstr, helpstr)
+    base_commands[('g', ch)] = (cmdstr, helpstr)
 
 command(curses.KEY_F1,    'vd.push(sheet.CommandHelp())', 'command help')
 command(ord('q'),         'vd.sheets.pop(0)', 'quit current sheet')
@@ -202,7 +199,7 @@ command(ord('F'), 'vd.push(VSheetFreqTable(sheet, sheet.cursorCol))', 'create fr
 
 command(ord('d'), 'sheet.rows.pop(sheet.cursorRowIndex)', 'delete current row')
 
-command(ord('g'), 'raise ChangeCommandSet(global_commands, "g")', 'global prefix')
+command(ord('g'), 'raise CommandPrefixException("g")', 'add global prefix')
 
 command(ord('S'), 'vd.push(vd.sheets)', 'push sheets sheet')
 command(ord('C'), 'vd.push(sheet.columnsSheet)', 'push columns sheet')
@@ -334,7 +331,7 @@ class VSheet:
     def command(self, key, cmdstr, helpstr=''):
 #        if key in self.commands:
 #            vd.status('overriding key %s' % key)
-        self.commands[key] = (cmdstr, helpstr)
+        self.commands[('', key)] = (cmdstr, helpstr)
 
     @property
     def columnsSheet(self):
@@ -677,9 +674,9 @@ class VSheet:
     def CommandHelp(self):
         vs = VSheet(self.name + '_help', self)
         vs.rows = list(self.commands.items())
-        vs.columns = [VColumn('key', str, lambda r: keyname(r[0])),
+        vs.columns = [VColumn('key', str, lambda r: r[0][0] + keyname(r[0][1])),
                 VColumn('action', str, lambda r: r[1][1]),
-                VColumn('global_action', str, lambda r: global_commands.get(r[0], ('', '-'))[1])]
+                VColumn('global_action', str, lambda r,sheet=self: sheet.commands.get(('g', r[0][1]), ('', '-'))[1])]
         return vs
 
 # end VSheet class
@@ -715,6 +712,7 @@ class VisiData:
         ch = 32
 
         command_overrides = None
+        prefixes = ''
         while True:
             if not self.sheets:
                 # if no more sheets, exit
@@ -750,25 +748,23 @@ class VisiData:
                     sheet.cursorRowIndex = sheet.topRowIndex+y-1
                 except Exception:
                     self.exceptionCaught()
-            elif (command_overrides and ch in command_overrides) or (not command_overrides and ch in sheet.commands):
-                cmdstr, helpstr = command_overrides and command_overrides.get(ch) or sheet.commands.get(ch)
+            elif (prefixes, ch) in sheet.commands:
+                cmdstr, helpstr = sheet.commands.get((prefixes, ch))
                 try:
                     exec(cmdstr)
-
-                    command_overrides = None
-                except ChangeCommandSet as e:
-                    # prefixes raise ChangeCommandSet exception instead
-                    command_overrides = e.commands
-                    self.status(e.mode)
-                except VEscape as e:  # user aborted
-                    self.status(str(e))
+                    prefixes = ''
+                except CommandPrefixException as e:
+                    prefixes += str(e)
+                except EscapeException as e:  # user aborted
+                    prefixes = ''
+                    self.status(keyname(int(e)))
                 except Exception:
-                    command_overrides = None
+                    prefixes = ''
                     self.exceptionCaught()
                     self.status(cmdstr)
             else:
-                command_overrides = None
-                self.status('no command for key "%s" (%d) ' % (keyname(ch), ch))
+                prefixes = ''
+                self.status('no command for key "%s" (%d) with prefixes "%s"' % (keyname(ch), ch, prefixes))
 
             sheet.checkCursor()
 
@@ -873,7 +869,7 @@ class VColumn:
         if len(rows) == 0:
             return 0
 
-        return min(max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name)+2), int(windowWidth-1))
+        return min(max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name)), int(windowWidth-3))+2
 
 
 ### common column setups and helpers

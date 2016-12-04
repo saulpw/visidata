@@ -18,6 +18,7 @@ A loose plan that is subject to change.
 - save sheets layout, including generated sheets and visible columns (via replay mechanism?)
 
 ## v0.6 data trail
+- mass transform column
 - save sources to .zip cache
 - edit/transform log
 
@@ -28,6 +29,13 @@ A loose plan that is subject to change.
 ## v0.8
 - undo/redo
 - '.' repeat command
+
+## v0.9
+- simple file management:
+  - rename with 'e'dit
+  - mass rename with transform
+  - ^Delete
+  - only apply changes with ^S
 
 ## v1.0
 - regexes and Python expressions should be interchangeable (search, select, etc)

@@ -8,7 +8,7 @@ except ImportError:
     pass
 
 setup(name="visidata",
-      version="0.29",
+      version="0.35",
       description="a curses interface for exploring and arranging tabular data",
       long_description=open('README.md').read(),
       author="Saul Pwanson",
