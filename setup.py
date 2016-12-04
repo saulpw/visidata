@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 
-from distutils.core import setup
-try:
-    # Setuptools only needed for building the package
-    import setuptools
-except ImportError:
-    pass
+from setuptools import setup
 
 setup(name="visidata",
       version="0.35",

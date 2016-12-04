@@ -1,5 +1,8 @@
 # VisiData release history
 
+## v0.35
+- reverse [/] sort keys
+
 ## v0.33
 - type detection with '~'
 - date type
