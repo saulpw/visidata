@@ -208,6 +208,8 @@ def setup_sheet_commands():
     command(Ctrl.O, 'expr = inputLine("eval: "); pushPyObjSheet(expr, eval(expr))', 'eval an expression and show the result')
 
     command(ord('e'), 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorVisibleColIndex))', 'edit current cell')
+    command(ord('c'), 'sheet.cursorVisibleColIndex = sheet.findColIdx(inputLine("goto column name: "), sheet.visibleCols)', 'goto visible column by name')
+    command(ord('r'), 'sheet.cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
 
     command(ord('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))', 'add column by expr')
     command(Ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'swap top two sheets (like vi)')
@@ -319,8 +321,10 @@ class VSheet:
 #            vd.status('overriding key %s' % key)
         self.commands[('', key)] = (cmdstr, helpstr)
 
-    def findColIdx(self, colname):
-        cols = list(colidx for colidx, c in enumerate(self.columns) if c.name == colname)
+    def findColIdx(self, colname, columns=None):
+        if columns is None:
+            columns = self.columns
+        cols = list(colidx for colidx, c in enumerate(columns) if c.name == colname)
         if not cols:
             error('no column named "%s"' % colname)
         elif len(cols) > 1:
@@ -904,7 +908,7 @@ class OnDemandDict:
     def keys(self):
         return [c.name for c in self.sheet.columns]
     def __getitem__(self, colname):
-        colidx = self.sheet.findColIdx(colname)
+        colidx = self.sheet.findColIdx(colname, self.sheet.columns)
         return self.sheet.columns[colidx].getValue(self.row)
 
 def ColumnExpr(sheet, expr):
