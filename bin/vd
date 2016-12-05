@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.35'
+__version__ = '0.35.1'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -211,7 +211,7 @@ def setup_sheet_commands():
     command(ord('c'), 'sheet.cursorVisibleColIndex = sheet.findColIdx(inputLine("goto column name: "), sheet.visibleCols)', 'goto visible column by name')
     command(ord('r'), 'sheet.cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
 
-    command(ord('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")))', 'add column by expr')
+    command(ord('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")), index=sheet.cursorColIndex+1)', 'add column by expr')
     command(Ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'swap top two sheets (like vi)')
     command(Key.TAB,  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheets')
     command(Key.BTAB, 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheets')
@@ -379,7 +379,7 @@ class VSheet:
 
     @property
     def statusLine(self):
-        return 'row %s/%s' % (self.cursorRowIndex, len(self.rows))
+        return 'row %s/%s (%s selected)' % (self.cursorRowIndex, len(self.rows), len(self._selectedRows))
 
     @property
     def nRows(self):
@@ -410,9 +410,11 @@ class VSheet:
         assert isinstance(col, VColumn)
         return [col.getValue(r) for r in self.rows]
 
-    def addColumn(self, col):
+    def addColumn(self, col, index=None):
+        if index is None:
+            index = len(self.columns)
         if col:
-            self.columns.append(col)
+            self.columns.insert(index, col)
 
     def toggleKeyColumn(self, colidx):
         if self.cursorColIndex >= self.nKeys: # if not a key, add it
@@ -761,7 +763,7 @@ class VisiData:
                     prefixes += str(e)
                 except EscapeException as e:  # user aborted
                     prefixes = ''
-                    self.status(keyname(int(e)))
+                    self.status(keyname(e.args[0]))
                 except Exception:
                     prefixes = ''
                     self.exceptionCaught()
