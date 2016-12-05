@@ -47,15 +47,14 @@ On the 'C'olumns sheet, these commands apply to rows (the columns of the source 
 
 ## Installation
 
-Copy the vd.py script to a bin/vd directory in PATH and make it executable.
+Copy the bin/vd script to a directory in PATH and make it executable.
 
-    OR
-
-        $ pip3 install visidata
+    $ curl -L saul.pw/vd > vd
+    $ chmod u+x ./vd
 
 ### Dependencies
 
-- Python 3.?
+- Python 3.3
 - openpyxl (if reading .xlsx files)
 - h5py and numpy (if reading .hdf5 files)
 
