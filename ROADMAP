@@ -4,27 +4,38 @@
 A loose plan that is subject to change.
 
 ## v0.4 column typing, usability
-- all columns should be typed (str by default)
-   - put indicator in header row to indicate more columns to the left/right
-   - provide autodetect command (g for all columns)
-   - treat None/Error specially and consistently
-   - indicate column type in header
-- F1 loads help sheet
+- add column by regex transform
 
-## v0.5 options management (loading/saving)
+## v0.45 options management (loading/saving)
 - make options an OrderedDict, with columns: option, default, sheet, help
 - make sheet options override global defaults
-- save/load options/command mappings (both global and per sheet--.cfg for now?)
+- save options sheet and commands to ~/.visidata.json by default
+- load config specified by -c option (or above by default)
+
+## v0.5
+- sql dbs via sqlalchemy
+- save all sheets to .h5 file
 - save sheets layout, including generated sheets and visible columns (via replay mechanism?)
 
 ## v0.6 data trail
+- mass transform column
 - save sources to .zip cache
 - edit/transform log
-- save all sheets to .h5 file
-- aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
 
-## v0.7
-- sql dbs via sqlalchemy
+## v0.7 alpha
+- break out 'g'lobal prefix into 'all [visible] columns' and 'selected rows'
+- fill out actions like e.g. freq table diving
+
+## v0.8
+- undo/redo
+- '.' repeat command
+
+## v0.9
+- simple file management:
+  - rename with 'e'dit
+  - mass rename with transform
+  - ^Delete
+  - only apply changes with ^S
 
 ## v1.0
 - regexes and Python expressions should be interchangeable (search, select, etc)
@@ -46,15 +57,14 @@ A loose plan that is subject to change.
 - bulk interface (command line, macros?)
 
 ## Unscheduled
-- html table parsing into columns
-- datetime conversion with auto-detect/sniffer
-- popup menus for editing enum fields
-- add column by regex transform
 - secondary column sort
+- aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
+- fixed-column detector
+- html table parsing into columns
+- popup menus for editing enum fields
 - parse .xml
 - save as .json
 - better csv/tsv sniffer
-- fixed-column detector
 - easy'q'uit (for easily reproducible pages) vs sheet 'Q'uit
 
 ### Details
