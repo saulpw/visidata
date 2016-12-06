@@ -4,6 +4,8 @@ A curses interface for exploring and arranging tabular data
 
 Usable via any remote shell which has Python3 installed.
 
+![VisiData silent demo](screenshot.gif "VisiData Screenshot")
+
 ## Features
 - 'F1' for command help sheet
 - 'o'pen .csv, .tsv, .json, .hdf5, .xlsx

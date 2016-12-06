@@ -211,7 +211,8 @@ def setup_sheet_commands():
     command(ord('c'), 'sheet.cursorVisibleColIndex = sheet.findColIdx(inputLine("goto column name: "), sheet.visibleCols)', 'goto visible column by name')
     command(ord('r'), 'sheet.cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
 
-    command(ord('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("=")), index=sheet.cursorColIndex+1)', 'add column by expr')
+    command(ord('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("new column expr=")), index=sheet.cursorColIndex+1)', 'add column by expr')
+    command(ord(':'), 'sheet.addColumn(ColumnRegex(sheet, inputLine("new column regex:")), index=sheet.cursorColIndex+1)', 'add column by regex')
     command(Ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'swap top two sheets (like vi)')
     command(Key.TAB,  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheets')
     command(Key.BTAB, 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheets')
@@ -697,6 +698,10 @@ class VisiData:
         del self.statusHistory[100:]  # keep most recent 100 only
         return s
 
+    def displayRightStatus(self, prefixes, ch):
+        rstat = "%s" % (keyname(ch)) # (chr(ch) if chr(ch).isprintable() else keyname(ch)
+        self.clipdraw(windowHeight-1, windowWidth-len(rstat)-2, rstat, colors[options.c_StatusLine])
+
     def editText(self, y, x, w, **kwargs):
         v = editText(scr, y, x, w, **kwargs)
         self.status('"%s"' % v)
@@ -739,13 +744,13 @@ class VisiData:
             self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
             self._status = []
 
-            ch = chr(ch)
-            if not ch.isprintable():
-                ch = ' '
-            scr.addstr(windowHeight-1, windowWidth-2, ch, attr)  # last key pressed
-            curses.doupdate()
+            self.displayRightStatus(prefixes, ch)  # visible for this getch
 
+            curses.doupdate()
             ch = scr.getch()
+
+            self.displayRightStatus(prefixes, ch)  # visible for commands that wait with getch
+
             if ch == curses.KEY_RESIZE:
                 windowHeight, windowWidth = scr.getmaxyx()
             elif ch == curses.KEY_MOUSE:
@@ -913,11 +918,28 @@ class OnDemandDict:
         colidx = self.sheet.findColIdx(colname, self.sheet.columns)
         return self.sheet.columns[colidx].getValue(self.row)
 
+
+def evalCol(sheet, col, row):
+    return eval(col.expr, {}, OnDemandDict(sheet, row))
+
 def ColumnExpr(sheet, expr):
     if expr:
         vc = VColumn(expr)
         vc.expr = expr
-        vc.func = lambda r,col=vc,sheet=sheet: eval(col.expr, {}, OnDemandDict(sheet, r))
+        vc.func = lambda r,newcol=vc,sheet=sheet: evalCol(sheet, newcol, r)
+        return vc
+
+def getTransformedValue(oldval, searchregex, replregex):
+    m = re.search(searchregex, oldval)
+    if not m:
+        return None
+    return m.expand(replregex)
+
+def ColumnRegex(sheet, regex):
+    if regex:
+        vc = VColumn(regex)
+        vc.expr, vc.searchregex, vc.replregex = regex.split('/')   # TODO: better syntax
+        vc.func = lambda r,newcol=vc,sheet=sheet: getTransformedValue(str(evalCol(sheet, newcol, r)), newcol.searchregex, newcol.replregex)
         return vc
 
 def getPublicAttrs(obj):
@@ -1389,7 +1411,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
 def inputLine(prompt, value=''):
     'add a prompt to the bottom of the screen and get a line of input from the user'
     scr.addstr(windowHeight-1, 0, prompt)
-    return vd.editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-1, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable)
+    return vd.editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable)
 
 
 nextColorPair = 1
