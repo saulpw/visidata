@@ -17,16 +17,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.35.1'
+__version__ = '0.36'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
 import itertools
 import os.path
+import copy
 import io
 import datetime
-import dateutil.parser
 import string
 import collections
 import functools
@@ -133,28 +133,28 @@ def setup_sheet_commands():
     command(Key.F1,    'vd.push(sheet.CommandHelp())', 'command help')
     command(ord('q'),         'vd.sheets.pop(0)', 'quit current sheet')
 
-    command(Key.LEFT,  'sheet.moveCursorRight(-1)', 'arrow keys move cursor')
-    command(Key.DOWN,  'sheet.moveCursorDown(+1)')
-    command(Key.UP,    'sheet.moveCursorDown(-1)')
-    command(Key.RIGHT, 'sheet.moveCursorRight(+1)')
-    command(Key.NPAGE, 'sheet.moveCursorDown(sheet.nVisibleRows); sheet.topRowIndex += sheet.nVisibleRows', 'scroll down one page')
-    command(Key.PPAGE, 'sheet.moveCursorDown(-sheet.nVisibleRows); sheet.topRowIndex -= sheet.nVisibleRows', 'scroll up one page')
+    command(Key.LEFT,  'sheet.cursorRight(-1)', 'go one column left')
+    command(Key.DOWN,  'sheet.cursorDown(+1)', 'go one row down')
+    command(Key.UP,    'sheet.cursorDown(-1)', 'go one row up')
+    command(Key.RIGHT, 'sheet.cursorRight(+1)', 'go one column right')
+    command(Key.NPAGE, 'sheet.cursorDown(sheet.nVisibleRows); sheet.topRowIndex += sheet.nVisibleRows', 'scroll one page down')
+    command(Key.PPAGE, 'sheet.cursorDown(-sheet.nVisibleRows); sheet.topRowIndex -= sheet.nVisibleRows', 'scroll one page up')
     command(Key.HOME,  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
     command(Key.END,   'sheet.cursorRowIndex = len(sheet.rows)-1', 'go to last row')
 
-    command(ord('h'), 'sheet.moveCursorRight(-1)', 'hjkl keys move cursor')
-    command(ord('j'), 'sheet.moveCursorDown(+1)')
-    command(ord('k'), 'sheet.moveCursorDown(-1)')
-    command(ord('l'), 'sheet.moveCursorRight(+1)')
+    command(ord('h'), 'sheet.cursorRight(-1)', 'go one column left')
+    command(ord('j'), 'sheet.cursorDown(+1)', 'go one row down')
+    command(ord('k'), 'sheet.cursorDown(-1)', 'go one row up')
+    command(ord('l'), 'sheet.cursorRight(+1)', 'go one column right')
 
-    command(ord('H'), 'moveListItem(sheet.columns, sheet.cursorColIndex, max(sheet.cursorColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'shift-movement reorders current row/column')
-    command(ord('J'), 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, min(sheet.cursorRowIndex+1, sheet.nRows-1))')
-    command(ord('K'), 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))')
-    command(ord('L'), 'moveListItem(sheet.columns, sheet.cursorColIndex, min(sheet.cursorColIndex+1, sheet.nCols)); sheet.cursorVisibleColIndex += 1')
+    command(ord('H'), 'sheet.moveVisibleCol(sheet.cursorVisibleColIndex, max(sheet.cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
+    command(ord('J'), 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, min(sheet.cursorRowIndex+1, sheet.nRows-1))', 'move this row one down')
+    command(ord('K'), 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))', 'move this row one up')
+    command(ord('L'), 'sheet.moveVisibleCol(sheet.cursorVisibleColIndex, min(sheet.cursorVisibleColIndex+1, sheet.nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
 
-    command(Ctrl.G, 'vd.status(sheet.statusLine)', 'current sheet info')
+    command(Ctrl.G, 'vd.status(sheet.statusLine)', 'show current sheet info')
     command(Ctrl.P, 'vd.status(vd.statusHistory[0])', 'show previous status line again')
-    command(Ctrl.V, 'vd.status(initialStatus)', 'get version information')
+    command(Ctrl.V, 'vd.status(initialStatus)', 'show version information')
 
     command(ord('t'), 'sheet.topRowIndex = sheet.cursorRowIndex', 'scroll cursor row to top of screen')
     command(ord('m'), 'sheet.topRowIndex = sheet.cursorRowIndex-int(sheet.nVisibleRows/2)', 'scroll cursor row to middle of screen')
@@ -166,18 +166,18 @@ def setup_sheet_commands():
     command(ord('_'), 'sheet.cursorCol.width = sheet.cursorCol.getMaxWidth(sheet.visibleRows)', 'set column width to max visible cell on screen')
     command(ord('-'), 'sheet.cursorCol.width = 0', 'hide current column')
     command(ord('^'), 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)', 'set current column header to current cell value')
-    command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as key')
+    command(ord('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as a key column')
 
-    command(ord('@'), 'sheet.cursorCol.type = date; sheet.moveCursorRight(+1)', 'set column type to ISO8601 date')
-    command(ord('#'), 'sheet.cursorCol.type = int; sheet.moveCursorRight(+1)', 'set column type to integer')
-    command(ord('$'), 'sheet.cursorCol.type = str; sheet.moveCursorRight(+1)', 'set column type to string')
-    command(ord('%'), 'sheet.cursorCol.type = float; sheet.moveCursorRight(+1)', 'set column type to float')
-    command(ord('~'), 'sheet.cursorCol.type = detectType(sheet.cursorValue); sheet.moveCursorRight(+1)', 'autodetect type of column by its data')
+    command(ord('@'), 'sheet.cursorCol.type = date', 'set column type to ISO8601 datetime')
+    command(ord('#'), 'sheet.cursorCol.type = int', 'set column type to integer')
+    command(ord('$'), 'sheet.cursorCol.type = str', 'set column type to string')
+    command(ord('%'), 'sheet.cursorCol.type = float', 'set column type to float')
+    command(ord('~'), 'sheet.cursorCol.type = detectType(sheet.cursorValue)', 'autodetect type of column by its data')
 
     command(ord(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r))', 'sort by current column ascending')
     command(ord('['), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r), reverse=True)', 'sort by current column descending')
     command(Ctrl.E, 'options.debug = True; error(vd.lastErrors[-1])', 'quit and print last error to terminal')
-    command(Ctrl.D, 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug option')
+    command(Ctrl.D, 'options.debug = not options.debug; vd.status("debug " + ("ON" if options.debug else "OFF"))', 'toggle abort-on-exception mode')
 
     command(ord('E'), 'if vd.lastErrors: vd.push(VSheetText("last_error", vd.lastErrors[-1]))', 'display stack trace for most recent exception')
     command(ord('F'), 'vd.push(VSheetFreqTable(sheet, sheet.cursorCol))', 'create frequency table from values in current column')
@@ -195,9 +195,9 @@ def setup_sheet_commands():
     command(ord('n'), 'sheet.searchRegex(columns=[sheet.cursorCol], moveCursor=True)', 'repeat last search forward')
     command(ord('p'), 'sheet.searchRegex(columns=[sheet.cursorCol], backward=True, moveCursor=True)', 'repeat last search backward')
 
-    command(ord(' '), 'sheet.toggle([sheet.cursorRow]); sheet.moveCursorDown(1)', 'toggle select of current row')
-    command(ord('s'), 'sheet.select([sheet.cursorRow]); sheet.moveCursorDown(1)', 'select current row')
-    command(ord('u'), 'sheet.unselect([sheet.cursorRow]); sheet.moveCursorDown(1)', 'unselect current row')
+    command(ord(' '), 'sheet.toggle([sheet.cursorRow]); sheet.cursorDown(1)', 'toggle select of current row')
+    command(ord('s'), 'sheet.select([sheet.cursorRow]); sheet.cursorDown(1)', 'select current row')
+    command(ord('u'), 'sheet.unselect([sheet.cursorRow]); sheet.cursorDown(1)', 'unselect current row')
     command(ord('|'), 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))', 'select rows by regex in this column')
     command(ord('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))', 'unselect rows by regex in this column')
 
@@ -263,14 +263,20 @@ def moveListItem(L, fromidx, toidx):
     L.insert(toidx, r)
     return toidx
 
-def iso8601(dt):
-    return dt.strftime('%Y-%m-%d %H:%M:%S')
+class date:
+    def __init__(self, s):
+        if isinstance(s, int) or isinstance(s, float):
+            self.dt = datetime.datetime.fromtimestamp(s)
+        elif isinstance(s, str):
+            import dateutil.parser
+            self.dt = dateutil.parser.parse(s)
+        else:
+            assert isinstance(s, datetime.datetime)
+            self.dt = s
 
-def datestr(t):
-    return iso8601(datetime.datetime.fromtimestamp(t))
+    def __str__(self):
+        return self.dt.strftime('%Y-%m-%d %H:%M:%S')
 
-def date(s):
-    return dateutil.parser.parse(s)
 
 def detectType(v):
     def tryType(T, v):
@@ -394,10 +400,16 @@ class VSheet:
     def nVisibleCols(self):
         return len(self.visibleCols)
 
-    def moveCursorDown(self, n):
+    def moveVisibleCol(self, fromVisColIdx, toVisColIdx):
+        fromColIdx = self.columns.index(self.visibleCols[fromVisColIdx])
+        toColIdx = self.columns.index(self.visibleCols[toVisColIdx])
+        moveListItem(self.columns, fromColIdx, toColIdx)
+        return toVisColIdx
+
+    def cursorDown(self, n):
         self.cursorRowIndex += n
 
-    def moveCursorRight(self, n):
+    def cursorRight(self, n):
         self.cursorVisibleColIndex += n
 
     def cellValue(self, rownum, col):
@@ -983,6 +995,7 @@ class VSheetList(VSheet):
             self.columns = AttrColumns(columns)
         elif isinstance(obj[0], dict):  # list of dict
             self.columns = [VColumn(k, type(obj[0][k]), lambda_colname(k)) for k in obj[0].keys()]
+            self.nKeys = 1
         else:
             self.columns = [VColumn(name)]
         self.command(Key.ENTER, 'pushPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex', 'dive into this row')
@@ -994,6 +1007,7 @@ class VSheetDict(VSheet):
         self.columns = [
             VColumn('key', str, lambda_col(0)),
             VColumn('value', UnspecifiedType, lambda_col(1)) ]
+        self.nKeys = 1
         self.command(Key.ENTER, 'if sheet.cursorColIndex == 1: pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
         self.command(ord('e'), 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1)', 'edit this value')
 
@@ -1010,6 +1024,7 @@ class VSheetObject(VSheet):
         self.columns = [
             VColumn(type(self.source).__name__ + '_attr', str, lambda_col(0)),
             VColumn('value', UnspecifiedType, valfunc) ]
+        self.nKeys = 1
         self.rows = [(k, getattr(self.source, k)) for k in getPublicAttrs(self.source)]
 
 #### specialized meta sheets
@@ -1025,17 +1040,18 @@ class VSheetSheets(VSheet, list):
 
     def reload(self):
         self.columns = AttrColumns('name nRows nCols cursorValue keyColNames source'.split())
+        self.nKeys = 1
         self.rows = self
 
 class VSheetColumns(VSheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
 # on the Columns sheet, these affect the 'row' (column in the source sheet)
-        self.command(ord('@'), 'sheet.cursorRow.type = date; sheet.moveCursorDown(+1)', 'set column type to date/time')
-        self.command(ord('#'), 'sheet.cursorRow.type = int; sheet.moveCursorDown(+1)', 'set source column type to integer')
-        self.command(ord('$'), 'sheet.cursorRow.type = str; sheet.moveCursorDown(+1)', 'set source column type to string')
-        self.command(ord('%'), 'sheet.cursorRow.type = float; sheet.moveCursorDown(+1)', 'set source column type to decimal numeric type')
-        self.command(ord('~'), 'sheet.cursorRow.type = detectType(sheet.cursorRow.getValue(sheet.source.cursorRow)); sheet.moveCursorDown(+1)', 'autodetect type of source column using its data')
+        self.command(ord('@'), 'sheet.cursorRow.type = date; sheet.cursorDown(+1)', 'set column type to datetime')
+        self.command(ord('#'), 'sheet.cursorRow.type = int; sheet.cursorDown(+1)', 'set source column type to integer')
+        self.command(ord('$'), 'sheet.cursorRow.type = str; sheet.cursorDown(+1)', 'set source column type to string')
+        self.command(ord('%'), 'sheet.cursorRow.type = float; sheet.cursorDown(+1)', 'set source column type to decimal numeric type')
+        self.command(ord('~'), 'sheet.cursorRow.type = detectType(sheet.cursorRow.getValue(sheet.source.cursorRow)); sheet.cursorDown(+1)', 'autodetect type of source column using its data')
         self.command(ord('!'), 'sheet.source.toggleKeyColumn(sheet.cursorRowIndex)', 'toggle key column on source sheet')
         self.command(ord('-'), 'sheet.cursorRow.width = 0', 'hide column on source sheet')
         self.command(ord('_'), 'sheet.cursorRow.width = sheet.cursorRow.getMaxWidth(sheet.source.rows)', 'set source column width to max width of its rows')
@@ -1043,6 +1059,7 @@ class VSheetColumns(VSheet):
 
     def reload(self):
         self.rows = self.source.columns
+        self.nKeys = 1
         self.columns = [
             VColumn('column',   str, lambda_getattr('name')),
             VColumn('width',  int, lambda_getattr('width')),
@@ -1117,6 +1134,8 @@ class VSheetFreqTable(VSheet):
             VColumn('num', int, lambda r: len(r[1])),
             VColumn('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
+        self.nKeys = 1
+
         self.command(ord(' '), 'sheet.source.toggle(sheet.cursorRow[1])', 'toggle these entries')
         self.command(ord('s'), 'sheet.source.select(sheet.cursorRow[1])', 'select these entries')
         self.command(ord('u'), 'sheet.source.unselect(sheet.cursorRow[1])', 'unselect these entries')
@@ -1181,7 +1200,7 @@ class VSheetDirectory(VSheet):
         self.columns = [VColumn('filename', str, lambda r: r[0].name),
                         VColumn('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
                         VColumn('size', int, lambda r: r[1].st_size),
-                        VColumn('mtime', str, lambda r: datestr(r[1].st_mtime))]
+                        VColumn('mtime', date, lambda r: r[1].st_mtime)]
         self.command(Key.ENTER, 'openFileOrUrl(sheet.cursorRow[0])', 'open file')  # path, filename
         self.reload()
 

@@ -66,6 +66,7 @@ A loose plan that is subject to change.
 - save as .json
 - better csv/tsv sniffer
 - easy'q'uit (for easily reproducible pages) vs sheet 'Q'uit
+- how to handle timezone for datetime
 
 ### Details
 
