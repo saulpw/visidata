@@ -71,7 +71,7 @@ browser.
 
 ### Commands
 
-Terms:
+Term definitions:
 
 - 'go': move cursor
 - 'move': change layout of visible data
@@ -81,6 +81,7 @@ Terms:
 - 'jump': change to existing sheet
 - 'pop': drop sheet
 - 'this': current [row/column/cell]
+- 'abort': exit program immediately
 
 `F1` opens the Help Sheet, which shows the available commands along with a brief description.
 This sheet can be searched, sorted, and filtered just like any other sheet.
@@ -107,49 +108,18 @@ expression over the row.  Each row
 
 - Edits made to a joined sheet are by design automatically reflected back to the source sheets.
 
-### Configurable Options (via shift-'O')
+## Credits/Contributions
 
-| Option | Default value | notes |
-| ---: | --- | --- |
-| `csv_dialect` | `excel` | as passed to csv.reader |
-| `csv_delimiter` | `,` |
-| `csv_quotechar` | `"` |
-|
-| `encoding` | `utf-8`| as passed to codecs.open |
-| `encoding_errors` | `surrogateescape`|
-|
-| `VisibleNone` | ``|  visible contents of a cell whose value was None |
-| `ColumnFiller` | ` `| pad chars after column value |
-| `Ellipsis` | `…`|
-| `ColumnSep` | ` \| `|  chars between columns |
-| `SubsheetSep` | `~`|
-| `StatusSep` | ` \| `|
-| `SheetNameFmt` | `%s\| `|  status line prefix |
-| `FunctionError` | `¿`|    when computation fails due to exception |
-| `HistogramChar` | `*`|
-|  color scheme |
-| `c_default` | `normal`|
-| `c_Header` | `bold`|
-| `c_CurHdr` | `reverse`|
-| `c_CurRow` | `reverse`|
-| `c_CurCol` | `bold`|
-| `c_StatusLine` | `bold`|
-| `c_SelectedRow` | `green`|
-
-## Contributions
-
-Created by Saul Pwanson `<vd@saul.pw>`.
+VisiData was created by Saul Pwanson `<vd@saul.pw>`.
 
 VisiData is currently under active development (as of December 2016).
 
 VisiData needs lots of usage and testing to help it become useful and dependable.  If you are actively using VisiData, please let me know!  Especially if you like it.  Maybe there is an easy way to improve the tool for both of us.
 
 Please create a GitHub issue if things don't appear to be working right.
-If you get an unexpected error (on the status line), please include the full stack trace that you get with `E` when reporting the bug.
+If you get an unexpected error (on the status line), please include the full stack trace that you get with `E`.
 
-If you have a particular raw dataset that you would like to transform, 
-Please contact me at the email address above 
-if you would like to contribute in some other way.   In particular I could use a 
+Please contact me at the email address above if you would like to contribute in some other way.
 
 ## Inspirations
 

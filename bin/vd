@@ -40,53 +40,6 @@ import csv
 initialStatus = 'saul.pw/VisiData v' + __version__
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
-default_options = {
-    'csv_dialect': 'excel',
-    'csv_delimiter': ',',
-    'csv_quotechar': '"',
-    'csv_header': '',
-
-    'debug': '',
-    'readonly': '',
-
-    'encoding': 'utf-8',
-    'encoding_errors': 'surrogateescape',
-
-    'SheetNameFmt': '%s| ',  # before status line
-    'ColumnStats': False,  # whether to include mean/median/etc on 'C'olumn sheet
-
-    'SubsheetSep': '~',
-
-    # display/color scheme
-    'ch_VisibleNone': '',   # visible contents of a cell whose value was None
-    'ch_FunctionError': '¿',    # when computation fails due to exception
-    'ch_Histogram': '*',
-    'ch_ColumnFiller': ' ',
-    'ch_LeftMore': '<',
-    'ch_RightMore': '>',
-    'ch_ColumnSep': '|',  # chars between columns
-    'ch_Ellipsis': '…',
-    'ch_StatusSep': ' | ',
-    'ch_KeySep': '/',
-    'ch_EditPadChar': '_',
-    'ch_Unprintable': '.',
-    'ch_WrongType': '~',
-    'ch_Error': '!',
-
-    'c_default': 'normal',
-    'c_Header': 'bold',
-    'c_CurHdr': 'reverse',
-    'c_CurRow': 'reverse',
-    'c_CurCol': 'bold',
-    'c_KeyCols': 'brown',
-    'c_StatusLine': 'bold',
-    'c_SelectedRow': 'green',
-    'c_ColumnSep': 'blue',
-    'c_EditCell': 'normal',
-    'c_WrongType': 'magenta',
-    'c_Error': 'red',
-}
-
 vd = None    # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
 sheet = None # current sheet
@@ -100,35 +53,82 @@ colors = {
     'normal': curses.A_NORMAL,
 }
 
-
 class attrdict(object):
     def __init__(self, d):
         self.__dict__ = d
 
-options = attrdict(default_options)
-
-class VException(Exception):
+class EscapeException(Exception):
     pass
 
-class EscapeException(VException):
-    pass
-
-class CommandPrefixException(VException):
+class CommandPrefixException(Exception):
     pass
 
 def error(s):
-    raise VException(s)
+    raise Exception(s)
 
 UnspecifiedType = lambda r=None: str(r)
 UnspecifiedType.__name__ = ''
 
 base_commands = collections.OrderedDict()
-def setup_sheet_commands():
-    def command(ch, cmdstr, helpstr=''):
-        base_commands[('', ch)] = (cmdstr, helpstr)
+base_options = collections.OrderedDict()
+options = attrdict(base_options)
 
+def setup_sheet_commands():
+    def command(ch, cmdstr, helpstr):
+        base_commands[('', ch)] = (cmdstr, helpstr)
     def global_command(ch, cmdstr, helpstr):
         base_commands[('g', ch)] = (cmdstr, helpstr)
+    def option(name, default, helpstr=''):
+        base_options[name] = default
+#        base_options[name] = (default, helpstr)
+    def theme(name, default, helpstr=''):
+        base_options[name] = default
+#        base_options[name] = (default, helpstr)
+
+    option('csv_dialect', 'excel', 'dialect passed to csv.reader')
+    option('csv_delimiter', ',', 'delimiter passed to csv.reader')
+    option('csv_quotechar', '"', 'quotechar passed to csv.reader')
+    option('csv_header', '', 'parse first row of CSV as column names')
+
+    option('debug', '', 'abort on error and display stacktrace')
+    option('readonly', '', 'disable saving')
+
+    option('encoding', 'utf-8', 'as passed to codecs.open')
+    option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
+
+    option('ColumnStats', False, 'include mean/median/etc on Column sheet')
+
+    option('SubsheetSep', '~')
+
+    # display/color scheme
+    theme('SheetNameFmt', '%s| ', 'status line prefix')
+    theme('ch_VisibleNone', '',  'visible contents of a cell whose value was None')
+    theme('ch_FunctionError', '¿', 'when computation fails due to exception')
+    theme('ch_Histogram', '*')
+    theme('ch_ColumnFiller', ' ', 'pad chars after column value')
+    theme('ch_LeftMore', '<')
+    theme('ch_RightMore', '>')
+    theme('ch_ColumnSep', '|', 'chars between columns')
+    theme('ch_Ellipsis', '…')
+    theme('ch_StatusSep', ' | ')
+    theme('ch_KeySep', '/')
+    theme('ch_EditPadChar', '_')
+    theme('ch_Unprintable', '.')
+    theme('ch_WrongType', '~')
+    theme('ch_Error', '!')
+
+    theme('c_default', 'normal')
+    theme('c_Header', 'bold')
+    theme('c_CurHdr', 'reverse')
+    theme('c_CurRow', 'reverse')
+    theme('c_CurCol', 'bold')
+    theme('c_KeyCols', 'brown')
+    theme('c_StatusLine', 'bold')
+    theme('c_SelectedRow', 'green')
+    theme('c_ColumnSep', 'blue')
+    theme('c_EditCell', 'normal')
+    theme('c_WrongType', 'magenta')
+    theme('c_Error', 'red')
 
     command(Key.F1,    'vd.push(sheet.CommandHelp())', 'push help sheet')
     command(Key('q'),  'vd.sheets.pop(0)', 'pop this sheet')
@@ -1475,7 +1475,7 @@ def terminal_main():
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('inputs', nargs='*', help='initial sheets')
-    parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='abort on exception')
+    parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='abort on error')
     parser.add_argument('-r', '--readonly', dest='readonly', action='store_true', default=False, help='editing disabled')
     args = parser.parse_args()
 
