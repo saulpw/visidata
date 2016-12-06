@@ -1,4 +1,4 @@
-# VisiData v0.35
+# VisiData v0.36
 
 A curses interface for exploring and arranging tabular data
 
@@ -13,7 +13,7 @@ Usable via any remote shell which has Python3 installed.
 - hjkl cursor movement, 't'op/'m'iddle/'b'ottom scroll to position screen cursor
 - '['/']' sort asc/desc by one column
 - 'e'dit cell contents
-- search/select/unselect by regex in column
+- search/select/unselect/subst by regex in column
 - 'F'requency table for current column with histogram
 - inner/outer/full/diff joins on any number of sheets, matching designated key columns
 - add new column by Python expression
@@ -59,6 +59,7 @@ Copy the bin/vd script to a directory in PATH and make it executable.
 - Python 3.3
 - openpyxl (if reading .xlsx files)
 - h5py and numpy (if reading .hdf5 files)
+- dateutil.parser (if converting string column to datetime)
 
 ## Usage
 
@@ -68,76 +69,43 @@ Inputs may be paths or URLs.  If no inputs are given, starts exploring the
 current directory.  Unknown filetypes are by default viewed with a text
 browser.
 
-### Working keys
+### Commands
 
-The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) for the next command only.
+Terms:
 
-| Keybinding | Action | with 'g' prefix |
-| ---: | --- | --- |
-|   **F1** | Show help screen with list of commands |
-|   **h**/**j**/**k**/**l** or **\<arrows\>** | Move cell cursor left/down/up/right | Move cursor all the way to the left/bottom/top/right |
-| **PgDn**/**PgUp** | Scroll sheet one page down/up (minus stickied rows/columns) |  Go to first/last page |
-|   **t**/**m**/**b**   | Scrolls cursor row to top/middle/bottom of screen |
-|   **Ctrl-G**      | Show sheet info on statusline |
-|   **Ctrl-P**      | Show last status message | Open status history |
-|   **Ctrl-R**      | Reload sheet from source |
-|   **Ctrl-S**     | Save current sheet to new file (type based on extension) |
-| **o** | open local file or url |
-| **Ctrl-O** | eval Python expression and push the result |
-|   **R**      | Change type of sheet (requires reload (Ctrl-R) to reparse) |
-|  **Ctrl-^** | Toggle to previous sheet |
-|  **TAB**/**Shift-Tab** | Cycle/reverse-cycle through sheets
-|
-|    **S**      | View current sheet stack |
-|    **C**      | Build column summary |
-|    **F**      | Build frequency table for current column |
-|    **O**      | Show/edit options |
-|
-|    **E**      | View stack trace for previous exceptions | View stacktraces for last 100 exceptions |
-|    **Ctrl-E**     | Abort and print last exception and stacktrace to terminal |
-|    **Ctrl-D**     | Toggle debug mode (future exceptions abort program) |
-|
-|    **_** (underscore)     | Set width of current column to fit values on screen | Set width of all columns to fit values on screen |
-|    **[**/**]**    | Sort by current column (asc/desc) |
-|   **<**/**>**     | Skip up/down to next value in column |
-|
-|  **/** / **?**    | Search forward/backward by regex in current column | Search all columns
-| **p**/**n**  | Go to previous/next search match | Go to first/last match |
-| **\|**//**\\** | Select/Unselect rows by regex if this column matches | Select/Unselect rows if any column matches |
-| **s**/**u**/**\<Space\>** | Select/Unselect/Toggle current row | Select/Unselect/Toggle all rows |
-|
-|**H**/**J**/**K**/**L** | Move current column or row one to the left/down/up/right (changes data ordering) | "Throw" the column/row all the way to the left/bottom/top/right |
-|    **^**      | Set name of current column | Set names of all columns to the values in the current row |
-|    **-** (hyphen)   | Delete current column |
-| **d**  | Delete current row | Delete all selected rows |
-| **#**/**$**/**%** | Convert column to int/string/float |
-|  **e** | Edit current cell value |
-|  **=** | Add new column by Python expression |
-| **!** | Make current column a key (pin to left and match on join) |
-| **~** | Autodetect this column | Autodetect all columns |
+- 'go': move cursor
+- 'move': change layout of visible data
+- 'show': put on status line
+- 'scroll': change set of visible rows
+- 'open': add a new sheet to the front of the sheets list (thus making it immediately visible)
+- 'jump': change to existing sheet
+- 'pop': drop sheet
+- 'this': current [row/column/cell]
 
-### HDF5 sheets
+`F1` opens the Help Sheet, which shows the available commands along with a brief description.
+This sheet can be searched, sorted, and filtered just like any other sheet.
 
-| Keybinding | Action | with 'g' prefix |
-| ---: | --- | --- |
-|  **<Enter>** | Open the group or dataset under the cursor |
-|  **A**   | View attributes of currently selected object | View attributes of current sheet |
+Here are slightly better descriptions of some non-obvious commands:
 
-### 'S'heets commands
+- the "`g`lobal prefix": always applies to the next command only, but could mean "apply to all columns" (as with the regex search commands) or "apply to selected rows" (as with `d`elete) or "apply to all sheets" (as with `q`).
+The global\_action column on the Help Sheet shows the specific way the global prefix changes each command.
 
-| Keybinding | Action | with 'g' prefix |
-| ---: | --- | --- |
-| **&** | Join all selected sheets, keeping only rows which match keys on all sheets (inner join) |
-| **+** | Join all selected sheets, keeping all rows from first sheet (outer join) |
-| * (asterisk) | Join all selected sheets, keeping all rows from all sheets (full join) |
-| **~** | Join all selected sheets, keeping only rows NOT in all sheets (diff join) |
+- `=` "add column expression" takes a Python expression as input and appends a new column, which evaluates the
+expression over the row.  Each row
 
+- `:` regex subst: creates a new column from an expression, a pattern, and a subst template: `:column/(.*)/\1`
 
-### Notes
+- `^S`ave sheet: the output type is determined by the file extension (currently .tsv and .csv)
 
-- Edits made to a joined sheet will be reflected in the source sheets.
+- `R` sets the source type of the current sheet.  The current sheet remains until a reload (`Ctrl-R`).
 
+- When sheets are joined, the rows are matched by the display values in the key columns.  Different numbers of key columns cannot match (no partial keys and rollup yet).  The join types are:
+    - `&`: Join all selected sheets, keeping only rows which match keys on all sheets (inner join)
+    - `+`: Join all selected sheets, keeping all rows from first sheet (outer join, with the first selected sheet being the "left")
+    - `*`: Join all selected sheets, keeping all rows from all sheets (full join)
+    - `~`: Join all selected sheets, keeping only rows NOT in all sheets (diff join)
 
+- Edits made to a joined sheet are by design automatically reflected back to the source sheets.
 
 ### Configurable Options (via shift-'O')
 
@@ -172,8 +140,16 @@ The 'g' prefix indicates 'global' context (e.g. apply action to *all* columns) f
 
 Created by Saul Pwanson `<vd@saul.pw>`.
 
-VisiData is currently under active development (as of Nov 2016).
-Please contact me at the email address above if you would like to contribute.
+VisiData is currently under active development (as of December 2016).
+
+VisiData needs lots of usage and testing to help it become useful and dependable.  If you are actively using VisiData, please let me know!  Especially if you like it.  Maybe there is an easy way to improve the tool for both of us.
+
+Please create a GitHub issue if things don't appear to be working right.
+If you get an unexpected error (on the status line), please include the full stack trace that you get with `E` when reporting the bug.
+
+If you have a particular raw dataset that you would like to transform, 
+Please contact me at the email address above 
+if you would like to contribute in some other way.   In particular I could use a 
 
 ## Inspirations
 
