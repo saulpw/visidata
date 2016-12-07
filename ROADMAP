@@ -4,12 +4,15 @@
 A loose plan that is subject to change.
 
 ## v0.4 column typing, usability
-- add column by regex transform
+- better interface:
+    - subst regex match in cells
+    - delete regex match in cells
+    - create versioned columns on subst/delete
 
 ## v0.45 options management (loading/saving)
 - make options an OrderedDict, with columns: option, default, sheet, help
 - make sheet options override global defaults
-- save options sheet and commands to ~/.visidata.json by default
+- save options sheet and commands to ~/.visidata.tsv by default
 - load config specified by -c option (or above by default)
 
 ## v0.5
@@ -31,7 +34,7 @@ A loose plan that is subject to change.
 - '.' repeat command
 
 ## v0.9
-- simple file management:
+- simple file management in VSheetDir:
   - rename with 'e'dit
   - mass rename with transform
   - ^Delete
@@ -57,6 +60,7 @@ A loose plan that is subject to change.
 - bulk interface (command line, macros?)
 
 ## Unscheduled
+- reload derived sheets
 - secondary column sort
 - aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
 - fixed-column detector

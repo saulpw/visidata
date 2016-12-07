@@ -513,22 +513,14 @@ class VSheet:
         if x <= 0:
             self.leftVisibleColIndex = self.cursorVisibleColIndex
         else:
-            i = 0
             while True:
-                i += 1
-                if i > 1000:
-                    error('too many iterations')
+                if self.leftVisibleColIndex == self.cursorVisibleColIndex: # not much more we can do
+                    break
                 self.calcColLayout()
-                if self.cursorVisibleColIndex not in self.visibleColLayout:  # should always be to the right
-                    if self.cursorVisibleColIndex > self.leftVisibleColIndex:
-                        self.leftVisibleColIndex += 1
-                    else:
-                        self.leftVisibleColIndex -= 1
-                    continue
+                assert self.cursorVisibleColIndex in self.visibleColLayout, self.visibleColLayout
                 cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
                 left_x, left_w = self.visibleColLayout[self.leftVisibleColIndex]
-                if cur_x+cur_w < windowWidth:
-                    # current columns fit entirely on screen
+                if cur_x+cur_w < windowWidth: # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1
 
@@ -1014,7 +1006,7 @@ class VSheetDict(VSheet):
 class VSheetObject(VSheet):
     def __init__(self, name, obj):
         super().__init__(name, obj)
-        self.command(Key.ENTER, 'pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
+        self.command(Key.ENTER, 'pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1]() if callable(sheet.cursorRow[1]) else sheet.cursorRow[1])', 'dive into this value')
         self.command(Key('e'), 'setattr(sheet.source, sheet.cursorRow[0], sheet.editCell(1)); sheet.reload()', 'edit this value')
         self.reload()
 
@@ -1025,7 +1017,7 @@ class VSheetObject(VSheet):
             VColumn(type(self.source).__name__ + '_attr', str, lambda_col(0)),
             VColumn('value', UnspecifiedType, valfunc) ]
         self.nKeys = 1
-        self.rows = [(k, getattr(self.source, k)) for k in getPublicAttrs(self.source)]
+        self.rows = [(k, getattr(self.source, k)) for k in dir(self.source)]
 
 #### specialized meta sheets
 class VSheetSheets(VSheet, list):
@@ -1181,7 +1173,10 @@ def openFileOrUrl(p):
         vs = openUrl(p)
     else:
         return openFileOrUrl(Path(p))
-    return vd.push(vs)
+    if vs:
+        vd.status('opened %s' % p.name)
+    if isinstance(vs, VSheet):
+        return vd.push(vs)
 
 class VSheetText(VSheet):
     def __init__(self, name, content, src=None):
@@ -1309,12 +1304,72 @@ class VSheetBlaze(VSheet):
         self.rows = list(data)
 
 def openUrl(url):
+    m = re.search(r'/spreadsheets/d/([a-zA-Z0-9-_]+)', url)
+    if m:
+        return open_gspreadsheet(Path(m.group(1)))
+
     import blaze
     import datashape; datashape.coretypes._canonical_string_encodings.update({"utf8_unicode_ci": "U8"})
     fp = blaze.data(url)
     vs = VSheetList(url, [getattr(fp, tblname) for tblname in fp.fields], url)
     vs.command(Key.ENTER, 'vd.push(VSheetBlaze(sheet.cursorRow.name, sheet.cursorRow, sheet))', 'open this table')
     return vs
+
+#### Google Sheets; requires credentials to be setup already
+
+@functools.lru_cache()
+def google_sheets():
+    import httplib2
+    import os
+
+    from apiclient import discovery
+    from oauth2client.file import Storage
+
+    home_dir = os.path.expanduser('~')
+    credential_dir = os.path.join(home_dir, '.credentials')
+    credential_path = os.path.join(credential_dir, 'sheets.googleapis.com-python-quickstart.json')
+
+    store = Storage(credential_path)
+    credentials = store.get()
+    if not credentials:
+        vd.status('Credentials required')
+    elif credentials.invalid:
+        vd.status('No or Invalid credentials')
+    else:
+        http = credentials.authorize(httplib2.Http())
+        discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
+        service = discovery.build('sheets', 'v4', http=http, discoveryServiceUrl=discoveryUrl)
+
+        return service.spreadsheets()
+
+def open_gspreadsheet(p):
+    sheets = google_sheets()
+    sheet_md = sheets.get(spreadsheetId=p.name).execute()
+    vs = VSheet(sheet_md['properties']['title'], p)
+    vs.columns = [VColumn('title', lambda_eval('properties.title')),
+                  VColumn('rowCount', lambda_eval('properties.gridProperties.rowCount')),
+                  VColumn('columnCount', lambda_eval('properties.gridProperties.columnCount'))]
+    vs.rows = sheet_md['sheets']
+    vs.command(Key.ENTER, 'sheet.cursorRow')
+    return vs
+
+def open_gsheet(p):
+    sheets = google_sheets()
+    sheet = sheets.values().get(spreadsheetId=p.name).execute()
+    pushPyObjSheet(p.name, sheet, p)
+#    vs = VSheet(sheet_md['properties']['title'], p)
+#    vs.columns = [VColumn('title', lambda_eval('properties.title')),
+#                  VColumn('rowCount', lambda_eval('properties.gridProperties.rowCount')),
+#                  VColumn('columnCount', lambda_eval('properties.gridProperties.columnCount'))]
+#    vs.rows = sheet_md['sheets']
+#    vs.command(Key.ENTER, 'sheet.cursorRow')
+#    return vs
+
+#### external addons
+def open_py(p):
+    contents = getTextContents(p)
+    exec(contents, globals())
+    vd.status('executed %s' % p)
 
 ### Sheet savers
 
@@ -1493,7 +1548,6 @@ def terminal_main():
     ret = wrapper(curses_main)
     if ret:
         print(ret)
-
 
 def curses_main(_scr):
     global scr

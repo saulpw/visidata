@@ -3,6 +3,7 @@
 ## v0.36
 - right column
 - regex subst
+- unreverse [/] sort keys ([ = ascending)
 
 ## v0.35 (2016-12-04)
 - reverse [/] sort keys

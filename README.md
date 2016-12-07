@@ -51,14 +51,15 @@ On the 'C'olumns sheet, these commands apply to rows (the columns of the source 
 
 Copy the bin/vd script to a directory in PATH and make it executable.
 
-    $ curl -L saul.pw/vd > vd
-    $ chmod u+x ./vd
+        $ curl -L saul.pw/vd > vd
+        $ chmod u+x ./vd
 
 ### Dependencies
 
 - Python 3.3
-- openpyxl (if reading .xlsx files)
-- h5py and numpy (if reading .hdf5 files)
+- openpyxl (if opening .xlsx files)
+- h5py and numpy (if opening .hdf5 files)
+- google-api-python-client (if opening Google Sheets; must [also set up OAuth credentials](https://developers.google.com/sheets/quickstart/python)
 - dateutil.parser (if converting string column to datetime)
 
 ## Usage
@@ -71,7 +72,7 @@ browser.
 
 ### Commands
 
-Term definitions:
+Definitions of terms:
 
 - 'go': move cursor
 - 'move': change layout of visible data
@@ -116,16 +117,18 @@ VisiData is currently under active development (as of December 2016).
 
 VisiData needs lots of usage and testing to help it become useful and dependable.  If you are actively using VisiData, please let me know!  Especially if you like it.  Maybe there is an easy way to improve the tool for both of us.
 
-Please create a GitHub issue if things don't appear to be working right.
+Also please create a GitHub issue if anything doesn't appear to be working right.
 If you get an unexpected error (on the status line), please include the full stack trace that you get with `E`.
 
 Please contact me at the email address above if you would like to contribute in some other way.
 
-## Inspirations
+## Inspirations and Related Work
 
 - [BurntSushi/xsv](https://github.com/BurntSushi/xsv)
-- [andmarti1424/sc-im](https://github.com/andmarti1424/sc-im)
 - [teapot](https://www.syntax-k.de/projekte/teapot/)
+- [firecat53/tabview](https://github.com/firecat53/tabview)
+- [andmarti1424/sc-im](https://github.com/andmarti1424/sc-im)
+- [jennybc/sanesheets](https://github.com/jennybc/sanesheets)
 - and, of course, [VisiCalc](http://danbricklin.com/visicalc.htm)
 
 ## License
