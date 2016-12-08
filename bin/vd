@@ -386,7 +386,7 @@ class VSheet:
 
     @property
     def statusLine(self):
-        return 'row %s/%s (%s selected)' % (self.cursorRowIndex, len(self.rows), len(self._selectedRows))
+        return 'row %s/%s (%s selected); %d/%d columns visible' % (self.cursorRowIndex, len(self.rows), len(self._selectedRows), self.nVisibleCols, self.nCols)
 
     @property
     def nRows(self):
@@ -517,7 +517,13 @@ class VSheet:
                 if self.leftVisibleColIndex == self.cursorVisibleColIndex: # not much more we can do
                     break
                 self.calcColLayout()
-                assert self.cursorVisibleColIndex in self.visibleColLayout, self.visibleColLayout
+                if self.cursorVisibleColIndex < min(self.visibleColLayout.keys()):
+                    self.leftVisibleColIndex -= 1
+                    continue
+                elif self.cursorVisibleColIndex > max(self.visibleColLayout.keys()):
+                    self.leftVisibleColIndex += 1
+                    continue
+
                 cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
                 left_x, left_w = self.visibleColLayout[self.leftVisibleColIndex]
                 if cur_x+cur_w < windowWidth: # current columns fit entirely on screen
@@ -621,6 +627,8 @@ class VSheet:
         numHeaderRows = 1
         scr.erase()  # clear screen before every re-draw
         sepchars = options.ch_ColumnSep
+        if not self.columns:
+            return vd.status('no columns')
 
         self.rowLayout = {}
         self.calcColLayout()
@@ -958,7 +966,7 @@ def ArrayColumns(n):
     return [VColumn('', UnspecifiedType, lambda_col(colnum)) for colnum in range(n)]
 
 def ArrayNamedColumns(columns):
-    'columnstr is a string of n column names (separated by spaces), mapping to r[0]..r[n]'
+    'columns is a list of column names, mapping to r[0]..r[n]'
     return [VColumn(colname, UnspecifiedType, lambda_col(i)) for i, colname in enumerate(columns)]
 
 def AttrColumns(colnames):
@@ -1222,7 +1230,11 @@ class open_csv(VSheet):
 
         rdr = csv.reader(io.StringIO(contents, newline=''), dialect=dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
         self.rows = [r for r in rdr]
-        self.columns = PyobjColumns(self.rows[0]) or ArrayColumns(len(self.rows[0]))
+        if options.csv_header:
+            self.columns = ArrayNamedColumns(self.rows[0])
+            self.rows = self.rows[1:]
+        else:
+            self.columns = ArrayColumns(len(self.rows[0]))
 
 class open_tsv(VSheet):
     def __init__(self, p):
@@ -1534,10 +1546,11 @@ def terminal_main():
     parser.add_argument('-r', '--readonly', dest='readonly', action='store_true', default=False, help='editing disabled')
     args = parser.parse_args()
 
+    setup_sheet_commands()  # before settings options from args
+
     options.debug = args.debug
     options.readonly = args.readonly
 
-    setup_sheet_commands()
     vd = VisiData()
     inputs = args.inputs or ['.']
 
@@ -1564,7 +1577,7 @@ def curses_main(_scr):
     except Exception as e:
         if options.debug:
             raise
-        return 'Exception: ' + str(e)
+        return '%s: %s' % (type(e).__name__, str(e))
 
 
 def wrapper(f, *args):

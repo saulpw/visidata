@@ -21,10 +21,10 @@ Usable via any remote shell which has Python3 installed.
 
 ### Metasheets
 
-- 'E'rror metasheet
 - 'S'heets metasheet to manage/navigate multiple sheets
 - 'C'olumns metasheet
 - 'O'ptions sheet to change the style or behavior
+- 'E'rror metasheet
 
 ### Columns
 
