@@ -188,7 +188,7 @@ def setup_sheet_commands():
 
     command(Shift.S, 'vd.push(vd.sheets)', 'open Sheet stack')
     command(Shift.C, 'vd.push(sheet.columnsSheet)', 'open Columns for this sheet')
-    command(Shift.O, 'vd.push(VSheetObject("options", options))', 'open Options')
+    command(Shift.O, 'vd.push(VSheetDict("options", options.__dict__))', 'open Options')
 
     command(Key('/'), 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)', 'search this column forward for regex')
     command(Key('?'), 'sheet.searchRegex(inputLine(prompt="?"), columns=[sheet.cursorCol], backward=True, moveCursor=True)', 'search this column backward for regex')
@@ -1003,7 +1003,7 @@ class VSheetList(VSheet):
 class VSheetDict(VSheet):
     def __init__(self, name, mapping):
         super().__init__(name, mapping)
-        self.rows = sorted(list(list(x) for x in mapping.items()))
+        self.rows = list(list(x) for x in mapping.items())
         self.columns = [
             VColumn('key', str, lambda_col(0)),
             VColumn('value', UnspecifiedType, lambda_col(1)) ]
