@@ -24,6 +24,7 @@ A loose plan that is subject to change.
 - mass transform column
 - save sources to .zip cache
 - edit/transform log
+    - can be replayed to generate exact duplicate sheet
 
 ## v0.7 alpha
 - break out 'g'lobal prefix into 'all [visible] columns' and 'selected rows'
@@ -49,6 +50,7 @@ A loose plan that is subject to change.
 - connect to larger datasets (via blaze?)
 - Python3 API for import by other scripts
 - load new .py plugins for inputs/outputs/sheets
+   - git app that can streamline standard workflows
 
 ## v1.2
 

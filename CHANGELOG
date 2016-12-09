@@ -2,8 +2,8 @@
 
 ## v0.37
 - 'g~' (autodetect all columns)
-- nulls, uniques on columns sheet
 - '"' copies row to immediately following
+- nulls, uniques on columns sheet
 
 ## v0.36
 - right column
