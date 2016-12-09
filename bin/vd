@@ -17,14 +17,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.36'
+__version__ = '0.37'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
 import itertools
 import os.path
-import copy
+from copy import copy
 import io
 import datetime
 import string
@@ -232,6 +232,7 @@ def setup_sheet_commands():
 
     global_command(Key('_'), 'for c in sheet.visibleCols: c.width = c.getMaxWidth(sheet.visibleRows)', 'set width of all columns to fit visible cells')
     global_command(Key('^'), 'for c in sheet.visibleCols: c.name = c.getDisplayValue(sheet.cursorRow)', 'set names of all visible columns to this row')
+    global_command(Key('~'), 'for c in sheet.visibleCols: c.type = detectType(c.getValue(sheet.cursorRow))', 'autodetect types of all visible columns by their data')
 
     global_command(Shift.E, 'vd.push(VSheetText("last_error", "\\n\\n".join(vd.lastErrors)))', 'open last 10 errors')
 
@@ -252,7 +253,7 @@ def setup_sheet_commands():
     global_command(Ctrl.P, 'vd.push(VSheetText("statuses", vd.statusHistory))', 'open last 100 statuses')
 
     # experimental commands
-    command(Key('a'), 'sheet.rows.insert(sheet.cursorRowIndex, copy.copy(sheet.cursorRow))', 'insert duplicate of this row')
+    command(Key('"'), 'sheet.rows.insert(sheet.cursorRowIndex, copy(sheet.cursorRow))', 'insert duplicate of this row')
 
 # end setup_sheet_commands
 
@@ -417,11 +418,6 @@ class VSheet:
             # assume it's the column number
             col = self.columns[col]
         return col.getValue(self.rows[rownum])
-
-    @functools.lru_cache()
-    def columnValues(self, col):
-        assert isinstance(col, VColumn)
-        return [col.getValue(r) for r in self.rows]
 
     def addColumn(self, col, index=None):
         if index is None:
@@ -847,6 +843,13 @@ class VColumn:
     def hidden(self):
         return self.width == 0
 
+    def nEmpty(self, rows):
+        vals = self.values(rows)
+        return sum(1 for v in vals if v == '' or v == None)
+
+    def values(self, rows):
+        return [self.getValue(r) for r in rows]
+
     def getValue(self, row):
         try:
             v = self.func(row)
@@ -1067,13 +1070,15 @@ class VSheetColumns(VSheet):
             VColumn('fmtstr', str, lambda_getattr('_fmtstr')),
             VColumn('expr',   str, lambda_getattr('expr')),
             VColumn('value',  UnspecifiedType, lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
+            VColumn('nulls',  int, lambda c,sheet=sheet: c.nEmpty(sheet.rows)),
 
-            VColumn('mode',   UnspecifiedType, lambda c: statistics.mode(sheet.columnValues(c)), width=0),
-            VColumn('min',    UnspecifiedType, lambda c: min(sheet.columnValues(c)), width=0),
-            VColumn('median', UnspecifiedType, lambda c: statistics.median(sheet.columnValues(c)), width=0),
-            VColumn('mean',   float, lambda c: statistics.mean(sheet.columnValues(c)), width=0),
-            VColumn('max',    UnspecifiedType, lambda c: max(sheet.columnValues(c)), width=0),
-            VColumn('stddev', float, lambda c: statistics.stdev(sheet.columnValues(c)), width=0),
+            VColumn('uniques',  int, lambda c,sheet=sheet: len(set(c.values(sheet.rows))), width=0),
+            VColumn('mode',   UnspecifiedType, lambda c: statistics.mode(c.values(sheet.rows)), width=0),
+            VColumn('min',    UnspecifiedType, lambda c: min(c.values(sheet.rows)), width=0),
+            VColumn('median', UnspecifiedType, lambda c: statistics.median(c.values(sheet.rows)), width=0),
+            VColumn('mean',   float, lambda c: statistics.mean(c.values(sheet.rows)), width=0),
+            VColumn('max',    UnspecifiedType, lambda c: max(c.values(sheet.rows)), width=0),
+            VColumn('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
             ]
 
 #### slicing and dicing
@@ -1087,7 +1092,10 @@ class VSheetJoin(VSheet):
     def reload(self):
         sheets = self.source
         # first element in joined row is the tuple of keys
-        self.columns = [VColumn(sheets[0].columns[colnum].name, UnspecifiedType, lambda_subrow_wrap(lambda_col(colnum), 0)) for colnum in range(sheets[0].nKeys)]
+        self.columns = []
+        for colnum in range(sheets[0].nKeys):
+            c = sheets[0].columns[colnum]
+            self.columns.append(VColumn(c.name, c.type, lambda_subrow_wrap(lambda_col(colnum), 0)))
         self.nKeys = sheets[0].nKeys
 
         rowsBySheetKey = {}
@@ -1101,7 +1109,7 @@ class VSheetJoin(VSheet):
 
         for sheetnum, vs in enumerate(sheets):
             # subsequent elements are the rows from each source, in order of the source sheets
-            self.columns.extend(VColumn(c.name, UnspecifiedType, lambda_subrow_wrap(c.func, sheetnum+1)) for c in vs.columns[vs.nKeys:])
+            self.columns.extend(VColumn(c.name, c.type, lambda_subrow_wrap(c.func, sheetnum+1), c.width) for c in vs.columns[vs.nKeys:])
             for r in vs.rows:
                 key = tuple(c.getValue(r) for c in vs.keyCols)
                 if key not in rowsByKey:
@@ -1122,15 +1130,18 @@ class VSheetFreqTable(VSheet):
         fqcolname = '%s_%s_freq' % (sheet.name, col.name)
         super().__init__(fqcolname, sheet)
 
-        values = collections.defaultdict(list)
+        self.origCol = col
+        self.values = collections.defaultdict(list)
         for r in sheet.rows:
-            values[str(col.getValue(r))].append(r)
+            self.values[str(col.getValue(r))].append(r)
+        self.reload()
 
-        self.rows = sorted(values.items(), key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
+    def reload(self):
+        self.rows = sorted(self.values.items(), key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
         self.largest = len(self.rows[0][1])+1
 
         self.columns = [
-            VColumn(col.name, str, lambda_col(0)),
+            VColumn(self.origCol.name, self.origCol.type, lambda_col(0)),
             VColumn('num', int, lambda r: len(r[1])),
             VColumn('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
@@ -1139,6 +1150,7 @@ class VSheetFreqTable(VSheet):
         self.command(Key(' '), 'sheet.source.toggle(sheet.cursorRow[1])', 'toggle these entries')
         self.command(Key('s'), 'sheet.source.select(sheet.cursorRow[1])', 'select these entries')
         self.command(Key('u'), 'sheet.source.unselect(sheet.cursorRow[1])', 'unselect these entries')
+        self.command(Key.ENTER, 'vd.push(copy(sheet.source)).rows = sheet.values[str(sheet.columns[0].getValue(sheet.cursorRow))]', 'push new sheet with only this value')
 
 
 ### input formats and helpers

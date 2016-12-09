@@ -1,5 +1,10 @@
 # VisiData version history
 
+## v0.37
+- 'g~' (autodetect all columns)
+- nulls, uniques on columns sheet
+- '"' copies row to immediately following
+
 ## v0.36
 - right column
 - regex subst
