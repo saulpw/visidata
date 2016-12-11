@@ -1070,15 +1070,15 @@ class VSheetColumns(VSheet):
             VColumn('fmtstr', str, lambda_getattr('_fmtstr')),
             VColumn('expr',   str, lambda_getattr('expr')),
             VColumn('value',  UnspecifiedType, lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
-            VColumn('nulls',  int, lambda c,sheet=sheet: c.nEmpty(sheet.rows)),
+#            VColumn('nulls',  int, lambda c,sheet=sheet: c.nEmpty(sheet.rows)),
 
-            VColumn('uniques',  int, lambda c,sheet=sheet: len(set(c.values(sheet.rows))), width=0),
-            VColumn('mode',   UnspecifiedType, lambda c: statistics.mode(c.values(sheet.rows)), width=0),
-            VColumn('min',    UnspecifiedType, lambda c: min(c.values(sheet.rows)), width=0),
-            VColumn('median', UnspecifiedType, lambda c: statistics.median(c.values(sheet.rows)), width=0),
-            VColumn('mean',   float, lambda c: statistics.mean(c.values(sheet.rows)), width=0),
-            VColumn('max',    UnspecifiedType, lambda c: max(c.values(sheet.rows)), width=0),
-            VColumn('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
+#            VColumn('uniques',  int, lambda c,sheet=sheet: len(set(c.values(sheet.rows))), width=0),
+#            VColumn('mode',   UnspecifiedType, lambda c: statistics.mode(c.values(sheet.rows)), width=0),
+#            VColumn('min',    UnspecifiedType, lambda c: min(c.values(sheet.rows)), width=0),
+#            VColumn('median', UnspecifiedType, lambda c: statistics.median(c.values(sheet.rows)), width=0),
+#            VColumn('mean',   float, lambda c: statistics.mean(c.values(sheet.rows)), width=0),
+#            VColumn('max',    UnspecifiedType, lambda c: max(c.values(sheet.rows)), width=0),
+#            VColumn('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
             ]
 
 #### slicing and dicing
