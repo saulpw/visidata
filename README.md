@@ -10,14 +10,14 @@ Usable via any remote shell which has Python3 installed.
 - `F1` for command help sheet
 - `o`pen .csv, .tsv, .json, .hdf5, .xlsx
 - `Ctrl-S`ave .csv, .tsv
-- hjkl cursor movement, `t`op/`m`iddle/`b`ottom scroll to position screen cursor
+- `hjkl` cursor movement, `t`op/`m`iddle/`b`ottom scroll to position screen cursor
 - `[`/`]` sort asc/desc by one column
 - `e`dit cell contents
 - search/select/unselect/subst by regex in column
 - `F`requency table for current column with histogram
 - inner/outer/full/diff joins on any number of sheets, matching designated key columns
 - add new column by Python expression
-- Ctrl-O to eval an expression and browse the result as a python object
+- `Ctrl-O` to eval an expression and browse the result as a python object
 
 ### Metasheets
 
@@ -31,7 +31,7 @@ Usable via any remote shell which has Python3 installed.
 On the `C`olumns sheet, these commands apply to rows (the columns of the source sheet), instead of the columns on the Columns sheet
 
 - `-` hides column (sets width to 0)
-- `\_` maximizes column width to fit longest value
+- `_` maximizes column width to fit longest value
 - `!` marks column as a key column (pins to the left and matches on sheet joins)
 
 #### Column typing
