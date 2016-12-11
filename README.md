@@ -93,11 +93,11 @@ Here are slightly better descriptions of some non-obvious commands:
 The global\_action column on the Help Sheet shows the specific way the global prefix changes each command.
 
 - `=` "add column expression" takes a Python expression as input and appends a new column, which evaluates the
-expression over the row.  Each row
+expression over the row.
 
 - `:` regex subst: creates a new column from an expression, a pattern, and a subst template: `:column/(.*)/\1`
 
-- `^S`ave sheet: the output type is determined by the file extension (currently .tsv and .csv)
+- `Ctrl-S`ave sheet: the output type is determined by the file extension (currently .tsv and .csv)
 
 - `R` sets the source type of the current sheet.  The current sheet remains until a reload (`Ctrl-R`).
 
@@ -124,12 +124,14 @@ Please contact me at the email address above if you would like to contribute in 
 
 ## Inspirations and Related Work
 
+- [VisiCalc](http://danbricklin.com/visicalc.htm)
 - [BurntSushi/xsv](https://github.com/BurntSushi/xsv)
 - [teapot](https://www.syntax-k.de/projekte/teapot/)
 - [firecat53/tabview](https://github.com/firecat53/tabview)
 - [andmarti1424/sc-im](https://github.com/andmarti1424/sc-im)
 - [jennybc/sanesheets](https://github.com/jennybc/sanesheets)
-- and, of course, [VisiCalc](http://danbricklin.com/visicalc.htm)
+- [Tidy Data](http://vita.had.co.nz/papers/tidy-data.pdf) by Hadley Wickham
+- [How to share data with a statistician](https://github.com/jtleek/datasharing)
 
 ## License
 

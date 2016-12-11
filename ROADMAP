@@ -51,6 +51,8 @@ A loose plan that is subject to change.
 - Python3 API for import by other scripts
 - load new .py plugins for inputs/outputs/sheets
    - git app that can streamline standard workflows
+     - checkout branch or revision with TUI interface
+     - browse through history
 
 ## v1.2
 
