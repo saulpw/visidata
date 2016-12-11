@@ -1301,7 +1301,6 @@ class VSheetH5Obj(VSheet):
             ]
             self.command(Key.ENTER, 'vd.push(VSheetH5Obj(sheet.name+options.SubsheetSep+sheet.cursorRow.name, sheet.cursorRow, sheet.source))', 'open this group or dataset')
             self.command(Key('A'), 'vd.push(VSheetDict(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs))', 'open metadata sheet for this object')
-            self.global_command(Key('A'), '', 'open metadata sheet for this sheet')
         elif isinstance(self.hobj, h5py.Dataset):
             if len(self.hobj.shape) == 1:
                 self.rows = self.hobj[:]  # copy
