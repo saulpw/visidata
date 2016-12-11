@@ -56,11 +56,14 @@ Copy the bin/vd script to a directory in PATH and make it executable.
 
 ### Dependencies
 
+
 - Python 3.3
 - openpyxl (if opening .xlsx files)
 - h5py and numpy (if opening .hdf5 files)
 - google-api-python-client (if opening Google Sheets; must [also set up OAuth credentials](https://developers.google.com/sheets/quickstart/python)
 - dateutil.parser (if converting string column to datetime)
+
+**Remember to install the Python3 versions of these modules with e.g. `pip3`**
 
 ## Usage
 
