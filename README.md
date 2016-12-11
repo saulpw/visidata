@@ -7,43 +7,43 @@ Usable via any remote shell which has Python3 installed.
 ![VisiData silent demo](screenshot.gif "VisiData Screenshot")
 
 ## Features
-- 'F1' for command help sheet
-- 'o'pen .csv, .tsv, .json, .hdf5, .xlsx
-- 'Ctrl-S'ave .csv, .tsv
-- hjkl cursor movement, 't'op/'m'iddle/'b'ottom scroll to position screen cursor
-- '['/']' sort asc/desc by one column
-- 'e'dit cell contents
+- `F1` for command help sheet
+- `o`pen .csv, .tsv, .json, .hdf5, .xlsx
+- `Ctrl-S`ave .csv, .tsv
+- hjkl cursor movement, `t`op/`m`iddle/`b`ottom scroll to position screen cursor
+- `[`/`]` sort asc/desc by one column
+- `e`dit cell contents
 - search/select/unselect/subst by regex in column
-- 'F'requency table for current column with histogram
+- `F`requency table for current column with histogram
 - inner/outer/full/diff joins on any number of sheets, matching designated key columns
 - add new column by Python expression
 - Ctrl-O to eval an expression and browse the result as a python object
 
 ### Metasheets
 
-- 'S'heets metasheet to manage/navigate multiple sheets
-- 'C'olumns metasheet
-- 'O'ptions sheet to change the style or behavior
-- 'E'rror metasheet
+- `S`heets metasheet to manage/navigate multiple sheets
+- `C`olumns metasheet
+- `O`ptions sheet to change the style or behavior
+- `E`rror metasheet
 
 ### Columns
 
-On the 'C'olumns sheet, these commands apply to rows (the columns of the source sheet), instead of the columns on the Columns sheet
+On the `C`olumns sheet, these commands apply to rows (the columns of the source sheet), instead of the columns on the Columns sheet
 
-- '-' hides column (sets width to 0)
-- '\_' maximizes column width to fit longest value
-- '!' marks column as a key column (pins to the left and matches on sheet joins)
+- `-` hides column (sets width to 0)
+- `\_` maximizes column width to fit longest value
+- `!` marks column as a key column (pins to the left and matches on sheet joins)
 
 #### Column typing
 
 - columns start out untyped (unless the source data is typed)
-   - '#' sets column type to int
-   - '$' sets column type to str
-   - '%' sets column type to float
-   - '@' sets column type to date
-   - '~' autodetects column type
+   - `#` sets column type to int
+   - `$` sets column type to str
+   - `%` sets column type to float
+   - `@` sets column type to date
+   - `~` autodetects column type
 - all values are stored in their original format, and only converted on demand and as needed.
-- values that can't be properly converted are flagged with '~' on the display
+- values that can't be properly converted are flagged with `~` on the display
 - for commands like sort which require a correctly typed value, the default (0) value for that type is used
 - cell edits are rejected if they don't convert to the column type
 
@@ -63,7 +63,7 @@ Copy the bin/vd script to a directory in PATH and make it executable.
 - google-api-python-client (if opening Google Sheets; must [also set up OAuth credentials](https://developers.google.com/sheets/quickstart/python)
 - dateutil.parser (if converting string column to datetime)
 
-**Remember to install the Python3 versions of these modules with e.g. `pip3`**
+**Remember to install the Python3 versions of these modules with e.g. `pip3`****
 
 ## Usage
 
@@ -133,7 +133,7 @@ Please contact me at the email address above if you would like to contribute in 
 - [firecat53/tabview](https://github.com/firecat53/tabview)
 - [andmarti1424/sc-im](https://github.com/andmarti1424/sc-im)
 - [jennybc/sanesheets](https://github.com/jennybc/sanesheets)
-- [Tidy Data](http://vita.had.co.nz/papers/tidy-data.pdf) by Hadley Wickham
+- [Tidy Data](http://vita.had.co.nz/papers/tidy-data.pdf)
 - [How to share data with a statistician](https://github.com/jtleek/datasharing)
 
 ## License
