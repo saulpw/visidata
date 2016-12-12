@@ -340,6 +340,14 @@ class VSheet:
         return cols[0]
 
     @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name.replace(' ', '_')
+
+    @property
     def columnsSheet(self):
         if not self._columnsSheet:
             self._columnsSheet = VSheetColumns(self)
@@ -831,6 +839,14 @@ class VColumn:
         self.type = type
         self.expr = None  # Python string expression if computed column
         self._fmtstr = None
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name.replace(' ', '_')
 
     @property
     def fmtstr(self):
