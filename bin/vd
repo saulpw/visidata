@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.37'
+__version__ = '0.38'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -277,6 +277,9 @@ class date:
 
     def __str__(self):
         return self.dt.strftime('%Y-%m-%d %H:%M:%S')
+
+    def __lt__(self, a):
+        return self.dt < a.dt
 
 
 def detectType(v):
@@ -1334,6 +1337,22 @@ class open_hdf5(VSheetH5Obj):
         import h5py
         super().__init__(p.name, h5py.File(str(p), 'r'), p)
 open_h5 = open_hdf5
+
+
+class open_zip(VSheet):
+    def __init__(self, p):
+        import zipfile
+        super().__init__(p.name, p)
+        self.zfp = zipfile.ZipFile(p.fqpn, 'r')
+        self.rows = self.zfp.infolist()
+        self.columns = AttrColumns("filename file_size date_time compress_size".split())
+        self.command(Ctrl.J, 'vd.push(sheet.open(sheet.cursorRow))', 'open this file')
+
+    def open(self, zi):
+        cachefn = zi.filename
+        if not os.path.exists(cachefn):
+            self.zfp.extract(zi)
+        return openFileOrUrl(cachefn)
 
 #### databases
 class VSheetBlaze(VSheet):

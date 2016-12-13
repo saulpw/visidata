@@ -1,5 +1,9 @@
 # VisiData version history
 
+## v0.38
+- sortable date
+- open_zip comes back
+
 ## v0.37
 - 'g~' (autodetect all columns)
 - '"' copies row to immediately following
