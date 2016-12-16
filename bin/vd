@@ -1162,6 +1162,7 @@ class VSheetFreqTable(VSheet):
         self.columns = [
             VColumn(self.origCol.name, self.origCol.type, lambda_col(0)),
             VColumn('num', int, lambda r: len(r[1])),
+            VColumn('percent', float, lambda r: len(r[1])*100/sheet.source.nRows),
             VColumn('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
         self.nKeys = 1
