@@ -32,12 +32,11 @@ import collections
 import functools
 import statistics
 import curses
-import curses.ascii
 
 import re
 import csv
 
-from visidata.tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException
+from visidata.tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException, wrapper, colors
 
 
 initialStatus = 'saul.pw/VisiData v' + __version__
@@ -50,11 +49,6 @@ sheet = None # current sheet
 windowWidth = None
 windowHeight = None
 
-colors = {
-    'bold': curses.A_BOLD,
-    'reverse': curses.A_REVERSE,
-    'normal': curses.A_NORMAL,
-}
 
 class attrdict(object):
     def __init__(self, d):
@@ -1466,38 +1460,6 @@ def inputLine(prompt, value=''):
     return vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable)
 
 
-nextColorPair = 1
-def setupcolors(stdscr, f, *args):
-    def makeColor(fg, bg):
-        global nextColorPair
-        if curses.has_colors():
-            curses.init_pair(nextColorPair, fg, bg)
-            c = curses.color_pair(nextColorPair)
-            nextColorPair += 1
-        else:
-            c = curses.A_NORMAL
-
-        return c
-
-    curses.meta(1)  # allow "8-bit chars"
-
-    colors['red'] = curses.A_BOLD | makeColor(curses.COLOR_RED, curses.COLOR_BLACK)
-    colors['blue'] = curses.A_BOLD | makeColor(curses.COLOR_BLUE, curses.COLOR_BLACK)
-    colors['green'] = curses.A_BOLD | makeColor(curses.COLOR_GREEN, curses.COLOR_BLACK)
-    colors['brown'] = makeColor(curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    colors['yellow'] = curses.A_BOLD | colors['brown']
-    colors['cyan'] = makeColor(curses.COLOR_CYAN, curses.COLOR_BLACK)
-    colors['magenta'] = makeColor(curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-
-    colors['red_bg'] = makeColor(curses.COLOR_WHITE, curses.COLOR_RED)
-    colors['blue_bg'] = makeColor(curses.COLOR_WHITE, curses.COLOR_BLUE)
-    colors['green_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_GREEN)
-    colors['brown_bg'] = colors['yellow_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_YELLOW)
-    colors['cyan_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_CYAN)
-    colors['magenta_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_MAGENTA)
-
-    return f(stdscr, *args)
-
 def vd():
     global g_vd
     if not g_vd:
@@ -1518,12 +1480,6 @@ def curses_main(_scr):
     global scr
     scr = _scr
 
-    # get control keys instead of signals
-    curses.raw()
-
-    # enable mouse events
-#    curses.mousemask(curses.ALL_MOUSE_EVENTS)
-
     try:
         return vd().run()
     except Exception as e:
@@ -1531,9 +1487,5 @@ def curses_main(_scr):
             raise
         return '%s: %s' % (type(e).__name__, str(e))
 
-
-def wrapper(f, *args):
-    import curses
-    return curses.wrapper(setupcolors, f, *args)
 
 setup_sheet_commands()  # on module import

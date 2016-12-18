@@ -1,5 +1,13 @@
 
 import curses
+import curses.ascii
+
+
+colors = {
+    'bold': curses.A_BOLD,
+    'reverse': curses.A_REVERSE,
+    'normal': curses.A_NORMAL,
+}
 
 
 class EscapeException(Exception):
@@ -94,3 +102,42 @@ def edit_text(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprin
         if i > len(v): i = len(v)
 
     return v
+
+
+nextColorPair = 1
+def setupcolors(stdscr, f, *args):
+    def makeColor(fg, bg):
+        global nextColorPair
+        if curses.has_colors():
+            curses.init_pair(nextColorPair, fg, bg)
+            c = curses.color_pair(nextColorPair)
+            nextColorPair += 1
+        else:
+            c = curses.A_NORMAL
+
+        return c
+
+    curses.raw()    # get control keys instead of signals
+    curses.meta(1)  # allow "8-bit chars"
+#    curses.mousemask(curses.ALL_MOUSE_EVENTS)  # enable mouse events
+
+    colors['red'] = curses.A_BOLD | makeColor(curses.COLOR_RED, curses.COLOR_BLACK)
+    colors['blue'] = curses.A_BOLD | makeColor(curses.COLOR_BLUE, curses.COLOR_BLACK)
+    colors['green'] = curses.A_BOLD | makeColor(curses.COLOR_GREEN, curses.COLOR_BLACK)
+    colors['brown'] = makeColor(curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    colors['yellow'] = curses.A_BOLD | colors['brown']
+    colors['cyan'] = makeColor(curses.COLOR_CYAN, curses.COLOR_BLACK)
+    colors['magenta'] = makeColor(curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+
+    colors['red_bg'] = makeColor(curses.COLOR_WHITE, curses.COLOR_RED)
+    colors['blue_bg'] = makeColor(curses.COLOR_WHITE, curses.COLOR_BLUE)
+    colors['green_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_GREEN)
+    colors['brown_bg'] = colors['yellow_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_YELLOW)
+    colors['cyan_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_CYAN)
+    colors['magenta_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+
+    return f(stdscr, *args)
+
+
+def wrapper(f, *args):
+    return curses.wrapper(setupcolors, f, *args)
