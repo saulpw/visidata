@@ -1,6 +1,9 @@
 
+import sys
 import curses
 import curses.ascii
+
+from . import options
 
 
 colors = {
@@ -50,6 +53,30 @@ Key = PlainKey()
 def keyname(ch):
     return curses.keyname(ch).decode('utf-8')
 
+
+def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
+    'Draw string s at (y,x)-(y,x+w), clipping with ellipsis char'
+    s = s.replace('\n', options.ch_Newline)
+
+    _, windowWidth = scr.getmaxyx()
+    try:
+        if w is None:
+            w = windowWidth-1
+        w = min(w, windowWidth-x-1)
+        if w == 0:  # no room anyway
+            return
+
+        # convert to string just before drawing
+        s = str(s)
+        if len(s) > w:
+            scr.addstr(y, x, s[:w-1] + options.ch_Ellipsis, attr)
+        else:
+            scr.addstr(y, x, s, attr)
+            if len(s) < w:
+                scr.addstr(y, x+len(s), options.ch_ColumnFiller*(w-len(s)), attr)
+    except Exception as e:
+        raise type(e)('%s [clip_draw y=%s x=%s len(s)=%s w=%s]' % (e, y, x, len(s), w)
+                ).with_traceback(sys.exc_info()[2])
 
 def edit_text(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.'):
     def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])

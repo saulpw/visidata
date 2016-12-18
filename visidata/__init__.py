@@ -26,7 +26,6 @@ import itertools
 import os.path
 from copy import copy
 import io
-import datetime
 import string
 import collections
 import functools
@@ -36,35 +35,53 @@ import curses
 import re
 import csv
 
-from visidata.tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException, wrapper, colors
+class attrdict(object):
+    def __init__(self, d):
+        self.__dict__ = d
+
+base_options = collections.OrderedDict()
+options = attrdict(base_options)
+
+anytype = lambda r=None: str(r)
+anytype.__name__ = ''
+
+class WrongTypeStr(str):
+    pass
+
+class CalcErrorStr(str):
+    pass
+
+
+# VisiData singleton contains all sheets
+@functools.lru_cache()
+def vd():
+    return VisiData()
+
+
+def status(s):
+    return vd().status(s)
+
+
+from visidata.tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException, wrapper, colors, draw_clip
+from visidata.date import date
+from .VSheet import VSheet, base_commands
+from .Column import VColumn, AttrColumns, PyobjColumns, ArrayColumns, ArrayNamedColumns
 
 
 initialStatus = 'saul.pw/VisiData v' + __version__
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
-g_vd = None  # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
 
 windowWidth = None
 windowHeight = None
 
 
-class attrdict(object):
-    def __init__(self, d):
-        self.__dict__ = d
-
 class CommandPrefixException(Exception):
     pass
 
 def error(s):
     raise Exception(s)
-
-UnspecifiedType = lambda r=None: str(r)
-UnspecifiedType.__name__ = ''
-
-base_commands = collections.OrderedDict()
-base_options = collections.OrderedDict()
-options = attrdict(base_options)
 
 def setup_sheet_commands():
     def command(ch, cmdstr, helpstr):
@@ -106,6 +123,7 @@ def setup_sheet_commands():
     theme('ch_StatusSep', ' | ')
     theme('ch_KeySep', '/')
     theme('ch_EditPadChar', '_')
+    theme('ch_Newline', '\\n')
     theme('ch_Unprintable', '.')
     theme('ch_WrongType', '~')
     theme('ch_Error', '!')
@@ -123,8 +141,8 @@ def setup_sheet_commands():
     theme('c_WrongType', 'magenta')
     theme('c_Error', 'red')
 
-    command(Key.F1,    'vd.push(sheet.CommandHelp())', 'push help sheet')
-    command(Key('q'),  'vd.sheets.pop(0)', 'pop this sheet')
+    command(Key.F1,    'vd.push(CommandHelp(sheet))', 'open help sheet')
+    command(Key('q'),  'vd.sheets.pop(0)', 'drop this sheet')
 
     command(Key.LEFT,  'sheet.cursorRight(-1)', 'go one column left')
     command(Key.DOWN,  'sheet.cursorDown(+1)', 'go one row down')
@@ -180,7 +198,7 @@ def setup_sheet_commands():
     command(Key('g'), 'raise CommandPrefixException("g")', 'add global prefix')
 
     command(Shift.S, 'vd.push(vd.sheets)', 'open Sheet stack')
-    command(Shift.C, 'vd.push(sheet.columnsSheet)', 'open Columns for this sheet')
+    command(Shift.C, 'vd.push(VSheetColumns(sheet))', 'open Columns for this sheet')
     command(Shift.O, 'vd.push(VSheetDict("options", options.__dict__))', 'open Options')
 
     command(Key('/'), 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)', 'search this column forward for regex')
@@ -257,24 +275,6 @@ def moveListItem(L, fromidx, toidx):
     L.insert(toidx, r)
     return toidx
 
-class date:
-    def __init__(self, s):
-        if isinstance(s, int) or isinstance(s, float):
-            self.dt = datetime.datetime.fromtimestamp(s)
-        elif isinstance(s, str):
-            import dateutil.parser
-            self.dt = dateutil.parser.parse(s)
-        else:
-            assert isinstance(s, datetime.datetime)
-            self.dt = s
-
-    def __str__(self):
-        return self.dt.strftime('%Y-%m-%d %H:%M:%S')
-
-    def __lt__(self, a):
-        return self.dt < a.dt
-
-
 def detectType(v):
     def tryType(T, v):
         try:
@@ -285,415 +285,6 @@ def detectType(v):
 
     return tryType(int, v) or tryType(float, v) or tryType(date, v) or str
 
-class VSheet:
-    def __init__(self, name, src=None):
-        self.name = name
-        self.source = src
-        self.rows = []
-        self.cursorRowIndex = 0  # absolute index of cursor into self.rows
-        self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
-
-        self.topRowIndex = 0     # cursorRowIndex of topmost row
-        self.leftVisibleColIndex = 0    # cursorVisibleColIndex of leftmost column
-
-        # as computed during draw()
-        self.rowLayout = {}      # [rowidx] -> y
-        self.visibleColLayout = {}      # [vcolidx] -> (x, w)
-
-        # all columns in display order
-        self.columns = []
-        self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
-        self._columnsSheet = None
-
-        # current search term
-        self.currentRegex = None
-        self.currentRegexColumns = None
-
-        self._selectedRows = {}   # id(row) -> row
-
-        # specialized sheet keys
-        self.commands = base_commands.copy()
-
-    def __repr__(self):
-        return self.name
-
-    def isSelected(self, r):
-        return id(r) in self._selectedRows
-
-    def command(self, key, cmdstr, helpstr=''):
-#        if key in self.commands:
-#            status('overriding key %s' % key)
-        self.commands[('', key)] = (cmdstr, helpstr)
-
-    def findColIdx(self, colname, columns=None):
-        if columns is None:
-            columns = self.columns
-        cols = list(colidx for colidx, c in enumerate(columns) if c.name == colname)
-        if not cols:
-            error('no column named "%s"' % colname)
-        elif len(cols) > 1:
-            status('%d columns named "%s"' % (len(cols), colname))
-        return cols[0]
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name):
-        self._name = name.replace(' ', '_')
-
-    @property
-    def columnsSheet(self):
-        if not self._columnsSheet:
-            self._columnsSheet = VSheetColumns(self)
-        return self._columnsSheet
-
-    @property
-    def nVisibleRows(self):
-        return windowHeight-2
-
-    @property
-    def cursorCol(self):
-        return self.visibleCols[self.cursorVisibleColIndex]
-
-    @property
-    def cursorRow(self):
-        return self.rows[self.cursorRowIndex]
-
-    @property
-    def visibleRows(self):  # onscreen rows
-        return self.rows[self.topRowIndex:self.topRowIndex+windowHeight-2]
-
-    @property
-    def visibleCols(self):  # non-hidden cols
-        return [c for c in self.columns if not c.hidden]
-
-    @property
-    def cursorColIndex(self):
-        return self.columns.index(self.cursorCol)
-
-    @property
-    def selectedRows(self):
-        return [r for r in self.rows if id(r) in self._selectedRows]
-
-    @property
-    def keyCols(self):
-        return self.columns[:self.nKeys]
-
-    @property
-    def keyColNames(self):
-        return options.ch_KeySep.join(c.name for c in self.keyCols)
-
-    @property
-    def cursorValue(self):
-        return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
-
-    @property
-    def statusLine(self):
-        return 'row %s/%s (%s selected); %d/%d columns visible' % (self.cursorRowIndex, len(self.rows), len(self._selectedRows), self.nVisibleCols, self.nCols)
-
-    @property
-    def nRows(self):
-        return len(self.rows)
-
-    @property
-    def nCols(self):
-        return len(self.columns)
-
-    @property
-    def nVisibleCols(self):
-        return len(self.visibleCols)
-
-    def moveVisibleCol(self, fromVisColIdx, toVisColIdx):
-        fromColIdx = self.columns.index(self.visibleCols[fromVisColIdx])
-        toColIdx = self.columns.index(self.visibleCols[toVisColIdx])
-        moveListItem(self.columns, fromColIdx, toColIdx)
-        return toVisColIdx
-
-    def cursorDown(self, n):
-        self.cursorRowIndex += n
-
-    def cursorRight(self, n):
-        self.cursorVisibleColIndex += n
-
-    def cellValue(self, rownum, col):
-        if not isinstance(col, VColumn):
-            # assume it's the column number
-            col = self.columns[col]
-        return col.getValue(self.rows[rownum])
-
-    def addColumn(self, col, index=None):
-        if index is None:
-            index = len(self.columns)
-        if col:
-            self.columns.insert(index, col)
-
-    def toggleKeyColumn(self, colidx):
-        if self.cursorColIndex >= self.nKeys: # if not a key, add it
-            moveListItem(self.columns, self.cursorColIndex, self.nKeys)
-            self.nKeys += 1
-        else:  # otherwise move it after the last key
-            self.nKeys -= 1
-            moveListItem(self.columns, self.cursorColIndex, self.nKeys)
-
-    def skipDown(self):
-        pv = self.cursorValue
-        for i in range(self.cursorRowIndex+1, len(self.rows)):
-            if self.cellValue(i, self.cursorColIndex) != pv:
-                self.cursorRowIndex = i
-                return
-
-        status('no different value down this column')
-
-    def skipUp(self):
-        pv = self.cursorValue
-        for i in range(self.cursorRowIndex, -1, -1):
-            if self.cellValue(i, self.cursorColIndex) != pv:
-                self.cursorRowIndex = i
-                return
-
-        status('no different value up this column')
-
-    def toggle(self, rows):
-        for r in rows:
-            if id(r) in self._selectedRows:
-                del self._selectedRows[id(r)]
-            else:
-                self._selectedRows[id(r)] = r
-
-    def select(self, rows):
-        rows = list(rows)
-        before = len(self._selectedRows)
-        self._selectedRows.update(dict((id(r), r) for r in rows))
-        status('selected %s/%s rows' % (len(self._selectedRows)-before, len(rows)))
-
-    def unselect(self, rows):
-        rows = list(rows)
-        before = len(self._selectedRows)
-        for r in rows:
-            if id(r) in self._selectedRows:
-                del self._selectedRows[id(r)]
-        status('unselected %s/%s rows' % (before-len(self._selectedRows), len(rows)))
-
-    def columnsMatch(self, row, columns, func):
-        for c in columns:
-            m = func(c.getDisplayValue(row))
-            if m:
-                return True
-        return False
-
-    def checkCursor(self):
-        # keep cursor within actual available rowset
-        if self.cursorRowIndex <= 0:
-            self.cursorRowIndex = 0
-        elif self.cursorRowIndex >= len(self.rows):
-            self.cursorRowIndex = len(self.rows)-1
-
-        if self.cursorVisibleColIndex <= 0:
-            self.cursorVisibleColIndex = 0
-        elif self.cursorVisibleColIndex >= self.nVisibleCols:
-            self.cursorVisibleColIndex = self.nVisibleCols-1
-
-        if self.topRowIndex <= 0:
-            self.topRowIndex = 0
-        elif self.topRowIndex > len(self.rows):
-            self.topRowIndex = len(self.rows)-1
-
-        # (x,y) is relative cell within screen viewport
-        x = self.cursorVisibleColIndex - self.leftVisibleColIndex
-        y = self.cursorRowIndex - self.topRowIndex + 1  # header
-
-        # check bounds, scroll if necessary
-        if y < 1:
-            self.topRowIndex = self.cursorRowIndex
-        elif y > windowHeight-2:
-            self.topRowIndex = self.cursorRowIndex-windowHeight+3
-
-        if x <= 0:
-            self.leftVisibleColIndex = self.cursorVisibleColIndex
-        else:
-            while True:
-                if self.leftVisibleColIndex == self.cursorVisibleColIndex: # not much more we can do
-                    break
-                self.calcColLayout()
-                if self.cursorVisibleColIndex < min(self.visibleColLayout.keys()):
-                    self.leftVisibleColIndex -= 1
-                    continue
-                elif self.cursorVisibleColIndex > max(self.visibleColLayout.keys()):
-                    self.leftVisibleColIndex += 1
-                    continue
-
-                cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
-                left_x, left_w = self.visibleColLayout[self.leftVisibleColIndex]
-                if cur_x+cur_w < windowWidth: # current columns fit entirely on screen
-                    break
-                self.leftVisibleColIndex += 1
-
-    def searchRegex(self, regex=None, columns=None, backward=False, moveCursor=False):
-        'sets row index if moveCursor; otherwise returns list of row indexes'
-        if regex:
-            self.currentRegex = re.compile(regex, re.IGNORECASE)
-
-        if not self.currentRegex:
-            status('no regex')
-            return []
-
-        if columns:
-            self.currentRegexColumns = columns
-
-        if not self.currentRegexColumns:
-            status('no columns given')
-            return []
-
-        if backward:
-            rng = range(self.cursorRowIndex-1, -1, -1)
-            rng2 = range(self.nRows-1, self.cursorRowIndex-1, -1)
-        else:
-            rng = range(self.cursorRowIndex+1, self.nRows)
-            rng2 = range(0, self.cursorRowIndex+1)
-
-        matchingRowIndexes = []
-
-        for r in rng:
-            if self.columnsMatch(self.rows[r], self.currentRegexColumns, self.currentRegex.search):
-                if moveCursor:
-                    self.cursorRowIndex = r
-                    return r
-                matchingRowIndexes.append(r)
-
-        for r in rng2:
-            if self.columnsMatch(self.rows[r], self.currentRegexColumns, self.currentRegex.search):
-                if moveCursor:
-                    self.cursorRowIndex = r
-                    status('search wrapped')
-                    return r
-                matchingRowIndexes.append(r)
-
-        status('%s matches for /%s/' % (len(matchingRowIndexes), self.currentRegex.pattern))
-
-        return matchingRowIndexes
-
-    def calcColLayout(self):
-        self.visibleColLayout = {}
-        x = 0
-        for vcolidx in range(0, len(self.visibleCols)):
-            col = self.visibleCols[vcolidx]
-            if col.width is None:
-                col.width = col.getMaxWidth(self.visibleRows)+len(options.ch_LeftMore)+len(options.ch_RightMore)
-            if vcolidx < self.nKeys or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self.visibleColLayout[vcolidx] = (x, min(col.width, windowWidth-x))
-                x += col.width+len(options.ch_ColumnSep)
-            if x > windowWidth-1:
-                break
-
-    def drawColHeader(self, vcolidx):
-        # choose attribute to highlight column header
-        if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-            hdrattr = colors[options.c_CurHdr]
-        elif vcolidx < self.nKeys:
-            hdrattr = colors[options.c_KeyCols]
-        else:
-            hdrattr = colors[options.c_Header]
-
-        col = self.visibleCols[vcolidx]
-        x, colwidth = self.visibleColLayout[vcolidx]
-
-        # ANameTC
-        typedict = {
-                int: '#',
-                str: '$',
-                float: '%',
-                date: '@',
-                UnspecifiedType: ' ',
-            }
-        T = typedict.get(col.type, '?')
-        N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
-        if len(N) > colwidth-1:
-            N = N[:colwidth-len(options.ch_Ellipsis)] + options.ch_Ellipsis
-        vd().clipdraw(0, x, N, hdrattr, colwidth)
-        vd().clipdraw(0, x+colwidth-1, T, hdrattr, 1)
-
-        if vcolidx == self.leftVisibleColIndex and vcolidx > self.nKeys:
-            A = options.ch_LeftMore
-            scr.addstr(0, x, A, colors[options.c_ColumnSep])
-
-        C = options.ch_ColumnSep
-        if x+colwidth+len(C) <= windowWidth:
-            scr.addstr(0, x+colwidth, C, colors[options.c_ColumnSep])
-
-
-    def draw(self):
-        numHeaderRows = 1
-        scr.erase()  # clear screen before every re-draw
-        sepchars = options.ch_ColumnSep
-        if not self.columns:
-            return status('no columns')
-
-        self.rowLayout = {}
-        self.calcColLayout()
-        for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
-            x, colwidth = colinfo
-            if x < windowWidth:  # only draw inside window
-                self.drawColHeader(vcolidx)
-
-                y = numHeaderRows
-                for rowidx in range(0, windowHeight-2):
-                    if self.topRowIndex + rowidx >= len(self.rows):
-                        break
-
-                    self.rowLayout[self.topRowIndex+rowidx] = y
-
-                    row = self.rows[self.topRowIndex + rowidx]
-
-                    if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
-                        attr = colors[options.c_CurRow]
-                    elif vcolidx < self.nKeys:
-                        attr = colors[options.c_KeyCols]
-                    else:
-                        attr = colors[options.c_default]
-
-                    if self.isSelected(row):
-                        attr |= colors[options.c_SelectedRow]
-
-                    if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-                        attr |= colors[options.c_CurCol]
-
-                    cellval = self.visibleCols[vcolidx].getDisplayValue(row, colwidth-1)
-                    vd().clipdraw(y, x, options.ch_ColumnFiller + cellval, attr, colwidth)
-
-                    if isinstance(cellval, CalcErrorStr):
-                        vd().clipdraw(y, x+colwidth-1, options.ch_Error, colors[options.c_Error])
-                    elif isinstance(cellval, WrongTypeStr):
-                        vd().clipdraw(y, x+colwidth-1, options.ch_WrongType, colors[options.c_WrongType])
-
-                    if x+colwidth+len(sepchars) <= windowWidth:
-                       scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
-
-                    y += 1
-
-        if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(0, windowWidth-1, options.ch_RightMore, colors[options.c_ColumnSep])
-
-    def editCell(self, vcolidx=None):
-        if vcolidx is None:
-            vcolidx = self.cursorVisibleColIndex
-        x, w = self.visibleColLayout[vcolidx]
-        y = self.rowLayout[self.cursorRowIndex]
-
-        currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
-        r = vd().editText(y, x, w, value=currentValue, fillchar=options.ch_EditPadChar)
-        return self.visibleCols[vcolidx].type(r)  # convert input to column type
-
-    def CommandHelp(self):
-        vs = VSheet(self.name + '_help', self)
-        vs.rows = list(self.commands.items())
-        vs.columns = [VColumn('key', str, lambda r: r[0][0] + keyname(r[0][1])),
-                VColumn('action', str, lambda r: r[1][1]),
-                VColumn('global_action', str, lambda r,sheet=self: sheet.commands.get(('g', r[0][1]), ('', '-'))[1])]
-        return vs
-
-# end VSheet class
 
 class VisiData:
     def __init__(self):
@@ -710,10 +301,6 @@ class VisiData:
         del self.statusHistory[100:]  # keep most recent 100 only
         return s
 
-    def displayRightStatus(self, prefixes, ch):
-        rstat = "%s" % (keyname(ch)) # (chr(ch) if chr(ch).isprintable() else keyname(ch)
-        self.clipdraw(windowHeight-1, windowWidth-len(rstat)-2, rstat, colors[options.c_StatusLine])
-
     def editText(self, y, x, w, **kwargs):
         v = editText(scr, y, x, w, **kwargs)
         self.status('"%s"' % v)
@@ -727,6 +314,17 @@ class VisiData:
             self.status(self.lastErrors[-1].splitlines()[-1])
         if options.debug:
             raise
+
+    def drawLeftStatus(self, scr, sheet):
+        'draws sheet info on last line, including previous status messages, which are then cleared.'
+        attr = colors[options.c_StatusLine]
+        statusstr = options.SheetNameFmt % sheet.name + options.ch_StatusSep.join(self._status)
+        draw_clip(scr, windowHeight-1, 0, statusstr, attr, windowWidth)
+        self._status = []
+
+    def drawRightStatus(self, scr, prefixes, ch):
+        rstat = "%s" % (keyname(ch))  # (chr(ch) if chr(ch).isprintable() else keyname(ch)
+        draw_clip(scr, windowHeight-1, windowWidth-len(rstat)-2, rstat, colors[options.c_StatusLine])
 
     def run(self):
         global windowHeight, windowWidth
@@ -745,22 +343,18 @@ class VisiData:
                 self.status('no rows')
 
             try:
-                sheet.draw()
+                sheet.draw(scr)
             except Exception as e:
                 self.exceptionCaught()
 
-            # draw status on last line
-            attr = colors[options.c_StatusLine]
-            statusstr = options.SheetNameFmt % sheet.name + options.ch_StatusSep.join(self._status)
-            self.clipdraw(windowHeight-1, 0, statusstr, attr, windowWidth)
-            self._status = []
+            self.drawLeftStatus(scr, sheet)
 
-            self.displayRightStatus(prefixes, ch)  # visible for this getch
+            self.drawRightStatus(scr, prefixes, ch)  # visible for this getch
 
             curses.doupdate()
             ch = scr.getch()
 
-            self.displayRightStatus(prefixes, ch)  # visible for commands that wait with getch
+            self.drawRightStatus(scr, prefixes, ch)  # visible for commands that wait with getch
 
             if ch == curses.KEY_RESIZE:
                 windowHeight, windowWidth = scr.getmaxyx()
@@ -796,196 +390,7 @@ class VisiData:
                 self.sheets.remove(vs)
             self.sheets.insert(0, vs)
             return vs
-
-    def clipdraw(self, y, x, s, attr=curses.A_NORMAL, w=None):
-        s = s.replace('\n', '\\n')
-        try:
-            if w is None:
-                w = windowWidth-1
-            w = min(w, windowWidth-x-1)
-            if w == 0:  # no room anyway
-                return
-
-            # convert to string just before drawing
-            s = str(s)
-            if len(s) > w:
-                scr.addstr(y, x, s[:w-1] + options.ch_Ellipsis, attr)
-            else:
-                scr.addstr(y, x, s, attr)
-                if len(s) < w:
-                    scr.addstr(y, x+len(s), options.ch_ColumnFiller*(w-len(s)), attr)
-        except Exception as e:
-            self.status('clipdraw error: y=%s x=%s len(s)=%s w=%s' % (y, x, len(s), w))
-            self.exceptionCaught()
 # end VisiData class
-
-class WrongTypeStr(str):
-    pass
-
-class CalcErrorStr(str):
-    pass
-
-## columns
-class VColumn:
-    def __init__(self, name, type=UnspecifiedType, func=lambda r: r, width=None):
-        self.name = name
-        self.func = func
-        self.width = width
-        self.type = type
-        self.expr = None  # Python string expression if computed column
-        self._fmtstr = None
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name):
-        self._name = name.replace(' ', '_')
-
-    @property
-    def fmtstr(self):
-        if self._fmtstr is not None: return self._fmtstr
-        elif self.type is int: return '%d'
-        elif self.type is float: return '%.02f'
-        else: return '%s'
-
-    @property
-    def hidden(self):
-        return self.width == 0
-
-    def nEmpty(self, rows):
-        vals = self.values(rows)
-        return sum(1 for v in vals if v == '' or v == None)
-
-    def values(self, rows):
-        return [self.getValue(r) for r in rows]
-
-    def getValue(self, row):
-        try:
-            v = self.func(row)
-        except Exception as e:
-            vd().exceptionCaught(status=False)
-            raise
-
-        try:
-            return self.type(v)  # convert type on-the-fly
-        except Exception as e:
-            vd().exceptionCaught(status=False)
-            return self.type()  # return a suitable value for this type
-
-    def getDisplayValue(self, row, width=None):
-        try:
-            cellval = self.func(row)
-        except Exception as e:
-            vd().exceptionCaught(status=False)
-            return CalcErrorStr(options.ch_FunctionError)
-
-        if cellval is None:
-            return options.ch_VisibleNone
-
-        if isinstance(cellval, bytes):
-            cellval = cellval.decode(options.encoding)
-
-        try:
-            cellval = self.fmtstr % self.type(cellval)  # convert type on-the-fly
-            if width and self.type in (int, float): cellval = cellval.rjust(width-1)
-        except Exception as e:
-            vd().exceptionCaught(status=False)
-            cellval = WrongTypeStr(str(cellval))
-
-        return cellval
-
-    def setValue(self, row, value):
-        if hasattr(self.func, 'setter'):
-            self.func.setter(row, value)
-        else:
-            error('column cannot be changed')
-
-    def getMaxWidth(self, rows):
-        if len(rows) == 0:
-            return 0
-
-        return min(max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name)), int(windowWidth-3))+2
-
-
-### common column setups and helpers
-def setter(r, k, v):  # needed for use in lambda
-    r[k] = v
-
-def lambda_colname(colname):
-    func = lambda r: r[colname]
-    func.setter = lambda r,v,b=colname: setter(r,b,v)
-    return func
-
-def lambda_col(b):
-    func = lambda r,b=b: r[b]
-    func.setter = lambda r,v,b=b: setter(r,b,v)
-    return func
-
-def lambda_getattr(b):
-    func = lambda r: getattr(r,b)
-    func.setter = lambda r,v,b=b: setattr(r,b,v)
-    return func
-
-def lambda_subrow_wrap(func, subrowidx):
-    'wraps original func to be func(r[subrowidx])'
-    subrow_func = lambda r,i=subrowidx,f=func: r[i] and f(r[i]) or None
-    subrow_func.setter = lambda r,v,i=subrowidx,f=func: r[i] and f.setter(r[i], v) or None
-    return subrow_func
-
-class OnDemandDict:
-    def __init__(self, sheet, row):
-        self.row = row
-        self.sheet = sheet
-    def keys(self):
-        return [c.name for c in self.sheet.columns]
-    def __getitem__(self, colname):
-        colidx = self.sheet.findColIdx(colname, self.sheet.columns)
-        return self.sheet.columns[colidx].getValue(self.row)
-
-
-def evalCol(sheet, col, row):
-    return eval(col.expr, {}, OnDemandDict(sheet, row))
-
-def ColumnExpr(sheet, expr):
-    if expr:
-        vc = VColumn(expr)
-        vc.expr = expr
-        vc.func = lambda r,newcol=vc,sheet=sheet: evalCol(sheet, newcol, r)
-        return vc
-
-def getTransformedValue(oldval, searchregex, replregex):
-    m = re.search(searchregex, oldval)
-    if not m:
-        return None
-    return m.expand(replregex)
-
-def ColumnRegex(sheet, regex):
-    if regex:
-        vc = VColumn(regex)
-        vc.expr, vc.searchregex, vc.replregex = regex.split('/')   # TODO: better syntax
-        vc.func = lambda r,newcol=vc,sheet=sheet: getTransformedValue(str(evalCol(sheet, newcol, r)), newcol.searchregex, newcol.replregex)
-        return vc
-
-def getPublicAttrs(obj):
-    return [k for k in dir(obj) if not k.startswith('_') and not callable(getattr(obj, k))]
-
-def PyobjColumns(exampleRow):
-    'columns for each public attribute on an object'
-    return [VColumn(k, type(getattr(exampleRow, k)), lambda_getattr(k)) for k in getPublicAttrs(exampleRow)]
-
-def ArrayColumns(n):
-    'columns that display r[0]..r[n]'
-    return [VColumn('', UnspecifiedType, lambda_col(colnum)) for colnum in range(n)]
-
-def ArrayNamedColumns(columns):
-    'columns is a list of column names, mapping to r[0]..r[n]'
-    return [VColumn(colname, UnspecifiedType, lambda_col(i)) for i, colname in enumerate(columns)]
-
-def AttrColumns(colnames):
-    'colnames is list of attribute names'
-    return [VColumn(name, UnspecifiedType, lambda_getattr(name)) for name in colnames]
 
 ### sheet layouts
 #### generic list/dict/object browsing
@@ -1020,7 +425,7 @@ class VSheetDict(VSheet):
         self.rows = list(list(x) for x in mapping.items())
         self.columns = [
             VColumn('key', str, lambda_col(0)),
-            VColumn('value', UnspecifiedType, lambda_col(1)) ]
+            VColumn('value', anytype, lambda_col(1)) ]
         self.nKeys = 1
         self.command(Key.ENTER, 'if sheet.cursorColIndex == 1: pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
         self.command(Key('e'), 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1)', 'edit this value')
@@ -1037,15 +442,25 @@ class VSheetObject(VSheet):
         valfunc.setter = lambda r,v,obj=self.source: setattr(obj, r[0], v)
         self.columns = [
             VColumn(type(self.source).__name__ + '_attr', str, lambda_col(0)),
-            VColumn('value', UnspecifiedType, valfunc) ]
+            VColumn('value', anytype, valfunc) ]
         self.nKeys = 1
         self.rows = [(k, getattr(self.source, k)) for k in dir(self.source)]
 
 #### specialized meta sheets
+@functools.lru_cache()
+def CommandHelp(sheet):
+    vs = VSheet(sheet.name + '_help', sheet)
+    vs.rows = list(sheet.commands.items())
+    vs.columns = [VColumn('key', str, lambda r: r[0][0] + keyname(r[0][1])),
+        VColumn('action', str, lambda r: r[1][1]),
+        VColumn('global_action', str, lambda r,sheet=sheet: sheet.commands.get(('g', r[0][1]), ('', '-'))[1])
+    ]
+    return vs
+
 class VSheetSheets(VSheet, list):
     def __init__(self):
         VSheet.__init__(self, 'sheets', 'vd.sheets')
-        self.command(Key.ENTER,    'moveListItem(sheet, sheet.cursorRowIndex, 0); vd.sheets.pop(1)', 'go to this sheet')
+        self.command(Key.ENTER,    'moveListItem(vd.sheets, sheet.cursorRowIndex, 0); vd.sheets.pop(1)', 'go to this sheet')
         self.command(Key('&'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="&")', 'open inner join of selected sheets')
         self.command(Key('+'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="+")', 'open outer join of selected sheets')
         self.command(Key('*'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="*")', 'open full join of selected sheets')
@@ -1080,15 +495,15 @@ class VSheetColumns(VSheet):
             VColumn('type',   str, lambda r: r.type.__name__),
             VColumn('fmtstr', str, lambda_getattr('_fmtstr')),
             VColumn('expr',   str, lambda_getattr('expr')),
-            VColumn('value',  UnspecifiedType, lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
+            VColumn('value',  anytype, lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
 #            VColumn('nulls',  int, lambda c,sheet=sheet: c.nEmpty(sheet.rows)),
 
 #            VColumn('uniques',  int, lambda c,sheet=sheet: len(set(c.values(sheet.rows))), width=0),
-#            VColumn('mode',   UnspecifiedType, lambda c: statistics.mode(c.values(sheet.rows)), width=0),
-#            VColumn('min',    UnspecifiedType, lambda c: min(c.values(sheet.rows)), width=0),
-#            VColumn('median', UnspecifiedType, lambda c: statistics.median(c.values(sheet.rows)), width=0),
+#            VColumn('mode',   anytype, lambda c: statistics.mode(c.values(sheet.rows)), width=0),
+#            VColumn('min',    anytype, lambda c: min(c.values(sheet.rows)), width=0),
+#            VColumn('median', anytype, lambda c: statistics.median(c.values(sheet.rows)), width=0),
 #            VColumn('mean',   float, lambda c: statistics.mean(c.values(sheet.rows)), width=0),
-#            VColumn('max',    UnspecifiedType, lambda c: max(c.values(sheet.rows)), width=0),
+#            VColumn('max',    anytype, lambda c: max(c.values(sheet.rows)), width=0),
 #            VColumn('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
             ]
 
@@ -1457,16 +872,6 @@ def inputLine(prompt, value=''):
     scr.addstr(windowHeight-1, 0, prompt)
     return vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable)
 
-
-def vd():
-    global g_vd
-    if not g_vd:
-        g_vd = VisiData()
-
-    return g_vd
-
-def status(s):
-    return vd().status(s)
 
 def run():
     os.putenv('ESCDELAY', '25')  # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
