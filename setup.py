@@ -3,8 +3,8 @@
 from setuptools import setup
 
 setup(name="visidata",
-      version="0.37",
-      description="a curses interface for exploring and arranging tabular data",
+      version="0.39",
+      description="curses interface for exploring and arranging tabular data",
       long_description=open('README.md').read(),
       author="Saul Pwanson",
       author_email="vd@saul.pw",

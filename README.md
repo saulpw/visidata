@@ -1,4 +1,4 @@
-# VisiData v0.37
+# VisiData v0.39
 
 A curses interface for exploring and arranging tabular data
 
@@ -49,13 +49,9 @@ On the `C`olumns sheet, these commands apply to rows (the columns of the source 
 
 ## Installation
 
-Copy the bin/vd script to a directory in PATH and make it executable.
-
-        $ curl -L saul.pw/vd > vd
-        $ chmod u+x ./vd
+        $ pip3 install visidata
 
 ### Dependencies
-
 
 - Python 3.3
 - openpyxl (if opening .xlsx files)
@@ -75,7 +71,7 @@ browser.
 
 ### Commands
 
-Definitions of terms:
+Definitions of terms in the help and documentation:
 
 - 'go': move cursor
 - 'move': change layout of visible data
