@@ -1,13 +1,14 @@
 import collections
 import functools
 
-from . import colors, options, date, anytype, WrongTypeStr, CalcErrorStr
+import visidata
+from . import colors, options, date, anytype, WrongTypeStr, CalcErrorStr, vd
 from .tui import draw_clip
 from .Column import Column
 
 base_commands = collections.OrderedDict()
 
-class VSheet:
+class Sheet:
     def __init__(self, name, src=None):
         self.name = name
         self.source = src
@@ -45,6 +46,14 @@ class VSheet:
 #        if key in self.commands:
 #            status('overriding key %s' % key)
         self.commands[('', key)] = (cmdstr, helpstr)
+
+    def exec_command(self, vdglobals, prefixes, key):
+        cmdstr, _ = self.commands.get((prefixes, key))
+        # handy globals for use by commands
+        self.vd = vd()
+        self.sheet = self
+        exec(cmdstr, vdglobals, dict((name, getattr(self, name)) for name in dir(self)))
+
 
     def findColIdx(self, colname, columns=None):
         if columns is None:

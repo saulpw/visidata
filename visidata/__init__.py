@@ -64,7 +64,7 @@ def status(s):
 
 from visidata.tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException, wrapper, colors, draw_clip
 from visidata.date import date
-from .VSheet import VSheet, base_commands
+from .Sheet import Sheet, base_commands
 from .Column import Column, ColumnAttr, AttrColumns, PyobjColumns, ArrayColumns, ArrayNamedColumns
 
 
@@ -144,86 +144,86 @@ def setup_sheet_commands():
     command(Key.F1,    'vd.push(CommandHelp(sheet))', 'open help sheet')
     command(Key('q'),  'vd.sheets.pop(0)', 'drop this sheet')
 
-    command(Key.LEFT,  'sheet.cursorRight(-1)', 'go one column left')
-    command(Key.DOWN,  'sheet.cursorDown(+1)', 'go one row down')
-    command(Key.UP,    'sheet.cursorDown(-1)', 'go one row up')
-    command(Key.RIGHT, 'sheet.cursorRight(+1)', 'go one column right')
-    command(Key.NPAGE, 'sheet.cursorDown(sheet.nVisibleRows); sheet.topRowIndex += sheet.nVisibleRows', 'scroll one page down')
-    command(Key.PPAGE, 'sheet.cursorDown(-sheet.nVisibleRows); sheet.topRowIndex -= sheet.nVisibleRows', 'scroll one page up')
-    command(Key.HOME,  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
-    command(Key.END,   'sheet.cursorRowIndex = len(sheet.rows)-1', 'go to last row')
+    command(Key.LEFT,  'cursorRight(-1)', 'go one column left')
+    command(Key.DOWN,  'cursorDown(+1)', 'go one row down')
+    command(Key.UP,    'cursorDown(-1)', 'go one row up')
+    command(Key.RIGHT, 'cursorRight(+1)', 'go one column right')
+    command(Key.NPAGE, 'cursorDown(nVisibleRows); topRowIndex += nVisibleRows', 'scroll one page down')
+    command(Key.PPAGE, 'cursorDown(-nVisibleRows); topRowIndex -= nVisibleRows', 'scroll one page up')
+    command(Key.HOME,  'topRowIndex = cursorRowIndex = 0', 'go to top row')
+    command(Key.END,   'cursorRowIndex = len(rows)-1', 'go to last row')
 
-    command(Key('h'), 'sheet.cursorRight(-1)', 'go one column left')
-    command(Key('j'), 'sheet.cursorDown(+1)', 'go one row down')
-    command(Key('k'), 'sheet.cursorDown(-1)', 'go one row up')
-    command(Key('l'), 'sheet.cursorRight(+1)', 'go one column right')
+    command(Key('h'), 'cursorRight(-1)', 'go one column left')
+    command(Key('j'), 'cursorDown(+1)', 'go one row down')
+    command(Key('k'), 'cursorDown(-1)', 'go one row up')
+    command(Key('l'), 'cursorRight(+1)', 'go one column right')
 
-    command(Shift.H, 'sheet.moveVisibleCol(sheet.cursorVisibleColIndex, max(sheet.cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
-    command(Shift.J, 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, min(sheet.cursorRowIndex+1, sheet.nRows-1))', 'move this row one down')
-    command(Shift.K, 'sheet.cursorRowIndex = moveListItem(sheet.rows, sheet.cursorRowIndex, max(sheet.cursorRowIndex-1, 0))', 'move this row one up')
-    command(Shift.L, 'sheet.moveVisibleCol(sheet.cursorVisibleColIndex, min(sheet.cursorVisibleColIndex+1, sheet.nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
+    command(Shift.H, 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); cursorVisibleColIndex -= 1', 'move this column one left')
+    command(Shift.J, 'cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
+    command(Shift.K, 'cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
+    command(Shift.L, 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); cursorVisibleColIndex += 1', 'move this column one right')
 
-    command(Ctrl.G, 'status(sheet.statusLine)', 'show this sheet info')
+    command(Ctrl.G, 'status(statusLine)', 'show this sheet info')
     command(Ctrl.P, 'status(vd.statusHistory[0])', 'show previous status line again')
     command(Ctrl.V, 'status(initialStatus)', 'show version information')
 
-    command(Key('t'), 'sheet.topRowIndex = sheet.cursorRowIndex', 'scroll cursor row to top of screen')
-    command(Key('m'), 'sheet.topRowIndex = sheet.cursorRowIndex-int(sheet.nVisibleRows/2)', 'scroll cursor row to middle of screen')
-    command(Key('b'), 'sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows+1', 'scroll cursor row to bottom of screen')
+    command(Key('t'), 'topRowIndex = cursorRowIndex', 'scroll cursor row to top of screen')
+    command(Key('m'), 'topRowIndex = cursorRowIndex-int(nVisibleRows/2)', 'scroll cursor row to middle of screen')
+    command(Key('b'), 'topRowIndex = cursorRowIndex-nVisibleRows+1', 'scroll cursor row to bottom of screen')
 
-    command(Key('<'), 'sheet.skipUp()', 'skip up this column to previous value')
-    command(Key('>'), 'sheet.skipDown()', 'skip down this column to next value')
+    command(Key('<'), 'skipUp()', 'skip up this column to previous value')
+    command(Key('>'), 'skipDown()', 'skip down this column to next value')
 
-    command(Key('_'), 'sheet.cursorCol.width = sheet.cursorCol.getMaxWidth(sheet.visibleRows)', 'set this column width to fit visible cells')
-    command(Key('-'), 'sheet.cursorCol.width = 0', 'hide this column')
-    command(Key('^'), 'sheet.cursorCol.name = sheet.cursorCol.getDisplayValue(sheet.cursorRow)', 'set this column header to this cell value')
-    command(Key('!'), 'sheet.toggleKeyColumn(sheet.cursorColIndex)', 'toggle this column as a key column')
+    command(Key('_'), 'cursorCol.width = cursorCol.getMaxWidth(visibleRows)', 'set this column width to fit visible cells')
+    command(Key('-'), 'cursorCol.width = 0', 'hide this column')
+    command(Key('^'), 'cursorCol.name = cursorCol.getDisplayValue(cursorRow)', 'set this column header to this cell value')
+    command(Key('!'), 'toggleKeyColumn(cursorColIndex)', 'toggle this column as a key column')
 
-    command(Key('@'), 'sheet.cursorCol.type = date', 'set column type to ISO8601 datetime')
-    command(Key('#'), 'sheet.cursorCol.type = int', 'set column type to integer')
-    command(Key('$'), 'sheet.cursorCol.type = str', 'set column type to string')
-    command(Key('%'), 'sheet.cursorCol.type = float', 'set column type to float')
-    command(Key('~'), 'sheet.cursorCol.type = detectType(sheet.cursorValue)', 'autodetect type of column by its data')
+    command(Key('@'), 'cursorCol.type = date', 'set column type to ISO8601 datetime')
+    command(Key('#'), 'cursorCol.type = int', 'set column type to integer')
+    command(Key('$'), 'cursorCol.type = str', 'set column type to string')
+    command(Key('%'), 'cursorCol.type = float', 'set column type to float')
+    command(Key('~'), 'cursorCol.type = detectType(cursorValue)', 'autodetect type of column by its data')
 
-    command(Key('['), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r))', 'sort by this column ascending')
-    command(Key(']'), 'sheet.rows = sorted(sheet.rows, key=lambda r: sheet.cursorCol.getValue(r), reverse=True)', 'sort by this column descending')
+    command(Key('['), 'rows = sorted(rows, key=lambda r: cursorCol.getValue(r))', 'sort by this column ascending')
+    command(Key(']'), 'rows = sorted(rows, key=lambda r: cursorCol.getValue(r), reverse=True)', 'sort by this column descending')
     command(Ctrl.E, 'options.debug = True; error(vd.lastErrors[-1])', 'abort and print last error to terminal')
     command(Ctrl.D, 'options.debug = not options.debug; status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug mode')
 
-    command(Shift.E, 'if vd.lastErrors: vd.push(VSheetText("last_error", vd.lastErrors[-1]))', 'open stack trace for most recent error')
-    command(Shift.F, 'vd.push(VSheetFreqTable(sheet, sheet.cursorCol))', 'open frequency table from values in this column')
+    command(Shift.E, 'if vd.lastErrors: vd.push(SheetText("last_error", vd.lastErrors[-1]))', 'open stack trace for most recent error')
+    command(Shift.F, 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
 
-    command(Key('d'), 'sheet.rows.pop(sheet.cursorRowIndex)', 'delete this row')
+    command(Key('d'), 'rows.pop(cursorRowIndex)', 'delete this row')
 
     command(Key('g'), 'raise CommandPrefixException("g")', 'add global prefix')
 
-    command(Shift.S, 'vd.push(vd.sheets)', 'open Sheet stack')
-    command(Shift.C, 'vd.push(VSheetColumns(sheet))', 'open Columns for this sheet')
-    command(Shift.O, 'vd.push(VSheetDict("options", options.__dict__))', 'open Options')
+    command(Shift.S, 'vd.push(Sheets(vd.sheets))', 'open Sheet stack')
+    command(Shift.C, 'vd.push(SheetColumns(sheet))', 'open Columns for this sheet')
+    command(Shift.O, 'vd.push(SheetDict("options", options.__dict__))', 'open Options')
 
-    command(Key('/'), 'sheet.searchRegex(inputLine(prompt="/"), columns=[sheet.cursorCol], moveCursor=True)', 'search this column forward for regex')
-    command(Key('?'), 'sheet.searchRegex(inputLine(prompt="?"), columns=[sheet.cursorCol], backward=True, moveCursor=True)', 'search this column backward for regex')
-    command(Key('n'), 'sheet.searchRegex(columns=[sheet.cursorCol], moveCursor=True)', 'go to next match')
-    command(Key('p'), 'sheet.searchRegex(columns=[sheet.cursorCol], backward=True, moveCursor=True)', 'go to previous match')
+    command(Key('/'), 'searchRegex(inputLine(prompt="/"), columns=[cursorCol], moveCursor=True)', 'search this column forward for regex')
+    command(Key('?'), 'searchRegex(inputLine(prompt="?"), columns=[cursorCol], backward=True, moveCursor=True)', 'search this column backward for regex')
+    command(Key('n'), 'searchRegex(columns=[cursorCol], moveCursor=True)', 'go to next match')
+    command(Key('p'), 'searchRegex(columns=[cursorCol], backward=True, moveCursor=True)', 'go to previous match')
 
-    command(Key(' '), 'sheet.toggle([sheet.cursorRow]); sheet.cursorDown(1)', 'toggle select of this row')
-    command(Key('s'), 'sheet.select([sheet.cursorRow]); sheet.cursorDown(1)', 'select this row')
-    command(Key('u'), 'sheet.unselect([sheet.cursorRow]); sheet.cursorDown(1)', 'unselect this row')
-    command(Key('|'), 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=[sheet.cursorCol]))', 'select rows by regex in this column')
-    command(Key('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=[sheet.cursorCol]))', 'unselect rows by regex in this column')
+    command(Key(' '), 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
+    command(Key('s'), 'select([cursorRow]); cursorDown(1)', 'select this row')
+    command(Key('u'), 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
+    command(Key('|'), 'select(rows[r] for r in searchRegex(inputLine(prompt="|"), columns=[cursorCol]))', 'select rows by regex in this column')
+    command(Key('\\'), 'unselect(rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=[cursorCol]))', 'unselect rows by regex in this column')
 
-    command(Shift.R, 'sheet.source.type = inputLine("change type to: ", value=initialsheet.source.type)', 'set source type of this sheet')
+    command(Shift.R, 'source.type = inputLine("change type to: ", value=initialsource.type)', 'set source type of this sheet')
     command(Ctrl.R, 'open_source(vd.sheets.pop(0).source); status("reloaded")', 'reload sheet from source')
     command(Ctrl.S, 'saveSheet(sheet, inputLine("save to: "))', 'save this sheet to new file')
     command(Key('o'), 'open_source(inputLine("open: "))', 'open local file or url')
     command(Ctrl.O, 'expr = inputLine("eval: "); pushPyObjSheet(expr, eval(expr))', 'eval Python expression and open the result')
 
-    command(Key('e'), 'sheet.cursorCol.setValue(sheet.cursorRow, sheet.editCell(sheet.cursorVisibleColIndex))', 'edit this cell')
-    command(Key('c'), 'sheet.cursorVisibleColIndex = sheet.findColIdx(inputLine("goto column name: "), sheet.visibleCols)', 'goto visible column by name')
-    command(Key('r'), 'sheet.cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
+    command(Key('e'), 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex))', 'edit this cell')
+    command(Key('c'), 'cursorVisibleColIndex = findColIdx(inputLine("goto column name: "), visibleCols)', 'goto visible column by name')
+    command(Key('r'), 'cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
 
-    command(Key('='), 'sheet.addColumn(ColumnExpr(sheet, inputLine("new column expr=")), index=sheet.cursorColIndex+1)', 'add column by expr')
-    command(Key(':'), 'sheet.addColumn(ColumnRegex(sheet, inputLine("new column regex:")), index=sheet.cursorColIndex+1)', 'add column by regex')
+    command(Key('='), 'addColumn(ColumnExpr(sheet, inputLine("new column expr=")), index=cursorColIndex+1)', 'add column by expr')
+    command(Key(':'), 'addColumn(ColumnRegex(sheet, inputLine("new column regex:")), index=cursorColIndex+1)', 'add column by regex')
     command(Ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet')
     command(Key.TAB,  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheet stack')
     command(Key.BTAB, 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheet stack')
@@ -231,40 +231,40 @@ def setup_sheet_commands():
 # when used with 'g' prefix
     global_command(Key('q'), 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
-    global_command(Key('h'), 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go to leftmost column')
-    global_command(Key('k'), 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go to top row')
-    global_command(Key('j'), 'sheet.cursorRowIndex = len(sheet.rows); sheet.topRowIndex = sheet.cursorRowIndex-sheet.nVisibleRows', 'go to bottom row')
-    global_command(Key('l'), 'sheet.cursorVisibleColIndex = len(sheet.visibleCols)-1', 'go to rightmost column')
+    global_command(Key('h'), 'cursorVisibleColIndex = leftVisibleColIndex = 0', 'go to leftmost column')
+    global_command(Key('k'), 'cursorRowIndex = topRowIndex = 0', 'go to top row')
+    global_command(Key('j'), 'cursorRowIndex = len(rows); topRowIndex = cursorRowIndex-nVisibleRows', 'go to bottom row')
+    global_command(Key('l'), 'cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmost column')
 
-    global_command(Shift.H, 'moveListItem(sheet.columns, sheet.cursorColIndex, 0)', 'move this column all the way to the left')
-    global_command(Shift.J, 'moveListItem(sheet.rows, sheet.cursorRowIndex, sheet.nRows)', 'move this row all the way to the bottom')
-    global_command(Shift.K, 'moveListItem(sheet.rows, sheet.cursorRowIndex, 0)', 'move this row all the way to the top')
-    global_command(Shift.L, 'moveListItem(sheet.columns, sheet.cursorColIndex, sheet.nCols)', 'move this column all the way to the right')
+    global_command(Shift.H, 'moveListItem(columns, cursorColIndex, 0)', 'move this column all the way to the left')
+    global_command(Shift.J, 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
+    global_command(Shift.K, 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
+    global_command(Shift.L, 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
 
-    global_command(Key('_'), 'for c in sheet.visibleCols: c.width = c.getMaxWidth(sheet.visibleRows)', 'set width of all columns to fit visible cells')
-    global_command(Key('^'), 'for c in sheet.visibleCols: c.name = c.getDisplayValue(sheet.cursorRow)', 'set names of all visible columns to this row')
-    global_command(Key('~'), 'for c in sheet.visibleCols: c.type = detectType(c.getValue(sheet.cursorRow))', 'autodetect types of all visible columns by their data')
+    global_command(Key('_'), 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
+    global_command(Key('^'), 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
+    global_command(Key('~'), 'for c in visibleCols: c.type = detectType(c.getValue(cursorRow))', 'autodetect types of all visible columns by their data')
 
-    global_command(Shift.E, 'vd.push(VSheetText("last_error", "\\n\\n".join(vd.lastErrors)))', 'open last 10 errors')
+    global_command(Shift.E, 'vd.push(SheetText("last_error", "\\n\\n".join(vd.lastErrors)))', 'open last 10 errors')
 
-    global_command(Key('/'), 'sheet.searchRegex(inputLine(prompt="/"), moveCursor=True, columns=sheet.visibleCols)', 'search regex forward in all visible columns')
-    global_command(Key('?'), 'sheet.searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=sheet.visibleCols)', 'search regex backward in all visible columns')
-    global_command(Key('n'), 'sheet.cursorRowIndex = max(sheet.searchRegex())', 'go to first match')
-    global_command(Key('p'), 'sheet.cursorRowIndex = min(sheet.searchRegex())', 'go to last match')
+    global_command(Key('/'), 'searchRegex(inputLine(prompt="/"), moveCursor=True, columns=visibleCols)', 'search regex forward in all visible columns')
+    global_command(Key('?'), 'searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
+    global_command(Key('n'), 'cursorRowIndex = max(searchRegex())', 'go to first match')
+    global_command(Key('p'), 'cursorRowIndex = min(searchRegex())', 'go to last match')
 
-    global_command(Key(' '), 'sheet.toggle(sheet.rows)', 'toggle select of all rows')
-    global_command(Key('s'), 'sheet.select(sheet.rows)', 'select all rows')
-    global_command(Key('u'), 'sheet._selectedRows = {}', 'unselect all rows')
+    global_command(Key(' '), 'toggle(rows)', 'toggle select of all rows')
+    global_command(Key('s'), 'select(rows)', 'select all rows')
+    global_command(Key('u'), '_selectedRows = {}', 'unselect all rows')
 
-    global_command(Key('|'), 'sheet.select(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="|"), columns=sheet.visibleCols))', 'select rows by regex in all visible columns')
-    global_command(Key('\\'), 'sheet.unselect(sheet.rows[r] for r in sheet.searchRegex(inputLine(prompt="\\\\"), columns=sheet.visibleCols))', 'unselect rows by regex in all visible columns')
+    global_command(Key('|'), 'select(rows[r] for r in searchRegex(inputLine(prompt="|"), columns=visibleCols))', 'select rows by regex in all visible columns')
+    global_command(Key('\\'), 'unselect(rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex in all visible columns')
 
-    global_command(Key('d'), 'sheet.rows = [r for r in sheet.rows if not sheet.isSelected(r)]; sheet._selectedRows = {}', 'delete all selected rows')
+    global_command(Key('d'), 'rows = [r for r in rows if not isSelected(r)]; _selectedRows = {}', 'delete all selected rows')
 
-    global_command(Ctrl.P, 'vd.push(VSheetText("statuses", vd.statusHistory))', 'open last 100 statuses')
+    global_command(Ctrl.P, 'vd.push(SheetText("statuses", vd.statusHistory))', 'open last 100 statuses')
 
     # experimental commands
-    command(Key('"'), 'sheet.rows.insert(sheet.cursorRowIndex, copy(sheet.cursorRow))', 'insert duplicate of this row')
+    command(Key('"'), 'rows.insert(cursorRowIndex, copy(cursorRow))', 'insert duplicate of this row')
 
 # end setup_sheet_commands
 
@@ -288,7 +288,7 @@ def detectType(v):
 
 class VisiData:
     def __init__(self):
-        self.sheets = VSheetSheets()
+        self.sheets = []
         self.statusHistory = []
         self._status = []
         self.status(initialStatus)
@@ -367,7 +367,7 @@ class VisiData:
             elif (prefixes, ch) in sheet.commands:
                 cmdstr, helpstr = sheet.commands.get((prefixes, ch))
                 try:
-                    exec(cmdstr, globals(), { 'vd': vd(), 'sheet': sheet })
+                    sheet.exec_command(globals(), prefixes, ch)
                     prefixes = ''
                 except CommandPrefixException as e:
                     prefixes += str(e)
@@ -396,15 +396,15 @@ class VisiData:
 #### generic list/dict/object browsing
 def pushPyObjSheet(name, pyobj, src=None):
     if isinstance(pyobj, list):
-        return vd().push(VSheetList(name, pyobj, src=src))
+        return vd().push(SheetList(name, pyobj, src=src))
     elif isinstance(pyobj, dict):
-        return vd().push(VSheetDict(name, pyobj))
+        return vd().push(SheetDict(name, pyobj))
     elif isinstance(pyobj, object):
-        return vd().push(VSheetObject(name, pyobj))
+        return vd().push(SheetObject(name, pyobj))
     else:
         status('unknown type ' + type(pyobj))
 
-class VSheetList(VSheet):
+class SheetList(Sheet):
     def __init__(self, name, obj, columns=None, src=None):
         'columns is a list of strings naming attributes on the objects within the obj'
         super().__init__(name, src or obj)
@@ -417,9 +417,9 @@ class VSheetList(VSheet):
             self.nKeys = 1
         else:
             self.columns = [Column(name)]
-        self.command(Key.ENTER, 'pushPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex', 'dive into this row')
+        self.command(Key.ENTER, 'pushPyObjSheet("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
 
-class VSheetDict(VSheet):
+class SheetDict(Sheet):
     def __init__(self, name, mapping):
         super().__init__(name, mapping)
         self.rows = list(list(x) for x in mapping.items())
@@ -427,14 +427,14 @@ class VSheetDict(VSheet):
             Column('key', str, lambda_col(0)),
             Column('value', anytype, lambda_col(1)) ]
         self.nKeys = 1
-        self.command(Key.ENTER, 'if sheet.cursorColIndex == 1: pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
-        self.command(Key('e'), 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1)', 'edit this value')
+        self.command(Key.ENTER, 'if cursorColIndex == 1: pushPyObjSheet(name + options.SubsheetSep + cursorRow[0], cursorRow[1])', 'dive into this value')
+        self.command(Key('e'), 'source[cursorRow[0]] = cursorRow[1] = editCell(1)', 'edit this value')
 
-class VSheetObject(VSheet):
+class SheetObject(Sheet):
     def __init__(self, name, obj):
         super().__init__(name, obj)
-        self.command(Key.ENTER, 'pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1]() if callable(sheet.cursorRow[1]) else sheet.cursorRow[1])', 'dive into this value')
-        self.command(Key('e'), 'setattr(sheet.source, sheet.cursorRow[0], sheet.editCell(1)); sheet.reload()', 'edit this value')
+        self.command(Key.ENTER, 'pushPyObjSheet(name + options.SubsheetSep + cursorRow[0], cursorRow[1]() if callable(cursorRow[1]) else cursorRow[1])', 'dive into this value')
+        self.command(Key('e'), 'setattr(source, cursorRow[0], editCell(1)); reload()', 'edit this value')
         self.reload()
 
     def reload(self):
@@ -449,41 +449,40 @@ class VSheetObject(VSheet):
 #### specialized meta sheets
 @functools.lru_cache()
 def CommandHelp(sheet):
-    vs = VSheet(sheet.name + '_help', sheet)
+    vs = Sheet(sheet.name + '_help', sheet)
     vs.rows = list(sheet.commands.items())
-    vs.columns = [Column('key', str, lambda r: r[0][0] + keyname(r[0][1])),
+    vs.columns = [
+        Column('key', str, lambda r: r[0][0] + keyname(r[0][1])),
         Column('action', str, lambda r: r[1][1]),
         Column('global_action', str, lambda r,sheet=sheet: sheet.commands.get(('g', r[0][1]), ('', '-'))[1])
     ]
     return vs
 
-class VSheetSheets(VSheet, list):
-    def __init__(self):
-        VSheet.__init__(self, 'sheets', 'vd.sheets')
-        self.command(Key.ENTER,    'moveListItem(vd.sheets, sheet.cursorRowIndex, 0); vd.sheets.pop(1)', 'go to this sheet')
-        self.command(Key('&'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="&")', 'open inner join of selected sheets')
-        self.command(Key('+'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="+")', 'open outer join of selected sheets')
-        self.command(Key('*'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="*")', 'open full join of selected sheets')
-        self.command(Key('~'), 'vd.sheets[0] = VSheetJoin(sheet.selectedRows, jointype="~")', 'open diff join of selected sheets')
-        self.reload()
+class Sheets(SheetList):
+    def __init__(self, src):
+        super().__init__('sheets', vd().sheets, 'name nRows nCols cursorValue keyColNames source'.split())
 
-    def reload(self):
-        self.columns = AttrColumns('name nRows nCols cursorValue keyColNames source'.split())
         self.nKeys = 1
-        self.rows = self
+        self.command(Key.ENTER,    'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'go to this sheet')
+        self.command(Key('&'), 'vd.sheets[0] = SheetJoin(selectedRows, jointype="&")', 'open inner join of selected sheets')
+        self.command(Key('+'), 'vd.sheets[0] = SheetJoin(selectedRows, jointype="+")', 'open outer join of selected sheets')
+        self.command(Key('*'), 'vd.sheets[0] = SheetJoin(selectedRows, jointype="*")', 'open full join of selected sheets')
+        self.command(Key('~'), 'vd.sheets[0] = SheetJoin(selectedRows, jointype="~")', 'open diff join of selected sheets')
+        self.rows = vd().sheets
 
-class VSheetColumns(VSheet):
+class SheetColumns(Sheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
-# on the Columns sheet, these affect the 'row' (column in the source sheet)
-        self.command(Key('@'), 'sheet.cursorRow.type = date; sheet.cursorDown(+1)', 'set column type to datetime')
-        self.command(Key('#'), 'sheet.cursorRow.type = int; sheet.cursorDown(+1)', 'set source column type to integer')
-        self.command(Key('$'), 'sheet.cursorRow.type = str; sheet.cursorDown(+1)', 'set source column type to string')
-        self.command(Key('%'), 'sheet.cursorRow.type = float; sheet.cursorDown(+1)', 'set source column type to decimal numeric type')
-        self.command(Key('~'), 'sheet.cursorRow.type = detectType(sheet.cursorRow.getValue(sheet.source.cursorRow)); sheet.cursorDown(+1)', 'autodetect type of source column using its data')
-        self.command(Key('!'), 'sheet.source.toggleKeyColumn(sheet.cursorRowIndex)', 'toggle key column on source sheet')
-        self.command(Key('-'), 'sheet.cursorRow.width = 0', 'hide column on source sheet')
-        self.command(Key('_'), 'sheet.cursorRow.width = sheet.cursorRow.getMaxWidth(sheet.source.rows)', 'set source column width to max width of its rows')
+
+        # on the Columns sheet, these affect the 'row' (column in the source sheet)
+        self.command(Key('@'), 'cursorRow.type = date; cursorDown(+1)', 'set source column type to datetime')
+        self.command(Key('#'), 'cursorRow.type = int; cursorDown(+1)', 'set source column type to integer')
+        self.command(Key('$'), 'cursorRow.type = str; cursorDown(+1)', 'set source column type to string')
+        self.command(Key('%'), 'cursorRow.type = float; cursorDown(+1)', 'set source column type to decimal numeric type')
+        self.command(Key('~'), 'cursorRow.type = detectType(cursorRow.getValue(source.cursorRow)); cursorDown(+1)', 'autodetect type of source column using its data')
+        self.command(Key('!'), 'source.toggleKeyColumn(cursorRowIndex)', 'toggle key column on source sheet')
+        self.command(Key('-'), 'cursorRow.width = 0', 'hide column on source sheet')
+        self.command(Key('_'), 'cursorRow.width = cursorRow.getMaxWidth(source.rows)', 'set source column width to max width of its rows')
         self.reload()
 
     def reload(self):
@@ -508,7 +507,7 @@ class VSheetColumns(VSheet):
             ]
 
 #### slicing and dicing
-class VSheetJoin(VSheet):
+class SheetJoin(Sheet):
     def __init__(self, sheets, jointype='&'):
         super().__init__(jointype.join(vs.name for vs in sheets))
         self.source = sheets
@@ -551,7 +550,7 @@ class VSheetJoin(VSheet):
             self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if not all(combinedRow))
 
 
-class VSheetFreqTable(VSheet):
+class SheetFreqTable(Sheet):
     def __init__(self, sheet, col):
         fqcolname = '%s_%s_freq' % (sheet.name, col.name)
         super().__init__(fqcolname, sheet)
@@ -574,10 +573,10 @@ class VSheetFreqTable(VSheet):
         ]
         self.nKeys = 1
 
-        self.command(Key(' '), 'sheet.source.toggle(sheet.cursorRow[1])', 'toggle these entries')
-        self.command(Key('s'), 'sheet.source.select(sheet.cursorRow[1])', 'select these entries')
-        self.command(Key('u'), 'sheet.source.unselect(sheet.cursorRow[1])', 'unselect these entries')
-        self.command(Key.ENTER, 'vd.push(copy(sheet.source)).rows = sheet.values[str(sheet.columns[0].getValue(sheet.cursorRow))]', 'push new sheet with only this value')
+        self.command(Key(' '), 'source.toggle(cursorRow[1])', 'toggle these entries')
+        self.command(Key('s'), 'source.select(cursorRow[1])', 'select these entries')
+        self.command(Key('u'), 'source.unselect(cursorRow[1])', 'unselect these entries')
+        self.command(Key.ENTER, 'vd.push(copy(source)).rows = values[str(columns[0].getValue(cursorRow))]', 'push new sheet with only this value')
 
 
 ### input formats and helpers
@@ -613,7 +612,7 @@ def getTextContents(p):
 def open_source(p):
     if isinstance(p, Path):
         if p.is_dir():
-            vs = VSheetDirectory(p)
+            vs = SheetDirectory(p)
         else:
             vs = globals().get('open_' + p.suffix, open_txt)(p)
     elif '://' in p:
@@ -622,10 +621,10 @@ def open_source(p):
         return open_source(Path(p))
     if vs:
         status('opened %s' % p.name)
-    if isinstance(vs, VSheet):
+    if isinstance(vs, Sheet):
         return vd().push(vs)
 
-class VSheetText(VSheet):
+class SheetText(Sheet):
     def __init__(self, name, content, src=None):
         super().__init__(name, src)
         self.columns = [Column(name, str)]
@@ -636,14 +635,14 @@ class VSheetText(VSheet):
         else:
             error('unknown text type ' + str(type(content)))
 
-class VSheetDirectory(VSheet):
+class SheetDirectory(Sheet):
     def __init__(self, p):
         super().__init__(p.name, p)
         self.columns = [Column('filename', str, lambda r: r[0].name),
                         Column('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
                         Column('size', int, lambda r: r[1].st_size),
                         Column('mtime', date, lambda r: r[1].st_mtime)]
-        self.command(Key.ENTER, 'open_source(sheet.cursorRow[0])', 'open file')  # path, filename
+        self.command(Key.ENTER, 'open_source(cursorRow[0])', 'open file')  # path, filename
         self.reload()
 
     def reload(self):
@@ -653,9 +652,9 @@ def open_txt(p):
     contents = getTextContents(p)
     if '\t' in contents[:32]:
         return open_tsv(p)  # TSV often have .txt extension
-    return VSheetText(p.name, contents, p)
+    return SheetText(p.name, contents, p)
 
-class open_csv(VSheet):
+class open_csv(Sheet):
     def __init__(self, p):
         super().__init__(p.name, p)
         contents = getTextContents(p)
@@ -675,7 +674,7 @@ class open_csv(VSheet):
         else:
             self.columns = ArrayColumns(len(self.rows[0]))
 
-class open_tsv(VSheet):
+class open_tsv(Sheet):
     def __init__(self, p):
         super().__init__(p.name, p)
         lines = getTextContents(p).splitlines()
@@ -693,25 +692,25 @@ def open_json(p):
     pushPyObjSheet(p.name, json.loads(getTextContents(p)))
 
 #### .xlsx
-class open_xlsx(VSheet):
+class open_xlsx(Sheet):
     def __init__(self, path):
         super().__init__(path.name, path)
         import openpyxl
         self.workbook = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
         self.rows = list(self.workbook.sheetnames)
         self.columns = [Column('name', str)]
-        self.command(Key.ENTER, 'vd.push(sheet.getSheet(sheet.cursorRow))', 'open this sheet')
+        self.command(Key.ENTER, 'vd.push(getSheet(cursorRow))', 'open this sheet')
 
     def getSheet(self, sheetname):
-        'create actual VSheet from xlsx sheet'
+        'create actual Sheet from xlsx sheet'
         worksheet = self.workbook.get_sheet_by_name(sheetname)
-        vs = VSheet('%s%s%s' % (self.source, options.SubsheetSep, sheetname), worksheet)
+        vs = Sheet('%s%s%s' % (self.source, options.SubsheetSep, sheetname), worksheet)
         vs.columns = ArrayColumns(worksheet.max_column)
         vs.rows = [ [cell.value for cell in row] for row in worksheet.iter_rows()]
         return vs
 
 #### .hdf5
-class VSheetH5Obj(VSheet):
+class SheetH5Obj(Sheet):
     def __init__(self, name, hobj, src):
         super().__init__(name, src)
         self.hobj = hobj
@@ -726,8 +725,8 @@ class VSheetH5Obj(VSheet):
                 Column('type', str, lambda r: type(r).__name__),
                 Column('nItems', int, lambda r: len(r)),
             ]
-            self.command(Key.ENTER, 'vd.push(VSheetH5Obj(sheet.name+options.SubsheetSep+sheet.cursorRow.name, sheet.cursorRow, sheet.source))', 'open this group or dataset')
-            self.command(Key('A'), 'vd.push(VSheetDict(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs))', 'open metadata sheet for this object')
+            self.command(Key.ENTER, 'vd.push(SheetH5Obj(name+options.SubsheetSep+cursorRow.name, cursorRow, source))', 'open this group or dataset')
+            self.command(Key('A'), 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))', 'open metadata sheet for this object')
         elif isinstance(self.hobj, h5py.Dataset):
             if len(self.hobj.shape) == 1:
                 self.rows = self.hobj[:]  # copy
@@ -740,21 +739,21 @@ class VSheetH5Obj(VSheet):
         else:
             status('unknown h5 object type %s' % type(self.hobj))
 
-class open_hdf5(VSheetH5Obj):
+class open_hdf5(SheetH5Obj):
     def __init__(self, p):
         import h5py
         super().__init__(p.name, h5py.File(str(p), 'r'), p)
 open_h5 = open_hdf5
 
 
-class open_zip(VSheet):
+class open_zip(Sheet):
     def __init__(self, p):
         import zipfile
         super().__init__(p.name, p)
         self.zfp = zipfile.ZipFile(p.fqpn, 'r')
         self.rows = self.zfp.infolist()
         self.columns = AttrColumns("filename file_size date_time compress_size".split())
-        self.command(Ctrl.J, 'vd.push(sheet.open(sheet.cursorRow))', 'open this file')
+        self.command(Ctrl.J, 'vd.push(open(cursorRow))', 'open this file')
 
     def open(self, zi):
         cachefn = zi.filename
@@ -763,7 +762,7 @@ class open_zip(VSheet):
         return open_source(cachefn)
 
 #### databases
-class VSheetBlaze(VSheet):
+class SheetBlaze(Sheet):
     def __init__(self, name, data, src):
         super().__init__(name, src)
         self.columns = ArrayNamedColumns(data.fields)
@@ -777,8 +776,8 @@ def openUrl(url):
     import blaze
     import datashape; datashape.coretypes._canonical_string_encodings.update({"utf8_unicode_ci": "U8"})
     fp = blaze.data(url)
-    vs = VSheetList(url, [getattr(fp, tblname) for tblname in fp.fields], url)
-    vs.command(Key.ENTER, 'vd.push(VSheetBlaze(sheet.cursorRow.name, sheet.cursorRow, sheet))', 'open this table')
+    vs = SheetList(url, [getattr(fp, tblname) for tblname in fp.fields], url)
+    vs.command(Key.ENTER, 'vd.push(SheetBlaze(cursorRow.name, cursorRow, sheet))', 'open this table')
     return vs
 
 #### Google Sheets; requires credentials to be setup already
@@ -811,24 +810,24 @@ def google_sheets():
 def open_gspreadsheet(p):
     sheets = google_sheets()
     sheet_md = sheets.get(spreadsheetId=p.name).execute()
-    vs = VSheet(sheet_md['properties']['title'], p)
+    vs = Sheet(sheet_md['properties']['title'], p)
     vs.columns = [Column('title', lambda_eval('properties.title')),
                   Column('rowCount', lambda_eval('properties.gridProperties.rowCount')),
                   Column('columnCount', lambda_eval('properties.gridProperties.columnCount'))]
     vs.rows = sheet_md['sheets']
-    vs.command(Key.ENTER, 'sheet.cursorRow')
+    vs.command(Key.ENTER, 'cursorRow')
     return vs
 
 def open_gsheet(p):
     sheets = google_sheets()
     sheet = sheets.values().get(spreadsheetId=p.name).execute()
     pushPyObjSheet(p.name, sheet, p)
-#    vs = VSheet(sheet_md['properties']['title'], p)
+#    vs = Sheet(sheet_md['properties']['title'], p)
 #    vs.columns = [Column('title', lambda_eval('properties.title')),
 #                  Column('rowCount', lambda_eval('properties.gridProperties.rowCount')),
 #                  Column('columnCount', lambda_eval('properties.gridProperties.columnCount'))]
 #    vs.rows = sheet_md['sheets']
-#    vs.command(Key.ENTER, 'sheet.cursorRow')
+#    vs.command(Key.ENTER, 'cursorRow')
 #    return vs
 
 #### external addons
