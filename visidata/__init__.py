@@ -44,7 +44,6 @@ defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i
 
 g_vd = None  # toplevel VisiData, contains all sheets
 scr = None   # toplevel curses screen
-sheet = None # current sheet
 
 windowWidth = None
 windowHeight = None
@@ -730,7 +729,6 @@ class VisiData:
             raise
 
     def run(self):
-        global sheet
         global windowHeight, windowWidth
         windowHeight, windowWidth = scr.getmaxyx()
         ch = 32
@@ -775,7 +773,7 @@ class VisiData:
             elif (prefixes, ch) in sheet.commands:
                 cmdstr, helpstr = sheet.commands.get((prefixes, ch))
                 try:
-                    exec(cmdstr, globals(), { 'vd': vd() })
+                    exec(cmdstr, globals(), { 'vd': vd(), 'sheet': sheet })
                     prefixes = ''
                 except CommandPrefixException as e:
                     prefixes += str(e)
