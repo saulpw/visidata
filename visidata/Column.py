@@ -1,13 +1,13 @@
-from . import anytype, vd
+from . import anytype, vd, options, WrongTypeStr, CalcErrorStr
 
-class VColumn:
+class Column:
     def __init__(self, name, type=anytype, func=lambda r: r, width=None):
         self.name = name
         self.func = func
         self.width = width
         self.type = type
         self.expr = None  # Python string expression if computed column
-        self._fmtstr = None
+        self.fmtstr = None
 
     @property
     def name(self):
@@ -17,9 +17,8 @@ class VColumn:
     def name(self, name):
         self._name = name.replace(' ', '_')
 
-    @property
-    def fmtstr(self):
-        if self._fmtstr is not None: return self._fmtstr
+    def deduceFmtstr(self):
+        if self.fmtstr is not None: return self.fmtstr
         elif self.type is int: return '%d'
         elif self.type is float: return '%.02f'
         else: return '%s'
@@ -62,7 +61,7 @@ class VColumn:
             cellval = cellval.decode(options.encoding)
 
         try:
-            cellval = self.fmtstr % self.type(cellval)  # convert type on-the-fly
+            cellval = self.deduceFmtstr() % self.type(cellval)  # convert type on-the-fly
             if width and self.type in (int, float): cellval = cellval.rjust(width-1)
         except Exception as e:
             vd().exceptionCaught(status=False)
@@ -81,6 +80,12 @@ class VColumn:
             return 0
 
         return max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name))+2
+
+
+
+class ColumnAttr(Column):
+    def __init__(self, attrname, valtype):
+        super().__init__(attrname, type=valtype, func=lambda_getattr(attrname))
 
 
 ### common column setups and helpers
@@ -124,7 +129,7 @@ def evalCol(sheet, col, row):
 
 def ColumnExpr(sheet, expr):
     if expr:
-        vc = VColumn(expr)
+        vc = Column(expr)
         vc.expr = expr
         vc.func = lambda r,newcol=vc,sheet=sheet: evalCol(sheet, newcol, r)
         return vc
@@ -137,7 +142,7 @@ def getTransformedValue(oldval, searchregex, replregex):
 
 def ColumnRegex(sheet, regex):
     if regex:
-        vc = VColumn(regex)
+        vc = Column(regex)
         vc.expr, vc.searchregex, vc.replregex = regex.split('/')   # TODO: better syntax
         vc.func = lambda r,newcol=vc,sheet=sheet: getTransformedValue(str(evalCol(sheet, newcol, r)), newcol.searchregex, newcol.replregex)
         return vc
@@ -147,17 +152,17 @@ def getPublicAttrs(obj):
 
 def PyobjColumns(exampleRow):
     'columns for each public attribute on an object'
-    return [VColumn(k, type(getattr(exampleRow, k)), lambda_getattr(k)) for k in getPublicAttrs(exampleRow)]
+    return [Column(k, type(getattr(exampleRow, k)), lambda_getattr(k)) for k in getPublicAttrs(exampleRow)]
 
 def ArrayColumns(n):
     'columns that display r[0]..r[n]'
-    return [VColumn('', anytype, lambda_col(colnum)) for colnum in range(n)]
+    return [Column('', anytype, lambda_col(colnum)) for colnum in range(n)]
 
 def ArrayNamedColumns(columns):
     'columns is a list of column names, mapping to r[0]..r[n]'
-    return [VColumn(colname, anytype, lambda_col(i)) for i, colname in enumerate(columns)]
+    return [Column(colname, anytype, lambda_col(i)) for i, colname in enumerate(columns)]
 
 def AttrColumns(colnames):
     'colnames is list of attribute names'
-    return [VColumn(name, anytype, lambda_getattr(name)) for name in colnames]
+    return [Column(name, anytype, lambda_getattr(name)) for name in colnames]
 

@@ -3,7 +3,7 @@ import functools
 
 from . import colors, options, date, anytype, WrongTypeStr, CalcErrorStr
 from .tui import draw_clip
-from .Column import VColumn
+from .Column import Column
 
 base_commands = collections.OrderedDict()
 
@@ -136,7 +136,7 @@ class VSheet:
         self.cursorVisibleColIndex += n
 
     def cellValue(self, rownum, col):
-        if not isinstance(col, VColumn):
+        if not isinstance(col, Column):
             # assume it's the column number
             col = self.columns[col]
         return col.getValue(self.rows[rownum])

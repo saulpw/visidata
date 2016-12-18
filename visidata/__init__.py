@@ -65,7 +65,7 @@ def status(s):
 from visidata.tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException, wrapper, colors, draw_clip
 from visidata.date import date
 from .VSheet import VSheet, base_commands
-from .Column import VColumn, AttrColumns, PyobjColumns, ArrayColumns, ArrayNamedColumns
+from .Column import Column, ColumnAttr, AttrColumns, PyobjColumns, ArrayColumns, ArrayNamedColumns
 
 
 initialStatus = 'saul.pw/VisiData v' + __version__
@@ -229,7 +229,7 @@ def setup_sheet_commands():
     command(Key.BTAB, 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheet stack')
 
 # when used with 'g' prefix
-    global_command(Key('q'), 'vd.sheets.clear()', 'pop all sheets (clean exit)')
+    global_command(Key('q'), 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
     global_command(Key('h'), 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go to leftmost column')
     global_command(Key('k'), 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go to top row')
@@ -413,10 +413,10 @@ class VSheetList(VSheet):
         if columns:
             self.columns = AttrColumns(columns)
         elif isinstance(obj[0], dict):  # list of dict
-            self.columns = [VColumn(k, type(obj[0][k]), lambda_colname(k)) for k in obj[0].keys()]
+            self.columns = [Column(k, type(obj[0][k]), lambda_colname(k)) for k in obj[0].keys()]
             self.nKeys = 1
         else:
-            self.columns = [VColumn(name)]
+            self.columns = [Column(name)]
         self.command(Key.ENTER, 'pushPyObjSheet("%s[%s]" % (sheet.name, sheet.cursorRowIndex), sheet.cursorRow).cursorRowIndex = sheet.cursorColIndex', 'dive into this row')
 
 class VSheetDict(VSheet):
@@ -424,8 +424,8 @@ class VSheetDict(VSheet):
         super().__init__(name, mapping)
         self.rows = list(list(x) for x in mapping.items())
         self.columns = [
-            VColumn('key', str, lambda_col(0)),
-            VColumn('value', anytype, lambda_col(1)) ]
+            Column('key', str, lambda_col(0)),
+            Column('value', anytype, lambda_col(1)) ]
         self.nKeys = 1
         self.command(Key.ENTER, 'if sheet.cursorColIndex == 1: pushPyObjSheet(sheet.name + options.SubsheetSep + sheet.cursorRow[0], sheet.cursorRow[1])', 'dive into this value')
         self.command(Key('e'), 'sheet.source[sheet.cursorRow[0]] = sheet.cursorRow[1] = sheet.editCell(1)', 'edit this value')
@@ -441,8 +441,8 @@ class VSheetObject(VSheet):
         valfunc = lambda_col(1)
         valfunc.setter = lambda r,v,obj=self.source: setattr(obj, r[0], v)
         self.columns = [
-            VColumn(type(self.source).__name__ + '_attr', str, lambda_col(0)),
-            VColumn('value', anytype, valfunc) ]
+            Column(type(self.source).__name__ + '_attr', str, lambda_col(0)),
+            Column('value', anytype, valfunc) ]
         self.nKeys = 1
         self.rows = [(k, getattr(self.source, k)) for k in dir(self.source)]
 
@@ -451,9 +451,9 @@ class VSheetObject(VSheet):
 def CommandHelp(sheet):
     vs = VSheet(sheet.name + '_help', sheet)
     vs.rows = list(sheet.commands.items())
-    vs.columns = [VColumn('key', str, lambda r: r[0][0] + keyname(r[0][1])),
-        VColumn('action', str, lambda r: r[1][1]),
-        VColumn('global_action', str, lambda r,sheet=sheet: sheet.commands.get(('g', r[0][1]), ('', '-'))[1])
+    vs.columns = [Column('key', str, lambda r: r[0][0] + keyname(r[0][1])),
+        Column('action', str, lambda r: r[1][1]),
+        Column('global_action', str, lambda r,sheet=sheet: sheet.commands.get(('g', r[0][1]), ('', '-'))[1])
     ]
     return vs
 
@@ -490,21 +490,21 @@ class VSheetColumns(VSheet):
         self.rows = self.source.columns
         self.nKeys = 1
         self.columns = [
-            VColumn('column',   str, lambda_getattr('name')),
-            VColumn('width',  int, lambda_getattr('width')),
-            VColumn('type',   str, lambda r: r.type.__name__),
-            VColumn('fmtstr', str, lambda_getattr('_fmtstr')),
-            VColumn('expr',   str, lambda_getattr('expr')),
-            VColumn('value',  anytype, lambda c,sheet=sheet: c.getValue(sheet.cursorRow)),
-#            VColumn('nulls',  int, lambda c,sheet=sheet: c.nEmpty(sheet.rows)),
+            ColumnAttr('name', str),
+            ColumnAttr('width', str),
+            Column('type',   str, lambda r: r.type.__name__),
+            ColumnAttr('fmtstr', str),
+            ColumnAttr('expr', str),
+            Column('value',  anytype, lambda c,sheet=self.source: c.getValue(sheet.cursorRow)),
+#            Column('nulls',  int, lambda c,sheet=sheet: c.nEmpty(sheet.rows)),
 
-#            VColumn('uniques',  int, lambda c,sheet=sheet: len(set(c.values(sheet.rows))), width=0),
-#            VColumn('mode',   anytype, lambda c: statistics.mode(c.values(sheet.rows)), width=0),
-#            VColumn('min',    anytype, lambda c: min(c.values(sheet.rows)), width=0),
-#            VColumn('median', anytype, lambda c: statistics.median(c.values(sheet.rows)), width=0),
-#            VColumn('mean',   float, lambda c: statistics.mean(c.values(sheet.rows)), width=0),
-#            VColumn('max',    anytype, lambda c: max(c.values(sheet.rows)), width=0),
-#            VColumn('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
+#            Column('uniques',  int, lambda c,sheet=sheet: len(set(c.values(sheet.rows))), width=0),
+#            Column('mode',   anytype, lambda c: statistics.mode(c.values(sheet.rows)), width=0),
+#            Column('min',    anytype, lambda c: min(c.values(sheet.rows)), width=0),
+#            Column('median', anytype, lambda c: statistics.median(c.values(sheet.rows)), width=0),
+#            Column('mean',   float, lambda c: statistics.mean(c.values(sheet.rows)), width=0),
+#            Column('max',    anytype, lambda c: max(c.values(sheet.rows)), width=0),
+#            Column('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
             ]
 
 #### slicing and dicing
@@ -521,7 +521,7 @@ class VSheetJoin(VSheet):
         self.columns = []
         for colnum in range(sheets[0].nKeys):
             c = sheets[0].columns[colnum]
-            self.columns.append(VColumn(c.name, c.type, lambda_subrow_wrap(lambda_col(colnum), 0)))
+            self.columns.append(Column(c.name, c.type, lambda_subrow_wrap(lambda_col(colnum), 0)))
         self.nKeys = sheets[0].nKeys
 
         rowsBySheetKey = {}
@@ -535,7 +535,7 @@ class VSheetJoin(VSheet):
 
         for sheetnum, vs in enumerate(sheets):
             # subsequent elements are the rows from each source, in order of the source sheets
-            self.columns.extend(VColumn(c.name, c.type, lambda_subrow_wrap(c.func, sheetnum+1), c.width) for c in vs.columns[vs.nKeys:])
+            self.columns.extend(Column(c.name, c.type, lambda_subrow_wrap(c.func, sheetnum+1), c.width) for c in vs.columns[vs.nKeys:])
             for r in vs.rows:
                 key = tuple(c.getValue(r) for c in vs.keyCols)
                 if key not in rowsByKey:
@@ -567,10 +567,10 @@ class VSheetFreqTable(VSheet):
         self.largest = len(self.rows[0][1])+1
 
         self.columns = [
-            VColumn(self.origCol.name, self.origCol.type, lambda_col(0)),
-            VColumn('num', int, lambda r: len(r[1])),
-            VColumn('percent', float, lambda r: len(r[1])*100/sheet.source.nRows),
-            VColumn('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
+            Column(self.origCol.name, self.origCol.type, lambda_col(0)),
+            Column('num', int, lambda r: len(r[1])),
+            Column('percent', float, lambda r: len(r[1])*100/sheet.source.nRows),
+            Column('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
         self.nKeys = 1
 
@@ -628,7 +628,7 @@ def open_source(p):
 class VSheetText(VSheet):
     def __init__(self, name, content, src=None):
         super().__init__(name, src)
-        self.columns = [VColumn(name, str)]
+        self.columns = [Column(name, str)]
         if isinstance(content, list):
             self.rows = content
         elif isinstance(content, str):
@@ -639,10 +639,10 @@ class VSheetText(VSheet):
 class VSheetDirectory(VSheet):
     def __init__(self, p):
         super().__init__(p.name, p)
-        self.columns = [VColumn('filename', str, lambda r: r[0].name),
-                        VColumn('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
-                        VColumn('size', int, lambda r: r[1].st_size),
-                        VColumn('mtime', date, lambda r: r[1].st_mtime)]
+        self.columns = [Column('filename', str, lambda r: r[0].name),
+                        Column('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
+                        Column('size', int, lambda r: r[1].st_size),
+                        Column('mtime', date, lambda r: r[1].st_mtime)]
         self.command(Key.ENTER, 'open_source(sheet.cursorRow[0])', 'open file')  # path, filename
         self.reload()
 
@@ -699,7 +699,7 @@ class open_xlsx(VSheet):
         import openpyxl
         self.workbook = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
         self.rows = list(self.workbook.sheetnames)
-        self.columns = [VColumn('name', str)]
+        self.columns = [Column('name', str)]
         self.command(Key.ENTER, 'vd.push(sheet.getSheet(sheet.cursorRow))', 'open this sheet')
 
     def getSheet(self, sheetname):
@@ -722,16 +722,16 @@ class VSheetH5Obj(VSheet):
         if isinstance(self.hobj, h5py.Group):
             self.rows = [ self.hobj[objname] for objname in self.hobj.keys() ]
             self.columns = [
-                VColumn(self.hobj.name, str, lambda r: r.name.split('/')[-1]),
-                VColumn('type', str, lambda r: type(r).__name__),
-                VColumn('nItems', int, lambda r: len(r)),
+                Column(self.hobj.name, str, lambda r: r.name.split('/')[-1]),
+                Column('type', str, lambda r: type(r).__name__),
+                Column('nItems', int, lambda r: len(r)),
             ]
             self.command(Key.ENTER, 'vd.push(VSheetH5Obj(sheet.name+options.SubsheetSep+sheet.cursorRow.name, sheet.cursorRow, sheet.source))', 'open this group or dataset')
             self.command(Key('A'), 'vd.push(VSheetDict(sheet.cursorRow.name + "_attrs", sheet.cursorRow.attrs))', 'open metadata sheet for this object')
         elif isinstance(self.hobj, h5py.Dataset):
             if len(self.hobj.shape) == 1:
                 self.rows = self.hobj[:]  # copy
-                self.columns = [VColumn(colname, str, lambda_colname(colname)) for colname in self.hobj.dtype.names]
+                self.columns = [Column(colname, str, lambda_colname(colname)) for colname in self.hobj.dtype.names]
             elif len(self.hobj.shape) == 2:  # matrix
                 self.rows = self.hobj[:]  # copy
                 self.columns = ArrayColumns(self.hobj.shape[1])
@@ -812,9 +812,9 @@ def open_gspreadsheet(p):
     sheets = google_sheets()
     sheet_md = sheets.get(spreadsheetId=p.name).execute()
     vs = VSheet(sheet_md['properties']['title'], p)
-    vs.columns = [VColumn('title', lambda_eval('properties.title')),
-                  VColumn('rowCount', lambda_eval('properties.gridProperties.rowCount')),
-                  VColumn('columnCount', lambda_eval('properties.gridProperties.columnCount'))]
+    vs.columns = [Column('title', lambda_eval('properties.title')),
+                  Column('rowCount', lambda_eval('properties.gridProperties.rowCount')),
+                  Column('columnCount', lambda_eval('properties.gridProperties.columnCount'))]
     vs.rows = sheet_md['sheets']
     vs.command(Key.ENTER, 'sheet.cursorRow')
     return vs
@@ -824,9 +824,9 @@ def open_gsheet(p):
     sheet = sheets.values().get(spreadsheetId=p.name).execute()
     pushPyObjSheet(p.name, sheet, p)
 #    vs = VSheet(sheet_md['properties']['title'], p)
-#    vs.columns = [VColumn('title', lambda_eval('properties.title')),
-#                  VColumn('rowCount', lambda_eval('properties.gridProperties.rowCount')),
-#                  VColumn('columnCount', lambda_eval('properties.gridProperties.columnCount'))]
+#    vs.columns = [Column('title', lambda_eval('properties.title')),
+#                  Column('rowCount', lambda_eval('properties.gridProperties.rowCount')),
+#                  Column('columnCount', lambda_eval('properties.gridProperties.columnCount'))]
 #    vs.rows = sheet_md['sheets']
 #    vs.command(Key.ENTER, 'sheet.cursorRow')
 #    return vs
