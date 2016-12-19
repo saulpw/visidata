@@ -1,4 +1,4 @@
-from . import anytype, vd, options, WrongTypeStr, CalcErrorStr
+from . import anytype, vd, options, WrongTypeStr, CalcErrorStr, error
 
 class Column:
     def __init__(self, name, type=anytype, func=lambda r: r, width=None):
@@ -88,6 +88,18 @@ class ColumnAttr(Column):
         super().__init__(attrname, type=valtype, func=lambda_getattr(attrname))
 
 
+class ColumnSourceAttr(Column):
+    'row is an attrname; this column getattr and setattr on the sheet source'
+    def __init__(self, name, source):
+        valfunc = lambda r,obj=source: getattr(obj, r)
+        valfunc.setter = lambda r,v,obj=source: setattr(obj, r, v)
+        super().__init__(name, func=valfunc)
+
+
+class ColumnItem(Column):
+    def __init__(self, attrname, itemkey, **kwargs):
+        super().__init__(attrname, func=lambda_getitem(itemkey), **kwargs)
+
 ### common column setups and helpers
 def setter(r, k, v):  # needed for use in lambda
     r[k] = v
@@ -97,7 +109,7 @@ def lambda_colname(colname):
     func.setter = lambda r,v,b=colname: setter(r,b,v)
     return func
 
-def lambda_col(b):
+def lambda_getitem(b):
     func = lambda r,b=b: r[b]
     func.setter = lambda r,v,b=b: setter(r,b,v)
     return func
@@ -156,11 +168,11 @@ def PyobjColumns(exampleRow):
 
 def ArrayColumns(n):
     'columns that display r[0]..r[n]'
-    return [Column('', anytype, lambda_col(colnum)) for colnum in range(n)]
+    return [Column('', anytype, lambda_getitem(colnum)) for colnum in range(n)]
 
 def ArrayNamedColumns(columns):
     'columns is a list of column names, mapping to r[0]..r[n]'
-    return [Column(colname, anytype, lambda_col(i)) for i, colname in enumerate(columns)]
+    return [Column(colname, anytype, lambda_getitem(i)) for i, colname in enumerate(columns)]
 
 def AttrColumns(colnames):
     'colnames is list of attribute names'

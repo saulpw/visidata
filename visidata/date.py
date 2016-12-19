@@ -1,8 +1,10 @@
 import datetime
 
 class date:
-    def __init__(self, s):
-        if isinstance(s, int) or isinstance(s, float):
+    def __init__(self, s=None):
+        if s is None:
+            self.dt = datetime.datetime.now()
+        elif isinstance(s, int) or isinstance(s, float):
             self.dt = datetime.datetime.fromtimestamp(s)
         elif isinstance(s, str):
             import dateutil.parser

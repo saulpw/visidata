@@ -61,27 +61,39 @@ def vd():
 def status(s):
     return vd().status(s)
 
+def error(s):
+    raise Exception(s)
+
+def moveListItem(L, fromidx, toidx):
+    r = L.pop(fromidx)
+    L.insert(toidx, r)
+    return toidx
+
 
 from visidata.tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException, wrapper, colors, draw_clip
 from visidata.date import date
 from .Sheet import Sheet, base_commands
-from .Column import Column, ColumnAttr, AttrColumns, PyobjColumns, ArrayColumns, ArrayNamedColumns
+from .Column import Column, ColumnAttr, ColumnSourceAttr, ColumnItem, ColumnExpr, ColumnRegex
+from .Column import AttrColumns, PyobjColumns, ArrayColumns, ArrayNamedColumns
 
 
 initialStatus = 'saul.pw/VisiData v' + __version__
+
+# A .. Z AA AB ...
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
-scr = None   # toplevel curses screen
-
+sheet = None
 windowWidth = None
 windowHeight = None
+
+def set_sheet(s):
+    'for tests'
+    global sheet
+    sheet = s
 
 
 class CommandPrefixException(Exception):
     pass
-
-def error(s):
-    raise Exception(s)
 
 def setup_sheet_commands():
     def command(ch, cmdstr, helpstr):
@@ -148,20 +160,20 @@ def setup_sheet_commands():
     command(Key.DOWN,  'cursorDown(+1)', 'go one row down')
     command(Key.UP,    'cursorDown(-1)', 'go one row up')
     command(Key.RIGHT, 'cursorRight(+1)', 'go one column right')
-    command(Key.NPAGE, 'cursorDown(nVisibleRows); topRowIndex += nVisibleRows', 'scroll one page down')
-    command(Key.PPAGE, 'cursorDown(-nVisibleRows); topRowIndex -= nVisibleRows', 'scroll one page up')
-    command(Key.HOME,  'topRowIndex = cursorRowIndex = 0', 'go to top row')
-    command(Key.END,   'cursorRowIndex = len(rows)-1', 'go to last row')
+    command(Key.NPAGE, 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows', 'scroll one page down')
+    command(Key.PPAGE, 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page up')
+    command(Key.HOME,  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
+    command(Key.END,   'sheet.cursorRowIndex = len(rows)-1', 'go to last row')
 
     command(Key('h'), 'cursorRight(-1)', 'go one column left')
     command(Key('j'), 'cursorDown(+1)', 'go one row down')
     command(Key('k'), 'cursorDown(-1)', 'go one row up')
     command(Key('l'), 'cursorRight(+1)', 'go one column right')
 
-    command(Shift.H, 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); cursorVisibleColIndex -= 1', 'move this column one left')
-    command(Shift.J, 'cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
-    command(Shift.K, 'cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
-    command(Shift.L, 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); cursorVisibleColIndex += 1', 'move this column one right')
+    command(Shift.H, 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
+    command(Shift.J, 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
+    command(Shift.K, 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
+    command(Shift.L, 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
 
     command(Ctrl.G, 'status(statusLine)', 'show this sheet info')
     command(Ctrl.P, 'status(vd.statusHistory[0])', 'show previous status line again')
@@ -185,8 +197,8 @@ def setup_sheet_commands():
     command(Key('%'), 'cursorCol.type = float', 'set column type to float')
     command(Key('~'), 'cursorCol.type = detectType(cursorValue)', 'autodetect type of column by its data')
 
-    command(Key('['), 'rows = sorted(rows, key=lambda r: cursorCol.getValue(r))', 'sort by this column ascending')
-    command(Key(']'), 'rows = sorted(rows, key=lambda r: cursorCol.getValue(r), reverse=True)', 'sort by this column descending')
+    command(Key('['), 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r))', 'sort by this column ascending')
+    command(Key(']'), 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r), reverse=True)', 'sort by this column descending')
     command(Ctrl.E, 'options.debug = True; error(vd.lastErrors[-1])', 'abort and print last error to terminal')
     command(Ctrl.D, 'options.debug = not options.debug; status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug mode')
 
@@ -209,18 +221,18 @@ def setup_sheet_commands():
     command(Key(' '), 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
     command(Key('s'), 'select([cursorRow]); cursorDown(1)', 'select this row')
     command(Key('u'), 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
-    command(Key('|'), 'select(rows[r] for r in searchRegex(inputLine(prompt="|"), columns=[cursorCol]))', 'select rows by regex in this column')
-    command(Key('\\'), 'unselect(rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=[cursorCol]))', 'unselect rows by regex in this column')
+    command(Key('|'), 'select(sheet.rows[r] for r in searchRegex(inputLine(prompt="|"), columns=[cursorCol]))', 'select rows by regex in this column')
+    command(Key('\\'), 'unselect(sheet.rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=[cursorCol]))', 'unselect rows by regex in this column')
 
-    command(Shift.R, 'source.type = inputLine("change type to: ", value=initialsource.type)', 'set source type of this sheet')
-    command(Ctrl.R, 'open_source(vd.sheets.pop(0).source); status("reloaded")', 'reload sheet from source')
+    command(Shift.R, 'sheet.filetype = inputLine("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
+    command(Ctrl.R, 'open_source(source, sheet.filetype); status("reloaded")', 'reload sheet from source')
     command(Ctrl.S, 'saveSheet(sheet, inputLine("save to: "))', 'save this sheet to new file')
     command(Key('o'), 'open_source(inputLine("open: "))', 'open local file or url')
-    command(Ctrl.O, 'expr = inputLine("eval: "); pushPyObjSheet(expr, eval(expr))', 'eval Python expression and open the result')
+    command(Ctrl.O, 'expr = inputLine("eval: "); openPyObjSheet(expr, eval(expr))', 'eval Python expression and open the result')
 
     command(Key('e'), 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex))', 'edit this cell')
-    command(Key('c'), 'cursorVisibleColIndex = findColIdx(inputLine("goto column name: "), visibleCols)', 'goto visible column by name')
-    command(Key('r'), 'cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
+    command(Key('c'), 'sheet.cursorVisibleColIndex = findColIdx(inputLine("goto column name: "), visibleCols)', 'goto visible column by name')
+    command(Key('r'), 'sheet.cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
 
     command(Key('='), 'addColumn(ColumnExpr(sheet, inputLine("new column expr=")), index=cursorColIndex+1)', 'add column by expr')
     command(Key(':'), 'addColumn(ColumnRegex(sheet, inputLine("new column regex:")), index=cursorColIndex+1)', 'add column by regex')
@@ -231,10 +243,10 @@ def setup_sheet_commands():
 # when used with 'g' prefix
     global_command(Key('q'), 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
-    global_command(Key('h'), 'cursorVisibleColIndex = leftVisibleColIndex = 0', 'go to leftmost column')
-    global_command(Key('k'), 'cursorRowIndex = topRowIndex = 0', 'go to top row')
-    global_command(Key('j'), 'cursorRowIndex = len(rows); topRowIndex = cursorRowIndex-nVisibleRows', 'go to bottom row')
-    global_command(Key('l'), 'cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmost column')
+    global_command(Key('h'), 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go to leftmost column')
+    global_command(Key('k'), 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go to top row')
+    global_command(Key('j'), 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'go to bottom row')
+    global_command(Key('l'), 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmost column')
 
     global_command(Shift.H, 'moveListItem(columns, cursorColIndex, 0)', 'move this column all the way to the left')
     global_command(Shift.J, 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
@@ -249,17 +261,17 @@ def setup_sheet_commands():
 
     global_command(Key('/'), 'searchRegex(inputLine(prompt="/"), moveCursor=True, columns=visibleCols)', 'search regex forward in all visible columns')
     global_command(Key('?'), 'searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
-    global_command(Key('n'), 'cursorRowIndex = max(searchRegex())', 'go to first match')
-    global_command(Key('p'), 'cursorRowIndex = min(searchRegex())', 'go to last match')
+    global_command(Key('n'), 'sheet.cursorRowIndex = max(searchRegex() or [cursorRowIndex])', 'go to first match')
+    global_command(Key('p'), 'sheet.cursorRowIndex = min(searchRegex() or [cursorRowIndex])', 'go to last match')
 
     global_command(Key(' '), 'toggle(rows)', 'toggle select of all rows')
     global_command(Key('s'), 'select(rows)', 'select all rows')
-    global_command(Key('u'), '_selectedRows = {}', 'unselect all rows')
+    global_command(Key('u'), '_selectedRows.clear()', 'unselect all rows')
 
-    global_command(Key('|'), 'select(rows[r] for r in searchRegex(inputLine(prompt="|"), columns=visibleCols))', 'select rows by regex in all visible columns')
-    global_command(Key('\\'), 'unselect(rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex in all visible columns')
+    global_command(Key('|'), 'select(sheet.rows[r] for r in searchRegex(inputLine(prompt="|"), columns=visibleCols))', 'select rows by regex in all visible columns')
+    global_command(Key('\\'), 'unselect(sheet.rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex in all visible columns')
 
-    global_command(Key('d'), 'rows = [r for r in rows if not isSelected(r)]; _selectedRows = {}', 'delete all selected rows')
+    global_command(Key('d'), 'sheet.rows = [r for r in sheet.rows if not sheet.isSelected(r)]; _selectedRows.clear()', 'delete all selected rows')
 
     global_command(Ctrl.P, 'vd.push(SheetText("statuses", vd.statusHistory))', 'open last 100 statuses')
 
@@ -269,11 +281,6 @@ def setup_sheet_commands():
 # end setup_sheet_commands
 
 ### VisiData core
-
-def moveListItem(L, fromidx, toidx):
-    r = L.pop(fromidx)
-    L.insert(toidx, r)
-    return toidx
 
 def detectType(v):
     def tryType(T, v):
@@ -302,7 +309,7 @@ class VisiData:
         return s
 
     def editText(self, y, x, w, **kwargs):
-        v = editText(scr, y, x, w, **kwargs)
+        v = edit_text(self.scr, y, x, w, **kwargs)
         self.status('"%s"' % v)
         return v
 
@@ -315,20 +322,22 @@ class VisiData:
         if options.debug:
             raise
 
-    def drawLeftStatus(self, scr, sheet):
+    def drawLeftStatus(self, sheet):
         'draws sheet info on last line, including previous status messages, which are then cleared.'
         attr = colors[options.c_StatusLine]
         statusstr = options.SheetNameFmt % sheet.name + options.ch_StatusSep.join(self._status)
-        draw_clip(scr, windowHeight-1, 0, statusstr, attr, windowWidth)
+        draw_clip(self.scr, windowHeight-1, 0, statusstr, attr, windowWidth)
         self._status = []
 
-    def drawRightStatus(self, scr, prefixes, ch):
+    def drawRightStatus(self, prefixes, ch):
         rstat = "%s" % (keyname(ch))  # (chr(ch) if chr(ch).isprintable() else keyname(ch)
-        draw_clip(scr, windowHeight-1, windowWidth-len(rstat)-2, rstat, colors[options.c_StatusLine])
+        draw_clip(self.scr, windowHeight-1, windowWidth-len(rstat)-2, rstat, colors[options.c_StatusLine])
 
-    def run(self):
-        global windowHeight, windowWidth
+    def run(self, scr):
+        global windowHeight, windowWidth, sheet
         windowHeight, windowWidth = scr.getmaxyx()
+        self.scr = scr
+
         ch = 32
 
         command_overrides = None
@@ -347,14 +356,14 @@ class VisiData:
             except Exception as e:
                 self.exceptionCaught()
 
-            self.drawLeftStatus(scr, sheet)
+            self.drawLeftStatus(sheet)
 
-            self.drawRightStatus(scr, prefixes, ch)  # visible for this getch
+            self.drawRightStatus(prefixes, ch)  # visible for this getch
 
             curses.doupdate()
             ch = scr.getch()
 
-            self.drawRightStatus(scr, prefixes, ch)  # visible for commands that wait with getch
+            self.drawRightStatus(prefixes, ch)  # visible for commands that wait with getch
 
             if ch == curses.KEY_RESIZE:
                 windowHeight, windowWidth = scr.getmaxyx()
@@ -394,7 +403,7 @@ class VisiData:
 
 ### sheet layouts
 #### generic list/dict/object browsing
-def pushPyObjSheet(name, pyobj, src=None):
+def openPyObjSheet(name, pyobj, src=None):
     if isinstance(pyobj, list):
         return vd().push(SheetList(name, pyobj, src=src))
     elif isinstance(pyobj, dict):
@@ -417,34 +426,32 @@ class SheetList(Sheet):
             self.nKeys = 1
         else:
             self.columns = [Column(name)]
-        self.command(Key.ENTER, 'pushPyObjSheet("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
+        self.command(Key.ENTER, 'openPyObjSheet("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
 
 class SheetDict(Sheet):
     def __init__(self, name, mapping):
         super().__init__(name, mapping)
         self.rows = list(list(x) for x in mapping.items())
-        self.columns = [
-            Column('key', str, lambda_col(0)),
-            Column('value', anytype, lambda_col(1)) ]
+        self.columns = [ ColumnItem('key', 0), ColumnItem('value', 1) ]
         self.nKeys = 1
-        self.command(Key.ENTER, 'if cursorColIndex == 1: pushPyObjSheet(name + options.SubsheetSep + cursorRow[0], cursorRow[1])', 'dive into this value')
+        self.command(Key.ENTER, 'if cursorColIndex == 1: openPyObjSheet(name + options.SubsheetSep + cursorRow[0], cursorRow[1])', 'dive into this value')
         self.command(Key('e'), 'source[cursorRow[0]] = cursorRow[1] = editCell(1)', 'edit this value')
+
 
 class SheetObject(Sheet):
     def __init__(self, name, obj):
         super().__init__(name, obj)
-        self.command(Key.ENTER, 'pushPyObjSheet(name + options.SubsheetSep + cursorRow[0], cursorRow[1]() if callable(cursorRow[1]) else cursorRow[1])', 'dive into this value')
-        self.command(Key('e'), 'setattr(source, cursorRow[0], editCell(1)); reload()', 'edit this value')
+        self.command(Key.ENTER, 'v = getattr(source, cursorRow); openPyObjSheet(name + options.SubsheetSep + cursorRow, v() if callable(v) else v)', 'dive into this value')
+        self.command(Key('e'), 'setattr(source, cursorRow, editCell(1)); reload()', 'edit this value')
         self.reload()
 
     def reload(self):
-        valfunc = lambda_col(1)
-        valfunc.setter = lambda r,v,obj=self.source: setattr(obj, r[0], v)
         self.columns = [
-            Column(type(self.source).__name__ + '_attr', str, lambda_col(0)),
-            Column('value', anytype, valfunc) ]
+            Column(type(self.source).__name__ + '_attr'),
+            ColumnSourceAttr('value', self.source)
+        ]
         self.nKeys = 1
-        self.rows = [(k, getattr(self.source, k)) for k in dir(self.source)]
+        self.rows = dir(self.source)
 
 #### specialized meta sheets
 @functools.lru_cache()
@@ -566,9 +573,9 @@ class SheetFreqTable(Sheet):
         self.largest = len(self.rows[0][1])+1
 
         self.columns = [
-            Column(self.origCol.name, self.origCol.type, lambda_col(0)),
+            ColumnItem(self.origCol.name, 0, type=self.origCol.type),
             Column('num', int, lambda r: len(r[1])),
-            Column('percent', float, lambda r: len(r[1])*100/sheet.source.nRows),
+            Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
             Column('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
         self.nKeys = 1
@@ -589,7 +596,8 @@ class Path:
         self.name = os.path.split(fqpn)[-1]
         self.suffix = os.path.splitext(self.name)[1][1:]
     def read_text(self):
-        return open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors).read()
+        with open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors) as fp:
+            return fp.read()
     def is_dir(self):
         return os.path.isdir(self.resolve())
     def iterdir(self):
@@ -609,16 +617,28 @@ def getTextContents(p):
         sourceCache[p] = p.read_text()
     return sourceCache[p]
 
-def open_source(p):
+def open_source(p, filetype=None):
     if isinstance(p, Path):
+        if filetype is None:
+            filetype = p.suffix
+
         if p.is_dir():
             vs = SheetDirectory(p)
         else:
-            vs = globals().get('open_' + p.suffix, open_txt)(p)
-    elif '://' in p:
-        vs = openUrl(p)
-    else:
-        return open_source(Path(p))
+            openfunc = 'open_' + filetype
+            if openfunc not in globals():
+                openfunc = 'open_txt'
+                status('no %s function' % openfunc)
+            vs = globals()[openfunc](p)
+    elif isinstance(p, str):
+        if '://' in p:
+            vs = openUrl(p)
+        else:
+            return open_source(Path(p), filetype)
+    else:  # some other object
+        status('unknown object type %s' % type(p))
+        vs = None
+
     if vs:
         status('opened %s' % p.name)
     if isinstance(vs, Sheet):
@@ -689,7 +709,7 @@ class open_tsv(Sheet):
 
 def open_json(p):
     import json
-    pushPyObjSheet(p.name, json.loads(getTextContents(p)))
+    openPyObjSheet(p.name, json.loads(getTextContents(p)))
 
 #### .xlsx
 class open_xlsx(Sheet):
@@ -821,7 +841,7 @@ def open_gspreadsheet(p):
 def open_gsheet(p):
     sheets = google_sheets()
     sheet = sheets.values().get(spreadsheetId=p.name).execute()
-    pushPyObjSheet(p.name, sheet, p)
+    openPyObjSheet(p.name, sheet, p)
 #    vs = Sheet(sheet_md['properties']['title'], p)
 #    vs.columns = [Column('title', lambda_eval('properties.title')),
 #                  Column('rowCount', lambda_eval('properties.gridProperties.rowCount')),
@@ -868,6 +888,8 @@ def save_csv(sheet, fn):
 
 def inputLine(prompt, value=''):
     'add a prompt to the bottom of the screen and get a line of input from the user'
+    scr = vd().scr
+    windowHeight, windowWidth = scr.getmaxyx()
     scr.addstr(windowHeight-1, 0, prompt)
     return vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable)
 
@@ -879,11 +901,8 @@ def run():
         print(ret)
 
 def curses_main(_scr):
-    global scr
-    scr = _scr
-
     try:
-        return vd().run()
+        return vd().run(_scr)
     except Exception as e:
         if options.debug:
             raise

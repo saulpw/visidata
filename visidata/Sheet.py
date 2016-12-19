@@ -1,8 +1,9 @@
 import collections
 import functools
+import re
 
 import visidata
-from . import colors, options, date, anytype, WrongTypeStr, CalcErrorStr, vd
+from . import colors, options, status, error, date, anytype, WrongTypeStr, CalcErrorStr, vd, moveListItem
 from .tui import draw_clip
 from .Column import Column
 
@@ -11,6 +12,7 @@ base_commands = collections.OrderedDict()
 class Sheet:
     def __init__(self, name, src=None):
         self.name = name
+        self.filetype = None
         self.source = src
         self.rows = []
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
@@ -339,7 +341,7 @@ class Sheet:
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.ch_Ellipsis)] + options.ch_Ellipsis
         self.clipdraw(0, x, N, hdrattr, colwidth)
-        self.clipdraw(0, x+colwidth-1, T, hdrattr, 1)
+        self.clipdraw(0, x+colwidth-len(T), T, hdrattr, len(T))
 
         if vcolidx == self.leftVisibleColIndex and vcolidx > self.nKeys:
             A = options.ch_LeftMore
@@ -393,9 +395,9 @@ class Sheet:
                     self.clipdraw(y, x, options.ch_ColumnFiller + cellval, attr, colwidth)
 
                     if isinstance(cellval, CalcErrorStr):
-                        self.clipdraw(y, x+colwidth-1, options.ch_Error, colors[options.c_Error])
+                        self.clipdraw(y, x+colwidth-len(options.ch_Error), options.ch_Error, colors[options.c_Error], len(options.ch_Error))
                     elif isinstance(cellval, WrongTypeStr):
-                        self.clipdraw(y, x+colwidth-1, options.ch_WrongType, colors[options.c_WrongType])
+                        self.clipdraw(y, x+colwidth-len(options.ch_WrongType), options.ch_WrongType, colors[options.c_WrongType], len(options.ch_WrongType))
 
                     if x+colwidth+len(sepchars) <= self.windowWidth:
                        self.scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])

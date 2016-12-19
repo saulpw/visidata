@@ -1,16 +1,17 @@
 
 import sys
+import collections
 import curses
 import curses.ascii
 
 from . import options
 
 
-colors = {
+colors = collections.defaultdict(lambda: curses.A_NORMAL, {
     'bold': curses.A_BOLD,
     'reverse': curses.A_REVERSE,
     'normal': curses.A_NORMAL,
-}
+})
 
 
 class EscapeException(Exception):
