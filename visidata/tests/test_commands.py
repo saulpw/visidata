@@ -9,7 +9,7 @@ import visidata.tui
 from visidata.tui import Key
 
 # test separately as needed
-expected_errors = [ '^E', 'g', '^R', '^^', 'gd', 'e', '^J' ]
+expected_errors = [ '^E', 'g', '^R', '^^', 'e', '^J' ]
 
 input_lines = { '^S': '/tmp/blah.csv',  # save to some tmp file
                  'o': '/tmp/blah.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
