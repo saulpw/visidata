@@ -203,7 +203,7 @@ def setup_sheet_commands():
 
     command(Shift.R, 'sheet.source.type = inputLine("change type to: ", value=initialsheet.source.type)', 'set source type of this sheet')
     command(Ctrl.R, 'openFileOrUrl(vd.sheets.pop(0).source); vd.status("reloaded")', 'reload sheet from source')
-    command(Ctrl.S, 'saveSheet(sheet, inputLine("save to: "))', 'save this sheet to new file')
+    command(Ctrl.S, 'saveSheet(sheet, inputLine("save to: ", fileInput=True))', 'save this sheet to new file')
     command(Key('o'), 'openFileOrUrl(inputLine("open: "))', 'open local file or url')
     command(Ctrl.O, 'expr = inputLine("eval: "); pushPyObjSheet(expr, eval(expr))', 'eval Python expression and open the result')
 
@@ -1455,7 +1455,15 @@ def keyname(ch):
     return curses.keyname(ch).decode('utf-8')
 
 
-def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.'):
+def filenameFill(fpath):
+    files = []
+    for li in os.scandir():
+        if li.is_file() and li.name.startswith(fpath):
+            files.append(li.name)
+    return sorted(files)[0] if files else fpath
+
+
+def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', fileInput=False):
     def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
         return v if i < 0 else v[:i] + s + v[i:]
     def clean(s):
@@ -1492,6 +1500,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         elif ch == Ctrl.T:                           v = delchar(splice(v, i-2, v[i-1]), i)
         elif ch == Ctrl.U:                           v = v[i:]; i = 0
         elif ch == Ctrl.V:                           v = splice(v, i, chr(scr.getch())); i += 1
+        elif fileInput and ch in (Ctrl.I, Key.TAB):  v = filenameFill(v); i = len(v)
         else:
             if insert_mode:
                 v = splice(v, i, chr(ch))
@@ -1506,10 +1515,12 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
     return v
 
 
-def inputLine(prompt, value=''):
-    'add a prompt to the bottom of the screen and get a line of input from the user'
+def inputLine(prompt, value='', fileInput=False):
+    """add a prompt to the bottom of the screen and get a line of input from the user
+        fileInput: for selecting file to save to
+    """
     scr.addstr(windowHeight-1, 0, prompt)
-    return vd.editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable)
+    return vd.editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable, fileInput=fileInput)
 
 
 nextColorPair = 1
