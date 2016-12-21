@@ -22,11 +22,10 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
-import itertools
+import os
 import os.path
 from copy import copy
 import io
-import string
 import collections
 import functools
 import statistics
@@ -72,15 +71,13 @@ def moveListItem(L, fromidx, toidx):
 
 from visidata.tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException, wrapper, colors, draw_clip
 from visidata.date import date
+from visidata.Path import Path
 from .Sheet import Sheet, base_commands
 from .Column import Column, ColumnAttr, ColumnSourceAttr, ColumnItem, ColumnExpr, ColumnRegex
 from .Column import AttrColumns, PyobjColumns, ArrayColumns, ArrayNamedColumns
 
 
 initialStatus = 'saul.pw/VisiData v' + __version__
-
-# A .. Z AA AB ...
-defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
 sheet = None
 windowWidth = None
@@ -91,15 +88,30 @@ def set_sheet(s):
     global sheet
     sheet = s
 
+class Command:
+    def __init__(self, prefixes, keystroke, execstr, helpstr):
+        self.prefixes = prefixes
+        self.keystroke = keystroke
+        self.execstr = execstr
+        self.helpstr = helpstr
 
 class CommandPrefixException(Exception):
     pass
+
+
+def load_commands():
+    syscmds = pkg_resources.resource_filename(__name__, 'commands.tsv')
+    usercmds = '~/.visidata.commands.tsv'
+
+    for fn in [syscmds, usercmds]:
+        vs = open_tsv(fn, )
+
 
 def setup_sheet_commands():
     def command(ch, cmdstr, helpstr):
         base_commands[('', ch)] = (cmdstr, helpstr)
     def global_command(ch, cmdstr, helpstr):
-        base_commands[('g', ch)] = (cmdstr, helpstr)
+        base_commands[('g', ch)] = (cmdstr, helpstr)  # Command('g', keyname(ch), cmdstr, helpstr)
     def option(name, default, helpstr=''):
         base_options[name] = default
 #        base_options[name] = (default, helpstr)
@@ -227,8 +239,8 @@ def setup_sheet_commands():
     command(Shift.R, 'sheet.filetype = inputLine("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
     command(Ctrl.R, 'open_source(source, sheet.filetype); status("reloaded")', 'reload sheet from source')
     command(Ctrl.S, 'saveSheet(sheet, inputLine("save to: "))', 'save this sheet to new file')
-    command(Key('o'), 'open_source(inputLine("open: "))', 'open local file or url')
-    command(Ctrl.O, 'expr = inputLine("eval: "); openPyObjSheet(expr, eval(expr))', 'eval Python expression and open the result')
+    command(Key('o'), 'open_source(inputFilename("open: "))', 'open local file or url')
+    command(Ctrl.O, 'expr = inputLine("eval: "); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 
     command(Key('e'), 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex))', 'edit this cell')
     command(Key('c'), 'sheet.cursorVisibleColIndex = findColIdx(inputLine("goto column name: "), visibleCols)', 'goto visible column by name')
@@ -276,7 +288,7 @@ def setup_sheet_commands():
     global_command(Ctrl.P, 'vd.push(SheetText("statuses", vd.statusHistory))', 'open last 100 statuses')
 
     # experimental commands
-    command(Key('"'), 'rows.insert(cursorRowIndex, copy(cursorRow))', 'insert duplicate of this row')
+    command(Key('"'), 'vd.push(vd.sheets[0].copy())', 'duplicate this sheet')
 
 # end setup_sheet_commands
 
@@ -299,6 +311,7 @@ class VisiData:
         self.statusHistory = []
         self._status = []
         self.status(initialStatus)
+        self.status('F1 opens command help')
         self.lastErrors = []
 
     def status(self, s):
@@ -403,13 +416,20 @@ class VisiData:
 
 ### sheet layouts
 #### generic list/dict/object browsing
-def openPyObjSheet(name, pyobj, src=None):
+def push_pyobj(name, pyobj, src=None):
+    vs = load_pyobj(name, pyobj, src)
+    if vs:
+        return v().push(vs)
+    else:
+        status('unknown type ' + type(pyobj))
+
+def load_pyobj(name, pyobj, src=None):
     if isinstance(pyobj, list):
-        return vd().push(SheetList(name, pyobj, src=src))
+        return SheetList(name, pyobj, src=src)
     elif isinstance(pyobj, dict):
-        return vd().push(SheetDict(name, pyobj))
+        return SheetDict(name, pyobj)
     elif isinstance(pyobj, object):
-        return vd().push(SheetObject(name, pyobj))
+        return SheetObject(name, pyobj)
     else:
         status('unknown type ' + type(pyobj))
 
@@ -426,7 +446,7 @@ class SheetList(Sheet):
             self.nKeys = 1
         else:
             self.columns = [Column(name)]
-        self.command(Key.ENTER, 'openPyObjSheet("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
+        self.command(Key.ENTER, 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
 
 class SheetDict(Sheet):
     def __init__(self, name, mapping):
@@ -434,14 +454,14 @@ class SheetDict(Sheet):
         self.rows = list(list(x) for x in mapping.items())
         self.columns = [ ColumnItem('key', 0), ColumnItem('value', 1) ]
         self.nKeys = 1
-        self.command(Key.ENTER, 'if cursorColIndex == 1: openPyObjSheet(name + options.SubsheetSep + cursorRow[0], cursorRow[1])', 'dive into this value')
+        self.command(Key.ENTER, 'if cursorColIndex == 1: push_pyobj(name + options.SubsheetSep + cursorRow[0], cursorRow[1])', 'dive into this value')
         self.command(Key('e'), 'source[cursorRow[0]] = cursorRow[1] = editCell(1)', 'edit this value')
 
 
 class SheetObject(Sheet):
     def __init__(self, name, obj):
         super().__init__(name, obj)
-        self.command(Key.ENTER, 'v = getattr(source, cursorRow); openPyObjSheet(name + options.SubsheetSep + cursorRow, v() if callable(v) else v)', 'dive into this value')
+        self.command(Key.ENTER, 'v = getattr(source, cursorRow); push_pyobj(name + options.SubsheetSep + cursorRow, v() if callable(v) else v)', 'dive into this value')
         self.command(Key('e'), 'setattr(source, cursorRow, editCell(1)); reload()', 'edit this value')
         self.reload()
 
@@ -583,38 +603,16 @@ class SheetFreqTable(Sheet):
         self.command(Key(' '), 'source.toggle(cursorRow[1])', 'toggle these entries')
         self.command(Key('s'), 'source.select(cursorRow[1])', 'select these entries')
         self.command(Key('u'), 'source.unselect(cursorRow[1])', 'unselect these entries')
-        self.command(Key.ENTER, 'vd.push(copy(source)).rows = values[str(columns[0].getValue(cursorRow))]', 'push new sheet with only this value')
+        self.command(Key.ENTER, 'vd.push(source.copy()).rows = values[str(columns[0].getValue(cursorRow))]', 'push new sheet with only this value')
 
 
 ### input formats and helpers
 
 sourceCache = {}
 
-class Path:
-    def __init__(self, fqpn):
-        self.fqpn = fqpn
-        self.name = os.path.split(fqpn)[-1]
-        self.suffix = os.path.splitext(self.name)[1][1:]
-    def read_text(self):
-        with open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors) as fp:
-            return fp.read()
-    def is_dir(self):
-        return os.path.isdir(self.resolve())
-    def iterdir(self):
-        return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
-    def stat(self):
-        return os.stat(self.resolve())
-    def resolve(self):
-        return os.path.expandvars(os.path.expanduser(self.fqpn))
-    @property
-    def parent(self):
-        return Path(self.fqpn + "/..")
-    def __str__(self):
-        return self.fqpn
-
 def getTextContents(p):
     if not p in sourceCache:
-        sourceCache[p] = p.read_text()
+        sourceCache[p] = p.read_text(encoding=options.encoding, errors=options.encoding_errors)
     return sourceCache[p]
 
 def open_source(p, filetype=None):
@@ -674,42 +672,50 @@ def open_txt(p):
         return open_tsv(p)  # TSV often have .txt extension
     return SheetText(p.name, contents, p)
 
-class open_csv(Sheet):
-    def __init__(self, p):
-        super().__init__(p.name, p)
-        contents = getTextContents(p)
+def open_csv(p):
+    contents = getTextContents(p)
+    if options.csv_dialect == 'sniff':
+        headers = contents[:1024]
+        dialect = csv.Sniffer().sniff(headers)
+        status('sniffed csv_dialect as %s' % dialect)
+    else:
+        dialect = options.csv_dialect
 
-        if options.csv_dialect == 'sniff':
-            headers = contents[:1024]
-            dialect = csv.Sniffer().sniff(headers)
-            status('sniffed csv_dialect as %s' % dialect)
-        else:
-            dialect = options.csv_dialect
+    return load_csv(Sheet(p.name, p), contents,
+                        header=options.csv_header,
+                        dialent=dialect,
+                        quotechar=options.csv_quotechar,
+                        delimiter=ptions.csv_delimiter)
 
-        rdr = csv.reader(io.StringIO(contents, newline=''), dialect=dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
-        self.rows = [r for r in rdr]
-        if options.csv_header:
-            self.columns = ArrayNamedColumns(self.rows[0])
-            self.rows = self.rows[1:]
-        else:
-            self.columns = ArrayColumns(len(self.rows[0]))
+def load_csv(vs, contents, header=False, **kwargs):
+    rdr = csv.reader(io.StringIO(contents, newline=''), **kwargs)
+    vs.rows = [r for r in rdr]
+    if header:
+        vs.columns = ArrayNamedColumns(vs.rows[0])
+        vs.rows = vs.rows[1:]
+    else:
+        vs.columns = ArrayColumns(len(vs.rows[0]))
 
-class open_tsv(Sheet):
-    def __init__(self, p):
-        super().__init__(p.name, p)
-        lines = getTextContents(p).splitlines()
+    return vs
 
-        if options.csv_header:
-            self.columns = ArrayNamedColumns(lines[0].split('\t'))
-            lines = lines[1:]
-        else:
-            self.columns = ArrayColumns(len(lines[0].split('\t')))
+def open_tsv(p, **kwargs):
+    return load_tsv(Sheet(p.name, p), getTextContents(p), header=options.csv_header)
 
-        self.rows = [L.split('\t') for L in lines]  # [rownum] -> [ field, ... ]
+def load_tsv(vs, contents, header=False):
+    toprow = lines[0].split('\t')
+
+    if header:
+        vs.columns = ArrayNamedColumns(toprow)
+        lines = lines[1:]
+    else:
+        vs.columns = ArrayColumns(len(toprow))
+
+    vs.rows = [L.split('\t') for L in lines]  # [rownum] -> [ field, ... ]
+    return vs
 
 def open_json(p):
     import json
-    openPyObjSheet(p.name, json.loads(getTextContents(p)))
+    return load_pyobj(p.name, json.loads(getTextContents(p)))
 
 #### .xlsx
 class open_xlsx(Sheet):
@@ -719,7 +725,7 @@ class open_xlsx(Sheet):
         self.workbook = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
         self.rows = list(self.workbook.sheetnames)
         self.columns = [Column('name', str)]
-        self.command(Key.ENTER, 'vd.push(getSheet(cursorRow))', 'open this sheet')
+        self.command(Key.ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
 
     def getSheet(self, sheetname):
         'create actual Sheet from xlsx sheet'
@@ -841,7 +847,7 @@ def open_gspreadsheet(p):
 def open_gsheet(p):
     sheets = google_sheets()
     sheet = sheets.values().get(spreadsheetId=p.name).execute()
-    openPyObjSheet(p.name, sheet, p)
+    push_pyobj(p.name, sheet, p)
 #    vs = Sheet(sheet_md['properties']['title'], p)
 #    vs.columns = [Column('title', lambda_eval('properties.title')),
 #                  Column('rowCount', lambda_eval('properties.gridProperties.rowCount')),
@@ -886,12 +892,16 @@ def save_csv(sheet, fn):
 
 ### curses, options, init
 
-def inputLine(prompt, value=''):
+def inputFilename(prompt):
+    cdfiles = [li.name for li in os.scandir()]  # scandir is 3.5
+    return inputLine(prompt, completions=cdfiles)
+
+def inputLine(prompt, value='', completions=None):
     'add a prompt to the bottom of the screen and get a line of input from the user'
     scr = vd().scr
     windowHeight, windowWidth = scr.getmaxyx()
     scr.addstr(windowHeight-1, 0, prompt)
-    return vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable)
+    return vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable, completions=completions)
 
 
 def run():

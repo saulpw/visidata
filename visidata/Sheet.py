@@ -1,6 +1,9 @@
+import string
 import collections
+import itertools
 import functools
 import re
+import copy
 
 import visidata
 from . import colors, options, status, error, date, anytype, WrongTypeStr, CalcErrorStr, vd, moveListItem
@@ -8,6 +11,9 @@ from .tui import draw_clip
 from .Column import Column
 
 base_commands = collections.OrderedDict()
+
+# A .. Z AA AB ...
+defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
 class Sheet:
     def __init__(self, name, src=None):
@@ -37,6 +43,15 @@ class Sheet:
 
         # specialized sheet keys
         self.commands = base_commands.copy()
+
+    def copy(self):
+        c = copy.copy(self)
+        c.name += "'"
+        c.topRowIndex = c.cursorRowIndex = 0
+        c.leftVisibleColIndex = c.cursorVisibleColIndex = 0
+        c.columns = copy.deepcopy(self.columns)
+
+        return c
 
     def __repr__(self):
         return self.name

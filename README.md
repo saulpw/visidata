@@ -77,10 +77,14 @@ Definitions of terms in the help and documentation:
 - 'move': change layout of visible data
 - 'show': put on status line
 - 'scroll': change set of visible rows
-- 'open': add a new sheet to the front of the sheets list (thus making it immediately visible)
+
+- 'push': move a sheet to the top of the sheets list (thus making it immediately visible)
+- 'open': create a new sheet from a file or url
+- 'load': reload an existing sheet from in-memory contents
+
 - 'jump': change to existing sheet
-- 'pop': drop sheet
-- 'this': current [row/column/cell]
+- 'drop': drop top (current) sheet
+- 'this': current [row/column/cell] ('current' is also used)
 - 'abort': exit program immediately
 
 `F1` opens the Help Sheet, which shows the available commands along with a brief description.

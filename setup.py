@@ -2,17 +2,19 @@
 
 from setuptools import setup
 
-setup(name="visidata",
-      version="0.39",
-      description="curses interface for exploring and arranging tabular data",
+setup(name='visidata',
+      version='0.39',
+      description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
-      author="Saul Pwanson",
-      author_email="vd@saul.pw",
-      url="http://saul.pw/visidata",
-      download_url="http://saul.pw/vd",
-      test_suite="visidata.tests",
-      scripts=["bin/vd"],
-      license="GPLv3",
+      author='Saul Pwanson',
+      author_email='vd@saul.pw',
+      url='http://saul.pw/visidata',
+      download_url='http://github.com/saulpw/visidata',
+      test_suite='visidata.tests',
+      scripts=['bin/vd'],
+      package_data=['*.tsv'],
+      include_package_data=True,
+      license='GPLv3',
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
@@ -29,6 +31,6 @@ setup(name="visidata",
           'Topic :: Scientific/Engineering :: Visualization',
           'Topic :: Utilities',
       ],
-      keywords=("console tabular data spreadsheet viewer textpunk"
-                "curses csv hdf5 h5 xlsx"),
+      keywords=('console tabular data spreadsheet viewer textpunk'
+                'curses csv hdf5 h5 xlsx'),
       )
