@@ -129,6 +129,7 @@ def setup_sheet_commands():
 
     option('encoding', 'utf-8', 'as passed to codecs.open')
     option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
+    option('save_dir', '.', 'default output folder')
 
     option('ColumnStats', False, 'include mean/median/etc on Column sheet')
 
@@ -239,7 +240,7 @@ def setup_sheet_commands():
     command(Shift.R, 'sheet.filetype = inputLine("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
     command(Ctrl.R, 'open_source(source, sheet.filetype); status("reloaded")', 'reload sheet from source')
     command(Ctrl.S, 'saveSheet(sheet, inputLine("save to: "))', 'save this sheet to new file')
-    command(Key('o'), 'open_source(inputFilename("open: "))', 'open local file or url')
+    command(Key('o'), 'open_source(inputLine("open: "))', 'open local file or url')
     command(Ctrl.O, 'expr = inputLine("eval: "); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 
     command(Key('e'), 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex))', 'edit this cell')
@@ -891,10 +892,6 @@ def save_csv(sheet, fn):
             cw.writerow([col.getDisplayValue(r) for col in sheet.visibleCols])
 
 ### curses, options, init
-
-def inputFilename(prompt):
-    cdfiles = [li.name for li in os.scandir()]  # scandir is 3.5
-    return inputLine(prompt, completions=cdfiles)
 
 def inputLine(prompt, value='', completions=None):
     'add a prompt to the bottom of the screen and get a line of input from the user'

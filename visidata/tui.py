@@ -79,6 +79,7 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
         raise type(e)('%s [clip_draw y=%s x=%s len(s)=%s w=%s]' % (e, y, x, len(s), w)
                 ).with_traceback(sys.exc_info()[2])
 
+
 def edit_text(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[]):
     def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
         return v if i < 0 else v[:i] + s + v[i:]
@@ -89,18 +90,20 @@ def edit_text(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprin
     def delchar(s, i, remove=1):
         return s[:i] + s[i+remove:]
 
-    def getCompletion(v, comps, cidx):
+    def complete(v, comps, cidx):
         if comps:
             for i in range(cidx, cidx + len(comps)):
                 i %= len(comps)
                 if comps[i].startswith(v):
-                    return comps[i], i
+                    return comps[i]
         # beep
-        return v, cidx
+        return v
 
     insert_mode = False
     v = str(value)  # value under edit
     i = 0           # index into v
+    comps_idx = 2
+
     while True:
         dispval = clean(v)
         dispi = i
@@ -109,8 +112,6 @@ def edit_text(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprin
         elif i >= w:
             dispi = w-1
             dispval = dispval[i-w:]
-
-        comps_idx = 0
 
         scr.addstr(y, x, dispval, attr)
         scr.move(y, x+dispi)
@@ -123,7 +124,8 @@ def edit_text(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprin
         elif ch == Ctrl.E or ch == Key.END:          i = len(v)
         elif ch == Ctrl.F or ch == Key.RIGHT:        i += 1
         elif ch in (Ctrl.H, Key.BACKSPACE, Key.DEL): i -= 1 if i > 0 else 0; v = delchar(v, i)
-        elif ch == Key.TAB:                          v, comps_idx = getCompletion(v, completions, comps_idx)
+        elif ch == Key.TAB:                          comps_idx += 1; v = complete(v[:i], completions, comps_idx)
+        elif ch == Key.BTAB:                         comps_idx -= 1; v = complete(v[:i], completions, comps_idx)
         elif ch == Ctrl.J or ch == Key.ENTER:        break
         elif ch == Ctrl.K:                           v = v[:i]
         elif ch == Ctrl.R:                           v = value
