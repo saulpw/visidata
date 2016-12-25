@@ -37,6 +37,8 @@ class CommandsTestCase(unittest.TestCase):
         self.scr.move = Mock()
         self.scr.getmaxyx = lambda: (25, 80)
         curses.initscr()  # activate keyname()
+        visidata.setup_options()
+        visidata.setup_sheet_commands()
         curses.endwin()   # but stay in terminal mode
 
     def test_commands(self):

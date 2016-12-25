@@ -1,21 +1,186 @@
 import string
-import collections
 import itertools
-import functools
+import pkg_resources
 import re
 import copy
 
 import visidata
-from . import colors, options, status, error, date, anytype, WrongTypeStr, CalcErrorStr, vd, moveListItem
-from .tui import draw_clip
-from .Column import Column
+from . import vd, colors, options, status, error, WrongTypeStr, CalcErrorStr, moveListItem
+from . import attrdict, values, date, anytype
 
-base_commands = collections.OrderedDict()
+from .tui import draw_clip, keyname, Key, Shift, Ctrl
+from .Column import Column, ArrayNamedColumns
+from .Path import Path
 
 # A .. Z AA AB ...
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
+def load_commands():
+    syscmds = pkg_resources.resource_filename(__name__, 'vd-syscmds.tsv')
+    usercmds = options.userdir_prefix + 'vd-usercmds.tsv'
+
+    vd().base_commands = Sheet('base_commands', Path(syscmds))
+    vd().user_commands = Sheet('user_commands', Path(usercmds))
+
+    from . import load_tsv  # must be after main import
+    try:
+        load_tsv(vd().base_commands, Path(syscmds).read_text(), header=True)
+    except OSError as e:
+        vd().status(str(e))
+    except Exception as e:
+        vd().exceptionCaught()
+
+    try:
+        load_tsv(vd().user_commands, Path(usercmds).read_text(), header=True)
+    except OSError as e:
+        pass  # vd().status(str(e))
+    except Exception as e:
+        vd().exceptionCaught()
+
+    # set columns after load
+    vd().base_commands.columns = ArrayNamedColumns(Sheet.help_colnames)
+    vd().user_commands.columns = ArrayNamedColumns(Sheet.help_colnames)
+
+def add_command(sheet_regex, prefixes, ch, execstr, helpstr):
+    vd().base_commands.rows.append((sheet_regex, prefixes, keyname(ch), helpstr, execstr))
+
+# must be done inside curses.initscr due to keyname
+def setup_sheet_commands():
+    def command(ch, cmdstr, helpstr):
+        add_command('', '', ch, cmdstr, helpstr)
+    def global_command(ch, cmdstr, helpstr):
+        add_command('', 'g', ch, cmdstr, helpstr)
+
+    load_commands()
+
+    command(Key.F1,    'vd.push(SheetList(name + "_commands", sheet.commands, help_colnames[1:]))', 'open command help sheet')
+    command(Key('q'),  'vd.sheets.pop(0)', 'quit the current sheet')
+
+    command(Key.LEFT,  'cursorRight(-1)', 'go one column left')
+    command(Key.DOWN,  'cursorDown(+1)', 'go one row down')
+    command(Key.UP,    'cursorDown(-1)', 'go one row up')
+    command(Key.RIGHT, 'cursorRight(+1)', 'go one column right')
+    command(Key.NPAGE, 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows', 'scroll one page down')
+    command(Key.PPAGE, 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page up')
+    command(Key.HOME,  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
+    command(Key.END,   'sheet.cursorRowIndex = len(rows)-1', 'go to last row')
+
+    command(Key('h'), 'cursorRight(-1)', 'go one column left')
+    command(Key('j'), 'cursorDown(+1)', 'go one row down')
+    command(Key('k'), 'cursorDown(-1)', 'go one row up')
+    command(Key('l'), 'cursorRight(+1)', 'go one column right')
+
+    command(Shift.H, 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
+    command(Shift.J, 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
+    command(Shift.K, 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
+    command(Shift.L, 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
+
+    command(Ctrl.G, 'status(statusLine)', 'show info for the current sheet')
+    command(Ctrl.P, 'status(vd.statusHistory[0])', 'show previous status line again')
+    command(Ctrl.V, 'status(initialStatus)', 'show version information')
+
+    command(Key('t'), 'topRowIndex = cursorRowIndex', 'scroll cursor row to top of screen')
+    command(Key('m'), 'topRowIndex = cursorRowIndex-int(nVisibleRows/2)', 'scroll cursor row to middle of screen')
+    command(Key('b'), 'topRowIndex = cursorRowIndex-nVisibleRows+1', 'scroll cursor row to bottom of screen')
+
+    command(Key('<'), 'skipUp()', 'skip up this column to previous value')
+    command(Key('>'), 'skipDown()', 'skip down this column to next value')
+
+    command(Key('_'), 'cursorCol.width = cursorCol.getMaxWidth(visibleRows)', 'set this column width to fit visible cells')
+    command(Key('-'), 'cursorCol.width = 0', 'hide this column')
+    command(Key('^'), 'cursorCol.name = cursorCol.getDisplayValue(cursorRow)', 'set this column header to this cell value')
+    command(Key('!'), 'toggleKeyColumn(cursorColIndex)', 'toggle this column as a key column')
+
+    command(Key('@'), 'cursorCol.type = date', 'set column type to ISO8601 datetime')
+    command(Key('#'), 'cursorCol.type = int', 'set column type to integer')
+    command(Key('$'), 'cursorCol.type = str', 'set column type to string')
+    command(Key('%'), 'cursorCol.type = float', 'set column type to float')
+    command(Key('~'), 'cursorCol.type = detectType(cursorValue)', 'autodetect type of column by its data')
+
+    command(Key('['), 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r))', 'sort by this column ascending')
+    command(Key(']'), 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r), reverse=True)', 'sort by this column descending')
+    command(Ctrl.E, 'options.debug = True; error(vd.lastErrors[-1])', 'abort and print last error to terminal')
+    command(Ctrl.D, 'options.debug = not options.debug; status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug mode')
+
+    command(Shift.E, 'if vd.lastErrors: vd.push(SheetText("last_error", vd.lastErrors[-1]))', 'open stack trace for most recent error')
+    command(Shift.F, 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
+
+    command(Key('d'), 'rows.pop(cursorRowIndex)', 'delete this row')
+
+    command(Shift.S, 'vd.push(Sheets(vd.sheets))', 'open Sheet stack')
+    command(Shift.C, 'vd.push(SheetColumns(sheet))', 'open Columns for this sheet')
+    command(Shift.O, 'vd.push(SheetDict("options", options.__dict__))', 'open Options')
+
+    command(Key('/'), 'searchRegex(inputLine(prompt="/"), columns=[cursorCol], moveCursor=True)', 'search this column forward for regex')
+    command(Key('?'), 'searchRegex(inputLine(prompt="?"), columns=[cursorCol], backward=True, moveCursor=True)', 'search this column backward for regex')
+    command(Key('n'), 'searchRegex(columns=[cursorCol], moveCursor=True)', 'go to next match')
+    command(Key('p'), 'searchRegex(columns=[cursorCol], backward=True, moveCursor=True)', 'go to previous match')
+
+    command(Key(' '), 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
+    command(Key('s'), 'select([cursorRow]); cursorDown(1)', 'select this row')
+    command(Key('u'), 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
+    command(Key('|'), 'select(sheet.rows[r] for r in searchRegex(inputLine(prompt="|"), columns=[cursorCol]))', 'select rows by regex in this column')
+    command(Key('\\'), 'unselect(sheet.rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=[cursorCol]))', 'unselect rows by regex in this column')
+
+    command(Shift.R, 'sheet.filetype = inputLine("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
+    command(Ctrl.R, 'open_source(source, sheet.filetype); status("reloaded")', 'reload sheet from source')
+    command(Ctrl.S, 'saveSheet(sheet, inputLine("save to: "))', 'save this sheet to new file')
+    command(Key('o'), 'open_source(inputLine("open: "))', 'open local file or url')
+    command(Ctrl.O, 'expr = inputLine("eval: "); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
+
+    command(Key('e'), 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex))', 'edit this cell')
+    command(Key('c'), 'sheet.cursorVisibleColIndex = findColIdx(inputLine("goto column name: "), visibleCols)', 'goto visible column by name')
+    command(Key('r'), 'sheet.cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
+
+    command(Key('='), 'addColumn(ColumnExpr(sheet, inputLine("new column expr=")), index=cursorColIndex+1)', 'add column by expr')
+    command(Key(':'), 'addColumn(ColumnRegex(sheet, inputLine("new column regex:")), index=cursorColIndex+1)', 'add column by regex')
+    command(Ctrl('^'), 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet')
+    command(Key.TAB,  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheet stack')
+    command(Key.BTAB, 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheet stack')
+
+# when used with 'g' prefix
+    global_command(Key.F1,   'vd.push(SheetAppend([vd.base_commands, vd.user_commands]))', 'open all commands sheet')
+    global_command(Key('q'), 'vd.sheets.clear()', 'drop all sheets (clean exit)')
+
+    global_command(Key('h'), 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go to leftmost column')
+    global_command(Key('k'), 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go to top row')
+    global_command(Key('j'), 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'go to bottom row')
+    global_command(Key('l'), 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmost column')
+
+    global_command(Shift.H, 'moveListItem(columns, cursorColIndex, 0)', 'move this column all the way to the left')
+    global_command(Shift.J, 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
+    global_command(Shift.K, 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
+    global_command(Shift.L, 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
+
+    global_command(Key('_'), 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
+    global_command(Key('^'), 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
+    global_command(Key('~'), 'for c in visibleCols: c.type = detectType(c.getValue(cursorRow))', 'autodetect types of all visible columns by their data')
+
+    global_command(Shift.E, 'vd.push(SheetText("last_error", "\\n\\n".join(vd.lastErrors)))', 'open last 10 errors')
+
+    global_command(Key('/'), 'searchRegex(inputLine(prompt="/"), moveCursor=True, columns=visibleCols)', 'search regex forward in all visible columns')
+    global_command(Key('?'), 'searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
+    global_command(Key('n'), 'sheet.cursorRowIndex = max(searchRegex() or [cursorRowIndex])', 'go to first match')
+    global_command(Key('p'), 'sheet.cursorRowIndex = min(searchRegex() or [cursorRowIndex])', 'go to last match')
+
+    global_command(Key(' '), 'toggle(rows)', 'toggle select of all rows')
+    global_command(Key('s'), 'select(rows)', 'select all rows')
+    global_command(Key('u'), '_selectedRows.clear()', 'unselect all rows')
+
+    global_command(Key('|'), 'select(sheet.rows[r] for r in searchRegex(inputLine(prompt="|"), columns=visibleCols))', 'select rows by regex in all visible columns')
+    global_command(Key('\\'), 'unselect(sheet.rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex in all visible columns')
+
+    global_command(Key('d'), 'sheet.rows = [r for r in sheet.rows if not sheet.isSelected(r)]; _selectedRows.clear()', 'delete all selected rows')
+
+    global_command(Ctrl.P, 'vd.push(SheetText("statuses", vd.statusHistory))', 'open last 100 statuses')
+
+    # experimental commands
+    command(Key('"'), 'vd.push(vd.sheets[0].copy())', 'duplicate this sheet')
+
+
+
 class Sheet:
+    help_colnames = 'sheet_regex prefixes keystroke helpstr execstr'.split()
     def __init__(self, name, src=None):
         self.name = name
         self.filetype = None
@@ -41,8 +206,16 @@ class Sheet:
 
         self._selectedRows = {}   # id(row) -> row
 
-        # specialized sheet keys
-        self.commands = base_commands.copy()
+        # a list of attrdict specific to this sheet, composed from user_commands and base_commands
+        self.commands = []
+
+    def reload_commands(self):
+        self.commands = []
+        for commandset in [vd().user_commands, vd().base_commands]:
+            for r in commandset.rows:
+                v = values(r, commandset.columns)
+                if not v.sheet_regex or re.match(v.sheet_regex, self.name):
+                    self.commands.append(v)
 
     def copy(self):
         c = copy.copy(self)
@@ -50,7 +223,6 @@ class Sheet:
         c.topRowIndex = c.cursorRowIndex = 0
         c.leftVisibleColIndex = c.cursorVisibleColIndex = 0
         c.columns = copy.deepcopy(self.columns)
-
         return c
 
     def __repr__(self):
@@ -59,17 +231,24 @@ class Sheet:
     def isSelected(self, r):
         return id(r) in self._selectedRows
 
-    def command(self, key, cmdstr, helpstr=''):
-#        if key in self.commands:
-#            status('overriding key %s' % key)
-        self.commands[('', key)] = (cmdstr, helpstr)
+    def command(self, keystroke, cmdstr, helpstr):
+        add_command(self.name, '', keystroke, cmdstr, helpstr)
 
-    def exec_command(self, vdglobals, prefixes, key):
-        cmdstr, _ = self.commands.get((prefixes, key))
+    def find_command(self, prefixes, keystroke):
+        for cmd in self.commands:
+            if cmd.prefixes == prefixes and cmd.keystroke == keystroke:
+                return cmd
+
+    def exec_command(self, vdglobals, prefixes, keystroke):
+        cmd = self.find_command(prefixes, keystroke)
+        if not cmd:
+            vd().status('no command for "%s%s"' % (prefixes, keystroke))
+            return
+
         # handy globals for use by commands
         self.vd = vd()
         self.sheet = self
-        exec(cmdstr, vdglobals, dict((name, getattr(self, name)) for name in dir(self)))
+        exec(cmd.execstr, vdglobals, dict((name, getattr(self, name)) for name in dir(self)))
 
 
     def findColIdx(self, colname, columns=None):

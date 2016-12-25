@@ -125,6 +125,18 @@ def lambda_subrow_wrap(func, subrowidx):
     subrow_func.setter = lambda r,v,i=subrowidx,f=func: r[i] and f.setter(r[i], v) or None
     return subrow_func
 
+def lambda_if_firstcol(func, val):
+    return lambda r,val=val: func(r[1]) if r[0] == val else ''
+
+class ColumnMultiplexer(Column):
+    def __init__(self, cols):
+        super().__init__(cols[0].name, type=cols[0].type, width=cols[0].width)
+        func = self.multiplexGetValue
+
+    def muliplexGetValue(self, taggedRow):
+        i, row = taggedRow
+        return self.cols[i].func(row)
+
 class OnDemandDict:
     def __init__(self, sheet, row):
         self.row = row

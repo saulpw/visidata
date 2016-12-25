@@ -16,16 +16,16 @@ def main():
     parser.add_argument('-r', '--readonly', dest='readonly', action='store_true', default=False, help='disable editing')
     args = parser.parse_args()
 
-    visidata.options.debug = args.debug
-    visidata.options.readonly = args.readonly
+    options = visidata.options
+    visidata.setup_options()
+    options.debug = args.debug
+    options.readonly = args.readonly
 
     inputs = args.inputs or ['.']
 
-    for src in inputs:
-        visidata.open_source(src)
+    sources = [visidata.open_source(src) for src in inputs]
 
-    visidata.run()
-
+    visidata.run(sources)
 
 if __name__ == '__main__':
     main()
