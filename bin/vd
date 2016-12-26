@@ -17,7 +17,6 @@ def main():
     args = parser.parse_args()
 
     options = visidata.options
-    visidata.setup_options()
     options.debug = args.debug
     options.readonly = args.readonly
 
