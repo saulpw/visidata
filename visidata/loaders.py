@@ -1,6 +1,6 @@
 import csv
 import io
-from . import status, option, options
+from . import status, option, options, vdglobals
 from . import FileBrowser, TextViewer, join_sheetnames
 from .columns import Column, ArrayColumns, ArrayNamedColumns, ColumnItem
 from .sheets import Sheet
@@ -24,10 +24,10 @@ def open_source(p, filetype=None):
             vs = FileBrowser(p)
         else:
             openfunc = 'open_' + filetype
-            if openfunc not in globals():
+            if openfunc not in vdglobals():
                 openfunc = 'open_txt'
                 status('no %s function' % openfunc)
-            vs = globals()[openfunc](p)
+            vs = vdglobals()[openfunc](p)
     elif isinstance(p, str):
         if '://' in p:
             vs = openUrl(p)
@@ -54,7 +54,7 @@ def open_json(p):
 #### external addons
 def open_py(p):
     contents = getTextContents(p)
-    exec(contents, globals())
+    exec(contents, vdglobals())
     status('executed %s' % p)
 
 ## csv/tsv

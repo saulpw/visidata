@@ -37,16 +37,16 @@ class CommandsTestCase(unittest.TestCase):
         self.scr.move = Mock()
         self.scr.getmaxyx = lambda: (25, 80)
         curses.initscr()  # activate keyname()
-        visidata.setup_options()
-        visidata.setup_sheet_commands()
         curses.endwin()   # but stay in terminal mode
 
     def test_commands(self):
         'exec each command at least once'
         vs = visidata.SheetObject('test_commands', self)
-        for prefixes, cmd in vs.commands:
-            testname = prefixes + visidata.tui.keyname(cmd)
-#            print(testname)
+        vs.reload()
+        vs.reload_commands()
+        for keystrokes in vs.commands:
+            testname = keystrokes
+            print(testname)
             if testname in expected_errors:
                 continue
 
@@ -62,5 +62,4 @@ class CommandsTestCase(unittest.TestCase):
             vd.scr = self.scr
             vd.push(vs)
             vs.draw(self.scr)
-            visidata.set_sheet(vs)
-            vs.exec_command(vars(visidata), prefixes, cmd)
+            vs.exec_command(vars(visidata), keystrokes)

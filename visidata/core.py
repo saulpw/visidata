@@ -44,12 +44,10 @@ option('debug', '', 'abort on error and display stacktrace')
 option('readonly', '', 'disable saving')
 
 
-sheet = None
 windowWidth = None
 windowHeight = None
 
-initial_statuses = ['saul.pw/VisiData v' + __version__,
-                    'F1 opens command help']
+initialStatus = 'saul.pw/VisiData v' + __version__
 
 
 
@@ -73,11 +71,6 @@ def moveListItem(L, fromidx, toidx):
     L.insert(toidx, r)
     return toidx
 
-def set_sheet(s):
-    'for tests'
-    global sheet
-    sheet = s
-
 # VisiData singleton contains all sheets
 @functools.lru_cache()
 def vd():
@@ -97,7 +90,7 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self.statusHistory = []
-        self._status = initial_statuses
+        self._status = [initialStatus]
         self.lastErrors = []
         self.nchars = 0
 
@@ -175,7 +168,7 @@ class VisiData:
                 prefixes += keystroke
             else:
                 try:
-                    sheet.exec_command(vdglobals(), prefixes, keystroke)
+                    sheet.exec_command(vdglobals(), prefixes + keystroke)
                 except EscapeException as e:  # user aborted
                     self.status(keyname(e.args[0]))
                 except Exception:
@@ -220,7 +213,9 @@ def saveSheet(sheet, fn):
         return
     basename, ext = os.path.splitext(fn)
     funcname = 'save_' + ext[1:]
-    globals().get(funcname, save_tsv)(sheet, fn)
+    if funcname not in vdglobals():
+        funcname = 'save_tsv'
+    vdglobals().get(funcname)(sheet, fn)
     status('saved to ' + fn)
 
 

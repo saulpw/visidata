@@ -82,7 +82,7 @@ command(Key(']'), 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r), revers
 command(Ctrl.E, 'options.debug = True; error(vd.lastErrors[-1])', 'abort and print last error to terminal')
 command(Ctrl.D, 'options.debug = not options.debug; status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug mode')
 
-command(Shift.E, 'vd.lastErrors and vd.push(SheetText("last_error", vd.lastErrors[-1])) or status("no error")', 'open stack trace for most recent error')
+command(Shift.E, 'vd.lastErrors and vd.push(TextViewer("last_error", vd.lastErrors[-1])) or status("no error")', 'open stack trace for most recent error')
 command(Shift.F, 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
 
 command(Key('d'), 'rows.pop(cursorRowIndex)', 'delete this row')
@@ -99,8 +99,8 @@ command(Key('p'), 'searchRegex(columns=[cursorCol], backward=True, moveCursor=Tr
 command(Key(' '), 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command(Key('s'), 'select([cursorRow]); cursorDown(1)', 'select this row')
 command(Key('u'), 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
-command(Key('|'), 'select(sheet.rows[r] for r in searchRegex(inputLine(prompt="|"), columns=[cursorCol]))', 'select rows by regex in this column')
-command(Key('\\'), 'unselect(sheet.rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=[cursorCol]))', 'unselect rows by regex in this column')
+command(Key('|'), 'selectByIdx(searchRegex(inputLine(prompt="|"), columns=[cursorCol]))', 'select rows by regex in this column')
+command(Key('\\'), 'unselectByIdx(searchRegex(inputLine(prompt="\\\\"), columns=[cursorCol]))', 'unselect rows by regex in this column')
 
 command(Shift.R, 'sheet.filetype = inputLine("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
 command(Ctrl.R, 'reload(); status("reloaded")', 'reload sheet from source')
@@ -136,7 +136,7 @@ global_command(Key('_'), 'for c in visibleCols: c.width = c.getMaxWidth(visibleR
 global_command(Key('^'), 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
 global_command(Key('~'), 'for c in visibleCols: c.type = detect_type(c.getValue(cursorRow))', 'autodetect types of all visible columns by their data')
 
-global_command(Shift.E, 'vd.push(SheetText("last_error", "\\n\\n".join(vd.lastErrors)))', 'open last 10 errors')
+global_command(Shift.E, 'vd.push(TextViewer("last_error", "\\n\\n".join(vd.lastErrors)))', 'open last 10 errors')
 
 global_command(Key('/'), 'searchRegex(inputLine(prompt="/"), moveCursor=True, columns=visibleCols)', 'search regex forward in all visible columns')
 global_command(Key('?'), 'searchRegex(inputLine(prompt="?"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
@@ -147,12 +147,12 @@ global_command(Key(' '), 'toggle(rows)', 'toggle select of all rows')
 global_command(Key('s'), 'select(rows)', 'select all rows')
 global_command(Key('u'), '_selectedRows.clear()', 'unselect all rows')
 
-global_command(Key('|'), 'select(sheet.rows[r] for r in searchRegex(inputLine(prompt="|"), columns=visibleCols))', 'select rows by regex in all visible columns')
-global_command(Key('\\'), 'unselect(sheet.rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex in all visible columns')
+global_command(Key('|'), 'selectByIdx(searchRegex(inputLine(prompt="|"), columns=visibleCols))', 'select rows by regex in all visible columns')
+global_command(Key('\\'), 'unselectByIdx(searchRegex(inputLine(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex in all visible columns')
 
-global_command(Key('d'), 'sheet.rows = [r for r in sheet.rows if not sheet.isSelected(r)]; _selectedRows.clear()', 'delete all selected rows')
+global_command(Key('d'), 'sheet.rows = filter(lambda r, sheet=sheet: not sheet.isSelected(r), sheet.rows); _selectedRows.clear()', 'delete all selected rows')
 
-global_command(Ctrl.P, 'vd.push(SheetText("statuses", vd.statusHistory))', 'open last 100 statuses')
+global_command(Ctrl.P, 'vd.push(TextViewer("statuses", vd.statusHistory))', 'open last 100 statuses')
 
 # experimental commands
 command(Key('"'), 'vd.push(vd.sheets[0].copy())', 'duplicate this sheet')
@@ -224,13 +224,10 @@ class Sheet:
     def isSelected(self, r):
         return id(r) in self._selectedRows
 
-    def find_command(self, prefixes, keystroke):
-        return self.commands.get(prefixes + keystroke)
-
-    def exec_command(self, vdglobals, prefixes, keystroke):
-        cmd = self.find_command(prefixes, keystroke)
+    def exec_command(self, vdglobals, keystrokes):
+        cmd = self.commands.get(keystrokes)
         if not cmd:
-            vd().status('no command for "%s%s"' % (prefixes, keystroke))
+            vd().status('no command for "%s"' % (keystrokes))
             return
 
         # handy globals for use by commands
@@ -387,6 +384,12 @@ class Sheet:
             if id(r) in self._selectedRows:
                 del self._selectedRows[id(r)]
         status('unselected %s/%s rows' % (before-len(self._selectedRows), len(rows)))
+
+    def selectByIdx(self, rowIdxs):
+        self.select(self.rows[i] for i in rowIdxs)
+
+    def unselectByIdx(self, rowIdxs):
+        self.unselect(self.rows[i] for i in rowIdxs)
 
     def columnsMatch(self, row, columns, func):
         for c in columns:
@@ -607,13 +610,13 @@ class Sheet:
 ### sheet layouts
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):
-    vs = load_pyobj(name, pyobj, src)
+    vs = open_pyobj(name, pyobj, src)
     if vs:
         return vd().push(vs)
     else:
         status('unknown type ' + type(pyobj))
 
-def load_pyobj(name, pyobj, src=None):
+def open_pyobj(name, pyobj, src=None):
     if isinstance(pyobj, list):
         return SheetList(name, pyobj, src=src)
     elif isinstance(pyobj, dict):
@@ -661,9 +664,8 @@ class SheetList(Sheet):
         self.command(Key.ENTER, 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
 
 class SheetDict(Sheet):
-    def __init__(self, name, mapping):
-        super().__init__(name, mapping)
-        self.rows = list(list(x) for x in mapping.items())
+    def reload(self):
+        self.rows = list(list(x) for x in self.source.items())
         self.columns = [ ColumnItem('key', 0), ColumnItem('value', 1) ]
         self.nKeys = 1
         self.command(Key.ENTER, 'if cursorColIndex == 1: push_pyobj(name + options.SubsheetSep + cursorRow[0], cursorRow[1])', 'dive into this value')
