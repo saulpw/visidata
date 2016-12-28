@@ -1,3 +1,4 @@
+import re
 from . import exceptionCaught, options, error
 from .types import anytype
 
@@ -48,21 +49,21 @@ class Column:
         'returns a properly-typed value, or a default value if the conversion fails, or reraises the exception if the getter fails'
         try:
             v = self.getter(row)
-        except Exception as e:
-            vd().exceptionCaught(status=False)
+        except Exception:
+            exceptionCaught(status=False)
             raise
 
         try:
             return self.type(v)  # convert type on-the-fly
-        except Exception as e:
-            vd().exceptionCaught(status=False)
+        except Exception:
+            exceptionCaught(status=False)
             return self.type()  # return a suitable value for this type
 
     def getDisplayValue(self, row, width=None):
         try:
             cellval = self.getter(row)
         except Exception as e:
-            vd().exceptionCaught(status=False)
+            exceptionCaught(status=False)
             return CalcErrorStr(options.ch_FunctionError)
 
         if cellval is None:
@@ -75,7 +76,7 @@ class Column:
             cellval = self.deduceFmtstr() % self.type(cellval)  # convert type on-the-fly
             if width and self.type in (int, float): cellval = cellval.rjust(width-1)
         except Exception as e:
-            vd().exceptionCaught(status=False)
+            exceptionCaught(status=False)
             cellval = WrongTypeStr(str(cellval))
 
         return cellval
@@ -114,6 +115,11 @@ def ColumnItem(attrname, itemkey, **kwargs):
 def ArrayNamedColumns(columns):
     'columns is a list of column names, mapping to r[0]..r[n]'
     return [ColumnItem(colname, i) for i, colname in enumerate(columns)]
+
+def ArrayColumns(ncols):
+    'columns is a list of column names, mapping to r[0]..r[n]'
+    return [ColumnItem('', i) for i in range(ncols)]
+
 
 class LazyMapping:
     'calculates column values as needed'
@@ -154,4 +160,3 @@ def ColumnRegex(sheet, regex):
         vc.expr, vc.searchregex, vc.replregex = regex.split('/')   # TODO: better syntax
         vc.getter = lambda r,c=vc,s=sheet: getTransformedValue(str(LazyMapping(s, r)(c)), newcol.searchregex, newcol.replregex)
         return vc
-

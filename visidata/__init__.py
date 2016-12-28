@@ -9,6 +9,9 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
+def vdglobals():
+    return globals()
+
 from .core import *
 from .types import *
 from .columns import *

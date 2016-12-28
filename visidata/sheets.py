@@ -1,16 +1,15 @@
 
 import string
 import itertools
-import pkg_resources
 import re
 import copy
 import collections
 
 from . import vd, colors, options, status, error, WrongTypeStr, CalcErrorStr, moveListItem, VisiData
-from . import attrdict, values, date, anytype
-from . import draw_clip, option, join_sheetnames
+from . import attrdict, date, anytype
+from . import draw_clip, option
 from .tui import keyname, Key, Shift, Ctrl
-from .columns import Column, ArrayNamedColumns
+from .columns import Column, ColumnAttr, ColumnItem, ArrayNamedColumns
 from .Path import Path
 
 # A .. Z AA AB ...
@@ -22,9 +21,9 @@ def load_user_commands():
 
     try:
         load_tsv(vd().user_commands, Path(usercmds).read_text(), header=True)
-    except OSError as e:
+    except OSError:
         pass  # vd().status(str(e))
-    except Exception as e:
+    except Exception:
         vd().exceptionCaught()
 
 def command(ch, execstr, helpstr, sheet_regex='', prefixes=''):
@@ -34,7 +33,7 @@ def command(ch, execstr, helpstr, sheet_regex='', prefixes=''):
 def global_command(ch, execstr, helpstr, sheet_regex='', prefixes='g'):
     VisiData.base_commands.append((sheet_regex, prefixes, ch, helpstr, execstr))
 
-command(Key.F1,    'vd.push(SheetList(name + "_commands", sheet.commands, help_colnames[1:]))', 'open command help sheet')
+command(Key.F1,    'vd.push(SheetList(name + "_commands", list(sheet.commands.values()), help_colnames))', 'open command help sheet')
 command(Key('q'),  'vd.sheets.pop(0)', 'quit the current sheet')
 
 command(Key.LEFT,  'cursorRight(-1)', 'go one column left')
@@ -83,7 +82,7 @@ command(Key(']'), 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r), revers
 command(Ctrl.E, 'options.debug = True; error(vd.lastErrors[-1])', 'abort and print last error to terminal')
 command(Ctrl.D, 'options.debug = not options.debug; status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug mode')
 
-command(Shift.E, 'if vd.lastErrors: vd.push(SheetText("last_error", vd.lastErrors[-1]))', 'open stack trace for most recent error')
+command(Shift.E, 'vd.lastErrors and vd.push(SheetText("last_error", vd.lastErrors[-1])) or status("no error")', 'open stack trace for most recent error')
 command(Shift.F, 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
 
 command(Key('d'), 'rows.pop(cursorRowIndex)', 'delete this row')
@@ -104,7 +103,7 @@ command(Key('|'), 'select(sheet.rows[r] for r in searchRegex(inputLine(prompt="|
 command(Key('\\'), 'unselect(sheet.rows[r] for r in searchRegex(inputLine(prompt="\\\\"), columns=[cursorCol]))', 'unselect rows by regex in this column')
 
 command(Shift.R, 'sheet.filetype = inputLine("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
-command(Ctrl.R, 'open_source(source, sheet.filetype); status("reloaded")', 'reload sheet from source')
+command(Ctrl.R, 'reload(); status("reloaded")', 'reload sheet from source')
 command(Ctrl.S, 'saveSheet(sheet, inputLine("save to: "))', 'save this sheet to new file')
 command(Key('o'), 'open_source(inputLine("open: "))', 'open local file or url')
 command(Ctrl.O, 'expr = inputLine("eval: "); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
@@ -120,8 +119,7 @@ command(Key.TAB,  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through s
 command(Key.BTAB, 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheet stack')
 
 # when used with 'g' prefix
-global_command(Key.F1,   'vd.push(SheetList("all_commands", vd.base_commands + vd.user_commands))', 'open all commands sheet')
-command(Key.F1,    'vd.push(SheetList(name + "_commands", sheet.commands, help_colnames[1:]))', 'open command help sheet')
+global_command(Key.F1,   'vd.push(SheetList("all_commands", vd.base_commands + vd.user_commands, help_colnames))', 'open all commands sheet')
 global_command(Key('q'), 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
 global_command(Key('h'), 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go to leftmost column')
@@ -165,6 +163,7 @@ class Sheet:
     help_colnames = 'sheet_regex prefixes keystroke helpstr execstr'.split()
     def __init__(self, name, src=None):
         self.name = name
+        self.loader = None       # reload function
         self.filetype = None
         self.source = src
         self.rows = []
@@ -189,18 +188,27 @@ class Sheet:
         self._selectedRows = {}   # id(row) -> row
 
         # a list of attrdict specific to this sheet, composed from user_commands and base_commands
-        self.commands = []
+        self.commands = collections.OrderedDict()
+
+    def command(self, keystroke, execstr, helpstr, prefixes=''):
+        if type(keystroke) is int:
+            keystroke = keyname(keystroke)  # for internal ones
+        self.commands[prefixes+keystroke] = (self.name, prefixes, keystroke, helpstr, execstr)
+
+    def reload(self):  # default reloader looks for .loader attr
+        if self.loader:
+            self.loader()
+        else:
+            status('no reloader')
+
 
     def reload_commands(self):
         self.commands = collections.OrderedDict()
         for commandset in [vd().user_commands, vd().base_commands]:
             for r in commandset:
-                sheet_regex, prefixes, keystroke, execstr, helpstr = r
+                sheet_regex, prefixes, keystroke, helpstr, execstr = r
                 if not sheet_regex or re.match(sheet_regex, self.name):
-                    # TODO: if not already in self.commands (user overrides)
-                    if type(keystroke) is int:
-                        keystroke = keyname(keystroke)  # for internal ones
-                    self.commands[prefixes+keystroke] = r
+                    self.command(keystroke, execstr, helpstr, prefixes)
 
     def copy(self):
         c = copy.copy(self)
@@ -215,9 +223,6 @@ class Sheet:
 
     def isSelected(self, r):
         return id(r) in self._selectedRows
-
-    def command(self, keystroke, cmdstr, helpstr):
-        globals()["command"](keystroke, cmdstr, helpstr, sheet_regex=self.name)
 
     def find_command(self, prefixes, keystroke):
         return self.commands.get(prefixes + keystroke)
@@ -634,14 +639,17 @@ class SheetList(Sheet):
     def __init__(self, name, obj, columns=None, src=None):
         'columns is a list of strings naming attributes on the objects within the obj'
         super().__init__(name, src or obj)
-        assert isinstance(obj, list)
+        assert isinstance(obj, list), type(obj)
         self.obj = obj
         self.colnames = columns
 
     def reload(self):
         self.rows = self.obj
         if self.colnames:
-            self.columns = AttrColumns(self.colnames)
+            if type(self.rows[0]) in [list,tuple]:
+                self.columns = ArrayNamedColumns(self.colnames)
+            else:
+                self.columns = AttrColumns(self.colnames)
         elif isinstance(self.rows[0], dict):  # list of dict
             self.columns = [ColumnItem(k, k, type=type(self.rows[0][k])) for k in self.rows[0]]
             self.nKeys = 1
@@ -844,7 +852,7 @@ class SheetColumns(Sheet):
         self.nKeys = 1
         self.columns = [
             ColumnAttr('name', str),
-            ColumnAttr('width', str),
+            ColumnAttr('width', int),
             Column('type',   str, lambda r: r.type.__name__),
             ColumnAttr('fmtstr', str),
             ColumnAttr('expr', str),
@@ -859,128 +867,6 @@ class SheetColumns(Sheet):
 #            Column('max',    anytype, lambda c: max(c.values(sheet.rows)), width=0),
 #            Column('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
             ]
-
-## csv/tsv
-
-option('csv_dialect', 'excel', 'dialect passed to csv.reader')
-option('csv_delimiter', ',', 'delimiter passed to csv.reader')
-option('csv_quotechar', '"', 'quotechar passed to csv.reader')
-option('csv_header', '', 'parse first row of CSV as column names')
-
-option('encoding', 'utf-8', 'as passed to codecs.open')
-option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
-
-def open_csv(p):
-    contents = getTextContents(p)
-    if options.csv_dialect == 'sniff':
-        headers = contents[:1024]
-        dialect = csv.Sniffer().sniff(headers)
-        status('sniffed csv_dialect as %s' % dialect)
-    else:
-        dialect = options.csv_dialect
-
-    return load_csv(Sheet(p.name, p), contents,
-                        header=options.csv_header,
-                        dialent=dialect,
-                        quotechar=options.csv_quotechar,
-                        delimiter=ptions.csv_delimiter)
-
-def load_csv(vs, contents, header=False, **kwargs):
-    rdr = csv.reader(io.StringIO(contents, newline=''), **kwargs)
-    vs.rows = [r for r in rdr]
-    if header:
-        vs.columns = ArrayNamedColumns(vs.rows[0])
-        vs.rows = vs.rows[1:]
-    else:
-        vs.columns = ArrayColumns(len(vs.rows[0]))
-
-    return vs
-
-def open_tsv(p, **kwargs):
-    return load_tsv(Sheet(p.name, p), getTextContents(p), header=options.csv_header)
-
-def load_tsv(vs, contents, header_lines=0):
-    'populates vs with the parsed tsv text in contents.'
-    lines = contents.splitlines()
-    if lines:
-        rows = [L.split('\t') for L in lines]
-        vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*rows[:header_lines]))
-        vs.rows = rows[header_lines:]
-    return vs
-
-def save_tsv(sheet, fn):
-    with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
-        colhdr = '\t'.join(col.name for col in sheet.visibleCols) + '\n'
-        if colhdr.strip():  # is anything but whitespace
-            fp.write(colhdr)
-        for r in sheet.rows:
-            fp.write('\t'.join(col.getDisplayValue(r) for col in sheet.visibleCols) + '\n')
-
-def save_csv(sheet, fn):
-    with open(fn, 'w', newline='', encoding=options.encoding, errors=options.encoding_errors) as fp:
-        cw = csv.writer(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
-        colnames = [col.name for col in sheet.visibleCols]
-        if ''.join(colnames):
-            cw.writerow(colnames)
-        for r in sheet.rows:
-            cw.writerow([col.getDisplayValue(r) for col in sheet.visibleCols])
-
-## xlsx
-
-class open_xlsx(Sheet):
-    def __init__(self, path):
-        super().__init__(path.name, path)
-        import openpyxl
-        self.workbook = openpyxl.load_workbook(str(path), data_only=True, read_only=True)
-        self.rows = list(self.workbook.sheetnames)
-        self.columns = [Column('name')]
-        self.command(Key.ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
-
-    def getSheet(self, sheetname):
-        'create actual Sheet from xlsx sheet'
-        worksheet = self.workbook.get_sheet_by_name(sheetname)
-        vs = Sheet(visidata.join_sheetnames(self.source, sheetname), worksheet)
-        vs.columns = ArrayColumns(worksheet.max_column)
-        vs.rows = [ [cell.value for cell in row] for row in worksheet.iter_rows()]
-        return vs
-
-## hdf5
-
-class SheetH5Obj(Sheet):
-    def __init__(self, name, hobj, src):
-        super().__init__(name, src)
-        self.hobj = hobj
-
-    def reload(self):
-        super().reload()
-        import h5py
-        if isinstance(self.hobj, h5py.Group):
-            self.rows = [ self.hobj[objname] for objname in self.hobj.keys() ]
-            self.columns = [
-                Column(self.hobj.name, str, lambda r: r.name.split('/')[-1]),
-                Column('type', str, lambda r: type(r).__name__),
-                Column('nItems', int, lambda r: len(r)),
-            ]
-            self.command(Key.ENTER, 'vd.push(SheetH5Obj(name+options.SubsheetSep+cursorRow.name, cursorRow, source))', 'open this group or dataset')
-            self.command(Key('A'), 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))', 'open metadata sheet for this object')
-        elif isinstance(self.hobj, h5py.Dataset):
-            if len(self.hobj.shape) == 1:
-                self.rows = self.hobj[:]  # copy
-                self.columns = [ColumnItem(colname, colname) for colname in self.hobj.dtype.names]
-            elif len(self.hobj.shape) == 2:  # matrix
-                self.rows = self.hobj[:]  # copy
-                self.columns = ArrayColumns(self.hobj.shape[1])
-            else:
-                status('too many dimensions in shape %s' % str(self.hobj.shape))
-        else:
-            status('unknown h5 object type %s' % type(self.hobj))
-
-class open_hdf5(SheetH5Obj):
-    def __init__(self, p):
-        import h5py
-        super().__init__(p.name, h5py.File(str(p), 'r'), p)
-
-open_h5 = open_hdf5
 
 ## text viewer, dir and .zip browsers
 class TextViewer(Sheet):

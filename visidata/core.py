@@ -2,6 +2,7 @@
 import functools
 import curses
 
+import sys
 import os
 import os.path
 from copy import copy
@@ -15,7 +16,7 @@ import re
 import csv
 
 from .tui import edit_text, Key, Shift, Ctrl, keyname, EscapeException, wrapper, colors
-from . import __version__
+from . import __version__, vdglobals
 from .Path import Path
 
 base_options = collections.OrderedDict()
@@ -82,7 +83,7 @@ def set_sheet(s):
 def vd():
     return VisiData()
 
-def exceptionCaught(self, status=True):
+def exceptionCaught(status=True):
     return vd().exceptionCaught(status)
 
 class VisiData:
@@ -174,7 +175,7 @@ class VisiData:
                 prefixes += keystroke
             else:
                 try:
-                    sheet.exec_command(globals(), prefixes, keystroke)
+                    sheet.exec_command(vdglobals(), prefixes, keystroke)
                 except EscapeException as e:  # user aborted
                     self.status(keyname(e.args[0]))
                 except Exception:
@@ -209,7 +210,7 @@ def inputLine(prompt, value='', completions=None):
 
 option('SubsheetSep', '~')
 def join_sheetnames(*sheetnames):
-    return options.SubsheetSep.join(sheetnames)
+    return options.SubsheetSep.join(str(x) for x in sheetnames)
 
 
 option('save_dir', '.', 'default output folder')
