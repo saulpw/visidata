@@ -119,11 +119,17 @@ class VisiData:
         'draws sheet info on last line, including previous status messages, which are then cleared.'
         attr = colors[options.c_StatusLine]
         statusstr = options.SheetNameFmt % sheet.name + options.ch_StatusSep.join(self._status)
-        draw_clip(self.scr, windowHeight-1, 0, statusstr, attr, windowWidth)
+        try:
+            draw_clip(self.scr, windowHeight-1, 0, statusstr, attr, windowWidth)
+        except Exception as e:
+            self.exceptionCaught()
         self._status = []
 
     def drawRightStatus(self, rstatus):
-        draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.c_StatusLine])
+        try:
+            draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.c_StatusLine])
+        except Exception as e:
+            self.exceptionCaught()
 
     def run(self, scr):
         global windowHeight, windowWidth, sheet
@@ -147,9 +153,8 @@ class VisiData:
             except Exception as e:
                 self.exceptionCaught()
 
-            self.drawLeftStatus(sheet)
-
             self.drawRightStatus(prefixes+keystroke)  # visible for this getch
+            self.drawLeftStatus(sheet)
 
             curses.doupdate()
             ch = scr.getch()
