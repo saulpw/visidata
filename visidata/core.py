@@ -22,6 +22,21 @@ from .Path import Path
 base_options = collections.OrderedDict()
 user_options = None
 
+def option(name, default, helpstr=''):
+    if name not in base_options:
+        base_options[name] = default
+
+def theme(name, default, helpstr=''):
+    base_options[name] = default
+
+theme('ch_StatusSep', ' | ', 'string separating multiple statuses')
+theme('ch_Unprintable', '.', 'a substitute character for unprintables')
+theme('ch_ColumnFiller', ' ', 'pad chars after column value')
+theme('ch_Newline', '\\n', 'displayable newline')
+theme('c_StatusLine', 'bold', 'status line color')
+theme('c_EditCell', 'normal', 'edit cell  line color')
+theme('SheetNameFmt', '%s| ', 'status line prefix')
+
 class attrdict(object):
     'simple class to turn a dictionary into an object with its keys as attributes'
     def __init__(self, kwargs):
@@ -33,12 +48,6 @@ class attrdict(object):
 
 options = attrdict(base_options)
 
-
-def option(name, default, helpstr=''):
-    if name not in base_options:
-        base_options[name] = default
-def theme(name, default, helpstr=''):
-    base_options[name] = default
 
 option('debug', '', 'abort on error and display stacktrace')
 option('readonly', '', 'disable saving')

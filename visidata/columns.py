@@ -1,6 +1,10 @@
 import re
-from . import exceptionCaught, options, error
+from . import exceptionCaught, options, error, theme, option
 from .types import anytype
+
+theme('ch_FunctionError', '¿', 'when computation fails due to exception')
+theme('ch_VisibleNone', '',  'visible contents of a cell whose value was None')
+
 
 class WrongTypeStr(str):
     'str wrapper with original str-ified contents to indicate that the type conversion failed'

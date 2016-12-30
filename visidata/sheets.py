@@ -7,7 +7,7 @@ import collections
 
 from . import vd, colors, options, status, error, WrongTypeStr, CalcErrorStr, moveListItem, VisiData
 from . import attrdict, date, anytype
-from . import draw_clip, option
+from . import draw_clip, option, theme
 from .tui import keyname, Key, Shift, Ctrl
 from .columns import Column, ColumnAttr, ColumnItem, ArrayNamedColumns
 from .Path import Path
@@ -15,23 +15,35 @@ from .Path import Path
 # A .. Z AA AB ...
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
-option('userdir_prefix', '~/.', 'prefix for vd-usercmds.tsv')
-def load_user_commands():
-    usercmds = options.userdir_prefix + 'vd-usercmds.tsv'
-
-    try:
-        load_tsv(vd().user_commands, Path(usercmds).read_text(), header=True)
-    except OSError:
-        pass  # vd().status(str(e))
-    except Exception:
-        vd().exceptionCaught()
-
-def command(ch, execstr, helpstr, sheet_regex='', prefixes=''):
+def command(ch, execstr, helpstr, prefixes=''):
     # must be done inside curses.initscr due to keyname
-    VisiData.base_commands.append((sheet_regex, prefixes, ch, helpstr, execstr))
+    VisiData.base_commands.append((prefixes, ch, helpstr, execstr))
 
-def global_command(ch, execstr, helpstr, sheet_regex='', prefixes='g'):
-    VisiData.base_commands.append((sheet_regex, prefixes, ch, helpstr, execstr))
+def global_command(ch, execstr, helpstr, prefixes='g'):
+    VisiData.base_commands.append((prefixes, ch, helpstr, execstr))
+
+
+theme('ch_Ellipsis', '…')
+theme('ch_KeySep', '/')
+theme('ch_WrongType', '~')
+theme('ch_Error', '!')
+theme('ch_Histogram', '*')
+theme('ch_EditPadChar', '_')
+theme('ch_LeftMore', '<')
+theme('ch_RightMore', '>')
+theme('ch_ColumnSep', '|', 'chars between columns')
+
+theme('c_CurRow', 'reverse')
+theme('c_default', 'normal')
+theme('c_SelectedRow', 'green')
+theme('c_WrongType', 'magenta')
+theme('c_Error', 'red')
+theme('c_CurCol', 'bold')
+theme('c_CurHdr', 'reverse')
+theme('c_KeyCols', 'brown')
+theme('c_Header', 'bold')
+theme('c_ColumnSep', 'blue')
+
 
 command(Key.F1,    'vd.push(SheetList(name + "_commands", list(sheet.commands.values()), help_colnames))', 'open command help sheet')
 command(Key('q'),  'vd.sheets.pop(0)', 'quit the current sheet')
@@ -150,17 +162,17 @@ global_command(Key('u'), '_selectedRows.clear()', 'unselect all rows')
 global_command(Key('|'), 'selectByIdx(searchRegex(inputLine(prompt="|"), columns=visibleCols))', 'select rows by regex in all visible columns')
 global_command(Key('\\'), 'unselectByIdx(searchRegex(inputLine(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex in all visible columns')
 
-global_command(Key('d'), 'sheet.rows = filter(lambda r, sheet=sheet: not sheet.isSelected(r), sheet.rows); _selectedRows.clear()', 'delete all selected rows')
+global_command(Key('d'), 'sheet.rows = list(filter(lambda r,sheet=sheet: not sheet.isSelected(r), sheet.rows)); _selectedRows.clear()', 'delete all selected rows')
 
 global_command(Ctrl.P, 'vd.push(TextViewer("statuses", vd.statusHistory))', 'open last 100 statuses')
 
 # experimental commands
-command(Key('"'), 'vd.push(vd.sheets[0].copy())', 'duplicate this sheet')
+#command(Key('"'), 'vd.push(vd.sheets[0].copy())', 'duplicate this sheet')
 
 
 
 class Sheet:
-    help_colnames = 'sheet_regex prefixes keystroke helpstr execstr'.split()
+    help_colnames = 'prefixes keystroke helpstr execstr'.split()
     def __init__(self, name, src=None):
         self.name = name
         self.loader = None       # reload function
@@ -193,7 +205,7 @@ class Sheet:
     def command(self, keystroke, execstr, helpstr, prefixes=''):
         if type(keystroke) is int:
             keystroke = keyname(keystroke)  # for internal ones
-        self.commands[prefixes+keystroke] = (self.name, prefixes, keystroke, helpstr, execstr)
+        self.commands[prefixes+keystroke] = (prefixes, keystroke, helpstr, execstr)
 
     def reload(self):  # default reloader looks for .loader attr
         if self.loader:
@@ -201,14 +213,12 @@ class Sheet:
         else:
             status('no reloader')
 
-
     def reload_commands(self):
         self.commands = collections.OrderedDict()
-        for commandset in [vd().user_commands, vd().base_commands]:
+        for commandset in [vd().base_commands, vd().user_commands]:
             for r in commandset:
-                sheet_regex, prefixes, keystroke, helpstr, execstr = r
-                if not sheet_regex or re.match(sheet_regex, self.name):
-                    self.command(keystroke, execstr, helpstr, prefixes)
+                prefixes, keystrokes, helpstr, execstr = r
+                self.command(keystrokes, execstr, helpstr, prefixes)
 
     def copy(self):
         c = copy.copy(self)
@@ -233,7 +243,7 @@ class Sheet:
         # handy globals for use by commands
         self.vd = vd()
         self.sheet = self
-        execstr = cmd[4]
+        execstr = cmd[3]
         exec(execstr, vdglobals, dict((name, getattr(self, name)) for name in dir(self)))
 
 
@@ -680,19 +690,15 @@ def ColumnSourceAttr(name, source):
         setter=lambda r,v,b=source: setattr(b,r,v))
 
 class SheetObject(Sheet):
-    def __init__(self, name, obj):
-        super().__init__(name, obj)
-        self.command(Key.ENTER, 'v = getattr(source, cursorRow); push_pyobj(name + options.SubsheetSep + cursorRow, v() if callable(v) else v)', 'dive into this value')
-        self.command(Key('e'), 'setattr(source, cursorRow, editCell(1)); reload()', 'edit this value')
-
     def reload(self):
-        super().reload()
+        self.rows = dir(self.source)
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
             ColumnSourceAttr('value', self.source)
         ]
         self.nKeys = 1
-        self.rows = dir(self.source)
+        self.command(Key.ENTER, 'v = getattr(source, cursorRow); push_pyobj(join_sheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value')
+        self.command(Key('e'), 'setattr(source, cursorRow, editCell(1)); reload()', 'edit this value')
 
 ## derived sheets
 
@@ -706,12 +712,10 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
 #### slicing and dicing
 class SheetJoin(Sheet):
     def __init__(self, sheets, jointype='&'):
-        super().__init__(jointype.join(vs.name for vs in sheets))
-        self.source = sheets
+        super().__init__(jointype.join(vs.name for vs in sheets), sheets)
         self.jointype = jointype
 
     def reload(self):
-        super().reload()
         sheets = self.source
 
         # first item in joined row is the key tuple from the first sheet.
@@ -789,7 +793,6 @@ class SheetFreqTable(Sheet):
             self.values[str(col.getValue(r))].append(r)
 
     def reload(self):
-        super().reload()
         self.rows = sorted(self.values.items(), key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
         self.largest = len(self.rows[0][1])+1
 
@@ -808,16 +811,6 @@ class SheetFreqTable(Sheet):
 
 
 ## metasheets
-
-# commands are a list of attrdicts loaded in from to that will of rows like anything other sheet.  a dict cache would be more efficient for command lookup, but there are only ~100 commands to consider,
-#    so a linear search may not be so bad, even if it does happen with every command.  and the expensive part of the search would be the regex match, which is
-#    factored out when the individual sheet's commands list is composed.
-
-#  so:
-# - user_commands 
-# - F1 pushes CommandsSheet with user_commands + sheet-specific-commands + base_commands, in that order.  sheet-specific can be from either user or base, but of course user overrides sheet and sheet overrides other ones from base.  non-matching sheet_regexes and overridden commands are filtered out.
-# - Only the most recent entry is executed (with warning) if multiple matches by sheet regex and keystrokes.
-# - gF1 pushes all_commands, which is an append of user_commands and base_commands.  Edits there are reflected back to user_commands.
 # - any changes to these should be saved to ~/.vd-commands.tsv (but with prompt) with ^S or on sheet quit if options.autosave
 
 class Sheets(SheetList):
@@ -826,7 +819,6 @@ class Sheets(SheetList):
         self.nKeys = 1
 
     def reload(self):
-        super().reload()
         self.command(Key.ENTER,    'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'go to this sheet')
         self.command(Key('&'), 'vd.replace(SheetJoin(selectedRows, jointype="&"))', 'open inner join of selected sheets')
         self.command(Key('+'), 'vd.replace(SheetJoin(selectedRows, jointype="+"))', 'open outer join of selected sheets')
@@ -849,7 +841,6 @@ class SheetColumns(Sheet):
         self.command(Key('_'), 'cursorRow.width = cursorRow.getMaxWidth(source.rows)', 'set source column width to max width of its rows')
 
     def reload(self):
-        super().reload()
         self.rows = self.source.columns
         self.nKeys = 1
         self.columns = [

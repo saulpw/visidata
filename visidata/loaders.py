@@ -62,8 +62,7 @@ def open_py(p):
 option('csv_dialect', 'excel', 'dialect passed to csv.reader')
 option('csv_delimiter', ',', 'delimiter passed to csv.reader')
 option('csv_quotechar', '"', 'quotechar passed to csv.reader')
-option('csv_headerlines', '0', 'parse first row of CSV as column names')
-
+option('headerlines', '0', 'parse first N rows of .csv/.tsv as column names')
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
@@ -74,7 +73,7 @@ def open_csv(p):
     return vs
 
 def load_csv(vs):
-    header_lines = int(options.csv_headerlines or 0)
+    header_lines = int(options.headerlines)
     if options.csv_dialect == 'sniff':
         headers = self.contents[:1024]
         dialect = csv.Sniffer().sniff(headers)
@@ -96,8 +95,9 @@ def load_csv(vs):
     return vs
 
 
-def open_tsv(p):
+def open_tsv(p, **kwargs):
     vs = Sheet(p.name, p)
+    vs.options = kwargs
     vs.contents = getTextContents(p)
     vs.loader = lambda vs=vs: load_tsv(vs)
     return vs
@@ -105,7 +105,7 @@ def open_tsv(p):
 # separate function, so reloads can be triggered
 def load_tsv(vs):
     'populates vs with the parsed tsv text in contents.'
-    header_lines = int(options.csv_headerlines or 0)
+    header_lines = int(options.headerlines)
     lines = vs.contents.splitlines()
     if lines:
         rows = [L.split('\t') for L in lines]
