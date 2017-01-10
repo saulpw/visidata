@@ -8,6 +8,7 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
+import locale
 import sys
 import os
 import os.path
@@ -150,8 +151,6 @@ command('~', 'cursorCol.type = detect_type(cursorValue)', 'autodetect type of co
 
 command("'", 'vd.push(vd.sheets[0].copy()).name = inputLine("name of copy:", value=vd.sheets[0].name)', 'push duplicate of this sheet')
 
-command('X', 'vd.push(SheetList("lastRegexes", vd.lastRegexes))', 'push regex sheet')
-
 command('gd', 'sheet.rows = list(filter(lambda r,sheet=sheet: not sheet.isSelected(r), sheet.rows)); _selectedRows.clear()', 'delete all selected rows')
 
 command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again')
@@ -183,6 +182,9 @@ command('gu', '_selectedRows.clear()', 'unselect all rows')
 
 command('g|', 'selectByIdx(searchRegex(inputRegex(prompt="|"), columns=visibleCols))', 'select rows by regex matching any visible column')
 command('g\\', 'unselectByIdx(searchRegex(inputRegex(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex matching any visible column')
+
+command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
+
 
 # VisiData uses Python native int, float, str, and adds a simple date and anytype.
 #
@@ -277,7 +279,7 @@ class VisiData:
         self._status = [__version__]
         self.lastErrors = []
         self.lastRegex = None
-        self.lastRegexes = []
+        self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.nchars = 0
 
     def status(self, s):
@@ -693,7 +695,6 @@ class Sheet:
         elif y > self.nVisibleRows:
             self.topRowIndex = self.cursorRowIndex-self.nVisibleRows+1
 
-        assert self.topRowIndex >= 0, (self.topRowIndex, self.cursorRowIndex, y)
         if x <= 0:
             self.leftVisibleColIndex = self.cursorVisibleColIndex
         else:
@@ -775,7 +776,6 @@ class Sheet:
 
                 y = numHeaderRows
                 for rowidx in range(0, self.nVisibleRows):
-                    assert self.topRowIndex >=0, self.topRowIndex
                     if self.topRowIndex + rowidx >= len(self.rows):
                         break
 
@@ -957,11 +957,15 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
 ###
 
 def inputRegex(prompt):
-    ret = inputLine(prompt, history=vd().lastRegexes)
-    vd().lastRegexes.append(ret)
+    ret = inputLine(prompt, type='regex')
     return ret
 
-def inputLine(prompt, value='', **kwargs):
+def inputLine(prompt, type=''):
+    ret = _inputLine(prompt, history=list(vd().lastInputs[type].keys()))
+    vd().lastInputs[type][ret] = ret
+    return ret
+
+def _inputLine(prompt, value='', **kwargs):
     'add a prompt to the bottom of the screen and get a line of input from the user'
     scr = vd().scr
     windowHeight, windowWidth = scr.getmaxyx()
@@ -1112,7 +1116,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         return v if i < 0 else v[:i] + s + v[i:]
 
     def clean(s):
-        return ''.join(c if c.isprintable() else unprintablechar for c in str(s))
+        return ''.join(c if c.isprintable() else ('<%04X>' % ord(c)) for c in str(s))
 
     def delchar(s, i, remove=1):
         return s[:i] + s[i+remove:]
@@ -1159,9 +1163,9 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         elif ch == '^R':                           v = str(value)
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)
         elif ch == '^U':                           v = v[i:]; i = 0
-        elif ch == '^V':                           v = splice(v, i, chr(scr.getch())); i += 1
-        elif ch == 'KEY_UP':                       hist_idx += 1; v = history[hist_idx % len(history)]
-        elif ch == 'KEY_DOWN':                     hist_idx -= 1; v = history[hist_idx % len(history)]
+        elif ch == '^V':                           v = splice(v, i, scr.get_wch()); i += 1
+        elif history and ch == 'KEY_UP':           hist_idx += 1; v = history[hist_idx % len(history)]
+        elif history and ch == 'KEY_DOWN':         hist_idx -= 1; v = history[hist_idx % len(history)]
         elif ch.startswith('KEY_'):                pass
         else:
             if insert_mode:
@@ -1303,7 +1307,13 @@ def run(sheetlist=[]):
         print(ret)
 
 def getkeystroke(scr):
-    return curses.keyname(scr.getch()).decode('utf-8')
+    k = scr.get_wch()
+    if isinstance(k, str):
+        if ord(k) >= 32:
+            return k
+        k = ord(k)
+    return curses.keyname(k).decode('utf-8')
+
 
 def curses_main(_scr, sheetlist=[]):
     for vs in sheetlist:
