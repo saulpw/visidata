@@ -5,14 +5,12 @@ from unittest.mock import Mock
 
 import curses
 import visidata
-import visidata.tui
-from visidata.tui import Key
 
 # test separately as needed
 expected_errors = [ '^E', 'g', '^R', '^^', 'e', '^J' ]
 
-input_lines = { '^S': '/tmp/blah.csv',  # save to some tmp file
-                 'o': '/tmp/blah.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
+input_lines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
+                 'o': 'tests/jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
                 '^O': '2+2',            # open the python object for '4'
                  '/': 'foo',
                  '?': 'bar',
@@ -51,10 +49,10 @@ class CommandsTestCase(unittest.TestCase):
                 continue
 
             if testname in input_lines:
-                line = [Key(ch) for ch in input_lines[testname]] + [Key.ENTER]
-                self.scr.getch = Mock(side_effect=line)
+                line = [ch for ch in input_lines[testname]] + ['^J']
+                visidata.getkeystroke = Mock(side_effect=line)
             else:
-                self.scr.getch = Mock(side_effect=[visidata.tui.Key.ENTER])
+                visidata.getkeystroke = Mock(side_effect=['^J'])
 
             visidata.vd.cache_clear()  # so vd() returns a new VisiData object for each command
             vd = visidata.vd()

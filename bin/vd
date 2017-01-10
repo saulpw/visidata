@@ -4,25 +4,30 @@
 
 'Use the VisiData interface to browse the given sources'
 
-import argparse
 import visidata
 
-
 def main():
+    import argparse
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('inputs', nargs='*', help='initial sources')
-    parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False, help='abort on error')
-    parser.add_argument('-r', '--readonly', dest='readonly', action='store_true', default=False, help='disable editing')
+    parser.add_argument('-d', dest='debug', action='store_true', default=False, help='abort on error')
+    parser.add_argument('-r', dest='readonly', action='store_true', default=False, help='disable editing')
+
+    for optname, v in visidata.base_options.items():
+        name, optval, defaultval, helpstr = v
+        action = 'store_true' if optval is False else 'store'
+        parser.add_argument('--' + optname, action=action, dest=optname, default=optval, help=helpstr)
+
     args = parser.parse_args()
 
-    options = visidata.options
-    options.debug = args.debug
-    options.readonly = args.readonly
+    for optname, optval in vars(args).items():
+        if optname != 'inputs':
+            visidata.options[optname] = optval
 
     inputs = args.inputs or ['.']
 
-    sources = [visidata.open_source(src) for src in inputs]
+    sources = [visidata.openSource(src) for src in inputs]
 
     visidata.run(sources)
 

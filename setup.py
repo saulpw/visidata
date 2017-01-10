@@ -3,17 +3,15 @@
 from setuptools import setup
 
 setup(name='visidata',
-      version='0.39',
+      version='0.40',
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       author='Saul Pwanson',
       author_email='vd@saul.pw',
-      url='http://saul.pw/visidata',
-      download_url='http://github.com/saulpw/visidata',
-      test_suite='visidata.tests',
+      url='http://github.com/saulpw/visidata',
+      download_url='https://github.com/saulpw/visidata/tarball/0.40',
+      test_suite='tests',
       scripts=['bin/vd'],
-      package_data={ '': ['*.tsv'] },
-      include_package_data=True,
       license='GPLv3',
       classifiers=[
           'Development Status :: 3 - Alpha',

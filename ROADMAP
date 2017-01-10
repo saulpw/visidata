@@ -28,12 +28,11 @@ A loose plan that is subject to change.
 
 ## v0.7 alpha
 - break out 'g'lobal prefix into 'all [visible] columns' and 'selected rows'
-- fill out actions like e.g. freq table diving
+- popup windows for enum selection
 
 ## v0.8
 - undo/redo
 - '.' repeat command
-
 ## v0.9
 - simple file management in VSheetDir:
   - rename with 'e'dit
