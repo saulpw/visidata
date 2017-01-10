@@ -1,6 +1,6 @@
 from visidata import *
 
-command('^O', 'expr = inputLine("eval: "); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
+command('^O', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 command('^S', 'push_pyobj(sheet.name + "_pyobj", sheet)', 'push object for this sheet')
 
 #### generic list/dict/object browsing

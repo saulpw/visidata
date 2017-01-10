@@ -1140,7 +1140,6 @@ def save_tsv(vs, fn):
 
 ### curses helpers
 
-
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[]):
     def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
         return v if i < 0 else v[:i] + s + v[i:]
@@ -1160,7 +1159,8 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         # beep
         return v
 
-    insert_mode = False
+    insert_mode = True
+    first_char = True
     v = str(value)  # value under edit
     i = 0           # index into v
     comps_idx = 2
@@ -1198,6 +1198,8 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         elif history and ch == 'KEY_DOWN':         hist_idx -= 1; v = history[hist_idx % len(history)]
         elif ch.startswith('KEY_'):                pass
         else:
+            if first_char:
+                v = ''
             if insert_mode:
                 v = splice(v, i, ch)
             else:
@@ -1207,6 +1209,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
 
         if i < 0: i = 0
         if i > len(v): i = len(v)
+        first_char = False
 
     return v
 
