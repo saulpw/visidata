@@ -130,16 +130,16 @@ command('KEY_BTAB', 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through she
 
 command('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'open most recent errors')
 
-command('R', 'sheet.filetype = inputLine("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
+command('R', 'sheet.filetype = input("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
 command('^R', 'reload(); status("reloaded")', 'reload sheet from source')
 
-command('/', 'searchRegex(inputRegex(prompt="/"), columns=[cursorCol], moveCursor=True)', 'search this column forward for regex')
-command('?', 'searchRegex(inputRegex(prompt="?"), columns=[cursorCol], backward=True, moveCursor=True)', 'search this column backward for regex')
+command('/', 'searchRegex(input("/", type="regex"), columns=[cursorCol], moveCursor=True)', 'search this column forward for regex')
+command('?', 'searchRegex(input("?", type="regex"), columns=[cursorCol], backward=True, moveCursor=True)', 'search this column backward for regex')
 command('n', 'searchRegex(columns=[cursorCol], moveCursor=True)', 'go to next match')
 command('p', 'searchRegex(columns=[cursorCol], backward=True, moveCursor=True)', 'go to previous match')
 
-command('g/', 'searchRegex(inputRegex(prompt="g/"), moveCursor=True, columns=visibleCols)', 'search regex forward in all visible columns')
-command('g?', 'searchRegex(inputRegex(prompt="g?"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
+command('g/', 'searchRegex(input("g/", type="regex"), moveCursor=True, columns=visibleCols)', 'search regex forward in all visible columns')
+command('g?', 'searchRegex(input("g?", type="regex"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
 command('gn', 'sheet.cursorRowIndex = max(searchRegex() or [cursorRowIndex])', 'go to first match')
 command('gp', 'sheet.cursorRowIndex = min(searchRegex() or [cursorRowIndex])', 'go to last match')
 
@@ -147,25 +147,32 @@ command('@', 'cursorCol.type = date', 'set column type to ISO8601 datetime')
 command('#', 'cursorCol.type = int', 'set column type to integer')
 command('$', 'cursorCol.type = str', 'set column type to string')
 command('%', 'cursorCol.type = float', 'set column type to float')
-command('~', 'cursorCol.type = detect_type(cursorValue)', 'autodetect type of column by its data')
+command('~', 'cursorCol.type = detectType(cursorValue)', 'autodetect type of column by its data')
 
-command("'", 'vd.push(vd.sheets[0].copy()).name = inputLine("name of copy:", value=vd.sheets[0].name)', 'push duplicate of this sheet')
+command("'", 'vd.push(vd.sheets[0].copy()).name = input("name of copy:", value=vd.sheets[0].name)', 'push duplicate of this sheet')
 
-command('gd', 'sheet.rows = list(filter(lambda r,sheet=sheet: not sheet.isSelected(r), sheet.rows)); _selectedRows.clear()', 'delete all selected rows')
 
 command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again')
 command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
-command('=', 'addColumn(ColumnExpr(sheet, inputLine("new column expr=")), index=cursorColIndex+1)', 'add column by expr')
-command(':', 'addColumn(ColumnRegex(sheet, inputLine("new column regex:")), index=cursorColIndex+1)', 'add column by regex')
+command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
+command(':', 'addColumn(ColumnRegex(sheet, input("new column regex:", "regex")), index=cursorColIndex+1)', 'add column by regex')
 
 command('e', 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex))', 'edit this cell')
-command('c', 'sheet.cursorVisibleColIndex = findColIdx(inputLine("goto column name: "), visibleCols)', 'goto visible column by name')
-command('r', 'sheet.cursorRowIndex = int(inputLine("goto row number: "))', 'goto row number')
+command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
+command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
 
-command('^S', 'saveSheet(sheet, inputLine("save to: "))', 'save this sheet to new file')
-command('o', 'openSource(inputLine("open: "))', 'open local file or url')
 command('d', 'rows.pop(cursorRowIndex)', 'delete this row')
+command('gd', 'sheet.rows = list(filter(lambda r,sheet=sheet: not sheet.isSelected(r), sheet.rows)); _selectedRows.clear()', 'delete all selected rows')
+
+command('o', 'openSource(input("open: ", "filename"))', 'open local file or url')
+command('^S', 'saveSheet(sheet, input("save to: ", "filename"))', 'save this sheet to new file')
+
+# slide rows/columns around
+command('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
+command('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
+command('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
+command('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
 
 command('O', 'vd.push(OptionsSheet("sheet options", base_options))', 'open Options for this sheet')
 
@@ -173,17 +180,23 @@ command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
 command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
 
-command('|', 'selectByIdx(searchRegex(inputRegex(prompt="|"), columns=[cursorCol]))', 'select rows by regex matching this columns')
-command('\\', 'unselectByIdx(searchRegex(inputRegex(prompt="\\\\"), columns=[cursorCol]))', 'unselect rows by regex matching this columns')
+command('|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=[cursorCol]))', 'select rows by regex matching this columns')
+command('\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=[cursorCol]))', 'unselect rows by regex matching this columns')
 
 command('g ', 'toggle(rows)', 'toggle select of all rows')
 command('gs', 'select(rows)', 'select all rows')
 command('gu', '_selectedRows.clear()', 'unselect all rows')
 
-command('g|', 'selectByIdx(searchRegex(inputRegex(prompt="|"), columns=visibleCols))', 'select rows by regex matching any visible column')
-command('g\\', 'unselectByIdx(searchRegex(inputRegex(prompt="\\\\"), columns=visibleCols))', 'unselect rows by regex matching any visible column')
+command('g|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=visibleCols))', 'select rows by regex matching any visible column')
+command('g\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=visibleCols))', 'unselect rows by regex matching any visible column')
 
 command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
+
+command(',', 'selectBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v)', 'select rows matching by this column')
+command('g,', 'selectBy(lambda r,v=cursorRow: r == v)', 'select all rows that match this row')
+
+command("'", 'vd.push(vd.sheets[0].copy()).rows = list(vd.sheets[0]._selectedRows.values())', 'push duplicate sheet with only selected rows')
+command("g'", 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
 
 
 # VisiData uses Python native int, float, str, and adds a simple date and anytype.
@@ -258,6 +271,14 @@ def moveListItem(L, fromidx, toidx):
     r = L.pop(fromidx)
     L.insert(toidx, r)
     return toidx
+
+def enumPivot(L, pivotIdx):
+    'like enumerate() but starts after pivotIdx and wraps around to end at pivotIdx'
+    rng = range(pivotIdx+1, len(L))
+    rng2 = range(0, pivotIdx+1)
+    for i in itertools.chain(rng, rng2):
+        yield i, L[i]
+
 
 # VisiData singleton contains all sheets
 @functools.lru_cache()
@@ -419,7 +440,7 @@ class VisiData:
                 try:
                     sheet.exec_command(g_globals, keystrokes)
                 except EscapeException as e:  # user aborted
-                    self.status(keyname(e.args[0]))
+                    self.status(e.args[0])
                 except Exception:
                     self.exceptionCaught()
 #                    self.status(sheet.commands[keystrokes].execstr)
@@ -490,6 +511,12 @@ class Sheet:
 
     def searchRegex(self, *args, **kwargs):
         return self.vd.searchRegex(self, *args, **kwargs)
+
+    def searchColumnNameRegex(self, colregex):
+        for i, c in enumPivot(self.visibleCols, self.cursorVisibleColIndex):
+            if re.search(colregex, c.name):
+                self.cursorVisibleColIndex = i
+                return
 
     def reload(self):  # default reloader looks for .loader attr
         if self.loader:
@@ -601,7 +628,7 @@ class Sheet:
         rows = list(rows)
         before = len(self._selectedRows)
         self._selectedRows.update(dict((id(r), r) for r in rows))
-        status('selected %s/%s rows' % (len(self._selectedRows)-before, len(rows)))
+        status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
 
     def unselect(self, rows):
         rows = list(rows)
@@ -616,6 +643,10 @@ class Sheet:
 
     def unselectByIdx(self, rowIdxs):
         self.unselect(self.rows[i] for i in rowIdxs)
+
+    def selectBy(self, func):
+        self.select(r for r in self.rows if func(r))
+
 ## end selection code
 
     def moveVisibleCol(self, fromVisColIdx, toVisColIdx):
@@ -945,7 +976,7 @@ def ArrayColumns(ncols):
     return [ColumnItem('', i) for i in range(ncols)]
 
 def DictKeyColumns(d):
-    return [ColumnItem(k, k, type=detect_type(d[k])) for k in d]
+    return [ColumnItem(k, k, type=detectType(d[k])) for k in d]
 
 def SubrowColumn(origcol, subrowidx, **kwargs):
     return Column(origcol.name, origcol.type,
@@ -956,21 +987,20 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
 
 ###
 
-def inputRegex(prompt):
-    ret = inputLine(prompt, type='regex')
+def input(prompt, type='', **kwargs):
+    if type:
+        ret = _inputLine(prompt, history=list(vd().lastInputs[type].keys()), **kwargs)
+        vd().lastInputs[type][ret] = ret
+    else:
+        return _inputLine(prompt, **kwargs)
     return ret
 
-def inputLine(prompt, type=''):
-    ret = _inputLine(prompt, history=list(vd().lastInputs[type].keys()))
-    vd().lastInputs[type][ret] = ret
-    return ret
-
-def _inputLine(prompt, value='', **kwargs):
+def _inputLine(prompt, **kwargs):
     'add a prompt to the bottom of the screen and get a line of input from the user'
     scr = vd().scr
     windowHeight, windowWidth = scr.getmaxyx()
     scr.addstr(windowHeight-1, 0, prompt)
-    return vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, value=value, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable, **kwargs)
+    return vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable, **kwargs)
 
 def saveSheet(vs, fn):
     basename, ext = os.path.splitext(fn)
@@ -1151,7 +1181,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         if ch == 'KEY_IC':                         insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
         elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
-        elif ch == '^C' or ch == 'KEY_ESC':        raise EscapeException(ch)
+        elif ch == '^C' or ch == '^[':             raise EscapeException(ch)
         elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1

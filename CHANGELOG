@@ -2,8 +2,9 @@
 
 ## v0.40
 - options settable with command-line arguments (`--encoding=cp437`)
-- inputRegex history with UP/DOWN
+- input() history with UP/DOWN (and viewable with `I`)
 - unicode input
+- 
 
 ## v0.38
 - sortable date
