@@ -16,5 +16,5 @@ class open_zip(Sheet):
         cachefn = zi.filename
         if not os.path.exists(cachefn):
             with zipfile.ZipFile(self.source.resolve(), 'r') as zfp:
-                self.zfp.extract(zi)
+                zfp.extract(zi)
         return openSource(cachefn)

@@ -165,7 +165,7 @@ command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row num
 command('d', 'rows.pop(cursorRowIndex)', 'delete this row')
 command('gd', 'sheet.rows = list(filter(lambda r,sheet=sheet: not sheet.isSelected(r), sheet.rows)); _selectedRows.clear()', 'delete all selected rows')
 
-command('o', 'openSource(input("open: ", "filename"))', 'open local file or url')
+command('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
 command('^S', 'saveSheet(sheet, input("save to: ", "filename"))', 'save this sheet to new file')
 
 # slide rows/columns around
@@ -527,8 +527,8 @@ class Sheet:
     def copy(self):
         c = copy.copy(self)
         c.name += "'"
-        c.topRowIndex = c.cursorRowIndex = 0
-        c.leftVisibleColIndex = c.cursorVisibleColIndex = 0
+#        c.topRowIndex = c.cursorRowIndex = 0
+#        c.leftVisibleColIndex = c.cursorVisibleColIndex = 0
         c.columns = copy.deepcopy(self.columns)
         return c
 
