@@ -20,6 +20,7 @@ import string
 import re
 import curses
 import datetime
+import random
 
 class EscapeException(Exception):
     pass
@@ -75,7 +76,7 @@ theme('c_StatusLine', 'bold', 'status line color')
 theme('c_EditCell', 'normal', 'edit cell  line color')
 theme('SheetNameFmt', '%s| ', 'status line prefix')
 
-command('KEY_F(1)', 'vd.push(HelpSheet(name + "_commands", sheet.commands))', 'open command help sheet')
+command('KEY_F(1)', 'vd.push(HelpSheet(name + "_commands", sheet.commands, base_commands))', 'open command help sheet')
 command('q',  'vd.sheets.pop(0)', 'quit the current sheet')
 
 command('KEY_LEFT',  'cursorRight(-1)', 'go one column left')
@@ -149,9 +150,6 @@ command('$', 'cursorCol.type = str', 'set column type to string')
 command('%', 'cursorCol.type = float', 'set column type to float')
 command('~', 'cursorCol.type = detectType(cursorValue)', 'autodetect type of column by its data')
 
-command("'", 'vd.push(vd.sheets[0].copy()).name = input("name of copy:", value=vd.sheets[0].name)', 'push duplicate of this sheet')
-
-
 command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again')
 command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
@@ -173,6 +171,10 @@ command('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1,
 command('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
 command('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
 command('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
+command('gH', 'moveListItem(columns, cursorColIndex, 0)', 'move this column all the way to the left')
+command('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
+command('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
+command('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
 
 command('O', 'vd.push(OptionsSheet("sheet options", base_options))', 'open Options for this sheet')
 
@@ -195,8 +197,9 @@ command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last input
 command(',', 'selectBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v)', 'select rows matching by this column')
 command('g,', 'selectBy(lambda r,v=cursorRow: r == v)', 'select all rows that match this row')
 
-command("'", 'vd.push(vd.sheets[0].copy()).rows = list(vd.sheets[0]._selectedRows.values())', 'push duplicate sheet with only selected rows')
-command("g'", 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
+command('"', 'vd.push(vd.sheets[0].copy("selected")).rows = list(vd.sheets[0]._selectedRows.values())', 'push duplicate sheet with only selected rows')
+command('g"', 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
+command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 
 
 # VisiData uses Python native int, float, str, and adds a simple date and anytype.
@@ -481,9 +484,9 @@ class LazyMap:
         self._setter(k, v)
 
 class Sheet:
-    def __init__(self, name, src=None, columns=None):
+    def __init__(self, name, *sources, columns=None):
         self.name = name
-        self.source = src
+        self.sources = sources
 
         self.rows = None         # list of opaque row objects
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
@@ -524,11 +527,10 @@ class Sheet:
         else:
             status('no reloader')
 
-    def copy(self):
+    def copy(self, suffix="'"):
         c = copy.copy(self)
-        c.name += "'"
-#        c.topRowIndex = c.cursorRowIndex = 0
-#        c.leftVisibleColIndex = c.cursorVisibleColIndex = 0
+        c.name += suffix
+        c.topRowIndex = c.cursorRowIndex = 0
         c.columns = copy.deepcopy(self.columns)
         return c
 
@@ -560,6 +562,14 @@ class Sheet:
     @name.setter
     def name(self, name):
         self._name = name.replace(' ', '_')
+
+    @property
+    def source(self):
+        if not self.sources:
+            return None
+        else:
+            assert len(self.sources) == 1, len(self.sources)
+            return self.sources[0]
 
     @property
     def nVisibleRows(self):
@@ -1045,10 +1055,13 @@ def getTextContents(p):
 
 class HelpSheet(Sheet):
     def reload(self):
-        self.rows = list(self.source.values())
-        self.columns = ArrayNamedColumns('keystrokes action'.split()) + [
-                Column('with_g_prefix', str, lambda r,self=self: self.source.get('g' + r[0], '0')),
-                ColumnItem('execstr', 'execstr', width=0)
+        self.rows = []
+        for i, src in enumerate(self.sources):
+            self.rows.extend((i, v) for v in src.values())
+        self.columns = [SubrowColumn(ColumnItem('keystrokes', 0), 1),
+                        SubrowColumn(ColumnItem('action', 1), 1),
+                        Column('with_g_prefix', str, lambda r,self=self: self.sources[r[0]].get('g' + r[1][0], (None,'-'))[1]),
+                        SubrowColumn(ColumnItem('execstr', 'execstr', width=0), 1)
                 ]
 
 
