@@ -96,8 +96,12 @@ class LazyMapping:
         return eval(col.expr, {}, self)
 
     def __getitem__(self, colname):
-        colidx = [c.name for c in self.sheet.columns].index(colname)
-        return self.sheet.columns[colidx].getValue(self.row)
+        colnames = [c.name for c in self.sheet.columns]
+        if colname in colnames:
+            colidx = colnames.index(colname)
+            return self.sheet.columns[colidx].getValue(self.row)
+        else:
+            raise KeyError(colname)
 
     def __getattr__(self, colname):
         return self.__getitem__(colname)
