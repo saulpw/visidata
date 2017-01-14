@@ -10,6 +10,7 @@ class SheetsSheet(SheetList):
         super().__init__('sheets', vd().sheets, columns=AttrColumns('name nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
 
     def reload(self):
+        super().reload()
         self.rows = vd().sheets
         self.command('^J', 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet')
         self.command('&', 'vd.replace(SheetJoin(selectedRows, jointype="&"))', 'open inner join of selected sheets')
@@ -94,3 +95,26 @@ class SheetJoin(Sheet):
         elif self.jointype == '~':  # diff join (only rows without matching key on all sheets)
             self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if not all(combinedRow))
 
+# from https://gist.github.com/liuw/2407154
+def ctype_async_raise(thread_obj, exception):
+    def dict_find(D, value):
+        for k, v in D.items():
+            if v is value:
+                return k
+
+        raise ValueError("no such value in dict")
+
+    import ctypes
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(dict_find(threading._active, thread_obj)),
+                                               ctypes.py_object(exception))
+
+command('M', 'vd.push(CommandHistorySheet("cmdhistory", vd.cmdhistory))', 'push command history sheet')
+class CommandHistorySheet(Sheet):
+    def reload(self):
+        self.rows = vd().cmdhistory
+        self.columns = [
+            ColumnItem('keystrokes', 0),
+            Column('elapsed_s', type=float, getter=lambda r: (r[2] or time.process_time())-r[1]),
+            ColumnItem('notes', 4),
+        ]
+        self.command('^C', 'ctype_async_raise(cursorRow[3], EscapeException)', 'cancel this action')

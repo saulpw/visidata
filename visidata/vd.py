@@ -8,7 +8,6 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
-import locale
 import sys
 import os
 import os.path
@@ -18,6 +17,8 @@ import functools
 import itertools
 import string
 import re
+import threading
+import time
 import curses
 import datetime
 import random
@@ -44,6 +45,8 @@ option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
 option('SubsheetSep', '~', 'string joining multiple sheet names')
+option('cmdhistThreshold_ms', 1, 'minimum amount of time taken before adding command to cmdhist')
+option('timeout_ms', '100', 'curses timeout in ms')
 
 theme('ch_Ellipsis', '…')
 theme('ch_KeySep', '/')
@@ -300,11 +303,14 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self.statusHistory = []
-        self._status = [__version__]
+        self._status = [__version__]  # statuses shown until next action
         self.lastErrors = []
         self.lastRegex = None
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
-        self.nchars = 0
+        self.cmdhistory = []  # list of [keystrokes, start_time, end_time, thread, notes]
+        self.keystrokes = ''
+        self.ticks = 0
+        self.inInput = False
 
     def status(self, s):
         strs = str(s)
@@ -317,6 +323,22 @@ class VisiData:
         v = editText(self.scr, y, x, w, **kwargs)
         self.status('"%s"' % v)
         return v
+
+    def getkeystroke(self):
+        k = None
+        while not k:
+            self.ticks += 1
+            try:
+                k = self.scr.get_wch()
+                self.drawRightStatus()
+            except Exception:
+                return ''  # curses timeout
+
+        if isinstance(k, str):
+            if ord(k) >= 32:
+                return k
+            k = ord(k)
+        return curses.keyname(k).decode('utf-8')
 
     def searchRegex(self, sheet, regex=None, columns=[], backward=False, moveCursor=False):
         'sets row index if moveCursor; otherwise returns list of row indexes'
@@ -374,7 +396,7 @@ class VisiData:
         self.lastErrors.append(traceback.format_exc().strip())
         self.lastErrors = self.lastErrors[-10:]  # keep most recent
         if status:
-            self.status(self.lastErrors[-1].splitlines()[-1])
+            return self.status(self.lastErrors[-1].splitlines()[-1])
         if options.debug:
             raise
 
@@ -388,18 +410,23 @@ class VisiData:
             self.exceptionCaught()
         self._status = []
 
-    def drawRightStatus(self, rstatus):
+    def drawRightStatus(self):
+        spinny = '-\\|/'
         try:
+            rstatus = self.keystrokes + ' ' + spinny[self.ticks%len(spinny)]
             draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.c_StatusLine])
+            curses.doupdate()
         except Exception as e:
             self.exceptionCaught()
 
     def run(self, scr):
         global windowHeight, windowWidth, sheet
         windowHeight, windowWidth = scr.getmaxyx()
+        scr.timeout(int(options.timeout_ms))
         self.scr = scr
 
-        keystrokes = ''
+        self.keystrokes = ''
+        activeThreads = []
         while True:
             if not self.sheets:
                 # if no more sheets, exit
@@ -415,17 +442,14 @@ class VisiData:
                 self.exceptionCaught()
 
             self.drawLeftStatus(sheet)
-            self.drawRightStatus(keystrokes)  # visible during this getkeystroke
+            self.drawRightStatus()  # visible during this getkeystroke
 
-            curses.doupdate()
+            if self.keystrokes not in self.allPrefixes:
+                self.keystrokes = ''
 
-            if keystrokes not in self.allPrefixes:
-                keystrokes = ''
-
-            keystroke = getkeystroke(scr)
-            self.nchars += 1
-            keystrokes += keystroke
-            self.drawRightStatus(keystrokes)  # visible for commands that wait for input
+            keystroke = self.getkeystroke()
+            self.keystrokes += keystroke
+            self.drawRightStatus()  # visible for commands that wait for input
 
             if keystroke in self.allPrefixes:
                 pass
@@ -441,12 +465,27 @@ class VisiData:
                     self.exceptionCaught()
             else:
                 try:
-                    sheet.exec_command(g_globals, keystrokes)
-                except EscapeException as e:  # user aborted
-                    self.status(e.args[0])
+                    row = [self.keystrokes, time.process_time(), 0, None, '']
+                    cmdt = threading.Thread(target=sheet.exec_command, args=(g_globals,self.keystrokes, row))
+                    row[3] = cmdt
+                    cmdt.start()
+                    self.cmdhistory.append(row)
+                    cmdt.join(0.5)  # wait for up to 500ms
+                    if self.inInput:
+                        cmdt.join()  # just do it
+                        assert not self.inInput
+                        del self.cmdhistory[-1]
+                    elif cmdt.is_alive():
+                        activeThreads.append((cmdt, self.cmdhistory[-1]))
+                    else:
+                        del self.cmdhistory[-1]
+
+                    for i, (t, histrow) in enumerate(activeThreads):
+                        if not t.is_alive():
+                            del activeThreads[i]
+                            histrow[2] = time.process_time()
                 except Exception:
                     self.exceptionCaught()
-#                    self.status(sheet.commands[keystrokes].execstr)
 
             sheet.checkCursor()
 
@@ -459,9 +498,10 @@ class VisiData:
         if vs:
             if vs in self.sheets:
                 self.sheets.remove(vs)
+                self.sheets.insert(0, vs)
             elif not vs.rows or not vs.columns:  # first time
+                self.sheets.insert(0, vs)
                 vs.reload()
-            self.sheets.insert(0, vs)
             return vs
 # end VisiData class
 
@@ -488,7 +528,7 @@ class Sheet:
         self.name = name
         self.sources = sources
 
-        self.rows = None         # list of opaque row objects
+        self.rows = []           # list of opaque row objects
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
 
@@ -537,7 +577,7 @@ class Sheet:
     def __repr__(self):
         return self.name
 
-    def exec_command(self, vdglobals, keystrokes):
+    def exec_command(self, vdglobals, keystrokes, cmdrow):
         cmd = self.commands.get(keystrokes)
         if not cmd:
             cmd = base_commands.get(keystrokes)
@@ -550,7 +590,14 @@ class Sheet:
         self.sheet = self
         locs = LazyMap(dir(self), lambda k,s=self: getattr(s, k), lambda k,v,s=self: setattr(s, k, v))
         _, _, execstr = cmd
-        exec(execstr, vdglobals, locs)
+        try:
+            exec(execstr, vdglobals, locs)
+        except EscapeException as e:  # user aborted
+            cmdrow[4] = self.vd.status('EscapeException ' + ''.join(e.args[0:]))
+        except Exception:
+            cmdrow[4] = self.vd.exceptionCaught()
+#            self.vd.status(sheet.commands[self.keystrokes].execstr)
+
 
     def clipdraw(self, y, x, s, attr, w):
         return draw_clip(self.scr, y, x, s, attr, w)
@@ -1010,7 +1057,10 @@ def _inputLine(prompt, **kwargs):
     scr = vd().scr
     windowHeight, windowWidth = scr.getmaxyx()
     scr.addstr(windowHeight-1, 0, prompt)
-    return vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable, **kwargs)
+    vd().inInput = True
+    ret = vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable, **kwargs)
+    vd().inInput = False
+    return ret
 
 def saveSheet(vs, fn):
     basename, ext = os.path.splitext(fn)
@@ -1126,21 +1176,41 @@ def open_tsv(p):
     vs.loader = lambda vs=vs: load_tsv(vs)
     return vs
 
+def phase(s):
+    return s
+
 # separate function, so reloads can be triggered
 def load_tsv(vs):
     'parses contents and populates vs'
+    phase('read')
     contents = getTextContents(vs.source)
     header_lines = int(options.headerlines)
+    phase('splitlines')
     lines = contents.splitlines()
+    vs.rows = []
     if lines:
-        rows = [L.split('\t') for L in lines if L]
-        if header_lines:
-            # columns ideally reflect the max number of fields over all rows
-            vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*rows[:header_lines]))
-        else:
-            vs.columns = ArrayColumns(len(rows[0]))
+        phase('splitfields')
+        it = iter(lines)
+        i = 0
+        while i < (header_lines or 1):
+            L = next(it)
+            if L:
+                vs.rows.append(L.split('\t'))
+                i += 1
 
-        vs.rows = rows[header_lines:]
+        if header_lines == 0:
+            vs.columns = ArrayColumns(len(vs.rows[0]))
+        else:
+            # columns ideally reflect the max number of fields over all rows
+            # but that's a lot of work for a large dataset
+            vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*vs.rows[:header_lines]))
+            vs.rows = vs.rows[header_lines:]
+
+        for L in it:
+            if L:
+                vs.rows.append(L.split('\t'))
+    phase('done')
+
     return vs
 
 def save_tsv(vs, fn):
@@ -1190,7 +1260,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
 
         scr.addstr(y, x, dispval, attr)
         scr.move(y, x+dispi)
-        ch = getkeystroke(scr)
+        ch = vd().getkeystroke()
         if ch == 'KEY_IC':                         insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
         elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
@@ -1339,7 +1409,7 @@ def openSource(p, filetype=None):
         vs = None
 
     if vs:
-        status('opened %s as %s' % (p.name, filetype))
+        status('opening %s as %s' % (p.name, filetype))
     return vs
 
 def run(sheetlist=[]):
@@ -1351,15 +1421,6 @@ def run(sheetlist=[]):
     ret = wrapper(curses_main, sheetlist)
     if ret:
         print(ret)
-
-def getkeystroke(scr):
-    k = scr.get_wch()
-    if isinstance(k, str):
-        if ord(k) >= 32:
-            return k
-        k = ord(k)
-    return curses.keyname(k).decode('utf-8')
-
 
 def curses_main(_scr, sheetlist=[]):
     for vs in sheetlist:

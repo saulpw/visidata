@@ -1,10 +1,15 @@
 # VisiData version history
 
+## v0.41
+- asynchronous commands (each in its own thread) with `M` sheet of long-running commands and `^C` cancel
+
 ## v0.40
 - options settable with command-line arguments (`--encoding=cp437`)
 - input() history with UP/DOWN (and viewable with `I`)
 - unicode input
-- 
+- editText clears value on first typing
+- `"` duplicates sheet with only selected rows; `g"` duplicates entire sheet verbatim
+- `'` duplicates row; `g'` does what?
 
 ## v0.38
 - sortable date
