@@ -2,6 +2,9 @@
 
 ## v0.41
 - asynchronous commands (each in its own thread) with `M` sheet of long-running commands and `^C` cancel
+- 'P'rofile sheet
+- '?' random sample of current sheet
+- headerlines default now 1
 
 ## v0.40
 - options settable with command-line arguments (`--encoding=cp437`)

@@ -3,7 +3,7 @@
 # VisiData: a curses interface for exploring and arranging tabular data
 #
 
-__version__ = 'saul.pw/VisiData v0.40'
+__version__ = 'saul.pw/VisiData v0.41'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -21,7 +21,12 @@ import threading
 import time
 import curses
 import datetime
+import ctypes  # async exception
+import io
+import cProfile
+import pstats
 import random
+
 
 class EscapeException(Exception):
     pass
@@ -40,7 +45,7 @@ theme = option
 option('debug', False, 'abort on error and display stacktrace')
 option('readonly', False, 'disable saving')
 
-option('headerlines', '0', 'parse first N rows of .csv/.tsv as column names')
+option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
@@ -78,6 +83,10 @@ theme('ch_Newline', '\\n', 'displayable newline')
 theme('c_StatusLine', 'bold', 'status line color')
 theme('c_EditCell', 'normal', 'edit cell  line color')
 theme('SheetNameFmt', '%s| ', 'status line prefix')
+theme('ch_spinny', '◴◷◶◵', 'characters shown while commands are processing')
+
+ENTER='^J'
+ESC='^['
 
 command('KEY_F(1)', 'vd.push(HelpSheet(name + "_commands", sheet.commands, base_commands))', 'open command help sheet')
 command('q',  'vd.sheets.pop(0)', 'quit the current sheet')
@@ -200,7 +209,7 @@ command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last input
 command(',', 'selectBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v)', 'select rows matching by this column')
 command('g,', 'selectBy(lambda r,v=cursorRow: r == v)', 'select all rows that match this row')
 
-command('"', 'vd.push(vd.sheets[0].copy("selected")).rows = list(vd.sheets[0]._selectedRows.values())', 'push duplicate sheet with only selected rows')
+command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0]._selectedRows.values())', 'push duplicate sheet with only selected rows')
 command('g"', 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 
@@ -311,6 +320,7 @@ class VisiData:
         self.keystrokes = ''
         self.ticks = 0
         self.inInput = False
+        self.tasks = []
 
     def status(self, s):
         strs = str(s)
@@ -326,13 +336,15 @@ class VisiData:
 
     def getkeystroke(self):
         k = None
-        while not k:
+        if [t for t in self.tasks if t.thread.is_alive()]:
             self.ticks += 1
-            try:
-                k = self.scr.get_wch()
-                self.drawRightStatus()
-            except Exception:
-                return ''  # curses timeout
+        else:
+            self.ticks = 0
+        try:
+            k = self.scr.get_wch()
+            self.drawRightStatus()
+        except Exception:
+            return ''  # curses timeout
 
         if isinstance(k, str):
             if ord(k) >= 32:
@@ -408,12 +420,12 @@ class VisiData:
             draw_clip(self.scr, windowHeight-1, 0, statusstr, attr, windowWidth)
         except Exception as e:
             self.exceptionCaught()
-        self._status = []
 
     def drawRightStatus(self):
-        spinny = '-\\|/'
         try:
-            rstatus = self.keystrokes + ' ' + spinny[self.ticks%len(spinny)]
+            spinny = options.ch_spinny
+            sheet = self.sheets[0]
+            rstatus = ' '.join((self.keystrokes, sheet.statusLine, spinny[self.ticks%len(spinny)] if self.ticks > 0 else ''))
             draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.c_StatusLine])
             curses.doupdate()
         except Exception as e:
@@ -426,15 +438,12 @@ class VisiData:
         self.scr = scr
 
         self.keystrokes = ''
-        activeThreads = []
         while True:
             if not self.sheets:
                 # if no more sheets, exit
                 return
 
             sheet = self.sheets[0]
-            if sheet.nRows == 0:
-                self.status('no rows')
 
             try:
                 sheet.draw(scr)
@@ -444,11 +453,13 @@ class VisiData:
             self.drawLeftStatus(sheet)
             self.drawRightStatus()  # visible during this getkeystroke
 
-            if self.keystrokes not in self.allPrefixes:
-                self.keystrokes = ''
-
             keystroke = self.getkeystroke()
-            self.keystrokes += keystroke
+            if keystroke:
+                if self.keystrokes not in self.allPrefixes:
+                    self.keystrokes = ''
+
+                self._status = []
+                self.keystrokes += keystroke
             self.drawRightStatus()  # visible for commands that wait for input
 
             if keystroke in self.allPrefixes:
@@ -464,28 +475,12 @@ class VisiData:
                 except Exception:
                     self.exceptionCaught()
             else:
-                try:
-                    row = [self.keystrokes, time.process_time(), 0, None, '']
-                    cmdt = threading.Thread(target=sheet.exec_command, args=(g_globals,self.keystrokes, row))
-                    row[3] = cmdt
-                    cmdt.start()
-                    self.cmdhistory.append(row)
-                    cmdt.join(0.5)  # wait for up to 500ms
-                    if self.inInput:
-                        cmdt.join()  # just do it
-                        assert not self.inInput
-                        del self.cmdhistory[-1]
-                    elif cmdt.is_alive():
-                        activeThreads.append((cmdt, self.cmdhistory[-1]))
-                    else:
-                        del self.cmdhistory[-1]
+                sheet.exec_command(g_globals, self.keystrokes)
 
-                    for i, (t, histrow) in enumerate(activeThreads):
-                        if not t.is_alive():
-                            del activeThreads[i]
-                            histrow[2] = time.process_time()
-                except Exception:
-                    self.exceptionCaught()
+            for i, task in enumerate(self.tasks):
+                if not task.endTime and not task.thread.is_alive():
+                    task.endTime = time.process_time()
+                    task.status += 'done'
 
             sheet.checkCursor()
 
@@ -497,11 +492,15 @@ class VisiData:
     def push(self, vs):
         if vs:
             if vs in self.sheets:
+                status('repushed %s' % vs.name)
                 self.sheets.remove(vs)
                 self.sheets.insert(0, vs)
             elif not vs.rows or not vs.columns:  # first time
+                status('pushed %s' % vs.name)
                 self.sheets.insert(0, vs)
                 vs.reload()
+            else:
+                self.sheets.insert(0, vs)
             return vs
 # end VisiData class
 
@@ -577,7 +576,7 @@ class Sheet:
     def __repr__(self):
         return self.name
 
-    def exec_command(self, vdglobals, keystrokes, cmdrow):
+    def exec_command(self, vdglobals, keystrokes):
         cmd = self.commands.get(keystrokes)
         if not cmd:
             cmd = base_commands.get(keystrokes)
@@ -593,9 +592,9 @@ class Sheet:
         try:
             exec(execstr, vdglobals, locs)
         except EscapeException as e:  # user aborted
-            cmdrow[4] = self.vd.status('EscapeException ' + ''.join(e.args[0:]))
+            self.vd.status('EscapeException ' + ''.join(e.args[0:]))
         except Exception:
-            cmdrow[4] = self.vd.exceptionCaught()
+            self.vd.exceptionCaught()
 #            self.vd.status(sheet.commands[self.keystrokes].execstr)
 
 
@@ -656,7 +655,7 @@ class Sheet:
 
     @property
     def statusLine(self):
-        return 'row %s/%s; %d/%d columns visible' % (self.cursorRowIndex, len(self.rows), self.nVisibleCols, self.nCols)
+        return 'row %s/%s col %d/%d' % (self.cursorRowIndex, len(self.rows), self.cursorColIndex, self.nCols)
 
     @property
     def nRows(self):
@@ -853,7 +852,7 @@ class Sheet:
         self.windowHeight, self.windowWidth = scr.getmaxyx()
         sepchars = options.ch_ColumnSep
         if not self.columns:
-            return status('no columns')
+            return
 
         self.rowLayout = {}
         self.calcColLayout()
@@ -1111,7 +1110,7 @@ class HelpSheet(Sheet):
         self.columns = [SubrowColumn(ColumnItem('keystrokes', 0), 1),
                         SubrowColumn(ColumnItem('action', 1), 1),
                         Column('with_g_prefix', str, lambda r,self=self: self.sources[r[0]].get('g' + r[1][0], (None,'-'))[1]),
-                        SubrowColumn(ColumnItem('execstr', 'execstr', width=0), 1)
+                        SubrowColumn(ColumnItem('execstr', 2, width=0), 1)
                 ]
 
 
@@ -1159,6 +1158,79 @@ class OptionsSheet(Sheet):
         self.command('^J', 'cursorRow[1] = editCell(1)', 'edit this option')
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
 
+
+# define @async for potentially long-running functions
+#   when function is called, instead launches a thread
+#   adds a row to cmdhistory
+#   ENTER on that row pushes a profile of the thread
+
+class Task:
+    def __init__(self, name):
+        self.name = name
+        self.startTime = time.process_time()
+        self.endTime = None
+        self.status = ''
+        self.thread = None
+        self.profileResults = None
+
+    def start(self, func, *args, **kwargs):
+        self.thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+        self.thread.start()
+
+    @property
+    def elapsed_s(self):
+        return (self.endTime or time.process_time())-self.startTime
+
+#execThread(self.keystrokes, sheet.exec_command, g_globals, self.keystrokes, row)
+def async(func):
+    def execThread(*args, **kwargs):
+        t = Task(func.__name__)
+        t.start(thread_profileCode, func, t, *args, **kwargs)
+        vd().tasks.append(t)
+        return t
+    return execThread
+
+def thread_profileCode(func, task, *args, **kwargs):
+    pr = cProfile.Profile()
+    pr.enable()
+    ret = func(*args, **kwargs)
+    pr.disable()
+    s = io.StringIO()
+    ps = pstats.Stats(pr, stream=s)
+    ps.print_stats()
+    task.profileResults = s.getvalue()
+    return ret
+
+
+# from https://gist.github.com/liuw/2407154
+def ctype_async_raise(thread_obj, exception):
+    def dict_find(D, value):
+        for k, v in D.items():
+            if v is value:
+                return k
+
+        raise ValueError("no such value in dict")
+
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(dict_find(threading._active, thread_obj)),
+                                               ctypes.py_object(exception))
+
+command('^C', 'ctype_async_raise(vd.tasks[-1].thread, EscapeException)', 'cancel most recent task')
+command('T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
+
+class TasksSheet(Sheet):
+    def reload(self):
+        self.command('^C', 'ctype_async_raise(cursorRow.thread, EscapeException)', 'cancel this action')
+        self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
+        self.columns = [
+            ColumnAttr('name'),
+            ColumnAttr('elapsed_s', type=float),
+            ColumnAttr('status'),
+        ]
+        self.rows = vd().tasks
+
+def ProfileSheet(task):
+    return TextSheet(task.name + '_profile', task.profileResults)
+
 #### enable external addons
 def open_py(p):
     contents = getTextContents(p)
@@ -1176,20 +1248,14 @@ def open_tsv(p):
     vs.loader = lambda vs=vs: load_tsv(vs)
     return vs
 
-def phase(s):
-    return s
-
-# separate function, so reloads can be triggered
+@async
 def load_tsv(vs):
     'parses contents and populates vs'
-    phase('read')
     contents = getTextContents(vs.source)
     header_lines = int(options.headerlines)
-    phase('splitlines')
     lines = contents.splitlines()
     vs.rows = []
     if lines:
-        phase('splitfields')
         it = iter(lines)
         i = 0
         while i < (header_lines or 1):
@@ -1209,7 +1275,7 @@ def load_tsv(vs):
         for L in it:
             if L:
                 vs.rows.append(L.split('\t'))
-    phase('done')
+    status('loaded')
 
     return vs
 
@@ -1348,7 +1414,6 @@ def wrapper(f, *args):
 
 class Path:
     '''should be compatible with Python 3.4 pathlib.Path.
-       transition to pathlib if/when we adopt async from 3.5.
        marginal desire to maintain compatibility with older Python versions.'''
     def __init__(self, fqpn):
         self.fqpn = fqpn
