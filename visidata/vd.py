@@ -512,7 +512,7 @@ class VisiData:
             if vs in self.sheets:
                 self.sheets.remove(vs)
                 self.sheets.insert(0, vs)
-            elif not vs.rows or not vs.columns:  # first time
+            elif len(vs.rows) == 0:  # first time
                 self.sheets.insert(0, vs)
                 vs.reload()
             else:
@@ -671,7 +671,7 @@ class Sheet:
 
     @property
     def statusLine(self):
-        return 'row %s/%s col %d/%d' % (self.cursorRowIndex, len(self.rows), self.cursorColIndex, self.nCols)
+        return 'row %s/%s col %d/%d' % (self.cursorRowIndex, self.nRows, self.cursorColIndex, self.nCols)
 
     @property
     def nRows(self):
@@ -755,7 +755,7 @@ class Sheet:
 
     def skipDown(self):
         pv = self.cursorValue
-        for i in range(self.cursorRowIndex+1, len(self.rows)):
+        for i in range(self.cursorRowIndex+1, self.nRows):
             if self.cellValue(i, self.cursorColIndex) != pv:
                 self.cursorRowIndex = i
                 return
@@ -773,10 +773,10 @@ class Sheet:
 
     def checkCursor(self):
         # keep cursor within actual available rowset
-        if not self.rows or self.cursorRowIndex <= 0:
+        if self.nRows == 0 or self.cursorRowIndex <= 0:
             self.cursorRowIndex = 0
-        elif self.cursorRowIndex >= len(self.rows):
-            self.cursorRowIndex = len(self.rows)-1
+        elif self.cursorRowIndex >= self.nRows:
+            self.cursorRowIndex = self.nRows-1
 
         if self.cursorVisibleColIndex <= 0:
             self.cursorVisibleColIndex = 0
@@ -785,8 +785,8 @@ class Sheet:
 
         if self.topRowIndex <= 0:
             self.topRowIndex = 0
-        elif self.topRowIndex > len(self.rows):
-            self.topRowIndex = len(self.rows)-1
+        elif self.topRowIndex > self.nRows:
+            self.topRowIndex = self.nRows-1
 
         # (x,y) is relative cell within screen viewport
         x = self.cursorVisibleColIndex - self.leftVisibleColIndex
@@ -821,7 +821,7 @@ class Sheet:
     def calcColLayout(self):
         self.visibleColLayout = {}
         x = 0
-        for vcolidx in range(0, len(self.visibleCols)):
+        for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None:
                 col.width = col.getMaxWidth(self.visibleRows)+len(options.ch_LeftMore)+len(options.ch_RightMore)
@@ -879,7 +879,7 @@ class Sheet:
 
                 y = numHeaderRows
                 for rowidx in range(0, self.nVisibleRows):
-                    if self.topRowIndex + rowidx >= len(self.rows):
+                    if self.topRowIndex + rowidx >= self.nRows:
                         break
 
                     self.rowLayout[self.topRowIndex+rowidx] = y
@@ -953,7 +953,7 @@ class Column:
 
     @name.setter
     def name(self, name):
-        self._name = name.replace(' ', '_')
+        self._name = str(name).replace(' ', '_')
 
     def deduceFmtstr(self):
         if self.fmtstr is not None: return self.fmtstr
