@@ -52,7 +52,9 @@ option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 option('SubsheetSep', '~', 'string joining multiple sheet names')
 option('cmdhistThreshold_ms', 1, 'minimum amount of time taken before adding command to cmdhist')
 option('timeout_ms', '100', 'curses timeout in ms')
+option('profile', True, 'profile async tasks')
 
+theme('progressBarWidth', 6, 'number of characters in progress bar')
 theme('ch_Ellipsis', '…')
 theme('ch_KeySep', '/')
 theme('ch_WrongType', '~')
@@ -62,6 +64,9 @@ theme('ch_EditPadChar', '_')
 theme('ch_LeftMore', '<')
 theme('ch_RightMore', '>')
 theme('ch_ColumnSep', '|', 'chars between columns')
+theme('ch_fuse', '…', 'fuse progress bar unfinished')
+theme('ch_burnt', ' ', 'finished progress')
+theme('ch_burny', '!¡:*;', 'burny characters')
 
 theme('ch_FunctionError', '¿', 'when computation fails due to exception')
 theme('ch_VisibleNone', '',  'visible contents of a cell whose value was None')
@@ -321,6 +326,8 @@ class VisiData:
         self.ticks = 0
         self.inInput = False
         self.tasks = []
+        self.progressTotal = 1
+        self.progressMade = 1
 
     def status(self, s):
         strs = str(s)
@@ -328,6 +335,17 @@ class VisiData:
         self.statusHistory.insert(0, strs)
         del self.statusHistory[100:]  # keep most recent 100 only
         return s
+
+    @property
+    def progressBar(self):
+        n = self.progressMade
+        total = self.progressTotal
+        width = int(options.progressBarWidth)
+        if n == total: return options.ch_burnt * width
+        burny = options.ch_burny
+        burnt = options.ch_burnt * int(n*width/total)
+        fuse = options.ch_fuse * int((total-n)*width/total)
+        return fuse+burny[n%len(burny)]+burnt
 
     def editText(self, y, x, w, **kwargs):
         v = editText(self.scr, y, x, w, **kwargs)
@@ -425,7 +443,7 @@ class VisiData:
         try:
             spinny = options.ch_spinny
             sheet = self.sheets[0]
-            rstatus = ' '.join((self.keystrokes, sheet.statusLine, spinny[self.ticks%len(spinny)] if self.ticks > 0 else ''))
+            rstatus = '%s  %8d%s' % (self.keystrokes, sheet.nRows, self.progressBar or ' rows')
             draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.c_StatusLine])
             curses.doupdate()
         except Exception as e:
@@ -480,7 +498,7 @@ class VisiData:
             for i, task in enumerate(self.tasks):
                 if not task.endTime and not task.thread.is_alive():
                     task.endTime = time.process_time()
-                    task.status += 'done'
+                    task.status += 'EOT'
 
             sheet.checkCursor()
 
@@ -492,11 +510,9 @@ class VisiData:
     def push(self, vs):
         if vs:
             if vs in self.sheets:
-                status('repushed %s' % vs.name)
                 self.sheets.remove(vs)
                 self.sheets.insert(0, vs)
             elif not vs.rows or not vs.columns:  # first time
-                status('pushed %s' % vs.name)
                 self.sheets.insert(0, vs)
                 vs.reload()
             else:
@@ -1184,19 +1200,32 @@ class Task:
 #execThread(self.keystrokes, sheet.exec_command, g_globals, self.keystrokes, row)
 def async(func):
     def execThread(*args, **kwargs):
-        t = Task(func.__name__)
-        t.start(thread_profileCode, func, t, *args, **kwargs)
+        t = Task(func.__name__ + ' ' + ','.join(str(x) for x in args))
+        if bool(options.profile):
+            t.start(thread_profileCode, t, func, *args, **kwargs)
+        else:
+            t.start(try_func, t, func, *args, **kwargs)
         vd().tasks.append(t)
         return t
     return execThread
 
-def thread_profileCode(func, task, *args, **kwargs):
+def try_func(task, func, *args, **kwargs):
+    try:
+        ret = func(*args, **kwargs)
+        return ret
+    except EscapeException as e:  # user aborted
+        task.status += status('canceled: ' + ' '.join(e.args))
+    except Exception as e:
+        task.status += status('%s: %s' % (type(e).__name__, ' '.join(e.args)))
+        exceptionCaught()
+
+def thread_profileCode(task, func, *args, **kwargs):
     pr = cProfile.Profile()
     pr.enable()
-    ret = func(*args, **kwargs)
+    ret = try_func(task, func, *args, **kwargs)
     pr.disable()
     s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s)
+    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
     ps.print_stats()
     task.profileResults = s.getvalue()
     return ret
@@ -1272,9 +1301,13 @@ def load_tsv(vs):
             vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*vs.rows[:header_lines]))
             vs.rows = vs.rows[header_lines:]
 
+        _vd = vd()
+        _vd.progressTotal += len(lines) - header_lines
         for L in it:
             if L:
                 vs.rows.append(L.split('\t'))
+            _vd.progressMade += 1
+
     status('loaded')
 
     return vs

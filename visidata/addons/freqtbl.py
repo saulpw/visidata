@@ -19,21 +19,23 @@ class SheetFreqTable(Sheet):
         self.command(' ', 'source.toggle(cursorRow[1])', 'toggle these entries')
         self.command('s', 'source.select(cursorRow[1])', 'select these entries')
         self.command('u', 'source.unselect(cursorRow[1])', 'unselect these entries')
-        self.command('^J', 'vd.push(source.copy()).rows = values[str(columns[0].getValue(cursorRow))]', 'push new sheet with only this value')
+        self.command('^J', 'vd.push(source.copy()).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value')
 
     @async
     def reload(self):
-        self.rowidx = {}
+        rowidx = {}
         self.rows = []
+        _vd = vd()
+        _vd.progressTotal += len(self.source.rows)
         for r in self.source.rows:
+            _vd.progressMade += 1
             v = str(self.origCol.getValue(r))
-            i = self.rowidx.get(v)
-            if i is None:
-                self.rowidx[v] = len(self.rows)
-                self.rows.append((v, [r]))
-            else:
-                self.rows[i][1].append(r)
+            histrow = rowidx.get(v)
+            if histrow is None:
+                histrow = (v, [r])
+                rowidx[v] = histrow
+                self.rows.append(histrow)
+            histrow[1].append(r)
 
         self.rows.sort(key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
         self.largest = len(self.rows[0][1])+1
-
