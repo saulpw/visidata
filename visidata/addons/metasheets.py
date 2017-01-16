@@ -4,6 +4,18 @@ command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
 command('C', 'vd.push(SheetColumns(sheet))', 'open Columns for this sheet')
 
 option('ColumnStats', False, 'include mean/median/etc on Column sheet')
+command(':', 'splitColumn(sheet, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
+
+
+def splitColumn(sheet, origcol, exampleVal, ch):
+    maxcols = len(exampleVal.split(ch))
+    if maxcols <= 1:
+        return status('move cursor to valid example row to split by this column')
+
+    for i in range(maxcols):
+        sheet.columns.insert(sheet.cursorColIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i: c.getValue(r).split(ch)[i])))
+    origcol.width = 0
+
 
 class SheetsSheet(SheetList):
     def __init__(self):
@@ -22,8 +34,23 @@ class SheetColumns(Sheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
 
+        # on the Columns sheet, these affect the 'row' (column in the source sheet)
+        self.command('@', 'cursorRow.type = date; cursorDown(+1)', 'set source column type to datetime')
+        self.command('#', 'cursorRow.type = int; cursorDown(+1)', 'set source column type to integer')
+        self.command('$', 'cursorRow.type = str; cursorDown(+1)', 'set source column type to string')
+        self.command('%', 'cursorRow.type = float; cursorDown(+1)', 'set source column type to decimal numeric type')
+        self.command('~', 'cursorRow.type = detectType(cursorRow.getValue(source.cursorRow)); cursorDown(+1)', 'autodetect type of source column using its data')
+        self.command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'toggle key column on source sheet')
+        self.command('-', 'cursorRow.width = 0', 'hide column on source sheet')
+        self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'set source column width to max width of its rows')
+
+        self.command('+', 'rows.insert(cursorRowIndex+1, Column("+".join(c.name for c in selectedRows), getter=lambda r,cols=selectedRows,ch=input("join char: "): ch.join(filter(None, (c.getValue(r) for c in cols)))))', 'join columns with the given char')
+        self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
+
+
     def reload(self):
         self.rows = self.source.columns
+        self.cursorRowIndex = self.source.cursorColIndex
         self.columns = [
             ColumnAttr('name', str),
             ColumnAttr('width', int),
@@ -31,7 +58,7 @@ class SheetColumns(Sheet):
             ColumnAttr('fmtstr', str),
             ColumnAttr('expr', str),
             Column('value',  anytype, lambda c,sheet=self.source: c.getValue(sheet.cursorRow)),
-            ]
+        ]
 
         if options.ColumnStats:
             self.columns.extend([
@@ -45,15 +72,6 @@ class SheetColumns(Sheet):
                 Column('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
             ])
 
-        # on the Columns sheet, these affect the 'row' (column in the source sheet)
-        self.command('@', 'cursorRow.type = date; cursorDown(+1)', 'set source column type to datetime')
-        self.command('#', 'cursorRow.type = int; cursorDown(+1)', 'set source column type to integer')
-        self.command('$', 'cursorRow.type = str; cursorDown(+1)', 'set source column type to string')
-        self.command('%', 'cursorRow.type = float; cursorDown(+1)', 'set source column type to decimal numeric type')
-        self.command('~', 'cursorRow.type = detectType(cursorRow.getValue(source.cursorRow)); cursorDown(+1)', 'autodetect type of source column using its data')
-        self.command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'toggle key column on source sheet')
-        self.command('-', 'cursorRow.width = 0', 'hide column on source sheet')
-        self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.rows)', 'set source column width to max width of its rows')
 
 #### slicing and dicing
 class SheetJoin(Sheet):

@@ -170,9 +170,6 @@ command('~', 'cursorCol.type = detectType(cursorValue)', 'autodetect type of col
 command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again')
 command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
-command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
-command(':', 'addColumn(ColumnRegex(sheet, input("new column regex:", "regex")), index=cursorColIndex+1)', 'add column by regex')
-
 command('e', 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex))', 'edit this cell')
 command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
 command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
@@ -188,7 +185,7 @@ command('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1,
 command('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
 command('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
 command('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
-command('gH', 'moveListItem(columns, cursorColIndex, 0)', 'move this column all the way to the left')
+command('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'move this column all the way to the left of the non-key columns')
 command('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
 command('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
 command('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
@@ -498,7 +495,7 @@ class VisiData:
             for i, task in enumerate(self.tasks):
                 if not task.endTime and not task.thread.is_alive():
                     task.endTime = time.process_time()
-                    task.status += 'EOT'
+                    task.status += 'ended'
 
             sheet.checkCursor()
 
@@ -718,6 +715,11 @@ class Sheet:
 
     def selectBy(self, func):
         self.select(r for r in self.rows if func(r))
+
+    @property
+    def selectedRows(self):
+        'returns a list of selected rows in sheet order'
+        return [r for r in self.rows if id(r) in self._selectedRows]
 
 ## end selection code
 
@@ -1214,7 +1216,8 @@ def try_func(task, func, *args, **kwargs):
         ret = func(*args, **kwargs)
         return ret
     except EscapeException as e:  # user aborted
-        task.status += status('canceled: ' + ' '.join(e.args))
+        task.status += ' cancelled by user'
+        status("%s cancelled" % task.name)
     except Exception as e:
         task.status += status('%s: %s' % (type(e).__name__, ' '.join(e.args)))
         exceptionCaught()
@@ -1320,6 +1323,13 @@ def save_tsv(vs, fn):
         for r in vs.rows:
             fp.write('\t'.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
 
+def until(func):
+    ret = None
+    while not ret:
+        ret = func()
+
+    return ret
+
 ### curses helpers
 
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[]):
@@ -1360,7 +1370,8 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         scr.addstr(y, x, dispval, attr)
         scr.move(y, x+dispi)
         ch = vd().getkeystroke()
-        if ch == 'KEY_IC':                         insert_mode = not insert_mode
+        if ch == '':                               continue
+        elif ch == 'KEY_IC':                       insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
         elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
         elif ch == '^C' or ch == '^[':             raise EscapeException(ch)
@@ -1375,7 +1386,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         elif ch == '^R':                           v = str(value)
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)
         elif ch == '^U':                           v = v[i:]; i = 0
-        elif ch == '^V':                           v = splice(v, i, scr.get_wch()); i += 1
+        elif ch == '^V':                           v = splice(v, i, until(scr.get_wch)); i += 1
         elif history and ch == 'KEY_UP':           hist_idx += 1; v = history[hist_idx % len(history)]
         elif history and ch == 'KEY_DOWN':         hist_idx -= 1; v = history[hist_idx % len(history)]
         elif ch.startswith('KEY_'):                pass

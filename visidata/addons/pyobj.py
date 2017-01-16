@@ -3,6 +3,10 @@ from visidata import *
 command('^O', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 command('^S', 'push_pyobj(sheet.name + "_pyobj", sheet)', 'push object for this sheet')
 
+command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
+#command(':', 'addColumn(ColumnRegex(sheet, input("new column regex:", "regex")), index=cursorColIndex+1)', 'add column by regex')
+#command(':', 'addColumn()', 'regex subst on current column')
+
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):
     vs = open_pyobj(name, pyobj, src)

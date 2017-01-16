@@ -19,7 +19,7 @@ class SheetFreqTable(Sheet):
         self.command(' ', 'source.toggle(cursorRow[1])', 'toggle these entries')
         self.command('s', 'source.select(cursorRow[1])', 'select these entries')
         self.command('u', 'source.unselect(cursorRow[1])', 'unselect these entries')
-        self.command('^J', 'vd.push(source.copy()).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value')
+        self.command('^J', 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value')
 
     @async
     def reload(self):
@@ -32,7 +32,7 @@ class SheetFreqTable(Sheet):
             v = str(self.origCol.getValue(r))
             histrow = rowidx.get(v)
             if histrow is None:
-                histrow = (v, [r])
+                histrow = (v, [])
                 rowidx[v] = histrow
                 self.rows.append(histrow)
             histrow[1].append(r)
