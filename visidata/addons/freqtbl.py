@@ -16,9 +16,9 @@ class SheetFreqTable(Sheet):
             Column('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
         self.nKeys = 1
-        self.command(' ', 'source.toggle(cursorRow[1])', 'toggle these entries')
-        self.command('s', 'source.select(cursorRow[1])', 'select these entries')
-        self.command('u', 'source.unselect(cursorRow[1])', 'unselect these entries')
+        self.command(' ', 'source.toggle(cursorRow[1]); toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
+        self.command('s', 'source.select(cursorRow[1]); select([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
+        self.command('u', 'source.unselect(cursorRow[1]); unselect([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
         self.command('^J', 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value')
 
     @async

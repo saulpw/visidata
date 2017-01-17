@@ -46,6 +46,7 @@ class SheetColumns(Sheet):
 
         self.command('+', 'rows.insert(cursorRowIndex+1, Column("+".join(c.name for c in selectedRows), getter=lambda r,cols=selectedRows,ch=input("join char: "): ch.join(filter(None, (c.getValue(r) for c in cols)))))', 'join columns with the given char')
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
+        self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
 
 
     def reload(self):
@@ -84,7 +85,7 @@ class SheetJoin(Sheet):
 
         # first item in joined row is the key tuple from the first sheet.
         # first columns are the key columns from the first sheet, using its row (0)
-        self.columns = [SubrowColumn(c, 0) for c in sheets[0].columns[:sheets[0].nKeys]]
+        self.columns = [SubrowColumn(ColumnItem(c.name, i), 0) for i, c in enumerate(sheets[0].columns[:sheets[0].nKeys])]
         self.nKeys = sheets[0].nKeys
 
         rowsBySheetKey = {}
@@ -100,7 +101,7 @@ class SheetJoin(Sheet):
             # subsequent elements are the rows from each source, in order of the source sheets
             self.columns.extend(SubrowColumn(c, sheetnum+1) for c in vs.columns[vs.nKeys:])
             for r in vs.rows:
-                key = tuple(c.getValue(r) for c in vs.keyCols)
+                key = tuple(str(c.getValue(r)) for c in vs.keyCols)
                 if key not in rowsByKey:
                     rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]  # combinedRow
 

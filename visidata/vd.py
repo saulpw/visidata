@@ -130,7 +130,7 @@ command('>', 'skipDown()', 'skip down this column to next value')
 command('_', 'cursorCol.width = cursorCol.getMaxWidth(visibleRows)', 'set this column width to fit visible cells')
 command('-', 'cursorCol.width = 0', 'hide this column')
 command('^', 'cursorCol.name = cursorCol.getDisplayValue(cursorRow)', 'set this column header to this cell value')
-command('!', 'toggleKeyColumn(cursorColIndex)', 'toggle this column as a key column')
+command('!', 'toggleKeyColumn(cursorColIndex); cursorRight(1)', 'toggle this column as a key column')
 
 command('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
 command('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
@@ -502,7 +502,7 @@ class VisiData:
     def replace(self, vs):
         'replace top sheet with the given sheet vs'
         self.sheets.pop(0)
-        return vs.push(vs)
+        return self.push(vs)
 
     def push(self, vs):
         if vs:
@@ -748,12 +748,12 @@ class Sheet:
             self.columns.insert(index, col)
 
     def toggleKeyColumn(self, colidx):
-        if self.cursorColIndex >= self.nKeys: # if not a key, add it
-            moveListItem(self.columns, self.cursorColIndex, self.nKeys)
+        if colidx >= self.nKeys: # if not a key, add it
+            moveListItem(self.columns, colidx, self.nKeys)
             self.nKeys += 1
         else:  # otherwise move it after the last key
             self.nKeys -= 1
-            moveListItem(self.columns, self.cursorColIndex, self.nKeys)
+            moveListItem(self.columns, colidx, self.nKeys)
 
     def skipDown(self):
         pv = self.cursorValue
@@ -1219,7 +1219,7 @@ def try_func(task, func, *args, **kwargs):
         task.status += ' cancelled by user'
         status("%s cancelled" % task.name)
     except Exception as e:
-        task.status += status('%s: %s' % (type(e).__name__, ' '.join(e.args)))
+        task.status += status('%s: %s' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
         exceptionCaught()
 
 def thread_profileCode(task, func, *args, **kwargs):
@@ -1245,6 +1245,7 @@ def ctype_async_raise(thread_obj, exception):
 
     ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(dict_find(threading._active, thread_obj)),
                                                ctypes.py_object(exception))
+    status('sent exception to %s' % thread_obj.name)
 
 command('^C', 'ctype_async_raise(vd.tasks[-1].thread, EscapeException)', 'cancel most recent task')
 command('T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
@@ -1316,7 +1317,7 @@ def load_tsv(vs):
     return vs
 
 def save_tsv(vs, fn):
-    with open(fn, 'w', encoding=vs.options.encoding, errors=vs.options.encoding_errors) as fp:
+    with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
         colhdr = '\t'.join(col.name for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
@@ -1507,7 +1508,7 @@ def openSource(p, filetype=None):
             vs = DirSheet(p.name, p)
             filetype = 'dir'
         else:
-            openfunc = 'open_' + filetype
+            openfunc = 'open_' + filetype.lower()
             if openfunc not in g_globals:
                 status('no %s function' % openfunc)
                 filetype = 'txt'
