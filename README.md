@@ -1,4 +1,4 @@
-# VisiData v0.40
+# VisiData v0.41
 
 A curses interface for exploring and arranging tabular data
 
@@ -7,24 +7,29 @@ Usable via any remote shell which has Python3 installed.
 ![VisiData silent demo](screenshot.gif "VisiData Screenshot")
 
 ## Features
+- browse first rows of huge csv/tsv/xlsx files immediately
 - `F1` for command help sheet
 - `o`pen .csv, .tsv, .json, .hdf5, .xlsx
 - `Ctrl-S`ave .csv, .tsv
 - `hjkl` cursor movement, `t`op/`m`iddle/`b`ottom scroll to position screen cursor
 - `[`/`]` sort asc/desc by one column
 - `e`dit cell contents
-- search/select/unselect/subst by regex in column
+- search/select/unselect by regex in column
 - `F`requency table for current column with histogram
 - inner/outer/full/diff joins on any number of sheets, matching designated key columns
 - add new column by Python expression
 - `Ctrl-O` to eval an expression and browse the result as a python object
+- watch long-running sheets load asynchronously
+- `:` split column (on any sheet)
+- `+` join selected columns on Columns sheet
 
 ### Metasheets
 
 - `S`heets metasheet to manage/navigate multiple sheets
 - `C`olumns metasheet
 - `O`ptions sheet to change the style or behavior
-- `E`rror metasheet
+- `^E`rror metasheet
+- `^T`hreads metasheet
 
 ### Columns
 
@@ -71,7 +76,7 @@ browser.
 
 ### Commands
 
-Definitions of terms in the help and documentation:
+Definitions of terms used in the help and documentation:
 
 - 'go': move cursor
 - 'move': change layout of visible data
@@ -98,8 +103,6 @@ The global\_action column on the Help Sheet shows the specific way the global pr
 - `=` "add column expression" takes a Python expression as input and appends a new column, which evaluates the
 expression over the row.
 
-- `:` regex subst: creates a new column from an expression, a pattern, and a subst template: `:column/(.*)/\1`
-
 - `Ctrl-S`ave sheet: the output type is determined by the file extension (currently .tsv and .csv)
 
 - `R` sets the source type of the current sheet.  The current sheet remains until a reload (`Ctrl-R`).
@@ -116,9 +119,9 @@ expression over the row.
 
 VisiData was created by Saul Pwanson `<vd@saul.pw>`.
 
-VisiData is currently under active development (as of December 2016).
+VisiData is currently under active development (as of January 2017).
 
-VisiData needs lots of usage and testing to help it become useful and dependable.  If you are actively using VisiData, please let me know!  Especially if you like it.  Maybe there is an easy way to improve the tool for both of us.
+VisiData needs lots of usage and testing to help it become useful and dependable.  If you are actively using VisiData, please let me know!  Maybe there is an easy way to improve the tool for both of us.
 
 Also please create a GitHub issue if anything doesn't appear to be working right.
 If you get an unexpected error (on the status line), please include the full stack trace that you get with `E`.

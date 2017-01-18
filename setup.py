@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
 from setuptools import setup
+from visidata import __version__
 
 setup(name='visidata',
-      version='0.40',
+      version=__version__,
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       author='Saul Pwanson',
       author_email='vd@saul.pw',
       url='http://github.com/saulpw/visidata',
-      download_url='https://github.com/saulpw/visidata/tarball/0.40',
+      download_url='https://github.com/saulpw/visidata/tarball/' + __version__,
       test_suite='tests',
       scripts=['bin/vd'],
       license='GPLv3',

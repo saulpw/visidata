@@ -5,7 +5,7 @@
    - `^T` sheet of long-running commands
    - `^C` cancel
    - `ENTER` to see the final performance profile
-- 'P' random population of current sheet
+- `P` random population of current sheet
 - headerlines default now 1
 
 ## v0.40
