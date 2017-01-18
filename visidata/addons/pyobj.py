@@ -119,6 +119,7 @@ def ColumnExpr(sheet, expr):
         vc.setter = lambda r,c=vc,s=sheet: setattr(c, 'expr', v)
         return vc
 
+
 def open_json(p):
     import json
-    return load_pyobj(p.name, json.loads(getTextContents(p)))
+    return load_pyobj(p.name, json.load(p.open_text()))

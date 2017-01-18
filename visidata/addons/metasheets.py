@@ -19,7 +19,7 @@ def splitColumn(sheet, origcol, exampleVal, ch):
 
 class SheetsSheet(SheetList):
     def __init__(self):
-        super().__init__('sheets', vd().sheets, columns=AttrColumns('name nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
+        super().__init__('sheets', vd().sheets, columns=AttrColumns('name progressPct nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
 
     def reload(self):
         super().reload()

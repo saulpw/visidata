@@ -25,10 +25,9 @@ class SheetFreqTable(Sheet):
     def reload(self):
         rowidx = {}
         self.rows = []
-        _vd = vd()
-        _vd.progressTotal += len(self.source.rows)
+        self.progressTotal = len(self.source.rows)
         for r in self.source.rows:
-            _vd.progressMade += 1
+            self.progressMade += 1
             v = str(self.origCol.getValue(r))
             histrow = rowidx.get(v)
             if histrow is None:

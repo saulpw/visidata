@@ -23,5 +23,7 @@ class xlsxSheet(Sheet):
     def reload(self):
         worksheet = self.source
         self.columns = ArrayColumns(worksheet.max_column)
+        self.progressTotal = worksheet.max_row
         for row in worksheet.iter_rows():
+            self.progressMade += 1
             self.rows.append([cell.value for cell in row])

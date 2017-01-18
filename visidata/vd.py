@@ -54,7 +54,6 @@ option('cmdhistThreshold_ms', 1, 'minimum amount of time taken before adding com
 option('timeout_ms', '100', 'curses timeout in ms')
 option('profile', True, 'profile async tasks')
 
-theme('progressBarWidth', 6, 'number of characters in progress bar')
 theme('ch_Ellipsis', '…')
 theme('ch_KeySep', '/')
 theme('ch_WrongType', '~')
@@ -64,9 +63,6 @@ theme('ch_EditPadChar', '_')
 theme('ch_LeftMore', '<')
 theme('ch_RightMore', '>')
 theme('ch_ColumnSep', '|', 'chars between columns')
-theme('ch_fuse', '…', 'fuse progress bar unfinished')
-theme('ch_burnt', ' ', 'finished progress')
-theme('ch_burny', '!¡:*;', 'burny characters')
 
 theme('ch_FunctionError', '¿', 'when computation fails due to exception')
 theme('ch_VisibleNone', '',  'visible contents of a cell whose value was None')
@@ -323,8 +319,6 @@ class VisiData:
         self.ticks = 0
         self.inInput = False
         self.tasks = []
-        self.progressTotal = 1
-        self.progressMade = 1
 
     def status(self, s):
         strs = str(s)
@@ -332,17 +326,6 @@ class VisiData:
         self.statusHistory.insert(0, strs)
         del self.statusHistory[100:]  # keep most recent 100 only
         return s
-
-    @property
-    def progressBar(self):
-        n = self.progressMade
-        total = self.progressTotal
-        width = int(options.progressBarWidth)
-        if n == total: return options.ch_burnt * width
-        burny = options.ch_burny
-        burnt = options.ch_burnt * int(n*width/total)
-        fuse = options.ch_fuse * int((total-n)*width/total)
-        return fuse+burny[n%len(burny)]+burnt
 
     def editText(self, y, x, w, **kwargs):
         v = editText(self.scr, y, x, w, **kwargs)
@@ -440,7 +423,11 @@ class VisiData:
         try:
             spinny = options.ch_spinny
             sheet = self.sheets[0]
-            rstatus = '%s  %8d%s' % (self.keystrokes, sheet.nRows, self.progressBar or ' rows')
+            if sheet.progressMade == sheet.progressTotal:
+                pctLoaded = 'rows'
+            else:
+                pctLoaded = ' %2d%%' % sheet.progressPct
+            rstatus = '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
             draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.c_StatusLine])
             curses.doupdate()
         except Exception as e:
@@ -561,6 +548,10 @@ class Sheet:
         self.filetype = None
         self._selectedRows = {}  # id(row) -> row
 
+        # for progress bar
+        self.progressMade = 0
+        self.progressTotal = 0
+
     def command(self, keystrokes, execstr, helpstr):
         self.commands[keystrokes] = (keystrokes, helpstr, execstr)
 
@@ -629,6 +620,10 @@ class Sheet:
         else:
             assert len(self.sources) == 1, len(self.sources)
             return self.sources[0]
+
+    @property
+    def progressPct(self):
+        return int(sheet.progressMade*100/sheet.progressTotal)
 
     @property
     def nVisibleRows(self):
@@ -1047,7 +1042,7 @@ def ArrayNamedColumns(columns):
 
 def ArrayColumns(ncols):
     'columns is a list of column names, mapping to r[0]..r[n]'
-    return [ColumnItem('', i) for i in range(ncols)]
+    return [ColumnItem('', i, width=8) for i in range(ncols)]
 
 def DictKeyColumns(d):
     return [ColumnItem(k, k, type=detectType(d[k])) for k in d]
@@ -1114,12 +1109,6 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
 
 
 ## Built-in sheets
-sourceCache = {}
-def getTextContents(p):
-    if not p in sourceCache:
-        sourceCache[p] = p.read_text(encoding=options.encoding, errors=options.encoding_errors)
-    return sourceCache[p]
-
 class HelpSheet(Sheet):
     def reload(self):
         self.rows = []
@@ -1138,9 +1127,12 @@ class TextSheet(Sheet):
     def reload(self):
         self.columns = [Column(self.name, str)]
         if isinstance(self.source, list):
-            self.rows = self.source.copy()  # modifications don't change 'original'
+            self.rows = []
+            for x in self.source:
+                # copy so modifications don't change 'original'; also one iteration through generator
+                self.rows.append(x)
         elif isinstance(self.source, str):
-            self.rows = self.source.split('\n')
+            self.rows = self.source.splitlines()
         else:
             error('unknown text type ' + str(type(self.source)))
 
@@ -1248,8 +1240,9 @@ def ctype_async_raise(thread_obj, exception):
     status('sent exception to %s' % thread_obj.name)
 
 command('^C', 'ctype_async_raise(vd.tasks[-1].thread, EscapeException)', 'cancel most recent task')
-command('T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
+command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
 
+# each row is a Task object
 class TasksSheet(Sheet):
     def reload(self):
         self.command('^C', 'ctype_async_raise(cursorRow.thread, EscapeException)', 'cancel this action')
@@ -1266,15 +1259,15 @@ def ProfileSheet(task):
 
 #### enable external addons
 def open_py(p):
-    contents = getTextContents(p)
+    contents = p.read_text()
     exec(contents, g_globals)
     status('executed %s' % p)
 
 def open_txt(p):
-    contents = getTextContents(p)
-    if '\t' in contents[:32]:
+    fp = p.open_text()
+    if '\t' in next(fp):
         return open_tsv(p)  # TSV often have .txt extension
-    return TextSheet(p.name, contents)
+    return TextSheet(p.name, fp)  # leaks file handle
 
 def open_tsv(p):
     vs = Sheet(p.name, p)
@@ -1284,15 +1277,13 @@ def open_tsv(p):
 @async
 def load_tsv(vs):
     'parses contents and populates vs'
-    contents = getTextContents(vs.source)
     header_lines = int(options.headerlines)
-    lines = contents.splitlines()
     vs.rows = []
-    if lines:
-        it = iter(lines)
+
+    with vs.source.open_text() as fp:
         i = 0
         while i < (header_lines or 1):
-            L = next(it)
+            L = next(fp)
             if L:
                 vs.rows.append(L.split('\t'))
                 i += 1
@@ -1305,12 +1296,16 @@ def load_tsv(vs):
             vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*vs.rows[:header_lines]))
             vs.rows = vs.rows[header_lines:]
 
-        _vd = vd()
-        _vd.progressTotal += len(lines) - header_lines
-        for L in it:
+        vs.progressMade = 0
+        vs.progressTotal = vs.source.filesize
+        for L in fp:
+            L = L[:-1]
             if L:
                 vs.rows.append(L.split('\t'))
-            _vd.progressMade += 1
+            vs.progressMade += len(L)
+
+    vs.progressMade = 0
+    vs.progressTotal = 0
 
     status('loaded')
 
@@ -1324,16 +1319,16 @@ def save_tsv(vs, fn):
         for r in vs.rows:
             fp.write('\t'.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
 
-def until(func):
-    ret = None
-    while not ret:
-        ret = func()
-
-    return ret
-
 ### curses helpers
 
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[]):
+    def until(func):
+        ret = None
+        while not ret:
+            ret = func()
+
+        return ret
+
     def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
         return v if i < 0 else v[:i] + s + v[i:]
 
@@ -1415,8 +1410,6 @@ colors = collections.defaultdict(lambda: curses.A_NORMAL, {
 })
 
 
-
-
 nextColorPair = 1
 def setupcolors(stdscr, f, *args):
     def makeColor(fg, bg):
@@ -1458,15 +1451,17 @@ def wrapper(f, *args):
 ### external interface
 
 class Path:
-    '''should be compatible with Python 3.4 pathlib.Path.
-       marginal desire to maintain compatibility with older Python versions.'''
+    '''Modeled after pathlib.Path.'''
     def __init__(self, fqpn):
         self.fqpn = fqpn
         self.name = os.path.split(fqpn)[-1]
         self.suffix = os.path.splitext(self.name)[1][1:]
 
-    def read_text(self, encoding=None, errors=None):
-        with open(self.resolve(), encoding=encoding, errors=errors) as fp:
+    def open_text(self):
+        return open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors)
+
+    def read_text(self):
+        with self.open_text() as fp:
             return fp.read()
 
     def read_bytes(self):
@@ -1488,6 +1483,10 @@ class Path:
     @property
     def parent(self):
         return Path(self.fqpn + "/..")
+
+    @property
+    def filesize(self):
+        return self.stat().st_size
 
     def __str__(self):
         return self.fqpn
