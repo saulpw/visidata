@@ -3,36 +3,31 @@
 
 A loose plan that is subject to change.
 
-## v0.4 column typing, usability
-- better interface:
-    - subst regex match in cells
-    - delete regex match in cells
-    - create versioned columns on subst/delete
-
-## v0.45 options management (loading/saving)
-- make options an OrderedDict, with columns: option, default, sheet, help
-- make sheet options override global defaults
-- save options sheet and commands to ~/.visidata.tsv by default
-- load config specified by -c option (or above by default)
-
-## v0.5
-- sql dbs via sqlalchemy
-- save all sheets to .h5 file
-- save sheets layout, including generated sheets and visible columns (via replay mechanism?)
-
-## v0.6 data trail
-- mass transform column
+## v0.5 data trail
 - save sources to .zip cache
 - edit/transform log
     - can be replayed to generate exact duplicate sheet
+    - undo just removes the last edit item and replays to that point
+- checkpoint data for faster replay
+
+## v0.55 better interface for regex transforms:
+- subst regex match in cells
+- delete regex match in cells
+- create versioned columns on subst/delete
+
+## v0.6
+- aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
+- sql dbs via sqlalchemy
+- save all sheets to .h5 file
+- save sheets layout, including generated sheets and visible columns (via replay mechanism?)
+- fixed-column detector
 
 ## v0.7 alpha
-- break out 'g'lobal prefix into 'all [visible] columns' and 'selected rows'
 - popup windows for enum selection
 
 ## v0.8
-- undo/redo
 - '.' repeat command
+
 ## v0.9
 - simple file management in VSheetDir:
   - rename with 'e'dit
@@ -41,34 +36,24 @@ A loose plan that is subject to change.
   - only apply changes with ^S
 
 ## v1.0
-- regexes and Python expressions should be interchangeable (search, select, etc)
+- Python expressions should be usable like regex for search, select, etc
 - generic mechanism for coloring rows
     - highlight key rows on Columns sheet same as key column
+- bulk interface (command line, macros?)
 
 ## v1.1
 - connect to larger datasets (via blaze?)
-- Python3 API for import by other scripts
+- document Python3 API for import by other scripts
 - load new .py plugins for inputs/outputs/sheets
    - git app that can streamline standard workflows
      - checkout branch or revision with TUI interface
      - browse through history
 
-## v1.2
-
-- use asyncio to do loading and computation in the background
-   - progress bar and ^C to abort
-- can start to browse huge and/or offline (e.g. redshift) datasets instantly
-
-## v1.3
-- bulk interface (command line, macros?)
 
 ## Unscheduled
 - reload derived sheets
 - secondary column sort
-- aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
-- fixed-column detector
 - html table parsing into columns
-- popup menus for editing enum fields
 - parse .xml
 - save as .json
 - better csv/tsv sniffer
@@ -77,7 +62,6 @@ A loose plan that is subject to change.
 
 ### Details
 
-- create rightside statusbar for status indicators like 'g' prefix and number of sheets
 - maintain original ordering with implicit/hidden line# column
 
 
