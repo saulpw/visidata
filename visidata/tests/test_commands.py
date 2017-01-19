@@ -3,7 +3,7 @@ import unittest
 from unittest import skip
 from unittest.mock import Mock
 
-import curses
+import itertools
 import visidata
 
 # test separately as needed
@@ -34,17 +34,14 @@ class CommandsTestCase(unittest.TestCase):
         self.scr.addstr = Mock()
         self.scr.move = Mock()
         self.scr.getmaxyx = lambda: (25, 80)
-        curses.initscr()  # activate keyname()
-        curses.endwin()   # but stay in terminal mode
 
     def test_commands(self):
         'exec each command at least once'
         vs = visidata.SheetObject('test_commands', self)
         vs.reload()
-        vs.reload_commands()
-        for keystrokes in vs.commands:
+        for keystrokes in itertools.chain(vs.commands.keys(), visidata.base_commands.keys()):
             testname = keystrokes
-            print(testname)
+#            print(testname)
             if testname in expected_errors:
                 continue
 

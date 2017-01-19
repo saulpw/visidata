@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from setuptools import setup
-from visidata import __version__
+# tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
+#from visidata import __version__
+__version__ = '0.41'
 
 setup(name='visidata',
       version=__version__,
@@ -11,7 +13,7 @@ setup(name='visidata',
       author_email='vd@saul.pw',
       url='http://github.com/saulpw/visidata',
       download_url='https://github.com/saulpw/visidata/tarball/' + __version__,
-      test_suite='tests',
+      test_suite='visidata.tests',
       scripts=['bin/vd'],
       license='GPLv3',
       classifiers=[
