@@ -44,7 +44,7 @@ class SheetColumns(Sheet):
         self.command('-', 'cursorRow.width = 0', 'hide column on source sheet')
         self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'set source column width to max width of its rows')
 
-        self.command('+', 'rows.insert(cursorRowIndex+1, Column("+".join(c.name for c in selectedRows), getter=lambda r,cols=selectedRows,ch=input("join char: "): ch.join(filter(None, (c.getValue(r) for c in cols)))))', 'join columns with the given char')
+        self.command('+', 'rows.insert(cursorRowIndex, Column("+".join(c.name for c in selectedRows), getter=lambda r,cols=selectedRows,ch=input("join char: "): ch.join(filter(None, (c.getValue(r) for c in cols)))))', 'join columns with the given char')
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
         self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
 

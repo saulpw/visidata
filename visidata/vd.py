@@ -211,7 +211,6 @@ command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0]._
 command('g"', 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 
-
 # VisiData uses Python native int, float, str, and adds a simple date and anytype.
 #
 # A type T is used internally in these ways:
@@ -574,7 +573,7 @@ class Sheet:
         c = copy.copy(self)
         c.name += suffix
         c.topRowIndex = c.cursorRowIndex = 0
-        c.columns = copy.deepcopy(self.columns)
+        c.columns = copy.deepcopy(self.columns)  # deepcopy so that layouts can be different
         return c
 
     def __repr__(self):
@@ -943,6 +942,9 @@ class Column:
         self.width = width  # == 0 if hidden, None if auto-compute next time
         self.expr = None    # Python string expression if computed column
         self.fmtstr = None
+
+    def copy(self):
+        return copy.copy(self)
 
     @property
     def name(self):
