@@ -2,6 +2,8 @@
 from visidata import *
 
 command('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
+command('gF', 'vd.push(SheetFreqTable(sheet, combineColumns(columns[:nKeys])))', 'open frequency table for the combined key columns')
+
 
 class SheetFreqTable(Sheet):
     def __init__(self, sheet, col):

@@ -49,6 +49,7 @@ option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
+option('joinchar', ' ', 'character used to join string fields')
 option('SubsheetSep', '~', 'string joining multiple sheet names')
 option('cmdhistThreshold_ms', 1, 'minimum amount of time taken before adding command to cmdhist')
 option('timeout_ms', '100', 'curses timeout in ms')
@@ -126,7 +127,7 @@ command('>', 'skipDown()', 'skip down this column to next value')
 command('_', 'cursorCol.width = cursorCol.getMaxWidth(visibleRows)', 'set this column width to fit visible cells')
 command('-', 'cursorCol.width = 0', 'hide this column')
 command('^', 'cursorCol.name = cursorCol.getDisplayValue(cursorRow)', 'set this column header to this cell value')
-command('!', 'toggleKeyColumn(cursorColIndex); cursorRight(1)', 'toggle this column as a key column')
+command('!', 'cursorRight(toggleKeyColumn(cursorColIndex))', 'toggle this column as a key column')
 
 command('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
 command('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
@@ -171,7 +172,7 @@ command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go
 command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
 
 command('d', 'rows.pop(cursorRowIndex)', 'delete this row')
-command('gd', 'sheet.rows = list(filter(lambda r,sheet=sheet: not sheet.isSelected(r), sheet.rows)); _selectedRows.clear()', 'delete all selected rows')
+command('gd', 'deleteSelected()', 'delete all selected rows')
 
 command('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
 command('^S', 'saveSheet(sheet, input("save to: ", "filename"))', 'save this sheet to new file')
@@ -381,6 +382,7 @@ class VisiData:
 
         matchingRowIndexes = 0
         sheet.progressTotal = sheet.nRows
+        sheet.progressMade = 0
 
         for r in rng:
             sheet.progressMade += 1
@@ -663,6 +665,30 @@ class Sheet:
         c.columns = copy.deepcopy(self.columns)  # deepcopy so that layouts can be different
         return c
 
+    @async
+    def deleteSelected(self):
+        oldrows = self.rows
+        oldidx = self.cursorRowIndex
+
+        row = None   # row to re-place cursor after
+        while oldidx < len(oldrows):
+            if not self.isSelected(oldrows[oldidx]):
+                row = self.rows[oldidx]
+                break
+            oldidx += 1
+
+        self.rows = []
+        self.progressMade = 0
+        self.progressTotal = len(oldrows)-1
+        for r in oldrows:
+            if not self.isSelected(r):
+                self.rows.append(r)
+                if r is row:
+                    self.cursorRowIndex = len(self.rows)-1
+            self.progressMade += 1
+
+        self._selectedRows.clear()
+
     def __repr__(self):
         return self.name
 
@@ -707,7 +733,8 @@ class Sheet:
 
     @property
     def progressPct(self):
-        return int(sheet.progressMade*100/sheet.progressTotal)
+        if self.progressTotal != 0:
+            return int(self.progressMade*100/self.progressTotal)
 
     @property
     def nVisibleRows(self):
@@ -834,9 +861,11 @@ class Sheet:
         if colidx >= self.nKeys: # if not a key, add it
             moveListItem(self.columns, colidx, self.nKeys)
             self.nKeys += 1
+            return 1
         else:  # otherwise move it after the last key
             self.nKeys -= 1
             moveListItem(self.columns, colidx, self.nKeys)
+            return 0
 
     def skipDown(self):
         pv = self.cursorValue
@@ -1145,6 +1174,9 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
             width=origcol.width,
             **kwargs)
 
+def combineColumns(cols):
+    return Column("+".join(c.name for c in cols),
+                  getter=lambda r,cols=cols,ch=options.joinchar: ch.join(filter(None, (c.getValue(r) for c in cols))))
 ###
 
 def input(prompt, type='', **kwargs):

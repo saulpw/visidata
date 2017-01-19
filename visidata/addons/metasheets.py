@@ -44,7 +44,7 @@ class SheetColumns(Sheet):
         self.command('-', 'cursorRow.width = 0', 'hide column on source sheet')
         self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'set source column width to max width of its rows')
 
-        self.command('+', 'rows.insert(cursorRowIndex, Column("+".join(c.name for c in selectedRows), getter=lambda r,cols=selectedRows,ch=input("join char: "): ch.join(filter(None, (c.getValue(r) for c in cols)))))', 'join columns with the given char')
+        self.command('+', 'rows.insert(cursorRowIndex+1, combineColumns(selectedRows)); cursorDown(1)', 'join selected source columns')
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
         self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
 
@@ -63,14 +63,14 @@ class SheetColumns(Sheet):
 
         if options.ColumnStats:
             self.columns.extend([
-                Column('nulls',  int, lambda c,sheet=sheet: c.nEmpty(sheet.rows)),
-                Column('uniques',  int, lambda c,sheet=sheet: len(set(c.values(sheet.rows))), width=0),
-                Column('mode',   anytype, lambda c: statistics.mode(c.values(sheet.rows)), width=0),
-                Column('min',    anytype, lambda c: min(c.values(sheet.rows)), width=0),
-                Column('median', anytype, lambda c: statistics.median(c.values(sheet.rows)), width=0),
-                Column('mean',   float, lambda c: statistics.mean(c.values(sheet.rows)), width=0),
-                Column('max',    anytype, lambda c: max(c.values(sheet.rows)), width=0),
-                Column('stddev', float, lambda c: statistics.stdev(c.values(sheet.rows)), width=0),
+                Column('nulls',  int, lambda c,sheet=self: c.nEmpty(sheet.rows)),
+                Column('uniques',  int, lambda c,sheet=self: len(set(c.values(sheet.rows))), width=0),
+                Column('mode',   anytype, lambda c,sheet=self: statistics.mode(c.values(sheet.rows)), width=0),
+                Column('min',    anytype, lambda c,sheet=self: min(c.values(sheet.rows)), width=0),
+                Column('median', anytype, lambda c,sheet=self: statistics.median(c.values(sheet.rows)), width=0),
+                Column('mean',   float, lambda c,sheet=self: statistics.mean(c.values(sheet.rows)), width=0),
+                Column('max',    anytype, lambda c,sheet=self: max(c.values(sheet.rows)), width=0),
+                Column('stddev', float, lambda c,sheet=self: statistics.stdev(c.values(sheet.rows)), width=0),
             ])
 
 
