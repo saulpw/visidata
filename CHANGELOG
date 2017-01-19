@@ -1,6 +1,9 @@
 # VisiData version history
 
-## v0.41
+## v0.42
+- async select/unselect
+
+## v0.41 (2017-01-18)
 - asynchronous commands (each in its own thread) with
    - `^T` sheet of long-running commands
    - `^C` cancel

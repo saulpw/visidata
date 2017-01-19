@@ -3,7 +3,7 @@
 # VisiData: a curses interface for exploring and arranging tabular data
 #
 
-__version__ = 'saul.pw/VisiData v0.41'
+__version__ = 'saul.pw/VisiData v0.42'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -147,15 +147,15 @@ command('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))'
 command('R', 'sheet.filetype = input("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
 command('^R', 'reload(); status("reloaded")', 'reload sheet from source')
 
-command('/', 'searchRegex(input("/", type="regex"), columns=[cursorCol], moveCursor=True)', 'search this column forward for regex')
-command('?', 'searchRegex(input("?", type="regex"), columns=[cursorCol], backward=True, moveCursor=True)', 'search this column backward for regex')
-command('n', 'searchRegex(columns=[cursorCol], moveCursor=True)', 'go to next match')
-command('p', 'searchRegex(columns=[cursorCol], backward=True, moveCursor=True)', 'go to previous match')
+command('/', 'moveRegex(input("/", type="regex"), columns=[cursorCol])', 'search this column forward for regex')
+command('?', 'moveRegex(input("?", type="regex"), columns=[cursorCol], backward=True)', 'search this column backward for regex')
+command('n', 'moveRegex(columns=[cursorCol])', 'go to next match')
+command('p', 'moveRegex(columns=[cursorCol], backward=True)', 'go to previous match')
 
-command('g/', 'searchRegex(input("g/", type="regex"), moveCursor=True, columns=visibleCols)', 'search regex forward in all visible columns')
-command('g?', 'searchRegex(input("g?", type="regex"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
-command('gn', 'sheet.cursorRowIndex = max(searchRegex() or [cursorRowIndex])', 'go to first match')
-command('gp', 'sheet.cursorRowIndex = min(searchRegex() or [cursorRowIndex])', 'go to last match')
+command('g/', 'moveRegex(input("g/", type="regex"), columns=visibleCols)', 'search regex forward in all visible columns')
+command('g?', 'moveRegex(input("g?", type="regex"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
+command('gn', 'sheet.cursorRowIndex = max(list(searchRegex()) or [cursorRowIndex])', 'go to first match')
+command('gp', 'sheet.cursorRowIndex = min(list(searchRegex()) or [cursorRowIndex])', 'go to last match')
 
 command('@', 'cursorCol.type = date', 'set column type to ISO8601 datetime')
 command('#', 'cursorCol.type = int', 'set column type to integer')
@@ -195,8 +195,8 @@ command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
 command('|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=[cursorCol]))', 'select rows by regex matching this columns')
 command('\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=[cursorCol]))', 'unselect rows by regex matching this columns')
 
-command('g ', 'toggle(rows)', 'toggle select of all rows')
-command('gs', 'select(rows)', 'select all rows')
+command('g ', 'toggle(r for r in rows)', 'toggle select of all rows')
+command('gs', 'select(r for r in rows)', 'select all rows')
 command('gu', '_selectedRows.clear()', 'unselect all rows')
 
 command('g|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=visibleCols))', 'select rows by regex matching any visible column')
@@ -379,26 +379,31 @@ class VisiData:
             rng = range(sheet.cursorRowIndex+1, sheet.nRows)
             rng2 = range(0, sheet.cursorRowIndex+1)
 
-        matchingRowIndexes = []
+        matchingRowIndexes = 0
+        sheet.progressTotal = sheet.nRows
 
         for r in rng:
+            sheet.progressMade += 1
             if columnsMatch(sheet, sheet.rows[r], columns, self.lastRegex.search):
                 if moveCursor:
                     sheet.cursorRowIndex = r
-                    return r
-                matchingRowIndexes.append(r)
+                    return
+                else:
+                    matchingRowIndexes += 1
+                    yield r
 
         for r in rng2:
+            sheet.progressMade += 1
             if columnsMatch(sheet, sheet.rows[r], columns, self.lastRegex.search):
                 if moveCursor:
                     sheet.cursorRowIndex = r
                     status('search wrapped')
-                    return r
-                matchingRowIndexes.append(r)
+                    return
+                else:
+                    matchingRowIndexes += 1
+                    yield r
 
-        status('%s matches for /%s/' % (len(matchingRowIndexes), self.lastRegex.pattern))
-
-        return matchingRowIndexes
+        status('%s matches for /%s/' % (matchingRowIndexes, self.lastRegex.pattern))
 
     def exceptionCaught(self, status=True):
         import traceback
@@ -503,6 +508,79 @@ class VisiData:
             return vs
 # end VisiData class
 
+# define @async for potentially long-running functions
+#   when function is called, instead launches a thread
+#   adds a row to cmdhistory
+#   ENTER on that row pushes a profile of the thread
+
+class Task:
+    def __init__(self, name):
+        self.name = name
+        self.startTime = time.process_time()
+        self.endTime = None
+        self.status = ''
+        self.thread = None
+        self.profileResults = None
+
+    def start(self, func, *args, **kwargs):
+        self.thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+        self.thread.start()
+
+    @property
+    def elapsed_s(self):
+        return (self.endTime or time.process_time())-self.startTime
+
+def async(func):
+    def execThread(*args, **kwargs):
+        t = Task(func.__name__ + ' ' + ','.join(str(x) for x in args))
+        if bool(options.profile):
+            t.start(thread_profileCode, t, func, *args, **kwargs)
+        else:
+            t.start(try_func, t, func, *args, **kwargs)
+        vd().tasks.append(t)
+        return t
+    return execThread
+
+def try_func(task, func, *args, **kwargs):
+    try:
+        ret = func(*args, **kwargs)
+        return ret
+    except EscapeException as e:  # user aborted
+        task.status += ' cancelled by user'
+        status("%s cancelled" % task.name)
+    except Exception as e:
+        task.status += status('%s: %s' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
+        exceptionCaught()
+
+def thread_profileCode(task, func, *args, **kwargs):
+    pr = cProfile.Profile()
+    pr.enable()
+    ret = try_func(task, func, *args, **kwargs)
+    pr.disable()
+    s = io.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+    ps.print_stats()
+    task.profileResults = s.getvalue()
+    return ret
+
+
+# from https://gist.github.com/liuw/2407154
+def ctype_async_raise(thread_obj, exception):
+    def dict_find(D, value):
+        for k, v in D.items():
+            if v is value:
+                return k
+
+        raise ValueError("no such value in dict")
+
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(dict_find(threading._active, thread_obj)),
+                                               ctypes.py_object(exception))
+    status('sent exception to %s' % thread_obj.name)
+
+command('^C', 'ctype_async_raise(vd.tasks[-1].thread, EscapeException)', 'cancel most recent task')
+command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
+
+
 class LazyMap:
     def __init__(self, keys, getter, setter):
         self._keys = keys
@@ -547,19 +625,28 @@ class Sheet:
         self.filetype = None
         self._selectedRows = {}  # id(row) -> row
 
+        # list of modifications [sheet, funcname, [args], {kwargs}]
+        self._editlog = []
+
         # for progress bar
         self.progressMade = 0
         self.progressTotal = 0
 
+    def editlog(self, funcname, *args, **kwargs):
+        self._editlog.append([self, funcname, args, kwargs])
+
     def command(self, keystrokes, execstr, helpstr):
         self.commands[keystrokes] = (keystrokes, helpstr, execstr)
+
+    def moveRegex(self, *args, **kwargs):
+        list(self.searchRegex(*args, moveCursor=True, **kwargs))
 
     def searchRegex(self, *args, **kwargs):
         return self.vd.searchRegex(self, *args, **kwargs)
 
     def searchColumnNameRegex(self, colregex):
         for i, c in enumPivot(self.visibleCols, self.cursorVisibleColIndex):
-            if re.search(colregex, c.name):
+            if re.search(colregex, c.name, re.IGNORECASE):
                 self.cursorVisibleColIndex = i
                 return
 
@@ -588,18 +675,16 @@ class Sheet:
             return
 
         # handy globals for use by commands
+        _, _, execstr = cmd
         self.vd = vd()
         self.sheet = self
         locs = LazyMap(dir(self), lambda k,s=self: getattr(s, k), lambda k,v,s=self: setattr(s, k, v))
-        _, _, execstr = cmd
         try:
             exec(execstr, vdglobals, locs)
         except EscapeException as e:  # user aborted
             self.vd.status('EscapeException ' + ''.join(e.args[0:]))
         except Exception:
             self.vd.exceptionCaught()
-#            self.vd.status(sheet.commands[self.keystrokes].execstr)
-
 
     def clipdraw(self, y, x, s, attr, w):
         return draw_clip(self.scr, y, x, s, attr, w)
@@ -662,7 +747,9 @@ class Sheet:
 
     @property
     def statusLine(self):
-        return 'row %s/%s col %d/%d' % (self.cursorRowIndex, self.nRows, self.cursorColIndex, self.nCols)
+        rowinfo = 'row %d/%d (%d selected)' % (self.cursorRowIndex, self.nRows, len(self._selectedRows))
+        colinfo = 'col %d/%d (%d visible)' % (self.cursorColIndex, self.nCols, len(self.visibleCols))
+        return '%s  %s' % (rowinfo, colinfo)
 
     @property
     def nRows(self):
@@ -680,6 +767,7 @@ class Sheet:
     def isSelected(self, r):
         return id(r) in self._selectedRows
 
+    @async
     def toggle(self, rows):
         for r in rows:
             if id(r) in self._selectedRows:
@@ -687,19 +775,20 @@ class Sheet:
             else:
                 self._selectedRows[id(r)] = r
 
+    @async
     def select(self, rows):
-        rows = list(rows)
         before = len(self._selectedRows)
-        self._selectedRows.update(dict((id(r), r) for r in rows))
+        for r in rows:
+            self._selectedRows[id(r)] = r
         status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
 
+    @async
     def unselect(self, rows):
-        rows = list(rows)
         before = len(self._selectedRows)
         for r in rows:
             if id(r) in self._selectedRows:
                 del self._selectedRows[id(r)]
-        status('unselected %s/%s rows' % (before-len(self._selectedRows), len(rows)))
+        status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
 
     def selectByIdx(self, rowIdxs):
         self.select(self.rows[i] for i in rowIdxs)
@@ -1077,12 +1166,13 @@ def _inputLine(prompt, **kwargs):
     return ret
 
 def saveSheet(vs, fn):
+    assert vs.progressTotal == 0, 'have to finish loading first'
     basename, ext = os.path.splitext(fn)
     funcname = 'save_' + ext[1:]
     if funcname not in g_globals:
         funcname = 'save_tsv'
     g_globals.get(funcname)(vs, fn)
-    status('saved to ' + fn)
+    status('saving to ' + fn)
 
 
 def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
@@ -1171,79 +1261,6 @@ class OptionsSheet(Sheet):
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
 
 
-# define @async for potentially long-running functions
-#   when function is called, instead launches a thread
-#   adds a row to cmdhistory
-#   ENTER on that row pushes a profile of the thread
-
-class Task:
-    def __init__(self, name):
-        self.name = name
-        self.startTime = time.process_time()
-        self.endTime = None
-        self.status = ''
-        self.thread = None
-        self.profileResults = None
-
-    def start(self, func, *args, **kwargs):
-        self.thread = threading.Thread(target=func, args=args, kwargs=kwargs)
-        self.thread.start()
-
-    @property
-    def elapsed_s(self):
-        return (self.endTime or time.process_time())-self.startTime
-
-#execThread(self.keystrokes, sheet.exec_command, g_globals, self.keystrokes, row)
-def async(func):
-    def execThread(*args, **kwargs):
-        t = Task(func.__name__ + ' ' + ','.join(str(x) for x in args))
-        if bool(options.profile):
-            t.start(thread_profileCode, t, func, *args, **kwargs)
-        else:
-            t.start(try_func, t, func, *args, **kwargs)
-        vd().tasks.append(t)
-        return t
-    return execThread
-
-def try_func(task, func, *args, **kwargs):
-    try:
-        ret = func(*args, **kwargs)
-        return ret
-    except EscapeException as e:  # user aborted
-        task.status += ' cancelled by user'
-        status("%s cancelled" % task.name)
-    except Exception as e:
-        task.status += status('%s: %s' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
-        exceptionCaught()
-
-def thread_profileCode(task, func, *args, **kwargs):
-    pr = cProfile.Profile()
-    pr.enable()
-    ret = try_func(task, func, *args, **kwargs)
-    pr.disable()
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-    ps.print_stats()
-    task.profileResults = s.getvalue()
-    return ret
-
-
-# from https://gist.github.com/liuw/2407154
-def ctype_async_raise(thread_obj, exception):
-    def dict_find(D, value):
-        for k, v in D.items():
-            if v is value:
-                return k
-
-        raise ValueError("no such value in dict")
-
-    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(dict_find(threading._active, thread_obj)),
-                                               ctypes.py_object(exception))
-    status('sent exception to %s' % thread_obj.name)
-
-command('^C', 'ctype_async_raise(vd.tasks[-1].thread, EscapeException)', 'cancel most recent task')
-command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
-
 # each row is a Task object
 class TasksSheet(Sheet):
     def reload(self):
@@ -1260,6 +1277,11 @@ def ProfileSheet(task):
     return TextSheet(task.name + '_profile', task.profileResults)
 
 #### enable external addons
+def open_vd(p):
+    vs = open_tsv(p)
+    vs.reload()
+    return vd
+
 def open_py(p):
     contents = p.read_text()
     exec(contents, g_globals)
@@ -1280,8 +1302,10 @@ def open_tsv(p):
 def load_tsv(vs):
     'parses contents and populates vs'
     header_lines = int(options.headerlines)
-    vs.rows = []
 
+    vs.editlog('load_tsv', vs.source.name, headerlines=header_lines)
+
+    vs.rows = []
     with vs.source.open_text() as fp:
         i = 0
         while i < (header_lines or 1):
@@ -1313,13 +1337,18 @@ def load_tsv(vs):
 
     return vs
 
+@async
 def save_tsv(vs, fn):
+    vs.progressMade = 0
+    vs.progressTotal = len(vs.rows)
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
         colhdr = '\t'.join(col.name for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
         for r in vs.rows:
+            vs.progressMade += 1
             fp.write('\t'.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
+    status('%s save finished' % fn)
 
 ### curses helpers
 
