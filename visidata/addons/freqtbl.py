@@ -4,12 +4,14 @@ from visidata import *
 command('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
 command('gF', 'vd.push(SheetFreqTable(sheet, combineColumns(columns[:nKeys])))', 'open frequency table for the combined key columns')
 
+theme('ch_Histogram', '*')
 
 class SheetFreqTable(Sheet):
     def __init__(self, sheet, col):
         fqcolname = '%s_%s_freq' % (sheet.name, col.name)
         super().__init__(fqcolname, sheet)
         self.origCol = col
+        self.largest = 100
 
         self.columns = [
             ColumnItem(col.name, 0, type=col.type),
@@ -18,10 +20,18 @@ class SheetFreqTable(Sheet):
             Column('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
         self.nKeys = 1
-        self.command(' ', 'source.toggle(cursorRow[1]); toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
-        self.command('s', 'source.select(cursorRow[1]); select([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
-        self.command('u', 'source.unselect(cursorRow[1]); unselect([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
+        self.command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
+        self.command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet')
+        self.command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet')
         self.command('^J', 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value')
+
+    def selectRow(self, row):
+        self.source.select(row[1])
+        return super().selectRow(row)
+
+    def unselectRow(self, row):
+        self.source.unselect(row[1])
+        return super().unselectRow(row)
 
     @async
     def reload(self):

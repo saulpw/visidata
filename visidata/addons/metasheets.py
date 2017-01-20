@@ -44,7 +44,7 @@ class SheetColumns(Sheet):
         self.command('-', 'cursorRow.width = 0', 'hide column on source sheet')
         self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'set source column width to max width of its rows')
 
-        self.command('+', 'rows.insert(cursorRowIndex+1, combineColumns(selectedRows)); cursorDown(1)', 'join selected source columns')
+        self.command('+', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns')
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
         self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
 
@@ -80,6 +80,7 @@ class SheetJoin(Sheet):
         super().__init__(jointype.join(vs.name for vs in sheets), sheets)
         self.jointype = jointype
 
+    @async
     def reload(self):
         sheets = self.source
 
@@ -91,9 +92,13 @@ class SheetJoin(Sheet):
         rowsBySheetKey = {}
         rowsByKey = {}
 
+        self.progressMade = 0
+        self.progressTotal = sum(len(vs.rows) for vs in sheets)*2
+
         for vs in sheets:
             rowsBySheetKey[vs] = {}
             for r in vs.rows:
+                self.progressMade += 1
                 key = tuple(c.getValue(r) for c in vs.keyCols)
                 rowsBySheetKey[vs][key] = r
 
@@ -101,15 +106,29 @@ class SheetJoin(Sheet):
             # subsequent elements are the rows from each source, in order of the source sheets
             self.columns.extend(SubrowColumn(c, sheetnum+1) for c in vs.columns[vs.nKeys:])
             for r in vs.rows:
+                self.progressMade += 1
                 key = tuple(str(c.getValue(r)) for c in vs.keyCols)
                 if key not in rowsByKey:
                     rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]  # combinedRow
 
-        if self.jointype == '&':  # inner join  (only rows with matching key on all sheets)
-            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if all(combinedRow))
-        elif self.jointype == '+':  # outer join (all rows from first sheet)
-            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if combinedRow[1])
-        elif self.jointype == '*':  # full join (keep all rows from all sheets)
-            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items())
-        elif self.jointype == '~':  # diff join (only rows without matching key on all sheets)
-            self.rows = list(combinedRow for k, combinedRow in rowsByKey.items() if not all(combinedRow))
+        self.rows = []
+        self.progressMade = 0
+        self.progressTotal = len(rowsByKey)
+
+        for k, combinedRow in rowsByKey.items():
+            self.progressMade += 1
+
+            if self.jointype == '*':  # full join (keep all rows from all sheets)
+                self.rows.append(combinedRow)
+
+            elif self.jointype == '&':  # inner join  (only rows with matching key on all sheets)
+                if all(combinedRow):
+                    self.rows.append(combinedRow)
+
+            elif self.jointype == '+':  # outer join (all rows from first sheet)
+                if combinedRow[1]:
+                    self.rows.append(combinedRow)
+
+            elif self.jointype == '~':  # diff join (only rows without matching key on all sheets)
+                if not all(combinedRow):
+                    self.rows.append(combinedRow)

@@ -12,11 +12,12 @@ class MeltedSheet(Sheet):
     @async
     def reload(self):
         sheet = self.source
-        self.columns = [SubrowColumn(c, 0) for c in sheet.columns[:sheet.nKeys]]
+        self.columns = [SubrowColumn(c, 0) for c in sheet.keyCols]
+        self.nKeys = sheet.nKeys
         self.columns.extend([Column(options.meltVarCol, getter=lambda r: r[1].name),
                              Column(options.meltValueCol, getter=lambda r: r[1].getValue(r[0]))])
 
-        colsToMelt = [c.copy() for c in sheet.visibleCols[sheet.nKeys:]]
+        colsToMelt = [c.copy() for c in sheet.nonKeyVisibleCols]
 
         self.rows = []
         self.progressMade = 0

@@ -59,7 +59,6 @@ theme('ch_Ellipsis', '…')
 theme('ch_KeySep', '/')
 theme('ch_WrongType', '~')
 theme('ch_Error', '!')
-theme('ch_Histogram', '*')
 theme('ch_EditPadChar', '_')
 theme('ch_LeftMore', '<')
 theme('ch_RightMore', '>')
@@ -208,7 +207,7 @@ command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last input
 command(',', 'selectBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v)', 'select rows matching by this column')
 command('g,', 'selectBy(lambda r,v=cursorRow: r == v)', 'select all rows that match this row')
 
-command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0]._selectedRows.values())', 'push duplicate sheet with only selected rows')
+command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0].selectedRows)', 'push duplicate sheet with only selected rows')
 command('g"', 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 
@@ -252,6 +251,8 @@ def detectType(v):
         try:
             v = T(v)
             return T
+        except EscapeException:
+            raise
         except:
             return None
 
@@ -316,7 +317,6 @@ class VisiData:
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.cmdhistory = []  # list of [keystrokes, start_time, end_time, thread, notes]
         self.keystrokes = ''
-        self.ticks = 0
         self.inInput = False
         self.tasks = []
 
@@ -334,10 +334,6 @@ class VisiData:
 
     def getkeystroke(self):
         k = None
-        if [t for t in self.tasks if t.thread.is_alive()]:
-            self.ticks += 1
-        else:
-            self.ticks = 0
         try:
             k = self.scr.get_wch()
             self.drawRightStatus()
@@ -525,7 +521,7 @@ class Task:
         self.profileResults = None
 
     def start(self, func, *args, **kwargs):
-        self.thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+        self.thread = threading.Thread(target=func, daemon=True, args=args, kwargs=kwargs)
         self.thread.start()
 
     @property
@@ -534,30 +530,33 @@ class Task:
 
 def async(func):
     def execThread(*args, **kwargs):
-        t = Task(func.__name__ + ' ' + ','.join(str(x) for x in args))
+        if threading.current_thread().daemon:
+            return func(*args, **kwargs)
+
+        t = Task(' '.join([func.__name__] + [str(x) for x in args[:1]]))
         if bool(options.profile):
             t.start(thread_profileCode, t, func, *args, **kwargs)
         else:
-            t.start(try_func, t, func, *args, **kwargs)
+            t.start(toplevel_try_func, t, func, *args, **kwargs)
         vd().tasks.append(t)
         return t
     return execThread
 
-def try_func(task, func, *args, **kwargs):
+def toplevel_try_func(task, func, *args, **kwargs):
     try:
         ret = func(*args, **kwargs)
         return ret
     except EscapeException as e:  # user aborted
-        task.status += ' cancelled by user'
+        task.status += 'cancelled by user;'
         status("%s cancelled" % task.name)
     except Exception as e:
-        task.status += status('%s: %s' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
+        task.status += status('%s: %s;' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
         exceptionCaught()
 
 def thread_profileCode(task, func, *args, **kwargs):
     pr = cProfile.Profile()
     pr.enable()
-    ret = try_func(task, func, *args, **kwargs)
+    ret = toplevel_try_func(task, func, *args, **kwargs)
     pr.disable()
     s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
@@ -765,6 +764,10 @@ class Sheet:
         return self.columns[:self.nKeys]
 
     @property
+    def nonKeyVisibleCols(self):
+        return [c for c in self.columns[self.nKeys:] if not c.hidden]
+
+    @property
     def keyColNames(self):
         return options.ch_KeySep.join(c.name for c in self.keyCols)
 
@@ -796,26 +799,47 @@ class Sheet:
 
     @async
     def toggle(self, rows):
+        self.progressMade = 0
+        self.progressTotal = len(self.rows)
         for r in rows:
-            if id(r) in self._selectedRows:
-                del self._selectedRows[id(r)]
-            else:
-                self._selectedRows[id(r)] = r
+            self.progressMade += 1
+            if not self.unselectRow(r):
+                self.selectRow(r)
+        self.progressTotal = self.progressMade
+
+    def selectRow(self, row):
+        self._selectedRows[id(row)] = row
+
+    def unselectRow(self, row):
+        if id(row) in self._selectedRows:
+            del self._selectedRows[id(row)]
+            return True
+        else:
+            return False
 
     @async
-    def select(self, rows):
+    def select(self, rows, status=True):
         before = len(self._selectedRows)
+        self.progressMade = 0
+        self.progressTotal = len(self.rows)
         for r in rows:
-            self._selectedRows[id(r)] = r
-        status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
+            self.progressMade += 1
+            self.selectRow(r)
+        if status:
+            vd().status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
+        self.progressTotal = self.progressMade
 
     @async
-    def unselect(self, rows):
+    def unselect(self, rows, status=True):
         before = len(self._selectedRows)
+        self.progressMade = 0
+        self.progressTotal = len(rows)
         for r in rows:
-            if id(r) in self._selectedRows:
-                del self._selectedRows[id(r)]
-        status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
+            self.progressMade += 1
+            self.unselectRow(r)
+        if status:
+            vd().status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
+        self.progressTotal = self.progressMade
 
     def selectByIdx(self, rowIdxs):
         self.select(self.rows[i] for i in rowIdxs)
@@ -899,8 +923,8 @@ class Sheet:
 
         if self.topRowIndex <= 0:
             self.topRowIndex = 0
-        elif self.topRowIndex > self.nRows:
-            self.topRowIndex = self.nRows-1
+        elif self.topRowIndex > self.nRows-self.nVisibleRows:
+            self.topRowIndex = self.nRows-self.nVisibleRows
 
         # (x,y) is relative cell within screen viewport
         x = self.cursorVisibleColIndex - self.leftVisibleColIndex
@@ -939,7 +963,7 @@ class Sheet:
             col = self.visibleCols[vcolidx]
             if col.width is None:
                 col.width = col.getMaxWidth(self.visibleRows)+len(options.ch_LeftMore)+len(options.ch_RightMore)
-            if vcolidx < self.nKeys or vcolidx >= self.leftVisibleColIndex:  # visible columns
+            if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self.visibleColLayout[vcolidx] = (x, min(col.width, self.windowWidth-x))
                 x += col.width+len(options.ch_ColumnSep)
             if x > self.windowWidth-1:
@@ -949,7 +973,7 @@ class Sheet:
         # choose attribute to highlight column header
         if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
             hdrattr = colors[options.c_CurHdr]
-        elif vcolidx < self.nKeys:
+        elif self.visibleCols[vcolidx] in self.keyCols:
             hdrattr = colors[options.c_KeyCols]
         else:
             hdrattr = colors[options.c_Header]
@@ -965,7 +989,7 @@ class Sheet:
         self.clipdraw(0, x, N, hdrattr, colwidth)
         self.clipdraw(0, x+colwidth-len(T), T, hdrattr, len(T))
 
-        if vcolidx == self.leftVisibleColIndex and vcolidx > self.nKeys:
+        if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.ch_LeftMore
             self.scr.addstr(0, x, A, colors[options.c_ColumnSep])
 
@@ -973,6 +997,8 @@ class Sheet:
         if x+colwidth+len(C) < self.windowWidth:
             self.scr.addstr(0, x+colwidth, C, colors[options.c_ColumnSep])
 
+    def isVisibleIdxKey(self, vcolidx):
+        return self.visibleCols[vcolidx] in self.keyCols
 
     def draw(self, scr):
         numHeaderRows = 1
@@ -1002,7 +1028,7 @@ class Sheet:
 
                     if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
                         attr = colors[options.c_CurRow]
-                    elif vcolidx < self.nKeys:
+                    elif self.isVisibleIdxKey(vcolidx):
                         attr = colors[options.c_KeyCols]
                     else:
                         attr = colors[options.c_default]
@@ -1093,12 +1119,16 @@ class Column:
         'returns a properly-typed value, or a default value if the conversion fails, or reraises the exception if the getter fails'
         try:
             v = self.getter(row)
+        except EscapeException:
+            raise
         except Exception:
             exceptionCaught(status=False)
             return CalcErrorStr(self.type())
 
         try:
             return self.type(v)  # convert type on-the-fly
+        except EscapeException:
+            raise
         except Exception:
             exceptionCaught(status=False)
             return self.type()  # return a suitable value for this type
@@ -1106,6 +1136,8 @@ class Column:
     def getDisplayValue(self, row, width=None):
         try:
             cellval = self.getter(row)
+        except EscapeException:
+            raise
         except Exception as e:
             exceptionCaught(status=False)
             return CalcErrorStr(options.ch_FunctionError)
@@ -1119,6 +1151,8 @@ class Column:
         try:
             cellval = self.deduceFmtstr() % self.type(cellval)  # convert type on-the-fly
             if width and self.type in (int, float): cellval = cellval.rjust(width-1)
+        except EscapeException:
+            raise
         except Exception as e:
             exceptionCaught(status=False)
             cellval = WrongTypeStr(str(cellval))
@@ -1517,8 +1551,9 @@ class Path:
     '''Modeled after pathlib.Path.'''
     def __init__(self, fqpn):
         self.fqpn = fqpn
-        self.name = os.path.split(fqpn)[-1]
-        self.suffix = os.path.splitext(self.name)[1][1:]
+        fn = os.path.split(fqpn)[-1]
+        self.name, ext = os.path.splitext(fn)
+        self.suffix = ext[1:]
 
     def open_text(self):
         return open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors)
