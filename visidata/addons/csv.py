@@ -53,7 +53,7 @@ def load_csv(vs):
 
 
 def save_csv(sheet, fn):
-    with open(fn, 'w', newline='', encoding=options.encoding, encoding_errors=options.encoding_errors) as fp:
+    with open(fn, 'w', newline='', encoding=options.encoding, errors=options.encoding_errors) as fp:
         cw = csv.writer(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):

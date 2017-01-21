@@ -53,6 +53,7 @@ option('joinchar', ' ', 'character used to join string fields')
 option('SubsheetSep', '~', 'string joining multiple sheet names')
 option('cmdhistThreshold_ms', 1, 'minimum amount of time taken before adding command to cmdhist')
 option('timeout_ms', '100', 'curses timeout in ms')
+option('minTaskTime_s', 0.10, 'only keep tasks that take longer than this number of seconds')
 option('profile', True, 'profile async tasks')
 
 theme('ch_Ellipsis', '…')
@@ -207,7 +208,7 @@ command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last input
 command(',', 'selectBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v)', 'select rows matching by this column')
 command('g,', 'selectBy(lambda r,v=cursorRow: r == v)', 'select all rows that match this row')
 
-command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0].selectedRows)', 'push duplicate sheet with only selected rows')
+command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0].selectedRows); vd.sheets[0]._selectedRows.clear()', 'push duplicate sheet with only selected rows')
 command('g"', 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 
@@ -481,10 +482,12 @@ class VisiData:
             else:
                 sheet.exec_command(g_globals, self.keystrokes)
 
-            for i, task in enumerate(self.tasks):
+            for i, task in list(enumerate(self.tasks)):
                 if not task.endTime and not task.thread.is_alive():
                     task.endTime = time.process_time()
                     task.status += 'ended'
+                    if task.elapsed_s < float(options.minTaskTime_s):
+                        self.tasks.remove(task)
 
             sheet.checkCursor()
 
@@ -662,6 +665,7 @@ class Sheet:
         c.name += suffix
         c.topRowIndex = c.cursorRowIndex = 0
         c.columns = copy.deepcopy(self.columns)  # deepcopy so that layouts can be different
+        c._selectedRows = self._selectedRows.copy()  # so that selections on source don't affect the copy and vice versa
         return c
 
     @async
@@ -1232,7 +1236,7 @@ def _inputLine(prompt, **kwargs):
     return ret
 
 def saveSheet(vs, fn):
-    assert vs.progressTotal == 0, 'have to finish loading first'
+    assert vs.progressTotal == vs.progressMade, 'have to finish loading first'
     basename, ext = os.path.splitext(fn)
     funcname = 'save_' + ext[1:]
     if funcname not in g_globals:
