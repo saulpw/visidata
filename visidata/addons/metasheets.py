@@ -4,17 +4,50 @@ command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
 command('C', 'vd.push(SheetColumns(sheet))', 'open Columns for this sheet')
 
 option('ColumnStats', False, 'include mean/median/etc on Column sheet')
-command(':', 'splitColumn(sheet, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
+command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
+command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 
-
-def splitColumn(sheet, origcol, exampleVal, ch):
+# exampleVal just to know how many subcolumns to make
+def splitColumn(columns, colIndex, origcol, exampleVal, ch):
     maxcols = len(exampleVal.split(ch))
     if maxcols <= 1:
         return status('move cursor to valid example row to split by this column')
 
     for i in range(maxcols):
-        sheet.columns.insert(sheet.cursorColIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i: c.getValue(r).split(ch)[i])))
-    origcol.width = 0
+        columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i: c.getValue(r).split(ch)[i])))
+
+
+class LazyMapping:
+    'calculates column values as needed'
+    def __init__(self, sheet, row):
+        self.row = row
+        self.sheet = sheet
+
+    def keys(self):
+        return [c.name for c in self.sheet.columns]
+
+    def __call__(self, col):
+        return eval(col.expr, {}, self)
+
+    def __getitem__(self, colname):
+        colnames = [c.name for c in self.sheet.columns]
+        if colname in colnames:
+            colidx = colnames.index(colname)
+            return self.sheet.columns[colidx].getValue(self.row)
+        else:
+            raise KeyError(colname)
+
+    def __getattr__(self, colname):
+        return self.__getitem__(colname)
+
+
+def ColumnExpr(sheet, expr):
+    if expr:
+        vc = Column(expr)  # or default name?
+        vc.expr = expr
+        vc.getter = lambda r,c=vc,s=sheet: LazyMapping(s, r)(c)
+        vc.setter = lambda r,c=vc,s=sheet: setattr(c, 'expr', v)
+        return vc
 
 
 class SheetsSheet(SheetList):
@@ -30,6 +63,7 @@ class SheetsSheet(SheetList):
         self.command('*', 'vd.replace(SheetJoin(selectedRows, jointype="*"))', 'open full join of selected sheets')
         self.command('~', 'vd.replace(SheetJoin(selectedRows, jointype="~"))', 'open diff join of selected sheets')
 
+
 class SheetColumns(Sheet):
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
@@ -40,9 +74,11 @@ class SheetColumns(Sheet):
         self.command('$', 'cursorRow.type = str; cursorDown(+1)', 'set source column type to string')
         self.command('%', 'cursorRow.type = float; cursorDown(+1)', 'set source column type to decimal numeric type')
         self.command('~', 'cursorRow.type = detectType(cursorRow.getValue(source.cursorRow)); cursorDown(+1)', 'autodetect type of source column using its data')
-        self.command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'toggle key column on source sheet')
-        self.command('-', 'cursorRow.width = 0', 'hide column on source sheet')
-        self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'set source column width to max width of its rows')
+        self.command('!', 'source.toggleKeyColumn(cursorRowIndex); cursorDown(+1)', 'toggle key column on source sheet')
+        self.command('-', 'cursorRow.width = 0; cursorDown(+1)', 'hide column on source sheet')
+        self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows); cursorDown(+1)', 'set source column width to max width of its rows')
+        self.command(':', 'splitColumn(source.columns, cursorRowIndex, cursorRow, cursorRow.getValue(sheet.cursorRow), input("split char: ") or None)', 'create new columns by splitting current column')
+        self.command('=', 'source.addColumn(ColumnExpr(source, input("new column expr=", "expr")), index=cursorRowIndex+1)', 'add column by expr')
 
         self.command('+', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns')
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')

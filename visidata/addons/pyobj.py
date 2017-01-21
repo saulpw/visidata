@@ -3,10 +3,6 @@ from visidata import *
 command('^O', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 #command('^S', 'push_pyobj(sheet.name + "_pyobj", sheet)', 'push object for this sheet')
 
-command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
-#command(':', 'addColumn(ColumnRegex(sheet, input("new column regex:", "regex")), index=cursorColIndex+1)', 'add column by regex')
-#command(':', 'addColumn()', 'regex subst on current column')
-
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):
     vs = open_pyobj(name, pyobj, src)
@@ -86,38 +82,6 @@ class SheetObject(Sheet):
         self.nKeys = 1
         self.command('^J', 'v = getattr(source, cursorRow); push_pyobj(join_sheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value')
         self.command('e', 'setattr(source, cursorRow, editCell(1)); reload()', 'edit this value')
-
-class LazyMapping:
-    'calculates column values as needed'
-    def __init__(self, sheet, row):
-        self.row = row
-        self.sheet = sheet
-
-    def keys(self):
-        return [c.name for c in self.sheet.columns]
-
-    def __call__(self, col):
-        return eval(col.expr, {}, self)
-
-    def __getitem__(self, colname):
-        colnames = [c.name for c in self.sheet.columns]
-        if colname in colnames:
-            colidx = colnames.index(colname)
-            return self.sheet.columns[colidx].getValue(self.row)
-        else:
-            raise KeyError(colname)
-
-    def __getattr__(self, colname):
-        return self.__getitem__(colname)
-
-
-def ColumnExpr(sheet, expr):
-    if expr:
-        vc = Column(expr)  # or default name?
-        vc.expr = expr
-        vc.getter = lambda r,c=vc,s=sheet: LazyMapping(s, r)(c)
-        vc.setter = lambda r,c=vc,s=sheet: setattr(c, 'expr', v)
-        return vc
 
 
 def open_json(p):

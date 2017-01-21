@@ -126,7 +126,7 @@ command('>', 'skipDown()', 'skip down this column to next value')
 
 command('_', 'cursorCol.width = cursorCol.getMaxWidth(visibleRows)', 'set this column width to fit visible cells')
 command('-', 'cursorCol.width = 0', 'hide this column')
-command('^', 'cursorCol.name = cursorCol.getDisplayValue(cursorRow)', 'set this column header to this cell value')
+command('^', 'cursorCol.name = input("column name: ", value=cursorCol.name or cursorCol.getDisplayValue(cursorRow))', 'rename column')
 command('!', 'cursorRight(toggleKeyColumn(cursorColIndex))', 'toggle this column as a key column')
 
 command('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
@@ -1380,6 +1380,7 @@ def load_tsv(vs):
         i = 0
         while i < (header_lines or 1):
             L = next(fp)
+            L = L[:-1]
             if L:
                 vs.rows.append(L.split('\t'))
                 i += 1
