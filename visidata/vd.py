@@ -1295,6 +1295,8 @@ class TextSheet(Sheet):
                 self.rows.append(x)
         elif isinstance(self.source, str):
             self.rows = self.source.splitlines()
+        elif isinstance(self.source, io.IOBase):
+            self.rows = [L[:-1] for L in self.source]
         else:
             error('unknown text type ' + str(type(self.source)))
 
@@ -1476,7 +1478,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
-        elif ch in ('^H', 'KEY_BACKSPACE', 'KEY_DC'): i -= 1 if i > 0 else 0; v = delchar(v, i)
+        elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1 if i > 0 else 0; v = delchar(v, i)
         elif ch == 'KEY_TAB':                      comps_idx += 1; v = complete(v[:i], completions, comps_idx)
         elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = complete(v[:i], completions, comps_idx)
         elif ch == '^J' or ch == '^J':             break
