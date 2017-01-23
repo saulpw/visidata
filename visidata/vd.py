@@ -139,7 +139,7 @@ command('^D', 'options.debug = not options.debug; status("debug " + ("ON" if opt
 command('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'open stack trace for most recent error')
 
 command('^^', 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet')
-command('KEY_TAB',  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheet stack')
+command('^I',  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheet stack') # TAB
 command('KEY_BTAB', 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheet stack')
 
 command('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'open most recent errors')
@@ -1450,7 +1450,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         return v
 
     insert_mode = True
-    first_char = True
+    first_action = True
     v = str(value)  # value under edit
     i = 0           # index into v
     comps_idx = 2
@@ -1477,19 +1477,19 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1 if i > 0 else 0; v = delchar(v, i)
-        elif ch == 'KEY_TAB':                      comps_idx += 1; v = complete(v[:i], completions, comps_idx)
+        elif ch == '^I':                           comps_idx += 1; v = complete(v[:i], completions, comps_idx)
         elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = complete(v[:i], completions, comps_idx)
-        elif ch == ENTER or ch == ENTER:             break
-        elif ch == '^K':                           v = v[:i]
-        elif ch == '^R':                           v = str(value)
-        elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)
-        elif ch == '^U':                           v = v[i:]; i = 0
-        elif ch == '^V':                           v = splice(v, i, until(scr.get_wch)); i += 1
+        elif ch == ENTER:                          break
+        elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
+        elif ch == '^R':                           v = str(value)  # ^Reload initial value
+        elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)  # swap chars
+        elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
+        elif ch == '^V':                           v = splice(v, i, until(scr.get_wch)); i += 1  # literal character
         elif history and ch == 'KEY_UP':           hist_idx += 1; v = history[hist_idx % len(history)]
         elif history and ch == 'KEY_DOWN':         hist_idx -= 1; v = history[hist_idx % len(history)]
         elif ch.startswith('KEY_'):                pass
         else:
-            if first_char:
+            if first_action:
                 v = ''
             if insert_mode:
                 v = splice(v, i, ch)
@@ -1500,7 +1500,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
 
         if i < 0: i = 0
         if i > len(v): i = len(v)
-        first_char = False
+        first_action = False
 
     return v
 
@@ -1639,6 +1639,7 @@ def curses_main(_scr, sheetlist=[]):
         vd().push(vs)  # first push does a reload
     return vd().run(_scr)
 
+g_globals = globals()
 def set_globals(g):
     global g_globals
     g_globals = g
