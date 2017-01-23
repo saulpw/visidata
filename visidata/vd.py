@@ -85,7 +85,6 @@ theme('ch_Newline', '\\n', 'displayable newline')
 theme('c_StatusLine', 'bold', 'status line color')
 theme('c_EditCell', 'normal', 'edit cell  line color')
 theme('SheetNameFmt', '%s| ', 'status line prefix')
-theme('ch_spinny', '◴◷◶◵', 'characters shown while commands are processing')
 
 ENTER='^J'
 ESC='^['
@@ -424,7 +423,6 @@ class VisiData:
 
     def drawRightStatus(self):
         try:
-            spinny = options.ch_spinny
             sheet = self.sheets[0]
             if sheet.progressMade == sheet.progressTotal:
                 pctLoaded = 'rows'
@@ -1304,8 +1302,8 @@ class DirSheet(Sheet):
     'browses a directory, ENTER dives into the file'
     def reload(self):
         self.rows = [(p, p.stat()) for p in self.source.iterdir()]  #  if not p.name.startswith('.')]
-        self.command('^J', 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
-        self.columns = [Column('filename', str, lambda r: r[0].name),
+        self.command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
+        self.columns = [Column('filename', str, lambda r: r[0].name + r[0].ext),
                       Column('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
                       Column('size', int, lambda r: r[1].st_size),
                       Column('mtime', date, lambda r: r[1].st_mtime)]
@@ -1329,7 +1327,7 @@ class OptionsSheet(Sheet):
     def reload(self):
         self.rows = list(self.source.values())
         self.columns = ArrayNamedColumns('option value default description'.split())
-        self.command('^J', 'cursorRow[1] = editCell(1)', 'edit this option')
+        self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
 
 
@@ -1474,14 +1472,14 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
         elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
-        elif ch == '^C' or ch == '^[':             raise EscapeException(ch)
+        elif ch == '^C' or ch == ESC:             raise EscapeException(ch)
         elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1 if i > 0 else 0; v = delchar(v, i)
         elif ch == 'KEY_TAB':                      comps_idx += 1; v = complete(v[:i], completions, comps_idx)
         elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = complete(v[:i], completions, comps_idx)
-        elif ch == '^J' or ch == '^J':             break
+        elif ch == ENTER or ch == ENTER:             break
         elif ch == '^K':                           v = v[:i]
         elif ch == '^R':                           v = str(value)
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)
@@ -1559,8 +1557,8 @@ class Path:
     def __init__(self, fqpn):
         self.fqpn = fqpn
         fn = os.path.split(fqpn)[-1]
-        self.name, ext = os.path.splitext(fn)
-        self.suffix = ext[1:]
+        self.name, self.ext = os.path.splitext(fn)
+        self.suffix = self.ext[1:]
 
     def open_text(self):
         return open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors)
