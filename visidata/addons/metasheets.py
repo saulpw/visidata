@@ -7,14 +7,24 @@ option('ColumnStats', False, 'include mean/median/etc on Column sheet')
 command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
 command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 
+option('maxsplit', -1, 'string.split limit')
 # exampleVal just to know how many subcolumns to make
 def splitColumn(columns, colIndex, origcol, exampleVal, ch):
-    maxcols = len(exampleVal.split(ch))
+    maxsplit = int(options.maxsplit)
+
+    if ch:
+        maxcols = len(exampleVal.split(ch, maxsplit))
+    else:
+        maxcols = len(exampleVal)
+
     if maxcols <= 1:
         return status('move cursor to valid example row to split by this column')
 
     for i in range(maxcols):
-        columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i: c.getValue(r).split(ch)[i])))
+        if ch:
+            columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,maxsplit=maxsplit: c.getValue(r).split(ch, maxsplit)[i])))
+        else:
+            columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,maxsplit=maxsplit: c.getValue(r)[i])))
 
 
 class LazyMapping:
