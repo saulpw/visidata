@@ -7,6 +7,14 @@ option('ColumnStats', False, 'include mean/median/etc on Column sheet')
 command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
 command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 
+def _getattrname(o, k):
+    v = getattr(o, k)
+    return v.__name__ if v else None
+
+def ColumnGlobal(name):
+    return Column(name, getter=lambda r,name=name: _getattrname(r, name),
+                        setter=lambda r,v,name=name: setattr(r, name, globals()[v]))
+
 option('maxsplit', -1, 'string.split limit')
 # exampleVal just to know how many subcolumns to make
 def splitColumn(columns, colIndex, origcol, exampleVal, ch):
@@ -56,7 +64,6 @@ def ColumnExpr(sheet, expr):
         vc = Column(expr)  # or default name?
         vc.expr = expr
         vc.getter = lambda r,c=vc,s=sheet: LazyMapping(s, r)(c)
-        vc.setter = lambda r,c=vc,s=sheet: setattr(c, 'expr', v)
         return vc
 
 
@@ -94,15 +101,15 @@ class SheetColumns(Sheet):
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
         self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
 
-
     def reload(self):
         self.rows = self.source.columns
         self.cursorRowIndex = self.source.cursorColIndex
         self.columns = [
             ColumnAttr('name', str),
             ColumnAttr('width', int),
-            Column('type',   str, lambda r: r.type.__name__),
+            ColumnGlobal('type'),
             ColumnAttr('fmtstr', str),
+            ColumnGlobal('aggregator'),
             ColumnAttr('expr', str),
             Column('value',  anytype, lambda c,sheet=self.source: c.getValue(sheet.cursorRow)),
         ]

@@ -8,6 +8,7 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
 
+from builtins import *
 import sys
 import os
 import os.path
@@ -1087,14 +1088,22 @@ class CalcErrorStr(str):
     'str wrapper (possibly with error message) to indicate that getValue failed'
     pass
 
+
+# aggregators: sum, avg/mean, count/len, min, max
+def avg(values):
+    return float(sum(values))/len(values)
+mean=avg
+count=len
+
 class Column:
     def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None):
-        self.name = name    # use property setter from the get-go to strip spaces
-        self.type = type
-        self.getter = getter
-        self.setter = setter
-        self.width = width  # == 0 if hidden, None if auto-compute next time
-        self.expr = None    # Python string expression if computed column
+        self.name = name      # use property setter from the get-go to strip spaces
+        self.type = type      # anytype/str/int/float/date/func
+        self.getter = getter  # getter(r)
+        self.setter = setter  # setter(r,v)
+        self.width = width    # == 0 if hidden, None if auto-compute next time
+        self.expr = None      # Python string expression if computed column
+        self.aggregator = None # function to use on the list of column values when grouping
         self.fmtstr = None
 
     def copy(self):

@@ -2,6 +2,7 @@
 
 ## v0.42
 - async select/unselect
+- aggregator functions on columns
 
 ## v0.41 (2017-01-18)
 - asynchronous commands (each in its own thread) with

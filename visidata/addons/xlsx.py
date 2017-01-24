@@ -11,7 +11,7 @@ class open_xlsx(Sheet):
     def reload(self):
         import openpyxl
         self.columns = [Column('name')]
-        self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
+        self.workbook = openpyxl.load_workbook(self.source.resolve(), data_only=True, read_only=True)
         self.rows = list(self.workbook.sheetnames)
 
     def getSheet(self, sheetname):
@@ -38,7 +38,7 @@ class open_xls(Sheet):
     def reload(self):
         import xlrd
         self.columns = [Column('name')]
-        self.workbook = xlrd.open_workbook(str(self.source))
+        self.workbook = xlrd.open_workbook(self.source.resolve())
         self.rows = list(self.workbook.sheet_names())
 
     def getSheet(self, sheetname):
