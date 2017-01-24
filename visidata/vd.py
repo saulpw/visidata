@@ -341,7 +341,7 @@ class VisiData:
             return ''  # curses timeout
 
         if isinstance(k, str):
-            if ord(k) >= 32:
+            if ord(k) >= 32 and ord(k) != 127:  # 127 == DEL or ^?
                 return k
             k = ord(k)
         return curses.keyname(k).decode('utf-8')
