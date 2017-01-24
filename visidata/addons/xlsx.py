@@ -16,7 +16,7 @@ class open_xlsx(Sheet):
 
     def getSheet(self, sheetname):
         worksheet = self.workbook.get_sheet_by_name(sheetname)
-        return xlsxSheet(join_sheetnames(self.source, sheetname), worksheet)
+        return xlsxSheet(join_sheetnames(self.name, sheetname), worksheet)
 
 class xlsxSheet(Sheet):
     @async
@@ -27,3 +27,31 @@ class xlsxSheet(Sheet):
         for row in worksheet.iter_rows():
             self.progressMade += 1
             self.rows.append([cell.value for cell in row])
+
+class open_xls(Sheet):
+    def __init__(self, path):
+        super().__init__(path.name, path)
+        self.workbook = None
+        self.command('^J', 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
+
+    @async
+    def reload(self):
+        import xlrd
+        self.columns = [Column('name')]
+        self.workbook = xlrd.open_workbook(str(self.source))
+        self.rows = list(self.workbook.sheet_names())
+
+    def getSheet(self, sheetname):
+        worksheet = self.workbook.sheet_by_name(sheetname)
+        return xlsSheet(join_sheetnames(self.name, sheetname), worksheet)
+
+
+class xlsSheet(Sheet):
+    @async
+    def reload(self):
+        worksheet = self.source
+        self.columns = ArrayColumns(worksheet.ncols)
+        self.progressTotal = worksheet.nrows
+        for rownum in range(worksheet.nrows):
+            self.rows.append([worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)])
+            self.progressMade += 1
