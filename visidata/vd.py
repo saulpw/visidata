@@ -125,7 +125,7 @@ command('>', 'skipDown()', 'skip down this column to next value')
 
 command('_', 'cursorCol.width = cursorCol.getMaxWidth(visibleRows)', 'set this column width to fit visible cells')
 command('-', 'cursorCol.width = 0', 'hide this column')
-command('^', 'cursorCol.name = input("column name: ", value=cursorCol.name or cursorCol.getDisplayValue(cursorRow))', 'rename column')
+command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename column')
 command('!', 'cursorRight(toggleKeyColumn(cursorColIndex))', 'toggle this column as a key column')
 
 command('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
@@ -1057,19 +1057,27 @@ class Sheet:
         if vcolidx+1 < self.nVisibleCols:
             self.scr.addstr(0, self.windowWidth-1, options.ch_RightMore, colors[options.c_ColumnSep])
 
-    def editCell(self, vcolidx=None):
+    def editCell(self, vcolidx=None, rowidx=None):
         if options.readonly:
             status('readonly mode')
             return
         if vcolidx is None:
             vcolidx = self.cursorVisibleColIndex
         x, w = self.visibleColLayout[vcolidx]
-        y = self.rowLayout[self.cursorRowIndex]
+        if rowidx is None:
+            rowidx = self.cursorRowIndex
+        if rowidx < 0:  # header
+            y = 0
+            currentValue = self.visibleCols[vcolidx].name
+        else:
+            y = self.rowLayout[rowidx]
+            currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
 
-        currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
         r = vd().editText(y, x, w, value=currentValue, fillchar=options.ch_EditPadChar)
-        return self.visibleCols[vcolidx].type(r)  # convert input to column type
+        if rowidx >= 0:
+            r = self.visibleCols[vcolidx].type(r)  # convert input to column type
 
+        return r
 
 class WrongTypeStr(str):
     'str wrapper with original str-ified contents to indicate that the type conversion failed'

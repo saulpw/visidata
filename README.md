@@ -7,9 +7,9 @@ Usable via any remote shell which has Python3 installed.
 ![VisiData silent demo](screenshot.gif "VisiData Screenshot")
 
 ## Features
-- browse first rows of huge csv/tsv/xlsx files immediately
+- browse first rows of huge csv/tsv/excel files immediately
 - `F1` for command help sheet
-- `o`pen .csv, .tsv, .json, .hdf5, .xlsx
+- `o`pen .csv, .tsv, .json, .hdf5, .xlsx, .xls
 - `Ctrl-S`ave .csv, .tsv
 - `hjkl` cursor movement, `t`op/`m`iddle/`b`ottom scroll to position screen cursor
 - `[`/`]` sort asc/desc by one column
@@ -59,10 +59,11 @@ On the `C`olumns sheet, these commands apply to rows (the columns of the source 
 ### Dependencies
 
 - Python 3.3
+- dateutil.parser (if converting string column to datetime)
 - openpyxl (if opening .xlsx files)
+- xlrd (if reading .xls files)
 - h5py and numpy (if opening .hdf5 files)
 - google-api-python-client (if opening Google Sheets; must [also set up OAuth credentials](https://developers.google.com/sheets/quickstart/python )
-- dateutil.parser (if converting string column to datetime)
 
 **Remember to install the Python3 versions of these modules with e.g. `pip3`**
 
