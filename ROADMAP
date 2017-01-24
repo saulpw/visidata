@@ -16,7 +16,6 @@ A loose plan that is subject to change.
 - create versioned columns on subst/delete
 
 ## v0.6
-- aggregate rows by key columns, rollup functions (mean/min/max) provided for other columns
 - sql dbs via sqlalchemy
 - save all sheets to .h5 file
 - save sheets layout, including generated sheets and visible columns (via replay mechanism?)
@@ -52,13 +51,15 @@ A loose plan that is subject to change.
 
 ## Unscheduled
 - reload derived sheets
-- secondary column sort
+- sort by keycols with g[ and g]
 - html table parsing into columns
 - parse .xml
 - save as .json
 - better csv/tsv sniffer
-- easy'q'uit (for easily reproducible pages) vs sheet 'Q'uit
+- dive back into source
+- freeze sheet values
 - how to handle timezone for datetime
+- backtick to run shell command and parse output
 
 ### Details
 

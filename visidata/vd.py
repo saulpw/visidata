@@ -1089,11 +1089,16 @@ class CalcErrorStr(str):
     pass
 
 
-# aggregators: sum, avg/mean, count/len, min, max
+# aggregators: distinct, sum, avg/mean, count (non-None), min, max
+def distinct(values):
+    return len(set(values))
+
 def avg(values):
     return float(sum(values))/len(values)
 mean=avg
-count=len
+
+def count(values):
+    return len([x for x in values if x is not None])
 
 class Column:
     def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None):
