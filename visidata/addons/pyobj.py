@@ -58,11 +58,11 @@ class SheetDict(Sheet):
         if self.rows and isinstance(self.rows[0][1], list):
             self.columns.extend(DictKeyColumns(self.rows[0]))
             self.command('e', 'if cursorColIndex > 0: source[cursorRow[0]][cursorColIndex-1] = editCell(cursorColIndex); reload()', 'edit this value')
-            self.command('^J', 'if cursorColIndex > 0: push_pyobj(join_sheetnames(name, cursorRow[0]), cursorRow[cursorColIndex-1])', 'dive into this value')
+            self.command(ENTER, 'if cursorColIndex > 0: push_pyobj(joinSheetnames(name, cursorRow[0]), cursorRow[cursorColIndex-1])', 'dive into this value')
         else:
             self.columns.append(ColumnItem('value', 1))
             self.command('e', 'source[cursorRow[0]][1] = editCell(1); reload()', 'edit this value')
-            self.command('^J', 'push_pyobj(join_sheetnames(name, cursorRow[0]), cursorRow[1])', 'dive into this value')
+            self.command(ENTER, 'push_pyobj(joinSheetnames(name, cursorRow[0]), cursorRow[1])', 'dive into this value')
 
 
 
@@ -80,7 +80,7 @@ class SheetObject(Sheet):
             ColumnSourceAttr('value', self.source)
         ]
         self.nKeys = 1
-        self.command('^J', 'v = getattr(source, cursorRow); push_pyobj(join_sheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value')
+        self.command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value')
         self.command('e', 'setattr(source, cursorRow, editCell(1)); reload()', 'edit this value')
 
 

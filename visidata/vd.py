@@ -211,6 +211,7 @@ command('g,', 'selectBy(lambda r,v=cursorRow: r == v)', 'select all rows that ma
 command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0].selectedRows); vd.sheets[0]._selectedRows.clear()', 'push duplicate sheet with only selected rows')
 command('g"', 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
+command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
 # VisiData uses Python native int, float, str, and adds a simple date and anytype.
 #
@@ -271,7 +272,7 @@ typemap = {
 windowWidth = None
 windowHeight = None
 
-def join_sheetnames(*sheetnames):
+def joinSheetnames(*sheetnames):
     return options.SubsheetSep.join(str(x) for x in sheetnames)
 
 def error(s):
@@ -730,7 +731,7 @@ class Sheet:
         if not self.sources:
             return None
         else:
-            assert len(self.sources) == 1, len(self.sources)
+#            assert len(self.sources) == 1, len(self.sources)
             return self.sources[0]
 
     @property
@@ -1170,7 +1171,7 @@ class Column:
             return options.ch_VisibleNone
 
         if isinstance(cellval, bytes):
-            cellval = cellval.decode(options.encoding)
+            cellval = cellval.decode(options.encoding, options.encoding_errors)
 
         try:
             cellval = self.deduceFmtstr() % self.type(cellval)  # convert type on-the-fly

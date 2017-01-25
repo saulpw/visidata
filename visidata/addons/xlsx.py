@@ -5,7 +5,7 @@ class open_xlsx(Sheet):
     def __init__(self, path):
         super().__init__(path.name, path)
         self.workbook = None
-        self.command('^J', 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
+        self.command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
 
     @async
     def reload(self):
@@ -16,7 +16,7 @@ class open_xlsx(Sheet):
 
     def getSheet(self, sheetname):
         worksheet = self.workbook.get_sheet_by_name(sheetname)
-        return xlsxSheet(join_sheetnames(self.name, sheetname), worksheet)
+        return xlsxSheet(joinSheetnames(self.name, sheetname), worksheet)
 
 class xlsxSheet(Sheet):
     @async
@@ -32,7 +32,7 @@ class open_xls(Sheet):
     def __init__(self, path):
         super().__init__(path.name, path)
         self.workbook = None
-        self.command('^J', 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
+        self.command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
 
     @async
     def reload(self):
@@ -43,7 +43,7 @@ class open_xls(Sheet):
 
     def getSheet(self, sheetname):
         worksheet = self.workbook.sheet_by_name(sheetname)
-        return xlsSheet(join_sheetnames(self.name, sheetname), worksheet)
+        return xlsSheet(joinSheetnames(self.name, sheetname), worksheet)
 
 
 class xlsSheet(Sheet):

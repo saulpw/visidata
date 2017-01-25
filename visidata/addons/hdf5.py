@@ -3,7 +3,7 @@ from visidata import *
 class SheetH5Obj(Sheet):
     def __init__(self, name, hobj):
         super().__init__(name, hobj)
-        self.command('^J', 'vd.push(SheetH5Obj(join_sheetnames(name,cursorRow.name), cursorRow))', 'open this group or dataset')
+        self.command(ENTER, 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), cursorRow))', 'open this group or dataset')
         self.command('A', 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))', 'open metadata sheet for this object')
 
     def reload(self):
