@@ -1,17 +1,17 @@
 from visidata import *
 
 command('^O', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
-#command('^S', 'push_pyobj(sheet.name + "_pyobj", sheet)', 'push object for this sheet')
+command('^Z', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):
-    vs = open_pyobj(name, pyobj, src)
+    vs = load_pyobj(name, pyobj, src)
     if vs:
         return vd().push(vs)
     else:
         status('unknown type ' + type(pyobj))
 
-def open_pyobj(name, pyobj, src=None):
+def load_pyobj(name, pyobj, src=None):
     if isinstance(pyobj, list):
         return SheetList(name, pyobj)
     elif isinstance(pyobj, dict):
@@ -20,6 +20,9 @@ def open_pyobj(name, pyobj, src=None):
         return SheetObject(name, pyobj)
     else:
         status('unknown type ' + type(pyobj))
+
+def open_pyobj(path):
+    return load_pyobj(path.name, eval(path.read_text()), path)
 
 def getPublicAttrs(obj):
     return [k for k in dir(obj) if not k.startswith('_') and not callable(getattr(obj, k))]
@@ -45,7 +48,6 @@ class SheetList(Sheet):
             pass
         elif self.rows and isinstance(self.rows[0], dict):  # list of dict
             self.columns = DictKeyColumns(self.rows[0])
-            self.nKeys = 1
         else:
             self.columns = [Column(self.name)]
 
@@ -87,3 +89,9 @@ class SheetObject(Sheet):
 def open_json(p):
     import json
     return load_pyobj(p.name, json.load(p.open_text()))
+
+# one json object per line
+def open_jsonl(p):
+    import json
+    return load_pyobj(p.name, list(json.loads(L) for L in p.read_text().splitlines()))
+

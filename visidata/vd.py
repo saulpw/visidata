@@ -27,6 +27,7 @@ import io
 import cProfile
 import pstats
 import random
+import textwrap
 
 
 class EscapeException(Exception):
@@ -82,7 +83,8 @@ theme('c_ColumnSep', 'blue')
 theme('ch_StatusSep', ' | ', 'string separating multiple statuses')
 theme('ch_Unprintable', '.', 'a substitute character for unprintables')
 theme('ch_ColumnFiller', ' ', 'pad chars after column value')
-theme('ch_Newline', '\\n', 'displayable newline')
+theme('ch_Newline', '', 'displayable newline')
+#theme('ch_Newline', u'\u2028', 'displayable newline')
 theme('c_StatusLine', 'bold', 'status line color')
 theme('c_EditCell', 'normal', 'edit cell  line color')
 theme('SheetNameFmt', '%s| ', 'status line prefix')
@@ -120,6 +122,8 @@ command('^V', 'status(__version__)', 'show version information')
 command('t', 'sheet.topRowIndex = cursorRowIndex', 'scroll cursor row to top of screen')
 command('m', 'sheet.topRowIndex = cursorRowIndex-int(nVisibleRows/2)', 'scroll cursor row to middle of screen')
 command('b', 'sheet.topRowIndex = cursorRowIndex-nVisibleRows+1', 'scroll cursor row to bottom of screen')
+command('kRIT5', 'setLeftVisibleColIndex(sheet.rightVisibleColIndex)', 'scroll columns to the right')
+command('kLFT5', 'setRightVisibleColIndex(leftVisibleColIndex)', 'scroll columns to the left')
 
 command('<', 'skipUp()', 'skip up this column to previous value')
 command('>', 'skipDown()', 'skip down this column to next value')
@@ -239,9 +243,14 @@ class date:
             assert isinstance(s, datetime.datetime)
             self.dt = s
 
+    def to_string(self, fmtstr=None):
+        'use ISO8601 by default'
+        if not fmtstr:
+            fmtstr = '%Y-%m-%d %H:%M:%S'
+        return self.dt.strftime(fmtstr)
+
     def __str__(self):
-        'always use ISO8601'
-        return self.dt.strftime('%Y-%m-%d %H:%M:%S')
+        return self.to_string()
 
     def __lt__(self, a):
         return self.dt < a.dt
@@ -614,6 +623,8 @@ class Sheet:
 
         self.topRowIndex = 0     # cursorRowIndex of topmost row
         self.leftVisibleColIndex = 0    # cursorVisibleColIndex of leftmost column
+        self.rightVisibleColIndex = 0
+        self.loader = None
 
         # as computed during draw()
         self.rowLayout = {}      # [rowidx] -> y
@@ -872,6 +883,14 @@ class Sheet:
 
     def cursorRight(self, n):
         self.cursorVisibleColIndex += n
+        self.calcColLayout()
+
+    def setRightVisibleColIndex(self, vcolidx):
+        while self.rightVisibleColIndex > vcolidx and self.leftVisibleColIndex != 0:
+            self.cursorRight(-1)
+
+    def setLeftVisibleColIndex(self, vcolidx):
+        self.cursorVisibleColIndex = self.leftVisibleColIndex = vcolidx
 
     def cellValue(self, rownum, col):
         if not isinstance(col, Column):
@@ -944,7 +963,7 @@ class Sheet:
             self.leftVisibleColIndex = self.cursorVisibleColIndex
         else:
             while True:
-                if self.leftVisibleColIndex == self.cursorVisibleColIndex: # not much more we can do
+                if self.leftVisibleColIndex == self.cursorVisibleColIndex:  # not much more we can do
                     break
                 self.calcColLayout()
                 if self.cursorVisibleColIndex < min(self.visibleColLayout.keys()):
@@ -956,7 +975,7 @@ class Sheet:
 
                 cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
                 left_x, left_w = self.visibleColLayout[self.leftVisibleColIndex]
-                if cur_x+cur_w < self.windowWidth: # current columns fit entirely on screen
+                if cur_x+cur_w < self.windowWidth:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1
 
@@ -968,10 +987,13 @@ class Sheet:
             if col.width is None:
                 col.width = col.getMaxWidth(self.visibleRows)+len(options.ch_LeftMore)+len(options.ch_RightMore)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self.visibleColLayout[vcolidx] = (x, min(col.width, self.windowWidth-x))
+                self.visibleColLayout[vcolidx] = [x, min(col.width, self.windowWidth-x)]
                 x += col.width+len(options.ch_ColumnSep)
             if x > self.windowWidth-1:
+                self.rightVisibleColIndex = vcolidx
                 break
+
+        self.visibleColLayout[vcolidx][1] = self.windowWidth-self.visibleColLayout[vcolidx][0]  # last column on screen uses rest of width
 
     def drawColHeader(self, vcolidx):
         # choose attribute to highlight column header
@@ -1102,7 +1124,7 @@ def count(values):
     return len([x for x in values if x is not None])
 
 class Column:
-    def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None):
+    def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None):
         self.name = name      # use property setter from the get-go to strip spaces
         self.type = type      # anytype/str/int/float/date/func
         self.getter = getter  # getter(r)
@@ -1110,7 +1132,7 @@ class Column:
         self.width = width    # == 0 if hidden, None if auto-compute next time
         self.expr = None      # Python string expression if computed column
         self.aggregator = None # function to use on the list of column values when grouping
-        self.fmtstr = None
+        self.fmtstr = fmtstr
 
     def copy(self):
         return copy.copy(self)
@@ -1123,11 +1145,13 @@ class Column:
     def name(self, name):
         self._name = str(name).replace(' ', '_')
 
-    def deduceFmtstr(self):
-        if self.fmtstr is not None: return self.fmtstr
-        elif self.type is int: return '%d'
-        elif self.type is float: return '%.02f'
-        else: return '%s'
+    def format(self, cellval):
+        val = self.type(cellval)
+        if self.type is date:         return val.to_string(self.fmtstr)
+        elif self.fmtstr is not None: return self.fmtstr % val
+        elif self.type is int:        return '%d' % val
+        elif self.type is float:      return '%.02f' % val
+        else: return '%s' % val
 
     @property
     def hidden(self):
@@ -1174,7 +1198,7 @@ class Column:
             cellval = cellval.decode(options.encoding, options.encoding_errors)
 
         try:
-            cellval = self.deduceFmtstr() % self.type(cellval)  # convert type on-the-fly
+            cellval = self.format(cellval)
             if width and self.type in (int, float): cellval = cellval.rjust(width-1)
         except EscapeException:
             raise
@@ -1313,13 +1337,20 @@ class TextSheet(Sheet):
             self.rows = []
             for x in self.source:
                 # copy so modifications don't change 'original'; also one iteration through generator
-                self.rows.append(x)
+                self.add_line(x)
         elif isinstance(self.source, str):
-            self.rows = self.source.splitlines()
+            for L in self.source.splitlines():
+                self.add_line(L)
         elif isinstance(self.source, io.IOBase):
-            self.rows = [L[:-1] for L in self.source]
+            for L in self.source:
+                self.add_line(L[:-1])
         else:
             error('unknown text type ' + str(type(self.source)))
+
+    # does text wrapping
+    def add_line(self, text):
+        self.rows.extend(textwrap.wrap(text, width=windowWidth-2))
+
 
 class DirSheet(Sheet):
     'browses a directory, ENTER dives into the file'
@@ -1662,10 +1693,13 @@ def curses_main(_scr, sheetlist=[]):
         vd().push(vs)  # first push does a reload
     return vd().run(_scr)
 
-g_globals = globals()
+g_globals = None
 def set_globals(g):
     global g_globals
     g_globals = g
+
+def set_global(k, v):
+    g_globals[k] = v
 
 if __name__ == '__main__':
     run(openSource(src) for src in sys.argv[1:])
