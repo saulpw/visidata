@@ -14,7 +14,7 @@ class SheetFreqTable(Sheet):
         self.largest = 100
 
         self.columns = [
-            ColumnItem(col.name, 0, type=col.type),
+            ColumnItem(col.name, 0, type=col.type, width=30),
             Column('num', int, lambda r: len(r[1])),
             Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
             Column('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
