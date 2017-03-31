@@ -19,7 +19,13 @@ class SheetFreqTable(Sheet):
             Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
             Column('histogram', str, lambda r,s=self: options.ch_Histogram*int(len(r[1])*80/s.largest), width=80)
         ]
-        self.columns.extend([Column(c.aggregator.__name__+'_'+c.name, getter=lambda r,c=c: c.aggregator(c.values(r[1]))) for c in self.source.visibleCols if c.aggregator])
+
+        for c in self.source.visibleCols:
+            if c.aggregator:
+                self.columns.append(Column(c.aggregator.__name__+'_'+c.name,
+                                           type=int,
+                                           getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
+
         self.nKeys = 1
         self.command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
         self.command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet')
