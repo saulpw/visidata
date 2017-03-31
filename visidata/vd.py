@@ -683,6 +683,7 @@ class Sheet:
     def deleteSelected(self):
         oldrows = self.rows
         oldidx = self.cursorRowIndex
+        ndeleted = 0
 
         row = None   # row to re-place cursor after
         while oldidx < len(oldrows):
@@ -699,9 +700,15 @@ class Sheet:
                 self.rows.append(r)
                 if r is row:
                     self.cursorRowIndex = len(self.rows)-1
+            else:
+                ndeleted += 1
             self.progressMade += 1
 
+        nselected = len(self._selectedRows)
         self._selectedRows.clear()
+        status('deleted %s rows' % ndeleted)
+        if ndeleted != nselected:
+            error('expected %s' % nselected)
 
     def __repr__(self):
         return self.name
