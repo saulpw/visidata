@@ -3,7 +3,7 @@
 # VisiData: a curses interface for exploring and arranging tabular data
 #
 
-__version__ = 'saul.pw/VisiData v0.42'
+__version__ = 'saul.pw/VisiData v0.43'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -83,8 +83,7 @@ theme('c_ColumnSep', 'blue')
 theme('ch_StatusSep', ' | ', 'string separating multiple statuses')
 theme('ch_Unprintable', '.', 'a substitute character for unprintables')
 theme('ch_ColumnFiller', ' ', 'pad chars after column value')
-theme('ch_Newline', '', 'displayable newline')
-#theme('ch_Newline', u'\u2028', 'displayable newline')
+theme('ch_Whitespace', '\u00b7', 'displayable character for odd whitespace')
 theme('c_StatusLine', 'bold', 'status line color')
 theme('c_EditCell', 'normal', 'edit cell  line color')
 theme('SheetNameFmt', '%s| ', 'status line prefix')
@@ -1297,11 +1296,37 @@ def saveSheet(vs, fn):
     status('saving to ' + fn)
 
 
+# returns the clipped string and width in terminal display characters, which may be different from len(s) due to width of east asian chars
+import unicodedata
+def clipstr(s, dispw):
+    w = 0
+    ret = ''
+    for c in s:
+        if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
+            ret += options.ch_Whitespace
+            w += len(options.ch_Whitespace)
+        else:
+            ret += c
+            eaw = unicodedata.east_asian_width(c)
+            if eaw == 'A':  # ambiguous
+                w += 2
+            elif eaw in 'WF': # wide/full
+                w += 2
+            elif not unicodedata.combining(c):
+                w += 1
+
+        if w > dispw-len(options.ch_Ellipsis)+1:
+            ret = ret[:-2] + options.ch_Ellipsis  # replace final char with ellipsis
+            w += len(options.ch_Ellipsis)
+
+    return ret, w
+
+
 def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
     'Draw string s at (y,x)-(y,x+w), clipping with ellipsis char'
-    s = s.replace('\n', options.ch_Newline)
 
     _, windowWidth = scr.getmaxyx()
+    dispw = 0
     try:
         if w is None:
             w = windowWidth-1
@@ -1310,15 +1335,12 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
             return
 
         # convert to string just before drawing
-        s = str(s)
-        if len(s) > w:
-            scr.addstr(y, x, s[:w-1] + options.ch_Ellipsis, attr)
-        else:
-            scr.addstr(y, x, s, attr)
-            if len(s) < w:
-                scr.addstr(y, x+len(s), options.ch_ColumnFiller*(w-len(s)), attr)
+        s, dispw = clipstr(str(s), w)
+        scr.addstr(y, x, s, attr)
+        if dispw <= w:
+            scr.addstr(y, x+dispw, options.ch_ColumnFiller*(w-dispw), attr)
     except Exception as e:
-        raise type(e)('%s [clip_draw y=%s x=%s len(s)=%s w=%s]' % (e, y, x, len(s), w)
+        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
                 ).with_traceback(sys.exc_info()[2])
 
 

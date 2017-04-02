@@ -26,7 +26,7 @@
 
 ## Absolute and Visible Column Indexes
 
-To make column navigation feel intuitively smooth, the column cursor should never alight on a 'hidden' Column; for all purposes, hidden Columns should appear to be non-existent in the main sheet (even though they will still be available on the Columns sheet).
+To make column navigation feel intuitively smooth, the column cursor should never alight on a 'hidden' column; for all purposes, hidden columns should appear to be non-existent in the main sheet (even though they will still be available on the columns metasheet).
 For example, a column being moved with 'H' or 'L' should skip over any hidden columns.
 
 To make this convenient for column manipulation in general, there are unfortunately two different column index spaces:
@@ -47,17 +47,18 @@ Each `visibleColLayout` key (visible column index) maps to a simple pair of (x c
 
 `visibleColLayout` always reflects the current layout displayed on the screen.  This may not be the layout for the next draw cycle, for example if the currently executing command hides a column or causes the columns to scroll.
 
-- *visibleCols* and *nonKeyVisibleCols* are helpful properties, each returning a list of Columns with the same ordering as Sheet.columns, but omitting hidden columns.
+- *visibleCols* and *nonKeyVisibleCols* are helpful properties, each returning a list of Column objects with the same ordering as Sheet.columns, but omitting hidden columns.
 
 - *nVisibleCols* is a property that returns the number of visible columns (i.e. one more than value of the maximum visible column index).
 
 ## Key Columns
 
-Key columns are always the first *nKeys* columns in Sheet.columns.
+Key columns are '___'.
 
 - *nKeys* is a real member variable that determines the number of columns to use as keys.
 - *keyCols* is a property that returns a list of the key columns.
 
+Key columns are always the first *nKeys* columns in Sheet.columns.
 
 # Cells, Values, Types, and Formatting
 
