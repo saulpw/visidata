@@ -121,8 +121,8 @@ command('^V', 'status(__version__)', 'show version information')
 command('t', 'sheet.topRowIndex = cursorRowIndex', 'scroll cursor row to top of screen')
 command('m', 'sheet.topRowIndex = cursorRowIndex-int(nVisibleRows/2)', 'scroll cursor row to middle of screen')
 command('b', 'sheet.topRowIndex = cursorRowIndex-nVisibleRows+1', 'scroll cursor row to bottom of screen')
-command('kRIT5', 'setLeftVisibleColIndex(sheet.rightVisibleColIndex)', 'scroll columns to the right')
-command('kLFT5', 'setRightVisibleColIndex(leftVisibleColIndex)', 'scroll columns to the left')
+command('kRIT5', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll columns one page to the right')
+command('kLFT5', 'pageLeft()', 'scroll columns one page to the left')
 
 command('<', 'skipUp()', 'skip up this column to previous value')
 command('>', 'skipDown()', 'skip down this column to next value')
@@ -321,7 +321,7 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self.statusHistory = []
-        self._status = [__version__]  # statuses shown until next action
+        self._status = [__version__, '<F1> opens help']  # statuses shown until next action
         self.lastErrors = []
         self.lastRegex = None
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
@@ -891,12 +891,33 @@ class Sheet:
         self.cursorVisibleColIndex += n
         self.calcColLayout()
 
-    def setRightVisibleColIndex(self, vcolidx):
-        while self.rightVisibleColIndex > vcolidx and self.leftVisibleColIndex != 0:
-            self.cursorRight(-1)
+    def pageLeft(self):
+        # keep the column cursor in the same general relative position:
+        #  - if it is on the furthest right column, then it should stay on the furthest right column if possible
+        #  - likewise on the left or in the middle
+        #  - so really both the leftIndex and the cursorIndex should move in tandem until things are correct
 
-    def setLeftVisibleColIndex(self, vcolidx):
-        self.cursorVisibleColIndex = self.leftVisibleColIndex = vcolidx
+        targetIdx = self.leftVisibleColIndex  # for rightmost column
+        firstNonKeyVisibleColIndex = self.visibleCols.index(self.nonKeyVisibleCols[0])
+        while self.rightVisibleColIndex != targetIdx and self.leftVisibleColIndex != firstNonKeyVisibleColIndex:
+            self.cursorVisibleColIndex -= 1
+            self.leftVisibleColIndex -= 1
+            self.calcColLayout()  # recompute rightVisibleColIndex
+
+        # in case that rightmost column is last column, try to squeeze maximum real estate from screen
+        if self.rightVisibleColIndex == self.nVisibleCols-1:
+            # try to move further left while right column is still full width
+            while True:
+                rightcol = self.visibleCols[self.rightVisibleColIndex]
+                if rightcol.width > self.visibleColLayout[self.rightVisibleColIndex][1]:
+                    # went too far
+                    self.cursorVisibleColIndex += 1
+                    self.leftVisibleColIndex += 1
+                    break
+                else:
+                    self.cursorVisibleColIndex -= 1
+                    self.leftVisibleColIndex -= 1
+                    self.calcColLayout()  # recompute rightVisibleColIndex
 
     def cellValue(self, rownum, col):
         if not isinstance(col, Column):
@@ -938,6 +959,7 @@ class Sheet:
 
         status('no different value up this column')
 
+    # keep cursor in bounds of data and screen
     def checkCursor(self):
         # keep cursor within actual available rowset
         if self.nRows == 0 or self.cursorRowIndex <= 0:
@@ -980,7 +1002,6 @@ class Sheet:
                     continue
 
                 cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
-                left_x, left_w = self.visibleColLayout[self.leftVisibleColIndex]
                 if cur_x+cur_w < self.windowWidth:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1
@@ -996,10 +1017,9 @@ class Sheet:
                 self.visibleColLayout[vcolidx] = [x, min(col.width, self.windowWidth-x)]
                 x += col.width+len(options.ch_ColumnSep)
             if x > self.windowWidth-1:
-                self.rightVisibleColIndex = vcolidx
                 break
 
-        self.visibleColLayout[vcolidx][1] = self.windowWidth-self.visibleColLayout[vcolidx][0]  # last column on screen uses rest of width
+        self.rightVisibleColIndex = vcolidx
 
     def drawColHeader(self, vcolidx):
         # choose attribute to highlight column header

@@ -27,7 +27,7 @@
 ## Absolute and Visible Column Indexes
 
 To make column navigation feel intuitively smooth, the column cursor should never alight on a 'hidden' column; for all purposes, hidden columns should appear to be non-existent in the main sheet (even though they will still be available on the columns metasheet).
-For example, a column being moved with 'H' or 'L' should skip over any hidden columns.
+For example, a column being moved with 'H' or 'L' should skip over any hidden columns.  [Whereas, on the columns metasheet, moving a "column" row up or down will not skip over hidden columns.]
 
 To make this convenient for column manipulation in general, there are unfortunately two different column index spaces:
 
@@ -36,12 +36,13 @@ To make this convenient for column manipulation in general, there are unfortunat
 
 When there are no hidden columns, these indexes are identical.
 
-*cursorVisibleColIndex* is a real member variable that indicates where the column cursor is.
+*cursorVisibleColIndex* is a settable sheet variable that indicates where the column cursor is.
 *cursorCol* and *cursorColIndex* are properties derived from cursorVisibleColIndex in a very inefficient way, which may make large numbers (hundreds or more) of columns untenable.
 
-*leftVisibleColIndex* is a real member variable that holds the visible column index of the left-most non-key column on the screen.
+*leftVisibleColIndex* is a settable sheet variable that holds the visible column index of the left-most non-key column on the screen.
+*rightVisibleColIndex* is a cached sheet member that contains the rightmost recently calculated column on the screen.
 
-`calcColLayout()` recomputes the entire visibleColLayout dict.
+`calcColLayout()` recomputes the entire visibleColLayout dict, and sets *rightVisibleColIndex* based on the current layout.  It also sets any onscreen Column.width that are None to the maxwidth of the displayed rows.
 
 Each `visibleColLayout` key (visible column index) maps to a simple pair of (x coordinate within the terminal, column width in characters).
 
