@@ -1127,6 +1127,8 @@ class Sheet:
         if rowidx >= 0:
             r = self.visibleCols[vcolidx].type(r)  # convert input to column type
 
+        self.cursorRowIndex += 1
+
         return r
 
 class WrongTypeStr(str):
