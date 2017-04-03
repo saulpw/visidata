@@ -907,7 +907,7 @@ class Sheet:
         # in case that rightmost column is last column, try to squeeze maximum real estate from screen
         if self.rightVisibleColIndex == self.nVisibleCols-1:
             # try to move further left while right column is still full width
-            while True:
+            while self.leftVisibleColIndex > 0:
                 rightcol = self.visibleCols[self.rightVisibleColIndex]
                 if rightcol.width > self.visibleColLayout[self.rightVisibleColIndex][1]:
                     # went too far
