@@ -1,6 +1,6 @@
 from visidata import *
 
-def open_db(path):
+def open_sqlite(path):
     vs = SqliteSheet(path.name + '_tables', path, 'sqlite_master')
     vs.columns = vs.getColumns('sqlite_master')
     vs.command(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'open this table')

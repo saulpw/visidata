@@ -57,6 +57,7 @@ option('cmdhistThreshold_ms', 1, 'minimum amount of time taken before adding com
 option('timeout_ms', '100', 'curses timeout in ms')
 option('minTaskTime_s', 0.10, 'only keep tasks that take longer than this number of seconds')
 option('profile', True, 'profile async tasks')
+option('defaultColWidth', 20, 'default column width')
 
 theme('ch_Ellipsis', '…')
 theme('ch_KeySep', '/')
@@ -127,7 +128,7 @@ command('kLFT5', 'pageLeft()', 'scroll columns one page to the left')
 command('<', 'skipUp()', 'skip up this column to previous value')
 command('>', 'skipDown()', 'skip down this column to next value')
 
-command('_', 'cursorCol.width = cursorCol.getMaxWidth(visibleRows)', 'set this column width to fit visible cells')
+command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle this column width between defaultColWidth and to fit visible values')
 command('-', 'cursorCol.width = 0', 'hide this column')
 command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename column')
 command('!', 'cursorRight(toggleKeyColumn(cursorColIndex))', 'toggle this column as a key column')
@@ -1247,6 +1248,12 @@ class Column:
         if len(rows) > 0:
             w = max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name))+2
         return max(w, len(self.name))
+
+    def toggleWidth(self, width):
+        if self.width != width:
+            self.width = width
+        else:
+            self.width = int(options.defaultColWidth)
 
 
 # ---- Column makers
