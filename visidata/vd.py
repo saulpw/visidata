@@ -37,7 +37,11 @@ base_commands = collections.OrderedDict()
 base_options = collections.OrderedDict()
 
 def command(keystrokes, execstr, helpstr):
-    base_commands[keystrokes] = (keystrokes, helpstr, execstr)
+    if isinstance(keystrokes, str):
+        keystrokes = [keystrokes]
+
+    for ks in keystrokes:
+        base_commands[ks] = (ks, helpstr, execstr)
 
 def option(name, default, helpstr=''):
     base_options[name] = [name, default, default, helpstr]  # see OptionsObject
@@ -95,19 +99,18 @@ ESC='^['
 command('KEY_F(1)', 'vd.push(HelpSheet(name + "_commands", sheet.commands, base_commands))', 'open command help sheet')
 command('q',  'vd.sheets.pop(0)', 'quit the current sheet')
 
-command('KEY_LEFT',  'cursorRight(-1)', 'go one column left')
-command('KEY_DOWN',  'cursorDown(+1)', 'go one row down')
-command('KEY_UP',    'cursorDown(-1)', 'go one row up')
-command('KEY_RIGHT', 'cursorRight(+1)', 'go one column right')
-command('KEY_NPAGE', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows', 'scroll one page down')
-command('KEY_PPAGE', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page up')
+command(['h', 'KEY_LEFT'],  'cursorRight(-1)', 'go one column left')
+command(['j', 'KEY_DOWN'],  'cursorDown(+1)', 'go one row down')
+command(['k', 'KEY_UP'],    'cursorDown(-1)', 'go one row up')
+command(['l', 'KEY_RIGHT'], 'cursorRight(+1)', 'go one column right')
+command(['^F', 'KEY_NPAGE', 'kDOWN'], 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows', 'scroll one page down')
+command(['^B', 'KEY_PPAGE', 'kUP'], 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page up')
+command('zk', 'sheet.topRowIndex -= 1', 'scroll one line up')
+command('zj', 'sheet.topRowIndex += 1', 'scroll one line down')
 command('KEY_HOME',  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
+command('zKEY_HOME', 'sheet.topRowIndex = sheet.cursorRowIndex = 0; sheet.leftVisibleColIndex = sheet.cursorVisibleColIndex = 0', 'go to top row and top column')
 command('KEY_END',   'sheet.cursorRowIndex = len(rows)-1', 'go to last row')
-
-command('h', 'cursorRight(-1)', 'go one column left')
-command('j', 'cursorDown(+1)', 'go one row down')
-command('k', 'cursorDown(-1)', 'go one row up')
-command('l', 'cursorRight(+1)', 'go one column right')
+command('zKEY_END',  'sheet.cursorRowIndex = len(rows)-1; sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to last row and last column')
 
 command('gq', 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
@@ -119,11 +122,15 @@ command('gl', 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmo
 command('^G', 'status(statusLine)', 'show info for the current sheet')
 command('^V', 'status(__version__)', 'show version information')
 
-command('t', 'sheet.topRowIndex = cursorRowIndex', 'scroll cursor row to top of screen')
-command('m', 'sheet.topRowIndex = cursorRowIndex-int(nVisibleRows/2)', 'scroll cursor row to middle of screen')
-command('b', 'sheet.topRowIndex = cursorRowIndex-nVisibleRows+1', 'scroll cursor row to bottom of screen')
-command('kRIT5', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll columns one page to the right')
-command('kLFT5', 'pageLeft()', 'scroll columns one page to the left')
+command('zt', 'sheet.topRowIndex = cursorRowIndex', 'scroll cursor row to top of screen')
+command('zz', 'sheet.topRowIndex = cursorRowIndex-int(nVisibleRows/2)', 'scroll cursor row to middle of screen')
+command('zb', 'sheet.topRowIndex = cursorRowIndex-nVisibleRows+1', 'scroll cursor row to bottom of screen')
+command(['zL', 'kRIT5'], 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll columns one page to the right')
+command(['zH', 'kLFT5'], 'pageLeft()', 'scroll columns one page to the left')
+command(['zh', 'zKEY_LEFT'], 'sheet.leftVisibleColIndex -= 1', 'scroll columns one to the left')
+command(['zl', 'zKEY_RIGHT'], 'sheet.leftVisibleColIndex += 1', 'scroll columns one to the right')
+command('zs', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll cursor to leftmost column')
+command('ze', 'tmp =  cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColIndex = tmp', 'scroll cursor to rightmost column')
 
 command('<', 'skipUp()', 'skip up this column to previous value')
 command('>', 'skipDown()', 'skip down this column to next value')
@@ -317,7 +324,7 @@ def exceptionCaught(status=True):
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
 class VisiData:
-    allPrefixes = 'g'
+    allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
 
     def __init__(self):
         self.sheets = []
