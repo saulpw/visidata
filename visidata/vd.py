@@ -550,9 +550,15 @@ class Task:
 def async(func):
     def execThread(*args, **kwargs):
         if threading.current_thread().daemon:
+            # Don't spawn a new thread from a subthread.
             return func(*args, **kwargs)
 
+        currentSheet = vd().sheets[0]
+        if currentSheet.currentTask:
+            error('A task is already in progress on this sheet')
         t = Task(' '.join([func.__name__] + [str(x) for x in args[:1]]))
+        currentSheet.currentTask = t
+        t.sheet = currentSheet
         if bool(options.profile):
             t.start(thread_profileCode, t, func, *args, **kwargs)
         else:
@@ -564,11 +570,14 @@ def async(func):
 def toplevel_try_func(task, func, *args, **kwargs):
     try:
         ret = func(*args, **kwargs)
+        task.sheet.currentTask = None
         return ret
     except EscapeException as e:  # user aborted
+        task.sheet.currentTask = None
         task.status += 'cancelled by user;'
         status("%s cancelled" % task.name)
     except Exception as e:
+        task.sheet.currentTask = None
         task.status += status('%s: %s;' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
         exceptionCaught()
 
@@ -597,7 +606,7 @@ def ctype_async_raise(thread_obj, exception):
                                                ctypes.py_object(exception))
     status('sent exception to %s' % thread_obj.name)
 
-command('^C', 'ctype_async_raise(vd.tasks[-1].thread, EscapeException)', 'cancel most recent task')
+command('^C', 'if vd.sheets[0].currentTask: ctype_async_raise(vd.sheets[0].currentTask.thread, EscapeException)', 'cancel task on the current sheet')
 command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
 
 
@@ -653,6 +662,9 @@ class Sheet:
         # for progress bar
         self.progressMade = 0
         self.progressTotal = 0
+
+        # only allow one async task per sheet
+        self.currentTask = None
 
     def editlog(self, funcname, *args, **kwargs):
         self._editlog.append([self, funcname, args, kwargs])
