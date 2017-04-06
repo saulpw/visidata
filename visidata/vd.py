@@ -606,7 +606,7 @@ def ctype_async_raise(thread_obj, exception):
                                                ctypes.py_object(exception))
     status('sent exception to %s' % thread_obj.name)
 
-command('^C', 'ctype_async_raise(vd.tasks[-1].thread, EscapeException)', 'cancel most recent task')
+command('^C', 'if vd.sheets[0].currentTask: ctype_async_raise(vd.sheets[0].currentTask.thread, EscapeException)', 'cancel task on the current sheet')
 command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
 
 
