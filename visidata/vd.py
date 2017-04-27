@@ -1457,8 +1457,8 @@ class Path:
         self.name = os.path.split(fqpn)[-1]
         self.suffix = os.path.splitext(self.name)[1][1:]
 
-    def open_text(self):
-        return open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors)
+    def open_text(self, mode='r'):
+        return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
     def read_text(self):
         with self.open_text() as fp:
@@ -1470,6 +1470,9 @@ class Path:
 
     def is_dir(self):
         return os.path.isdir(self.resolve())
+
+    def exists(self):
+        return os.path.exists(self.resolve())
 
     def iterdir(self):
         return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
