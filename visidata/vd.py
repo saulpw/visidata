@@ -1471,6 +1471,9 @@ class Path:
     def is_dir(self):
         return os.path.isdir(self.resolve())
 
+    def exists(self):
+        return os.path.exists(self.resolve())
+
     def iterdir(self):
         return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
 
