@@ -1457,8 +1457,8 @@ class Path:
         self.name = os.path.split(fqpn)[-1]
         self.suffix = os.path.splitext(self.name)[1][1:]
 
-    def open_text(self):
-        return open(self.resolve(), encoding=options.encoding, errors=options.encoding_errors)
+    def open_text(self, mode='r'):
+        return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
     def read_text(self):
         with self.open_text() as fp:
