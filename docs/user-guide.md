@@ -1,11 +1,3 @@
-# VisiData v0.41
-
-A curses interface for exploring and arranging tabular data
-
-Usable via any remote shell which has Python3 installed.
-
-![VisiData silent demo](docs/img/screenshot.gif "VisiData Screenshot")
-
 ## Features
 - browse first rows of huge csv/tsv/xlsx files immediately
 - `F1` for command help sheet
@@ -52,28 +44,6 @@ On the `C`olumns sheet, these commands apply to rows (the columns of the source 
 - for commands like sort which require a correctly typed value, the default (0) value for that type is used
 - cell edits are rejected if they don't convert to the column type
 
-## Installation
-
-        $ pip3 install visidata
-
-### Dependencies
-
-- Python 3.3
-- openpyxl (if opening .xlsx files)
-- h5py and numpy (if opening .hdf5 files)
-- google-api-python-client (if opening Google Sheets; must [also set up OAuth credentials](https://developers.google.com/sheets/quickstart/python )
-- dateutil.parser (if converting string column to datetime)
-
-**Remember to install the Python3 versions of these modules with e.g. `pip3`**
-
-## Usage
-
-        $ vd [-r/--readonly] [<input> ...]
-
-Inputs may be paths or URLs.  If no inputs are given, starts exploring the
-current directory.  Unknown filetypes are by default viewed with a text
-browser.
-
 ### Commands
 
 Definitions of terms used in the help and documentation:
@@ -114,32 +84,3 @@ expression over the row.
     - `~`: Join all selected sheets, keeping only rows NOT in all sheets (diff join)
 
 - Edits made to a joined sheet are by design automatically reflected back to the source sheets.
-
-## Credits/Contributions
-
-VisiData was created by Saul Pwanson `<vd@saul.pw>`.
-
-VisiData is currently under active development (as of January 2017).
-
-VisiData needs lots of usage and testing to help it become useful and dependable.  If you are actively using VisiData, please let me know!  Maybe there is an easy way to improve the tool for both of us.
-
-Also please create a GitHub issue if anything doesn't appear to be working right.
-If you get an unexpected error (on the status line), please include the full stack trace that you get with `^E`.
-
-Please contact me at the email address above if you would like to contribute in some other way.
-
-## Inspirations and Related Work
-
-- [VisiCalc](http://danbricklin.com/visicalc.htm)
-- [BurntSushi/xsv](https://github.com/BurntSushi/xsv)
-- [teapot](https://www.syntax-k.de/projekte/teapot/)
-- [firecat53/tabview](https://github.com/firecat53/tabview)
-- [andmarti1424/sc-im](https://github.com/andmarti1424/sc-im)
-- [jennybc/sanesheets](https://github.com/jennybc/sanesheets)
-- [Tidy Data](http://vita.had.co.nz/papers/tidy-data.pdf)
-- [How to share data with a statistician](https://github.com/jtleek/datasharing)
-
-## License
-
-VisiData is licensed under GPLv3.
-
