@@ -2,7 +2,7 @@ site_name: VisiData v0.41
 site_description: A curses interface for exploring and arranging tabular data
 site_author: Saul Pwanson
 
-repo_url: github.com/saulpw/visidata
+repo_url: http://github.com/saulpw/visidata
 
 pages:
 - Home: index.md
