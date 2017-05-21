@@ -1,4 +1,4 @@
-# VisiData v0.43
+# VisiData v0.44
 
 A curses interface for exploring and arranging tabular data
 

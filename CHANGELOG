@@ -1,5 +1,8 @@
 # VisiData version history
 
+## v0.44
+- creating sustainable dev process at RC
+
 ## v0.42
 - async select/unselect
 - aggregator functions on columns

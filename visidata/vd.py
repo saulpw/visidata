@@ -3,7 +3,7 @@
 # VisiData: a curses interface for exploring and arranging tabular data
 #
 
-__version__ = 'saul.pw/VisiData v0.43'
+__version__ = 'saul.pw/VisiData v0.44'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
