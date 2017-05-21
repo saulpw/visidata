@@ -35,4 +35,5 @@ setup(name='visidata',
       ],
       keywords=('console tabular data spreadsheet viewer textpunk'
                 'curses csv hdf5 h5 xlsx'),
+      packages=['visidata', 'visidata.addons'],
       )
