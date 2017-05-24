@@ -63,7 +63,7 @@ export PATH=<visidata_dir>/bin
 # Arranging Columns
 
 - `-` (minus) hides a column
-- `_` (underscore) adjusts a column's width to fit
+- `_` (underscore) adjusts a column's width so that the entire contents of its cells are visible.
 - `^` sets a column's name
 - `!` makes the current column a [*key column*]().
 
@@ -84,8 +84,8 @@ export PATH=<visidata_dir>/bin
 ## Creating new columns
 
 - `:` split column (on any sheet)
-- `=` "add column expression" takes a Python expression as input and appends a new column, which evaluates the
-expression over the row.
+- `=` "add column expression" takes a Python expression as input, evaluates the expression, and appends the results into a new column. Column names can be supplied as variables, in order to have the expression performed on the column cell-by-cell.
+    - Example: Suppose there is a column named `Foo` and a column named `Bar`. `=Foo+Bar` would result in a column named `Foo+Bar` whose first row is the sum of the first row of `Foo` and the first row of `Bar`. Its second row would be the sum of the second row of `Foo` and the second row of `Bar`, and so on.
 - `+` join selected columns on Columns sheet
 
 # Searching/Selecting/Deleting rows
@@ -93,7 +93,7 @@ expression over the row.
 
 # Modifying data
 
-- `Ctrl-S`ave to '.csv` or `.tsv` (by extension)
+- `Ctrl-S`ave to `.csv` or `.tsv` (by extension)
 - `e`dit cell contents
     - Edits made to a joined sheet are by design automatically reflected back to the source sheets.
 
