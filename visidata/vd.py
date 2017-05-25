@@ -778,7 +778,7 @@ class Sheet:
 
     @property
     def nVisibleRows(self):
-        return self.windowHeight-2
+        return windowHeight-2
 
     @property
     def cursorCol(self):
@@ -1034,7 +1034,7 @@ class Sheet:
                     continue
 
                 cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
-                if cur_x+cur_w < self.windowWidth:  # current columns fit entirely on screen
+                if cur_x+cur_w < windowWidth:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1
 
@@ -1046,9 +1046,9 @@ class Sheet:
             if col.width is None:
                 col.width = col.getMaxWidth(self.visibleRows)+len(options.ch_LeftMore)+len(options.ch_RightMore)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self.visibleColLayout[vcolidx] = [x, min(col.width, self.windowWidth-x)]
+                self.visibleColLayout[vcolidx] = [x, min(col.width, windowWidth-x)]
                 x += col.width+len(options.ch_ColumnSep)
-            if x > self.windowWidth-1:
+            if x > windowWidth-1:
                 break
 
         self.rightVisibleColIndex = vcolidx
@@ -1078,18 +1078,19 @@ class Sheet:
             self.scr.addstr(0, x, A, colors[options.c_ColumnSep])
 
         C = options.ch_ColumnSep
-        if x+colwidth+len(C) < self.windowWidth:
+        if x+colwidth+len(C) < windowWidth:
             self.scr.addstr(0, x+colwidth, C, colors[options.c_ColumnSep])
 
     def isVisibleIdxKey(self, vcolidx):
         return self.visibleCols[vcolidx] in self.keyCols
 
     def draw(self, scr):
+        global windowHeight, windowWidth
         numHeaderRows = 1
         self.scr = scr  # for clipdraw convenience
         scr.erase()  # clear screen before every re-draw
 
-        self.windowHeight, self.windowWidth = scr.getmaxyx()
+        windowHeight, windowWidth = scr.getmaxyx()
         sepchars = options.ch_ColumnSep
         if not self.columns:
             return
@@ -1098,7 +1099,7 @@ class Sheet:
         self.calcColLayout()
         for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
             x, colwidth = colinfo
-            if x < self.windowWidth:  # only draw inside window
+            if x < windowWidth:  # only draw inside window
                 self.drawColHeader(vcolidx)
 
                 y = numHeaderRows
@@ -1131,13 +1132,13 @@ class Sheet:
                     elif isinstance(cellval, WrongTypeStr):
                         self.clipdraw(y, x+colwidth-len(options.ch_WrongType), options.ch_WrongType, colors[options.c_WrongType], len(options.ch_WrongType))
 
-                    if x+colwidth+len(sepchars) <= self.windowWidth:
+                    if x+colwidth+len(sepchars) <= windowWidth:
                        self.scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
 
                     y += 1
 
         if vcolidx+1 < self.nVisibleCols:
-            self.scr.addstr(0, self.windowWidth-1, options.ch_RightMore, colors[options.c_ColumnSep])
+            self.scr.addstr(0, windowWidth-1, options.ch_RightMore, colors[options.c_ColumnSep])
 
     def editCell(self, vcolidx=None, rowidx=None):
         if options.readonly:
