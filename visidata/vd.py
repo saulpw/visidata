@@ -208,8 +208,8 @@ command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
 command('|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=[cursorCol]))', 'select rows by regex matching this columns')
 command('\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=[cursorCol]))', 'unselect rows by regex matching this columns')
 
-command('g ', 'toggle(r for r in rows)', 'toggle select of all rows')
-command('gs', 'select(r for r in rows)', 'select all rows')
+command('g ', 'toggle(rows)', 'toggle select of all rows')
+command('gs', 'select(rows)', 'select all rows')
 command('gu', '_selectedRows.clear()', 'unselect all rows')
 
 command('g|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=visibleCols))', 'select rows by regex matching any visible column')
@@ -217,8 +217,8 @@ command('g\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=v
 
 command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
-command(',', 'selectBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v)', 'select rows matching by this column')
-command('g,', 'selectBy(lambda r,v=cursorRow: r == v)', 'select all rows that match this row')
+command(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching by this column')
+command('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
 command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0].selectedRows); vd.sheets[0]._selectedRows.clear()', 'push duplicate sheet with only selected rows')
 command('g"', 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
@@ -859,37 +859,49 @@ class Sheet:
             return False
 
     @async
-    def select(self, rows, status=True):
+    def select(self, rows, status=True, progress=True):
         before = len(self._selectedRows)
-        self.progressMade = 0
-        self.progressTotal = len(self.rows)
+        if progress:
+            self.progressMade = 0
+            self.progressTotal = len(rows)
         for r in rows:
-            self.progressMade += 1
+            if progress:
+                self.progressMade += 1
             self.selectRow(r)
         if status:
             vd().status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
-        self.progressTotal = self.progressMade
+        if progress:
+            self.progressTotal = self.progressMade
 
     @async
-    def unselect(self, rows, status=True):
+    def unselect(self, rows, status=True, progress=True):
         before = len(self._selectedRows)
-        self.progressMade = 0
-        self.progressTotal = len(rows)
+        if progress:
+            self.progressMade = 0
+            self.progressTotal = len(rows)
         for r in rows:
-            self.progressMade += 1
+            if progress:
+                self.progressMade += 1
             self.unselectRow(r)
         if status:
             vd().status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
-        self.progressTotal = self.progressMade
+        if progress:
+            self.progressTotal = self.progressMade
 
     def selectByIdx(self, rowIdxs):
-        self.select(self.rows[i] for i in rowIdxs)
+        self.select((self.rows[i] for i in rowIdxs), progress=False)
 
     def unselectByIdx(self, rowIdxs):
-        self.unselect(self.rows[i] for i in rowIdxs)
+        self.unselect((self.rows[i] for i in rowIdxs), progress=False)
 
-    def selectBy(self, func):
-        self.select(r for r in self.rows if func(r))
+    def gatherBy(self, func):
+        self.progressMade = 0
+        self.progressTotal = len(rows)
+        for r in self.rows:
+            self.progressMade += 1
+            if func(r):
+                yield r
+        self.progressTotal = self.progressMade
 
     @property
     def selectedRows(self):

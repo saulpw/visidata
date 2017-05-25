@@ -27,9 +27,12 @@ class SheetFreqTable(Sheet):
                                            getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
 
         self.nKeys = 1
+
+        # redefine these commands only to change the helpstr
         self.command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
         self.command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet')
         self.command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet')
+
         self.command('^J', 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value')
 
     def selectRow(self, row):
