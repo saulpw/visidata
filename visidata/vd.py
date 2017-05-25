@@ -178,7 +178,8 @@ command('~', 'cursorCol.type = detectType(cursorValue)', 'autodetect type of col
 command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again')
 command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
-command('e', 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex))', 'edit this cell')
+command('e', 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
+
 command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
 command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
 
@@ -1145,8 +1146,6 @@ class Sheet:
         r = vd().editText(y, x, w, value=currentValue, fillchar=options.ch_EditPadChar)
         if rowidx >= 0:
             r = self.visibleCols[vcolidx].type(r)  # convert input to column type
-
-        self.cursorRowIndex += 1
 
         return r
 
