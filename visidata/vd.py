@@ -483,7 +483,7 @@ class VisiData:
                 self.keystrokes += keystroke
             self.drawRightStatus()  # visible for commands that wait for input
 
-            if keystroke in self.allPrefixes:
+            if not keystroke:  # timeout instead of keypress
                 pass
             elif keystroke == '^Q':
                 return self.lastErrors and self.lastErrors[-1]
@@ -495,8 +495,14 @@ class VisiData:
                     sheet.cursorRowIndex = sheet.topRowIndex+y-1
                 except Exception:
                     self.exceptionCaught()
+            elif self.keystrokes in sheet.commands:
+                sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
+            elif self.keystrokes in base_commands:
+                sheet.exec_command(g_globals, base_commands[self.keystrokes])
+            elif keystroke in self.allPrefixes:
+                pass
             else:
-                sheet.exec_command(g_globals, self.keystrokes)
+                status('no command for "%s"' % (self.keystrokes))
 
             for i, task in list(enumerate(self.tasks)):
                 if not task.endTime and not task.thread.is_alive():
@@ -732,14 +738,7 @@ class Sheet:
     def __repr__(self):
         return self.name
 
-    def exec_command(self, vdglobals, keystrokes):
-        cmd = self.commands.get(keystrokes)
-        if not cmd:
-            cmd = base_commands.get(keystrokes)
-        if not cmd:
-            status('no command for "%s"' % (keystrokes))
-            return
-
+    def exec_command(self, vdglobals, cmd):
         # handy globals for use by commands
         _, _, execstr = cmd
         self.vd = vd()

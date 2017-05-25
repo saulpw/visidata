@@ -35,11 +35,17 @@ class CommandsTestCase(unittest.TestCase):
         self.scr.move = Mock()
         self.scr.getmaxyx = lambda: (25, 80)
 
-    def test_commands(self):
+    def test_base_commands(self):
+        self.test_commands(visidata.base_commands)
+
+    def test_sheet_commands(self):
+        self.test_commands(vs.commands)
+
+    def test_commands(self, cmdlist):
         'exec each command at least once'
         vs = visidata.SheetObject('test_commands', self)
         vs.reload()
-        for keystrokes in itertools.chain(vs.commands.keys(), visidata.base_commands.keys()):
+        for keystrokes in cmdlist.keys():
             testname = keystrokes
 #            print(testname)
             if testname in expected_errors:
@@ -57,4 +63,4 @@ class CommandsTestCase(unittest.TestCase):
             vd.scr = self.scr
             vd.push(vs)
             vs.draw(self.scr)
-            vs.exec_command(vars(visidata), keystrokes)
+            vs.exec_command(vars(visidata), cmdlist[keystrokes])
