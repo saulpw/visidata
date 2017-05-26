@@ -7,6 +7,8 @@ repo_url: http://github.com/saulpw/visidata
 pages:
 - Home: index.md
 - User Guide: user-guide.md
+- Developer Guide: dev-guide.md
+- Screen Layout: screen-layout.md
 - About:
     - Credits and Inspiration: about/credits.md
     - Contributing: about/contributing.md
