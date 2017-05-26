@@ -14,12 +14,12 @@ Usable via any remote shell which has Python3 installed.
 ### Dependencies
 
 - Python 3.3
+- python3-dateutil (if converting string column to datetime)
 - openpyxl (if opening .xlsx files)
 - h5py and numpy (if opening .hdf5 files)
 - google-api-python-client (if opening Google Sheets; must [also set up OAuth credentials](https://developers.google.com/sheets/quickstart/python )
-- dateutil.parser (if converting string column to datetime)
 
-**Remember to install the Python3 versions of these modules with e.g. `pip3`**
+**Remember to install the Python3 versions of these packages with e.g. `pip3`**
 
 ## Usage
 
