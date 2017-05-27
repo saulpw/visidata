@@ -61,6 +61,8 @@ option('timeout_ms', '100', 'curses timeout in ms')
 option('minTaskTime_s', 0.10, 'only keep tasks that take longer than this number of seconds')
 option('profile', True, 'profile async tasks')
 option('defaultColWidth', 20, 'default column width')
+option('regexFlags', 'I', 'flags to pass to re.compile() [AILMSUX]')
+
 
 theme('ch_Ellipsis', '…')
 theme('ch_KeySep', '/')
@@ -375,7 +377,8 @@ class VisiData:
             return False
 
         if regex:
-            r = re.compile(regex, re.IGNORECASE)
+            flags = sum(getattr(re, f.upper()) for f in options.regexFlags)
+            r = re.compile(regex, flags)
             if r:
                 self.lastRegex = r
             else:
