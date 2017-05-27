@@ -96,7 +96,7 @@ theme('SheetNameFmt', '%s| ', 'status line prefix')
 ENTER='^J'
 ESC='^['
 
-command('KEY_F(1)', 'vd.push(HelpSheet(name + "_commands", sheet.commands, base_commands))', 'open command help sheet')
+command(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", sheet.commands, base_commands))', 'open command help sheet')
 command('q',  'vd.sheets.pop(0)', 'quit the current sheet')
 
 command(['h', 'KEY_LEFT'],  'cursorRight(-1)', 'go one column left')
@@ -107,7 +107,7 @@ command(['^F', 'KEY_NPAGE', 'kDOWN'], 'cursorDown(nVisibleRows); sheet.topRowInd
 command(['^B', 'KEY_PPAGE', 'kUP'], 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page up')
 command('zk', 'sheet.topRowIndex -= 1', 'scroll one line up')
 command('zj', 'sheet.topRowIndex += 1', 'scroll one line down')
-command('KEY_HOME',  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
+command(['KEY_HOME', 'gg'],  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
 command('zKEY_HOME', 'sheet.topRowIndex = sheet.cursorRowIndex = 0; sheet.leftVisibleColIndex = sheet.cursorVisibleColIndex = 0', 'go to top row and top column')
 command('KEY_END',   'sheet.cursorRowIndex = len(rows)-1', 'go to last row')
 command('zKEY_END',  'sheet.cursorRowIndex = len(rows)-1; sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to last row and last column')
@@ -330,7 +330,7 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self.statusHistory = []
-        self._status = [__version__, '<F1> opens help']  # statuses shown until next action
+        self._status = [__version__, '<F1> or z? opens help']  # statuses shown until next action
         self.lastErrors = []
         self.lastRegex = None
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
