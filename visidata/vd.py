@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-#
-# VisiData: a curses interface for exploring and arranging tabular data
-#
+
+'VisiData core functionality'
 
 __version__ = 'saul.pw/VisiData v0.44'
 __author__ = 'Saul Pwanson <vd@saul.pw>'

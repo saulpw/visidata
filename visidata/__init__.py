@@ -1,3 +1,6 @@
+
+'VisiData: a curses interface for exploring and arranging tabular data'
+
 from .vd import __version__
 from .vd import *
 from .addons.freqtbl import *
