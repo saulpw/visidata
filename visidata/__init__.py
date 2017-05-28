@@ -8,6 +8,7 @@ from .addons.pyobj import *
 from .addons.metasheets import *
 from .addons.pivot import *
 from .addons.tidydata import *
+from .addons.editlog import *
 
 from .addons.csv import *
 from .addons.zip import *

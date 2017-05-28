@@ -96,7 +96,7 @@ theme('disp_status_fmt', '%s| ', 'status line prefix')
 ENTER='^J'
 ESC='^['
 
-command(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", sheet.commands, base_commands))', 'open command help sheet')
+command(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", sheet.commands))', 'open command help sheet')
 command('q',  'vd.sheets.pop(0)', 'quit the current sheet')
 
 command(['h', 'KEY_LEFT'],  'cursorRight(-1)', 'go one column left')
@@ -220,8 +220,8 @@ command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last input
 command(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching by this column')
 command('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
-command('"', 'vd.push(vd.sheets[0].copy("_selected")).rows = list(vd.sheets[0].selectedRows); vd.sheets[0]._selectedRows.clear()', 'push duplicate sheet with only selected rows')
-command('g"', 'vd.push(vd.sheets[0].copy())', 'push duplicate sheet')
+command('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows); sheet._selectedRows.clear()', 'push duplicate sheet with only selected rows')
+command('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
@@ -338,6 +338,10 @@ class VisiData:
         self.keystrokes = ''
         self.inInput = False
         self.tasks = []
+
+    @property
+    def unfinishedTasks(self):
+        return [task for task in self.tasks if not task.endTime]
 
     def status(self, s):
         strs = str(s)
@@ -499,15 +503,13 @@ class VisiData:
                     self.exceptionCaught()
             elif self.keystrokes in sheet.commands:
                 sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
-            elif self.keystrokes in base_commands:
-                sheet.exec_command(g_globals, base_commands[self.keystrokes])
             elif keystroke in self.allPrefixes:
                 pass
             else:
                 status('no command for "%s"' % (self.keystrokes))
 
-            for i, task in list(enumerate(self.tasks)):
-                if not task.endTime and not task.thread.is_alive():
+            for task in self.unfinishedTasks:
+                if not task.thread.is_alive():
                     task.endTime = time.process_time()
                     task.status += 'ended'
                     if task.elapsed_s*1000 < float(options.min_task_time):
@@ -528,6 +530,7 @@ class VisiData:
             elif len(vs.rows) == 0:  # first time
                 self.sheets.insert(0, vs)
                 vs.reload()
+                vd().editlog.first_load(vs)
             else:
                 self.sheets.insert(0, vs)
             return vs
@@ -614,7 +617,7 @@ def ctype_async_raise(thread_obj, exception):
                                                ctypes.py_object(exception))
     status('sent exception to %s' % thread_obj.name)
 
-command('^C', 'if vd.sheets[0].currentTask: ctype_async_raise(vd.sheets[0].currentTask.thread, EscapeException)', 'cancel task on the current sheet')
+command('^C', 'if sheet.currentTask: ctype_async_raise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
 command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
 
 
@@ -659,13 +662,10 @@ class Sheet:
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # commands specific to this sheet
-        self.commands = collections.OrderedDict()
+        self.commands = collections.ChainMap(collections.OrderedDict(), base_commands)
 
         self.filetype = None
         self._selectedRows = {}  # id(row) -> row
-
-        # list of modifications [sheet, funcname, [args], {kwargs}]
-        self._editlog = []
 
         # for progress bar
         self.progressMade = 0
@@ -673,9 +673,6 @@ class Sheet:
 
         # only allow one async task per sheet
         self.currentTask = None
-
-    def editlog(self, funcname, *args, **kwargs):
-        self._editlog.append([self, funcname, args, kwargs])
 
     def command(self, keystrokes, execstr, helpstr):
         self.commands[keystrokes] = (keystrokes, helpstr, execstr)
@@ -742,11 +739,13 @@ class Sheet:
 
     def exec_command(self, vdglobals, cmd):
         # handy globals for use by commands
-        _, _, execstr = cmd
+        keystrokes, _, execstr = cmd
         self.vd = vd()
         self.sheet = self
         locs = LazyMap(dir(self), lambda k,s=self: getattr(s, k), lambda k,v,s=self: setattr(s, k, v))
         try:
+            if vd().current_replay_row is None:
+                vd().editlog.append(self.name, keystrokes)
             exec(execstr, vdglobals, locs)
         except EscapeException as e:  # user aborted
             self.vd.status('EscapeException ' + ''.join(e.args[0:]))
@@ -796,6 +795,10 @@ class Sheet:
     @property
     def visibleCols(self):  # non-hidden cols
         return [c for c in self.columns if not c.hidden]
+
+    @property
+    def visibleColNames(self):
+        return ' '.join(c.name for c in self.visibleCols)
 
     @property
     def cursorColIndex(self):
@@ -1044,11 +1047,12 @@ class Sheet:
         x = 0
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
-            if col.width is None:
+            if col.width is None and self.visibleRows:
                 col.width = col.getMaxWidth(self.visibleRows)+len(options.disp_more_left)+len(options.disp_more_right)
+            width = col.width if col.width is not None else col.getMaxWidth(self.visibleRows)  # handle delayed column width-finding
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self.visibleColLayout[vcolidx] = [x, min(col.width, windowWidth-x)]
-                x += col.width+len(options.disp_column_sep)
+                self.visibleColLayout[vcolidx] = [x, min(width, windowWidth-x)]
+                x += width+len(options.disp_column_sep)
             if x > windowWidth-1:
                 break
 
@@ -1329,11 +1333,14 @@ def combineColumns(cols):
 ###
 
 def input(prompt, type='', **kwargs):
+    if vd().current_replay_row is not None:
+        return vd().current_replay_row[2]
     if type:
         ret = _inputLine(prompt, history=list(vd().lastInputs[type].keys()), **kwargs)
         vd().lastInputs[type][ret] = ret
     else:
-        return _inputLine(prompt, **kwargs)
+        ret = _inputLine(prompt, **kwargs)
+    vd().editlog.set_last_args(ret)
     return ret
 
 def _inputLine(prompt, **kwargs):
@@ -1506,35 +1513,48 @@ def open_txt(p):
         return open_tsv(p)  # TSV often have .txt extension
     return TextSheet(p.name, fp)  # leaks file handle
 
-def open_tsv(p):
-    vs = Sheet(p.name, p)
-    vs.loader = lambda vs=vs: load_tsv(vs)
-    return vs
+def get_tsv_headers(fp, nlines):
+    headers = []
+    i = 0
+    while i < nlines:
+        L = next(fp)
+        L = L[:-1]
+        if L:
+            headers.append(L.split('\t'))
+            i += 1
 
-@async
-def load_tsv(vs):
-    'parses contents and populates vs'
+    return headers
+
+def open_tsv(p, vs=None):
+    'parses contents and populates columns'
+    if vs is None:
+        vs = Sheet(p.name, p)
+        vs.loader = lambda vs=vs: reload_tsv(vs)
+
     header_lines = int(options.headerlines)
 
-    vs.editlog('load_tsv', vs.source.name, headerlines=header_lines)
-
-    vs.rows = []
     with vs.source.open_text() as fp:
-        i = 0
-        while i < (header_lines or 1):
-            L = next(fp)
-            L = L[:-1]
-            if L:
-                vs.rows.append(L.split('\t'))
-                i += 1
+        headers = get_tsv_headers(fp, header_lines or 1)  # get one data line if no headers
 
         if header_lines == 0:
-            vs.columns = ArrayColumns(len(vs.rows[0]))
+            vs.columns = ArrayColumns(len(headers[0]))
         else:
             # columns ideally reflect the max number of fields over all rows
             # but that's a lot of work for a large dataset
-            vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*vs.rows[:header_lines]))
-            vs.rows = vs.rows[header_lines:]
+            vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers[:header_lines]))
+
+    return vs
+
+@async
+def reload_tsv(vs):
+    reload_tsv_sync(vs)
+
+def reload_tsv_sync(vs):
+    header_lines = int(options.headerlines)
+
+    vs.rows = []
+    with vs.source.open_text() as fp:
+        get_tsv_headers(fp, header_lines)  # discard header lines
 
         vs.progressMade = 0
         vs.progressTotal = vs.source.filesize
@@ -1547,9 +1567,8 @@ def load_tsv(vs):
     vs.progressMade = 0
     vs.progressTotal = 0
 
-    status('loaded')
+    status('loaded %s' % vs.name)
 
-    return vs
 
 @async
 def save_tsv(vs, fn):
