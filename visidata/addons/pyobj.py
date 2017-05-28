@@ -12,7 +12,7 @@ def push_pyobj(name, pyobj, src=None):
         status('unknown type ' + type(pyobj))
 
 def load_pyobj(name, pyobj, src=None):
-    if isinstance(pyobj, list):
+    if isinstance(pyobj, list) or isinstance(pyobj, tuple):
         return SheetList(name, pyobj)
     elif isinstance(pyobj, dict):
         return SheetDict(name, pyobj)
@@ -40,7 +40,7 @@ class SheetList(Sheet):
     def __init__(self, name, src, **kwargs):
         'columns is a list of strings naming attributes on the objects within the obj'
         super().__init__(name, src, **kwargs)
-        assert isinstance(src, list), type(src)
+        assert isinstance(src, list) or isinstance(src, tuple), type(src)
 
     def reload(self):
         self.rows = self.source
