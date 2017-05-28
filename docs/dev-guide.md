@@ -67,7 +67,7 @@ from visidata import *
 command('t', 'vd.journal.rows.append([sheet, cursorCol, cursorRow])', 'take this cell and append it to the journal')
 command('T', 'vd.push(vd.journal)', 'push the journal')
 
-option('fnJournal', 'journal.tsv', 'default journal output file')
+option('fn_journal', 'journal.tsv', 'default journal output file')
 
 class JournalSheet(Sheet):
     def __init__(self):
@@ -84,7 +84,7 @@ class JournalSheet(Sheet):
                      'append to existing journal and clear sheet')
 
     def appendToJournalFile(self):
-        p = Path(options.fnJournal)
+        p = Path(options.fn_journal)
         writeHdr = not p.exists()
 
         with p.open_text('a') as fp:

@@ -3,7 +3,7 @@ from visidata import *
 command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
 command('C', 'vd.push(SheetColumns(sheet))', 'open Columns for this sheet')
 
-option('ColumnStats', False, 'include mean/median/etc on Column sheet')
+option('col_stats', False, 'include mean/median/etc on Column sheet')
 command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
 command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 
@@ -15,13 +15,13 @@ def ColumnGlobal(name):
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
                         setter=lambda r,v,name=name: setattr(r, name, globals()[v]))
 
-option('maxsplit', -1, 'string.split limit')
+option('split_max', -1, 'string.split limit')
 # exampleVal just to know how many subcolumns to make
 def splitColumn(columns, colIndex, origcol, exampleVal, ch):
-    maxsplit = int(options.maxsplit)
+    split_max = int(options.split_max)
 
     if ch:
-        maxcols = len(exampleVal.split(ch, maxsplit))
+        maxcols = len(exampleVal.split(ch, split_max))
     else:
         maxcols = len(exampleVal)
 
@@ -30,9 +30,9 @@ def splitColumn(columns, colIndex, origcol, exampleVal, ch):
 
     for i in range(maxcols):
         if ch:
-            columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,maxsplit=maxsplit: c.getValue(r).split(ch, maxsplit)[i])))
+            columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,split_max=split_max: c.getValue(r).split(ch, split_max)[i])))
         else:
-            columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,maxsplit=maxsplit: c.getValue(r)[i])))
+            columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,split_max=split_max: c.getValue(r)[i])))
 
 
 class LazyMapping:
@@ -117,7 +117,7 @@ class SheetColumns(Sheet):
             Column('value',  anytype, lambda c,sheet=self.source: c.getValue(sheet.cursorRow)),
         ]
 
-        if options.ColumnStats:
+        if options.col_stats:
             self.columns.extend([
                 Column('nulls',  int, lambda c,sheet=self: c.nEmpty(sheet.rows)),
                 Column('uniques',  int, lambda c,sheet=self: len(set(c.values(sheet.rows))), width=0),

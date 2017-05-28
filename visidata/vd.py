@@ -54,45 +54,44 @@ option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
-option('joinchar', ' ', 'character used to join string fields')
-option('SubsheetSep', '~', 'string joining multiple sheet names')
-option('cmdhistThreshold_ms', 1, 'minimum amount of time taken before adding command to cmdhist')
-option('timeout_ms', '100', 'curses timeout in ms')
-option('minTaskTime_s', 0.10, 'only keep tasks that take longer than this number of seconds')
-option('profile', True, 'profile async tasks')
-option('defaultColWidth', 20, 'default column width')
-option('regexFlags', 'I', 'flags to pass to re.compile() [AILMSUX]')
+option('field_joiner', ' ', 'character used to join string fields')
+option('sheetname_joiner', '~', 'string joining multiple sheet names')
+option('curses_timeout', '100', 'curses timeout in ms')
+option('min_task_time', 0.10, 'only keep tasks that take longer than this number of seconds')
+option('profile_tasks', True, 'profile async tasks')
+option('default_width', 20, 'default column width')
+option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 
 
-theme('ch_Ellipsis', '…')
-theme('ch_KeySep', '/')
-theme('ch_WrongType', '~')
-theme('ch_Error', '!')
-theme('ch_EditPadChar', '_')
-theme('ch_LeftMore', '<')
-theme('ch_RightMore', '>')
-theme('ch_ColumnSep', '|', 'chars between columns')
+theme('disp_truncator', '…')
+theme('disp_key_sep', '/')
+theme('disp_format_exc', '~')
+theme('disp_getter_exc', '!')
+theme('disp_edit_fill', '_', 'edit field fill character')
+theme('disp_more_left', '<', 'display cue in header indicating more columns to the left')
+theme('disp_more_right', '>', 'display cue in header indicating more columns to the right')
+theme('disp_column_sep', '|', 'chars between columns')
 
-theme('ch_FunctionError', '¿', 'when computation fails due to exception')
-theme('ch_VisibleNone', '',  'visible contents of a cell whose value was None')
+theme('disp_error_val', '¿', 'displayed contents when getter fails due to exception')
+theme('disp_none', '',  'visible contents of a cell whose value was None')
 
-theme('c_CurRow', 'reverse')
-theme('c_default', 'normal')
-theme('c_SelectedRow', 'green')
-theme('c_WrongType', 'magenta')
-theme('c_Error', 'red')
-theme('c_CurCol', 'bold')
-theme('c_CurHdr', 'reverse')
-theme('c_KeyCols', 'brown')
-theme('c_Header', 'bold')
-theme('c_ColumnSep', 'blue')
-theme('ch_StatusSep', ' | ', 'string separating multiple statuses')
-theme('ch_Unprintable', '.', 'a substitute character for unprintables')
-theme('ch_ColumnFiller', ' ', 'pad chars after column value')
-theme('ch_Whitespace', '\u00b7', 'displayable character for odd whitespace')
-theme('c_StatusLine', 'bold', 'status line color')
-theme('c_EditCell', 'normal', 'edit cell  line color')
-theme('SheetNameFmt', '%s| ', 'status line prefix')
+theme('color_current_row', 'reverse')
+theme('color_default', 'normal')
+theme('color_selected_row', 'green')
+theme('color_format_exc', 'magenta')
+theme('color_getter_exc', 'red')
+theme('color_current_col', 'bold')
+theme('color_current_hdr', 'reverse')
+theme('color_key_col', 'brown')
+theme('color_default_hdr', 'bold')
+theme('color_column_sep', 'blue')
+theme('disp_status_sep', ' | ', 'string separating multiple statuses')
+theme('disp_unprintable', '.', 'a substitute character for unprintables')
+theme('disp_column_fill', ' ', 'pad chars after column value')
+theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
+theme('color_status', 'bold', 'status line color')
+theme('color_edit_cell', 'normal', 'edit cell color')
+theme('disp_status_fmt', '%s| ', 'status line prefix')
 
 ENTER='^J'
 ESC='^['
@@ -136,7 +135,7 @@ command('ze', 'tmp =  cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColI
 command('<', 'skipUp()', 'skip up this column to previous value')
 command('>', 'skipDown()', 'skip down this column to next value')
 
-command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle this column width between defaultColWidth and to fit visible values')
+command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle this column width between default_width and to fit visible values')
 command('-', 'cursorCol.width = 0', 'hide this column')
 command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename column')
 command('!', 'cursorRight(toggleKeyColumn(cursorColIndex))', 'toggle this column as a key column')
@@ -291,7 +290,7 @@ windowWidth = None
 windowHeight = None
 
 def joinSheetnames(*sheetnames):
-    return options.SubsheetSep.join(str(x) for x in sheetnames)
+    return options.sheetname_joiner.join(str(x) for x in sheetnames)
 
 def error(s):
     'scripty sugar function to just raise, needed for lambda and eval'
@@ -377,7 +376,7 @@ class VisiData:
             return False
 
         if regex:
-            flags = sum(getattr(re, f.upper()) for f in options.regexFlags)
+            flags = sum(getattr(re, f.upper()) for f in options.regex_flags)
             r = re.compile(regex, flags)
             if r:
                 self.lastRegex = r
@@ -435,8 +434,8 @@ class VisiData:
 
     def drawLeftStatus(self, vs):
         'draws sheet info on last line, including previous status messages, which are then cleared.'
-        attr = colors[options.c_StatusLine]
-        statusstr = options.SheetNameFmt % vs.name + options.ch_StatusSep.join(self._status)
+        attr = colors[options.color_status]
+        statusstr = options.disp_status_fmt % vs.name + options.disp_status_sep.join(self._status)
         try:
             draw_clip(self.scr, windowHeight-1, 0, statusstr, attr, windowWidth)
         except Exception as e:
@@ -450,7 +449,7 @@ class VisiData:
             else:
                 pctLoaded = ' %2d%%' % sheet.progressPct
             rstatus = '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
-            draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.c_StatusLine])
+            draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.color_status])
             curses.doupdate()
         except Exception as e:
             self.exceptionCaught()
@@ -458,7 +457,7 @@ class VisiData:
     def run(self, scr):
         global windowHeight, windowWidth, sheet
         windowHeight, windowWidth = scr.getmaxyx()
-        scr.timeout(int(options.timeout_ms))
+        scr.timeout(int(options.curses_timeout))
         self.scr = scr
 
         self.keystrokes = ''
@@ -511,7 +510,7 @@ class VisiData:
                 if not task.endTime and not task.thread.is_alive():
                     task.endTime = time.process_time()
                     task.status += 'ended'
-                    if task.elapsed_s < float(options.minTaskTime_s):
+                    if task.elapsed_s*1000 < float(options.min_task_time):
                         self.tasks.remove(task)
 
             sheet.checkCursor()
@@ -568,7 +567,7 @@ def async(func):
         t = Task(' '.join([func.__name__] + [str(x) for x in args[:1]]))
         currentSheet.currentTask = t
         t.sheet = currentSheet
-        if bool(options.profile):
+        if bool(options.profile_tasks):
             t.start(thread_profileCode, t, func, *args, **kwargs)
         else:
             t.start(toplevel_try_func, t, func, *args, **kwargs)
@@ -812,7 +811,7 @@ class Sheet:
 
     @property
     def keyColNames(self):
-        return options.ch_KeySep.join(c.name for c in self.keyCols)
+        return options.disp_key_sep.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
@@ -1046,10 +1045,10 @@ class Sheet:
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None:
-                col.width = col.getMaxWidth(self.visibleRows)+len(options.ch_LeftMore)+len(options.ch_RightMore)
+                col.width = col.getMaxWidth(self.visibleRows)+len(options.disp_more_left)+len(options.disp_more_right)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self.visibleColLayout[vcolidx] = [x, min(col.width, windowWidth-x)]
-                x += col.width+len(options.ch_ColumnSep)
+                x += col.width+len(options.disp_column_sep)
             if x > windowWidth-1:
                 break
 
@@ -1058,11 +1057,11 @@ class Sheet:
     def drawColHeader(self, vcolidx):
         # choose attribute to highlight column header
         if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-            hdrattr = colors[options.c_CurHdr]
+            hdrattr = colors[options.color_current_hdr]
         elif self.visibleCols[vcolidx] in self.keyCols:
-            hdrattr = colors[options.c_KeyCols]
+            hdrattr = colors[options.color_key_col]
         else:
-            hdrattr = colors[options.c_Header]
+            hdrattr = colors[options.color_default_hdr]
 
         col = self.visibleCols[vcolidx]
         x, colwidth = self.visibleColLayout[vcolidx]
@@ -1071,17 +1070,17 @@ class Sheet:
         T = typemap.get(col.type, '?')
         N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
         if len(N) > colwidth-1:
-            N = N[:colwidth-len(options.ch_Ellipsis)] + options.ch_Ellipsis
+            N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
         self.clipdraw(0, x, N, hdrattr, colwidth)
         self.clipdraw(0, x+colwidth-len(T), T, hdrattr, len(T))
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
-            A = options.ch_LeftMore
-            self.scr.addstr(0, x, A, colors[options.c_ColumnSep])
+            A = options.disp_more_left
+            self.scr.addstr(0, x, A, colors[options.color_column_sep])
 
-        C = options.ch_ColumnSep
+        C = options.disp_column_sep
         if x+colwidth+len(C) < windowWidth:
-            self.scr.addstr(0, x+colwidth, C, colors[options.c_ColumnSep])
+            self.scr.addstr(0, x+colwidth, C, colors[options.color_column_sep])
 
     def isVisibleIdxKey(self, vcolidx):
         return self.visibleCols[vcolidx] in self.keyCols
@@ -1093,7 +1092,7 @@ class Sheet:
         scr.erase()  # clear screen before every re-draw
 
         windowHeight, windowWidth = scr.getmaxyx()
-        sepchars = options.ch_ColumnSep
+        sepchars = options.disp_column_sep
         if not self.columns:
             return
 
@@ -1114,33 +1113,33 @@ class Sheet:
                     row = self.rows[self.topRowIndex + rowidx]
 
                     if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
-                        attr = colors[options.c_CurRow]
+                        attr = colors[options.color_current_row]
                     elif self.isVisibleIdxKey(vcolidx):
-                        attr = colors[options.c_KeyCols]
+                        attr = colors[options.color_key_col]
                     else:
-                        attr = colors[options.c_default]
+                        attr = colors[options.color_default]
 
                     if self.isSelected(row):
-                        attr |= colors[options.c_SelectedRow]
+                        attr |= colors[options.color_selected_row]
 
                     if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-                        attr |= colors[options.c_CurCol]
+                        attr |= colors[options.color_current_col]
 
                     cellval = self.visibleCols[vcolidx].getDisplayValue(row, colwidth-1)
-                    self.clipdraw(y, x, options.ch_ColumnFiller + cellval, attr, colwidth)
+                    self.clipdraw(y, x, options.disp_column_fill + cellval, attr, colwidth)
 
                     if isinstance(cellval, CalcErrorStr):
-                        self.clipdraw(y, x+colwidth-len(options.ch_Error), options.ch_Error, colors[options.c_Error], len(options.ch_Error))
+                        self.clipdraw(y, x+colwidth-len(options.disp_getter_exc), options.disp_getter_exc, colors[options.color_getter_exc], len(options.disp_getter_exc))
                     elif isinstance(cellval, WrongTypeStr):
-                        self.clipdraw(y, x+colwidth-len(options.ch_WrongType), options.ch_WrongType, colors[options.c_WrongType], len(options.ch_WrongType))
+                        self.clipdraw(y, x+colwidth-len(options.disp_format_exc), options.disp_format_exc, colors[options.color_format_exc], len(options.disp_format_exc))
 
                     if x+colwidth+len(sepchars) <= windowWidth:
-                       self.scr.addstr(y, x+colwidth, sepchars, attr or colors[options.c_ColumnSep])
+                       self.scr.addstr(y, x+colwidth, sepchars, attr or colors[options.color_column_sep])
 
                     y += 1
 
         if vcolidx+1 < self.nVisibleCols:
-            self.scr.addstr(0, windowWidth-1, options.ch_RightMore, colors[options.c_ColumnSep])
+            self.scr.addstr(0, windowWidth-1, options.disp_more_right, colors[options.color_column_sep])
 
     def editCell(self, vcolidx=None, rowidx=None):
         if options.readonly:
@@ -1158,7 +1157,7 @@ class Sheet:
             y = self.rowLayout[rowidx]
             currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
 
-        r = vd().editText(y, x, w, value=currentValue, fillchar=options.ch_EditPadChar)
+        r = vd().editText(y, x, w, value=currentValue, fillchar=options.disp_edit_fill)
         if rowidx >= 0:
             r = self.visibleCols[vcolidx].type(r)  # convert input to column type
 
@@ -1253,7 +1252,7 @@ class Column:
             return CalcErrorStr(options.ch_FunctionError)
 
         if cellval is None:
-            return options.ch_VisibleNone
+            return options.disp_none
 
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding, options.encoding_errors)
@@ -1285,7 +1284,7 @@ class Column:
         if self.width != width:
             self.width = width
         else:
-            self.width = int(options.defaultColWidth)
+            self.width = int(options.default_width)
 
 
 # ---- Column makers
@@ -1326,7 +1325,7 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
 
 def combineColumns(cols):
     return Column("+".join(c.name for c in cols),
-                  getter=lambda r,cols=cols,ch=options.joinchar: ch.join(filter(None, (c.getValue(r) for c in cols))))
+                  getter=lambda r,cols=cols,ch=options.field_joiner: ch.join(filter(None, (c.getValue(r) for c in cols))))
 ###
 
 def input(prompt, type='', **kwargs):
@@ -1343,7 +1342,7 @@ def _inputLine(prompt, **kwargs):
     windowHeight, windowWidth = scr.getmaxyx()
     scr.addstr(windowHeight-1, 0, prompt)
     vd().inInput = True
-    ret = vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, attr=colors[options.c_EditCell], unprintablechar=options.ch_Unprintable, **kwargs)
+    ret = vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
     vd().inInput = False
     return ret
 
@@ -1364,8 +1363,8 @@ def clipstr(s, dispw):
     ret = ''
     for c in s:
         if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
-            ret += options.ch_Whitespace
-            w += len(options.ch_Whitespace)
+            ret += options.disp_oddspace
+            w += len(options.disp_oddspace)
         else:
             ret += c
             eaw = unicodedata.east_asian_width(c)
@@ -1376,9 +1375,9 @@ def clipstr(s, dispw):
             elif not unicodedata.combining(c):
                 w += 1
 
-        if w > dispw-len(options.ch_Ellipsis)+1:
-            ret = ret[:-2] + options.ch_Ellipsis  # replace final char with ellipsis
-            w += len(options.ch_Ellipsis)
+        if w > dispw-len(options.disp_truncator)+1:
+            ret = ret[:-2] + options.disp_truncator  # replace final char with ellipsis
+            w += len(options.disp_truncator)
 
     return ret, w
 
@@ -1399,7 +1398,7 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
         s, dispw = clipstr(str(s), w)
         scr.addstr(y, x, s, attr)
         if dispw <= w:
-            scr.addstr(y, x+dispw, options.ch_ColumnFiller*(w-dispw), attr)
+            scr.addstr(y, x+dispw, options.disp_column_fill*(w-dispw), attr)
     except Exception as e:
         raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
                 ).with_traceback(sys.exc_info()[2])

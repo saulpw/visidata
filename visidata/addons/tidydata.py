@@ -2,8 +2,8 @@ from visidata import *
 
 command('M', 'vd.push(MeltedSheet(sheet))', 'push melted (unpivoted) sheet')
 
-option('meltVarCol', 'Variable', 'column name to use for the melted variable name')
-option('meltValueCol', 'Value', 'column name to use for the melted value')
+option('melt_var_colname', 'Variable', 'column name to use for the melted variable name')
+option('melt_value_colname', 'Value', 'column name to use for the melted value')
 
 class MeltedSheet(Sheet):
     def __init__(self, sheet):
@@ -14,8 +14,8 @@ class MeltedSheet(Sheet):
         sheet = self.source
         self.columns = [SubrowColumn(c, 0) for c in sheet.keyCols]
         self.nKeys = sheet.nKeys
-        self.columns.extend([Column(options.meltVarCol, getter=lambda r: r[1].name),
-                             Column(options.meltValueCol, getter=lambda r: r[1].getValue(r[0]))])
+        self.columns.extend([Column(options.melt_var_colname, getter=lambda r: r[1].name),
+                             Column(options.melt_value_colname, getter=lambda r: r[1].getValue(r[0]))])
 
         colsToMelt = [c.copy() for c in sheet.nonKeyVisibleCols]
 
