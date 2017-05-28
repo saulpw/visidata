@@ -101,6 +101,9 @@ class SheetColumns(Sheet):
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
         self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
 
+        self.command('W', 'vd.replace(SheetPivot(source, selectedRows))', 'push a pivot table, keeping nonselected keys, making variables from selected columns, and creating a column for each variable-aggregate combination')
+
+
     def reload(self):
         self.rows = self.source.columns
         self.cursorRowIndex = self.source.cursorColIndex

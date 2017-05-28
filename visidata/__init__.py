@@ -6,6 +6,7 @@ from .vd import *
 from .addons.freqtbl import *
 from .addons.pyobj import *
 from .addons.metasheets import *
+from .addons.pivot import *
 from .addons.tidydata import *
 
 from .addons.csv import *
