@@ -419,7 +419,7 @@ class VisiData:
             if columnsMatch(sheet, sheet.rows[r], columns, self.lastRegex.search):
                 if moveCursor:
                     sheet.cursorRowIndex = r
-                    status('search wrapped')
+                    status('search wrapped')   # the only reason for the duplicate code block
                     return
                 else:
                     matchingRowIndexes += 1
@@ -674,6 +674,15 @@ class Sheet:
         # only allow one async task per sheet
         self.currentTask = None
 
+    def genProgress(self, L, total=None):
+        self.progressTotal = total or len(L)
+        self.progressMade = 0
+        for i in L:
+            self.progressMade += 1
+            yield i
+
+        self.progressMade = self.progressTotal
+
     def command(self, keystrokes, execstr, helpstr):
         self.commands[keystrokes] = (keystrokes, helpstr, execstr)
 
@@ -717,16 +726,13 @@ class Sheet:
             oldidx += 1
 
         self.rows = []
-        self.progressMade = 0
-        self.progressTotal = len(oldrows)-1
-        for r in oldrows:
+        for r in self.genProgress(oldrows):
             if not self.isSelected(r):
                 self.rows.append(r)
                 if r is row:
                     self.cursorRowIndex = len(self.rows)-1
             else:
                 ndeleted += 1
-            self.progressMade += 1
 
         nselected = len(self._selectedRows)
         self._selectedRows.clear()
@@ -865,32 +871,18 @@ class Sheet:
     @async
     def select(self, rows, status=True, progress=True):
         before = len(self._selectedRows)
-        if progress:
-            self.progressMade = 0
-            self.progressTotal = len(rows)
-        for r in rows:
-            if progress:
-                self.progressMade += 1
+        for r in (self.genProgress(rows) if progress else rows):
             self.selectRow(r)
         if status:
             vd().status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
-        if progress:
-            self.progressTotal = self.progressMade
 
     @async
     def unselect(self, rows, status=True, progress=True):
         before = len(self._selectedRows)
-        if progress:
-            self.progressMade = 0
-            self.progressTotal = len(rows)
-        for r in rows:
-            if progress:
-                self.progressMade += 1
+        for r in (self.genProgress(rows) if progress else rows):
             self.unselectRow(r)
         if status:
             vd().status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
-        if progress:
-            self.progressTotal = self.progressMade
 
     def selectByIdx(self, rowIdxs):
         self.select((self.rows[i] for i in rowIdxs), progress=False)
@@ -899,13 +891,9 @@ class Sheet:
         self.unselect((self.rows[i] for i in rowIdxs), progress=False)
 
     def gatherBy(self, func):
-        self.progressMade = 0
-        self.progressTotal = len(rows)
-        for r in self.rows:
-            self.progressMade += 1
+        for r in self.genProgress(self.rows):
             if func(r):
                 yield r
-        self.progressTotal = self.progressMade
 
     @property
     def selectedRows(self):
@@ -1572,14 +1560,11 @@ def reload_tsv_sync(vs):
 
 @async
 def save_tsv(vs, fn):
-    vs.progressMade = 0
-    vs.progressTotal = len(vs.rows)
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
         colhdr = '\t'.join(col.name for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
-        for r in vs.rows:
-            vs.progressMade += 1
+        for r in vs.genProgress(vs.rows):
             fp.write('\t'.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
     status('%s save finished' % fn)
 
