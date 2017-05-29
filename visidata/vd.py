@@ -1241,7 +1241,7 @@ class Column:
             raise
         except Exception as e:
             exceptionCaught(status=False)
-            return CalcErrorStr(options.ch_FunctionError)
+            return CalcErrorStr(options.disp_getter_exc)
 
         if cellval is None:
             return options.disp_none
