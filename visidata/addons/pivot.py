@@ -28,7 +28,7 @@ class SheetPivot(Sheet):
                 self.progressTotal = len(allValues)
                 for value in allValues:
                     self.progressMade += 1
-                    self.columns.append(Column(value + '_' + aggcol.name,
+                    self.columns.append(Column('_'.join([value, aggcol.name, aggcol.aggregator.__name__]),
                         getter=lambda r,aggcol=aggcol,value=value: aggcol.aggregator(aggcol.values(r[1].get(value, [])))))
 
         rowidx = {}
