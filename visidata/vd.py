@@ -137,7 +137,8 @@ command('>', 'skipDown()', 'skip down this column to next value')
 
 command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle this column width between default_width and to fit visible values')
 command('-', 'cursorCol.width = 0', 'hide this column')
-command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename column')
+command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename this column')
+command('+', 'cursorCol.aggregator = chooseOne(aggregators)', 'choose aggregator for this column')
 command('!', 'cursorRight(toggleKeyColumn(cursorColIndex))', 'toggle this column as a key column')
 
 command('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
@@ -178,7 +179,8 @@ command('~', 'cursorCol.type = detectType(cursorValue)', 'autodetect type of col
 command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again')
 command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
-command('e', 'cursorCol.setValue(cursorRow, editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
+command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
+command('ge', 'v = editCell(cursorVisibleColIndex); cursorCol.setValues(selectedRows, v)', 'edit this column for all selected rows')
 
 command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
 command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
@@ -321,6 +323,13 @@ def vd():
 def exceptionCaught(status=True):
     return vd().exceptionCaught(status)
 
+def chooseOne(choices):
+    'choices can be list/tuple or dict'
+    if isinstance(choices, dict):
+        return choices[input('/'.join(choices.keys()) + ': ')]
+    else:
+        return input('/'.join(str(x) for x in choices) + ': ')
+
 # A .. Z AA AB ...
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
@@ -342,6 +351,14 @@ class VisiData:
     @property
     def unfinishedTasks(self):
         return [task for task in self.tasks if not task.endTime]
+
+    def checkForUnfinishedTasks(self):
+        for task in self.unfinishedTasks:
+            if not task.thread.is_alive():
+                task.endTime = time.process_time()
+                task.status += 'ended'
+                if task.elapsed_s*1000 < float(options.min_task_time):
+                    self.tasks.remove(task)
 
     def status(self, s):
         strs = str(s)
@@ -508,13 +525,7 @@ class VisiData:
             else:
                 status('no command for "%s"' % (self.keystrokes))
 
-            for task in self.unfinishedTasks:
-                if not task.thread.is_alive():
-                    task.endTime = time.process_time()
-                    task.status += 'ended'
-                    if task.elapsed_s*1000 < float(options.min_task_time):
-                        self.tasks.remove(task)
-
+            self.checkForUnfinishedTasks()
             sheet.checkCursor()
 
     def replace(self, vs):
@@ -1260,11 +1271,11 @@ class Column:
 
         return cellval
 
-    def setValue(self, row, value):
-        if self.setter:
-            self.setter(row, value)
-        else:
+    def setValues(self, rows, value):
+        if not self.setter:
             error('column cannot be changed')
+        for r in rows:
+            self.setter(r, value)
 
     def getMaxWidth(self, rows):
         w = 0
