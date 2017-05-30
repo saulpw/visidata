@@ -13,7 +13,7 @@ def _getattrname(o, k):
 
 def ColumnGlobal(name):
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
-                        setter=lambda r,v,name=name: setattr(r, name, globals()[v]))
+                        setter=lambda r,v,name=name: setattr(r, name, v))
 
 option('split_max', -1, 'string.split limit')
 # exampleVal just to know how many subcolumns to make

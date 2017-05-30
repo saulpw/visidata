@@ -1175,16 +1175,36 @@ class CalcErrorStr(str):
     pass
 
 
-# aggregators: distinct, sum, avg/mean, count (non-None), min, max
 def distinct(values):
     return len(set(values))
 
 def avg(values):
-    return float(sum(values))/len(values)
+    return float(sum(values))/len(values) if values else None
 mean=avg
 
 def count(values):
     return len([x for x in values if x is not None])
+
+_sum = sum
+def sum(values):
+    return _sum(values)
+avg.type = float
+count.type = int
+distinct.type = int
+sum.type = None
+#min.type = None
+#max.type = None
+
+aggregators = { '': None,
+                'distinct': distinct,
+                'sum': sum,
+                'avg': avg,
+                'mean': avg,
+                'count': count, # (non-None)
+                'min': min,
+                'max': max
+               }
+
 
 class Column:
     def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None):
@@ -1207,6 +1227,37 @@ class Column:
     @name.setter
     def name(self, name):
         self._name = str(name).replace(' ', '_')
+
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, t):
+        if isinstance(t, str):
+            t = globals()[t]
+
+        if t:
+            assert callable(t)
+            self._type = t
+        else:
+            self._type = anytype
+
+    @property
+    def aggregator(self):
+        return self._aggregator
+
+    @aggregator.setter
+    def aggregator(self, aggfunc):
+        if isinstance(aggfunc, str):
+            if aggfunc:
+                aggfunc = globals()[aggfunc]
+
+        if aggfunc:
+            assert callable(aggfunc)
+            self._aggregator = aggfunc
+        else:
+            self._aggregator = None
 
     def format(self, cellval):
         val = self.type(cellval)
