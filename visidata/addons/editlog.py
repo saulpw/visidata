@@ -50,7 +50,7 @@ class EditLog(Sheet):
         vd().current_replay_row = r
         if keystrokes != 'first_load':
             vs = self.sheetmap[sheetname]
-            vs.exec_command(g_globals, vs.commands[keystrokes])
+            vs.exec_command(None, vs.commands[keystrokes])
         vd().current_replay_row = None
 
     @async

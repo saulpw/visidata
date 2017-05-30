@@ -755,6 +755,8 @@ class Sheet:
         return self.name
 
     def exec_command(self, vdglobals, cmd):
+        if vdglobals is None:
+            vdglobals = g_globals
         # handy globals for use by commands
         keystrokes, _, execstr = cmd
         self.vd = vd()
