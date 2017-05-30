@@ -26,10 +26,7 @@ class SheetPivot(Sheet):
 
             for col in self.variableCols:
                 allValues = set(col.values(self.source.rows))
-                self.progressMade = 0
-                self.progressTotal = len(allValues)
-                for value in allValues:
-                    self.progressMade += 1
+                for value in self.genProgress(allValues):
                     c = Column('_'.join([value, aggcol.name, aggcol.aggregator.__name__]),
                                type=aggcol.aggregator.type or aggcol.type,
                                getter=lambda r,aggcol=aggcol,aggvalue=value: aggcol.aggregator(aggcol.values(r[1].get(aggvalue, []))))
@@ -38,10 +35,7 @@ class SheetPivot(Sheet):
 
         rowidx = {}
         self.rows = []
-        self.progressMade = 0
-        self.progressTotal = len(self.source.rows)
-        for r in self.source.rows:
-            self.progressMade += 1
+        for r in self.genProgress(self.source.rows):
             keys = tuple(keycol.srccol.getValue(r) for keycol in self.nonpivotKeyCols)
 
             pivotrow = rowidx.get(keys)
