@@ -23,7 +23,7 @@ class SheetFreqTable(Sheet):
         for c in self.source.visibleCols:
             if c.aggregator:
                 self.columns.append(Column(c.aggregator.__name__+'_'+c.name,
-                                           type=int,
+                                           type=c.aggregator.type or c.type,
                                            getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
 
         self.nKeys = 1

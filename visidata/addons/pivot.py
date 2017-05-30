@@ -14,6 +14,8 @@ class SheetPivot(Sheet):
                 newcol.srccol = col
                 self.nonpivotKeyCols.append(newcol)
 
+        self.command(ENTER, 'vd.push(source.copy(cursorCol.aggvalue)).rows = cursorRow[1].get(cursorCol.aggvalue, [])', 'push sheet of source rows aggregated in this cell')
+
     @async
     def reload(self):
         self.columns = copy.copy(self.nonpivotKeyCols)
@@ -28,8 +30,11 @@ class SheetPivot(Sheet):
                 self.progressTotal = len(allValues)
                 for value in allValues:
                     self.progressMade += 1
-                    self.columns.append(Column('_'.join([value, aggcol.name, aggcol.aggregator.__name__]),
-                        getter=lambda r,aggcol=aggcol,value=value: aggcol.aggregator(aggcol.values(r[1].get(value, [])))))
+                    c = Column('_'.join([value, aggcol.name, aggcol.aggregator.__name__]),
+                               type=aggcol.aggregator.type or aggcol.type,
+                               getter=lambda r,aggcol=aggcol,aggvalue=value: aggcol.aggregator(aggcol.values(r[1].get(aggvalue, []))))
+                    c.aggvalue = value
+                    self.columns.append(c)
 
         rowidx = {}
         self.rows = []
