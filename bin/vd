@@ -29,6 +29,7 @@ def main():
 
     sources = [visidata.openSource(src) for src in inputs]
 
+    visidata.vd().args = args
     visidata.run(sources)
 
 if __name__ == '__main__':

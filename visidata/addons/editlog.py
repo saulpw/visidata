@@ -1,6 +1,7 @@
 from visidata import *
 
 command('D', 'vd.push(vd.editlog)', 'push the editlog')
+command('KEY_BACKSPACE', 'vd.editlog.undo()', 'remove last action on editlog and replay')
 
 def open_vd(p):
     return EditLog(p.name, p)
@@ -20,6 +21,25 @@ class EditLog(Sheet):
 
         self.sheetmap = {}
 
+    def undo(self):
+        del vd().editlog.rows[-2:]  # the undo command itself, and the command to undo
+        vd().sheets = []
+        for x in vd().args.inputs:
+            vd().push(openSource(x))
+#            assert self.rows[-1][1] == 'first_load'
+#            del self.rows[-1]  # don't want it again
+
+        # wait for all sources to load
+        while len(vd().unfinishedTasks) > 0:
+            vd().checkForUnfinishedTasks()
+
+        for r in self.rows:
+            self.replay_one(r)
+            while len(vd().unfinishedTasks) > 0:
+                vd().checkForUnfinishedTasks()
+
+        status('undid 1')
+
     def append(self, sheetname, keystrokes, args=''):
         if sheetname == self.name:
             return
@@ -27,7 +47,8 @@ class EditLog(Sheet):
         self.rows.append([ sheetname, keystrokes, args ])
 
     def first_load(self, vs):
-        self.append(vs.name, 'first_load', vs.visibleColNames)
+#        self.append(vs.name, 'first_load', vs.visibleColNames)
+        self.sheetmap[vs.name] = vs
 
     @async
     def reload(self):
