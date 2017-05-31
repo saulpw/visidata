@@ -61,7 +61,7 @@ option('min_task_time', 0.10, 'only keep tasks that take longer than this number
 option('profile_tasks', True, 'profile async tasks')
 option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
-
+option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -189,7 +189,7 @@ command('d', 'rows.pop(cursorRowIndex)', 'delete this row')
 command('gd', 'deleteSelected()', 'delete all selected rows')
 
 command('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
-command('^S', 'saveSheet(sheet, input("save to: ", "filename"))', 'save this sheet to new file')
+command('^S', 'saveSheet(sheet, input("save to: ", "filename", value=sheet.source.fqpn))', 'save this sheet to new file')
 
 # slide rows/columns around
 command('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
@@ -1407,6 +1407,12 @@ def _inputLine(prompt, **kwargs):
 
 def saveSheet(vs, fn):
     assert vs.progressTotal == vs.progressMade, 'have to finish loading first'
+    if Path(fn).exists():
+        if options.confirm_overwrite:
+            yn = input('%s already exists. overwrite? ' % fn, value='n')[:1]
+            if not yn or yn not in 'Yy':
+                error('overwrite disconfirmed')
+
     basename, ext = os.path.splitext(fn)
     funcname = 'save_' + ext[1:]
     if funcname not in g_globals:
