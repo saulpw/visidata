@@ -27,9 +27,12 @@ def main():
 
     inputs = args.inputs or ['.']
 
-    sources = [visidata.openSource(src) for src in inputs]
+    sources = []
+    for src in inputs:
+        vs = visidata.openSource(src)
+        visidata.vd().editlog.open_hook(vs, src)
+        sources.append(vs)
 
-    visidata.vd().args = args
     visidata.run(sources)
 
 if __name__ == '__main__':

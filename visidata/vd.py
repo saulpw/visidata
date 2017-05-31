@@ -189,7 +189,7 @@ command('d', 'rows.pop(cursorRowIndex)', 'delete this row')
 command('gd', 'deleteSelected()', 'delete all selected rows')
 
 command('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
-command('^S', 'saveSheet(sheet, input("save to: ", "filename", value=sheet.source.fqpn))', 'save this sheet to new file')
+command('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')
 
 # slide rows/columns around
 command('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
@@ -368,8 +368,12 @@ class VisiData:
         return s
 
     def editText(self, y, x, w, **kwargs):
+        v = self.editlog.get_last_args()
+        if v is not None:
+            return v
         v = editText(self.scr, y, x, w, **kwargs)
         self.status('"%s"' % v)
+        self.editlog.set_last_args(v)
         return v
 
     def getkeystroke(self):
@@ -519,7 +523,10 @@ class VisiData:
                 except Exception:
                     self.exceptionCaught()
             elif self.keystrokes in sheet.commands:
-                sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
+                vd().editlog.before_exec_hook(sheet, self.keystrokes)
+                escaped = sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
+                if vd().sheets:
+                    vd().editlog.after_exec_sheet(vd().sheets[0], escaped)
             elif keystroke in self.allPrefixes:
                 pass
             else:
@@ -541,7 +548,6 @@ class VisiData:
             elif len(vs.rows) == 0:  # first time
                 self.sheets.insert(0, vs)
                 vs.reload()
-                vd().editlog.first_load(vs)
             else:
                 self.sheets.insert(0, vs)
             return vs
@@ -763,13 +769,14 @@ class Sheet:
         self.sheet = self
         locs = LazyMap(dir(self), lambda k,s=self: getattr(s, k), lambda k,v,s=self: setattr(s, k, v))
         try:
-            if vd().current_replay_row is None:
-                vd().editlog.append(self.name, keystrokes)
             exec(execstr, vdglobals, locs)
         except EscapeException as e:  # user aborted
             self.vd.status('EscapeException ' + ''.join(e.args[0:]))
+            return True
         except Exception:
             self.vd.exceptionCaught()
+
+        return False
 
     def clipdraw(self, y, x, s, attr, w):
         return draw_clip(self.scr, y, x, s, attr, w)
@@ -1385,14 +1392,11 @@ def combineColumns(cols):
 ###
 
 def input(prompt, type='', **kwargs):
-    if vd().current_replay_row is not None:
-        return vd().current_replay_row[2]
     if type:
         ret = _inputLine(prompt, history=list(vd().lastInputs[type].keys()), **kwargs)
         vd().lastInputs[type][ret] = ret
     else:
         ret = _inputLine(prompt, **kwargs)
-    vd().editlog.set_last_args(ret)
     return ret
 
 def _inputLine(prompt, **kwargs):

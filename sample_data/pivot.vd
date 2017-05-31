@@ -1,0 +1,10 @@
+start_sheet	keystrokes	input	end_sheet
+	o	sample_data/sample.tsv	sample
+sample	l		sample
+sample	l		sample
+sample	!		sample
+sample	l		sample
+sample	#		sample
+sample	+	sum	sample
+sample	h		sample
+sample	W		sample_pivot
