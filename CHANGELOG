@@ -1,7 +1,15 @@
 # VisiData version history
 
+## v0.59
+- pivot sheets with `W`
+- undo with `BACKSPACE` and replay with `ga`
+- dev guide and user guide
+- `ge` mass edit
+- freeze with `g'`
+
 ## v0.44
 - creating sustainable dev process at RC
+- `z` scrolling prefix
 
 ## v0.42
 - async select/unselect

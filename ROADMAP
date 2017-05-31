@@ -3,23 +3,10 @@
 
 A loose plan that is subject to change.
 
-## v0.5 data trail
-- save sources to .zip cache
-- edit/transform log
-    - can be replayed to generate exact duplicate sheet
-    - undo just removes the last edit item and replays to that point
-- checkpoint data for faster replay
-
-## v0.55 better interface for regex transforms:
+## v0.6 better interface for regex transforms:
 - subst regex match in cells
 - delete regex match in cells
 - create versioned columns on subst/delete
-
-## v0.6
-- sql dbs via sqlalchemy
-- save all sheets to .h5 file
-- save sheets layout, including generated sheets and visible columns (via replay mechanism?)
-- fixed-column detector
 
 ## v0.7 alpha
 - popup windows for enum selection
@@ -39,6 +26,7 @@ A loose plan that is subject to change.
 - generic mechanism for coloring rows
     - highlight key rows on Columns sheet same as key column
 - bulk interface (command line, macros?)
+- checkpoint data for faster replay
 
 ## v1.1
 - connect to larger datasets (via blaze?)
@@ -50,6 +38,8 @@ A loose plan that is subject to change.
 
 
 ## Unscheduled
+- save all sheets to .h5 file
+- fixed-column detector
 - reload derived sheets
 - sort by keycols with g[ and g]
 - html table parsing into columns
@@ -57,7 +47,6 @@ A loose plan that is subject to change.
 - save as .json
 - better csv/tsv sniffer
 - dive back into source
-- freeze sheet values
 - how to handle timezone for datetime
 - backtick to run shell command and parse output
 
