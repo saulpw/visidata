@@ -20,14 +20,14 @@ $ pip3 install visidata
 ### from pypi (test server for develop version)
 
 ```
-pip3 install -i https://testpypi.python.org/pypi visidata
+$ pip3 install -i https://testpypi.python.org/pypi visidata
 ```
 
 ### or clone from git
 
 ```
-git clone http://github.com/saulpw/visidata.git
-git checkout develop
+$ git clone http://github.com/saulpw/visidata.git
+$ git checkout develop
 ```
 ### Dependencies
 
@@ -52,11 +52,11 @@ browser.
 If installed via git clone, first set up some environment variables (per terminal):
 
 ```
-export PYTHONPATH=<visidata_dir>
-export PATH=<visidata_dir>/bin
+$ export PYTHONPATH=<visidata_dir>
+$ export PATH=<visidata_dir>/bin
 ```
 
-Further user documentation is available at [readthedocs](https://visidata.readthedocs.io/en/develop/).
+Further user documentation is available at [readthedocs](https://visidata.readthedocs.io/).
 
 ## Contributing
 
