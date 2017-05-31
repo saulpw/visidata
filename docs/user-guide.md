@@ -1,33 +1,6 @@
+# User Guide
 
-# Getting Started
-
-## Install VisiData
-
-### from pypi (test server for develop version)
-
-```
-pip3 install -i https://testpypi.python.org/pypi visidata
-```
-
-### or clone from git
-
-```
-git clone http://github.com/saulpw/visidata.git
-git checkout develop
-```
-
-## Run VisiData
-
-If installed via pip3, `vd` should launch without issue, and open a listing of the current directory.
-
-If installed via git clone, first set up some environment variables (per terminal):
-
-```
-export PYTHONPATH=<visidata_dir>
-export PATH=<visidata_dir>/bin
-```
-
-## Basic Movement and Essential Commands
+# Basic Movement and Essential Commands
 
 - `hjkl` or arrow keys move the cursor around
 - `F1` opens command help for the current sheet
