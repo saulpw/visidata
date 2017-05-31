@@ -71,7 +71,8 @@ Visidata has two main branches:
 * [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of visidata (which will eventually be merged to stable).
 
 If you wish to contribute, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it.
-A developer's guide can be found [!http://visidata.readthedocs.io/en/stable/dev-guide].
+
+A developer's guide can be found [here](http://visidata.readthedocs.io/en/stable/dev-guide).
 
 ## License
 
