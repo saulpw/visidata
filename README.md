@@ -41,7 +41,13 @@ git checkout develop
 
 ## Run VisiData
 
-If installed via pip3, `vd` should launch without issue, and open a listing of the current directory.
+If installed via pip3, `vd` should launch without issue.
+```
+$ vd [-r/--readonly] [<input> ...]
+```
+Inputs may be paths or URLs.  If no inputs are given, starts exploring the
+current directory.  Unknown filetypes are by default viewed with a text
+browser. 
 
 If installed via git clone, first set up some environment variables (per terminal):
 
@@ -50,13 +56,7 @@ export PYTHONPATH=<visidata_dir>
 export PATH=<visidata_dir>/bin
 ```
 
-## Usage
-
-        $ vd [-r/--readonly] [<input> ...]
-
-Inputs may be paths or URLs.  If no inputs are given, starts exploring the
-current directory.  Unknown filetypes are by default viewed with a text
-browser. Further documentation is available at [readthedocs](https://visidata.readthedocs.io/en/develop/).
+Further user documentation is available at [readthedocs](https://visidata.readthedocs.io/en/develop/).
 
 ## Contributing
 
