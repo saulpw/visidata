@@ -6,10 +6,21 @@ Usable via any remote shell which has Python3 installed.
 
 ![VisiData silent demo](img/screenshot.gif "VisiData Screenshot")
 
+# Getting Started
 
-## Installation
+## Install VisiData
 
-        $ pip3 install visidata
+### from pypi (`stable` branch)
+
+```
+$ pip3 install visidata
+```
+
+### or clone from git
+
+```
+$ git clone http://github.com/saulpw/visidata.git
+```
 
 ### Dependencies
 
@@ -21,13 +32,23 @@ Usable via any remote shell which has Python3 installed.
 
 **Remember to install the Python3 versions of these packages with e.g. `pip3`**
 
-## Usage
+## Run VisiData
 
-        $ vd [-r/--readonly] [<input> ...]
+If installed via pip3, `vd` should launch without issue.
 
-Inputs may be paths or URLs.  If no inputs are given, starts exploring the
-current directory.  Unknown filetypes are by default viewed with a text
-browser.
+```
+$ vd [<options>] [<inputs> ...]
+```
+
+If no inputs are given, `vd` opens the current directory.
+Unknown filetypes are by default viewed with a text browser.
+
+If installed via `git clone`, first set up some environment variables (on terminal):
+
+```
+$ export PYTHONPATH=<visidata_dir>
+$ export PATH=<visidata_dir>/bin
+```
 
 ## License
 
