@@ -11,24 +11,18 @@ Usable via any remote shell which has Python3 installed.
 
 ## Install VisiData
 
-## from pypi (stable version)
+### from pypi (`stable` branch)
 
 ```
 $ pip3 install visidata
-```
-
-### from pypi (test server for develop version)
-
-```
-$ pip3 install -i https://testpypi.python.org/pypi visidata
 ```
 
 ### or clone from git
 
 ```
 $ git clone http://github.com/saulpw/visidata.git
-$ git checkout develop
 ```
+
 ### Dependencies
 
 - Python 3.3
@@ -42,40 +36,42 @@ $ git checkout develop
 ## Run VisiData
 
 If installed via pip3, `vd` should launch without issue.
-```
-$ vd [-r/--readonly] [<input> ...]
-```
-Inputs may be paths or URLs.  If no inputs are given, starts exploring the
-current directory.  Unknown filetypes are by default viewed with a text
-browser. 
 
-If installed via git clone, first set up some environment variables (per terminal):
+```
+$ vd [<options>] [<inputs> ...]
+```
+
+If no inputs are given, `vd` opens the current directory.
+Unknown filetypes are by default viewed with a text browser.
+
+If installed via `git clone`, first set up some environment variables (on terminal):
 
 ```
 $ export PYTHONPATH=<visidata_dir>
 $ export PATH=<visidata_dir>/bin
 ```
 
-Further user documentation is available at [readthedocs](https://visidata.readthedocs.io/).
+Further documentation is available at [readthedocs](https://visidata.readthedocs.io/).
 
 ## Contributing
 
 VisiData was created by Saul Pwanson `<vd@saul.pw>`.
 
-VisiData is currently under active development (as of May 2017).
-
-VisiData needs lots of usage and testing to help it become useful and dependable.  If you are actively using VisiData, please let me know!  Maybe there is an easy way to improve the tool for both of us.
+VisiData needs lots of usage and testing to help it become useful and reliable.
+If you are actively using VisiData, please let me know!
+Maybe there is an easy way to improve the tool for both of us.
 
 Also please create a GitHub issue if anything doesn't appear to be working right.
-If you get an unexpected error (on the status line), please include the full stack trace that you get with `^E`.
+If you get an unexpected error, please include the full stack trace that you get with `^E`.
 
 ### Branch structure
 
 Visidata has two main branches:
-* [stable](https://github.com/saulpw/visidata/tree/stable) has the most reliable and robust version of visidata.
-* [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of visidata (which will eventually be pushed to stable).
+* [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of visidata.
+* [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of visidata (which will eventually be merged to stable).
 
-If you wish to contribute, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it. A developer's guide can be found [here](https://github.com/saulpw/visidata/blob/develop/docs/dev-guide.md).
+If you wish to contribute, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it.
+A developer's guide can be found [!http://visidata.readthedocs.io/en/stable/dev-guide].
 
 ## License
 
