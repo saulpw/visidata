@@ -75,7 +75,7 @@ Visidata has two main branches:
 * [stable](https://github.com/saulpw/visidata/tree/stable) has the most reliable and robust version of visidata.
 * [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of visidata (which will eventually be pushed to stable).
 
-If you wish to contribute, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it. A developer's guide can be found [here](https://github.com/saulpw/visidata/blob/develop/docs/dev-guide.md
+If you wish to contribute, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it. A developer's guide can be found [here](https://github.com/saulpw/visidata/blob/develop/docs/dev-guide.md).
 
 ## License
 
