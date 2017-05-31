@@ -6,6 +6,7 @@
 2. Ensure `develop` automated tests run correctly
 3. Set version number to next most reasonable number
    a. add to front of CHANGELOG
+   b. update version number on README and docs
 4. Push `develop` to testpypi
 5. Test install from testpypi
    a. on virgin instance
