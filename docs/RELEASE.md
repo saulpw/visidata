@@ -1,4 +1,3 @@
-- [ ] Fix undo and replay
 
 # Release process for the next `stable` version
 
