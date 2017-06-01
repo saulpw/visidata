@@ -65,8 +65,9 @@ class EditLog(Sheet):
             self.current_active_row = None
 
     def open_hook(self, vs, src):
-        self.rows.append([ None, 'o', src, vs.name ])
-        self.sheetmap[vs.name] = vs
+        if vs:
+            self.rows.append([ None, 'o', src, vs.name ])
+            self.sheetmap[vs.name] = vs
 
     def replay_one(self, r):
         before_sheet, keystrokes, args, after_sheet = r
