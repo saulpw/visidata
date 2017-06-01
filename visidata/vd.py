@@ -372,8 +372,9 @@ class VisiData:
         if v is not None:
             return v
         v = editText(self.scr, y, x, w, **kwargs)
-        self.status('"%s"' % v)
-        self.editlog.set_last_args(v)
+        if kwargs.get('display', True):
+            self.status('"%s"' % v)
+            self.editlog.set_last_args(v)
         return v
 
     def getkeystroke(self):
@@ -1644,7 +1645,7 @@ def save_tsv(vs, fn):
 
 ### curses helpers
 
-def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[]):
+def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[], display=True):
     def until(func):
         ret = None
         while not ret:
@@ -1678,7 +1679,10 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
     hist_idx = 0
 
     while True:
-        dispval = clean(v)
+        if display:
+            dispval = clean(v)
+        else:
+            dispval = '*' * len(v)
         dispi = i
         if len(dispval) < w:
             dispval += fillchar*(w-len(dispval))
