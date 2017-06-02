@@ -1448,6 +1448,7 @@ def clipstr(s, dispw):
         if w > dispw-len(options.disp_truncator)+1:
             ret = ret[:-2] + options.disp_truncator  # replace final char with ellipsis
             w += len(options.disp_truncator)
+            break
 
     return ret, w
 
