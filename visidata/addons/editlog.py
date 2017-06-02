@@ -80,11 +80,10 @@ class EditLog(Sheet):
 
         escaped = vs.exec_command(None, vs.commands[keystrokes])
 
+        sync()
+
         if after_sheet not in self.sheetmap:
             self.sheetmap[after_sheet] = vd().sheets[0]
-
-        while len(vd().unfinishedTasks) > 0:
-            vd().checkForUnfinishedTasks()
 
         EditLog.current_replay_row = None
 

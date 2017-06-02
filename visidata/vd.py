@@ -288,8 +288,8 @@ typemap = {
     anytype: ' ',
 }
 
-windowWidth = None
-windowHeight = None
+windowWidth = 0
+windowHeight = 0
 
 def joinSheetnames(*sheetnames):
     return options.sheetname_joiner.join(str(x) for x in sheetnames)
@@ -347,6 +347,7 @@ class VisiData:
         self.keystrokes = ''
         self.inInput = False
         self.tasks = []
+        self.scr = None  # curses scr
 
     @property
     def unfinishedTasks(self):
@@ -575,6 +576,10 @@ class Task:
     @property
     def elapsed_s(self):
         return (self.endTime or time.process_time())-self.startTime
+
+def sync():
+    while len(vd().unfinishedTasks) > 0:
+        vd().checkForUnfinishedTasks()
 
 def async(func):
     def execThread(*args, **kwargs):
@@ -1401,10 +1406,12 @@ def input(prompt, type='', **kwargs):
     return ret
 
 def _inputLine(prompt, **kwargs):
+    global windowHeight, windowWidth
     'add a prompt to the bottom of the screen and get a line of input from the user'
     scr = vd().scr
-    windowHeight, windowWidth = scr.getmaxyx()
-    scr.addstr(windowHeight-1, 0, prompt)
+    if scr:
+        windowHeight, windowWidth = scr.getmaxyx()
+        scr.addstr(windowHeight-1, 0, prompt)
     vd().inInput = True
     ret = vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
     vd().inInput = False
