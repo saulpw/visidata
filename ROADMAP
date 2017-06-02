@@ -4,17 +4,30 @@
 A loose plan that is subject to change.
 
 ## v0.6 better interface for regex transforms:
+#
+- bulk interface (command line)
+
 - subst regex match in cells
 - delete regex match in cells
-- create versioned columns on subst/delete
+
+- sort by keycols with g[ and g]
+- dive back into source
+- maintain original ordering with implicit/hidden line# column
 
 ## v0.7 alpha
+
+- Python expressions should be usable like regex for search, select, etc
 - popup windows for enum selection
+- generic mechanism for coloring rows
+    - highlight key rows on Columns sheet same as key column
 
 ## v0.8
-- '.' repeat command
+- save as .json
 
 ## v0.9
+- freqtbl: make bins from continuous data
+
+## v0.9x:
 - simple file management in VSheetDir:
   - rename with 'e'dit
   - mass rename with transform
@@ -22,36 +35,27 @@ A loose plan that is subject to change.
   - only apply changes with ^S
 
 ## v1.0
-- Python expressions should be usable like regex for search, select, etc
-- generic mechanism for coloring rows
-    - highlight key rows on Columns sheet same as key column
-- bulk interface (command line, macros?)
-- checkpoint data for faster replay
+- documented Python3 API for import by other scripts
 
 ## v1.1
+- checkpoint data for faster replay/undo
 - connect to larger datasets (via blaze?)
-- document Python3 API for import by other scripts
 - load new .py plugins for inputs/outputs/sheets
    - git app that can streamline standard workflows
      - checkout branch or revision with TUI interface
      - browse through history
 
+## v1.2
+- load larger than memory .csv/tsv files
 
 ## Unscheduled
-- save all sheets to .h5 file
+
 - fixed-column detector
+- '.' repeat command
+- save all sheets to .h5 file
 - reload derived sheets
-- sort by keycols with g[ and g]
 - html table parsing into columns
 - parse .xml
-- save as .json
 - better csv/tsv sniffer
-- dive back into source
 - how to handle timezone for datetime
-- backtick to run shell command and parse output
-
-### Details
-
-- maintain original ordering with implicit/hidden line# column
-
 
