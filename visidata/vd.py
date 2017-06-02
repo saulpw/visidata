@@ -1165,14 +1165,14 @@ class Sheet:
             return
         if vcolidx is None:
             vcolidx = self.cursorVisibleColIndex
-        x, w = self.visibleColLayout[vcolidx]
+        x, w = self.visibleColLayout.get(vcolidx, (0, 0))
         if rowidx is None:
             rowidx = self.cursorRowIndex
         if rowidx < 0:  # header
             y = 0
             currentValue = self.visibleCols[vcolidx].name
         else:
-            y = self.rowLayout[rowidx]
+            y = self.rowLayout.get(rowidx, 0)
             currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
 
         r = vd().editText(y, x, w, value=currentValue, fillchar=options.disp_edit_fill)
@@ -1829,6 +1829,19 @@ class Path:
 
     def __str__(self):
         return self.fqpn
+
+
+class InternalSource(Path):
+    'minimal Path interface to satisfy a tsv loader'
+    def __init__(self, fqpn, contents):
+        super().__init__(fqpn)
+        self.contents = contents
+
+    def read_text(self):
+        return self.contents
+
+    def open_text(self):
+        return io.StringIO(self.contents)
 
 
 def openSource(p, filetype=None):
