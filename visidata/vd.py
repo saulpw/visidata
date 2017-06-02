@@ -699,6 +699,10 @@ class Sheet:
         # only allow one async task per sheet
         self.currentTask = None
 
+    def rowColor(self, r):
+        if self.isSelected(r):
+            return options.color_selected_row
+
     def genProgress(self, L, total=None):
         self.progressTotal = total or len(L)
         self.progressMade = 0
@@ -1139,8 +1143,9 @@ class Sheet:
                     else:
                         attr = colors[options.color_default]
 
-                    if self.isSelected(row):
-                        attr |= colors[options.color_selected_row]
+                    colorname = self.rowColor(row)
+                    if colorname:
+                        attr |= colors[colorname]
 
                     if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
                         attr |= colors[options.color_current_col]

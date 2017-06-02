@@ -129,6 +129,10 @@ class SheetColumns(Sheet):
                 Column('stddev', float, lambda c,sheet=self: statistics.stdev(c.values(sheet.rows)), width=0),
             ])
 
+    def rowColor(self, r):
+        if r in self.source.keyCols:
+            return options.color_key_col
+        return super().rowColor(r)
 
 #### slicing and dicing
 class SheetJoin(Sheet):
