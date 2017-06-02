@@ -3,7 +3,7 @@ from visidata import *
 command('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'push a sheet pivoted on the current column')
 
 class SheetPivot(Sheet):
-    """Summarize key columns in pivot table and display as new sheet"""
+    """Summarize key columns in pivot table and display as new sheet."""
     def __init__(self, srcsheet, variableCols):
         super().__init__(srcsheet.name+'_pivot', srcsheet)
 

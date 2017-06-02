@@ -9,7 +9,7 @@ def open_vd(p):
     return vs
 
 class EditLog(Sheet):
-    """Populate log of commands for current session"""
+    """Populate log of commands for current session."""
     current_replay_row = None  # must be global, to allow replay
 
     def __init__(self, name, *args):
@@ -29,7 +29,7 @@ class EditLog(Sheet):
         self.current_exec_row = None
 
     def undo(self):
-        """Delete last command and replay entire log"""
+        """Delete last command and replay entire log."""
         if len(self.rows) < 2:
             error('no more to undo')
 
@@ -47,14 +47,14 @@ class EditLog(Sheet):
     def before_exec_hook(self, sheet, keystrokes, args=''):
         """Declare initial sheet before any undos can occur.
 
-        This is done when source is initiallylopened"""
+        This is done when source is initiallylopened."""
         assert sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.current_replay_row is None:
             self.current_active_row = [ sheet.name, keystrokes, args, None ]
             self.rows.append(self.current_active_row)
 
     def after_exec_sheet(self, vs, escaped):
-        """Declare ending sheet for the most recent command"""
+        """Declare ending sheet for the most recent command."""
         if self.current_active_row:
             if escaped:
                 del self.rows[-1]
@@ -74,7 +74,7 @@ class EditLog(Sheet):
         self.sheetmap[vs.name] = vs
 
     def replay_one(self, r):
-        """Replay the command in one given row"""
+        """Replay the command in one given row."""
         before_sheet, keystrokes, args, after_sheet = r
 
         EditLog.current_replay_row = r
@@ -94,7 +94,7 @@ class EditLog(Sheet):
         EditLog.current_replay_row = None
 
     def replay(self):
-        """Replay all commands in log"""
+        """Replay all commands in log."""
         self.sheetmap = {}
 
         for r in self.rows:
@@ -109,7 +109,7 @@ class EditLog(Sheet):
             return None
 
     def set_last_args(self, args):
-        """Set args on any log but editlog (we don't log editlog commands)"""
+        """Set args on any log but editlog (we don't log editlog commands)."""
         if vd().sheets[0] is not self:
             self.rows[-1][2] = args
 

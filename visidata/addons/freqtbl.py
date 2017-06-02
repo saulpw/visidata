@@ -7,7 +7,7 @@ command('gF', 'vd.push(SheetFreqTable(sheet, combineColumns(columns[:nKeys])))',
 theme('disp_histogram', '*')
 
 class SheetFreqTable(Sheet):
-    """Generate frequency-table sheet on currently selected column"""
+    """Generate frequency-table sheet on currently selected column."""
     def __init__(self, sheet, col):
         fqcolname = '%s_%s_freq' % (sheet.name, col.name)
         super().__init__(fqcolname, sheet)
@@ -46,7 +46,7 @@ class SheetFreqTable(Sheet):
 
     @async
     def reload(self):
-        """Generate histrow for each row and then reverse-sort by length"""
+        """Generate histrow for each row and then reverse-sort by length."""
         rowidx = {}
         self.rows = []
         self.progressTotal = len(self.source.rows)

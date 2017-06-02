@@ -32,7 +32,7 @@ def google_sheets():
         return service.spreadsheets()
 
 def open_gspreadsheet(p):
-    """Open Google Sheets spreadsheet, given its name"""
+    """Open Google Sheets spreadsheet, given its name."""
     sheets = google_sheets()
     sheet_md = sheets.get(spreadsheetId=p.name).execute()
     vs = Sheet(sheet_md['properties']['title'], p)

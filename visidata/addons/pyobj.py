@@ -31,7 +31,7 @@ def getPublicAttrs(obj):
     return [k for k in dir(obj) if not k.startswith('_') and not callable(getattr(obj, k))]
 
 def PyobjColumns(obj):
-    """Return columns for each public attribute on an object"""
+    """Return columns for each public attribute on an object."""
     return [ColumnAttr(k, type(getattr(obj, k))) for k in getPublicAttrs(obj)]
 
 def AttrColumns(attrnames):
@@ -97,7 +97,7 @@ def open_json(p):
 
 # one json object per line
 def open_jsonl(p):
-    """Handle JSON file incrementally via `json.loads`"""
+    """Handle JSON file incrementally via `json.loads`."""
     import json
     return load_pyobj(p.name, list(json.loads(L) for L in p.read_text().splitlines()))
 
