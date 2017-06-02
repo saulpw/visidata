@@ -2,6 +2,7 @@
 from visidata import *
 
 class open_xlsx(Sheet):
+    """Load XLSX file (in Excel Open XML format)"""
     def __init__(self, path):
         super().__init__(path.name, path)
         self.workbook = None
@@ -29,6 +30,7 @@ class xlsxSheet(Sheet):
             self.rows.append([cell.value for cell in row])
 
 class open_xls(Sheet):
+    """Load XLS file (in Excel format)"""
     def __init__(self, path):
         super().__init__(path.name, path)
         self.workbook = None

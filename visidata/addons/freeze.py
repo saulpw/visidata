@@ -3,6 +3,7 @@ from visidata import *
 command("g'", 'vd.push(StaticCopy(sheet))', 'evaluate all cells and copy to new sheet (freeze)')
 
 class StaticCopy(Sheet):
+    """Make new copy of source sheet, allowing updating to proceed off-screen"""
     def __init__(self, source):
         super().__init__(source.name + "'", source)
 

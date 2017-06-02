@@ -1,6 +1,8 @@
 from visidata import *
 
 class open_zip(Sheet):
+    """Provide wrapper around `zipfile` library for opening ZIP files."""
+
     def __init__(self, p):
         super().__init__(p.name, p)
 

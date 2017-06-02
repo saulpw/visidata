@@ -12,12 +12,14 @@ def _getattrname(o, k):
     return v.__name__ if v else None
 
 def ColumnGlobal(name):
+    """Return Column object with given name"""
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
                         setter=lambda r,v,name=name: setattr(r, name, v))
 
 option('split_max', -1, 'string.split limit')
 # exampleVal just to know how many subcolumns to make
 def splitColumn(columns, colIndex, origcol, exampleVal, ch):
+    """Split selected column, up to maximum in options,  on character `ch`"""
     split_max = int(options.split_max)
 
     if ch:
@@ -36,7 +38,7 @@ def splitColumn(columns, colIndex, origcol, exampleVal, ch):
 
 
 class LazyMapping:
-    'calculates column values as needed'
+    """Calculate column values as needed"""
     def __init__(self, sheet, row):
         self.row = row
         self.sheet = sheet
@@ -60,6 +62,7 @@ class LazyMapping:
 
 
 def ColumnExpr(sheet, expr):
+    """Assign expression to column object"""
     if expr:
         vc = Column(expr)  # or default name?
         vc.expr = expr
@@ -68,6 +71,7 @@ def ColumnExpr(sheet, expr):
 
 
 class SheetsSheet(SheetList):
+    """Open Sheet stack"""
     def __init__(self):
         super().__init__('sheets', vd().sheets, columns=AttrColumns('name progressPct nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
 
@@ -82,6 +86,7 @@ class SheetsSheet(SheetList):
 
 
 class SheetColumns(Sheet):
+    """Open Columns for Sheet"""
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
 
@@ -132,6 +137,13 @@ class SheetColumns(Sheet):
 
 #### slicing and dicing
 class SheetJoin(Sheet):
+    """Implement four kinds of JOIN.
+
+     * "full": full outer JOIN
+     * inner JOIN (default)
+     * "outer": left JOIN
+     * "diff": outer excluding JOIN, i.e., full JOIN minus inner JOIN"""
+
     def __init__(self, sheets, jointype='&'):
         super().__init__(jointype.join(vs.name for vs in sheets), sheets)
         self.jointype = jointype
