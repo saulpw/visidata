@@ -12,7 +12,9 @@ def _getattrname(o, k):
     return v.__name__ if v else None
 
 def ColumnGlobal(name):
-    """Return Column object with given name."""
+    """Return Column object with given name.
+
+    TODO: remove or rename this function when possible to do so."""
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
                         setter=lambda r,v,name=name: setattr(r, name, v))
 
@@ -62,7 +64,7 @@ class LazyMapping:
 
 
 def ColumnExpr(sheet, expr):
-    """Assign expression to column object."""
+    """Create new `Column` from Python expression."""
     if expr:
         vc = Column(expr)  # or default name?
         vc.expr = expr
@@ -139,10 +141,10 @@ class SheetColumns(Sheet):
 class SheetJoin(Sheet):
     """Implement four kinds of JOIN.
 
-     * "full": full outer JOIN
-     * inner JOIN (default)
-     * "outer": left JOIN
-     * "diff": outer excluding JOIN, i.e., full JOIN minus inner JOIN"""
+     * `&`: inner JOIN (default)
+     * `*`: full outer JOIN
+     * `+`: left outer JOIN
+     * "~": "diff" or outer excluding JOIN, i.e., full JOIN minus inner JOIN"""
 
     def __init__(self, sheets, jointype='&'):
         super().__init__(jointype.join(vs.name for vs in sheets), sheets)

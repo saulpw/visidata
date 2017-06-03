@@ -9,7 +9,7 @@ def open_vd(p):
     return vs
 
 class EditLog(Sheet):
-    """Populate log of commands for current session."""
+    """Maintain log of commands for current session."""
     current_replay_row = None  # must be global, to allow replay
 
     def __init__(self, name, *args):
@@ -29,7 +29,7 @@ class EditLog(Sheet):
         self.current_exec_row = None
 
     def undo(self):
-        """Delete last command and replay entire log."""
+        """Delete last command, reload sources, and replay entire log."""
         if len(self.rows) < 2:
             error('no more to undo')
 
@@ -47,7 +47,7 @@ class EditLog(Sheet):
     def before_exec_hook(self, sheet, keystrokes, args=''):
         """Declare initial sheet before any undos can occur.
 
-        This is done when source is initiallylopened."""
+        This is done when source is initially opened."""
         assert sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.current_replay_row is None:
             self.current_active_row = [ sheet.name, keystrokes, args, None ]

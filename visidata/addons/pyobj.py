@@ -91,13 +91,13 @@ class SheetObject(Sheet):
 
 
 def open_json(p):
-    """Handle JSON file as a whole, via `json.load`."""
+    """Handle JSON file as a single object, via `json.load`."""
     import json
     return load_pyobj(p.name, json.load(p.open_text()))
 
 # one json object per line
 def open_jsonl(p):
-    """Handle JSON file incrementally via `json.loads`."""
+    """Handle JSON file as a list of objects, one per line, via `json.loads`."""
     import json
     return load_pyobj(p.name, list(json.loads(L) for L in p.read_text().splitlines()))
 
