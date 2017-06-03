@@ -4,6 +4,10 @@ import functools
 
 @functools.lru_cache()
 def google_sheets():
+    """Log in to Google Sheets and retrieve spreadsheets object.
+
+    Fail on missing or invalid login credentials.
+    """
     import httplib2
     import os
 
@@ -28,6 +32,7 @@ def google_sheets():
         return service.spreadsheets()
 
 def open_gspreadsheet(p):
+    """Open Google Sheets spreadsheet, given its name."""
     sheets = google_sheets()
     sheet_md = sheets.get(spreadsheetId=p.name).execute()
     vs = Sheet(sheet_md['properties']['title'], p)
@@ -39,6 +44,7 @@ def open_gspreadsheet(p):
     return vs
 
 def open_gsheet(p):
+    """TODO: Is this function still active?"""
     sheets = google_sheets()
     sheet = sheets.values().get(spreadsheetId=p.name).execute()
     push_pyobj(p.name, sheet, p)
@@ -49,4 +55,4 @@ def open_gsheet(p):
 #    vs.rows = sheet_md['sheets']
 #    vs.command(Key.ENTER, 'cursorRow')
 #    return vs
-
+h_pyobj

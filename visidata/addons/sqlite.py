@@ -7,6 +7,7 @@ def open_sqlite(path):
     return vs
 
 class SqliteSheet(Sheet):
+    """Provide functionality for importing SQLite databases."""
     def __init__(self, name, path_or_sheet, table_name):
         super().__init__(name, path_or_sheet, table_name)
         if isinstance(path_or_sheet, Sheet):

@@ -15,6 +15,7 @@ def open_csv(p):
 
 @async
 def load_csv(vs):
+    """Convert from CSV, first handling header row specially."""
     with vs.source.open_text() as fp:
         samplelen = min(len(next(fp)) for i in range(10))
         fp.seek(0)
@@ -53,6 +54,7 @@ def load_csv(vs):
 
 
 def save_csv(sheet, fn):
+    """Save as single CSV file, handling column names as first line."""
     with open(fn, 'w', newline='', encoding=options.encoding, errors=options.encoding_errors) as fp:
         cw = csv.writer(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
         colnames = [col.name for col in sheet.visibleCols]
