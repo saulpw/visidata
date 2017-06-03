@@ -71,6 +71,7 @@ theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_more_left', '<', 'display cue in header indicating more columns to the left')
 theme('disp_more_right', '>', 'display cue in header indicating more columns to the right')
 theme('disp_column_sep', '|', 'chars between columns')
+theme('disp_keycol_sep', '\u2016', 'chars between keys and rest of columns')
 
 theme('disp_error_val', '¿', 'displayed contents when getter fails due to exception')
 theme('disp_none', '',  'visible contents of a cell whose value was None')
@@ -81,9 +82,9 @@ theme('color_selected_row', 'green')
 theme('color_format_exc', 'magenta')
 theme('color_getter_exc', 'red')
 theme('color_current_col', 'bold')
-theme('color_current_hdr', 'reverse')
-theme('color_key_col', 'brown')
-theme('color_default_hdr', 'bold')
+theme('color_current_hdr', 'reverse underline')
+theme('color_key_col', 'yellow')
+theme('color_default_hdr', 'bold underline')
 theme('color_column_sep', 'blue')
 theme('disp_status_sep', ' | ', 'string separating multiple statuses')
 theme('disp_unprintable', '.', 'a substitute character for unprintables')
@@ -1079,13 +1080,19 @@ class Sheet:
         self.rightVisibleColIndex = vcolidx
 
     def drawColHeader(self, vcolidx):
-        # choose attribute to highlight column header
-        if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-            hdrattr = colors[options.color_current_hdr]
-        elif self.visibleCols[vcolidx] in self.keyCols:
-            hdrattr = colors[options.color_key_col]
-        else:
-            hdrattr = colors[options.color_default_hdr]
+        # hdrattr is attribute to highlight whole column header
+        hdrattr = 0
+        C = options.disp_column_sep
+        if self.isVisibleIdxKey(vcolidx):
+            hdrattr = colors.update(hdrattr, options.color_key_col)
+            if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
+                C = options.disp_keycol_sep
+
+        innerattr = colors.update(hdrattr, options.color_default_hdr)
+
+        if vcolidx == self.cursorVisibleColIndex:   # cursor is at this column
+            hdrattr = colors.update(hdrattr, options.color_current_col)
+            innerattr = colors.update(innerattr, options.color_current_hdr)
 
         col = self.visibleCols[vcolidx]
         x, colwidth = self.visibleColLayout[vcolidx]
@@ -1095,16 +1102,15 @@ class Sheet:
         N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
-        self.clipdraw(0, x, N, hdrattr, colwidth)
-        self.clipdraw(0, x+colwidth-len(T), T, hdrattr, len(T))
+        self.clipdraw(0, x, N, innerattr or colors[options.color_default_hdr], colwidth)
+        self.clipdraw(0, x+colwidth-len(T), T, innerattr or colors[options.color_default_hdr], len(T))
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.disp_more_left
             self.scr.addstr(0, x, A, colors[options.color_column_sep])
 
-        C = options.disp_column_sep
         if x+colwidth+len(C) < windowWidth:
-            self.scr.addstr(0, x+colwidth, C, colors[options.color_column_sep])
+            self.scr.addstr(0, x+colwidth, C, hdrattr or colors[options.color_column_sep])
 
     def isVisibleIdxKey(self, vcolidx):
         return self.visibleCols[vcolidx] in self.keyCols
@@ -1116,7 +1122,6 @@ class Sheet:
         scr.erase()  # clear screen before every re-draw
 
         windowHeight, windowWidth = scr.getmaxyx()
-        sepchars = options.disp_column_sep
         if not self.columns:
             return
 
@@ -1143,12 +1148,11 @@ class Sheet:
                     else:
                         attr = colors[options.color_default]
 
-                    colorname = self.rowColor(row)
-                    if colorname:
-                        attr |= colors[colorname]
-
                     if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-                        attr |= colors[options.color_current_col]
+                        attr = colors.update(attr, options.color_current_col)
+
+                    colorname = self.rowColor(row)
+                    attr = colors.update(attr, colorname)
 
                     cellval = self.visibleCols[vcolidx].getDisplayValue(row, colwidth-1)
                     self.clipdraw(y, x, options.disp_column_fill + cellval, attr, colwidth)
@@ -1157,6 +1161,10 @@ class Sheet:
                         self.clipdraw(y, x+colwidth-len(options.disp_getter_exc), options.disp_getter_exc, colors[options.color_getter_exc], len(options.disp_getter_exc))
                     elif isinstance(cellval, WrongTypeStr):
                         self.clipdraw(y, x+colwidth-len(options.disp_format_exc), options.disp_format_exc, colors[options.color_format_exc], len(options.disp_format_exc))
+
+                    sepchars = options.disp_column_sep
+                    if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
+                        sepchars = options.disp_keycol_sep
 
                     if x+colwidth+len(sepchars) <= windowWidth:
                        self.scr.addstr(y, x+colwidth, sepchars, attr or colors[options.color_column_sep])
@@ -1745,47 +1753,43 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
     return v
 
 
-colors = collections.defaultdict(lambda: curses.A_NORMAL, {
-    'bold': curses.A_BOLD,
-    'reverse': curses.A_REVERSE,
-    'normal': curses.A_NORMAL,
-})
+class ColorMaker:
+    def setup(self):
+        self.attrs = {}
+        self.color_attrs = {}
+
+        for c in 'red green yellow blue magenta cyan white'.split():
+            colornum = getattr(curses, 'COLOR_' + c.upper())
+            curses.init_pair(colornum, colornum, curses.COLOR_BLACK)
+            self.color_attrs[c] = curses.color_pair(colornum)
+
+        for a in 'normal blink bold dim reverse standout underline'.split():
+            self.attrs[a] = getattr(curses, 'A_' + a.upper())
+
+    def __getitem__(self, colornamestr):
+        return self.update(0, colornamestr)
+
+    def update(self, attr, colornamestr):
+        if colornamestr:
+            for colorname in colornamestr.split(' '):
+                if colorname in self.color_attrs:
+                    attr &= ~2047
+                    attr |= self.color_attrs[colorname.lower()]
+                else:
+                    attr |= self.attrs[colorname.lower()]
+        return attr
 
 
-nextColorPair = 1
+colors = ColorMaker()
+
 def setupcolors(stdscr, f, *args):
-    def makeColor(fg, bg):
-        global nextColorPair
-        if curses.has_colors():
-            curses.init_pair(nextColorPair, fg, bg)
-            c = curses.color_pair(nextColorPair)
-            nextColorPair += 1
-        else:
-            c = curses.A_NORMAL
-
-        return c
-
+    global colors
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
 #    curses.mousemask(curses.ALL_MOUSE_EVENTS)  # enable mouse events
-
-    colors['red'] = curses.A_BOLD | makeColor(curses.COLOR_RED, curses.COLOR_BLACK)
-    colors['blue'] = curses.A_BOLD | makeColor(curses.COLOR_BLUE, curses.COLOR_BLACK)
-    colors['green'] = curses.A_BOLD | makeColor(curses.COLOR_GREEN, curses.COLOR_BLACK)
-    colors['brown'] = makeColor(curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    colors['yellow'] = curses.A_BOLD | colors['brown']
-    colors['cyan'] = makeColor(curses.COLOR_CYAN, curses.COLOR_BLACK)
-    colors['magenta'] = makeColor(curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-
-    colors['red_bg'] = makeColor(curses.COLOR_WHITE, curses.COLOR_RED)
-    colors['blue_bg'] = makeColor(curses.COLOR_WHITE, curses.COLOR_BLUE)
-    colors['green_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_GREEN)
-    colors['brown_bg'] = colors['yellow_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_YELLOW)
-    colors['cyan_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_CYAN)
-    colors['magenta_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+    colors.setup()
 
     return f(stdscr, *args)
-
 
 def wrapper(f, *args):
     return curses.wrapper(setupcolors, f, *args)
