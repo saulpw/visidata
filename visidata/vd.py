@@ -62,6 +62,7 @@ option('profile_tasks', True, 'profile async tasks')
 option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
+option('num_colors', 0, 'force number of colors to use')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -83,9 +84,9 @@ theme('color_format_exc', 'magenta')
 theme('color_getter_exc', 'red')
 theme('color_current_col', 'bold')
 theme('color_current_hdr', 'reverse underline')
-theme('color_key_col', 'yellow')
+theme('color_key_col', 'yellow 226')
 theme('color_default_hdr', 'bold underline')
-theme('color_column_sep', 'blue')
+theme('color_column_sep', 'blue 25')
 theme('disp_status_sep', ' | ', 'string separating multiple statuses')
 theme('disp_unprintable', '.', 'a substitute character for unprintables')
 theme('disp_column_fill', ' ', 'pad chars after column value')
@@ -1565,7 +1566,9 @@ class OptionsSheet(Sheet):
         self.columns = ArrayNamedColumns('option value default description'.split())
         self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
-
+    def rowColor(self, r):
+        if r[0].startswith('color_'):
+            return r[1]
 
 # each row is a Task object
 class TasksSheet(Sheet):
@@ -1754,28 +1757,38 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
 
 
 class ColorMaker:
-    def setup(self):
+    def __init__(self):
         self.attrs = {}
         self.color_attrs = {}
 
+    def setup(self):
+        self.color_attrs['black'] = curses.color_pair(0)
+
+        for c in range(0, options.num_colors or curses.COLORS):
+            curses.init_pair(c+1, c, curses.COLOR_BLACK)
+            self.color_attrs[str(c)] = curses.color_pair(c+1)
+
         for c in 'red green yellow blue magenta cyan white'.split():
             colornum = getattr(curses, 'COLOR_' + c.upper())
-            curses.init_pair(colornum, colornum, curses.COLOR_BLACK)
-            self.color_attrs[c] = curses.color_pair(colornum)
+            self.color_attrs[c] = curses.color_pair(colornum+1)
 
         for a in 'normal blink bold dim reverse standout underline'.split():
             self.attrs[a] = getattr(curses, 'A_' + a.upper())
+
+    def keys(self):
+        return list(self.attrs.keys()) + list(self.color_attrs.keys())
 
     def __getitem__(self, colornamestr):
         return self.update(0, colornamestr)
 
     def update(self, attr, colornamestr):
-        if colornamestr:
+        attr = attr or 0
+        if isinstance(colornamestr, str):
             for colorname in colornamestr.split(' '):
                 if colorname in self.color_attrs:
                     attr &= ~2047
                     attr |= self.color_attrs[colorname.lower()]
-                else:
+                elif colorname in self.attrs:
                     attr |= self.attrs[colorname.lower()]
         return attr
 
@@ -1783,7 +1796,6 @@ class ColorMaker:
 colors = ColorMaker()
 
 def setupcolors(stdscr, f, *args):
-    global colors
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
 #    curses.mousemask(curses.ALL_MOUSE_EVENTS)  # enable mouse events
