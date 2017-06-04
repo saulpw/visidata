@@ -614,8 +614,8 @@ def toplevel_try_func(task, func, *args, **kwargs):
         return ret
     except EscapeException as e:  # user aborted
         task.sheet.currentTask = None
-        task.status += 'cancelled by user;'
-        status("%s cancelled" % task.name)
+        task.status += 'aborted by user;'
+        status("%s aborted" % task.name)
     except Exception as e:
         task.sheet.currentTask = None
         task.status += status('%s: %s;' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
