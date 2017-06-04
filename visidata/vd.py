@@ -49,6 +49,7 @@ theme = option
 
 option('debug', False, 'abort on error and display stacktrace')
 option('readonly', False, 'disable saving')
+option('filetype', None, 'specify file type')
 
 option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('encoding', 'utf-8', 'as passed to codecs.open')
@@ -1878,7 +1879,7 @@ def openSource(p, filetype=None):
             return openSource(Path(p), filetype)  # convert to Path and recurse
     elif isinstance(p, Path):
         if filetype is None:
-            filetype = p.suffix
+            filetype = options.filetype or p.suffix
 
         if os.path.isdir(p.resolve()):
             vs = DirSheet(p.name, p)
