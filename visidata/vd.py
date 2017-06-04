@@ -184,7 +184,7 @@ command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again'
 command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
 command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
-command('ge', 'v = editCell(cursorVisibleColIndex); cursorCol.setValues(selectedRows, v)', 'edit this column for all selected rows')
+command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
 
 command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
 command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
