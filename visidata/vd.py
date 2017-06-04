@@ -231,6 +231,8 @@ command('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
+command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
+
 # VisiData uses Python native int, float, str, and adds a simple date and anytype.
 #
 # A type T is used internally in these ways:
