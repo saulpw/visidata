@@ -70,8 +70,9 @@ class EditLog(Sheet):
             self.current_active_row = None
 
     def open_hook(self, vs, src):
-        self.rows.append([ None, 'o', src, vs.name ])
-        self.sheetmap[vs.name] = vs
+        if vs:
+            self.rows.append([ None, 'o', src, vs.name ])
+            self.sheetmap[vs.name] = vs
 
     def replay_one(self, r):
         """Replay the command in one given row."""
@@ -85,11 +86,10 @@ class EditLog(Sheet):
 
         escaped = vs.exec_command(None, vs.commands[keystrokes])
 
+        sync()
+
         if after_sheet not in self.sheetmap:
             self.sheetmap[after_sheet] = vd().sheets[0]
-
-        while len(vd().unfinishedTasks) > 0:
-            vd().checkForUnfinishedTasks()
 
         EditLog.current_replay_row = None
 

@@ -11,14 +11,15 @@ def push_pyobj(name, pyobj, src=None):
     else:
         status('unknown type ' + type(pyobj))
 
-def load_pyobj(name, pyobj, src=None):
-    """Return Sheet object of appropriate type for given `pyobj`."""
+def load_pyobj(name, *args):
+    """Return Sheet object of appropriate type for given sources in `args`."""
+    pyobj = args[0]
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
-        return SheetList(name, pyobj)
+        return SheetList(name, *args)
     elif isinstance(pyobj, dict):
-        return SheetDict(name, pyobj)
+        return SheetDict(name, *args)
     elif isinstance(pyobj, object):
-        return SheetObject(name, pyobj)
+        return SheetObject(name, *args)
     else:
         status('unknown type ' + type(pyobj))
 
@@ -40,10 +41,11 @@ def AttrColumns(attrnames):
 
 
 class SheetList(Sheet):
-    """Define dict of column names from  list."""
+    """A sheet from a list of homogenous dicts."""
     def __init__(self, name, src, **kwargs):
         # columns is a list of strings naming attributes on the objects within the obj
         super().__init__(name, src, **kwargs)
+        src = args[0]
         assert isinstance(src, list) or isinstance(src, tuple), type(src)
 
     def reload(self):
@@ -58,19 +60,38 @@ class SheetList(Sheet):
         self.command('^J', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
 
 class SheetDict(Sheet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.command('e', 'edit()', 'edit this value')
+        self.command(ENTER, 'dive()', 'dive into this value')
+
     def reload(self):
         self.columns = [ColumnItem('key', 0)]
         self.rows = list(list(x) for x in self.source.items())
         if self.rows and isinstance(self.rows[0][1], list):
             self.columns.extend(DictKeyColumns(self.rows[0]))
-            self.command('e', 'if cursorColIndex > 0: source[cursorRow[0]][cursorColIndex-1] = editCell(cursorColIndex); sheet.cursorRowIndex += 1; reload()', 'edit this value')
-            self.command(ENTER, 'if cursorColIndex > 0: push_pyobj(joinSheetnames(name, cursorRow[0]), cursorRow[cursorColIndex-1])', 'dive into this value')
+            self.dictOfList = True
         else:
             self.columns.append(ColumnItem('value', 1))
-            self.command('e', 'source[cursorRow[0]][1] = editCell(1); sheet.cursorRowIndex += 1; reload()', 'edit this value')
-            self.command(ENTER, 'push_pyobj(joinSheetnames(name, cursorRow[0]), cursorRow[1])', 'dive into this value')
+            self.dictOfList = False
 
+    def edit(self):
+        if self.dictOfList:
+            if self.cursorColIndex > 0:
+                self.source[self.cursorRow[0]][self.cursorColIndex-1] = self.editCell(self.cursorColIndex)
+                self.cursorRowIndex += 1
+                self.reload()
+        else:
+            self.source[self.cursorRow[0]][1] = self.editCell(1)
+            self.cursorRowIndex += 1
+            self.reload()
 
+    def dive(self):
+        if self.dictOfList:
+            if self.cursorColIndex > 0:
+                push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[self.cursorColIndex-1])
+        else:
+            push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
 
 def ColumnSourceAttr(name, source):
     """Use row as attribute name on given object `source`."""

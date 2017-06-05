@@ -12,6 +12,7 @@ def main():
     parser.add_argument('inputs', nargs='*', help='initial sources')
     parser.add_argument('-d', dest='debug', action='store_true', default=False, help='abort on error')
     parser.add_argument('-r', dest='readonly', action='store_true', default=False, help='disable editing')
+    parser.add_argument('-f', dest='filetype', help='specify file type')
 
     for optname, v in visidata.base_options.items():
         name, optval, defaultval, helpstr = v

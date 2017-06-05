@@ -47,8 +47,8 @@ Unknown filetypes are by default viewed with a text browser.
 If installed via `git clone`, first set up some environment variables (on terminal):
 
 ```
-$ export PYTHONPATH=<visidata_dir>
-$ export PATH=<visidata_dir>/bin
+$ export PYTHONPATH=<visidata_dir>:$PYTHONPATH
+$ export PATH=<visidata_dir>/bin:$PATH
 ```
 
 Further documentation is available at [readthedocs](https://visidata.readthedocs.io/).

@@ -1,10 +1,13 @@
 start_sheet	keystrokes	input	end_sheet
-	o	sample_data/sample.tsv	sample
-sample	l		sample
-sample	l		sample
+	o	{input}	sample
+sample	c	rep	sample
 sample	!		sample
-sample	l		sample
+sample	c	unit	sample
 sample	#		sample
 sample	+	sum	sample
-sample	h		sample
+sample	c	item	sample
 sample	W		sample_pivot
+sample_pivot	C		sample_pivot_columns
+sample_pivot_columns	]		sample_pivot_columns
+sample_pivot_columns	q		sample_pivot
+sample_pivot	^S	{output}	sample_pivot

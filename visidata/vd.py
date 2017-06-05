@@ -49,6 +49,7 @@ theme = option
 
 option('debug', False, 'abort on error and display stacktrace')
 option('readonly', False, 'disable saving')
+option('filetype', None, 'specify file type')
 
 option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('encoding', 'utf-8', 'as passed to codecs.open')
@@ -62,6 +63,7 @@ option('profile_tasks', True, 'profile async tasks')
 option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
+option('num_colors', 0, 'force number of colors to use')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -71,6 +73,7 @@ theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_more_left', '<', 'display cue in header indicating more columns to the left')
 theme('disp_more_right', '>', 'display cue in header indicating more columns to the right')
 theme('disp_column_sep', '|', 'chars between columns')
+theme('disp_keycol_sep', '\u2016', 'chars between keys and rest of columns')
 
 theme('disp_error_val', '¿', 'displayed contents when getter fails due to exception')
 theme('disp_none', '',  'visible contents of a cell whose value was None')
@@ -81,10 +84,10 @@ theme('color_selected_row', 'green')
 theme('color_format_exc', 'magenta')
 theme('color_getter_exc', 'red')
 theme('color_current_col', 'bold')
-theme('color_current_hdr', 'reverse')
-theme('color_key_col', 'brown')
-theme('color_default_hdr', 'bold')
-theme('color_column_sep', 'blue')
+theme('color_current_hdr', 'reverse underline')
+theme('color_key_col', 'yellow 226')
+theme('color_default_hdr', 'bold underline')
+theme('color_column_sep', 'blue 25')
 theme('disp_status_sep', ' | ', 'string separating multiple statuses')
 theme('disp_unprintable', '.', 'a substitute character for unprintables')
 theme('disp_column_fill', ' ', 'pad chars after column value')
@@ -146,6 +149,8 @@ command('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'se
 
 command('[', 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r))', 'sort by this column ascending')
 command(']', 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r), reverse=True)', 'sort by this column descending')
+command('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols))', 'sort by all key columns ascending')
+command('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
 
 command('^D', 'options.debug = not options.debug; status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug mode')
 
@@ -180,7 +185,7 @@ command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again'
 command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
 command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
-command('ge', 'v = editCell(cursorVisibleColIndex); cursorCol.setValues(selectedRows, v)', 'edit this column for all selected rows')
+command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
 
 command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
 command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
@@ -226,6 +231,8 @@ command('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows); 
 command('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
+
+command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
 
 # VisiData uses Python native int, float, str, and adds a simple date and anytype.
 #
@@ -291,8 +298,8 @@ typemap = {
     anytype: ' ',
 }
 
-windowWidth = None
-windowHeight = None
+windowWidth = 0
+windowHeight = 0
 
 def joinSheetnames(*sheetnames):
     """Concatenate sheet names using separator ("joiner") from options."""
@@ -364,6 +371,7 @@ class VisiData:
         self.keystrokes = ''
         self.inInput = False
         self.tasks = []
+        self.scr = None  # curses scr
 
     @property
     def unfinishedTasks(self):
@@ -393,8 +401,9 @@ class VisiData:
         if v is not None:
             return v
         v = editText(self.scr, y, x, w, **kwargs)
-        self.status('"%s"' % v)
-        self.editlog.set_last_args(v)
+        if kwargs.get('display', True):
+            self.status('"%s"' % v)
+            self.editlog.set_last_args(v)
         return v
 
     def getkeystroke(self):
@@ -610,6 +619,10 @@ class Task:
         """Return elapsed time."""
         return (self.endTime or time.process_time())-self.startTime
 
+def sync():
+    while len(vd().unfinishedTasks) > 0:
+        vd().checkForUnfinishedTasks()
+
 def async(func):
     """Supply `execThread` for use decorating functions."""
     def execThread(*args, **kwargs):
@@ -640,8 +653,8 @@ def toplevel_try_func(task, func, *args, **kwargs):
         return ret
     except EscapeException as e:  # user aborted
         task.sheet.currentTask = None
-        task.status += 'cancelled by user;'
-        status("%s cancelled" % task.name)
+        task.status += 'aborted by user;'
+        status("%s aborted" % task.name)
     except Exception as e:
         task.sheet.currentTask = None
         task.status += status('%s: %s;' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
@@ -737,6 +750,10 @@ class Sheet:
 
         # only allow one async task per sheet
         self.currentTask = None
+
+    def rowColor(self, r):
+        if self.isSelected(r):
+            return options.color_selected_row
 
     def genProgress(self, L, total=None):
         """Provide generator (for for-loops), with `progressTotal` property."""
@@ -1172,14 +1189,21 @@ class Sheet:
         self.rightVisibleColIndex = vcolidx
 
     def drawColHeader(self, vcolidx):
-        """Compose and draw column header for given index."""
-        # choose attribute to highlight column header
-        if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-            hdrattr = colors[options.color_current_hdr]
-        elif self.visibleCols[vcolidx] in self.keyCols:
-            hdrattr = colors[options.color_key_col]
-        else:
-            hdrattr = colors[options.color_default_hdr]
+        """Compose and draw column header for given vcolidx."""
+
+        # hdrattr is attribute to highlight whole column header
+        hdrattr = 0
+        C = options.disp_column_sep
+        if self.isVisibleIdxKey(vcolidx):
+            hdrattr = colors.update(hdrattr, options.color_key_col)
+            if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
+                C = options.disp_keycol_sep
+
+        innerattr = colors.update(hdrattr, options.color_default_hdr)
+
+        if vcolidx == self.cursorVisibleColIndex:   # cursor is at this column
+            hdrattr = colors.update(hdrattr, options.color_current_col)
+            innerattr = colors.update(innerattr, options.color_current_hdr)
 
         col = self.visibleCols[vcolidx]
         x, colwidth = self.visibleColLayout[vcolidx]
@@ -1189,16 +1213,15 @@ class Sheet:
         N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
-        self.clipdraw(0, x, N, hdrattr, colwidth)
-        self.clipdraw(0, x+colwidth-len(T), T, hdrattr, len(T))
+        self.clipdraw(0, x, N, innerattr or colors[options.color_default_hdr], colwidth)
+        self.clipdraw(0, x+colwidth-len(T), T, innerattr or colors[options.color_default_hdr], len(T))
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.disp_more_left
             self.scr.addstr(0, x, A, colors[options.color_column_sep])
 
-        C = options.disp_column_sep
         if x+colwidth+len(C) < windowWidth:
-            self.scr.addstr(0, x+colwidth, C, colors[options.color_column_sep])
+            self.scr.addstr(0, x+colwidth, C, hdrattr or colors[options.color_column_sep])
 
     def isVisibleIdxKey(self, vcolidx):
         """Return boolean: is given column index a key column?"""
@@ -1212,7 +1235,6 @@ class Sheet:
         scr.erase()  # clear screen before every re-draw
 
         windowHeight, windowWidth = scr.getmaxyx()
-        sepchars = options.disp_column_sep
         if not self.columns:
             return
 
@@ -1239,11 +1261,11 @@ class Sheet:
                     else:
                         attr = colors[options.color_default]
 
-                    if self.isSelected(row):
-                        attr |= colors[options.color_selected_row]
-
                     if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-                        attr |= colors[options.color_current_col]
+                        attr = colors.update(attr, options.color_current_col)
+
+                    colorname = self.rowColor(row)
+                    attr = colors.update(attr, colorname)
 
                     cellval = self.visibleCols[vcolidx].getDisplayValue(row, colwidth-1)
                     self.clipdraw(y, x, options.disp_column_fill + cellval, attr, colwidth)
@@ -1252,6 +1274,10 @@ class Sheet:
                         self.clipdraw(y, x+colwidth-len(options.disp_getter_exc), options.disp_getter_exc, colors[options.color_getter_exc], len(options.disp_getter_exc))
                     elif isinstance(cellval, WrongTypeStr):
                         self.clipdraw(y, x+colwidth-len(options.disp_format_exc), options.disp_format_exc, colors[options.color_format_exc], len(options.disp_format_exc))
+
+                    sepchars = options.disp_column_sep
+                    if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
+                        sepchars = options.disp_keycol_sep
 
                     if x+colwidth+len(sepchars) <= windowWidth:
                        self.scr.addstr(y, x+colwidth, sepchars, attr or colors[options.color_column_sep])
@@ -1270,14 +1296,14 @@ class Sheet:
             return
         if vcolidx is None:
             vcolidx = self.cursorVisibleColIndex
-        x, w = self.visibleColLayout[vcolidx]
+        x, w = self.visibleColLayout.get(vcolidx, (0, 0))
         if rowidx is None:
             rowidx = self.cursorRowIndex
         if rowidx < 0:  # header
             y = 0
             currentValue = self.visibleCols[vcolidx].name
         else:
-            y = self.rowLayout[rowidx]
+            y = self.rowLayout.get(rowidx, 0)
             currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
 
         r = vd().editText(y, x, w, value=currentValue, fillchar=options.disp_edit_fill)
@@ -1553,9 +1579,12 @@ def input(prompt, type='', **kwargs):
 
 def _inputLine(prompt, **kwargs):
     """Add prompt to bottom of screen and get line of input from user."""
+    global windowHeight, windowWidth
+
     scr = vd().scr
-    windowHeight, windowWidth = scr.getmaxyx()
-    scr.addstr(windowHeight-1, 0, prompt)
+    if scr:
+        windowHeight, windowWidth = scr.getmaxyx()
+        scr.addstr(windowHeight-1, 0, prompt)
     vd().inInput = True
     ret = vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
     vd().inInput = False
@@ -1602,6 +1631,7 @@ def clipstr(s, dispw):
         if w > dispw-len(options.disp_truncator)+1:
             ret = ret[:-2] + options.disp_truncator  # replace final char with ellipsis
             w += len(options.disp_truncator)
+            break
 
     return ret, w
 
@@ -1706,7 +1736,9 @@ class OptionsSheet(Sheet):
         self.columns = ArrayNamedColumns('option value default description'.split())
         self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
-
+    def rowColor(self, r):
+        if r[0].startswith('color_'):
+            return r[1]
 
 # each row is a Task object
 class TasksSheet(Sheet):
@@ -1822,9 +1854,9 @@ def save_tsv(vs, fn):
 
 ### Curses helpers
 
-def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[]):
-    """Provide helpers for Curses."""
-
+def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[], display=True):
+      """A better curses line editing widget.""""
+    
     def until(func):
         """Delay until function `func` returns non-zero."""
         ret = None
@@ -1863,7 +1895,10 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
     hist_idx = 0
 
     while True:
-        dispval = clean(v)
+        if display:
+            dispval = clean(v)
+        else:
+            dispval = '*' * len(v)
         dispi = i
         if len(dispval) < w:
             dispval += fillchar*(w-len(dispval))
@@ -1911,50 +1946,52 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
     return v
 
 
-colors = collections.defaultdict(lambda: curses.A_NORMAL, {
-    'bold': curses.A_BOLD,
-    'reverse': curses.A_REVERSE,
-    'normal': curses.A_NORMAL,
-})
+class ColorMaker:
+    def __init__(self):
+        self.attrs = {}
+        self.color_attrs = {}
+
+    def setup(self):
+        self.color_attrs['black'] = curses.color_pair(0)
+
+        for c in range(0, options.num_colors or curses.COLORS):
+            curses.init_pair(c+1, c, curses.COLOR_BLACK)
+            self.color_attrs[str(c)] = curses.color_pair(c+1)
+
+        for c in 'red green yellow blue magenta cyan white'.split():
+            colornum = getattr(curses, 'COLOR_' + c.upper())
+            self.color_attrs[c] = curses.color_pair(colornum+1)
+
+        for a in 'normal blink bold dim reverse standout underline'.split():
+            self.attrs[a] = getattr(curses, 'A_' + a.upper())
+
+    def keys(self):
+        return list(self.attrs.keys()) + list(self.color_attrs.keys())
+
+    def __getitem__(self, colornamestr):
+        return self.update(0, colornamestr)
+
+    def update(self, attr, colornamestr):
+        attr = attr or 0
+        if isinstance(colornamestr, str):
+            for colorname in colornamestr.split(' '):
+                if colorname in self.color_attrs:
+                    attr &= ~2047
+                    attr |= self.color_attrs[colorname.lower()]
+                elif colorname in self.attrs:
+                    attr |= self.attrs[colorname.lower()]
+        return attr
 
 
-nextColorPair = 1
+colors = ColorMaker()
+
 def setupcolors(stdscr, f, *args):
-    """Configure colors for Curses."""
-
-    def makeColor(fg, bg):
-        """Construct color-pairs for Curses, or else use basic colors."""
-        global nextColorPair
-        if curses.has_colors():
-            curses.init_pair(nextColorPair, fg, bg)
-            c = curses.color_pair(nextColorPair)
-            nextColorPair += 1
-        else:
-            c = curses.A_NORMAL
-
-        return c
-
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
 #    curses.mousemask(curses.ALL_MOUSE_EVENTS)  # enable mouse events
-
-    colors['red'] = curses.A_BOLD | makeColor(curses.COLOR_RED, curses.COLOR_BLACK)
-    colors['blue'] = curses.A_BOLD | makeColor(curses.COLOR_BLUE, curses.COLOR_BLACK)
-    colors['green'] = curses.A_BOLD | makeColor(curses.COLOR_GREEN, curses.COLOR_BLACK)
-    colors['brown'] = makeColor(curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    colors['yellow'] = curses.A_BOLD | colors['brown']
-    colors['cyan'] = makeColor(curses.COLOR_CYAN, curses.COLOR_BLACK)
-    colors['magenta'] = makeColor(curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-
-    colors['red_bg'] = makeColor(curses.COLOR_WHITE, curses.COLOR_RED)
-    colors['blue_bg'] = makeColor(curses.COLOR_WHITE, curses.COLOR_BLUE)
-    colors['green_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_GREEN)
-    colors['brown_bg'] = colors['yellow_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_YELLOW)
-    colors['cyan_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_CYAN)
-    colors['magenta_bg'] = makeColor(curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+    colors.setup()
 
     return f(stdscr, *args)
-
 
 def wrapper(f, *args):
     """Wrap `curses.wrapper`."""
@@ -2013,11 +2050,24 @@ class Path:
 
     @property
     def filesize(self):
-        """Return file size.":""
+        """Return file size."""
         return self.stat().st_size
 
     def __str__(self):
         return self.fqpn
+
+
+class InternalSource(Path):
+    'minimal Path interface to satisfy a tsv loader'
+    def __init__(self, fqpn, contents):
+        super().__init__(fqpn)
+        self.contents = contents
+
+    def read_text(self):
+        return self.contents
+
+    def open_text(self):
+        return io.StringIO(self.contents)
 
 
 def openSource(p, filetype=None):
@@ -2029,7 +2079,7 @@ def openSource(p, filetype=None):
             return openSource(Path(p), filetype)  # convert to Path and recurse
     elif isinstance(p, Path):
         if filetype is None:
-            filetype = p.suffix
+            filetype = options.filetype or p.suffix
 
         if os.path.isdir(p.resolve()):
             vs = DirSheet(p.name, p)
