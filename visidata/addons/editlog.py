@@ -103,6 +103,7 @@ class EditLog(Sheet):
         status('replayed entire %s' % self.name)
 
     def get_last_args(self):
+        """Get last command, if any."""
         if EditLog.current_replay_row is not None:
             return EditLog.current_replay_row[2]
         else:
