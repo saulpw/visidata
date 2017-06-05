@@ -270,7 +270,7 @@ class date:
 
 
 def detectType(v):
-    """Auto-detect types in this order of preference: int float date str."""
+    """Auto-detect types in this order of preference: int, float, date, str."""
     def tryType(T, v):
         try:
             v = T(v)
@@ -303,7 +303,7 @@ def error(s):
     raise Exception(s)
 
 def status(s):
-    """Return status property via function."""
+    """Return status property via function call."""
     return vd().status(s)
 
 def moveListItem(L, fromidx, toidx):
@@ -327,7 +327,7 @@ def enumPivot(L, pivotIdx):
 def vd():
     """Instantiate and return singleton instance of VisiData class.
     
-    Contains all sheets, and as singleton is unique instance.."""
+    Contains all sheets, and (as singleton) is unique instance.."""
     return VisiData()
 
 def exceptionCaught(status=True):
@@ -838,7 +838,7 @@ class Sheet:
         return False
 
     def clipdraw(self, y, x, s, attr, w):
-        """Provide wrapper for `draw_clip`."""
+        """Wrap `draw_clip`."""
         return draw_clip(self.scr, y, x, s, attr, w)
 
     @property
@@ -1287,7 +1287,7 @@ class Sheet:
         return r
 
 class WrongTypeStr(str):
-    """Wrap `str` to indicate that type conversion failed."""
+    """Wrap `str` to indicate that type-conversion failed."""
     pass
 
 class CalcErrorStr(str):
@@ -1398,9 +1398,8 @@ class Column:
             self._aggregator = None
 
     def format(self, cellval):
-        """Format the type-name of given `cellval`.
+        """Format the type-name of given `cellval`."""
 
-        TODO: is the use of `type` here and in __init__ actually as intended?"""
         val = self.type(cellval)
         if self.type is date:         return val.to_string(self.fmtstr)
         elif self.fmtstr is not None: return self.fmtstr % val
@@ -1482,7 +1481,7 @@ class Column:
         """Return the maximum length of any cell in column or its header."""
         w = 0
         if len(rows) > 0:
-            w = max(max(len(self.getDisplayValue(r)) for r in rows),len(self.name))+2
+            w = max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name))+2
         return max(w, len(self.name))
 
     def toggleWidth(self, width):
@@ -1521,7 +1520,7 @@ def ArrayNamedColumns(columns):
 def ArrayColumns(ncols):
     """Return list of Column objects.
 
-    Note: argument `ncols` is a count of columns, Mapping to r[0]..r[n].
+    Note: argument `ncols` is a count of columns,
     """
     return [ColumnItem('', i, width=8) for i in range(ncols)]
 
@@ -1530,7 +1529,7 @@ def DictKeyColumns(d):
     return [ColumnItem(k, k, type=detectType(d[k])) for k in d]
 
 def SubrowColumn(origcol, subrowidx, **kwargs):
-    """Return Column object from subrow."""
+    """Return Column object from sub-row."""
     return Column(origcol.name, origcol.type,
             getter=lambda r,i=subrowidx,f=origcol.getter: r[i] and f(r[i]) or None,
             setter=lambda r,v,i=subrowidx,f=origcol.setter: r[i] and f(r[i], v) or None,
@@ -1634,7 +1633,7 @@ class HelpSheet(Sheet):
     """Help sheet, showing keystrokes etc. from given source(s)."""
 
     def reload(self):
-        """Populate sheet as `reload` function."""
+        """Populate sheet via `reload` function."""
         self.rows = []
         for i, src in enumerate(self.sources):
             self.rows.extend((i, v) for v in src.values())
@@ -1650,7 +1649,7 @@ class TextSheet(Sheet):
     """Sheet displaying a string (one line per row) or a list of strings."""
 
     def reload(self):
-        """Populate sheet as `reload` function."""
+        """Populate sheet via `reload` function."""
         self.columns = [Column(self.name, str)]
         if isinstance(self.source, list):
             self.rows = []
@@ -1675,7 +1674,7 @@ class DirSheet(Sheet):
     """Sheet displaying directory, using ENTER to open a particular file."""
 
     def reload(self):
-        """Populate sheet as `reload` function."""
+        """Populate sheet via `reload` function."""
         self.rows = [(p, p.stat()) for p in self.source.iterdir()]  #  if not p.name.startswith('.')]
         self.command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
         self.columns = [Column('filename', str, lambda r: r[0].name + r[0].ext),
@@ -1702,7 +1701,7 @@ class OptionsSheet(Sheet):
     """Sheet displaying user options."""
 
     def reload(self):
-        """Populate sheet as `reload` function."""
+        """Populate sheet via `reload` function."""
         self.rows = list(self.source.values())
         self.columns = ArrayNamedColumns('option value default description'.split())
         self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
@@ -1714,7 +1713,7 @@ class TasksSheet(Sheet):
     """Sheet displaying "Task" objects: asynchronous threads."""
 
     def reload(self):
-        """Populate sheet as `reload` function."""
+        """Populate sheet via `reload` function."""
         self.command('^C', 'ctype_async_raise(cursorRow.thread, EscapeException)', 'cancel this action')
         self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
         self.columns = [
@@ -1726,7 +1725,7 @@ class TasksSheet(Sheet):
 
 
 def ProfileSheet(task):
-    """Wrapper for populating sheet showing profiling results."""
+    """Populate sheet showing profiling results."""
     return TextSheet(task.name + '_profile', task.profileResults)
 
 #### enable external addons
@@ -1821,7 +1820,7 @@ def save_tsv(vs, fn):
             fp.write('\t'.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
     status('%s save finished' % fn)
 
-### curses helpers
+### Curses helpers
 
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[]):
     """Provide helpers for Curses."""
@@ -1839,7 +1838,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         return v if i < 0 else v[:i] + s + v[i:]
 
     def clean(s):
-        """Escape curses-unprintable characters."""
+        """Escape Curses-unprintable characters."""
         return ''.join(c if c.isprintable() else ('<%04X>' % ord(c)) for c in str(s))
 
     def delchar(s, i, remove=1):
@@ -2051,7 +2050,7 @@ def openSource(p, filetype=None):
     return vs
 
 def run(sheetlist=[]):
-    """Invoke curses mode. (This is the main entry point.)"""
+    """Invoke Curses mode. (This is the main entry point.)"""
 
     # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     os.putenv('ESCDELAY', '25')
