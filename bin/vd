@@ -2,11 +2,10 @@
 #
 # Usage: $0 [-d] [-r] [<input_source> ...]
 
-'Use the VisiData interface to browse the given sources'
-
 import visidata
 
 def main():
+    """Use the VisiData interface to browse the given sources."""
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
 
