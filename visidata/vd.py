@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Provide VisiData core functionality"""
+"""VisiData core functionality"""
 
 __version__ = 'saul.pw/VisiData v0.59'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
@@ -247,7 +247,7 @@ anytype = lambda r='': str(r)
 anytype.__name__ = ''
 
 class date:
-    """Provide simple wrapper around `datetime`.
+    """Simple wrapper around `datetime`.
 
     This allows it to be created from dateutil str or numeric input as time_t"""
 
@@ -302,7 +302,7 @@ windowWidth = 0
 windowHeight = 0
 
 def joinSheetnames(*sheetnames):
-    """Concatenate sheet names using separator ("joiner") from options."""
+    """Concatenate sheet names using separator (`options.sheetname_joiner`)."""
     return options.sheetname_joiner.join(str(x) for x in sheetnames)
 
 def error(s):
@@ -322,7 +322,8 @@ def moveListItem(L, fromidx, toidx):
 def enumPivot(L, pivotIdx):
     """Model Python `enumerate()` but starting midway through sequence `L`.
 
-    At sequence-end, begin at sequence-head, continuing up to starting point."""
+    Begin at index following `pivotIdx`, traverse through end.
+    At sequence-end, begin at sequence-head, continuing through `pivotIdx`."""
     rng = range(pivotIdx+1, len(L))
     rng2 = range(0, pivotIdx+1)
     for i in itertools.chain(rng, rng2):
@@ -432,7 +433,7 @@ class VisiData:
                     return True
             return False
         # TODO: I believe we can more concisely replace function body with:
-        #   return any([c.getDisplayValue(row) for c in columns])
+        #   return any([funct(c.getDisplayValue(row)) for c in columns])
 
         if regex:
             flags = sum(getattr(re, f.upper()) for f in options.regex_flags)
@@ -674,9 +675,8 @@ def thread_profileCode(task, func, *args, **kwargs):
 
 
 def ctype_async_raise(thread_obj, exception):
-    """Raise exception for threads running asynchronously.
+    """Raise exception for threads running asynchronously."""
 
-    Ctypes call follows https://gist.github.com/liuw/2407154."""
 
     def dict_find(D, value):
         """Return first key in dict `D` corresponding to `value`."""
@@ -686,6 +686,7 @@ def ctype_async_raise(thread_obj, exception):
 
         raise ValueError("no such value in dict")
 
+    # Following `ctypes call follows https://gist.github.com/liuw/2407154.
     ctypes.pythonapi.PyThreadState_SetAsyncExc(
             ctypes.c_long(dict_find(threading._active, thread_obj)),
             ctypes.py_object(exception)
@@ -756,7 +757,7 @@ class Sheet:
             return options.color_selected_row
 
     def genProgress(self, L, total=None):
-        """Provide generator (for for-loops), with `progressTotal` property."""
+        """Create generator (for for-loops), with `progressTotal` property."""
         self.progressTotal = total or len(L)
         self.progressMade = 0
         for i in L:
@@ -785,7 +786,7 @@ class Sheet:
                 return
 
     def reload(self):
-        """Provide default reloader, wrapping `loader` method."""
+        """Default reloader, wrapping `loader` method."""
         if self.loader:
             self.loader()
         else:
@@ -981,7 +982,7 @@ class Sheet:
         self._selectedRows[id(row)] = row
 
     def unselectRow(self, row):
-        """Unselect given row, if selected; return boolean."""
+        """Unselect given row, return True if selected; else return False."""
         if id(row) in self._selectedRows:
             del self._selectedRows[id(row)]
             return True
@@ -1228,7 +1229,7 @@ class Sheet:
         return self.visibleCols[vcolidx] in self.keyCols
 
     def draw(self, scr):
-        """Draw given screen object."""
+        """Draw entire screen onto the `scr` curses object."""
         global windowHeight, windowWidth
         numHeaderRows = 1
         self.scr = scr  # for clipdraw convenience
