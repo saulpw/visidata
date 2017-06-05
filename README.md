@@ -21,13 +21,14 @@ $ pip3 install visidata
 
 ```
 $ git clone http://github.com/saulpw/visidata.git
+$ cd visidata
+$ pip install -r requirements.txt
+$ python setup.py install
 ```
 
 ### Dependencies
 
-- Python 3.3
-- python3-dateutil (if converting string column to datetime)
-- openpyxl (if opening .xlsx files)
+- Python 3.3+
 - h5py and numpy (if opening .hdf5 files)
 - google-api-python-client (if opening Google Sheets; must [also set up OAuth credentials](https://developers.google.com/sheets/quickstart/python )
 
