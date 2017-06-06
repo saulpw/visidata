@@ -352,11 +352,6 @@ def chooseOne(choices):
 
 # A .. Z AA AB .. ZZ
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
-# TODO: How about this, more concise and more readable:
-# defaultColNames = (list(string.ascii_uppercase) +
-#                    [i+j for i in string.ascii_uppercase
-#                         for j in string.ascii_uppercase]
-#                    )
 
 class VisiData:
     allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
@@ -432,8 +427,6 @@ class VisiData:
                 if m:
                     return True
             return False
-        # TODO: I believe we can more concisely replace function body with:
-        #   return any([funct(c.getDisplayValue(row)) for c in columns])
 
         if regex:
             flags = sum(getattr(re, f.upper()) for f in options.regex_flags)
@@ -475,7 +468,7 @@ class VisiData:
             if columnsMatch(sheet, sheet.rows[r], columns, self.lastRegex.search):
                 if moveCursor:
                     sheet.cursorRowIndex = r
-                    status('search wrapped')   # the only reason for the duplicate code block TODO: this can be condensed.
+                    status('search wrapped')   # the only reason for the duplicate code block
                     return
                 else:
                     matchingRowIndexes += 1
@@ -2116,7 +2109,7 @@ def curses_main(_scr, sheetlist=[]):
         vd().push(vs)  # first push does a reload
     return vd().run(_scr)
 
-g_globals = None # TODO: If we expect a dict, why not `dict()` here?
+g_globals = None
 def set_globals(g):
     """Assign given `g` to (expected) global dict `g_globals`."""
     global g_globals

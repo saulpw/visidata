@@ -44,7 +44,7 @@ def open_gspreadsheet(p):
     return vs
 
 def open_gsheet(p):
-    """TODO: Is this function still active?"""
+    """Open Google Sheets spreadsheet, given its name."""
     sheets = google_sheets()
     sheet = sheets.values().get(spreadsheetId=p.name).execute()
     push_pyobj(p.name, sheet, p)

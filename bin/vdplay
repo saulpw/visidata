@@ -9,6 +9,7 @@ import sys
 import visidata
 
 def eval_vd(fn_editlog, *args, **kwargs):
+    """Open log, instantiate as VisiData sheet, replay all commands, report."""
     log = open(fn_editlog).read().format(*args, **kwargs)
     src = visidata.InternalSource(fn_editlog, log)
     vs = visidata.openSource(src)

@@ -12,9 +12,7 @@ def _getattrname(o, k):
     return v.__name__ if v else None
 
 def ColumnGlobal(name):
-    """Return Column object with given name.
-
-    TODO: remove or rename this function when possible to do so."""
+    """Return Column object with given name."""
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
                         setter=lambda r,v,name=name: setattr(r, name, v))
 
