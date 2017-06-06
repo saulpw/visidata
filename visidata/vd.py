@@ -1940,9 +1940,17 @@ def run(sheetlist=[]):
         print(ret)
 
 def curses_main(_scr, sheetlist=[]):
+    for fnrc in ('$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
+        p = Path(fnrc)
+        if p.exists():
+            exec(open(p.resolve()).read())
+            break
+
     colors.setup()
+
     for vs in sheetlist:
         vd().push(vs)  # first push does a reload
+
     return vd().run(_scr)
 
 g_globals = None
