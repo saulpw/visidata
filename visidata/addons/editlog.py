@@ -19,6 +19,7 @@ class EditLog(Sheet):
             ColumnItem('keystrokes', 1),
             ColumnItem('input', 2),
             ColumnItem('end_sheet', 3),
+            ColumnItem('comment', 4),
         ]
 
         self.command('a', 'sheet.replay_one(cursorRow); status("replayed one row")', 'replay this editlog')
@@ -45,7 +46,8 @@ class EditLog(Sheet):
     def before_exec_hook(self, sheet, keystrokes, args=''):
         assert sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.current_replay_row is None:
-            self.current_active_row = [ sheet.name, keystrokes, args, None ]
+            self.current_active_row = [ sheet.name, keystrokes, args, None,
+                    sheet.commands[keystrokes][1] ]
             self.rows.append(self.current_active_row)
 
     def after_exec_sheet(self, vs, escaped):
@@ -55,7 +57,8 @@ class EditLog(Sheet):
                 del self.rows[-1]
             else:
                 self.current_active_row[3] = vs.name
-                before_name, _, _, after_name = self.current_active_row
+                before_name = self.current_active_row[0]
+                after_name = self.current_active_row[3]
 
                 # only record the sheet movement to/from the editlog
                 if self.name in [before_name, after_name]:
@@ -66,7 +69,7 @@ class EditLog(Sheet):
 
     def open_hook(self, vs, src):
         if vs:
-            self.rows.append([ None, 'o', src, vs.name ])
+            self.rows.append([ None, 'o', src, vs.name, 'open file' ])
             self.sheetmap[vs.name] = vs
 
     def replay_one(self, r):
