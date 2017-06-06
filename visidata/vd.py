@@ -703,9 +703,8 @@ class Sheet:
         # only allow one async task per sheet
         self.currentTask = None
 
-    def rowColor(self, r):
-        if self.isSelected(r):
-            return options.color_selected_row
+        self.colorizers = [ self.colorValue, self.colorCursorCol,
+                            self.colorKeyCol, self.colorCursorRow, self.colorSelectedRow ]
 
     def genProgress(self, L, total=None):
         self.progressTotal = total or len(L)
@@ -715,6 +714,32 @@ class Sheet:
             yield i
 
         self.progressMade = self.progressTotal
+
+    def colorCursorCol(self, col, r, value):
+        if col is self.cursorCol:
+            if r is None:
+                return options.color_current_hdr, 9
+            else:
+                return options.color_current_col, 9
+
+    def colorKeyCol(self, col, r, value):
+        if col in self.keyCols:
+            return options.color_key_col, 7
+
+    def colorCursorRow(self, col, r, value):
+        if r is self.cursorRow:
+            return options.color_current_row, 10
+
+    def colorValue(self, col, r, value):
+        if isinstance(value, CalcErrorStr):
+            return options.color_getter_exc, 5
+        elif isinstance(value, WrongTypeStr):
+            return options.color_format_exc, 5
+
+    def colorSelectedRow(self, col, r, value):
+        if self.isSelected(r):
+            return options.color_selected_row, 8
+
 
     def command(self, keystrokes, execstr, helpstr):
         self.commands[keystrokes] = (keystrokes, helpstr, execstr)
@@ -1082,22 +1107,31 @@ class Sheet:
 
         self.rightVisibleColIndex = vcolidx
 
+    def colorize(self, col, row, value=None):
+        rowattr = 0
+        rowattrpre = 0
+
+        for func in self.colorizers:
+            ret = func(col, row, value)
+            if ret:
+                color, precedence = ret
+                rowattr, rowattrpre = colors.update(rowattr, rowattrpre, color, precedence)
+
+        return rowattr
+
     def drawColHeader(self, vcolidx):
-        # hdrattr is attribute to highlight whole column header
-        hdrattr = 0
+        col = self.visibleCols[vcolidx]
+
+        # hdrattr highlights whole column header
+        # rowattr is for header separators
+        rowattr = self.colorize(None, None) or colors[options.color_column_sep]
+        hdrattr = self.colorize(col, None, None) or colors[options.color_default_hdr]
+
         C = options.disp_column_sep
         if self.isVisibleIdxKey(vcolidx):
-            hdrattr = colors.update(hdrattr, options.color_key_col)
             if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
                 C = options.disp_keycol_sep
 
-        innerattr = colors.update(hdrattr, options.color_default_hdr)
-
-        if vcolidx == self.cursorVisibleColIndex:   # cursor is at this column
-            hdrattr = colors.update(hdrattr, options.color_current_col)
-            innerattr = colors.update(innerattr, options.color_current_hdr)
-
-        col = self.visibleCols[vcolidx]
         x, colwidth = self.visibleColLayout[vcolidx]
 
         # ANameTC
@@ -1105,15 +1139,15 @@ class Sheet:
         N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
-        self.clipdraw(0, x, N, innerattr or colors[options.color_default_hdr], colwidth)
-        self.clipdraw(0, x+colwidth-len(T), T, innerattr or colors[options.color_default_hdr], len(T))
+        self.clipdraw(0, x, N, hdrattr, colwidth)
+        self.clipdraw(0, x+colwidth-len(T), T, hdrattr, len(T))
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.disp_more_left
-            self.scr.addstr(0, x, A, colors[options.color_column_sep])
+            self.scr.addstr(0, x, A, rowattr)
 
         if x+colwidth+len(C) < windowWidth:
-            self.scr.addstr(0, x+colwidth, C, hdrattr or colors[options.color_column_sep])
+            self.scr.addstr(0, x+colwidth, C, rowattr)
 
     def isVisibleIdxKey(self, vcolidx):
         return self.visibleCols[vcolidx] in self.keyCols
@@ -1132,6 +1166,8 @@ class Sheet:
         self.calcColLayout()
         for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
             x, colwidth = colinfo
+            col = self.visibleCols[vcolidx]
+
             if x < windowWidth:  # only draw inside window
                 self.drawColHeader(vcolidx)
 
@@ -1143,21 +1179,11 @@ class Sheet:
                     self.rowLayout[self.topRowIndex+rowidx] = y
 
                     row = self.rows[self.topRowIndex + rowidx]
+                    cellval = col.getDisplayValue(row, colwidth-1)
 
-                    if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
-                        attr = colors[options.color_current_row]
-                    elif self.isVisibleIdxKey(vcolidx):
-                        attr = colors[options.color_key_col]
-                    else:
-                        attr = colors[options.color_default]
+                    attr = self.colorize(col, row, cellval) or colors[options.color_default]
+                    rowattr = self.colorize(None, row) or colors[options.color_column_sep]
 
-                    if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-                        attr = colors.update(attr, options.color_current_col)
-
-                    colorname = self.rowColor(row)
-                    attr = colors.update(attr, colorname)
-
-                    cellval = self.visibleCols[vcolidx].getDisplayValue(row, colwidth-1)
                     self.clipdraw(y, x, options.disp_column_fill + cellval, attr, colwidth)
 
                     if isinstance(cellval, CalcErrorStr):
@@ -1170,7 +1196,7 @@ class Sheet:
                         sepchars = options.disp_keycol_sep
 
                     if x+colwidth+len(sepchars) <= windowWidth:
-                       self.scr.addstr(y, x+colwidth, sepchars, attr or colors[options.color_column_sep])
+                       self.scr.addstr(y, x+colwidth, sepchars, rowattr)
 
                     y += 1
 
@@ -1568,9 +1594,11 @@ class OptionsSheet(Sheet):
         self.columns = ArrayNamedColumns('option value default description'.split())
         self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
-    def rowColor(self, r):
-        if r[0].startswith('color_'):
-            return r[1]
+        self.colorizers.append(self.colorOptionCell)
+
+    def colorOptionCell(self, col, row, value):
+        if row and col and col.name in ['value', 'default'] and row[0].startswith('color_'):
+            return col.getValue(row), 9
 
 # each row is a Task object
 class TasksSheet(Sheet):
@@ -1781,18 +1809,21 @@ class ColorMaker:
         return list(self.attrs.keys()) + list(self.color_attrs.keys())
 
     def __getitem__(self, colornamestr):
-        return self.update(0, colornamestr)
+        color, prec = self.update(0, 0, colornamestr, 10)
+        return color
 
-    def update(self, attr, colornamestr):
+    def update(self, attr, attr_prec, colornamestr, newcolor_prec):
         attr = attr or 0
         if isinstance(colornamestr, str):
             for colorname in colornamestr.split(' '):
                 if colorname in self.color_attrs:
-                    attr &= ~2047
-                    attr |= self.color_attrs[colorname.lower()]
+                    if newcolor_prec > attr_prec:
+                        attr &= ~2047
+                        attr |= self.color_attrs[colorname.lower()]
+                        attr_prec = newcolor_prec
                 elif colorname in self.attrs:
                     attr |= self.attrs[colorname.lower()]
-        return attr
+        return attr, attr_prec
 
 
 colors = ColorMaker()
