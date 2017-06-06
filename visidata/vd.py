@@ -730,7 +730,7 @@ class Sheet:
 
     @staticmethod
     def colorCursorRow(self, col, r, value):
-        if r is self.cursorRow:
+        if r and r is self.cursorRow:
             return options.color_current_row, 10
 
     @staticmethod
@@ -1127,9 +1127,8 @@ class Sheet:
         hdrattr = self.colorize(col, None, None) or colors[options.color_default_hdr]
 
         C = options.disp_column_sep
-        if self.isVisibleIdxKey(vcolidx):
-            if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
-                C = options.disp_keycol_sep
+        if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
+            C = options.disp_keycol_sep
 
         x, colwidth = self.visibleColLayout[vcolidx]
 
@@ -1191,7 +1190,7 @@ class Sheet:
                         self.clipdraw(y, x+colwidth-len(options.disp_format_exc), options.disp_format_exc, colors[options.color_format_exc], len(options.disp_format_exc))
 
                     sepchars = options.disp_column_sep
-                    if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
+                    if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
                         sepchars = options.disp_keycol_sep
 
                     if x+colwidth+len(sepchars) <= windowWidth:
@@ -1537,6 +1536,7 @@ class HelpSheet(Sheet):
                         Column('with_g_prefix', str, lambda r,self=self: self.sources[r[0]].get('g' + r[1][0], (None,'-'))[1]),
                         SubrowColumn(ColumnItem('execstr', 2, width=0), 1)
                 ]
+        self.nKeys = 1
 
 
 ## text viewer and dir browser
@@ -1595,6 +1595,7 @@ class OptionsSheet(Sheet):
         self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
         self.colorizers.append(self.colorOptionCell)
+        self.nKeys = 1
 
     @staticmethod
     def colorOptionCell(sheet, col, row, value):
