@@ -403,11 +403,7 @@ class VisiData:
         'sets row index if moveCursor; otherwise returns list of row indexes'
 
         def columnsMatch(sheet, row, columns, func):
-            for c in columns:
-                m = func(c.getDisplayValue(row))
-                if m:
-                    return True
-            return False
+            return any([func(c.getDisplayValue(row)) for c in columns])
 
         if regex:
             flags = sum(getattr(re, f.upper()) for f in options.regex_flags)
