@@ -716,6 +716,7 @@ class Sheet:
 
         self.progressMade = self.progressTotal
 
+    @staticmethod
     def colorCursorCol(self, col, r, value):
         if col is self.cursorCol:
             if r is None:
@@ -723,20 +724,24 @@ class Sheet:
             else:
                 return options.color_current_col, 9
 
+    @staticmethod
     def colorKeyCol(self, col, r, value):
         if col in self.keyCols:
             return options.color_key_col, 7
 
+    @staticmethod
     def colorCursorRow(self, col, r, value):
         if r is self.cursorRow:
             return options.color_current_row, 10
 
+    @staticmethod
     def colorValue(self, col, r, value):
         if isinstance(value, CalcErrorStr):
             return options.color_getter_exc, 5
         elif isinstance(value, WrongTypeStr):
             return options.color_format_exc, 5
 
+    @staticmethod
     def colorSelectedRow(self, col, r, value):
         if self.isSelected(r):
             return options.color_selected_row, 8
@@ -767,6 +772,7 @@ class Sheet:
         c = copy.copy(self)
         c.name += suffix
         c.topRowIndex = c.cursorRowIndex = 0
+        c.colorizers = self.colorizers.copy()
         c.columns = copy.deepcopy(self.columns)  # deepcopy so that layouts can be different
         c._selectedRows = self._selectedRows.copy()  # so that selections on source don't affect the copy and vice versa
         return c
@@ -1113,7 +1119,7 @@ class Sheet:
         rowattrpre = 0
 
         for func in self.colorizers:
-            ret = func(col, row, value)
+            ret = func(self, col, row, value)
             if ret:
                 color, precedence = ret
                 rowattr, rowattrpre = colors.update(rowattr, rowattrpre, color, precedence)
@@ -1597,7 +1603,8 @@ class OptionsSheet(Sheet):
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
         self.colorizers.append(self.colorOptionCell)
 
-    def colorOptionCell(self, col, row, value):
+    @staticmethod
+    def colorOptionCell(sheet, col, row, value):
         if row and col and col.name in ['value', 'default'] and row[0].startswith('color_'):
             return col.getValue(row), 9
 
