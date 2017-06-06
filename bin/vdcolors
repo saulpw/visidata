@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+from visidata import *
+
+class ColorSheet(Sheet):
+    def __init__(self):
+        super().__init__('colors')
+        self.columns=[
+            Column('color', type=int),
+            Column('R', getter=lambda r: curses.color_content(curses.pair_number(colors[r])-1)[0]),
+            Column('G', getter=lambda r: curses.color_content(curses.pair_number(colors[r])-1)[1]),
+            Column('B', getter=lambda r: curses.color_content(curses.pair_number(colors[r])-1)[2]),
+            ]
+        self.colorizers.append(lambda self,c,r,v: (r, 1) if c and c.name == 'color' else None)
+
+    def reload(self):
+        self.rows = colors.keys()
+        self.exec_command(None, self.commands['['])
+
+run([ColorSheet()])

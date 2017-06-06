@@ -704,8 +704,7 @@ class Sheet:
         # only allow one async task per sheet
         self.currentTask = None
 
-        self.colorizers = [ self.colorValue, self.colorCursorCol,
-                            self.colorKeyCol, self.colorCursorRow, self.colorSelectedRow ]
+        self.colorizers = [ self.colorCursorCol, self.colorKeyCol, self.colorCursorRow, self.colorSelectedRow ]
 
     def genProgress(self, L, total=None):
         self.progressTotal = total or len(L)
@@ -733,13 +732,6 @@ class Sheet:
     def colorCursorRow(self, col, r, value):
         if r is self.cursorRow:
             return options.color_current_row, 10
-
-    @staticmethod
-    def colorValue(self, col, r, value):
-        if isinstance(value, CalcErrorStr):
-            return options.color_getter_exc, 5
-        elif isinstance(value, WrongTypeStr):
-            return options.color_format_exc, 5
 
     @staticmethod
     def colorSelectedRow(self, col, r, value):
@@ -1840,7 +1832,6 @@ def setupcolors(stdscr, f, *args):
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
 #    curses.mousemask(curses.ALL_MOUSE_EVENTS)  # enable mouse events
-    colors.setup()
 
     return f(stdscr, *args)
 
@@ -1948,6 +1939,7 @@ def run(sheetlist=[]):
         print(ret)
 
 def curses_main(_scr, sheetlist=[]):
+    colors.setup()
     for vs in sheetlist:
         vd().push(vs)  # first push does a reload
     return vd().run(_scr)
