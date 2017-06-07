@@ -64,6 +64,7 @@ option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('num_colors', 0, 'force number of colors to use')
+option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -337,8 +338,6 @@ def chooseOne(choices):
     else:
         return input('/'.join(str(x) for x in choices) + ': ')
 
-# A .. Z AA AB ...
-defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
 class VisiData:
     allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
@@ -1583,6 +1582,12 @@ class OptionsObject:
         self._opts[k][1] = v
 
 options = OptionsObject(base_options)
+
+# Generator => A .. Z AA AB ...
+chars = string.ascii_uppercase
+defaultColNames = (''.join(j) for i in range(options.maxlen_col_hdr)
+                              for j in itertools.product(chars, repeat=i+1)
+                  )
 
 class OptionsSheet(Sheet):
     def reload(self):
