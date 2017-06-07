@@ -1884,8 +1884,8 @@ def save_tsv(vs, fn):
 ### Curses helpers
 
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[], display=True):
-      """A better curses line editing widget.""""
-    
+    """A better curses line editing widget."""
+
     def until(func):
         """Delay until function `func` returns non-zero."""
         ret = None
