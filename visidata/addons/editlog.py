@@ -79,7 +79,7 @@ class EditLog(Sheet):
 
     def replay_one(self, r):
         """Replay the command in one given row."""
-        before_sheet, keystrokes, args, after_sheet = r
+        before_sheet, keystrokes, args, after_sheet = r[:4]
 
         EditLog.current_replay_row = r
         if before_sheet:
