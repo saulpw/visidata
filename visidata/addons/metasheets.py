@@ -32,9 +32,9 @@ def splitColumn(columns, colIndex, origcol, exampleVal, ch):
 
     for i in range(maxcols):
         if ch:
-            columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,split_max=split_max: c.getValue(r).split(ch, split_max)[i])))
+            columns.insert(colIndex+i+1, (Column("%s_%s" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,split_max=split_max: c.getValue(r).split(ch, split_max)[i])))
         else:
-            columns.insert(colIndex+i+1, (Column("%s[%s]" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,split_max=split_max: c.getValue(r)[i])))
+            columns.insert(colIndex+i+1, (Column("%s_%s" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,split_max=split_max: c.getValue(r)[i])))
 
 
 class LazyMapping:
