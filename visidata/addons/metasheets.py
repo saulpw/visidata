@@ -102,12 +102,18 @@ class SheetColumns(Sheet):
         self.command(':', 'splitColumn(source.columns, cursorRowIndex, cursorRow, cursorRow.getValue(sheet.cursorRow), input("split char: ") or None)', 'create new columns by splitting current column')
         self.command('=', 'source.addColumn(ColumnExpr(source, input("new column expr=", "expr")), index=cursorRowIndex+1)', 'add column by expr')
 
-        self.command('+', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns')
+        self.command('+', 'cursorRow.aggregator = chooseOne(aggregators)', 'choose aggregator for this column')
+        self.command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns')
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
         self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
+        self.command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float')
+        self.command('g#', 'for c in selectedRows: c.type = int', 'set type of all selected columns to int')
+        self.command('g@', 'for c in selectedRows: c.type = date', 'set type of all selected columns to date')
+        self.command('g$', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string')
 
         self.command('W', 'vd.replace(SheetPivot(source, selectedRows))', 'push a pivot table, keeping nonselected keys, making variables from selected columns, and creating a column for each variable-aggregate combination')
 
+        self.colorizers.append(lambda self,c,r,v: (options.color_key_col, 8) if r in self.source.keyCols else None)
 
     def reload(self):
         self.rows = self.source.columns
@@ -134,10 +140,6 @@ class SheetColumns(Sheet):
                 Column('stddev', float, lambda c,sheet=self: statistics.stdev(c.values(sheet.rows)), width=0),
             ])
 
-    def rowColor(self, r):
-        if r in self.source.keyCols:
-            return options.color_key_col
-        return super().rowColor(r)
 
 #### slicing and dicing
 class SheetJoin(Sheet):

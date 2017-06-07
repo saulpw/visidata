@@ -80,14 +80,14 @@ theme('disp_none', '',  'visible contents of a cell whose value was None')
 
 theme('color_current_row', 'reverse')
 theme('color_default', 'normal')
-theme('color_selected_row', 'green')
-theme('color_format_exc', 'magenta')
-theme('color_getter_exc', 'red')
+theme('color_selected_row', '215 yellow')
+theme('color_format_exc', '48 bold yellow')
+theme('color_getter_exc', 'red bold')
 theme('color_current_col', 'bold')
 theme('color_current_hdr', 'reverse underline')
-theme('color_key_col', 'yellow 226')
+theme('color_key_col', '81 cyan')
 theme('color_default_hdr', 'bold underline')
-theme('color_column_sep', 'blue 25')
+theme('color_column_sep', '246 blue')
 theme('disp_status_sep', ' | ', 'string separating multiple statuses')
 theme('disp_unprintable', '.', 'a substitute character for unprintables')
 theme('disp_column_fill', ' ', 'pad chars after column value')
@@ -745,9 +745,7 @@ class Sheet:
         # only allow one async task per sheet
         self.currentTask = None
 
-    def rowColor(self, r):
-        if self.isSelected(r):
-            return options.color_selected_row
+        self.colorizers = [ self.colorCursorCol, self.colorKeyCol, self.colorCursorRow, self.colorSelectedRow ]
 
     def genProgress(self, L, total=None):
         """Create generator (for for-loops), with `progressTotal` property."""
@@ -758,6 +756,30 @@ class Sheet:
             yield i
 
         self.progressMade = self.progressTotal
+
+    @staticmethod
+    def colorCursorCol(self, col, r, value):
+        if col is self.cursorCol:
+            if r is None:
+                return options.color_current_hdr, 9
+            else:
+                return options.color_current_col, 9
+
+    @staticmethod
+    def colorKeyCol(self, col, r, value):
+        if col in self.keyCols:
+            return options.color_key_col, 7
+
+    @staticmethod
+    def colorCursorRow(self, col, r, value):
+        if r and r is self.cursorRow:
+            return options.color_current_row, 10
+
+    @staticmethod
+    def colorSelectedRow(self, col, r, value):
+        if self.isSelected(r):
+            return options.color_selected_row, 8
+
 
     def command(self, keystrokes, execstr, helpstr):
         """Populate command, help-string and execution string for keystrokes."""
@@ -792,6 +814,7 @@ class Sheet:
         c.topRowIndex = c.cursorRowIndex = 0
         c.columns = copy.deepcopy(self.columns)
         c._selectedRows = self._selectedRows.copy()
+        c.colorizers = self.colorizers.copy()
         return c
 
     @async
@@ -1182,24 +1205,32 @@ class Sheet:
 
         self.rightVisibleColIndex = vcolidx
 
+    def colorize(self, col, row, value=None):
+        """Returns curses attribute for the given col/row/value"""
+        rowattr = 0
+        rowattrpre = 0
+
+        for func in self.colorizers:
+            ret = func(self, col, row, value)
+            if ret:
+                color, precedence = ret
+                rowattr, rowattrpre = colors.update(rowattr, rowattrpre, color, precedence)
+
+        return rowattr
+
     def drawColHeader(self, vcolidx):
         """Compose and draw column header for given vcolidx."""
-
-        # hdrattr is attribute to highlight whole column header
-        hdrattr = 0
-        C = options.disp_column_sep
-        if self.isVisibleIdxKey(vcolidx):
-            hdrattr = colors.update(hdrattr, options.color_key_col)
-            if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
-                C = options.disp_keycol_sep
-
-        innerattr = colors.update(hdrattr, options.color_default_hdr)
-
-        if vcolidx == self.cursorVisibleColIndex:   # cursor is at this column
-            hdrattr = colors.update(hdrattr, options.color_current_col)
-            innerattr = colors.update(innerattr, options.color_current_hdr)
-
         col = self.visibleCols[vcolidx]
+
+        # hdrattr highlights whole column header
+        # rowattr is for header separators
+        rowattr = self.colorize(None, None) or colors[options.color_column_sep]
+        hdrattr = self.colorize(col, None, None) or colors[options.color_default_hdr]
+
+        C = options.disp_column_sep
+        if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
+            C = options.disp_keycol_sep
+
         x, colwidth = self.visibleColLayout[vcolidx]
 
         # ANameTC
@@ -1207,15 +1238,15 @@ class Sheet:
         N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
-        self.clipdraw(0, x, N, innerattr or colors[options.color_default_hdr], colwidth)
-        self.clipdraw(0, x+colwidth-len(T), T, innerattr or colors[options.color_default_hdr], len(T))
+        self.clipdraw(0, x, N, hdrattr, colwidth)
+        self.clipdraw(0, x+colwidth-len(T), T, hdrattr, len(T))
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.disp_more_left
-            self.scr.addstr(0, x, A, colors[options.color_column_sep])
+            self.scr.addstr(0, x, A, rowattr)
 
         if x+colwidth+len(C) < windowWidth:
-            self.scr.addstr(0, x+colwidth, C, hdrattr or colors[options.color_column_sep])
+            self.scr.addstr(0, x+colwidth, C, rowattr)
 
     def isVisibleIdxKey(self, vcolidx):
         """Return boolean: is given column index a key column?"""
@@ -1236,6 +1267,8 @@ class Sheet:
         self.calcColLayout()
         for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
             x, colwidth = colinfo
+            col = self.visibleCols[vcolidx]
+
             if x < windowWidth:  # only draw inside window
                 self.drawColHeader(vcolidx)
 
@@ -1247,34 +1280,30 @@ class Sheet:
                     self.rowLayout[self.topRowIndex+rowidx] = y
 
                     row = self.rows[self.topRowIndex + rowidx]
+                    cellval = col.getDisplayValue(row, colwidth-1)
 
-                    if self.topRowIndex + rowidx == self.cursorRowIndex:  # cursor at this row
-                        attr = colors[options.color_current_row]
-                    elif self.isVisibleIdxKey(vcolidx):
-                        attr = colors[options.color_key_col]
-                    else:
-                        attr = colors[options.color_default]
+                    attr = self.colorize(col, row, cellval) or colors[options.color_default]
+                    rowattr = self.colorize(None, row) or colors[options.color_column_sep]
 
-                    if vcolidx == self.cursorVisibleColIndex:  # cursor is at this column
-                        attr = colors.update(attr, options.color_current_col)
-
-                    colorname = self.rowColor(row)
-                    attr = colors.update(attr, colorname)
-
-                    cellval = self.visibleCols[vcolidx].getDisplayValue(row, colwidth-1)
                     self.clipdraw(y, x, options.disp_column_fill + cellval, attr, colwidth)
 
+                    annotation = ''
                     if isinstance(cellval, CalcErrorStr):
-                        self.clipdraw(y, x+colwidth-len(options.disp_getter_exc), options.disp_getter_exc, colors[options.color_getter_exc], len(options.disp_getter_exc))
+                        annotation = options.disp_getter_exc
+                        notecolor = colors[options.color_getter_exc]
                     elif isinstance(cellval, WrongTypeStr):
-                        self.clipdraw(y, x+colwidth-len(options.disp_format_exc), options.disp_format_exc, colors[options.color_format_exc], len(options.disp_format_exc))
+                        annotation = options.disp_format_exc
+                        notecolor = colors[options.color_format_exc]
+
+                    if annotation:
+                        self.clipdraw(y, x+colwidth-len(annotation), annotation, notecolor, len(annotation))
 
                     sepchars = options.disp_column_sep
-                    if (self.keyCols and self.visibleCols[vcolidx] is self.keyCols[-1]) or self.visibleCols[vcolidx] is self.visibleCols[-1]:
+                    if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
                         sepchars = options.disp_keycol_sep
 
                     if x+colwidth+len(sepchars) <= windowWidth:
-                       self.scr.addstr(y, x+colwidth, sepchars, attr or colors[options.color_column_sep])
+                       self.scr.addstr(y, x+colwidth, sepchars, rowattr)
 
                     y += 1
 
@@ -1471,7 +1500,7 @@ class Column:
             raise
         except Exception as e:
             exceptionCaught(status=False)
-            return CalcErrorStr(options.disp_getter_exc)
+            return CalcErrorStr(options.disp_error_val)
 
         if cellval is None:
             return options.disp_none
@@ -1648,8 +1677,9 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
         if dispw <= w:
             scr.addstr(y, x+dispw, options.disp_column_fill*(w-dispw), attr)
     except Exception as e:
-        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
-                ).with_traceback(sys.exc_info()[2])
+#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
+#                ).with_traceback(sys.exc_info()[2])
+        pass
 
 
 ## Built-in sheets
@@ -1666,6 +1696,7 @@ class HelpSheet(Sheet):
                         Column('with_g_prefix', str, lambda r,self=self: self.sources[r[0]].get('g' + r[1][0], (None,'-'))[1]),
                         SubrowColumn(ColumnItem('execstr', 2, width=0), 1)
                 ]
+        self.nKeys = 1
 
 
 ## text viewer and dir browser
@@ -1730,9 +1761,13 @@ class OptionsSheet(Sheet):
         self.columns = ArrayNamedColumns('option value default description'.split())
         self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
         self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
-    def rowColor(self, r):
-        if r[0].startswith('color_'):
-            return r[1]
+        self.colorizers.append(self.colorOptionCell)
+        self.nKeys = 1
+
+    @staticmethod
+    def colorOptionCell(sheet, col, row, value):
+        if row and col and col.name in ['value', 'default'] and row[0].startswith('color_'):
+            return col.getValue(row), 9
 
 # each row is a Task object
 class TasksSheet(Sheet):
@@ -1948,7 +1983,7 @@ class ColorMaker:
     def setup(self):
         self.color_attrs['black'] = curses.color_pair(0)
 
-        for c in range(0, options.num_colors or curses.COLORS):
+        for c in range(0, int(options.num_colors) or curses.COLORS):
             curses.init_pair(c+1, c, curses.COLOR_BLACK)
             self.color_attrs[str(c)] = curses.color_pair(c+1)
 
@@ -1963,18 +1998,21 @@ class ColorMaker:
         return list(self.attrs.keys()) + list(self.color_attrs.keys())
 
     def __getitem__(self, colornamestr):
-        return self.update(0, colornamestr)
+        color, prec = self.update(0, 0, colornamestr, 10)
+        return color
 
-    def update(self, attr, colornamestr):
+    def update(self, attr, attr_prec, colornamestr, newcolor_prec):
         attr = attr or 0
         if isinstance(colornamestr, str):
             for colorname in colornamestr.split(' '):
                 if colorname in self.color_attrs:
-                    attr &= ~2047
-                    attr |= self.color_attrs[colorname.lower()]
+                    if newcolor_prec > attr_prec:
+                        attr &= ~2047
+                        attr |= self.color_attrs[colorname.lower()]
+                        attr_prec = newcolor_prec
                 elif colorname in self.attrs:
                     attr |= self.attrs[colorname.lower()]
-        return attr
+        return attr, attr_prec
 
 
 colors = ColorMaker()
@@ -1983,7 +2021,6 @@ def setupcolors(stdscr, f, *args):
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
 #    curses.mousemask(curses.ALL_MOUSE_EVENTS)  # enable mouse events
-    colors.setup()
 
     return f(stdscr, *args)
 
@@ -2105,8 +2142,18 @@ def run(sheetlist=[]):
 
 def curses_main(_scr, sheetlist=[]):
     """Populate VisiData object with sheets from a given list."""
+
+    for fnrc in ('$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
+        p = Path(fnrc)
+        if p.exists():
+            exec(open(p.resolve()).read())
+            break
+
+    colors.setup()
+
     for vs in sheetlist:
         vd().push(vs)  # first push does a reload
+
     return vd().run(_scr)
 
 g_globals = None
