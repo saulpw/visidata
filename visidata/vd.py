@@ -350,6 +350,9 @@ def chooseOne(choices):
     else:
         return input('/'.join(str(x) for x in choices) + ': ')
 
+def regex_flags():
+    return sum(getattr(re, f.upper()) for f in options.regex_flags)
+
 # A .. Z AA AB .. ZZ
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
@@ -429,8 +432,7 @@ class VisiData:
             return False
 
         if regex:
-            flags = sum(getattr(re, f.upper()) for f in options.regex_flags)
-            r = re.compile(regex, flags)
+            r = re.compile(regex, regex_flags())
             if r:
                 self.lastRegex = r
             else:
