@@ -80,14 +80,14 @@ theme('disp_none', '',  'visible contents of a cell whose value was None')
 
 theme('color_current_row', 'reverse')
 theme('color_default', 'normal')
-theme('color_selected_row', 'green')
-theme('color_format_exc', 'magenta')
-theme('color_getter_exc', 'red')
+theme('color_selected_row', '215 yellow')
+theme('color_format_exc', '48 bold yellow')
+theme('color_getter_exc', 'red bold')
 theme('color_current_col', 'bold')
 theme('color_current_hdr', 'reverse underline')
-theme('color_key_col', 'yellow 226')
+theme('color_key_col', '81 cyan')
 theme('color_default_hdr', 'bold underline')
-theme('color_column_sep', 'blue 25')
+theme('color_column_sep', '246 blue')
 theme('disp_status_sep', ' | ', 'string separating multiple statuses')
 theme('disp_unprintable', '.', 'a substitute character for unprintables')
 theme('disp_column_fill', ' ', 'pad chars after column value')
@@ -1184,10 +1184,16 @@ class Sheet:
 
                     self.clipdraw(y, x, options.disp_column_fill + cellval, attr, colwidth)
 
+                    annotation = ''
                     if isinstance(cellval, CalcErrorStr):
-                        self.clipdraw(y, x+colwidth-len(options.disp_getter_exc), options.disp_getter_exc, colors[options.color_getter_exc], len(options.disp_getter_exc))
+                        annotation = options.disp_getter_exc
+                        notecolor = colors[options.color_getter_exc]
                     elif isinstance(cellval, WrongTypeStr):
-                        self.clipdraw(y, x+colwidth-len(options.disp_format_exc), options.disp_format_exc, colors[options.color_format_exc], len(options.disp_format_exc))
+                        annotation = options.disp_format_exc
+                        notecolor = colors[options.color_format_exc]
+
+                    if annotation:
+                        self.clipdraw(y, x+colwidth-len(annotation), annotation, notecolor, len(annotation))
 
                     sepchars = options.disp_column_sep
                     if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
@@ -1360,7 +1366,7 @@ class Column:
             raise
         except Exception as e:
             exceptionCaught(status=False)
-            return CalcErrorStr(options.disp_getter_exc)
+            return CalcErrorStr(options.disp_error_val)
 
         if cellval is None:
             return options.disp_none
@@ -1796,7 +1802,7 @@ class ColorMaker:
     def setup(self):
         self.color_attrs['black'] = curses.color_pair(0)
 
-        for c in range(0, options.num_colors or curses.COLORS):
+        for c in range(0, int(options.num_colors) or curses.COLORS):
             curses.init_pair(c+1, c, curses.COLOR_BLACK)
             self.color_attrs[str(c)] = curses.color_pair(c+1)
 

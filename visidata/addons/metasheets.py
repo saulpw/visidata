@@ -109,7 +109,6 @@ class SheetColumns(Sheet):
         self.command('W', 'vd.replace(SheetPivot(source, selectedRows))', 'push a pivot table, keeping nonselected keys, making variables from selected columns, and creating a column for each variable-aggregate combination')
 
         self.colorizers.append(lambda self,c,r,v: (options.color_key_col, 8) if r in self.source.keyCols else None)
-        self.nKeys = 1
 
     def reload(self):
         self.rows = self.source.columns
