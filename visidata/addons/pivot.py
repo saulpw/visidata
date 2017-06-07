@@ -3,18 +3,21 @@ from visidata import *
 command('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'push a sheet pivoted on the current column')
 
 class SheetPivot(Sheet):
+    """Summarize key columns in pivot table and display as new sheet."""
     def __init__(self, srcsheet, variableCols):
-        super().__init__(srcsheet.name + '_pivot', srcsheet)
+        super().__init__(srcsheet.name+'_pivot', srcsheet)
 
         self.nonpivotKeyCols = []
         self.variableCols = variableCols
         for colnum, col in enumerate(srcsheet.keyCols):
             if col not in variableCols:
-                newcol = Column(col.name, getter=lambda r,colnum=colnum: r[0][colnum])
+                newcol = Column(col.name, getter=lambda r, colnum=colnum: r[0][colnum])
                 newcol.srccol = col
                 self.nonpivotKeyCols.append(newcol)
 
-        self.command(ENTER, 'vd.push(source.copy(cursorCol.aggvalue)).rows = cursorRow[1].get(cursorCol.aggvalue, [])', 'push sheet of source rows aggregated in this cell')
+        self.command(ENTER, '''vd.push(source.copy(cursorCol.aggvalue)).rows='''
+                                '''cursorRow[1].get(cursorCol.aggvalue, [])''',
+                            'push sheet of source rows aggregated in this cell')
 
     @async
     def reload(self):

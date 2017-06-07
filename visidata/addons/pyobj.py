@@ -12,6 +12,7 @@ def push_pyobj(name, pyobj, src=None):
         status('unknown type ' + type(pyobj))
 
 def load_pyobj(name, *args):
+    """Return Sheet object of appropriate type for given sources in `args`."""
     pyobj = args[0]
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
         return SheetList(name, *args)
@@ -23,24 +24,27 @@ def load_pyobj(name, *args):
         status('unknown type ' + type(pyobj))
 
 def open_pyobj(path):
+    """Provide wrapper for `load_pyobj`."""
     return load_pyobj(path.name, eval(path.read_text()), path)
 
 def getPublicAttrs(obj):
+    """Return all public attributes (not methods or `_`-prefixed) on object."""
     return [k for k in dir(obj) if not k.startswith('_') and not callable(getattr(obj, k))]
 
 def PyobjColumns(obj):
-    'columns for each public attribute on an object'
+    """Return columns for each public attribute on an object."""
     return [ColumnAttr(k, type(getattr(obj, k))) for k in getPublicAttrs(obj)]
 
 def AttrColumns(attrnames):
-    'attrnames is list of attribute names'
+    """Return column names for all elements of list `attrnames`."""
     return [ColumnAttr(name) for name in attrnames]
 
 
 class SheetList(Sheet):
-    def __init__(self, name, *args, **kwargs):
-        'columns is a list of strings naming attributes on the objects within the obj'
-        super().__init__(name, *args, **kwargs)
+    """A sheet from a list of homogenous dicts."""
+    def __init__(self, name, src, **kwargs):
+        # columns is a list of strings naming attributes on the objects within the obj
+        super().__init__(name, src, **kwargs)
         src = args[0]
         assert isinstance(src, list) or isinstance(src, tuple), type(src)
 
@@ -90,7 +94,7 @@ class SheetDict(Sheet):
             push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
 
 def ColumnSourceAttr(name, source):
-    'For using the row as attribute name on the given source Python object'
+    """Use row as attribute name on given object `source`."""
     return Column(name, type=anytype,
         getter=lambda r,b=source: getattr(b,r),
         setter=lambda r,v,b=source: setattr(b,r,v))
@@ -108,11 +112,13 @@ class SheetObject(Sheet):
 
 
 def open_json(p):
+    """Handle JSON file as a single object, via `json.load`."""
     import json
     return load_pyobj(p.name, json.load(p.open_text()))
 
 # one json object per line
 def open_jsonl(p):
+    """Handle JSON file as a list of objects, one per line, via `json.loads`."""
     import json
     return load_pyobj(p.name, list(json.loads(L) for L in p.read_text().splitlines()))
 

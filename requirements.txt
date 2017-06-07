@@ -1,2 +1,2 @@
-python3-dateutil
+python-dateutil
 openpyxl

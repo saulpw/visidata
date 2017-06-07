@@ -3,3 +3,7 @@ __pycache__
 .tox/
 .idea/
 visidata.egg-info/
+*v_env*
+*~
+*.swp
+*.swo

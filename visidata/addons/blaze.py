@@ -1,6 +1,7 @@
 from visidata import Sheet
 
 class SheetBlaze(Sheet):
+    """Open a dataset via Blaze, either stored in spreadsheets/ or from URL."""
     def __init__(self, name, data, src):
         super().__init__(name, src)
         self.columns = ArrayNamedColumns(data.fields)

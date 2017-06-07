@@ -9,6 +9,7 @@ def open_vd(p):
     return vs
 
 class EditLog(Sheet):
+    """Maintain log of commands for current session."""
     current_replay_row = None  # must be global, to allow replay
 
     def __init__(self, name, *args):
@@ -19,6 +20,7 @@ class EditLog(Sheet):
             ColumnItem('keystrokes', 1),
             ColumnItem('input', 2),
             ColumnItem('end_sheet', 3),
+            ColumnItem('comment', 4),
         ]
 
         self.command('a', 'sheet.replay_one(cursorRow); status("replayed one row")', 'replay this editlog')
@@ -28,6 +30,7 @@ class EditLog(Sheet):
         self.current_exec_row = None
 
     def undo(self):
+        """Delete last command, reload sources, and replay entire log."""
         if len(self.rows) < 2:
             error('no more to undo')
 
@@ -43,19 +46,24 @@ class EditLog(Sheet):
         status('undid "%s"' % deleted_row[1])
 
     def before_exec_hook(self, sheet, keystrokes, args=''):
+        """Declare initial sheet before any undos can occur.
+
+        This is done when source is initially opened."""
         assert sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.current_replay_row is None:
-            self.current_active_row = [ sheet.name, keystrokes, args, None ]
+            self.current_active_row = [ sheet.name, keystrokes, args, None,
+                    sheet.commands[keystrokes][1] ]
             self.rows.append(self.current_active_row)
 
     def after_exec_sheet(self, vs, escaped):
-        'declares the ending sheet for the most recent command'
+        """Declare ending sheet for the most recent command."""
         if self.current_active_row:
             if escaped:
                 del self.rows[-1]
             else:
                 self.current_active_row[3] = vs.name
-                before_name, _, _, after_name = self.current_active_row
+                before_name = self.current_active_row[0]
+                after_name = self.current_active_row[3]
 
                 # only record the sheet movement to/from the editlog
                 if self.name in [before_name, after_name]:
@@ -66,11 +74,12 @@ class EditLog(Sheet):
 
     def open_hook(self, vs, src):
         if vs:
-            self.rows.append([ None, 'o', src, vs.name ])
+            self.rows.append([ None, 'o', src, vs.name, 'open file' ])
             self.sheetmap[vs.name] = vs
 
     def replay_one(self, r):
-        before_sheet, keystrokes, args, after_sheet = r
+        """Replay the command in one given row."""
+        before_sheet, keystrokes, args, after_sheet = r[:4]
 
         EditLog.current_replay_row = r
         if before_sheet:
@@ -88,6 +97,7 @@ class EditLog(Sheet):
         EditLog.current_replay_row = None
 
     def replay(self):
+        """Replay all commands in log."""
         self.sheetmap = {}
 
         for r in self.rows:
@@ -96,13 +106,15 @@ class EditLog(Sheet):
         status('replayed entire %s' % self.name)
 
     def get_last_args(self):
+        """Get last command, if any."""
         if EditLog.current_replay_row is not None:
             return EditLog.current_replay_row[2]
         else:
             return None
 
     def set_last_args(self, args):
-        if vd().sheets[0] is not self:  # only set args if not on editlog (because editlog commands are not logged)
+        """Set args on any log but editlog (we don't log editlog commands)."""
+        if vd().sheets[0] is not self:
             self.rows[-1][2] = args
 
 vd().editlog = EditLog('__editlog__')
