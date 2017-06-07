@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'VisiData core functionality'
+"""VisiData core functionality"""
 
 __version__ = 'saul.pw/VisiData v0.59'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
@@ -247,7 +247,10 @@ anytype = lambda r='': str(r)
 anytype.__name__ = ''
 
 class date:
-    'simple wrapper around datetime so it can be created from dateutil str or numeric input as time_t'
+    """Simple wrapper around `datetime`.
+
+    This allows it to be created from dateutil str or numeric input as time_t"""
+
     def __init__(self, s=None):
         if s is None:
             self.dt = datetime.datetime.now()
@@ -261,7 +264,7 @@ class date:
             self.dt = s
 
     def to_string(self, fmtstr=None):
-        'use ISO8601 by default'
+        """Convert datetime object to string, in ISO 8601 format by default."""
         if not fmtstr:
             fmtstr = '%Y-%m-%d %H:%M:%S'
         return self.dt.strftime(fmtstr)
@@ -274,7 +277,7 @@ class date:
 
 
 def detectType(v):
-    'auto-detect types in this order of preference: int float date str'
+    """Auto-detect types in this order of preference: int, float, date, str."""
     def tryType(T, v):
         try:
             v = T(v)
@@ -299,23 +302,28 @@ windowWidth = 0
 windowHeight = 0
 
 def joinSheetnames(*sheetnames):
+    """Concatenate sheet names using separator (`options.sheetname_joiner`)."""
     return options.sheetname_joiner.join(str(x) for x in sheetnames)
 
 def error(s):
-    'scripty sugar function to just raise, needed for lambda and eval'
+    """Return custom exception as function, for use with `lambda` and `eval`."""
     raise Exception(s)
 
 def status(s):
-    'scripty sugar function for status'
+    """Return status property via function call."""
     return vd().status(s)
 
 def moveListItem(L, fromidx, toidx):
+    """Move element within list `L` and return element's new index."""
     r = L.pop(fromidx)
     L.insert(toidx, r)
     return toidx
 
 def enumPivot(L, pivotIdx):
-    'like enumerate() but starts after pivotIdx and wraps around to end at pivotIdx'
+    """Model Python `enumerate()` but starting midway through sequence `L`.
+
+    Begin at index following `pivotIdx`, traverse through end.
+    At sequence-end, begin at sequence-head, continuing through `pivotIdx`."""
     rng = range(pivotIdx+1, len(L))
     rng2 = range(0, pivotIdx+1)
     for i in itertools.chain(rng, rng2):
@@ -325,19 +333,24 @@ def enumPivot(L, pivotIdx):
 # VisiData singleton contains all sheets
 @functools.lru_cache()
 def vd():
+    """Instantiate and return singleton instance of VisiData class.
+    
+    Contains all sheets, and (as singleton) is unique instance.."""
     return VisiData()
 
 def exceptionCaught(status=True):
     return vd().exceptionCaught(status)
 
 def chooseOne(choices):
-    'choices can be list/tuple or dict'
+    """Return `input` statement choices formatted with `/` as separator.
+
+    Choices can be list/tuple or dict (if dict, its keys will be used)."""
     if isinstance(choices, dict):
         return choices[input('/'.join(choices.keys()) + ': ')]
     else:
         return input('/'.join(str(x) for x in choices) + ': ')
 
-# A .. Z AA AB ...
+# A .. Z AA AB .. ZZ
 defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
 
 class VisiData:
@@ -358,9 +371,11 @@ class VisiData:
 
     @property
     def unfinishedTasks(self):
+        """Return list of tasks for which `endTime` has not been reached."""
         return [task for task in self.tasks if not task.endTime]
 
     def checkForUnfinishedTasks(self):
+        """Prune old threads that were not started or terminated."""
         for task in self.unfinishedTasks:
             if not task.thread.is_alive():
                 task.endTime = time.process_time()
@@ -369,6 +384,7 @@ class VisiData:
                     self.tasks.remove(task)
 
     def status(self, s):
+        """Populate status bar and maintain `statusHistory` list."""
         strs = str(s)
         self._status.append(strs)
         self.statusHistory.insert(0, strs)
@@ -376,6 +392,7 @@ class VisiData:
         return s
 
     def editText(self, y, x, w, **kwargs):
+        """Return last command if it exists in EditLog or screen object."""
         v = self.editlog.get_last_args()
         if v is not None:
             return v
@@ -386,6 +403,7 @@ class VisiData:
         return v
 
     def getkeystroke(self):
+        """Get keystroke and display it on status bar."""
         k = None
         try:
             k = self.scr.get_wch()
@@ -400,9 +418,10 @@ class VisiData:
         return curses.keyname(k).decode('utf-8')
 
     def searchRegex(self, sheet, regex=None, columns=[], backward=False, moveCursor=False):
-        'sets row index if moveCursor; otherwise returns list of row indexes'
+        """Set row index if moveCursor, otherwise return list of row indexes."""
 
         def columnsMatch(sheet, row, columns, func):
+            """Return boolean: is cell value formatted for display?"""
             for c in columns:
                 m = func(c.getDisplayValue(row))
                 if m:
@@ -458,6 +477,7 @@ class VisiData:
         status('%s matches for /%s/' % (matchingRowIndexes, self.lastRegex.pattern))
 
     def exceptionCaught(self, status=True):
+        """Maintain list of most recent errors and return most recent one."""
         import traceback
         self.lastErrors.append(traceback.format_exc().strip())
         self.lastErrors = self.lastErrors[-10:]  # keep most recent
@@ -467,7 +487,9 @@ class VisiData:
             raise
 
     def drawLeftStatus(self, vs):
-        'draws sheet info on last line, including previous status messages, which are then cleared.'
+        """Compose and draw left side of status bar.
+
+        Include previous status messages, which are then cleared."""
         attr = colors[options.color_status]
         statusstr = options.disp_status_fmt % vs.name + options.disp_status_sep.join(self._status)
         try:
@@ -476,6 +498,7 @@ class VisiData:
             self.exceptionCaught()
 
     def drawRightStatus(self):
+        """Compose and draw right side of status bar."""
         try:
             sheet = self.sheets[0]
             if sheet.progressMade == sheet.progressTotal:
@@ -489,6 +512,7 @@ class VisiData:
             self.exceptionCaught()
 
     def run(self, scr):
+        """Manage execution of keystrokes and subsequent redrawing of screen."""
         global windowHeight, windowWidth, sheet
         windowHeight, windowWidth = scr.getmaxyx()
         scr.timeout(int(options.curses_timeout))
@@ -545,11 +569,12 @@ class VisiData:
             sheet.checkCursor()
 
     def replace(self, vs):
-        'replace top sheet with the given sheet vs'
+        """Replace top sheet with the given sheet `vs`."""
         self.sheets.pop(0)
         return self.push(vs)
 
     def push(self, vs):
+        """Move given sheet `vs` to index 0 of list `sheets`."""
         if vs:
             if vs in self.sheets:
                 self.sheets.remove(vs)
@@ -562,12 +587,14 @@ class VisiData:
             return vs
 # end VisiData class
 
+
 # define @async for potentially long-running functions
 #   when function is called, instead launches a thread
 #   adds a row to cmdhistory
 #   ENTER on that row pushes a profile of the thread
 
 class Task:
+    """Prepare function and its parameters for asynchronous processing."""
     def __init__(self, name):
         self.name = name
         self.startTime = time.process_time()
@@ -577,11 +604,13 @@ class Task:
         self.profileResults = None
 
     def start(self, func, *args, **kwargs):
+        """Start parallel thread."""
         self.thread = threading.Thread(target=func, daemon=True, args=args, kwargs=kwargs)
         self.thread.start()
 
     @property
     def elapsed_s(self):
+        """Return elapsed time."""
         return (self.endTime or time.process_time())-self.startTime
 
 def sync():
@@ -589,7 +618,9 @@ def sync():
         vd().checkForUnfinishedTasks()
 
 def async(func):
+    """Supply `execThread` for use decorating functions."""
     def execThread(*args, **kwargs):
+        """Manage execution of asynchronous thread, checking for redundancy."""
         if threading.current_thread().daemon:
             # Don't spawn a new thread from a subthread.
             return func(*args, **kwargs)
@@ -609,6 +640,7 @@ def async(func):
     return execThread
 
 def toplevel_try_func(task, func, *args, **kwargs):
+    """Modify status-bar content on user-abort/exceptions, for use by @async."""
     try:
         ret = func(*args, **kwargs)
         task.sheet.currentTask = None
@@ -623,6 +655,7 @@ def toplevel_try_func(task, func, *args, **kwargs):
         exceptionCaught()
 
 def thread_profileCode(task, func, *args, **kwargs):
+    """Wrap profiling functionality for use by @async."""
     pr = cProfile.Profile()
     pr.enable()
     ret = toplevel_try_func(task, func, *args, **kwargs)
@@ -634,17 +667,23 @@ def thread_profileCode(task, func, *args, **kwargs):
     return ret
 
 
-# from https://gist.github.com/liuw/2407154
 def ctype_async_raise(thread_obj, exception):
+    """Raise exception for threads running asynchronously."""
+
+
     def dict_find(D, value):
+        """Return first key in dict `D` corresponding to `value`."""
         for k, v in D.items():
             if v is value:
                 return k
 
         raise ValueError("no such value in dict")
 
-    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(dict_find(threading._active, thread_obj)),
-                                               ctypes.py_object(exception))
+    # Following `ctypes call follows https://gist.github.com/liuw/2407154.
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(
+            ctypes.c_long(dict_find(threading._active, thread_obj)),
+            ctypes.py_object(exception)
+            )
     status('sent exception to %s' % thread_obj.name)
 
 command('^C', 'if sheet.currentTask: ctype_async_raise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
@@ -652,6 +691,7 @@ command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task histor
 
 
 class LazyMap:
+    """Wrap Python `dict` basic functionality."""
     def __init__(self, keys, getter, setter):
         self._keys = keys
         self._getter = getter
@@ -670,6 +710,7 @@ class LazyMap:
         self._setter(k, v)
 
 class Sheet:
+    """Base object for add-on inheritance."""
     def __init__(self, name, *sources, columns=None):
         self.name = name
         self.sources = sources
@@ -707,6 +748,7 @@ class Sheet:
         self.colorizers = [ self.colorCursorCol, self.colorKeyCol, self.colorCursorRow, self.colorSelectedRow ]
 
     def genProgress(self, L, total=None):
+        """Create generator (for for-loops), with `progressTotal` property."""
         self.progressTotal = total or len(L)
         self.progressMade = 0
         for i in L:
@@ -740,37 +782,44 @@ class Sheet:
 
 
     def command(self, keystrokes, execstr, helpstr):
+        """Populate command, help-string and execution string for keystrokes."""
         self.commands[keystrokes] = (keystrokes, helpstr, execstr)
 
     def moveRegex(self, *args, **kwargs):
+        """Wrap `VisiData.searchRegex`, with cursor additionally moved."""
         list(self.searchRegex(*args, moveCursor=True, **kwargs))
 
     def searchRegex(self, *args, **kwargs):
+        """Wrap `VisiData.searchRegex`."""
         return self.vd.searchRegex(self, *args, **kwargs)
 
     def searchColumnNameRegex(self, colregex):
+        """Select visible column matching `colregex`, if found."""
         for i, c in enumPivot(self.visibleCols, self.cursorVisibleColIndex):
             if re.search(colregex, c.name, re.IGNORECASE):
                 self.cursorVisibleColIndex = i
                 return
 
-    def reload(self):  # default reloader looks for .loader attr
+    def reload(self):
+        """Default reloader, wrapping `loader` method."""
         if self.loader:
             self.loader()
         else:
             status('no reloader')
 
     def copy(self, suffix="'"):
+        """Wrap `deepcopy`, needed to avoid pass-by-reference pollution."""
         c = copy.copy(self)
         c.name += suffix
         c.topRowIndex = c.cursorRowIndex = 0
+        c.columns = copy.deepcopy(self.columns)
+        c._selectedRows = self._selectedRows.copy()
         c.colorizers = self.colorizers.copy()
-        c.columns = copy.deepcopy(self.columns)  # deepcopy so that layouts can be different
-        c._selectedRows = self._selectedRows.copy()  # so that selections on source don't affect the copy and vice versa
         return c
 
     @async
     def deleteSelected(self):
+        """Delete all selected rows."""
         oldrows = self.rows
         oldidx = self.cursorRowIndex
         ndeleted = 0
@@ -801,13 +850,17 @@ class Sheet:
         return self.name
 
     def exec_command(self, vdglobals, cmd):
+        """Wrap execution of `cmd`, adding globals and `locs` dictionary."""
         if vdglobals is None:
             vdglobals = g_globals
         # handy globals for use by commands
         keystrokes, _, execstr = cmd
         self.vd = vd()
         self.sheet = self
-        locs = LazyMap(dir(self), lambda k,s=self: getattr(s, k), lambda k,v,s=self: setattr(s, k, v))
+        locs = LazyMap(dir(self),
+                lambda k,s=self: getattr(s, k),
+                lambda k,v,s=self: setattr(s, k, v)
+                )
         try:
             exec(execstr, vdglobals, locs)
         except EscapeException as e:  # user aborted
@@ -819,18 +872,22 @@ class Sheet:
         return False
 
     def clipdraw(self, y, x, s, attr, w):
+        """Wrap `draw_clip`."""
         return draw_clip(self.scr, y, x, s, attr, w)
 
     @property
     def name(self):
+        """Wrap return of `_name`."""
         return self._name
 
     @name.setter
     def name(self, name):
+        """Wrap setting of `_name`."""
         self._name = name.replace(' ', '_')
 
     @property
     def source(self):
+        """Return first source, if any."""
         if not self.sources:
             return None
         else:
@@ -839,77 +896,95 @@ class Sheet:
 
     @property
     def progressPct(self):
+        """Return percentage of rows completed."""
         if self.progressTotal != 0:
             return int(self.progressMade*100/self.progressTotal)
 
     @property
     def nVisibleRows(self):
+        """Return number of visible rows, calculable from window height."""
         return windowHeight-2
 
     @property
     def cursorCol(self):
+        """Return column number of current column."""
         return self.visibleCols[self.cursorVisibleColIndex]
 
     @property
     def cursorRow(self):
+        """Return row number of current row."""
         return self.rows[self.cursorRowIndex]
 
     @property
     def visibleRows(self):  # onscreen rows
+        """Return the rows currently visible."""
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
     def visibleCols(self):  # non-hidden cols
+        """Return the columns currently visible."""
         return [c for c in self.columns if not c.hidden]
 
     @property
     def visibleColNames(self):
+        """Return space-separated string of visible column-names."""
         return ' '.join(c.name for c in self.visibleCols)
 
     @property
     def cursorColIndex(self):
+        """Return index of current column."""
         return self.columns.index(self.cursorCol)
 
     @property
     def keyCols(self):
+        """Return list of key columns."""
         return self.columns[:self.nKeys]
 
     @property
     def nonKeyVisibleCols(self):
+        """Return list of non-key columns that are visible."""
         return [c for c in self.columns[self.nKeys:] if not c.hidden]
 
     @property
     def keyColNames(self):
+        """Return custom-separator string of visible column names."""
         return options.disp_key_sep.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
+        """Return cell contents for current row and column."""
         return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
 
     @property
     def statusLine(self):
+        """Return status-line element showing row and column stats."""
         rowinfo = 'row %d/%d (%d selected)' % (self.cursorRowIndex, self.nRows, len(self._selectedRows))
         colinfo = 'col %d/%d (%d visible)' % (self.cursorColIndex, self.nCols, len(self.visibleCols))
         return '%s  %s' % (rowinfo, colinfo)
 
     @property
     def nRows(self):
+        """Return number of rows."""
         return len(self.rows)
 
     @property
     def nCols(self):
+        """Return number of columns."""
         return len(self.columns)
 
     @property
     def nVisibleCols(self):
+        """Return number of visible columns."""
         return len(self.visibleCols)
 
 ## selection code
     def isSelected(self, r):
+        """Return boolean: is current row selected?"""
         return id(r) in self._selectedRows
 
     @async
     def toggle(self, rows):
+        """Select any unselected rows."""
         self.progressMade = 0
         self.progressTotal = len(self.rows)
         for r in rows:
@@ -919,9 +994,11 @@ class Sheet:
         self.progressTotal = self.progressMade
 
     def selectRow(self, row):
+        """Select given row."""
         self._selectedRows[id(row)] = row
 
     def unselectRow(self, row):
+        """Unselect given row, return True if selected; else return False."""
         if id(row) in self._selectedRows:
             del self._selectedRows[id(row)]
             return True
@@ -930,6 +1007,7 @@ class Sheet:
 
     @async
     def select(self, rows, status=True, progress=True):
+        """Select given rows with option for progress-tracking."""
         before = len(self._selectedRows)
         for r in (self.genProgress(rows) if progress else rows):
             self.selectRow(r)
@@ -938,6 +1016,7 @@ class Sheet:
 
     @async
     def unselect(self, rows, status=True, progress=True):
+        """Unselect given rows with option for progress-tracking."""
         before = len(self._selectedRows)
         for r in (self.genProgress(rows) if progress else rows):
             self.unselectRow(r)
@@ -945,41 +1024,55 @@ class Sheet:
             vd().status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
 
     def selectByIdx(self, rowIdxs):
+        """Select given rows by index numbers."""
         self.select((self.rows[i] for i in rowIdxs), progress=False)
 
     def unselectByIdx(self, rowIdxs):
+        """Unselect given rows by index numbers."""
         self.unselect((self.rows[i] for i in rowIdxs), progress=False)
 
     def gatherBy(self, func):
+        """Yield each row matching the cursor value """
         for r in self.genProgress(self.rows):
             if func(r):
                 yield r
 
     @property
     def selectedRows(self):
-        'returns a list of selected rows in sheet order'
+        """Return a list of selected rows in sheet order."""
         return [r for r in self.rows if id(r) in self._selectedRows]
 
 ## end selection code
 
     def moveVisibleCol(self, fromVisColIdx, toVisColIdx):
+        """Move column to another position in sheet."""
         fromColIdx = self.columns.index(self.visibleCols[fromVisColIdx])
         toColIdx = self.columns.index(self.visibleCols[toVisColIdx])
         moveListItem(self.columns, fromColIdx, toColIdx)
         return toVisColIdx
 
     def cursorDown(self, n):
+        """Increment cursor's row by `n`."""
         self.cursorRowIndex += n
 
     def cursorRight(self, n):
+        """Increment cursor's column by `n`."""
         self.cursorVisibleColIndex += n
         self.calcColLayout()
 
     def pageLeft(self):
-        # keep the column cursor in the same general relative position:
-        #  - if it is on the furthest right column, then it should stay on the furthest right column if possible
-        #  - likewise on the left or in the middle
-        #  - so really both the leftIndex and the cursorIndex should move in tandem until things are correct
+        """Redraw page one screen to the left.
+
+        Note: keep the column cursor in the same general relative position:
+
+         - if it is on the furthest right column, then it should stay on the
+           furthest right column if possible
+
+         - likewise on the left or in the middle
+
+        So really both the `leftIndex` and the `cursorIndex` should move in
+        tandem until things are correct.
+        """
 
         targetIdx = self.leftVisibleColIndex  # for rightmost column
         firstNonKeyVisibleColIndex = self.visibleCols.index(self.nonKeyVisibleCols[0])
@@ -1004,18 +1097,21 @@ class Sheet:
                     self.calcColLayout()  # recompute rightVisibleColIndex
 
     def cellValue(self, rownum, col):
+        """Return cell value for given row number and Column object."""
         if not isinstance(col, Column):
             # assume it's the column number
             col = self.columns[col]
         return col.getValue(self.rows[rownum])
 
     def addColumn(self, col, index=None):
+        """Insert column before current column or at given index."""
         if index is None:
             index = len(self.columns)
         if col:
             self.columns.insert(index, col)
 
     def toggleKeyColumn(self, colidx):
+        """Toggle column at given index as key column."""
         if colidx >= self.nKeys: # if not a key, add it
             moveListItem(self.columns, colidx, self.nKeys)
             self.nKeys += 1
@@ -1026,6 +1122,7 @@ class Sheet:
             return 0
 
     def skipDown(self):
+        """Select next different value in column; report if none different."""
         pv = self.cursorValue
         for i in range(self.cursorRowIndex+1, self.nRows):
             if self.cellValue(i, self.cursorColIndex) != pv:
@@ -1035,6 +1132,7 @@ class Sheet:
         status('no different value down this column')
 
     def skipUp(self):
+        """Select last different value in column; report if none different."""
         pv = self.cursorValue
         for i in range(self.cursorRowIndex, -1, -1):
             if self.cellValue(i, self.cursorColIndex) != pv:
@@ -1043,8 +1141,8 @@ class Sheet:
 
         status('no different value up this column')
 
-    # keep cursor in bounds of data and screen
     def checkCursor(self):
+        """Keep cursor in bounds of data and screen."""
         # keep cursor within actual available rowset
         if self.nRows == 0 or self.cursorRowIndex <= 0:
             self.cursorRowIndex = 0
@@ -1091,6 +1189,7 @@ class Sheet:
                 self.leftVisibleColIndex += 1
 
     def calcColLayout(self):
+        """Set right-most visible column, based on calculation."""
         self.visibleColLayout = {}
         x = 0
         for vcolidx in range(0, self.nVisibleCols):
@@ -1107,6 +1206,7 @@ class Sheet:
         self.rightVisibleColIndex = vcolidx
 
     def colorize(self, col, row, value=None):
+        """Returns curses attribute for the given col/row/value"""
         rowattr = 0
         rowattrpre = 0
 
@@ -1119,6 +1219,7 @@ class Sheet:
         return rowattr
 
     def drawColHeader(self, vcolidx):
+        """Compose and draw column header for given vcolidx."""
         col = self.visibleCols[vcolidx]
 
         # hdrattr highlights whole column header
@@ -1148,9 +1249,11 @@ class Sheet:
             self.scr.addstr(0, x+colwidth, C, rowattr)
 
     def isVisibleIdxKey(self, vcolidx):
+        """Return boolean: is given column index a key column?"""
         return self.visibleCols[vcolidx] in self.keyCols
 
     def draw(self, scr):
+        """Draw entire screen onto the `scr` curses object."""
         global windowHeight, windowWidth
         numHeaderRows = 1
         self.scr = scr  # for clipdraw convenience
@@ -1208,6 +1311,9 @@ class Sheet:
             self.scr.addstr(0, windowWidth-1, options.disp_more_right, colors[options.color_column_sep])
 
     def editCell(self, vcolidx=None, rowidx=None):
+        """Call `editText` on given cell after setting other parameters.
+
+        Return row after editing cell."""
         if options.readonly:
             status('readonly mode')
             return
@@ -1230,34 +1336,40 @@ class Sheet:
         return r
 
 class WrongTypeStr(str):
-    'str wrapper with original str-ified contents to indicate that the type conversion failed'
+    """Wrap `str` to indicate that type-conversion failed."""
     pass
 
 class CalcErrorStr(str):
-    'str wrapper (possibly with error message) to indicate that getValue failed'
+    """Wrap `str` (perhaps with error message), indicating `getValue` failed."""
     pass
 
 
 def distinct(values):
+    """Count unique elements in `values`."""
     return len(set(values))
 
 def avg(values):
+    """Calculate average or return None."""
     return float(sum(values))/len(values) if values else None
+
 mean=avg
 
 def count(values):
+    """Count total number of elements or return None if 0."""
     return len([x for x in values if x is not None])
 
 _sum = sum
+
 def sum(values):
+    """Wrap `_sum`, which is itself Python's built-in `sum`."""
     return _sum(values)
+
 avg.type = float
 count.type = int
 distinct.type = int
 sum.type = None
 #min.type = None
 #max.type = None
-
 aggregators = { '': None,
                 'distinct': distinct,
                 'sum': sum,
@@ -1270,6 +1382,11 @@ aggregators = { '': None,
 
 
 class Column:
+    """Model spreadsheet-style "column".
+    
+    If `expr` is set, cell values will be computed by this object.
+    """
+
     def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None):
         self.name = name      # use property setter from the get-go to strip spaces
         self.type = type      # anytype/str/int/float/date/func
@@ -1281,22 +1398,27 @@ class Column:
         self.fmtstr = fmtstr
 
     def copy(self):
+        """Wrap `copy.copy`."""
         return copy.copy(self)
 
     @property
     def name(self):
+        """Return `_name`."""
         return self._name
 
     @name.setter
     def name(self, name):
+        """Set `_name`."""
         self._name = str(name).replace(' ', '_')
 
     @property
     def type(self):
+        """Return `_type`."""
         return self._type
 
     @type.setter
     def type(self, t):
+        """Set `_type`."""
         if isinstance(t, str):
             t = globals()[t]
 
@@ -1308,10 +1430,12 @@ class Column:
 
     @property
     def aggregator(self):
+        """Return `_aggregator`."""
         return self._aggregator
 
     @aggregator.setter
     def aggregator(self, aggfunc):
+        """Set `_aggregator` to given `aggfunc` if it is callable."""
         if isinstance(aggfunc, str):
             if aggfunc:
                 aggfunc = globals()[aggfunc]
@@ -1323,6 +1447,8 @@ class Column:
             self._aggregator = None
 
     def format(self, cellval):
+        """Format the type-name of given `cellval`."""
+
         val = self.type(cellval)
         if self.type is date:         return val.to_string(self.fmtstr)
         elif self.fmtstr is not None: return self.fmtstr % val
@@ -1332,17 +1458,24 @@ class Column:
 
     @property
     def hidden(self):
+        """Set column width to zero, to "hide" it."""
         return self.width == 0
 
     def nEmpty(self, rows):
+        """Count rows that are empty or contain None."""
         vals = self.values(rows)
         return sum(1 for v in vals if v == '' or v == None)
 
     def values(self, rows):
+        """Return list of values of all rows."""
         return [self.getValue(r) for r in rows]
 
     def getValue(self, row):
-        'returns a properly-typed value, or a default value if the conversion fails, or reraises the exception if the getter fails'
+        """Return a properly-typed value, and also handle failures.
+        
+        Return a default value if the conversion fails; re-raise the
+        exception if the getter fails.
+        """
         try:
             v = self.getter(row)
         except EscapeException:
@@ -1360,6 +1493,7 @@ class Column:
             return self.type()  # return a suitable value for this type
 
     def getDisplayValue(self, row, width=None):
+        """Format cell value for display and return."""
         try:
             cellval = self.getter(row)
         except EscapeException:
@@ -1386,18 +1520,21 @@ class Column:
         return cellval
 
     def setValues(self, rows, value):
+        """Set given rows to `value`."""
         if not self.setter:
             error('column cannot be changed')
         for r in rows:
             self.setter(r, value)
 
     def getMaxWidth(self, rows):
+        """Return the maximum length of any cell in column or its header."""
         w = 0
         if len(rows) > 0:
             w = max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name))+2
         return max(w, len(self.name))
 
     def toggleWidth(self, width):
+        """Change column width to either given `width` or default value."""
         if self.width != width:
             self.width = width
         else:
@@ -1407,13 +1544,13 @@ class Column:
 # ---- Column makers
 
 def ColumnAttr(attrname, type=anytype):
-    'a getattr/setattr column on the row Python object'
+    """Return Column object with `attrname` from current row Python object."""
     return Column(attrname, type=type,
             getter=lambda r,b=attrname: getattr(r,b),
             setter=lambda r,v,b=attrname: setattr(r,b,v))
 
 def ColumnItem(attrname, itemkey, **kwargs):
-    'a getitem/setitem column on the row Python object'
+    """Return Column object (with getitem/setitem) on the row Python object."""
     def setitem(r, i, v):  # function needed for use in lambda
         r[i] = v
 
@@ -1423,17 +1560,25 @@ def ColumnItem(attrname, itemkey, **kwargs):
             **kwargs)
 
 def ArrayNamedColumns(columns):
-    'columns is a list of column names, mapping to r[0]..r[n]'
+    """Return list of Column objects from named columns.
+
+    Note: argument `columns` is a list of column names, Mapping to r[0]..r[n].
+    """
     return [ColumnItem(colname, i) for i, colname in enumerate(columns)]
 
 def ArrayColumns(ncols):
-    'columns is a list of column names, mapping to r[0]..r[n]'
+    """Return list of Column objects.
+
+    Note: argument `ncols` is a count of columns,
+    """
     return [ColumnItem('', i, width=8) for i in range(ncols)]
 
 def DictKeyColumns(d):
+    """Return a list of Column objects from dictionary keys."""
     return [ColumnItem(k, k, type=detectType(d[k])) for k in d]
 
 def SubrowColumn(origcol, subrowidx, **kwargs):
+    """Return Column object from sub-row."""
     return Column(origcol.name, origcol.type,
             getter=lambda r,i=subrowidx,f=origcol.getter: r[i] and f(r[i]) or None,
             setter=lambda r,v,i=subrowidx,f=origcol.setter: r[i] and f(r[i], v) or None,
@@ -1441,11 +1586,13 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
             **kwargs)
 
 def combineColumns(cols):
+    """Return Column object formed by joining fields in given columns."""
     return Column("+".join(c.name for c in cols),
                   getter=lambda r,cols=cols,ch=options.field_joiner: ch.join(filter(None, (c.getValue(r) for c in cols))))
 ###
 
 def input(prompt, type='', **kwargs):
+    """Compose input prompt."""
     if type:
         ret = _inputLine(prompt, history=list(vd().lastInputs[type].keys()), **kwargs)
         vd().lastInputs[type][ret] = ret
@@ -1454,8 +1601,9 @@ def input(prompt, type='', **kwargs):
     return ret
 
 def _inputLine(prompt, **kwargs):
+    """Add prompt to bottom of screen and get line of input from user."""
     global windowHeight, windowWidth
-    'add a prompt to the bottom of the screen and get a line of input from the user'
+
     scr = vd().scr
     if scr:
         windowHeight, windowWidth = scr.getmaxyx()
@@ -1466,6 +1614,7 @@ def _inputLine(prompt, **kwargs):
     return ret
 
 def saveSheet(vs, fn):
+    """Save sheet `vs` with given filename `fn`."""
     assert vs.progressTotal == vs.progressMade, 'have to finish loading first'
     if Path(fn).exists():
         if options.confirm_overwrite:
@@ -1481,9 +1630,11 @@ def saveSheet(vs, fn):
     status('saving to ' + fn)
 
 
-# returns the clipped string and width in terminal display characters, which may be different from len(s) due to width of east asian chars
 import unicodedata
 def clipstr(s, dispw):
+    """Return clipped string and width in terminal display characters.
+
+    Note: width may differ from len(s) if East Asian chars are "fullwidth"."""
     w = 0
     ret = ''
     for c in s:
@@ -1509,7 +1660,7 @@ def clipstr(s, dispw):
 
 
 def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
-    'Draw string s at (y,x)-(y,x+w), clipping with ellipsis char'
+    """Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char."""
 
     _, windowWidth = scr.getmaxyx()
     dispw = 0
@@ -1533,7 +1684,10 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
 
 ## Built-in sheets
 class HelpSheet(Sheet):
+    """Help sheet, showing keystrokes etc. from given source(s)."""
+
     def reload(self):
+        """Populate sheet via `reload` function."""
         self.rows = []
         for i, src in enumerate(self.sources):
             self.rows.extend((i, v) for v in src.values())
@@ -1547,8 +1701,10 @@ class HelpSheet(Sheet):
 
 ## text viewer and dir browser
 class TextSheet(Sheet):
-    'views a string (one line per row) or a list of strings'
+    """Sheet displaying a string (one line per row) or a list of strings."""
+
     def reload(self):
+        """Populate sheet via `reload` function."""
         self.columns = [Column(self.name, str)]
         if isinstance(self.source, list):
             self.rows = []
@@ -1564,14 +1720,16 @@ class TextSheet(Sheet):
         else:
             error('unknown text type ' + str(type(self.source)))
 
-    # does text wrapping
     def add_line(self, text):
+        """Handle text re-wrapping."""
         self.rows.extend(textwrap.wrap(text, width=windowWidth-2))
 
 
 class DirSheet(Sheet):
-    'browses a directory, ENTER dives into the file'
+    """Sheet displaying directory, using ENTER to open a particular file."""
+
     def reload(self):
+        """Populate sheet via `reload` function."""
         self.rows = [(p, p.stat()) for p in self.source.iterdir()]  #  if not p.name.startswith('.')]
         self.command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
         self.columns = [Column('filename', str, lambda r: r[0].name + r[0].ext),
@@ -1581,7 +1739,7 @@ class DirSheet(Sheet):
 
 #### options management
 class OptionsObject:
-    'simple class to get the option value from base_options'
+    """Get particular option value from `base_options`."""
     def __init__(self, d):
         self._opts = d
     def __getattr__(self, k):
@@ -1595,7 +1753,10 @@ class OptionsObject:
 options = OptionsObject(base_options)
 
 class OptionsSheet(Sheet):
+    """Sheet displaying user options."""
+
     def reload(self):
+        """Populate sheet via `reload` function."""
         self.rows = list(self.source.values())
         self.columns = ArrayNamedColumns('option value default description'.split())
         self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
@@ -1610,7 +1771,10 @@ class OptionsSheet(Sheet):
 
 # each row is a Task object
 class TasksSheet(Sheet):
+    """Sheet displaying "Task" objects: asynchronous threads."""
+
     def reload(self):
+        """Populate sheet via `reload` function."""
         self.command('^C', 'ctype_async_raise(cursorRow.thread, EscapeException)', 'cancel this action')
         self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
         self.columns = [
@@ -1620,27 +1784,33 @@ class TasksSheet(Sheet):
         ]
         self.rows = vd().tasks
 
+
 def ProfileSheet(task):
+    """Populate sheet showing profiling results."""
     return TextSheet(task.name + '_profile', task.profileResults)
 
 #### enable external addons
 def open_vd(p):
+    """Return a VisiData object with a sheet populated from a path `p`."""
     vs = open_tsv(p)
     vs.reload()
     return vd
 
 def open_py(p):
+    """Read and execute Python script at path `p`."""
     contents = p.read_text()
     exec(contents, g_globals)
     status('executed %s' % p)
 
 def open_txt(p):
+    """Create sheet from `.txt` file at path `p`, checking whether it is TSV."""
     fp = p.open_text()
     if '\t' in next(fp):
         return open_tsv(p)  # TSV often have .txt extension
     return TextSheet(p.name, fp)  # leaks file handle
 
 def get_tsv_headers(fp, nlines):
+    """Return list of lists for use as headers, from paragraphs `fp`."""
     headers = []
     i = 0
     while i < nlines:
@@ -1653,7 +1823,8 @@ def get_tsv_headers(fp, nlines):
     return headers
 
 def open_tsv(p, vs=None):
-    'parses contents and populates columns'
+    """Parse contents of path `p` and populate columns."""
+
     if vs is None:
         vs = Sheet(p.name, p)
         vs.loader = lambda vs=vs: reload_tsv(vs)
@@ -1674,9 +1845,11 @@ def open_tsv(p, vs=None):
 
 @async
 def reload_tsv(vs):
+    """Wrap `reload_tsv_sync`."""
     reload_tsv_sync(vs)
 
 def reload_tsv_sync(vs):
+    """Perform synchronous loading of TSV file, discarding header lines."""
     header_lines = int(options.headerlines)
 
     vs.rows = []
@@ -1699,6 +1872,7 @@ def reload_tsv_sync(vs):
 
 @async
 def save_tsv(vs, fn):
+    """Write sheet to file `fn` as TSV, reporting progress on status bar."""
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
         colhdr = '\t'.join(col.name for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
@@ -1707,26 +1881,33 @@ def save_tsv(vs, fn):
             fp.write('\t'.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
     status('%s save finished' % fn)
 
-### curses helpers
+### Curses helpers
 
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[], display=True):
+      """A better curses line editing widget.""""
+    
     def until(func):
+        """Delay until function `func` returns non-zero."""
         ret = None
         while not ret:
             ret = func()
 
         return ret
 
-    def splice(v, i, s):  # splices s into the string v at i (v[i] = s[0])
+    def splice(v, i, s):
+        """Splice (insert) `s` into string `v` at `i`: (v[i] = s[0])."""
         return v if i < 0 else v[:i] + s + v[i:]
 
     def clean(s):
+        """Escape Curses-unprintable characters."""
         return ''.join(c if c.isprintable() else ('<%04X>' % ord(c)) for c in str(s))
 
     def delchar(s, i, remove=1):
+        """Delete `remove` characters from str `s` beginning at position `i`."""
         return s[:i] + s[i+remove:]
 
     def complete(v, comps, cidx):
+        """Complete keystroke `v` based on list `comps` of completions."""
         if comps:
             for i in range(cidx, cidx + len(comps)):
                 i %= len(comps)
@@ -1844,50 +2025,63 @@ def setupcolors(stdscr, f, *args):
     return f(stdscr, *args)
 
 def wrapper(f, *args):
+    """Wrap `curses.wrapper`."""
     return curses.wrapper(setupcolors, f, *args)
 
 ### external interface
 
 class Path:
-    '''Modeled after pathlib.Path.'''
+    """File and path-handling class, modeled on `pathlib.Path`."""
+
     def __init__(self, fqpn):
+        """Initialize with file-queue path-name."""
         self.fqpn = fqpn
         fn = os.path.split(fqpn)[-1]
         self.name, self.ext = os.path.splitext(fn)
         self.suffix = self.ext[1:]
 
     def open_text(self, mode='r'):
+        """Open file."""
         return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
     def read_text(self):
+        """Open and read file."""
         with self.open_text() as fp:
             return fp.read()
 
     def read_bytes(self):
+        """Open and read file of bytes."""
         with open(self.resolve(), 'rb') as fp:
             return fp.read()
 
     def is_dir(self):
+        """Return boolean: is path directory?"""
         return os.path.isdir(self.resolve())
 
     def exists(self):
+        """Return boolean: does path exist?"""
         return os.path.exists(self.resolve())
 
     def iterdir(self):
+        """Return list of directory contents."""
         return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
 
     def stat(self):
+        """Wrap `os.stat`."""
         return os.stat(self.resolve())
 
     def resolve(self):
+        """Wrap `os.path.expanduser`."""
         return os.path.expandvars(os.path.expanduser(self.fqpn))
 
     @property
     def parent(self):
+        """Return symbolic parent directory."""
         return Path(self.fqpn + "/..")
 
     @property
     def filesize(self):
+        """Return file size."""
         return self.stat().st_size
 
     def __str__(self):
@@ -1937,7 +2131,7 @@ def openSource(p, filetype=None):
     return vs
 
 def run(sheetlist=[]):
-    'main entry point to invoke curses mode'
+    """Invoke Curses mode. (This is the main entry point.)"""
 
     # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     os.putenv('ESCDELAY', '25')
@@ -1947,6 +2141,8 @@ def run(sheetlist=[]):
         print(ret)
 
 def curses_main(_scr, sheetlist=[]):
+    """Populate VisiData object with sheets from a given list."""
+
     for fnrc in ('$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
         p = Path(fnrc)
         if p.exists():
@@ -1962,10 +2158,12 @@ def curses_main(_scr, sheetlist=[]):
 
 g_globals = None
 def set_globals(g):
+    """Assign given `g` to (expected) global dict `g_globals`."""
     global g_globals
     g_globals = g
 
 def set_global(k, v):
+    """Manually set global key-value pair in `g_globals`."""
     g_globals[k] = v
 
 if __name__ == '__main__':
