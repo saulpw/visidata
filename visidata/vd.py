@@ -1954,7 +1954,7 @@ def curses_main(_scr, sheetlist=[]):
 
     return vd().run(_scr)
 
-g_globals = None
+g_globals = dict() # Show that we intend this to be a dict.
 def set_globals(g):
     global g_globals
     g_globals = g
