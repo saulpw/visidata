@@ -1,0 +1,176 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VisiData v0.59 &#8212; VisiData 0.59 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.59',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User Guide" href="user-guide.html" />
+    <link rel="prev" title="Welcome to VisiData’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="visidata-v0-59">
+<h1>VisiData v0.59<a class="headerlink" href="#visidata-v0-59" title="Permalink to this headline">¶</a></h1>
+<p>A curses interface for exploring and arranging tabular data</p>
+<p>Usable via any remote shell which has Python3 installed.</p>
+<div class="figure" id="id1">
+<img alt="VisiData Screenshot" src="_images/screenshot.gif" />
+<p class="caption"><span class="caption-text">VisiData silent demo</span></p>
+</div>
+<div class="section" id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="install-visidata">
+<h3>Install VisiData<a class="headerlink" href="#install-visidata" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="from-pypi-stable-branch">
+<h4>from pypi (<code class="docutils literal"><span class="pre">stable</span></code> branch)<a class="headerlink" href="#from-pypi-stable-branch" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ pip3 install visidata
+</pre></div>
+</div>
+</div>
+<div class="section" id="or-clone-from-git">
+<h4>or clone from git<a class="headerlink" href="#or-clone-from-git" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ git clone http://github.com/saulpw/visidata.git
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h4>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>Python 3.3</li>
+<li>python3-dateutil (if converting string column to datetime)</li>
+<li>openpyxl (if opening .xlsx files)</li>
+<li>h5py and numpy (if opening .hdf5 files)</li>
+<li>google-api-python-client (if opening Google Sheets; must <a class="reference external" href="https://developers.google.com/sheets/quickstart/python">also set up
+OAuth
+credentials</a></li>
+</ul>
+<p><strong>Remember to install the Python3 versions of these packages with e.g.
+“pip3“</strong></p>
+</div>
+</div>
+<div class="section" id="run-visidata">
+<h3>Run VisiData<a class="headerlink" href="#run-visidata" title="Permalink to this headline">¶</a></h3>
+<p>If installed via pip3, <code class="docutils literal"><span class="pre">vd</span></code> should launch without issue.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ vd [&lt;options&gt;] [&lt;inputs&gt; ...]
+</pre></div>
+</div>
+<p>If no inputs are given, <code class="docutils literal"><span class="pre">vd</span></code> opens the current directory. Unknown
+filetypes are by default viewed with a text browser.</p>
+<p>If installed via <code class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span></code>, first set up some environment variables
+(on terminal):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ export PYTHONPATH=&lt;visidata_dir&gt;:$PYTHONPATH
+$ export PATH=&lt;visidata_dir&gt;/bin:$PATH
+</pre></div>
+</div>
+</div>
+<div class="section" id="license">
+<h3>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h3>
+<p>VisiData is licensed under GPLv3.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">VisiData v0.59</a><ul>
+<li><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li><a class="reference internal" href="#install-visidata">Install VisiData</a><ul>
+<li><a class="reference internal" href="#from-pypi-stable-branch">from pypi (<code class="docutils literal"><span class="pre">stable</span></code> branch)</a></li>
+<li><a class="reference internal" href="#or-clone-from-git">or clone from git</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#run-visidata">Run VisiData</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to VisiData’s documentation!</a></li>
+      <li>Next: <a href="user-guide.html" title="next chapter">User Guide</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/home.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Saul Pwanson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/home.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

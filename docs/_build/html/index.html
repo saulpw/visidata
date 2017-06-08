@@ -1,0 +1,203 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to VisiData’s documentation! &#8212; VisiData 0.59 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.59',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="VisiData v0.59" href="home.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-visidata-s-documentation">
+<h1>Welcome to VisiData’s documentation!<a class="headerlink" href="#welcome-to-visidata-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="home.html">VisiData v0.59</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="home.html#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="home.html#install-visidata">Install VisiData</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="home.html#from-pypi-stable-branch">from pypi (<code class="docutils literal"><span class="pre">stable</span></code> branch)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="home.html#or-clone-from-git">or clone from git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="home.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="home.html#run-visidata">Run VisiData</a></li>
+<li class="toctree-l3"><a class="reference internal" href="home.html#license">License</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#basic-movement-and-essential-commands">Basic Movement and Essential Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#advanced-movement">Advanced movement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user-guide.html#scrolling">Scrolling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#arranging-columns">Arranging Columns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user-guide.html#column-types">Column Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide.html#creating-new-columns">Creating new columns</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#searching-selecting-deleting-rows">Searching/Selecting/Deleting rows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#modifying-data">Modifying data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#special-sheets">Special Sheets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user-guide.html#metasheets">Metasheets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#glossary">Glossary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev-guide.html">Overview of VisiData architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev-guide.html#extending-visidata">Extending VisiData</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev-guide.html#add-a-new-command">Add a new command</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dev-guide.html#what-can-be-done-with-commands">What can be done with commands</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dev-guide.html#creating-a-new-sheet">Creating a new sheet</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dev-guide.html#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dev-guide.html#sheet-initialization">Sheet initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev-guide.html#custom-options">Custom options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev-guide.html#defining-a-sheet-specific-command">Defining a sheet-specific command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev-guide.html#column-definition">Column definition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dev-guide.html#using-the-base-column-class">Using the base Column class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dev-guide.html#helpful-column-creators">Helpful column creators</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev-guide.html#adding-a-new-data-source">Adding a new data source</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev-guide.html#id1">Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dev-guide.html#reload"><code class="docutils literal"><span class="pre">reload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="dev-guide.html#async"><code class="docutils literal"><span class="pre">&#64;async</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="screen-layout.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev-cursors.html">Screen layout</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev-cursors.html#terminal-window-size">Terminal Window Size</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev-cursors.html#rows">Rows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dev-cursors.html#column-layout">Column layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dev-cursors.html#column-visibility">Column Visibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev-cursors.html#absolute-and-visible-column-indexes">Absolute and Visible Column Indexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev-cursors.html#key-columns">Key Columns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dev-cursors.html#cells-values-types-and-formatting">Cells, Values, Types, and Formatting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="about/contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="about/contributing.html#branch-structure">Branch structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="about/credits.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about/credits.html#inspirations-and-related-work">Inspirations and Related Work</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to VisiData’s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="home.html" title="next chapter">VisiData v0.59</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Saul Pwanson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

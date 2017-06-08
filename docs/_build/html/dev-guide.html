@@ -1,0 +1,419 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview of VisiData architecture &#8212; VisiData 0.59 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.59',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="For developers" href="screen-layout.html" />
+    <link rel="prev" title="User Guide" href="user-guide.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="overview-of-visidata-architecture">
+<h1>Overview of VisiData architecture<a class="headerlink" href="#overview-of-visidata-architecture" title="Permalink to this headline">¶</a></h1>
+<p>VisiData is like a powerful spreadsheet from an alternate textpunk
+reality, in which data can be easily manipulated from the keyboard and
+terminal. Unlike a spreadsheet, however, the data is well-structured, so
+that the data model is closer to Pandas or an RDBMS.</p>
+<ul class="simple">
+<li>The main unit of functionality is the <em>sheet</em>.</li>
+<li>Sheets are divided into <em>rows</em> and <em>columns</em>.</li>
+<li>Each sheet has a homogenous list of rows, which can be any kind of
+Python object.</li>
+<li>Individual cells do not contain arbitrary values, but are extracted
+by the column from the particular Python object for that row.</li>
+</ul>
+<p>In effect, a <em>column</em> is a lens through which each individual <em>row</em> is
+viewed. Constraining the data to fit within this architecture simplifies
+the implementation and allows for some radical optimizations to data
+workflow.</p>
+<div class="section" id="extending-visidata">
+<h2>Extending VisiData<a class="headerlink" href="#extending-visidata" title="Permalink to this headline">¶</a></h2>
+<p>Extensions to VisiData can be added via Python code. These extensions
+should be in files with a <code class="docutils literal"><span class="pre">.py</span></code> extension, which are passed on the
+command-line. It is also possible to import the <code class="docutils literal"><span class="pre">visidata</span></code> package
+from a Python script to create a <a class="reference external" href="vdapp">custom VisiData
+application</a>.</p>
+<div class="section" id="add-a-new-command">
+<h3>Add a new command<a class="headerlink" href="#add-a-new-command" title="Permalink to this headline">¶</a></h3>
+<p>Keyboard commands are the primary interface for the user to control
+VisiData. Users can add new commands using the global <code class="docutils literal"><span class="pre">command()</span></code>
+function within a .py file.</p>
+<p><code class="docutils literal"><span class="pre">command()</span></code> takes three arguments:</p>
+<ul class="simple">
+<li><em>command sequence</em>: the sequence of keys pressed to trigger the
+action</li>
+<li><em>exec string</em>: a string containing valid python code that will be
+passed to exec</li>
+<li><em>help string</em>: help text provided to users on the help sheet</li>
+</ul>
+<p>For example, VisiData has a builtin command <code class="docutils literal"><span class="pre">Shift-P</span></code> to get a random
+sample of rows from the current sheet:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">command</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span>
+   <span class="s1">&#39;vd.push(sheet.copy(&quot;_sample&quot;)).rows = random.sample(rows, int(input(&quot;random population size: &quot;)))&#39;</span><span class="p">,</span>
+   <span class="s1">&#39;push duplicate sheet with a random sample of &lt;N&gt; rows&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this case the command sequence is just a regular ASCII <code class="docutils literal"><span class="pre">P</span></code>, but the
+command sequence could include one or more <a class="reference external" href="prefixes">prefixes</a>
+and/or be a curses keyname (e.g. <code class="docutils literal"><span class="pre">KEY_HOME</span></code>).</p>
+<p>This exec string illustrates the basic interface for commands:</p>
+<ul class="simple">
+<li>The global VisiData singleton object is available as <code class="docutils literal"><span class="pre">vd</span></code> in the
+exec string (and <code class="docutils literal"><span class="pre">vd()</span></code> in other contexts).</li>
+<li>The <code class="docutils literal"><span class="pre">VisiData.push</span></code> method takes a Sheet object and pushes it onto
+the sheet stack, making it the currently visible sheet. It returns
+the same Sheet, so that a member (in this case, <code class="docutils literal"><span class="pre">rows</span></code>) may be
+conveniently set without using a temporary variable.</li>
+<li>The current sheet is available as <code class="docutils literal"><span class="pre">sheet</span></code>.</li>
+<li>The current sheet is also passed as the locals dict to exec, so all
+Sheet members and methods can be read and called without referencing
+<code class="docutils literal"><span class="pre">sheet</span></code> explicitly. <strong>Note: due to the implementation of
+“Sheet.exec_command“, setting sheet members requires “sheet“ to
+be passed explicitly. That is, when a sheet member variable is on the
+LHS of an assignment, it must be referred to as “sheet.member“ or
+the assignment will not stick.</strong></li>
+<li>The <code class="docutils literal"><span class="pre">Sheet.copy</span></code> member function takes a string, which is appended
+to the original sheet name to make the new sheet’s name.</li>
+<li><code class="docutils literal"><span class="pre">random.sample</span></code> is a builtin Python function. The <code class="docutils literal"><span class="pre">random</span></code>
+package is imported by VisiData (and thus available to all extensions
+automatically); other packages may be imported at the toplevel of the
+.py extension.</li>
+<li><code class="docutils literal"><span class="pre">`input</span></code> &lt;&gt;`__ is a global function that displays a prompt and gets
+a string of input from the user (on the bottom line).</li>
+</ul>
+<div class="section" id="what-can-be-done-with-commands">
+<h4>What can be done with commands<a class="headerlink" href="#what-can-be-done-with-commands" title="Permalink to this headline">¶</a></h4>
+<p>Anything is possible! However, the exec string limits functionality to
+Python one-liners. More complicated commands will require a custom sheet
+to implement longer Python functions.</p>
+<p>There will eventually be a VisiData API reference. In the meantime,
+please see the source code for examples of how to accomplish most tasks.</p>
+</div>
+</div>
+<div class="section" id="creating-a-new-sheet">
+<h3>Creating a new sheet<a class="headerlink" href="#creating-a-new-sheet" title="Permalink to this headline">¶</a></h3>
+<p>Developers can specify more advanced user interfaces are implemented
+using custom sheets. These sheets are created and pushed with a toplevel
+command available on all sheets, with a more highly-tuned workflow
+becoming available when the custom sheet is visible.</p>
+<div class="section" id="example">
+<h4>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h4>
+<p>Here is a simple sheet which makes a <code class="docutils literal"><span class="pre">t</span></code> command to ‘take’ the current
+cell from any sheet and append it to a predefined “journal” sheet. This
+sheet can be viewed with <code class="docutils literal"><span class="pre">Shift-T</span></code> and then dumped to a .tsv file with
+<code class="docutils literal"><span class="pre">Ctrl-W</span></code>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">visidata</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="n">command</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;vd.journal.rows.append([sheet, cursorCol, cursorRow])&#39;</span><span class="p">,</span> <span class="s1">&#39;take this cell and append it to the journal&#39;</span><span class="p">)</span>
+<span class="n">command</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;vd.push(vd.journal)&#39;</span><span class="p">,</span> <span class="s1">&#39;push the journal&#39;</span><span class="p">)</span>
+
+<span class="n">option</span><span class="p">(</span><span class="s1">&#39;fn_journal&#39;</span><span class="p">,</span> <span class="s1">&#39;journal.tsv&#39;</span><span class="p">,</span> <span class="s1">&#39;default journal output file&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">JournalSheet</span><span class="p">(</span><span class="n">Sheet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s1">&#39;journal&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;sheet&#39;</span><span class="p">,</span> <span class="n">getter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+            <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;column&#39;</span><span class="p">,</span> <span class="n">getter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+            <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">getter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s1">&#39;^W&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;appendToJournalFile(); sheet.rows = []&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;append to existing journal and clear sheet&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">appendToJournalFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">fn_journal</span><span class="p">)</span>
+        <span class="n">writeHdr</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="n">p</span><span class="o">.</span><span class="n">open_text</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">writeHdr</span><span class="p">:</span>
+                <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;sheet&#39;</span><span class="p">,</span> <span class="s1">&#39;column&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">))</span>
+                <span class="n">status</span><span class="p">(</span><span class="s1">&#39;created journal at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">:</span>
+                <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">getDisplayValue</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">status</span><span class="p">(</span><span class="s1">&#39;saved </span><span class="si">%d</span><span class="s1"> rows&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">))</span>
+
+<span class="n">vd</span><span class="p">()</span><span class="o">.</span><span class="n">journal</span> <span class="o">=</span> <span class="n">JournalSheet</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that the <code class="docutils literal"><span class="pre">t</span></code> command includes <code class="docutils literal"><span class="pre">cursorRow</span></code> in the list instead
+of <code class="docutils literal"><span class="pre">cursorValue</span></code>, and the <code class="docutils literal"><span class="pre">value</span></code> column calls Column.getValue().
+This is the desired pattern for appending rows based on existing sheets,
+so that changes to the source row are automatically reflected in the
+subsheets.</p>
+</div>
+</div>
+<div class="section" id="sheet-initialization">
+<h3>Sheet initialization<a class="headerlink" href="#sheet-initialization" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>All custom sheets must inherit from <code class="docutils literal"><span class="pre">Sheet</span></code>.</li>
+<li>The constructor passes the name of the sheet and any source sheets
+(which are available later as <code class="docutils literal"><span class="pre">Sheet.source</span></code>).</li>
+<li>The constructor should also set up the columns and the sheet-specific
+commands.</li>
+</ul>
+</div>
+<div class="section" id="custom-options">
+<h3>Custom options<a class="headerlink" href="#custom-options" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">option()</span></code> global function allows a user-modifiable option to be
+specified instead of using a hard-coded value.</p>
+<ul class="simple">
+<li>The arguments are the option name, a default value, and a help
+string.</li>
+<li>Options are available as attributes on the <code class="docutils literal"><span class="pre">options</span></code> object.</li>
+<li>Options should always have a usable default.</li>
+<li>Options should not be cached as the user can change them while the
+program is running.</li>
+</ul>
+</div>
+<div class="section" id="defining-a-sheet-specific-command">
+<h3>Defining a sheet-specific command<a class="headerlink" href="#defining-a-sheet-specific-command" title="Permalink to this headline">¶</a></h3>
+<p>Use <code class="docutils literal"><span class="pre">self.command()</span></code> within the constructor. The arguments are
+identical to the global <code class="docutils literal"><span class="pre">command()</span></code> function.</p>
+</div>
+<div class="section" id="column-definition">
+<h3>Column definition<a class="headerlink" href="#column-definition" title="Permalink to this headline">¶</a></h3>
+<p>Set <code class="docutils literal"><span class="pre">self.columns</span></code> to a list of all possible columns. Each entry
+should be a <code class="docutils literal"><span class="pre">Column</span></code> object (or subclass).</p>
+<div class="section" id="using-the-base-column-class">
+<h4>Using the base Column class<a class="headerlink" href="#using-the-base-column-class" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>The first argument is the column name, which should be a valid Python
+identifier (i.e. only letters, numbers and underscores). It should
+also be unique among column names on the sheet. These are not hard
+requirements (any name is acceptable, including no name), but several
+features will not work unless they are valid identifiers.</li>
+<li>The only other essential argument is a getter function, which takes a
+row and returns the value for that column.</li>
+<li>Optional named arguments:</li>
+<li><code class="docutils literal"><span class="pre">type</span></code> can be passed explicitly. Valid values are <code class="docutils literal"><span class="pre">int</span></code>,
+<code class="docutils literal"><span class="pre">float</span></code>, <code class="docutils literal"><span class="pre">date</span></code>, <code class="docutils literal"><span class="pre">str</span></code>. Columns that are not explicitly typed
+will be stringified just before being displayed.</li>
+<li>a <code class="docutils literal"><span class="pre">setter</span></code> function allows a row to be modified by the user using
+the <code class="docutils literal"><span class="pre">Sheet.editCell</span></code> method. The setter takes a row object and new
+value, and sets the value for that column. Without a setter, the
+column can’t be modified.</li>
+<li><code class="docutils literal"><span class="pre">width</span></code> specifies the default width for the column; <code class="docutils literal"><span class="pre">0</span></code> means
+hidden.</li>
+</ul>
+</div>
+<div class="section" id="helpful-column-creators">
+<h4>Helpful column creators<a class="headerlink" href="#helpful-column-creators" title="Permalink to this headline">¶</a></h4>
+<p>VisiData provides some utility classes to make it easier to create
+common types of columns. The most common are:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">ColumnAttr(attrname)</span></code> gets an attribute from the row object using
+<code class="docutils literal"><span class="pre">getattr</span></code> (and allows it to be set with <code class="docutils literal"><span class="pre">setattr</span></code>). Useful when
+the rows are Python objects.</li>
+<li><code class="docutils literal"><span class="pre">ColumnItem(colname,</span> <span class="pre">itemkey)</span></code> uses <code class="docutils literal"><span class="pre">getitem</span></code>, which is useful
+when the rows are mapping objects.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="adding-a-new-data-source">
+<h2>Adding a new data source<a class="headerlink" href="#adding-a-new-data-source" title="Permalink to this headline">¶</a></h2>
+<p>In the JournalSheet example above, the rows are added incrementally
+during a user’s workflow, so the <code class="docutils literal"><span class="pre">reload()</span></code> method is extremely simple
+(if it should even be there at all).</p>
+<p>New data sources can also be integrated into VisiData, and the primary
+difference is the <code class="docutils literal"><span class="pre">reload()</span></code> method. There are several existing
+examples in the <code class="docutils literal"><span class="pre">visidata/addons</span></code> directory, and the general structure
+looks like this:</p>
+<div class="section" id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">visidata</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">open_xlsx</span><span class="p">(</span><span class="n">Sheet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">ENTER</span><span class="p">,</span> <span class="s1">&#39;vd.push(sheet.getSheet(cursorRow))&#39;</span><span class="p">,</span> <span class="s1">&#39;push this sheet&#39;</span><span class="p">)</span>
+
+    <span class="nd">@async</span>
+    <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">openpyxl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span> <span class="o">=</span> <span class="n">openpyxl</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">),</span> <span class="n">data_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">sheetnames</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getSheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">):</span>
+        <span class="n">worksheet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">get_sheet_by_name</span><span class="p">(</span><span class="n">sheetname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">xlsxSheet</span><span class="p">(</span><span class="n">join_sheetnames</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">),</span> <span class="n">worksheet</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">xlsxSheet</span><span class="p">(</span><span class="n">Sheet</span><span class="p">):</span>
+    <span class="nd">@async</span>
+    <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">worksheet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">ArrayColumns</span><span class="p">(</span><span class="n">worksheet</span><span class="o">.</span><span class="n">max_column</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progressTotal</span> <span class="o">=</span> <span class="n">worksheet</span><span class="o">.</span><span class="n">max_row</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">worksheet</span><span class="o">.</span><span class="n">iter_rows</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">progressMade</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">cell</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">row</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>New data sources are generally implemented with one or more subclasses
+of Sheet.</p>
+<p>To have a data source apply to files with extension <code class="docutils literal"><span class="pre">.foo</span></code>, create a
+class (or function) called <code class="docutils literal"><span class="pre">open_foo</span></code>. This should return a new sheet
+constructed from the given source, which will be a <code class="docutils literal"><span class="pre">Path</span></code> object
+instead of a parent sheet.</p>
+<p>This <code class="docutils literal"><span class="pre">.xlsx</span></code> example is fairly typical of real world data sources,
+which often contain multiple datasets. In such a case, an index sheet is
+pushed first, with an <code class="docutils literal"><span class="pre">ENTER</span></code> command to push one of the contained
+sheets. The <code class="docutils literal"><span class="pre">getSheet</span></code> in this example is just a sheet-specific method
+on the index sheet that constructs the chosen sheet.</p>
+<div class="section" id="reload">
+<h4><code class="docutils literal"><span class="pre">reload()</span></code><a class="headerlink" href="#reload" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal"><span class="pre">reload()</span></code> method (invoked with <code class="docutils literal"><span class="pre">^R</span></code> (Ctrl-R)) should in general
+reset the sheet to its starting rowset, without changing the column
+layout.</p>
+<p>In the above example, <code class="docutils literal"><span class="pre">reload()</span></code> clears <code class="docutils literal"><span class="pre">Sheet.rows</span></code> before
+reloading, to prevent the sheet from growing in size with every <code class="docutils literal"><span class="pre">^R</span></code>.</p>
+<p><code class="docutils literal"><span class="pre">reload()</span></code> is not called until the sheet is first viewed.</p>
+<p>Note that <code class="docutils literal"><span class="pre">import</span></code> of non-standard Python packages should be just
+before their first use; in the case of data sources, in the <code class="docutils literal"><span class="pre">reload()</span></code>
+method itself. This is so that <code class="docutils literal"><span class="pre">vd</span></code> does not require external packages
+to be installed unless they are actually needed for parsing a specific
+data source.</p>
+</div>
+<div class="section" id="async">
+<h4><code class="docutils literal"><span class="pre">&#64;async</span></code><a class="headerlink" href="#async" title="Permalink to this headline">¶</a></h4>
+<p>Functions which can take a long time to execute may be decorated with
+<code class="docutils literal"><span class="pre">&#64;async</span></code>, which spawns a managed Task in a new thread to run the
+function. This is especially useful for data sources which may require
+loading large amounts of data.</p>
+<p>Async functions should initialize <code class="docutils literal"><span class="pre">Sheet.progressTotal</span></code> to some
+reasonable measure of total work, and they should also be structured to
+frequently update <code class="docutils literal"><span class="pre">Sheet.progressMade</span></code> with the amount of work already
+done. This is used for the progress meter on the right status line.</p>
+<hr class="docutils" />
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Overview of VisiData architecture</a><ul>
+<li><a class="reference internal" href="#extending-visidata">Extending VisiData</a><ul>
+<li><a class="reference internal" href="#add-a-new-command">Add a new command</a><ul>
+<li><a class="reference internal" href="#what-can-be-done-with-commands">What can be done with commands</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-a-new-sheet">Creating a new sheet</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sheet-initialization">Sheet initialization</a></li>
+<li><a class="reference internal" href="#custom-options">Custom options</a></li>
+<li><a class="reference internal" href="#defining-a-sheet-specific-command">Defining a sheet-specific command</a></li>
+<li><a class="reference internal" href="#column-definition">Column definition</a><ul>
+<li><a class="reference internal" href="#using-the-base-column-class">Using the base Column class</a></li>
+<li><a class="reference internal" href="#helpful-column-creators">Helpful column creators</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#adding-a-new-data-source">Adding a new data source</a><ul>
+<li><a class="reference internal" href="#id1">Example</a><ul>
+<li><a class="reference internal" href="#reload"><code class="docutils literal"><span class="pre">reload()</span></code></a></li>
+<li><a class="reference internal" href="#async"><code class="docutils literal"><span class="pre">&#64;async</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="user-guide.html" title="previous chapter">User Guide</a></li>
+      <li>Next: <a href="screen-layout.html" title="next chapter">For developers</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dev-guide.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Saul Pwanson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/dev-guide.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

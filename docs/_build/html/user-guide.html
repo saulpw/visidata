@@ -1,0 +1,304 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>User Guide &#8212; VisiData 0.59 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.59',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Overview of VisiData architecture" href="dev-guide.html" />
+    <link rel="prev" title="VisiData v0.59" href="home.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="basic-movement-and-essential-commands">
+<h2>Basic Movement and Essential Commands<a class="headerlink" href="#basic-movement-and-essential-commands" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">hjkl</span></code> or arrow keys move the cursor around (left/down/up/right)</li>
+<li><code class="docutils literal"><span class="pre">F1</span></code> opens command help for the current sheet</li>
+<li><code class="docutils literal"><span class="pre">q</span></code> quits the current sheet (backs out one level); in a pinch,
+<code class="docutils literal"><span class="pre">Ctrl-Q</span></code> will force-quit the program entirely</li>
+</ul>
+</div>
+<div class="section" id="advanced-movement">
+<h2>Advanced movement<a class="headerlink" href="#advanced-movement" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="scrolling">
+<h3>Scrolling<a class="headerlink" href="#scrolling" title="Permalink to this headline">¶</a></h3>
+<p>“Scrolling” adjusts the onscreen visible slice, but will not change the
+current cursor position.</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">z</span></code> prefix scrolling (most behave exactly like vim):<ul>
+<li><code class="docutils literal"><span class="pre">zt</span></code> scrolls current row to top of screen</li>
+<li><code class="docutils literal"><span class="pre">zz</span></code> scrolls current row to middle of screen</li>
+<li><code class="docutils literal"><span class="pre">zb</span></code> scrolls current row to bottom of screen</li>
+<li><code class="docutils literal"><span class="pre">zH</span></code> moves cursor one page to left</li>
+<li><code class="docutils literal"><span class="pre">zL</span></code> moves cursor one page to right</li>
+<li><code class="docutils literal"><span class="pre">zh</span></code> moves cursor one column to left</li>
+<li><code class="docutils literal"><span class="pre">zl</span></code> scrolls sheet one column to right</li>
+<li><code class="docutils literal"><span class="pre">zs</span></code> scrolls sheet to leftmost column</li>
+<li><code class="docutils literal"><span class="pre">ze</span></code> scrolls sheet to rightmost column</li>
+<li><code class="docutils literal"><span class="pre">zk</span></code> scrolls one row up</li>
+<li><code class="docutils literal"><span class="pre">zj</span></code> scrolls one row down</li>
+</ul>
+</li>
+<li><code class="docutils literal"><span class="pre">Home</span></code> and <code class="docutils literal"><span class="pre">End</span></code> move the cursor to the first and last row of the
+entire sheet, respectively. The column cursor position is maintained.</li>
+<li><code class="docutils literal"><span class="pre">PageUp</span></code> and <code class="docutils literal"><span class="pre">PageDown</span></code> move the cursor exactly one onscreen page
+up or down. <code class="docutils literal"><span class="pre">Ctrl-B</span></code> and <code class="docutils literal"><span class="pre">Ctrl-F</span></code> do the same</li>
+<li>The <code class="docutils literal"><span class="pre">g</span></code> prefix modifies movement commands by making them go “all
+the way”.<ul>
+<li><code class="docutils literal"><span class="pre">gk</span></code> and <code class="docutils literal"><span class="pre">gj</span></code> are the same as <code class="docutils literal"><span class="pre">Home</span></code> and <code class="docutils literal"><span class="pre">End</span></code>,
+respectively.</li>
+<li><code class="docutils literal"><span class="pre">gh</span></code> and <code class="docutils literal"><span class="pre">gl</span></code> move the cursor to the first and last column.</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="arranging-columns">
+<h2>Arranging Columns<a class="headerlink" href="#arranging-columns" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">-</span></code> (minus) hides a column</li>
+<li><code class="docutils literal"><span class="pre">_</span></code> (underscore) adjusts a column’s width so that the entire
+contents of its cells are visible.</li>
+<li><code class="docutils literal"><span class="pre">^</span></code> sets a column’s name</li>
+<li><code class="docutils literal"><span class="pre">!</span></code> makes the current column a <em>key column</em>.</li>
+</ul>
+<div class="section" id="column-types">
+<h3>Column Types<a class="headerlink" href="#column-types" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>columns start out untyped (unless the source data is typed)</li>
+<li><code class="docutils literal"><span class="pre">#</span></code> sets column type to int</li>
+<li><code class="docutils literal"><span class="pre">$</span></code> sets column type to str</li>
+<li><code class="docutils literal"><span class="pre">%</span></code> sets column type to float</li>
+<li><code class="docutils literal"><span class="pre">&#64;</span></code> sets column type to date</li>
+<li><code class="docutils literal"><span class="pre">~</span></code> autodetects column type</li>
+<li>all values are stored in their original format, and only converted on
+demand and as needed.</li>
+<li>values that can’t be properly converted are flagged with <code class="docutils literal"><span class="pre">~</span></code> on the
+display</li>
+<li>for commands like sort which require a correctly typed value, the
+default (0) value for that type is used</li>
+<li>cell edits are rejected if they don’t convert to the column type</li>
+</ul>
+</div>
+<div class="section" id="creating-new-columns">
+<h3>Creating new columns<a class="headerlink" href="#creating-new-columns" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">:</span></code> split column (on any sheet)</li>
+<li><code class="docutils literal"><span class="pre">=</span></code> “add column expression” takes a Python expression as input,
+evaluates the expression, and appends the results into a new column.
+Column names can be supplied as variables, in order to have the
+expression performed on the column cell-by-cell.<ul>
+<li>Example: Suppose there is a column named <code class="docutils literal"><span class="pre">Foo</span></code> and a column
+named <code class="docutils literal"><span class="pre">Bar</span></code>. <code class="docutils literal"><span class="pre">=Foo+Bar</span></code> would result in a column named
+<code class="docutils literal"><span class="pre">Foo+Bar</span></code> whose first row is the sum of the first row of <code class="docutils literal"><span class="pre">Foo</span></code>
+and the first row of <code class="docutils literal"><span class="pre">Bar</span></code>. Its second row would be the sum of
+the second row of <code class="docutils literal"><span class="pre">Foo</span></code> and the second row of <code class="docutils literal"><span class="pre">Bar</span></code>, and so
+on.</li>
+</ul>
+</li>
+<li><code class="docutils literal"><span class="pre">+</span></code> join selected columns on Columns sheet</li>
+</ul>
+</div>
+</div>
+<div class="section" id="searching-selecting-deleting-rows">
+<h2>Searching/Selecting/Deleting rows<a class="headerlink" href="#searching-selecting-deleting-rows" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">[</span></code>/<code class="docutils literal"><span class="pre">]</span></code> sort asc/desc by one column</li>
+</ul>
+</div>
+<div class="section" id="modifying-data">
+<h2>Modifying data<a class="headerlink" href="#modifying-data" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">Ctrl-S</span></code>ave to <code class="docutils literal"><span class="pre">.csv</span></code> or <code class="docutils literal"><span class="pre">.tsv</span></code> (by extension)</li>
+<li><code class="docutils literal"><span class="pre">e</span></code>dit cell contents<ul>
+<li>Edits made to a joined sheet are by design automatically reflected
+back to the source sheets.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="special-sheets">
+<h2>Special Sheets<a class="headerlink" href="#special-sheets" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">F</span></code>requency table for current column with histogram</li>
+<li><code class="docutils literal"><span class="pre">Ctrl-O</span></code> to eval an expression and browse the result as a python
+object</li>
+</ul>
+<div class="section" id="metasheets">
+<h3>Metasheets<a class="headerlink" href="#metasheets" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">S</span></code>heets metasheet to manage/navigate multiple sheets</li>
+<li><code class="docutils literal"><span class="pre">C</span></code>olumns metasheet<ul>
+<li>On the <code class="docutils literal"><span class="pre">C</span></code>olumns sheet, these commands apply to rows (the
+columns of the source sheet), instead of the columns on the
+Columns sheet<ul>
+<li><code class="docutils literal"><span class="pre">-</span></code> hides column (sets width to 0)</li>
+<li><code class="docutils literal"><span class="pre">_</span></code> maximizes column width to fit longest value</li>
+<li><code class="docutils literal"><span class="pre">!</span></code> marks column as a key column (pins to the left and
+matches on sheet joins)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code class="docutils literal"><span class="pre">O</span></code>ptions sheet to change the style or behavior</li>
+<li><code class="docutils literal"><span class="pre">^E</span></code>rror metasheet</li>
+<li><code class="docutils literal"><span class="pre">^T</span></code>hreads metasheet</li>
+</ul>
+</div>
+</div>
+<div class="section" id="glossary">
+<h2>Glossary<a class="headerlink" href="#glossary" title="Permalink to this headline">¶</a></h2>
+<p>Definitions of terms used in the help and documentation:</p>
+<ul class="simple">
+<li>‘go’: move cursor</li>
+<li>‘move’: change layout of visible data</li>
+<li>‘show’: put on status line</li>
+<li>‘scroll’: change set of visible rows</li>
+<li>‘push’: move a sheet to the top of the sheets list (thus making it
+immediately visible)</li>
+<li>‘open’: create a new sheet from a file or url</li>
+<li>‘load’: reload an existing sheet from in-memory contents</li>
+<li>‘jump’: change to existing sheet</li>
+<li>‘drop’: drop top (current) sheet</li>
+<li>‘this’: current [row/column/cell] (‘current’ is also used)</li>
+<li>‘abort’: exit program immediately</li>
+</ul>
+<p>Here are slightly better descriptions of some non-obvious commands:</p>
+<ul class="simple">
+<li>the “<code class="docutils literal"><span class="pre">g</span></code>lobal prefix”: always applies to the next command only,
+but could mean “apply to all columns” (as with the regex search
+commands) or “apply to selected rows” (as with <code class="docutils literal"><span class="pre">d</span></code>elete) or
+“apply to all sheets” (as with <code class="docutils literal"><span class="pre">q</span></code>). The global_action column on
+the Help Sheet shows the specific way the global prefix changes each
+command.</li>
+<li><code class="docutils literal"><span class="pre">R</span></code> sets the source type of the current sheet. The current sheet
+remains until a reload (<code class="docutils literal"><span class="pre">Ctrl-R</span></code>).</li>
+<li>When sheets are joined, the rows are matched by the display values in
+the key columns. Different numbers of key columns cannot match (no
+partial keys and rollup yet). The join types are:<ul>
+<li><code class="docutils literal"><span class="pre">&amp;</span></code>: Join all selected sheets, keeping only rows which match
+keys on all sheets (inner join)</li>
+<li><code class="docutils literal"><span class="pre">+</span></code>: Join all selected sheets, keeping all rows from first sheet
+(outer join, with the first selected sheet being the “left”)</li>
+<li><code class="docutils literal"><span class="pre">*</span></code>: Join all selected sheets, keeping all rows from all sheets
+(full join)</li>
+<li><code class="docutils literal"><span class="pre">~</span></code>: Join all selected sheets, keeping only rows NOT in all
+sheets (diff join)</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">User Guide</a><ul>
+<li><a class="reference internal" href="#basic-movement-and-essential-commands">Basic Movement and Essential Commands</a></li>
+<li><a class="reference internal" href="#advanced-movement">Advanced movement</a><ul>
+<li><a class="reference internal" href="#scrolling">Scrolling</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#arranging-columns">Arranging Columns</a><ul>
+<li><a class="reference internal" href="#column-types">Column Types</a></li>
+<li><a class="reference internal" href="#creating-new-columns">Creating new columns</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#searching-selecting-deleting-rows">Searching/Selecting/Deleting rows</a></li>
+<li><a class="reference internal" href="#modifying-data">Modifying data</a></li>
+<li><a class="reference internal" href="#special-sheets">Special Sheets</a><ul>
+<li><a class="reference internal" href="#metasheets">Metasheets</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#glossary">Glossary</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="home.html" title="previous chapter">VisiData v0.59</a></li>
+      <li>Next: <a href="dev-guide.html" title="next chapter">Overview of VisiData architecture</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/user-guide.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Saul Pwanson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/user-guide.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
