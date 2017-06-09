@@ -9,6 +9,8 @@ import builtins
 
 from visidata import *
 
+option('refresh_rate_s', 1.0, 'time to sleep between refreshes')
+
 class WSIClient:
     def __init__(self, url):
         self.sessionid = None
@@ -59,6 +61,8 @@ class PlayersSheet(Sheet):
 
 g_players = PlayersSheet()
 g_client = WSIClient(sys.argv[1])
+
+vd().rightStatus = lambda: time.strftime('%H:%M:%S')
 
 if __name__ == '__main__':
     g_client.login()
