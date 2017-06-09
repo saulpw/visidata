@@ -47,6 +47,7 @@ class PlayersSheet(Sheet):
 
         self.columns = [
             ColumnItem('name', 1),
+            ColumnItem('color', 2),
             ColumnItem('ready', 3),
         ]
         self.command(ENTER, 'status(g_client.get("/ready").text)', 'Indicate ready to start')
@@ -57,7 +58,25 @@ class PlayersSheet(Sheet):
     def reload(self):
         while True:
             self.rows = g_client.get('/players').json()
-            time.sleep(1.0)
+            time.sleep(options.refresh_rate_s)
+
+    def get_player_color(self, playername):
+        for plrow in self.rows:
+            if plrow[1] == playername:
+                return plrow[2]
+
+
+command('P', 'vd.push(PlanetsSheet())', 'push planets sheet')
+command('R', 'status(g_client.get("/regen_map")); reload()', 'regenerate map')
+
+class PlanetsSheet(Sheet):
+    def __init__(self):
+        super().__init__('planets')
+        self.columns = ArrayNamedColumns('name x y prod killpct owner nships'.split())
+        self.colorizers.append(lambda sheet,col,row,value: (g_players.get_player_color(row[5]), 5) if row else None)
+
+    def reload(self):
+        self.rows = g_client.get('/planets').json()
 
 g_players = PlayersSheet()
 g_client = WSIClient(sys.argv[1])
@@ -67,5 +86,6 @@ vd().rightStatus = lambda: time.strftime('%H:%M:%S')
 if __name__ == '__main__':
     g_client.login()
     set_global('g_client', g_client)
+    set_global('PlanetsSheet', PlanetsSheet)
     run([g_players])
 

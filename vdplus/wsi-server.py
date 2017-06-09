@@ -10,22 +10,63 @@ import random
 
 player_colors = 'green yellow cyan magenta red blue'.split()
 planet_names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-map_width = 10
-map_height = 10
 rand = random.randrange
+
+#### options management
+class OptionsObject:
+    """Get particular option value from `base_options`."""
+    def __init__(self, d):
+        self._opts = d
+    def __getattr__(self, k):
+        return self._opts[k]
+    def __setitem__(self, k, v):
+        if k not in self._opts:
+            raise Exception('no such option "%s"' % k)
+        self._opts[k] = v
 
 class Game:
     def __init__(self):
         self.game_started = False
+        self.options_dict = {
+            'map_width': 10,
+            'map_height': 10
+        }
+        self.options = OptionsObject(self.options_dict)
         self.players = {}   # [playername] -> Player
         self.planets = {}   # [planetname] -> Planet
+        self.current_turn = 0
+
+        self.generate_planets()
 
     def start_game(self):
-        self.generate_planets()
+        self.next_turn()
+
+    def end_turn(self):
+        # resolve orders/battles
+        # generate random events
+        self.next_turn()
+
+    def next_turn(self):
+        self.current_turn += 1
 
     @property
     def started(self):
-        return bool(self.planets)
+        return self.current_turn > 0
+
+    def POST_options(self, pl, **kwargs):
+        if self.started:
+            return 'game already started'
+
+        if pl not in self.players.values():
+            return 'only players in the game can set the options'
+
+        self.options.update(kwargs)
+
+    def GET_options(self, pl, **kwargs):
+        return self.options
+
+    def GET_regen_map(self, pl, **kwargs):
+        self.generate_planets()
 
     def POST_join(self, pl, **kwargs):
         if self.started:
@@ -36,6 +77,9 @@ class Game:
 
         pl.number = len(self.players)
         self.players[pl.name] = pl
+
+        self.generate_planets()
+
         return pl.sessionid  # leaky
 
     def GET_ready(self, pl, **kwargs):
@@ -85,13 +129,14 @@ class Game:
 
     def generate_planets(self):
         # name, x, y, prod, killpct, owner, nships
+        self.planets = {}
         nplayers = len(self.players)
         for i, (name, pl) in enumerate(self.players.items()):
             planet_name = planet_names[i]
-            self.planets[name] = Planet(name, rand(map_width), rand(map_height), 10, 40, pl)
+            self.planets[name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), 10, 40, pl)
 
         for name in planet_names[nplayers:]:
-            self.planets[name] = Planet(name, rand(map_width), rand(map_height), rand(10), rand(40))
+            self.planets[name] = Planet(name, rand(self.options.map_width), rand(self.options.map_height), rand(10), rand(40))
 
 
 class Player:
@@ -117,7 +162,7 @@ class Planet:
         self.nships = prod
 
     def as_tuple(self):
-        return (self.name, self.x, self.y, self.prod, self.killpct, self.owner, self.nships)
+        return (self.name, self.x, self.y, self.prod, self.killpct, self.owner.name if self.owner else None, self.nships)
 
 
 class Deployment:
@@ -183,7 +228,8 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/json')
                 self.end_headers()
 
-                self.wfile.write(ret.encode('utf-8'))
+                if ret:
+                    self.wfile.write(ret.encode('utf-8'))
             except HTTPException as e:
                 self.send_response(e.errcode)
                 self.send_header('Content-type', 'text/plain')
