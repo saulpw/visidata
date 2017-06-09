@@ -2,6 +2,7 @@
 
 import sys
 import requests
+import time
 import getpass
 import hashlib
 import builtins
@@ -46,13 +47,15 @@ class PlayersSheet(Sheet):
             ColumnItem('name', 1),
             ColumnItem('ready', 3),
         ]
-        self.command(ENTER, 'status(g_client.get("/ready").text); reload()', 'Indicate ready to start')
+        self.command(ENTER, 'status(g_client.get("/ready").text)', 'Indicate ready to start')
 
         self.colorizers.append(lambda sheet,col,row,value: row and (row[2], 8))
 
+    @async
     def reload(self):
-        r = g_client.get('/players')
-        self.rows = r.json()
+        while True:
+            self.rows = g_client.get('/players').json()
+            time.sleep(1.0)
 
 g_players = PlayersSheet()
 g_client = WSIClient(sys.argv[1])
