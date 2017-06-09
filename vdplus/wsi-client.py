@@ -125,6 +125,13 @@ class UnsentRoutesSheet(Sheet):
         self.columns = ColumnItems('launch_planet_name dest_planet_name dest_turn nships_requested nships_deployed result'.split())
 
         self.command('^S', 'send_routes()', 'commit routes and end turn')
+        self.colorizers.append(self.colorIncomplete)
+
+    @staticmethod
+    def colorIncomplete(sheet, col, row, value):
+        if row and col and col.name == 'nships_deployed':
+            if row['result'] and row['nships_deployed'] != row['nships_requested']:
+                return 'red bold', 5
 
     def send_routes(self):
         for i, route in enumerate(self.rows):
