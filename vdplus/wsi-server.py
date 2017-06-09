@@ -39,16 +39,49 @@ class Game:
         self.players = {}   # [playername] -> Player
         self.planets = {}   # [planetname] -> Planet
         self.deployments = []
+        self.events = []
         self.current_turn = 0
 
         self.generate_planets()
+
+    def notify(self, eventstr):
+        self.events.append(Event(self.current_turn, eventstr))
 
     def start_game(self):
         self.next_turn()
 
     def end_turn(self):
-        # resolve orders/battles
-        # generate random events
+        for d in self.deployments:
+            if d.dest_turn != self.current_turn+1:
+                continue
+
+            if d.dest_planet.owner is d.launch_player:
+                d.dest_planet.nships += d.nships_deployed
+                self.notify('%d reinforcements arrived at %s' % (d.nships_deployed, d.dest_planet.name))
+                continue
+
+            # battle time
+            attack_strength = float(d.nships_deployed * d.killpct)
+            defend_strength = float(d.dest_planet.nships * d.dest_planet.killpct)
+            ratio = defend_strength / attack_strength
+            attack_num = random.betavariate(2, 2)
+            if attack_num > ratio:
+                ships_left = (attack_num-ratio)/(1-ratio)*d.nships_deployed
+                d.dest_planet.owner = d.launch_player
+                self.notify('planet %s overtaken by %s with %d ships' % (d.dest_planet.name, d.launch_player, d.nships_deployed))
+            else:
+                ships_left = (ratio-attack_num)/ratio*d.dest_planet.nships
+                self.notify('planet %s held its own against an attack by %s with %d ships' % (d.dest_planet.name, d.launch_player, d.nships_deployed))
+
+            assert ships_left > 0
+            d.dest_planet.nships = int(ships_left+0.5)
+
+        for p in self.planets.values():
+            if p.owner:
+                p.nships += p.prod
+                self.notify('planet %s produced %d ships (now at %d)' % (p.name, p.prod, p.nships))
+
+        # TODO: generate random events
 
         self.next_turn()
 
@@ -57,6 +90,8 @@ class Game:
 
         for p in self.players.values():
             p.turn_sent = False
+
+        self.notify('turn %d started' % self.current_turn)
 
     @property
     def started(self):
@@ -123,7 +158,10 @@ class Game:
         return [x.as_tuple() for x in self.planets.values()]
 
     def GET_deployments(self, pl, **kwargs):
-        return [x.as_tuple() for x in self.deployments]
+        return [x.as_dict() for x in self.deployments]
+
+    def GET_events(self, pl):
+        return [x.as_dict() for x in self.events]
 
     def predeploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships=0):
         launch_planet = self.planets.get(launch_planet_name) or error('no such planet %s' % launch_planet_name)
@@ -135,9 +173,9 @@ class Game:
         d = launch_planet.distance(dest_planet)
         if dest_turn is None:
             dest_turn = 0
-        dest_turn = max(int(dest_turn), int(self.current_turn + d/2))
+        dest_turn = max(int(dest_turn), int(self.current_turn + d/2), self.current_turn+1)
 
-        dobj = Deployment(launch_player, launch_planet, dest_planet, dest_turn, int(nships), launch_planet.killpct)
+        dobj = Deployment(launch_player, self.current_turn, launch_planet, dest_planet, dest_turn, int(nships), launch_planet.killpct)
         dobj.nships_deployed = min(int(nships), launch_planet.nships)
         return dobj
 
@@ -188,6 +226,9 @@ class Player:
     def as_tuple(self):
         return (self.number, self.name, player_colors[self.number], self.turn_sent)
 
+    def __str__(self):
+        return self.name
+
 
 class Planet:
     def __init__(self, name, x, y, prod, killpct, owner=None):
@@ -210,8 +251,9 @@ class Planet:
 
 
 class Deployment:
-    def __init__(self, launch_player, launch_planet, dest_planet, dest_turn, nships, killpct):
+    def __init__(self, launch_player, launch_turn, launch_planet, dest_planet, dest_turn, nships, killpct):
         self.launch_player = launch_player
+        self.launch_turn = launch_turn
         self.launch_planet = launch_planet
         self.dest_planet = dest_planet
         self.dest_turn = dest_turn
@@ -221,6 +263,7 @@ class Deployment:
 
     def as_dict(self):
         return {
+            'launch_turn': self.launch_turn,
             'launch_player_name': self.launch_player.name,
             'launch_planet_name': self.launch_planet.name, 
             'dest_planet_name': self.dest_planet.name,
@@ -229,6 +272,19 @@ class Deployment:
             'nships_deployed': self.nships_deployed,
             'killpct': self.killpct
         }
+
+
+class Event:
+    def __init__(self, turn_num, eventstr):
+        self.turn_num = turn_num
+        self.eventstr = eventstr
+
+    def as_dict(self):
+        return {
+            'turn': self.turn_num,
+            'event': self.eventstr,
+        }
+
 
 ### networking via simple HTTP
 

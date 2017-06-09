@@ -17,6 +17,7 @@ command('P', 'vd.push(g_Planets)', 'push planets sheet')
 command('M', 'vd.push(MapSheet())', 'push map sheet')
 command('R', 'vd.push(g_UnsentRoutes)', 'push unsent routes sheet')
 command('D', 'vd.push(g_HistoricalDeployments)', 'push historical deployments sheet')
+command('E', 'vd.push(g_Events); g_Events.reload()', 'push events sheet')
 
 
 class LocalPlanet:
@@ -117,7 +118,6 @@ class PlanetsSheet(Sheet):
         self.rows = [LocalPlanet(x) for x in g_client.get('/planets').json()]
 
 
-
 class UnsentRoutesSheet(Sheet):
     def __init__(self):
         super().__init__('routes_to_send')
@@ -150,10 +150,19 @@ class UnsentRoutesSheet(Sheet):
 class HistoricalDeploymentsSheet(Sheet):
     def __init__(self):
         super().__init__('historical_deployments')
-        self.columns = ArrayNamedColumns('launch_player launch_planet dest_planet dest_turn nships killpct'.split())
+        self.columns = ColumnItems('launch_turn launch_player_name launch_planet_name dest_planet_name dest_turn nships_deployed killpct'.split())
 
     def reload(self):
         self.rows = g_client.get('/deployments').json()
+
+
+class EventsSheet(Sheet):
+    def __init__(self):
+        super().__init__('events')
+        self.columns = ColumnItems('turn event'.split())
+
+    def reload(self):
+        self.rows = g_client.get('/events').json()
 
 
 class MapSheet(Sheet):
@@ -193,6 +202,7 @@ class MapSheet(Sheet):
 g_players = PlayersSheet()
 g_Planets = PlanetsSheet()
 g_UnsentRoutes = UnsentRoutesSheet()
+g_Events = EventsSheet()
 g_HistoricalDeployments = HistoricalDeploymentsSheet()
 g_client = WSIClient(sys.argv[1])
 
@@ -204,6 +214,7 @@ if __name__ == '__main__':
     set_global('g_Planets', g_Planets)
     set_global('g_HistoricalDeployments', g_HistoricalDeployments)
     set_global('g_UnsentRoutes', g_UnsentRoutes)
+    set_global('g_Events', g_Events)
     set_global('MapSheet', MapSheet)
     set_global('add_deployment', add_deployment)
     run([g_players])
