@@ -62,7 +62,7 @@ class WSIClient:
 
 
 def add_deployment(src, dest, nships):
-    r = g_client.get('/validate_deploy', launch_planet_name=src.name, dest_planet_name=dest.name, nships=nships)
+    r = g_client.get('/validate_deploy', launch_planet_name=src.name, dest_planet_name=dest.name, nships_requested=nships)
     if r.status_code != 200:
         status(r.text)
     else:
@@ -122,14 +122,17 @@ class UnsentRoutesSheet(Sheet):
     def __init__(self):
         super().__init__('routes_to_send')
 
-        self.columns = ColumnItems('launch_planet_name dest_planet_name dest_turn nships result'.split())
+        self.columns = ColumnItems('launch_planet_name dest_planet_name dest_turn nships_requested nships_deployed result'.split())
 
         self.command('^S', 'send_routes()', 'commit routes and end turn')
 
     def send_routes(self):
         for i, route in enumerate(self.rows):
-            r = g_client.get('/deploy', **route)
-            self.rows[i] = r.json()
+            try:
+                r = g_client.get('/deploy', **route)
+                self.rows[i] = r.json()
+            except Exception as e:
+                self.rows[i]['result'] = str(e)
 
         status(g_client.get('/end_turn').text)
 

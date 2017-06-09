@@ -137,25 +137,24 @@ class Game:
             dest_turn = 0
         dest_turn = max(int(dest_turn), int(self.current_turn + d/2))
 
-        nships = min(int(nships), launch_planet.nships)
-        if nships <= 0:
-            error('no ships to deploy')
+        dobj = Deployment(launch_player, launch_planet, dest_planet, dest_turn, int(nships), launch_planet.killpct)
+        dobj.nships_deployed = min(int(nships), launch_planet.nships)
+        return dobj
 
-        return Deployment(launch_player, launch_planet, dest_planet, dest_turn, int(nships), launch_planet.killpct)
+    def GET_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships_requested=0, **kwargs):
+        dobj = self.predeploy(launch_player, launch_planet_name, dest_planet_name, dest_turn, nships_requested)
 
-    def GET_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships=0, **kwargs):
-        dobj = self.predeploy(launch_player, launch_planet_name, dest_planet_name, dest_turn, nships)
-
-        assert dobj.launch_planet.nships >= dobj.nships
-        dobj.launch_planet.nships -= dobj.nships
+        assert dobj.launch_planet.nships >= dobj.nships_deployed
+        dobj.launch_planet.nships -= dobj.nships_deployed
 
         self.deployments.append(dobj)
         d = dobj.as_dict()
         d['result'] = 'deployed'
         return d
 
-    def GET_validate_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships=0, **kwargs):
-        dobj = self.predeploy(launch_player, launch_planet_name, dest_planet_name, dest_turn, nships)
+    def GET_validate_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships_requested=0, **kwargs):
+        dobj = self.predeploy(launch_player, launch_planet_name, dest_planet_name, dest_turn, nships_requested)
+        dobj.nships_deployed = 0  # for client to display correctly before actual deployment
         return dobj.as_dict()
 
     def GET_end_turn(self, pl):
@@ -216,7 +215,8 @@ class Deployment:
         self.launch_planet = launch_planet
         self.dest_planet = dest_planet
         self.dest_turn = dest_turn
-        self.nships = nships
+        self.nships_requested = nships
+        self.nships_deployed = 0
         self.killpct = killpct
 
     def as_dict(self):
@@ -225,7 +225,8 @@ class Deployment:
             'launch_planet_name': self.launch_planet.name, 
             'dest_planet_name': self.dest_planet.name,
             'dest_turn': int(self.dest_turn),
-            'nships': self.nships,
+            'nships_requested': self.nships_requested,
+            'nships_deployed': self.nships_deployed,
             'killpct': self.killpct
         }
 
