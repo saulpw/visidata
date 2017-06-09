@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import math
 import json
 import http.server
 import urllib.parse
@@ -11,6 +12,9 @@ import random
 player_colors = 'green yellow cyan magenta red blue'.split()
 planet_names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 rand = random.randrange
+
+def error(s):
+    raise HTTPException(300, s)
 
 #### options management
 class OptionsObject:
@@ -26,14 +30,15 @@ class OptionsObject:
 
 class Game:
     def __init__(self):
-        self.game_started = False
         self.options_dict = {
             'map_width': 10,
-            'map_height': 10
+            'map_height': 10,
+            'debug': True,
         }
         self.options = OptionsObject(self.options_dict)
         self.players = {}   # [playername] -> Player
         self.planets = {}   # [planetname] -> Planet
+        self.deployments = []
         self.current_turn = 0
 
         self.generate_planets()
@@ -68,7 +73,19 @@ class Game:
     def GET_regen_map(self, pl, **kwargs):
         self.generate_planets()
 
-    def POST_join(self, pl, **kwargs):
+    def GET_gamestate(self, pl, **kwargs):
+        return {
+            'map_width': self.options.map_width,
+            'map_height': self.options.map_height,
+            'started': self.started,
+            'current_turn': self.current_turn,
+        }
+
+    # leaky
+    def POST_auth(self, pl, **kwargs):
+        return pl.sessionid
+
+    def GET_join(self, pl, **kwargs):
         if self.started:
             raise HTTPException(402, 'Game already started')
 
@@ -79,8 +96,7 @@ class Game:
         self.players[pl.name] = pl
 
         self.generate_planets()
-
-        return pl.sessionid  # leaky
+        return 'joined game'
 
     def GET_ready(self, pl, **kwargs):
         if self.started:
@@ -103,23 +119,23 @@ class Game:
         return [x.as_tuple() for x in self.planets.values()]
 
     def GET_deployments(self, pl, **kwargs):
-        return [x.as_tuple() for x in self.planets.values()]
+        return [x.as_tuple() for x in self.deployments]
 
-    def POST_deploy(self, launch_player, launch_planet=None, dest_planet=None, dest_turn=None, nships=0):
+    def GET_deploy(self, launch_player, launch_planet=None, dest_planet=None, dest_turn=None, nships=0, **kwargs):
         launch_planet = self.planets.get(launch_planet) or error('no such planet %s' % launch_planet)
         if launch_player is not launch_planet.owner:
             error('player does not own planet')
 
         dest_planet = self.planets.get(dest_planet) or error('no such planet %s' % dest_planet)
 
-        d = distance(launch_planet, dest_planet)
+        d = launch_planet.distance(dest_planet)
         if dest_turn is None:
             dest_turn = 0
         dest_turn = max(dest_turn, self.current_turn + d/2)
 
-        nships = min(nships, launch_planet.nships)
+        nships = min(int(nships), launch_planet.nships)
 
-        if not nships:
+        if nships:
             launch_planet.nships -= nships
 
             self.deployments.append(Deployment(launch_player, launch_planet, dest_planet, dest_turn, nships, launch_planet.killpct))
@@ -133,10 +149,10 @@ class Game:
         nplayers = len(self.players)
         for i, (name, pl) in enumerate(self.players.items()):
             planet_name = planet_names[i]
-            self.planets[name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), 10, 40, pl)
+            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), 10, 40, pl)
 
-        for name in planet_names[nplayers:]:
-            self.planets[name] = Planet(name, rand(self.options.map_width), rand(self.options.map_height), rand(10), rand(40))
+        for planet_name in planet_names[nplayers:]:
+            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(10), rand(40))
 
 
 class Player:
@@ -161,8 +177,14 @@ class Planet:
         self.owner = owner
         self.nships = prod
 
+    def distance(self, dest):
+        return math.sqrt((self.y-dest.y)**2 + (self.x-dest.x)**2)
+
     def as_tuple(self):
-        return (self.name, self.x, self.y, self.prod, self.killpct, self.owner.name if self.owner else None, self.nships)
+        if self.owner:
+            return (self.name, self.x, self.y, self.prod, self.killpct, self.owner.name, self.nships)
+        else:
+            return (self.name, self.x, self.y, None, None, None, None)
 
 
 class Deployment:
@@ -175,7 +197,7 @@ class Deployment:
         self.killpct = killpct
 
     def as_tuple(self):
-        return (self.launch_player, self.launch_planet, self.dest_planet, self.dest_turn, self.nships, self.killpct)
+        return (self.launch_player.name, self.launch_planet.name, self.dest_planet.name, int(self.dest_turn), self.nships, self.killpct)
 
 ### networking via simple HTTP
 
@@ -194,27 +216,29 @@ class WSIServer(http.server.HTTPServer):
 
 
 class WSIHandler(http.server.BaseHTTPRequestHandler):
-    def generic_handler(self, reqtype, path, data, **kwargs):
+    def generic_handler(self, reqtype, path, data):
         fields = urllib.parse.parse_qs(data)
-        fields.update(kwargs)
+        if 'params' in fields:
+            fields = fields['params']
+
+        fields = dict((k, v[0]) for k, v in fields.items())  # every param is a list; assume only one value for any param
 
         toplevel = path.split('/')[1]
         if toplevel:
             try:
                 sessions = fields.get('session')
-                pl = self.server.sessions.get(sessions[0]) if sessions else None
+                pl = self.server.sessions.get(sessions) if sessions else None
 
                 if not pl:
                     username = fields.get('username')
                     if username:
-                        username = username[0]
                         if username in self.server.users:
                             pl = self.server.users[username]
-                            if fields['password'][0] != pl.md5_password:
+                            if fields['password'] != pl.md5_password:
                                 raise HTTPException(403, 'Sorry, wrong password')
                         else:
                             sessionid = uuid.uuid1().hex
-                            pl = Player(username, fields['password'][0], sessionid)
+                            pl = Player(username, fields['password'], sessionid)
                             self.server.sessions[sessionid] = pl
                             self.server.users[username] = pl
 
@@ -231,6 +255,9 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
                 if ret:
                     self.wfile.write(ret.encode('utf-8'))
             except HTTPException as e:
+                if self.server.game.options.debug:
+                    import traceback
+                    print(traceback.format_exc())
                 self.send_response(e.errcode)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
@@ -246,7 +273,6 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
         return self.generic_handler('GET', parsed_url.path, parsed_url.query)
-        query = urllib.parse.parse_qs(parsed_url.query)
 
     def do_POST(self):
         length = int(self.headers['content-length'])
