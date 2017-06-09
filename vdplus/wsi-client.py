@@ -12,6 +12,18 @@ from visidata import *
 option('refresh_rate_s', 1.0, 'time to sleep between refreshes')
 theme('color_dest_planet', 'underline', 'color of marked destination planet')
 
+command('N', 'status(g_client.get("/regen_map")); reload()', 'make New map')
+command('P', 'vd.push(g_Planets)', 'push planets sheet')
+command('M', 'vd.push(MapSheet())', 'push map sheet')
+command('R', 'vd.push(g_UnsentRoutes)', 'push unsent routes sheet')
+command('D', 'vd.push(g_HistoricalDeployments)', 'push historical deployments sheet')
+
+
+class LocalPlanet:
+    def __init__(self, row):
+        self.name, self.x, self.y, self.prod, self.killpct, self.ownername, self.nships = row
+
+
 class WSIClient:
     def __init__(self, url):
         self.sessionid = None
@@ -49,6 +61,17 @@ class WSIClient:
         return r
 
 
+def add_deployment(src, dest, nships):
+    r = g_client.get('/validate_deploy', launch_planet_name=src.name, dest_planet_name=dest.name, nships=nships)
+    if r.status_code != 200:
+        status(r.text)
+    else:
+        d = r.json()
+        d['result'] = None
+        g_UnsentRoutes.rows.append(d)
+        status('queued deployment')
+
+
 class PlayersSheet(Sheet):
     def __init__(self):
         super().__init__('players')
@@ -61,53 +84,67 @@ class PlayersSheet(Sheet):
 
         self.colorizers.append(lambda sheet,col,row,value: row and (row[2], 8))
 
-    @async
+#    @async
     def reload(self):
-        while True:
+#        while True:
             self.rows = g_client.get('/players').json()
-            time.sleep(options.refresh_rate_s)
+#            time.sleep(options.refresh_rate_s)
 
     def get_player_color(self, playername):
         for plrow in self.rows:
             if plrow[1] == playername:
                 return plrow[2]
 
+def AttrNamedColumns(attr_list):
+    return [ColumnAttr(x) for x in attr_list]
 
-command('P', 'vd.push(PlanetsSheet())', 'push planets sheet')
-command('R', 'status(g_client.get("/regen_map")); reload()', 'regenerate map')
-command('D', 'vd.push(DeploymentsSheet())', 'push deployment sheet')
-command('M', 'vd.push(MapSheet())', 'push map sheet')
+def ColumnItems(key_list, **kwargs):
+    return [ColumnItem(x, x, **kwargs) for x in key_list]
 
 class PlanetsSheet(Sheet):
     def __init__(self):
         super().__init__('planets')
-        self.columns = ArrayNamedColumns('name x y prod killpct owner nships'.split())
-        self.colorizers.append(lambda sheet,col,row,value: (g_players.get_player_color(row[5]), 5) if row else None)
+        self.columns = AttrNamedColumns('name x y prod killpct ownername nships'.split())
+        self.colorizers.append(lambda sheet,col,row,value: (g_players.get_player_color(row.ownername), 5) if row else None)
         self.colorizers.append(lambda sheet,col,row,value: (options.color_dest_planet, 5) if row is sheet.marked_planet else None)
         self.marked_planet = None
 
         self.command('m', 'sheet.marked_planet = cursorRow', 'mark current planet as destination')
-        self.command('f', 'status(deploy(cursorRow, marked_planet, int(input("# ships: "))))', 'deploy N ships from current planet to marked planet')
+        self.command('f', 'add_deployment(cursorRow, marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
 
     def reload(self):
         # name, x, y, prod, killpct, owner.name, nships
-        self.rows = g_client.get('/planets').json()
-
-    def deploy(self, src, dest, nships):
-        return g_client.get('/deploy', launch_planet=src[0], dest_planet=dest[0], nships=nships).text
+        self.rows = [LocalPlanet(x) for x in g_client.get('/planets').json()]
 
 
-class DeploymentsSheet(Sheet):
+
+class UnsentRoutesSheet(Sheet):
     def __init__(self):
-        super().__init__('deployments')
+        super().__init__('routes_to_send')
+
+        self.columns = ColumnItems('launch_planet_name dest_planet_name dest_turn nships result'.split())
+
+        self.command('^S', 'send_routes()', 'commit routes and end turn')
+
+    def send_routes(self):
+        for i, route in enumerate(self.rows):
+            r = g_client.get('/deploy', **route)
+            self.rows[i] = r.json()
+
+        status(g_client.get('/end_turn').text)
+
+    def reload(self):
+        pass
+
+
+class HistoricalDeploymentsSheet(Sheet):
+    def __init__(self):
+        super().__init__('historical_deployments')
         self.columns = ArrayNamedColumns('launch_player launch_planet dest_planet dest_turn nships killpct'.split())
 
     def reload(self):
         self.rows = g_client.get('/deployments').json()
 
-class LocalPlanet:
-    def __init__(self, row):
-        self.name, self.x, self.y, self.prod, self.killpct, self.ownername, self.nships = row
 
 class MapSheet(Sheet):
     def __init__(self):
@@ -144,6 +181,9 @@ class MapSheet(Sheet):
 
 
 g_players = PlayersSheet()
+g_Planets = PlanetsSheet()
+g_UnsentRoutes = UnsentRoutesSheet()
+g_HistoricalDeployments = HistoricalDeploymentsSheet()
 g_client = WSIClient(sys.argv[1])
 
 vd().rightStatus = lambda: time.strftime('%H:%M:%S')
@@ -151,8 +191,10 @@ vd().rightStatus = lambda: time.strftime('%H:%M:%S')
 if __name__ == '__main__':
     g_client.login()
     set_global('g_client', g_client)
-    set_global('PlanetsSheet', PlanetsSheet)
-    set_global('DeploymentsSheet', DeploymentsSheet)
+    set_global('g_Planets', g_Planets)
+    set_global('g_HistoricalDeployments', g_HistoricalDeployments)
+    set_global('g_UnsentRoutes', g_UnsentRoutes)
     set_global('MapSheet', MapSheet)
+    set_global('add_deployment', add_deployment)
     run([g_players])
 

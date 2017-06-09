@@ -49,10 +49,14 @@ class Game:
     def end_turn(self):
         # resolve orders/battles
         # generate random events
+
         self.next_turn()
 
     def next_turn(self):
         self.current_turn += 1
+
+        for p in self.players.values():
+            p.turn_sent = False
 
     @property
     def started(self):
@@ -105,8 +109,8 @@ class Game:
         if not pl:
             raise HTTPException(403, 'Unauthorized')
 
-        pl.ready = True
-        if len(self.players) > 1 and all(pl.ready for pl in self.players.values()):
+        pl.turn_sent = True
+        if len(self.players) > 1 and all(pl.turn_sent for pl in self.players.values()):
             self.start_game()
             return 'game started'
 
@@ -121,27 +125,46 @@ class Game:
     def GET_deployments(self, pl, **kwargs):
         return [x.as_tuple() for x in self.deployments]
 
-    def GET_deploy(self, launch_player, launch_planet=None, dest_planet=None, dest_turn=None, nships=0, **kwargs):
-        launch_planet = self.planets.get(launch_planet) or error('no such planet %s' % launch_planet)
+    def predeploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships=0):
+        launch_planet = self.planets.get(launch_planet_name) or error('no such planet %s' % launch_planet_name)
         if launch_player is not launch_planet.owner:
             error('player does not own planet')
 
-        dest_planet = self.planets.get(dest_planet) or error('no such planet %s' % dest_planet)
+        dest_planet = self.planets.get(dest_planet_name) or error('no such planet %s' % dest_planet_name)
 
         d = launch_planet.distance(dest_planet)
         if dest_turn is None:
             dest_turn = 0
-        dest_turn = max(dest_turn, self.current_turn + d/2)
+        dest_turn = max(int(dest_turn), int(self.current_turn + d/2))
 
         nships = min(int(nships), launch_planet.nships)
+        if nships <= 0:
+            error('no ships to deploy')
 
-        if nships:
-            launch_planet.nships -= nships
+        return Deployment(launch_player, launch_planet, dest_planet, dest_turn, int(nships), launch_planet.killpct)
 
-            self.deployments.append(Deployment(launch_player, launch_planet, dest_planet, dest_turn, nships, launch_planet.killpct))
-            return 'deployed'
+    def GET_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships=0, **kwargs):
+        dobj = self.predeploy(launch_player, launch_planet_name, dest_planet_name, dest_turn, nships)
+
+        assert dobj.launch_planet.nships >= dobj.nships
+        dobj.launch_planet.nships -= dobj.nships
+
+        self.deployments.append(dobj)
+        d = dobj.as_dict()
+        d['result'] = 'deployed'
+        return d
+
+    def GET_validate_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships=0, **kwargs):
+        dobj = self.predeploy(launch_player, launch_planet_name, dest_planet_name, dest_turn, nships)
+        return dobj.as_dict()
+
+    def GET_end_turn(self, pl):
+        pl.turn_sent = True
+        num_still_turning = len([p for p in self.players.values() if not p.turn_sent])
+        if num_still_turning > 0:
+            return 'still waiting on %d players' % num_still_turning
         else:
-            return 'no ships'
+            return self.end_turn()
 
     def generate_planets(self):
         # name, x, y, prod, killpct, owner, nships
@@ -161,10 +184,10 @@ class Player:
         self.name = name
         self.md5_password = md5_password
         self.sessionid = sessionid
-        self.ready = False
+        self.turn_sent = False
 
     def as_tuple(self):
-        return (self.number, self.name, player_colors[self.number], self.ready)
+        return (self.number, self.name, player_colors[self.number], self.turn_sent)
 
 
 class Planet:
@@ -196,8 +219,15 @@ class Deployment:
         self.nships = nships
         self.killpct = killpct
 
-    def as_tuple(self):
-        return (self.launch_player.name, self.launch_planet.name, self.dest_planet.name, int(self.dest_turn), self.nships, self.killpct)
+    def as_dict(self):
+        return {
+            'launch_player_name': self.launch_player.name,
+            'launch_planet_name': self.launch_planet.name, 
+            'dest_planet_name': self.dest_planet.name,
+            'dest_turn': int(self.dest_turn),
+            'nships': self.nships,
+            'killpct': self.killpct
+        }
 
 ### networking via simple HTTP
 
@@ -226,8 +256,11 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
         toplevel = path.split('/')[1]
         if toplevel:
             try:
-                sessions = fields.get('session')
-                pl = self.server.sessions.get(sessions) if sessions else None
+                sessions = fields.pop('session', None)
+                if sessions:
+                    pl = self.server.sessions.get(sessions)
+                else:
+                    pl = None
 
                 if not pl:
                     username = fields.get('username')
