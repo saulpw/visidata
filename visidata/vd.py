@@ -500,18 +500,22 @@ class VisiData:
             self.exceptionCaught()
 
     def drawRightStatus(self):
-        """Compose and draw right side of status bar."""
+        """Draw right side of status bar."""
         try:
-            sheet = self.sheets[0]
-            if sheet.progressMade == sheet.progressTotal:
-                pctLoaded = 'rows'
-            else:
-                pctLoaded = ' %2d%%' % sheet.progressPct
-            rstatus = '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
+            rstatus = self.rightStatus()
             draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.color_status])
             curses.doupdate()
         except Exception as e:
             self.exceptionCaught()
+
+    def rightStatus(self):
+        """Compose right side of status bar."""
+        sheet = self.sheets[0]
+        if sheet.progressMade == sheet.progressTotal:
+            pctLoaded = 'rows'
+        else:
+            pctLoaded = ' %2d%%' % sheet.progressPct
+        return '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
 
     def run(self, scr):
         """Manage execution of keystrokes and subsequent redrawing of screen."""
