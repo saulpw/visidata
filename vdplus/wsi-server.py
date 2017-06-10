@@ -45,7 +45,7 @@ class Game:
         self.events = []
         self.current_turn = 0
 
-        self.generate_planets()
+        self.generate_planets(use_rc_logo=True)
 
     def notify(self, eventstr):
         self.events.append(Event(self.current_turn, eventstr))
@@ -115,11 +115,11 @@ class Game:
     def GET_options(self, pl, **kwargs):
         return self.options
 
-    def GET_regen_map(self, pl, **kwargs):
+    def GET_regen_map(self, pl, use_rc_logo=True, **kwargs):
         if self.started:
             error('game already started')
 
-        self.generate_planets()
+        self.generate_planets(use_rc_logo=use_rc_logo)
 
     def GET_gamestate(self, pl, **kwargs):
         return {
@@ -225,7 +225,7 @@ class Game:
         else:
             return self.end_turn()
 
-    def generate_planets(self):
+    def generate_planets(self, use_rc_logo=True):
         # name, x, y, prod, killpct, owner, nships
         self.planets = {}
         planet_names = all_planet_names[:self.options.num_planets]
