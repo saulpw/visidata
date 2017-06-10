@@ -37,7 +37,7 @@ From any sheet:
 - `Ctrl-S` submits the pending deployments to the server and signals the player is done
 
 On the `M`ap sheet:
-- The colour of the planet name indicates which players currently 'own' it.
+- The colour of the planet name indicates which player currently 'owns' it.
 - White planets are neutral and currently not in anybody's control.
 
 On the `P`lanet sheet:
