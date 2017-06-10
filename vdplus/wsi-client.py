@@ -21,10 +21,12 @@ command('N', 'status(g_client.get("/regen_map")); g_client.Map.reload()', 'make 
 command('Y', 'vd.push(g_client.Players)', 'push players sheet')
 command('P', 'vd.push(g_client.Planets)', 'push planets sheet')
 command('M', 'vd.push(g_client.Map)', 'push map sheet')
-command('Q', 'vd.push(g_client.QueuedDeployments)', 'push unsent routes sheet')
+command('U', 'vd.push(g_client.QueuedDeployments)', 'push unsent routes sheet')
 command('D', 'vd.push(g_client.HistoricalDeployments)', 'push historical deployments sheet')
 command('E', 'vd.push(g_client.Events)', 'push events sheet')
+command('R', 'vd.push(SheetList("scores", g_client.get("/scores").json()))', 'push scores sheet')
 command('^S', 'g_client.QueuedDeployments.submit_deployments()', 'submit deployments and end turn')
+command('Q', 'g_client.player_quit()', 'quit the game (with confirm)')
 
 options.disp_column_sep = ''
 
@@ -56,9 +58,11 @@ class WSIClient:
             g_client.refresh_everything()
 
         turn_num = self.gamestate.get('current_turn')
+        max_turn = self.gamestate.get('num_turns')
+
         rstatus = ''
         if turn_num:
-            rstatus += 'Turn %s:' % turn_num
+            rstatus += 'Turn %s/%s:' % (turn_num, max_turn)
 
         for pl in self.Players.rows:
             name = pl.name
@@ -103,15 +107,25 @@ class WSIClient:
 
         return r
 
-    def add_deployment(self, src, dest, nships):
-        r = self.get('/validate_deploy', launch_planet_name=src.name, dest_planet_name=dest.name, nships_requested=nships)
-        if r.status_code != 200:
-            status(r.text)
+    def player_quit(self):
+        yn = input('Are you sure you want to leave the game? (y/N) ')
+        if yn[:1].upper() == 'Y':
+            status(self.get('/player_quit').text)
         else:
-            d = AttrDict(r.json())
-            d.result = None
-            self.QueuedDeployments.rows.append(d)
-            status('queued deployment')
+            status('Whew! That was close.')
+
+    def add_deployment(self, sources, dest, nships):
+        ndeployments = 0
+        for src in sources:
+            r = self.get('/validate_deploy', launch_planet_name=src.name, dest_planet_name=dest.name, nships_requested=nships)
+            if r.status_code != 200:
+                status(r.text)
+            else:
+                d = AttrDict(r.json())
+                d.result = None
+                self.QueuedDeployments.rows.append(d)
+                ndeployments += 1
+        status('Queued %s deployments' % ndeployments)
 
     @async
     def refresh_everything(self):
@@ -122,16 +136,22 @@ class WSIClient:
                 prev_turn = self.gamestate.get('current_turn', 0)
                 self.gamestate = self.get('/gamestate').json()
 
-                current_turn = self.gamestate.get('current_turn')
+                current_turn = self.gamestate.get('current_turn', 0)
                 if current_turn != prev_turn:
                     self.Planets.reload()
                     self.Events.reload()
                     self.Map.reload()
                     self.HistoricalDeployments.reload()
 
-                    if current_turn > 0:
+                    if current_turn > self.gamestate.get('num_turns'):
+
+                        scores = self.get("/scores").json()
+                        status('Game over. %s is the winner!' % scores[0]['name'])
+                        vd().push(SheetList("scores", scores))
+
+                    elif current_turn > 0:
                         vd().push(self.Events)
-                        status('turn %s completed' % prev_turn)
+                        status('Turn %s started' % current_turn)
 
             time.sleep(options.refresh_rate_s)
 
@@ -173,7 +193,7 @@ class PlanetsSheet(Sheet):
         self.columns = [
             ColumnAttr('name'),
             ColumnAttr('prod', type=int),
-            ColumnAttr('killpct', type=int),
+            ColumnAttr('killpct', type=int, fmtstr='%s%%'),
             ColumnAttr('ownername'),
             ColumnAttr('nships', type=int),
             Column('turns_to_marked', type=int, getter=lambda row: distance_turns(row, self.marked_planet)),
@@ -186,7 +206,8 @@ class PlanetsSheet(Sheet):
         self.marked_planet = None
 
         self.command('m', 'sheet.marked_planet = cursorRow', 'mark current planet as destination')
-        self.command('f', 'g_client.add_deployment(cursorRow, marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
+        self.command('f', 'g_client.add_deployment([cursorRow], marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
+        self.command('gf', 'g_client.add_deployment(selectedRows, marked_planet, int(input("# ships: ")))', 'deploy N ships from each selected planet to marked planet')
 
     def reload(self):
         # name, x, y, prod, killpct, owner.name, nships
@@ -242,20 +263,31 @@ class HistoricalDeploymentsSheet(Sheet):
             ColumnItem('src', 'launch_planet_name'),
             ColumnItem('dest', 'dest_planet_name'),
             ColumnItem('nships', 'nships_deployed', type=int),
-            ColumnItem('killpct', 'killpct', type=int),
+            ColumnItem('killpct', 'killpct', type=int, fmtstr='%s%%'),
         ]
+        self.colorizers.append(self.colorDeployment)
+
+    @staticmethod
+    def colorDeployment(sheet, col, row, value):
+        if row:
+            return (g_client.Players.get_player_color(row['launch_player_name']), 9)
 
     def reload(self):
         self.rows = g_client.get('/deployments').json()
+        self.rows.sort(key=lambda row: (row['dest_turn'], row['launch_turn']), reverse=True)
 
 
 class EventsSheet(Sheet):
     def __init__(self):
         super().__init__('events')
-        self.columns = ColumnItems('turn event'.split())
+        self.columns = [
+            ColumnItem('turn', 'turn', type=int),
+            ColumnItem('event', 'event', width=80),
+        ]
 
     def reload(self):
         self.rows = g_client.get('/events').json()
+        self.rows.sort(key=lambda row: row['turn'], reverse=True)
 
 
 class MapSheet(Sheet):
@@ -265,7 +297,7 @@ class MapSheet(Sheet):
         self.colorizers.append(self.colorPlanet)
         self.colorizers.append(self.colorMarkedPlanet)
         self.command('m', 'g_client.Planets.marked_planet = cursorRow[cursorCol.x]', 'mark current planet as destination')
-        self.command('f', 'g_client.add_deployment(cursorRow[cursorCol.x], g_client.Planets.marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
+        self.command('f', 'g_client.add_deployment([cursorRow[cursorCol.x]], g_client.Planets.marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
         self.command(' ', 'cycle_info()', 'cycle the information displayed')
 
     @staticmethod
