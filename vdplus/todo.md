@@ -1,4 +1,5 @@
 # TODO
-- [ ] **BUG** Owned planet [lacked information](bugImg/ships_absent.png) in the `P`lanet sheet. Still behaved like an owned planet (e.g. ships could be deployed from it.
-- [ ] **BUG** Occasionally, the opponent's colors will not show for [one of the players](bugImg/colors.png) in either the `P` sheet or the `M` sheet.
-- [ ] **FEATURE** Indicate the number of turns remaining until deployed ships arrive to a planet. Example: a `turns_till_marked` column on the queued orders sheet.
+- [ ] **BUG** entire client freezes for up to 30 seconds
+- [ ] **FEATURE** Battle resolution sheet
+- [ ] **INVESTIGATE** Battle maths (ships_left == 0)
+- [ ] **COSMETIC** unicode planets have blip in selected row
