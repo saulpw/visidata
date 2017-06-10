@@ -203,7 +203,7 @@ class HistoricalDeploymentsSheet(Sheet):
         self.columns = [
             ColumnItem('player', 'launch_player_name'),
             ColumnItem('src_turn', 'launch_turn'),
-            ColumnItem('dest_turn', 'launch_turn'),
+            ColumnItem('dest_turn', 'dest_turn'),
             ColumnItem('src', 'launch_planet_name'),
             ColumnItem('dest', 'dest_planet_name'),
             ColumnItem('nships', 'nships_deployed'),
