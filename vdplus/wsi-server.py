@@ -226,27 +226,35 @@ class Game:
             return self.end_turn()
 
     
-    def generate_planets(self, use_rc_logo=True):
+    def generate_planets(self, planets = None,  use_rc_logo=True):
         # name, x, y, prod, killpct, owner, nships
-        self.planets = {}
+        if planets == None:
+            self.planets = {}
+        else:
+            self.planets = planets
+    
         planet_names = all_planet_names[:self.options.num_planets]
         nplayers = len(self.players)
-        def allowed_coord_set(width, height, use_rc):
-            width = self.options.map_width
-            height =self.options.map_height
-            allowed = {}
+        
+        
+        def allowed_coord_set(width, height, use_rc_logo):
             def rectangle(leftupper, rightlower): # inclusive
-                return Set([(i,j) for i in range(leftupper[0], rightlower[0]) for j in range(leftupper[1]+1, rightlower[1]+1)])
-            
-            allowed = allowed | rectangle((2,0)                  ,(width-1,0))
-            allowed = allowed | rectangle((2,Int(2/3 * height))  ,(width-1,Int(2/3 * height)+1))
-            allowed = allowed | rectangle((Int(1/3 * width),Int(2/3 * height)+1),(Int(2/3 * width),Int(2/3 * height)+2)) # stand
-            allowed = allowed | rectangle((4,height-2)        ,(width-3,height-1)) # top keyboard
-            allowed = allowed | rectangle((2,height)        ,(width-1,height)) # keyboard
-            
-            allowed = allowed | rectangle((2,0)                  ,(3,Int(2/3 * height)))  # left edge
-            allowed = allowed | rectangle((width-2,0)  ,(width-1,Int(2/3 * height)))  # right edge
-            allowed = allowed | rectangle((Int(width/2 - 1/3*10),Int(1/3 * height - 1/3*10))  , (Int(width/2 + 1/3*10),Int(1/3 * height + 1/3*10)) )  # screen
+                return set([(i,j) for i in range(leftupper[0], rightlower[0]) for j in range(leftupper[1]+1, rightlower[1]+1)])
+            if not use_rc_logo:
+                return rectangle((0,0),(width,height))
+            else:
+                allowed = set()
+                
+                allowed = allowed | rectangle((2,0)                  ,(width-1,0))
+                allowed = allowed | rectangle((2,int(2/3 * height))  ,(width-1,int(2/3 * height)+1))
+                allowed = allowed | rectangle((int(1/3 * width),int(2/3 * height)+1),(int(2/3 * width),int(2/3 * height)+2)) # stand
+                allowed = allowed | rectangle((4,height-2)        ,(width-3,height-1)) # top keyboard
+                allowed = allowed | rectangle((2,height)        ,(width-1,height)) # keyboard
+                
+                allowed = allowed | rectangle((2,0)                  ,(3,int(2/3 * height)))  # left edge
+                allowed = allowed | rectangle((width-2,0)  ,(width-1,int(2/3 * height)))  # right edge
+                allowed = allowed | rectangle((int(width/2 - 1/3*10),int(1/3 * height - 1/3*10))  , (int(width/2 + 1/3*10),int(1/3 * height + 1/3*10)) )  # screen
+                return allowed
             
         # name, x, y, prod, killpct, owner, nships
         def rand_rc_planet(width, height, existingplanets):
@@ -266,14 +274,14 @@ class Game:
             else:
                 return potentialplanets[0]
             
-        
-        self.planets = planets
-        owners = [p.owner for p in planets]
-
-
-
-        for planet_name in planet_names[len(owners):] :
-            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(10), rand(39)+1)
+        if planets!=None:
+            owners = [p.owner for p in planets]
+        else:
+            owners = []
+        # newcoords depends on use_rc_logo
+        newcoord_list = random.sample(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) , len(planet_names) - len(owners) )
+        for i,planet_name in  enumerate(planet_names[len(owners):]) :
+            self.planets[planet_name] = Planet(planet_name, newcoord_list[i][0], newcoord_list[i][1], rand(10), rand(39)+1)
 
         for i, (name, pl) in enumerate(self.players.items()):
             if name not in owners:
