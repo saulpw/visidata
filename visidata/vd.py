@@ -1549,11 +1549,12 @@ class Column:
 
 # ---- Column makers
 
-def ColumnAttr(attrname, type=anytype):
+def ColumnAttr(attrname, type=anytype, **kwargs):
     """Return Column object with `attrname` from current row Python object."""
     return Column(attrname, type=type,
             getter=lambda r,b=attrname: getattr(r,b),
-            setter=lambda r,v,b=attrname: setattr(r,b,v))
+            setter=lambda r,v,b=attrname: setattr(r,b,v),
+            **kwargs)
 
 def ColumnItem(attrname, itemkey, **kwargs):
     """Return Column object (with getitem/setitem) on the row Python object."""
