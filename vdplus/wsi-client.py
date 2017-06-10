@@ -12,6 +12,8 @@ import builtins
 from visidata import *
 
 option('refresh_rate_s', 2.0, 'time to sleep between refreshes')
+option('disp_turn_done', '☗', 'symbol to indicate player turn taken')
+
 theme('color_dest_planet', 'underline', 'color of marked destination planet')
 
 command('N', 'status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
@@ -52,10 +54,21 @@ class WSIClient:
             self.refresh = True
             g_client.refresh_everything()
 
-        rstatus = '[%s] ' % self.username
         turn_num = self.gamestate.get('current_turn')
+        rstatus = ''
         if turn_num:
-            rstatus += 'Turn %s' % turn_num
+            rstatus += 'Turn %s:' % turn_num
+
+        for pl in self.Players.rows:
+            name = pl.name
+            if pl.ready:
+                name += options.disp_turn_done
+            if pl.name == self.username:
+                fmtstr = ' [%s]'
+            else:
+                fmtstr = ' %s'
+            rstatus += fmtstr % name
+
         return rstatus
 
     def login(self):  # before curses init

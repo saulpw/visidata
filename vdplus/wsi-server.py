@@ -195,12 +195,18 @@ class Game:
     def GET_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships_requested=0, **kwargs):
         dobj = self.predeploy(launch_player, launch_planet_name, dest_planet_name, dest_turn, nships_requested)
 
-        assert dobj.launch_planet.nships >= dobj.nships_deployed
-        dobj.launch_planet.nships -= dobj.nships_deployed
 
-        self.deployments.append(dobj)
+        assert dobj.launch_planet.nships >= dobj.nships_deployed
+
         d = dobj.as_dict()
-        d['result'] = 'deployed'
+
+        if dobj.nships_deployed > 0:
+            dobj.launch_planet.nships -= dobj.nships_deployed
+            self.deployments.append(dobj)
+            d['result'] = 'deployed'
+        else:
+            d['result'] = 'no ships'
+
         return d
 
     def GET_validate_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships_requested=0, **kwargs):
