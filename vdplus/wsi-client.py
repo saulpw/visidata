@@ -226,10 +226,12 @@ class EventsSheet(Sheet):
 class MapSheet(Sheet):
     def __init__(self):
         super().__init__('map')
+        self.fieldToShow = [ 'name', 'prod', 'killpct' ]
         self.colorizers.append(self.colorPlanet)
         self.colorizers.append(self.colorMarkedPlanet)
         self.command('m', 'g_client.Planets.marked_planet = cursorRow[cursorCol.x]', 'mark current planet as destination')
         self.command('f', 'g_client.add_deployment(cursorRow[cursorCol.x], g_client.Planets.marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
+        self.command(' ', 'cycle_info()', 'cycle the information displayed')
 
     @staticmethod
     def colorMarkedPlanet(sheet,col,row,value):
@@ -239,6 +241,10 @@ class MapSheet(Sheet):
     def colorPlanet(sheet,col,row,value):
         return (g_client.Players.get_player_color(row[col.x].ownername), 9) if row and col and row[col.x] else None
 
+    def cycle_info(self):
+        self.fieldToShow = self.fieldToShow[1:] + [self.fieldToShow[0]]
+        status('showing "%s"' % self.fieldToShow[0])
+
     def reload(self):
         g_client.Planets.reload()
         map_w = g_client.gamestate['map_width']
@@ -246,7 +252,7 @@ class MapSheet(Sheet):
 
         self.columns = []
         for x in range(map_w):
-            c = Column('', width=3, getter=lambda row,x=x: row[x].name if row[x] else '.')
+            c = Column('', width=3, getter=lambda row,x=x,self=self: getattr(row[x], self.fieldToShow[0]) if row[x] else '.')
             c.x = x
             self.columns.append(c)
 
