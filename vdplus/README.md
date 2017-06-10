@@ -36,21 +36,19 @@ From any sheet:
 - `E` opens the events sheet
 - `Ctrl-S` submits the pending deployments to the server and signals the player is done
 
-On the `M`ap sheet:
-- The colour of the planet name indicates which player currently 'owns' it.
-- White planets are neutral and currently not in anybody's control.
-- `SPACE` cycles through `name`, `prod` and `killpct` fields.
-- `m` marks the destination planet
-- `f` marks the source planet.
-- Once both source and destination planet are selected, the player is prompted to input how many ships they wish to deploy and then press `ENTER`.
-
 On the `P`lanet sheet:
 - `m` marks the destination planet
-- `f` marks the source planet.
-- Once both source and destination planet are selected, the player is prompted to input how many ships they wish to deploy and then press `ENTER`.
+- `f` marks the source planet
+- Once both source and destination planet are selected, the player is prompted to input how many ships they wish to deploy and then press `ENTER`
+
+On the `M`ap sheet:
+- The colour of the planet name indicates which player currently 'owns' it
+- White planets are neutral and currently not in anybody's control
+- `SPACE` cycles through `name`, `prod` and `killpct` fields
+- `You may also mark and deploy on the map sheet, like your would on the `P`lanet sheet
 
 On the `Q` queued orders sheet:
 - `e` to modify an order
-- `d` to delete an order.
+- `d` to delete an order
 
 When all players have submitted their moves, the turn is over.  Ships arrive, battles are resolved, and planets produce.  Then the next turn begins.
