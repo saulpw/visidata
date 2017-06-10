@@ -33,9 +33,10 @@ class OptionsObject:
 class Game:
     def __init__(self):
         self.options_dict = {
-            'num_planets': 40,
-            'map_width': 15,
-            'map_height': 15,
+            'num_planets': 30,
+            'num_turns': 20,
+            'map_width': 16,
+            'map_height': 16,
             'debug': True,
         }
         self.options = OptionsObject(self.options_dict)
@@ -97,7 +98,41 @@ class Game:
         for p in self.players.values():
             p.turn_sent = False
 
-        self.notify('turn %d started' % self.current_turn)
+        if self.current_turn > self.options.num_turns:
+            scores = self.GET_scores(None)
+            self.notify('Game over!')
+            self.notify('%s is the winner!' % scores[0]['name'])
+        else:
+            self.notify('turn %d started' % self.current_turn)
+
+    def GET_scores(self, pl, **kwargs):
+        player_scores = {}
+        for plname in self.players.keys():
+            player_scores[plname] = {
+                'name': plname,
+                'nplanets': 0,
+                'nships': 0
+            }
+
+        for planet in self.planets.values():
+            if planet.owner:
+                player_scores[planet.owner.name]['nplanets'] += 1
+                player_scores[planet.owner.name]['nships'] += planet.nships
+
+        return sorted(player_scores.values(), key=lambda r: (r['nplanets'], r['nships']), reverse=True)
+
+    def GET_player_quit(self, pl, **kwargs):
+        if pl not in self.players.values():
+            error('no such player in game')
+
+        self.players.pop(pl.name)
+
+        for planet in self.planets.values():
+            if planet.owner is pl:
+                planet.owner = None
+
+        self.notify('Player %s has quit the game.' % pl.name)
+        return 'Thanks for playing!'
 
     @property
     def started(self):
@@ -127,6 +162,7 @@ class Game:
             'map_height': self.options.map_height,
             'started': self.started,
             'current_turn': self.current_turn,
+            'num_turns': self.options.num_turns,
         }
 
     # leaky
