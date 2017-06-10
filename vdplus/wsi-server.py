@@ -66,15 +66,19 @@ class Game:
             # battle time
             attack_strength = float(d.nships_deployed * d.killpct)
             defend_strength = float(d.dest_planet.nships * d.dest_planet.killpct)
-            ratio = defend_strength / attack_strength
+            if attack_strength == 0:
+                self.notify('inconsequential attack against planet %s by player %s with %s ships (%s killpct)' % (d.dest_planet.name, d.launch_player, d.nships_deployed, d.killpct))
+                continue
+
+            ratio = defend_strength / (attack_strength + defend_strength)
             attack_num = random.betavariate(2, 2)
             if attack_num > ratio:
                 ships_left = (attack_num-ratio)/(1-ratio)*d.nships_deployed
                 d.dest_planet.owner = d.launch_player
-                self.notify('planet %s overtaken by %s with %d ships' % (d.dest_planet.name, d.launch_player, d.nships_deployed))
+                self.notify('planet %s overtaken by %s with %d ships (%d%%) (%d ships remain)' % (d.dest_planet.name, d.launch_player, d.nships_deployed, d.killpct, ships_left))
             else:
                 ships_left = (ratio-attack_num)/ratio*d.dest_planet.nships
-                self.notify('planet %s held its own against an attack by %s with %d ships' % (d.dest_planet.name, d.launch_player, d.nships_deployed))
+                self.notify('planet %s held its own against an attack by %s with %d ships (%d%%) (%d ships remain)' % (d.dest_planet.name, d.launch_player, d.nships_deployed, d.killpct, ships_left))
 
             assert ships_left > 0
             d.dest_planet.nships = int(ships_left+0.5)
@@ -82,7 +86,6 @@ class Game:
         for p in self.planets.values():
             if p.owner:
                 p.nships += p.prod
-                self.notify('planet %s produced %d ships (now at %d)' % (p.name, p.prod, p.nships))
 
         # TODO: generate random events
 
@@ -158,28 +161,32 @@ class Game:
         return 'player ready'
 
     def GET_players(self, pl, **kwargs):
-        return [x.as_tuple() for x in self.players.values()]
+        return [x.as_dict() for x in self.players.values()]
 
     def GET_planets(self, pl, **kwargs):
-        return [x.as_tuple() for x in self.planets.values()]
+        return [x.as_dict() for x in self.planets.values()]
 
     def GET_deployments(self, pl, **kwargs):
-        return [x.as_dict() for x in self.deployments]
+        return [x.as_dict() for x in self.deployments if x.dest_turn <= self.current_turn or x.launch_player is pl]
 
     def GET_events(self, pl):
         return [x.as_dict() for x in self.events]
 
     def predeploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships=0):
+        if not self.started:
+            error('game not yet started')
+
         launch_planet = self.planets.get(launch_planet_name) or error('no such planet %s' % launch_planet_name)
         if launch_player is not launch_planet.owner:
             error('player does not own planet')
 
         dest_planet = self.planets.get(dest_planet_name) or error('no such planet %s' % dest_planet_name)
 
-        d = launch_planet.distance(dest_planet)
+        turns = int(launch_planet.distance(dest_planet)/2 + 0.5)
+
         if dest_turn is None:
             dest_turn = 0
-        dest_turn = max(int(dest_turn), int(self.current_turn + d/2), self.current_turn+1)
+        dest_turn = max(int(dest_turn), self.current_turn+turns, self.current_turn+1)
 
         dobj = Deployment(launch_player, self.current_turn, launch_planet, dest_planet, dest_turn, int(nships), launch_planet.killpct)
         dobj.nships_deployed = min(int(nships), launch_planet.nships)
@@ -202,6 +209,9 @@ class Game:
         return dobj.as_dict()
 
     def GET_end_turn(self, pl):
+        if not self.started:
+            error('game not yet started')
+
         pl.turn_sent = True
         num_still_turning = len([p for p in self.players.values() if not p.turn_sent])
         if num_still_turning > 0:
@@ -219,7 +229,7 @@ class Game:
             self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), 10, 40, pl)
 
         for planet_name in planet_names[nplayers:]:
-            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(10), rand(40))
+            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(10), rand(39)+1)
 
 
 class Player:
@@ -230,8 +240,11 @@ class Player:
         self.sessionid = sessionid
         self.turn_sent = False
 
-    def as_tuple(self):
-        return (self.number, self.name, player_colors[self.number], self.turn_sent)
+    def as_dict(self):
+        return dict(number=self.number,
+                    name=self.name,
+                    color=player_colors[self.number],
+                    ready=self.turn_sent)
 
     def __str__(self):
         return self.name
@@ -250,12 +263,24 @@ class Planet:
     def distance(self, dest):
         return math.sqrt((self.y-dest.y)**2 + (self.x-dest.x)**2)
 
-    def as_tuple(self):
-        if self.owner:
-            return (self.name, self.x, self.y, self.prod, self.killpct, self.owner.name, self.nships)
+    def as_dict(self):
+        r = {
+                'name': self.name,
+                'x': self.x,
+                'y': self.y,
+        }
+        if self.owner:  # if owned by any player, all players can see it
+            r.update(prod = self.prod,
+                     killpct = self.killpct,
+                     ownername = self.owner.name,
+                     nships = self.nships)
         else:
-            return (self.name, self.x, self.y, None, None, None, None)
+            r.update(prod = None,
+                     killpct = None,
+                     ownername = None,
+                     nships = None)
 
+        return r
 
 class Deployment:
     def __init__(self, launch_player, launch_turn, launch_planet, dest_planet, dest_turn, nships, killpct):
