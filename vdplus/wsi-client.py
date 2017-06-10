@@ -165,7 +165,7 @@ class QueuedDeploymentsSheet(Sheet):
 
         self.columns = [
             ColumnItem('src_turn', 'launch_turn'),
-            ColumnItem('dest_turn', 'launch_turn'),
+            ColumnItem('dest_turn', 'dest_turn'),
             ColumnItem('src', 'launch_planet_name'),
             ColumnItem('dest', 'dest_planet_name'),
             ColumnItem('nrequested', 'nships_requested'),
@@ -207,7 +207,7 @@ class HistoricalDeploymentsSheet(Sheet):
             ColumnItem('src', 'launch_planet_name'),
             ColumnItem('dest', 'dest_planet_name'),
             ColumnItem('nships', 'nships_deployed'),
-            ColumnItem('killpct', 'nships_deployed'),
+            ColumnItem('killpct', 'killpct'),
         ]
 
     def reload(self):
