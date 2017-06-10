@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+'Whitespace Invaders v0.50'
+
 import sys
 import requests
 import time
@@ -12,13 +14,15 @@ from visidata import *
 option('refresh_rate_s', 1.0, 'time to sleep between refreshes')
 theme('color_dest_planet', 'underline', 'color of marked destination planet')
 
-command('N', 'status(g_client.get("/regen_map")); reload()', 'make New map')
-command('P', 'vd.push(g_Planets)', 'push planets sheet')
-command('M', 'vd.push(MapSheet())', 'push map sheet')
-command('R', 'vd.push(g_UnsentRoutes)', 'push unsent routes sheet')
-command('D', 'vd.push(g_HistoricalDeployments)', 'push historical deployments sheet')
-command('E', 'vd.push(g_Events); g_Events.reload()', 'push events sheet')
+command('N', 'status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
+command('P', 'vd.push(g_client.Planets).reload()', 'push planets sheet')
+command('M', 'vd.push(g_client.Map).reload()', 'push map sheet')
+command('R', 'vd.push(g_client.UnsentRoutes)', 'push unsent routes sheet')
+command('D', 'vd.push(g_client.HistoricalDeployments).reload()', 'push historical deployments sheet')
+command('E', 'vd.push(g_client.Events).reload()', 'push events sheet')
+command('^S', 'g_client.UnsentRoutes.send_routes()', 'commit routes and end turn')
 
+options.disp_column_sep = ''
 
 class LocalPlanet:
     def __init__(self, row):
@@ -29,6 +33,13 @@ class WSIClient:
     def __init__(self, url):
         self.sessionid = None
         self.server_url = url
+
+        self.Players = PlayersSheet()
+        self.Planets = PlanetsSheet()
+        self.UnsentRoutes = UnsentRoutesSheet()
+        self.Events = EventsSheet()
+        self.Map = MapSheet()
+        self.HistoricalDeployments = HistoricalDeploymentsSheet()
 
     def login(self):  # before curses init
         username = builtins.input('player name: ')
@@ -106,7 +117,7 @@ class PlanetsSheet(Sheet):
     def __init__(self):
         super().__init__('planets')
         self.columns = AttrNamedColumns('name x y prod killpct ownername nships'.split())
-        self.colorizers.append(lambda sheet,col,row,value: (g_players.get_player_color(row.ownername), 5) if row else None)
+        self.colorizers.append(lambda sheet,col,row,value: (g_client.Players.get_player_color(row.ownername), 5) if row else None)
         self.colorizers.append(lambda sheet,col,row,value: (options.color_dest_planet, 5) if row is sheet.marked_planet else None)
         self.marked_planet = None
 
@@ -124,7 +135,6 @@ class UnsentRoutesSheet(Sheet):
 
         self.columns = ColumnItems('launch_planet_name dest_planet_name dest_turn nships_requested nships_deployed result'.split())
 
-        self.command('^S', 'send_routes()', 'commit routes and end turn')
         self.colorizers.append(self.colorIncomplete)
 
     @staticmethod
@@ -170,10 +180,9 @@ class MapSheet(Sheet):
         super().__init__('map')
         self.colorizers.append(self.colorPlanet)
 
-
     @staticmethod
     def colorPlanet(sheet,col,row,value):
-        return (g_players.get_player_color(row[col.x].ownername), 9) if row and col and row[col.x] else None
+        return (g_client.Players.get_player_color(row[col.x].ownername), 9) if row and col and row[col.x] else None
 
     def reload(self):
         gamestate = g_client.get('/gamestate').json()
@@ -183,7 +192,7 @@ class MapSheet(Sheet):
 
         self.columns = []
         for x in range(map_w):
-            c = Column(str(x), width=3, getter=lambda row,x=x: row[x].name if row[x] else '.')
+            c = Column('', width=3, getter=lambda row,x=x: row[x].name if row[x] else '.')
             c.x = x
             self.columns.append(c)
 
@@ -199,23 +208,12 @@ class MapSheet(Sheet):
             self.rows[lplanet.y][lplanet.x] = lplanet
 
 
-g_players = PlayersSheet()
-g_Planets = PlanetsSheet()
-g_UnsentRoutes = UnsentRoutesSheet()
-g_Events = EventsSheet()
-g_HistoricalDeployments = HistoricalDeploymentsSheet()
 g_client = WSIClient(sys.argv[1])
 
-vd().rightStatus = lambda: time.strftime('%H:%M:%S')
-
 if __name__ == '__main__':
+    print(__doc__)
     g_client.login()
     set_global('g_client', g_client)
-    set_global('g_Planets', g_Planets)
-    set_global('g_HistoricalDeployments', g_HistoricalDeployments)
-    set_global('g_UnsentRoutes', g_UnsentRoutes)
-    set_global('g_Events', g_Events)
-    set_global('MapSheet', MapSheet)
     set_global('add_deployment', add_deployment)
-    run([g_players])
+    run([g_client.Players])
 

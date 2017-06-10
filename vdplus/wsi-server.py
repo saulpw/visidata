@@ -10,7 +10,7 @@ import random
 
 
 player_colors = 'green yellow cyan magenta red blue'.split()
-planet_names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+planet_names =  ''.join(chr(x) for x in range(0x2600, 0x26b9))
 rand = random.randrange
 
 def error(s):
@@ -31,8 +31,8 @@ class OptionsObject:
 class Game:
     def __init__(self):
         self.options_dict = {
-            'map_width': 10,
-            'map_height': 10,
+            'map_width': 25,
+            'map_height': 25,
             'debug': True,
         }
         self.options = OptionsObject(self.options_dict)
