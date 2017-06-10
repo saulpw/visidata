@@ -250,8 +250,8 @@ class Game:
         for i, (name, pl) in enumerate(self.players.items()):
             if name not in owners:
                 planet_name = planet_names[i]
-                (xx,yy) = rand_rc(width, height, planets).xy
-                self.planets[planet_name] = Planet(planet_name, xx, yy), 10, 40, pl)
+                (xx,yy) = rand_rc_planet(width, height, planets).xy
+                self.planets[planet_name] = Planet(planet_name, xx, yy, 10, 40, pl)
 
 
 
