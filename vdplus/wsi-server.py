@@ -202,17 +202,57 @@ class Game:
             return 'still waiting on %d players' % num_still_turning
         else:
             return self.end_turn()
-
-    def generate_planets(self):
+    
+    def generate_planets(self, planets = {}, use_rc=True):
+        def allowed_coord_set(width, height, use_rc):
+            width = self.options.map_width
+            height =self.options.map_height
+            allowed = {}
+            def rectangle(leftupper, rightlower): # inclusive
+                return Set([(i,j) for i in range(leftupper[0], rightlower[0]) for j in range(leftupper[1]+1, rightlower[1]+1)])
+            
+            allowed = allowed | rectangle((2,0)                  ,(width-1,0))
+            allowed = allowed | rectangle((2,Int(2/3 * height))  ,(width-1,Int(2/3 * height)+1))
+            allowed = allowed | rectangle((Int(1/3 * width),Int(2/3 * height)+1),(Int(2/3 * width),Int(2/3 * height)+2)) # stand
+            allowed = allowed | rectangle((4,height-2)        ,(width-3,height-1)) # top keyboard
+            allowed = allowed | rectangle((2,height)        ,(width-1,height)) # keyboard
+            
+            allowed = allowed | rectangle((2,0)                  ,(3,Int(2/3 * height)))  # left edge
+            allowed = allowed | rectangle((width-2,0)  ,(width-1,Int(2/3 * height)))  # right edge
+            allowed = allowed | rectangle((Int(width/2 - 1/3*10),Int(1/3 * height - 1/3*10))  , (Int(width/2 + 1/3*10),Int(1/3 * height + 1/3*10)) )  # screen
+            
         # name, x, y, prod, killpct, owner, nships
-        self.planets = {}
+        def rand_rc_planet(width, height, existingplanets):
+            def index_greatest_distance(oneplanet, planets):
+                distances = map(lambda x: oneplanet.distance(x), planets)
+                index_of_greatest_planet = max([(d,i) for i,d in enumerate(distances)])[1]
+                return index_of_greatest_planet
+            
+            ownedplanets = [p for p in planets if p.owner != None]
+            potentialplanets = []
+            for i in range(5):
+                potentialplanets = potentialplanets.append(random.choice(planets))
+            
+            if len(ownedplanets) > 0 :
+                idx =  index_greatest_distance(oneplanet, potentialplanets)
+                return potentialplanets[idx]
+            else:
+                return potentialplanets[0]
+            
+        
+        self.planets = planets
+        owners = [p.owner for p in planets]
         nplayers = len(self.players)
-        for i, (name, pl) in enumerate(self.players.items()):
-            planet_name = planet_names[i]
-            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), 10, 40, pl)
 
-        for planet_name in planet_names[nplayers:]:
+        for planet_name in planet_names[nplayers:].drop(len(owners)): # for non-owned planets
             self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(10), rand(40))
+
+        for i, (name, pl) in enumerate(self.players.items()):
+            if name not in owners:
+                planet_name = planet_names[i]
+                (xx,yy) = rand_rc(width, height, planets).xy
+                self.planets[planet_name] = Planet(planet_name, xx, yy), 10, 40, pl)
+
 
 
 class Player:
@@ -239,6 +279,10 @@ class Planet:
         self.killpct = killpct
         self.owner = owner
         self.nships = prod
+        
+    @property
+    def xy(self):
+        return (self.x, self.y)
 
     def distance(self, dest):
         return math.sqrt((self.y-dest.y)**2 + (self.x-dest.x)**2)
@@ -265,7 +309,7 @@ class Deployment:
         return {
             'launch_turn': self.launch_turn,
             'launch_player_name': self.launch_player.name,
-            'launch_planet_name': self.launch_planet.name, 
+            'launch_planet_name': self.launch_planet.name,
             'dest_planet_name': self.dest_planet.name,
             'dest_turn': int(self.dest_turn),
             'nships_requested': self.nships_requested,
