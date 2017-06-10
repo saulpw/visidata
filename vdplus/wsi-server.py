@@ -34,8 +34,8 @@ class Game:
     def __init__(self):
         self.options_dict = {
             'num_planets': 40,
-            'map_width': 25,
-            'map_height': 25,
+            'map_width': 15,
+            'map_height': 15,
             'debug': True,
         }
         self.options = OptionsObject(self.options_dict)
@@ -45,7 +45,7 @@ class Game:
         self.events = []
         self.current_turn = 0
 
-        self.generate_planets()
+        self.generate_planets(use_rc_logo=True)
 
     def notify(self, eventstr):
         self.events.append(Event(self.current_turn, eventstr))
@@ -60,7 +60,7 @@ class Game:
 
             if d.dest_planet.owner is d.launch_player:
                 d.dest_planet.nships += d.nships_deployed
-                self.notify('%d reinforcements arrived at %s' % (d.nships_deployed, d.dest_planet.name))
+                self.notify('%s sent %d reinforcements to %s' % (d.launch_player, d.nships_deployed, d.dest_planet.name))
                 continue
 
             # battle time
@@ -115,11 +115,11 @@ class Game:
     def GET_options(self, pl, **kwargs):
         return self.options
 
-    def GET_regen_map(self, pl, **kwargs):
+    def GET_regen_map(self, pl, use_rc_logo=True, **kwargs):
         if self.started:
             error('game already started')
 
-        self.generate_planets()
+        self.generate_planets(use_rc_logo=use_rc_logo)
 
     def GET_gamestate(self, pl, **kwargs):
         return {
@@ -195,12 +195,18 @@ class Game:
     def GET_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships_requested=0, **kwargs):
         dobj = self.predeploy(launch_player, launch_planet_name, dest_planet_name, dest_turn, nships_requested)
 
-        assert dobj.launch_planet.nships >= dobj.nships_deployed
-        dobj.launch_planet.nships -= dobj.nships_deployed
 
-        self.deployments.append(dobj)
+        assert dobj.launch_planet.nships >= dobj.nships_deployed
+
         d = dobj.as_dict()
-        d['result'] = 'deployed'
+
+        if dobj.nships_deployed > 0:
+            dobj.launch_planet.nships -= dobj.nships_deployed
+            self.deployments.append(dobj)
+            d['result'] = 'deployed'
+        else:
+            d['result'] = 'no ships'
+
         return d
 
     def GET_validate_deploy(self, launch_player, launch_planet_name=None, dest_planet_name=None, dest_turn=None, nships_requested=0, **kwargs):
@@ -219,7 +225,7 @@ class Game:
         else:
             return self.end_turn()
 
-    def generate_planets(self):
+    def generate_planets(self, use_rc_logo=True):
         # name, x, y, prod, killpct, owner, nships
         self.planets = {}
         planet_names = all_planet_names[:self.options.num_planets]
