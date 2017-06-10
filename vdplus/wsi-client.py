@@ -11,10 +11,11 @@ import builtins
 
 from visidata import *
 
-option('refresh_rate_s', 1.0, 'time to sleep between refreshes')
+option('refresh_rate_s', 2.0, 'time to sleep between refreshes')
 theme('color_dest_planet', 'underline', 'color of marked destination planet')
 
 command('N', 'status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
+command('Y', 'vd.push(g_client.Players).reload()', 'push players sheet')
 command('P', 'vd.push(g_client.Planets).reload()', 'push planets sheet')
 command('M', 'vd.push(g_client.Map).reload()', 'push map sheet')
 command('R', 'vd.push(g_client.UnsentRoutes)', 'push unsent routes sheet')
@@ -41,11 +42,22 @@ class WSIClient:
         self.Map = MapSheet()
         self.HistoricalDeployments = HistoricalDeploymentsSheet()
 
+        vd().rightStatus = self.rightStatus
+        self.gamestate = {}
+        self.refresh = False
+
+    def rightStatus(self):
+        if not self.gamestate:
+            self.refresh = True
+            g_client.refresh_everything()
+
+        return '[%s] Turn %s' % (self.username, self.gamestate.get('current_turn'))
+
     def login(self):  # before curses init
-        username = builtins.input('player name: ')
+        self.username = builtins.input('player name: ')
         password = getpass.getpass('password: ')
 
-        data = { 'username': username, 'password': hashlib.md5(password.encode('utf-8')).hexdigest() }
+        data = { 'username': self.username, 'password': hashlib.md5(password.encode('utf-8')).hexdigest() }
 
         r = requests.post(self.server_url + '/auth', data=data)
 
@@ -72,16 +84,29 @@ class WSIClient:
 
         return r
 
+    def add_deployment(self, src, dest, nships):
+        r = self.get('/validate_deploy', launch_planet_name=src.name, dest_planet_name=dest.name, nships_requested=nships)
+        if r.status_code != 200:
+            status(r.text)
+        else:
+            d = r.json()
+            d['result'] = None
+            self.UnsentRoutes.rows.append(d)
+            status('queued deployment')
 
-def add_deployment(src, dest, nships):
-    r = g_client.get('/validate_deploy', launch_planet_name=src.name, dest_planet_name=dest.name, nships_requested=nships)
-    if r.status_code != 200:
-        status(r.text)
-    else:
-        d = r.json()
-        d['result'] = None
-        g_UnsentRoutes.rows.append(d)
-        status('queued deployment')
+    @async
+    def refresh_everything(self):
+        while True:
+            if self.refresh:
+                self.gamestate = self.get('/gamestate').json()
+
+                self.Players.reload()
+#                self.Planets.reload()
+#                self.Events.reload()
+#                self.Map.reload()
+#                self.HistoricalDeployments.reload()
+
+            time.sleep(options.refresh_rate_s)
 
 
 class PlayersSheet(Sheet):
@@ -96,11 +121,8 @@ class PlayersSheet(Sheet):
 
         self.colorizers.append(lambda sheet,col,row,value: row and (row[2], 8))
 
-#    @async
     def reload(self):
-#        while True:
-            self.rows = g_client.get('/players').json()
-#            time.sleep(options.refresh_rate_s)
+        self.rows = g_client.get('/players').json()
 
     def get_player_color(self, playername):
         for plrow in self.rows:
@@ -122,7 +144,7 @@ class PlanetsSheet(Sheet):
         self.marked_planet = None
 
         self.command('m', 'sheet.marked_planet = cursorRow', 'mark current planet as destination')
-        self.command('f', 'add_deployment(cursorRow, marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
+        self.command('f', 'g_client.add_deployment(cursorRow, marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
 
     def reload(self):
         # name, x, y, prod, killpct, owner.name, nships
@@ -207,13 +229,15 @@ class MapSheet(Sheet):
             lplanet = LocalPlanet(planet)
             self.rows[lplanet.y][lplanet.x] = lplanet
 
+        # so the order can't be changed
+        self.columns = tuple(self.columns)
+        self.rows = tuple(self.rows)
 
 g_client = WSIClient(sys.argv[1])
 
 if __name__ == '__main__':
     print(__doc__)
-    g_client.login()
     set_global('g_client', g_client)
-    set_global('add_deployment', add_deployment)
+    g_client.login()
     run([g_client.Players])
 

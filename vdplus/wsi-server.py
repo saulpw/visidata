@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import string
 import math
 import json
 import http.server
@@ -10,7 +11,8 @@ import random
 
 
 player_colors = 'green yellow cyan magenta red blue'.split()
-planet_names =  ''.join(chr(x) for x in range(0x2600, 0x26b9))
+all_planet_names =  string.ascii_uppercase + '0123456789' + '☿♀♂♃♄⛢♅♆⚳⚴⚵'
+
 rand = random.randrange
 
 def error(s):
@@ -31,6 +33,7 @@ class OptionsObject:
 class Game:
     def __init__(self):
         self.options_dict = {
+            'num_planets': 40,
             'map_width': 25,
             'map_height': 25,
             'debug': True,
@@ -110,6 +113,9 @@ class Game:
         return self.options
 
     def GET_regen_map(self, pl, **kwargs):
+        if self.started:
+            error('game already started')
+
         self.generate_planets()
 
     def GET_gamestate(self, pl, **kwargs):
@@ -206,6 +212,7 @@ class Game:
     def generate_planets(self):
         # name, x, y, prod, killpct, owner, nships
         self.planets = {}
+        planet_names = all_planet_names[:self.options.num_planets]
         nplayers = len(self.players)
         for i, (name, pl) in enumerate(self.players.items()):
             planet_name = planet_names[i]
