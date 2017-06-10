@@ -34,8 +34,8 @@ class Game:
     def __init__(self):
         self.options_dict = {
             'num_planets': 40,
-            'map_width': 25,
-            'map_height': 25,
+            'map_width': 15,
+            'map_height': 15,
             'debug': True,
         }
         self.options = OptionsObject(self.options_dict)
@@ -60,7 +60,7 @@ class Game:
 
             if d.dest_planet.owner is d.launch_player:
                 d.dest_planet.nships += d.nships_deployed
-                self.notify('%d reinforcements arrived at %s' % (d.nships_deployed, d.dest_planet.name))
+                self.notify('%s sent %d reinforcements to %s' % (d.launch_player, d.nships_deployed, d.dest_planet.name))
                 continue
 
             # battle time
