@@ -120,8 +120,8 @@ class Game:
                         self.notify('Planet %s instituted compulsory opera, killpct improved to %s%%' % (p.name, p.killpct))
                     elif rand(10) > p.prod:
                         p.prod += 1
-                        self.notify('Planet %s improved its production to %s%%' % (p.name, p.prod))
-                    if rand(40) < p.killpct:
+                        self.notify('Planet %s improved its production to %s' % (p.name, p.prod))
+                    elif rand(40) < p.killpct:
                         p.killpct -= rand(5)
                         self.notify('Planet %s legalized dancing, killpct dropped to %s%%' % (p.name, p.killpct))
                     elif rand(10) < p.prod:
