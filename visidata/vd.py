@@ -1558,7 +1558,7 @@ def ColumnAttr(attrname, type=anytype, **kwargs):
     return Column(attrname, type=type,
             getter=lambda r,b=attrname: getattr(r,b),
             setter=lambda r,v,b=attrname: setattr(r,b,v),
-            **kwargs)
+                    **kwargs)
 
 def ColumnItem(attrname, itemkey, **kwargs):
     """Return Column object (with getitem/setitem) on the row Python object."""

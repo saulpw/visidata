@@ -1,5 +1,5 @@
 Credits
--------
+=======
 
 VisiData was created by Saul Pwanson ``<vd@saul.pw>``.
 

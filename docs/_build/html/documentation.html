@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Documentation &mdash; VisiData 0.60 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="VisiData 0.60 documentation" href="index.html"/>
+        <link rel="next" title="Contributing" href="about/contributing.html"/>
+        <link rel="prev" title="Screen layout" href="dev-cursors.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> VisiData
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.60
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="home.html">home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev-guide.html">Overview of VisiData architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screen-layout.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev-cursors.html">Screen layout</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#python-docstrings">Python Docstrings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#restructuredtext">reStructuredText</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sphinx">Sphinx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#read-the-docs">Read the Docs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="about/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about/credits.html">Credits</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">VisiData</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/documentation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="python-docstrings">
+<h2>Python Docstrings<a class="headerlink" href="#python-docstrings" title="Permalink to this headline">¶</a></h2>
+<p>Functions and methods, classes, and modules normally have standard docstrings.</p>
+</div>
+<div class="section" id="restructuredtext">
+<h2>reStructuredText<a class="headerlink" href="#restructuredtext" title="Permalink to this headline">¶</a></h2>
+<p>This project uses reStructuredText (in files with extension <code class="docutils literal"><span class="pre">.rst</span></code>) because it is more extensible and powerful than Markdown.</p>
+</div>
+<div class="section" id="sphinx">
+<h2>Sphinx<a class="headerlink" href="#sphinx" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Sphinx is installed via <code class="docutils literal"><span class="pre">pip</span></code>. Do initial set-up with <code class="docutils literal"><span class="pre">sphinx-quickstart</span></code>. Here we have followed all defaults except creation of a <code class="docutils literal"><span class="pre">.bat</span></code> file:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>&gt; Create Windows command file? (y/n) [y]: n
+</pre></div>
+</div>
+</li>
+<li><p class="first">In the auto-populated <code class="docutils literal"><span class="pre">index.rst</span></code> there are three additions to make.</p>
+<ol class="loweralpha">
+<li><p class="first">At very the top of the file, add:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">:</span><span class="n">tocdepth</span><span class="p">:</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Change <code class="docutils literal"><span class="pre">:maxdepth:</span> <span class="pre">2</span></code> to <code class="docutils literal"><span class="pre">:maxdepth:</span> <span class="pre">4</span></code>.</p>
+</li>
+<li><p class="first">Below <code class="docutils literal"><span class="pre">:caption:</span> <span class="pre">Contents:</span></code> add the name of each file containing documentation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">home</span>
+<span class="n">user</span><span class="o">-</span><span class="n">guide</span>
+<span class="n">dev</span><span class="o">-</span><span class="n">guide</span>
+<span class="n">screen</span><span class="o">-</span><span class="n">layout</span>
+<span class="n">dev</span><span class="o">-</span><span class="n">cursors</span>
+<span class="n">about</span><span class="o">/</span><span class="n">contributing</span>
+<span class="n">about</span><span class="o">/</span><span class="n">credits</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</li>
+<li><p class="first">In the auto-populated <code class="docutils literal"><span class="pre">conf.py</span></code> you can set the Sphinx them and its options. Themes are listed <a class="reference external" href="http://www.sphinx-doc.org/en/stable/theming.html">on the Sphinx site</a>. Declare a theme by setting <code class="docutils literal"><span class="pre">html_theme</span></code> to a string containing the name of the theme; declare its options by setting <code class="docutils literal"><span class="pre">html_theme_options</span></code> to a dictionary containing key-value pairs for each option, following the page linked to above.</p>
+<p><code class="docutils literal"><span class="pre">sphinx-quickstart</span></code> defaults to the <code class="docutils literal"><span class="pre">alabaster</span></code> theme. By default, if Sphinx is not used, Read the Docs installs a custom theme called the “<a class="reference external" href="https://github.com/rtfd/sphinx_rtd_theme">Read the Docs Sphinx Theme</a>”, which is available via <code class="docutils literal"><span class="pre">pip</span></code> or <code class="docutils literal"><span class="pre">git-clone</span></code>. We have installed that theme here. You can create other custom themes using <code class="docutils literal"><span class="pre">INI</span></code> format, as described <a class="reference external" href="http://www.sphinx-doc.org/en/stable/theming.html">on the Sphinx site</a>.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">sphinx-quickstart</span></code> creates a <code class="docutils literal"><span class="pre">Makefile</span></code> in <code class="docutils literal"><span class="pre">docs/</span></code>, which will construct HTML straightforwardly:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">html</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">If <code class="docutils literal"><span class="pre">make</span></code> runs without errors, <code class="docutils literal"><span class="pre">index.html</span></code> will contain your table of contents and documentation. You can now stage, commit, and push the current contents of the repository.</p>
+<p>Warnings, for instance that a certain <code class="docutils literal"><span class="pre">.rst</span></code> file is not referred to in the documentation, do not seem to cause Sphinx to fail to build.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="read-the-docs">
+<h2>Read the Docs<a class="headerlink" href="#read-the-docs" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">In order to use Read the Docs, you need to sign up for an account. The service is free to use, but support may cost money.</p>
+</li>
+<li><p class="first">To import a new project, use the <a class="reference external" href="https://readthedocs.org/dashboard/import/manual/">manual import page of the Dashboard</a> and click the “Import a Project” button.</p>
+<p>If you grant Read the Docs admin access to your Git-hosting repository (at <a class="reference external" href="https://readthedocs.org/accounts/social/connections/">https://readthedocs.org/accounts/social/connections/</a>), it will attempt to build a new set of docs each time a commit is pushed, via webhooks. You can also build new docs manually, in the absence of a valid webhook. If a webhook is set up for GitHub, it will be listed on the <code class="docutils literal"><span class="pre">settings</span> <span class="pre">=&gt;</span> <span class="pre">Webhooks</span></code> page of the repository.</p>
+</li>
+<li><p class="first">On the <code class="docutils literal"><span class="pre">Admin</span></code> settings for the project, set “programming language” to Python.</p>
+</li>
+<li><p class="first">If the Sphinx docs are not stored in the <code class="docutils literal"><span class="pre">master</span></code> branch, Read the Docs may not be able to find them, even if the correct branch is set as default on the Git-hosting service (on GitHub, that means Settings =&gt; Branches =&gt; Default Branch). To ensure that Read the Docs reads from the correct branch, set it at:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Read</span> <span class="n">the</span> <span class="n">Docs</span> <span class="n">project</span><span class="p">:</span> <span class="n">Admin</span> <span class="o">=&gt;</span> <span class="n">Advanced</span> <span class="n">Settings</span> <span class="o">=&gt;</span> <span class="n">Default</span> <span class="n">branch</span>
+</pre></div>
+</div>
+<p>Also on the “Advanced Settings” page, it may be useful to set the Python interpreter to the correct version of Python for the project (CPython 3.x).</p>
+<p>On submit, assuming a webhook is found, Read the Docs will build and deploy a new version, using the branch set.</p>
+<p>The build may fail if you make too many attempts to build within a very short time.</p>
+<p>If a build attempt fails, Python or other tracebacks are visible if you click on the attempt in question, on the Builds pages. Currently (20170611) the presence of <code class="docutils literal"><span class="pre">pkg-resource==0.0.0</span></code> in <code class="docutils literal"><span class="pre">requirements.txt</span></code> causes such a failure, so edit it out if you have updated that file from <code class="docutils literal"><span class="pre">pip</span> <span class="pre">freeze</span></code>.</p>
+</li>
+</ol>
+<p>[end]</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="about/contributing.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="dev-cursors.html" class="btn btn-neutral" title="Screen layout" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Saul Pwanson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.60',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

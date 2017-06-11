@@ -1,0 +1,4 @@
+start_sheet	keystrokes	input	end_sheet
+	o	{input}	sample
+sample	]		sample
+sample	^S	{output}	sample
