@@ -153,8 +153,15 @@ class Game:
     def GET_regen_map(self, pl, use_rc_logo=True, **kwargs):
         if self.started:
             error('game already started')
-
-        self.generate_planets(planets=self.planets, use_rc_logo=use_rc_logo)
+        # huge hack and there's duplication in rc_logo from the client get("/regen_map" too
+        if "planets" not in kwargs:
+            kwargs["planets"] = self.planets
+            self.generate_planets( use_rc_logo=use_rc_logo, **kwargs)
+        else:
+            if kwargs["planets"]=="reset current completely":
+                self.generate_planets( use_rc_logo=False, planets=None)
+            else:
+                self.generate_planets( use_rc_logo=use_rc_logo, **kwargs)
 
     def GET_gamestate(self, pl, **kwargs):
         return {
@@ -277,37 +284,26 @@ class Game:
             def rectangle(leftupper, rightlower): # inclusive
                 return set([(i,j) for i in range(leftupper[0], rightlower[0]+1) for j in range(leftupper[1], rightlower[1]+1)])
             if not use_rc_logo:
-                return rectangle((0,0),(width,height))
+                return rectangle((0,0),(width-1,height-1))
             else:
                 allowed = set()
                 
                 allowed = allowed | rectangle((2,2)                  ,(width-3,2))
-                assert 16 not in [x[1] for x in allowed] , "1"
                 allowed = allowed | rectangle((2,int(2/3 * height)-2)  ,(width-3,int(2/3 * height)-2))
-                assert 16 not in [x[1] for x in allowed] , "2"
                 allowed = allowed | rectangle((int(6/15 * width),int(2/3 * height)-1),(int(6/15 * width),int(2/3 * height))) # left stand
                 allowed = allowed | rectangle((int(7/15 * width),int(2/3 * height)+1), (int(7/15*width), int(2/3 * height)+2)) # right stand
                 allowed = allowed | rectangle((int(8/15 * width),int(2/3 * height)-1),(int(8/15 * width),int(2/3 * height))) # left stand
                 allowed = allowed | rectangle((int(9/15 * width),int(2/3 * height)+1), (int(9/15*width), int(2/3 * height)+2)) # right stand
-                assert 16 not in [x[1] for x in allowed] , "4"
                 allowed = allowed | rectangle( (int(width*2/10),height-3)        ,(int(3/10*width),height-3)) # left keyboard
                 allowed = allowed | rectangle( (int(width*4/10),height-2)        ,(int(5/10*width),height-2)) # left keyboard
                 allowed = allowed | rectangle( (int(width*6/10),height-3)        ,(int(7/10*width),height-3)) # left keyboard
                 allowed = allowed | rectangle( (int(width*7/10),height-2)        ,(int(8/10*width),height-2)) # right keyboard
-                assert 16 not in [x[1] for x in allowed] , "5"
-                # allowed = allowed | rectangle((int(1/3 * width),int(2/3 * height)+1),(int(2/3 * width),int(2/3 * height)+2)) # stand
-                # assert 16 not in [x[1] for x in allowed] , "3"
-                # allowed = allowed | rectangle((4,height-2)        ,(width-3,height-1)) # top keyboard
-                # assert 16 not in [x[1] for x in allowed] , "4"
-                # allowed = allowed | rectangle((2,height-1)        ,(width-2,height-1)) # keyboard
-                # assert 16 not in [x[1] for x in allowed] , "5"
-                
+
                 allowed = allowed | rectangle( (2,2)                  ,(2,int(2/3 * height)-2) )  # left edge
-                assert 16 not in [x[1] for x in allowed] , "6"
                 allowed = allowed | rectangle((width-3,2)             ,(width-3,int(2/3 * height)-2))  # right edge
-                assert 16 not in [x[1] for x in allowed] , "7"
-                # allowed = allowed | rectangle((int(width/2 - width/8),int(1/3 * height - height/8))  , (int(width/2 + width/8),int(1/3 * height + height/8)) )  # screen
-                # assert 16 not in [x[1] for x in allowed] , "8"
+                assert self.options.map_height not in [x[1] for x in allowed], "allowed set is too tall"
+                assert self.options.map_width not in [x[0] for x in allowed], "allowed set is too wide"
+
                 return allowed
             
         # name, x, y, prod, killpct, owner, nships
@@ -335,22 +331,14 @@ class Game:
             owners = []
         # newcoords depends on use_rc_logo
         owned_planet_coords = set([p.xy for p in planets.values() if p.owner is not None])
-        print(owned_planet_coords)
-        print(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) - owned_planet_coords)
-        print("asdf")
-        print(len(planet_names))
-        
-        print(owners)
         newcoord_list = random.sample(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) - owned_planet_coords , k=len(planet_names) - len(owners) )
-        print(newcoord_list)
-
 
         for i,planet_name in  enumerate(planet_names[len(owners):]) :
             self.planets[planet_name] = Planet(planet_name, newcoord_list[i][0], newcoord_list[i][1], rand(10), rand(39)+1)
 
         for i, (name, pl) in enumerate(self.players.items()):
-            if pl not in owners:
-                print("expected here only in join")
+            if pl not in owners or planets is None  :
+                print("expected here only on joining, or on hard regenerates")
                 planet_name = planet_names[i]
                 (xx,yy) = planet_away_from_planets(self.options.map_width, self.options.map_height, self.planets).xy
                 self.planets[planet_name] = Planet(planet_name, xx, yy, 10, 40, pl)
