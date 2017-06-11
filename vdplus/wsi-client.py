@@ -21,6 +21,7 @@ theme('color_empty_space', '20 blue', 'color of empty space')
 theme('color_unowned_planet', 'white', 'color of unowned planet')
 theme('disp_empty_space', '.', 'color of empty space')
 
+command('1', 'status(g_client.get("/regen_map", planets="reset current completely", use_rc_logo=False)); g_client.Map.reload()', 'make New map')
 command('N', 'status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
 command('Y', 'vd.push(g_client.Players)', 'push players sheet')
 command('P', 'vd.push(g_client.Planets)', 'push planets sheet')

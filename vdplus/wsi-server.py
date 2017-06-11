@@ -197,8 +197,15 @@ class Game:
     def GET_regen_map(self, pl, use_rc_logo=True, **kwargs):
         if self.started:
             error('game already started')
-
-        self.generate_planets(use_rc_logo=use_rc_logo)
+        # huge hack and there's duplication in rc_logo from the client get("/regen_map" too
+        if "planets" not in kwargs:
+            kwargs["planets"] = self.planets
+            self.generate_planets( use_rc_logo=use_rc_logo, **kwargs)
+        else:
+            if kwargs["planets"]=="reset current completely":
+                self.generate_planets( use_rc_logo=False, planets=None)
+            else:
+                self.generate_planets( use_rc_logo=use_rc_logo, **kwargs)
 
     def GET_gamestate(self, pl, **kwargs):
         return {
@@ -223,7 +230,7 @@ class Game:
         pl.number = len(self.players)
         self.players[pl.name] = pl
 
-        self.generate_planets()
+        self.generate_planets(planets=self.planets)
         return 'joined game'
 
     def GET_ready(self, pl, **kwargs):
@@ -262,7 +269,7 @@ class Game:
 
         dest_planet = self.planets.get(dest_planet_name) or error('no such planet %s' % dest_planet_name)
 
-        turns = int(launch_planet.distance(dest_planet)/2 + 0.5)
+        turns = int(distance(launch_planet, dest_planet)/2 + 0.5)
         turns = max(1, turns)
 
         if dest_turn is None:
@@ -306,17 +313,84 @@ class Game:
         else:
             return self.end_turn()
 
-    def generate_planets(self, use_rc_logo=True):
+    
+    def generate_planets(self, planets = None,  use_rc_logo=True):
         # name, x, y, prod, killpct, owner, nships
-        self.planets = {}
+        if planets is None:
+            planets = {}
+        
+        #self.planets = planets
+    
         planet_names = all_planet_names[:self.options.num_planets]
         nplayers = len(self.players)
-        for i, (name, pl) in enumerate(self.players.items()):
-            planet_name = planet_names[i]
-            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), 10, 40, pl)
+        
+        
+        def allowed_coord_set(width, height, use_rc_logo):
+            def rectangle(leftupper, rightlower): # inclusive
+                return set([(i,j) for i in range(leftupper[0], rightlower[0]+1) for j in range(leftupper[1], rightlower[1]+1)])
+            if not use_rc_logo:
+                return rectangle((0,0),(width-1,height-1))
+            else:
+                allowed = set()
+                
+                allowed = allowed | rectangle((2,2)                  ,(width-3,2))
+                allowed = allowed | rectangle((2,int(2/3 * height)-2)  ,(width-3,int(2/3 * height)-2))
+                allowed = allowed | rectangle((int(6/15 * width),int(2/3 * height)-1),(int(6/15 * width),int(2/3 * height))) # left stand
+                allowed = allowed | rectangle((int(7/15 * width),int(2/3 * height)+1), (int(7/15*width), int(2/3 * height)+2)) # right stand
+                allowed = allowed | rectangle((int(8/15 * width),int(2/3 * height)-1),(int(8/15 * width),int(2/3 * height))) # left stand
+                allowed = allowed | rectangle((int(9/15 * width),int(2/3 * height)+1), (int(9/15*width), int(2/3 * height)+2)) # right stand
+                allowed = allowed | rectangle( (int(width*2/10),height-3)        ,(int(3/10*width),height-3)) # left keyboard
+                allowed = allowed | rectangle( (int(width*4/10),height-2)        ,(int(5/10*width),height-2)) # left keyboard
+                allowed = allowed | rectangle( (int(width*6/10),height-3)        ,(int(7/10*width),height-3)) # left keyboard
+                allowed = allowed | rectangle( (int(width*7/10),height-2)        ,(int(8/10*width),height-2)) # right keyboard
 
-        for planet_name in planet_names[nplayers:]:
-            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(6)+rand(6), rand(11)+rand(11)+rand(11)+rand(11)+10)
+                allowed = allowed | rectangle( (2,2)                  ,(2,int(2/3 * height)-2) )  # left edge
+                allowed = allowed | rectangle((width-3,2)             ,(width-3,int(2/3 * height)-2))  # right edge
+                assert self.options.map_height not in [x[1] for x in allowed], "allowed set is too tall"
+                assert self.options.map_width not in [x[0] for x in allowed], "allowed set is too wide"
+
+                return allowed
+            
+        # name, x, y, prod, killpct, owner, nships
+        def planet_away_from_planets(width, height, existingplanets):
+            def min_distance(oneplanet, planets):
+                return min(map(lambda x, oneplanet=oneplanet, self=self : self.distance(oneplanet,x), planets))
+                
+            def index_best(potentialplanets, ownedplanets):
+                distances = map(lambda x, ownedplanets=ownedplanets: min_distance(x ,ownedplanets), potentialplanets)
+                index_of_best_planet = max([(d,i) for i,d in enumerate(distances)])[1]
+                return index_of_best_planet
+            
+            ownedplanets = [p for p in existingplanets.values() if p.owner is not None]
+            potentialplanets = random.sample(list(existingplanets.values()),k=5)
+            if len(ownedplanets) > 0 :
+                idx =  index_best(ownedplanets, potentialplanets)
+                return potentialplanets[idx]
+            else:
+                return potentialplanets[0]
+        
+        # body
+        if planets is not None:
+            owners = [p.owner for p in planets.values() if p.owner is not None]
+        else:
+            owners = []
+        # newcoords' setdifference seems to depend on use_rc_logo but i can't see why
+        owned_planet_coords = set([p.xy for p in planets.values() if p.owner is not None])
+        newcoord_list = random.sample(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) - owned_planet_coords , k=len(planet_names) - len(owners) )
+
+        for i,planet_name in  enumerate(planet_names[len(owners):]) :
+            self.planets[planet_name] = Planet(planet_name, newcoord_list[i][0], newcoord_list[i][1], rand(6)+rand(6), rand(11)+rand(11)+rand(11)+rand(11)+10)
+
+        for i, (name, pl) in enumerate(self.players.items()):
+            if pl not in owners or planets is None  :
+                print("expected here only on joining, or on hard regenerates")
+                planet_name = planet_names[i]
+                (xx,yy) = planet_away_from_planets(self.options.map_width, self.options.map_height, self.planets).xy
+                self.planets[planet_name] = Planet(planet_name, xx, yy, 10, 40, pl)
+
+    # toroidal distance : going off the edge comes back on the other side
+    def distance(self, here, dest): #self is useless arg. but here cuz DL don't grok self.method(,) at the callsite
+        return math.sqrt( ((here.y-dest.y)%self.options.map_height)**2 + ((here.x-dest.x)%self.options.map_width)**2)
 
 
 class Player:
@@ -346,12 +420,13 @@ class Planet:
         self.killpct = killpct
         self.owner = owner
         self.nships = prod
+        
+    @property
+    def xy(self):
+        return (self.x, self.y)
 
     def __str__(self):
         return self.name
-
-    def distance(self, dest):
-        return math.sqrt((self.y-dest.y)**2 + (self.x-dest.x)**2)
 
     def as_dict(self):
         r = {
@@ -387,7 +462,7 @@ class Deployment:
         return {
             'launch_turn': self.launch_turn,
             'launch_player_name': self.launch_player.name,
-            'launch_planet_name': self.launch_planet.name, 
+            'launch_planet_name': self.launch_planet.name,
             'dest_planet_name': self.dest_planet.name,
             'dest_turn': int(self.dest_turn),
             'nships_requested': self.nships_requested,
@@ -473,14 +548,14 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
                 self.send_response(e.errcode)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(str(e).encode('utf-8'))
+                self.wfile.write(str(traceback.format_exc()).encode('utf-8')) #
             except Exception as e:
                 import traceback
                 print(traceback.format_exc())
                 self.send_response(404)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(str(e).encode('utf-8'))
+                self.wfile.write(str(traceback.format_exc()).encode('utf-8'))
 
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
