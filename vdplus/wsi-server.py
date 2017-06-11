@@ -11,7 +11,7 @@ import random
 
 
 player_colors = 'green yellow cyan magenta red blue'.split()
-all_planet_names =  string.ascii_uppercase + '0123456789' + '☿♀♂♃♄⛢♅♆⚳⚴⚵'
+all_planet_names =  string.ascii_uppercase + '0123456789' + '☿♀♂♃♄⛢♅♆⚳⚴⚵' + '+&%$#@![](){}=<>'
 
 rand = random.randrange
 
