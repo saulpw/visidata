@@ -267,7 +267,7 @@ class Game:
 
         dest_planet = self.planets.get(dest_planet_name) or error('no such planet %s' % dest_planet_name)
 
-        turns = int(launch_planet.distance(dest_planet)/2 + 0.5)
+        turns = int(distance(launch_planet, dest_planet)/2 + 0.5)
         turns = max(1, turns)
 
         if dest_turn is None:
@@ -352,7 +352,7 @@ class Game:
         # name, x, y, prod, killpct, owner, nships
         def planet_away_from_planets(width, height, existingplanets):
             def min_distance(oneplanet, planets):
-                return min(map(lambda x, oneplanet=oneplanet : oneplanet.distance(x), planets))
+                return min(map(lambda x, oneplanet=oneplanet, self=self : self.distance(oneplanet,x), planets))
                 
             def index_best(potentialplanets, ownedplanets):
                 distances = map(lambda x, ownedplanets=ownedplanets: min_distance(x ,ownedplanets), potentialplanets)
@@ -372,7 +372,7 @@ class Game:
             owners = [p.owner for p in planets.values() if p.owner is not None]
         else:
             owners = []
-        # newcoords depends on use_rc_logo
+        # newcoords' setdifference seems to depend on use_rc_logo but i can't see why
         owned_planet_coords = set([p.xy for p in planets.values() if p.owner is not None])
         newcoord_list = random.sample(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) - owned_planet_coords , k=len(planet_names) - len(owners) )
 
@@ -385,6 +385,10 @@ class Game:
                 planet_name = planet_names[i]
                 (xx,yy) = planet_away_from_planets(self.options.map_width, self.options.map_height, self.planets).xy
                 self.planets[planet_name] = Planet(planet_name, xx, yy, 10, 40, pl)
+
+    # toroidal distance : going off the edge comes back on the other side
+    def distance(self, here, dest): #self is useless arg. but here cuz DL don't grok self.method(,) at the callsite
+        return math.sqrt( ((here.y-dest.y)%self.options.map_height)**2 + ((here.x-dest.x)%self.options.map_width)**2)
 
 
 
@@ -422,9 +426,6 @@ class Planet:
 
     def __str__(self):
         return self.name
-
-    def distance(self, dest):
-        return math.sqrt((self.y-dest.y)**2 + (self.x-dest.x)**2)
 
     def as_dict(self):
         r = {
@@ -546,14 +547,14 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
                 self.send_response(e.errcode)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(str(traceback.format_exc()).encode('utf-8')) # testing
+                self.wfile.write(str(traceback.format_exc()).encode('utf-8')) #
             except Exception as e:
                 import traceback
                 print(traceback.format_exc())
                 self.send_response(404)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(str(traceback.format_exc()).encode('utf-8')) # testing
+                self.wfile.write(str(traceback.format_exc()).encode('utf-8'))
 
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
