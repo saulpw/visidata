@@ -546,14 +546,14 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
                 self.send_response(e.errcode)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(str(e).encode('utf-8'))
+                self.wfile.write(str(traceback.format_exc()).encode('utf-8')) # testing
             except Exception as e:
                 import traceback
                 print(traceback.format_exc())
                 self.send_response(404)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(str(e).encode('utf-8'))
+                self.wfile.write(str(traceback.format_exc()).encode('utf-8')) # testing
 
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
