@@ -21,7 +21,7 @@ theme('color_empty_space', '20 blue', 'color of empty space')
 theme('color_unowned_planet', 'white', 'color of unowned planet')
 theme('disp_empty_space', '.', 'color of empty space')
 
-command('1', 'status(g_client.get("/regen_map", planets="reset current completely", use_rc_logo=False)); g_client.Map.reload()', 'make New map')
+command('G', 'vd.push(g_client.GameOptions)', 'push game options')
 command('N', 'status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
 command('Y', 'vd.push(g_client.Players)', 'push players sheet')
 command('P', 'vd.push(g_client.Planets)', 'push planets sheet')
@@ -52,6 +52,7 @@ class WSIClient:
         self.Events = EventsSheet()
         self.Map = MapSheet()
         self.HistoricalDeployments = HistoricalDeploymentsSheet()
+        self.GameOptions = GameOptionsSheet()
 
         vd().rightStatus = self.rightStatus
         self.gamestate = {}
@@ -354,20 +355,19 @@ class MapSheet(Sheet):
     def reload(self):
         g_client.Planets.reload()
 
-        # can't do in init, g_client doesn't exist yet
-        if not self.columns:
-            self.map_w = g_client.gamestate['map_width']
-            self.map_h = g_client.gamestate['map_height']
+        # set columns on every reload, to use current width/height
+        self.map_w = g_client.gamestate['map_width']
+        self.map_h = g_client.gamestate['map_height']
 
-            self.columns = []
-            for x in range(self.map_w):
-                c = Column(' ', width=3, getter=lambda row,x=x,self=self: getattr(row[x], self.fieldToShow[0]) or '?' if row[x] else options.disp_empty_space)
-                c.x = x
-                self.columns.append(c)
-            self.title = options.disp_title
+        self.columns = []
+        for x in range(self.map_w):
+            c = Column(' ', width=3, getter=lambda row,x=x,self=self: getattr(row[x], self.fieldToShow[0]) or '?' if row[x] else options.disp_empty_space)
+            c.x = x
+            self.columns.append(c)
+        self.title = options.disp_title
 
-            # so the order can't be changed
-            self.columns = tuple(self.columns)
+        # so the order can't be changed
+        self.columns = tuple(self.columns)
 
         self.rows = []
         for y in range(self.map_h):
@@ -380,6 +380,18 @@ class MapSheet(Sheet):
             self.rows[planet.y][planet.x] = planet
 
         self.rows = tuple(self.rows)
+
+class GameOptionsSheet(Sheet):
+    def __init__(self):
+        super().__init__('game_options')
+        self.columns = [
+            ColumnItem('option', 0),
+            ColumnItem('value', 1),
+        ]
+        self.command([ENTER, 'e'], 'g_client.get("/set_option", option=cursorRow[0], value=editCell(1)); reload()', 'edit game option')
+
+    def reload(self):
+        self.rows = list(g_client.get('/options').json().items())
 
 g_client = WSIClient(sys.argv[1])
 

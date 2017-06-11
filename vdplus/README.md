@@ -1,5 +1,6 @@
-# wsinvaders
-Whitespace Invaders: Galactic Conquest ported to VisiData
+# vdgalcon
+
+Galactic Conquest on VisiData
 
 ## Instructions
 

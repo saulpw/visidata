@@ -36,6 +36,8 @@ class Game:
             'num_turns': 20,
             'map_width': 16,
             'map_height': 16,
+            'toroidal_map': True,  # toroidal distance : going off the edge comes back on the other side
+            'map_generator': 'rclogo1',  # or 'random'
             'debug': True,
         }
         self.options = OptionsObject(self.options_dict)
@@ -45,7 +47,28 @@ class Game:
         self.events = []
         self.current_turn = 0
 
-        self.generate_planets(use_rc_logo=True)
+        self.generate_planets()
+
+    def generate_planets(self):
+        f = globals()['generate_map_' + self.options.map_generator]
+
+        self.planets = f(self.options.map_width,
+                         self.options.map_height,
+                         self.options.num_planets,
+                         self.distance)
+
+        # assign a starting planet for each player
+        for i, player in enumerate(self.players.values()):
+            starting_planet = self.planets[all_planet_names[i]]
+            starting_planet.owner = player
+            starting_planet.prod = 10
+            starting_planet.nships = 10
+            starting_planet.killpct = 40
+
+        for planet in self.planets.values():
+            if planet.name not in all_planet_names[:len(self.players)]:
+                planet.prod = rand(6) + rand(6)
+                planet.killpct = rand(11)+rand(11)+rand(11)+rand(11)+6
 
     def notify(self, eventstr):
         self.events.append(Event(self.current_turn, eventstr))
@@ -192,20 +215,20 @@ class Game:
         self.options.update(kwargs)
 
     def GET_options(self, pl, **kwargs):
-        return self.options
+        return self.options._opts
 
-    def GET_regen_map(self, pl, use_rc_logo=True, **kwargs):
+    def GET_set_option(self, pl, option='', value=''):
+        if pl.number is None:
+            error('only a participating player can change a game options')
+
+        self.options[option] = type(getattr(self.options, option))(value)
+        return 'options.%s is now %s' % (option, value)
+
+    def GET_regen_map(self, pl, **kwargs):
         if self.started:
             error('game already started')
-        # huge hack and there's duplication in rc_logo from the client get("/regen_map" too
-        if "planets" not in kwargs:
-            kwargs["planets"] = self.planets
-            self.generate_planets( use_rc_logo=use_rc_logo, **kwargs)
-        else:
-            if kwargs["planets"]=="reset current completely":
-                self.generate_planets( use_rc_logo=False, planets=None)
-            else:
-                self.generate_planets( use_rc_logo=use_rc_logo, **kwargs)
+
+        self.generate_planets()
 
     def GET_gamestate(self, pl, **kwargs):
         return {
@@ -230,7 +253,7 @@ class Game:
         pl.number = len(self.players)
         self.players[pl.name] = pl
 
-        self.generate_planets(planets=self.planets)
+        self.generate_planets()
         return 'joined game'
 
     def GET_ready(self, pl, **kwargs):
@@ -269,7 +292,7 @@ class Game:
 
         dest_planet = self.planets.get(dest_planet_name) or error('no such planet %s' % dest_planet_name)
 
-        turns = int(distance(launch_planet, dest_planet)/2 + 0.5)
+        turns = int(self.distance(launch_planet, dest_planet)/2 + 0.5)
         turns = max(1, turns)
 
         if dest_turn is None:
@@ -313,84 +336,12 @@ class Game:
         else:
             return self.end_turn()
 
-    
-    def generate_planets(self, planets = None,  use_rc_logo=True):
-        # name, x, y, prod, killpct, owner, nships
-        if planets is None:
-            planets = {}
-        
-        #self.planets = planets
-    
-        planet_names = all_planet_names[:self.options.num_planets]
-        nplayers = len(self.players)
-        
-        
-        def allowed_coord_set(width, height, use_rc_logo):
-            def rectangle(leftupper, rightlower): # inclusive
-                return set([(i,j) for i in range(leftupper[0], rightlower[0]+1) for j in range(leftupper[1], rightlower[1]+1)])
-            if not use_rc_logo:
-                return rectangle((0,0),(width-1,height-1))
-            else:
-                allowed = set()
-                
-                allowed = allowed | rectangle((2,2)                  ,(width-3,2))
-                allowed = allowed | rectangle((2,int(2/3 * height)-2)  ,(width-3,int(2/3 * height)-2))
-                allowed = allowed | rectangle((int(6/15 * width),int(2/3 * height)-1),(int(6/15 * width),int(2/3 * height))) # left stand
-                allowed = allowed | rectangle((int(7/15 * width),int(2/3 * height)+1), (int(7/15*width), int(2/3 * height)+2)) # right stand
-                allowed = allowed | rectangle((int(8/15 * width),int(2/3 * height)-1),(int(8/15 * width),int(2/3 * height))) # left stand
-                allowed = allowed | rectangle((int(9/15 * width),int(2/3 * height)+1), (int(9/15*width), int(2/3 * height)+2)) # right stand
-                allowed = allowed | rectangle( (int(width*2/10),height-3)        ,(int(3/10*width),height-3)) # left keyboard
-                allowed = allowed | rectangle( (int(width*4/10),height-2)        ,(int(5/10*width),height-2)) # left keyboard
-                allowed = allowed | rectangle( (int(width*6/10),height-3)        ,(int(7/10*width),height-3)) # left keyboard
-                allowed = allowed | rectangle( (int(width*7/10),height-2)        ,(int(8/10*width),height-2)) # right keyboard
-
-                allowed = allowed | rectangle( (2,2)                  ,(2,int(2/3 * height)-2) )  # left edge
-                allowed = allowed | rectangle((width-3,2)             ,(width-3,int(2/3 * height)-2))  # right edge
-                assert self.options.map_height not in [x[1] for x in allowed], "allowed set is too tall"
-                assert self.options.map_width not in [x[0] for x in allowed], "allowed set is too wide"
-
-                return allowed
-            
-        # name, x, y, prod, killpct, owner, nships
-        def planet_away_from_planets(width, height, existingplanets):
-            def min_distance(oneplanet, planets):
-                return min(map(lambda x, oneplanet=oneplanet, self=self : self.distance(oneplanet,x), planets))
-                
-            def index_best(potentialplanets, ownedplanets):
-                distances = map(lambda x, ownedplanets=ownedplanets: min_distance(x ,ownedplanets), potentialplanets)
-                index_of_best_planet = max([(d,i) for i,d in enumerate(distances)])[1]
-                return index_of_best_planet
-            
-            ownedplanets = [p for p in existingplanets.values() if p.owner is not None]
-            potentialplanets = random.sample(list(existingplanets.values()),k=5)
-            if len(ownedplanets) > 0 :
-                idx =  index_best(ownedplanets, potentialplanets)
-                return potentialplanets[idx]
-            else:
-                return potentialplanets[0]
-        
-        # body
-        if planets is not None:
-            owners = [p.owner for p in planets.values() if p.owner is not None]
+    def distance(self, here, dest):
+        if self.options.toroidal_map:
+            # toroidal distance : going off the edge comes back on the other side
+            return math.sqrt( ((here.y-dest.y) % self.options.map_height)**2 + ((here.x-dest.x) % self.options.map_width)**2)
         else:
-            owners = []
-        # newcoords' setdifference seems to depend on use_rc_logo but i can't see why
-        owned_planet_coords = set([p.xy for p in planets.values() if p.owner is not None])
-        newcoord_list = random.sample(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) - owned_planet_coords , k=len(planet_names) - len(owners) )
-
-        for i,planet_name in  enumerate(planet_names[len(owners):]) :
-            self.planets[planet_name] = Planet(planet_name, newcoord_list[i][0], newcoord_list[i][1], rand(6)+rand(6), rand(11)+rand(11)+rand(11)+rand(11)+10)
-
-        for i, (name, pl) in enumerate(self.players.items()):
-            if pl not in owners or planets is None  :
-                print("expected here only on joining, or on hard regenerates")
-                planet_name = planet_names[i]
-                (xx,yy) = planet_away_from_planets(self.options.map_width, self.options.map_height, self.planets).xy
-                self.planets[planet_name] = Planet(planet_name, xx, yy, 10, 40, pl)
-
-    # toroidal distance : going off the edge comes back on the other side
-    def distance(self, here, dest): #self is useless arg. but here cuz DL don't grok self.method(,) at the callsite
-        return math.sqrt( ((here.y-dest.y)%self.options.map_height)**2 + ((here.x-dest.x)%self.options.map_width)**2)
+            return math.sqrt((here.y-dest.y)**2 + (here.x-dest.x)**2)
 
 
 class Player:
@@ -412,7 +363,7 @@ class Player:
 
 
 class Planet:
-    def __init__(self, name, x, y, prod, killpct, owner=None):
+    def __init__(self, name, x, y, prod=0, killpct=0, owner=None):
         self.name = name
         self.x = x
         self.y = y
@@ -420,7 +371,7 @@ class Planet:
         self.killpct = killpct
         self.owner = owner
         self.nships = prod
-        
+
     @property
     def xy(self):
         return (self.x, self.y)
@@ -565,6 +516,81 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
         length = int(self.headers['content-length'])
         field_data = self.rfile.read(length).decode('utf-8')
         return self.generic_handler('POST', self.path, field_data)
+
+
+def generate_map_random(width, height, num_planets, distancefunc):
+    planets = {}
+
+    for planet_name in all_planet_names[:num_planets]:
+        planets[planet_name] = Planet(planet_name, rand(width), rand(height))
+
+    return planets
+
+
+def generate_map_rcvar(width, height, num_planets, distancefunc):
+    planet_names = all_planet_names[:num_planets]
+
+    def allowed_coord_set(width, height):
+        def rectangle(leftupper, rightlower): # inclusive
+            return set([(i,j) for i in range(leftupper[0], rightlower[0]+1) for j in range(leftupper[1], rightlower[1]+1)])
+
+        allowed = set()
+
+        allowed = allowed | rectangle((2,2)                  ,(width-3,2))
+        allowed = allowed | rectangle((2,int(2/3 * height)-2)  ,(width-3,int(2/3 * height)-2))
+        allowed = allowed | rectangle((int(6/15 * width),int(2/3 * height)-1),(int(6/15 * width),int(2/3 * height))) # left stand
+        allowed = allowed | rectangle((int(7/15 * width),int(2/3 * height)+1), (int(7/15*width), int(2/3 * height)+2)) # right stand
+        allowed = allowed | rectangle((int(8/15 * width),int(2/3 * height)-1),(int(8/15 * width),int(2/3 * height))) # left stand
+        allowed = allowed | rectangle((int(9/15 * width),int(2/3 * height)+1), (int(9/15*width), int(2/3 * height)+2)) # right stand
+        allowed = allowed | rectangle( (int(width*2/10),height-3)        ,(int(3/10*width),height-3)) # left keyboard
+        allowed = allowed | rectangle( (int(width*4/10),height-2)        ,(int(5/10*width),height-2)) # left keyboard
+        allowed = allowed | rectangle( (int(width*6/10),height-3)        ,(int(7/10*width),height-3)) # left keyboard
+        allowed = allowed | rectangle( (int(width*7/10),height-2)        ,(int(8/10*width),height-2)) # right keyboard
+
+        allowed = allowed | rectangle( (2,2)                  ,(2,int(2/3 * height)-2) )  # left edge
+        allowed = allowed | rectangle((width-3,2)             ,(width-3,int(2/3 * height)-2))  # right edge
+        assert height not in [x[1] for x in allowed], "allowed set is too tall"
+        assert width not in [x[0] for x in allowed], "allowed set is too wide"
+
+        return allowed
+
+    def planet_away_from_planets(width, height, existingplanets):
+        def min_distance(oneplanet, planets):
+            return min(map(lambda x, oneplanet=oneplanet, distancefunc=distancefunc: distancefunc(oneplanet,x), planets))
+
+        def index_best(potentialplanets, ownedplanets):
+            distances = map(lambda x, ownedplanets=ownedplanets: min_distance(x ,ownedplanets), potentialplanets)
+            index_of_best_planet = max([(d,i) for i,d in enumerate(distances)])[1]
+            return index_of_best_planet
+
+        ownedplanets = [p for p in existingplanets.values() if p.owner is not None]
+        potentialplanets = random.sample(list(existingplanets.values()),k=5)
+        if len(ownedplanets) > 0 :
+            idx =  index_best(ownedplanets, potentialplanets)
+            return potentialplanets[idx]
+        else:
+            return potentialplanets[0]
+
+    # body
+#    if planets is not None:
+#        owners = [p.owner for p in planets.values() if p.owner is not None]
+#    else:
+#        owners = []
+
+#    owned_planet_coords = set([p.xy for p in planets.values() if p.owner is not None])
+    newcoord_list = random.sample(allowed_coord_set(width, height), k=len(planet_names))
+
+    planets = {}
+    for i, planet_name in enumerate(planet_names[:num_planets]):
+        planets[planet_name] = Planet(planet_name, newcoord_list[i][0], newcoord_list[i][1])
+
+#    for i, (name, pl) in enumerate(self.players.items()):
+#        if pl not in owners or planets is None  :
+#            planet_name = planet_names[i]
+#            (xx,yy) = planet_away_from_planets(width, height, self.planets).xy
+#            self.planets[planet_name] = Planet(planet_name, xx, yy, 10, 40, pl)
+
+    return planets
 
 
 def main():
