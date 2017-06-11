@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'vdgalcon (Galactic Conquest on VisiData)'
+'Galactic Conquest for VisiData'
 
 import sys
 import math
@@ -15,7 +15,7 @@ from visidata import *
 option('refresh_rate_s', 2.0, 'time to sleep between refreshes')
 option('disp_turn_done', '*', 'symbol to indicate player turn taken')
 
-theme('disp_title', 'RC GameJam S1\'17', 'title on map sheet')
+theme('disp_title', 'RCGameJam S1\'17', 'title on map sheet')
 theme('color_dest_planet', 'underline', 'color of marked destination planet')
 theme('color_empty_space', '20 blue', 'color of empty space')
 theme('color_unowned_planet', 'white', 'color of unowned planet')
@@ -388,7 +388,7 @@ class GameOptionsSheet(Sheet):
             ColumnItem('option', 0),
             ColumnItem('value', 1),
         ]
-        self.command([ENTER, 'e'], 'g_client.get("/set_option", option=cursorRow[0], value=editCell(1)); reload()', 'edit game option')
+        self.command([ENTER, 'e'], 'status(g_client.get("/set_option", option=cursorRow[0], value=editCell(1))); reload()', 'edit game option')
 
     def reload(self):
         self.rows = list(g_client.get('/options').json().items())

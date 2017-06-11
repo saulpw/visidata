@@ -34,10 +34,10 @@ class Game:
         self.options_dict = {
             'num_planets': 30,
             'num_turns': 20,
-            'map_width': 16,
-            'map_height': 16,
-            'toroidal_map': True,  # toroidal distance : going off the edge comes back on the other side
-            'map_generator': 'rclogo_var',  # or 'random'
+            'map_width': 15,
+            'map_height': 15,
+            'toroidal_map': False,  # if the edges are connected
+            'map_generator': 'rclogo_fixed',  # or 'random' or 'rclogo_var'
             'debug': True,
         }
         self.options = OptionsObject(self.options_dict)
@@ -218,8 +218,10 @@ class Game:
         return self.options._opts
 
     def GET_set_option(self, pl, option='', value=''):
+        if self.started:
+            return 'options cannot be changed after game start'
         if pl.number is None:
-            error('only a participating player can change a game options')
+            return 'only a participating player can change a game option'
 
         self.options[option] = type(getattr(self.options, option))(value)
         return 'options.%s is now %s' % (option, value)
@@ -522,7 +524,55 @@ def generate_map_random(width, height, num_planets, distancefunc):
     planets = {}
 
     for planet_name in all_planet_names[:num_planets]:
-        planets[planet_name] = Planet(planet_name, rand(width), rand(height))
+        x = rand(width)
+        y = rand(height)
+        while (x,y) in planet_coords:
+            x = rand(width)
+            y = rand(height)
+
+        planets[planet_name] = Planet(planet_name, x, y)
+        planet_coords.add((x,y))
+
+    return planets
+
+
+def generate_map_rclogo_fixed(width, height, num_planets, distancefunc):
+    grid = '''
+.X.X.X.X.X.X.X.
+.X...........X.
+....A.X.X......
+.X...........X.
+.....XX.XB.....
+.X...........X.
+...............
+.C.X.X.X.X.X.F.
+......X.X......
+..X.X.X.X.X.X..
+X.X.........X.X
+....X.X.X.E....
+X..D.X.X.X....X
+...............
+X.X.X.X.X.X.X.X'''
+
+    starting_coords = {}
+    rclogo_coords = []
+    for y, line in enumerate(grid.strip().splitlines()):
+        for x, ch in enumerate(line):
+            if ch == 'X':
+                rclogo_coords.append((x, y))
+            elif ch != '.':
+                starting_coords[ch] = (x, y)
+
+    random.shuffle(rclogo_coords)
+
+    planets = {}
+    for planet_name in all_planet_names[:num_planets]:
+        if planet_name in starting_coords:
+            x, y = starting_coords[planet_name]
+        else:
+            x, y = rclogo_coords.pop()
+
+        planets[planet_name] = Planet(planet_name, x, y)
 
     return planets
 
