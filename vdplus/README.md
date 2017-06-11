@@ -8,13 +8,13 @@ Galactic Conquest on VisiData
 
 The host has to start a server:
 
-    $ ./wsi-server.py
+    $ ./vdgalcon-server.py
 
 All players then start their clients and login:
 
-    $ ./wsi-client.py http://localhost:8080
+    $ ./vdgalcon.py http://localhost:8080
 
-(or whatever url works to access the server)
+(or whatever URL the server prints on startup)
 
 The first time a player name is used, the password is set.
 Players join the game if it has not yet started (each server only hosts one game).
@@ -22,7 +22,7 @@ Players join the game if it has not yet started (each server only hosts one game
 Each player presses `ENTER` when they are ready for the game to start.
 
 Press `M` to go to the Map for this game, or `P` for the list of planets.
-Any player can press `N` to generate a New map (`Ctrl-R` to Reload the pages).
+Before the game has started, any player can change 'G'ame options or press `N` to generate a New map (`Ctrl-R` to Reload the pages).
 
 When the map is all players are ready, the game begins.
 
@@ -35,7 +35,7 @@ From any sheet:
 - `U` opens the queued deployments sheet (not yet sent to server)
 - `D` opens the full deployments sheet
 - `E` opens the events sheet
-- `Q` allows players to quit.
+- `Q` allows players to quit
 - `Ctrl-S` submits the pending deployments to the server and signals the player is done
 
 On the `P`lanet sheet:
@@ -54,7 +54,7 @@ On the `U` queued orders sheet:
 - `e` to modify an order
 - `d` to delete an order
 
-Whitespace invaders is a VisiData app. [VisiData commands](https://visidata.readthedocs.io/en/stable/user-guide/) such as column sorting and cell searching are also available.
+vdgalcon is a VisiData app. [VisiData commands](https://visidata.readthedocs.io/en/stable/user-guide/) such as column sorting and cell searching are also available.
 
 When all players have submitted their moves, the turn is over.  Ships arrive, battles are resolved, and planets produce.  Then the next turn begins.
 
