@@ -9,8 +9,6 @@ import urllib.parse
 import uuid
 import random
 
-port = 8080
-
 player_colors = 'green yellow cyan magenta red blue'.split()
 all_planet_names =  string.ascii_uppercase + '0123456789' + '☿♀♂♃♄⛢♅♆⚳⚴⚵' + '+&%$#@![](){}=<>'
 
@@ -495,9 +493,19 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-p', dest='port', help='port to run on', default=8080)
+    args = parser.parse_args()
+
+    port = int(args.port)
+
     server = WSIServer(('', port), WSIHandler)
 
-    print('http://localhost:%d' % port)
+    import requests
+    public_ip = requests.get('http://ip.42.pl/raw').text
+
+    print('http://%s:%s' % (public_ip, port))
     server.serve_forever()
 
 

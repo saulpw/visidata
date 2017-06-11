@@ -17,7 +17,7 @@ option('disp_turn_done', '*', 'symbol to indicate player turn taken')
 
 theme('disp_title', 'RC GameJam S1\'17', 'title on map sheet')
 theme('color_dest_planet', 'underline', 'color of marked destination planet')
-theme('color_empty_space', '234 blue', 'color of empty space')
+theme('color_empty_space', '20 blue', 'color of empty space')
 theme('color_unowned_planet', 'white', 'color of unowned planet')
 theme('disp_empty_space', '.', 'color of empty space')
 
@@ -320,6 +320,16 @@ class MapSheet(Sheet):
         self.colorizers.append(self.colorMarkedPlanet)
         self.colorizers.append(self.colorSpace)
 
+
+    @property
+    def title(self):
+        return ''.join(c.name for c in columns)
+
+    @title.setter
+    def title(self, value):
+        for i in range(self.map_w):
+            self.columns[i].name = value[i:i+1]
+
     @staticmethod
     def colorMarkedPlanet(sheet,col,row,value):
         return (options.color_dest_planet, 5) if row and col and row[col.x] and row[col.x] is g_client.Planets.marked_planet else None
@@ -342,28 +352,32 @@ class MapSheet(Sheet):
 
     def reload(self):
         g_client.Planets.reload()
-        map_w = g_client.gamestate['map_width']
-        map_h = g_client.gamestate['map_height']
 
-        self.columns = [Column(' ', width=3, getter=lambda row: None)]
-        self.columns[0].x = -1
-        for x in range(map_w):
-            c = Column(options.disp_title[x:x+1] or ' ', width=3, getter=lambda row,x=x,self=self: getattr(row[x], self.fieldToShow[0]) if row[x] else options.disp_empty_space)
-            c.x = x
-            self.columns.append(c)
+        # can't do in init, g_client doesn't exist yet
+        if not self.columns:
+            self.map_w = g_client.gamestate['map_width']
+            self.map_h = g_client.gamestate['map_height']
+
+            self.columns = []
+            for x in range(self.map_w):
+                c = Column(' ', width=3, getter=lambda row,x=x,self=self: getattr(row[x], self.fieldToShow[0]) or '?' if row[x] else options.disp_empty_space)
+                c.x = x
+                self.columns.append(c)
+            self.title = options.disp_title
+
+            # so the order can't be changed
+            self.columns = tuple(self.columns)
 
         self.rows = []
-        for y in range(map_h):
+        for y in range(self.map_h):
             current_row = []
-            for x in range(map_w):
+            for x in range(self.map_w):
                 current_row.append(None)
             self.rows.append(current_row)
 
         for planet in g_client.Planets.rows:
             self.rows[planet.y][planet.x] = planet
 
-        # so the order can't be changed
-        self.columns = tuple(self.columns)
         self.rows = tuple(self.rows)
 
 g_client = WSIClient(sys.argv[1])
