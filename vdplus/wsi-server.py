@@ -9,6 +9,7 @@ import urllib.parse
 import uuid
 import random
 
+port = 8080
 
 player_colors = 'green yellow cyan magenta red blue'.split()
 all_planet_names =  string.ascii_uppercase + '0123456789' + '☿♀♂♃♄⛢♅♆⚳⚴⚵'
@@ -65,30 +66,71 @@ class Game:
                 continue
 
             # battle time
-            attack_strength = float(d.nships_deployed * d.killpct)
-            defend_strength = float(d.dest_planet.nships * d.dest_planet.killpct)
-            if attack_strength == 0:
-                self.notify('inconsequential attack against planet %s by player %s with %s ships (%s killpct)' % (d.dest_planet.name, d.launch_player, d.nships_deployed, d.killpct))
-                continue
 
-            ratio = defend_strength / (attack_strength + defend_strength)
-            attack_num = random.betavariate(2, 2)
-            if attack_num > ratio:
-                ships_left = (attack_num-ratio)/(1-ratio)*d.nships_deployed
-                d.dest_planet.owner = d.launch_player
-                self.notify('planet %s overtaken by %s with %d ships (%d%%) (%d ships remain)' % (d.dest_planet.name, d.launch_player, d.nships_deployed, d.killpct, ships_left))
+            attackers = d.nships_deployed
+            defenders = d.dest_planet.nships
+            attack_killpct = d.killpct
+            defend_killpct = d.dest_planet.killpct
+
+            battle_notice = '%s attacked %s (%s ships at %s%%) with %s ships (%s%%)' % (d.launch_player,
+                d.dest_planet,
+                defenders,
+                defend_killpct,
+                attackers,
+                attack_killpct)
+
+            round_results = []
+
+            while attackers > 0 and defenders > 0:
+                killed_by_attackers = sum(1 for i in range(attackers) if rand(100) <= attack_killpct)
+                killed_by_defenders = sum(1 for i in range(defenders) if rand(100) <= defend_killpct)
+                if self.options.debug:
+                    round_results.append('%s/%s' % (
+                        defenders-min(killed_by_attackers, defenders),
+                        attackers-min(killed_by_defenders, attackers)))
+
+                attackers -= killed_by_defenders
+                defenders -= killed_by_attackers
+
+            if round_results:
+                battle_notice += '[%s]' % ','.join(round_results)
+
+            if attackers <= defenders:
+                defenders = max(defenders, 0)
+                battle_notice += ' and was destroyed, leaving %s ships!' % defenders
+                d.dest_planet.nships = defenders
             else:
-                ships_left = (ratio-attack_num)/ratio*d.dest_planet.nships
-                self.notify('planet %s held its own against an attack by %s with %d ships (%d%%) (%d ships remain)' % (d.dest_planet.name, d.launch_player, d.nships_deployed, d.killpct, ships_left))
+                attackers = max(attackers, 0)
+                battle_notice += ' and seized control with %s ships!' % attackers
 
-            assert ships_left > 0
-            d.dest_planet.nships = int(ships_left+0.5)
+                d.dest_planet.owner = d.launch_player
+                d.dest_planet.nships = attackers
+
+            self.notify(battle_notice)
 
         for p in self.planets.values():
             if p.owner:
+                # production
                 p.nships += p.prod
 
-        # TODO: generate random events
+                # random planetary events
+                if rand(100) < 10:
+                    if rand(40) > p.killpct:
+                        p.killpct += rand(5)
+                        self.notify('Planet %s instituted compulsory opera, killpct improved to %s%%' % (p.name, p.killpct))
+                    elif rand(10) > p.prod:
+                        p.prod += 1
+                        self.notify('Planet %s improved its production to %s%%' % (p.name, p.prod))
+                    if rand(40) < p.killpct:
+                        p.killpct -= rand(5)
+                        self.notify('Planet %s legalized dancing, killpct dropped to %s%%' % (p.name, p.killpct))
+                    elif rand(10) < p.prod:
+                        p.prod -= 1
+                        self.notify('Planet %s production decreased to %s%%' % (p.name, p.prod))
+                    else:
+                        self.GET_deploy(p.owner, p.name, random.choice([p.name for p in self.planets.values() if p.owner is self.dest_planet.owner]), None, self.dest_planet.nships)
+                        self.notify('Planet %s revolted against the tyrannical rule of %s!' % (p.name, p.owner))
+                        p.owner = None
 
         self.next_turn()
 
@@ -219,10 +261,11 @@ class Game:
         dest_planet = self.planets.get(dest_planet_name) or error('no such planet %s' % dest_planet_name)
 
         turns = int(launch_planet.distance(dest_planet)/2 + 0.5)
+        turns = max(1, turns)
 
         if dest_turn is None:
             dest_turn = 0
-        dest_turn = max(int(dest_turn), self.current_turn+turns, self.current_turn+1)
+        dest_turn = max(int(dest_turn), self.current_turn+turns)
 
         dobj = Deployment(launch_player, self.current_turn, launch_planet, dest_planet, dest_turn, int(nships), launch_planet.killpct)
         dobj.nships_deployed = min(int(nships), launch_planet.nships)
@@ -271,7 +314,7 @@ class Game:
             self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), 10, 40, pl)
 
         for planet_name in planet_names[nplayers:]:
-            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(10), rand(39)+1)
+            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(5)+rand(5), rand(11)+rand(11)+rand(11)+7)
 
 
 class Player:
@@ -301,6 +344,9 @@ class Planet:
         self.killpct = killpct
         self.owner = owner
         self.nships = prod
+
+    def __str__(self):
+        return self.name
 
     def distance(self, dest):
         return math.sqrt((self.y-dest.y)**2 + (self.x-dest.x)**2)
@@ -445,9 +491,9 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
 
 
 def main():
-    server = WSIServer(('', 8080), WSIHandler)
+    server = WSIServer(('', port), WSIHandler)
 
-    print('http://localhost:8080')
+    print('http://localhost:%d' % port)
     server.serve_forever()
 
 
