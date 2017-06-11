@@ -154,7 +154,7 @@ class Game:
         if self.started:
             error('game already started')
 
-        self.generate_planets(use_rc_logo=use_rc_logo)
+        self.generate_planets(planets=self.planets, use_rc_logo=use_rc_logo)
 
     def GET_gamestate(self, pl, **kwargs):
         return {
@@ -179,7 +179,7 @@ class Game:
         pl.number = len(self.players)
         self.players[pl.name] = pl
 
-        self.generate_planets()
+        self.generate_planets(planets=self.planets)
         return 'joined game'
 
     def GET_ready(self, pl, **kwargs):
@@ -264,10 +264,10 @@ class Game:
     
     def generate_planets(self, planets = None,  use_rc_logo=True):
         # name, x, y, prod, killpct, owner, nships
-        if planets == None:
-            self.planets = {}
-        else:
-            self.planets = planets
+        if planets is None:
+            planets = {}
+        
+        #self.planets = planets
     
         planet_names = all_planet_names[:self.options.num_planets]
         nplayers = len(self.players)
@@ -275,54 +275,84 @@ class Game:
         
         def allowed_coord_set(width, height, use_rc_logo):
             def rectangle(leftupper, rightlower): # inclusive
-                return set([(i,j) for i in range(leftupper[0], rightlower[0]) for j in range(leftupper[1]+1, rightlower[1]+1)])
+                return set([(i,j) for i in range(leftupper[0], rightlower[0]+1) for j in range(leftupper[1], rightlower[1]+1)])
             if not use_rc_logo:
                 return rectangle((0,0),(width,height))
             else:
                 allowed = set()
                 
-                allowed = allowed | rectangle((2,0)                  ,(width-1,0))
-                allowed = allowed | rectangle((2,int(2/3 * height))  ,(width-1,int(2/3 * height)+1))
-                allowed = allowed | rectangle((int(1/3 * width),int(2/3 * height)+1),(int(2/3 * width),int(2/3 * height)+2)) # stand
-                allowed = allowed | rectangle((4,height-2)        ,(width-3,height-1)) # top keyboard
-                allowed = allowed | rectangle((2,height)        ,(width-1,height)) # keyboard
+                allowed = allowed | rectangle((2,2)                  ,(width-3,2))
+                assert 16 not in [x[1] for x in allowed] , "1"
+                allowed = allowed | rectangle((2,int(2/3 * height)-2)  ,(width-3,int(2/3 * height)-2))
+                assert 16 not in [x[1] for x in allowed] , "2"
+                allowed = allowed | rectangle((int(6/15 * width),int(2/3 * height)-1),(int(6/15 * width),int(2/3 * height))) # left stand
+                allowed = allowed | rectangle((int(7/15 * width),int(2/3 * height)+1), (int(7/15*width), int(2/3 * height)+2)) # right stand
+                allowed = allowed | rectangle((int(8/15 * width),int(2/3 * height)-1),(int(8/15 * width),int(2/3 * height))) # left stand
+                allowed = allowed | rectangle((int(9/15 * width),int(2/3 * height)+1), (int(9/15*width), int(2/3 * height)+2)) # right stand
+                assert 16 not in [x[1] for x in allowed] , "4"
+                allowed = allowed | rectangle( (int(width*2/10),height-3)        ,(int(3/10*width),height-3)) # left keyboard
+                allowed = allowed | rectangle( (int(width*4/10),height-2)        ,(int(5/10*width),height-2)) # left keyboard
+                allowed = allowed | rectangle( (int(width*6/10),height-3)        ,(int(7/10*width),height-3)) # left keyboard
+                allowed = allowed | rectangle( (int(width*7/10),height-2)        ,(int(8/10*width),height-2)) # right keyboard
+                assert 16 not in [x[1] for x in allowed] , "5"
+                # allowed = allowed | rectangle((int(1/3 * width),int(2/3 * height)+1),(int(2/3 * width),int(2/3 * height)+2)) # stand
+                # assert 16 not in [x[1] for x in allowed] , "3"
+                # allowed = allowed | rectangle((4,height-2)        ,(width-3,height-1)) # top keyboard
+                # assert 16 not in [x[1] for x in allowed] , "4"
+                # allowed = allowed | rectangle((2,height-1)        ,(width-2,height-1)) # keyboard
+                # assert 16 not in [x[1] for x in allowed] , "5"
                 
-                allowed = allowed | rectangle((2,0)                  ,(3,int(2/3 * height)))  # left edge
-                allowed = allowed | rectangle((width-2,0)  ,(width-1,int(2/3 * height)))  # right edge
-                allowed = allowed | rectangle((int(width/2 - 1/3*10),int(1/3 * height - 1/3*10))  , (int(width/2 + 1/3*10),int(1/3 * height + 1/3*10)) )  # screen
+                allowed = allowed | rectangle( (2,2)                  ,(2,int(2/3 * height)-2) )  # left edge
+                assert 16 not in [x[1] for x in allowed] , "6"
+                allowed = allowed | rectangle((width-3,2)             ,(width-3,int(2/3 * height)-2))  # right edge
+                assert 16 not in [x[1] for x in allowed] , "7"
+                # allowed = allowed | rectangle((int(width/2 - width/8),int(1/3 * height - height/8))  , (int(width/2 + width/8),int(1/3 * height + height/8)) )  # screen
+                # assert 16 not in [x[1] for x in allowed] , "8"
                 return allowed
             
         # name, x, y, prod, killpct, owner, nships
-        def rand_rc_planet(width, height, existingplanets):
-            def index_greatest_distance(oneplanet, planets):
-                distances = map(lambda x: oneplanet.distance(x), planets)
-                index_of_greatest_planet = max([(d,i) for i,d in enumerate(distances)])[1]
-                return index_of_greatest_planet
+        def planet_away_from_planets(width, height, existingplanets):
+            def min_distance(oneplanet, planets):
+                return min(map(lambda x, oneplanet=oneplanet : oneplanet.distance(x), planets))
+                
+            def index_best(potentialplanets, ownedplanets):
+                distances = map(lambda x, ownedplanets=ownedplanets: min_distance(x ,ownedplanets), potentialplanets)
+                index_of_best_planet = max([(d,i) for i,d in enumerate(distances)])[1]
+                return index_of_best_planet
             
-            ownedplanets = [p for p in planets if p.owner != None]
-            potentialplanets = []
-            for i in range(5):
-                potentialplanets = potentialplanets.append(random.choice(planets))
-            
+            ownedplanets = [p for p in existingplanets.values() if p.owner is not None]
+            potentialplanets = random.sample(list(existingplanets.values()),k=5)
             if len(ownedplanets) > 0 :
-                idx =  index_greatest_distance(oneplanet, potentialplanets)
+                idx =  index_best(ownedplanets, potentialplanets)
                 return potentialplanets[idx]
             else:
                 return potentialplanets[0]
-            
-        if planets!=None:
-            owners = [p.owner for p in planets]
+        
+        # body
+        if planets is not None:
+            owners = [p.owner for p in planets.values() if p.owner is not None]
         else:
             owners = []
         # newcoords depends on use_rc_logo
-        newcoord_list = random.sample(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) , len(planet_names) - len(owners) )
+        owned_planet_coords = set([p.xy for p in planets.values() if p.owner is not None])
+        print(owned_planet_coords)
+        print(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) - owned_planet_coords)
+        print("asdf")
+        print(len(planet_names))
+        
+        print(owners)
+        newcoord_list = random.sample(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) - owned_planet_coords , k=len(planet_names) - len(owners) )
+        print(newcoord_list)
+
+
         for i,planet_name in  enumerate(planet_names[len(owners):]) :
             self.planets[planet_name] = Planet(planet_name, newcoord_list[i][0], newcoord_list[i][1], rand(10), rand(39)+1)
 
         for i, (name, pl) in enumerate(self.players.items()):
-            if name not in owners:
+            if pl not in owners:
+                print("expected here only in join")
                 planet_name = planet_names[i]
-                (xx,yy) = rand_rc_planet(width, height, planets).xy
+                (xx,yy) = planet_away_from_planets(self.options.map_width, self.options.map_height, self.planets).xy
                 self.planets[planet_name] = Planet(planet_name, xx, yy, 10, 40, pl)
 
 
