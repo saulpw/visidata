@@ -63,6 +63,8 @@ class Game:
             if d.dest_planet.owner is d.launch_player:
                 d.dest_planet.nships += d.nships_deployed
                 self.notify('%s sent %d reinforcements to %s' % (d.launch_player, d.nships_deployed, d.dest_planet.name))
+                if self.options.debug:
+                    self.notify('   from %s' % d.launch_planet)
                 continue
 
             # battle time
@@ -107,6 +109,8 @@ class Game:
                 d.dest_planet.nships = attackers
 
             self.notify(battle_notice)
+            if self.options.debug:
+                self.notify('   from %s' % d.launch_planet)
 
         for p in self.planets.values():
             if p.owner:
@@ -114,7 +118,7 @@ class Game:
                 p.nships += p.prod
 
                 # random planetary events
-                if rand(100) < 10:
+                if rand(100) < 5:
                     if rand(40) > p.killpct:
                         p.killpct += rand(5)
                         self.notify('Planet %s instituted compulsory opera, killpct improved to %s%%' % (p.name, p.killpct))
@@ -128,7 +132,7 @@ class Game:
                         p.prod -= 1
                         self.notify('Planet %s production decreased to %s%%' % (p.name, p.prod))
                     else:
-                        self.GET_deploy(p.owner, p.name, random.choice([p.name for p in self.planets.values() if p.owner is self.dest_planet.owner]), None, self.dest_planet.nships)
+                        self.GET_deploy(p.owner, p.name, random.choice([x.name for x in self.planets.values() if x.owner is p.owner]), None, p.nships)
                         self.notify('Planet %s revolted against the tyrannical rule of %s!' % (p.name, p.owner))
                         p.owner = None
 
@@ -145,7 +149,7 @@ class Game:
             self.notify('Game over!')
             self.notify('%s is the winner!' % scores[0]['name'])
         else:
-            self.notify('turn %d started' % self.current_turn)
+            self.notify('*** Turn %d started' % self.current_turn)
 
     def GET_scores(self, pl, **kwargs):
         player_scores = {}
@@ -314,7 +318,7 @@ class Game:
             self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), 10, 40, pl)
 
         for planet_name in planet_names[nplayers:]:
-            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(5)+rand(5), rand(11)+rand(11)+rand(11)+7)
+            self.planets[planet_name] = Planet(planet_name, rand(self.options.map_width), rand(self.options.map_height), rand(6)+rand(6), rand(11)+rand(11)+rand(11)+rand(11)+10)
 
 
 class Player:

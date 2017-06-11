@@ -282,7 +282,6 @@ class HistoricalDeploymentsSheet(Sheet):
 
     def reload(self):
         self.rows = g_client.get('/deployments').json()
-        self.rows.sort(key=lambda row: (row['dest_turn'], row['launch_turn']), reverse=True)
 
 
 class EventsSheet(Sheet):
@@ -300,17 +299,20 @@ class EventsSheet(Sheet):
         for i, (turn, _) in enumerate(self.rows):
             if turn == g_client.current_turn:
                 self.topRowIndex = index
+                self.cursorRowIndex = index
                 break
 
 class MapSheet(Sheet):
     def __init__(self):
         super().__init__('map')
         self.fieldToShow = [ 'name', 'prod', 'killpct', 'nships' ]
+        self.command('m', 'g_client.Planets.marked_planet = cursorRow[cursorCol.x]', 'mark current planet as destination')
+        self.command('f', 'g_client.add_deployment([cursorRow[cursorCol.x]], g_client.Planets.marked_planet, int(input("# ships: ", value=cursorRow[cursorCol.x].nships)))', 'deploy N ships from current planet to marked planet')
+        self.command(' ', 'cycle_info()', 'cycle the information displayed')
+
         self.colorizers.append(self.colorPlanet)
         self.colorizers.append(self.colorMarkedPlanet)
-        self.command('m', 'g_client.Planets.marked_planet = cursorRow[cursorCol.x]', 'mark current planet as destination')
-        self.command('f', 'g_client.add_deployment([cursorRow[cursorCol.x]], g_client.Planets.marked_planet, int(input("# ships: ")))', 'deploy N ships from current planet to marked planet')
-        self.command(' ', 'cycle_info()', 'cycle the information displayed')
+        self.colorizers.append(self.colorSpace)
 
     @staticmethod
     def colorMarkedPlanet(sheet,col,row,value):
@@ -319,6 +321,10 @@ class MapSheet(Sheet):
     @staticmethod
     def colorPlanet(sheet,col,row,value):
         return (g_client.Players.get_player_color(row[col.x].ownername), 9) if row and col and row[col.x] else None
+
+    @staticmethod
+    def colorSpace(sheet,col,row,value):
+        return (options.color_empty_space, 4) if row and col else None
 
     def cycle_info(self):
         self.fieldToShow = self.fieldToShow[1:] + [self.fieldToShow[0]]
