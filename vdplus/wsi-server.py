@@ -63,6 +63,8 @@ class Game:
             if d.dest_planet.owner is d.launch_player:
                 d.dest_planet.nships += d.nships_deployed
                 self.notify('%s sent %d reinforcements to %s' % (d.launch_player, d.nships_deployed, d.dest_planet.name))
+                if self.options.debug:
+                    self.notify('   from %s' % d.launch_planet)
                 continue
 
             # battle time
@@ -107,6 +109,8 @@ class Game:
                 d.dest_planet.nships = attackers
 
             self.notify(battle_notice)
+            if self.options.debug:
+                self.notify('   from %s' % d.launch_planet)
 
         for p in self.planets.values():
             if p.owner:
@@ -114,21 +118,21 @@ class Game:
                 p.nships += p.prod
 
                 # random planetary events
-                if rand(100) < 10:
+                if rand(100) < 5:
                     if rand(40) > p.killpct:
                         p.killpct += rand(5)
                         self.notify('Planet %s instituted compulsory opera, killpct improved to %s%%' % (p.name, p.killpct))
                     elif rand(10) > p.prod:
                         p.prod += 1
-                        self.notify('Planet %s improved its production to %s%%' % (p.name, p.prod))
-                    if rand(40) < p.killpct:
+                        self.notify('Planet %s improved its production to %s' % (p.name, p.prod))
+                    elif rand(40) < p.killpct:
                         p.killpct -= rand(5)
                         self.notify('Planet %s legalized dancing, killpct dropped to %s%%' % (p.name, p.killpct))
                     elif rand(10) < p.prod:
                         p.prod -= 1
                         self.notify('Planet %s production decreased to %s%%' % (p.name, p.prod))
                     else:
-                        self.GET_deploy(p.owner, p.name, random.choice([p.name for p in self.planets.values() if p.owner is self.dest_planet.owner]), None, self.dest_planet.nships)
+                        self.GET_deploy(p.owner, p.name, random.choice([x.name for x in self.planets.values() if x.owner is p.owner]), None, p.nships)
                         self.notify('Planet %s revolted against the tyrannical rule of %s!' % (p.name, p.owner))
                         p.owner = None
 
@@ -145,7 +149,7 @@ class Game:
             self.notify('Game over!')
             self.notify('%s is the winner!' % scores[0]['name'])
         else:
-            self.notify('turn %d started' % self.current_turn)
+            self.notify('*** Turn %d started' % self.current_turn)
 
     def GET_scores(self, pl, **kwargs):
         player_scores = {}
@@ -377,7 +381,7 @@ class Game:
         newcoord_list = random.sample(allowed_coord_set(self.options.map_width, self.options.map_height, use_rc_logo) - owned_planet_coords , k=len(planet_names) - len(owners) )
 
         for i,planet_name in  enumerate(planet_names[len(owners):]) :
-            self.planets[planet_name] = Planet(planet_name, newcoord_list[i][0], newcoord_list[i][1], rand(5)+rand(5), rand(11)+rand(11)+rand(11)+7)
+            self.planets[planet_name] = Planet(planet_name, newcoord_list[i][0], newcoord_list[i][1], rand(6)+rand(6), rand(11)+rand(11)+rand(11)+rand(11)+10)
 
         for i, (name, pl) in enumerate(self.players.items()):
             if pl not in owners or planets is None  :
@@ -389,7 +393,6 @@ class Game:
     # toroidal distance : going off the edge comes back on the other side
     def distance(self, here, dest): #self is useless arg. but here cuz DL don't grok self.method(,) at the callsite
         return math.sqrt( ((here.y-dest.y)%self.options.map_height)**2 + ((here.x-dest.x)%self.options.map_width)**2)
-
 
 
 class Player:
