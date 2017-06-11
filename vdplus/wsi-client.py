@@ -15,7 +15,11 @@ from visidata import *
 option('refresh_rate_s', 2.0, 'time to sleep between refreshes')
 option('disp_turn_done', '*', 'symbol to indicate player turn taken')
 
+theme('disp_title', 'RC GameJam S1\'17', 'title on map sheet')
 theme('color_dest_planet', 'underline', 'color of marked destination planet')
+theme('color_empty_space', '234 blue', 'color of empty space')
+theme('color_unowned_planet', 'white', 'color of unowned planet')
+theme('disp_empty_space', '.', 'color of empty space')
 
 command('N', 'status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
 command('Y', 'vd.push(g_client.Players)', 'push players sheet')
@@ -195,6 +199,7 @@ class PlayersSheet(Sheet):
         for plrow in self.rows:
             if plrow.name == playername:
                 return plrow.color
+        return options.color_unowned_planet
 
 def ColumnItems(key_list, **kwargs):
     return [ColumnItem(x, x, **kwargs) for x in key_list]
@@ -310,7 +315,8 @@ class MapSheet(Sheet):
         self.command('f', 'g_client.add_deployment([cursorRow[cursorCol.x]], g_client.Planets.marked_planet, int(input("# ships: ", value=cursorRow[cursorCol.x].nships)))', 'deploy N ships from current planet to marked planet')
         self.command(' ', 'cycle_info()', 'cycle the information displayed')
 
-        self.colorizers.append(self.colorPlanet)
+        self.colorizers.append(self.colorOwnedPlanet)
+        self.colorizers.append(self.colorRoguePlanet)
         self.colorizers.append(self.colorMarkedPlanet)
         self.colorizers.append(self.colorSpace)
 
@@ -319,12 +325,16 @@ class MapSheet(Sheet):
         return (options.color_dest_planet, 5) if row and col and row[col.x] and row[col.x] is g_client.Planets.marked_planet else None
 
     @staticmethod
-    def colorPlanet(sheet,col,row,value):
+    def colorOwnedPlanet(sheet,col,row,value):
+        return (g_client.Players.get_player_color(row[col.x].ownername), 9) if row and col and row[col.x] else None
+
+    @staticmethod
+    def colorRoguePlanet(sheet,col,row,value):
         return (g_client.Players.get_player_color(row[col.x].ownername), 9) if row and col and row[col.x] else None
 
     @staticmethod
     def colorSpace(sheet,col,row,value):
-        return (options.color_empty_space, 4) if row and col else None
+        return (options.color_empty_space, 2) if row and col and row[col.x] is None else None
 
     def cycle_info(self):
         self.fieldToShow = self.fieldToShow[1:] + [self.fieldToShow[0]]
@@ -335,9 +345,10 @@ class MapSheet(Sheet):
         map_w = g_client.gamestate['map_width']
         map_h = g_client.gamestate['map_height']
 
-        self.columns = []
+        self.columns = [Column(' ', width=3, getter=lambda row: None)]
+        self.columns[0].x = -1
         for x in range(map_w):
-            c = Column('', width=3, getter=lambda row,x=x,self=self: getattr(row[x], self.fieldToShow[0]) if row[x] else '.')
+            c = Column(options.disp_title[x:x+1] or ' ', width=3, getter=lambda row,x=x,self=self: getattr(row[x], self.fieldToShow[0]) if row[x] else options.disp_empty_space)
             c.x = x
             self.columns.append(c)
 
