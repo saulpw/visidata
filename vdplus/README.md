@@ -19,10 +19,10 @@ All players then start their clients and login:
 The first time a player name is used, the password is set.
 Players join the game if it has not yet started (each server only hosts one game).
 
-Each player presses `ENTER` when they are ready for the game to start.
+Each player presses `Ctrl-S` when they are ready for the game to start.
 
 Press `M` to go to the Map for this game, or `P` for the list of planets.
-Before the game has started, any player can change 'G'ame options or press `N` to generate a New map (`Ctrl-R` to Reload the pages).
+Before the game has started, any player can change `G`ame options or press `N` to generate a New map (`Ctrl-R` to Reload the pages).
 
 When the map is all players are ready, the game begins.
 
@@ -47,7 +47,7 @@ On the `P`lanet sheet:
 On the `M`ap sheet:
 - The colour of the planet name indicates which player currently 'owns' it
 - White planets are neutral and currently not in anybody's control
-- `SPACE` cycles through `name`, `prod` and `killpct` fields
+- `SPACE` cycles through `name`, `prod`,`killpct` and `numships` fields
 - You may also mark and deploy on the map sheet, like you would on the `P`lanet sheet
 
 On the `U` queued orders sheet:
