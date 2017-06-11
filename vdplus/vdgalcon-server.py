@@ -37,7 +37,7 @@ class Game:
             'map_width': 16,
             'map_height': 16,
             'toroidal_map': True,  # toroidal distance : going off the edge comes back on the other side
-            'map_generator': 'rclogo1',  # or 'random'
+            'map_generator': 'rclogo_var',  # or 'random'
             'debug': True,
         }
         self.options = OptionsObject(self.options_dict)
@@ -527,7 +527,7 @@ def generate_map_random(width, height, num_planets, distancefunc):
     return planets
 
 
-def generate_map_rcvar(width, height, num_planets, distancefunc):
+def generate_map_rclogo_var(width, height, num_planets, distancefunc):
     planet_names = all_planet_names[:num_planets]
 
     def allowed_coord_set(width, height):
