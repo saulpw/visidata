@@ -20,6 +20,7 @@ theme('color_dest_planet', 'underline', 'color of marked destination planet')
 theme('color_empty_space', '20 blue', 'color of empty space')
 theme('color_unowned_planet', 'white', 'color of unowned planet')
 theme('disp_empty_space', '.', 'color of empty space')
+theme('twinkle_rate', '200', 'neg twinkle')
 
 command('G', 'vd.push(g_client.GameOptions)', 'push game options')
 command('N', 'status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
@@ -34,7 +35,8 @@ command('^S', 'g_client.submit_turn()', 'submit deployments and end turn')
 command('Q', 'g_client.player_quit()', 'quit the game (with confirm)')
 
 options.disp_column_sep = ''
-options.color_current_row = 'reverse white'
+options.curses_timeout = '200'
+#options.color_current_row = 'reverse white'
 
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
@@ -66,8 +68,8 @@ class WSIClient:
                 if depl.result:
                     continue
                 try:
-                    r = self.get('/deploy', **depl)
-                    qd.rows[i] = AttrDict(r.json())
+                    r = AttrDict(self.get('/deploy', **depl).json())
+                    qd.rows[i] = r
                 except Exception as e:
                     qd.rows[i].result = str(e)
 
@@ -348,7 +350,12 @@ class MapSheet(Sheet):
 
     @staticmethod
     def colorSpace(sheet,col,row,value):
-        return (options.color_empty_space, 2) if row and col and row[col.x] is None else None
+        if row and col and row[col.x] is None:
+            if row is not sheet.cursorRow:
+                r = options.color_empty_space
+                if random.randrange(0, int(options.twinkle_rate)) == 0:
+                    r = 'cyan bold'
+                return (r, 2)
 
     def cycle_info(self):
         self.fieldToShow = self.fieldToShow[1:] + [self.fieldToShow[0]]
