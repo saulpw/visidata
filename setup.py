@@ -7,7 +7,7 @@ __version__ = '0.60'
 
 setup(name='visidata',
       version=__version__,
-      install_requires=open('requirements.txt').read().split(),
+      install_requires='python-dateutil openpyxl'.split(),
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       author='Saul Pwanson',
