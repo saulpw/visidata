@@ -2,7 +2,7 @@
 
 ## User Guides
 
-* [README](/saulpw/visidata/README), an effective quickstart guide
+* [README](https://github.com/saulpw/visidata/blob/stable/docs/user-guide.md), an effective quickstart guide
 
 ## Developer Guides
 
