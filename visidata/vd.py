@@ -789,7 +789,11 @@ class Sheet:
 
     def command(self, keystrokes, execstr, helpstr):
         """Populate command, help-string and execution string for keystrokes."""
-        self.commands[keystrokes] = (keystrokes, helpstr, execstr)
+        if isinstance(keystrokes, str):
+            keystrokes = [keystrokes]
+
+        for ks in keystrokes:
+            self.commands[ks] = (ks, helpstr, execstr)
 
     def moveRegex(self, *args, **kwargs):
         """Wrap `VisiData.searchRegex`, with cursor additionally moved."""
