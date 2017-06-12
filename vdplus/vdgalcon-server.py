@@ -38,7 +38,7 @@ class Game:
             'map_height': 15,
             'toroidal_map': False,  # if the edges are connected
             'map_generator': 'rclogo_fixed',  # or 'random' or 'rclogo_var'
-            'debug': True,
+            'debug': False,
         }
         self.options = OptionsObject(self.options_dict)
         self.players = {}   # [playername] -> Player

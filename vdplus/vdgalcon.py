@@ -402,10 +402,15 @@ class GameOptionsSheet(Sheet):
     def reload(self):
         self.rows = list(g_client.get('/options').json().items())
 
-g_client = WSIClient(sys.argv[1])
 
 if __name__ == '__main__':
     print(__doc__)
+
+    server_addr = sys.argv[1] if len(sys.argv) > 1 else 'localhost'
+    server_port = int(sys.argv[2] if len(sys.argv) > 2 else 80)
+
+    g_client = WSIClient('http://%s:%s' % (server_addr, server_port))
+
     vd()._status = ["'N' to generate new 'M'ap; Ctrl-S when ready to start"]
     set_global('g_client', g_client)
     g_client.login()
