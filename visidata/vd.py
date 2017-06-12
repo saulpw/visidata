@@ -2,7 +2,7 @@
 
 """VisiData core functionality"""
 
-__version__ = 'saul.pw/VisiData v0.60'
+__version__ = 'saul.pw/VisiData v0.61'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -1202,6 +1202,7 @@ class Sheet:
         """Set right-most visible column, based on calculation."""
         self.visibleColLayout = {}
         x = 0
+        vcolidx = 0
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None and self.visibleRows:
@@ -1558,7 +1559,7 @@ def ColumnAttr(attrname, type=anytype, **kwargs):
     return Column(attrname, type=type,
             getter=lambda r,b=attrname: getattr(r,b),
             setter=lambda r,v,b=attrname: setattr(r,b,v),
-                    **kwargs)
+            **kwargs)
 
 def ColumnItem(attrname, itemkey, **kwargs):
     """Return Column object (with getitem/setitem) on the row Python object."""
