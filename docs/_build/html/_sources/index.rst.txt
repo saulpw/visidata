@@ -9,9 +9,10 @@ Welcome to VisiData's documentation!
 ====================================
 
 .. toctree::
+   :maxdepth: 4
    :caption: Contents:
 
-   home <home>
+   Home <home>
    user-guide
    dev-guide
    screen-layout

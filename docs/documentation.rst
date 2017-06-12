@@ -14,11 +14,11 @@ This project uses reStructuredText (in files with extension ``.rst``) because it
 Sphinx
 ------
 
-#. Sphinx is installed via ``pip``. Do initial set-up with ``sphinx-quickstart``. Here we have followed all defaults except creation of a ``.bat`` file::
+#. **Installation**: Sphinx is installed via ``pip``. Do initial set-up with ``sphinx-quickstart``. Here we have followed all defaults except creation of a ``.bat`` file::
 
       > Create Windows command file? (y/n) [y]: n
 
-#. In the auto-populated ``index.rst`` there are three additions to make.
+#. **Table of Contents**: In the auto-populated ``index.rst`` there are three additions to make.
 
    a. At very the top of the file, add::
 
@@ -28,7 +28,7 @@ Sphinx
 
    c. Below ``:caption: Contents:`` add the name of each file containing documentation::
 
-         home
+         Home <home>
          user-guide
          dev-guide
          screen-layout
@@ -36,11 +36,17 @@ Sphinx
          about/contributing
          about/credits
 
-#. In the auto-populated ``conf.py`` you can set the Sphinx them and its options. Themes are listed `on the Sphinx site <http://www.sphinx-doc.org/en/stable/theming.html>`_. Declare a theme by setting ``html_theme`` to a string containing the name of the theme; declare its options by setting ``html_theme_options`` to a dictionary containing key-value pairs for each option, following the page linked to above.
+#. **Theme**: In the auto-populated ``conf.py`` you can set the Sphinx theme and its options. 
+   
+   Themes are listed `on the Sphinx site <http://www.sphinx-doc.org/en/stable/theming.html>`_. 
+   
+   Declare a theme by setting ``html_theme`` to a string containing the theme's name
+   
+   Declare its options by setting ``html_theme_options`` to a dictionary containing key-value pairs for each option, following the page linked to above.
 
-   ``sphinx-quickstart`` defaults to the ``alabaster`` theme. By default, if Sphinx is not used, Read the Docs installs a custom theme called the "`Read the Docs Sphinx Theme <https://github.com/rtfd/sphinx_rtd_theme>`_", which is available via ``pip`` or ``git-clone``. We have installed that theme here. You can create other custom themes using ``INI`` format, as described `on the Sphinx site <http://www.sphinx-doc.org/en/stable/theming.html>`_.
+   ``sphinx-quickstart`` defaults to the ``alabaster`` theme. But by default, if Sphinx is not used at all, Read the Docs installs a custom theme called the "`Read the Docs Sphinx Theme <https://github.com/rtfd/sphinx_rtd_theme>`_", which is available via ``pip`` or cloning with ``git``. We have installed that theme here. You can create other custom themes using ``INI`` format, as described `on the Sphinx site <http://www.sphinx-doc.org/en/stable/theming.html>`_.
 
-#. ``sphinx-quickstart`` creates a ``Makefile`` in ``docs/``, which will construct HTML straightforwardly::
+#. **HTML**: ``sphinx-quickstart`` creates a ``Makefile`` in ``docs/``, which will construct HTML straightforwardly::
 
       make html
 
@@ -51,21 +57,21 @@ Sphinx
 Read the Docs
 -------------
 
-#. In order to use Read the Docs, you need to sign up for an account. The service is free to use, but support may cost money.
+#. **Read the Docs service**: In order to use Read the Docs, you need to sign up for an account. The service is free to use, but support may cost money. Avoiding advertisements also costs money.
 
-#. To import a new project, use the `manual import page of the Dashboard <https://readthedocs.org/dashboard/import/manual/>`_ and click the "Import a Project" button. 
+#. **Import project**: Use the `manual import page of the Dashboard <https://readthedocs.org/dashboard/import/manual/>`_ and click the "Import a Project" button. 
 
-   If you grant Read the Docs admin access to your Git-hosting repository (at https://readthedocs.org/accounts/social/connections/), it will attempt to build a new set of docs each time a commit is pushed, via webhooks. You can also build new docs manually, in the absence of a valid webhook. If a webhook is set up for GitHub, it will be listed on the ``settings => Webhooks`` page of the repository.
+#. **Set up webhook**: If you grant Read the Docs admin access to your Git-hosting repository (at https://readthedocs.org/accounts/social/connections/), it will attempt to build a new set of docs each time a commit is pushed, via webhooks. You can also build new docs manually, in the absence of a valid webhook. If a webhook is set up for GitHub, it will be listed on the ``settings => Webhooks`` page of the repository.
 
-#. On the ``Admin`` settings for the project, set "programming language" to Python.
+#. **Set programming language**: On Read the Docs's ``Admin`` settings for the project, set "programming language" to Python.
 
-#. If the Sphinx docs are not stored in the ``master`` branch, Read the Docs may not be able to find them, even if the correct branch is set as default on the Git-hosting service (on GitHub, that means Settings => Branches => Default Branch). To ensure that Read the Docs reads from the correct branch, set it at::
+#. **Set default branch (in two places)**: If the Sphinx docs are not stored in the ``master`` branch, Read the Docs may not be able to find them, even though the correct branch is set as default on the Git-hosting service (on GitHub, that means Settings => Branches => Default Branch). After setting the default branch on GitHub, also set it on Read the Docs, at::
 
       Read the Docs project: Admin => Advanced Settings => Default branch
 
-   Also on the "Advanced Settings" page, it may be useful to set the Python interpreter to the correct version of Python for the project (CPython 3.x).
+#. **Set Python interpreter version**: Also on the "Advanced Settings" page, it may be useful to set the Python interpreter to the correct version of Python for the project (CPython 3.x).
 
-   On submit, assuming a webhook is found, Read the Docs will build and deploy a new version, using the branch set.
+#. **Submit and build**: On submit, assuming a webhook is found, Read the Docs will build and deploy a new version, using the branch you have set.
 
    The build may fail if you make too many attempts to build within a very short time.
 
