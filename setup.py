@@ -7,12 +7,7 @@ __version__ = '0.61'
 
 setup(name='visidata',
       version=__version__,
-      install_requires=[
-              'openpyxl',
-              'python-dateutil',
-              'Sphinx',
-              'sphinx-rtd-theme',
-              ],
+      install_requires=['openpyxl', 'python-dateutil'],
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       author='Saul Pwanson',

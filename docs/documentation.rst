@@ -14,7 +14,11 @@ This project uses reStructuredText (in files with extension ``.rst``) because it
 Sphinx
 ------
 
-#. **Installation**: Sphinx is installed via ``pip``. Do initial set-up with ``sphinx-quickstart``. Here we have followed all defaults except creation of a ``.bat`` file::
+#. **Installation**: Install Sphinx and ``sphinx_rtd_theme``::
+
+    pip install Sphinx sphinx_rtd_theme
+   
+  Do initial set-up with ``sphinx-quickstart``. Here we have followed all defaults except creation of a ``.bat`` file::
 
       > Create Windows command file? (y/n) [y]: n
 
@@ -40,17 +44,17 @@ Sphinx
    
    Themes are listed `on the Sphinx site <http://www.sphinx-doc.org/en/stable/theming.html>`_. 
    
-   Declare a theme by setting ``html_theme`` to a string containing the theme's name
+   Declare a theme by setting ``html_theme`` to a string containing the theme's name.
    
    Declare its options by setting ``html_theme_options`` to a dictionary containing key-value pairs for each option, following the page linked to above.
 
-   ``sphinx-quickstart`` defaults to the ``alabaster`` theme. But by default, if Sphinx is not used at all, Read the Docs installs a custom theme called the "`Read the Docs Sphinx Theme <https://github.com/rtfd/sphinx_rtd_theme>`_", which is available via ``pip`` or cloning with ``git``. We have installed that theme here. You can create other custom themes using ``INI`` format, as described `on the Sphinx site <http://www.sphinx-doc.org/en/stable/theming.html>`_.
+   ``sphinx-quickstart`` defaults to the ``alabaster`` theme. But we are using ``sphinx_rtd_theme``, which is the default of Read the Docs. You can create other custom themes using ``INI`` format, as described `on the Sphinx site <http://www.sphinx-doc.org/en/stable/theming.html>`_.
 
 #. **HTML**: ``sphinx-quickstart`` creates a ``Makefile`` in ``docs/``, which will construct HTML straightforwardly::
 
       make html
 
-#. If ``make`` runs without errors, ``index.html`` will contain your table of contents and documentation. You can now stage, commit, and push the current contents of the repository. 
+#. **Build errors and warnings**: If ``make`` runs without errors, ``index.html`` will contain your table of contents and documentation. You can now stage, commit, and push the current contents of the repository. 
 
    Warnings, for instance that a certain ``.rst`` file is not referred to in the documentation, do not seem to cause Sphinx to fail to build.
 
@@ -75,6 +79,6 @@ Read the Docs
 
    The build may fail if you make too many attempts to build within a very short time.
 
-   If a build attempt fails, Python or other tracebacks are visible if you click on the attempt in question, on the Builds pages. Currently (20170611) the presence of ``pkg-resource==0.0.0`` in ``requirements.txt`` causes such a failure, so edit it out if you have updated that file from ``pip freeze``.
+   If a build attempt fails, Python or other tracebacks are visible if you click on the attempt in question, on the Builds pages.
 
 [end]
