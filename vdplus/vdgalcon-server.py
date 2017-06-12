@@ -32,7 +32,7 @@ class OptionsObject:
 class Game:
     def __init__(self):
         self.options_dict = {
-            'num_planets': 30,
+            'num_planets': 57,
             'num_turns': 20,
             'map_width': 15,
             'map_height': 15,
@@ -538,19 +538,19 @@ def generate_map_random(width, height, num_planets, distancefunc):
 
 def generate_map_rclogo_fixed(width, height, num_planets, distancefunc):
     grid = '''
-.X.X.X.X.X.X.X.
+.X.X.X.G.X.X.X.
 .X...........X.
-....A.X.X......
+....E.X.X......
 .X...........X.
 .....XX.XB.....
 .X...........X.
 ...............
-.C.X.X.X.X.X.F.
+.C.X.X.H.X.X.D.
 ......X.X......
 ..X.X.X.X.X.X..
 X.X.........X.X
-....X.X.X.E....
-X..D.X.X.X....X
+....X.X.X.F....
+X..A.X.X.X....X
 ...............
 X.X.X.X.X.X.X.X'''
 
