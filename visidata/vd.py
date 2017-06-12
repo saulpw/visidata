@@ -1202,6 +1202,7 @@ class Sheet:
         """Set right-most visible column, based on calculation."""
         self.visibleColLayout = {}
         x = 0
+        vcolidx = 0
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None and self.visibleRows:
