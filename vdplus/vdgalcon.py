@@ -34,6 +34,7 @@ command('^S', 'g_client.submit_turn()', 'submit deployments and end turn')
 command('Q', 'g_client.player_quit()', 'quit the game (with confirm)')
 
 options.disp_column_sep = ''
+options.color_current_row = 'reverse white'
 
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
