@@ -31,7 +31,7 @@ command('D', 'vd.push(g_client.HistoricalDeployments)', 'push historical deploym
 command('E', 'vd.push(g_client.Events)', 'push events sheet')
 command('R', 'vd.push(SheetList("scores", g_client.get("/scores").json()))', 'push scores sheet')
 command('^S', 'g_client.submit_turn()', 'submit deployments and end turn')
-command('Q', 'g_client.player_quit()', 'quit the game (with confirm)')
+command('Q', 'g_client.player_quit(); vd.sheets.clear()', 'quit the game (with confirm)')
 
 options.disp_column_sep = ''
 options.color_current_row = 'reverse white'

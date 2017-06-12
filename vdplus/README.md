@@ -2,6 +2,15 @@
 
 Galactic Conquest on VisiData
 
+Take over the galaxy with your warship fleet!  Starting with only one planet
+and 10 ships, you must compete with any number of enemies for the most planets
+and galactic glory.
+
+At the start, most planets are inhabited by savages with only a few spaceships
+for battle.  Some planets have better pilots and their ships get a higher kill percentage than their enemies in battle.
+
+To capture a planet, you need to send a strong enough fleet.  Deploy ships from your planets and conquer the galaxy!
+
 ## Instructions
 
 ### Starting a game
