@@ -69,7 +69,7 @@ class Game:
             if planet.name not in all_planet_names[:len(self.players)]:
                 planet.prod = rand(6) + rand(6)
                 planet.killpct = rand(11)+rand(11)+rand(11)+rand(11)+6
-                planet.nships = max(prod, 1)
+                planet.nships = max(planet.prod, 1)
 
     def notify(self, eventstr):
         self.events.append(Event(self.current_turn, eventstr))
