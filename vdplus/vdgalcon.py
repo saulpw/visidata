@@ -152,6 +152,7 @@ class WSIClient:
                 d.result = None
                 self.QueuedDeployments.rows.append(d)
                 ndeployments += 1
+                src.nships -= d.nships_requested  # keep track for the player
         status('Queued %s deployments' % ndeployments)
 
     @async
