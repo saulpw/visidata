@@ -1684,9 +1684,8 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
 
         # convert to string just before drawing
         s, dispw = clipstr(str(s), w)
+        scr.addstr(y, x, options.disp_column_fill*w, attr)
         scr.addstr(y, x, s, attr)
-        if dispw <= w:
-            scr.addstr(y, x+dispw, options.disp_column_fill*(w-dispw), attr)
     except Exception as e:
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
 #                ).with_traceback(sys.exc_info()[2])
