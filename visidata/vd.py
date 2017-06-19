@@ -17,17 +17,12 @@ import functools
 import itertools
 import string
 import re
-import threading
 import time
 import curses
 import datetime
-import ctypes  # async exception
 import io
-import cProfile
-import pstats
 import random
 import textwrap
-
 
 class EscapeException(Exception):
     pass
@@ -58,8 +53,7 @@ option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 option('field_joiner', ' ', 'character used to join string fields')
 option('sheetname_joiner', '~', 'string joining multiple sheet names')
 option('curses_timeout', '100', 'curses timeout in ms')
-option('min_task_time', 0.10, 'only keep tasks that take longer than this number of seconds')
-option('profile_tasks', True, 'profile async tasks')
+
 option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
@@ -350,10 +344,19 @@ def chooseOne(choices):
     else:
         return input('/'.join(str(x) for x in choices) + ': ')
 
-
 def regex_flags():
     """Return flags to pass to regex functions from options"""
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
+
+def sync(f):
+    'stub wrapper to wait for unfinished async tasks'
+    pass
+
+def async(func):
+    """Function decorator to call in separate thread if async available."""
+    def _exec_async(*args, **kwargs):
+        return vd().exec_async(func, *args, **kwargs)
+    return _exec_async
 
 class VisiData:
     allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
@@ -367,22 +370,8 @@ class VisiData:
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
         self.inInput = False
-        self.tasks = []
         self.scr = None  # curses scr
-
-    @property
-    def unfinishedTasks(self):
-        """Return list of tasks for which `endTime` has not been reached."""
-        return [task for task in self.tasks if not task.endTime]
-
-    def checkForUnfinishedTasks(self):
-        """Prune old threads that were not started or terminated."""
-        for task in self.unfinishedTasks:
-            if not task.thread.is_alive():
-                task.endTime = time.process_time()
-                task.status += 'ended'
-                if task.elapsed_s*1000 < float(options.min_task_time):
-                    self.tasks.remove(task)
+        self.hooks = {}
 
     def status(self, s):
         """Populate status bar and maintain `statusHistory` list."""
@@ -391,6 +380,27 @@ class VisiData:
         self.statusHistory.insert(0, strs)
         del self.statusHistory[100:]  # keep most recent 100 only
         return s
+
+    def add_hook(self, hookname, hookfunc):
+        """Add hookfunc by hookname, to be called by corresponding `call_hook`."""
+        if hookname in self.hooks:
+            hooklist = self.hooks[hookname]
+        else:
+            hooklist = []
+            self.hooks[hookname] = hooklist
+
+        hooklist.append(hookfunc)
+
+    def call_hook(self, hookname, *args, **kwargs):
+        """Call all functions registered with `add_hook` for the given hookname."""
+        for f in self.hooks.get(hookname, []):
+            r = f(*args, **kwargs)
+            if r:
+                status(r)
+
+    def exec_async(self, func, *args, **kwargs):
+        """Synchronous async caller stub, replaced if async available."""
+        return func(*args, **kwargs)
 
     def editText(self, y, x, w, **kwargs):
         """Return last command if it exists in EditLog or screen object."""
@@ -564,7 +574,7 @@ class VisiData:
             else:
                 status('no command for "%s"' % (self.keystrokes))
 
-            self.checkForUnfinishedTasks()
+            self.call_hook('predraw')
             sheet.checkCursor()
 
     def replace(self, vs):
@@ -585,108 +595,6 @@ class VisiData:
                 self.sheets.insert(0, vs)
             return vs
 # end VisiData class
-
-
-# define @async for potentially long-running functions
-#   when function is called, instead launches a thread
-#   ENTER on that row pushes a profile of the thread
-
-class Task:
-    """Prepare function and its parameters for asynchronous processing."""
-    def __init__(self, name):
-        self.name = name
-        self.startTime = time.process_time()
-        self.endTime = None
-        self.status = ''
-        self.thread = None
-        self.profileResults = None
-
-    def start(self, func, *args, **kwargs):
-        """Start parallel thread."""
-        self.thread = threading.Thread(target=func, daemon=True, args=args, kwargs=kwargs)
-        self.thread.start()
-
-    @property
-    def elapsed_s(self):
-        """Return elapsed time."""
-        return (self.endTime or time.process_time())-self.startTime
-
-def sync():
-    while len(vd().unfinishedTasks) > 0:
-        vd().checkForUnfinishedTasks()
-
-def async(func):
-    """Supply `execThread` for use decorating functions."""
-    def execThread(*args, **kwargs):
-        """Manage execution of asynchronous thread, checking for redundancy."""
-        if threading.current_thread().daemon:
-            # Don't spawn a new thread from a subthread.
-            return func(*args, **kwargs)
-
-        currentSheet = vd().sheets[0]
-        if currentSheet.currentTask:
-            error('A task is already in progress on this sheet')
-        t = Task(' '.join([func.__name__] + [str(x) for x in args[:1]]))
-        currentSheet.currentTask = t
-        t.sheet = currentSheet
-        if bool(options.profile_tasks):
-            t.start(thread_profileCode, t, func, *args, **kwargs)
-        else:
-            t.start(toplevel_try_func, t, func, *args, **kwargs)
-        vd().tasks.append(t)
-        return t
-    return execThread
-
-def toplevel_try_func(task, func, *args, **kwargs):
-    """Modify status-bar content on user-abort/exceptions, for use by @async."""
-    try:
-        ret = func(*args, **kwargs)
-        task.sheet.currentTask = None
-        return ret
-    except EscapeException as e:  # user aborted
-        task.sheet.currentTask = None
-        task.status += 'aborted by user;'
-        status("%s aborted" % task.name)
-    except Exception as e:
-        task.sheet.currentTask = None
-        task.status += status('%s: %s;' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
-        exceptionCaught()
-
-def thread_profileCode(task, func, *args, **kwargs):
-    """Wrap profiling functionality for use by @async."""
-    pr = cProfile.Profile()
-    pr.enable()
-    ret = toplevel_try_func(task, func, *args, **kwargs)
-    pr.disable()
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-    ps.print_stats()
-    task.profileResults = s.getvalue()
-    return ret
-
-
-def ctype_async_raise(thread_obj, exception):
-    """Raise exception for threads running asynchronously."""
-
-
-    def dict_find(D, value):
-        """Return first key in dict `D` corresponding to `value`."""
-        for k, v in D.items():
-            if v is value:
-                return k
-
-        raise ValueError("no such value in dict")
-
-    # Following `ctypes call follows https://gist.github.com/liuw/2407154.
-    ctypes.pythonapi.PyThreadState_SetAsyncExc(
-            ctypes.c_long(dict_find(threading._active, thread_obj)),
-            ctypes.py_object(exception)
-            )
-    status('sent exception to %s' % thread_obj.name)
-
-command('^C', 'if sheet.currentTask: ctype_async_raise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
-command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
-
 
 class LazyMap:
     """Wrap Python `dict` basic functionality."""
@@ -1763,25 +1671,6 @@ class OptionsSheet(Sheet):
         if row and col and col.name in ['value', 'default'] and row[0].startswith('color_'):
             return col.getValue(row), 9
 
-# each row is a Task object
-class TasksSheet(Sheet):
-    """Sheet displaying "Task" objects: asynchronous threads."""
-
-    def reload(self):
-        """Populate sheet via `reload` function."""
-        self.command('^C', 'ctype_async_raise(cursorRow.thread, EscapeException)', 'cancel this action')
-        self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
-        self.columns = [
-            ColumnAttr('name'),
-            ColumnAttr('elapsed_s', type=float),
-            ColumnAttr('status'),
-        ]
-        self.rows = vd().tasks
-
-
-def ProfileSheet(task):
-    """Populate sheet showing profiling results."""
-    return TextSheet(task.name + '_profile', task.profileResults)
 
 #### enable external addons
 def open_vd(p):
