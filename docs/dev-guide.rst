@@ -311,5 +311,4 @@ reasonable measure of total work, and they should also be structured to
 frequently update ``Sheet.progressMade`` with the amount of work already
 done. This is used for the progress meter on the right status line.
 
---------------
 
