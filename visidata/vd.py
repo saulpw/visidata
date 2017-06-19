@@ -2,7 +2,7 @@
 
 """VisiData core functionality"""
 
-__version__ = 'saul.pw/VisiData v0.59'
+__version__ = 'saul.pw/VisiData v0.60'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'GPLv3'
 __status__ = 'Development'
@@ -352,6 +352,14 @@ def chooseOne(choices):
         return input('/'.join(str(x) for x in choices) + ': ')
 
 
+def regex_flags():
+    """Return flags to pass to regex functions from options"""
+    return sum(getattr(re, f.upper()) for f in options.regex_flags)
+
+# A .. Z AA AB .. ZZ
+defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
+
+
 class VisiData:
     allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
 
@@ -423,8 +431,7 @@ class VisiData:
             return any([func(c.getDisplayValue(row)) for c in columns])
 
         if regex:
-            flags = sum(getattr(re, f.upper()) for f in options.regex_flags)
-            r = re.compile(regex, flags)
+            r = re.compile(regex, regex_flags())
             if r:
                 self.lastRegex = r
             else:
@@ -492,18 +499,22 @@ class VisiData:
             self.exceptionCaught()
 
     def drawRightStatus(self):
-        """Compose and draw right side of status bar."""
+        """Draw right side of status bar."""
         try:
-            sheet = self.sheets[0]
-            if sheet.progressMade == sheet.progressTotal:
-                pctLoaded = 'rows'
-            else:
-                pctLoaded = ' %2d%%' % sheet.progressPct
-            rstatus = '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
+            rstatus = self.rightStatus()
             draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.color_status])
             curses.doupdate()
         except Exception as e:
             self.exceptionCaught()
+
+    def rightStatus(self):
+        """Compose right side of status bar."""
+        sheet = self.sheets[0]
+        if sheet.progressMade == sheet.progressTotal:
+            pctLoaded = 'rows'
+        else:
+            pctLoaded = ' %2d%%' % sheet.progressPct
+        return '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
 
     def run(self, scr):
         """Manage execution of keystrokes and subsequent redrawing of screen."""
@@ -777,7 +788,11 @@ class Sheet:
 
     def command(self, keystrokes, execstr, helpstr):
         """Populate command, help-string and execution string for keystrokes."""
-        self.commands[keystrokes] = (keystrokes, helpstr, execstr)
+        if isinstance(keystrokes, str):
+            keystrokes = [keystrokes]
+
+        for ks in keystrokes:
+            self.commands[ks] = (ks, helpstr, execstr)
 
     def moveRegex(self, *args, **kwargs):
         """Wrap `VisiData.searchRegex`, with cursor additionally moved."""
@@ -1186,6 +1201,7 @@ class Sheet:
         """Set right-most visible column, based on calculation."""
         self.visibleColLayout = {}
         x = 0
+        vcolidx = 0
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None and self.visibleRows:
@@ -1537,11 +1553,12 @@ class Column:
 
 # ---- Column makers
 
-def ColumnAttr(attrname, type=anytype):
+def ColumnAttr(attrname, type=anytype, **kwargs):
     """Return Column object with `attrname` from current row Python object."""
     return Column(attrname, type=type,
             getter=lambda r,b=attrname: getattr(r,b),
-            setter=lambda r,v,b=attrname: setattr(r,b,v))
+            setter=lambda r,v,b=attrname: setattr(r,b,v),
+            **kwargs)
 
 def ColumnItem(attrname, itemkey, **kwargs):
     """Return Column object (with getitem/setitem) on the row Python object."""
@@ -1667,9 +1684,8 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
 
         # convert to string just before drawing
         s, dispw = clipstr(str(s), w)
+        scr.addstr(y, x, options.disp_column_fill*w, attr)
         scr.addstr(y, x, s, attr)
-        if dispw <= w:
-            scr.addstr(y, x+dispw, options.disp_column_fill*(w-dispw), attr)
     except Exception as e:
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
 #                ).with_traceback(sys.exc_info()[2])

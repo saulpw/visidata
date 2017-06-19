@@ -1,5 +1,10 @@
 # VisiData version history
 
+## v0.60
+- colorizers
+- `g[` and `g]` to sort by all key columns
+- `;` and `.` experimental regex commands
+
 ## v0.59
 - pivot sheets with `W`
 - undo with `BACKSPACE` and replay with `ga`

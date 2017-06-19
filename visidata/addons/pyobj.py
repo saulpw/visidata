@@ -42,9 +42,9 @@ def AttrColumns(attrnames):
 
 class SheetList(Sheet):
     """A sheet from a list of homogenous dicts."""
-    def __init__(self, name, src, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         # columns is a list of strings naming attributes on the objects within the obj
-        super().__init__(name, src, **kwargs)
+        super().__init__(name, *args, **kwargs)
         src = args[0]
         assert isinstance(src, list) or isinstance(src, tuple), type(src)
 

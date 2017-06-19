@@ -10,6 +10,7 @@ from .addons.pivot import *
 from .addons.tidydata import *
 from .addons.editlog import *
 from .addons.freeze import *
+from .addons.regex import *
 
 from .addons.csv import *
 from .addons.zip import *
