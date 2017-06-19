@@ -393,24 +393,24 @@ class VisiData:
 
     def call_hook(self, hookname, *args, **kwargs):
         """Call all functions registered with `add_hook` for the given hookname."""
+        r = None
         for f in self.hooks.get(hookname, []):
-            r = f(*args, **kwargs)
-            if r:
-                status(r)
+            r = r or f(*args, **kwargs)
+        return r
 
     def exec_async(self, func, *args, **kwargs):
         """Synchronous async caller stub, replaced if async available."""
         return func(*args, **kwargs)
 
     def editText(self, y, x, w, **kwargs):
-        """Return last command if it exists in EditLog or screen object."""
-        v = self.editlog.get_last_args()
+        """Wrap global editText with `preedit` and `postedit` hooks."""
+        v = self.call_hook('preedit')
         if v is not None:
             return v
         v = editText(self.scr, y, x, w, **kwargs)
         if kwargs.get('display', True):
             self.status('"%s"' % v)
-            self.editlog.set_last_args(v)
+            self.call_hook('postedit', v)
         return v
 
     def getkeystroke(self):
@@ -565,10 +565,9 @@ class VisiData:
                 except Exception:
                     self.exceptionCaught()
             elif self.keystrokes in sheet.commands:
-                vd().editlog.before_exec_hook(sheet, self.keystrokes)
+                self.call_hook('preexec', sheet, self.keystrokes)
                 escaped = sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
-                if vd().sheets:
-                    vd().editlog.after_exec_sheet(vd().sheets[0], escaped)
+                self.call_hook('postexec', vd().sheets[0] if vd().sheets else None, escaped)
             elif keystroke in self.allPrefixes:
                 pass
             else:

@@ -57,7 +57,7 @@ class EditLog(Sheet):
 
     def after_exec_sheet(self, vs, escaped):
         """Declare ending sheet for the most recent command."""
-        if self.current_active_row:
+        if vs and self.current_active_row:
             if escaped:
                 del self.rows[-1]
             else:
@@ -118,4 +118,7 @@ class EditLog(Sheet):
             self.rows[-1][2] = args
 
 vd().editlog = EditLog('__editlog__')
-
+vd().add_hook('preexec', vd().editlog.before_exec_hook)
+vd().add_hook('postexec', vd().editlog.after_exec_sheet)
+vd().add_hook('preedit', vd().editlog.get_last_args)
+vd().add_hook('postedit', vd().editlog.set_last_args)
