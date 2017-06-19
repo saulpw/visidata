@@ -241,9 +241,7 @@ anytype = lambda r='': str(r)
 anytype.__name__ = ''
 
 class date:
-    """Simple wrapper around `datetime`.
-
-    This allows it to be created from dateutil str or numeric input as time_t"""
+    """`datetime` wrapper, constructing from time_t or with dateutil.parse"""
 
     def __init__(self, s=None):
         if s is None:
@@ -262,6 +260,10 @@ class date:
         if not fmtstr:
             fmtstr = '%Y-%m-%d %H:%M:%S'
         return self.dt.strftime(fmtstr)
+
+    def __getattr__(self, k):
+        """Forward unknown attributes to inner datetime object"""
+        return getattr(self.dt, k)
 
     def __str__(self):
         return self.to_string()
