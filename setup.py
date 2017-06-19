@@ -3,11 +3,11 @@
 from setuptools import setup
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 #from visidata import __version__
-__version__ = '0.60'
+__version__ = '0.61'
 
 setup(name='visidata',
       version=__version__,
-      install_requires=open('requirements.txt').read().split(),
+      install_requires=['openpyxl', 'python-dateutil'],
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       author='Saul Pwanson',
