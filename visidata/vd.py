@@ -64,6 +64,7 @@ option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('num_colors', 0, 'force number of colors to use')
+option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -350,11 +351,10 @@ def chooseOne(choices):
     else:
         return input('/'.join(str(x) for x in choices) + ': ')
 
-def regex_flags():
-    return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
-# A .. Z AA AB .. ZZ
-defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
+def regex_flags():
+    """Return flags to pass to regex functions from options"""
+    return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
 class VisiData:
     allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
@@ -424,12 +424,7 @@ class VisiData:
         """Set row index if moveCursor, otherwise return list of row indexes."""
 
         def columnsMatch(sheet, row, columns, func):
-            """Return boolean: is cell value formatted for display?"""
-            for c in columns:
-                m = func(c.getDisplayValue(row))
-                if m:
-                    return True
-            return False
+            return any([func(c.getDisplayValue(row)) for c in columns])
 
         if regex:
             r = re.compile(regex, regex_flags())
@@ -1763,6 +1758,12 @@ class OptionsObject:
 
 options = OptionsObject(base_options)
 
+# Generator => A .. Z AA AB ...
+defaultColNames = (''.join(j) for i in range(options.maxlen_col_hdr)
+                             for j in itertools.product(string.ascii_uppercase,
+                                   repeat=i+1)
+                  )
+
 class OptionsSheet(Sheet):
     """Sheet displaying user options."""
 
@@ -2167,7 +2168,7 @@ def curses_main(_scr, sheetlist=[]):
 
     return vd().run(_scr)
 
-g_globals = None
+g_globals = dict() # Show that we intend this to be a dict.
 def set_globals(g):
     """Assign given `g` to (expected) global dict `g_globals`."""
     global g_globals
