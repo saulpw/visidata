@@ -100,7 +100,6 @@ theme('disp_status_fmt', '%s| ', 'status line prefix')
 ENTER='^J'
 ESC='^['
 
-command(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", sheet.commands))', 'open command help sheet')
 command('q',  'vd.sheets.pop(0)', 'quit the current sheet')
 
 command(['h', 'KEY_LEFT'],  'cursorRight(-1)', 'go one column left')
@@ -362,11 +361,10 @@ class VisiData:
     def __init__(self):
         self.sheets = []
         self.statusHistory = []
-        self._status = [__version__, '<F1> or z? opens help']  # statuses shown until next action
+        self._status = [__version__]  # statuses shown until next action
         self.lastErrors = []
         self.lastRegex = None
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
-        self.cmdhistory = []  # list of [keystrokes, start_time, end_time, thread, notes]
         self.keystrokes = ''
         self.inInput = False
         self.tasks = []
@@ -591,7 +589,6 @@ class VisiData:
 
 # define @async for potentially long-running functions
 #   when function is called, instead launches a thread
-#   adds a row to cmdhistory
 #   ENTER on that row pushes a profile of the thread
 
 class Task:
@@ -1689,21 +1686,6 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
 
 
 ## Built-in sheets
-class HelpSheet(Sheet):
-    """Help sheet, showing keystrokes etc. from given source(s)."""
-
-    def reload(self):
-        """Populate sheet via `reload` function."""
-        self.rows = []
-        for i, src in enumerate(self.sources):
-            self.rows.extend((i, v) for v in src.values())
-        self.columns = [SubrowColumn(ColumnItem('keystrokes', 0), 1),
-                        SubrowColumn(ColumnItem('action', 1), 1),
-                        Column('with_g_prefix', str, lambda r,self=self: self.sources[r[0]].get('g' + r[1][0], (None,'-'))[1]),
-                        SubrowColumn(ColumnItem('execstr', 2, width=0), 1)
-                ]
-        self.nKeys = 1
-
 
 ## text viewer and dir browser
 class TextSheet(Sheet):
