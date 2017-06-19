@@ -7,3 +7,7 @@ visidata.egg-info/
 *~
 *.swp
 *.swo
+*dist
+*_build
+*_static
+*_templates
