@@ -1256,7 +1256,7 @@ class Sheet:
             A = options.disp_more_left
             self.scr.addstr(0, x, A, rowattr)
 
-        if x+colwidth+len(C) < windowWidth:
+        if C and x+colwidth+len(C) < windowWidth:
             self.scr.addstr(0, x+colwidth, C, rowattr)
 
     def isVisibleIdxKey(self, vcolidx):
