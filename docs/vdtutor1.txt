@@ -1,0 +1,34 @@
+Welcome to vdtutor	an interactive tutorial
+	
+If you get stuck somewhere unfamiliar,	try these keys:
+	
+To drop the current sheet	q
+To abort a command expecting input	Ctrl-c
+To exit the program immediately	Ctrl-q
+To see the last error	Ctrl-e
+	
+#	Sheet1
+	
+So let's get started with	some basic concepts:
+	
+All screens in VisiData are	sheets
+Sheets have	rows and columns
+Inside VisiData, there are	no cells
+Any apparent cell is	just one row as viewed by one column
+This is the zen of VisiData.
+	
+The row cursor is highlighted in	reverse
+The column cursor is highlighted in	bold
+[These display elements can be changed in	the 'O'ptions sheet]
+	
+To move the cursor	press these keys:
+	
+Left Down Up Right	h j k l
+PageUp PageDown	Ctrl-b Ctrl-f
+	
+Many commands can be modified with	the 'g' prefix
+With movement commands, 'g' makes the cursor	go all the way in that direction
+	
+leftmost bottom top rightmost	gh gj gk gl
+	
+Go ahead and try it; can you bring the cursor to	this cell and press ENTER?
