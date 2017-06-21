@@ -4,6 +4,12 @@ A curses interface for exploring and arranging tabular data
 
 Usable via any remote shell which has Python3 installed.
 
+A few interesting commands:
+
+* `Shift-F` pushes a frequency analysis of the current column
+* `=` creates a new column from the given Python expression (use column names to refer to their contents)
+* `.` creates new columns from the match groups of the given regex
+
 ![VisiData silent demo](docs/img/screenshot.gif "VisiData Screenshot")
 
 
