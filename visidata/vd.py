@@ -237,7 +237,8 @@ command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push sou
 # The resulting object o must be orderable and convertible to a string for display and certain outputs (like csv).
 
 ## minimalist 'any' type
-anytype = lambda r='': str(r)
+def anytype(r=''):
+    return str(r)
 anytype.__name__ = ''
 
 class date:
