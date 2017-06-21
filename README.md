@@ -63,13 +63,13 @@ If you are actively using VisiData, please let me know!
 Maybe there is an easy way to improve the tool for both of us.
 
 Also please create a GitHub issue if anything doesn't appear to be working right.
-If you get an unexpected error, please include the full stack trace that you get with `^E`.
+If you get an unexpected error, please include the full stack trace that you get with `Ctrl-E`.
 
 ### Branch structure
 
 Visidata has two main branches:
-* [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of visidata.
-* [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of visidata (which will eventually be merged to stable).
+* [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (which should be on pypi).
+* [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
 
 If you wish to contribute, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it.
 
