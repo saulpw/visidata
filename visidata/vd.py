@@ -331,7 +331,7 @@ def enumPivot(L, pivotIdx):
 @functools.lru_cache()
 def vd():
     """Instantiate and return singleton instance of VisiData class.
-    
+
     Contains all sheets, and (as singleton) is unique instance.."""
     return VisiData()
 
@@ -819,32 +819,32 @@ class Sheet:
 
     @property
     def cursorCol(self):
-        """Return column number of current column."""
+        """Return current Column object."""
         return self.visibleCols[self.cursorVisibleColIndex]
 
     @property
     def cursorRow(self):
-        """Return row number of current row."""
+        """Return current row."""
         return self.rows[self.cursorRowIndex]
 
     @property
     def visibleRows(self):  # onscreen rows
-        """Return the rows currently visible."""
+        """Return a list of rows currently visible onscreen."""
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
     def visibleCols(self):  # non-hidden cols
-        """Return the columns currently visible."""
+        """Return a list of unhidden Column objects."""
         return [c for c in self.columns if not c.hidden]
 
     @property
     def visibleColNames(self):
-        """Return space-separated string of visible column-names."""
+        """Return string of visible column-names."""
         return ' '.join(c.name for c in self.visibleCols)
 
     @property
     def cursorColIndex(self):
-        """Return index of current column."""
+        """Return index of current column into Sheet.columns."""
         return self.columns.index(self.cursorCol)
 
     @property
@@ -854,17 +854,17 @@ class Sheet:
 
     @property
     def nonKeyVisibleCols(self):
-        """Return list of non-key columns that are visible."""
+        """Return list of unhidden non-key columns."""
         return [c for c in self.columns[self.nKeys:] if not c.hidden]
 
     @property
     def keyColNames(self):
-        """Return custom-separator string of visible column names."""
+        """Return string of key column names."""
         return options.disp_key_sep.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
-        """Return cell contents for current row and column."""
+        """Return cell contents at current row and column."""
         return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
 
     @property
@@ -1296,7 +1296,7 @@ aggregators = { '': None,
 
 class Column:
     """Model spreadsheet-style "column".
-    
+
     If `expr` is set, cell values will be computed by this object.
     """
 
@@ -1385,7 +1385,7 @@ class Column:
 
     def getValue(self, row):
         """Return a properly-typed value, and also handle failures.
-        
+
         Return a default value if the conversion fails; re-raise the
         exception if the getter fails.
         """
