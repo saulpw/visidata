@@ -156,11 +156,11 @@ command('g?', 'moveRegex(input("g?", type="regex"), backward=True, moveCursor=Tr
 command('gn', 'sheet.cursorRowIndex = max(list(searchRegex()) or [cursorRowIndex])', 'go to first match')
 command('gp', 'sheet.cursorRowIndex = min(list(searchRegex()) or [cursorRowIndex])', 'go to last match')
 
+command('~', 'cursorCol.type = str', 'set column type to string')
 command('@', 'cursorCol.type = date', 'set column type to ISO8601 datetime')
 command('#', 'cursorCol.type = int', 'set column type to integer')
-command('$', 'cursorCol.type = str', 'set column type to string')
+command('$', 'cursorCol.type = currency', 'set column type to currency')
 command('%', 'cursorCol.type = float', 'set column type to float')
-command('~', 'cursorCol.type = detectType(cursorValue)', 'autodetect type of column by its data')
 
 command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
 command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
@@ -212,7 +212,7 @@ command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.n
 
 command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
 
-# VisiData uses Python native int, float, str, and adds a simple date and anytype.
+# VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
 #
 # A type T is used internally in these ways:
 #    o = T(str)   # for conversion from string
@@ -224,6 +224,16 @@ command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push sou
 def anytype(r=''):
     return str(r)
 anytype.__name__ = ''
+
+option('float_chars', '+-0123456789.eE_', 'valid numeric characters')
+def currency(s):
+    floatchars = options.float_chars
+    if isinstance(s, str):
+        while s[0] not in floatchars:
+            s = s[1:]
+        while s[-1] not in floatchars:
+            s = s[:-1]
+    return float(s)
 
 class date:
     """`datetime` wrapper, constructing from time_t or with dateutil.parse"""
@@ -257,25 +267,12 @@ class date:
         return self.dt < a.dt
 
 
-def detectType(v):
-    """Auto-detect types in this order of preference: int, float, date, str."""
-    def tryType(T, v):
-        try:
-            v = T(v)
-            return T
-        except EscapeException:
-            raise
-        except:
-            return None
-
-    return tryType(int, v) or tryType(float, v) or tryType(date, v) or str
-
-
 typemap = {
-    int: '#',
-    str: '$',
-    float: '%',
+    str: '~',
     date: '@',
+    int: '#',
+    currency: '$',
+    float: '%',
     anytype: ' ',
 }
 
@@ -1350,10 +1347,11 @@ class Column:
 
         val = self.type(cellval)
         if self.type is date:         return val.to_string(self.fmtstr)
-        elif self.fmtstr is not None: return self.fmtstr % val
-        elif self.type is int:        return '%d' % val
-        elif self.type is float:      return '%.02f' % val
-        else: return '%s' % val
+        elif self.fmtstr is not None: return self.fmtstr.format(val)
+        elif self.type is int:        return '{:d}'.format(val)
+        elif self.type is float:      return '{:.02f}'.format(val)
+        elif self.type is currency:   return '{:,.02f}'.format(val)
+        else: return str(val)
 
     @property
     def hidden(self):
@@ -1409,7 +1407,8 @@ class Column:
 
         try:
             cellval = self.format(cellval)
-            if width and self.type in (int, float): cellval = cellval.rjust(width-1)
+            if width and self.type in (int, float, currency):
+                cellval = cellval.rjust(width-1)
         except EscapeException:
             raise
         except Exception as e:
@@ -1475,7 +1474,7 @@ def ArrayColumns(ncols):
 
 def DictKeyColumns(d):
     """Return a list of Column objects from dictionary keys."""
-    return [ColumnItem(k, k, type=detectType(d[k])) for k in d]
+    return [ColumnItem(k, k) for k in d]
 
 def SubrowColumn(origcol, subrowidx, **kwargs):
     """Return Column object from sub-row."""

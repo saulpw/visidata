@@ -91,11 +91,11 @@ class SheetColumns(Sheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
 
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
+        self.command('~', 'cursorRow.type = str; cursorDown(+1)', 'set source column type to string')
         self.command('@', 'cursorRow.type = date; cursorDown(+1)', 'set source column type to datetime')
-        self.command('#', 'cursorRow.type = int; cursorDown(+1)', 'set source column type to integer')
-        self.command('$', 'cursorRow.type = str; cursorDown(+1)', 'set source column type to string')
+        self.command('#', 'cursorRow.type = int; cursorDown(+1)', 'set source column type to integer numeric type')
+        self.command('$', 'cursorRow.type = currency; cursorDown(+1)', 'set source column type to currency numeric type')
         self.command('%', 'cursorRow.type = float; cursorDown(+1)', 'set source column type to decimal numeric type')
-        self.command('~', 'cursorRow.type = detectType(cursorRow.getValue(source.cursorRow)); cursorDown(+1)', 'autodetect type of source column using its data')
         self.command('!', 'source.toggleKeyColumn(cursorRowIndex); cursorDown(+1)', 'toggle key column on source sheet')
         self.command('-', 'cursorRow.width = 0; cursorDown(+1)', 'hide column on source sheet')
         self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows); cursorDown(+1)', 'set source column width to max width of its rows')
@@ -109,7 +109,8 @@ class SheetColumns(Sheet):
         self.command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float')
         self.command('g#', 'for c in selectedRows: c.type = int', 'set type of all selected columns to int')
         self.command('g@', 'for c in selectedRows: c.type = date', 'set type of all selected columns to date')
-        self.command('g$', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string')
+        self.command('g$', 'for c in selectedRows: c.type = currency', 'set type of all selected columns to currency')
+        self.command('g~', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string')
 
         self.command('W', 'vd.replace(SheetPivot(source, selectedRows))', 'push a pivot table, keeping nonselected keys, making variables from selected columns, and creating a column for each variable-aggregate combination')
 

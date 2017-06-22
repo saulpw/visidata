@@ -58,11 +58,11 @@ Column Types
 ------------
 
 -  columns start out untyped (unless the source data is typed)
+-  ``~`` sets column type to str
 -  ``#`` sets column type to int
--  ``$`` sets column type to str
+-  ``$`` sets column type to currency
 -  ``%`` sets column type to float
 -  ``@`` sets column type to date
--  ``~`` autodetects column type
 
 -  all values are stored in their original format, and only converted on
    demand and as needed.
