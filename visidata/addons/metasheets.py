@@ -44,7 +44,7 @@ class LazyMapping:
         self.sheet = sheet
 
     def keys(self):
-        return [c.name for c in self.sheet.columns]
+        return [c.name for c in self.sheet.columns if c.name.isidentifier()]
 
     def __call__(self, col):
         return eval(col.expr, {}, self)
