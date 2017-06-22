@@ -5,6 +5,7 @@ from .vd import __version__
 from .vd import *
 from .help import *
 from .async import *
+from .status_history import *
 
 from .addons.freqtbl import *
 from .addons.pyobj import *

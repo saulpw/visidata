@@ -89,7 +89,7 @@ theme('disp_column_fill', ' ', 'pad chars after column value')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
 theme('color_status', 'bold', 'status line color')
 theme('color_edit_cell', 'normal', 'edit cell color')
-theme('disp_status_fmt', '%s| ', 'status line prefix')
+theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
 
 ENTER='^J'
 ESC='^['
@@ -174,9 +174,6 @@ command('#', 'cursorCol.type = int', 'set column type to integer')
 command('$', 'cursorCol.type = str', 'set column type to string')
 command('%', 'cursorCol.type = float', 'set column type to float')
 command('~', 'cursorCol.type = detectType(cursorValue)', 'autodetect type of column by its data')
-
-command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again')
-command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
 command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
 command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
@@ -366,8 +363,7 @@ class VisiData:
 
     def __init__(self):
         self.sheets = []
-        self.statusHistory = []
-        self._status = [__version__]  # statuses shown until next action
+        self.statuses = [__version__]  # statuses shown until next action
         self.lastErrors = []
         self.lastRegex = None
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
@@ -377,11 +373,9 @@ class VisiData:
         self.hooks = {}
 
     def status(self, s):
-        """Populate status bar and maintain `statusHistory` list."""
-        strs = str(s)
-        self._status.append(strs)
-        self.statusHistory.insert(0, strs)
-        del self.statusHistory[100:]  # keep most recent 100 only
+        """Add status message to be shown until next action."""
+        s = str(s)
+        self.statuses.append(s)
         return s
 
     def add_hook(self, hookname, hookfunc):
@@ -495,13 +489,11 @@ class VisiData:
             raise
 
     def drawLeftStatus(self, vs):
-        """Compose and draw left side of status bar.
-
-        Include previous status messages, which are then cleared."""
-        attr = colors[options.color_status]
-        statusstr = options.disp_status_fmt % vs.name + options.disp_status_sep.join(self._status)
+        """Draw left side of status bar."""
         try:
-            draw_clip(self.scr, windowHeight-1, 0, statusstr, attr, windowWidth)
+            lstatus = self.leftStatus(vs)
+            attr = colors[options.color_status]
+            draw_clip(self.scr, windowHeight-1, 0, lstatus, attr, windowWidth)
         except Exception as e:
             self.exceptionCaught()
 
@@ -509,10 +501,17 @@ class VisiData:
         """Draw right side of status bar."""
         try:
             rstatus = self.rightStatus()
-            draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.color_status])
+            attr = colors[options.color_status]
+            draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, attr)
             curses.doupdate()
         except Exception as e:
             self.exceptionCaught()
+
+    def leftStatus(self, vs):
+        """Compose left side of status bar from status messages."""
+        s = options.disp_status_fmt.format(sheet=vs)
+        s += options.disp_status_sep.join(self.statuses)
+        return s
 
     def rightStatus(self):
         """Compose right side of status bar."""
@@ -551,7 +550,7 @@ class VisiData:
                 if self.keystrokes not in self.allPrefixes:
                     self.keystrokes = ''
 
-                self._status = []
+                self.statuses.clear()
                 self.keystrokes += keystroke
             self.drawRightStatus()  # visible for commands that wait for input
 
