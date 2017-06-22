@@ -6,6 +6,7 @@ from .vd import *
 from .help import *
 from .async import *
 from .status_history import *
+from .zscroll import *
 
 from .addons.freqtbl import *
 from .addons.pyobj import *
