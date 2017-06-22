@@ -1442,6 +1442,7 @@ class Column:
         """Set given rows to `value`."""
         if not self.setter:
             error('column cannot be changed')
+        value = self.type(value)
         for r in rows:
             self.setter(r, value)
 
