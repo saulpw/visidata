@@ -62,7 +62,7 @@ option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
-theme('disp_format_exc', '~')
+theme('disp_format_exc', '?')
 theme('disp_getter_exc', '!')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_more_left', '<', 'display cue in header indicating more columns to the left')
