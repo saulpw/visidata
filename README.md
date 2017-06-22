@@ -83,4 +83,6 @@ A developer's guide can be found [here](http://visidata.readthedocs.io/en/stable
 
 ## License
 
-VisiData is licensed under GPLv3.
+The innermost core file, `vd.py`, is licensed under the MIT license.
+
+Other VisiData components, including the main `vd` application, addons, and other code in this repository, are licensed under GPLv3.
