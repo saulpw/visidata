@@ -20,10 +20,8 @@ class SqliteSheet(Sheet):
         tblname = self.sources[1]
         self.columns = self.getColumns(tblname)
         r = self.conn.execute('SELECT COUNT(*) FROM %s' % tblname).fetchall()
-        self.progressTotal = r[0][0]-1
         self.rows = []
-        for i, r in enumerate(self.conn.execute("SELECT * FROM %s" % tblname)):
-            self.progressMade = i
+        for r in self.genProgress(self.conn.execute("SELECT * FROM %s" % tblname), r[0][0]-1):
             self.rows.append(r)
 
     def getColumns(self, table_name):
