@@ -3,53 +3,30 @@
 
 A loose plan that is subject to change.
 
-## v0.6 better interface for regex transforms:
-#
-- bulk interface (command line)
+## v0.75 alpha
 
-- subst regex match in cells
-- delete regex match in cells
-
-- sort by keycols with g[ and g]
-- dive back into source
-- maintain original ordering with implicit/hidden line# column
-
-## v0.7 alpha
-
+## v1.0
 - Python expressions should be usable like regex for search, select, etc
-- popup windows for enum selection
-- generic mechanism for coloring rows
-    - highlight key rows on Columns sheet same as key column
+- documented Python3 API for vd.py use by other scripts
 
-## v0.8
-- save as .json
-
-## v0.9
+## Future
+- delete regex match in cells
+- maintain original ordering with implicit/hidden line# column
 - freqtbl: make bins from continuous data
-
-## v0.9x:
+- popup windows for enum selection
+- save as .json
 - simple file management in VSheetDir:
   - rename with 'e'dit
   - mass rename with transform
   - ^Delete
   - only apply changes with ^S
-
-## v1.0
-- documented Python3 API for import by other scripts
-
-## v1.1
 - checkpoint data for faster replay/undo
 - connect to larger datasets (via blaze?)
 - load new .py plugins for inputs/outputs/sheets
    - git app that can streamline standard workflows
      - checkout branch or revision with TUI interface
      - browse through history
-
-## v1.2
 - load larger than memory .csv/tsv files
-
-## Unscheduled
-
 - fixed-column detector
 - '.' repeat command
 - save all sheets to .h5 file
