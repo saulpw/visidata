@@ -2040,7 +2040,7 @@ def curses_main(_scr, sheetlist=[]):
 
     return vd().run(_scr)
 
-g_globals = dict() # Show that we intend this to be a dict.
+g_globals = None
 def set_globals(g):
     """Assign given `g` to (expected) global dict `g_globals`."""
     global g_globals
