@@ -1,7 +1,7 @@
 from visidata import *
 
 command(';', 'splitColumnByRegex(columns, cursorColIndex, cursorCol, cursorValue, input("split regex: ", type="regex"))', 'split column by regex')
-command('.', 'columns.insert(cursorColIndex+1, regexTransform(cursorCol, input("transform column by regex: ", type="regex")))', 'transform column by regex')
+command('*', 'columns.insert(cursorColIndex+1, regexTransform(cursorCol, input("transform column by regex: ", type="regex")))', 'transform column by regex')
 
 def splitColumnByRegex(columns, colIndex, origcol, exampleVal, regexstr):
     regex = re.compile(regexstr, regex_flags())
