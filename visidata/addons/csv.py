@@ -16,7 +16,7 @@ def wrapped_next(rdr):
     try:
         return next(rdr)
     except csv.Error as e:
-        return [str(e)]
+        return ['[csv.Error: %s]' % e]
 
 @async
 def load_csv(vs):
