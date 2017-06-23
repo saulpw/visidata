@@ -36,7 +36,6 @@ $ python setup.py install
 
 - Python 3.3+
 - h5py and numpy (if opening .hdf5 files)
-- google-api-python-client (if opening Google Sheets; must [also set up OAuth credentials](https://developers.google.com/sheets/quickstart/python )
 
 **Remember to install the Python3 versions of these packages with e.g. `pip3`**
 
