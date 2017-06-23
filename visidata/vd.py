@@ -137,8 +137,10 @@ command('gl', 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmo
 command('^G', 'status(statusLine)', 'show info for the current sheet')
 command('^V', 'status(__version__)', 'show version information')
 
-command('<', 'skipUp()', 'skip up this column to previous value')
-command('>', 'skipDown()', 'skip down this column to next value')
+command('<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")', 'move up to previous value in this column')
+command('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")', 'move down to next value in this column')
+command('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'move to previous selected row')
+command('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move to next selected row')
 
 command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle this column width between default_width and to fit visible values')
 command('-', 'cursorCol.width = 0', 'hide this column')
@@ -1037,25 +1039,16 @@ class Sheet:
             moveListItem(self.columns, colidx, self.nKeys)
             return 0
 
-    def skipDown(self):
-        """Select next different value in column; report if none different."""
-        pv = self.cursorValue
-        for i in range(self.cursorRowIndex+1, self.nRows):
-            if self.cellValue(i, self.cursorColIndex) != pv:
+    def moveToNextRow(self, func, reverse=False):
+        """Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria."""
+        rng = range(self.cursorRowIndex-1, -1, -1) if reverse else range(self.cursorRowIndex+1, self.nRows)
+
+        for i in rng:
+            if func(self.rows[i]):
                 self.cursorRowIndex = i
-                return
+                return True
 
-        status('no different value down this column')
-
-    def skipUp(self):
-        """Select last different value in column; report if none different."""
-        pv = self.cursorValue
-        for i in range(self.cursorRowIndex, -1, -1):
-            if self.cellValue(i, self.cursorColIndex) != pv:
-                self.cursorRowIndex = i
-                return
-
-        status('no different value up this column')
+        return False
 
     def checkCursor(self):
         """Keep cursor in bounds of data and screen."""
