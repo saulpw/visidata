@@ -169,15 +169,13 @@ command('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))'
 command('R', 'sheet.filetype = input("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
 command('^R', 'reload(); status("reloaded")', 'reload sheet from source')
 
-command('/', 'moveRegex(input("/", type="regex"), columns=[cursorCol])', 'search this column forward for regex')
-command('?', 'moveRegex(input("?", type="regex"), columns=[cursorCol], backward=True)', 'search this column backward for regex')
-command('n', 'moveRegex(columns=[cursorCol])', 'go to next match')
-command('p', 'moveRegex(columns=[cursorCol], backward=True)', 'go to previous match')
+command('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search this column forward for regex')
+command('?', 'moveRegex(regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search this column backward for regex')
+command('n', 'moveRegex(reverse=False)', 'go to next match')
+command('p', 'moveRegex(reverse=True)', 'go to previous match')
 
-command('g/', 'moveRegex(input("g/", type="regex"), columns=visibleCols)', 'search regex forward in all visible columns')
-command('g?', 'moveRegex(input("g?", type="regex"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
-command('gn', 'sheet.cursorRowIndex = max(list(searchRegex()) or [cursorRowIndex])', 'go to first match')
-command('gp', 'sheet.cursorRowIndex = min(list(searchRegex()) or [cursorRowIndex])', 'go to last match')
+command('g/', 'moveRegex(regex=input("g/", type="regex"), backward=False, columns="visibleCols")', 'search regex forward in all visible columns')
+command('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search regex backward in all visible columns')
 
 command('~', 'cursorCol.type = str', 'set column type to string')
 command('@', 'cursorCol.type = date', 'set column type to ISO8601 datetime')
@@ -213,15 +211,15 @@ command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
 command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
 
-command('|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=[cursorCol]))', 'select rows by regex matching this columns')
-command('\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=[cursorCol]))', 'unselect rows by regex matching this columns')
+command('|', 'selectByIdx(searchRegex(regex=input("|", type="regex"), columns="cursorCol"))', 'select rows by regex matching this columns')
+command('\\', 'unselectByIdx(searchRegex(regex=input(r"\\", type="regex"), columns="cursorCol"))', 'unselect rows by regex matching this columns')
 
 command('g ', 'toggle(rows)', 'toggle select of all rows')
 command('gs', 'select(rows)', 'select all rows')
 command('gu', '_selectedRows.clear()', 'unselect all rows')
 
-command('g|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=visibleCols))', 'select rows by regex matching any visible column')
-command('g\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=visibleCols))', 'unselect rows by regex matching any visible column')
+command('g|', 'selectByIdx(searchRegex(regex=input("g|", type="regex"), columns="visibleCols"))', 'select rows by regex matching any visible column')
+command('g\\', 'unselectByIdx(searchRegex(regex=input(r"g\\", type="regex"), columns="visibleCols"))', 'unselect rows by regex matching any visible column')
 
 command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
@@ -372,7 +370,7 @@ class VisiData:
         self.sheets = []
         self.statuses = [__version__]  # statuses shown until next action
         self.lastErrors = []
-        self.lastRegex = None
+        self.search_context = {}
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
         self.inInput = False
@@ -432,26 +430,40 @@ class VisiData:
             k = ord(k)
         return curses.keyname(k).decode('utf-8')
 
-    def searchRegex(self, sheet, regex=None, columns=[], backward=False, moveCursor=False):
+
+    # kwargs: regex=None, columns=None, backward=False
+    def searchRegex(self, sheet, moveCursor=False, reverse=False, **kwargs):
         """Set row index if moveCursor, otherwise return list of row indexes."""
+        def findMatchingColumn(sheet, row, columns, func):
+            for c in columns:
+                if func(c.getDisplayValue(row)):
+                    return c
 
-        def columnsMatch(sheet, row, columns, func):
-            return any([func(c.getDisplayValue(row)) for c in columns])
+        self.search_context.update(kwargs)
 
+        regex = kwargs.get("regex")
         if regex:
-            r = re.compile(regex, regex_flags())
-            if r:
-                self.lastRegex = r
-            else:
-                error('regex error')
+            self.search_context["regex"] = re.compile(regex, regex_flags()) or error('invalid regex: %s' % regex)
+
+        regex = self.search_context.get("regex") or error("no regex")
+
+        columns = self.search_context.get("columns")
+        if columns == "cursorCol":
+            columns = [sheet.cursorCol]
+        elif columns == "visibleCols":
+            columns = tuple(sheet.visibleCols)
+        elif isinstance(columns, Column):
+            columns = [columns]
 
         if not columns:
-            error('no columns')
+            error('bad columns')
 
-        if not self.lastRegex:
-            error('no regex')
+        status("ncols=%s" % len(columns))
+        search_backward = self.search_context.get("backward")
+        if reverse:
+            search_backward = not search_backward
 
-        if backward:
+        if search_backward:
             rng = range(sheet.cursorRowIndex-1, -1, -1)
             rng2 = range(sheet.nRows-1, sheet.cursorRowIndex-1, -1)
         else:
@@ -464,9 +476,11 @@ class VisiData:
 
         for r in rng:
             sheet.progressMade += 1
-            if columnsMatch(sheet, sheet.rows[r], columns, self.lastRegex.search):
+            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
+            if c:
                 if moveCursor:
                     sheet.cursorRowIndex = r
+                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
                     return
                 else:
                     matchingRowIndexes += 1
@@ -474,16 +488,18 @@ class VisiData:
 
         for r in rng2:
             sheet.progressMade += 1
-            if columnsMatch(sheet, sheet.rows[r], columns, self.lastRegex.search):
+            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
+            if c:
                 if moveCursor:
                     sheet.cursorRowIndex = r
+                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
                     status('search wrapped')   # the only reason for the duplicate code block
                     return
                 else:
                     matchingRowIndexes += 1
                     yield r
 
-        status('%s matches for /%s/' % (matchingRowIndexes, self.lastRegex.pattern))
+        status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
     def exceptionCaught(self, status=True):
         """Maintain list of most recent errors and return most recent one."""
@@ -1359,12 +1375,13 @@ class Column:
     def format(self, cellval):
         """Format the type-name of given `cellval`."""
 
-        val = self.type(cellval)
-        if self.type is date:         return val.to_string(self.fmtstr)
+        t = self.type
+        val = t(cellval)
+        if t is date:         return val.to_string(self.fmtstr)
         elif self.fmtstr is not None: return self.fmtstr.format(val)
-        elif self.type is int:        return '{:d}'.format(val)
-        elif self.type is float:      return '{:.02f}'.format(val)
-        elif self.type is currency:   return '{:,.02f}'.format(val)
+        elif t is int:        return '{:d}'.format(val)
+        elif t is float:      return '{:.02f}'.format(val)
+        elif t is currency:   return '{:,.02f}'.format(val)
         else: return str(val)
 
     @property
@@ -1421,7 +1438,7 @@ class Column:
 
         try:
             cellval = self.format(cellval)
-            if width and self.type in (int, float, currency):
+            if width and self._type in (int, float, currency):
                 cellval = cellval.rjust(width-1)
         except EscapeException:
             raise
