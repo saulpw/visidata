@@ -1240,18 +1240,20 @@ class Sheet:
         if vcolidx is None:
             vcolidx = self.cursorVisibleColIndex
         x, w = self.visibleColLayout.get(vcolidx, (0, 0))
+
+        col = self.visibleCols[vcolidx]
         if rowidx is None:
             rowidx = self.cursorRowIndex
         if rowidx < 0:  # header
             y = 0
-            currentValue = self.visibleCols[vcolidx].name
+            currentValue = col.name
         else:
             y = self.rowLayout.get(rowidx, 0)
-            currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
+            currentValue = self.cellValue(self.cursorRowIndex, col)
 
         r = vd().editText(y, x, w, value=currentValue, fillchar=options.disp_edit_fill)
         if rowidx >= 0:
-            r = self.visibleCols[vcolidx].type(r)  # convert input to column type
+            r = col.type(r)  # convert input to column type
 
         return r
 
