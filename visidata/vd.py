@@ -917,13 +917,9 @@ class Sheet:
     @async
     def toggle(self, rows):
         """Select any unselected rows."""
-        self.progressMade = 0
-        self.progressTotal = len(self.rows)
-        for r in rows:
-            self.progressMade += 1
+        for r in self.genProgress(rows, len(self.rows)):
             if not self.unselectRow(r):
                 self.selectRow(r)
-        self.progressTotal = self.progressMade
 
     def selectRow(self, row):
         """Select given row."""
