@@ -129,7 +129,7 @@ command(['KEY_END', 'G'],   'sheet.cursorRowIndex = len(rows)-1', 'go to last ro
 
 command('gq', 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
-command('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go to leftmost column')
+command('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = nKeys', 'go to leftmost non-key column')
 command('gk', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go to top row')
 command('gj', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'go to bottom row')
 command('gl', 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmost column')
