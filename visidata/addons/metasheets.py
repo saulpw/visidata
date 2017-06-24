@@ -118,9 +118,6 @@ class ColumnsSheet(Sheet):
 
         self.colorizers.append(lambda self,c,r,v: (options.color_key_col, 8) if r in self.source.keyCols else None)
 
-    def reload(self):
-        self.rows = self.source.columns
-        self.cursorRowIndex = self.source.cursorColIndex
         self.columns = [
             ColumnAttr('name', str),
             ColumnAttr('width', int),
@@ -128,8 +125,12 @@ class ColumnsSheet(Sheet):
             ColumnAttr('fmtstr', str),
             ColumnAttrNamedObject('aggregator'),
             ColumnAttr('expr', str),
-            Column('value',  anytype, lambda c,sheet=self.source: c.getValue(sheet.cursorRow)),
+            Column('value',  anytype, lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
         ]
+
+    def reload(self):
+        self.rows = self.source.columns
+        self.cursorRowIndex = self.source.cursorColIndex
 
         if options.col_stats:
             self.columns.extend([
