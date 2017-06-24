@@ -1375,6 +1375,10 @@ class Column:
     def format(self, cellval):
         """Format the type-name of given `cellval`."""
 
+        if isinstance(cellval, (list, dict)):
+            # complex objects can be arbitrarily large (like sheet.rows)
+            return str(type(cellval))
+
         t = self.type
         val = t(cellval)
         if t is date:         return val.to_string(self.fmtstr)
