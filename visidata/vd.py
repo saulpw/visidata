@@ -2045,7 +2045,7 @@ def run(sheetlist=[]):
 def curses_main(_scr, sheetlist=[]):
     """Populate VisiData object with sheets from a given list."""
 
-    for fnrc in ('$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
+    for fnrc in ('.visidatarc', '$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
         p = Path(fnrc)
         if p.exists():
             exec(open(p.resolve()).read())
