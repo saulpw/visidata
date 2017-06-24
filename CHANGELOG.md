@@ -1,5 +1,15 @@
 # VisiData version history
 
+## v0.75
+- regex transform now `*` (';' is still regex split)
+- Make regex search/select to work more like vim
+- Move several non-essential commands out of vd.py
+- change license of vd.py to MIT
+- vdtutor start
+- currency type with `$`; str type moved to `~`; remove type autodetect
+- www/ for landing page
+- move from .md to .rst for documentation
+
 ## v0.60
 - colorizers
 - `g[` and `g]` to sort by all key columns
