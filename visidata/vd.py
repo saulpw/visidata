@@ -125,7 +125,7 @@ command(['^F', 'KEY_NPAGE', 'kDOWN'], 'cursorDown(nVisibleRows); sheet.topRowInd
 command(['^B', 'KEY_PPAGE', 'kUP'], 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page up')
 
 command(['KEY_HOME', 'gg'],  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
-command('KEY_END',   'sheet.cursorRowIndex = len(rows)-1', 'go to last row')
+command(['KEY_END', 'G'],   'sheet.cursorRowIndex = len(rows)-1', 'go to last row')
 
 command('gq', 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
