@@ -221,8 +221,6 @@ command('gu', '_selectedRows.clear()', 'unselect all rows')
 command('g|', 'selectByIdx(searchRegex(regex=input("g|", type="regex"), columns="visibleCols"))', 'select rows by regex matching any visible column')
 command('g\\', 'unselectByIdx(searchRegex(regex=input(r"g\\", type="regex"), columns="visibleCols"))', 'unselect rows by regex matching any visible column')
 
-command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
-
 command(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching by this column')
 command('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
