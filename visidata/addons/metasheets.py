@@ -1,7 +1,7 @@
 from visidata import *
 
 command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
-command('C', 'vd.push(SheetColumns(sheet))', 'open Columns for this sheet')
+command('C', 'vd.push(ColumnsSheet(sheet))', 'open Columns for this sheet')
 
 command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
@@ -87,7 +87,7 @@ class SheetsSheet(SheetList):
         self.command('~', 'vd.replace(SheetJoin(selectedRows, jointype="~"))', 'open diff join of selected sheets')
 
 
-class SheetColumns(Sheet):
+class ColumnsSheet(Sheet):
     """Open Columns for Sheet."""
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
