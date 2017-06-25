@@ -48,18 +48,18 @@ import textwrap
 class EscapeException(Exception):
     pass
 
-base_commands = collections.OrderedDict()
-base_options = collections.OrderedDict()
+baseCommands = collections.OrderedDict()
+baseOptions = collections.OrderedDict()
 
 def command(keystrokes, execstr, helpstr):
     if isinstance(keystrokes, str):
         keystrokes = [keystrokes]
 
     for ks in keystrokes:
-        base_commands[ks] = (ks, helpstr, execstr)
+        baseCommands[ks] = (ks, helpstr, execstr)
 
 def option(name, default, helpstr=''):
-    base_options[name] = [name, default, default, helpstr]  # see OptionsObject
+    baseOptions[name] = [name, default, default, helpstr]  # see OptionsObject
 theme = option
 
 
@@ -205,7 +205,7 @@ command('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all th
 command('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
 command('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
 
-command('O', 'vd.push(OptionsSheet("sheet options", base_options))', 'open Options for this sheet')
+command('O', 'vd.push(OptionsSheet("sheet options", baseOptions))', 'open Options for this sheet')
 
 command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
@@ -357,9 +357,9 @@ def sync(f):
 
 def async(func):
     'Function decorator to call in separate thread if async available.'
-    def _exec_async(*args, **kwargs):
-        return vd().exec_async(func, *args, **kwargs)
-    return _exec_async
+    def _execAsync(*args, **kwargs):
+        return vd().execAsync(func, *args, **kwargs)
+    return _execAsync
 
 class VisiData:
     allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
@@ -368,7 +368,7 @@ class VisiData:
         self.sheets = []
         self.statuses = [__version__]  # statuses shown until next action
         self.lastErrors = []
-        self.search_context = {}
+        self.searchContext = {}
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
         self.inInput = False
@@ -381,7 +381,7 @@ class VisiData:
         self.statuses.append(s)
         return s
 
-    def add_hook(self, hookname, hookfunc):
+    def addHook(self, hookname, hookfunc):
         'Add hookfunc by hookname, to be called by corresponding `callHook`.'
         if hookname in self.hooks:
             hooklist = self.hooks[hookname]
@@ -391,26 +391,26 @@ class VisiData:
 
         hooklist.append(hookfunc)
 
-    def call_hook(self, hookname, *args, **kwargs):
+    def callHook(self, hookname, *args, **kwargs):
         'Call all functions registered with `addHook` for the given hookname.'
         r = None
         for f in self.hooks.get(hookname, []):
             r = r or f(*args, **kwargs)
         return r
 
-    def exec_async(self, func, *args, **kwargs):
+    def execAsync(self, func, *args, **kwargs):
         'Synchronous async caller stub, replaced if async available.'
         return func(*args, **kwargs)
 
     def editText(self, y, x, w, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
-        v = self.call_hook('preedit')
+        v = self.callHook('preedit')
         if v is not None:
             return v
         v = editText(self.scr, y, x, w, **kwargs)
         if kwargs.get('display', True):
             self.status('"%s"' % v)
-            self.call_hook('postedit', v)
+            self.callHook('postedit', v)
         return v
 
     def getkeystroke(self):
@@ -437,15 +437,15 @@ class VisiData:
                 if func(c.getDisplayValue(row)):
                     return c
 
-        self.search_context.update(kwargs)
+        self.searchContext.update(kwargs)
 
         regex = kwargs.get("regex")
         if regex:
-            self.search_context["regex"] = re.compile(regex, regex_flags()) or error('invalid regex: %s' % regex)
+            self.searchContext["regex"] = re.compile(regex, regex_flags()) or error('invalid regex: %s' % regex)
 
-        regex = self.search_context.get("regex") or error("no regex")
+        regex = self.searchContext.get("regex") or error("no regex")
 
-        columns = self.search_context.get("columns")
+        columns = self.searchContext.get("columns")
         if columns == "cursorCol":
             columns = [sheet.cursorCol]
         elif columns == "visibleCols":
@@ -457,11 +457,11 @@ class VisiData:
             error('bad columns')
 
         status("ncols=%s" % len(columns))
-        search_backward = self.search_context.get("backward")
+        searchBackward = self.searchContext.get("backward")
         if reverse:
-            search_backward = not search_backward
+            searchBackward = not searchBackward
 
-        if search_backward:
+        if searchBackward:
             rng = range(sheet.cursorRowIndex-1, -1, -1)
             rng2 = range(sheet.nRows-1, sheet.cursorRowIndex-1, -1)
         else:
@@ -588,15 +588,15 @@ class VisiData:
                 except Exception:
                     self.exceptionCaught()
             elif self.keystrokes in sheet.commands:
-                self.call_hook('preexec', sheet, self.keystrokes)
+                self.callHook('preexec', sheet, self.keystrokes)
                 escaped = sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
-                self.call_hook('postexec', vd().sheets[0] if vd().sheets else None, escaped)
+                self.callHook('postexec', vd().sheets[0] if vd().sheets else None, escaped)
             elif keystroke in self.allPrefixes:
                 pass
             else:
                 status('no command for "%s"' % (self.keystrokes))
 
-            self.call_hook('predraw')
+            self.callHook('predraw')
             sheet.checkCursor()
 
     def replace(self, vs):
@@ -661,7 +661,7 @@ class Sheet:
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # commands specific to this sheet
-        self.commands = collections.ChainMap(collections.OrderedDict(), base_commands)
+        self.commands = collections.ChainMap(collections.OrderedDict(), baseCommands)
 
         self.filetype = None
         self._selectedRows = {}  # id(row) -> row
@@ -805,7 +805,7 @@ class Sheet:
 
     def clipdraw(self, y, x, s, attr, w):
         'Wrap `drawClip`.'
-        return draw_clip(self.scr, y, x, s, attr, w)
+        return drawClip(self.scr, y, x, s, attr, w)
 
     @property
     def name(self):
@@ -1585,7 +1585,7 @@ def clipstr(s, dispw):
     return ret, w
 
 
-def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
+def drawClip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
     'Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char.'
 
     _, windowWidth = scr.getmaxyx()
@@ -1620,17 +1620,17 @@ class TextSheet(Sheet):
             self.rows = []
             for x in self.source:
                 # copy so modifications don't change 'original'; also one iteration through generator
-                self.add_line(x)
+                self.addLine(x)
         elif isinstance(self.source, str):
             for L in self.source.splitlines():
-                self.add_line(L)
+                self.addLine(L)
         elif isinstance(self.source, io.IOBase):
             for L in self.source:
-                self.add_line(L[:-1])
+                self.addLine(L[:-1])
         else:
             error('unknown text type ' + str(type(self.source)))
 
-    def add_line(self, text):
+    def addLine(self, text):
         'Handle text re-wrapping.'
         self.rows.extend(textwrap.wrap(text, width=windowWidth-2))
 
@@ -1660,7 +1660,7 @@ class OptionsObject:
             raise Exception('no such option "%s"' % k)
         self._opts[k][1] = v
 
-options = OptionsObject(base_options)
+options = OptionsObject(baseOptions)
 
 # Generator => A .. Z AA AB ...
 defaultColNames = (''.join(j) for i in range(options.maxlen_col_hdr)
@@ -1706,7 +1706,7 @@ def open_txt(p):
         return open_tsv(p)  # TSV often have .txt extension
     return TextSheet(p.name, fp)  # leaks file handle
 
-def get_tsv_headers(fp, nlines):
+def getTsvHeaders(fp, nlines):
     'Return list of lists for use as headers, from paragraphs `fp`.'
     headers = []
     i = 0
@@ -1729,7 +1729,7 @@ def open_tsv(p, vs=None):
     header_lines = int(options.headerlines)
 
     with vs.source.open_text() as fp:
-        headers = get_tsv_headers(fp, header_lines or 1)  # get one data line if no headers
+        headers = getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
 
         if header_lines == 0:
             vs.columns = ArrayColumns(len(headers[0]))
@@ -1742,16 +1742,16 @@ def open_tsv(p, vs=None):
 
 @async
 def reload_tsv(vs):
-    """Wrap `reload_tsv_sync`."""
+    'Wrap `reload_tsv_sync`.'
     reload_tsv_sync(vs)
 
 def reload_tsv_sync(vs):
-    """Perform synchronous loading of TSV file, discarding header lines."""
+    'Perform synchronous loading of TSV file, discarding header lines.'
     header_lines = int(options.headerlines)
 
     vs.rows = []
     with vs.source.open_text() as fp:
-        get_tsv_headers(fp, header_lines)  # discard header lines
+        getTsvHeaders(fp, header_lines)  # discard header lines
 
         vs.progressMade = 0
         vs.progressTotal = vs.source.filesize
@@ -2033,11 +2033,11 @@ def run(sheetlist=[]):
     # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     os.putenv('ESCDELAY', '25')
 
-    ret = wrapper(curses_main, sheetlist)
+    ret = wrapper(cursesMain, sheetlist)
     if ret:
         print(ret)
 
-def curses_main(_scr, sheetlist=[]):
+def cursesMain(_scr, sheetlist=[]):
     'Populate VisiData object with sheets from a given list.'
 
     for fnrc in ('.visidatarc', '$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
@@ -2054,12 +2054,12 @@ def curses_main(_scr, sheetlist=[]):
     return vd().run(_scr)
 
 g_globals = None
-def set_globals(g):
+def setGlobals(g):
     'Assign given `g` to (expected) global dict `g_globals`.'
     global g_globals
     g_globals = g
 
-def set_global(k, v):
+def setGlobal(k, v):
     'Manually set global key-value pair in `g_globals`.'
     g_globals[k] = v
 

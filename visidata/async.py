@@ -8,7 +8,7 @@ from visidata import *
 option('profile_tasks', True, 'profile async tasks')
 option('min_task_time', 0.10, 'only keep tasks that take longer than this number of seconds')
 
-command('^C', 'if sheet.currentTask: ctype_async_raise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
+command('^C', 'if sheet.currentTask: ctypeAsyncRaise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
 command('^T', 'vd.push(TasksSheet("task_history"))', 'push task history sheet')
 
 
@@ -40,7 +40,7 @@ def sync():
     while len(g_TaskMgr.unfinishedTasks) > 0:
         g_TaskMgr.checkForUnfinishedTasks()
 
-def exec_async(func, *args, **kwargs):
+def execAsync(func, *args, **kwargs):
     'Manage execution of asynchronous thread, checking for redundancy.'
     if threading.current_thread().daemon:
         # Don't spawn a new thread from a subthread.
@@ -53,13 +53,13 @@ def exec_async(func, *args, **kwargs):
     currentSheet.currentTask = t
     t.sheet = currentSheet
     if bool(options.profile_tasks):
-        t.start(thread_profileCode, t, func, *args, **kwargs)
+        t.start(threadProfileCode, t, func, *args, **kwargs)
     else:
-        t.start(toplevel_try_func, t, func, *args, **kwargs)
+        t.start(toplevelTryFunc, t, func, *args, **kwargs)
     g_TaskMgr.tasks.append(t)
     return t
 
-def toplevel_try_func(task, func, *args, **kwargs):
+def toplevelTryFunc(task, func, *args, **kwargs):
     'Modify status-bar content on user-abort/exceptions, for use by @async.'
     try:
         ret = func(*args, **kwargs)
@@ -74,11 +74,11 @@ def toplevel_try_func(task, func, *args, **kwargs):
         task.status += status('%s: %s;' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
         exceptionCaught()
 
-def thread_profileCode(task, func, *args, **kwargs):
+def threadProfileCode(task, func, *args, **kwargs):
     'Wrap profiling functionality for use by @async.'
     pr = cProfile.Profile()
     pr.enable()
-    ret = toplevel_try_func(task, func, *args, **kwargs)
+    ret = toplevelTryFunc(task, func, *args, **kwargs)
     pr.disable()
     s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
@@ -87,11 +87,11 @@ def thread_profileCode(task, func, *args, **kwargs):
     return ret
 
 
-def ctype_async_raise(thread_obj, exception):
+def ctypeAsyncRaise(threadObj, exception):
     'Raise exception for threads running asynchronously.'
 
 
-    def dict_find(D, value):
+    def dictFind(D, value):
         'Return first key in dict `D` corresponding to `value`.'
         for k, v in D.items():
             if v is value:
@@ -101,10 +101,10 @@ def ctype_async_raise(thread_obj, exception):
 
     # Following `ctypes call follows https://gist.github.com/liuw/2407154.
     ctypes.pythonapi.PyThreadState_SetAsyncExc(
-            ctypes.c_long(dict_find(threading._active, thread_obj)),
+            ctypes.c_long(dictFind(threading._active, threadObj)),
             ctypes.py_object(exception)
             )
-    status('sent exception to %s' % thread_obj.name)
+    status('sent exception to %s' % threadObj.name)
 
 
 class TaskManager:
@@ -131,7 +131,7 @@ class TasksSheet(Sheet):
 
     def reload(self):
         'Populate sheet via `reload` function.'
-        self.command('^C', 'ctype_async_raise(cursorRow.thread, EscapeException)', 'cancel this action')
+        self.command('^C', 'ctypeAsyncRaise(cursorRow.thread, EscapeException)', 'cancel this action')
         self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
         self.columns = [
             ColumnAttr('name'),
@@ -147,6 +147,6 @@ def ProfileSheet(task):
 
 g_TaskMgr = TaskManager()
 
-vd().add_hook('predraw', g_TaskMgr.checkForUnfinishedTasks)
-vd().exec_async = exec_async
+vd().addHook('predraw', g_TaskMgr.checkForUnfinishedTasks)
+vd().execAsync = execAsync
 

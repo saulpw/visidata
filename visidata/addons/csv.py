@@ -12,7 +12,7 @@ def open_csv(p):
     vs.loader = lambda vs=vs: load_csv(vs)
     return vs
 
-def wrapped_next(rdr):
+def wrappedNext(rdr):
     try:
         return next(rdr)
     except csv.Error as e:
@@ -22,7 +22,7 @@ def wrapped_next(rdr):
 def load_csv(vs):
     'Convert from CSV, first handling header row specially.'
     with vs.source.open_text() as fp:
-        samplelen = min(len(wrapped_next(fp)) for i in range(10))
+        samplelen = min(len(wrappedNext(fp)) for i in range(10))
         fp.seek(0)
 
         rdr = csv.reader(fp,
@@ -33,14 +33,14 @@ def load_csv(vs):
         vs.rows = []
 
         # headers first, to setup columns before adding rows
-        headers = [wrapped_next(rdr) for i in range(int(options.headerlines))]
+        headers = [wrappedNext(rdr) for i in range(int(options.headerlines))]
 
         if headers:
             # columns ideally reflect the max number of fields over all rows
             vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers))
         else:
-            r = wrapped_next(rdr)
-            vs.rows.append(wrapped_next(rdr))
+            r = wrappedNext(rdr)
+            vs.rows.append(wrappedNext(rdr))
             vs.columns = ArrayColumns(len(vs.rows[0]))
 
         vs.progressMade = 0
@@ -48,7 +48,7 @@ def load_csv(vs):
 
         try:
             while True:
-                vs.rows.append(wrapped_next(rdr))
+                vs.rows.append(wrappedNext(rdr))
                 vs.progressMade += samplelen
 
         except StopIteration:
