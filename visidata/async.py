@@ -17,7 +17,7 @@ command('^T', 'vd.push(TasksSheet("task_history"))', 'push task history sheet')
 #   ENTER on that row pushes a profile of the thread
 
 class Task:
-    """Prepare function and its parameters for asynchronous processing."""
+    'Prepare function and its parameters for asynchronous processing.'
     def __init__(self, name):
         self.name = name
         self.startTime = time.process_time()
@@ -27,13 +27,13 @@ class Task:
         self.profileResults = None
 
     def start(self, func, *args, **kwargs):
-        """Start parallel thread."""
+        'Start parallel thread.'
         self.thread = threading.Thread(target=func, daemon=True, args=args, kwargs=kwargs)
         self.thread.start()
 
     @property
     def elapsed_s(self):
-        """Return elapsed time."""
+        'Return elapsed time.'
         return (self.endTime or time.process_time())-self.startTime
 
 def sync():
@@ -41,7 +41,7 @@ def sync():
         g_TaskMgr.checkForUnfinishedTasks()
 
 def exec_async(func, *args, **kwargs):
-    """Manage execution of asynchronous thread, checking for redundancy."""
+    'Manage execution of asynchronous thread, checking for redundancy.'
     if threading.current_thread().daemon:
         # Don't spawn a new thread from a subthread.
         return func(*args, **kwargs)
@@ -60,7 +60,7 @@ def exec_async(func, *args, **kwargs):
     return t
 
 def toplevel_try_func(task, func, *args, **kwargs):
-    """Modify status-bar content on user-abort/exceptions, for use by @async."""
+    'Modify status-bar content on user-abort/exceptions, for use by @async.'
     try:
         ret = func(*args, **kwargs)
         task.sheet.currentTask = None
@@ -75,7 +75,7 @@ def toplevel_try_func(task, func, *args, **kwargs):
         exceptionCaught()
 
 def thread_profileCode(task, func, *args, **kwargs):
-    """Wrap profiling functionality for use by @async."""
+    'Wrap profiling functionality for use by @async.'
     pr = cProfile.Profile()
     pr.enable()
     ret = toplevel_try_func(task, func, *args, **kwargs)
@@ -88,11 +88,11 @@ def thread_profileCode(task, func, *args, **kwargs):
 
 
 def ctype_async_raise(thread_obj, exception):
-    """Raise exception for threads running asynchronously."""
+    'Raise exception for threads running asynchronously.'
 
 
     def dict_find(D, value):
-        """Return first key in dict `D` corresponding to `value`."""
+        'Return first key in dict `D` corresponding to `value`.'
         for k, v in D.items():
             if v is value:
                 return k
@@ -113,11 +113,11 @@ class TaskManager:
 
     @property
     def unfinishedTasks(self):
-        """Return list of tasks for which `endTime` has not been reached."""
+        'Return list of tasks for which `endTime` has not been reached.'
         return [task for task in self.tasks if not task.endTime]
 
     def checkForUnfinishedTasks(self):
-        """Prune old threads that were not started or terminated."""
+        'Prune old threads that were not started or terminated.'
         for task in self.unfinishedTasks:
             if not task.thread.is_alive():
                 task.endTime = time.process_time()
@@ -127,10 +127,10 @@ class TaskManager:
 
 # each row is a Task object
 class TasksSheet(Sheet):
-    """Sheet displaying "Task" objects: asynchronous threads."""
+    'Sheet displaying "Task" objects: asynchronous threads.'
 
     def reload(self):
-        """Populate sheet via `reload` function."""
+        'Populate sheet via `reload` function.'
         self.command('^C', 'ctype_async_raise(cursorRow.thread, EscapeException)', 'cancel this action')
         self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
         self.columns = [
@@ -142,7 +142,7 @@ class TasksSheet(Sheet):
 
 
 def ProfileSheet(task):
-    """Populate sheet showing profiling results."""
+    'Populate sheet showing profiling results.'
     return TextSheet(task.name + '_profile', task.profileResults)
 
 g_TaskMgr = TaskManager()

@@ -7,12 +7,12 @@ def open_sqlite(path):
     return vs
 
 class SqliteSheet(Sheet):
-    """Provide functionality for importing SQLite databases."""
     def __init__(self, name, path_or_sheet, table_name):
         super().__init__(name, path_or_sheet, table_name)
         if isinstance(path_or_sheet, Sheet):
             self.conn = path_or_sheet.conn
         elif isinstance(path_or_sheet, Path):
+    'Provide functionality for importing SQLite databases.'
             import sqlite3
             self.conn = sqlite3.connect(path_or_sheet.resolve())
 
