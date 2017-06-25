@@ -19,8 +19,8 @@ def eval_vd(fnEditlog, *args, **kwargs):
     vs.replay()
 
 def main():
-    fmtArgs = []
-    fmtKwargs = {}
+    args = []
+    kwargs = {}
 
     i=2
     while i < len(sys.argv):
@@ -30,16 +30,16 @@ def main():
         if arg.startswith('--'):
             if '=' in arg:
                 k, v = arg[2:].split('=')
-                fmtKwargs[k] = v
+                kwargs[k] = v
             else:
                 i += 1
-                fmtKwargs[arg[2:]] = sys.argv[i]
+                kwargs[arg[2:]] = sys.argv[i]
         else:
-            fmtArgs.append(arg)
+            args.append(arg)
 
         i += 1
 
-    eval_vd(sys.argv[1], *fmtArgs, **fmtKwargs)
+    eval_vd(sys.argv[1], *args, **kwargs)
 
 if __name__ == '__main__':
     main()

@@ -311,7 +311,7 @@ def status(s):
     return vd().status(s)
 
 def moveListItem(L, fromidx, toidx):
-    '''Move element within list `L` and return element's new index.'''
+    "Move element within list `L` and return element's new index."
     r = L.pop(fromidx)
     L.insert(toidx, r)
     return toidx
@@ -980,11 +980,11 @@ class Sheet:
         return toVisColIdx
 
     def cursorDown(self, n):
-        '''Increment cursor's row by `n`.'''
+        "Increment cursor's row by `n`."
         self.cursorRowIndex += n
 
     def cursorRight(self, n):
-        '''Increment cursor's column by `n`.'''
+        "Increment cursor's column by `n`."
         self.cursorVisibleColIndex += n
         self.calcColLayout()
 
@@ -1282,7 +1282,7 @@ def count(values):
 _sum = sum
 
 def sum(values):
-    '''Wrap `_sum`, which is itself Python's built-in `sum`.'''
+    "Wrap `_sum`, which is itself Python's built-in `sum`."
     return _sum(values)
 
 avg.type = float
@@ -1384,7 +1384,7 @@ class Column:
 
     @property
     def hidden(self):
-        '''Set column width to zero, to 'hide' it.'''
+        "Set column width to zero, to 'hide' it."
         return self.width == 0
 
     def nEmpty(self, rows):

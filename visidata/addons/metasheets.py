@@ -152,7 +152,7 @@ class SheetJoin(Sheet):
      * `&`: inner JOIN (default)
      * `*`: full outer JOIN
      * `+`: left outer JOIN
-     * "~": "diff" or outer excluding JOIN, i.e., full JOIN minus inner JOIN'''
+     * `~`: "diff" or outer excluding JOIN, i.e., full JOIN minus inner JOIN'''
 
     def __init__(self, sheets, jointype='&'):
         super().__init__(jointype.join(vs.name for vs in sheets), sheets)

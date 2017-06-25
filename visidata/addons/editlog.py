@@ -113,7 +113,7 @@ class EditLog(Sheet):
             return None
 
     def setLastArgs(self, args):
-        '''Set args on any log but editlog (we don't log editlog commands).'''
+        "Set args on any log but editlog (we don't log editlog commands)."
         if vd().sheets[0] is not self:
             self.rows[-1][2] = args
 
