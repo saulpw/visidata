@@ -111,6 +111,7 @@ theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
 theme('color_status', 'bold', 'status line color')
 theme('color_edit_cell', 'normal', 'edit cell color')
 theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
+theme('unicode_ambiguous_width', 1, 'width to use for unicode chars marked ambiguous')
 
 ENTER='^J'
 ESC='^['
@@ -295,8 +296,8 @@ typemap = {
     anytype: ' ',
 }
 
-windowWidth = 0
-windowHeight = 0
+windowWidth = 80
+windowHeight = 25
 
 def joinSheetnames(*sheetnames):
     'Concatenate sheet names using separator (`options.sheetname_joiner`).'
@@ -1563,6 +1564,7 @@ def clipstr(s, dispw):
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
     w = 0
     ret = ''
+    ambig_width = options.unicode_ambiguous_width
     for c in s:
         if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
             ret += options.disp_oddspace
@@ -1571,7 +1573,7 @@ def clipstr(s, dispw):
             ret += c
             eaw = unicodedata.east_asian_width(c)
             if eaw == 'A':  # ambiguous
-                w += 2
+                w += ambig_width
             elif eaw in 'WF': # wide/full
                 w += 2
             elif not unicodedata.combining(c):
@@ -1613,11 +1615,12 @@ def drawClip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
 class TextSheet(Sheet):
     'Sheet displaying a string (one line per row) or a list of strings.'
 
+    @async
     def reload(self):
         'Populate sheet via `reload` function.'
-        self.columns = [Column(self.name, str)]
+        self.rows = []
+        self.columns = [Column(self.name, str, width=windowWidth)]
         if isinstance(self.source, list):
-            self.rows = []
             for x in self.source:
                 # copy so modifications don't change 'original'; also one iteration through generator
                 self.addLine(x)
@@ -1626,6 +1629,9 @@ class TextSheet(Sheet):
                 self.addLine(L)
         elif isinstance(self.source, io.IOBase):
             for L in self.source:
+                self.addLine(L[:-1])
+        elif isinstance(self.source, Path):
+            for L in self.source.open_text():
                 self.addLine(L[:-1])
         else:
             error('unknown text type ' + str(type(self.source)))
@@ -1701,10 +1707,10 @@ def open_py(p):
 
 def open_txt(p):
     'Create sheet from `.txt` file at path `p`, checking whether it is TSV.'
-    fp = p.open_text()
-    if '\t' in next(fp):
-        return open_tsv(p)  # TSV often have .txt extension
-    return TextSheet(p.name, fp)  # leaks file handle
+    with p.open_text() as fp:
+        if '\t' in next(fp):
+            return open_tsv(p)  # TSV often have .txt extension
+        return TextSheet(p.name, p)
 
 def getTsvHeaders(fp, nlines):
     'Return list of lists for use as headers, from paragraphs `fp`.'

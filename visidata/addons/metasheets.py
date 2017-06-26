@@ -49,7 +49,7 @@ class LazyMapping:
         return [c.name for c in self.sheet.columns if c.name.isidentifier()]
 
     def __call__(self, col):
-        return eval(col.expr, {}, self)
+        return eval(col.expr, g_globals, self)
 
     def __getitem__(self, colname):
         colnames = [c.name for c in self.sheet.columns]
