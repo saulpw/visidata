@@ -7,7 +7,7 @@ import itertools
 import visidata
 
 # test separately as needed
-expectedErrors = [ '^E', 'g', '^R', '^^', 'e', '^J' ]
+expectedErrors = [ '^R', '^^', 'e', 'ge', '^J', '^S', 'o', 'KEY_BACKSPACE']
 
 inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
                  'o': 'tests/jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
@@ -20,12 +20,15 @@ inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
                  'c': 'value',          # column name in SheetObject
                  'r': '5',              # go to row 5
                  '=': 'value',          # just copy the column
-                 ':': r'value/(\w)/\1', # the first character
+                 ':': '_',
+                 ';': '(.)(.*)',
+                 '*': r'value/(\w)/\1', # the first character
                  'g/': 'foo',
                  'g?': 'bar',
                  'g|': '.',
                  'g\\': '.',
-                 'R': '.',
+                 'R': 'tsv',
+                 'P': '50',
               }
 
 class CommandsTestCase(unittest.TestCase):
@@ -36,31 +39,32 @@ class CommandsTestCase(unittest.TestCase):
         self.scr.getmaxyx = lambda: (25, 80)
 
     def test_baseCommands(self):
-        self.test_commands(visidata.baseCommands)
+        'exec each global command at least once'
 
-    def test_sheetCommands(self):
-        self.test_commands(vs.commands)
+        cmdlist = visidata.baseCommands
 
-    def test_commands(self, cmdlist):
-        'exec each command at least once'
         vs = visidata.SheetObject('test_commands', self)
         vs.reload()
         for keystrokes in cmdlist.keys():
             testname = keystrokes
-#            print(testname)
             if testname in expectedErrors:
                 continue
+#            print(testname)
+
+#            visidata.vd.cache_clear()  # so vd() returns a new VisiData object for each command
+            vd = visidata.vd()
+            vd.scr = self.scr
 
             if testname in inputLines:
                 line = [ch for ch in inputLines[testname]] + ['^J']
-                visidata.getkeystroke = Mock(side_effect=line)
+                vd.getkeystroke = Mock(side_effect=line)
             else:
-                visidata.getkeystroke = Mock(side_effect=['^J'])
+                vd.getkeystroke = Mock(side_effect=['^J'])
 
-            visidata.vd.cacheClear()  # so vd() returns a new VisiData object for each command
-            vd = visidata.vd()
             vs = visidata.SheetObject('test_commands', 'some object')
-            vd.scr = self.scr
-            vd.push(vs)
+            vs.reload()
+            vd.sheets = [vs]
             vs.draw(self.scr)
             vs.exec_command(vars(visidata), cmdlist[keystrokes])
+            self.assertFalse(vd.lastErrors and (keystrokes, cmdlist[keystrokes][2], vd.lastErrors))
+            vs.checkCursor()

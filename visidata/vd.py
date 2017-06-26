@@ -1009,7 +1009,7 @@ class Sheet:
 
         targetIdx = self.leftVisibleColIndex  # for rightmost column
         firstNonKeyVisibleColIndex = self.visibleCols.index(self.nonKeyVisibleCols[0])
-        while self.rightVisibleColIndex != targetIdx and self.leftVisibleColIndex != firstNonKeyVisibleColIndex:
+        while self.rightVisibleColIndex != targetIdx and self.leftVisibleColIndex > firstNonKeyVisibleColIndex:
             self.cursorVisibleColIndex -= 1
             self.leftVisibleColIndex -= 1
             self.calcColLayout()  # recompute rightVisibleColIndex
