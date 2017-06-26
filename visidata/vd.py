@@ -23,7 +23,7 @@
 
 'VisiData core functionality'
 
-__version__ = 'saul.pw/VisiData v0.75'
+__version__ = 'saul.pw/VisiData v0.80'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Alpha'
@@ -1569,7 +1569,7 @@ def clipstr(s, dispw):
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
     w = 0
     ret = ''
-    ambig_width = options.unicode_ambiguous_width
+    ambig_width = int(options.unicode_ambiguous_width)
     for c in s:
         if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
             ret += options.disp_oddspace

@@ -3,8 +3,6 @@
 
 A loose plan that is subject to change.
 
-## v0.75 alpha
-
 ## v1.0
 - Python expressions should be usable like regex for search, select, etc
 - documented Python3 API for vd.py use by other scripts

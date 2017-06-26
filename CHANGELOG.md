@@ -1,6 +1,7 @@
 # VisiData version history
 
-## v0.75
+## v0.80
+- tour of screenshot.gif
 - regex transform now `*` (';' is still regex split)
 - Make regex search/select to work more like vim
 - Move several non-essential commands out of vd.py

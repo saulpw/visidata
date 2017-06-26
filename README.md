@@ -1,4 +1,4 @@
-# VisiData v0.61
+# VisiData v0.80 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A curses interface for exploring and arranging tabular data
 
