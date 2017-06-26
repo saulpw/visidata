@@ -2,7 +2,7 @@
 VisiData Tour
 =============
 
-Example query: using [birdsdiet.tsv](../sample_data/birdsdiet.tsv), what is the relationship between the diet and average mass of passerine birds?
+Example query: using birdsdiet.tsv_, what is the relationship between the diet and average mass of passerine birds?
 -------------------------------------------------------------------------------------------------------------------
 
 .. image:: img/birdsdiet_bymass.gif
@@ -61,8 +61,10 @@ Example query: using [birdsdiet.tsv](../sample_data/birdsdiet.tsv), what is the 
 |17. Save the current sheet to ``.tsv`` with ``Ctrl-s`` followed by ``ENTER``       | .. image:: img/283.jpg    |
 +-----------------------------------------------------------------------------------+---------------------------+
 +--------------------------------------------------------------+------------------------------------------------+
-|19. View editlog with ``D``.                                  | .. image:: img/editlog.png                     |
+|19. View editlog with ``D``                                   | .. image:: img/editlog.png                     |
 +--------------------------------------------------------------+------------------------------------------------+
 +--------------------------------------------------------------+------------------------------------------------+
 |19. Exit VisiData with ``gq``                                 | .. image:: img/298.jpg                         |
 +--------------------------------------------------------------+------------------------------------------------+
+
+.. birdsdiet.tsv https://github.com/saulpw/visidata/tree/develop/sample_data/birdsdiet.tsv
