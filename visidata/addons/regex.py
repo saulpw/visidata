@@ -16,8 +16,12 @@ def splitColumnByRegex(columns, colIndex, origcol, exampleVal, regexstr):
 
 def regexTransform(col, instr):
     i = indexWithEscape(instr, '/')
-    before = instr[:i]
-    after = instr[i+1:]
+    if i is None:
+        before = instr
+        after = ''
+    else:
+        before = instr[:i]
+        after = instr[i+1:]
     newCol = Column(col.name + '_re',
                     getter=lambda row, col=col, before=before, after=after: re.sub(before, after, col.getValue(row), flags=regex_flags()))
     return newCol

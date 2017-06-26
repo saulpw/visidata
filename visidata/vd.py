@@ -213,14 +213,14 @@ command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
 command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
 
 command('|', 'selectByIdx(searchRegex(regex=input("|", type="regex"), columns="cursorCol"))', 'select rows by regex matching this columns')
-command('\\', 'unselectByIdx(searchRegex(regex=input(r"\\", type="regex"), columns="cursorCol"))', 'unselect rows by regex matching this columns')
+command('\\', 'unselectByIdx(searchRegex(regex=input("\\\\", type="regex"), columns="cursorCol"))', 'unselect rows by regex matching this columns')
 
 command('g ', 'toggle(rows)', 'toggle select of all rows')
 command('gs', 'select(rows)', 'select all rows')
 command('gu', '_selectedRows.clear()', 'unselect all rows')
 
 command('g|', 'selectByIdx(searchRegex(regex=input("g|", type="regex"), columns="visibleCols"))', 'select rows by regex matching any visible column')
-command('g\\', 'unselectByIdx(searchRegex(regex=input(r"g\\", type="regex"), columns="visibleCols"))', 'unselect rows by regex matching any visible column')
+command('g\\', 'unselectByIdx(searchRegex(regex=input("g\\\\", type="regex"), columns="visibleCols"))', 'unselect rows by regex matching any visible column')
 
 command(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching by this column')
 command('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
