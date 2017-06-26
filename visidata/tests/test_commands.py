@@ -7,9 +7,9 @@ import itertools
 import visidata
 
 # test separately as needed
-expected_errors = [ '^E', 'g', '^R', '^^', 'e', '^J' ]
+expectedErrors = [ '^E', 'g', '^R', '^^', 'e', '^J' ]
 
-input_lines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
+inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
                  'o': 'tests/jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
                 '^O': '2+2',            # open the python object for '4'
                  '/': 'foo',
@@ -35,10 +35,10 @@ class CommandsTestCase(unittest.TestCase):
         self.scr.move = Mock()
         self.scr.getmaxyx = lambda: (25, 80)
 
-    def test_base_commands(self):
-        self.test_commands(visidata.base_commands)
+    def test_baseCommands(self):
+        self.test_commands(visidata.baseCommands)
 
-    def test_sheet_commands(self):
+    def test_sheetCommands(self):
         self.test_commands(vs.commands)
 
     def test_commands(self, cmdlist):
@@ -48,16 +48,16 @@ class CommandsTestCase(unittest.TestCase):
         for keystrokes in cmdlist.keys():
             testname = keystrokes
 #            print(testname)
-            if testname in expected_errors:
+            if testname in expectedErrors:
                 continue
 
-            if testname in input_lines:
-                line = [ch for ch in input_lines[testname]] + ['^J']
+            if testname in inputLines:
+                line = [ch for ch in inputLines[testname]] + ['^J']
                 visidata.getkeystroke = Mock(side_effect=line)
             else:
                 visidata.getkeystroke = Mock(side_effect=['^J'])
 
-            visidata.vd.cache_clear()  # so vd() returns a new VisiData object for each command
+            visidata.vd.cacheClear()  # so vd() returns a new VisiData object for each command
             vd = visidata.vd()
             vs = visidata.SheetObject('test_commands', 'some object')
             vd.scr = self.scr

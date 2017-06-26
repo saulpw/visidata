@@ -218,6 +218,13 @@ common types of columns. The most common are:
    the rows are Python objects.
 -  ``ColumnItem(colname, itemkey)`` uses ``getitem``, which is useful
    when the rows are mapping objects.
+   
+Deviations from PEP8
+-----------------
+
+- One-line docstrings will be encompassed by a single ``'``.
+- Multi-line docstrings are surrounded by three ``'``.
+- functionNames and variableNames are primarily in camelCase, with some exceptions.
 
 Adding a new data source
 ========================

@@ -23,4 +23,4 @@ from .addons.xlsx import *
 from .addons.hdf5 import *
 from .addons.sqlite import *
 
-set_globals(globals())
+setGlobals(globals())
