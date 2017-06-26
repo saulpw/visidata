@@ -28,7 +28,7 @@ $ pip3 install visidata
 ```
 $ git clone http://github.com/saulpw/visidata.git
 $ cd visidata
-$ pip install -r requirements.txt
+$ pip install -r docs/requirements.txt
 $ python setup.py install
 ```
 
