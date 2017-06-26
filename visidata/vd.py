@@ -589,9 +589,7 @@ class VisiData:
                 except Exception:
                     self.exceptionCaught()
             elif self.keystrokes in sheet.commands:
-                self.callHook('preexec', sheet, self.keystrokes)
-                escaped = sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
-                self.callHook('postexec', vd().sheets[0] if vd().sheets else None, escaped)
+                sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
             elif keystroke in self.allPrefixes:
                 pass
             else:
@@ -784,6 +782,8 @@ class Sheet:
 
     def exec_command(self, vdglobals, cmd):
         'Wrap execution of `cmd`, adding globals and `locs` dictionary.'
+        escaped = False
+
         if vdglobals is None:
             vdglobals = g_globals
         # handy globals for use by commands
@@ -794,15 +794,20 @@ class Sheet:
                 lambda k,s=self: getattr(s, k),
                 lambda k,v,s=self: setattr(s, k, v)
                 )
+
+        self.vd.callHook('preexec', self, keystrokes)
+
         try:
             exec(execstr, vdglobals, locs)
         except EscapeException as e:  # user aborted
             self.vd.status('EscapeException ' + ''.join(e.args[0:]))
-            return True
+            escaped = True
         except Exception:
             self.vd.exceptionCaught()
 
-        return False
+        self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped)
+
+        return escaped
 
     def clipdraw(self, y, x, s, attr, w):
         'Wrap `drawClip`.'
