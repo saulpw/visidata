@@ -96,8 +96,8 @@ please see the source code for examples of how to accomplish most tasks.
 Creating a new sheet
 --------------------
 
-Developers can specify more advanced user interfaces are implemented
-using custom sheets. These sheets are created and pushed with a toplevel
+Developers can specify more advanced user interfaces by implementing
+custom sheets. These sheets are created and pushed with a toplevel
 command available on all sheets, with a more highly-tuned workflow
 becoming available when the custom sheet is visible.
 
@@ -146,11 +146,11 @@ sheet can be viewed with ``Shift-T`` and then dumped to a .tsv file with
 
     vd().journal = JournalSheet()
 
-Note that the ``t`` command includes ``cursorRow`` in the list instead
-of ``cursorValue``, and the ``value`` column calls Column.getValue().
-This is the desired pattern for appending rows based on existing sheets,
-so that changes to the source row are automatically reflected in the
-subsheets.
+Note that the ``t`` command includes ``cursorRow`` in the list instead of
+``cursorValue``, and when the journal is saved the value in the column of
+the referenced row is retrieved using `Column.getValue`.  This is the
+desired pattern for appending rows based on existing sheets, so that
+changes to the source row are automatically reflected in the subsheets.
 
 Sheet initialization
 --------------------
@@ -197,15 +197,18 @@ Using the base Column class
 -  The only other essential argument is a getter function, which takes a
    row and returns the value for that column.
 -  Optional named arguments:
--  ``type`` can be passed explicitly. Valid values are ``int``,
-   ``float``, ``date``, ``str``. Columns that are not explicitly typed
-   will be stringified just before being displayed.
--  a ``setter`` function allows a row to be modified by the user using
-   the ``Sheet.editCell`` method. The setter takes a row object and new
-   value, and sets the value for that column. Without a setter, the
-   column can't be modified.
--  ``width`` specifies the default width for the column; ``0`` means
-   hidden.
+
+    -  ``type`` can be passed explicitly. Valid values are ``int``,
+       ``float``, ``date``, ``str``. Columns that are not explicitly typed
+       will be stringified just before being displayed.
+    -  a ``setter`` function allows a row to be modified by the user using
+       the ``Sheet.editCell`` method. The setter takes a row object and new
+       value, and sets the value for that column. Without a setter, the
+       column can't be modified.
+    -  ``width`` specifies the default width for the column; ``0`` means
+       hidden.
+    - ``fmtstr`` is a format string in the Column class's ``getDislayValue()`` 
+      function.
 
 Helpful column creators
 ~~~~~~~~~~~~~~~~~~~~~~~
