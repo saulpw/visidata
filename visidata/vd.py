@@ -59,13 +59,13 @@ def command(keystrokes, execstr, helpstr):
         baseCommands[ks] = (ks, helpstr, execstr)
 
 def option(name, default, helpstr=''):
-    baseOptions[name] = [name, default, default, helpstr]  # see OptionsObject
+    baseOptions[name] = [name, default, default, helpstr, type(default)]  # see OptionsObject
 theme = option
 
 
 option('debug', False, 'abort on error and display stacktrace')
 option('readonly', False, 'disable saving')
-option('filetype', None, 'specify file type')
+option('filetype', '', 'specify file type')
 
 option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('encoding', 'utf-8', 'as passed to codecs.open')
@@ -1569,7 +1569,7 @@ def clipstr(s, dispw):
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
     w = 0
     ret = ''
-    ambig_width = int(options.unicode_ambiguous_width)
+    ambig_width = options.unicode_ambiguous_width
     for c in s:
         if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
             ret += options.disp_oddspace
@@ -1664,12 +1664,12 @@ class OptionsObject:
     def __init__(self, d):
         self._opts = d
     def __getattr__(self, k):
-        name, value, default, helpstr = self._opts[k]
-        return value
+        name, value, default, helpstr, option_type = self._opts[k]
+        return option_type(value)
     def __setitem__(self, k, v):
         if k not in self._opts:
             raise Exception('no such option "%s"' % k)
-        self._opts[k][1] = v
+        self._opts[k][1] = self._opts[k][4](v)
 
 options = OptionsObject(baseOptions)
 
