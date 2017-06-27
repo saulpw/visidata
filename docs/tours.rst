@@ -16,7 +16,9 @@ Example query: using `birdsdiet.tsv <https://github.com/saulpw/visidata/tree/dev
 |2. Toggle the ``Family`` column to be a key column column with ``!``   | .. image:: img/tour01/02.jpg              |
 +-----------------------------------------------------------------------+-------------------------------------------+
 +--------------------------------------------------------------+----------------------------------------------------+
-|3. Hide undesired columns with ``-``                          | .. image:: img/tour01/03.jpg                       |
+|**3. Hide undesired columns with** ``-``                      | .. image:: img/tour01/03.jpg                       |
+|                                                              |                                                    |
+|lorum ipsum                                                   |                                                    |
 +--------------------------------------------------------------+----------------------------------------------------+
 +--------------------------------------------------------------+----------------------------------------------------+
 |4. Set the ``Mass`` column to the float type with ``%``       | .. image:: img/tour01/04.jpg                       |
