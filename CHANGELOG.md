@@ -11,7 +11,7 @@
 - www/ for landing page
 - move from .md to .rst for documentation
 
-## v0.60
+## v0.61
 - colorizers
 - `g[` and `g]` to sort by all key columns
 - `;` and `.` experimental regex commands
