@@ -43,7 +43,7 @@ Example query: using `birdsdiet.tsv <https://github.com/saulpw/visidata/tree/dev
 |11. Push a frequency table sheet for the ``Diet`` column with ``F``      | .. image:: img/tour01/11.jpg            |
 +-------------------------------------------------------------------------+-----------------------------------------+
 +------------------------------------------------------------------------+------------------------------------------+
-|12. Minimize the ``Diet`` column to fit the longest value with ``_``    | .. image:: img/tou01/12.jpg              |
+|12. Minimize the ``Diet`` column to fit the longest value with ``_``    | .. image:: img/tour01/12.jpg             |
 +------------------------------------------------------------------------+------------------------------------------+
 +--------------------------------------------------------------+----------------------------------------------------+
 |13. Go to the rightmost column with ``gl``                    | .. image:: img/tour01/13.jpg                       |
