@@ -198,16 +198,16 @@ Using the base Column class
    row and returns the value for that column.
 -  Optional named arguments:
 
-    -  ``type`` can be passed explicitly. Valid values are ``int``,
-       ``float``, ``date``, ``str``. Columns that are not explicitly typed
-       will be stringified just before being displayed.
+    -  ``type`` can be passed explicitly. Valid values are ``int``, ``float``,
+      ``date``, ``str``, and ``currency``. Columns that are not explicitly
+      typed will be stringified just before being displayed.
     -  a ``setter`` function allows a row to be modified by the user using
        the ``Sheet.editCell`` method. The setter takes a row object and new
        value, and sets the value for that column. Without a setter, the
        column can't be modified.
     -  ``width`` specifies the default width for the column; ``0`` means
        hidden.
-    - ``fmtstr`` is a format string in the Column class's ``getDislayValue()`` 
+    - ``fmtstr`` is a format string for the Column class' ``getDislayValue()`` 
       function.
 
 Helpful column creators
@@ -221,7 +221,7 @@ common types of columns. The most common are:
    the rows are Python objects.
 -  ``ColumnItem(colname, itemkey)`` uses ``getitem``, which is useful
    when the rows are mapping objects.
-   
+
 Deviations from PEP8
 -----------------
 
