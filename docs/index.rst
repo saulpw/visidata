@@ -14,6 +14,7 @@ Welcome to VisiData's documentation!
 
    Home <home>
    user-guide
+   tours
    dev-guide
    screen-layout
    dev-cursors
