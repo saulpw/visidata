@@ -727,7 +727,7 @@ class Sheet:
     def searchColumnNameRegex(self, colregex):
         'Select visible column matching `colregex`, if found.'
         for i, c in enumPivot(self.visibleCols, self.cursorVisibleColIndex):
-            if re.search(colregex, c.name, re.IGNORECASE):
+            if re.search(colregex, c.name, regex_flags()):
                 self.cursorVisibleColIndex = i
                 return
 
@@ -1686,8 +1686,7 @@ class OptionsSheet(Sheet):
         'Populate sheet via `reload` function.'
         self.rows = list(self.source.values())
         self.columns = ArrayNamedColumns('option value default description'.split())
-        self.command(ENTER, 'cursorRow[1] = editCell(1)', 'edit this option')
-        self.command('e', 'cursorRow[1] = editCell(1)', 'edit this option')
+        self.command([ENTER, 'e'], 'cursorRow[1] = editCell(1)', 'edit this option')
         self.colorizers.append(self.colorOptionCell)
         self.nKeys = 1
 
@@ -1731,7 +1730,7 @@ def getTsvHeaders(fp, nlines):
     return headers
 
 def open_tsv(p, vs=None):
-    'Parse contents of path `p` and populate columns.'
+    'Parse contents of Path `p` and populate columns.'
 
     if vs is None:
         vs = Sheet(p.name, p)
@@ -1753,7 +1752,7 @@ def open_tsv(p, vs=None):
 
 @async
 def reload_tsv(vs):
-    'Wrap `reload_tsv_sync`.'
+    'Asynchronous wrapper for `reload_tsv_sync`.'
     reload_tsv_sync(vs)
 
 def reload_tsv_sync(vs):
