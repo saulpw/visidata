@@ -80,26 +80,17 @@ This exec string illustrates the basic interface for commands:
    package is imported by VisiData (and thus available to all extensions
    automatically); other packages may be imported at the toplevel of the
    .py extension.
--  ```input`` <>`__ is a global function that displays a prompt and gets
-   a string of input from the user (on the bottom line).
+-  ```input`` is a global function that displays a prompt and gets
+    a string of input from the user (on the bottom status line).
 
-What can be done with commands
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Anything is possible! However, the exec string limits functionality to
-Python one-liners. More complicated commands will require a custom sheet
-to implement longer Python functions.
-
-There will eventually be a VisiData API reference. In the meantime,
-please see the source code for examples of how to accomplish most tasks.
 
 Creating a new sheet
 --------------------
 
-Developers can specify more advanced user interfaces by implementing
-custom sheets. These sheets are created and pushed with a toplevel
-command available on all sheets, with a more highly-tuned workflow
-becoming available when the custom sheet is visible.
+More advanced interfaces and workflows can be implemented via custom sheets.
+These sheets are created and pushed with a toplevel command available on all
+sheets, with a more highly-tuned workflow becoming available when the custom
+sheet is visible.
 
 Example
 ~~~~~~~
@@ -148,7 +139,7 @@ sheet can be viewed with ``Shift-T`` and then dumped to a .tsv file with
 
 Note that the ``t`` command includes ``cursorRow`` in the list instead of
 ``cursorValue``, and when the journal is saved the value in the column of
-the referenced row is retrieved using `Column.getValue`.  This is the
+the referenced row is retrieved using ``Column.getValue``.  This is the
 desired pattern for appending rows based on existing sheets, so that
 changes to the source row are automatically reflected in the subsheets.
 
@@ -199,8 +190,8 @@ Using the base Column class
 -  Optional named arguments:
 
     -  ``type`` can be passed explicitly. Valid values are ``int``, ``float``,
-      ``date``, ``str``, and ``currency``. Columns that are not explicitly
-      typed will be stringified just before being displayed.
+       ``date``, ``str``, and ``currency``. Columns that are not explicitly
+       typed will be stringified just before being displayed.
     -  a ``setter`` function allows a row to be modified by the user using
        the ``Sheet.editCell`` method. The setter takes a row object and new
        value, and sets the value for that column. Without a setter, the
