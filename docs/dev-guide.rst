@@ -8,7 +8,8 @@ spreadsheet, however, the data is well-structured, so that the data model is
 closer to Pandas or an RDBMS.
 
 * The main unit of functionality is the *sheet*. A ``vd`` instance contains a
-  stack of sheets, the last of which (``vd.sheets[0]``) is the one displayed.
+  stack of sheets, the left-most (!) of which (``vd.sheets[0]``) is the one
+  displayed.
 
 * Sheets have *rows* and *columns*.
 
@@ -22,6 +23,12 @@ closer to Pandas or an RDBMS.
 Constraining the data to fit within this architecture simplifies the
 implementation and allows for some radical optimizations to data workflow.
 
+One project, two licenses
+=========================
+
+``vd.py`` is a stand-alone library. It is meant for use in other projects. It is distributed under the MIT free software license.
+
+The rest of the matter in this project is distributed under the more restrictive GPLv3 free software license.
 
 Columns
 =======
@@ -450,15 +457,26 @@ reasonable measure of total work, and they should also be structured to
 frequently update ``Sheet.progressMade`` with the amount of work already
 done. This is used for the progress meter on the right status line.
 
-``editText``
-------------
+Curses line-editing: ``editText``
+---------------------------------
 
-(Not yet documented.)
+The module-level function ``editText`` is a hack to replace ``curses.textpad``
+for line-editing functionality. It supplies a subset of standard GNU
+`Readline key-bindings
+<https://cnswww.cns.cwru.edu/php/chet/readline/readline.html>`_: ``^a`` for
+start of line, ``^e`` for end of line,
+and so on. One innovation is ``^r`` to reload the initial value of a cell.
 
-Regular expressions (regex)
+Module-level ``editText`` is wrapped by ``VisiData.editText`` and
+``Sheet.editCell``.
+
+Regular expressions (RegEx)
 ---------------------------
 
-(Not yet documented.)
+Developers may enjoy using regular expressions (RegEx) to select rows.
+``VisiData.searchRegex`` is available for that purpose. The flavor of RegEx is
+that of `Python <https://docs.python.org/3/library/re.html>`_, similar to that
+of Perl rather than that of ``vi``.
 
 Drawing
 -------
@@ -487,5 +505,84 @@ Making VisiData sources
 
 (Not yet documented. Topics include ``Path`` objects, ``openSource``, and
 ``open_*``.)
+
+Common variables
+================
+
+Following are some variable names used frequently in the codebase, together with their usual associations:
+
+   * ``c``: column
+
+   * ``expr``: Python expression
+
+   * ``D``, ``d``: dict
+
+   * ``f``: function
+
+   * ``fn``: filename
+
+   * ``i``: target variable of iterator or generator
+
+   * ``idx``: index
+
+   * ``L``: list
+
+   * ``p``: path
+     
+   * ``pv``: present value
+
+   * ``r``: row
+
+   * ``ret``: return value
+
+   * ``rng``: range
+
+   * ``s``: string
+
+   * ``scr``: "screen" object in Curses
+
+   * ``v``: name of variable
+
+   * ``vd``: ``visidata.Visidata``, normally constructed as a singleton (one-time-only instance) as ``VisiData()``
+
+   * ``vs``: sheet, constructed as ``visidata.Sheet(name, path)`` or returned from some function as ``openURL(path)``, ``open_tsv(path)``, ``DirSheet(name, path)``, etc.
+
+   * ``w``: width
+
+   * ``x``: horizontal position on the screen
+
+   * ``y``: vertical position on the screen
+
+Unresolved hacks
+================
+
+Your insight as to how to improve these is most welcome.
+
+#. ``chooseOne`` should be a proper chooser.
+
+#. Adding a property to the VisiData singleton in an extension is done as in
+   ``visidata/status_history.py``:
+
+   .. code-block:: python
+
+      vd().statusHistory = []
+
+#. Accessing all commands in an extension requires the use of globals. The extension requires a statement like
+
+   .. code-block:: python
+
+      setGlobal('g_client', g_client)
+
+   which calls a setter for a global dict in ``vd.py``:
+
+   .. code-block:: python
+
+      g_globals = None
+      def setGlobal(k, v):
+          'Manually set global key-value pair in `g_globals`.'
+          g_globals[k = v
+
+   That yogic maneuver allows instances of ``command()`` in the extension to pass the string ``'g_client'`` to ``exec`` statements.
+
 
 
