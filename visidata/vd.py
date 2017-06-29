@@ -23,7 +23,7 @@
 
 'VisiData core functionality'
 
-__version__ = 'saul.pw/VisiData v0.90'
+__version__ = 'saul.pw/VisiData v0.91'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Alpha'

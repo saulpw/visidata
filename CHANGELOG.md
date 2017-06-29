@@ -1,8 +1,9 @@
 # VisiData version history
 
-## v0.90 (2017-06-28)
+## v0.91 (2017-06-28)
 - Make options automatically typed based on default
 - Documentation cleanups
+- Remove R command (set filetype on CLI)
 
 ## v0.80
 - tour of screenshot.gif

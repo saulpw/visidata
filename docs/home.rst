@@ -1,5 +1,5 @@
 ==============
-VisiData v0.90
+VisiData v0.91
 ==============
 
 A curses interface for exploring and arranging tabular data
