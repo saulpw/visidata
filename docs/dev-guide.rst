@@ -157,7 +157,7 @@ more prefixes or consist of a Curses `key constant
 ``KEY_HOME``).
 
 The ``exec`` string in this example illustrates the basic interface for
-commands. Below we dissect
+commands. Below we dissect various elements in the example.
 
 * The global ``VisiData`` singleton object is available as ``vd`` in the exec
   string (and ``vd()`` in other contexts).
@@ -292,7 +292,7 @@ sheet can be viewed with ``Shift-T`` and then dumped to a ``.tsv`` file with
     vd().journal = JournalSheet()
 
 Note that the ``t`` command includes ``cursorRow`` in the list instead
-of ``cursorValue``, and the ``value`` column calls Column.getValue().
+of ``cursorValue``, and the ``value`` column calls ``Column.getValue()``.
 This is the desired pattern for appending rows based on existing sheets,
 so that changes to the source row are automatically reflected in the
 subsheets.
@@ -414,7 +414,7 @@ specified instead of using a hard-coded value.
 ``reload()``
 ------------
 
-The ``reload()`` method (invoked with ``^R`` (Ctrl-R)) should in general
+The ``reload()`` method (invoked with ``^R``, Ctrl-r) should in general
 reset the sheet to its starting rowset, without changing the column
 layout.
 
