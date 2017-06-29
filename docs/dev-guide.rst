@@ -23,12 +23,16 @@ closer to Pandas or an RDBMS.
 Constraining the data to fit within this architecture simplifies the
 implementation and allows for some radical optimizations to data workflow.
 
+----
+
 One project, two licenses
 =========================
 
 ``vd.py`` is a stand-alone library. It is meant for use in other projects. It is distributed under the MIT free software license.
 
 The rest of the matter in this project is distributed under the more restrictive GPLv3 free software license.
+
+----
 
 Columns
 =======
@@ -37,8 +41,8 @@ Note that each ``Column`` object is detached from any sheets in which it
 appears. Think of is as a lens through which each individual *row* of a sheet
 is viewed. Every ``Column`` must have a name and a ``getter`` method.
 
-Name and other properties
--------------------------
+``name`` and other properties
+-----------------------------
 
 Columns have a few properties, all optional except for ``name``:
   
@@ -124,6 +128,8 @@ observe in a REPL or using a conventional debugger. It may be useful to call
 ``Ctrl-o`` followed by ``sheet`` or ``vd.sheets``, to inspect sheets'
 attributes visually.
 
+----
+
 Commands
 ========
 
@@ -202,6 +208,8 @@ to implement longer Python functions.
 
 There will eventually be a VisiData API reference. In the meantime, please see
 the source code for examples of how to accomplish most tasks.
+
+----
 
 Extending VisiData
 ==================
@@ -307,42 +315,45 @@ changes to the source row are automatically reflected in the subsheets.
 Custom VisiData applications
 ----------------------------
 
-Import the ``visidata`` package into a Python script to create a custom VisiData application.
+Import the ``visidata`` package into a Python script to create a custom
+VisiData application.
 
-   
+----
+
 Other functionality
 ===================
 
 Status bar
 ----------
    
-The ``VisiData`` singleton has a list ``statuses`` that stores status-messages successively. Add a status message using ``VisiData.status``; there is also module-level wrapper ``status``, available to lambdas and ``eval``.
+The ``VisiData`` singleton has a list ``statuses`` that stores status-messages
+successively. Add a status message using ``VisiData.status``; there is also
+module-level wrapper ``status``, available to lambdas and ``eval``.
    
-The on-screen status bar is composed in two parts, with ``VisiData.leftStatus`` and ``VisiData.rightStatus``; the two parts are drawn separately, with ``VisiData.drawLeftStatus`` and ``VisiData.drawRightStatus``.
+The on-screen status bar is composed in two parts, with ``VisiData.leftStatus``
+and ``VisiData.rightStatus``; the two parts are drawn separately, with
+``VisiData.drawLeftStatus`` and ``VisiData.drawRightStatus``.
   
-Special to the ``Sheet`` object is method ``statusLine``, which returns the number of rows and the numbers of selected rows and columns.
+Special to the ``Sheet`` object is method ``statusLine``, which returns the
+number of rows and the numbers of selected rows and columns.
    
 Errors and debugging
 --------------------
    
-The ``VisiData`` singleton maintains a list ``lastErrors``, containing the most recent ten tracebacks. A traceback is added by ``VisiData.exceptionCaught``, which is normally called in the ``except`` clause of a ``try except`` block.
+The ``VisiData`` singleton maintains a list ``lastErrors``, containing the most
+recent ten tracebacks. A traceback is added by ``VisiData.exceptionCaught``,
+which is normally called in the ``except`` clause of a ``try except`` block.
    
 There is a module-level ``error`` function for use with lambdas and ``eval``.
    
-The developer will find it useful to toggle debug-mode on with ``Ctrl-d``, to display error messages (without traceback) on the left side of the status bar.
+The developer will find it useful to toggle debug-mode on with ``Ctrl-d``, to
+display error messages (without traceback) on the left side of the status bar.
    
 Hooks
 -----
    
 Hooks for special functionality are stored in ``VisiData.hooks`` and supported with ``VisiData.addHook`` and ``VisiData.callHook``. At the moment, hooks are used mainly in ``editText``, the optional ``editlog`` addon, and before redrawing the screen.
 
-
-Deviations from PEP8
------------------
-
-- One-line docstrings will be encompassed by a single ``'``.
-- Multi-line docstrings are surrounded by three ``'``.
-- functionNames and variableNames are primarily in camelCase, with some exceptions.
 
 Adding a new data source
 ------------------------
@@ -506,6 +517,8 @@ Making VisiData sources
 (Not yet documented. Topics include ``Path`` objects, ``openSource``, and
 ``open_*``.)
 
+----
+
 Common variables
 ================
 
@@ -553,21 +566,34 @@ Following are some variable names used frequently in the codebase, together with
 
    * ``y``: vertical position on the screen
 
+----
+
+
 Unresolved hacks
 ================
 
 Your insight as to how to improve these is most welcome.
 
-#. ``chooseOne`` should be a proper chooser.
+``chooseOne``
+-------------
 
-#. Adding a property to the VisiData singleton in an extension is done as in
+``chooseOne`` should be a proper chooser.
+
+Adding properties to ``vd`` in extensions
+-----------------------------------------
+
+Adding a property to the VisiData singleton in an extension is done as in
    ``visidata/status_history.py``:
 
    .. code-block:: python
 
       vd().statusHistory = []
 
-#. Accessing all commands in an extension requires the use of globals. The extension requires a statement like
+
+Globals
+-------
+
+Accessing all commands in an extension requires the use of globals. The extension requires a statement like
 
    .. code-block:: python
 
@@ -583,6 +609,16 @@ Your insight as to how to improve these is most welcome.
           g_globals[k = v
 
    That yogic maneuver allows instances of ``command()`` in the extension to pass the string ``'g_client'`` to ``exec`` statements.
+
+
+Deviations from PEP8
+--------------------
+
+* One-line docstrings are surrounded by a single (``'...'``).
+
+* Multi-line docstrings are surrounded by three single quotes (``'''...'''``).
+
+* Names of functions and variables are mostly in camel case, with some exceptions.
 
 
 
