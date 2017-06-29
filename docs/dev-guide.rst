@@ -8,7 +8,7 @@ spreadsheet, however, the data is well-structured, so that the data model is
 closer to Pandas or an RDBMS.
 
 * The main unit of functionality is the *sheet*. A ``vd`` instance contains a
-  stack of sheets, the last of which (``vd.sheets[-1]``) is the one displayed.
+  stack of sheets, the last of which (``vd.sheets[0]``) is the one displayed.
 
 * Sheets have *rows* and *columns*.
 
@@ -40,8 +40,8 @@ Columns have a few properties, all optional except for ``name``:
   are not met.
     
 * **type**: defaults to ``str``; other values are ``int``, ``float``,
-  ``date``. There is also a dummy ``anytype`` to produce a stringified version
-  for anything not in these categories.
+  ``date``, ``currency``. There is also a dummy ``anytype`` to produce a
+  stringified version for anything not in these categories.
     
 * **width**: specifies the default width for the column; ``0`` means
   hidden.
@@ -68,7 +68,7 @@ Getter
 This lambda function is required. It takes a row as input and returns the value
 for that column. This is the essential functionality of a ``Column``.
 
-A ``getter`` has wrapper methods ``getValue`` and ``getDisPlayValue`` to
+A ``getter`` has wrapper methods ``getValue`` and ``getDisplayValue`` to
 represent a value as its declared type or to format a value properly for
 display.
     
