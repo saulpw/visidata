@@ -167,7 +167,6 @@ command('KEY_BTAB', 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through she
 
 command('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'open most recent errors')
 
-command('R', 'sheet.filetype = input("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
 command('^R', 'reload(); status("reloaded")', 'reload sheet from source')
 
 command('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search this column forward for regex')
