@@ -2016,7 +2016,7 @@ def openSource(p, filetype=None):
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
     elif isinstance(p, Path):
-        if filetype is None:
+        if not filetype:
             filetype = options.filetype or p.suffix
 
         if os.path.isdir(p.resolve()):
