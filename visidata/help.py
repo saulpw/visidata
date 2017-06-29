@@ -4,10 +4,10 @@ command(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", *sheet.comman
 
 ## Built-in sheets
 class HelpSheet(Sheet):
-    """Help sheet, showing keystrokes etc. from given source(s)."""
+    'Help sheet, showing keystrokes etc. from given source(s).'
 
     def reload(self):
-        """Populate sheet via `reload` function."""
+        'Populate sheet via `reload` function.'
         self.rows = []
         for i, src in enumerate(self.sources):
             self.rows.extend((i, v) for v in src.values())

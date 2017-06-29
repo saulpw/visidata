@@ -1,14 +1,14 @@
 from visidata import *
 
-command('^P', 'vd.statuses.append(vd.status_history[0])', 'show last status message again')
-command('g^P', 'vd.push(TextSheet("status_history", vd.status_history))', 'open sheet with all previous status messages')
+command('^P', 'vd.statuses.append(vd.statusHistory[0])', 'show last status message again')
+command('g^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory))', 'open sheet with all previous status messages')
 
-_old_status = VisiData.status
+_oldStatus = VisiData.status
 
-def new_status(self, s):
-    self.status_history.insert(0, str(s))
-    return _old_status(self, s)
+def newStatus(self, s):
+    self.statusHistory.insert(0, str(s))
+    return _oldStatus(self, s)
 
-vd().status_history = []
-VisiData.status = new_status
+vd().statusHistory = []
+VisiData.status = newStatus
 

@@ -291,11 +291,11 @@ sheet can be viewed with ``Shift-T`` and then dumped to a ``.tsv`` file with
 
     vd().journal = JournalSheet()
 
-Note that the ``t`` command includes ``cursorRow`` in the list instead
-of ``cursorValue``, and the ``value`` column calls ``Column.getValue()``.
-This is the desired pattern for appending rows based on existing sheets,
-so that changes to the source row are automatically reflected in the
-subsheets.
+Note that the ``t`` command includes ``cursorRow`` in the list instead of
+``cursorValue``, and when the journal is saved the value in the column of
+the referenced row is retrieved using ``Column.getValue``.  This is the
+desired pattern for appending rows based on existing sheets, so that
+changes to the source row are automatically reflected in the subsheets.
 
 Custom VisiData applications
 ----------------------------
@@ -328,6 +328,14 @@ Hooks
 -----
    
 Hooks for special functionality are stored in ``VisiData.hooks`` and supported with ``VisiData.addHook`` and ``VisiData.callHook``. At the moment, hooks are used mainly in ``editText``, the optional ``editlog`` addon, and before redrawing the screen.
+
+
+Deviations from PEP8
+-----------------
+
+- One-line docstrings will be encompassed by a single ``'``.
+- Multi-line docstrings are surrounded by three ``'``.
+- functionNames and variableNames are primarily in camelCase, with some exceptions.
 
 Adding a new data source
 ------------------------
