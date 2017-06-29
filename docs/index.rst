@@ -1,4 +1,4 @@
-:tocdepth: 3
+:tocdepth: 4
 
 .. VisiData documentation master file, created by
    sphinx-quickstart on Sun Jun 11 14:20:24 2017.
