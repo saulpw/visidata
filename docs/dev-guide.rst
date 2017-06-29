@@ -134,7 +134,7 @@ Syntax
 
 * *exec string*: a string containing valid python code that will be passed to
   ``exec``. This string is limited to a single line of Python; longer code must
-  be placed in a separate "add-on" module (see `Extending VisiData`__).
+  be placed in a separate "add-on" module (see `Extending VisiData`_).
 
 * *help string*: help text provided to users on the help sheet.
 
@@ -228,10 +228,10 @@ The skeleton of an add-on, apart from its actual functionality, is as follows:
 
   * Define any sheet-specific commands, using ``self.command()`` within the
     constructor. The arguments are identical to those of the global
-    ``command()`` function (see `Commands`__).
+    ``command()`` function (see `Commands`_).
    
 * Define ``reload`` to as to recompute the values of the rows. See
-  `reload()`__ below.
+  `reload()`_ below.
    
 * Consider whether the sheet may be so large or slow to recompute that you
   don't want to user to be blocked waiting for reloading to finish. Some
@@ -241,7 +241,7 @@ The skeleton of an add-on, apart from its actual functionality, is as follows:
   * Use ``genProgress`` to display a progress bar showing the percentage of
     rows recomputed.
    
-  * Decorate ``reload`` with `@async`__.
+  * Decorate ``reload`` with `@async`_.
    
 Example
 ~~~~~~~
