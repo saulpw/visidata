@@ -4,6 +4,7 @@
 A loose plan that is subject to change.
 
 ## v1.0
+- improve colorizer interface
 - Python expressions should be usable like regex for search, select, etc
 - documented Python3 API for vd.py use by other scripts
 
@@ -34,3 +35,14 @@ A loose plan that is subject to change.
 - better csv/tsv sniffer
 - how to handle timezone for datetime
 
+# Applications
+
+- vdsh ('x' executes a shell command and creates a sheet from the output)
+- vdgit
+- vdb (interface to gdb)
+- vdchat
+- vdmail
+- vdsearch
+- [vdgalcon](http://github.com/saulpw/vdgalcon)
+- vdscrape
+- vdcalc

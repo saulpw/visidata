@@ -1,16 +1,14 @@
 # VisiData v0.91 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
-A curses interface for exploring and arranging tabular data
+A terminal interface for exploring and arranging tabular data
 
-Usable via any remote shell which has Python3 installed.
+<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)]</a>
 
 A few interesting commands:
 
 * `Shift-F` pushes a frequency analysis of the current column
 * `=` creates a new column from the given Python expression (use column names to refer to their contents)
 * `.` creates new columns from the match groups of the given regex
-
-<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)]</a>
 
 # Getting Started
 
