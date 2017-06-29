@@ -2,19 +2,19 @@
 
 from visidata import *
 
-command(ENTER, 'vd.replace(vd.next_level(cursorValue, int(name[-1])))', 'advance to next vdtutor level if ready')
+command(ENTER, 'vd.replace(vd.nextLevel(cursorValue, int(name[-1])))', 'advance to next vdtutor level if ready')
 
-def next_level(value, level=0):
-    if "ENTER" not in value:
-        error("not quite there yet..")
+def nextLevel(value, level=0):
+    if 'ENTER' not in value:
+        error('not quite there yet..')
 
     if level > 0:
-        status("Good job! You are ready for the next sheet.")
+        status('Good job! You are ready for the next sheet.')
 
     return open_txt(Path('docs/vdtutor%s.txt' % (int(level) + 1)))
 
-vd().next_level = next_level
+vd().nextLevel = nextLevel
 
-run([vd().next_level("ENTER")])
+run([vd().nextLevel("ENTER")])
 
 

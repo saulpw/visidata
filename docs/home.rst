@@ -1,15 +1,13 @@
 ==============
-VisiData v0.61
+VisiData v0.91
 ==============
 
 A curses interface for exploring and arranging tabular data
 
 Usable via any remote shell which has Python3 installed.
 
-.. figure:: img/screenshot.gif
-   :alt: VisiData Screenshot
-
-   VisiData silent demo
+.. image:: img/birdsdiet_bymass.gif
+   :target: https://github.com/saulpw/visidata/blob/develop/docs/tours.rst
 
 Getting Started
 ===============

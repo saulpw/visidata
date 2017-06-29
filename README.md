@@ -1,4 +1,4 @@
-# VisiData v0.61
+# VisiData v0.91 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A curses interface for exploring and arranging tabular data
 
@@ -10,8 +10,7 @@ A few interesting commands:
 * `=` creates a new column from the given Python expression (use column names to refer to their contents)
 * `.` creates new columns from the match groups of the given regex
 
-![VisiData silent demo](docs/img/screenshot.gif "VisiData Screenshot")
-
+<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)]</a>
 
 # Getting Started
 

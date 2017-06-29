@@ -1,11 +1,9 @@
-.. figure:: https://github.com/saulpw/visidata/blob/stable/docs/img/visidata-interface.png
+.. figure:: https://raw.githubusercontent.com/saulpw/visidata/stable/docs/img/visidata-interface.png
    :alt: screenshot
 
-   screenshot
-
 -  A. Column names in header row (bold)
--  B. Key columns (highlighted yellow)
--  C. '<'/'>' in header row indicate offscreen columns (dark blue)
+-  B. Key columns (blue)
+-  C. '<'/'>' in header row indicate offscreen columns
 -  D. Current column (bold with inverse header)
 -  E. Overflowing cells truncated with ellipsis (``…``)
 -  F. Row cursor (inverse row)
@@ -18,23 +16,21 @@
 For developers
 --------------
 
-.. figure:: https://github.com/saulpw/visidata/blob/stable/docs/img/visidata-interface.png
+.. figure:: https://raw.githubusercontent.com/saulpw/visidata/stable/docs/img/visidata-interface.png
    :alt: screenshot
 
-   screenshot
-
--  A. ``Column.name`` (``c_Header``)
--  B. ``keyCols == columns[:nKeys]`` (``c_KeyCols``)
+-  A. ``Column.name`` (``color_default_hdr``)
+-  B. ``keyCols == columns[:nKeys]`` (``color_key_col``)
 -  C. if
    ``leftVisibleColIndex > nKeys or rightVisibleColIndex < nVisibleCols-1``,
-   more non-hidden columns offscreen (``ch_LeftMore``/``ch_RightMore``)
+   more non-hidden columns offscreen (``disp_more_left``/``disp_more_right``)
 -  onscreen columns:
    ``visibleCols[leftVisibleColIndex:rightVisibleColIndex+1]``
--  D. ``cursorCol == visibleCols[cursorVisibleColIndex]`` (``c_CurCol``)
--  E. (``ch_Ellipsis``)
--  F. ``cursorRow`` (``c_CurRow``)
--  G. ``selectedRows`` (``c_SelectedRow``)
--  H. ``name`` and previous status (``c_StatusLine``)
+-  D. ``cursorCol == visibleCols[cursorVisibleColIndex]`` (``color_current_col``)
+-  E. (``disp_truncator``)
+-  F. ``cursorRow`` (``color_current_row``)
+-  G. ``selectedRows`` (``color_selected_row``)
+-  H. ``name`` and previous status (``color_status``)
 -  I. ``cursorValue``
 -  J. ``VisiData.keystrokes``
 -  K. ``nRows``

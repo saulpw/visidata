@@ -1,7 +1,7 @@
 from visidata import *
 
 class SheetH5Obj(Sheet):
-    """Support sheets in HDF5 format."""
+    'Support sheets in HDF5 format.'
     def __init__(self, name, hobj):
         super().__init__(name, hobj)
         self.command(ENTER, 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), cursorRow))', 'open this group or dataset')
