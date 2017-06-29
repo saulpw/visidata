@@ -1,11 +1,32 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017 Saul Pwanson
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
 """VisiData core functionality"""
 
-__version__ = 'saul.pw/VisiData v0.61'
+__version__ = 'saul.pw/VisiData v0.75'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__license__ = 'GPLv3'
-__status__ = 'Development'
+__license__ = 'MIT'
+__status__ = 'Alpha'
 
 from builtins import *
 import sys
@@ -17,17 +38,12 @@ import functools
 import itertools
 import string
 import re
-import threading
 import time
 import curses
 import datetime
-import ctypes  # async exception
 import io
-import cProfile
-import pstats
 import random
 import textwrap
-
 
 class EscapeException(Exception):
     pass
@@ -58,16 +74,16 @@ option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 option('field_joiner', ' ', 'character used to join string fields')
 option('sheetname_joiner', '~', 'string joining multiple sheet names')
 option('curses_timeout', '100', 'curses timeout in ms')
-option('min_task_time', 0.10, 'only keep tasks that take longer than this number of seconds')
-option('profile_tasks', True, 'profile async tasks')
+
 option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('num_colors', 0, 'force number of colors to use')
+option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
-theme('disp_format_exc', '~')
+theme('disp_format_exc', '?')
 theme('disp_getter_exc', '!')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_more_left', '<', 'display cue in header indicating more columns to the left')
@@ -94,12 +110,11 @@ theme('disp_column_fill', ' ', 'pad chars after column value')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
 theme('color_status', 'bold', 'status line color')
 theme('color_edit_cell', 'normal', 'edit cell color')
-theme('disp_status_fmt', '%s| ', 'status line prefix')
+theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
 
 ENTER='^J'
 ESC='^['
 
-command(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", sheet.commands))', 'open command help sheet')
 command('q',  'vd.sheets.pop(0)', 'quit the current sheet')
 
 command(['h', 'KEY_LEFT'],  'cursorRight(-1)', 'go one column left')
@@ -108,16 +123,13 @@ command(['k', 'KEY_UP'],    'cursorDown(-1)', 'go one row up')
 command(['l', 'KEY_RIGHT'], 'cursorRight(+1)', 'go one column right')
 command(['^F', 'KEY_NPAGE', 'kDOWN'], 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows', 'scroll one page down')
 command(['^B', 'KEY_PPAGE', 'kUP'], 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page up')
-command('zk', 'sheet.topRowIndex -= 1', 'scroll one line up')
-command('zj', 'sheet.topRowIndex += 1', 'scroll one line down')
+
 command(['KEY_HOME', 'gg'],  'sheet.topRowIndex = sheet.cursorRowIndex = 0', 'go to top row')
-command('zKEY_HOME', 'sheet.topRowIndex = sheet.cursorRowIndex = 0; sheet.leftVisibleColIndex = sheet.cursorVisibleColIndex = 0', 'go to top row and top column')
-command('KEY_END',   'sheet.cursorRowIndex = len(rows)-1', 'go to last row')
-command('zKEY_END',  'sheet.cursorRowIndex = len(rows)-1; sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to last row and last column')
+command(['KEY_END', 'G'],   'sheet.cursorRowIndex = len(rows)-1', 'go to last row')
 
 command('gq', 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
-command('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go to leftmost column')
+command('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = nKeys', 'go to leftmost non-key column')
 command('gk', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go to top row')
 command('gj', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'go to bottom row')
 command('gl', 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmost column')
@@ -125,18 +137,10 @@ command('gl', 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmo
 command('^G', 'status(statusLine)', 'show info for the current sheet')
 command('^V', 'status(__version__)', 'show version information')
 
-command('zt', 'sheet.topRowIndex = cursorRowIndex', 'scroll cursor row to top of screen')
-command('zz', 'sheet.topRowIndex = cursorRowIndex-int(nVisibleRows/2)', 'scroll cursor row to middle of screen')
-command('zb', 'sheet.topRowIndex = cursorRowIndex-nVisibleRows+1', 'scroll cursor row to bottom of screen')
-command(['zL', 'kRIT5'], 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll columns one page to the right')
-command(['zH', 'kLFT5'], 'pageLeft()', 'scroll columns one page to the left')
-command(['zh', 'zKEY_LEFT'], 'sheet.leftVisibleColIndex -= 1', 'scroll columns one to the left')
-command(['zl', 'zKEY_RIGHT'], 'sheet.leftVisibleColIndex += 1', 'scroll columns one to the right')
-command('zs', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll cursor to leftmost column')
-command('ze', 'tmp =  cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColIndex = tmp', 'scroll cursor to rightmost column')
-
-command('<', 'skipUp()', 'skip up this column to previous value')
-command('>', 'skipDown()', 'skip down this column to next value')
+command('<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")', 'move up to previous value in this column')
+command('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")', 'move down to next value in this column')
+command('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'move to previous selected row')
+command('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move to next selected row')
 
 command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle this column width between default_width and to fit visible values')
 command('-', 'cursorCol.width = 0', 'hide this column')
@@ -165,24 +169,19 @@ command('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))'
 command('R', 'sheet.filetype = input("change type to: ", value=sheet.filetype)', 'set source type of this sheet')
 command('^R', 'reload(); status("reloaded")', 'reload sheet from source')
 
-command('/', 'moveRegex(input("/", type="regex"), columns=[cursorCol])', 'search this column forward for regex')
-command('?', 'moveRegex(input("?", type="regex"), columns=[cursorCol], backward=True)', 'search this column backward for regex')
-command('n', 'moveRegex(columns=[cursorCol])', 'go to next match')
-command('p', 'moveRegex(columns=[cursorCol], backward=True)', 'go to previous match')
+command('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search this column forward for regex')
+command('?', 'moveRegex(regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search this column backward for regex')
+command('n', 'moveRegex(reverse=False)', 'go to next match')
+command('p', 'moveRegex(reverse=True)', 'go to previous match')
 
-command('g/', 'moveRegex(input("g/", type="regex"), columns=visibleCols)', 'search regex forward in all visible columns')
-command('g?', 'moveRegex(input("g?", type="regex"), backward=True, moveCursor=True, columns=visibleCols)', 'search regex backward in all visible columns')
-command('gn', 'sheet.cursorRowIndex = max(list(searchRegex()) or [cursorRowIndex])', 'go to first match')
-command('gp', 'sheet.cursorRowIndex = min(list(searchRegex()) or [cursorRowIndex])', 'go to last match')
+command('g/', 'moveRegex(regex=input("g/", type="regex"), backward=False, columns="visibleCols")', 'search regex forward in all visible columns')
+command('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search regex backward in all visible columns')
 
+command('~', 'cursorCol.type = str', 'set column type to string')
 command('@', 'cursorCol.type = date', 'set column type to ISO8601 datetime')
 command('#', 'cursorCol.type = int', 'set column type to integer')
-command('$', 'cursorCol.type = str', 'set column type to string')
+command('$', 'cursorCol.type = currency', 'set column type to currency')
 command('%', 'cursorCol.type = float', 'set column type to float')
-command('~', 'cursorCol.type = detectType(cursorValue)', 'autodetect type of column by its data')
-
-command('^P', 'vd.status(vd.statusHistory[0])', 'show last status message again')
-command('g^P', 'vd.push(TextSheet("statuses", vd.statusHistory))', 'open last 100 statuses')
 
 command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
 command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
@@ -212,29 +211,27 @@ command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
 command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
 
-command('|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=[cursorCol]))', 'select rows by regex matching this columns')
-command('\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=[cursorCol]))', 'unselect rows by regex matching this columns')
+command('|', 'selectByIdx(searchRegex(regex=input("|", type="regex"), columns="cursorCol"))', 'select rows by regex matching this columns')
+command('\\', 'unselectByIdx(searchRegex(regex=input(r"\\", type="regex"), columns="cursorCol"))', 'unselect rows by regex matching this columns')
 
 command('g ', 'toggle(rows)', 'toggle select of all rows')
 command('gs', 'select(rows)', 'select all rows')
 command('gu', '_selectedRows.clear()', 'unselect all rows')
 
-command('g|', 'selectByIdx(searchRegex(input("|", type="regex"), columns=visibleCols))', 'select rows by regex matching any visible column')
-command('g\\', 'unselectByIdx(searchRegex(input("\\\\", type="regex"), columns=visibleCols))', 'unselect rows by regex matching any visible column')
-
-command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
+command('g|', 'selectByIdx(searchRegex(regex=input("g|", type="regex"), columns="visibleCols"))', 'select rows by regex matching any visible column')
+command('g\\', 'unselectByIdx(searchRegex(regex=input(r"g\\", type="regex"), columns="visibleCols"))', 'unselect rows by regex matching any visible column')
 
 command(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching by this column')
 command('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
-command('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows); sheet._selectedRows.clear()', 'push duplicate sheet with only selected rows')
+command('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows)', 'push duplicate sheet with only selected rows')
 command('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
 command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
 
-# VisiData uses Python native int, float, str, and adds a simple date and anytype.
+# VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
 #
 # A type T is used internally in these ways:
 #    o = T(str)   # for conversion from string
@@ -243,13 +240,22 @@ command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push sou
 # The resulting object o must be orderable and convertible to a string for display and certain outputs (like csv).
 
 ## minimalist 'any' type
-anytype = lambda r='': str(r)
+def anytype(r=''):
+    return str(r)
 anytype.__name__ = ''
 
-class date:
-    """Simple wrapper around `datetime`.
+option('float_chars', '+-0123456789.eE_', 'valid numeric characters')
+def currency(s):
+    floatchars = options.float_chars
+    if isinstance(s, str):
+        while s[0] not in floatchars:
+            s = s[1:]
+        while s[-1] not in floatchars:
+            s = s[:-1]
+    return float(s)
 
-    This allows it to be created from dateutil str or numeric input as time_t"""
+class date:
+    """`datetime` wrapper, constructing from time_t or with dateutil.parse"""
 
     def __init__(self, s=None):
         if s is None:
@@ -269,6 +275,10 @@ class date:
             fmtstr = '%Y-%m-%d %H:%M:%S'
         return self.dt.strftime(fmtstr)
 
+    def __getattr__(self, k):
+        """Forward unknown attributes to inner datetime object"""
+        return getattr(self.dt, k)
+
     def __str__(self):
         return self.to_string()
 
@@ -276,25 +286,12 @@ class date:
         return self.dt < a.dt
 
 
-def detectType(v):
-    """Auto-detect types in this order of preference: int, float, date, str."""
-    def tryType(T, v):
-        try:
-            v = T(v)
-            return T
-        except EscapeException:
-            raise
-        except:
-            return None
-
-    return tryType(int, v) or tryType(float, v) or tryType(date, v) or str
-
-
 typemap = {
-    int: '#',
-    str: '$',
-    float: '%',
+    str: '~',
     date: '@',
+    int: '#',
+    currency: '$',
+    float: '%',
     anytype: ' ',
 }
 
@@ -334,7 +331,7 @@ def enumPivot(L, pivotIdx):
 @functools.lru_cache()
 def vd():
     """Instantiate and return singleton instance of VisiData class.
-    
+
     Contains all sheets, and (as singleton) is unique instance.."""
     return VisiData()
 
@@ -351,58 +348,69 @@ def chooseOne(choices):
         return input('/'.join(str(x) for x in choices) + ': ')
 
 def regex_flags():
+    """Return flags to pass to regex functions from options"""
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
-# A .. Z AA AB .. ZZ
-defaultColNames = list(itertools.chain(string.ascii_uppercase, [''.join(i) for i in itertools.product(string.ascii_uppercase, repeat=2)]))
+def sync(f):
+    'stub wrapper to wait for unfinished async tasks'
+    pass
+
+def async(func):
+    """Function decorator to call in separate thread if async available."""
+    def _exec_async(*args, **kwargs):
+        return vd().exec_async(func, *args, **kwargs)
+    return _exec_async
 
 class VisiData:
     allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
 
     def __init__(self):
         self.sheets = []
-        self.statusHistory = []
-        self._status = [__version__, '<F1> or z? opens help']  # statuses shown until next action
+        self.statuses = [__version__]  # statuses shown until next action
         self.lastErrors = []
-        self.lastRegex = None
+        self.search_context = {}
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
-        self.cmdhistory = []  # list of [keystrokes, start_time, end_time, thread, notes]
         self.keystrokes = ''
         self.inInput = False
-        self.tasks = []
         self.scr = None  # curses scr
-
-    @property
-    def unfinishedTasks(self):
-        """Return list of tasks for which `endTime` has not been reached."""
-        return [task for task in self.tasks if not task.endTime]
-
-    def checkForUnfinishedTasks(self):
-        """Prune old threads that were not started or terminated."""
-        for task in self.unfinishedTasks:
-            if not task.thread.is_alive():
-                task.endTime = time.process_time()
-                task.status += 'ended'
-                if task.elapsed_s*1000 < float(options.min_task_time):
-                    self.tasks.remove(task)
+        self.hooks = {}
 
     def status(self, s):
-        """Populate status bar and maintain `statusHistory` list."""
-        strs = str(s)
-        self._status.append(strs)
-        self.statusHistory.insert(0, strs)
-        del self.statusHistory[100:]  # keep most recent 100 only
+        """Add status message to be shown until next action."""
+        s = str(s)
+        self.statuses.append(s)
         return s
 
+    def add_hook(self, hookname, hookfunc):
+        """Add hookfunc by hookname, to be called by corresponding `call_hook`."""
+        if hookname in self.hooks:
+            hooklist = self.hooks[hookname]
+        else:
+            hooklist = []
+            self.hooks[hookname] = hooklist
+
+        hooklist.append(hookfunc)
+
+    def call_hook(self, hookname, *args, **kwargs):
+        """Call all functions registered with `add_hook` for the given hookname."""
+        r = None
+        for f in self.hooks.get(hookname, []):
+            r = r or f(*args, **kwargs)
+        return r
+
+    def exec_async(self, func, *args, **kwargs):
+        """Synchronous async caller stub, replaced if async available."""
+        return func(*args, **kwargs)
+
     def editText(self, y, x, w, **kwargs):
-        """Return last command if it exists in EditLog or screen object."""
-        v = self.editlog.get_last_args()
+        """Wrap global editText with `preedit` and `postedit` hooks."""
+        v = self.call_hook('preedit')
         if v is not None:
             return v
         v = editText(self.scr, y, x, w, **kwargs)
         if kwargs.get('display', True):
             self.status('"%s"' % v)
-            self.editlog.set_last_args(v)
+            self.call_hook('postedit', v)
         return v
 
     def getkeystroke(self):
@@ -420,31 +428,40 @@ class VisiData:
             k = ord(k)
         return curses.keyname(k).decode('utf-8')
 
-    def searchRegex(self, sheet, regex=None, columns=[], backward=False, moveCursor=False):
+
+    # kwargs: regex=None, columns=None, backward=False
+    def searchRegex(self, sheet, moveCursor=False, reverse=False, **kwargs):
         """Set row index if moveCursor, otherwise return list of row indexes."""
-
-        def columnsMatch(sheet, row, columns, func):
-            """Return boolean: is cell value formatted for display?"""
+        def findMatchingColumn(sheet, row, columns, func):
             for c in columns:
-                m = func(c.getDisplayValue(row))
-                if m:
-                    return True
-            return False
+                if func(c.getDisplayValue(row)):
+                    return c
 
+        self.search_context.update(kwargs)
+
+        regex = kwargs.get("regex")
         if regex:
-            r = re.compile(regex, regex_flags())
-            if r:
-                self.lastRegex = r
-            else:
-                error('regex error')
+            self.search_context["regex"] = re.compile(regex, regex_flags()) or error('invalid regex: %s' % regex)
+
+        regex = self.search_context.get("regex") or error("no regex")
+
+        columns = self.search_context.get("columns")
+        if columns == "cursorCol":
+            columns = [sheet.cursorCol]
+        elif columns == "visibleCols":
+            columns = tuple(sheet.visibleCols)
+        elif isinstance(columns, Column):
+            columns = [columns]
 
         if not columns:
-            error('no columns')
+            error('bad columns')
 
-        if not self.lastRegex:
-            error('no regex')
+        status("ncols=%s" % len(columns))
+        search_backward = self.search_context.get("backward")
+        if reverse:
+            search_backward = not search_backward
 
-        if backward:
+        if search_backward:
             rng = range(sheet.cursorRowIndex-1, -1, -1)
             rng2 = range(sheet.nRows-1, sheet.cursorRowIndex-1, -1)
         else:
@@ -457,9 +474,11 @@ class VisiData:
 
         for r in rng:
             sheet.progressMade += 1
-            if columnsMatch(sheet, sheet.rows[r], columns, self.lastRegex.search):
+            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
+            if c:
                 if moveCursor:
                     sheet.cursorRowIndex = r
+                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
                     return
                 else:
                     matchingRowIndexes += 1
@@ -467,16 +486,18 @@ class VisiData:
 
         for r in rng2:
             sheet.progressMade += 1
-            if columnsMatch(sheet, sheet.rows[r], columns, self.lastRegex.search):
+            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
+            if c:
                 if moveCursor:
                     sheet.cursorRowIndex = r
+                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
                     status('search wrapped')   # the only reason for the duplicate code block
                     return
                 else:
                     matchingRowIndexes += 1
                     yield r
 
-        status('%s matches for /%s/' % (matchingRowIndexes, self.lastRegex.pattern))
+        status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
     def exceptionCaught(self, status=True):
         """Maintain list of most recent errors and return most recent one."""
@@ -489,13 +510,11 @@ class VisiData:
             raise
 
     def drawLeftStatus(self, vs):
-        """Compose and draw left side of status bar.
-
-        Include previous status messages, which are then cleared."""
-        attr = colors[options.color_status]
-        statusstr = options.disp_status_fmt % vs.name + options.disp_status_sep.join(self._status)
+        """Draw left side of status bar."""
         try:
-            draw_clip(self.scr, windowHeight-1, 0, statusstr, attr, windowWidth)
+            lstatus = self.leftStatus(vs)
+            attr = colors[options.color_status]
+            draw_clip(self.scr, windowHeight-1, 0, lstatus, attr, windowWidth)
         except Exception as e:
             self.exceptionCaught()
 
@@ -503,10 +522,17 @@ class VisiData:
         """Draw right side of status bar."""
         try:
             rstatus = self.rightStatus()
-            draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, colors[options.color_status])
+            attr = colors[options.color_status]
+            draw_clip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, attr)
             curses.doupdate()
         except Exception as e:
             self.exceptionCaught()
+
+    def leftStatus(self, vs):
+        """Compose left side of status bar from status messages."""
+        s = options.disp_status_fmt.format(sheet=vs)
+        s += options.disp_status_sep.join(self.statuses)
+        return s
 
     def rightStatus(self):
         """Compose right side of status bar."""
@@ -545,7 +571,7 @@ class VisiData:
                 if self.keystrokes not in self.allPrefixes:
                     self.keystrokes = ''
 
-                self._status = []
+                self.statuses.clear()
                 self.keystrokes += keystroke
             self.drawRightStatus()  # visible for commands that wait for input
 
@@ -562,16 +588,15 @@ class VisiData:
                 except Exception:
                     self.exceptionCaught()
             elif self.keystrokes in sheet.commands:
-                vd().editlog.before_exec_hook(sheet, self.keystrokes)
+                self.call_hook('preexec', sheet, self.keystrokes)
                 escaped = sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
-                if vd().sheets:
-                    vd().editlog.after_exec_sheet(vd().sheets[0], escaped)
+                self.call_hook('postexec', vd().sheets[0] if vd().sheets else None, escaped)
             elif keystroke in self.allPrefixes:
                 pass
             else:
                 status('no command for "%s"' % (self.keystrokes))
 
-            self.checkForUnfinishedTasks()
+            self.call_hook('predraw')
             sheet.checkCursor()
 
     def replace(self, vs):
@@ -592,109 +617,6 @@ class VisiData:
                 self.sheets.insert(0, vs)
             return vs
 # end VisiData class
-
-
-# define @async for potentially long-running functions
-#   when function is called, instead launches a thread
-#   adds a row to cmdhistory
-#   ENTER on that row pushes a profile of the thread
-
-class Task:
-    """Prepare function and its parameters for asynchronous processing."""
-    def __init__(self, name):
-        self.name = name
-        self.startTime = time.process_time()
-        self.endTime = None
-        self.status = ''
-        self.thread = None
-        self.profileResults = None
-
-    def start(self, func, *args, **kwargs):
-        """Start parallel thread."""
-        self.thread = threading.Thread(target=func, daemon=True, args=args, kwargs=kwargs)
-        self.thread.start()
-
-    @property
-    def elapsed_s(self):
-        """Return elapsed time."""
-        return (self.endTime or time.process_time())-self.startTime
-
-def sync():
-    while len(vd().unfinishedTasks) > 0:
-        vd().checkForUnfinishedTasks()
-
-def async(func):
-    """Supply `execThread` for use decorating functions."""
-    def execThread(*args, **kwargs):
-        """Manage execution of asynchronous thread, checking for redundancy."""
-        if threading.current_thread().daemon:
-            # Don't spawn a new thread from a subthread.
-            return func(*args, **kwargs)
-
-        currentSheet = vd().sheets[0]
-        if currentSheet.currentTask:
-            error('A task is already in progress on this sheet')
-        t = Task(' '.join([func.__name__] + [str(x) for x in args[:1]]))
-        currentSheet.currentTask = t
-        t.sheet = currentSheet
-        if bool(options.profile_tasks):
-            t.start(thread_profileCode, t, func, *args, **kwargs)
-        else:
-            t.start(toplevel_try_func, t, func, *args, **kwargs)
-        vd().tasks.append(t)
-        return t
-    return execThread
-
-def toplevel_try_func(task, func, *args, **kwargs):
-    """Modify status-bar content on user-abort/exceptions, for use by @async."""
-    try:
-        ret = func(*args, **kwargs)
-        task.sheet.currentTask = None
-        return ret
-    except EscapeException as e:  # user aborted
-        task.sheet.currentTask = None
-        task.status += 'aborted by user;'
-        status("%s aborted" % task.name)
-    except Exception as e:
-        task.sheet.currentTask = None
-        task.status += status('%s: %s;' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
-        exceptionCaught()
-
-def thread_profileCode(task, func, *args, **kwargs):
-    """Wrap profiling functionality for use by @async."""
-    pr = cProfile.Profile()
-    pr.enable()
-    ret = toplevel_try_func(task, func, *args, **kwargs)
-    pr.disable()
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-    ps.print_stats()
-    task.profileResults = s.getvalue()
-    return ret
-
-
-def ctype_async_raise(thread_obj, exception):
-    """Raise exception for threads running asynchronously."""
-
-
-    def dict_find(D, value):
-        """Return first key in dict `D` corresponding to `value`."""
-        for k, v in D.items():
-            if v is value:
-                return k
-
-        raise ValueError("no such value in dict")
-
-    # Following `ctypes call follows https://gist.github.com/liuw/2407154.
-    ctypes.pythonapi.PyThreadState_SetAsyncExc(
-            ctypes.c_long(dict_find(threading._active, thread_obj)),
-            ctypes.py_object(exception)
-            )
-    status('sent exception to %s' % thread_obj.name)
-
-command('^C', 'if sheet.currentTask: ctype_async_raise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
-command('^T', 'vd.push(TasksSheet("task_history", vd.tasks))', 'push task history sheet')
-
 
 class LazyMap:
     """Wrap Python `dict` basic functionality."""
@@ -917,32 +839,32 @@ class Sheet:
 
     @property
     def cursorCol(self):
-        """Return column number of current column."""
+        """Return current Column object."""
         return self.visibleCols[self.cursorVisibleColIndex]
 
     @property
     def cursorRow(self):
-        """Return row number of current row."""
+        """Return current row."""
         return self.rows[self.cursorRowIndex]
 
     @property
     def visibleRows(self):  # onscreen rows
-        """Return the rows currently visible."""
+        """Return a list of rows currently visible onscreen."""
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
     def visibleCols(self):  # non-hidden cols
-        """Return the columns currently visible."""
+        """Return a list of unhidden Column objects."""
         return [c for c in self.columns if not c.hidden]
 
     @property
     def visibleColNames(self):
-        """Return space-separated string of visible column-names."""
+        """Return string of visible column-names."""
         return ' '.join(c.name for c in self.visibleCols)
 
     @property
     def cursorColIndex(self):
-        """Return index of current column."""
+        """Return index of current column into Sheet.columns."""
         return self.columns.index(self.cursorCol)
 
     @property
@@ -952,17 +874,17 @@ class Sheet:
 
     @property
     def nonKeyVisibleCols(self):
-        """Return list of non-key columns that are visible."""
+        """Return list of unhidden non-key columns."""
         return [c for c in self.columns[self.nKeys:] if not c.hidden]
 
     @property
     def keyColNames(self):
-        """Return custom-separator string of visible column names."""
+        """Return string of key column names."""
         return options.disp_key_sep.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
-        """Return cell contents for current row and column."""
+        """Return cell contents at current row and column."""
         return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
 
     @property
@@ -995,13 +917,9 @@ class Sheet:
     @async
     def toggle(self, rows):
         """Select any unselected rows."""
-        self.progressMade = 0
-        self.progressTotal = len(self.rows)
-        for r in rows:
-            self.progressMade += 1
+        for r in self.genProgress(rows, len(self.rows)):
             if not self.unselectRow(r):
                 self.selectRow(r)
-        self.progressTotal = self.progressMade
 
     def selectRow(self, row):
         """Select given row."""
@@ -1131,25 +1049,16 @@ class Sheet:
             moveListItem(self.columns, colidx, self.nKeys)
             return 0
 
-    def skipDown(self):
-        """Select next different value in column; report if none different."""
-        pv = self.cursorValue
-        for i in range(self.cursorRowIndex+1, self.nRows):
-            if self.cellValue(i, self.cursorColIndex) != pv:
+    def moveToNextRow(self, func, reverse=False):
+        """Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria."""
+        rng = range(self.cursorRowIndex-1, -1, -1) if reverse else range(self.cursorRowIndex+1, self.nRows)
+
+        for i in rng:
+            if func(self.rows[i]):
                 self.cursorRowIndex = i
-                return
+                return True
 
-        status('no different value down this column')
-
-    def skipUp(self):
-        """Select last different value in column; report if none different."""
-        pv = self.cursorValue
-        for i in range(self.cursorRowIndex, -1, -1):
-            if self.cellValue(i, self.cursorColIndex) != pv:
-                self.cursorRowIndex = i
-                return
-
-        status('no different value up this column')
+        return False
 
     def checkCursor(self):
         """Keep cursor in bounds of data and screen."""
@@ -1331,18 +1240,20 @@ class Sheet:
         if vcolidx is None:
             vcolidx = self.cursorVisibleColIndex
         x, w = self.visibleColLayout.get(vcolidx, (0, 0))
+
+        col = self.visibleCols[vcolidx]
         if rowidx is None:
             rowidx = self.cursorRowIndex
         if rowidx < 0:  # header
             y = 0
-            currentValue = self.visibleCols[vcolidx].name
+            currentValue = col.name
         else:
             y = self.rowLayout.get(rowidx, 0)
-            currentValue = self.cellValue(self.cursorRowIndex, vcolidx)
+            currentValue = self.cellValue(self.cursorRowIndex, col)
 
         r = vd().editText(y, x, w, value=currentValue, fillchar=options.disp_edit_fill)
         if rowidx >= 0:
-            r = self.visibleCols[vcolidx].type(r)  # convert input to column type
+            r = col.type(r)  # convert input to column type
 
         return r
 
@@ -1394,7 +1305,7 @@ aggregators = { '': None,
 
 class Column:
     """Model spreadsheet-style "column".
-    
+
     If `expr` is set, cell values will be computed by this object.
     """
 
@@ -1460,12 +1371,18 @@ class Column:
     def format(self, cellval):
         """Format the type-name of given `cellval`."""
 
-        val = self.type(cellval)
-        if self.type is date:         return val.to_string(self.fmtstr)
-        elif self.fmtstr is not None: return self.fmtstr % val
-        elif self.type is int:        return '%d' % val
-        elif self.type is float:      return '%.02f' % val
-        else: return '%s' % val
+        if isinstance(cellval, (list, dict)):
+            # complex objects can be arbitrarily large (like sheet.rows)
+            return str(type(cellval))
+
+        t = self.type
+        val = t(cellval)
+        if t is date:         return val.to_string(self.fmtstr)
+        elif self.fmtstr is not None: return self.fmtstr.format(val)
+        elif t is int:        return '{:d}'.format(val)
+        elif t is float:      return '{:.02f}'.format(val)
+        elif t is currency:   return '{:,.02f}'.format(val)
+        else: return str(val)
 
     @property
     def hidden(self):
@@ -1483,7 +1400,7 @@ class Column:
 
     def getValue(self, row):
         """Return a properly-typed value, and also handle failures.
-        
+
         Return a default value if the conversion fails; re-raise the
         exception if the getter fails.
         """
@@ -1521,7 +1438,8 @@ class Column:
 
         try:
             cellval = self.format(cellval)
-            if width and self.type in (int, float): cellval = cellval.rjust(width-1)
+            if width and self._type in (int, float, currency):
+                cellval = cellval.rjust(width-1)
         except EscapeException:
             raise
         except Exception as e:
@@ -1534,6 +1452,7 @@ class Column:
         """Set given rows to `value`."""
         if not self.setter:
             error('column cannot be changed')
+        value = self.type(value)
         for r in rows:
             self.setter(r, value)
 
@@ -1587,7 +1506,7 @@ def ArrayColumns(ncols):
 
 def DictKeyColumns(d):
     """Return a list of Column objects from dictionary keys."""
-    return [ColumnItem(k, k, type=detectType(d[k])) for k in d]
+    return [ColumnItem(k, k) for k in d]
 
 def SubrowColumn(origcol, subrowidx, **kwargs):
     """Return Column object from sub-row."""
@@ -1694,21 +1613,6 @@ def draw_clip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
 
 
 ## Built-in sheets
-class HelpSheet(Sheet):
-    """Help sheet, showing keystrokes etc. from given source(s)."""
-
-    def reload(self):
-        """Populate sheet via `reload` function."""
-        self.rows = []
-        for i, src in enumerate(self.sources):
-            self.rows.extend((i, v) for v in src.values())
-        self.columns = [SubrowColumn(ColumnItem('keystrokes', 0), 1),
-                        SubrowColumn(ColumnItem('action', 1), 1),
-                        Column('with_g_prefix', str, lambda r,self=self: self.sources[r[0]].get('g' + r[1][0], (None,'-'))[1]),
-                        SubrowColumn(ColumnItem('execstr', 2, width=0), 1)
-                ]
-        self.nKeys = 1
-
 
 ## text viewer and dir browser
 class TextSheet(Sheet):
@@ -1763,6 +1667,12 @@ class OptionsObject:
 
 options = OptionsObject(base_options)
 
+# Generator => A .. Z AA AB ...
+defaultColNames = (''.join(j) for i in range(options.maxlen_col_hdr)
+                             for j in itertools.product(string.ascii_uppercase,
+                                   repeat=i+1)
+                  )
+
 class OptionsSheet(Sheet):
     """Sheet displaying user options."""
 
@@ -1780,25 +1690,6 @@ class OptionsSheet(Sheet):
         if row and col and col.name in ['value', 'default'] and row[0].startswith('color_'):
             return col.getValue(row), 9
 
-# each row is a Task object
-class TasksSheet(Sheet):
-    """Sheet displaying "Task" objects: asynchronous threads."""
-
-    def reload(self):
-        """Populate sheet via `reload` function."""
-        self.command('^C', 'ctype_async_raise(cursorRow.thread, EscapeException)', 'cancel this action')
-        self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
-        self.columns = [
-            ColumnAttr('name'),
-            ColumnAttr('elapsed_s', type=float),
-            ColumnAttr('status'),
-        ]
-        self.rows = vd().tasks
-
-
-def ProfileSheet(task):
-    """Populate sheet showing profiling results."""
-    return TextSheet(task.name + '_profile', task.profileResults)
 
 #### enable external addons
 def open_vd(p):
@@ -2154,7 +2045,7 @@ def run(sheetlist=[]):
 def curses_main(_scr, sheetlist=[]):
     """Populate VisiData object with sheets from a given list."""
 
-    for fnrc in ('$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
+    for fnrc in ('.visidatarc', '$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
         p = Path(fnrc)
         if p.exists():
             exec(open(p.resolve()).read())

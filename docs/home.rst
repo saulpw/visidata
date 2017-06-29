@@ -38,9 +38,6 @@ Dependencies
 -  python3-dateutil (if converting string column to datetime)
 -  openpyxl (if opening .xlsx files)
 -  h5py and numpy (if opening .hdf5 files)
--  google-api-python-client (if opening Google Sheets; must `also set up
-   OAuth
-   credentials <https://developers.google.com/sheets/quickstart/python>`__
 
 **Remember to install the Python3 versions of these packages with e.g.
 ``pip3``**

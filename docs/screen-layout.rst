@@ -1,4 +1,4 @@
-.. figure:: img/visidata-interface.png
+.. figure:: https://github.com/saulpw/visidata/blob/stable/docs/img/visidata-interface.png
    :alt: screenshot
 
    screenshot
@@ -18,7 +18,7 @@
 For developers
 --------------
 
-.. figure:: img/visidata-interface.png
+.. figure:: https://github.com/saulpw/visidata/blob/stable/docs/img/visidata-interface.png
    :alt: screenshot
 
    screenshot

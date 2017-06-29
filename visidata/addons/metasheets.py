@@ -1,7 +1,9 @@
 from visidata import *
 
 command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
-command('C', 'vd.push(SheetColumns(sheet))', 'open Columns for this sheet')
+command('C', 'vd.push(ColumnsSheet(sheet))', 'open Columns for this sheet')
+
+command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
 option('col_stats', False, 'include mean/median/etc on Column sheet')
 command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
@@ -11,8 +13,8 @@ def _getattrname(o, k):
     v = getattr(o, k)
     return v.__name__ if v else None
 
-def ColumnGlobal(name):
-    """Return Column object with given name."""
+def ColumnAttrNamedObject(name):
+    """Return an effective ColumnAttr which displays the __name__ of the object value."""
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
                         setter=lambda r,v,name=name: setattr(r, name, v))
 
@@ -44,7 +46,7 @@ class LazyMapping:
         self.sheet = sheet
 
     def keys(self):
-        return [c.name for c in self.sheet.columns]
+        return [c.name for c in self.sheet.columns if c.name.isidentifier()]
 
     def __call__(self, col):
         return eval(col.expr, {}, self)
@@ -85,17 +87,17 @@ class SheetsSheet(SheetList):
         self.command('~', 'vd.replace(SheetJoin(selectedRows, jointype="~"))', 'open diff join of selected sheets')
 
 
-class SheetColumns(Sheet):
+class ColumnsSheet(Sheet):
     """Open Columns for Sheet."""
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
 
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
+        self.command('~', 'cursorRow.type = str; cursorDown(+1)', 'set source column type to string')
         self.command('@', 'cursorRow.type = date; cursorDown(+1)', 'set source column type to datetime')
-        self.command('#', 'cursorRow.type = int; cursorDown(+1)', 'set source column type to integer')
-        self.command('$', 'cursorRow.type = str; cursorDown(+1)', 'set source column type to string')
+        self.command('#', 'cursorRow.type = int; cursorDown(+1)', 'set source column type to integer numeric type')
+        self.command('$', 'cursorRow.type = currency; cursorDown(+1)', 'set source column type to currency numeric type')
         self.command('%', 'cursorRow.type = float; cursorDown(+1)', 'set source column type to decimal numeric type')
-        self.command('~', 'cursorRow.type = detectType(cursorRow.getValue(source.cursorRow)); cursorDown(+1)', 'autodetect type of source column using its data')
         self.command('!', 'source.toggleKeyColumn(cursorRowIndex); cursorDown(+1)', 'toggle key column on source sheet')
         self.command('-', 'cursorRow.width = 0; cursorDown(+1)', 'hide column on source sheet')
         self.command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows); cursorDown(+1)', 'set source column width to max width of its rows')
@@ -109,24 +111,26 @@ class SheetColumns(Sheet):
         self.command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float')
         self.command('g#', 'for c in selectedRows: c.type = int', 'set type of all selected columns to int')
         self.command('g@', 'for c in selectedRows: c.type = date', 'set type of all selected columns to date')
-        self.command('g$', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string')
+        self.command('g$', 'for c in selectedRows: c.type = currency', 'set type of all selected columns to currency')
+        self.command('g~', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string')
 
         self.command('W', 'vd.replace(SheetPivot(source, selectedRows))', 'push a pivot table, keeping nonselected keys, making variables from selected columns, and creating a column for each variable-aggregate combination')
 
         self.colorizers.append(lambda self,c,r,v: (options.color_key_col, 8) if r in self.source.keyCols else None)
 
-    def reload(self):
-        self.rows = self.source.columns
-        self.cursorRowIndex = self.source.cursorColIndex
         self.columns = [
             ColumnAttr('name', str),
             ColumnAttr('width', int),
-            ColumnGlobal('type'),
+            ColumnAttrNamedObject('type'),
             ColumnAttr('fmtstr', str),
-            ColumnGlobal('aggregator'),
+            ColumnAttrNamedObject('aggregator'),
             ColumnAttr('expr', str),
-            Column('value',  anytype, lambda c,sheet=self.source: c.getValue(sheet.cursorRow)),
+            Column('value',  anytype, lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
         ]
+
+    def reload(self):
+        self.rows = self.source.columns
+        self.cursorRowIndex = self.source.cursorColIndex
 
         if options.col_stats:
             self.columns.extend([

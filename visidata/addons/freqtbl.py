@@ -5,6 +5,7 @@ command('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table 
 command('gF', 'vd.push(SheetFreqTable(sheet, combineColumns(columns[:nKeys])))', 'open frequency table for the combined key columns')
 
 theme('disp_histogram', '*')
+option('disp_histolen', 80, 'width of histogram column')
 
 class SheetFreqTable(Sheet):
     """Generate frequency-table sheet on currently selected column."""
@@ -18,7 +19,7 @@ class SheetFreqTable(Sheet):
             ColumnItem(col.name, 0, type=col.type, width=30),
             Column('num', int, lambda r: len(r[1])),
             Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
-            Column('histogram', str, lambda r,s=self: options.disp_histogram*int(len(r[1])*80/s.largest), width=80)
+            Column('histogram', str, lambda r,s=self: options.disp_histogram*int(len(r[1])*int(options.disp_histolen)/s.largest), width=int(options.disp_histolen))
         ]
 
         for c in self.source.visibleCols:
