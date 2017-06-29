@@ -1,5 +1,9 @@
 # VisiData version history
 
+## v0.9
+- Make options automatically typed based on default
+- Documentation cleanups
+
 ## v0.80
 - tour of screenshot.gif
 - regex transform now `*` (';' is still regex split)
