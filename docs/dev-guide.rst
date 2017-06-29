@@ -35,23 +35,23 @@ Name and other properties
 
 Columns have a few properties, all optional except for ``name``:
   
-* **``name``**: should be a valid Python identifier and unique among
+* **name**: should be a valid Python identifier and unique among
   the column names on the sheet. Some features may not work if these conditions
   are not met.
     
-* **``type``**: defaults to ``str``; other values are ``int``, ``float``,
+* **type**: defaults to ``str``; other values are ``int``, ``float``,
   ``date``. There is also a dummy ``anytype`` to produce a stringified version
   for anything not in these categories.
     
-* **``width``**: specifies the default width for the column; ``0`` means
+* **width**: specifies the default width for the column; ``0`` means
   hidden.
     
-* **``fmtstr``**: format string for use with ``type`` when ``type`` is a date. 
+* **fmtstr**: format string for use with ``type`` when ``type`` is a date. 
     
-* **``aggregators``**: a dictionary providing a few simple statistical
+* **aggregators**: a dictionary providing a few simple statistical
   functions (``sum``, ``mean``, ``max``, etc.).
 
-* **``expr``**: Python expression that generates values if the column is a
+* **expr**: Python expression that generates values if the column is a
   "computed column".
 
 
@@ -134,7 +134,7 @@ Syntax
 
 * *exec string*: a string containing valid python code that will be passed to
   ``exec``. This string is limited to a single line of Python; longer code must
-  be placed in a separate "`add-on <Extending VisiData>`--" module.
+  be placed in a separate "`add-on <Extending VisiData>`_" module.
 
 * *help string*: help text provided to users on the help sheet.
 
