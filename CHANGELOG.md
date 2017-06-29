@@ -1,6 +1,6 @@
 # VisiData version history
 
-## v0.9
+## v0.90 (2017-06-28)
 - Make options automatically typed based on default
 - Documentation cleanups
 
@@ -15,12 +15,12 @@
 - www/ for landing page
 - move from .md to .rst for documentation
 
-## v0.61
+## v0.61 (2017-06-12)
 - colorizers
 - `g[` and `g]` to sort by all key columns
 - `;` and `.` experimental regex commands
 
-## v0.59
+## v0.59 (2017-05-31)
 - pivot sheets with `W`
 - undo with `BACKSPACE` and replay with `ga`
 - dev guide and user guide
