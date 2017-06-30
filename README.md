@@ -10,7 +10,7 @@ A few interesting commands:
 * `=` creates a new column from the given Python expression (use column names to refer to their contents)
 * `.` creates new columns from the match groups of the given regex
 
-<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)]</a>
+<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)</a>
 
 # Getting Started
 
