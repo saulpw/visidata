@@ -437,8 +437,8 @@ specified instead of using a hard-coded value.
 *  Options should not be cached as the user can change them while the
    program is running.
 
-``reload()``
-------------
+The ``reload()`` method
+-----------------------
 
 The ``reload()`` method (invoked with ``^R``, Ctrl-r) should in general
 reset the sheet to its starting rowset, without changing the column
@@ -455,8 +455,8 @@ before their first use. In the case of data sources, that means in the
 packages to be installed unless they are actually needed for parsing a specific
 data source.
 
-``@async``
-----------
+The ``@async`` decorator
+------------------------
 
 Functions which can take a long time to execute may be decorated with
 ``@async``, which spawns a managed Task in a new thread to run the
