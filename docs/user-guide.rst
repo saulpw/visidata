@@ -26,9 +26,6 @@ current cursor position.
    -  ``zb`` scrolls current row to bottom of screen
    -  ``zk`` scrolls one row up
    -  ``zj`` scrolls one row down
-
-   - ----
-
    -  ``zH`` moves cursor one page to left
    -  ``zL`` moves cursor one page to right
    -  ``zh`` moves cursor one column to left
@@ -181,4 +178,3 @@ Here are slightly better descriptions of some non-obvious commands:
       (full join)
    -  ``~``: Join all selected sheets, keeping only rows NOT in all
       sheets (diff join)
-
