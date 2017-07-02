@@ -1,5 +1,5 @@
 ====================================
-VisiData architecture for developers
+VisiData Architecture for Developers
 ====================================
 
 VisiData is like a powerful spreadsheet from an alternate textpunk reality, in
