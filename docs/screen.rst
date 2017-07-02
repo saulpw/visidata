@@ -84,11 +84,11 @@ Rows
 
 * ``nRows``
 
-Column layout
-~~~~~~~~~~~~~
+Columns
+-------
 
 Column Visibility
-.................
+~~~~~~~~~~~~~~~~~
 
 * `Key columns <#key-columns>`__ are always visible: they appear to be
    'pinned' to the left.
@@ -129,14 +129,14 @@ When there are no hidden columns, these indexes are identical.
 
 * ``calcColLayout()`` recomputes the entire ``visibleColLayout`` dict, and
   sets ``rightVisibleColIndex`` based on the current layout. It also sets any
-  onscreen ``Column.width`` that are None to the maximum width of the displayed
-  rows.
+  onscreen ``Column.width`` that are ``None`` to the maximum width of the
+  displayed rows.
 
 Each ``visibleColLayout`` key (visible column index) maps to a simple
 pair of ``(x, w)``, where ``x`` is the coordinate within the terminal, and
 ``w`` is the column width in characters.
 
-``visibleColLayout`` always reflects the current layout displayed on the
+Object ``visibleColLayout`` always reflects the current layout displayed on the
 screen. This may not be the layout for the next draw cycle, for example
 if the currently executing command hides a column or causes the columns
 to scroll.
@@ -163,6 +163,8 @@ Key columns are always the first ``nKeys`` columns in Sheet.columns.
 
 Cells, Values, Types, and Formatting
 ------------------------------------
+
+Note the following properties and methods:
 
 * ``cursorValue``
 
