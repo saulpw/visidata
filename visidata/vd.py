@@ -1674,7 +1674,7 @@ class OptionsObject:
 options = OptionsObject(baseOptions)
 
 # Generator => A .. Z AA AB ...
-defaultColNames = (''.join(j) for i in range(options.maxlen_col_hdr)
+defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)
                              for j in itertools.product(string.ascii_uppercase,
                                    repeat=i+1)
                   )
