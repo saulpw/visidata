@@ -18,7 +18,9 @@ Sphinx
 
     pip install Sphinx sphinx_rtd_theme
    
-  Do initial set-up with ``sphinx-quickstart``. Here we have followed all defaults except creation of a ``.bat`` file::
+  If Sphinx has not yet been run locally, do initial set-up with ``sphinx-quickstart``. Sphinx will refuse to overwrite an existing ``docs/conf.py`` file. 
+  
+  Here we have followed all defaults except creation of a ``.bat`` file::
 
       > Create Windows command file? (y/n) [y]: n
 

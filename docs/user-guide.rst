@@ -6,9 +6,9 @@ Basic Movement and Essential Commands
 =====================================
 
 -  ``hjkl`` or arrow keys move the cursor around (left/down/up/right)
--  ``F1`` opens command help for the current sheet
+-  ``F1`` or ``z?`` opens command help for the current sheet
 -  ``q`` quits the current sheet (backs out one level); in a pinch,
-   ``Ctrl-Q`` will force-quit the program entirely
+   ``Ctrl-q`` will force-quit the program entirely
 
 Advanced movement
 =================
@@ -24,14 +24,14 @@ current cursor position.
    -  ``zt`` scrolls current row to top of screen
    -  ``zz`` scrolls current row to middle of screen
    -  ``zb`` scrolls current row to bottom of screen
+   -  ``zk`` scrolls one row up
+   -  ``zj`` scrolls one row down
    -  ``zH`` moves cursor one page to left
    -  ``zL`` moves cursor one page to right
    -  ``zh`` moves cursor one column to left
    -  ``zl`` scrolls sheet one column to right
    -  ``zs`` scrolls sheet to leftmost column
    -  ``ze`` scrolls sheet to rightmost column
-   -  ``zk`` scrolls one row up
-   -  ``zj`` scrolls one row down
 
 -  ``Home`` and ``End`` move the cursor to the first and last row of the
    entire sheet, respectively. The column cursor position is maintained.
@@ -57,20 +57,26 @@ Arranging Columns
 Column Types
 ------------
 
--  columns start out untyped (unless the source data is typed)
--  ``~`` sets column type to str
--  ``#`` sets column type to int
--  ``$`` sets column type to currency
--  ``%`` sets column type to float
--  ``@`` sets column type to date
+-  Columns start out untyped (unless the source data is typed).
 
--  all values are stored in their original format, and only converted on
+-  You can set a column manually to a specific type:
+
+   -  ``~`` : ``str`` (the effective default)
+   -  ``#`` : ``int``
+   -  ``$`` : currency
+   -  ``%`` : ``float``
+   -  ``@`` : date
+
+   After column-type has been changed manually, the type is shown at the right
+   edge of the column header.
+
+-  All values are stored in their original format, and only converted on
    demand and as needed.
--  values that can't be properly converted are flagged with ``~`` on the
-   display
--  for commands like sort which require a correctly typed value, the
-   default (0) value for that type is used
--  cell edits are rejected if they don't convert to the column type
+-  Values that can't be properly converted are flagged with ``?`` at the right
+   edge of the cell.
+-  For commands like sort which require a correctly typed value, the
+   default (0) value for that type is used.
+-  Cell edits are rejected if they don't convert to the column type.
 
 Creating new columns
 --------------------
@@ -127,28 +133,26 @@ Metasheets
          matches on sheet joins)
 
 -  ``O``\ ptions sheet to change the style or behavior
--  ``^E``\ rror metasheet
--  ``^T``\ hreads metasheet
+-  ``Ctrl-E``\ rror metasheet
+-  ``Ctrl-T``\ hreads metasheet
 
 Glossary
 ========
 
 Definitions of terms used in the help and documentation:
 
+-  'abort': exit program immediately
+-  'drop': drop top (current) sheet
 -  'go': move cursor
+-  'jump': change to existing sheet
+-  'load': reload an existing sheet from in-memory contents
 -  'move': change layout of visible data
--  'show': put on status line
--  'scroll': change set of visible rows
-
+-  'open': create a new sheet from a file or url
 -  'push': move a sheet to the top of the sheets list (thus making it
    immediately visible)
--  'open': create a new sheet from a file or url
--  'load': reload an existing sheet from in-memory contents
-
--  'jump': change to existing sheet
--  'drop': drop top (current) sheet
+-  'scroll': change set of visible rows
+-  'show': put on status line
 -  'this': current [row/column/cell] ('current' is also used)
--  'abort': exit program immediately
 
 Here are slightly better descriptions of some non-obvious commands:
 
@@ -174,4 +178,3 @@ Here are slightly better descriptions of some non-obvious commands:
       (full join)
    -  ``~``: Join all selected sheets, keeping only rows NOT in all
       sheets (diff join)
-

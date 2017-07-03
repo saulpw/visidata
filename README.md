@@ -2,7 +2,7 @@
 
 A terminal interface for exploring and arranging tabular data
 
-<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)]</a>
+<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)</a>
 
 A few interesting commands:
 

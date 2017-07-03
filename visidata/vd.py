@@ -35,6 +35,7 @@ import os.path
 import copy
 import collections
 import functools
+import gzip
 import itertools
 import string
 import re
@@ -1673,7 +1674,7 @@ class OptionsObject:
 options = OptionsObject(baseOptions)
 
 # Generator => A .. Z AA AB ...
-defaultColNames = (''.join(j) for i in range(options.maxlen_col_hdr)
+defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)
                              for j in itertools.product(string.ascii_uppercase,
                                    repeat=i+1)
                   )
@@ -1943,12 +1944,23 @@ class Path:
         'Initialize with file-queue path-name.'
         self.fqpn = fqpn
         fn = os.path.split(fqpn)[-1]
+        
+        # check if file is gzip-compressed
+        if fn.endswith('.gz'):
+            self.gzip_compressed = True
+            fn = fn[:-3]
+        else:
+            self.gzip_compressed = False
+
         self.name, self.ext = os.path.splitext(fn)
         self.suffix = self.ext[1:]
 
     def open_text(self, mode='r'):
         'Open file.'
-        return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+        if self.gzip_compressed:
+            return gzip.open(self.resolve(), mode='rt', encoding=options.encoding, errors=options.encoding_errors)
+        else:
+            return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
     def read_text(self):
         'Open and read file.'
@@ -1978,7 +1990,9 @@ class Path:
 
     def resolve(self):
         'Wrap `os.path.expanduser`.'
-        return os.path.expandvars(os.path.expanduser(self.fqpn))
+        fp = os.path.expandvars(os.path.expanduser(self.fqpn))
+        
+        return fp
 
     @property
     def parent(self):
