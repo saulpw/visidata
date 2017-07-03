@@ -1,0 +1,3 @@
+[submodule "zulip"]
+	path = zulip
+	url = https://github.com/zulip/zulip.git
