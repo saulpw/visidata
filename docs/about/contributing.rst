@@ -27,6 +27,5 @@ If you wish to contribute, please fork from `develop
 <https://github.com/saulpw/visidata/tree/develop>`__ and submit a `pull request
 <https://github.com/saulpw/visidata/pulls>`__ against it.
 
-A developer's guide can be found `here
-<http://visidata.readthedocs.io/en/stable/dev-guide>`__.
+A developer's guide can be found `here <http://visidata.readthedocs.io>`__.
 
