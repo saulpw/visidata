@@ -473,26 +473,15 @@ class VisiData:
         sheet.progressTotal = sheet.nRows
         sheet.progressMade = 0
 
-        for r in rng:
+        for r in itertools.chain(rng, rng2):
             sheet.progressMade += 1
             c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
             if c:
                 if moveCursor:
                     sheet.cursorRowIndex = r
                     sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
-                    return
-                else:
-                    matchingRowIndexes += 1
-                    yield r
-
-        for r in rng2:
-            sheet.progressMade += 1
-            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
-            if c:
-                if moveCursor:
-                    sheet.cursorRowIndex = r
-                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
-                    status('search wrapped')   # the only reason for the duplicate code block
+                    if r in rng2:
+                        status('search wrapped')
                     return
                 else:
                     matchingRowIndexes += 1
