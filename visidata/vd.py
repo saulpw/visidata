@@ -1392,17 +1392,15 @@ class Column:
         return [self.getValue(r) for r in rows]
 
     def getValue(self, row):
-        '''Return a properly-typed value, and also handle failures.
-
-        Return a default value if the conversion fails; re-raise the
-        exception if the getter fails.'''
+        '''Returns the properly-typed value for the given row at this column.
+           Returns the type's default value if either the getter or the type conversion fails.'''
         try:
             v = self.getter(row)
         except EscapeException:
             raise
         except Exception:
             exceptionCaught(status=False)
-            return CalcErrorStr(self.type())
+            return self.type()
 
         try:
             return self.type(v)  # convert type on-the-fly
