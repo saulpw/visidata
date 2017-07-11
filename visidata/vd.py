@@ -595,6 +595,7 @@ class VisiData:
     def push(self, vs):
         'Move given sheet `vs` to index 0 of list `sheets`.'
         if vs:
+            vs.vd = self
             if vs in self.sheets:
                 self.sheets.remove(vs)
                 self.sheets.insert(0, vs)
@@ -1333,7 +1334,7 @@ class Column:
 
     @type.setter
     def type(self, t):
-        'Set `_type`.'
+        'Sets `_type` from t as either a typename or a callable. Revert to anytype if not callable.'
         if isinstance(t, str):
             t = globals()[t]
 

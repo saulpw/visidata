@@ -83,7 +83,9 @@ class EditLog(Sheet):
 
         EditLog.currentReplayRow = r
         if beforeSheet:
-            vs = self.sheetmap[beforeSheet]
+            vs = self.sheetmap.get(beforeSheet)
+            if not vs:
+                vs = [x for x in vd().sheets if x.name == beforeSheet][0]
         else:
             vs = self
 
