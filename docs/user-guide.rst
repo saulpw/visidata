@@ -7,8 +7,8 @@ Basic Movement and Essential Commands
 
 -  ``hjkl`` or arrow keys move the cursor around (left/down/up/right)
 -  ``F1`` or ``z?`` opens command help for the current sheet
--  ``q`` quits the current sheet (backs out one level); in a pinch,
-   ``Ctrl-q`` will force-quit the program entirely
+-  ``q`` quits the current sheet (backs out one level)
+-  ``Ctrl-q`` aborts the program immediately
 
 Advanced movement
 =================
@@ -19,6 +19,17 @@ Scrolling
 "Scrolling" adjusts the onscreen visible slice, but will not change the
 current cursor position.
 
+-  ``Home`` and ``End`` move the cursor to the first and last row of the
+   entire sheet, respectively. The column cursor position is maintained.
+-  ``PageUp`` and ``PageDown`` move the cursor exactly one onscreen page
+   up or down. ``Ctrl-b`` and ``Ctrl-f`` do the same
+
+-  The ``g`` prefix modifies movement commands by making them go "all
+   the way".
+
+   -  ``gk`` and ``gj`` are the same as ``Home`` and ``End``,
+      respectively.
+   -  ``gh`` and ``gl`` move the cursor to the first and last column.
 -  ``z`` prefix scrolling (most behave exactly like vim):
 
    -  ``zt`` scrolls current row to top of screen
@@ -33,17 +44,6 @@ current cursor position.
    -  ``zs`` scrolls sheet to leftmost column
    -  ``ze`` scrolls sheet to rightmost column
 
--  ``Home`` and ``End`` move the cursor to the first and last row of the
-   entire sheet, respectively. The column cursor position is maintained.
--  ``PageUp`` and ``PageDown`` move the cursor exactly one onscreen page
-   up or down. ``Ctrl-B`` and ``Ctrl-F`` do the same
-
--  The ``g`` prefix modifies movement commands by making them go "all
-   the way".
-
-   -  ``gk`` and ``gj`` are the same as ``Home`` and ``End``,
-      respectively.
-   -  ``gh`` and ``gl`` move the cursor to the first and last column.
 
 Arranging Columns
 =================
@@ -61,14 +61,13 @@ Column Types
 
 -  You can set a column manually to a specific type:
 
-   -  ``~`` : ``str`` (the effective default)
+   -  ``~`` : ``str`` (the default)
    -  ``#`` : ``int``
-   -  ``$`` : currency
    -  ``%`` : ``float``
-   -  ``@`` : date
+   -  ``$`` : ``currency`` (a float that strips leading and/or trailing non-numeric characters)
+   -  ``@`` : ``date`` (datetime wrapper)
 
-   After column-type has been changed manually, the type is shown at the right
-   edge of the column header.
+   The column type is shown at the right edge of the column header.
 
 -  All values are stored in their original format, and only converted on
    demand and as needed.
@@ -104,17 +103,16 @@ Searching/Selecting/Deleting rows
 Modifying data
 ==============
 
--  ``Ctrl-S``\ ave to ``.csv`` or ``.tsv`` (by extension)
 -  ``e``\ dit cell contents
+   -  Edits made to a joined sheet are by design automatically reflected back to the source sheets.
 
-   -  Edits made to a joined sheet are by design automatically reflected
-      back to the source sheets.
+-  ``Ctrl-s``\ ave to ``.csv`` or ``.tsv`` (by extension)
 
 Special Sheets
 ==============
 
 -  ``F``\ requency table for current column with histogram
--  ``Ctrl-O`` to eval an expression and browse the result as a python
+-  ``Ctrl-o`` to eval an expression and browse the result as a python
    object
 
 Metasheets
@@ -133,8 +131,8 @@ Metasheets
          matches on sheet joins)
 
 -  ``O``\ ptions sheet to change the style or behavior
--  ``Ctrl-E``\ rror metasheet
--  ``Ctrl-T``\ hreads metasheet
+-  ``Ctrl-e``\ rror metasheet
+-  ``Ctrl-t``\ hreads metasheet
 
 Glossary
 ========
@@ -162,9 +160,6 @@ Here are slightly better descriptions of some non-obvious commands:
    "apply to all sheets" (as with ``q``). The global\_action column on
    the Help Sheet shows the specific way the global prefix changes each
    command.
-
--  ``R`` sets the source type of the current sheet. The current sheet
-   remains until a reload (``Ctrl-R``).
 
 -  When sheets are joined, the rows are matched by the display values in
    the key columns. Different numbers of key columns cannot match (no

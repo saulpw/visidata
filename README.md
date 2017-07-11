@@ -61,11 +61,11 @@ Further documentation is available at [readthedocs](https://visidata.readthedocs
 VisiData was created by Saul Pwanson `<vd@saul.pw>`.
 
 VisiData needs lots of usage and testing to help it become useful and reliable.
-If you are actively using VisiData, please let me know!
+If you use VisiData, I would love if you would send me a screencast!
 Maybe there is an easy way to improve the tool for both of us.
 
 Also please create a GitHub issue if anything doesn't appear to be working right.
-If you get an unexpected error, please include the full stack trace that you get with `Ctrl-E`.
+If you get an unexpected error, please include the full stack trace that you get with `Ctrl-e`.
 
 ### Branch structure
 
