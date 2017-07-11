@@ -307,9 +307,9 @@ def error(s):
     'Return custom exception as function, for use with `lambda` and `eval`.'
     raise Exception(s)
 
-def status(s):
+def status(*args):
     'Return status property via function call.'
-    return vd().status(s)
+    return vd().status(*args)
 
 def moveListItem(L, fromidx, toidx):
     "Move element within list `L` and return element's new index."
@@ -376,9 +376,9 @@ class VisiData:
         self.scr = None  # curses scr
         self.hooks = {}
 
-    def status(self, s):
+    def status(self, *args):
         'Add status message to be shown until next action.'
-        s = str(s)
+        s = '; '.join(str(x) for x in args)
         self.statuses.append(s)
         return s
 
