@@ -1,0 +1,128 @@
+  Ctrl- @  NUL
+  Ctrl- A
+  Ctrl- B  'B'ack one page [vim]
+  Ctrl- C  'C'ancel task on the current sheet
+  Ctrl- D  'D'ebug mode toggle
+  Ctrl- E  'E'rrors sheet
+  Ctrl- F  'F'orward one page [vim]
+  Ctrl- G  file information [vim]
+  Ctrl- H  BACKSPACE (undo, with editlog)
+  Ctrl- I  TAB (cycle sheets)
+  Ctrl- J  ENTER (dive into row/value) [sheet-specific]
+  Ctrl- K
+  Ctrl- L  (should be redraw)
+  Ctrl- M  (must be same as ENTER)
+  Ctrl- N
+  Ctrl- O  'O'ptions sheet
+  Ctrl- P  'P'revious status [nethack]
+  Ctrl- Q  'Q'uit
+  Ctrl- R  'R'eload
+  Ctrl- S  'S'ave
+  Ctrl- T  'T'asks sheet
+  Ctrl- U
+  Ctrl- V  'V'ersion
+  Ctrl- W
+  Ctrl- X
+  Ctrl- Y
+  Ctrl- Z  'Z'oom into row as python object
+  Ctrl- [  ESC
+  Ctrl- \
+  Ctrl- ]
+  Ctrl- ^  swap sheets [vim]
+  Ctrl- _
+    SPACE  toggle select
+ Shift- !  make key column
+ Shift- "  duplicate sheet (keeping only selected rows)
+ Shift- #  make int column
+ Shift- $  make currency column
+ Shift- %  make float column
+ Shift- &  ('join' on Sheets and Columns metasheets)
+        '  (reserved for duplicate column)
+ Shift- (
+ Shift- )
+ Shift- *  new regex transform column
+ Shift- +  set column aggregator
+        ,  select matching rows ['pick up', from nethack]
+        -  hide column
+        .
+        /  search forward
+        0
+        1
+        2
+        3
+        4
+        5
+        6
+        7
+        8
+        9
+ Shift- :  split by string
+        ;  split by regex
+ Shift- >  move down to different value
+        =  add new column by python expr
+ Shift- <  move up to different value
+ Shift- ?  reverse search by regex [vim]
+ Shift- @  make column date
+ Shift- A
+ Shift- B
+ Shift- C  'C'olumns sheet
+ Shift- D  e'D'itlog sheet
+ Shift- E
+ Shift- F  'F'requency sheet
+ Shift- G  bottom row [vim]
+ Shift- H  slide left
+ Shift- I
+ Shift- J  slide down
+ Shift- K  slide up
+ Shift- L  slide right
+ Shift- M  'M'elt
+ Shift- N
+ Shift- O
+ Shift- P  'P'opulation sample
+ Shift- Q
+ Shift- R
+ Shift- S  'S'heets sheet
+ Shift- T
+ Shift- U
+ Shift- V
+ Shift- W  Pivot (inverse of Melt)
+ Shift- X
+ Shift- Y
+ Shift- Z
+        [  sort ascending
+        \  unselect rows by regex
+        ]  sort descending
+ Shift- ^  change column name
+ Shift- _  change column width
+        `  (backtick) push source sheet
+        a
+        b
+        c  'c'olumn move by regex
+        d  'd'elete row
+        e  'e'dit cell
+        f
+        g  'g'lobal prefix
+        h  move left
+        i
+        j  move down
+        k  move up
+        l  move right
+        m
+        n  'n'ext match [vim]
+        o
+        p  'p'revious match [vim]
+        q  'q'uit sheet
+        r  'r'ow move by number
+        s  's'elect row
+        t
+        u  'u'nselect row
+        v
+        w
+        x
+        y
+        z  scroll prefix [vim]
+ Shift- }  move to next selected
+ Shift- |  select by regex
+ Shift- {  move to prev selected
+ Shift- ~  make string column
+        DEL
