@@ -8,7 +8,7 @@ from visidata import *
 option('profile_tasks', True, 'profile async tasks')
 option('min_task_time', 0.10, 'only keep tasks that take longer than this number of seconds')
 
-command('^C', 'if sheet.currentTask: ctypeAsyncRaise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
+command('^C', 'if sheet.currentTask: ctypeAsyncRaise(sheet.currentTask.thread, EscapeException); sheet.currentTask = None', 'cancel task on the current sheet')
 command('^T', 'vd.push(TasksSheet("task_history"))', 'push task history sheet')
 
 
