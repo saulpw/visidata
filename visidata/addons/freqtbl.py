@@ -7,6 +7,7 @@ command('gF', 'vd.push(SheetFreqTable(sheet, combineColumns(columns[:nKeys])))',
 theme('disp_histogram', '*')
 option('disp_histolen', 80, 'width of histogram column')
 option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
+option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 
 class SheetFreqTable(Sheet):
@@ -38,6 +39,7 @@ class SheetFreqTable(Sheet):
         self.command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet')
 
         self.command(ENTER, 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value')
+        self.command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
 
     def selectRow(self, row):
         self.source.select(row[1])     # select all entries in the bin on the source sheet
@@ -70,14 +72,20 @@ class SheetFreqTable(Sheet):
 
             # find bin pivots from non-error values
             binPivots = []
-
             sortedValues = sorted(allbin)
-            binsize = len(sortedValues)//nbins
-            for binIdx, firstIdx in enumerate(self.genProgress(range(0, len(sortedValues), binsize))):
-                firstVal = self.origCol.getValue(sortedValues[firstIdx][1])
 
-                binPivots.append(firstVal)
+            if options.histogram_even_interval:
+                binsize = len(sortedValues)//nbins
+                for binIdx, firstIdx in enumerate(self.genProgress(range(0, len(sortedValues), binsize))):
+                    firstVal = self.origCol.getValue(sortedValues[firstIdx][1])
 
+                    binPivots.append(firstVal)
+            else:
+                minval, maxval = sortedValues[0][0], sortedValues[-1][0]
+                binWidth = (maxval - minval)/nbins
+                binPivots = list((minval + binWidth*i) for i in range(0, nbins))
+
+            status(*binPivots)
             # put rows into bins (as self.rows) based on values
             binMinIdx = 0
             binMinVal = self.origCol.getDisplayValue(sortedValues[binMinIdx][1])
@@ -91,9 +99,9 @@ class SheetFreqTable(Sheet):
 
                 binMaxVal = self.origCol.getDisplayValue(row)  # last row before break
                 if binMinIdx == 0:
-                    binName = '<=[%s-]%s' % (binMinVal, binMaxVal)
+                    binName = '<=%s' % binMaxVal
                 elif binMax == binPivots[-1]:
-                    binName = '>=%s[-%s]' % (binMinVal, binMaxVal)
+                    binName = '>=%s' % binMinVal
                     binrows.append(row)
                 else:
                     binName = '%s-%s' % (binMinVal, binMaxVal)
