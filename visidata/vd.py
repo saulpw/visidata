@@ -1276,17 +1276,19 @@ def count(values):
     return len([x for x in values if x is not None])
 
 _sum = sum
+_max = max
+_min = min
 
-def sum(values):
-    "Wrap `_sum`, which is itself Python's built-in `sum`."
-    return _sum(values)
+def sum(*values): return _sum(*values)
+def max(*values): return _max(*values)
+def min(*values): return _min(*values)
 
 avg.type = float
 count.type = int
 distinct.type = int
 sum.type = None
-#min.type = None
-#max.type = None
+min.type = None
+max.type = None
 aggregators = { '': None,
                 'distinct': distinct,
                 'sum': sum,
