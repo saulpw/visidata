@@ -8,8 +8,8 @@ from visidata import *
 option('profile_tasks', True, 'profile async tasks')
 option('min_task_time', 0.10, 'only keep tasks that take longer than this number of seconds')
 
-command('^C', 'if sheet.currentTask: ctypeAsyncRaise(sheet.currentTask.thread, EscapeException); sheet.currentTask = None', 'cancel task on the current sheet')
-command('^T', 'vd.push(TasksSheet("task_history"))', 'push task history sheet')
+command('^C', 'if sheet.currentTask: ctypeAsyncRaise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
+command('^T', 'vd.push(vd.taskMgr)', 'push task history sheet')
 
 
 # define @async for potentially long-running functions
@@ -37,8 +37,8 @@ class Task:
         return (self.endTime or time.process_time())-self.startTime
 
 def sync():
-    while len(g_TaskMgr.unfinishedTasks) > 0:
-        g_TaskMgr.checkForUnfinishedTasks()
+    while len(vd().taskMgr.unfinishedTasks) > 0:
+        vd().taskMgr.checkForUnfinishedTasks()
 
 def execAsync(func, *args, **kwargs):
     'Manage execution of asynchronous thread, checking for redundancy.'
@@ -56,23 +56,23 @@ def execAsync(func, *args, **kwargs):
         t.start(threadProfileCode, t, func, *args, **kwargs)
     else:
         t.start(toplevelTryFunc, t, func, *args, **kwargs)
-    g_TaskMgr.tasks.append(t)
+    vd().taskMgr.rows.append(t)
     return t
 
 def toplevelTryFunc(task, func, *args, **kwargs):
     'Modify status-bar content on user-abort/exceptions, for use by @async.'
+    ret = None
     try:
         ret = func(*args, **kwargs)
-        task.sheet.currentTask = None
-        return ret
     except EscapeException as e:  # user aborted
-        task.sheet.currentTask = None
         task.status += 'aborted by user;'
-        status("%s aborted" % task.name)
+        status('%s aborted' % task.name)
     except Exception as e:
-        task.sheet.currentTask = None
         task.status += status('%s: %s;' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
         exceptionCaught()
+
+    task.sheet.currentTask = None
+    return ret
 
 def threadProfileCode(task, func, *args, **kwargs):
     'Wrap profiling functionality for use by @async.'
@@ -97,24 +97,33 @@ def ctypeAsyncRaise(threadObj, exception):
             if v is value:
                 return k
 
-        raise ValueError("no such value in dict")
-
     # Following `ctypes call follows https://gist.github.com/liuw/2407154.
-    ctypes.pythonapi.PyThreadState_SetAsyncExc(
-            ctypes.c_long(dictFind(threading._active, threadObj)),
-            ctypes.py_object(exception)
-            )
-    status('sent exception to %s' % threadObj.name)
+    thread = dictFind(threading._active, threadObj)
+    if thread:
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(thread), ctypes.py_object(exception))
+        status('canceling %s' % threadObj.name)
+    else:
+        status('no thread to cancel')
 
 
-class TaskManager:
+# each row is a Task object
+class TaskManager(Sheet):
+    'Sheet displaying "Task" objects: asynchronous threads.'
     def __init__(self):
-        self.tasks = []
+        super().__init__('task_history')
+        self.command('^C', 'ctypeAsyncRaise(cursorRow.thread, EscapeException)', 'cancel this action')
+        self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
+
+        self.columns = [
+            ColumnAttr('name'),
+            ColumnAttr('elapsed_s', type=float),
+            ColumnAttr('status'),
+        ]
 
     @property
     def unfinishedTasks(self):
         'Return list of tasks for which `endTime` has not been reached.'
-        return [task for task in self.tasks if not task.endTime]
+        return [task for task in self.rows if not task.endTime]
 
     def checkForUnfinishedTasks(self):
         'Prune old threads that were not started or terminated.'
@@ -123,30 +132,14 @@ class TaskManager:
                 task.endTime = time.process_time()
                 task.status += 'ended'
                 if task.elapsed_s*1000 < float(options.min_task_time):
-                    self.tasks.remove(task)
-
-# each row is a Task object
-class TasksSheet(Sheet):
-    'Sheet displaying "Task" objects: asynchronous threads.'
-
-    def reload(self):
-        'Populate sheet via `reload` function.'
-        self.command('^C', 'ctypeAsyncRaise(cursorRow.thread, EscapeException)', 'cancel this action')
-        self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
-        self.columns = [
-            ColumnAttr('name'),
-            ColumnAttr('elapsed_s', type=float),
-            ColumnAttr('status'),
-        ]
-        self.rows = g_TaskMgr.tasks
-
+                    self.rows.remove(task)
 
 def ProfileSheet(task):
     'Populate sheet showing profiling results.'
     return TextSheet(task.name + '_profile', task.profileResults)
 
-g_TaskMgr = TaskManager()
+vd().taskMgr = TaskManager()
 
-vd().addHook('predraw', g_TaskMgr.checkForUnfinishedTasks)
+vd().addHook('predraw', vd().taskMgr.checkForUnfinishedTasks)
 vd().execAsync = execAsync
 
