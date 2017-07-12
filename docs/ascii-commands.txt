@@ -13,7 +13,7 @@
   Ctrl- L  (should be redraw)
   Ctrl- M  (must be same as ENTER)
   Ctrl- N
-  Ctrl- O  'O'ptions sheet
+  Ctrl- O
   Ctrl- P  'P'revious status [nethack]
   Ctrl- Q  'Q'uit
   Ctrl- R  'R'eload
@@ -22,7 +22,7 @@
   Ctrl- U
   Ctrl- V  'V'ersion
   Ctrl- W
-  Ctrl- X
+  Ctrl- X  push sheet with eval of python e'X'pression
   Ctrl- Y
   Ctrl- Z  'Z'oom into row as python object
   Ctrl- [  ESC
@@ -69,7 +69,7 @@
  Shift- D  e'D'itlog sheet
  Shift- E
  Shift- F  'F'requency sheet
- Shift- G  bottom row [vim]
+ Shift- G  move to bottom row [vim]
  Shift- H  slide left
  Shift- I
  Shift- J  slide down
@@ -77,14 +77,14 @@
  Shift- L  slide right
  Shift- M  'M'elt
  Shift- N
- Shift- O
+ Shift- O  'O'ptions
  Shift- P  'P'opulation sample
  Shift- Q
  Shift- R
  Shift- S  'S'heets sheet
  Shift- T
  Shift- U
- Shift- V
+ Shift- V  'V'iew contents of cell in new sheet
  Shift- W  Pivot (inverse of Melt)
  Shift- X
  Shift- Y
