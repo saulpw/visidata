@@ -125,10 +125,10 @@ Special Sheets
 Metasheets
 ----------
 
--  ``S``\ heets metasheet to manage/navigate multiple sheets
--  ``C``\ olumns metasheet
+-  ``Shift-S``\ heets metasheet to manage/navigate multiple sheets
+-  ``Shift-C``\ olumns metasheet
 
-   -  On the ``C``\ olumns sheet, these commands apply to rows (the
+   -  On the ``Shift-C``\ olumns sheet, these commands apply to rows (the
       columns of the source sheet), instead of the columns on the
       Columns sheet
 
@@ -137,7 +137,7 @@ Metasheets
       -  ``!`` marks column as a key column (pins to the left and
          matches on sheet joins)
 
--  ``O``\ ptions sheet to change the style or behavior
+-  ``Shift-O``\ ptions sheet to change the style or behavior
 -  ``Ctrl-e``\ rror metasheet
 -  ``Ctrl-t``\ hreads metasheet
 

@@ -264,7 +264,7 @@ Example
 Here is a simple sheet which makes a ``t`` command to "take" the current
 cell from any sheet and append it to a predefined "journal" sheet. This
 sheet can be viewed with ``Shift-T`` and then dumped to a ``.tsv`` file with
-``^W`` (Ctrl-w).
+``Ctrl-w``.
 
 ::
 
@@ -440,12 +440,12 @@ specified instead of using a hard-coded value.
 The ``reload()`` method
 -----------------------
 
-The ``reload()`` method (invoked with ``^R``, Ctrl-r) should in general
+The ``reload()`` method (invoked with ``Ctrl-r``) should in general
 reset the sheet to its starting rowset, without changing the column
 layout.
 
 In the above example, ``reload()`` clears ``Sheet.rows`` before
-reloading, to prevent the sheet from growing in size with every ``^R``.
+reloading, to prevent the sheet from growing in size with every ``Ctrl-r``.
 
 ``reload()`` is not called until the sheet is first viewed.
 
@@ -474,9 +474,9 @@ Curses line-editing: ``editText``
 The module-level function ``editText`` is a hack to replace ``curses.textpad``
 for line-editing functionality. It supplies a subset of standard GNU
 `Readline key-bindings
-<https://cnswww.cns.cwru.edu/php/chet/readline/readline.html>`_: ``^a`` for
-start of line, ``^e`` for end of line,
-and so on. One innovation is ``^r`` to reload the initial value of a cell.
+<https://cnswww.cns.cwru.edu/php/chet/readline/readline.html>`_: ``Ctrl-a`` for
+start of line, ``Ctrl-e`` for end of line,
+and so on. One innovation is ``Ctrl-r`` to reload the initial value of a cell.
 
 Module-level ``editText`` is wrapped by ``VisiData.editText`` and
 ``Sheet.editCell``.
@@ -614,7 +614,7 @@ Accessing all commands in an extension requires the use of globals. The extensio
 Deviations from PEP8
 --------------------
 
-* One-line docstrings are surrounded by a single (``'...'``).
+* One-line docstrings are surrounded by a single quote (``'...'``).
 
 * Multi-line docstrings are surrounded by three single quotes (``'''...'''``).
 
