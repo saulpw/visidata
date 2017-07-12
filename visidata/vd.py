@@ -23,10 +23,10 @@
 
 'VisiData core functionality'
 
-__version__ = 'saul.pw/VisiData v0.91'
+__version__ = 'saul.pw/VisiData v0.92'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'MIT'
-__status__ = 'Alpha'
+__status__ = 'Beta'
 
 from builtins import *
 import sys

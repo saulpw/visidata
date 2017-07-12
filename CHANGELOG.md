@@ -1,5 +1,11 @@
 # VisiData version history
 
+## v0.92 (2017-07-11)
+- `F`requency sheet groups numeric data into intervals
+   - added `histogram_bins` and `histogram_even_interval` options
+   - added `w` command on the sheet that toggles `histogram_even_interval`
+- change key for 'eval Python expression as new pyobj sheet' from Ctrl-O to Ctrl-X
+
 ## v0.91 (2017-06-28)
 - Make options automatically typed based on default
 - Documentation cleanups
