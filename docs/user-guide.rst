@@ -98,7 +98,13 @@ Creating new columns
 Searching/Selecting/Deleting rows
 =================================
 
+- ``d``\elete a row
+- ``s``\elect a row
+- ``u``\nselect a row
+- ``|`` select rows whose contents within this column match a regex search
+- ``,`` select rows whose contents within this column match the current cell
 -  ``[``/``]`` sort asc/desc by one column
+- ``"`` push a duplicate sheet which contains only the selected rows
 
 Modifying data
 ==============
@@ -111,7 +117,8 @@ Modifying data
 Special Sheets
 ==============
 
--  ``F``\ requency table for current column with histogram
+-  ``Shift-F``\ requency table for current column with histogram
+    - ``w`` toggles between bins with an even interval width and bins with an even frequency height
 -  ``Ctrl-o`` to eval an expression and browse the result as a python
    object
 
