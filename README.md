@@ -8,7 +8,7 @@ A few interesting commands:
 
 * `Shift-F` pushes a frequency analysis of the current column
 * `=` creates a new column from the given Python expression (use column names to refer to their contents)
-* `.` creates new columns from the match groups of the given regex
+* `;` creates new columns from the match groups of the given regex
 
 # Getting Started
 
