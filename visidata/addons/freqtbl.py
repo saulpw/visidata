@@ -1,3 +1,4 @@
+import math
 
 from visidata import *
 
@@ -55,7 +56,7 @@ class SheetFreqTable(Sheet):
         rowidx = {}
         self.rows = []
 
-        nbins = options.histogram_bins or int(len(self.source.rows) ** (1./3))
+        nbins = options.histogram_bins or int(len(self.source.rows) ** (1./2))
 
         if nbins and self.origCol.type in (int, float, currency):
             self.columns[0]._type = str
@@ -64,56 +65,60 @@ class SheetFreqTable(Sheet):
             errorbin = []
             allbin = []
             for row in self.genProgress(self.source.rows):
-                v = self.origCol.getDisplayValue(row)
+                v = self.origCol.getValue(row)
                 if not v:
                     errorbin.append(row)
                 else:
-                    allbin.append((self.origCol.getValue(row), row))
+                    allbin.append((v, row))
 
             # find bin pivots from non-error values
             binPivots = []
             sortedValues = sorted(allbin)
 
             if options.histogram_even_interval:
-                binsize = len(sortedValues)//nbins
-                for binIdx, firstIdx in enumerate(self.genProgress(range(0, len(sortedValues), binsize))):
-                    firstVal = self.origCol.getValue(sortedValues[firstIdx][1])
-
+                binsize = len(sortedValues)/nbins
+                pivotIdx = 0
+                for i in range(math.ceil(len(sortedValues)/binsize)):
+                    firstVal = sortedValues[int(pivotIdx)][0]
                     binPivots.append(firstVal)
+                    pivotIdx += binsize
+
             else:
                 minval, maxval = sortedValues[0][0], sortedValues[-1][0]
                 binWidth = (maxval - minval)/nbins
                 binPivots = list((minval + binWidth*i) for i in range(0, nbins))
 
-            status(*binPivots)
+            binPivots.append(None)
+
             # put rows into bins (as self.rows) based on values
             binMinIdx = 0
-            binMinVal = self.origCol.getDisplayValue(sortedValues[binMinIdx][1])
+            binMin = 0
 
-            for binMax in binPivots[1:]:
+            for binMax in binPivots[1:-1]:
                 binrows = []
                 for i, (v, row) in enumerate(sortedValues[binMinIdx:]):
-                    if v > binMax:
+                    if binMax != binPivots[-2] and v > binMax:
                         break
                     binrows.append(row)
 
-                binMaxVal = self.origCol.getDisplayValue(row)  # last row before break
+                binMaxDispVal = self.origCol.format(binMax)
+                binMinDispVal = self.origCol.format(binMin)
                 if binMinIdx == 0:
-                    binName = '<=%s' % binMaxVal
-                elif binMax == binPivots[-1]:
-                    binName = '>=%s' % binMinVal
-                    binrows.append(row)
+                    binName = '<=%s' % binMaxDispVal
+                elif binMax == binPivots[-2]:
+                    binName = '>=%s' % binMinDispVal
                 else:
-                    binName = '%s-%s' % (binMinVal, binMaxVal)
+                    binName = '%s-%s' % (binMinDispVal, binMaxDispVal)
 
                 self.rows.append((binName, binrows))
                 binMinIdx += i
-                binMinVal = self.origCol.getDisplayValue(row)
+                binMin = binMax
 
             if errorbin:
-                self.rows.append(('errors', errorbin))
+                self.rows.insert(0, ('errors', errorbin))
 
-            sync()
+            ntallied = sum(len(x[1]) for x in self.rows)
+            assert ntallied == len(self.source.rows), (ntallied, len(self.source.rows))
         else:
             for r in self.genProgress(self.source.rows):
                 v = str(self.origCol.getValue(r))
@@ -125,4 +130,5 @@ class SheetFreqTable(Sheet):
                 histrow[1].append(r)
 
             self.rows.sort(key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
+
         self.largest = len(self.rows[0][1])+1
