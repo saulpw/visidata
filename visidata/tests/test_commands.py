@@ -11,7 +11,7 @@ expectedErrors = [ '^R', '^^', 'e', 'ge', '^J', '^S', 'o', 'KEY_BACKSPACE']
 
 inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
                  'o': 'tests/jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
-                '^O': '2+2',            # open the python object for '4'
+                '^X': '2+2',            # open the python object for '4'
                  '/': 'foo',
                  '?': 'bar',
                  '|': '.',
@@ -27,7 +27,6 @@ inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
                  'g?': 'bar',
                  'g|': '.',
                  'g\\': '.',
-                 'R': 'tsv',
                  'P': '50',
               }
 
