@@ -10,7 +10,7 @@ class ColorSheet(Sheet):
             Column('G', getter=lambda r: curses.color_content(curses.pair_number(colors[r])-1)[1]),
             Column('B', getter=lambda r: curses.color_content(curses.pair_number(colors[r])-1)[2]),
             ]
-        self.colorizers.append(lambda self,c,r,v: (r, 1) if c and c.name == 'color' else None)
+        self.addColorizer('row', 7, lambda s,c,r,v: r)
 
     def reload(self):
         self.rows = colors.keys()

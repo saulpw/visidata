@@ -116,7 +116,7 @@ class ColumnsSheet(Sheet):
 
         self.command('W', 'vd.replace(SheetPivot(source, selectedRows))', 'push a pivot table, keeping nonselected keys, making variables from selected columns, and creating a column for each variable-aggregate combination')
 
-        self.colorizers.append(lambda self,c,r,v: (options.color_key_col, 8) if r in self.source.keyCols else None)
+        self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
 
         self.columns = [
             ColumnAttr('name', str),
