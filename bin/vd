@@ -15,7 +15,7 @@ def main():
     parser.add_argument('-f', dest='filetype', default='', help='specify file type')
 
     for optname, v in visidata.baseOptions.items():
-        name, optval, defaultval, helpstr, opttype = v
+        name, optval, defaultval, helpstr = v
         action = 'store_true' if optval is False else 'store'
         parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=optval, help=helpstr)
 

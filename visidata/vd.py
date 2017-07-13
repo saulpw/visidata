@@ -60,7 +60,8 @@ def command(keystrokes, execstr, helpstr):
         baseCommands[ks] = (ks, helpstr, execstr)
 
 def option(name, default, helpstr=''):
-    baseOptions[name] = [name, default, default, helpstr, type(default)]  # see OptionsObject
+    baseOptions[name] = [name, default, default, helpstr]  # see OptionsObject
+
 theme = option
 
 
@@ -205,8 +206,6 @@ command('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'move this column 
 command('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
 command('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
 command('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
-
-command('O', 'vd.push(OptionsSheet("sheet options", baseOptions))', 'open Options for this sheet')
 
 command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
@@ -1648,42 +1647,38 @@ class DirSheet(Sheet):
                       Column('size', int, lambda r: r[1].st_size),
                       Column('mtime', date, lambda r: r[1].st_mtime)]
 
-#### options management
-class OptionsObject:
-    'Get particular option value from `baseOptions`.'
-    def __init__(self, d):
-        self._opts = d
-    def __getattr__(self, k):
-        name, value, default, helpstr, option_type = self._opts[k]
-        return option_type(value)
-    def __setitem__(self, k, v):
-        if k not in self._opts:
-            raise Exception('no such option "%s"' % k)
-        self._opts[k][1] = self._opts[k][4](v)
+command('O', 'vd.push(vd.options)', 'open Options for this sheet')
 
-options = OptionsObject(baseOptions)
+class Options(Sheet):
+    'options management'
+    def __init__(self, d):
+        super().__init__('options', d)
+        self.columns = ArrayNamedColumns('option value default description'.split())
+        self.command([ENTER, 'e'], 'sheet[cursorRow[0]] = editCell(1)', 'edit this option')
+        self.addColorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
+        self.nKeys = 1
+
+    def __getattr__(self, k):
+        name, value, default, helpstr = self.source[k]
+        return value
+
+    def __setitem__(self, k, v):
+        if k not in self.source:
+            raise Exception('no such option "%s"' % k)
+        self.source[k][1] = type(self.source[k][1])(v)
+
+    def reload(self):
+        self.rows = list(self.source.values())
+
+options = Options(baseOptions)
+vd().options = options
+
 
 # Generator => A .. Z AA AB ...
 defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)
                              for j in itertools.product(string.ascii_uppercase,
                                    repeat=i+1)
                   )
-
-class OptionsSheet(Sheet):
-    'Sheet displaying user options.'
-
-    def reload(self):
-        'Populate sheet via `reload` function.'
-        self.rows = list(self.source.values())
-        self.columns = ArrayNamedColumns('option value default description'.split())
-        self.command([ENTER, 'e'], 'cursorRow[1] = editCell(1)', 'edit this option')
-        self.colorizers.append(self.colorOptionCell)
-        self.nKeys = 1
-
-    @staticmethod
-    def colorOptionCell(sheet, col, row, value):
-        if row and col and col.name in ['value', 'default'] and row[0].startswith('color_'):
-            return col.getValue(row), 9
 
 
 #### enable external addons
