@@ -73,7 +73,7 @@ class SheetFreqTable(Sheet):
 
             # find bin pivots from non-error values
             binPivots = []
-            sortedValues = sorted(allbin)
+            sortedValues = sorted(allbin, key=lambda x: x[0])
 
             if options.histogram_even_interval:
                 binsize = len(sortedValues)/nbins
