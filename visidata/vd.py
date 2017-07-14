@@ -503,7 +503,7 @@ class VisiData:
         try:
             lstatus = self.leftStatus(vs)
             attr = colors[options.color_status]
-            drawClip(self.scr, windowHeight-1, 0, lstatus, attr, windowWidth)
+            self.clipdraw(windowHeight-1, 0, lstatus, attr, windowWidth)
         except Exception as e:
             self.exceptionCaught()
 
@@ -512,7 +512,7 @@ class VisiData:
         try:
             rstatus = self.rightStatus()
             attr = colors[options.color_status]
-            drawClip(self.scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, attr)
+            self.clipdraw(windowHeight-1, windowWidth-len(rstatus)-2, rstatus, attr)
             curses.doupdate()
         except Exception as e:
             self.exceptionCaught()
@@ -555,6 +555,8 @@ class VisiData:
             self.drawLeftStatus(sheet)
             self.drawRightStatus()  # visible during this getkeystroke
 
+            curses.curs_set(0)
+
             keystroke = self.getkeystroke()
             if keystroke:
                 if self.keystrokes not in self.allPrefixes:
@@ -562,6 +564,8 @@ class VisiData:
 
                 self.statuses.clear()
                 self.keystrokes += keystroke
+
+            curses.curs_set(1)
             self.drawRightStatus()  # visible for commands that wait for input
 
             if not keystroke:  # timeout instead of keypress
@@ -812,8 +816,26 @@ class Sheet:
         return escaped
 
     def clipdraw(self, y, x, s, attr, w):
-        'Wrap `drawClip`.'
-        return drawClip(self.scr, y, x, s, attr, w)
+        'Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char.'
+        global windowWidth
+
+        _, windowWidth = self.scr.getmaxyx()
+        dispw = 0
+        try:
+            if w is None:
+                w = windowWidth-1
+            w = min(w, windowWidth-x-1)
+            if w == 0:  # no room anyway
+                return
+
+            # convert to string just before drawing
+            s, dispw = clipstr(str(s), w)
+            self.scr.addstr(y, x, options.disp_column_fill*w, attr)
+            self.scr.addstr(y, x, s, attr)
+        except Exception as e:
+#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
+#                ).with_traceback(sys.exc_info()[2])
+            pass
 
     @property
     def name(self):
@@ -1579,28 +1601,6 @@ def clipstr(s, dispw):
             break
 
     return ret, w
-
-
-def drawClip(scr, y, x, s, attr=curses.A_NORMAL, w=None):
-    'Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char.'
-
-    _, windowWidth = scr.getmaxyx()
-    dispw = 0
-    try:
-        if w is None:
-            w = windowWidth-1
-        w = min(w, windowWidth-x-1)
-        if w == 0:  # no room anyway
-            return
-
-        # convert to string just before drawing
-        s, dispw = clipstr(str(s), w)
-        scr.addstr(y, x, options.disp_column_fill*w, attr)
-        scr.addstr(y, x, s, attr)
-    except Exception as e:
-#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
-#                ).with_traceback(sys.exc_info()[2])
-        pass
 
 
 ## Built-in sheets
