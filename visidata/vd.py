@@ -1625,31 +1625,40 @@ class DirSheet(Sheet):
                       Column('size', int, lambda r: r[1].st_size),
                       Column('mtime', date, lambda r: r[1].st_mtime)]
 
-command('O', 'vd.push(vd.options)', 'open Options for this sheet')
+command('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
 
-class Options(Sheet):
+class OptionsObject:
+    'minimalist options framework'
+    def __init__(self, d):
+        object.__setattr__(self, '_opts', d)
+
+    def __getattr__(self, k):
+        name, value, default, helpstr = self._opts[k]
+        return value
+
+    def __setattr__(self, k, v):
+        self.__setitem__(k, v)
+
+    def __setitem__(self, k, v):
+        if k not in self._opts:
+            raise Exception('no such option "%s"' % k)
+        self._opts[k][1] = type(self._opts[k][1])(v)
+
+
+class OptionsSheet(Sheet):
     'options management'
     def __init__(self, d):
         super().__init__('options', d)
         self.columns = ArrayNamedColumns('option value default description'.split())
-        self.command([ENTER, 'e'], 'sheet[cursorRow[0]] = editCell(1)', 'edit this option')
+        self.command([ENTER, 'e'], 'source[cursorRow[0]] = editCell(1)', 'edit this option')
         self.addColorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
         self.nKeys = 1
 
-    def __getattr__(self, k):
-        name, value, default, helpstr = self.source[k]
-        return value
-
-    def __setitem__(self, k, v):
-        if k not in self.source:
-            raise Exception('no such option "%s"' % k)
-        self.source[k][1] = type(self.source[k][1])(v)
-
     def reload(self):
-        self.rows = list(self.source.values())
+        self.rows = list(self.source._opts.values())
 
-options = Options(baseOptions)
-vd().options = options
+options = OptionsObject(baseOptions)
+vd().optionsSheet = OptionsSheet(options)
 
 
 # Generator => A .. Z AA AB ...
