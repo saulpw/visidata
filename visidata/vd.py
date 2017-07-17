@@ -407,18 +407,20 @@ class VisiData:
         v = self.callHook('preedit')
         if v is not None:
             return v
+        curses.curs_set(1)
         v = editText(self.scr, y, x, w, **kwargs)
+        curses.curs_set(0)
         if kwargs.get('display', True):
             self.status('"%s"' % v)
             self.callHook('postedit', v)
         return v
 
-    def getkeystroke(self):
+    def getkeystroke(self, scr):
         'Get keystroke and display it on status bar.'
         k = None
         try:
-            k = self.scr.get_wch()
-            self.drawRightStatus()
+            k = scr.get_wch()
+            self.drawRightStatus(scr)
         except Exception:
             return ''  # curses timeout
 
@@ -498,21 +500,21 @@ class VisiData:
         if options.debug:
             raise
 
-    def drawLeftStatus(self, vs):
+    def drawLeftStatus(self, scr, vs):
         'Draw left side of status bar.'
         try:
             lstatus = self.leftStatus(vs)
             attr = colors[options.color_status]
-            self.clipdraw(windowHeight-1, 0, lstatus, attr, windowWidth)
+            _clipdraw(scr, windowHeight-1, 0, lstatus, attr, windowWidth)
         except Exception as e:
             self.exceptionCaught()
 
-    def drawRightStatus(self):
+    def drawRightStatus(self, scr):
         'Draw right side of status bar.'
         try:
             rstatus = self.rightStatus()
             attr = colors[options.color_status]
-            self.clipdraw(windowHeight-1, windowWidth-len(rstatus)-2, rstatus, attr)
+            _clipdraw(scr, windowHeight-1, windowWidth-len(rstatus)-2, rstatus, attr, len(rstatus))
             curses.doupdate()
         except Exception as e:
             self.exceptionCaught()
@@ -537,6 +539,8 @@ class VisiData:
         global windowHeight, windowWidth, sheet
         windowHeight, windowWidth = scr.getmaxyx()
         scr.timeout(int(options.curses_timeout))
+        curses.curs_set(0)
+
         self.scr = scr
 
         self.keystrokes = ''
@@ -552,12 +556,10 @@ class VisiData:
             except Exception as e:
                 self.exceptionCaught()
 
-            self.drawLeftStatus(sheet)
-            self.drawRightStatus()  # visible during this getkeystroke
+            self.drawLeftStatus(scr, sheet)
+            self.drawRightStatus(scr)  # visible during this getkeystroke
 
-            curses.curs_set(0)
-
-            keystroke = self.getkeystroke()
+            keystroke = self.getkeystroke(scr)
             if keystroke:
                 if self.keystrokes not in self.allPrefixes:
                     self.keystrokes = ''
@@ -565,8 +567,7 @@ class VisiData:
                 self.statuses.clear()
                 self.keystrokes += keystroke
 
-            curses.curs_set(1)
-            self.drawRightStatus()  # visible for commands that wait for input
+            self.drawRightStatus(scr)  # visible for commands that wait for input
 
             if not keystroke:  # timeout instead of keypress
                 pass
@@ -814,28 +815,6 @@ class Sheet:
         self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped)
 
         return escaped
-
-    def clipdraw(self, y, x, s, attr, w):
-        'Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char.'
-        global windowWidth
-
-        _, windowWidth = self.scr.getmaxyx()
-        dispw = 0
-        try:
-            if w is None:
-                w = windowWidth-1
-            w = min(w, windowWidth-x-1)
-            if w == 0:  # no room anyway
-                return
-
-            # convert to string just before drawing
-            s, dispw = clipstr(str(s), w)
-            self.scr.addstr(y, x, options.disp_column_fill*w, attr)
-            self.scr.addstr(y, x, s, attr)
-        except Exception as e:
-#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
-#                ).with_traceback(sys.exc_info()[2])
-            pass
 
     @property
     def name(self):
@@ -1154,7 +1133,7 @@ class Sheet:
 
         self.rightVisibleColIndex = vcolidx
 
-    def drawColHeader(self, vcolidx):
+    def drawColHeader(self, scr, vcolidx):
         'Compose and draw column header for given vcolidx.'
         col = self.visibleCols[vcolidx]
 
@@ -1174,15 +1153,15 @@ class Sheet:
         N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
-        self.clipdraw(0, x, N, hdrattr, colwidth)
-        self.clipdraw(0, x+colwidth-len(T), T, hdrattr, len(T))
+        _clipdraw(scr, 0, x, N, hdrattr, colwidth)
+        _clipdraw(scr, 0, x+colwidth-len(T), T, hdrattr, len(T))
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.disp_more_left
-            self.scr.addstr(0, x, A, sepattr)
+            scr.addstr(0, x, A, sepattr)
 
         if C and x+colwidth+len(C) < windowWidth:
-            self.scr.addstr(0, x+colwidth, C, sepattr)
+            scr.addstr(0, x+colwidth, C, sepattr)
 
     def isVisibleIdxKey(self, vcolidx):
         'Return boolean: is given column index a key column?'
@@ -1192,7 +1171,6 @@ class Sheet:
         'Draw entire screen onto the `scr` curses object.'
         global windowHeight, windowWidth
         numHeaderRows = 1
-        self.scr = scr  # for clipdraw convenience
         scr.erase()  # clear screen before every re-draw
 
         windowHeight, windowWidth = scr.getmaxyx()
@@ -1206,7 +1184,7 @@ class Sheet:
             col = self.visibleCols[vcolidx]
 
             if x < windowWidth:  # only draw inside window
-                self.drawColHeader(vcolidx)
+                self.drawColHeader(scr, vcolidx)
 
                 y = numHeaderRows
                 for rowidx in range(0, self.nVisibleRows):
@@ -1221,7 +1199,7 @@ class Sheet:
                     attr = self.colorizeCell(col, row, cellval)
                     sepattr = self.colorizeRow(row) or colors[options.color_column_sep]
 
-                    self.clipdraw(y, x, options.disp_column_fill + cellval, attr, colwidth)
+                    _clipdraw(scr, y, x, options.disp_column_fill + cellval, attr, colwidth)
 
                     annotation = ''
                     if isinstance(cellval, CalcErrorStr):
@@ -1232,19 +1210,19 @@ class Sheet:
                         notecolor = colors[options.color_format_exc]
 
                     if annotation:
-                        self.clipdraw(y, x+colwidth-len(annotation), annotation, notecolor, len(annotation))
+                        _clipdraw(scr, y, x+colwidth-len(annotation), annotation, notecolor, len(annotation))
 
                     sepchars = options.disp_column_sep
                     if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
                         sepchars = options.disp_keycol_sep
 
                     if x+colwidth+len(sepchars) <= windowWidth:
-                       self.scr.addstr(y, x+colwidth, sepchars, sepattr)
+                       scr.addstr(y, x+colwidth, sepchars, sepattr)
 
                     y += 1
 
         if vcolidx+1 < self.nVisibleCols:
-            self.scr.addstr(0, windowWidth-1, options.disp_more_right, colors[options.color_column_sep])
+            scr.addstr(0, windowWidth-1, options.disp_more_right, colors[options.color_column_sep])
 
     def editCell(self, vcolidx=None, rowidx=None):
         '''Call `editText` on given cell after setting other parameters.
@@ -1775,6 +1753,29 @@ def save_tsv(vs, fn):
 
 ### Curses helpers
 
+def _clipdraw(scr, y, x, s, attr, w):
+    'Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char.'
+    global windowWidth
+
+    _, windowWidth = scr.getmaxyx()
+    dispw = 0
+    try:
+        if w is None:
+            w = windowWidth-1
+        w = min(w, windowWidth-x-1)
+        if w == 0:  # no room anyway
+            return
+
+        # convert to string just before drawing
+        s, dispw = clipstr(str(s), w)
+        scr.addstr(y, x, options.disp_column_fill*w, attr)
+        scr.addstr(y, x, s, attr)
+    except Exception as e:
+#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
+#                ).with_traceback(sys.exc_info()[2])
+        pass
+
+
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[], display=True):
     'A better curses line editing widget.'
 
@@ -1829,7 +1830,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
 
         scr.addstr(y, x, dispval, attr)
         scr.move(y, x+dispi)
-        ch = vd().getkeystroke()
+        ch = vd().getkeystroke(scr)
         if ch == '':                               continue
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
