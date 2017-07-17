@@ -1830,12 +1830,14 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
             dispval = clean(v)
         else:
             dispval = '*' * len(v)
-        dispi = i
+        dispi = i  # the onscreen offset within the field where v[i] is displayed
         if len(dispval) < w:
             dispval += fillchar*(w-len(dispval))
-        elif i >= w:
+        elif i > w:
             dispi = w-1
-            dispval = dispval[i-w:]
+            dispval = dispval[i-w:i]
+        else:
+            dispval = dispval[:w]
 
         scr.addstr(y, x, dispval, attr)
         scr.move(y, x+dispi)
