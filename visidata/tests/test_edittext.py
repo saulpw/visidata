@@ -40,8 +40,8 @@ class EditTextTestCase(unittest.TestCase):
         self.t('a b KEY_HOME KEY_RIGHT c ^J', result='acb')
         self.t('a b KEY_BACKSPACE c ^J', result='ac')
 
-        # Backspace deletes the first character at the start
-        self.t('a b KEY_HOME KEY_BACKSPACE c ^J', result='cb')
+        # Backspace no longer deletes the first character at the start
+        self.t('a b KEY_HOME KEY_BACKSPACE c ^J', result='cab')
 
         # Backspace works in different combos, including on the mac.
         self.t('a b c KEY_BACKSPACE ^H KEY_LEFT KEY_DC ^J', result='')

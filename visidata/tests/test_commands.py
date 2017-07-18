@@ -36,6 +36,8 @@ class CommandsTestCase(unittest.TestCase):
         self.scr.addstr = Mock()
         self.scr.move = Mock()
         self.scr.getmaxyx = lambda: (25, 80)
+        import curses
+        curses.curs_set = lambda v: None
 
     def test_baseCommands(self):
         'exec each global command at least once'
