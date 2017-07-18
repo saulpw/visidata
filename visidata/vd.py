@@ -1824,6 +1824,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
     i = 0           # index into v
     comps_idx = 2
     hist_idx = 0
+    left_truncchar = right_truncchar = truncchar
 
     while True:
         if display:
@@ -1835,15 +1836,16 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
             dispval += fillchar*(w-len(dispval))
         elif i == len(dispval):  # cursor after value (will append)
             dispi = w-1
-            dispval = truncchar + dispval[len(dispval)-w+2:] + fillchar
+            dispval = left_truncchar + dispval[len(dispval)-w+2:] + fillchar
         elif i >= len(dispval)-w//2:  # cursor within halfwidth of end
             dispi = w-(len(dispval)-i)
-            dispval = truncchar + dispval[len(dispval)-w+1:]
+            dispval = left_truncchar + dispval[len(dispval)-w+1:]
         elif i <= w//2:  # cursor within halfwidth of beginning
-            dispval = dispval[:w-1] + truncchar
+            dispval = dispval[:w-1] + right_truncchar
         else:
-            dispi = w//2
-            dispval = truncchar + dispval[i-w//2+1:i+w//2-1] + truncchar
+            dispi = w//2  # visual cursor stays right in the middle
+            k = 1 if w%2==0 else 0  # odd widths have one character more
+            dispval = left_truncchar + dispval[i-w//2+1:i+w//2-k] + right_truncchar
 
         scr.addstr(y, x, dispval, attr)
         scr.move(y, x+dispi)
