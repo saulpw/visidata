@@ -1806,7 +1806,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
 
     def delchar(s, i, remove=1):
         'Delete `remove` characters from str `s` beginning at position `i`.'
-        return s[:i] + s[i+remove:]
+        return s if i < 0 else s[:i] + s[i+remove:]
 
     def complete(v, comps, cidx):
         'Complete keystroke `v` based on list `comps` of completions.'
@@ -1856,7 +1856,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
-        elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1 if i > 0 else 0; v = delchar(v, i)
+        elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
         elif ch == '^I':                           comps_idx += 1; v = complete(v[:i], completions, comps_idx)
         elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = complete(v[:i], completions, comps_idx)
         elif ch == ENTER:                          break
