@@ -1245,7 +1245,7 @@ class Sheet:
             y = self.rowLayout.get(rowidx, 0)
             currentValue = self.cellValue(self.cursorRowIndex, col)
 
-        r = vd().editText(y, x, w, value=currentValue, fillchar=options.disp_edit_fill)
+        r = vd().editText(y, x, w, value=currentValue, fillchar=options.disp_edit_fill, truncchar=options.disp_truncator)
         if rowidx >= 0:
             r = col.type(r)  # convert input to column type
 
@@ -1785,7 +1785,7 @@ def _clipdraw(scr, y, x, s, attr, w):
         pass
 
 
-def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprintablechar='.', completions=[], history=[], display=True):
+def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completions=[], history=[], display=True):
     'A better curses line editing widget.'
 
     def until(func):
@@ -1831,13 +1831,19 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', unprint
         else:
             dispval = '*' * len(v)
         dispi = i  # the onscreen offset within the field where v[i] is displayed
-        if len(dispval) < w:
+        if len(dispval) < w:  # entire value fits
             dispval += fillchar*(w-len(dispval))
-        elif i > w:
+        elif i == len(dispval):  # cursor after value (will append)
             dispi = w-1
-            dispval = dispval[i-w:i]
+            dispval = truncchar + dispval[len(dispval)-w+2:] + fillchar
+        elif i >= len(dispval)-w//2:  # cursor within halfwidth of end
+            dispi = w-(len(dispval)-i)
+            dispval = truncchar + dispval[len(dispval)-w+1:]
+        elif i <= w//2:  # cursor within halfwidth of beginning
+            dispval = dispval[:w-1] + truncchar
         else:
-            dispval = dispval[:w]
+            dispi = w//2
+            dispval = truncchar + dispval[i-w//2+1:i+w//2-1] + truncchar
 
         scr.addstr(y, x, dispval, attr)
         scr.move(y, x+dispi)
