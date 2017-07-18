@@ -746,7 +746,8 @@ class Sheet:
             status('no reloader')
 
     def copy(self, suffix="'"):
-        'Wrap `deepcopy`, needed to avoid pass-by-reference pollution.'
+        '''Return copy of this sheet, with `suffix` appended to `name`, and a deepcopy of `columns`,
+         so their display attributes (width, etc) y may be adjusted independently.'''
         c = copy.copy(self)
         c.name += suffix
         c.topRowIndex = c.cursorRowIndex = 0
@@ -807,7 +808,7 @@ class Sheet:
         try:
             exec(execstr, vdglobals, locs)
         except EscapeException as e:  # user aborted
-            self.vd.status('EscapeException ' + ''.join(e.args[0:]))
+            self.vd.status(e.args[0])
             escaped = True
         except Exception:
             self.vd.exceptionCaught()
