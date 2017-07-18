@@ -1,7 +1,7 @@
 from visidata import *
 
 command('D', 'vd.push(vd.editlog)', 'push the editlog')
-command('KEY_BACKSPACE', 'vd.editlog.undo()', 'remove last action on editlog and replay')
+#command('KEY_BACKSPACE', 'vd.editlog.undo()', 'remove last action on editlog and replay')
 
 def open_vd(p):
     vs = EditLog(p.name, p)
