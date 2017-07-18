@@ -1929,7 +1929,7 @@ class Path:
         'Initialize with file-queue path-name.'
         self.fqpn = fqpn
         fn = os.path.split(fqpn)[-1]
-        
+
         # check if file is gzip-compressed
         if fn.endswith('.gz'):
             self.gzip_compressed = True
@@ -1953,7 +1953,7 @@ class Path:
             return fp.read()
 
     def read_bytes(self):
-        'Open and read file of bytes.'
+        'Open and read binary file.'
         with open(self.resolve(), 'rb') as fp:
             return fp.read()
 
@@ -1974,19 +1974,17 @@ class Path:
         return os.stat(self.resolve())
 
     def resolve(self):
-        'Wrap `os.path.expanduser`.'
-        fp = os.path.expandvars(os.path.expanduser(self.fqpn))
-        
-        return fp
+        'Resolve pathname shell variables and ~userdir'
+        return os.path.expandvars(os.path.expanduser(self.fqpn))
 
     @property
     def parent(self):
-        'Return symbolic parent directory.'
+        'Return Path resolving to parent directory.'
         return Path(self.fqpn + "/..")
 
     @property
     def filesize(self):
-        'Return file size.'
+        'Return number of bytes in the file according to stat().'
         return self.stat().st_size
 
     def __str__(self):

@@ -38,6 +38,10 @@ A loose plan that is subject to change.
 # Applications
 
 - vdsh ('x' executes a shell command and creates a sheet from the output)
+   - vdtop (includes kill/killall/ps)
+   - vdls (rm/mv/cp/mount/find/grep/mkdir/rmdir/ln/touch)
+   - vdnet (netstat)
+   - vdproc (explore /proc filesystem with some added goodies)
 - vdgit
 - vdb (interface to gdb)
 - vdchat
