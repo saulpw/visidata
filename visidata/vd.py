@@ -1364,7 +1364,7 @@ class Column:
             self._aggregator = None
 
     def format(self, cellval):
-        'Format the type-name of given `cellval`.'
+        'Return displayable string of `cellval` according to our `Column.type` and `Column.fmtstr`'
 
         if isinstance(cellval, (list, dict)):
             # complex objects can be arbitrarily large (like sheet.rows)
@@ -1381,16 +1381,16 @@ class Column:
 
     @property
     def hidden(self):
-        "Set column width to zero, to 'hide' it."
+        'True if this Column.width is 0.'
         return self.width == 0
 
     def nEmpty(self, rows):
-        'Count rows that are empty or contain None.'
+        'Count rows that are empty strings or None.'
         vals = self.values(rows)
         return sum(1 for v in vals if v == '' or v == None)
 
     def values(self, rows):
-        'Return list of values of all rows.'
+        'Return a list of values for the given `rows` at this Column.'
         return [self.getValue(r) for r in rows]
 
     def getValue(self, row):
@@ -1789,7 +1789,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
     'A better curses line editing widget.'
 
     def until(func):
-        'Delay until function `func` returns non-zero.'
+        'Call func() until it returns a true value'
         ret = None
         while not ret:
             ret = func()
@@ -1797,11 +1797,11 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         return ret
 
     def splice(v, i, s):
-        'Splice (insert) `s` into string `v` at `i`: (v[i] = s[0]).'
+        'Insert `s` into string `v` at `i` (such that v[i] == s[0]).'
         return v if i < 0 else v[:i] + s + v[i:]
 
     def clean(s):
-        'Escape Curses-unprintable characters.'
+        'Escape unprintable characters.'
         return ''.join(c if c.isprintable() else ('<%04X>' % ord(c)) for c in str(s))
 
     def delchar(s, i, remove=1):
@@ -1852,7 +1852,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
         elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
-        elif ch == '^C' or ch == ESC:             raise EscapeException(ch)
+        elif ch == '^C' or ch == ESC:              raise EscapeException(ch)
         elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
