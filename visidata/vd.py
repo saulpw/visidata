@@ -502,7 +502,7 @@ class VisiData:
         try:
             lstatus = self.leftStatus(vs)
             attr = colors[options.color_status]
-            _clipdraw(scr, self.windowHeight-1, 1, lstatus, attr, self.windowWidth)
+            _clipdraw(scr, self.windowHeight-1, 0, lstatus, attr, self.windowWidth)
         except Exception as e:
             self.exceptionCaught()
 
@@ -1203,8 +1203,7 @@ class Sheet:
                     attr = self.colorizeCell(col, row, cellval)
                     sepattr = self.colorizeRow(row) or colors[options.color_column_sep]
 
-                    scr.chgat(y, x, attr)
-                    _clipdraw(scr, y, x+1, cellval, attr, colwidth)
+                    _clipdraw(scr, y, x, options.disp_column_fill+cellval, attr, colwidth)
 
                     annotation = ''
                     if isinstance(cellval, CalcErrorStr):
