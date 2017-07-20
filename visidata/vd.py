@@ -1803,7 +1803,7 @@ def _clipdraw(scr, y, x, s, attr, w):
         pass
 
 
-def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completions=[], history=[], display=True):
+def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
 
     def until(func):
@@ -1840,7 +1840,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
     first_action = True
     v = str(value)  # value under edit
     i = 0           # index into v
-    comps_idx = 2
+    comps_idx = -1
     hist_idx = 0
     left_truncchar = right_truncchar = truncchar
 
@@ -1877,8 +1877,8 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
-        elif ch == '^I':                           comps_idx += 1; v = complete(v[:i], completions, comps_idx)
-        elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = complete(v[:i], completions, comps_idx)
+        elif ch == '^I':                           comps_idx += 1; v = completer(v[:i], comps_idx) or v
+        elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = completer(v[:i], comps_idx) or v
         elif ch == ENTER:                          break
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
