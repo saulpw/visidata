@@ -23,8 +23,8 @@ class SheetFreqTable(Sheet):
             ColumnItem(col.name, 0, type=col.type, width=30),
             Column('num', int, lambda r: len(r[1])),
             Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
-            Column('histogram', str, lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None)
         ]
+        self.nKeys = 1
 
         for c in self.source.visibleCols:
             if c.aggregator:
@@ -32,7 +32,8 @@ class SheetFreqTable(Sheet):
                                            type=c.aggregator.type or c.type,
                                            getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
 
-        self.nKeys = 1
+        if len(self.columns) == 3:
+            self.columns.append(Column('histogram', str, lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None))
 
         # redefine these commands only to change the helpstr
         self.command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
