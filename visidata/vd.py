@@ -1499,10 +1499,6 @@ def ArrayColumns(ncols):
     Note: argument `ncols` is a count of columns,'''
     return [ColumnItem('', i, width=8) for i in range(ncols)]
 
-def DictKeyColumns(d):
-    'Return a list of Column objects from dictionary keys.'
-    return [ColumnItem(k, k) for k in d]
-
 def SubrowColumn(origcol, subrowidx, **kwargs):
     'Return Column object from sub-row.'
     return Column(origcol.name, origcol.type,
