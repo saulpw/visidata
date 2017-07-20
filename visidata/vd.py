@@ -169,7 +169,7 @@ command('KEY_BTAB', 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through she
 
 command('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'open most recent errors')
 
-command('^R', 'reload(); status("reloaded")', 'reload sheet from source')
+command('^R', 'reload(); recalc(); status("reloaded")', 'reload sheet from source')
 
 command('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search this column forward for regex')
 command('?', 'moveRegex(regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search this column backward for regex')
@@ -742,8 +742,12 @@ class Sheet:
                 self.cursorVisibleColIndex = i
                 return
 
+    def recalc(self):
+        for c in self.columns:
+            c._cachedValues.clear()
+
     def reload(self):
-        'Default reloader, wrapping `loader` method.'
+        'Default reloader, wrapping `loader` member function.'
         if self.loader:
             self.loader()
         else:
@@ -1309,7 +1313,7 @@ class Column:
 
     If `expr` is set, cell values will be computed by this object.'''
 
-    def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None):
+    def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None, cache=False):
         self.name = name      # use property setter from the get-go to strip spaces
         self.type = type      # anytype/str/int/float/date/func
         self.getter = getter  # getter(r)
@@ -1318,6 +1322,7 @@ class Column:
         self.expr = None      # Python string expression if computed column
         self.aggregator = None # function to use on the list of column values when grouping
         self.fmtstr = fmtstr
+        self._cachedValues = collections.OrderedDict() if cache else None
 
     def copy(self):
         'Wrap `copy.copy`.'
@@ -1418,6 +1423,22 @@ class Column:
             return self.type()  # return a suitable value for this type
 
     def getDisplayValue(self, row, width=None):
+        if self._cachedValues is None:
+            return self._getDisplayValue(row, width)
+
+        k = (id(row), width)
+        if k in self._cachedValues:
+            return self._cachedValues[k]
+
+        ret = self._getDisplayValue(row, width)
+        self._cachedValues[k] = ret
+
+        if len(self._cachedValues) > 256:  # max number of entries
+            self._cachedValues.popitem(last=False)
+
+        return ret
+
+    def _getDisplayValue(self, row, width=None):
         'Format cell value for display and return.'
         try:
             cellval = self.getter(row)
