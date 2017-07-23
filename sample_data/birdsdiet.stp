@@ -1,0 +1,19 @@
+-spec: schematype.org/v0.0.1
+-from: github:schematype
+
++birdsdiet:
+  Family: +bird-name
+  MaxAbund: +float 0..500
+  AvgAbund: +float 0..50
+  Mass: +float 0..5500
+  Diet: +bird-food
+  Passerine: +bool/int
+  Aquatic: +bool/int
+
++bird-name: +str // {Word} ( {sep} {word} ){0,3} //
++bird-food: .[Insect PlantInsect Vertebrate]
+
+-defs:
+  Word: / {uc} {word}? /
+  word: / {wc} ( {dash} (= {lc}) | {lc} )* /
+  sep: /( {sp}{amp}{sp} | {sp} | {amp} )/
