@@ -230,6 +230,7 @@ command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("ran
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
 command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
+command('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
 
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
 #

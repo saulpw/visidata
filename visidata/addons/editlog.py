@@ -23,8 +23,8 @@ class EditLog(Sheet):
             ColumnItem('comment', 4),
         ]
 
-        self.command('a', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this editlog')
-        self.command('ga', 'sheet.replay()', 'replay this editlog')
+        self.command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this editlog')
+        self.command('g^A', 'sheet.replay()', 'replay this editlog')
 
         self.sheetmap = {}
         self.currentExecRow = None
