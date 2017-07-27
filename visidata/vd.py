@@ -745,7 +745,8 @@ class Sheet:
 
     def recalc(self):
         for c in self.columns:
-            c._cachedValues.clear()
+            if c._cachedValues:
+                c._cachedValues.clear()
 
     def reload(self):
         'Default reloader, wrapping `loader` member function.'
