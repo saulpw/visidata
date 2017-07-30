@@ -247,6 +247,7 @@ anytype.__name__ = ''
 
 option('float_chars', '+-0123456789.eE_', 'valid numeric characters')
 def currency(s):
+    'a `float` with any leading and trailing non-numeric characters stripped'
     floatchars = options.float_chars
     if isinstance(s, str):
         while s[0] not in floatchars:
@@ -256,7 +257,7 @@ def currency(s):
     return float(s)
 
 class date:
-    '`datetime` wrapper, constructing from time_t or with dateutil.parse'
+    '`datetime` wrapper, constructing from time_t or from str with dateutil.parse'
 
     def __init__(self, s=None):
         if s is None:
@@ -297,7 +298,7 @@ typemap = {
 }
 
 def joinSheetnames(*sheetnames):
-    'Concatenate sheet names using separator (`options.sheetname_joiner`).'
+    'Concatenate sheet names using `options.sheetname_joiner`.'
     return options.sheetname_joiner.join(str(x) for x in sheetnames)
 
 def error(s):
@@ -456,7 +457,6 @@ class VisiData:
         if not columns:
             error('bad columns')
 
-        status("ncols=%s" % len(columns))
         searchBackward = self.searchContext.get("backward")
         if reverse:
             searchBackward = not searchBackward
@@ -617,7 +617,7 @@ class VisiData:
 # end VisiData class
 
 class LazyMap:
-    'Wrap Python `dict` basic functionality.'
+    'A lazily evaluated mapping'
     def __init__(self, keys, getter, setter):
         self._keys = keys
         self._getter = getter
@@ -757,7 +757,7 @@ class Sheet:
 
     def copy(self, suffix="'"):
         '''Return copy of this sheet, with `suffix` appended to `name`, and a deepcopy of `columns`,
-         so their display attributes (width, etc) y may be adjusted independently.'''
+         so their display attributes (width, etc) may be adjusted independently.'''
         c = copy.copy(self)
         c.name += suffix
         c.topRowIndex = c.cursorRowIndex = 0
@@ -1683,7 +1683,7 @@ options = OptionsObject(baseOptions)
 vd().optionsSheet = OptionsSheet(options)
 
 
-# Generator => A .. Z AA AB ...
+# A .. Z AA AB .. ZY ZZ
 defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)
                              for j in itertools.product(string.ascii_uppercase,
                                    repeat=i+1)
@@ -1692,26 +1692,25 @@ defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)
 
 #### enable external addons
 def open_vd(p):
-    'Return a VisiData object with a sheet populated from a path `p`.'
+    'Opens a .vd file as a .tsv file'
     vs = open_tsv(p)
     vs.reload()
-    return vd
+    return vs
 
 def open_py(p):
-    'Read and execute Python script at path `p`.'
+    'Load a .py addon into the global context.'
     contents = p.read_text()
     exec(contents, g_globals)
     status('executed %s' % p)
 
 def open_txt(p):
-    'Create sheet from `.txt` file at path `p`, checking whether it is TSV.'
+    'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     with p.open_text() as fp:
         if '\t' in next(fp):
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, p)
 
-def getTsvHeaders(fp, nlines):
-    'Return list of lists for use as headers, from paragraphs `fp`.'
+def _getTsvHeaders(fp, nlines):
     headers = []
     i = 0
     while i < nlines:
@@ -1733,7 +1732,7 @@ def open_tsv(p, vs=None):
     header_lines = int(options.headerlines)
 
     with vs.source.open_text() as fp:
-        headers = getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
+        headers = _getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
 
         if header_lines == 0:
             vs.columns = ArrayColumns(len(headers[0]))
@@ -1755,7 +1754,7 @@ def reload_tsv_sync(vs):
 
     vs.rows = []
     with vs.source.open_text() as fp:
-        getTsvHeaders(fp, header_lines)  # discard header lines
+        _getTsvHeaders(fp, header_lines)  # discard header lines
 
         vs.progressMade = 0
         vs.progressTotal = vs.source.filesize
@@ -1966,7 +1965,6 @@ class Path:
     'File and path-handling class, modeled on `pathlib.Path`.'
 
     def __init__(self, fqpn):
-        'Initialize with file-queue path-name.'
         self.fqpn = fqpn
         fn = os.path.split(fqpn)[-1]
 
@@ -1981,36 +1979,29 @@ class Path:
         self.suffix = self.ext[1:]
 
     def open_text(self, mode='r'):
-        'Open file.'
         if self.gzip_compressed:
             return gzip.open(self.resolve(), mode='rt', encoding=options.encoding, errors=options.encoding_errors)
         else:
             return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
     def read_text(self):
-        'Open and read file.'
         with self.open_text() as fp:
             return fp.read()
 
     def read_bytes(self):
-        'Open and read binary file.'
         with open(self.resolve(), 'rb') as fp:
             return fp.read()
 
     def is_dir(self):
-        'Return boolean: is path directory?'
         return os.path.isdir(self.resolve())
 
     def exists(self):
-        'Return boolean: does path exist?'
         return os.path.exists(self.resolve())
 
     def iterdir(self):
-        'Return list of directory contents.'
         return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
 
     def stat(self):
-        'Wrap `os.stat`.'
         return os.stat(self.resolve())
 
     def resolve(self):
@@ -2019,12 +2010,11 @@ class Path:
 
     @property
     def parent(self):
-        'Return Path resolving to parent directory.'
+        'Return Path to parent directory.'
         return Path(self.fqpn + "/..")
 
     @property
     def filesize(self):
-        'Return number of bytes in the file according to stat().'
         return self.stat().st_size
 
     def __str__(self):
@@ -2048,7 +2038,9 @@ def openSource(p, filetype=None):
     'open a Path or a str (converts to Path or calls some TBD openUrl)'
     if isinstance(p, str):
         if '://' in p:
-            vs = openUrl(p)
+            filetype = url(p).schema.lower()
+            openfunc = 'openurl_' + filetype
+            vs = g_globals[openfunc](p)
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
     elif isinstance(p, Path):
