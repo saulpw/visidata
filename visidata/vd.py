@@ -414,12 +414,12 @@ class VisiData:
             self.callHook('postedit', v)
         return v
 
-    def getkeystroke(self, scr):
+    def getkeystroke(self, scr, vs=None):
         'Get keystroke and display it on status bar.'
         k = None
         try:
             k = scr.get_wch()
-            self.drawRightStatus(scr)
+            self.drawRightStatus(scr, vs or self.sheets[0]) # continue to display progress %
         except Exception:
             return ''  # curses timeout
 
@@ -507,10 +507,10 @@ class VisiData:
         except Exception as e:
             self.exceptionCaught()
 
-    def drawRightStatus(self, scr):
+    def drawRightStatus(self, scr, vs):
         'Draw right side of status bar.'
         try:
-            rstatus = self.rightStatus()
+            rstatus = self.rightStatus(vs)
             attr = colors[options.color_status]
             _clipdraw(scr, self.windowHeight-1, self.windowWidth-len(rstatus)-2, rstatus, attr, len(rstatus))
             curses.doupdate()
@@ -523,9 +523,8 @@ class VisiData:
         s += options.disp_status_sep.join(self.statuses)
         return s
 
-    def rightStatus(self):
+    def rightStatus(self, sheet):
         'Compose right side of status bar.'
-        sheet = self.sheets[0]
         if sheet.progressMade == sheet.progressTotal:
             pctLoaded = 'rows'
         else:
@@ -562,9 +561,9 @@ class VisiData:
                 self.exceptionCaught()
 
             self.drawLeftStatus(scr, sheet)
-            self.drawRightStatus(scr)  # visible during this getkeystroke
+            self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
-            keystroke = self.getkeystroke(scr)
+            keystroke = self.getkeystroke(scr, sheet)
             if keystroke:
                 if self.keystrokes not in self.allPrefixes:
                     self.keystrokes = ''
@@ -572,7 +571,7 @@ class VisiData:
                 self.statuses.clear()
                 self.keystrokes += keystroke
 
-            self.drawRightStatus(scr)  # visible for commands that wait for input
+            self.drawRightStatus(scr, sheet)  # visible for commands that wait for input
 
             if not keystroke:  # timeout instead of keypress
                 pass
