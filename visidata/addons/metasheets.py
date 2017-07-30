@@ -1,5 +1,7 @@
 from visidata import *
 
+import statistics
+
 command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
 command('C', 'vd.push(ColumnsSheet(sheet))', 'open Columns for this sheet')
 
@@ -152,14 +154,14 @@ class ColumnsSheet(Sheet):
 
         if options.col_stats:
             self.columns.extend([
-                Column('nulls',  int, lambda c,sheet=self: c.nEmpty(sheet.rows)),
-                Column('uniques',  int, lambda c,sheet=self: len(set(c.values(sheet.rows))), width=0),
-                Column('mode',   anytype, lambda c,sheet=self: statistics.mode(c.values(sheet.rows)), width=0),
-                Column('min',    anytype, lambda c,sheet=self: min(c.values(sheet.rows)), width=0),
-                Column('median', anytype, lambda c,sheet=self: statistics.median(c.values(sheet.rows)), width=0),
-                Column('mean',   float, lambda c,sheet=self: statistics.mean(c.values(sheet.rows)), width=0),
-                Column('max',    anytype, lambda c,sheet=self: max(c.values(sheet.rows)), width=0),
-                Column('stddev', float, lambda c,sheet=self: statistics.stdev(c.values(sheet.rows)), width=0),
+                Column('nulls',  int, lambda c,sheet=self.source: c.nEmpty(sheet.rows)),
+                Column('uniques',  int, lambda c,sheet=self.source: len(set(c.values(sheet.rows)))),
+                Column('mode',   anytype, lambda c,sheet=self.source: statistics.mode(c.values(sheet.rows))),
+                Column('min',    anytype, lambda c,sheet=self.source: min(c.values(sheet.rows))),
+                Column('median', anytype, lambda c,sheet=self.source: statistics.median(c.values(sheet.rows))),
+                Column('mean',   float, lambda c,sheet=self.source: statistics.mean(c.values(sheet.rows))),
+                Column('max',    anytype, lambda c,sheet=self.source: max(c.values(sheet.rows))),
+                Column('stddev', float, lambda c,sheet=self.source: statistics.stdev(c.values(sheet.rows))),
             ])
 
 
