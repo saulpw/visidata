@@ -9,6 +9,24 @@ option('col_stats', False, 'include mean/median/etc on Column sheet')
 command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
 command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 
+command('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
+
+class OptionsSheet(Sheet):
+    'options management'
+    def __init__(self, d):
+        super().__init__('options', d)
+        self.columns = ArrayNamedColumns('option value default description'.split())
+        self.command([ENTER, 'e'], 'source[cursorRow[0]] = editCell(1)', 'edit this option')
+        self.addColorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
+        self.nKeys = 1
+
+    def reload(self):
+        self.rows = list(self.source._opts.values())
+
+vd().optionsSheet = OptionsSheet(options)
+
+##
+
 def _getattrname(o, k):
     v = getattr(o, k)
     return v.__name__ if v else None

@@ -1557,7 +1557,6 @@ def _inputLine(prompt, **kwargs):
 
 def saveSheet(vs, fn):
     'Save sheet `vs` with given filename `fn`.'
-    assert vs.progressTotal == vs.progressMade, 'have to finish loading first'
     if Path(fn).exists():
         if options.confirm_overwrite:
             yn = input('%s already exists. overwrite? ' % fn, value='n')[:1]
@@ -1646,8 +1645,6 @@ class DirSheet(Sheet):
                       Column('size', int, lambda r: r[1].st_size),
                       Column('mtime', date, lambda r: r[1].st_mtime)]
 
-command('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
-
 class OptionsObject:
     'minimalist options framework'
     def __init__(self, d):
@@ -1665,22 +1662,7 @@ class OptionsObject:
             raise Exception('no such option "%s"' % k)
         self._opts[k][1] = type(self._opts[k][1])(v)
 
-
-class OptionsSheet(Sheet):
-    'options management'
-    def __init__(self, d):
-        super().__init__('options', d)
-        self.columns = ArrayNamedColumns('option value default description'.split())
-        self.command([ENTER, 'e'], 'source[cursorRow[0]] = editCell(1)', 'edit this option')
-        self.addColorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
-        self.nKeys = 1
-
-    def reload(self):
-        self.rows = list(self.source._opts.values())
-
 options = OptionsObject(baseOptions)
-vd().optionsSheet = OptionsSheet(options)
-
 
 # A .. Z AA AB .. ZY ZZ
 defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)
