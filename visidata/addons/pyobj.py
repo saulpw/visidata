@@ -15,7 +15,7 @@ def load_pyobj(name, *args):
     'Return Sheet object of appropriate type for given sources in `args`.'
     pyobj = args[0]
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
-        if getattr(pyobj, '_fields'):  # list of namedtuple
+        if getattr(pyobj, '_fields', None):  # list of namedtuple
             return SheetNamedTuple(name, *args)
         else:
             return SheetList(name, *args)
