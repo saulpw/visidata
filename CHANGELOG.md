@@ -1,5 +1,10 @@
 # VisiData version history
 
+## v0.93 (2017-07-??)
+- Fix display/feel bugs in editText
+- Remove BACKSPACE for editlog undo
+- Fix colorizer API
+
 ## v0.92 (2017-07-11)
 - `F`requency sheet groups numeric data into intervals
    - added `histogram_bins` and `histogram_even_interval` options

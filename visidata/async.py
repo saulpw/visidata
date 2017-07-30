@@ -10,6 +10,17 @@ option('min_task_time', 0.10, 'only keep tasks that take longer than this number
 
 command('^C', 'if sheet.currentTask: ctypeAsyncRaise(sheet.currentTask.thread, EscapeException)', 'cancel task on the current sheet')
 command('^T', 'vd.push(vd.taskMgr)', 'push task history sheet')
+command('^U', 'toggleProfiling(vd)', 'turn profiling on for main process')
+
+vd().profile = None
+def toggleProfiling(vd):
+    if not vd.profile:
+        vd.profile = cProfile.Profile()
+        vd.profile.enable()
+    else:
+        vd.profile.disable()
+        vd.push(TextSheet("main_profile", getProfileResults(vd.profile)))
+        vd.profile = None
 
 
 # define @async for potentially long-running functions
@@ -80,12 +91,15 @@ def threadProfileCode(task, func, *args, **kwargs):
     pr.enable()
     ret = toplevelTryFunc(task, func, *args, **kwargs)
     pr.disable()
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-    ps.print_stats()
-    task.profileResults = s.getvalue()
+    task.profileResults = getProfileResults(pr)
     return ret
 
+def getProfileResults(pr):
+    s = io.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+    ps.strip_dirs()
+    ps.print_stats()
+    return s.getvalue()
 
 def ctypeAsyncRaise(threadObj, exception):
     'Raise exception for threads running asynchronously.'
@@ -112,7 +126,7 @@ class TaskManager(Sheet):
     def __init__(self):
         super().__init__('task_history')
         self.command('^C', 'ctypeAsyncRaise(cursorRow.thread, EscapeException)', 'cancel this action')
-        self.command(ENTER, 'vd.push(ProfileSheet(cursorRow))', 'push profile sheet for this action')
+        self.command(ENTER, 'vd.push(TextSheet(cursorRow.name+"_profile", cursorRow.profileResults))', 'push profile sheet for this action')
 
         self.columns = [
             ColumnAttr('name'),
@@ -134,9 +148,6 @@ class TaskManager(Sheet):
                 if task.elapsed_s*1000 < float(options.min_task_time):
                     self.rows.remove(task)
 
-def ProfileSheet(task):
-    'Populate sheet showing profiling results.'
-    return TextSheet(task.name + '_profile', task.profileResults)
 
 vd().taskMgr = TaskManager()
 

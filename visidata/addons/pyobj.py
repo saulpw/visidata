@@ -15,7 +15,10 @@ def load_pyobj(name, *args):
     'Return Sheet object of appropriate type for given sources in `args`.'
     pyobj = args[0]
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
-        return SheetList(name, *args)
+        if getattr(pyobj, '_fields'):  # list of namedtuple
+            return SheetNamedTuple(name, *args)
+        else:
+            return SheetList(name, *args)
     elif isinstance(pyobj, dict):
         return SheetDict(name, *args)
     elif isinstance(pyobj, object):
@@ -39,9 +42,13 @@ def AttrColumns(attrnames):
     'Return column names for all elements of list `attrnames`.'
     return [ColumnAttr(name) for name in attrnames]
 
+def DictKeyColumns(d):
+    'Return a list of Column objects from dictionary keys.'
+    return [ColumnItem(k, k) for k in d.keys()]
+
 
 class SheetList(Sheet):
-    'A sheet from a list of homogenous dicts.'
+    'A sheet from a list of homogenous dicts or namedtuples.'
     def __init__(self, name, *args, **kwargs):
         # columns is a list of strings naming attributes on the objects within the obj
         super().__init__(name, *args, **kwargs)
@@ -53,11 +60,28 @@ class SheetList(Sheet):
         if self.columns:
             pass
         elif self.rows and isinstance(self.rows[0], dict):  # list of dict
-            self.columns = DictKeyColumns(self.rows[0])
+            self.columns = DictKeyColumns(self.rows[0], self.rows[0].keys())
+        elif self.rows and isinstance(self.rows[0], tuple) and getattr(self.rows[0], '_fields'):  # list of namedtuple
+            self.columns = [ColumnItem(k, i) for i, k in enumerate(self.rows[0]._fields)]
         else:
             self.columns = [Column(self.name)]
 
         self.command('^J', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
+
+
+class SheetNamedTuple(Sheet):
+    'a single namedtuple, with key and value columns'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.command(ENTER, 'dive()', 'dive into this value')
+        self.columns = [ColumnItem('name', 0), ColumnItem('value', 1)]
+
+    def reload(self):
+        self.rows = list(zip(self.source._fields, self.source))
+
+    def dive(self):
+        push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
+
 
 class SheetDict(Sheet):
     def __init__(self, *args, **kwargs):

@@ -169,7 +169,7 @@ command('KEY_BTAB', 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through she
 
 command('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'open most recent errors')
 
-command('^R', 'reload(); status("reloaded")', 'reload sheet from source')
+command('^R', 'reload(); recalc(); status("reloaded")', 'reload sheet from source')
 
 command('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search this column forward for regex')
 command('?', 'moveRegex(regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search this column backward for regex')
@@ -230,6 +230,7 @@ command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("ran
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
 command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
+command('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
 
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
 #
@@ -742,8 +743,13 @@ class Sheet:
                 self.cursorVisibleColIndex = i
                 return
 
+    def recalc(self):
+        for c in self.columns:
+            if c._cachedValues:
+                c._cachedValues.clear()
+
     def reload(self):
-        'Default reloader, wrapping `loader` method.'
+        'Default reloader, wrapping `loader` member function.'
         if self.loader:
             self.loader()
         else:
@@ -1309,7 +1315,7 @@ class Column:
 
     If `expr` is set, cell values will be computed by this object.'''
 
-    def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None):
+    def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None, cache=False):
         self.name = name      # use property setter from the get-go to strip spaces
         self.type = type      # anytype/str/int/float/date/func
         self.getter = getter  # getter(r)
@@ -1318,6 +1324,7 @@ class Column:
         self.expr = None      # Python string expression if computed column
         self.aggregator = None # function to use on the list of column values when grouping
         self.fmtstr = fmtstr
+        self._cachedValues = collections.OrderedDict() if cache else None
 
     def copy(self):
         'Wrap `copy.copy`.'
@@ -1418,6 +1425,22 @@ class Column:
             return self.type()  # return a suitable value for this type
 
     def getDisplayValue(self, row, width=None):
+        if self._cachedValues is None:
+            return self._getDisplayValue(row, width)
+
+        k = (id(row), width)
+        if k in self._cachedValues:
+            return self._cachedValues[k]
+
+        ret = self._getDisplayValue(row, width)
+        self._cachedValues[k] = ret
+
+        if len(self._cachedValues) > 256:  # max number of entries
+            self._cachedValues.popitem(last=False)
+
+        return ret
+
+    def _getDisplayValue(self, row, width=None):
         'Format cell value for display and return.'
         try:
             cellval = self.getter(row)
@@ -1498,10 +1521,6 @@ def ArrayColumns(ncols):
 
     Note: argument `ncols` is a count of columns,'''
     return [ColumnItem('', i, width=8) for i in range(ncols)]
-
-def DictKeyColumns(d):
-    'Return a list of Column objects from dictionary keys.'
-    return [ColumnItem(k, k) for k in d]
 
 def SubrowColumn(origcol, subrowidx, **kwargs):
     'Return Column object from sub-row.'
@@ -1786,7 +1805,7 @@ def _clipdraw(scr, y, x, s, attr, w):
         pass
 
 
-def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completions=[], history=[], display=True):
+def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
 
     def until(func):
@@ -1823,7 +1842,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
     first_action = True
     v = str(value)  # value under edit
     i = 0           # index into v
-    comps_idx = 2
+    comps_idx = -1
     hist_idx = 0
     left_truncchar = right_truncchar = truncchar
 
@@ -1860,8 +1879,8 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
-        elif ch == '^I':                           comps_idx += 1; v = complete(v[:i], completions, comps_idx)
-        elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = complete(v[:i], completions, comps_idx)
+        elif ch == '^I':                           comps_idx += 1; v = completer(v[:i], comps_idx) or v
+        elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = completer(v[:i], comps_idx) or v
         elif ch == ENTER:                          break
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
