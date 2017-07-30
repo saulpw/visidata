@@ -59,6 +59,11 @@ def command(keystrokes, execstr, helpstr):
     for ks in keystrokes:
         baseCommands[ks] = (ks, helpstr, execstr)
 
+def alias(new, existing):
+    _, helpstr, execstr = baseCommands[existing]
+    command(new, execstr, helpstr)
+
+
 def option(name, default, helpstr=''):
     baseOptions[name] = [name, default, default, helpstr]  # see OptionsObject
 

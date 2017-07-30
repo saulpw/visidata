@@ -1,6 +1,7 @@
 from visidata import *
 
-command(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", *sheet.commands.maps))', 'open command help sheet')
+command('z?', 'vd.push(HelpSheet(name + "_commands", *sheet.commands.maps))', 'open command help sheet')
+alias('KEY_F(1)', 'z?')
 
 ## Built-in sheets
 class HelpSheet(Sheet):
