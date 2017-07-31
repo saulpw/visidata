@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+#  how to detect and colors:
+#    files changed in index
+#    changes not staged for commit
+#    untracked files
+
+from visidata import *
+import pygit2
+
+option('color_git_nonindex', 'yellow')
+option('color_git_index_new', 'green')
+option('color_git_wt_new', 'cyan')
+
+def open_git(p):
+    return GitStatus(p)
+
+class VisiGit:
+    def rightStatus(self, vs):
+        pass
+
+def ToEnum(d, start):
+    return dict((d[k], k[len(start):]) for k in d if k.startswith(start))
+
+class GitStatus(Sheet):
+    GIT_STATUSES = ToEnum(vars(pygit2), 'GIT_STATUS_')
+    def __init__(self, p):
+        self.repo = pygit2.Repository(p.resolve())
+        super().__init__(p.resolve(), p)
+
+        self.columns = [Column('filename', str, lambda r: r.name + r.ext),
+                      Column('status', anytype, lambda r,s=self: s.git_status(r)),
+                      Column('type', str, lambda r: r.is_dir() and '/' or r.suffix),
+                      Column('size', int, lambda r: r.filesize),
+                      Column('mtime', date, lambda r: r.stat().st_mtime)]
+
+        self.addColorizer('row', 3, GitStatus.fileColorizer)
+
+        self.command('a', 'repo.index.add(rel(cursorRow))', 'add file to index')
+        self.command('ga', 'repo.index.add_all([rel(r) for r in self.selectedRows])', 'add all selected files to index')
+        self.command('d', 'repo.index.remove(rel(cursorRow)) if rel(cursorRow) in repo.index else status("not in index")', 'delete this file from index')
+        self.command('gd', '[repo.index.remove(rel(r)) for r in self.selectedRows if rel(r) in repo.index]', 'delete all selected files from index')
+        self.command('^S', 'repo.index.write()', 'commit changes to index')
+        self.command(ENTER, 'vd.push(openSource(rel(cursorRow)))', 'open file')  # path, filename
+        self.command('i', 'open(repo.workdir + "/.gitignore", "a").write(rel(cursorRow)+"\\n")', 'add file to toplevel .gitignore')  # path, filename
+        self.command('gi', 'open(repo.workdir + "/.gitignore", "a").write(input("add to .gitignore"))', 'add input line to toplevel .gitignore')  # path, filename
+
+    @staticmethod
+    def fileColorizer(self, c, row, v):
+        if self.git_status(row) == 'INDEX_NEW':
+            return options.color_git_index_new
+        elif self.git_status(row) == 'WT_NEW':
+            return options.color_git_wt_new
+        elif self.rel(row) not in self.repo.index:
+            return options.color_git_nonindex
+
+    def git_status(self, pathrow):
+        relfn = pathrow.relpath(self.repo.workdir)
+        st = self._cachedGitStatus.get(relfn, None)
+        if st is None:
+            return ''
+
+        if st in self.GIT_STATUSES:
+            return self.GIT_STATUSES[self._cachedGitStatus[pathrow.relpath(self.repo.workdir)]]
+
+        return str(st)
+
+    def rel(self, r):
+        return r.relpath(self.repo.workdir)
+
+    def reload(self):
+        self._cachedGitStatus = self.repo.status()
+        self.rows = [p for p in Path(self.repo.workdir).iterdir() if p.name != '.git']  #  if not p.name.startswith('.')]
+
+vd().status('saul.pw/vgit v0.1')
+run([GitStatus(Path('.git'))])
