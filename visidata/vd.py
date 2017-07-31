@@ -1994,6 +1994,9 @@ class Path:
         'Resolve pathname shell variables and ~userdir'
         return os.path.expandvars(os.path.expanduser(self.fqpn))
 
+    def relpath(self, start):
+        return os.path.relpath(os.path.realpath(self.resolve()), start)
+
     @property
     def parent(self):
         'Return Path to parent directory.'
