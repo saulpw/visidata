@@ -63,6 +63,7 @@ class CommandsTestCase(unittest.TestCase):
                 vd.getkeystroke = Mock(side_effect=['^J'])
 
             vs = visidata.SheetObject('test_commands', 'some object')
+            vs.vd = vd
             vs.reload()
             vd.sheets = [vs]
             vs.draw(self.scr)

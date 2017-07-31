@@ -1,9 +1,11 @@
 # VisiData version history
 
-## v0.93 (2017-07-??)
+## v0.93 (2017-07-30)
 - Fix display/feel bugs in editText
 - Remove BACKSPACE for editlog undo
 - Fix colorizer API
+- Add `ctrl-u` command to toggle profiling of main thread
+- Fix `C`olumn statistics (`options.col_stats` still disabled by default)
 
 ## v0.92 (2017-07-11)
 - `F`requency sheet groups numeric data into intervals

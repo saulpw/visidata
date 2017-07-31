@@ -1,4 +1,4 @@
-# VisiData v0.92 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
+# VisiData v0.93 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A terminal interface for exploring and arranging tabular data
 
@@ -61,7 +61,7 @@ Further documentation is available at [readthedocs](https://visidata.readthedocs
 VisiData was created by Saul Pwanson `<vd@saul.pw>`.
 
 VisiData needs lots of usage and testing to help it become useful and reliable.
-If you use VisiData, I would love if you would send me a screencast!
+If you use VisiData, I would love it if you would send me a screencast!
 Maybe there is an easy way to improve the tool for both of us.
 
 Also please create a GitHub issue if anything doesn't appear to be working right.
@@ -75,7 +75,7 @@ Visidata has two main branches:
 
 If you wish to contribute, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it.
 
-A developer's guide can be found [here](http://visidata.readthedocs.io/en/stable/dev-guide).
+A developer's guide can be found [here](http://visidata.readthedocs.io/en/stable/architecture.html).
 
 ## License
 

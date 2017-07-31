@@ -9,6 +9,24 @@ option('col_stats', False, 'include mean/median/etc on Column sheet')
 command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
 command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 
+command('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
+
+class OptionsSheet(Sheet):
+    'options management'
+    def __init__(self, d):
+        super().__init__('options', d)
+        self.columns = ArrayNamedColumns('option value default description'.split())
+        self.command([ENTER, 'e'], 'source[cursorRow[0]] = editCell(1)', 'edit this option')
+        self.addColorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
+        self.nKeys = 1
+
+    def reload(self):
+        self.rows = list(self.source._opts.values())
+
+vd().optionsSheet = OptionsSheet(options)
+
+##
+
 def _getattrname(o, k):
     v = getattr(o, k)
     return v.__name__ if v else None
@@ -133,15 +151,17 @@ class ColumnsSheet(Sheet):
         self.cursorRowIndex = self.source.cursorColIndex
 
         if options.col_stats:
+            import statistics
+
             self.columns.extend([
-                Column('nulls',  int, lambda c,sheet=self: c.nEmpty(sheet.rows)),
-                Column('uniques',  int, lambda c,sheet=self: len(set(c.values(sheet.rows))), width=0),
-                Column('mode',   anytype, lambda c,sheet=self: statistics.mode(c.values(sheet.rows)), width=0),
-                Column('min',    anytype, lambda c,sheet=self: min(c.values(sheet.rows)), width=0),
-                Column('median', anytype, lambda c,sheet=self: statistics.median(c.values(sheet.rows)), width=0),
-                Column('mean',   float, lambda c,sheet=self: statistics.mean(c.values(sheet.rows)), width=0),
-                Column('max',    anytype, lambda c,sheet=self: max(c.values(sheet.rows)), width=0),
-                Column('stddev', float, lambda c,sheet=self: statistics.stdev(c.values(sheet.rows)), width=0),
+                Column('nulls',  int, lambda c,sheet=self.source: c.nEmpty(sheet.rows)),
+                Column('uniques',  int, lambda c,sheet=self.source: len(set(c.values(sheet.rows)))),
+                Column('mode',   anytype, lambda c,sheet=self.source: statistics.mode(c.values(sheet.rows))),
+                Column('min',    anytype, lambda c,sheet=self.source: min(c.values(sheet.rows))),
+                Column('median', anytype, lambda c,sheet=self.source: statistics.median(c.values(sheet.rows))),
+                Column('mean',   float, lambda c,sheet=self.source: statistics.mean(c.values(sheet.rows))),
+                Column('max',    anytype, lambda c,sheet=self.source: max(c.values(sheet.rows))),
+                Column('stddev', float, lambda c,sheet=self.source: statistics.stdev(c.values(sheet.rows))),
             ])
 
 
