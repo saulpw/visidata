@@ -1,7 +1,5 @@
 from visidata import *
 
-import statistics
-
 command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
 command('C', 'vd.push(ColumnsSheet(sheet))', 'open Columns for this sheet')
 
@@ -153,6 +151,8 @@ class ColumnsSheet(Sheet):
         self.cursorRowIndex = self.source.cursorColIndex
 
         if options.col_stats:
+            import statistics
+
             self.columns.extend([
                 Column('nulls',  int, lambda c,sheet=self.source: c.nEmpty(sheet.rows)),
                 Column('uniques',  int, lambda c,sheet=self.source: len(set(c.values(sheet.rows)))),

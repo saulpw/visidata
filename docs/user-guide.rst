@@ -43,15 +43,18 @@ current cursor position.
    -  ``zl`` scrolls sheet one column to right
    -  ``zs`` scrolls sheet to leftmost column
    -  ``ze`` scrolls sheet to rightmost column
+- ``c`` move to a column whose name matches a regex search
+- ``r`` move to a specified row number
+- ``<``/``>`` moves up/down this column to the next cell which has a different value from the current cell
+- ``{``/``}`` moves up/down to the next selected row
 
 
 Arranging Columns
 =================
 
 -  ``-`` (minus) hides a column
--  ``_`` (underscore) adjusts a column's width so that the entire
-   contents of its cells are visible.
--  ``^`` sets a column's name
+    - To unhide a column, go to the ``C``\olumns sheet and ``e``\dit the width.
+-  ``_`` (underscore) adjusts a column's width so that the entire contents of its cells are visible.
 -  ``!`` makes the current column a *key column*.
 
 Column Types
@@ -94,10 +97,16 @@ Creating new columns
       on.
 
 -  ``+`` join selected columns on Columns sheet
+-  ``+`` on the source sheet allows you to select a statistical aggregator for this column
+    - you can see and edit all existing aggregators in the ``C``\olumns sheet
+    - see `tour 01 <http://github.com/saulpw/visidata/tree/stable/docs/tours.rst>`_ for an example usage
+- ``;`` creates new columns from the capture groups of the given regex
 
-Searching/Selecting/Deleting rows
-=================================
+Searching/Selecting/Modifying rows
+==================================
 
+- ``/`` search this column forward with regex search
+- ``?`` search this column backwards with regex search
 - ``d``\elete a row
 - ``s``\elect a row
 - ``u``\nselect a row
@@ -105,14 +114,19 @@ Searching/Selecting/Deleting rows
 - ``,`` select rows whose contents within this column match the current cell
 -  ``[``/``]`` sort asc/desc by one column
 - ``"`` push a duplicate sheet which contains only the selected rows
+- ``a``\ppend a blank row
 
 Modifying data
 ==============
 
 -  ``e``\ dit cell contents
    -  Edits made to a joined sheet are by design automatically reflected back to the source sheets.
-
+- ``ge`` edits the cell contents of all of the selected rows
+-  ``^`` allows you to edit a column's name
+- ``HL`` allow you to move the current column (left/right).
+- ``JK`` allow you to move the current row (up/down).
 -  ``Ctrl-s``\ ave to ``.csv`` or ``.tsv`` (by extension)
+
 
 Special Sheets
 ==============
@@ -138,8 +152,22 @@ Metasheets
          matches on sheet joins)
 
 -  ``Shift-O``\ ptions sheet to change the style or behavior
+    - Note: currently the only way to set an option to ``False`` is to pass an empty string.
 -  ``Ctrl-e``\ rror metasheet
 -  ``Ctrl-t``\ hreads metasheet
+
+.visidatarc
+-----------
+Allows you to customize VisiData settings across every session.
+
+A sample .visidatarc is
+
+::
+
+    options.color_key_col = "cyan"
+
+This configures the  key column to be colored 'cyan'.
+
 
 Glossary
 ========

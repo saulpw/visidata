@@ -6,7 +6,7 @@
   Ctrl- E  'E'rrors sheet
   Ctrl- F  'F'orward one page [vim]
   Ctrl- G  file information [vim]
-  Ctrl- H  BACKSPACE (undo, with editlog)
+  Ctrl- H
   Ctrl- I  TAB (cycle sheets)
   Ctrl- J  ENTER (dive into row/value) [sheet-specific]
   Ctrl- K
@@ -95,7 +95,7 @@
  Shift- ^  change column name
  Shift- _  change column width
         `  (backtick) push source sheet
-        a
+        a  'a'dd a blank row
         b
         c  'c'olumn move by regex
         d  'd'elete row

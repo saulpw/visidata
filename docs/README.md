@@ -2,10 +2,10 @@
 
 ## User Guides
 
-* [README](https://github.com/saulpw/visidata/blob/stable/docs/user-guide.rst), an effective quickstart guide
+* [README](https://visidata.readthedocs.io/en/stable/user-guide.html), an effective quickstart guide
 
-* [Tours](https://github.com/saulpw/visidata/blob/stable/docs/tours.rst)
+* [Tours](https://visidata.readthedocs.io/en/stable/tours.html)
 
 ## Developer Guides
 
-* [Architecture](https://github.com/saulpw/visidata/blob/stable/docs/architecture.rst)
+* [Architecture](https://visidata.readthedocs.io/en/stable/architecture.html)

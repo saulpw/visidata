@@ -318,6 +318,8 @@ Custom VisiData applications
 Import the ``visidata`` package into a Python script to create a custom
 VisiData application.
 
+For an example, see `vdgalcon <https://github.com/saulpw/vdgalcon`_.
+
 ----
 
 Other functionality

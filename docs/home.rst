@@ -1,5 +1,5 @@
 ==============
-VisiData v0.92
+VisiData v0.93
 ==============
 
 A terminal interface for exploring and arranging tabular data
@@ -28,13 +28,14 @@ or clone from git
 ::
 
     $ git clone http://github.com/saulpw/visidata.git
+    $ cd visidata
+    $ pip install -r requirements.txt
+    $ python setup.py install
 
 Dependencies
 ~~~~~~~~~~~~
 
--  Python 3.3
--  python3-dateutil (if converting string column to datetime)
--  openpyxl (if opening .xlsx files)
+-  Python 3.3+
 -  h5py and numpy (if opening .hdf5 files)
 
 **Remember to install the Python3 versions of these packages with e.g.
@@ -63,6 +64,7 @@ If installed via ``git clone``, first set up some environment variables
 License
 -------
 
-VisiData is licensed under GPLv3.
+The innermost core file, ``vd.py``, is licensed under the MIT license.
 
+Other VisiData components, including the main ``vd`` application, addons, and other code in this repository are licensed under GPLv3.
 

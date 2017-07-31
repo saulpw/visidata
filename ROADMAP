@@ -1,4 +1,3 @@
-
 # Feature Roadmap
 
 A loose plan that is subject to change.
@@ -11,7 +10,6 @@ A loose plan that is subject to change.
 ## Future
 - delete regex match in cells
 - maintain original ordering with implicit/hidden line# column
-- freqtbl: make bins from continuous data
 - popup windows for enum selection
 - save as .json
 - simple file management in VSheetDir:
