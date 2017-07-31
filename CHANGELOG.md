@@ -1,6 +1,6 @@
 # VisiData version history
 
-## v0.93 (2017-07-??)
+## v0.93 (2017-07-30)
 - Fix display/feel bugs in editText
 - Remove BACKSPACE for editlog undo
 - Fix colorizer API
