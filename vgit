@@ -44,7 +44,7 @@ class GitStatus(Sheet):
 #        self.repo.index.read()
 
         self.columns = [Column('filename', str, lambda r: r.name + r.ext),
-                      Column('status', anytype, lambda r,s=self: s.git_status(r)),
+                      Column('status', anytype, lambda r,s=self: s.git_status(r), cache=True),
                       Column('type', str, lambda r: r.is_dir() and '/' or r.suffix),
                       Column('size', int, lambda r: r.filesize),
                       Column('mtime', date, lambda r: r.stat().st_mtime)]
@@ -59,6 +59,7 @@ class GitStatus(Sheet):
         self.command(ENTER, 'vd.push(openSource(rel(cursorRow)))', 'open file')  # path, filename
         self.command('i', 'open(repo.workdir + "/.gitignore", "a").write(rel(cursorRow)+"\\n")', 'add file to toplevel .gitignore')  # path, filename
         self.command('gi', 'open(repo.workdir + "/.gitignore", "a").write(input("add to .gitignore"))', 'add input line to toplevel .gitignore')  # path, filename
+        self.command('m', 'os.rename(rel(cursorRow), input("rename file to: ", value=rel(cursorRow)))', 'rename this file')
 
     @staticmethod
     def fileColorizer(self, c, row, v):
@@ -71,7 +72,10 @@ class GitStatus(Sheet):
 
     def git_status(self, pathrow):
         relfn = pathrow.relpath(self.repo.workdir)
-        st = self._cachedGitStatus.get(relfn, None)
+        if pathrow.is_dir():
+            relfn += '/'
+        #st = self._cachedGitStatus.get(relfn, None)
+        st = self.repo.status_file(relfn)
         if st is None:
             return 'no'
 
