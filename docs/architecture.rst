@@ -7,9 +7,7 @@ which data can be easily manipulated from the keyboard and terminal.  Unlike a
 spreadsheet, however, the data is well-structured, so that the data model is
 closer to Pandas or an RDBMS.
 
-* The main unit of functionality is the *sheet*. A ``vd`` instance contains a
-  stack of sheets, the left-most (!) of which (``vd.sheets[0]``) is the one
-  displayed.
+* The main unit of functionality is the *sheet*.
 
 * Sheets have *rows* and *columns*.
 
@@ -28,9 +26,13 @@ implementation and allows for some radical optimizations to data workflow.
 One project, two licenses
 =========================
 
-``vd.py`` is a stand-alone library. It is meant for use in other projects. It is distributed under the MIT free software license.
+``vd.py`` is a single-file stand-alone library, freely available for use in
+other projects.  It is distributed under the MIT free software license.
 
-The rest of the matter in this project is distributed under the more restrictive GPLv3 free software license.
+The rest of this repository is the VisiData application, runnable as ``vd``
+from the command-line.  Everything but ``vd.py``, including the data sources and
+extensions and addons, are distributed under the more restrictive GPLv3 free
+software license.  Additional commercial licenses are negotiable.
 
 ----
 
@@ -38,27 +40,27 @@ Columns
 =======
 
 Note that each ``Column`` object is detached from any sheets in which it
-appears. Think of is as a lens through which each individual *row* of a sheet
-is viewed. Every ``Column`` must have a name and a ``getter`` method.
+appears. Think of it as a lens through which each individual *row* of a sheet
+is viewed. Every ``Column`` must have at least a ``name`` and a ``getter`` method.
 
 ``name`` and other properties
 -----------------------------
 
-Columns have a few properties, all optional except for ``name``:
-  
+Columns have a few properties, all optional in the constructor except for ``name``:
+
 * **name**: should be a valid Python identifier and unique among
   the column names on the sheet. Some features may not work if these conditions
   are not met.
-    
+
 * **type**: defaults to ``str``; other values are ``int``, ``float``,
   ``date``, ``currency``. There is also a dummy ``anytype`` to produce a
   stringified version for anything not in these categories.
-    
+
 * **width**: specifies the default width for the column; ``0`` means
   hidden.
-    
+
 * **fmtstr**: format string for use with ``type`` when ``type`` is a date. 
-    
+
 * **aggregators**: a dictionary providing a few simple statistical
   functions (``sum``, ``mean``, ``max``, etc.).
 
@@ -82,7 +84,7 @@ for that column. This is the essential functionality of a ``Column``.
 A ``getter`` has wrapper methods ``getValue`` and ``getDisplayValue`` to
 represent a value as its declared type or to format a value properly for
 display.
-    
+
 Setter
 ~~~~~~
 
@@ -91,42 +93,23 @@ the ``Sheet.editCell`` method. It takes a row object and new value, and sets
 the value for that column.
 
 When a new ``Column`` object is initialized, ``setter`` defaults to ``None``,
-making the column read-only (``Column.setValues``).
+making the column read-only.
 
-Normally when a
-``Column`` object is instantiated in code rather than being read from a source,
-the setter is defined as an argument to ``Column``. For example:
-
-.. code-block:: python
-
-   def ColumnAttr(attrname, type=anytype, **kwargs):
-       'Return Column object with `attrname` from current row Python object.'
-       return Column(attrname,
-                     type=type,
-                     getter=lambda r,b=attrname: getattr(r,b),
-                     setter=lambda r,v,b=attrname: setattr(r,b,v),
-                     **kwargs)
+``Column.setValues`` is used to set the values for one or many rows programmatically.
 
 Built-in methods for column-creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``ColumnAttr`` above is one of several built-in methods for constructing a
-``Column`` object:
+There are several helper methods for constructing a ``Column`` object:
 
-* ``ColumnAttr`` gets an attribute from the row object using
-  ``visidata.getattr`` (and allows it to be set with ``visidata.setattr``).
-  This is useful when the rows are Python objects. 
-   
-* Another is ``ColumnItem(colname, itemkey)``. It uses ``visidata.getitem``,
-  which is useful when the rows are mapping objects.
+* ``ColumnAttr(attrname, **kwargs)`` gets/sets an attribute from the row object using
+  ``getattr``/``setattr``.
+  This is useful when the rows are Python objects.
 
-* Two others are ``combineColumns``, ``SubrowColumn``, and
-  ``visidata.ColumnItem``.
+* ``ColumnItem(colname, itemkey, **kwargs)`` uses ``__getitem__``/``setitem`` on the row.
+  This is useful when the rows are Python mappings, like dict.
 
-Because cell-values are computed on the fly by lambdas, they are hard to
-observe in a REPL or using a conventional debugger. It may be useful to call
-``Ctrl-o`` followed by ``sheet`` or ``vd.sheets``, to inspect sheets'
-attributes visually.
+* ``SubrowColumn(origcol, subrowidx, **kwargs)`` uses ``origcol.getter(row[i])``.  This is useful for rows which are a list of references to other rows, like with joined sheets.
 
 ----
 
