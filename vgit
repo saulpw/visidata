@@ -23,10 +23,25 @@ def ToEnum(d, start):
     return dict((d[k], k[len(start):]) for k in d if k.startswith(start))
 
 class GitStatus(Sheet):
-    GIT_STATUSES = ToEnum(vars(pygit2), 'GIT_STATUS_')
+    GIT_STATUSES = { 0: '',
+            1: 'add',
+            2: 'mod',
+            4: 'rm',
+            8: 'mv',
+            16: 'chmod',
+            128: 'unstaged_add',
+            256: 'unstaged_mod',
+            512: 'unstaged_rm',
+            1024: 'unstaged_chmod',
+            2048: 'unstaged_mv',
+            4096: 'unreadable',
+            16384: 'ignored',
+    }
     def __init__(self, p):
         self.repo = pygit2.Repository(p.resolve())
         super().__init__(p.resolve(), p)
+
+#        self.repo.index.read()
 
         self.columns = [Column('filename', str, lambda r: r.name + r.ext),
                       Column('status', anytype, lambda r,s=self: s.git_status(r)),
@@ -34,7 +49,7 @@ class GitStatus(Sheet):
                       Column('size', int, lambda r: r.filesize),
                       Column('mtime', date, lambda r: r.stat().st_mtime)]
 
-        self.addColorizer('row', 3, GitStatus.fileColorizer)
+#        self.addColorizer('row', 3, GitStatus.fileColorizer)
 
         self.command('a', 'repo.index.add(rel(cursorRow))', 'add file to index')
         self.command('ga', 'repo.index.add_all([rel(r) for r in self.selectedRows])', 'add all selected files to index')
@@ -58,19 +73,19 @@ class GitStatus(Sheet):
         relfn = pathrow.relpath(self.repo.workdir)
         st = self._cachedGitStatus.get(relfn, None)
         if st is None:
-            return ''
+            return 'no'
 
-        if st in self.GIT_STATUSES:
-            return self.GIT_STATUSES[self._cachedGitStatus[pathrow.relpath(self.repo.workdir)]]
-
-        return str(st)
+        strstatus = ' '.join(v for k, v in self.GIT_STATUSES.items() if st & k)
+        if not strstatus:
+            strstatus = str(st)
+        return strstatus
 
     def rel(self, r):
         return r.relpath(self.repo.workdir)
 
     def reload(self):
         self._cachedGitStatus = self.repo.status()
-        self.rows = [p for p in Path(self.repo.workdir).iterdir() if p.name != '.git']  #  if not p.name.startswith('.')]
+        self.rows = [p for p in Path(self.repo.workdir).iterdir() if p.name not in ('.git', '..')]
 
 vd().status('saul.pw/vgit v0.1')
 run([GitStatus(Path('.git'))])
