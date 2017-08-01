@@ -13,6 +13,7 @@ option('color_git_unmodified', 'yellow')
 option('color_git_add_staged', 'green')
 option('color_git_wt_new', 'cyan')
 option('color_git_mod_unstaged', 'brown')
+option('vgit_show_ignored', True)
 
 def open_git(p):
     return GitStatus(p)
@@ -20,6 +21,7 @@ def open_git(p):
 class GitStatus(Sheet):
     def __init__(self, p):
         super().__init__(p.relpath(''), p)
+        self.extra_args = []
 
         self.columns = [Column('filename', str, lambda r,s=self: s.rel(r)),
                       Column('status', anytype, lambda r,s=self: s.status_text(s._cachedStatus[s.rel(r)])),
@@ -28,6 +30,8 @@ class GitStatus(Sheet):
                       Column('mtime', date, lambda r: r.stat().st_mtime)]
 
         self.addColorizer('row', 3, GitStatus.fileColorizer)
+
+        self.command('f', 'sheet.extra_args.append("-f")', 'force next action with "-f"')
 
         self.command('a', 'git("add", rel(cursorRow))', 'add new file or file modifications to staging/index')
         self.command('d', 'git("rm", rel(cursorRow))', 'stage this file for deletion')
@@ -38,7 +42,7 @@ class GitStatus(Sheet):
 #        self.command('gd', '[repo.index.remove(rel(r)) for r in self.selectedRows if rel(r) in repo.index]', 'delete all selected files from index')
         self.command('^S', 'git("commit", "-m", input("commit message: "))', 'commit changes')
         self.command(ENTER, 'vd.push(openSource(rel(cursorRow)))', 'open file')  # path, filename
-#        self.command('i', 'open(repo.workdir + "/.gitignore", "a").write(rel(cursorRow)+"\\n")', 'add file to toplevel .gitignore')  # path, filename
+        self.command('i', 'open(workdir + "/.gitignore", "a").write(rel(cursorRow)+"\\n")', 'add file to toplevel .gitignore')
 #        self.command('gi', 'open(repo.workdir + "/.gitignore", "a").write(input("add to .gitignore"))', 'add input line to toplevel .gitignore')  # path, filename
 #        self.command('m', 'os.rename(rel(cursorRow), input("rename file to: ", value=rel(cursorRow)))', 'rename this file')
 #
@@ -57,6 +61,7 @@ class GitStatus(Sheet):
             return 'ignored'
         else:
             return ''
+
     @staticmethod
     def fileColorizer(self, c, row, v):
         st = self.git_status(row)
@@ -67,25 +72,30 @@ class GitStatus(Sheet):
             return 'red'
         elif st == '??': # untracked
             return 'yellow'
-        elif self.git_status(row) == '!!':  # ignored
-            return 'blue bold'
+        elif st == '!!':  # ignored
+            return '237 blue'
 
         return 'white'
 
     def git(self, *args, **kwargs):
-        status(*args)
+        args = list(args) + self.extra_args
+        self.extra_args.clear()
         status(sh.git(*args, **kwargs))
         self.reload()
 
     def git_status(self, r):
         return self._cachedStatus.get(self.rel(r), ',,')
 
+    def ignored(self, fn):
+        return not options.vgit_show_ignored and self._cachedStatus[fn] == '!!'
+
     def rel(self, r):
         return r.relpath(str(self.source) + '/')
 
     def reload(self):
         filenames = dict((self.rel(p), Path(self.rel(p))) for p in self.source.iterdir() if p.name not in ('.git', '..'))  # files in working dir
-        self.rows = [p for k, p in filenames.items()]
+
+        self.rows = []
         self._cachedStatus.clear()
         for fn in sh.git('ls-files', '-z').split('\0'):
             self._cachedStatus[fn] = '  '
@@ -95,8 +105,11 @@ class GitStatus(Sheet):
                 st = status_line[:2]
                 fn = self.rel(Path(status_line[3:]))
                 if fn not in filenames:
-                    self.rows.append(Path(fn))
+                    if not self.ignored(fn):
+                        self.rows.append(Path(fn))
                 self._cachedStatus[fn] = st
+
+        self.rows.extend([p for k, p in filenames.items() if not self.ignored(k)])
 
         self.recalc()
         self.rows.sort(key=lambda r,col=self.columns[-1]: col.getValue(r), reverse=True)
