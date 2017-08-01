@@ -6,7 +6,7 @@
 #    untracked files
 
 from visidata import *
-import pygit2
+import sh
 
 option('color_git_nonindex', 'yellow')
 option('color_git_index_new', 'green')
@@ -38,13 +38,10 @@ class GitStatus(Sheet):
             16384: 'ignored',
     }
     def __init__(self, p):
-        self.repo = pygit2.Repository(p.resolve())
         super().__init__(p.resolve(), p)
 
-#        self.repo.index.read()
-
-        self.columns = [Column('filename', str, lambda r: r.name + r.ext),
-                      Column('status', anytype, lambda r,s=self: s.git_status(r), cache=True),
+        self.columns = [Column('filename', str, lambda r,s=self: s.rel(r)),
+                      Column('status', anytype, lambda r,s=self: s._cachedStatus[s.rel(r)]),
                       Column('type', str, lambda r: r.is_dir() and '/' or r.suffix),
                       Column('size', int, lambda r: r.filesize),
                       Column('mtime', date, lambda r: r.stat().st_mtime)]
@@ -61,6 +58,8 @@ class GitStatus(Sheet):
         self.command('gi', 'open(repo.workdir + "/.gitignore", "a").write(input("add to .gitignore"))', 'add input line to toplevel .gitignore')  # path, filename
         self.command('m', 'os.rename(rel(cursorRow), input("rename file to: ", value=rel(cursorRow)))', 'rename this file')
 
+        self._cachedStatus = {}
+
     @staticmethod
     def fileColorizer(self, c, row, v):
         if self.git_status(row) == 'INDEX_NEW':
@@ -74,7 +73,6 @@ class GitStatus(Sheet):
         relfn = pathrow.relpath(self.repo.workdir)
         if pathrow.is_dir():
             relfn += '/'
-        #st = self._cachedGitStatus.get(relfn, None)
         st = self.repo.status_file(relfn)
         if st is None:
             return 'no'
@@ -85,11 +83,22 @@ class GitStatus(Sheet):
         return strstatus
 
     def rel(self, r):
-        return r.relpath(self.repo.workdir)
+        return r.relpath(str(self.source) + '/')
 
     def reload(self):
-        self._cachedGitStatus = self.repo.status()
-        self.rows = [p for p in Path(self.repo.workdir).iterdir() if p.name not in ('.git', '..')]
+        filenames = dict((self.rel(p), Path(self.rel(p))) for p in self.source.iterdir() if p.name not in ('.git', '..'))  # files in working dir
+        self.rows = [p for k, p in filenames.items()]
+        self._cachedStatus.clear()
+        for fn in sh.git('ls-files', '-z').split('\0'):
+            self._cachedStatus[fn] = '**'
+
+        for status_line in sh.git('status', '-z', '-unormal', '--ignored').split('\0'):
+            if status_line:
+                st = status_line[:2]
+                fn = self.rel(Path(status_line[3:]))
+                if fn not in filenames:
+                    self.rows.append(Path(fn))
+                self._cachedStatus[fn] = st
 
 vd().status('saul.pw/vgit v0.1')
-run([GitStatus(Path('.git'))])
+run([GitStatus(Path('.'))])
