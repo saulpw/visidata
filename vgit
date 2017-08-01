@@ -9,73 +9,24 @@ import sys
 import sh
 from visidata import *
 
+__version__ = 'saul.pw/vgit v0.0.2'
+
 option('color_git_unmodified', 'yellow')
 option('color_git_add_staged', 'green')
 option('color_git_wt_new', 'cyan')
 option('color_git_mod_unstaged', 'brown')
 option('vgit_show_ignored', True)
+option('diff_algorithm', 'minimal')
+
+command('gi', 'i = input("git ", type="git"); vd.push(TextSheet(i, sh.git(*i.split()).split("\\n")))', 'execute arbitrary git command')
 
 def open_git(p):
     return GitStatus(p)
 
-class GitStatus(Sheet):
-    def __init__(self, p):
-        super().__init__(p.relpath(''), p)
+class GitSheet(Sheet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.extra_args = []
-
-        self.columns = [Column('filename', str, lambda r,s=self: s.rel(r)),
-                      Column('status', anytype, lambda r,s=self: s.status_text(s._cachedStatus[s.rel(r)])),
-                      Column('type', str, lambda r: r.is_dir() and '/' or r.suffix),
-                      Column('size', int, lambda r: r.filesize),
-                      Column('mtime', date, lambda r: r.stat().st_mtime)]
-
-        self.addColorizer('row', 3, GitStatus.fileColorizer)
-
-        self.command('f', 'sheet.extra_args.append("-f")', 'force next action with "-f"')
-
-        self.command('a', 'git("add", rel(cursorRow))', 'add new file or file modifications to staging/index')
-        self.command('d', 'git("rm", rel(cursorRow))', 'stage this file for deletion')
-#        self.command('w', 'git("rm", "--cached", rel(cursorRow))', 'unstage this file')
-        self.command('w', 'git("reset", "HEAD", rel(cursorRow))', 'unstage this file')
-        self.command('c', 'git("checkout", rel(cursorRow))', 'checkout this file')
-#        self.command('ga', 'repo.index.add_all([rel(r) for r in self.selectedRows])', 'add all selected files to index')
-#        self.command('gd', '[repo.index.remove(rel(r)) for r in self.selectedRows if rel(r) in repo.index]', 'delete all selected files from index')
-        self.command('^S', 'git("commit", "-m", input("commit message: "))', 'commit changes')
-        self.command(ENTER, 'vd.push(openSource(rel(cursorRow)))', 'open file')  # path, filename
-        self.command('i', 'open(workdir + "/.gitignore", "a").write(rel(cursorRow)+"\\n")', 'add file to toplevel .gitignore')
-#        self.command('gi', 'open(repo.workdir + "/.gitignore", "a").write(input("add to .gitignore"))', 'add input line to toplevel .gitignore')  # path, filename
-#        self.command('m', 'os.rename(rel(cursorRow), input("rename file to: ", value=rel(cursorRow)))', 'rename this file')
-#
-        self._cachedStatus = {}
-
-    def status_text(self, st):
-        vmod = {'A': 'add', 'D': 'rm', 'M': 'mod', 'T': 'type'}
-        x, y = st
-        if x != ' ' and y == ' ': # staged
-            return vmod.get(x, '') # + ' staged'
-        elif x == ' ' and y != ' ': # unstaged
-            return vmod[y] + '*'
-        elif st == '??': # untracked
-            return 'new'
-        elif st == '!!':  # ignored
-            return 'ignored'
-        else:
-            return ''
-
-    @staticmethod
-    def fileColorizer(self, c, row, v):
-        st = self.git_status(row)
-        x, y = st
-        if x in 'AMD' and y == ' ': # staged add/mod/rm
-            return 'green'
-        elif y in 'AMD': # unstaged add/mod/rm
-            return 'red'
-        elif st == '??': # untracked
-            return 'yellow'
-        elif st == '!!':  # ignored
-            return '237 blue'
-
-        return 'white'
 
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
@@ -83,31 +34,110 @@ class GitStatus(Sheet):
         status(sh.git(*args, **kwargs))
         self.reload()
 
+
+class GitStatus(GitSheet):
+    def __init__(self, p):
+        super().__init__(p.relpath(''), p)
+
+        self.columns = [Column('path', str, lambda r,s=self: s.filename(r) + (r.is_dir() and '/' or ''), cache=True),
+                      Column('status', anytype, lambda r,s=self: s.statusText(s._cachedStatus[s.filename(r)]), width=8),
+                      Column('staged', getter=lambda r,s=self: s._cachedStatus[s.filename(r)][2], cache=True),
+                      Column('unstaged', getter=lambda r,s=self: s._cachedStatus[s.filename(r)][1], cache=True),
+                      Column('type', str, lambda r: r.is_dir() and '/' or r.suffix, width=0),
+                      Column('size', int, lambda r: r.filesize),
+                      Column('mtime', date, lambda r: r.stat().st_mtime),
+                    ]
+
+        self.addColorizer('row', 3, GitStatus.rowColor)
+
+        self.command('f', 'sheet.extra_args.append("-f")', 'force next action with "-f"')
+
+        self.command('a', 'git("add", filename(cursorRow))', 'add this new file or modified file to staging')
+        self.command('d', 'git("rm", filename(cursorRow))', 'stage this file for deletion')
+        self.command('w', 'git("reset", "HEAD", filename(cursorRow))', 'unstage this file')
+        self.command('c', 'git("checkout", filename(cursorRow))', 'checkout this file')
+        self.command('ga', 'git("add", *[filename(r) for r in selectedRows])', 'add all selected files to staging')
+        self.command('gd', 'git("rm", *[filename(r) for r in selectedRows])', 'delete all selected files')
+        self.command(['^S', 'C'], 'git("commit", "-m", input("commit message: "))', 'commit changes')
+        self.command('V', 'vd.push(openSource(filename(cursorRow)))', 'open file')  # path, filename
+        self.command('i', 'open(workdir + "/.gitignore", "a").write(filename(cursorRow)+"\\n")', 'add file to toplevel .gitignore')
+#        self.command('gi', 'open(repo.workdir + "/.gitignore", "a").write(input("add to .gitignore"))', 'add input line to toplevel .gitignore')  # path, filename
+#        self.command('m', 'os.rename(filename(cursorRow), input("rename file to: ", value=filename(cursorRow)))', 'rename this file')
+
+        self.command(ENTER, 'vd.push(HunksSheet(cursorRow))', 'push sheet of diffs for this file')
+
+        self.command('g/', 'vd.push(GitCommand("grep", input("git grep: ")))', 'find in all files')
+#
+        self._cachedStatus = {}
+
+    def statusText(self, st):
+        vmod = {'A': 'add', 'D': 'rm', 'M': 'mod', 'T': 'chmod', '?': 'out'}
+        x, y = st[0]
+        if st == '??': # untracked
+            return 'new'
+        elif st == '!!':  # ignored
+            return 'ignored'
+        elif x != ' ' and y == ' ': # staged
+            ret = vmod.get(x, '!') + ' '
+            return ret
+        elif y != ' ': # unstaged
+            ret = vmod.get(y, '!')
+            return ret
+        else:
+            return ''
+
+    @staticmethod  # due to the way colorizers are called
+    def rowColor(self, c, row, v):
+        st = self.git_status(row)
+        x, y = st
+        if st == '??': # untracked
+            return 'yellow'
+        elif st == '!!':  # ignored
+            return '237 blue'
+        elif x in 'AMD' and y == ' ': # staged add/mod/rm
+            return 'green'
+        elif y in 'AMD': # unstaged add/mod/rm
+            return 'red'
+
+        return 'white'
+
     def git_status(self, r):
-        return self._cachedStatus.get(self.rel(r), ',,')
+        return self._cachedStatus[self.filename(r)][0]
 
     def ignored(self, fn):
         return not options.vgit_show_ignored and self._cachedStatus[fn] == '!!'
 
-    def rel(self, r):
+    def filename(self, r):
         return r.relpath(str(self.source) + '/')
 
     def reload(self):
-        filenames = dict((self.rel(p), Path(self.rel(p))) for p in self.source.iterdir() if p.name not in ('.git', '..'))  # files in working dir
+        filenames = dict((self.filename(p), Path(self.filename(p))) for p in self.source.iterdir() if p.name not in ('.git', '..'))  # files in working dir
 
         self.rows = []
         self._cachedStatus.clear()
         for fn in sh.git('ls-files', '-z').split('\0'):
-            self._cachedStatus[fn] = '  '
+            self._cachedStatus[fn] = ['  ', None, None]  # status, adds, dels
 
         for status_line in sh.git('status', '-z', '-unormal', '--ignored').split('\0'):
             if status_line:
                 st = status_line[:2]
-                fn = self.rel(Path(status_line[3:]))
+                fn = self.filename(Path(status_line[3:]))
                 if fn not in filenames:
                     if not self.ignored(fn):
                         self.rows.append(Path(fn))
-                self._cachedStatus[fn] = st
+                self._cachedStatus[fn] = [st, None, None]
+
+        for line in sh.git('diff-files', '--numstat', '-z').split('\0'):
+            if not line: continue
+            adds, dels, fn = line.split('\t')
+            cs = self._cachedStatus[fn]
+            cs[1] = '+%s/-%s' % (adds, dels)
+
+        for line in sh.git('diff-index', '--cached', '--numstat', '-z', 'HEAD').split('\0'):
+            if not line: continue
+            adds, dels, fn = line.split('\t')
+            cs = self._cachedStatus[fn]
+            cs[2] = '+%s/-%s' % (adds, dels)
 
         self.rows.extend([p for k, p in filenames.items() if not self.ignored(k)])
 
@@ -115,8 +145,96 @@ class GitStatus(Sheet):
         self.rows.sort(key=lambda r,col=self.columns[-1]: col.getValue(r), reverse=True)
 
 
-vd().status('saul.pw/vgit v0.0.1')
+class HunksSheet(GitSheet):
+    def __init__(self, *files):
+        super().__init__('hunks', *files)
+        self.columns = [
+            ColumnItem('origfn', 0, width=0),
+            ColumnItem('filename', 1),
+            ColumnItem('context', 2),
+            ColumnItem('leftlinenum', 3),
+            ColumnItem('leftcount', 4),
+            ColumnItem('rightlinenum', 5),
+            ColumnItem('rightcount', 6),
+        ]
 
+        self.command(ENTER, 'vd.push(HunkViewer(cursorRow))', 'view the diff for this hunk')
+        self.command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'apply this hunk to the index')
+        self.command('a', 'git("apply", "--cached", "-p0", "-", _in="\\n".join(cursorRow[7]) + "\\n")', 'apply this hunk to the index')
+
+    def reload(self):
+        diffout = sh.git('--no-pager', 'diff', '--patch', '--diff-algorithm=' + options.diff_algorithm, '--no-color', '--no-prefix', *[p.resolve() for p in self.sources])
+        self.rows = []
+        leftfn = ''
+        rightfn = ''
+        header_lines = []
+        for line in diffout.splitlines():
+            if line.startswith('---'):
+                header_lines.append(line)
+                leftfn = line[4:]
+            elif line.startswith('+++'):
+                header_lines.append(line)
+                rightfn = line[4:]
+            elif line.startswith('@@'):
+                header_lines.append(line)
+                _, linenums, context = line.split('@@')
+                leftlinenums, rightlinenums = linenums.split()
+                leftstart, leftcount = leftlinenums[1:].split(',')
+                rightstart, rightcount = rightlinenums[1:].split(',')
+                self.rows.append((leftfn, rightfn, context, int(leftstart), int(leftcount), int(rightstart), int(rightcount), header_lines))
+                header_lines = []
+            elif line[0] in ' +-':
+                self.rows[-1][-1].append(line)
+
+
+class HunkViewer(GitSheet):
+    def __init__(self, hunkrow):
+        super().__init__('hunk', hunkrow)
+        self.columns = [
+            ColumnItem('left', 1, width=vd().windowWidth//2-1),
+            ColumnItem('right', 2, width=vd().windowWidth//2-1),
+        ]
+        self.addColorizer('row', 4, HunkViewer.colorDiffRow)
+
+    def reload(self):
+        nextDelIdx = None
+        for line in self.source[7][3:]:  # actual diff lines for this hunk
+            typech = line[0]
+            line = line[1:]
+            if typech == '-':
+                self.rows.append([typech, line, None])
+                if nextDelIdx is None:
+                    nextDelIdx = len(self.rows)-1
+            elif typech == '+':
+                if nextDelIdx is not None:
+                    if nextDelIdx < len(self.rows):
+                        self.rows[nextDelIdx][2] = line
+                        nextDelIdx += 1
+                        continue
+
+                self.rows.append([typech, None, line])
+                nextDelIdx = None
+            elif typech == ' ':
+                self.rows.append([typech, line, line])
+                nextDelIdx = None
+            else:
+                continue  # headers
+
+    def colorDiffRow(self, c, row, v):
+        if row[1] != row[2]:
+            if row[1] is None:
+                return 'green'  # addition
+            elif row[2] is None:
+                return 'red'  # deletion
+            else:
+                return 'yellow'  # difference
+
+
+vd().status(__version__)
+
+setGlobal('sh', sh)
+setGlobal('HunkViewer', HunkViewer)
+setGlobal('HunksSheet', HunksSheet)
 fn = sys.argv[1] if sys.argv[1:] else '.'
 os.chdir(fn)
 run([GitStatus(Path('.'))])
