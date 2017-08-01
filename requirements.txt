@@ -1,3 +1,2 @@
-libgit2-dev
-visidata>=0.92
-pygit2
+#visidata>=0.92
+sh

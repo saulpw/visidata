@@ -9,6 +9,9 @@ As per http://www.pygit2.org/install.html:
         make
         sudo make install
 
+        sudo apt install libffi-dev
+
         sudo pip3 install pygit2
 
-        python -c 'import pygit2'  # to test
+        export LD_LIBRARY_PATH=/usr/local/lib
+        python3 -c 'import pygit2'  # to test

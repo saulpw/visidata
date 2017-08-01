@@ -5,82 +5,80 @@
 #    changes not staged for commit
 #    untracked files
 
-from visidata import *
+import sys
 import sh
+from visidata import *
 
-option('color_git_nonindex', 'yellow')
-option('color_git_index_new', 'green')
+option('color_git_unmodified', 'yellow')
+option('color_git_add_staged', 'green')
 option('color_git_wt_new', 'cyan')
+option('color_git_mod_unstaged', 'brown')
 
 def open_git(p):
     return GitStatus(p)
 
-class VisiGit:
-    def rightStatus(self, vs):
-        pass
-
-def ToEnum(d, start):
-    return dict((d[k], k[len(start):]) for k in d if k.startswith(start))
-
 class GitStatus(Sheet):
-    GIT_STATUSES = { 0: '',
-            1: 'add',
-            2: 'mod',
-            4: 'rm',
-            8: 'mv',
-            16: 'chmod',
-            128: 'unstaged_add',
-            256: 'unstaged_mod',
-            512: 'unstaged_rm',
-            1024: 'unstaged_chmod',
-            2048: 'unstaged_mv',
-            4096: 'unreadable',
-            16384: 'ignored',
-    }
     def __init__(self, p):
-        super().__init__(p.resolve(), p)
+        super().__init__(p.relpath(''), p)
 
         self.columns = [Column('filename', str, lambda r,s=self: s.rel(r)),
-                      Column('status', anytype, lambda r,s=self: s._cachedStatus[s.rel(r)]),
+                      Column('status', anytype, lambda r,s=self: s.status_text(s._cachedStatus[s.rel(r)])),
                       Column('type', str, lambda r: r.is_dir() and '/' or r.suffix),
                       Column('size', int, lambda r: r.filesize),
                       Column('mtime', date, lambda r: r.stat().st_mtime)]
 
-#        self.addColorizer('row', 3, GitStatus.fileColorizer)
+        self.addColorizer('row', 3, GitStatus.fileColorizer)
 
-        self.command('a', 'repo.index.add(rel(cursorRow))', 'add file to index')
-        self.command('ga', 'repo.index.add_all([rel(r) for r in self.selectedRows])', 'add all selected files to index')
-        self.command('d', 'repo.index.remove(rel(cursorRow)) if rel(cursorRow) in repo.index else status("not in index")', 'delete this file from index')
-        self.command('gd', '[repo.index.remove(rel(r)) for r in self.selectedRows if rel(r) in repo.index]', 'delete all selected files from index')
-        self.command('^S', 'repo.index.write()', 'commit changes to index')
+        self.command('a', 'git("add", rel(cursorRow))', 'add new file or file modifications to staging/index')
+        self.command('d', 'git("rm", rel(cursorRow))', 'stage this file for deletion')
+#        self.command('w', 'git("rm", "--cached", rel(cursorRow))', 'unstage this file')
+        self.command('w', 'git("reset", "HEAD", rel(cursorRow))', 'unstage this file')
+        self.command('c', 'git("checkout", rel(cursorRow))', 'checkout this file')
+#        self.command('ga', 'repo.index.add_all([rel(r) for r in self.selectedRows])', 'add all selected files to index')
+#        self.command('gd', '[repo.index.remove(rel(r)) for r in self.selectedRows if rel(r) in repo.index]', 'delete all selected files from index')
+        self.command('^S', 'git("commit", "-m", input("commit message: "))', 'commit changes')
         self.command(ENTER, 'vd.push(openSource(rel(cursorRow)))', 'open file')  # path, filename
-        self.command('i', 'open(repo.workdir + "/.gitignore", "a").write(rel(cursorRow)+"\\n")', 'add file to toplevel .gitignore')  # path, filename
-        self.command('gi', 'open(repo.workdir + "/.gitignore", "a").write(input("add to .gitignore"))', 'add input line to toplevel .gitignore')  # path, filename
-        self.command('m', 'os.rename(rel(cursorRow), input("rename file to: ", value=rel(cursorRow)))', 'rename this file')
-
+#        self.command('i', 'open(repo.workdir + "/.gitignore", "a").write(rel(cursorRow)+"\\n")', 'add file to toplevel .gitignore')  # path, filename
+#        self.command('gi', 'open(repo.workdir + "/.gitignore", "a").write(input("add to .gitignore"))', 'add input line to toplevel .gitignore')  # path, filename
+#        self.command('m', 'os.rename(rel(cursorRow), input("rename file to: ", value=rel(cursorRow)))', 'rename this file')
+#
         self._cachedStatus = {}
 
+    def status_text(self, st):
+        vmod = {'A': 'add', 'D': 'rm', 'M': 'mod', 'T': 'type'}
+        x, y = st
+        if x != ' ' and y == ' ': # staged
+            return vmod.get(x, '') # + ' staged'
+        elif x == ' ' and y != ' ': # unstaged
+            return vmod[y] + '*'
+        elif st == '??': # untracked
+            return 'new'
+        elif st == '!!':  # ignored
+            return 'ignored'
+        else:
+            return ''
     @staticmethod
     def fileColorizer(self, c, row, v):
-        if self.git_status(row) == 'INDEX_NEW':
-            return options.color_git_index_new
-        elif self.git_status(row) == 'WT_NEW':
-            return options.color_git_wt_new
-        elif self.rel(row) not in self.repo.index:
-            return options.color_git_nonindex
+        st = self.git_status(row)
+        x, y = st
+        if x in 'AMD' and y == ' ': # staged add/mod/rm
+            return 'green'
+        elif y in 'AMD': # unstaged add/mod/rm
+            return 'red'
+        elif st == '??': # untracked
+            return 'yellow'
+        elif self.git_status(row) == '!!':  # ignored
+            return 'blue bold'
 
-    def git_status(self, pathrow):
-        relfn = pathrow.relpath(self.repo.workdir)
-        if pathrow.is_dir():
-            relfn += '/'
-        st = self.repo.status_file(relfn)
-        if st is None:
-            return 'no'
+        return 'white'
 
-        strstatus = ' '.join(v for k, v in self.GIT_STATUSES.items() if st & k)
-        if not strstatus:
-            strstatus = str(st)
-        return strstatus
+    def git(self, *args, **kwargs):
+        status(*args)
+        status(sh.git(*args, **kwargs))
+        self.reload()
+
+    def git_status(self, r):
+        return self._cachedStatus.get(self.rel(r), ',,')
 
     def rel(self, r):
         return r.relpath(str(self.source) + '/')
@@ -90,7 +88,7 @@ class GitStatus(Sheet):
         self.rows = [p for k, p in filenames.items()]
         self._cachedStatus.clear()
         for fn in sh.git('ls-files', '-z').split('\0'):
-            self._cachedStatus[fn] = '**'
+            self._cachedStatus[fn] = '  '
 
         for status_line in sh.git('status', '-z', '-unormal', '--ignored').split('\0'):
             if status_line:
@@ -100,5 +98,12 @@ class GitStatus(Sheet):
                     self.rows.append(Path(fn))
                 self._cachedStatus[fn] = st
 
-vd().status('saul.pw/vgit v0.1')
+        self.recalc()
+        self.rows.sort(key=lambda r,col=self.columns[-1]: col.getValue(r), reverse=True)
+
+
+vd().status('saul.pw/vgit v0.0.1')
+
+fn = sys.argv[1] if sys.argv[1:] else '.'
+os.chdir(fn)
 run([GitStatus(Path('.'))])
