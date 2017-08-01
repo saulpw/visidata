@@ -9,7 +9,7 @@ import sys
 import sh
 from visidata import *
 
-__version__ = 'saul.pw/vgit v0.0.2'
+__version__ = 'saul.pw/vgit v0.0.3'
 
 option('color_git_unmodified', 'yellow')
 option('color_git_add_staged', 'green')
@@ -158,19 +158,28 @@ class HunksSheet(GitSheet):
             ColumnItem('rightcount', 6),
         ]
 
-        self.command(ENTER, 'vd.push(HunkViewer(cursorRow))', 'view the diff for this hunk')
+        self.command(ENTER, 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunk')
+        self.command('g^J', 'vd.push(HunkViewer(sheet, *selectedRows))', 'view the diffs for the selected hunks')
         self.command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'apply this hunk to the index')
-        self.command('a', 'git("apply", "--cached", "-p0", "-", _in="\\n".join(cursorRow[7]) + "\\n")', 'apply this hunk to the index')
+        self.command('a', 'apply(cursorRow)', 'apply this hunk to the index')
+
+    def apply(self, hunk):
+        self.git("apply", "--cached", "-p0", "-", _in="\n".join(hunk[7]) + "\n")
+        status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
     def reload(self):
-        diffout = sh.git('--no-pager', 'diff', '--patch', '--diff-algorithm=' + options.diff_algorithm, '--no-color', '--no-prefix', *[p.resolve() for p in self.sources])
+        diffout = sh.git('--no-pager', 'diff',
+                '--diff-algorithm=' + options.diff_algorithm,
+                '--patch',
+                '--no-color',
+                '--no-prefix', *[p.resolve() for p in self.sources])
         self.rows = []
         leftfn = ''
         rightfn = ''
-        header_lines = []
+        header_lines = None
         for line in diffout.splitlines():
             if line.startswith('---'):
-                header_lines.append(line)
+                header_lines = [line]  # new file
                 leftfn = line[4:]
             elif line.startswith('+++'):
                 header_lines.append(line)
@@ -182,21 +191,30 @@ class HunksSheet(GitSheet):
                 leftstart, leftcount = leftlinenums[1:].split(',')
                 rightstart, rightcount = rightlinenums[1:].split(',')
                 self.rows.append((leftfn, rightfn, context, int(leftstart), int(leftcount), int(rightstart), int(rightcount), header_lines))
-                header_lines = []
+                header_lines = header_lines[:2]  # keep file context
             elif line[0] in ' +-':
                 self.rows[-1][-1].append(line)
 
 
 class HunkViewer(GitSheet):
-    def __init__(self, hunkrow):
-        super().__init__('hunk', hunkrow)
+    def __init__(self, srchunks, *hunks):
+        super().__init__('hunk', *hunks)
+        self.srchunks = srchunks
         self.columns = [
             ColumnItem('left', 1, width=vd().windowWidth//2-1),
             ColumnItem('right', 2, width=vd().windowWidth//2-1),
         ]
         self.addColorizer('row', 4, HunkViewer.colorDiffRow)
+        self.command('a', 'srchunks.apply(sources.pop(0)); reload()', 'apply this hunk to the index and move to the next hunk')
+        self.command(ENTER, 'sources.pop(0); reload()', 'apply this hunk to the index')
+#        self.command('d', '', 'discard this hunk from the working tree')
 
     def reload(self):
+        if not self.source:
+            self.vd.remove(self)
+            return
+
+        self.rows = []
         nextDelIdx = None
         for line in self.source[7][3:]:  # actual diff lines for this hunk
             typech = line[0]
@@ -233,8 +251,8 @@ class HunkViewer(GitSheet):
 vd().status(__version__)
 
 setGlobal('sh', sh)
-setGlobal('HunkViewer', HunkViewer)
 setGlobal('HunksSheet', HunksSheet)
+setGlobal('HunkViewer', HunkViewer)
 fn = sys.argv[1] if sys.argv[1:] else '.'
 os.chdir(fn)
 run([GitStatus(Path('.'))])
