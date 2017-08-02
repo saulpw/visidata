@@ -524,8 +524,8 @@ class VisiData:
             self.exceptionCaught()
 
     def leftStatus(self, vs):
-        'Compose left side of status bar from status messages.'
-        s = options.disp_status_fmt.format(sheet=vs)
+        'Compose left side of status bar and add status messages.'
+        s = vs.leftStatus()
         s += options.disp_status_sep.join(self.statuses)
         return s
 
@@ -714,6 +714,10 @@ class Sheet:
                     attr, attrpre = colors.update(attr, attrpre, color, precedence)
 
         return attr
+
+    def leftStatus(self):
+        'Compose left side of status bar for this sheet (overridable).'
+        return options.disp_status_fmt.format(sheet=self)
 
     def genProgress(self, L, total=None):
         'Create generator (for for-loops), with `progressTotal` property.'
