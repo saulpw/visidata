@@ -87,6 +87,7 @@ option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('num_colors', 0, 'force number of colors to use')
 option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
+option('textwrap', True, 'if TextSheet breaks rows to fit in windowWidth')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -1616,7 +1617,7 @@ class TextSheet(Sheet):
     def reload(self):
         'Populate sheet via `reload` function.'
         self.rows = []
-        self.columns = [Column(self.name, str, width=self.vd.windowWidth)]
+        self.columns = [Column(self.name, width=self.vd.windowWidth, getter=lambda r: r[1])]
         if isinstance(self.source, list):
             for x in self.source:
                 # copy so modifications don't change 'original'; also one iteration through generator
@@ -1635,7 +1636,12 @@ class TextSheet(Sheet):
 
     def addLine(self, text):
         'Handle text re-wrapping.'
-        self.rows.extend(textwrap.wrap(text, width=self.vd.windowWidth-2))
+        if options.textwrap:
+            startingLine = len(self.rows)
+            for i, L in enumerate(textwrap.wrap(text, width=self.vd.windowWidth-2)):
+                self.rows.append((startingLine+i, L))
+        else:
+            self.rows.append((len(self.rows), text))
 
 
 class DirSheet(Sheet):
