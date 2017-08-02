@@ -27,6 +27,7 @@ class GitSheet(Sheet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_args = []
+        self.branch = '{branch}'
 
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
@@ -34,6 +35,8 @@ class GitSheet(Sheet):
         status(sh.git(*args, **kwargs))
         self.reload()
 
+    def reload(self):
+        self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
 class GitStatus(GitSheet):
     def __init__(self, p):
@@ -111,6 +114,7 @@ class GitStatus(GitSheet):
         return r.relpath(str(self.source) + '/')
 
     def reload(self):
+        super().reload()
         filenames = dict((self.filename(p), Path(self.filename(p))) for p in self.source.iterdir() if p.name not in ('.git', '..'))  # files in working dir
 
         self.rows = []
@@ -168,6 +172,7 @@ class HunksSheet(GitSheet):
         status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
     def reload(self):
+        super().reload()
         diffout = sh.git('--no-pager', 'diff',
                 '--diff-algorithm=' + options.diff_algorithm,
                 '--patch',
@@ -210,6 +215,7 @@ class HunkViewer(GitSheet):
 #        self.command('d', '', 'discard this hunk from the working tree')
 
     def reload(self):
+        super().reload()
         if not self.source:
             self.vd.remove(self)
             return
@@ -249,6 +255,7 @@ class HunkViewer(GitSheet):
 
 
 vd().status(__version__)
+options.disp_status_fmt = '‹{sheet.branch}› ' + options.disp_status_fmt
 
 setGlobal('sh', sh)
 setGlobal('HunksSheet', HunksSheet)
