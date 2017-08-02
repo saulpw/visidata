@@ -19,7 +19,7 @@ option('vgit_show_ignored', True)
 option('diff_algorithm', 'minimal')
 
 command('x', 'i = input("git ", type="git"); vd.push(TextSheet(i, sh.git(*i.split()).split("\\n")))', 'execute arbitrary git command')
-command('B', 'vd.push(BranchesSheet())', 'execute arbitrary git command')
+command('B', 'vd.push(GitBranches())', 'execute arbitrary git command')
 command('O', 'vd.push(GitOptions())', 'push sheet of git options')
 
 def open_git(p):
@@ -44,7 +44,7 @@ class GitSheet(Sheet):
         self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
 
-class BranchesSheet(GitSheet):
+class GitBranches(GitSheet):
     def __init__(self):
         super().__init__('branches')
         self.columns = [
@@ -321,6 +321,7 @@ class GitOptions(GitSheet):
         self.command('gd', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset this config value')
         self.command('e', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues([cursorRow], editCell(i)); sheet.cursorRowIndex += 1', 'edit this option')
         self.command('ge', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this option for all selected rows')
+        self.command('a', 'git("config", "--add", "--"+CONFIG_CONTEXTS[cursorColIndex], input("option to add: "), "added")', 'add new option')
 
     def config_setter(self, ctx):
         def setter(r, v):
@@ -341,14 +342,14 @@ class GitOptions(GitSheet):
             except:
                 pass # exceptionCaught()
 
-        self.rows = list(opts.items())
+        self.rows = sorted(list(opts.items()))
 
 vd().status(__version__)
 
 setGlobal('sh', sh)
 setGlobal('HunksSheet', HunksSheet)
 setGlobal('HunkViewer', HunkViewer)
-setGlobal('BranchesSheet', BranchesSheet)
+setGlobal('GitBranches', GitBranches)
 setGlobal('GitGrep', GitGrep)
 setGlobal('GitOptions', GitOptions)
 fn = sys.argv[1] if sys.argv[1:] else '.'
