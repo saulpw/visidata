@@ -2098,12 +2098,12 @@ def cursesMain(_scr, sheetlist=[]):
 
 g_globals = None
 def setGlobals(g):
-    'Assign given `g` to (expected) global dict `g_globals`.'
+    'needed to make addon globals visible to execstrings'
     global g_globals
     g_globals = g
 
 def setGlobal(k, v):
-    'Manually set global key-value pair in `g_globals`.'
+    'Make k visible to execstrings'
     g_globals[k] = v
 
 if __name__ == '__main__':
