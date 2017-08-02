@@ -606,6 +606,12 @@ class VisiData:
         self.sheets.pop(0)
         return self.push(vs)
 
+    def remove(self, vs):
+        if vs in self.sheets:
+            self.sheets.remove(vs)
+        else:
+            error('sheet not on stack')
+
     def push(self, vs):
         'Move given sheet `vs` to index 0 of list `sheets`.'
         if vs:
