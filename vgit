@@ -19,6 +19,7 @@ option('vgit_show_ignored', True)
 option('diff_algorithm', 'minimal')
 
 command('gi', 'i = input("git ", type="git"); vd.push(TextSheet(i, sh.git(*i.split()).split("\\n")))', 'execute arbitrary git command')
+command('B', 'vd.push(BranchesSheet())', 'execute arbitrary git command')
 
 def open_git(p):
     return GitStatus(p)
@@ -27,7 +28,7 @@ class GitSheet(Sheet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_args = []
-        self.branch = '{branch}'
+        self.branch = 'BRANCHSTUB'  # should never appear in the status
 
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
@@ -35,8 +36,35 @@ class GitSheet(Sheet):
         status(sh.git(*args, **kwargs))
         self.reload()
 
+    def leftStatus(self):
+        return ('‹%s› ' % self.branch) + super().leftStatus()
+
     def reload(self):
         self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
+
+
+class BranchesSheet(GitSheet):
+    def __init__(self):
+        super().__init__('branches')
+        self.columns = [
+            Column('branch')
+        ]
+
+        self.command('a', 'git("checkout", "-b", input("create branch: ", type="branch"))', 'create a new branch off the current checkout')
+        self.command('d', 'git("branch", "--delete", cursorRow)', 'delete this branch')
+        self.command('e', 'git("branch", "-v", "--move", cursorRow, editCell(0))', 'rename this branch')
+        self.command([ENTER, 'c'], 'git("checkout", cursorRow)', 'checkout this branch')
+        self.command('m', 'git("merge", cursorRow)', 'merge this branch into the current branch')
+
+    def reload(self):
+        super().reload()
+        self.rows = []
+        for line in sh.git('--no-pager', 'branch', '--no-color',
+#                '--all',  # local and remote branches
+                '--list').splitlines():
+            self.rows.append(line[2:])
+
+
 
 class GitStatus(GitSheet):
     def __init__(self, p):
@@ -255,11 +283,11 @@ class HunkViewer(GitSheet):
 
 
 vd().status(__version__)
-options.disp_status_fmt = '‹{sheet.branch}› ' + options.disp_status_fmt
 
 setGlobal('sh', sh)
 setGlobal('HunksSheet', HunksSheet)
 setGlobal('HunkViewer', HunkViewer)
+setGlobal('BranchesSheet', BranchesSheet)
 fn = sys.argv[1] if sys.argv[1:] else '.'
 os.chdir(fn)
 run([GitStatus(Path('.'))])
