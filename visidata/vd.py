@@ -650,7 +650,7 @@ class Sheet:
     'Base object for add-on inheritance.'
     def __init__(self, name, *sources, columns=None):
         self.name = name
-        self.sources = sources
+        self.sources = list(sources)
 
         self.rows = []           # list of opaque row objects
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
