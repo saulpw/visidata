@@ -9,7 +9,7 @@ import sys
 import sh
 from visidata import *
 
-__version__ = 'saul.pw/vgit v0.0.3'
+__version__ = 'saul.pw/vgit v0.1'
 
 option('color_git_unmodified', 'yellow')
 option('color_git_add_staged', 'green')

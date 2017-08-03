@@ -1,17 +1,45 @@
-# Installation instructions
+# vgit v0.1
 
-As per http://www.pygit2.org/install.html:
+vgit is a sleek terminal user interface for git, supplanting the arcana of git command-line operations with intuitive keystrokes. It was built using the [VisiData tui](https://github.com/saulpw/visidata/blob/stable/visidata/vd.py) as a platform.
 
-        wget https://github.com/libgit2/libgit2/archive/v0.26.0.tar.gz
-        tar xzf v0.26.0.tar.gz
-        cd libgit2-0.26.0/
-        cmake .
-        make
-        sudo make install
+![vgit screenshot]()
 
-        sudo apt install libffi-dev
+Current features include:
+    * branch management
+    * viewing, staging, and committing of diff hunks.
+    * setting of local and global git config options
 
-        sudo pip3 install pygit2
 
-        export LD_LIBRARY_PATH=/usr/local/lib
-        python3 -c 'import pygit2'  # to test
+## Installing vgit
+
+### using pypi
+
+```
+pip3 install vgit
+```
+
+### cloning from git
+
+```
+$ git clone https://github.com/saulpw/vgit.git
+$ cd vgit
+$ pip3 install -r requirements.txt
+$ python setup.py install
+```
+
+### Dependencies
+
+- Python 3.3+
+- visidata 0.94+
+- sh
+
+## Running vgit
+
+`vgit [<working_dir>]` opens a git status sheet for the given working directory (or the current directory if not specified).
+
+Further documentation is available [here]().
+
+## License
+
+vgit is released under a GPLv3 license.
+

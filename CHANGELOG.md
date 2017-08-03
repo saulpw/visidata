@@ -1,0 +1,34 @@
+## v0.1 (2017-08-02) -- Initial Release
+- git status sheet
+    - provides information about the working tree
+    - `a` to stage a file for addition
+    - `m` to rename a file
+    - `d` to stage a file for deletion
+    - `w` to unstage a file
+    - `c` to checkout a file
+    - `C` to commit all staged changes
+    - `ga`/`gd` adds/removes all selected files
+    - `g/` performs a search through all files
+    - `ENTER` pushes a hunks sheet for a file
+    - `x` execute an arbitrary git command
+    - `f` will add a --force flag to the next git command
+    - `B` pushes the git branches sheet
+    - `O` pushes the git options sheet
+- hunks sheet
+    - allows the viewing of hunks for a file (pieces of diffs)
+    - `ENTER` on a hunk allows the viewing of its diffs
+    - `gENTER` allows the viewing of diffs for all of the selected hunks (or all hunks, if none selected)
+    - `a` stages a hunk
+- diff viewer for selected hunks sheet
+    - opens a view for the diff of a hunk
+    - `a` to stage a hunk
+    - `ENTER` to skip this hunk without staging
+    - viewer exits when all hunks have been added or skipped
+- git branches sheet
+    - displays information about branches and enables their modification
+    - `c` to checkout a branch
+    - `a` to create a new branch
+    - `d` to remove a branch
+- git options sheet
+    - for editing git configuration
+    - `e` to edit an option
