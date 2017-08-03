@@ -2,12 +2,10 @@
 
 vgit is a sleek terminal user interface for git, supplanting the arcana of git command-line operations with intuitive keystrokes. It was built using the [VisiData tui](https://github.com/saulpw/visidata/blob/stable/visidata/vd.py) as a platform.
 
-![vgit screenshot]()
-
 Current features include:
-    * branch management
-    * viewing, staging, and committing of diff hunks.
-    * setting of local and global git config options
+- branch management
+- viewing, staging, and committing of diff hunks.
+- setting of local and global git config options
 
 
 ## Installing vgit
@@ -37,7 +35,7 @@ $ python setup.py install
 
 `vgit [<working_dir>]` opens a git status sheet for the given working directory (or the current directory if not specified).
 
-Further documentation is available [here]().
+Further documentation is available [here](CHANGELOG.md).
 
 ## License
 
