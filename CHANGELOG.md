@@ -1,11 +1,16 @@
 # VisiData version history
 
+## v0.94 (2017-08-02)
+- add options.textwrap for TextSheet
+- add vd.remove(sheet)
+- Sheet.sources now  modifiable
+
 ## v0.93 (2017-07-30)
-- Fix display/feel bugs in editText
-- Remove BACKSPACE for editlog undo
-- Fix colorizer API
-- Add `ctrl-u` command to toggle profiling of main thread
-- Fix `C`olumn statistics (`options.col_stats` still disabled by default)
+- fix display/feel bugs in editText
+- remove BACKSPACE for editlog undo
+- fix colorizer API
+- add `ctrl-u` command to toggle profiling of main thread
+- fix `C`olumn statistics (`options.col_stats` still disabled by default)
 
 ## v0.92 (2017-07-11)
 - `F`requency sheet groups numeric data into intervals
@@ -14,9 +19,9 @@
 - change key for 'eval Python expression as new pyobj sheet' from Ctrl-O to Ctrl-X
 
 ## v0.91 (2017-06-28)
-- Make options automatically typed based on default
-- Documentation cleanups
-- Remove R command (set filetype on CLI)
+- make options automatically typed based on default
+- documentation cleanups
+- remove R command (set filetype on CLI)
 
 ## v0.80
 - tour of screenshot.gif
