@@ -30,7 +30,6 @@ setup(name='vgit',
           'Topic :: Software Development :: Version Control'
           'Topic :: Terminals'
       ],
-      keywords=('console textpunk git version-control'
-                'curses visidata tui terminal'),
+      keywords=('console textpunk git version-control curses visidata tui terminal'),
       packages=['vgit'],
       )

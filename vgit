@@ -21,6 +21,8 @@ option('diff_algorithm', 'minimal')
 command('x', 'i = input("git ", type="git"); vd.push(TextSheet(i, sh.git(*i.split()).split("\\n")))', 'execute arbitrary git command')
 command('B', 'vd.push(GitBranches())', 'execute arbitrary git command')
 command('O', 'vd.push(GitOptions())', 'push sheet of git options')
+command('P', 'git("push")', 'git push')
+command('A', 'git("merge", "--abort")', 'abort merge')
 
 def open_git(p):
     return GitStatus(p)
@@ -34,8 +36,14 @@ class GitSheet(Sheet):
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
         self.extra_args.clear()
-        status(sh.git(*args, **kwargs))
+        err = io.StringIO()
+        ret = sh.git(*args, _err=err, **kwargs)
+        status(ret)
+        err = err.read()
+        status(err)
         self.reload()
+        if err:
+            vd().push(TextSheet('git_%s_stderr' % args[0], err))
 
     def leftStatus(self):
         return ('‹%s› ' % self.branch) + super().leftStatus()
@@ -81,6 +89,7 @@ class GitStatus(GitSheet):
                     ]
 
         self.addColorizer('row', 3, GitStatus.rowColor)
+        self.addColorizer('row', 6, lambda s,c,r,v: 'red underline' if 'U' in s.git_status(r)[0] else None)
 
         self.command('f', 'sheet.extra_args.append("-f")', 'force next action with "-f"')
 
@@ -103,18 +112,16 @@ class GitStatus(GitSheet):
         self._cachedStatus = {}
 
     def statusText(self, st):
-        vmod = {'A': 'add', 'D': 'rm', 'M': 'mod', 'T': 'chmod', '?': 'out', '!': 'ignored'}
+        vmod = {'A': 'add', 'D': 'rm', 'M': 'mod', 'T': 'chmod', '?': 'out', '!': 'ignored', 'U': 'unmerged'}
         x, y = st[0]
         if st == '??': # untracked
             return 'new'
         elif st == '!!':  # ignored
             return 'ignored'
         elif x != ' ' and y == ' ': # staged
-            ret = vmod.get(x, '!') + ' '
-            return ret
+            return vmod.get(x, x)
         elif y != ' ': # unstaged
-            ret = vmod.get(y, '!')
-            return ret
+            return vmod.get(y, y)
         else:
             return ''
 
@@ -122,7 +129,6 @@ class GitStatus(GitSheet):
     def workdir(self):
         return str(self.source)
 
-    @staticmethod  # due to the way colorizers are called
     def rowColor(self, c, row, v):
         st = self.git_status(row)[0]
         x, y = st
@@ -167,12 +173,16 @@ class GitStatus(GitSheet):
         for line in sh.git('diff-files', '--numstat', '-z').split('\0'):
             if not line: continue
             adds, dels, fn = line.split('\t')
+            if fn not in self._cachedStatus:
+                self._cachedStatus[fn] = ['##', None, None]
             cs = self._cachedStatus[fn]
             cs[1] = '+%s/-%s' % (adds, dels)
 
         for line in sh.git('diff-index', '--cached', '--numstat', '-z', 'HEAD').split('\0'):
             if not line: continue
             adds, dels, fn = line.split('\t')
+            if fn not in self._cachedStatus:
+                self._cachedStatus[fn] = ['$$', None, None]
             cs = self._cachedStatus[fn]
             cs[2] = '+%s/-%s' % (adds, dels)
 
