@@ -17,10 +17,12 @@ def toggleProfiling(vd):
     if not vd.profile:
         vd.profile = cProfile.Profile()
         vd.profile.enable()
+        vd.status('profiling of main task enabled')
     else:
         vd.profile.disable()
         vd.push(TextSheet("main_profile", getProfileResults(vd.profile)))
         vd.profile = None
+        vd.status('profiling of main task disabled')
 
 
 # define @async for potentially long-running functions

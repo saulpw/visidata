@@ -64,11 +64,29 @@ def alias(new, existing):
     command(new, execstr, helpstr)
 
 
+class configbool:
+    def __init__(self, v):
+        if isinstance(v, (bool, configbool)):
+            self.val = bool(v)
+        elif isinstance(v, str):
+            self.val = v and (v[0] not in "0fFnN")
+        else:
+            raise Exception(type(v))
+
+    def __bool__(self):
+        return self.val
+
+    def __str__(self):
+        return str(self.val)
+
+
 def option(name, default, helpstr=''):
+    if isinstance(default, bool):
+        default = configbool(default)
+
     baseOptions[name] = [name, default, default, helpstr]  # see OptionsObject
 
 theme = option
-
 
 option('debug', False, 'abort on error and display stacktrace')
 option('readonly', False, 'disable saving')
