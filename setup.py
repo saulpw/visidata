@@ -8,7 +8,7 @@ setup(name='vgit',
       version=__version__,
       install_requires='visidata>=0.94 sh'.split(),
       description='a sleek terminal user interface for git',
-      long_description=open('README.md').read(),
+      #long_description=open('README.md').read(),
       author='Saul Pwanson',
       author_email='vgit@saul.pw',
       url='http://github.com/saulpw/vgit',
@@ -27,10 +27,10 @@ setup(name='vgit',
           'Operating System :: OS Independent',
           'Programming Language :: Python :: 3',
           'Topic :: Utilities',
-          'Topic :: Software Development :: Version Control'
+          'Topic :: Software Development :: Version Control',
           'Topic :: Terminals'
       ],
       keywords=('console textpunk git version-control'
                 'curses visidata tui terminal'),
-      packages=['vgit'],
+      packages=[''],
       )
