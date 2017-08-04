@@ -2,7 +2,7 @@
 
 import sys
 import sh
-from visidata.vdtui import *
+from vdtui import *
 
 __version__ = 'saul.pw/vgit v0.1'
 
@@ -367,15 +367,18 @@ class GitOptions(GitSheet):
 
         self.rows = sorted(list(opts.items()))
 
-vd().status(__version__)
 
-setGlobal('sh', sh)
-setGlobal('HunksSheet', HunksSheet)
-setGlobal('HunkViewer', HunkViewer)
-setGlobal('GitBranches', GitBranches)
-setGlobal('GitGrep', GitGrep)
-setGlobal('GitOptions', GitOptions)
-fn = sys.argv[1] if sys.argv[1:] else '.'
-os.chdir(fn)
-options.textwrap = False
-run([GitStatus(Path('.'))])
+def main():
+    options.textwrap = False
+
+    status(__version__)
+
+    addGlobals(globals())
+
+    fn = sys.argv[1] if sys.argv[1:] else '.'
+    os.chdir(fn)
+
+    run([GitStatus(Path('.'))])
+
+
+main()
