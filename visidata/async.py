@@ -98,8 +98,9 @@ def threadProfileCode(task, func, *args, **kwargs):
 
 def getProfileResults(pr):
     s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+    ps = pstats.Stats(pr, stream=s)
     ps.strip_dirs()
+    ps.sort_stats('cumulative')
     ps.print_stats()
     return s.getvalue()
 
