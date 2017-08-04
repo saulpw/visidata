@@ -2,6 +2,8 @@
 #
 # Usage: $0 [-d] [-r] [<input_source> ...]
 
+__version__ = 'saul.pw/VisiData v0.95'
+
 import visidata
 
 def main():
@@ -36,4 +38,5 @@ def main():
     visidata.run(sources)
 
 if __name__ == '__main__':
+    visidata.status(__version__)
     main()

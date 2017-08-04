@@ -7,6 +7,7 @@ from .help import *
 from .async import *
 from .status_history import *
 from .zscroll import *
+from .data import *
 
 from .addons.freqtbl import *
 from .addons.pyobj import *
@@ -23,4 +24,4 @@ from .addons.xlsx import *
 from .addons.hdf5 import *
 from .addons.sqlite import *
 
-setGlobals(globals())
+addGlobals(globals())
