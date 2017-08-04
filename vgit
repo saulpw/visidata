@@ -30,16 +30,18 @@ class GitSheet(Sheet):
 
         try:
             ret = sh.git(*args, _err_to_out=True, **kwargs)
+            out = ret.stdout
         except sh.ErrorReturnCode as e:
             status('retcode=%s' % e.exit_code)
-            ret = e.stdout.decode('utf-8')
+            out = e.stdout
 
         self.reload()
 
-        if len(ret.splitlines()) > 1:
-            vd().push(TextSheet('git_%s_stderr' % args[0], ret))
+        out = out.decode('utf-8')
+        if len(out.splitlines()) > 1:
+            vd().push(TextSheet('git_%s' % args[0], out))
         else:
-            status(ret)
+            status(out)
 
     def leftStatus(self):
         return ('‹%s› ' % self.branch) + super().leftStatus()
