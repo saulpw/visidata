@@ -66,12 +66,10 @@ def alias(new, existing):
 
 class configbool:
     def __init__(self, v):
-        if isinstance(v, (bool, configbool)):
-            self.val = bool(v)
-        elif isinstance(v, str):
+        if isinstance(v, str):
             self.val = v and (v[0] not in "0fFnN")
         else:
-            raise Exception(type(v))
+            self.val = bool(v)
 
     def __bool__(self):
         return self.val
