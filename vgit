@@ -1,21 +1,12 @@
 #!/usr/bin/env python3
 
-#  how to detect and colors:
-#    files changed in index
-#    changes not staged for commit
-#    untracked files
-
 import sys
 import sh
-from visidata import *
+from visidata.vdtui import *
 
 __version__ = 'saul.pw/vgit v0.1'
 
-option('color_git_unmodified', 'yellow')
-option('color_git_add_staged', 'green')
-option('color_git_wt_new', 'cyan')
-option('color_git_mod_unstaged', 'brown')
-option('vgit_show_ignored', True)
+option('vgit_show_ignored', False)
 option('diff_algorithm', 'minimal')
 
 command('x', 'i = input("git ", type="git"); vd.push(TextSheet(i, sh.git(*i.split()).split("\\n")))', 'execute arbitrary git command')
@@ -36,14 +27,19 @@ class GitSheet(Sheet):
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
         self.extra_args.clear()
-        err = io.StringIO()
-        ret = sh.git(*args, _err=err, **kwargs)
-        status(ret)
-        err = err.read()
-        status(err)
+
+        try:
+            ret = sh.git(*args, _err_to_out=True, **kwargs)
+        except sh.ErrorReturnCode as e:
+            status('retcode=%s' % e.exit_code)
+            ret = e.stdout.decode('utf-8')
+
         self.reload()
-        if err:
-            vd().push(TextSheet('git_%s_stderr' % args[0], err))
+
+        if len(ret.splitlines()) > 1:
+            vd().push(TextSheet('git_%s_stderr' % args[0], ret))
+        else:
+            status(ret)
 
     def leftStatus(self):
         return ('‹%s› ' % self.branch) + super().leftStatus()
@@ -74,18 +70,27 @@ class GitBranches(GitSheet):
             self.rows.append(line[2:])
 
 
+class GitFile:
+    def __init__(self, f, gitsrc):
+        self.path = f if isinstance(f, Path) else Path(f)
+        self.filename = self.path.relpath(str(gitsrc) + '/')
+        self.is_dir = self.path.is_dir()
+
+    def __str__(self):
+        return self.filename + (self.is_dir and '/' or '')
+
 
 class GitStatus(GitSheet):
     def __init__(self, p):
         super().__init__(p.relpath(''), p)
 
-        self.columns = [Column('path', getter=lambda r,s=self: s.filename(r) + (r.is_dir() and '/' or ''), cache=True),
+        self.columns = [Column('path', getter=lambda r,s=self: str(r)),
                       Column('status', getter=lambda r,s=self: s.statusText(s.git_status(r)), width=8),
                       Column('staged', getter=lambda r,s=self: s.git_status(r)[2]),
                       Column('unstaged', getter=lambda r,s=self: s.git_status(r)[1]),
-                      Column('type', getter=lambda r: r.is_dir() and '/' or r.suffix, width=0),
-                      Column('size', type=int, getter=lambda r: r.filesize),
-                      Column('mtime', type=date, getter=lambda r: r.stat().st_mtime),
+                      Column('type', getter=lambda r: r.is_dir and '/' or r.path.suffix, width=0),
+                      Column('size', type=int, getter=lambda r: r.path.filesize),
+                      Column('mtime', type=date, getter=lambda r: r.path.stat().st_mtime),
                     ]
 
         self.addColorizer('row', 3, GitStatus.rowColor)
@@ -93,16 +98,16 @@ class GitStatus(GitSheet):
 
         self.command('f', 'sheet.extra_args.append("-f")', 'force next action with "-f"')
 
-        self.command('a', 'git("add", filename(cursorRow))', 'add this new file or modified file to staging')
-        self.command('m', 'git("mv", filename(cursorRow), input("rename file to: ", value=filename(cursorRow)))', 'rename this file')
-        self.command('d', 'git("rm", filename(cursorRow))', 'stage this file for deletion')
-        self.command('w', 'git("reset", "HEAD", filename(cursorRow))', 'unstage this file')
-        self.command('c', 'git("checkout", filename(cursorRow))', 'checkout this file')
-        self.command('ga', 'git("add", *[filename(r) for r in selectedRows])', 'add all selected files to staging')
-        self.command('gd', 'git("rm", *[filename(r) for r in selectedRows])', 'delete all selected files')
+        self.command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging')
+        self.command('m', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file')
+        self.command('d', 'git("rm", cursorRow.filename)', 'stage this file for deletion')
+        self.command('w', 'git("reset", "HEAD", cursorRow.filename)', 'unstage this file')
+        self.command('c', 'git("checkout", cursorRow.filename)', 'checkout this file')
+        self.command('ga', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging')
+        self.command('gd', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files')
         self.command(['^S', 'C'], 'git("commit", "-m", input("commit message: "))', 'commit changes')
-        self.command('V', 'vd.push(TextSheet(filename(cursorRow), Path(filename(cursorRow))))', 'open file')
-        self.command('i', 'open(workdir+"/.gitignore", "a").write(filename(cursorRow)+"\\n")', 'add file to toplevel .gitignore')
+        self.command('V', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file')
+        self.command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n")', 'add file to toplevel .gitignore')
         self.command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')  # path, filename
 
         self.command(ENTER, 'vd.push(HunksSheet(cursorRow))', 'push sheet of diffs for this file')
@@ -144,17 +149,22 @@ class GitStatus(GitSheet):
         return 'white'
 
     def git_status(self, r):
-        return self._cachedStatus.get(self.filename(r), ["FU", None, None])
+        return self._cachedStatus.get(r.filename, ["//", None, None])
 
     def ignored(self, fn):
-        return not options.vgit_show_ignored and self._cachedStatus[fn][0] == '!!'
+        if options.vgit_show_ignored:
+            return False
 
-    def filename(self, r):
-        return r.relpath(str(self.source) + '/')
+        if fn in self._cachedStatus:
+            return self._cachedStatus[fn][0] == '!!'
+
+        return False
 
     def reload(self):
         super().reload()
-        filenames = dict((self.filename(p), Path(self.filename(p))) for p in self.source.iterdir() if p.name not in ('.git', '..'))  # files in working dir
+        files = [GitFile(p, self.source) for p in self.source.iterdir() if p.name not in ('.git', '..')]  # files in working dir
+
+        filenames = dict((gf.filename, gf) for gf in files)
 
         self.rows = []
         self._cachedStatus.clear()
@@ -164,11 +174,11 @@ class GitStatus(GitSheet):
         for status_line in sh.git('status', '-z', '-unormal', '--ignored').split('\0'):
             if status_line:
                 st = status_line[:2]
-                fn = self.filename(Path(status_line[3:]))
-                if fn not in filenames:
-                    if not self.ignored(fn):
-                        self.rows.append(Path(fn))
-                self._cachedStatus[fn] = [st, None, None]
+                gf = GitFile(status_line[3:], self.source)
+                self._cachedStatus[gf.filename] = [st, None, None]
+                if gf.filename not in filenames:
+                    if not self.ignored(gf.filename):
+                        self.rows.append(gf)
 
         for line in sh.git('diff-files', '--numstat', '-z').split('\0'):
             if not line: continue
@@ -186,10 +196,11 @@ class GitStatus(GitSheet):
             cs = self._cachedStatus[fn]
             cs[2] = '+%s/-%s' % (adds, dels)
 
-        self.rows.extend([p for k, p in filenames.items() if not self.ignored(k)])
+        self.rows.extend(gf for fn, gf in filenames.items() if not self.ignored(gf.filename))
 
-        self.recalc()
-        self.rows.sort(key=lambda r,col=self.columns[-1]: col.getValue(r), reverse=True)
+        self.rows.sort(key=lambda r,col=self.columns[-1]: col.getValue(r), reverse=True)  # sort by -mtime
+
+        self.recalc()  # erase column caches
 
 
 class HunksSheet(GitSheet):
@@ -220,7 +231,7 @@ class HunksSheet(GitSheet):
                 '--diff-algorithm=' + options.diff_algorithm,
                 '--patch',
                 '--no-color',
-                '--no-prefix', *[p.resolve() for p in self.sources])
+                '--no-prefix', *[gf.filename for gf in self.sources])
         self.rows = []
         leftfn = ''
         rightfn = ''
