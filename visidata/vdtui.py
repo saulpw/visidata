@@ -1666,15 +1666,28 @@ def _clipdraw(scr, y, x, s, attr, w):
 #                ).with_traceback(sys.exc_info()[2])
         pass
 
+# https://stackoverflow.com/questions/19833315/running-system-commands-in-python-using-curses-and-panel-and-come-back-to-previ
+class suspend_curses():
+    'Context Manager to temporarily leave curses mode'
+    def __enter__(self):
+        curses.endwin()
+
+    def __exit__(self, exc_type, exc_val, tb):
+        newscr = curses.initscr()
+        newscr.refresh()
+        curses.doupdate()
 
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
 
-    def until(func):
-        'Call func() until it returns a true value'
+    def until_get_wch():
+        'Ignores get_wch timeouts'
         ret = None
         while not ret:
-            ret = func()
+            try:
+                ret = scr.get_wch()
+            except _curses.error:
+                pass
 
         return ret
 
@@ -1699,6 +1712,20 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
                     return comps[i]
         # beep
         return v
+
+    def launchExternalEditor(v):
+        editor = os.environ.get('EDITOR') or error('$EDITOR not set')
+
+        import tempfile
+        fd, fqpn = tempfile.mkstemp(text=True)
+        with open(fd, 'w') as fp:
+            fp.write(v)
+
+        with suspend_curses():
+            os.system('%s %s' % (editor, fqpn))
+
+        with open(fqpn, 'r') as fp:
+            return fp.read()
 
     insert_mode = True
     first_action = True
@@ -1748,7 +1775,8 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
-        elif ch == '^V':                           v = splice(v, i, until(scr.get_wch)); i += 1  # literal character
+        elif ch == '^V':                           v = splice(v, i, until_get_wch()); i += 1  # literal character
+        elif ch == '^Z':                           v = launchExternalEditor(v)
         elif history and ch == 'KEY_UP':           hist_idx += 1; v = history[hist_idx % len(history)]
         elif history and ch == 'KEY_DOWN':         hist_idx -= 1; v = history[hist_idx % len(history)]
         elif ch.startswith('KEY_'):                pass
