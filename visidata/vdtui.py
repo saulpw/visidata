@@ -499,8 +499,7 @@ class VisiData:
     def drawRightStatus(self, scr, vs):
         'Draw right side of status bar.'
         try:
-            rstatus = self.rightStatus(vs)
-            attr = colors[options.color_status]
+            rstatus, attr = self.rightStatus(vs)
             _clipdraw(scr, self.windowHeight-1, self.windowWidth-len(rstatus)-2, rstatus, attr, len(rstatus))
             curses.doupdate()
         except Exception as e:
@@ -518,7 +517,9 @@ class VisiData:
             pctLoaded = 'rows'
         else:
             pctLoaded = ' %2d%%' % sheet.progressPct
-        return '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
+        status = '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
+        attr = colors[options.color_status]
+        return status, attr
 
     @property
     def windowHeight(self):
