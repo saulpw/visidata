@@ -1527,12 +1527,6 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
             width=origcol.width,
             **kwargs)
 
-def combineColumns(cols):
-    'Return Column object formed by joining fields in given columns.'
-    return Column("+".join(c.name for c in cols),
-                  getter=lambda r,cols=cols,ch=options.field_joiner: ch.join(filter(None, (c.getValue(r) for c in cols))))
-###
-
 def input(prompt, type='', **kwargs):
     'Compose input prompt.'
     if type:
