@@ -573,8 +573,8 @@ class VisiData:
                 try:
                     devid, x, y, z, bstate = curses.getmouse()
                     sheet.cursorRowIndex = sheet.topRowIndex+y-1
-                except Exception:
-                    self.exceptionCaught()
+                except curses.error:
+                    pass
             elif self.keystrokes in sheet.commands:
                 sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
             elif keystroke in self.allPrefixes:
@@ -1844,7 +1844,7 @@ def setupcolors(stdscr, f, *args):
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
 #    curses.mousemask(curses.ALL_MOUSE_EVENTS)  # enable mouse events
-
+#    curses.mouseinterval(0)
     return f(stdscr, *args)
 
 def wrapper(f, *args):
