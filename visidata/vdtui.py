@@ -157,6 +157,7 @@ alias('G', 'gj')
 alias('KEY_HOME', 'gk')
 alias('KEY_END', 'gj')
 
+command('^L', 'vd.scr.clear()', 'redraw entire terminal screen')
 command('^G', 'status(statusLine)', 'show info for the current sheet')
 command('^V', 'status(__version__)', 'show version information')
 
