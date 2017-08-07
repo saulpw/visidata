@@ -220,6 +220,9 @@ command('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
 command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
+command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
+command('C', 'vd.push(ColumnsSheet(sheet))', 'open Columns for this sheet')
+command('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
 
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
 #
@@ -1619,6 +1622,28 @@ class TextSheet(Sheet):
         else:
             self.rows.append((len(self.rows), text))
 
+class ColumnsSheet(Sheet):
+    def __init__(self, srcsheet):
+        super().__init__(srcsheet.name + '_columns', srcsheet)
+
+        self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
+
+        self.columns = [
+            ColumnAttr('name', str),
+            ColumnAttr('width', int),
+            ColumnAttrNamedObject('type'),
+            ColumnAttr('fmtstr', str),
+            Column('value',  anytype, lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
+        ]
+
+
+class SheetsSheet:
+    def __init__(self):
+        super().__init__('sheets', vd().sheets, columns=AttrColumns('name nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
+
+    def reload(self):
+        self.rows = vd().sheets
+        self.command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet')
 
 class OptionsObject:
     'minimalist options framework'
@@ -1638,6 +1663,19 @@ class OptionsObject:
         self._opts[k][1] = type(self._opts[k][1])(v)
 
 options = OptionsObject(baseOptions)
+
+
+class OptionsSheet(Sheet):
+    def __init__(self, d):
+        super().__init__('options', d)
+        self.columns = ArrayNamedColumns('option value default description'.split())
+        self.command([ENTER, 'e'], 'source[cursorRow[0]] = editCell(1)', 'edit this option')
+        self.nKeys = 1
+
+    def reload(self):
+        self.rows = list(self.source._opts.values())
+
+vd().optionsSheet = OptionsSheet(options)
 
 # A .. Z AA AB .. ZY ZZ
 defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)

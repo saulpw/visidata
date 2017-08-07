@@ -1,15 +1,10 @@
 from visidata import *
 
-command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
-command('C', 'vd.push(ColumnsSheet(sheet))', 'open Columns for this sheet')
-
 command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
 option('col_stats', False, 'include mean/median/etc on Column sheet')
 command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
 command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
-
-command('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
 
 class OptionsSheet(Sheet):
     'options management'
