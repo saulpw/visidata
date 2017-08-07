@@ -10,12 +10,12 @@ option('vgit_show_ignored', False)
 option('diff_algorithm', 'minimal')
 
 command('x', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
-command('B', 'vd.push(GitBranches())', 'execute arbitrary git command')
-command('O', 'vd.push(GitOptions())', 'push sheet of git options')
+command('B', 'vd.push(vd.gitBranchesSheet).reload()', 'execute arbitrary git command')
+command('O', 'vd.push(vd.gitOptionsSheet).reload()', 'push sheet of git options')
 command('P', 'git("push")', 'git push')
 command('A', 'git("merge", "--abort")', 'abort merge')
 
-command('1', 'vd.push(GitStashes())', '')
+command('1', 'vd.push(vd.gitStashesSheet).reload()', '')
 command('^S', 'git("stash", "save")', 'stash uncommitted changes')
 command('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
 
@@ -70,7 +70,7 @@ class GitStashes(GitSheet):
         self.command('^P', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it')
         self.command('d', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change')
         self.command('b', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash')
-        self.command(ENTER, 'vd.push(HunksSheet(cursorRow[0] + " diffs", "--no-pager", "stash", "show", "--no-color", cursorRow[0]))', 'show this stashed change')
+        self.command(ENTER, 'vd.push(HunksSheet(cursorRow[0]+"_diffs", sheet, "--no-pager", "stash", "show", "--no-color", "--patch", cursorRow[0]))', 'show this stashed change')
 
 
     def reload(self):
@@ -82,6 +82,34 @@ class GitStashes(GitSheet):
             sha1, msg = rest.split(' ', 1)
             self.rows.append([stashid, starting_branch, sha1, msg])
 
+
+
+class LogSheet(GitSheet):
+    GIT_LOG_FORMAT = '%H %an %ae %ai %s %b'.split()
+    GIT_LOG_FIELDS = 'id author_name author_email author_date subject body'.split()
+
+    def __init__(self, name, branchname):
+        super().__init__(name, branchname)
+        self.columns = [
+            ColumnItem('commitid', 0, width=8),
+            ColumnItem('subject', 4),
+            ColumnItem('author_name', 1),
+            ColumnItem('author_email', 2),
+            ColumnItem('author_date', 3),
+            ColumnItem('body', 5),
+        ]
+        self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0]+"_commit", sheet, cursorRow[0]))', 'show this stashed change')
+
+    def reload(self):
+        self.rows = []
+        thisCommit = []
+        log = sh.git("--no-pager", "log", "--no-color", "--first-parent", "--pretty=format:%s%%x1e" % '%x1f'.join(self.GIT_LOG_FORMAT), self.source)
+        log = log.strip('\n\x1e')
+        for record in log.split('\x1e'):
+            record = record.lstrip()
+            self.rows.append(record.split('\x1f'))
+
+
 class GitBranches(GitSheet):
     def __init__(self):
         super().__init__('branches')
@@ -92,8 +120,9 @@ class GitBranches(GitSheet):
         self.command('a', 'git("checkout", "-b", input("create branch: ", type="branch"))', 'create a new branch off the current checkout')
         self.command('d', 'git("branch", "--delete", cursorRow)', 'delete this branch')
         self.command('e', 'git("branch", "-v", "--move", cursorRow, editCell(0))', 'rename this branch')
-        self.command([ENTER, 'c'], 'git("checkout", cursorRow)', 'checkout this branch')
+        self.command('c', 'git("checkout", cursorRow)', 'checkout this branch')
         self.command('m', 'git("merge", cursorRow)', 'merge this branch into the current branch')
+        self.command(ENTER, 'vd.push(LogSheet(cursorRow+"_log", cursorRow))', '')
 
     def reload(self):
         super().reload()
@@ -237,6 +266,7 @@ class GitStatus(GitSheet):
 
         self.recalc()  # erase column caches
 
+
 def getHunksSheet(parent, *files):
     return HunksSheet('hunks', parent, '--no-pager', 'diff',
                   '--diff-algorithm=' + options.diff_algorithm,
@@ -244,6 +274,12 @@ def getHunksSheet(parent, *files):
                   '--no-color',
                   '--no-prefix', *[gf.filename for gf in files])
 
+def getCommitSheet(name, parent, *refids):
+    return HunksSheet(name, parent, '--no-pager', 'show',
+                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--patch',
+                  '--no-color',
+                  '--no-prefix', *refids)
 
 # source is arguments to git()
 class HunksSheet(GitSheet):
@@ -287,7 +323,14 @@ class HunksSheet(GitSheet):
         leftfn = ''
         rightfn = ''
         header_lines = None
+        diff_started = False
         for line in diffout.splitlines():
+            if line.startswith('diff'):
+                diff_started = True
+                continue
+            if not diff_started:
+                continue
+
             if line.startswith('---'):
                 header_lines = [line]  # new file
                 leftfn = line[4:]
@@ -424,6 +467,9 @@ def main():
 
     addGlobals(globals())
     vd().gitStatusSheet = GitStatus(Path('.'))
+    vd().gitBranchesSheet = GitBranches()
+    vd().gitOptionsSheet = GitOptions()
+    vd().gitStashesSheet = GitStashes()
 
     fn = sys.argv[1] if sys.argv[1:] else '.'
     os.chdir(fn)
