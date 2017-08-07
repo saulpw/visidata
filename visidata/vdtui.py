@@ -100,6 +100,7 @@ option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('num_colors', 0, 'force number of colors to use')
 option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 option('textwrap', True, 'if TextSheet breaks rows to fit in windowWidth')
+option('force_valid_names', False, 'force column names to be valid Python identifiers')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -1277,13 +1278,12 @@ def distinct(values):
     return len(set(values))
 
 def avg(values):
-    'Calculate average or return None.'
     return float(sum(values))/len(values) if values else None
 
 mean=avg
 
 def count(values):
-    'Count total number of elements or return None if 0.'
+    'Count total number of non-None elements.'
     return len([x for x in values if x is not None])
 
 _sum = sum
@@ -1312,10 +1312,6 @@ aggregators = { '': None,
 
 
 class Column:
-    '''Model spreadsheet-style "column".
-
-    If `expr` is set, cell values will be computed by this object.'''
-
     def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None, cache=False):
         self.name = name      # use property setter from the get-go to strip spaces
         self.type = type      # anytype/str/int/float/date/func
@@ -1328,22 +1324,21 @@ class Column:
         self._cachedValues = collections.OrderedDict() if cache else None
 
     def copy(self):
-        'Wrap `copy.copy`.'
         return copy.copy(self)
 
     @property
     def name(self):
-        'Return `_name`.'
         return self._name
 
     @name.setter
     def name(self, name):
-        'Set `_name`.'
-        self._name = str(name).replace(' ', '_')
+        if options.force_valid_names:
+            name = ''.join(c for c in str(name) if unicodedata.category(c) not in ('Cc', 'Zs', 'Zl'))  # control char, space, line sep
+        self._name = name
 
+#######  cut; move global-getting into columnssheet
     @property
     def type(self):
-        'Return `_type`.'
         return self._type
 
     @type.setter
@@ -1360,12 +1355,11 @@ class Column:
 
     @property
     def aggregator(self):
-        'Return `_aggregator`.'
         return self._aggregator
 
     @aggregator.setter
     def aggregator(self, aggfunc):
-        'Set `_aggregator` to given `aggfunc` if it is callable.'
+        'Set `_aggregator` to given `aggfunc`, which is either a function or a string naming a global function.'
         if isinstance(aggfunc, str):
             if aggfunc:
                 aggfunc = globals()[aggfunc]
@@ -1375,6 +1369,7 @@ class Column:
             self._aggregator = aggfunc
         else:
             self._aggregator = None
+###### end cut
 
     def format(self, cellval):
         'Return displayable string of `cellval` according to our `Column.type` and `Column.fmtstr`'
@@ -1394,7 +1389,7 @@ class Column:
 
     @property
     def hidden(self):
-        'True if this Column.width is 0.'
+        'A column is hidden if its width == 0.'
         return self.width == 0
 
     def nEmpty(self, rows):
