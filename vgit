@@ -15,8 +15,10 @@ command('O', 'vd.push(GitOptions())', 'push sheet of git options')
 command('P', 'git("push")', 'git push')
 command('A', 'git("merge", "--abort")', 'abort merge')
 
-def open_git(p):
-    return GitStatus(p)
+command('1', 'vd.push(GitStashes())', '')
+command('^S', 'sh.git("stash", "save")', 'stash uncommitted changes')
+command('^P', 'sh.git("stash", "pop")', 'apply the most recent stashed change and drop it')
+
 
 class GitSheet(Sheet):
     def __init__(self, *args, **kwargs):
@@ -29,7 +31,7 @@ class GitSheet(Sheet):
         self.extra_args.clear()
 
         try:
-            ret = sh.git(*args, _err_to_out=True, **kwargs)
+            ret = sh.git('--no-pager', *args, _err_to_out=True, **kwargs)
             out = ret.stdout
         except sh.ErrorReturnCode as e:
             status('retcode=%s' % e.exit_code)
@@ -38,7 +40,7 @@ class GitSheet(Sheet):
         self.reload()
 
         out = out.decode('utf-8')
-        if len(out.splitlines()) > 1:
+        if len(out.splitlines()) > 2:
             vd().push(TextSheet('git_%s' % args[0], out))
         else:
             status(out)
@@ -49,6 +51,32 @@ class GitSheet(Sheet):
     def reload(self):
         self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
+
+
+class GitStashes(GitSheet):
+    def __init__(self):
+        super().__init__('stashes')
+        self.columns = [
+            ColumnItem('stashid', 0),
+            ColumnItem('start_branch', 1),
+            ColumnItem('sha1', 2),
+            ColumnItem('msg', 3),
+        ]
+        self.command('^A', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing')
+        self.command(')', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it')
+        self.command('d', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change')
+        self.command('b', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash')
+        self.command(ENTER, 'vd.push(HunksSheet("--no-pager", "stash", "show", "--no-color", cursorRow[0]))', 'show this stashed change')
+
+
+    def reload(self):
+        self.rows = []
+        stashout = sh.git('--no-pager', 'stash', 'list')
+        for line in stashout:
+            stashid, ctx, rest = line[:-1].split(': ', 2)
+            starting_branch = ctx[len('WIP on '):]
+            sha1, msg = rest.split(' ', 1)
+            self.rows.append([stashid, starting_branch, sha1, msg])
 
 class GitBranches(GitSheet):
     def __init__(self):
@@ -112,7 +140,7 @@ class GitStatus(GitSheet):
         self.command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n")', 'add file to toplevel .gitignore')
         self.command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')  # path, filename
 
-        self.command(ENTER, 'vd.push(HunksSheet(cursorRow))', 'push sheet of diffs for this file')
+        self.command(ENTER, 'vd.push(getHunksSheet(cursorRow))', 'push sheet of diffs for this file')
 
         self.command('g/', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files')
 #
@@ -204,10 +232,18 @@ class GitStatus(GitSheet):
 
         self.recalc()  # erase column caches
 
+def getHunksSheet(*files):
+    return HunksSheet('hunks', list('--no-pager', 'diff',
+                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--patch',
+                  '--no-color',
+                  '--no-prefix', *[gf.filename for gf in files]))
 
+
+# source is arguments to git()
 class HunksSheet(GitSheet):
-    def __init__(self, *files):
-        super().__init__('hunks', *files)
+    def __init__(self, *git_args):
+        super().__init__('hunks', git_args)
         self.columns = [
             ColumnItem('origfn', 0, width=0),
             ColumnItem('filename', 1),
@@ -220,7 +256,7 @@ class HunksSheet(GitSheet):
 
         self.command(ENTER, 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunk')
         self.command('g^J', 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks')
-        self.command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'apply this hunk to the index')
+        self.command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the entire raw patch')
         self.command('a', 'apply(cursorRow)', 'apply this hunk to the index')
 
     def apply(self, hunk):
@@ -229,11 +265,9 @@ class HunksSheet(GitSheet):
 
     def reload(self):
         super().reload()
-        diffout = sh.git('--no-pager', 'diff',
-                '--diff-algorithm=' + options.diff_algorithm,
-                '--patch',
-                '--no-color',
-                '--no-prefix', *[gf.filename for gf in self.sources])
+
+        diffout = sh.git(*self.source)
+
         self.rows = []
         leftfn = ''
         rightfn = ''
