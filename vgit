@@ -39,6 +39,8 @@ class GitSheet(Sheet):
 
         self.reload()
 
+        vd().gitStatusSheet.reload()
+
         out = out.decode('utf-8')
         if len(out.splitlines()) > 2:
             vd().push(TextSheet('git_%s' % args[0], out))
@@ -133,7 +135,7 @@ class GitStatus(GitSheet):
         self.command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging')
         self.command('m', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file')
         self.command('d', 'git("rm", cursorRow.filename)', 'stage this file for deletion')
-        self.command('w', 'git("reset", "HEAD", cursorRow.filename)', 'unstage this file')
+        self.command('r', 'git("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file')
         self.command('c', 'git("checkout", cursorRow.filename)', 'checkout this file')
         self.command('ga', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging')
         self.command('gd', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files')
@@ -411,11 +413,12 @@ def main():
     status(__version__)
 
     addGlobals(globals())
+    vd().gitStatusSheet = GitStatus(Path('.'))
 
     fn = sys.argv[1] if sys.argv[1:] else '.'
     os.chdir(fn)
 
-    run([GitStatus(Path('.'))])
+    run([vd().gitStatusSheet])
 
 
 main()
