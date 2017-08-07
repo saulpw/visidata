@@ -66,8 +66,8 @@ class GitStashes(GitSheet):
             ColumnItem('sha1', 2),
             ColumnItem('msg', 3),
         ]
-        self.command('^A', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing')
-        self.command(')', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it')
+        self.command('a', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing')
+        self.command('^P', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it')
         self.command('d', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change')
         self.command('b', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash')
         self.command(ENTER, 'vd.push(HunksSheet(cursorRow[0] + " diffs", "--no-pager", "stash", "show", "--no-color", cursorRow[0]))', 'show this stashed change')
@@ -141,10 +141,11 @@ class GitStatus(GitSheet):
         self.command('gd', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files')
         self.command('C', 'git("commit", "-m", input("commit message: "))', 'commit changes')
         self.command('V', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file')
-        self.command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n")', 'add file to toplevel .gitignore')
+        self.command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore')
         self.command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')  # path, filename
 
         self.command(ENTER, 'vd.push(getHunksSheet(sheet, cursorRow))', 'push sheet of diffs for this file')
+        self.command('g^J', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push sheet of diffs selected rows or all rows')
 
         self.command('g/', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files')
 #
@@ -259,16 +260,25 @@ class HunksSheet(GitSheet):
             ColumnItem('rightcount', 6),
         ]
 
-        self.command(ENTER, 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunk')
-        self.command('g^J', 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks')
-        self.command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the entire raw patch')
-        self.command('a', 'apply(cursorRow)', 'apply this hunk to the index')
+        self.command(ENTER, 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks')
+#        self.command('g^J', '', 'view the diff for this patch')
+        self.command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk')
+#        self.command('gV', '', 'view the raw patch for selected/all hunks')
+        self.command('a', 'apply(cursorRow, "--cached")', 'apply this hunk to the index')
+        self.command('d', 'apply(cursorRow, "--reverse")', 'undo this hunk')
 
-    def apply(self, hunk):
-        self.git("apply", "--cached", "-p0", "-", _in="\n".join(hunk[7]) + "\n")
+    def apply(self, hunk, *args):
+        self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
         status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
     def reload(self):
+        def _parseStartCount(s):
+            sc = s.split(',')
+            if len(sc) == 2:
+                return sc
+            if len(sc) == 1:
+                return sc[0], 1
+
         super().reload()
 
         diffout = sh.git(*self.git_args)
@@ -288,8 +298,8 @@ class HunksSheet(GitSheet):
                 header_lines.append(line)
                 _, linenums, context = line.split('@@')
                 leftlinenums, rightlinenums = linenums.split()
-                leftstart, leftcount = leftlinenums[1:].split(',')
-                rightstart, rightcount = rightlinenums[1:].split(',')
+                leftstart, leftcount = _parseStartCount(leftlinenums[1:])
+                rightstart, rightcount = _parseStartCount(rightlinenums[1:])
                 self.rows.append((leftfn, rightfn, context, int(leftstart), int(leftcount), int(rightstart), int(rightcount), header_lines))
                 header_lines = header_lines[:2]  # keep file context
             elif line[0] in ' +-':
@@ -305,8 +315,8 @@ class HunkViewer(GitSheet):
             ColumnItem('right', 2, width=vd().windowWidth//2-1),
         ]
         self.addColorizer('row', 4, HunkViewer.colorDiffRow)
-        self.command('a', 'srchunks.apply(sources.pop(0)); reload()', 'apply this hunk to the index and move to the next hunk')
-        self.command(ENTER, 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk')
+        self.command(['y', 'a'], 'srchunks.apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk')
+        self.command(['n', ENTER], 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk')
         self.command('d', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch')
 
     def reload(self):
