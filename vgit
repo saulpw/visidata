@@ -66,7 +66,7 @@ class GitStashes(GitSheet):
         self.command(')', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it')
         self.command('d', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change')
         self.command('b', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash')
-        self.command(ENTER, 'vd.push(HunksSheet("--no-pager", "stash", "show", "--no-color", cursorRow[0]))', 'show this stashed change')
+        self.command(ENTER, 'vd.push(HunksSheet(cursorRow[0] + " diffs", "--no-pager", "stash", "show", "--no-color", cursorRow[0]))', 'show this stashed change')
 
 
     def reload(self):
@@ -135,7 +135,7 @@ class GitStatus(GitSheet):
         self.command('c', 'git("checkout", cursorRow.filename)', 'checkout this file')
         self.command('ga', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging')
         self.command('gd', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files')
-        self.command(['^S', 'C'], 'git("commit", "-m", input("commit message: "))', 'commit changes')
+        self.command('C', 'git("commit", "-m", input("commit message: "))', 'commit changes')
         self.command('V', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file')
         self.command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n")', 'add file to toplevel .gitignore')
         self.command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')  # path, filename
