@@ -15,7 +15,7 @@ setup(name='vgit',
       download_url='https://github.com/saulpw/vgit/tarball/' + __version__,
       scripts=['vgit'],
       py_modules = ['vdtui'],
-      license='GPLv3',
+      license='GPLv2',
       classifiers=[
           'Development Status :: 2 - Pre-Alpha',
           'Environment :: Console',

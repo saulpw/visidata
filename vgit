@@ -233,17 +233,17 @@ class GitStatus(GitSheet):
         self.recalc()  # erase column caches
 
 def getHunksSheet(*files):
-    return HunksSheet('hunks', list('--no-pager', 'diff',
+    return HunksSheet('hunks', '--no-pager', 'diff',
                   '--diff-algorithm=' + options.diff_algorithm,
                   '--patch',
                   '--no-color',
-                  '--no-prefix', *[gf.filename for gf in files]))
+                  '--no-prefix', *[gf.filename for gf in files])
 
 
 # source is arguments to git()
 class HunksSheet(GitSheet):
-    def __init__(self, *git_args):
-        super().__init__('hunks', git_args)
+    def __init__(self, name, *git_args):
+        super().__init__(name, git_args)
         self.columns = [
             ColumnItem('origfn', 0, width=0),
             ColumnItem('filename', 1),
