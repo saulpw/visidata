@@ -98,7 +98,10 @@ class LogSheet(GitSheet):
             ColumnItem('author_date', 3),
             ColumnItem('body', 5),
         ]
-        self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0]+"_commit", sheet, cursorRow[0]))', 'show this stashed change')
+        self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0]+"_commit", sheet, cursorRow[0]))', 'show this commit')
+        self.command('Q', '', 'squash selected commits')
+        self.command('c', 'git("cherry-pick")', 'cherry-pick this commit onto current branch')
+#        self.command('gc', '', 'cherry-pick selected commits onto current branch')
 
     def reload(self):
         self.rows = []
@@ -114,7 +117,10 @@ class GitBranches(GitSheet):
     def __init__(self):
         super().__init__('branches')
         self.columns = [
-            Column('branch')
+            ColumnItem('branch', 0),
+            ColumnItem('head_commitid', 1, width=0),
+            ColumnItem('tracking_branch', 2),
+            ColumnItem('head_commitmsg', 3),
         ]
 
         self.command('a', 'git("checkout", "-b", input("create branch: ", type="branch"))', 'create a new branch off the current checkout')
@@ -127,10 +133,13 @@ class GitBranches(GitSheet):
     def reload(self):
         super().reload()
         self.rows = []
-        for line in sh.git('--no-pager', 'branch', '--no-color',
-#                '--all',  # local and remote branches
+        for line in sh.git('--no-pager', 'branch', '--no-color', '-vv',
+                '--all',  # local and remote branches
                 '--list').splitlines():
-            self.rows.append(line[2:])
+
+            if '->' in line:
+                continue
+            self.rows.append(line[2:].split(maxsplit=3))
 
 
 class GitFile:
