@@ -25,6 +25,7 @@ class GitSheet(Sheet):
         super().__init__(*args, **kwargs)
         self.extra_args = []
         self.branch = ''
+        self.remotediff = ''  # ahead/behind status
 
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
@@ -82,12 +83,26 @@ class GitSheet(Sheet):
     def leftStatus(self):
         inp = self.inProgress()
         ret = ('[%s] ' % inp) if inp else ''
-        ret += ('‹%s› ' % self.branch)
+        ret += '‹%s%s› ' % (self.branch, self.remotediff)
 
         return ret + super().leftStatus()
 
     def reload(self):
         self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
+
+        branch_status = sh.git('status', '-z', '--short', '--branch', '--porcelain').split('\0')[0]
+        m = re.search(r'(\w+)\.\.\.(\S+)( \[(ahead|behind) (\d+)\])', branch_status)
+        if m:
+            localb, remoteb, remotediff, aheadbehind, ncommits = m.groups()
+            assert localb == self.branch
+            if 'ahead' in aheadbehind:
+                self.remotediff = ' +%s' % ncommits
+            elif 'behind' in aheadbehind:
+                self.remotediff = ' -%s' % ncommits
+            else:
+                self.remotediff = ''
+        else:
+            status(branch_status)
 
         if self.sources and isinstance(self.sources[0], GitSheet):
             self.sources[0].reload()
