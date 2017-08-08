@@ -580,7 +580,7 @@ class VisiData:
                 except curses.error:
                     pass
             elif self.keystrokes in sheet.commands:
-                sheet.exec_command(g_globals, sheet.commands[self.keystrokes])
+                sheet.exec_command(globals(), sheet.commands[self.keystrokes])
             elif keystroke in self.allPrefixes:
                 pass
             else:
@@ -805,7 +805,7 @@ class Sheet:
         escaped = False
 
         if vdglobals is None:
-            vdglobals = g_globals
+            vdglobals = globals()
         # handy globals for use by commands
         keystrokes, _, execstr = cmd
         self.sheet = self
@@ -1989,11 +1989,9 @@ def cursesMain(_scr, sheetlist=[]):
     return vd().run(_scr)
 
 
-g_globals = globals()
-
 def addGlobals(g):
     'importers can call `addGlobals(globals())` to have their globals accessible to execstrings'
-    g_globals.update(g)
+    globals().update(g)
 
 if __name__ == '__main__':
-    run(TextSheet(src, open(src)) for src in sys.argv[1:])
+    run(TextSheet('contents', Path(src)) for src in sys.argv[1:])
