@@ -240,11 +240,14 @@ class GitStatus(GitSheet):
         self.command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore')
         self.command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')  # path, filename
 
-        self.command(ENTER, 'vd.push(getHunksSheet(sheet, cursorRow))', 'push sheet of diffs for this file')
-        self.command('g^J', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push sheet of diffs selected rows or all rows')
+        self.command(ENTER, 'vd.push(getHunksSheet(sheet, cursorRow))', 'push unstaged diffs for this file')
+        self.command('g^J', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files')
 
         self.command('g/', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files')
-#
+
+        self.command('z^J', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file')
+        self.command(['zg^J', 'gz^J'], 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files')
+
         self._cachedStatus = {}
 
     def statusText(self, st):
@@ -336,6 +339,13 @@ class GitStatus(GitSheet):
 
 def getHunksSheet(parent, *files):
     return HunksSheet('hunks', parent, '--no-pager', 'diff',
+                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--patch',
+                  '--no-color',
+                  '--no-prefix', *[gf.filename for gf in files])
+
+def getStagedHunksSheet(parent, *files):
+    return HunksSheet('staged_hunks', parent, '--no-pager', 'diff', '--cached',
                   '--diff-algorithm=' + options.diff_algorithm,
                   '--patch',
                   '--no-color',
