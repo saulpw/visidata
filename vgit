@@ -15,7 +15,7 @@ command('O', 'vd.push(vd.gitOptionsSheet).reload()', 'push sheet of git options'
 command('P', 'git("push")', 'git push')
 command('A', 'abortWhatever()', 'abort the current in-progress action')
 
-command('1', 'vd.push(vd.gitStashesSheet).reload()', '')
+command('T', 'vd.push(vd.gitStashesSheet).reload()', 'push stashes sheet')
 command('^S', 'git("stash", "save")', 'stash uncommitted changes')
 command('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
 
