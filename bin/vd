@@ -4,6 +4,7 @@
 
 __version__ = 'saul.pw/VisiData v0.95'
 
+import os
 import visidata
 
 def main():
@@ -39,4 +40,6 @@ def main():
 
 if __name__ == '__main__':
     visidata.status(__version__)
+    visidata.addGlobals(globals())
     main()
+    os._exit(0)  # cleanup can be expensive with large datasets
