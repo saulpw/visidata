@@ -13,7 +13,7 @@ command('x', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrar
 command('B', 'vd.push(vd.gitBranchesSheet).reload()', 'execute arbitrary git command')
 command('O', 'vd.push(vd.gitOptionsSheet).reload()', 'push sheet of git options')
 command('P', 'git("push")', 'git push')
-command('A', 'git("merge", "--abort")', 'abort merge')
+command('A', 'abortWhatever()', 'abort the current in-progress action')
 
 command('1', 'vd.push(vd.gitStashesSheet).reload()', '')
 command('^S', 'git("stash", "save")', 'stash uncommitted changes')
@@ -42,13 +42,49 @@ class GitSheet(Sheet):
         vd().gitStatusSheet.reload()
 
         out = out.decode('utf-8')
-        if len(out.splitlines()) > 2:
-            vd().push(TextSheet('git_%s' % args[0], out))
+        if out:
+            if len(out.splitlines()) <= 2:
+                status(out)
+            else:
+                status('git ' + ' '.join(args))
+                vd().push(TextSheet('git_%s' % args[0], out))
         else:
-            status(out)
+            status('git ' + ' '.join(args))
+
+    @staticmethod
+    def inProgress():
+        if Path('.git/rebase-merge').exists() or Path('.git/rebase-apply/rebasing').exists():
+            return 'rebasing'
+        elif Path('.git/rebase-apply').exists():
+            return 'applying'
+        elif Path('.git/CHERRY_PICK_HEAD').exists():
+            return 'cherry-picking'
+        elif Path('.git/MERGE_HEAD').exists():
+            return 'merging'
+        elif Path('.git/BISECT_LOG').exists():
+            return 'bisecting'
+        return ''
+
+
+    def abortWhatever(self):
+        inp = self.inProgress()
+        if inp.startswith('cherry-pick'):
+            self.git('cherry-pick', '--abort')
+        elif inp.startswith('merg'):
+            self.git('merge', '--abort')
+        elif inp.startswith('bisect'):
+            self.git('bisect', 'reset')
+        elif inp.startswith('rebas') or inp.startswith('apply'):
+            self.git('rebase', '--abort')  # or --quit?
+        else:
+            status('nothing to abort')
 
     def leftStatus(self):
-        return ('‹%s› ' % self.branch) + super().leftStatus()
+        inp = self.inProgress()
+        ret = ('[%s] ' % inp) if inp else ''
+        ret += ('‹%s› ' % self.branch)
+
+        return ret + super().leftStatus()
 
     def reload(self):
         self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
@@ -100,10 +136,12 @@ class LogSheet(GitSheet):
         ]
         self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0]+"_commit", sheet, cursorRow[0]))', 'show this commit')
         self.command('Q', '', 'squash selected commits')
-        self.command('c', 'git("cherry-pick")', 'cherry-pick this commit onto current branch')
+        self.command('c', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch')
 #        self.command('gc', '', 'cherry-pick selected commits onto current branch')
 
     def reload(self):
+        super().reload()
+
         self.rows = []
         thisCommit = []
         log = sh.git("--no-pager", "log", "--no-color", "--first-parent", "--pretty=format:%s%%x1e" % '%x1f'.join(self.GIT_LOG_FORMAT), self.source)
@@ -124,11 +162,11 @@ class GitBranches(GitSheet):
         ]
 
         self.command('a', 'git("checkout", "-b", input("create branch: ", type="branch"))', 'create a new branch off the current checkout')
-        self.command('d', 'git("branch", "--delete", cursorRow)', 'delete this branch')
-        self.command('e', 'git("branch", "-v", "--move", cursorRow, editCell(0))', 'rename this branch')
-        self.command('c', 'git("checkout", cursorRow)', 'checkout this branch')
-        self.command('m', 'git("merge", cursorRow)', 'merge this branch into the current branch')
-        self.command(ENTER, 'vd.push(LogSheet(cursorRow+"_log", cursorRow))', '')
+        self.command('d', 'git("branch", "--delete", cursorRow[0])', 'delete this branch')
+        self.command('e', 'git("branch", "-v", "--move", cursorRow[0], editCell(0))', 'rename this branch')
+        self.command('c', 'git("checkout", cursorRow[0])', 'checkout this branch')
+        self.command('m', 'git("merge", cursorRow[0])', 'merge this branch into the current branch')
+        self.command(ENTER, 'vd.push(LogSheet(cursorRow[0]+"_log", cursorRow[0]))', '')
 
     def reload(self):
         super().reload()
