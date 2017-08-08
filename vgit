@@ -92,13 +92,13 @@ class GitSheet(Sheet):
         self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
         branch_status = sh.git('status', '-z', '--short', '--branch', '--porcelain').split('\0')[0]
-        m = re.search(r'(\w+)\.\.\.(\S+)( \[(ahead|behind) (\d+)\])', branch_status)
+        m = re.search(r'(\w+)\.\.\.(\S+)( \[(ahead|behind) (\d+)\])?', branch_status)
         if m:
             localb, remoteb, remotediff, aheadbehind, ncommits = m.groups()
             assert localb == self.branch
-            if 'ahead' in aheadbehind:
+            if aheadbehind and 'ahead' in aheadbehind:
                 self.remotediff = ' +%s' % ncommits
-            elif 'behind' in aheadbehind:
+            elif aheadbehind and 'behind' in aheadbehind:
                 self.remotediff = ' -%s' % ncommits
             else:
                 self.remotediff = ''
@@ -150,8 +150,8 @@ class LogSheet(GitSheet):
             ColumnItem('author_date', 3),
             ColumnItem('body', 5),
         ]
-        self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0]+"_commit", sheet, cursorRow[0]))', 'show this commit')
-        self.command('Q', '', 'squash selected commits')
+        self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit')
+#        self.command('Q', '', 'squash selected commits')
         self.command('c', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch')
 #        self.command('gc', '', 'cherry-pick selected commits onto current branch')
 
@@ -171,10 +171,11 @@ class GitBranches(GitSheet):
     def __init__(self):
         super().__init__('branches')
         self.columns = [
-            ColumnItem('branch', 0),
-            ColumnItem('head_commitid', 1, width=0),
-            ColumnItem('tracking_branch', 2),
-            ColumnItem('head_commitmsg', 3),
+            ColumnItem('branch', 1),
+            ColumnItem('head_commitid', 2, width=0),
+            ColumnItem('tracking_branch', 3),
+            ColumnItem('extra', 4),
+            ColumnItem('head_commitmsg', 5),
         ]
 
         self.command('a', 'git("checkout", "-b", input("create branch: ", type="branch"))', 'create a new branch off the current checkout')
@@ -182,7 +183,7 @@ class GitBranches(GitSheet):
         self.command('e', 'git("branch", "-v", "--move", cursorRow[0], editCell(0))', 'rename this branch')
         self.command('c', 'git("checkout", cursorRow[0])', 'checkout this branch')
         self.command('m', 'git("merge", cursorRow[0])', 'merge this branch into the current branch')
-        self.command(ENTER, 'vd.push(LogSheet(cursorRow[0]+"_log", cursorRow[0]))', '')
+        self.command(ENTER, 'vd.push(LogSheet(cursorRow[0]+"_log", cursorRow[0]))', 'push log of this branch')
 
     def reload(self):
         super().reload()
@@ -193,7 +194,10 @@ class GitBranches(GitSheet):
 
             if '->' in line:
                 continue
-            self.rows.append(line[2:].split(maxsplit=3))
+            m = re.match(r'(\*?)\s+(\S+)\s+(\w+)\s+\[([^\s\]:]+):?\s*(.*?)\] (.*)', line)
+            if m:
+#                current, localbranch, refid, remotebranch, extra, msg = m.groups()
+                self.rows.append(m.groups())
 
 
 class GitFile:
