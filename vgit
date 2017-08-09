@@ -188,9 +188,9 @@ class GitBranches(GitSheet):
     def reload(self):
         super().reload()
         self.rows = []
-        for line in sh.git('--no-pager', 'branch', '--no-color', '-vv',
-                '--all',  # local and remote branches
-                '--list').splitlines():
+        for line in sh.git('--no-pager', 'branch', '--list', '-vv', '--no-color',
+                '--all'  # local and remote branches
+                ).splitlines():
 
             if '->' in line:
                 continue
@@ -488,9 +488,10 @@ class GitGrep(GitSheet):
             ColumnItem('linenum', 1),
             ColumnItem('line', 2),
         ])
-        self.command(ENTER, 'vd.push(openSource(cursorRow[0], filetype="txt")).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
+        self.command(ENTER, 'vd.push(TextSheet(cursorRow[0], Path(cursorRow[0]))).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
 
     def reload(self):
+        super().reload()
         self.rows = []
         for line in sh.git('--no-pager', 'grep', '--no-color', '-z',
                 '--line-number',
