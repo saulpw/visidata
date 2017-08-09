@@ -338,21 +338,21 @@ class GitStatus(GitSheet):
 
 
 def getHunksSheet(parent, *files):
-    return HunksSheet('hunks', parent, '--no-pager', 'diff',
+    return HunksSheet('hunks', parent, 'diff',
                   '--diff-algorithm=' + options.diff_algorithm,
                   '--patch',
                   '--no-color',
                   '--no-prefix', *[gf.filename for gf in files])
 
 def getStagedHunksSheet(parent, *files):
-    return HunksSheet('staged_hunks', parent, '--no-pager', 'diff', '--cached',
+    return HunksSheet('staged_hunks', parent, 'diff', '--cached',
                   '--diff-algorithm=' + options.diff_algorithm,
                   '--patch',
                   '--no-color',
                   '--no-prefix', *[gf.filename for gf in files])
 
 def getCommitSheet(name, parent, *refids):
-    return HunksSheet(name, parent, '--no-pager', 'show',
+    return HunksSheet(name, parent, 'show',
                   '--diff-algorithm=' + options.diff_algorithm,
                   '--patch',
                   '--no-color',
@@ -394,7 +394,7 @@ class HunksSheet(GitSheet):
 
         super().reload()
 
-        diffout = sh.git(*self.git_args)
+        diffout = sh.git('--no-pager', *self.git_args)
 
         self.rows = []
         leftfn = ''
