@@ -10,13 +10,13 @@ option('vgit_show_ignored', False)
 option('diff_algorithm', 'minimal')
 
 command('x', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
-command('B', 'vd.push(vd.gitBranchesSheet).reload()', 'execute arbitrary git command')
-command('O', 'vd.push(vd.gitOptionsSheet).reload()', 'push sheet of git options')
+command('B', 'vd.push(gitBranchesSheet).reload()', 'execute arbitrary git command')
+command('O', 'vd.push(gitOptionsSheet).reload()', 'push sheet of git options')
 command('P', 'git("push")', 'git push')
 command('A', 'abortWhatever()', 'abort the current in-progress action')
 
 command('H', 'vd.push(LogSheet(branch+"_log", branch))', 'push log of current branch')
-command('T', 'vd.push(vd.gitStashesSheet).reload()', 'push stashes sheet')
+command('T', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
 command('^S', 'git("stash", "save")', 'stash uncommitted changes')
 command('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
 
@@ -25,8 +25,8 @@ class GitSheet(Sheet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_args = []
-        self.branch = ''
-        self.remotediff = ''  # ahead/behind status
+        self.command('f', 'extra_args.append("-f")', 'force next action with "-f"')
+
 
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
@@ -41,7 +41,7 @@ class GitSheet(Sheet):
 
         self.reload()
 
-        vd().gitStatusSheet.reload()
+        gitStatusSheet.reload()
 
         out = out.decode('utf-8')
         if out:
@@ -84,29 +84,17 @@ class GitSheet(Sheet):
     def leftStatus(self):
         inp = self.inProgress()
         ret = ('[%s] ' % inp) if inp else ''
-        ret += '‹%s%s› ' % (self.branch, self.remotediff)
+        ret += '‹%s%s› ' % (gitStatusSheet.branch, gitStatusSheet.remotediff)
 
         return ret + super().leftStatus()
 
     def reload(self):
-        self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
-
-        branch_status = sh.git('status', '-z', '--short', '--branch', '--porcelain').split('\0')[0]
-        m = re.search(r'(\w+)\.\.\.(\S+)( \[(ahead|behind) (\d+)\])?', branch_status)
-        if m:
-            localb, remoteb, remotediff, aheadbehind, ncommits = m.groups()
-            assert localb == self.branch
-            if aheadbehind and 'ahead' in aheadbehind:
-                self.remotediff = ' +%s' % ncommits
-            elif aheadbehind and 'behind' in aheadbehind:
-                self.remotediff = ' -%s' % ncommits
-            else:
-                self.remotediff = ''
-        else:
-            status(branch_status)
-
         if self.sources and isinstance(self.sources[0], GitSheet):
             self.sources[0].reload()
+
+    def apply(self, hunk, *args):
+        self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
+        status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
 
 class GitStashes(GitSheet):
@@ -156,8 +144,6 @@ class LogSheet(GitSheet):
 #        self.command('gc', '', 'cherry-pick selected commits onto current branch')
 
     def reload(self):
-        super().reload()
-
         self.rows = []
         thisCommit = []
         log = sh.git("--no-pager", "log", "--no-color", "--first-parent", "--pretty=format:%s%%x1e" % '%x1f'.join(self.GIT_LOG_FORMAT), self.source)
@@ -176,7 +162,9 @@ class GitBranches(GitSheet):
             ColumnItem('tracking_branch', 3),
             ColumnItem('extra', 4),
             ColumnItem('head_commitmsg', 5),
+            ColumnItem('commit_distance', 6),
         ]
+        self.nKeys = 1
 
         self.command('a', 'git("checkout", "-b", input("create branch: ", type="branch"))', 'create a new branch off the current checkout')
         self.command('d', 'git("branch", "--delete", cursorRow[1])', 'delete this branch')
@@ -185,19 +173,18 @@ class GitBranches(GitSheet):
         self.command('m', 'git("merge", cursorRow[1])', 'merge this branch into the current branch')
         self.command(ENTER, 'vd.push(LogSheet(cursorRow[1]+"_log", cursorRow[1]))', 'push log of this branch')
 
-    def reload(self):
-        super().reload()
-        self.rows = []
-        for line in sh.git('--no-pager', 'branch', '--list', '-vv', '--no-color',
-                '--all'  # local and remote branches
-                ).splitlines():
+        self.addColorizer('row', 6, lambda s,c,r,v: 'green' if r[0] else None)
 
+    def reload(self):
+        self.rows = []
+        for line in sh.git('--no-pager', 'branch', '--list', '-vv', '--no-color', '--all').splitlines():
             if '->' in line:
                 continue
+
             m = re.match(r'(\*?)\s+(\S+)\s+(\w+)\s+\[([^\s\]:]+):?\s*(.*?)\] (.*)', line)
             if m:
-#                current, localbranch, refid, remotebranch, extra, msg = m.groups()
-                self.rows.append(m.groups())
+                current, localbranch, refid, remotebranch, extra, msg = m.groups()
+                self.rows.append(list(m.groups()) + [gitStatusSheet.getBranchStatus(localbranch)])
 
 
 class GitFile:
@@ -213,6 +200,8 @@ class GitFile:
 class GitStatus(GitSheet):
     def __init__(self, p):
         super().__init__(p.relpath(''), p)
+        self.branch = ''
+        self.remotediff = ''  # ahead/behind status
 
         self.columns = [Column('path', getter=lambda r,s=self: str(r)),
                       Column('status', getter=lambda r,s=self: s.statusText(s.git_status(r)), width=8),
@@ -225,8 +214,6 @@ class GitStatus(GitSheet):
 
         self.addColorizer('row', 3, GitStatus.rowColor)
         self.addColorizer('row', 6, lambda s,c,r,v: 'red underline' if 'U' in s.git_status(r)[0] else None)
-
-        self.command('f', 'sheet.extra_args.append("-f")', 'force next action with "-f"')
 
         self.command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging')
         self.command('m', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file')
@@ -294,11 +281,28 @@ class GitStatus(GitSheet):
 
         return False
 
+    @staticmethod
+    def getBranchStatus(branch):
+        branch_status = sh.git('status', '-z', '--short', '--branch', '--porcelain', branch).split('\0')[0]
+        m = re.search(r'(\w+)\.\.\.(\S+)( \[(ahead|behind) (\d+)\])?', branch_status)
+        if m:
+            localb, remoteb, remotediff, aheadbehind, ncommits = m.groups()
+            if aheadbehind and 'ahead' in aheadbehind:
+                return ' +%s' % ncommits
+            elif aheadbehind and 'behind' in aheadbehind:
+                return ' -%s' % ncommits
+            else:
+                return ''
+        else:
+            status(branch_status)
+
     def reload(self):
-        super().reload()
         files = [GitFile(p, self.source) for p in self.source.iterdir() if p.name not in ('.git', '..')]  # files in working dir
 
         filenames = dict((gf.filename, gf) for gf in files)
+
+        self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
+        self.remotediff = self.getBranchStatus(self.branch)
 
         self.rows = []
         self._cachedStatus.clear()
@@ -341,6 +345,7 @@ def getHunksSheet(parent, *files):
     return HunksSheet('hunks', parent, 'diff',
                   '--diff-algorithm=' + options.diff_algorithm,
                   '--patch',
+                  '--inter-hunk-context=2', '-U1',
                   '--no-color',
                   '--no-prefix', *[gf.filename for gf in files])
 
@@ -348,6 +353,7 @@ def getStagedHunksSheet(parent, *files):
     return HunksSheet('staged_hunks', parent, 'diff', '--cached',
                   '--diff-algorithm=' + options.diff_algorithm,
                   '--patch',
+                  '--inter-hunk-context=2', '-U1',
                   '--no-color',
                   '--no-prefix', *[gf.filename for gf in files])
 
@@ -355,6 +361,7 @@ def getCommitSheet(name, parent, *refids):
     return HunksSheet(name, parent, 'show',
                   '--diff-algorithm=' + options.diff_algorithm,
                   '--patch',
+                  '--inter-hunk-context=2', '-U1',
                   '--no-color',
                   '--no-prefix', *refids)
 
@@ -373,16 +380,12 @@ class HunksSheet(GitSheet):
             ColumnItem('rightcount', 6),
         ]
 
-        self.command(ENTER, 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks')
-#        self.command('g^J', '', 'view the diff for this patch')
+        self.command(ENTER, 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunks')
+        self.command('g^J', 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks (or all hunks)')
         self.command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk')
 #        self.command('gV', '', 'view the raw patch for selected/all hunks')
         self.command('a', 'apply(cursorRow, "--cached")', 'apply this hunk to the index')
-        self.command('d', 'apply(cursorRow, "--reverse")', 'undo this hunk')
-
-    def apply(self, hunk, *args):
-        self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
-        status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
+        self.command(['d','r'], 'apply(cursorRow, "--reverse")', 'undo this hunk')
 
     def reload(self):
         def _parseStartCount(s):
@@ -391,8 +394,6 @@ class HunksSheet(GitSheet):
                 return sc
             if len(sc) == 1:
                 return sc[0], 1
-
-        super().reload()
 
         diffout = sh.git('--no-pager', *self.git_args)
 
@@ -431,16 +432,16 @@ class HunkViewer(GitSheet):
         super().__init__('hunk', *hunks)
         self.srchunks = srchunks
         self.columns = [
-            ColumnItem('left', 1, width=vd().windowWidth//2-1),
-            ColumnItem('right', 2, width=vd().windowWidth//2-1),
+            ColumnItem('1', 1, width=vd().windowWidth//2-1),
+            ColumnItem('2', 2, width=vd().windowWidth//2-1),
         ]
         self.addColorizer('row', 4, HunkViewer.colorDiffRow)
-        self.command(['y', 'a'], 'srchunks.apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk')
+        self.command(['y', 'a', '2'], 'srchunks.apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk')
+        self.command(['r','1'], 'apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff')
         self.command(['n', ENTER], 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk')
         self.command('d', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch')
 
     def reload(self):
-        super().reload()
         if not self.sources:
             self.vd.remove(self)
             return
@@ -491,7 +492,6 @@ class GitGrep(GitSheet):
         self.command(ENTER, 'vd.push(TextSheet(cursorRow[0], Path(cursorRow[0]))).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
 
     def reload(self):
-        super().reload()
         self.rows = []
         for line in sh.git('--no-pager', 'grep', '--no-color', '-z',
                 '--line-number',
@@ -522,7 +522,6 @@ class GitOptions(GitSheet):
         return setter
 
     def reload(self):
-        super().reload()
         opts = {}
         for i, ctx in enumerate(self.CONFIG_CONTEXTS[1:]):
             try:
@@ -538,21 +537,22 @@ class GitOptions(GitSheet):
         self.rows = sorted(list(opts.items()))
 
 
+gitBranchesSheet = GitBranches()
+gitStatusSheet = GitStatus(Path('.'))
+gitOptionsSheet = GitOptions()
+gitStashesSheet = GitStashes()
+
 def main():
     options.textwrap = False
 
     status(__version__)
 
     addGlobals(globals())
-    vd().gitStatusSheet = GitStatus(Path('.'))
-    vd().gitBranchesSheet = GitBranches()
-    vd().gitOptionsSheet = GitOptions()
-    vd().gitStashesSheet = GitStashes()
 
     fn = sys.argv[1] if sys.argv[1:] else '.'
     os.chdir(fn)
 
-    run([vd().gitStatusSheet])
+    run([gitStatusSheet])
 
 
 main()
