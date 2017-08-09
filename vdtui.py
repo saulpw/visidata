@@ -551,12 +551,16 @@ class VisiData:
             self.drawLeftStatus(scr, sheet)
             self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
+            if len(self.statuses) > 3:
+                vd().push(TextSheet('status', self.statuses))
+                self.statuses = []
+
             keystroke = self.getkeystroke(scr, sheet)
             if keystroke:
                 if self.keystrokes not in self.allPrefixes:
                     self.keystrokes = ''
 
-                self.statuses.clear()
+                self.statuses = []
                 self.keystrokes += keystroke
 
             self.drawRightStatus(scr, sheet)  # visible for commands that wait for input
