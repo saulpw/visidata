@@ -179,11 +179,11 @@ class GitBranches(GitSheet):
         ]
 
         self.command('a', 'git("checkout", "-b", input("create branch: ", type="branch"))', 'create a new branch off the current checkout')
-        self.command('d', 'git("branch", "--delete", cursorRow[0])', 'delete this branch')
-        self.command('e', 'git("branch", "-v", "--move", cursorRow[0], editCell(0))', 'rename this branch')
-        self.command('c', 'git("checkout", cursorRow[0])', 'checkout this branch')
-        self.command('m', 'git("merge", cursorRow[0])', 'merge this branch into the current branch')
-        self.command(ENTER, 'vd.push(LogSheet(cursorRow[0]+"_log", cursorRow[0]))', 'push log of this branch')
+        self.command('d', 'git("branch", "--delete", cursorRow[1])', 'delete this branch')
+        self.command('e', 'git("branch", "-v", "--move", cursorRow[1], editCell(0))', 'rename this branch')
+        self.command('c', 'git("checkout", cursorRow[1])', 'checkout this branch')
+        self.command('m', 'git("merge", cursorRow[1])', 'merge this branch into the current branch')
+        self.command(ENTER, 'vd.push(LogSheet(cursorRow[1]+"_log", cursorRow[1]))', 'push log of this branch')
 
     def reload(self):
         super().reload()
