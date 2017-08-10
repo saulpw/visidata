@@ -135,7 +135,7 @@ class LogSheet(GitSheet):
             ColumnItem('subject', 4),
             ColumnItem('author_name', 1),
             ColumnItem('author_email', 2),
-            ColumnItem('author_date', 3),
+            ColumnItem('author_date', 3, type=date),
             ColumnItem('body', 5),
         ]
         self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit')
