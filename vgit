@@ -159,10 +159,10 @@ class GitBranches(GitSheet):
         self.columns = [
             ColumnItem('branch', 1),
             ColumnItem('head_commitid', 2, width=0),
-            ColumnItem('tracking_branch', 3),
-            ColumnItem('extra', 4),
+            ColumnItem('tracking', 3),
+            ColumnItem('upstream', 6),
+            ColumnItem('extra', 4, width=0),
             ColumnItem('head_commitmsg', 5),
-            ColumnItem('commit_distance', 6),
         ]
         self.nKeys = 1
 
@@ -184,7 +184,7 @@ class GitBranches(GitSheet):
             m = re.match(r'(\*?)\s+(\S+)\s+(\w+)\s+\[([^\s\]:]+):?\s*(.*?)\] (.*)', line)
             if m:
                 current, localbranch, refid, remotebranch, extra, msg = m.groups()
-                self.rows.append(list(m.groups()) + [gitStatusSheet.getBranchStatus(localbranch)])
+                self.rows.append(list(m.groups()) + [gitStatusSheet.getBranchStatuses().get(localbranch, 'no branch')])
 
 
 class GitFile:
@@ -281,20 +281,33 @@ class GitStatus(GitSheet):
 
         return False
 
+
     @staticmethod
-    def getBranchStatus(branch):
-        branch_status = sh.git('status', '-z', '--short', '--branch', '--porcelain', branch).split('\0')[0]
-        m = re.search(r'(\w+)\.\.\.(\S+)( \[(ahead|behind) (\d+)\])?', branch_status)
-        if m:
-            localb, remoteb, remotediff, aheadbehind, ncommits = m.groups()
-            if aheadbehind and 'ahead' in aheadbehind:
-                return ' +%s' % ncommits
-            elif aheadbehind and 'behind' in aheadbehind:
-                return ' -%s' % ncommits
+    def getBranchStatuses():
+        ret = {}  # localbranchname -> "+5/-2"
+        for branch_status in sh.git('for-each-ref', '--format=%(refname:short) %(upstream:short) %(upstream:track)', 'refs/heads').splitlines():
+            m = re.search(r'''(\S+)\s+
+                              (\S+)\s+
+                              (\[
+                              (ahead.(\d+)),?\s*
+                              (behind.(\d+))?
+                              \])?''', branch_status, re.VERBOSE)
+            if not m:
+                status(branch_status)
+                continue
+
+            localb, remoteb, _, _, nahead, _, nbehind = m.groups()
+            if nahead:
+                r = '+%s' % nahead
             else:
-                return ''
-        else:
-            status(branch_status)
+                r = ''
+            if nbehind:
+                if r:
+                    r += '/'
+                r += '-%s' % nbehind
+            ret[localb] = r
+
+        return ret
 
     def reload(self):
         files = [GitFile(p, self.source) for p in self.source.iterdir() if p.name not in ('.git', '..')]  # files in working dir
@@ -302,7 +315,7 @@ class GitStatus(GitSheet):
         filenames = dict((gf.filename, gf) for gf in files)
 
         self.branch = sh.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
-        self.remotediff = self.getBranchStatus(self.branch)
+        self.remotediff = self.getBranchStatuses().get(self.branch, 'no branch')
 
         self.rows = []
         self._cachedStatus.clear()
