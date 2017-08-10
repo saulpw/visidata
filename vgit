@@ -161,6 +161,7 @@ class GitBranches(GitSheet):
             ColumnItem('head_commitid', 2, width=0),
             ColumnItem('tracking', 3),
             ColumnItem('upstream', 6),
+            ColumnItem('merge_base', 7),
             ColumnItem('extra', 4, width=0),
             ColumnItem('head_commitmsg', 5),
         ]
@@ -184,7 +185,9 @@ class GitBranches(GitSheet):
             m = re.match(r'(\*?)\s+(\S+)\s+(\w+)\s+\[([^\s\]:]+):?\s*(.*?)\] (.*)', line)
             if m:
                 current, localbranch, refid, remotebranch, extra, msg = m.groups()
-                self.rows.append(list(m.groups()) + [gitStatusSheet.getBranchStatuses().get(localbranch, 'no branch')])
+                merge_base = sh.git("show-branch", "--merge-base", localbranch, gitStatusSheet.branch).strip()
+                merge_name = sh.git("name-rev", "--name-only", merge_base).strip()
+                self.rows.append(list(m.groups()) + [gitStatusSheet.getBranchStatuses().get(localbranch, 'no branch')] + [merge_name])
 
 
 class GitFile:
