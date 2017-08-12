@@ -201,6 +201,12 @@ class LogSheet(GitSheet):
         self.command('c', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch')
 #        self.command('gc', '', 'cherry-pick selected commits onto current branch')
 
+        self.addColorizer('row', 5, lambda s,c,r,v: 'cyan' if not s.inRemoteBranch(r[0]) else None)
+
+    @functools.lru_cache()
+    def inRemoteBranch(self, commitid):
+        return git_all('branch', '-r', '--contains', commitid)
+
     @async
     def reload(self):
         self.rows = []
