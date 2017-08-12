@@ -176,18 +176,19 @@ class GitStashes(GitSheet):
 
 
 class LogSheet(GitSheet):
-    GIT_LOG_FORMAT = '%H %an %ae %ai %s %b'.split()
-    GIT_LOG_FIELDS = 'id author_name author_email author_date subject body'.split()
+    # commit_hash, refnames, author, author_date, body, notes
+    GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
+
 
     def __init__(self, name, branchname):
         super().__init__(name, branchname)
         self.columns = [
             ColumnItem('commitid', 0, width=8),
-            ColumnItem('subject', 4, width=50),
-            ColumnItem('author_name', 1),
-            ColumnItem('author_email', 2),
-            ColumnItem('author_date', 3),
-            ColumnItem('body', 5),
+            ColumnItem('refnames', 1, width=12),
+            Column('message', getter=lambda r: r[4], setter=lambda r,v,s=self: s.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
+            Column('author', getter=lambda r: r[2], setter=lambda r,v,s=self: s.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
+            Column('author_date', type=date, getter=lambda r:r[3], setter=lambda r,v,s=self: s.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
+            Column('notes', getter=lambda r: r[5], setter=lambda r,v,s=self: s.git('notes', 'add', '--force', '--message', v, r[0])),
         ]
         self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit')
 #        self.command('Q', '', 'squash selected commits')
