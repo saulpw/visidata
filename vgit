@@ -22,16 +22,11 @@ command('^S', 'git("stash", "save")', 'stash uncommitted changes')
 command('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
 command('1', 'vd.push(TextSheet("git_commands", git_commands))', 'push list of git commands executed')
 
-extra_args = []
 git_commands = []
 
 
 def git_all(*args, **kwargs):
     'Return entire output of git command.'
-    args = list(args) + extra_args
-    extra_args.clear()
-
-    git_commands.append('git ' + ' '.join(args))
     try:
         out = sh.git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
     except sh.ErrorReturnCode as e:
@@ -43,10 +38,6 @@ def git_all(*args, **kwargs):
 
 def git_lines(*args, **kwargs):
     'Generator of stdout lines from given git command'
-    args = list(args) + extra_args
-    extra_args.clear()
-
-    git_commands.append('git ' + ' '.join(args))
     err = io.StringIO()
     try:
         for line in sh.git('--no-pager', _err=err, *args, _decode_errors='replace', _iter=True, _bg_exc=False, **kwargs):
@@ -106,6 +97,11 @@ class GitSheet(Sheet):
 
     @async
     def git(self, *args, **kwargs):
+        args = list(args) + self.extra_args
+        self.extra_args.clear()
+
+        git_commands.append('git ' + ' '.join(args))
+
         for line in git_lines(*args, **kwargs):
             status(line)
 
