@@ -1,6 +1,6 @@
 import random
 
-from visidata import *
+from .vdtui import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')

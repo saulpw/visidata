@@ -1,4 +1,4 @@
-from visidata import *
+from .vdtui import *
 
 command('z?', 'vd.push(HelpSheet(name + "_commands", *sheet.commands.maps))', 'open command help sheet')
 alias('KEY_F(1)', 'z?')

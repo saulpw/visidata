@@ -24,4 +24,3 @@ from .addons.xlsx import *
 from .addons.hdf5 import *
 from .addons.sqlite import *
 
-addGlobals(globals())

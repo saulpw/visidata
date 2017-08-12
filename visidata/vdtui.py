@@ -358,7 +358,7 @@ class VisiData:
 
     def __init__(self):
         self.sheets = []
-        self.statuses = [__version__]  # statuses shown until next action
+        self.statuses = []  # statuses shown until next action
         self.lastErrors = []
         self.searchContext = {}
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
@@ -399,9 +399,9 @@ class VisiData:
         v = self.callHook('preedit')
         if v is not None:
             return v
-        curses.curs_set(1)
+        cursorEnable(True)
         v = editText(self.scr, y, x, w, **kwargs)
-        curses.curs_set(0)
+        cursorEnable(False)
         if kwargs.get('display', True):
             self.status('"%s"' % v)
             self.callHook('postedit', v)
@@ -537,7 +537,7 @@ class VisiData:
         'Manage execution of keystrokes and subsequent redrawing of screen.'
         global sheet
         scr.timeout(int(options.curses_timeout))
-        curses.curs_set(0)
+        cursorEnable(False)
 
         self.scr = scr
 
@@ -557,12 +557,16 @@ class VisiData:
             self.drawLeftStatus(scr, sheet)
             self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
+            if len(self.statuses) > 3:
+                vd().push(TextSheet('status', self.statuses))
+                self.statuses = []
+
             keystroke = self.getkeystroke(scr, sheet)
             if keystroke:
                 if self.keystrokes not in self.allPrefixes:
                     self.keystrokes = ''
 
-                self.statuses.clear()
+                self.statuses = []
                 self.keystrokes += keystroke
 
             self.drawRightStatus(scr, sheet)  # visible for commands that wait for input
@@ -1971,6 +1975,12 @@ def run(sheetlist=[]):
     ret = wrapper(cursesMain, sheetlist)
     if ret:
         print(ret)
+
+def cursorEnable(b):
+    try:
+        curses.curs_set(1 if b else 0)
+    except:
+        pass
 
 def cursesMain(_scr, sheetlist=[]):
     'Populate VisiData object with sheets from a given list.'

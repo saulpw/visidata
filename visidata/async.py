@@ -3,7 +3,7 @@ import threading
 import pstats
 import cProfile
 
-from visidata import *
+from .vdtui import *
 
 option('profile_tasks', True, 'profile async tasks')
 option('min_task_time', 0.10, 'only keep tasks that take longer than this number of seconds')

@@ -1,4 +1,4 @@
-from visidata import *
+from .vdtui import *
 
 # vim-style scrolling with the 'z' prefix
 
