@@ -18,6 +18,7 @@ command('A', 'abortWhatever()', 'abort the current in-progress action')
 
 command('H', 'vd.push(LogSheet(branch+"_log", branch))', 'push log of current branch')
 command('T', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
+command('R', 'vd.push(gitRemotesSheet).reload()', 'push remotes sheet')
 command('^S', 'git("stash", "save")', 'stash uncommitted changes')
 command('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
 command('1', 'vd.push(TextSheet("git_commands", git_commands))', 'push list of git commands executed')
@@ -614,10 +615,30 @@ class GitOptions(GitSheet):
         self.rows = sorted(list(opts.items()))
 
 
+# how to incorporate fetch/push/pull?
+class GitRemotes(GitSheet):
+    def __init__(self, **kwargs):
+        super().__init__('remotes', **kwargs)
+        self.columns=[
+            Column('remote', getter=lambda r: r[0], setter=lambda r,v,s=self: s.git('remote', 'rename', r[0], v)),
+            Column('url', getter=lambda r: r[1], setter=lambda r,v,s=self: s.git('remote', 'set-url', r[0], v)),
+            Column('type', getter=lambda r: r[2]),
+        ]
+        self.command('d', 'git("remote", "rm", cursorRow[0])', 'delete remote')
+        self.command('a', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
+
+    def reload(self):
+        self.rows = []
+        for line in git_lines('remote', '-v', 'show'):
+            name, url, paren_type = line.split()
+            self.rows.append((name, url, paren_type[1:-1]))
+
 gitBranchesSheet = GitBranches()
 gitStatusSheet = GitStatus(Path('.'))
 gitOptionsSheet = GitOptions()
 gitStashesSheet = GitStashes()
+gitRemotesSheet = GitRemotes()
+
 
 def main():
     options.textwrap = False
