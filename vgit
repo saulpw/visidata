@@ -56,12 +56,9 @@ def git_lines(*args, **kwargs):
 def git_iter(sep, *args, **kwargs):
     'Generator of chunks of stdout from given git command, delineated by sep character'
     bufsize = 512
-    args = list(args) + extra_args
-    extra_args.clear()
-
     err = io.StringIO()
 
-    git_commands.append('git ' + ' '.join(args))
+#    git_commands.append('git ' + ' '.join(args))
     chunks = []
     try:
       for data in sh.git('--no-pager', *args, _decode_errors='replace', _out_bufsize=bufsize, _iter=True, _err=err, **kwargs):
