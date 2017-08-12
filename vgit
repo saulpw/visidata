@@ -35,35 +35,45 @@ def git_all(*args, **kwargs):
     try:
         out = sh.git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
     except sh.ErrorReturnCode as e:
-        status('retcode=%s' % e.exit_code)
+        status('exit_code=%s' % e.exit_code)
         out = e.stdout
 
     return out
 
 
 def git_lines(*args, **kwargs):
-    'Return iterable of lines'
+    'Generator of stdout lines from given git command'
     args = list(args) + extra_args
     extra_args.clear()
 
     git_commands.append('git ' + ' '.join(args))
+    err = io.StringIO()
     try:
-        for line in sh.git('--no-pager', *args, _decode_errors='replace', _iter=True, **kwargs):
+        for line in sh.git('--no-pager', _err=err, *args, _decode_errors='replace', _iter=True, _bg_exc=False, **kwargs):
             yield line[:-1]  # remove EOL
     except sh.ErrorReturnCode as e:
-        status('retcode=%s' % e.exit_code)
+        status('exit_code=%s' % e.exit_code)
+
+    errlines = err.getvalue().splitlines()
+    if len(errlines) < 3:
+        for line in errlines:
+            status(line)
+    else:
+        vd().push(TextSheet('git ' + ' '.join(args), errlines))
 
 
 def git_iter(sep, *args, **kwargs):
-    'Yield chunks separated by sep character'
+    'Generator of chunks of stdout from given git command, delineated by sep character'
     bufsize = 512
     args = list(args) + extra_args
     extra_args.clear()
 
+    err = io.StringIO()
+
     git_commands.append('git ' + ' '.join(args))
     chunks = []
     try:
-      for data in sh.git('--no-pager', *args, _decode_errors='replace', _out_bufsize=bufsize, _iter=True, **kwargs):
+      for data in sh.git('--no-pager', *args, _decode_errors='replace', _out_bufsize=bufsize, _iter=True, _err=err, **kwargs):
         while True:
             i = data.find(sep)
             if i < 0:
@@ -75,12 +85,18 @@ def git_iter(sep, *args, **kwargs):
 
         chunks.append(data)
     except sh.ErrorReturnCode as e:
-        status('retcode=%s' % e.exit_code)
+        status('exit_code=%s' % e.exit_code)
 
     r = ''.join(chunks)
     if r:
         yield r
 
+    errlines = err.getvalue().splitlines()
+    if len(errlines) < 3:
+        for line in errlines:
+            status(line)
+    else:
+        vd().push(TextSheet('git ' + ' '.join(args), errlines))
 
 class GitSheet(Sheet):
     def __init__(self, *args, **kwargs):
