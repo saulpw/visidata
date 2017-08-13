@@ -13,7 +13,8 @@ Welcome to VisiData's documentation!
    :caption: Contents:
 
    Home <home>
-   user-guide
+   vdtui-guide
+   vd-guide
    tours
    architecture
    screen

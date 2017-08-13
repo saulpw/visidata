@@ -23,7 +23,7 @@
 
 'VisiData core functionality'
 
-__version__ = 'saul.pw/vdtui v0.95'
+__version__ = 'saul.pw/vdtui v0.95.1'
 __author__ = 'Saul Pwanson <vdtui@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Beta'

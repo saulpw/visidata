@@ -1,4 +1,4 @@
-# VisiData v0.94 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
+# VisiData v0.95.1 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A terminal interface for exploring and arranging tabular data
 
@@ -79,6 +79,6 @@ A developer's guide can be found [here](http://visidata.readthedocs.io/en/stable
 
 ## License
 
-The innermost core file, `vd.py`, is licensed under the MIT license.
+The innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT free software license, and freely available for use in other projects.
 
 Other VisiData components, including the main `vd` application, addons, and other code in this repository, are licensed under GPLv3.

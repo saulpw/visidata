@@ -1,6 +1,6 @@
-==============
-VisiData v0.94
-==============
+================
+VisiData v0.95.1
+================
 
 A terminal interface for exploring and arranging tabular data
 
@@ -64,7 +64,7 @@ If installed via ``git clone``, first set up some environment variables
 License
 -------
 
-The innermost core file, ``vd.py``, is licensed under the MIT license.
+The innermost core file, ``vdtui.py``, is a single-file stand-alone library that provides a solid framwork for building text user interface apps. It is distributed under the MIT free software license, and freely available for use in other projects. 
 
 Other VisiData components, including the main ``vd`` application, addons, and other code in this repository are licensed under GPLv3.
 

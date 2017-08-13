@@ -1,5 +1,10 @@
 # VisiData version history
 
+## v0.95.1 (2017-08-13)
+- move some functionality out of vdtui into seperate python files
+- add Ctrl-z command to launch external $EDITOR
+- add ``options.force_valid_names``
+
 ## v0.94 (2017-08-02)
 - add options.textwrap for TextSheet
 - add vd.remove(sheet)
