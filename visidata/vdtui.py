@@ -101,6 +101,7 @@ option('num_colors', 0, 'force number of colors to use')
 option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 option('textwrap', True, 'if TextSheet breaks rows to fit in windowWidth')
 option('force_valid_names', False, 'force column names to be valid Python identifiers')
+option('max_status', 5, 'max number of statuses to display on status line before pushing new sheet')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -557,7 +558,7 @@ class VisiData:
             self.drawLeftStatus(scr, sheet)
             self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
-            if len(self.statuses) > 3:
+            if len(self.statuses) > options.max_status:
                 vd().push(TextSheet('status', self.statuses))
                 self.statuses = []
 
