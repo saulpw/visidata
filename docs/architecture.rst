@@ -578,22 +578,11 @@ Adding a property to the VisiData singleton in an extension is done as in
 Globals
 -------
 
-Accessing all commands in an extension requires the use of globals. The extension requires a statement like
+Accessing all commands in an extension requires the use of globals. The extension requires a statement like this for all importers.
 
    .. code-block:: python
 
-      setGlobal('g_client', g_client)
-
-   which calls a setter for a global dict in ``vd.py``:
-
-   .. code-block:: python
-
-      g_globals = None
-      def setGlobal(k, v):
-          'Manually set global key-value pair in `g_globals`.'
-          g_globals[k = v
-
-   That yogic maneuver allows instances of ``command()`` in the extension to pass the string ``'g_client'`` to ``exec`` statements.
+      addGlobals(globals())
 
 
 Deviations from PEP8

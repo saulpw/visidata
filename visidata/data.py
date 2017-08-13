@@ -49,9 +49,9 @@ def saveSheet(vs, fn):
 
     basename, ext = os.path.splitext(fn)
     funcname = 'save_' + ext[1:]
-    if funcname not in g_globals:
+    if funcname not in globals():
         funcname = 'save_tsv'
-    g_globals.get(funcname)(vs, fn)
+    globals().get(funcname)(vs, fn)
     status('saving to ' + fn)
 
 class DirSheet(Sheet):
@@ -73,7 +73,7 @@ def openSource(p, filetype=None):
         if '://' in p:
             filetype = url(p).schema.lower()
             openfunc = 'openurl_' + filetype
-            vs = g_globals[openfunc](p)
+            vs = globals()[openfunc](p)
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
     elif isinstance(p, Path):
@@ -85,11 +85,11 @@ def openSource(p, filetype=None):
             filetype = 'dir'
         else:
             openfunc = 'open_' + filetype.lower()
-            if openfunc not in g_globals:
+            if openfunc not in globals():
                 status('no %s function' % openfunc)
                 filetype = 'txt'
                 openfunc = 'open_txt'
-            vs = g_globals[openfunc](p)
+            vs = globals()[openfunc](p)
     else:  # some other object
         status('unknown object type %s' % type(p))
         vs = None
@@ -108,7 +108,7 @@ def open_vd(p):
 def open_py(p):
     'Load a .py addon into the global context.'
     contents = p.read_text()
-    exec(contents, g_globals)
+    exec(contents, globals())
     status('executed %s' % p)
 
 def open_txt(p):

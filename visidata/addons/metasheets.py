@@ -22,15 +22,6 @@ vd().optionsSheet = OptionsSheet(options)
 
 ##
 
-def _getattrname(o, k):
-    v = getattr(o, k)
-    return v.__name__ if v else None
-
-def ColumnAttrNamedObject(name):
-    'Return an effective ColumnAttr which displays the __name__ of the object value.'
-    return Column(name, getter=lambda r,name=name: _getattrname(r, name),
-                        setter=lambda r,v,name=name: setattr(r, name, v))
-
 option('split_max', -1, 'string.split limit')
 # exampleVal just to know how many subcolumns to make
 def splitColumn(columns, colIndex, origcol, exampleVal, ch):
@@ -62,7 +53,7 @@ class LazyMapping:
         return [c.name for c in self.sheet.columns if c.name.isidentifier()]
 
     def __call__(self, col):
-        return eval(col.expr, g_globals, self)
+        return eval(col.expr, globals(), self)
 
     def __getitem__(self, colname):
         colnames = [c.name for c in self.sheet.columns]

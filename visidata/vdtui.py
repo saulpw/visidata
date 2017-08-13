@@ -1530,6 +1530,16 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
             width=origcol.width,
             **kwargs)
 
+def ColumnAttrNamedObject(name):
+    'Return an effective ColumnAttr which displays the __name__ of the object value.'
+    def _getattrname(o, k):
+        v = getattr(o, k)
+        return v.__name__ if v else None
+
+    return Column(name, getter=lambda r,name=name: _getattrname(r, name),
+                        setter=lambda r,v,name=name: setattr(r, name, v))
+
+
 def input(prompt, type='', **kwargs):
     'Compose input prompt.'
     if type:
@@ -1635,10 +1645,14 @@ class ColumnsSheet(Sheet):
             Column('value',  anytype, lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
         ]
 
+    def reload(self):
+        self.rows = self.source.columns
 
-class SheetsSheet:
+
+class SheetsSheet(Sheet):
     def __init__(self):
-        super().__init__('sheets', vd().sheets, columns=AttrColumns('name nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
+        super().__init__('sheets', vd().sheets,
+                columns=list(ColumnAttr(name) for name in 'name nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
 
     def reload(self):
         self.rows = vd().sheets
@@ -1778,6 +1792,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
             dispval = clean(v)
         else:
             dispval = '*' * len(v)
+
         dispi = i  # the onscreen offset within the field where v[i] is displayed
         if len(dispval) < w:  # entire value fits
             dispval += fillchar*(w-len(dispval))
