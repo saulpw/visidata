@@ -366,6 +366,7 @@ class VisiData:
         self.statuses = []  # statuses shown until next action
         self.lastErrors = []
         self.searchContext = {}
+        self.statusHistory = []
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
         self.inInput = False
@@ -377,6 +378,7 @@ class VisiData:
         'Add status message to be shown until next action.'
         s = '; '.join(str(x) for x in args)
         self.statuses.append(s)
+        self.statusHistory.insert(0, s)
         return s
 
     def addHook(self, hookname, hookfunc):
