@@ -225,6 +225,9 @@ command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push sou
 command('S', 'vd.push(SheetsSheet())', 'open Sheet stack')
 command('C', 'vd.push(ColumnsSheet(sheet))', 'open Columns for this sheet')
 command('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
+command('z?', 'vd.push(HelpSheet(name + "_commands", sheet))', 'open command help sheet')
+alias('KEY_F(1)', 'z?')
+
 
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
 #
@@ -1703,6 +1706,22 @@ class SheetsSheet(Sheet):
         self.rows = vd().sheets
         self.command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet')
 
+
+class HelpSheet(Sheet):
+    'Show all commands available to the source sheet.'
+    def reload(self):
+        self.columns = [ColumnItem('keystrokes', 0),
+                        ColumnItem('action', 1),
+                        Column('with_g_prefix', str, lambda r,self=self: self.source.commands.get('g'+r[0], (None,'-'))[1]),
+                        ColumnItem('execstr', 2, width=0),
+                ]
+        self.nKeys = 1
+
+        self.rows = []
+        for src in self.source.commands.maps:
+            self.rows.extend(src.values())
+
+
 class OptionsObject:
     'minimalist options framework'
     def __init__(self, d):
@@ -2048,6 +2067,7 @@ def cursesMain(_scr, sheetlist=[]):
     for vs in sheetlist:
         vd().push(vs)  # first push does a reload
 
+    status('<F1> or z? opens help')
     return vd().run(_scr)
 
 def addGlobals(g):
