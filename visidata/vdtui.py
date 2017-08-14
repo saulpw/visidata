@@ -2019,5 +2019,8 @@ def addGlobals(g):
     'importers can call `addGlobals(globals())` to have their globals accessible to execstrings'
     globals().update(g)
 
+def getGlobals():
+    return globals()
+
 if __name__ == '__main__':
     run(TextSheet('contents', Path(src)) for src in sys.argv[1:])
