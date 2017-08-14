@@ -1,6 +1,6 @@
 # VisiData version history
 
-## v0.95.1 (2017-08-13)
+## v0.95.2 (2017-08-13)
 - move some functionality out of vdtui into seperate python files
 - add Ctrl-z command to launch external $EDITOR
 - add ``options.force_valid_names``
