@@ -44,6 +44,7 @@ import curses
 import datetime
 import io
 import textwrap
+import threading
 
 class EscapeException(Exception):
     pass
@@ -101,7 +102,6 @@ option('num_colors', 0, 'force number of colors to use')
 option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 option('textwrap', True, 'if TextSheet breaks rows to fit in windowWidth')
 option('force_valid_names', False, 'force column names to be valid Python identifiers')
-option('max_status', 5, 'max number of statuses to display on status line before pushing new sheet')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -344,12 +344,13 @@ def regex_flags():
     'Return flags to pass to regex functions from options'
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
-def sync(f):
-    'stub wrapper to wait for unfinished async tasks'
-    pass
+def sync():
+    'Wait for all async threads to finish.'
+    while len(vd().unfinishedThreads) > 0:
+        vd().checkForFinishedThreads()
 
 def async(func):
-    'Function decorator to call in separate thread if async available.'
+    'Function decorator, to make calls to `func()` spawn a separate thread if available.'
     def _execAsync(*args, **kwargs):
         return vd().execAsync(func, *args, **kwargs)
     return _execAsync
@@ -367,6 +368,7 @@ class VisiData:
         self.inInput = False
         self.scr = None  # curses scr
         self.hooks = {}
+        self.threads = []  # all threads, including finished
 
     def status(self, *args):
         'Add status message to be shown until next action.'
@@ -392,8 +394,53 @@ class VisiData:
         return r
 
     def execAsync(self, func, *args, **kwargs):
-        'Synchronous async caller stub, replaced if async available.'
-        return func(*args, **kwargs)
+        'Execute `func(*args, **kwargs)`, possibly in a separate thread.'
+        if threading.current_thread().daemon:
+            # Don't spawn a new thread from a subthread.
+            return func(*args, **kwargs)
+
+        currentSheet = self.sheets[0]
+        if currentSheet.currentThread:
+            confirm('replace task %s already in progress? ' % currentSheet.currentThread.name)
+        thread = threading.Thread(target=self.toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
+        self.threads.append(thread)
+        currentSheet.currentThread = thread
+        thread.sheet = currentSheet
+        thread.start()
+        return thread
+
+    def toplevelTryFunc(self, func, *args, **kwargs):
+        'Thread entry-point for `func(*args, **kwargs)` with try/except wrapper'
+        t = threading.current_thread()
+        t.name = func.__name__
+        t.startTime = time.process_time()
+        t.endTime = None
+        t.status = ''
+        ret = None
+        try:
+            ret = func(*args, **kwargs)
+        except EscapeException as e:  # user aborted
+            t.status += 'aborted by user'
+            status('%s aborted' % t.name)
+        except Exception as e:
+            t.status += status('%s: %s' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
+            exceptionCaught()
+
+        t.sheet.currentThread = None
+        t.sheet.progressMade = t.sheet.progressTotal
+        return ret
+
+    @property
+    def unfinishedThreads(self):
+        'A list of unfinished threads (those without a recorded `endTime`).'
+        return [t for t in self.threads if t.endTime is None]
+
+    def checkForFinishedThreads(self):
+        'Mark terminated threads with endTime.'
+        for t in self.unfinishedThreads:
+            if not t.is_alive():
+                t.endTime = time.process_time()
+                t.status += 'ended'
 
     def editText(self, y, x, w, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
@@ -558,10 +605,6 @@ class VisiData:
             self.drawLeftStatus(scr, sheet)
             self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
-            if len(self.statuses) > options.max_status:
-                vd().push(TextSheet('status', self.statuses))
-                self.statuses = []
-
             keystroke = self.getkeystroke(scr, sheet)
             if keystroke:
                 if self.keystrokes not in self.allPrefixes:
@@ -591,6 +634,7 @@ class VisiData:
             else:
                 status('no command for "%s"' % (self.keystrokes))
 
+            self.checkForFinishedThreads()
             self.callHook('predraw')
             sheet.checkCursor()
 
@@ -672,7 +716,7 @@ class Sheet:
         self.progressTotal = 0
 
         # only allow one async task per sheet
-        self.currentTask = None
+        self.currentThread = None
 
         self.colorizers = {'row': [], 'col': [], 'hdr': [], 'cell': []}
 
