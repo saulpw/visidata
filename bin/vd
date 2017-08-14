@@ -5,7 +5,7 @@
 __version__ = 'saul.pw/VisiData v0.95.2'
 
 import os
-from visidata import vdtui, openSource
+from visidata import *
 
 def main():
     'Use the VisiData interface to browse the given sources.'
@@ -24,6 +24,14 @@ def main():
 
     args = parser.parse_args()
 
+    # user customisations in config file in standard location
+    for fnrc in ('.visidatarc', '$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
+        p = Path(fnrc)
+        if p.exists():
+            exec(open(p.resolve()).read())
+            break
+
+    # command-line overrides
     for optname, optval in vars(args).items():
         if optname != 'inputs':
             vdtui.options[optname] = optval

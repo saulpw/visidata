@@ -1945,14 +1945,12 @@ def setupcolors(stdscr, f, *args):
     return f(stdscr, *args)
 
 def wrapper(f, *args):
-    'Wrap `curses.wrapper`.'
     return curses.wrapper(setupcolors, f, *args)
 
 ### external interface
 
 class Path:
     'File and path-handling class, modeled on `pathlib.Path`.'
-
     def __init__(self, fqpn):
         self.fqpn = fqpn
         fn = os.path.split(fqpn)[-1]
@@ -2027,7 +2025,7 @@ class InternalSource(Path):
 
 
 def run(sheetlist=[]):
-    'Invoke Curses mode. (This is the main entry point.)'
+    'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
     # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     os.putenv('ESCDELAY', '25')
@@ -2045,19 +2043,12 @@ def cursorEnable(b):
 def cursesMain(_scr, sheetlist=[]):
     'Populate VisiData object with sheets from a given list.'
 
-    for fnrc in ('.visidatarc', '$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
-        p = Path(fnrc)
-        if p.exists():
-            exec(open(p.resolve()).read())
-            break
-
     colors.setup()
 
     for vs in sheetlist:
         vd().push(vs)  # first push does a reload
 
     return vd().run(_scr)
-
 
 def addGlobals(g):
     'importers can call `addGlobals(globals())` to have their globals accessible to execstrings'
