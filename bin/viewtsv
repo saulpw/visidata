@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+import sys
+import vdtui
+
+class TsvSheet(vdtui.Sheet):
+    @vdtui.async
+    def reload(self):
+        self.columns = [vdtui.ColumnItem('tsv', 0)]
+        self.rows = []
+
+        with self.source.open_text() as fp:
+            for line in fp:
+                line = line[:-1]
+                if line:
+                    self.rows.append(line.split('\t'))
+
+        self.columns = [vdtui.ColumnItem(colname, i) for i, colname in enumerate(self.rows[0])]
+        self.rows = self.rows[1:]
+
+
+vdtui.run([TsvSheet(fn, vdtui.Path(fn)) for fn in sys.argv[1:]])
