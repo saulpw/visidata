@@ -1,10 +1,10 @@
-========================================
-User Documention for VisiData Components 
-========================================
+==========================================
+User Documentation for VisiData Components
+==========================================
 
 
-Moving the cursor
------------------
+Additional Cursor Movements
+---------------------------
 
 -  ``z`` prefix scrolling (most behave exactly like vim).
 
@@ -45,13 +45,12 @@ Columns
 
 -  ``!`` makes the current column a *key column*.
 
-- ``HL`` moves the current column (left/right).
+- ``H``/``L`` moves the current column (left/right).
 
--  Columns start out untyped (unless the source data is typed).
-
+-  Columns generally start out ``anytype``.
     -  A column can be manually set to a specific type:
 
-       -  ``~`` : ``str`` (the default)
+       -  ``~`` : ``str``
 
        -  ``#`` : ``int``
 
@@ -65,13 +64,15 @@ Columns
 
     -  Values that can't be properly converted are flagged with ``?`` at the right edge of the cell.
 
-    -  For commands like sort (``[``/``]``) which require a correctly typed value, the default (0) value for that type is used.
+       -  For commands like sort (``[``/``]``) which require a correctly typed value, the default (0) value for that type is used.
 
     -  Cell edits are rejected if they don't convert to the column type.
 
 -  ``:`` splits the current column into multiple columns based on a provided separator
 
-- ``;`` creates new columns from the capture groups of the given regex
+    -  The cursor must be on an "example" row, to know how many columns to create.
+
+- ``;`` creates new columns from the capture groups of the given regex (also needs example row)
 
 -  ``=`` "add column expression" takes a Python expression as input,
    evaluates the expression, and appends the results into a new column.
@@ -90,7 +91,7 @@ Rows
 
 - ``a``\ppends a blank row
 
-- ``JK`` moves the current row (up/down).
+- ``J``/``K`` moves the current row up/down.
 
 Toolkit
 =======
@@ -106,7 +107,7 @@ Statistics
 
 -  ``Shift-F``\ requency table for current column with histogram
 
-    - ``w`` toggles between bins with an even interval width and bins with an even frequency height
+    - with a numeric column, ``w`` toggles between bins with an even interval width and bins with an even frequency height
 
 Joining two datasets
 --------------------
