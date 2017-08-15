@@ -14,6 +14,7 @@ class EditLog(Sheet):
 
     def __init__(self, name, *args):
         super().__init__(name, *args)
+        self.currentActiveRow = None
 
         self.columns = [
             ColumnItem('start_sheet', 0),
@@ -49,7 +50,7 @@ class EditLog(Sheet):
         '''Declare initial sheet before any undos can occur.
 
         This is done when source is initially opened.'''
-        assert sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
+        assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.currentReplayRow is None:
             self.currentActiveRow = [ sheet.name, keystrokes, args, None,
                     sheet.commands[keystrokes][1] ]

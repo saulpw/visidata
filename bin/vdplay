@@ -13,9 +13,11 @@ def eval_vd(fnEditlog, *args, **kwargs):
     log = open(fnEditlog).read().format(*args, **kwargs)
     src = visidata.InternalSource(fnEditlog, log)
     vs = visidata.openSource(src)
-    vs.reload()
     vd = visidata.vd()
+    vd.editlog.openHook(vs, src)
+    vd.push(vs)
     vd.status = print
+    vs.vd = vd
     vs.replay()
 
 def main():

@@ -1603,10 +1603,9 @@ def _inputLine(prompt, **kwargs):
     'Add prompt to bottom of screen and get line of input from user.'
     scr = vd().scr
     if scr:
-        windowHeight, windowWidth = scr.getmaxyx()
-        scr.addstr(windowHeight-1, 0, prompt)
+        scr.addstr(vd().windowHeight-1, 0, prompt)
     vd().inInput = True
-    ret = vd().editText(windowHeight-1, len(prompt), windowWidth-len(prompt)-8, attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
+    ret = vd().editText(vd().windowHeight-1, len(prompt), vd().windowWidth-len(prompt)-8, attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
     vd().inInput = False
     return ret
 

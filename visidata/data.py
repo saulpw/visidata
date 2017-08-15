@@ -180,7 +180,7 @@ def reload_tsv_sync(vs):
 
 @async
 def save_tsv(vs, fn):
-    'Write sheet to file `fn` as TSV, reporting progress on status bar.'
+    'Write sheet to file `fn` as TSV.'
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
         colhdr = '\t'.join(col.name for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
