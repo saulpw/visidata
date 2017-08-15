@@ -1,3 +1,65 @@
+# CHANGELOG
+
+## v0.2 (2017-08-13)
+- vgit auto pushes a full sheet of statuses if the status is more than 3 lines
+- add async to some git commands
+- global keystrokes
+    - `R` pushes the remotes sheet
+    - `P`ushes the local refs to the currently set remote refs
+    - `1` pushes the list of git commands executed
+    - `H` pushes the git log sheet (history) for the current branch
+    - `Ctrl-s`tashes uncommited changes
+    - `Ctrl-p`ops the most recent stashed change and drops it
+    - `A`bort the current in-progress action
+    - `T` pushes the stashes sheet
+- git status sheet
+    - provides information about the working tree
+    - `r` to unstage a file (instead of `w`)
+    - `i` to add a file to toplevel .gitignore
+   - `gi` to add an input line to toplevel .gitignore
+   - `V` opens selected file
+   - `g<ENTER>` pushes hunks sheet for selected files (or all files, if none selected)
+   - `z<ENTER>` pushes hunks sheet for the staged diffs for the selected file
+   - `zg<ENTER>` pushes hunks sheet for the staged diffs for selected files (or all files, if none selected)
+- git branches sheet
+    - displays information about branches and enables their modification
+    - add upstream diff column
+    - add `merge_base` column
+    - `m`erge the selected branch into the current branch
+    - `e` renames a branch
+    - `<ENTER>` pushes the log sheet of the selected branch
+- git stashes sheet
+    - allows viewing of current stashed commits
+    - `<ENTER>` shows the selected stashed change
+    - `a`pplies a stashed change without removing it from the stash
+    - `Ctrl-p` applies a stashed change and drops it
+    - `d`rops a stashed change
+    - `b` creates a new branch from the stashed change
+- git log sheet
+    - allows viewing of the git commit history for the selected branch
+    - `c` cherry-picks the selected commit onto the current branch
+    - `<ENTER>` shows the diff for the selected commit
+- hunks sheet
+    - allows the viewing of hunks for a file (pieces of diffs)
+    - `V`iew the raw patch for this hunk
+    - `d` or `r` undo this hunk
+- diff viewer for selected hunks sheet
+    - opens a view for the diff of a hunk
+    - `y`, `a` or `2` stage a hunk to the index and move on to the next hunk
+    - `r` or `1` remove this hunk from the diff
+    - `n` or `<ENTER>`to skip this hunk without staging
+    - `d` deletes a line from a patch
+- git options sheet
+    - for editing git configuration
+    - `d` unsets this config value
+    - `gd` unsets all selected config values
+    - `ge` edits this option for all selected rows
+    - `a`dd new option
+- git remotes sheet
+    - allows viewing and managing of remote urls
+    - `d`elete remote
+    - `a`dd new remote
+
 ## v0.1 (2017-08-02) -- Initial Release
 - git status sheet
     - provides information about the working tree

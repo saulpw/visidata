@@ -3,15 +3,14 @@
 import sys
 import sh
 from vdtui import *
-from async import async
 
-__version__ = 'saul.pw/vgit v0.1'
+__version__ = 'saul.pw/vgit v0.2'
 
 option('vgit_show_ignored', False)
 option('diff_algorithm', 'minimal')
 
 command('x', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
-command('B', 'vd.push(gitBranchesSheet).reload()', 'execute arbitrary git command')
+command('B', 'vd.push(gitBranchesSheet).reload()', 'push branches sheet')
 command('O', 'vd.push(gitOptionsSheet).reload()', 'push sheet of git options')
 command('P', 'git("push")', 'git push')
 command('A', 'abortWhatever()', 'abort the current in-progress action')
@@ -589,7 +588,7 @@ class GitOptions(GitSheet):
         self.nKeys = 1
 
         self.command('d', 'git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], cursorRow[0])', 'unset this config value')
-        self.command('gd', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset this config value')
+        self.command('gd', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset selected config values')
         self.command('e', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues([cursorRow], editCell(i)); sheet.cursorRowIndex += 1', 'edit this option')
         self.command('ge', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this option for all selected rows')
         self.command('a', 'git("config", "--add", "--"+CONFIG_CONTEXTS[cursorColIndex], input("option to add: "), "added")', 'add new option')
