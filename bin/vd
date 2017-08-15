@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Usage: $0 [-d] [-r] [<input_source> ...]
+# Usage: $0 [-d] [-r] [-f <filetype>] [<visidata options>] [<input_source> ...]
 
 __version__ = 'saul.pw/VisiData v0.95.2'
 
@@ -8,7 +8,7 @@ import os
 from visidata import *
 
 def main():
-    'Use the VisiData interface to browse the given sources.'
+    'Open the given sources using the VisiData interface.'
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
 
