@@ -9,8 +9,9 @@ import time
 import getpass
 import hashlib
 import builtins
+import random
 
-from visidata import *
+from vdtui import *
 
 option('refresh_rate_s', 2.0, 'time to sleep between refreshes')
 option('disp_turn_done', '*', 'symbol to indicate player turn taken')
@@ -85,7 +86,7 @@ class WSIClient:
 
         return self.gamestate.get('current_turn')
 
-    def rightStatus(self):
+    def rightStatus(self, sheet):
         max_turn = self.gamestate.get('num_turns')
         turn_num = self.current_turn
 
@@ -103,7 +104,7 @@ class WSIClient:
                 fmtstr = ' %s'
             rstatus += fmtstr % name
 
-        return rstatus
+        return rstatus, colors['white']
 
     def login(self):  # before curses init
         self.username = builtins.input('player name: ')
@@ -195,7 +196,7 @@ class PlayersSheet(Sheet):
             ColumnAttr('ready'),
         ]
 
-        self.colorizers.append(lambda sheet,col,row,value: row and (row.color, 8))
+        self.addColorizer('row', 8, lambda sheet,col,row,value: row.color)
 
     def reload(self):
         self.rows = [AttrDict(r) for r in g_client.get('/players').json()]
@@ -231,8 +232,8 @@ class PlanetsSheet(Sheet):
             ColumnAttr('y', type=int, width=4),
         ]
 
-        self.colorizers.append(lambda sheet,col,row,value: (g_client.Players.get_player_color(row.ownername), 5) if row else None)
-        self.colorizers.append(lambda sheet,col,row,value: (options.color_dest_planet, 5) if row is sheet.marked_planet else None)
+        self.addColorizer('row', 5, lambda sheet,col,row,value: g_client.Players.get_player_color(row.ownername))
+        self.addColorizer('row', 6, lambda sheet,col,row,value: options.color_dest_planet if row is sheet.marked_planet else None)
         self.marked_planet = None
 
         self.command(ENTER, 'vd.push(g_client.Map).cursorRowIndex = cursorRow.y; g_client.Map.cursorColIndex = cursorRow.x', 'go to this planet on the map')
@@ -260,13 +261,7 @@ class QueuedDeploymentsSheet(Sheet):
             ColumnItem('result', 'result'),
         ]
 
-        self.colorizers.append(self.colorIncomplete)
-
-    @staticmethod
-    def colorIncomplete(sheet, col, row, value):
-        if row and col and col.name == 'ndeployed':
-            if row.result and row.nships_deployed != row.nships_requested:
-                return 'red bold', 5
+        self.addColorizer('cell', 5, lambda s,c,r,v: 'red bold' if c.name == 'ndeployed' and r.result and r.nships_deployed != r.nships_requested else None)
 
     def reload(self):
         pass
@@ -284,12 +279,7 @@ class HistoricalDeploymentsSheet(Sheet):
             ColumnItem('nships', 'nships_deployed', type=int),
             ColumnItem('killpct', 'killpct', type=int, fmtstr='%s%%'),
         ]
-        self.colorizers.append(self.colorDeployment)
-
-    @staticmethod
-    def colorDeployment(sheet, col, row, value):
-        if row:
-            return (g_client.Players.get_player_color(row['launch_player_name']), 9)
+        self.addColorizer('row', 9, lambda s,c,r,v: g_client.Players.get_player_color(row['launch_player_name']))
 
     def reload(self):
         self.rows = g_client.get('/deployments').json()
@@ -321,10 +311,9 @@ class MapSheet(Sheet):
         self.command('f', 'g_client.add_deployment([cursorRow[cursorCol.x]], g_client.Planets.marked_planet, int(input("# ships: ", value=cursorRow[cursorCol.x].nships)))', 'deploy N ships from current planet to marked planet')
         self.command(' ', 'cycle_info()', 'cycle the information displayed')
 
-        self.colorizers.append(self.colorOwnedPlanet)
-        self.colorizers.append(self.colorRoguePlanet)
-        self.colorizers.append(self.colorMarkedPlanet)
-        self.colorizers.append(self.colorSpace)
+        self.addColorizer('cell', 9, lambda s,c,r,v: g_client.Players.get_player_color(r[c.x].ownername) if r[c.x] else None)
+        self.addColorizer('cell', 5, lambda s,c,r,v: options.color_dest_planet if r[c.x] and r[c.x] is g_client.Planets.marked_planet else None)
+        self.addColorizer('cell', 2, self.colorSpace)
 
 
     @property
@@ -337,25 +326,13 @@ class MapSheet(Sheet):
             self.columns[i].name = value[i:i+1]
 
     @staticmethod
-    def colorMarkedPlanet(sheet,col,row,value):
-        return (options.color_dest_planet, 5) if row and col and row[col.x] and row[col.x] is g_client.Planets.marked_planet else None
-
-    @staticmethod
-    def colorOwnedPlanet(sheet,col,row,value):
-        return (g_client.Players.get_player_color(row[col.x].ownername), 9) if row and col and row[col.x] else None
-
-    @staticmethod
-    def colorRoguePlanet(sheet,col,row,value):
-        return (g_client.Players.get_player_color(row[col.x].ownername), 9) if row and col and row[col.x] else None
-
-    @staticmethod
     def colorSpace(sheet,col,row,value):
         if row and col and row[col.x] is None:
             if row is not sheet.cursorRow:
                 r = options.color_empty_space
                 if random.randrange(0, int(options.twinkle_rate)) == 0:
                     r = 'cyan bold'
-                return (r, 2)
+                return r
 
     def cycle_info(self):
         self.fieldToShow = self.fieldToShow[1:] + [self.fieldToShow[0]]
@@ -411,8 +388,8 @@ if __name__ == '__main__':
 
     g_client = WSIClient('http://%s:%s' % (server_addr, server_port))
 
-    vd()._status = ["'N' to generate new 'M'ap; Ctrl-S when ready to start"]
-    set_global('g_client', g_client)
+    vd().status("'N' to generate new 'M'ap; Ctrl-S when ready to start")
+    addGlobals(globals())
     g_client.login()
     run([g_client.Players])
 

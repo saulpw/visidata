@@ -8,6 +8,7 @@ import http.server
 import urllib.parse
 import uuid
 import random
+import traceback
 
 player_colors = 'green yellow cyan magenta red blue'.split()
 all_planet_names =  string.ascii_uppercase + '0123456789' + '☿♀♂♃♄⛢♅♆⚳⚴⚵' + '+&%$#@![](){}=<>'
@@ -497,14 +498,12 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
                     self.wfile.write(ret.encode('utf-8'))
             except HTTPException as e:
                 if self.server.game.options.debug:
-                    import traceback
                     print(traceback.format_exc())
                 self.send_response(e.errcode)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
                 self.wfile.write(str(traceback.format_exc()).encode('utf-8')) #
             except Exception as e:
-                import traceback
                 print(traceback.format_exc())
                 self.send_response(404)
                 self.send_header('Content-type', 'text/plain')
