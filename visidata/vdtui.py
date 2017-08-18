@@ -636,7 +636,7 @@ class VisiData:
                 except curses.error:
                     pass
             elif self.keystrokes in sheet.commands:
-                sheet.exec_command(globals(), sheet.commands[self.keystrokes])
+                sheet.exec_keystrokes(self.keystrokes)
             elif keystroke in self.allPrefixes:
                 pass
             else:
@@ -857,13 +857,16 @@ class Sheet:
     def __repr__(self):
         return self.name
 
-    def exec_command(self, vdglobals, cmd):
-        'Wrap execution of `cmd`, adding globals and `locs` dictionary.'
+    def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
+        return self.exec_command(self.commands[keystrokes], vdglobals)
+
+    def exec_command(self, cmd, vdglobals=None):
+        "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
         escaped = False
 
         if vdglobals is None:
             vdglobals = globals()
-        # handy globals for use by commands
+
         keystrokes, _, execstr = cmd
         self.sheet = self
         locs = LazyMap(dir(self),

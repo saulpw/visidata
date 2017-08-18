@@ -14,6 +14,6 @@ class ColorSheet(Sheet):
 
     def reload(self):
         self.rows = colors.keys()
-        self.exec_command(None, self.commands['['])
+        self.exec_keystrokes('[')  # sort by the current column
 
 run([ColorSheet()])

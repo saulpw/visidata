@@ -90,7 +90,7 @@ class EditLog(Sheet):
         else:
             vs = self
 
-        escaped = vs.exec_command(None, vs.commands[keystrokes])
+        escaped = vs.exec_keystroke(keystrokes)
 
         sync()
 

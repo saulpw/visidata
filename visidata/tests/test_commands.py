@@ -67,6 +67,6 @@ class CommandsTestCase(unittest.TestCase):
             vs.reload()
             vd.sheets = [vs]
             vs.draw(self.scr)
-            vs.exec_command(vars(visidata), cmdlist[keystrokes])
+            vs.exec_command(cmdlist[keystrokes], vars(visidata))
             self.assertFalse(vd.lastErrors and (keystrokes, cmdlist[keystrokes][2], vd.lastErrors))
             vs.checkCursor()
