@@ -1,7 +1,8 @@
 from visidata import *
 
 command('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
-command('^Z', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
+# find new key
+#command('', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):

@@ -192,7 +192,7 @@ command('^R', 'reload(); recalc(); status("reloaded")', 'reload sheet from sourc
 command('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search this column forward for regex')
 command('?', 'moveRegex(regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search this column backward for regex')
 command('n', 'moveRegex(reverse=False)', 'go to next match')
-command('p', 'moveRegex(reverse=True)', 'go to previous match')
+command('N', 'moveRegex(reverse=True)', 'go to previous match')
 
 command('g/', 'moveRegex(regex=input("g/", type="regex"), backward=False, columns="visibleCols")', 'search regex forward in all visible columns')
 command('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search regex backward in all visible columns')
@@ -200,9 +200,6 @@ command('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
 command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
 command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
-
-command('d', 'rows.pop(cursorRowIndex)', 'delete this row')
-command('gd', 'deleteSelected()', 'delete all selected rows')
 
 command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')

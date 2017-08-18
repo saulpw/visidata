@@ -7,6 +7,7 @@ from .async import *
 from .status_history import *
 from .zscroll import *
 from .data import *
+from .clipboard import *
 
 from .addons.freqtbl import *
 from .addons.pyobj import *
