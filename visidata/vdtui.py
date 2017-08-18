@@ -197,7 +197,8 @@ command('p', 'moveRegex(reverse=True)', 'go to previous match')
 command('g/', 'moveRegex(regex=input("g/", type="regex"), backward=False, columns="visibleCols")', 'search regex forward in all visible columns')
 command('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search regex backward in all visible columns')
 
-command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.cursorRowIndex += 1', 'edit this cell')
+option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
+command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
 command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
 
 command('d', 'rows.pop(cursorRowIndex)', 'delete this row')
@@ -1060,11 +1061,11 @@ class Sheet:
         moveListItem(self.columns, fromColIdx, toColIdx)
         return toVisColIdx
 
-    def cursorDown(self, n):
+    def cursorDown(self, n=1):
         "Increment cursor's row by `n`."
         self.cursorRowIndex += n
 
-    def cursorRight(self, n):
+    def cursorRight(self, n=1):
         "Increment cursor's column by `n`."
         self.cursorVisibleColIndex += n
         self.calcColLayout()

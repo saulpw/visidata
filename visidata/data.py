@@ -34,7 +34,7 @@ command('%', 'cursorCol.type = float', 'set column type to float')
 
 command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename this column')
 command('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
-command('!', 'cursorRight(toggleKeyColumn(cursorColIndex))', 'toggle this column as a key column')
+command('!', 'toggleKeyColumn(cursorColIndex)', 'toggle this column as a key column')
 command('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols))', 'sort by all key columns ascending')
 command('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
 
