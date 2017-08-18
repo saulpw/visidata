@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 2017 Saul Pwanson
+# Copyright 2017 Saul Pwanson  http://saul.pw/vdtui
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,11 @@
 # SOFTWARE.
 #
 
-'VisiData core functionality'
+'vdtui: a curses framework for columnar data'
 
+# Just include this whole file in your project as-is.  If you do make
+# modifications, please keep the base vdtui version and append your own id and
+# version.
 __version__ = 'saul.pw/vdtui v0.95.1'
 __author__ = 'Saul Pwanson <vdtui@saul.pw>'
 __license__ = 'MIT'
@@ -32,19 +35,19 @@ from builtins import *
 import sys
 import os
 import os.path
-import copy
 import collections
+import copy
+import curses
+import datetime
 import functools
 import gzip
+import io
 import itertools
 import string
 import re
-import time
-import curses
-import datetime
-import io
 import textwrap
 import threading
+import time
 
 class EscapeException(Exception):
     pass

@@ -69,7 +69,7 @@ If you get an unexpected error, please include the full stack trace that you get
 
 ### Branch structure
 
-Visidata has two main branches:
+VisiData has two main branches:
 * [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (which should be on pypi).
 * [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
 
@@ -79,6 +79,6 @@ A developer's guide can be found [here](http://visidata.readthedocs.io/en/stable
 
 ## License
 
-The innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT free software license, and freely available for use in other projects.
+The innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT free software license, and freely available for inclusion in other projects.
 
 Other VisiData components, including the main `vd` application, addons, and other code in this repository, are licensed under GPLv3.
