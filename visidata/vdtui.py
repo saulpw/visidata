@@ -733,7 +733,6 @@ class Sheet:
         self.addColorizer('col', 7, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None)
         self.addColorizer('cell', 2, lambda s,c,r,v: options.color_default)
         self.addColorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None)
-        self.addColorizer('row', 10, lambda s,c,r,v: options.color_current_row if r is s.cursorRow else None)
 
     def addColorizer(self, colorizerType, precedence, colorfunc):
         self.colorizers[colorizerType].append((precedence, colorfunc))
@@ -1258,16 +1257,24 @@ class Sheet:
                 y = headerRow + numHeaderRows
 
                 for rowidx in range(0, self.nVisibleRows):
-                    if self.topRowIndex + rowidx >= self.nRows:
+                    dispRowIdx = self.topRowIndex + rowidx
+                    if dispRowIdx >= self.nRows:
                         break
 
-                    self.rowLayout[self.topRowIndex+rowidx] = y
+                    self.rowLayout[dispRowIdx] = y
 
-                    row = self.rows[self.topRowIndex + rowidx]
+                    row = self.rows[dispRowIdx]
                     cellval = col.getDisplayValue(row, colwidth-1)
 
                     attr = self.colorizeCell(col, row, cellval)
-                    sepattr = self.colorizeRow(row) or colors[options.color_column_sep]
+                    sepattr = self.colorizeRow(row)
+
+                    # must apply current row here, because this colorization requires cursorRowIndex
+                    if dispRowIdx == self.cursorRowIndex:
+                        attr, _ = colors.update(attr, 0, options.color_current_row, 10)
+                        sepattr, _ = colors.update(sepattr, 0, options.color_current_row, 10)
+
+                    sepattr = sepattr or colors[options.color_column_sep]
 
                     _clipdraw(scr, y, x, options.disp_column_fill+cellval, attr, colwidth)
 
