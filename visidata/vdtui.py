@@ -819,6 +819,8 @@ class Sheet:
         c.topRowIndex = c.cursorRowIndex = 0
         c.columns = copy.deepcopy(self.columns)
         c._selectedRows = self._selectedRows.copy()
+        c.progressMade = c.progressTotal = 0
+        c.currentThread = None
         c.colorizers = self.colorizers.copy()
         return c
 
@@ -1389,7 +1391,9 @@ class Column:
         self._cachedValues = collections.OrderedDict() if cache else None
 
     def copy(self):
-        return copy.copy(self)
+        r = copy.copy(self)
+        r._cachedValues.clear()
+        return r
 
     @property
     def name(self):
