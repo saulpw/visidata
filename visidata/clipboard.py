@@ -4,7 +4,8 @@ from visidata import *
 clipboard = []
 
 command('^Z', 's,i,r = clipboard.pop(); s.rows.insert(i, r)', 'undo last delete on original sheet')
-command('g^Z', 'for s,i,r in clipboard[::-1]: s.rows.insert(i, r)', 'undo all deletes on clipboard')  # clear clipboard?
+command('g^Z', '''for s,i,r in clipboard: s.rows.insert(i, r)
+clipboard.clear()''', 'undo all deletes on clipboard')  # clear clipboard?
 
 command('y', 'clipboard.append((sheet, cursorRowIndex, cursorRow))', 'yank (copy) this row to clipboard')
 command('d', 'clipboard.append((sheet, cursorRowIndex, rows.pop(cursorRowIndex)))', 'delete (cut) this row and move to clipboard')
