@@ -9,7 +9,7 @@ def open_vd(p):
     return vs
 
 class EditLog(Sheet):
-    'Maintain log of commands for current session.'
+    'Log of commands for current session.'
     currentReplayRow = None  # must be global, to allow replay
 
     def __init__(self, name, *args):
@@ -47,9 +47,7 @@ class EditLog(Sheet):
         status('undid "%s"' % deletedRow[1])
 
     def beforeExecHook(self, sheet, keystrokes, args=''):
-        '''Declare initial sheet before any undos can occur.
-
-        This is done when source is initially opened.'''
+        'Log keystrokes and args unless replaying.'
         assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.currentReplayRow is None:
             self.currentActiveRow = [ sheet.name, keystrokes, args, None,
@@ -57,16 +55,16 @@ class EditLog(Sheet):
             self.rows.append(self.currentActiveRow)
 
     def afterExecSheet(self, vs, escaped):
-        'Declare ending sheet for the most recent command.'
+        'Set end_sheet for the most recent command.'
         if vs and self.currentActiveRow:
-            if escaped:
+            if escaped:  # remove user-aborted commands
                 del self.rows[-1]
             else:
                 self.currentActiveRow[3] = vs.name
                 beforeName = self.currentActiveRow[0]
                 afterName = self.currentActiveRow[3]
 
-                # only record the sheet movement to/from the editlog
+                # do not record actions on the editlog itself, only sheet movement to/from
                 if self.name in [beforeName, afterName]:
                     if beforeName == afterName:
                         del self.rows[-1]
@@ -90,7 +88,7 @@ class EditLog(Sheet):
         else:
             vs = self
 
-        escaped = vs.exec_keystroke(keystrokes)
+        escaped = vs.exec_keystrokes(keystrokes)
 
         sync()
 
