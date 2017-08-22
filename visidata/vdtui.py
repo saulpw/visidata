@@ -827,7 +827,7 @@ class Sheet:
     @async
     def deleteSelected(self):
         'Delete all selected rows.'
-        oldrows = self.rows
+        oldrows = copy.copy(self.rows)
         oldidx = self.cursorRowIndex
         ndeleted = 0
 
@@ -838,7 +838,7 @@ class Sheet:
                 break
             oldidx += 1
 
-        self.rows = []
+        self.rows.clear()
         for r in self.genProgress(oldrows):
             if not self.isSelected(r):
                 self.rows.append(r)
