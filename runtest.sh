@@ -2,7 +2,7 @@
 
 # Usage $0
 
-for i in tests/0*.vd ; do
+for i in tests/*.vd ; do
     PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i -- --output=${i%.vd}.tsv
 done
 
