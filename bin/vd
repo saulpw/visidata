@@ -11,7 +11,7 @@ from visidata import *
 def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
     log = logpath.read_text().format(*args, **kwargs)
-    src = PathFd(logpath.name, io.StringIO(log))
+    src = PathFd(logpath.fqpn, io.StringIO(log))
     vs = openSource(src)
     vd().editlog.openHook(vs, src)
     vd().push(vs)
@@ -81,8 +81,8 @@ def main():
         arg = args.inputs[i]
 
         # parse either '--key value' or '--key=value'
-        if arg.startswith('--'):
-            arg = arg[2:]
+        if arg.startswith('-'):
+            arg = arg.lstrip('-')
         else:
             fmtargs.append(arg)
             # goes into args
