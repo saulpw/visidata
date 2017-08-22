@@ -166,7 +166,11 @@ def reload_tsv_sync(vs):
 
         vs.progressMade = 0
         vs.progressTotal = vs.source.filesize
-        for L in fp:
+        while True:
+            try:
+                L = next(fp)
+            except StopIteration:
+                break
             L = L[:-1]
             if L:
                 vs.rows.append(L.split('\t'))

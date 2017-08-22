@@ -11,7 +11,7 @@ import visidata
 def eval_vd(fnEditlog, *args, **kwargs):
     'Open log, instantiate as VisiData sheet, replay all commands, report.'
     log = open(fnEditlog).read().format(*args, **kwargs)
-    src = visidata.InternalSource(fnEditlog, log)
+    src = visidata.PathFd(fnEditlog, io.StringIO(log))
     vs = visidata.openSource(src)
     vd = visidata.vd()
     vd.editlog.openHook(vs, src)

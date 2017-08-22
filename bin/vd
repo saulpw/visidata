@@ -36,7 +36,17 @@ def main():
         if optname != 'inputs':
             vdtui.options[optname] = optval
 
-    inputs = args.inputs or ['.']
+    inputs = list(args.inputs)
+
+    if not sys.stdin.isatty():
+        # duplicate stdin for input and reopen tty as stdin
+        src = PathFd('stdin', open(os.dup(0)))
+        f = open('/dev/tty')
+        os.dup2(f.fileno(), 0)
+        inputs.append(src)
+
+    if not inputs:
+        inputs = ['.']
 
     sources = []
     for src in inputs:

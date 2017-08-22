@@ -2046,17 +2046,59 @@ class Path:
         return self.fqpn
 
 
-class InternalSource(Path):
+class PathFd(Path):
     'minimal Path interface to satisfy a tsv loader'
-    def __init__(self, fqpn, contents):
+    def __init__(self, fqpn, fp):
         super().__init__(fqpn)
-        self.contents = contents
+        self.fp = fp
+        self.alreadyRead = []  # shared among all RepeatFile instances
 
     def read_text(self):
-        return self.contents
+        return self.fp.read()
 
     def open_text(self):
-        return io.StringIO(self.contents)
+        return RepeatFile(self)
+
+    @property
+    def filesize(self):
+        return 0
+
+
+class RepeatFile:
+    def __init__(self, pathfd):
+        self.pathfd = pathfd
+        self.iter = None
+
+    def __enter__(self):
+        self.iter = RepeatFileIter(self)
+        return self
+
+    def __exit__(self, a,b,c):
+        pass
+
+    def __iter__(self):
+        return RepeatFileIter(self)
+
+    def __next__(self):
+        return next(self.iter)
+
+class RepeatFileIter:
+    def __init__(self, rf):
+        self.rf = rf
+        self.nextIndex = 0
+
+    def __iter__(self):
+        return RepeatFileIter(self.rf)
+
+    def __next__(self):
+        if self.nextIndex < len(self.rf.pathfd.alreadyRead):
+            r = self.rf.pathfd.alreadyRead[self.nextIndex]
+        else:
+            r = next(self.rf.pathfd.fp)
+            self.rf.pathfd.alreadyRead.append(r)
+
+        self.nextIndex += 1
+        return r
 
 
 def run(sheetlist=[]):
