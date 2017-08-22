@@ -3,7 +3,6 @@ from visidata import *
 command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
 option('col_stats', False, 'include mean/median/etc on Column sheet')
-command(':', 'splitColumn(columns, cursorColIndex, cursorCol, cursorValue, input("split char: ") or None)', 'split column by the given char')
 command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 
 class OptionsSheet(Sheet):
@@ -21,28 +20,6 @@ class OptionsSheet(Sheet):
 vd().optionsSheet = OptionsSheet(options)
 
 ##
-
-option('split_max', -1, 'string.split limit')
-# exampleVal just to know how many subcolumns to make
-def splitColumn(columns, colIndex, origcol, exampleVal, ch):
-    'Split selected column, up to maximum in options,  on character `ch`.'
-    split_max = int(options.split_max)
-
-    if ch:
-        maxcols = len(exampleVal.split(ch, split_max))
-    else:
-        maxcols = len(exampleVal)
-
-    if maxcols <= 1:
-        return status('move cursor to valid example row to split by this column')
-
-    for i in range(maxcols):
-        if ch:
-            columns.insert(colIndex+i+1, (Column("%s_%s" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,split_max=split_max: c.getValue(r).split(ch, split_max)[i])))
-        else:
-            columns.insert(colIndex+i+1, (Column("%s_%s" % (origcol.name, i), getter=lambda r,c=origcol,ch=ch,i=i,split_max=split_max: c.getValue(r)[i])))
-
-
 class LazyMapping:
     'Calculate column values as needed.'
     def __init__(self, sheet, row):

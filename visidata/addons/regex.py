@@ -1,18 +1,26 @@
 from visidata import *
 
-command(';', 'splitColumnByRegex(columns, cursorColIndex, cursorCol, cursorValue, input("split regex: ", type="regex"))', 'split column by regex')
+command(':', 'addRegexColumns(makeRegexSplitter, columns, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex"))', 'add columns by regex split')
+command(';', 'addRegexColumns(makeRegexMatcher, columns, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex"))', 'add columns by regex match')
 command('*', 'columns.insert(cursorColIndex+1, regexTransform(cursorCol, input("transform column by regex: ", type="regex")))', 'transform column by regex')
 
-def splitColumnByRegex(columns, colIndex, origcol, exampleVal, regexstr):
+option('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
+
+def makeRegexSplitter(regex, origcol):
+    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getValue(row), maxsplit=0)
+
+def makeRegexMatcher(regex, origcol):
+    return lambda row, regex=regex, origcol=origcol: regex.search(origcol.getValue(row)).groups()
+
+def addRegexColumns(regexMaker, columns, colIndex, origcol, exampleRow, regexstr):
     regex = re.compile(regexstr, regex_flags())
 
-    result = regex.search(exampleVal)
+    func = regexMaker(regex, origcol)
+    result = func(exampleRow)
 
-    for i, g in enumerate(result.groups()):
-        c = Column(origcol.name+'_re'+str(i),
-                getter=lambda row, regex=regex, i=i, origcol=origcol: regex.search(origcol.getValue(row)).group(i+1))
+    for i, g in enumerate(result):
+        columns.insert(colIndex+i+1, Column(origcol.name+'_re'+str(i), getter=lambda r,i=i,func=func: func(r)[i]))
 
-        columns.insert(colIndex+i+1, c)
 
 def regexTransform(col, instr):
     i = indexWithEscape(instr, '/')
