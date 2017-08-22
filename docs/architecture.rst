@@ -5,7 +5,7 @@ VisiData Architecture for Developers
 VisiData is like a powerful spreadsheet from an alternate textpunk reality, in
 which data can be easily manipulated from the keyboard and terminal.  Unlike a
 spreadsheet, however, the data is well-structured, so that the data model is
-closer to Pandas or an RDBMS.
+closer to an RDBMS.
 
 * The main unit of functionality is the *sheet*.
 

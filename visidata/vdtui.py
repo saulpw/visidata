@@ -889,12 +889,11 @@ class Sheet:
 
     @property
     def name(self):
-        'Wrap return of `_name`.'
         return self._name
 
     @name.setter
     def name(self, name):
-        'Wrap setting of `_name`.'
+        'Set name without spaces.'
         self._name = name.replace(' ', '_')
 
     @property
@@ -908,85 +907,86 @@ class Sheet:
 
     @property
     def progressPct(self):
-        'Return percentage of rows completed.'
+        'Percent complete as indicated by async actions.'
         if self.progressTotal != 0:
             return int(self.progressMade*100/self.progressTotal)
+        return 0
 
     @property
     def nVisibleRows(self):
-        'Return number of visible rows, calculable from window height.'
+        'Number of visible rows at the current window height.'
         return self.vd.windowHeight-2
 
     @property
     def cursorCol(self):
-        'Return current Column object.'
+        'Current Column object.'
         return self.visibleCols[self.cursorVisibleColIndex]
 
     @property
     def cursorRow(self):
-        'Return current row.'
+        'The row object at the row cursor.'
         return self.rows[self.cursorRowIndex]
 
     @property
     def visibleRows(self):  # onscreen rows
-        'Return a list of rows currently visible onscreen.'
+        'Slice of rows visible in the window.'
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
     def visibleCols(self):  # non-hidden cols
-        'Return a list of unhidden Column objects.'
+        'List of unhidden Column objects.'
         return [c for c in self.columns if not c.hidden]
 
     @property
     def visibleColNames(self):
-        'Return string of visible column-names.'
+        'String of visible column names.'
         return ' '.join(c.name for c in self.visibleCols)
 
     @property
     def cursorColIndex(self):
-        'Return index of current column into Sheet.columns.'
+        'Index of column into cursor.columns.'
         return self.columns.index(self.cursorCol)
 
     @property
     def keyCols(self):
-        'Return list of key columns.'
+        'List of key columns.'
         return self.columns[:self.nKeys]
 
     @property
     def nonKeyVisibleCols(self):
-        'Return list of unhidden non-key columns.'
+        'List of unhidden non-key columns.'
         return [c for c in self.columns[self.nKeys:] if not c.hidden]
 
     @property
     def keyColNames(self):
-        'Return string of key column names.'
+        'String of key column names.'
         return options.disp_key_sep.join(c.name for c in self.keyCols)
 
     @property
     def cursorValue(self):
-        'Return cell contents at current row and column.'
+        'Calculated cell value at current row and column.'
         return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
 
     @property
     def statusLine(self):
-        'Return status-line element showing row and column stats.'
+        'Status-line element showing row and column stats.'
         rowinfo = 'row %d/%d (%d selected)' % (self.cursorRowIndex, self.nRows, len(self._selectedRows))
         colinfo = 'col %d/%d (%d visible)' % (self.cursorColIndex, self.nCols, len(self.visibleCols))
         return '%s  %s' % (rowinfo, colinfo)
 
     @property
     def nRows(self):
-        'Return number of rows.'
+        'Number of rows on this sheet.'
         return len(self.rows)
 
     @property
     def nCols(self):
-        'Return number of columns.'
+        'Number of columns on this sheet.'
         return len(self.columns)
 
     @property
     def nVisibleCols(self):
-        'Return number of visible columns.'
+        'Number of visible columns on this sheet.'
         return len(self.visibleCols)
 
 ## selection code

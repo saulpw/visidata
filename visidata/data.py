@@ -114,7 +114,7 @@ def open_py(p):
 def open_txt(p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     with p.open_text() as fp:
-        if '\t' in next(fp):
+        if '\t' in next(fp):    # peek at the first line
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, p)
 
