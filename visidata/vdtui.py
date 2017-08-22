@@ -1111,7 +1111,7 @@ class Sheet:
         return col.getValue(self.rows[rownum])
 
     def addColumn(self, col, index=None):
-        'Insert column before current column or at given index.'
+        'Insert column at given index or after all columns.'
         if index is None:
             index = len(self.columns)
         if col:

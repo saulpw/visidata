@@ -1,0 +1,3 @@
+start_sheet	keystrokes	input	end_sheet	comment
+	o	sample_data/birdsdiet.csv	birdsdiet	open file
+birdsdiet	^S	tests/03-loadcsv.tsv	birdsdiet	save this sheet to new file

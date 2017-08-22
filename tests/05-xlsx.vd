@@ -1,0 +1,4 @@
+start_sheet	keystrokes	input	end_sheet	comment
+	o	sample_data/sample-sales-reps.xlsx	sample-sales-reps	open file
+sample-sales-reps	^J		sample-sales-reps~sample-salesv4	push this sheet
+sample-sales-reps~sample-salesv4	^S	{output}	sample-sales-reps~sample-salesv4	save this sheet to new file

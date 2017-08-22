@@ -1,0 +1,20 @@
+start_sheet	keystrokes	input	end_sheet	comment
+	o	sample_data/sample.tsv	sample	open file
+sample	;	(\d+-\d+)	sample	add columns by regex match
+sample	-		sample	hide this column
+sample	^	OrderDate	sample	rename this column
+sample	c	Total	sample	go to visible column by regex of name
+sample	$		sample	set column type to currency
+sample	+	sum	sample	choose aggregator for this column
+sample	c	o	sample	go to visible column by regex of name
+sample	F		sample_OrderDate_freq	open frequency table from values in this column
+sample_OrderDate_freq	C		sample_OrderDate_freq_columns	open Columns for this sheet
+sample_OrderDate_freq_columns	j		sample_OrderDate_freq_columns	go one row down
+sample_OrderDate_freq_columns	s		sample_OrderDate_freq_columns	select this row
+sample_OrderDate_freq_columns	s		sample_OrderDate_freq_columns	select this row
+sample_OrderDate_freq_columns	g-		sample_OrderDate_freq_columns	hide all selected columns on source sheet
+sample_OrderDate_freq_columns	q		sample_OrderDate_freq	quit the current sheet
+sample_OrderDate_freq	[		sample_OrderDate_freq	sort by this column ascending
+sample_OrderDate_freq	l		sample_OrderDate_freq	go one column right
+sample_OrderDate_freq	^	Revenue	sample_OrderDate_freq	rename this column
+sample_OrderDate_freq	^S	{output}	sample_OrderDate_freq	save this sheet to new file
