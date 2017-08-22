@@ -1,6 +1,6 @@
-================
-VisiData v0.95.2
-================
+==============
+VisiData v0.96
+==============
 
 A terminal interface for exploring and arranging tabular data
 

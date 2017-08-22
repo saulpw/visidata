@@ -1,6 +1,20 @@
 # VisiData version history
 
-## v0.95.2 (2017-08-13)
+## 0.96 (2017-08-21)
+- data can be piped through stdin
+- remap: `N` is now previous match (instead of `p`)
+- `:` now regex split
+- add `bin/viewtsv` example tsv viewer as an example of a small vdtui application
+- add `options.cmd_after_edit` for automove after edit
+- add clipboard functionality
+    - `y` yanks row at cursor to clipboard; `gy` copies all selected rows
+    - `d` deletes row and move to clipboard; `gd` moves all selected rows
+    - `p` now pastes the row most recently added to the clipboard after current row; `gp` pastes all rows from clipboard after current row
+    - `Shift-B` opens clipboard sheet
+    - `Ctrl-z` now undoes the most recent delete; `gCtrl-z` undoes all deletes
+- Fix cursor row highlighting of identical rows
+
+## v0.95.2
 - move some functionality out of vdtui into seperate python files
 - add Ctrl-z command to launch external $EDITOR
 - add ``options.force_valid_names``

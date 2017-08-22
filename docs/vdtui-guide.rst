@@ -38,7 +38,7 @@ Moving the cursor
 
 - ``/``/``?`` search this column forward/backward with regex search; ``g/``/``g?`` search all columns.
 
-  - ``n``/``p`` move the cursor to the next/previous match.
+  - ``n``/``N`` move the cursor to the next/previous match.
 
 
 Manipulating Sheet Contents
@@ -55,8 +55,6 @@ Columns
 
 Rows
 ----
-
-- ``d`` deletes a row; ``gd`` deletes all selected rows.
 
 - ``s`` selects a row; ``gs`` selects all rows.
 

@@ -68,7 +68,7 @@ Columns
 
     -  Cell edits are rejected if they don't convert to the column type.
 
--  ``:`` splits the current column into multiple columns based on a provided separator
+-  ``:`` creates new columns from multiple columns based on a given regex split
 
     -  The cursor must be on an "example" row, to know how many columns to create.
 
@@ -93,8 +93,22 @@ Rows
 
 - ``J``/``K`` moves the current row up/down.
 
+
 Toolkit
 =======
+
+Clipboard
+---------
+
+- ``y`` yanks current row to clipboard; ``gy`` copies all selected rows
+
+- ``d`` deletes current row and moves it to clipboard; ``gd`` deletes and moves all selected rows
+
+- ``p`` pastes the row most recently added to the clipboard after the current row; ``gp`` pastes all rows from clipboard after the current row
+
+- ``Ctrl-z`` undoes the most recent delete; ``gCtrl-z`` undoes all deletes
+
+- ``Shift-B`` opens the clipboard sheet
 
 Statistics
 ----------
@@ -108,6 +122,7 @@ Statistics
 -  ``Shift-F``\ requency table for current column with histogram
 
     - with a numeric column, ``w`` toggles between bins with an even interval width and bins with an even frequency height
+
 
 Joining two datasets
 --------------------

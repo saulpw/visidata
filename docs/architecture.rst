@@ -15,8 +15,7 @@ closer to an RDBMS.
   object.
 
 * Individual cells do not contain arbitrary values, but are extracted by the
-  column from the particular Python object for that row. Unlike in a
-  traditional spreadsheet, this is the primary function of a VisiData column.
+  column from the particular Python object for that row.
 
 Constraining the data to fit within this architecture simplifies the
 implementation and allows for some radical optimizations to data workflow.
