@@ -185,11 +185,16 @@ def reload_tsv_sync(vs):
 @async
 def save_tsv(vs, fn):
     'Write sheet to file `fn` as TSV.'
+
+    # replace tabs and newlines
+    replch = options.disp_oddspace
+    trdict = {9: replch, 10: replch, 13: replch}
+
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
-        colhdr = '\t'.join(col.name for col in vs.visibleCols) + '\n'
+        colhdr = '\t'.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
         for r in vs.genProgress(vs.rows):
-            fp.write('\t'.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
+            fp.write('\t'.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
     status('%s save finished' % fn)
 
