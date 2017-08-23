@@ -7,7 +7,7 @@ import itertools
 import visidata
 
 # test separately as needed
-expectedErrors = [ '^R', '^^', 'e', 'ge', '^J', '^S', 'o', 'KEY_BACKSPACE']
+expectedErrors = [ '^R', '^^', 'e', 'ge', '^J', '^S', 'o', 'KEY_BACKSPACE', '^Z', 'p']
 
 inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
                  'o': 'tests/jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
