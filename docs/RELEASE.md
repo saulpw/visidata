@@ -79,5 +79,8 @@ twine upload dist/*
    b. Ask someone else to test install
 
 13. Create a tag `v#.#.#` for that commit
-
+```
+git tag v#.#.#
+git push --tags
+```
 14. Announce the release and have some ice cream
