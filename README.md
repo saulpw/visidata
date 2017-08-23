@@ -41,7 +41,11 @@ $ python setup.py install
 If installed via pip3, `vd` should launch without issue.
 
 ```
-$ vd [<options>] [<inputs> ...]
+$ vd [<options>] <input> ...
+$ <command> | vd
+$ vd [<options>] --play <script.vd> [--<format-field>=<value> ...]
+$ vd [<options>] --play - [--<format-field>=<value> ...] < <script.vd>
+$ vd [<options>] < <input>
 ```
 
 If no inputs are given, `vd` opens the current directory.

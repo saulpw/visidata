@@ -56,15 +56,15 @@
         7
         8
         9
- Shift- :  split by string
-        ;  split by regex
+ Shift- :  add columns by regex split
+        ;  add columns by regex capture groups
  Shift- >  move down to different value
         =  add new column by python expr
  Shift- <  move up to different value
  Shift- ?  reverse search by regex [vim]
  Shift- @  make column date
  Shift- A
- Shift- B
+ Shift- B  clip'B'oard sheet
  Shift- C  'C'olumns sheet
  Shift- D  e'D'itlog sheet
  Shift- E
@@ -76,7 +76,7 @@
  Shift- K  slide up
  Shift- L  slide right
  Shift- M  'M'elt
- Shift- N
+ Shift- N  previous match [vim]
  Shift- O  'O'ptions
  Shift- P  'P'opulation sample
  Shift- Q
@@ -98,7 +98,7 @@
         a  'a'dd a blank row
         b
         c  'c'olumn move by regex
-        d  'd'elete row
+        d  'd'elete row to clipboard
         e  'e'dit cell
         f
         g  'g'lobal prefix
@@ -110,7 +110,7 @@
         m
         n  'n'ext match [vim]
         o
-        p  'p'revious match [vim]
+        p  'p'aste row from clipboard
         q  'q'uit sheet
         r  'r'ow move by number
         s  's'elect row
@@ -119,7 +119,7 @@
         v
         w
         x
-        y
+        y  'y'ank a row to clipbard [vim]
         z  scroll prefix [vim]
  Shift- }  move to next selected
  Shift- |  select by regex
