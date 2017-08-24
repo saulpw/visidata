@@ -14,7 +14,7 @@ setup(name='vgit',
       url='http://github.com/saulpw/vgit',
       download_url='https://github.com/saulpw/vgit/tarball/' + __version__,
       scripts=['vgit'],
-      py_modules = ['vdtui'],
+      py_modules = ['vdtui', 'merge', 'blame', 'git'],
       license='GPLv2',
       classifiers=[
           'Development Status :: 2 - Pre-Alpha',
@@ -31,5 +31,4 @@ setup(name='vgit',
           'Topic :: Terminals'
       ],
       keywords=('console textpunk git version-control curses visidata tui terminal'),
-      packages=['vgit'],
       )
