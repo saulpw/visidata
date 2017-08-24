@@ -24,7 +24,7 @@ command('T', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
 command('R', 'vd.push(gitRemotesSheet).reload()', 'push remotes sheet')
 command('^S', 'git("stash", "save")', 'stash uncommitted changes')
 command('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
-command('1', 'vd.push(TextSheet("git_commands", git_commands))', 'push list of git commands executed')
+command('X', 'vd.push(TextSheet("git_commands", git_commands))', 'push list of git commands executed')
 
 
 class GitStashes(GitSheet):
