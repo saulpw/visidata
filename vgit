@@ -227,7 +227,7 @@ class HunkViewer(GitSheet):
         ]
         self.addColorizer('row', 4, HunkViewer.colorDiffRow)
         self.command(['y', 'a', '2'], 'srchunks.git_apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk')
-        self.command(['r','1'], 'git_apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff')
+#        self.command(['r','1'], 'git_apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff')
         self.command(['n', ENTER], 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk')
         self.command('d', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch')
 
