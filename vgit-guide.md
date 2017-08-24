@@ -30,8 +30,8 @@
    - `z<ENTER>` pushes hunks sheet for the staged diffs for the selected file; `zg<ENTER>` pushes hunks sheet for the staged diffs for selected files (or all files, if none selected)
 
 ## Hunks Sheet 
-    - allows the viewing of hunks for a file (pieces of diffs)
-    - `ENTER` on a hunk allows the viewing of its diffs; `gENTER` allows the viewing of diffs for all of the selected hunks (or all hunks, if none selected)
+    - opens a view for the hunks of a file (pieces of diffs)
+    - `ENTER` on a hunk shows you its diffs; `gENTER` scrolls through diffs for all of the selected hunks (or all hunks, if none selected)
     - `a` stages a hunk
     - `d` or `r` undoes this hunk
     - `V` views the raw patch for this hunk

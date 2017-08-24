@@ -138,6 +138,7 @@ class GitSheet(Sheet):
         status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
 
+# each row is a GitFile
 class GitStatus(GitSheet):
     def __init__(self, p):
         super().__init__(p.relpath(''), p)
@@ -176,7 +177,8 @@ class GitStatus(GitSheet):
         self.command('z^J', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file')
         self.command(['zg^J', 'gz^J'], 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files')
 
-        self.command('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file')
+#        self.command('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file')
+        self.command('L', 'vd.push(GitBlame(cursorRow))', 'push blame for this file')
 
         self._cachedStatus = {}
 

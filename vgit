@@ -6,6 +6,7 @@ from vdtui import *
 
 from git import *
 from merge import GitMerge
+from blame import GitBlame
 
 __version__ = 'saul.pw/vgit v0.2'
 
