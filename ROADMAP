@@ -1,0 +1,28 @@
+# vgit roadmap
+
+A loose plan that is subject to change
+
+- conflict resolution
+- checkout one file from a different branch
+- edit arbitrary commit message with automatic rebase
+- streamlined rebase workflow
+
+- GitStatus
+   - directory summary (ENTER to dive)
+   - ^Z on file to edit in $EDITOR
+   - ENTER to dive into a submodule pushes a new GitStatus
+
+- Branches
+  - reset 'H'EAD to this commit
+  - 'R'ebase selected commits on top of HEAD
+  - create tag
+
+- Diffs
+  - j/k or up/down to jump hunks.  or </> ?
+  - 1/2/3 to set index to that column
+  - should not remove content from working tree
+
+- Blame
+  - ENTER goes to that commit
+  - '' goes to list of all commits for that file
+

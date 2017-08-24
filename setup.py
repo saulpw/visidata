@@ -2,11 +2,11 @@
 
 from setuptools import setup
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 setup(name='vgit',
       version=__version__,
-      install_requires='visidata>=0.94 sh'.split(),
+      install_requires=['sh'],
       description='a sleek terminal user interface for git',
       #long_description=open('README.md').read(),
       author='Saul Pwanson',
@@ -14,8 +14,8 @@ setup(name='vgit',
       url='http://github.com/saulpw/vgit',
       download_url='https://github.com/saulpw/vgit/tarball/' + __version__,
       scripts=['vgit'],
-      py_modules = ['vgit'],
-      license='GPLv3',
+      py_modules = ['vdtui'],
+      license='GPLv2',
       classifiers=[
           'Development Status :: 2 - Pre-Alpha',
           'Environment :: Console',
@@ -30,7 +30,6 @@ setup(name='vgit',
           'Topic :: Software Development :: Version Control',
           'Topic :: Terminals'
       ],
-      keywords=('console textpunk git version-control'
-                'curses visidata tui terminal'),
-      packages=[''],
+      keywords=('console textpunk git version-control curses visidata tui terminal'),
+      packages=['vgit'],
       )
