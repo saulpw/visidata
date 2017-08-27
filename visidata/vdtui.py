@@ -446,7 +446,8 @@ class VisiData:
         for t in self.unfinishedThreads:
             if not t.is_alive():
                 t.endTime = time.process_time()
-                t.status += 'ended'
+                if not t.status:
+                    t.status = 'ended'
 
     def editText(self, y, x, w, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
