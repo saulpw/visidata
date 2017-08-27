@@ -1392,7 +1392,8 @@ class Column:
 
     def copy(self):
         r = copy.copy(self)
-        r._cachedValues.clear()
+        if r._cachedValues:
+            r._cachedValues.clear()
         return r
 
     @property
