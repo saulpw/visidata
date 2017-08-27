@@ -32,6 +32,8 @@ def main():
 
     for optname, v in vdtui.baseOptions.items():
         name, optval, defaultval, helpstr = v
+        if name.startswith('color_') or name.startswith('disp_'):
+            continue
         action = 'store_true' if optval is False else 'store'
         parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=helpstr)
 
