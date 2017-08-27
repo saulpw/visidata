@@ -1673,18 +1673,22 @@ class TextSheet(Sheet):
         self.rows = []
         self.columns = [Column(self.name, width=self.vd.windowWidth, getter=lambda r: r[1])]
         if isinstance(self.source, list):
-            for x in self.source:
+            for x in self.genProgress(self.source):
                 # copy so modifications don't change 'original'; also one iteration through generator
                 self.addLine(x)
         elif isinstance(self.source, str):
-            for L in self.source.splitlines():
+            for L in self.genProgress(self.source.splitlines()):
                 self.addLine(L)
         elif isinstance(self.source, io.IOBase):
             for L in self.source:
                 self.addLine(L[:-1])
         elif isinstance(self.source, Path):
-            for L in self.source.open_text():
-                self.addLine(L[:-1])
+            self.progressMade = 0
+            self.progressTotal = self.source.filesize
+            with self.source.open_text() as fp:
+                for L in fp:
+                    self.addLine(L[:-1])
+                    self.progressMade += len(L)
         else:
             error('unknown text type ' + str(type(self.source)))
 
