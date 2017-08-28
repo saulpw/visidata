@@ -232,7 +232,7 @@ command('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows)',
 command('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
 
 command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
-command('g=', 'setValuesFromExpr(cursorCol, selectedRows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
+command('g=', 'cursorCol.setValuesFromExpr(sheet, selectedRows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
 
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
@@ -1545,10 +1545,9 @@ class Column:
             self.setter(r, value)
 
     @async
-    def setValuesFromExpr(self, col, rows, expr):
-        for r in self.genProgress(rows):
-            col.setValues([r], LazyMapping(self, r)(expr))
-
+    def setValuesFromExpr(self, sheet, rows, expr):
+        for r in sheet.genProgress(rows):
+            self.setValues([r], LazyMapping(sheet, r)(expr))
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'
