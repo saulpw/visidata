@@ -1,5 +1,14 @@
 # VisiData version history
 
+## Unreleased
+
+- Move ~!@#$%^ column commands back into vdtui
+- Move g[ and g] also into vdtui
+- Remove TAB/Shift-TAB sheet cycling
+- `gh` moves cursor to leftmost column (instead of leftmost non-key column)
+- min_memory_mb now set to 100 by default.  If `free` reports less memory, loading (or any async task) will be automatically aborted to prevent thrashing.
+- theme options removed as CLI arguments (still available for .visidatarc or apps)
+
 ## 0.96 (2017-08-21)
 - data can be piped through stdin
 - remap: `N` is now previous match (instead of `p`)

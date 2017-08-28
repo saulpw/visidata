@@ -7,7 +7,7 @@
   Ctrl- F  'F'orward one page [vim]
   Ctrl- G  file information [vim]
   Ctrl- H
-  Ctrl- I  TAB (cycle sheets)
+  Ctrl- I
   Ctrl- J  ENTER (dive into row/value) [sheet-specific]
   Ctrl- K
   Ctrl- L  (should be redraw)
@@ -37,7 +37,7 @@
  Shift- $  make currency column
  Shift- %  make float column
  Shift- &  ('join' on Sheets and Columns metasheets)
-        '  (reserved for duplicate column)
+        '  freeze column
  Shift- (
  Shift- )
  Shift- *  new regex transform column

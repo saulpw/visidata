@@ -24,19 +24,7 @@ command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row num
 command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 
 command('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
-command('^I',  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheet stack') # TAB
-command('KEY_BTAB', 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheet stack')
-command('~', 'cursorCol.type = str', 'set column type to string')
-command('@', 'cursorCol.type = date', 'set column type to ISO8601 datetime')
-command('#', 'cursorCol.type = int', 'set column type to integer')
-command('$', 'cursorCol.type = currency', 'set column type to currency')
-command('%', 'cursorCol.type = float', 'set column type to float')
-
-command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename this column')
 command('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
-command('!', 'toggleKeyColumn(cursorColIndex)', 'toggle this column as a key column')
-command('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols))', 'sort by all key columns ascending')
-command('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
 
 command('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
 command('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')

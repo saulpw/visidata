@@ -152,7 +152,7 @@ command(['^B', 'KEY_PPAGE', 'kUP'], 'cursorDown(-nVisibleRows); sheet.topRowInde
 
 command('gq', 'vd.sheets.clear()', 'drop all sheets (clean exit)')
 
-command('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = nKeys', 'go to leftmost non-key column')
+command('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go to leftmost column')
 command('gk', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go to top row')
 command('gj', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'go to bottom row')
 command('gl', 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmost column')
@@ -173,11 +173,20 @@ command('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or st
 
 command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle this column width between default_width and to fit visible values')
 command('-', 'cursorCol.width = 0', 'hide this column')
+command('!', 'toggleKeyColumn(cursorColIndex)', 'toggle this column as a key column')
+command('~', 'cursorCol.type = str', 'set column type to string')
+command('@', 'cursorCol.type = date', 'set column type to ISO8601 datetime')
+command('#', 'cursorCol.type = int', 'set column type to integer')
+command('$', 'cursorCol.type = currency', 'set column type to currency')
+command('%', 'cursorCol.type = float', 'set column type to float')
+command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename this column')
 
 command('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
 
 command('[', 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r))', 'sort by this column ascending')
 command(']', 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r), reverse=True)', 'sort by this column descending')
+command('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols))', 'sort by all key columns ascending')
+command('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
 
 command('^D', 'options.debug = not options.debug; status("debug " + ("ON" if options.debug else "OFF"))', 'toggle debug mode')
 
@@ -1340,44 +1349,33 @@ class CalcErrorStr(str):
     'Wrap `str` (perhaps with error message), indicating `getValue` failed.'
     pass
 
+aggregators = collections.OrderedDict()
 
-def distinct(values):
-    'Count unique elements in `values`.'
-    return len(set(values))
+option('aggr_null_filter', 'none', '"none", "empty", "false", or "" for no filtering')
+def filterNull(L):
+    omitch = options.aggr_null_filter[:1].lower()
+    if omitch == 'n':  # nones
+        return [v for v in L if v is not None]
+    elif omitch == 'e':  # empties
+        return [v for v in L if v is not None and v is not '']
+    elif omitch == 'f':  # falsies
+        return [v for v in L if v]
+    else:
+        return L
 
-def avg(values):
-    return float(sum(values))/len(values) if values else None
+def aggregator(name, type, func):
+    def _func(values):  # wrap builtins so they can have a .type
+        return func(filterNull(values))
+    _func.type=type
+    _func.__name__ = name
+    aggregators[name] = _func
 
-mean=avg
-
-def count(values):
-    'Count total number of non-None elements.'
-    return len([x for x in values if x is not None])
-
-_sum = sum
-_max = max
-_min = min
-
-def sum(*values): return _sum(*values)
-def max(*values): return _max(*values)
-def min(*values): return _min(*values)
-
-avg.type = float
-count.type = int
-distinct.type = int
-sum.type = None
-min.type = None
-max.type = None
-aggregators = { '': None,
-                'distinct': distinct,
-                'sum': sum,
-                'avg': avg,
-                'mean': avg,
-                'count': count, # (non-None)
-                'min': min,
-                'max': max
-               }
-
+aggregator('min', None, min)
+aggregator('max', None, max)
+aggregator('avg', float, lambda values: float(sum(values))/len(values))
+aggregator('sum', None, sum)
+aggregator('distinct', int, lambda values: len(set(values)))
+aggregator('count', int, len)
 
 class Column:
     def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None, cache=False):
@@ -1462,11 +1460,6 @@ class Column:
     def hidden(self):
         'A column is hidden if its width == 0.'
         return self.width == 0
-
-    def nEmpty(self, rows):
-        'Count rows that are empty strings or None.'
-        vals = self.values(rows)
-        return sum(1 for v in vals if v == '' or v == None)
 
     def values(self, rows):
         'Return a list of values for the given `rows` at this Column.'
