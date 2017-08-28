@@ -229,6 +229,10 @@ command('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 
 
 command('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows)', 'push duplicate sheet with only selected rows')
 command('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
+
+command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
+command('g=', 'setValuesFromExpr(cursorCol, selectedRows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
+
 command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
 
 command('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
@@ -1539,6 +1543,12 @@ class Column:
         for r in rows:
             self.setter(r, value)
 
+    @async
+    def setValuesFromExpr(self, col, rows, expr):
+        for r in self.genProgress(rows):
+            col.setValues([r], LazyMapping(self, r)(expr))
+
+
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'
         w = 0
@@ -1556,15 +1566,17 @@ class Column:
 
 # ---- Column makers
 
+def setitem(r, i, v):  # function needed for use in lambda
+    r[i] = v
+
+
+
 def ColumnAttr(attrname, type=anytype, **kwargs):
     'Return Column object with `attrname` from current row Python object.'
     return Column(attrname, type=type,
             getter=lambda r,b=attrname: getattr(r,b),
             setter=lambda r,v,b=attrname: setattr(r,b,v),
             **kwargs)
-
-def setitem(r, i, v):  # function needed for use in lambda
-    r[i] = v
 
 def ColumnItem(attrname, itemkey, **kwargs):
     'Return Column object (with getitem/setitem) on the row Python object.'
@@ -1602,6 +1614,40 @@ def ColumnAttrNamedObject(name):
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
                         setter=lambda r,v,name=name: setattr(r, name, v))
 
+
+class LazyMapping:
+    'Calculate column values as needed.'
+    def __init__(self, sheet, row):
+        self.row = row
+        self.sheet = sheet
+
+    def keys(self):
+        return [c.name for c in self.sheet.columns if c.name.isidentifier()]
+
+    def __call__(self, expr):
+        return eval(expr, getGlobals(), self)
+
+    def __getitem__(self, colname):
+        colnames = [c.name for c in self.sheet.columns]
+        if colname in colnames:
+            colidx = colnames.index(colname)
+            return self.sheet.columns[colidx].getValue(self.row)
+        else:
+            raise KeyError(colname)
+
+    def __getattr__(self, colname):
+        return self.__getitem__(colname)
+
+
+def ColumnExpr(sheet, expr):
+    'Create new `Column` from Python expression.'
+    if expr:
+        vc = Column(expr)  # or default name?
+        vc.expr = expr
+        vc.getter = lambda r,c=vc,s=sheet: LazyMapping(s, r)(c.expr)
+        return vc
+
+###
 
 def input(prompt, type='', **kwargs):
     'Compose input prompt.'

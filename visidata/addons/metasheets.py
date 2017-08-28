@@ -3,10 +3,9 @@ from visidata import *
 command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
 option('col_stats', False, 'include mean/median/etc on Column sheet')
-command('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 
 class OptionsSheet(Sheet):
-    'options management'
+    'options viewing and editing'
     def __init__(self, d):
         super().__init__('options', d)
         self.columns = ArrayNamedColumns('option value default description'.split())
@@ -19,48 +18,13 @@ class OptionsSheet(Sheet):
 
 vd().optionsSheet = OptionsSheet(options)
 
-##
-class LazyMapping:
-    'Calculate column values as needed.'
-    def __init__(self, sheet, row):
-        self.row = row
-        self.sheet = sheet
-
-    def keys(self):
-        return [c.name for c in self.sheet.columns if c.name.isidentifier()]
-
-    def __call__(self, col):
-        return eval(col.expr, getGlobals(), self)
-
-    def __getitem__(self, colname):
-        colnames = [c.name for c in self.sheet.columns]
-        if colname in colnames:
-            colidx = colnames.index(colname)
-            return self.sheet.columns[colidx].getValue(self.row)
-        else:
-            raise KeyError(colname)
-
-    def __getattr__(self, colname):
-        return self.__getitem__(colname)
-
-
-def ColumnExpr(sheet, expr):
-    'Create new `Column` from Python expression.'
-    if expr:
-        vc = Column(expr)  # or default name?
-        vc.expr = expr
-        vc.getter = lambda r,c=vc,s=sheet: LazyMapping(s, r)(c)
-        return vc
-
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
     return Column("+".join(c.name for c in cols),
                   getter=lambda r,cols=cols,ch=options.field_joiner: ch.join(filter(None, (c.getValue(r) for c in cols))))
-###
 
 
 class SheetsSheet(Sheet):
-    'Open Sheet stack.'
     def __init__(self):
         super().__init__('sheets', vd().sheets, columns=AttrColumns('name progressPct nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
 
@@ -74,13 +38,12 @@ class SheetsSheet(Sheet):
 
 
 class ColumnsSheet(Sheet):
-    'Open Columns for Sheet.'
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
 
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
+        self.command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns')
         self.command('g!', 'for c in selectedRows: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet')
-        self.command('g&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns')
         self.command('g+', 'v = chooseOne(aggregators); for c in selectedRows: c.aggregator = v', 'choose aggregator for this column')
         self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
         self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
