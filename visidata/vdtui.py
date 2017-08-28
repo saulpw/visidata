@@ -786,6 +786,9 @@ class Sheet:
 
         self.progressMade = self.progressTotal
 
+    def addRow(self, row):
+        self.rows.append(row)
+
     def command(self, keystrokes, execstr, helpstr):
         'Populate command, help-string and execution string for keystrokes.'
         if isinstance(keystrokes, str):
@@ -2004,6 +2007,12 @@ class Path:
             return gzip.open(self.resolve(), mode='rt', encoding=options.encoding, errors=options.encoding_errors)
         else:
             return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+
+    def readlines(self):
+        for i, line in enumerate(self.open_text()):
+            if i < options.skiplines:
+                continue
+            yield line[:-1]
 
     def read_text(self):
         with self.open_text() as fp:

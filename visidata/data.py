@@ -4,6 +4,7 @@ from .vdtui import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
+option('skiplines', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
 
 command('+', 'cursorCol.aggregator = chooseOne(aggregators)', 'choose aggregator for this column')
@@ -29,6 +30,16 @@ command('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'se
 command('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
 command('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')
 
+
+def readlines(linegen):
+    'Generate lines from linegen, skipping first options.skiplines lines and stripping trailing newline'
+    skiplines = options.skiplines
+    for i, line in enumerate(linegen):
+        if i < skiplines:
+            continue
+        yield line[:-1]
+
+
 def saveSheet(vs, fn):
     'Save sheet `vs` with given filename `fn`.'
     if Path(fn).exists():
@@ -41,6 +52,7 @@ def saveSheet(vs, fn):
         funcname = 'save_tsv'
     getGlobals().get(funcname)(vs, fn)
     status('saving to ' + fn)
+
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.'
