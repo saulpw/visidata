@@ -67,7 +67,7 @@ class SheetList(Sheet):
         else:
             self.columns = [Column(self.name)]
 
-        self.command('^J', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
+        self.command(ENTER, 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
 
 
 class SheetNamedTuple(Sheet):

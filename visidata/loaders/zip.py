@@ -11,7 +11,7 @@ class open_zip(Sheet):
         with zipfile.ZipFile(self.source.resolve(), 'r') as zfp:
             self.rows = zfp.infolist()
         self.columns = AttrColumns('filename file_size date_time compress_size'.split())
-        self.command('^J', 'vd.push(openZipFileEntry(cursorRow))', 'open this file')
+        self.command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'open this file')
 
     def openZipFileEntry(self, zi):
         import zipfile
