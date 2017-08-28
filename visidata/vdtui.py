@@ -1563,11 +1563,11 @@ def ColumnAttr(attrname, type=anytype, **kwargs):
             setter=lambda r,v,b=attrname: setattr(r,b,v),
             **kwargs)
 
+def setitem(r, i, v):  # function needed for use in lambda
+    r[i] = v
+
 def ColumnItem(attrname, itemkey, **kwargs):
     'Return Column object (with getitem/setitem) on the row Python object.'
-    def setitem(r, i, v):  # function needed for use in lambda
-        r[i] = v
-
     return Column(attrname,
             getter=lambda r,i=itemkey: r[i],
             setter=lambda r,v,i=itemkey,f=setitem: f(r,i,v),

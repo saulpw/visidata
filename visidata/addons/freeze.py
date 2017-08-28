@@ -1,8 +1,21 @@
 from visidata import *
 
-command("g'", 'vd.push(StaticCopy(sheet))', 'evaluate all cells and copy to new sheet (freeze)')
+command("'", 'addColumn(StaticColumn(sheet, cursorCol), cursorColIndex+1)', 'add a frozen copy of this column')
+command("g'", 'vd.push(StaticSheet(sheet))', 'push a frozen copy of this sheet')
 
-class StaticCopy(Sheet):
+
+def StaticColumn(sheet, col):
+    c = col.copy()
+    frozenData = {}
+    for r in sheet.rows:
+        frozenData[id(r)] = c.getValue(r)
+    c.getter=lambda r,d=frozenData: d[id(r)]
+    c.setter=lambda r,v,d=frozenData: setitem(d, id(r), v)
+    c.name = c.name + '_frozen'
+    return c
+
+
+class StaticSheet(Sheet):
     'A copy of the source sheet with all cells frozen.'
     def __init__(self, source):
         super().__init__(source.name + "'", source)
