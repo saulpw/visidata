@@ -8,7 +8,6 @@ from .status_history import *
 from .zscroll import *
 from .data import *
 from .clipboard import *
-from .fixed_width import *
 
 from .addons.freqtbl import *
 from .addons.pyobj import *
@@ -19,10 +18,11 @@ from .addons.editlog import *
 from .addons.freeze import *
 from .addons.regex import *
 
-from .addons.csv import *
-from .addons.zip import *
-from .addons.xlsx import *
-from .addons.hdf5 import *
-from .addons.sqlite import *
+from .loaders.csv import *
+from .loaders.zip import *
+from .loaders.xlsx import *
+from .loaders.hdf5 import *
+from .loaders.sqlite import *
+from .loaders.fixed_width import *
 
 addGlobals(globals())
