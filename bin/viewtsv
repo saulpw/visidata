@@ -13,10 +13,9 @@ class TsvSheet(vdtui.Sheet):
         self.rows = []
 
         with self.source.open_text() as fp:
-            for line in fp:
-                line = line[:-1]
+            for line in readlines(fp):
                 if line:
-                    self.rows.append(line.split('\t'))
+                    self.addRow(line.split('\t'))
 
         self.columns = [vdtui.ColumnItem(colname, i) for i, colname in enumerate(self.rows[0])]
         self.rows = self.rows[1:]

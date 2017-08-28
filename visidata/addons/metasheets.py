@@ -136,16 +136,16 @@ class SheetJoin(Sheet):
             self.progressMade += 1
 
             if self.jointype == '*':  # full join (keep all rows from all sheets)
-                self.rows.append(combinedRow)
+                self.addRow(combinedRow)
 
             elif self.jointype == '&':  # inner join  (only rows with matching key on all sheets)
                 if all(combinedRow):
-                    self.rows.append(combinedRow)
+                    self.addRow(combinedRow)
 
             elif self.jointype == '+':  # outer join (all rows from first sheet)
                 if combinedRow[1]:
-                    self.rows.append(combinedRow)
+                    self.addRow(combinedRow)
 
             elif self.jointype == '~':  # diff join (only rows without matching key on all sheets)
                 if not all(combinedRow):
-                    self.rows.append(combinedRow)
+                    self.addRow(combinedRow)

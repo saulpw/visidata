@@ -45,7 +45,7 @@ class SheetPivot(Sheet):
             if pivotrow is None:
                 pivotrow = (keys, {})
                 rowidx[keys] = pivotrow
-                self.rows.append(pivotrow)
+                self.addRow(pivotrow)
 
             for col in self.variableCols:
                 varval = col.getValue(r)

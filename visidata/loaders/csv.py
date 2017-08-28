@@ -40,7 +40,7 @@ def load_csv(vs):
             vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers))
         else:
             r = wrappedNext(rdr)
-            vs.rows.append(wrappedNext(rdr))
+            vs.addRow(wrappedNext(rdr))
             vs.columns = ArrayColumns(len(vs.rows[0]))
 
         vs.progressMade = 0
@@ -48,7 +48,7 @@ def load_csv(vs):
 
         try:
             while True:
-                vs.rows.append(wrappedNext(rdr))
+                vs.addRow(wrappedNext(rdr))
                 vs.progressMade += samplelen
 
         except StopIteration:

@@ -111,7 +111,7 @@ class SheetFreqTable(Sheet):
                 else:
                     binName = '%s-%s' % (binMinDispVal, binMaxDispVal)
 
-                self.rows.append((binName, binrows))
+                self.addRow((binName, binrows))
                 binMinIdx += i
                 binMin = binMax
 
@@ -127,7 +127,7 @@ class SheetFreqTable(Sheet):
                 if histrow is None:
                     histrow = (v, [])
                     rowidx[v] = histrow
-                    self.rows.append(histrow)
+                    self.addRow(histrow)
                 histrow[1].append(r)
 
             self.rows.sort(key=lambda r: len(r[1]), reverse=True)  # sort by num reverse

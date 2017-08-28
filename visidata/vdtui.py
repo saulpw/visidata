@@ -1723,14 +1723,14 @@ class TextSheet(Sheet):
             for L in self.genProgress(self.source.splitlines()):
                 self.addLine(L)
         elif isinstance(self.source, io.IOBase):
-            for L in self.source:
-                self.addLine(L[:-1])
+            for L in readlines(self.source):
+                self.addLine(L)
         elif isinstance(self.source, Path):
             self.progressMade = 0
             self.progressTotal = self.source.filesize
             with self.source.open_text() as fp:
-                for L in fp:
-                    self.addLine(L[:-1])
+                for L in readlines(fp):
+                    self.addLine(L)
                     self.progressMade += len(L)
         else:
             error('unknown text type ' + str(type(self.source)))
@@ -1740,9 +1740,9 @@ class TextSheet(Sheet):
         if options.textwrap:
             startingLine = len(self.rows)
             for i, L in enumerate(textwrap.wrap(text, width=self.vd.windowWidth-2)):
-                self.rows.append((startingLine+i, L))
+                self.addRow((startingLine+i, L))
         else:
-            self.rows.append((len(self.rows), text))
+            self.addRow((len(self.rows), text))
 
 class ColumnsSheet(Sheet):
     def __init__(self, srcsheet):

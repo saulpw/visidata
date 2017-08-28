@@ -26,4 +26,4 @@ class StaticSheet(Sheet):
     def reload(self):
         self.rows = []
         for r in self.genProgress(self.source.rows):
-            self.rows.append([col.getValue(r) for col in self.source.columns])
+            self.addRow([col.getValue(r) for col in self.source.columns])

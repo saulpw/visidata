@@ -22,7 +22,7 @@ class SqliteSheet(Sheet):
         r = self.conn.execute('SELECT COUNT(*) FROM %s' % tblname).fetchall()
         self.rows = []
         for r in self.genProgress(self.conn.execute("SELECT * FROM %s" % tblname), r[0][0]-1):
-            self.rows.append(r)
+            self.addRow(r)
 
     def getColumns(self, tableName):
         cols = []

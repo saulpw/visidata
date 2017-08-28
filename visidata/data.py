@@ -173,7 +173,7 @@ def reload_tsv_sync(vs):
                 break
             L = L[:-1]
             if L:
-                vs.rows.append(L.split('\t'))
+                vs.addRow(L.split('\t'))
             vs.progressMade += len(L)
 
     vs.progressMade = 0

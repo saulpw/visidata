@@ -26,5 +26,5 @@ class MeltedSheet(Sheet):
         for r in self.source.rows:
             for c in colsToMelt:
                 if c.getValue(r) is not None:
-                    self.rows.append((r, c))
+                    self.addRow((r, c))
             self.progressMade += 1

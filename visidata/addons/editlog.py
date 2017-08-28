@@ -52,7 +52,7 @@ class EditLog(Sheet):
         if EditLog.currentReplayRow is None:
             self.currentActiveRow = [ sheet.name, keystrokes, args, None,
                     sheet.commands[keystrokes][1] ]
-            self.rows.append(self.currentActiveRow)
+            self.addRow(self.currentActiveRow)
 
     def afterExecSheet(self, vs, escaped):
         'Set end_sheet for the most recent command.'
@@ -73,7 +73,7 @@ class EditLog(Sheet):
 
     def openHook(self, vs, src):
         if vs:
-            self.rows.append([ None, 'o', src, vs.name, 'open file' ])
+            self.addRow([ None, 'o', src, vs.name, 'open file' ])
             self.sheetmap[vs.name] = vs
 
     def replayOne(self, r):

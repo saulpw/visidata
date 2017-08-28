@@ -27,7 +27,7 @@ class xlsxSheet(Sheet):
         self.progressTotal = worksheet.max_row
         for row in worksheet.iter_rows():
             self.progressMade += 1
-            self.rows.append([cell.value for cell in row])
+            self.addRow([cell.value for cell in row])
 
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
@@ -55,5 +55,5 @@ class xlsSheet(Sheet):
         self.columns = ArrayColumns(worksheet.ncols)
         self.progressTotal = worksheet.nrows
         for rownum in range(worksheet.nrows):
-            self.rows.append([worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)])
+            self.addRow([worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)])
             self.progressMade += 1
