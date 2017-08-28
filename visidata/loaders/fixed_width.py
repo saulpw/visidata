@@ -1,6 +1,8 @@
 
 from visidata import *
 
+option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
+
 def open_fixed(p):
     return FixedWidthColumnsSheet(p.name, p)
 
@@ -34,7 +36,7 @@ class FixedWidthColumnsSheet(Sheet):
         self.rows = list(readlines(self.source.open_text()))
 
         # compute fixed width columns
-        for i, j in columnize(self.rows[:20]):
+        for i, j in columnize(self.rows[:options.fixed_rows]):
             c = FixedWidthColumn('', i, j)
             c.name = '_'.join(c.getValue(r) for r in self.rows[:options.headerlines])
             self.addColumn(c)
