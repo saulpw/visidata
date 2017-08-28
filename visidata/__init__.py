@@ -4,7 +4,6 @@
 from .vdtui import __version__
 from .vdtui import *
 from .async import *
-from .status_history import *
 from .zscroll import *
 from .data import *
 from .clipboard import *

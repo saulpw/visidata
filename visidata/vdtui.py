@@ -165,6 +165,7 @@ alias('KEY_END', 'gj')
 command('^L', 'vd.scr.clear()', 'redraw entire terminal screen')
 command('^G', 'status(statusLine)', 'show info for the current sheet')
 command('^V', 'status(__version__)', 'show version information')
+command('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory))', 'open sheet with all previous status messages')
 
 command('<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")', 'move up to previous value in this column')
 command('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")', 'move down to next value in this column')
