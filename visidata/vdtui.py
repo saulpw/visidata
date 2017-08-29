@@ -208,8 +208,8 @@ command('g/', 'moveRegex(regex=input("g/", type="regex"), backward=False, column
 command('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search regex backward in all visible columns')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
-command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
-command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
+command('e', 'cursorCol.setValues(sheet, [cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
+command('ge', 'cursorCol.setValues(sheet, selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
 
 command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
@@ -1536,18 +1536,18 @@ class Column:
 
         return cellval
 
-    def setValues(self, rows, value):
+    def setValues(self, sheet, rows, value):
         'Set given rows to `value`.'
         if not self.setter:
             error('column cannot be changed')
         value = self.type(value)
         for r in rows:
-            self.setter(r, value)
+            self.setter(sheet, self, r, value)
 
     @async
     def setValuesFromExpr(self, sheet, rows, expr):
         for r in sheet.genProgress(rows):
-            self.setValues([r], LazyMapping(sheet, r)(expr))
+            self.setValues(sheet, [r], LazyMapping(sheet, r)(expr))
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'
