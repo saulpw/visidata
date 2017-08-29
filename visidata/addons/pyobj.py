@@ -1,5 +1,7 @@
 from visidata import *
 
+option('pyobj_show_hidden', False, 'show methods and _ properties')
+
 command('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 # find new key
 #command('', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
@@ -61,7 +63,7 @@ class SheetList(Sheet):
         if self.columns:
             pass
         elif self.rows and isinstance(self.rows[0], dict):  # list of dict
-            self.columns = DictKeyColumns(self.rows[0], self.rows[0].keys())
+            self.columns = DictKeyColumns(self.rows[0])
         elif self.rows and isinstance(self.rows[0], tuple) and getattr(self.rows[0], '_fields'):  # list of namedtuple
             self.columns = [ColumnItem(k, i) for i, k in enumerate(self.rows[0]._fields)]
         else:
@@ -89,6 +91,7 @@ class SheetDict(Sheet):
         super().__init__(*args, **kwargs)
         self.command('e', 'edit()', 'edit this value')
         self.command(ENTER, 'dive()', 'dive into this value')
+        self.dictOfList = False
 
     def reload(self):
         self.columns = [ColumnItem('key', 0)]
@@ -122,11 +125,17 @@ def ColumnSourceAttr(name, source):
     'Use row as attribute name on given object `source`.'
     return Column(name, type=anytype,
         getter=lambda r,b=source: getattr(b,r),
-        setter=lambda r,v,b=source: setattr(b,r,v))
+        setter=lambda s,c,r,v,b=source: setattr(b,r,v))
 
 class SheetObject(Sheet):
     def reload(self):
-        self.rows = dir(self.source)
+        self.rows = []
+        for r in dir(self.source):
+            if not options.pyobj_show_hidden:
+                if r.startswith('_') or callable(getattr(self.source, r)):
+                    continue
+            self.addRow(r)
+
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
             ColumnSourceAttr('value', self.source)
@@ -134,6 +143,7 @@ class SheetObject(Sheet):
         self.nKeys = 1
         self.command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value')
         self.command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edit this value')
+        self.command('.', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle methods and hidden properties')
 
 
 def open_json(p):

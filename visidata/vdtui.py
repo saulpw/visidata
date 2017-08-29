@@ -209,8 +209,8 @@ command('g/', 'moveRegex(regex=input("g/", type="regex"), backward=False, column
 command('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search regex backward in all visible columns')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
-command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
-command('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
+command('e', 'cursorCol.setValues(sheet, [cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
+command('ge', 'cursorCol.setValues(sheet, selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
 
 command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 command('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
@@ -649,7 +649,7 @@ class VisiData:
                     sheet.cursorRowIndex = sheet.topRowIndex+y-1
                 except curses.error:
                     pass
-            elif self.keystrokes in sheet.commands:
+            elif self.keystrokes in sheet._commands:
                 sheet.exec_keystrokes(self.keystrokes)
             elif keystroke in self.allPrefixes:
                 pass
@@ -688,10 +688,10 @@ class VisiData:
 
 class LazyMap:
     'A lazily evaluated mapping'
-    def __init__(self, keys, getter, setter):
+    def __init__(self, keys, getitem, setitem):
         self._keys = keys
-        self._getter = getter
-        self._setter = setter
+        self._getitem = getitem
+        self._setitem = setitem
 
     def keys(self):
         return self._keys
@@ -699,15 +699,16 @@ class LazyMap:
     def __getitem__(self, k):
         if k not in self._keys:
             raise KeyError(k)
-        return self._getter(k)
+        return self._getitem(k)
 
     def __setitem__(self, k, v):
         self._keys.append(k)
-        self._setter(k, v)
+        self._setitem(k, v)
 
 class Sheet:
-    'Base object for add-on inheritance.'
-    def __init__(self, name, *sources, columns=None):
+    columns = []
+    commands = []
+    def __init__(self, name, *sources, **kwargs):
         self.name = name
         self.sources = list(sources)
 
@@ -725,11 +726,11 @@ class Sheet:
         self.visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # all columns in display order
-        self.columns = columns or []        # list of Column objects
+        self.columns = kwargs.get('columns') or copy.deepcopy(self.columns) # list of Column objects
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # commands specific to this sheet
-        self.commands = collections.ChainMap(collections.OrderedDict(), baseCommands)
+        self._commands = collections.ChainMap(collections.OrderedDict((v[0], v) for v in self.commands), baseCommands)
 
         self._selectedRows = {}  # id(row) -> row
 
@@ -801,7 +802,7 @@ class Sheet:
             keystrokes = [keystrokes]
 
         for ks in keystrokes:
-            self.commands[ks] = (ks, helpstr, execstr)
+            self._commands[ks] = (ks, helpstr, execstr)
 
     def moveRegex(self, *args, **kwargs):
         'Wrap `VisiData.searchRegex`, with cursor additionally moved.'
@@ -876,7 +877,7 @@ class Sheet:
         return self.name
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
-        return self.exec_command(self.commands[keystrokes], vdglobals)
+        return self.exec_command(self._commands[keystrokes], vdglobals)
 
     def exec_command(self, cmd, vdglobals=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
@@ -1391,7 +1392,7 @@ class Column:
         self.name = name      # use property setter from the get-go to strip spaces
         self.type = type      # anytype/str/int/float/date/func
         self.getter = getter  # getter(r)
-        self.setter = setter  # setter(r,v)
+        self.setter = setter  # setter(sheet,col,row,value)
         self.width = width    # == 0 if hidden, None if auto-compute next time
         self.expr = None      # Python string expression if computed column
         self.aggregator = None # function to use on the list of column values when grouping
@@ -1537,18 +1538,18 @@ class Column:
 
         return cellval
 
-    def setValues(self, rows, value):
+    def setValues(self, sheet, rows, value):
         'Set given rows to `value`.'
         if not self.setter:
             error('column cannot be changed')
         value = self.type(value)
         for r in rows:
-            self.setter(r, value)
+            self.setter(sheet, self, r, value)
 
     @async
     def setValuesFromExpr(self, sheet, rows, expr):
         for r in sheet.genProgress(rows):
-            self.setValues([r], LazyMapping(sheet, r)(expr))
+            self.setValues(sheet, [r], LazyMapping(sheet, r)(expr))
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'
@@ -1570,20 +1571,22 @@ class Column:
 def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
 
-
-
-def ColumnAttr(attrname, type=anytype, **kwargs):
+def ColumnAttr(name, attr=None, **kwargs):
     'Return Column object with `attrname` from current row Python object.'
-    return Column(attrname, type=type,
-            getter=lambda r,b=attrname: getattr(r,b),
-            setter=lambda r,v,b=attrname: setattr(r,b,v),
+    if attr is None:
+        attr = name
+    return Column(name,
+            getter=lambda r,b=attr: getattr(r,b),
+            setter=lambda s,c,r,v,b=attr: setattr(r,b,v),
             **kwargs)
 
-def ColumnItem(attrname, itemkey, **kwargs):
+def ColumnItem(name, key=None, **kwargs):
     'Return Column object (with getitem/setitem) on the row Python object.'
-    return Column(attrname,
-            getter=lambda r,i=itemkey: r[i],
-            setter=lambda r,v,i=itemkey,f=setitem: f(r,i,v),
+    if key is None:
+        key = name
+    return Column(name,
+            getter=lambda r,i=key: r[i],
+            setter=lambda s,c,r,v,i=key,f=setitem: f(r,i,v),
             **kwargs)
 
 def ArrayNamedColumns(columns):
@@ -1602,7 +1605,7 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
     'Return Column object from sub-row.'
     return Column(origcol.name, origcol.type,
             getter=lambda r,i=subrowidx,f=origcol.getter: r[i] and f(r[i]) or None,
-            setter=lambda r,v,i=subrowidx,f=origcol.setter: r[i] and f(r[i], v) or None,
+            setter=lambda s,c,r,v,i=subrowidx,f=origcol.setter: r[i] and f(s, c, r[i], v) or None,
             width=origcol.width,
             **kwargs)
 
@@ -1613,7 +1616,7 @@ def ColumnAttrNamedObject(name):
         return v.__name__ if v else None
 
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
-                        setter=lambda r,v,name=name: setattr(r, name, v))
+                        setter=lambda s,c,r,v,name=name: setattr(r, name, v))
 
 
 class LazyMapping:
@@ -1705,6 +1708,15 @@ def clipstr(s, dispw):
 
 
 ## Built-in sheets
+class TextColumn(Column):
+    'TextColumn always uses the terminal width'
+    @property
+    def width(self):
+        return vd().windowWidth
+
+    @width.setter
+    def width(self, v):
+        pass
 
 ## text viewer and dir browser
 class TextSheet(Sheet):
@@ -1713,8 +1725,8 @@ class TextSheet(Sheet):
     @async
     def reload(self):
         'Populate sheet via `reload` function.'
+        self.columns = (TextColumn(self.name, getter=lambda r: r[1]), )
         self.rows = []
-        self.columns = [Column(self.name, width=self.vd.windowWidth, getter=lambda r: r[1])]
         if isinstance(self.source, list):
             for x in self.genProgress(self.source):
                 # copy so modifications don't change 'original'; also one iteration through generator
@@ -1777,13 +1789,13 @@ class HelpSheet(Sheet):
     def reload(self):
         self.columns = [ColumnItem('keystrokes', 0),
                         ColumnItem('action', 1),
-                        Column('with_g_prefix', str, lambda r,self=self: self.source.commands.get('g'+r[0], (None,'-'))[1]),
+                        Column('with_g_prefix', str, lambda r,self=self: self.source._commands.get('g'+r[0], (None,'-'))[1]),
                         ColumnItem('execstr', 2, width=0),
                 ]
         self.nKeys = 1
 
         self.rows = []
-        for src in self.source.commands.maps:
+        for src in self.source._commands.maps:
             self.rows.extend(src.values())
 
 
@@ -2099,6 +2111,19 @@ class Path:
 
     def __str__(self):
         return self.fqpn
+
+class UrlPath:
+    def __init__(self, url):
+        from urllib.parse import urlparse
+        self.url = url
+        self.obj = urlparse(url)
+        self.name = self.obj.netloc
+
+    def __str__(self):
+        return self.url
+
+    def __getattr__(self, k):
+        return getattr(self.obj, k)
 
 
 class PathFd(Path):
