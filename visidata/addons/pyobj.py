@@ -61,7 +61,7 @@ class SheetList(Sheet):
         if self.columns:
             pass
         elif self.rows and isinstance(self.rows[0], dict):  # list of dict
-            self.columns = DictKeyColumns(self.rows[0], self.rows[0].keys())
+            self.columns = DictKeyColumns(self.rows[0])
         elif self.rows and isinstance(self.rows[0], tuple) and getattr(self.rows[0], '_fields'):  # list of namedtuple
             self.columns = [ColumnItem(k, i) for i, k in enumerate(self.rows[0]._fields)]
         else:
@@ -89,6 +89,7 @@ class SheetDict(Sheet):
         super().__init__(*args, **kwargs)
         self.command('e', 'edit()', 'edit this value')
         self.command(ENTER, 'dive()', 'dive into this value')
+        self.dictOfList = False
 
     def reload(self):
         self.columns = [ColumnItem('key', 0)]
