@@ -1,5 +1,7 @@
 from visidata import *
 
+option('pyobj_show_hidden', False, 'show methods and _ properties')
+
 command('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 # find new key
 #command('', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
@@ -127,7 +129,13 @@ def ColumnSourceAttr(name, source):
 
 class SheetObject(Sheet):
     def reload(self):
-        self.rows = dir(self.source)
+        self.rows = []
+        for r in dir(self.source):
+            if not options.pyobj_show_hidden:
+                if r.startswith('_') or callable(getattr(self.source, r)):
+                    continue
+            self.addRow(r)
+
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
             ColumnSourceAttr('value', self.source)
@@ -135,6 +143,7 @@ class SheetObject(Sheet):
         self.nKeys = 1
         self.command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value')
         self.command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edit this value')
+        self.command('.', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle methods and hidden properties')
 
 
 def open_json(p):
