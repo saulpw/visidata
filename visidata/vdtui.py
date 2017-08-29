@@ -1705,6 +1705,15 @@ def clipstr(s, dispw):
 
 
 ## Built-in sheets
+class TextColumn(Column):
+    'TextColumn always uses the terminal width'
+    @property
+    def width(self):
+        return vd().windowWidth
+
+    @width.setter
+    def width(self, v):
+        pass
 
 ## text viewer and dir browser
 class TextSheet(Sheet):
@@ -1713,8 +1722,8 @@ class TextSheet(Sheet):
     @async
     def reload(self):
         'Populate sheet via `reload` function.'
+        self.columns = (TextColumn(self.name, getter=lambda r: r[1]), )
         self.rows = []
-        self.columns = [Column(self.name, width=self.vd.windowWidth, getter=lambda r: r[1])]
         if isinstance(self.source, list):
             for x in self.genProgress(self.source):
                 # copy so modifications don't change 'original'; also one iteration through generator
