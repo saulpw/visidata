@@ -648,7 +648,7 @@ class VisiData:
                     sheet.cursorRowIndex = sheet.topRowIndex+y-1
                 except curses.error:
                     pass
-            elif self.keystrokes in sheet.commands:
+            elif self.keystrokes in sheet._commands:
                 sheet.exec_keystrokes(self.keystrokes)
             elif keystroke in self.allPrefixes:
                 pass
@@ -705,8 +705,9 @@ class LazyMap:
         self._setter(k, v)
 
 class Sheet:
-    'Base object for add-on inheritance.'
-    def __init__(self, name, *sources, columns=None):
+    columns = []
+    commands = []
+    def __init__(self, name, *sources, **kwargs):
         self.name = name
         self.sources = list(sources)
 
@@ -724,11 +725,11 @@ class Sheet:
         self.visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # all columns in display order
-        self.columns = columns or []        # list of Column objects
+        self.columns = kwargs.get('columns') or copy.deepcopy(self.columns) # list of Column objects
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # commands specific to this sheet
-        self.commands = collections.ChainMap(collections.OrderedDict(), baseCommands)
+        self._commands = collections.ChainMap(collections.OrderedDict((v[0], v) for v in self.commands), baseCommands)
 
         self._selectedRows = {}  # id(row) -> row
 
@@ -800,7 +801,7 @@ class Sheet:
             keystrokes = [keystrokes]
 
         for ks in keystrokes:
-            self.commands[ks] = (ks, helpstr, execstr)
+            self._commands[ks] = (ks, helpstr, execstr)
 
     def moveRegex(self, *args, **kwargs):
         'Wrap `VisiData.searchRegex`, with cursor additionally moved.'
@@ -875,7 +876,7 @@ class Sheet:
         return self.name
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
-        return self.exec_command(self.commands[keystrokes], vdglobals)
+        return self.exec_command(self._commands[keystrokes], vdglobals)
 
     def exec_command(self, cmd, vdglobals=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
@@ -1776,13 +1777,13 @@ class HelpSheet(Sheet):
     def reload(self):
         self.columns = [ColumnItem('keystrokes', 0),
                         ColumnItem('action', 1),
-                        Column('with_g_prefix', str, lambda r,self=self: self.source.commands.get('g'+r[0], (None,'-'))[1]),
+                        Column('with_g_prefix', str, lambda r,self=self: self.source._commands.get('g'+r[0], (None,'-'))[1]),
                         ColumnItem('execstr', 2, width=0),
                 ]
         self.nKeys = 1
 
         self.rows = []
-        for src in self.source.commands.maps:
+        for src in self.source._commands.maps:
             self.rows.extend(src.values())
 
 

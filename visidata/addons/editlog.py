@@ -51,7 +51,7 @@ class EditLog(Sheet):
         assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.currentReplayRow is None:
             self.currentActiveRow = [ sheet.name, keystrokes, args, None,
-                    sheet.commands[keystrokes][1] ]
+                    sheet._commands[keystrokes][1] ]
             self.addRow(self.currentActiveRow)
 
     def afterExecSheet(self, vs, escaped):
