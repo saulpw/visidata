@@ -13,7 +13,8 @@ class TsvSheet(vdtui.Sheet):
         self.rows = []
 
         with self.source.open_text() as fp:
-            for line in readlines(fp):
+            for line in fp:
+                line = line[:-1]
                 if line:
                     self.addRow(line.split('\t'))
 

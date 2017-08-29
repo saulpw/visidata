@@ -80,6 +80,7 @@ class configbool:
     def __str__(self):
         return str(self.val)
 
+configbool.__name__ = 'bool'
 
 def option(name, default, helpstr=''):
     if isinstance(default, bool):
@@ -103,7 +104,7 @@ option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('num_colors', 0, 'force number of colors to use')
 option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
-option('textwrap', True, 'if TextSheet breaks rows to fit in windowWidth')
+option('textwrap', True, 'wrap text to fit window width on TextSheet')
 option('force_valid_names', False, 'force column names to be valid Python identifiers')
 
 theme('disp_truncator', '…')
@@ -136,7 +137,7 @@ theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
 theme('color_status', 'bold', 'status line color')
 theme('color_edit_cell', 'normal', 'edit cell color')
 theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
-theme('unicode_ambiguous_width', 1, 'width to use for unicode chars marked ambiguous')
+theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
 
 ENTER='^J'
 ESC='^['
@@ -1359,7 +1360,7 @@ class CalcErrorStr(str):
 
 aggregators = collections.OrderedDict()
 
-option('aggr_null_filter', 'none', '"none", "empty", "false", or "" for no filtering')
+option('aggr_null_filter', 'none', 'invalid values to filter out when aggregating: (n/e/f/"")')
 def filterNull(L):
     omitch = options.aggr_null_filter[:1].lower()
     if omitch == 'n':  # nones
@@ -1680,7 +1681,7 @@ def clipstr(s, dispw):
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
     w = 0
     ret = ''
-    ambig_width = options.unicode_ambiguous_width
+    ambig_width = options.disp_ambig_width
     for c in s:
         if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
             ret += options.disp_oddspace
