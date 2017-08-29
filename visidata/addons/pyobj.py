@@ -125,7 +125,7 @@ def ColumnSourceAttr(name, source):
     'Use row as attribute name on given object `source`.'
     return Column(name, type=anytype,
         getter=lambda r,b=source: getattr(b,r),
-        setter=lambda r,v,b=source: setattr(b,r,v))
+        setter=lambda s,c,r,v,b=source: setattr(b,r,v))
 
 class SheetObject(Sheet):
     def reload(self):

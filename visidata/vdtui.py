@@ -687,10 +687,10 @@ class VisiData:
 
 class LazyMap:
     'A lazily evaluated mapping'
-    def __init__(self, keys, getter, setter):
+    def __init__(self, keys, getitem, setitem):
         self._keys = keys
-        self._getter = getter
-        self._setter = setter
+        self._getitem = getitem
+        self._setitem = setitem
 
     def keys(self):
         return self._keys
@@ -698,11 +698,11 @@ class LazyMap:
     def __getitem__(self, k):
         if k not in self._keys:
             raise KeyError(k)
-        return self._getter(k)
+        return self._getitem(k)
 
     def __setitem__(self, k, v):
         self._keys.append(k)
-        self._setter(k, v)
+        self._setitem(k, v)
 
 class Sheet:
     columns = []
@@ -1391,7 +1391,7 @@ class Column:
         self.name = name      # use property setter from the get-go to strip spaces
         self.type = type      # anytype/str/int/float/date/func
         self.getter = getter  # getter(r)
-        self.setter = setter  # setter(r,v)
+        self.setter = setter  # setter(sheet,col,row,value)
         self.width = width    # == 0 if hidden, None if auto-compute next time
         self.expr = None      # Python string expression if computed column
         self.aggregator = None # function to use on the list of column values when grouping
@@ -1570,20 +1570,22 @@ class Column:
 def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
 
-
-
-def ColumnAttr(attrname, type=anytype, **kwargs):
+def ColumnAttr(name, attr=None, **kwargs):
     'Return Column object with `attrname` from current row Python object.'
-    return Column(attrname, type=type,
-            getter=lambda r,b=attrname: getattr(r,b),
-            setter=lambda r,v,b=attrname: setattr(r,b,v),
+    if attr is None:
+        attr = name
+    return Column(name,
+            getter=lambda r,b=attr: getattr(r,b),
+            setter=lambda s,c,r,v,b=attr: setattr(r,b,v),
             **kwargs)
 
-def ColumnItem(attrname, itemkey, **kwargs):
+def ColumnItem(name, key=None, **kwargs):
     'Return Column object (with getitem/setitem) on the row Python object.'
-    return Column(attrname,
-            getter=lambda r,i=itemkey: r[i],
-            setter=lambda r,v,i=itemkey,f=setitem: f(r,i,v),
+    if key is None:
+        key = name
+    return Column(name,
+            getter=lambda r,i=key: r[i],
+            setter=lambda s,c,r,v,i=key,f=setitem: f(r,i,v),
             **kwargs)
 
 def ArrayNamedColumns(columns):
@@ -1602,7 +1604,7 @@ def SubrowColumn(origcol, subrowidx, **kwargs):
     'Return Column object from sub-row.'
     return Column(origcol.name, origcol.type,
             getter=lambda r,i=subrowidx,f=origcol.getter: r[i] and f(r[i]) or None,
-            setter=lambda r,v,i=subrowidx,f=origcol.setter: r[i] and f(r[i], v) or None,
+            setter=lambda s,c,r,v,i=subrowidx,f=origcol.setter: r[i] and f(s, c, r[i], v) or None,
             width=origcol.width,
             **kwargs)
 
@@ -1613,7 +1615,7 @@ def ColumnAttrNamedObject(name):
         return v.__name__ if v else None
 
     return Column(name, getter=lambda r,name=name: _getattrname(r, name),
-                        setter=lambda r,v,name=name: setattr(r, name, v))
+                        setter=lambda s,c,r,v,name=name: setattr(r, name, v))
 
 
 class LazyMapping:
