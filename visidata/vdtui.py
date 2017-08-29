@@ -2109,6 +2109,19 @@ class Path:
     def __str__(self):
         return self.fqpn
 
+class UrlPath:
+    def __init__(self, url):
+        from urllib.parse import urlparse
+        self.url = url
+        self.obj = urlparse(url)
+        self.name = self.obj.netloc
+
+    def __str__(self):
+        return self.url
+
+    def __getattr__(self, k):
+        return getattr(self.obj, k)
+
 
 class PathFd(Path):
     'minimal Path interface to satisfy a tsv loader'
