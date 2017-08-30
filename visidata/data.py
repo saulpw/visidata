@@ -30,6 +30,8 @@ globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)
 globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
 globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')
 
+globalCommand('g+', 'status(chooseOne(aggregators)(cursorCol.values(selectedRows or rows)))', 'aggregate selected rows in this column')
+
 
 def readlines(linegen):
     'Generate lines from linegen, skipping first options.skiplines lines and stripping trailing newline'
