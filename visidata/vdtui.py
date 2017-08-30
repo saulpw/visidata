@@ -218,6 +218,8 @@ globalCommand('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, c
 
 globalCommand('e', 'cursorCol.setValues(sheet, [cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
 globalCommand('ge', 'cursorCol.setValues(sheet, selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
+globalCommand('KEY_DC', 'cursorCol.setValues(sheet, [cursorRow], None)', 'set this cell to None')
+globalCommand('gKEY_DC', 'cursorCol.setValues(sheet, selectedRows, None)', 'set this column to None for all selected rows')
 
 globalCommand(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 globalCommand('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
@@ -261,8 +263,8 @@ alias('KEY_F(1)', 'z?')
 # The resulting object o must be orderable and convertible to a string for display and certain outputs (like csv).
 
 ## minimalist 'any' type
-def anytype(r=''):
-    return str(r)
+def anytype(r=None):
+    return r
 anytype.__name__ = ''
 
 option('float_chars', '+-0123456789.eE_', 'valid numeric characters')
