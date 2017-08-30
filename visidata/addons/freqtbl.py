@@ -31,8 +31,6 @@ class SheetFreqTable(Sheet):
 
         self.columns = [
             ColumnItem(col.name, 0, type=col.type, width=30),
-            Column('num', int, lambda r: len(r[1])),
-            Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
         ]
         self.nKeys = 1
 
@@ -42,8 +40,13 @@ class SheetFreqTable(Sheet):
                                            type=c.aggregator.type or c.type,
                                            getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
 
-        if len(self.columns) == 3:
-            self.columns.append(Column('histogram', str, lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None))
+        if len(self.columns) == 1:  # default has count and histogram
+            self.columns.extend([
+                Column('count', int, lambda r: len(r[1])),
+                Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
+                Column('histogram', str, lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
+            ])
+
 
     def selectRow(self, row):
         self.source.select(row[1])     # select all entries in the bin on the source sheet
