@@ -26,7 +26,7 @@
 # Just include this whole file in your project as-is.  If you do make
 # modifications, please keep the base vdtui version and append your own id and
 # version.
-__version__ = 'saul.pw/vdtui v0.96'
+__version__ = 'saul.pw/vdtui v0.97pre'
 __author__ = 'Saul Pwanson <vdtui@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Beta'
@@ -58,12 +58,15 @@ baseOptions = collections.OrderedDict()
 def Command(keystrokes, execstr, helpstr):
     return (keystrokes, helpstr, execstr)
 
-def globalCommand(keystrokes, execstr, helpstr):
+def _registerCommand(cmddict, keystrokes, execstr, helpstr):
     if isinstance(keystrokes, str):
         keystrokes = [keystrokes]
 
     for ks in keystrokes:
-        baseCommands[ks] = (ks, helpstr, execstr)
+        cmddict[ks] = (ks, helpstr, execstr)
+
+def globalCommand(keystrokes, execstr, helpstr):
+    _registerCommand(baseCommands, keystrokes, execstr, helpstr)
 
 def alias(new, existing):
     _, helpstr, execstr = baseCommands[existing]
@@ -710,8 +713,8 @@ class LazyMap:
         self._setitem(k, v)
 
 class Sheet:
-    columns = []
-    commands = []
+    columns = []  # list of Column
+    commands = []  # list of (keystrokes, helpstr, execstr)
     def __init__(self, name, *sources, **kwargs):
         self.name = name
         self.sources = list(sources)
@@ -734,7 +737,10 @@ class Sheet:
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # commands specific to this sheet
-        self._commands = collections.ChainMap(collections.OrderedDict((v[0], v) for v in self.commands), baseCommands)
+        sheetcmds = collections.OrderedDict()
+        for ks, helpstr, execstr in self.commands:
+            _registerCommand(sheetcmds, ks, execstr, helpstr)
+        self._commands = collections.ChainMap(sheetcmds, baseCommands)
 
         self._selectedRows = {}  # id(row) -> row
 
