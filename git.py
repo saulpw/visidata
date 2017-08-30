@@ -156,6 +156,7 @@ class GitStatus(GitSheet):
 
         self.addColorizer('row', 3, GitStatus.rowColor)
         self.addColorizer('row', 6, lambda s,c,r,v: 'red underline' if 'U' in s.git_status(r)[0] else None)
+        self.addColorizer('cell', 7, lambda s,c,r,v: 'green' if c.name == 'staged' and s.git_status(r)[0][0] == 'M' else None)
 
         self.command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging')
         self.command('m', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file')

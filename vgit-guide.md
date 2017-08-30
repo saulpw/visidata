@@ -7,7 +7,7 @@
 - `R` opens the remotes sheet
 - `T` opens the stashes sheet
 - `O` opens the git options sheet
-- `1` opens the list of git commands executed
+- `X` opens the list of git commands executed
 - `P`ushes the local refs to the currently set remote refs (`git push`)
 - `Ctrl-s` stashes all uncommited changes (`git stash`)
 - `Ctrl-p` pops the most recent stashed change and drops it (`git stash pop`)
@@ -40,7 +40,7 @@
 ## Diff Viewer for Selected Hunks Sheet
 - opens a view for the diff of a hunk
 - `y`, `a` or `2` stages a hunk to the index and move on to the next hunk
-- `r` or `1` removes this hunk from the diff
+- `r` or `1` removes this hunk from the diff (from the working tree)
 - `n` or `<ENTER>` skips this hunk without staging 
 - `d` deletes a line from a patch
 - viewer exits when all hunks have been added or skipped
