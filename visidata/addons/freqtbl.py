@@ -2,8 +2,8 @@ import math
 
 from visidata import *
 
-command('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
-command('gF', 'vd.push(SheetFreqTable(sheet, combineColumns(columns[:nKeys])))', 'open frequency table for the combined key columns')
+globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
+globalCommand('gF', 'vd.push(SheetFreqTable(sheet, combineColumns(columns[:nKeys])))', 'open frequency table for the combined key columns')
 
 theme('disp_histogram', '*')
 option('disp_histolen', 80, 'width of histogram column')
@@ -13,6 +13,16 @@ option('histogram_even_interval', False, 'if histogram bins should have even dis
 
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
+    commands = [
+        # redefine these commands only to change the helpstr
+        Command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet'),
+        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet'),
+        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet'),
+
+        Command(ENTER, 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value'),
+        Command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
+    ]
+
     def __init__(self, sheet, col):
         fqcolname = '%s_%s_freq' % (sheet.name, col.name)
         super().__init__(fqcolname, sheet)
@@ -34,14 +44,6 @@ class SheetFreqTable(Sheet):
 
         if len(self.columns) == 3:
             self.columns.append(Column('histogram', str, lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None))
-
-        # redefine these commands only to change the helpstr
-        self.command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet')
-        self.command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet')
-        self.command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet')
-
-        self.command(ENTER, 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value')
-        self.command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
 
     def selectRow(self, row):
         self.source.select(row[1])     # select all entries in the bin on the source sheet

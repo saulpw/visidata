@@ -1,8 +1,8 @@
 from visidata import *
 
-command(':', 'addRegexColumns(makeRegexSplitter, columns, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex"))', 'add columns by regex split')
-command(';', 'addRegexColumns(makeRegexMatcher, columns, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex"))', 'add columns by regex match')
-command('*', 'columns.insert(cursorColIndex+1, regexTransform(cursorCol, input("transform column by regex: ", type="regex")))', 'transform column by regex')
+globalCommand(':', 'addRegexColumns(makeRegexSplitter, columns, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex"))', 'add columns by regex split')
+globalCommand(';', 'addRegexColumns(makeRegexMatcher, columns, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex"))', 'add columns by regex match')
+globalCommand('*', 'columns.insert(cursorColIndex+1, regexTransform(cursorCol, input("transform column by regex: ", type="regex")))', 'transform column by regex')
 
 option('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 

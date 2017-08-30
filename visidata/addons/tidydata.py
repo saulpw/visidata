@@ -1,6 +1,6 @@
 from visidata import *
 
-command('M', 'vd.push(MeltedSheet(sheet))', 'push melted (unpivoted) sheet')
+globalCommand('M', 'vd.push(MeltedSheet(sheet))', 'push melted (unpivoted) sheet')
 
 option('melt_var_colname', 'Variable', 'column name to use for the melted variable name')
 option('melt_value_colname', 'Value', 'column name to use for the melted value')

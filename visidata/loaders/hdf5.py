@@ -2,10 +2,10 @@ from visidata import *
 
 class SheetH5Obj(Sheet):
     'Support sheets in HDF5 format.'
-    def __init__(self, name, hobj):
-        super().__init__(name, hobj)
-        self.command(ENTER, 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), cursorRow))', 'open this group or dataset')
-        self.command('A', 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))', 'open metadata sheet for this object')
+    commands = [
+        Command(ENTER, 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), cursorRow))', 'open this group or dataset'),
+        Command('A', 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))', 'open metadata sheet for this object')
+    ]
 
     def reload(self):
         import h5py

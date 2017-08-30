@@ -3,10 +3,12 @@ from visidata import *
 
 class open_xlsx(Sheet):
     'Load XLSX file (in Excel Open XML format).'
+    commands = [
+        Command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
+    ]
     def __init__(self, path):
         super().__init__(path.name, path)
         self.workbook = None
-        self.command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
 
     @async
     def reload(self):
@@ -31,10 +33,12 @@ class xlsxSheet(Sheet):
 
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
+    commands = [
+        Command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
+    ]
     def __init__(self, path):
         super().__init__(path.name, path)
         self.workbook = None
-        self.command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'push this sheet')
 
     @async
     def reload(self):

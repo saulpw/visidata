@@ -1,7 +1,7 @@
 from visidata import *
 
-command("'", 'addColumn(StaticColumn(sheet, cursorCol), cursorColIndex+1)', 'add a frozen copy of this column')
-command("g'", 'vd.push(StaticSheet(sheet))', 'push a frozen copy of this sheet')
+globalCommand("'", 'addColumn(StaticColumn(sheet, cursorCol), cursorColIndex+1)', 'add a frozen copy of this column')
+globalCommand("g'", 'vd.push(StaticSheet(sheet))', 'push a frozen copy of this sheet')
 
 
 def StaticColumn(sheet, col):

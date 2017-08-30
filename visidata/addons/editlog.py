@@ -1,7 +1,7 @@
 from visidata import *
 
-command('D', 'vd.push(vd.editlog)', 'push the editlog')
-#command('KEY_BACKSPACE', 'vd.editlog.undo()', 'remove last action on editlog and replay')
+globalCommand('D', 'vd.push(vd.editlog)', 'push the editlog')
+#globalCommand('KEY_BACKSPACE', 'vd.editlog.undo()', 'remove last action on editlog and replay')
 
 def open_vd(p):
     vs = EditLog(p.name, p)
@@ -10,6 +10,11 @@ def open_vd(p):
 
 class EditLog(Sheet):
     'Log of commands for current session.'
+    commands = [
+        Command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this editlog'),
+        Command('g^A', 'sheet.replay()', 'replay this editlog')
+    ]
+
     currentReplayRow = None  # must be global, to allow replay
 
     def __init__(self, name, *args):
@@ -23,9 +28,6 @@ class EditLog(Sheet):
             ColumnItem('end_sheet', 3),
             ColumnItem('comment', 4),
         ]
-
-        self.command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this editlog')
-        self.command('g^A', 'sheet.replay()', 'replay this editlog')
 
         self.sheetmap = {}
         self.currentExecRow = None

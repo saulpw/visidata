@@ -9,9 +9,9 @@ option('profile_tasks', True, 'profile async tasks')
 option('min_task_time_s', 0.10, 'only keep tasks that take longer than this number of seconds')
 option('min_memory_mb', 100, 'stop loading and async processing unless this much memory is available')
 
-command('^C', 'if sheet.currentThread: ctypeAsyncRaise(sheet.currentThread, EscapeException)', 'cancel task on the current sheet')
-command('^T', 'vd.push(vd.tasksSheet)', 'push task history sheet')
-command('^U', 'toggleProfiling(vd)', 'turn profiling on for main process')
+globalCommand('^C', 'if sheet.currentThread: ctypeAsyncRaise(sheet.currentThread, EscapeException)', 'cancel task on the current sheet')
+globalCommand('^T', 'vd.push(vd.tasksSheet)', 'push task history sheet')
+globalCommand('^U', 'toggleProfiling(vd)', 'turn profiling on for main process')
 
 vd().profile = None
 def toggleProfiling(vd):
@@ -77,17 +77,15 @@ def ctypeAsyncRaise(threadObj, exception):
 
 # each row is an augmented threading.Thread object
 class TasksSheet(Sheet):
-    def __init__(self):
-        super().__init__('task_history')
-        self.command('^C', 'ctypeAsyncRaise(cursorRow.thread, EscapeException)', 'cancel this action')
-        self.command(ENTER, 'vd.push(TextSheet(cursorRow.name+"_profile", cursorRow.profileResults))', 'push profile sheet for this action')
-
-        self.columns = [
-            ColumnAttr('name'),
-            Column('elapsed_s', type=float, getter=lambda r: elapsed_s(r)),
-            Column('status', getter=lambda r: r.status),
-        ]
-
+    commands = [
+        Command('^C', 'ctypeAsyncRaise(cursorRow.thread, EscapeException)', 'cancel this action'),
+        Command(ENTER, 'vd.push(TextSheet(cursorRow.name+"_profile", cursorRow.profileResults))', 'push profile sheet for this action'),
+    ]
+    columns = [
+        ColumnAttr('name'),
+        Column('elapsed_s', type=float, getter=lambda r: elapsed_s(r)),
+        Column('status', getter=lambda r: r.status),
+    ]
     def reload(self):
         self.rows = vd().threads
 
@@ -109,7 +107,7 @@ def checkMemoryUsage(vs):
                     ctypeAsyncRaise(t, EscapeException)
     return ret, attr
 
-vd().tasksSheet = TasksSheet()
+vd().tasksSheet = TasksSheet('task_history')
 vd().toplevelTryFunc = threadProfileCode
 vd().rightStatus = checkMemoryUsage
 

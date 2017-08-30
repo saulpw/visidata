@@ -1,15 +1,15 @@
 from visidata import *
 
-command('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
+globalCommand('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
 option('col_stats', False, 'include mean/median/etc on Column sheet')
 
 class OptionsSheet(Sheet):
     'options viewing and editing'
+    commands = [Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edit this option')]
     def __init__(self, d):
         super().__init__('options', d)
         self.columns = ArrayNamedColumns('option value default description'.split())
-        self.command([ENTER, 'e'], 'source[cursorRow[0]] = editCell(1)', 'edit this option')
         self.addColorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
         self.nKeys = 1
 
@@ -25,33 +25,35 @@ def combineColumns(cols):
 
 
 class SheetsSheet(Sheet):
-    def __init__(self):
-        super().__init__('sheets', vd().sheets, columns=AttrColumns('name progressPct nRows nCols nVisibleCols cursorValue keyColNames source'.split()))
-
+    commands = [
+        Command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet'),
+        Command('&', 'vd.replace(SheetJoin(selectedRows, jointype="&"))', 'open inner join of selected sheets'),
+        Command('+', 'vd.replace(SheetJoin(selectedRows, jointype="+"))', 'open outer join of selected sheets'),
+        Command('*', 'vd.replace(SheetJoin(selectedRows, jointype="*"))', 'open full join of selected sheets'),
+        Command('~', 'vd.replace(SheetJoin(selectedRows, jointype="~"))', 'open diff join of selected sheets'),
+    ]
+    columns = AttrColumns('name progressPct nRows nCols nVisibleCols cursorValue keyColNames source'.split())
     def reload(self):
         self.rows = vd().sheets
-        self.command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet')
-        self.command('&', 'vd.replace(SheetJoin(selectedRows, jointype="&"))', 'open inner join of selected sheets')
-        self.command('+', 'vd.replace(SheetJoin(selectedRows, jointype="+"))', 'open outer join of selected sheets')
-        self.command('*', 'vd.replace(SheetJoin(selectedRows, jointype="*"))', 'open full join of selected sheets')
-        self.command('~', 'vd.replace(SheetJoin(selectedRows, jointype="~"))', 'open diff join of selected sheets')
 
 
 class ColumnsSheet(Sheet):
+    commands = [
+        # on the Columns sheet, these affect the 'row' (column in the source sheet)
+        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns'),
+        Command('g!', 'for c in selectedRows: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet'),
+        Command('g+', 'v = chooseOne(aggregators); for c in selectedRows: c.aggregator = v', 'choose aggregator for this column'),
+        Command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet'),
+        Command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen'),
+        Command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float'),
+        Command('g#', 'for c in selectedRows: c.type = int', 'set type of all selected columns to int'),
+        Command('g@', 'for c in selectedRows: c.type = date', 'set type of all selected columns to date'),
+        Command('g$', 'for c in selectedRows: c.type = currency', 'set type of all selected columns to currency'),
+        Command('g~', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string'),
+    ]
+
     def __init__(self, srcsheet):
         super().__init__(srcsheet.name + '_columns', srcsheet)
-
-        # on the Columns sheet, these affect the 'row' (column in the source sheet)
-        self.command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns')
-        self.command('g!', 'for c in selectedRows: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet')
-        self.command('g+', 'v = chooseOne(aggregators); for c in selectedRows: c.aggregator = v', 'choose aggregator for this column')
-        self.command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet')
-        self.command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen')
-        self.command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float')
-        self.command('g#', 'for c in selectedRows: c.type = int', 'set type of all selected columns to int')
-        self.command('g@', 'for c in selectedRows: c.type = date', 'set type of all selected columns to date')
-        self.command('g$', 'for c in selectedRows: c.type = currency', 'set type of all selected columns to currency')
-        self.command('g~', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string')
 
         self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
 

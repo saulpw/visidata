@@ -7,28 +7,28 @@ option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('skiplines', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
 
-command('+', 'cursorCol.aggregator = chooseOne(aggregators)', 'choose aggregator for this column')
+globalCommand('+', 'cursorCol.aggregator = chooseOne(aggregators)', 'choose aggregator for this column')
 
 # slide rows/columns around
-command('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
-command('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
-command('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
-command('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
-command('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'move this column all the way to the left of the non-key columns')
-command('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
-command('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
-command('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
+globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
+globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
+globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
+globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
+globalCommand('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'move this column all the way to the left of the non-key columns')
+globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
+globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
+globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
 
-command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
-command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
+globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
+globalCommand('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
 
-command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
+globalCommand('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
 
-command('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
-command('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
+globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
+globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
 
-command('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
-command('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')
+globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
+globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')
 
 
 def readlines(linegen):
@@ -56,15 +56,18 @@ def saveSheet(vs, fn):
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.'
+    commands = [
+        Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
+    ]
+    columns = [
+        Column('filename', str, lambda r: r[0].name + r[0].ext),
+        Column('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
+        Column('size', int, lambda r: r[1].st_size),
+        Column('mtime', date, lambda r: r[1].st_mtime)
+    ]
 
     def reload(self):
-        'Populate sheet via `reload` function.'
         self.rows = [(p, p.stat()) for p in self.source.iterdir()]  #  if not p.name.startswith('.')]
-        self.command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
-        self.columns = [Column('filename', str, lambda r: r[0].name + r[0].ext),
-                      Column('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
-                      Column('size', int, lambda r: r[1].st_size),
-                      Column('mtime', date, lambda r: r[1].st_mtime)]
 
 
 def openSource(p, filetype=None):
