@@ -3,10 +3,7 @@ from git import GitSheet
 
 # row is (hdr, orig, final, 
 class GitBlame(GitSheet):
-    def __init__(self, gf, ref='HEAD'):
-        super().__init__('blame_'+str(gf), gf)
-
-        self.columns = [
+    columns = [
             Column('sha', width=8, getter=lambda r: r[0]['sha']),
             Column('orig_linenum', width=0, getter=lambda r: r[0]['orig_linenum']),
             Column('orig_linenum1', width=0, getter=lambda r: r[1]),
@@ -17,7 +14,10 @@ class GitBlame(GitSheet):
             Column('committer_date', width=0, type=date, getter=lambda r: int(r[0].get('committer-time', 0)) or None),
             Column('linenum', width=5, getter=lambda r: r[2]),
             Column('code', getter=lambda r: r[3]),
-        ]
+    ]
+
+    def __init__(self, gf, ref='HEAD'):
+        super().__init__('blame_'+str(gf), gf)
 
     def reload(self):
         self.rows = []

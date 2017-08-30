@@ -21,8 +21,6 @@ from git import GitSheet
 #     c) if '1' stages a grand reversion of everything local
 #     d) then '4' should bring the index back to the same exact state as after (b)
 
-command('0', 'vd.push(TextSheet("statuses", vd.statusHistory))', '')
-
 def _parseStartCount(s):
     sc = s.split(',')
     if len(sc) == 2: return sc
@@ -136,11 +134,6 @@ class GitMerge(GitSheet):
             Column('2:index', getter=lambda r: r[4]),
             Column('3:working', getter=lambda r: r[5]),
         ]
-
-        self.command('1', '', '')
-        self.command('2', '', '')
-        self.command('3', '', '')
-        self.command('4', '', '')
 
 #        self.addColorizer('col', 4, lambda s,c,r,v: 'green' if c is s.columns[2] else None)
 #        self.addColorizer('cell', 5, self.colorDiffCell)
