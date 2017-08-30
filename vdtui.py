@@ -59,12 +59,11 @@ def Command(keystrokes, execstr, helpstr):
     return (keystrokes, helpstr, execstr)
 
 def _registerCommand(cmddict, keystrokes, execstr, helpstr):
-
     if isinstance(keystrokes, str):
         keystrokes = [keystrokes]
 
     for ks in keystrokes:
-        baseCommands[ks] = (ks, helpstr, execstr)
+        cmddict[ks] = (ks, helpstr, execstr)
 
 def globalCommand(keystrokes, execstr, helpstr):
     _registerCommand(baseCommands, keystrokes, execstr, helpstr)
