@@ -287,9 +287,10 @@ class date:
         elif isinstance(s, str):
             import dateutil.parser
             self.dt = dateutil.parser.parse(s)
+        elif isinstance(s, date):
+            self.dt = s.dt
         else:
-            assert isinstance(s, datetime.datetime)
-            self.dt = s
+            assert isinstance(s, datetime.datetime), (type(s), s)
 
     def to_string(self, fmtstr=None):
         'Convert datetime object to string, in ISO 8601 format by default.'
@@ -1378,7 +1379,7 @@ def filterNull(L):
 def aggregator(name, type, func):
     def _func(values):  # wrap builtins so they can have a .type
         return func(filterNull(values))
-    _func.type=type
+    _func.type = type
     _func.__name__ = name
     aggregators[name] = _func
 
@@ -1440,10 +1441,10 @@ class Column:
 
     @aggregator.setter
     def aggregator(self, aggfunc):
-        'Set `_aggregator` to given `aggfunc`, which is either a function or a string naming a global function.'
+        'Set `_aggregator` to given `aggfunc`, which is either a function or a key in aggregators'
         if isinstance(aggfunc, str):
             if aggfunc:
-                aggfunc = globals()[aggfunc]
+                aggfunc = aggregators[aggfunc]
 
         if aggfunc:
             assert callable(aggfunc)
@@ -1765,11 +1766,11 @@ class ColumnsSheet(Sheet):
         self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
 
         self.columns = [
-            ColumnAttr('name', str),
-            ColumnAttr('width', int),
+            ColumnAttr('name', type=str),
+            ColumnAttr('width', type=int),
             ColumnAttrNamedObject('type'),
-            ColumnAttr('fmtstr', str),
-            Column('value',  anytype, lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
+            ColumnAttr('fmtstr', type=str),
+            Column('value',  type=anytype, getter=lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
         ]
 
     def reload(self):
@@ -1788,7 +1789,7 @@ class HelpSheet(Sheet):
     def reload(self):
         self.columns = [ColumnItem('keystrokes', 0),
                         ColumnItem('action', 1),
-                        Column('with_g_prefix', str, lambda r,self=self: self.source._commands.get('g'+r[0], (None,'-'))[1]),
+                        Column('with_g_prefix', type=str, getter=lambda r,self=self: self.source._commands.get('g'+r[0], (None,'-'))[1]),
                         ColumnItem('execstr', 2, width=0),
                 ]
         self.nKeys = 1

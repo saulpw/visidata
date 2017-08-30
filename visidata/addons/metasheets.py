@@ -42,7 +42,7 @@ class ColumnsSheet(Sheet):
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns'),
         Command('g!', 'for c in selectedRows: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet'),
-        Command('g+', 'v = chooseOne(aggregators); for c in selectedRows: c.aggregator = v', 'choose aggregator for this column'),
+        Command('g+', 'columns[4].setValues(sheet, selectedRows, chooseOne(aggregators.keys()))', 'choose aggregator for this column'),
         Command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet'),
         Command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen'),
         Command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float'),
@@ -58,13 +58,13 @@ class ColumnsSheet(Sheet):
         self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
 
         self.columns = [
-            ColumnAttr('name', str),
-            ColumnAttr('width', int),
+            ColumnAttr('name', type=str),
+            ColumnAttr('width', type=int),
             ColumnAttrNamedObject('type'),
-            ColumnAttr('fmtstr', str),
+            ColumnAttr('fmtstr', type=str),
             ColumnAttrNamedObject('aggregator'),
-            ColumnAttr('expr', str),
-            Column('value',  anytype, lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
+            ColumnAttr('expr', type=str),
+            Column('value',  type=anytype, getter=lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
         ]
 
     def reload(self):
@@ -75,14 +75,14 @@ class ColumnsSheet(Sheet):
             import statistics
 
             self.columns.extend([
-                Column('nulls',  int, lambda c,sheet=self.source: c.nEmpty(sheet.rows)),
-                Column('uniques',  int, lambda c,sheet=self.source: len(set(c.values(sheet.rows)))),
-                Column('mode',   anytype, lambda c,sheet=self.source: statistics.mode(c.values(sheet.rows))),
-                Column('min',    anytype, lambda c,sheet=self.source: min(c.values(sheet.rows))),
-                Column('median', anytype, lambda c,sheet=self.source: statistics.median(c.values(sheet.rows))),
-                Column('mean',   float, lambda c,sheet=self.source: statistics.mean(c.values(sheet.rows))),
-                Column('max',    anytype, lambda c,sheet=self.source: max(c.values(sheet.rows))),
-                Column('stddev', float, lambda c,sheet=self.source: statistics.stdev(c.values(sheet.rows))),
+                Column('nulls',  type=int, getter=lambda c,sheet=self.source: c.nEmpty(sheet.rows)),
+                Column('uniques',  type=int, getter=lambda c,sheet=self.source: len(set(c.values(sheet.rows)))),
+                Column('mode',   type=anytype, getter=lambda c,sheet=self.source: statistics.mode(c.values(sheet.rows))),
+                Column('min',    type=anytype, getter=lambda c,sheet=self.source: min(c.values(sheet.rows))),
+                Column('median', type=anytype, getter=lambda c,sheet=self.source: statistics.median(c.values(sheet.rows))),
+                Column('mean',   type=float, getter=lambda c,sheet=self.source: statistics.mean(c.values(sheet.rows))),
+                Column('max',    type=anytype, getter=lambda c,sheet=self.source: max(c.values(sheet.rows))),
+                Column('stddev', type=float, getter=lambda c,sheet=self.source: statistics.stdev(c.values(sheet.rows))),
             ])
 
 
