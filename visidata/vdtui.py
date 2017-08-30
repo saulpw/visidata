@@ -1366,15 +1366,23 @@ class CalcErrorStr(str):
 
 aggregators = collections.OrderedDict()
 
+def isNull(v, omitch=None):
+    if omitch is None:
+        omitch = options.aggr_null_filter[:1].lower()
+    if omitch == 'n':  # nones
+        return v is None
+    elif omitch == 'e':  # empties
+        return v is None or v == ''
+    elif omitch == 'f':  # falsies
+        return bool(v)
+    else:
+        return False
+
 option('aggr_null_filter', 'none', 'invalid values to filter out when aggregating: (n/e/f/"")')
 def filterNull(L):
     omitch = options.aggr_null_filter[:1].lower()
-    if omitch == 'n':  # nones
-        return [v for v in L if v is not None]
-    elif omitch == 'e':  # empties
-        return [v for v in L if v is not None and v is not '']
-    elif omitch == 'f':  # falsies
-        return [v for v in L if v]
+    if omitch:
+        return [v for v in L if isNull(v, omitch)]
     else:
         return L
 
