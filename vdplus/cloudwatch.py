@@ -11,14 +11,13 @@ def findValue(L, name):
 
 
 class CloudWatchMetrics(Sheet):
-    def __init__(self):
-        super().__init__('cloudwatch_metrics')
-        self.cw = boto3.resource('cloudwatch')
-        self.columns = [
-            ColumnAttr('namespace'),
-            ColumnAttr('name'),
-        ]
-        self.command(ENTER, 'push_pyobj(cursorRow.metric_name, load_metric(cursorRow))', '')
+    columns = [
+        ColumnAttr('namespace'),
+        ColumnAttr('name'),
+    ]
+    commands = [
+        Command(ENTER, 'push_pyobj(cursorRow.metric_name, load_metric(cursorRow))', '')
+    ]
 
     def load_metric(self, row):
         stats = row.get_statistics(
@@ -34,7 +33,7 @@ class CloudWatchMetrics(Sheet):
     def reload(self):
         self.rows = []
         allCols = {}
-        for m in self.cw.metrics.all():
+        for m in boto3.resource('cloudwatch').metrics.all():
             self.addRow(m)
             for i, dim in enumerate(m.dimensions):
                 name = dim['Name']
@@ -44,6 +43,6 @@ class CloudWatchMetrics(Sheet):
                     allCols[name] = c
 
 #        self.cw.alarms.all()
-g_aws_cloudwatch_metrics = CloudWatchMetrics()
+g_aws_cloudwatch_metrics = CloudWatchMetrics('cloudwatch_metrics')
 
 addGlobals(globals())

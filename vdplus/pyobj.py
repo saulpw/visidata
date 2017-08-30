@@ -1,8 +1,10 @@
 from vdtui import *
 
-command('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
+option('pyobj_show_hidden', False, 'show methods and _ properties')
+
+globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 # find new key
-command('^A', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
+#globalCommand('', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):
@@ -50,6 +52,10 @@ def DictKeyColumns(d):
 
 class SheetList(Sheet):
     'A sheet from a list of homogenous dicts or namedtuples.'
+    commands = [
+        Command(ENTER, 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
+    ]
+
     def __init__(self, name, *args, **kwargs):
         # columns is a list of strings naming attributes on the objects within the obj
         super().__init__(name, *args, **kwargs)
@@ -67,15 +73,11 @@ class SheetList(Sheet):
         else:
             self.columns = [Column(self.name)]
 
-        self.command(ENTER, 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
-
 
 class SheetNamedTuple(Sheet):
     'a single namedtuple, with key and value columns'
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.command(ENTER, 'dive()', 'dive into this value')
-        self.columns = [ColumnItem('name', 0), ColumnItem('value', 1)]
+    commands = [Command(ENTER, 'dive()', 'dive into this value')]
+    columns = [ColumnItem('name', 0), ColumnItem('value', 1)]
 
     def reload(self):
         self.rows = list(zip(self.source._fields, self.source))
@@ -85,10 +87,12 @@ class SheetNamedTuple(Sheet):
 
 
 class SheetDict(Sheet):
+    commands = [
+        Command('e', 'edit()', 'edit this value'),
+        Command(ENTER, 'dive()', 'dive into this value')
+    ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.command('e', 'edit()', 'edit this value')
-        self.command(ENTER, 'dive()', 'dive into this value')
         self.dictOfList = False
 
     def reload(self):
@@ -123,11 +127,14 @@ def ColumnSourceAttr(name, source):
     'Use row as attribute name on given object `source`.'
     return Column(name, type=anytype,
         getter=lambda r,b=source: getattr(b,r),
-        setter=lambda r,v,b=source: setattr(b,r,v))
-
-option('pyobj_show_hidden', False, 'show methods and _ properties')
+        setter=lambda s,c,r,v,b=source: setattr(b,r,v))
 
 class SheetObject(Sheet):
+    commands = [
+        Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value'),
+        Command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edit this value'),
+        Command('.', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle methods and hidden properties')
+    ]
     def reload(self):
         self.rows = []
         for r in dir(self.source):
@@ -141,9 +148,6 @@ class SheetObject(Sheet):
             ColumnSourceAttr('value', self.source)
         ]
         self.nKeys = 1
-        self.command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value')
-        self.command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edit this value')
-        self.command('.', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle methods and hidden properties')
 
 
 def open_json(p):

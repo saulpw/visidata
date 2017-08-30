@@ -8,15 +8,15 @@ import cloudwatch
 
 options.disp_none = '∅'
 
-command('0', 'vd.push(g_aws_index)', '(dial 0 for operator)')
+globalCommand('0', 'vd.push(g_aws_index)', '(dial 0 for operator)')
 
 class AWSIndex(Sheet):
-    def __init__(self):
-        super().__init__('aws')
-        self.columns = [
-            Column('sheet', getter=lambda r: r.name)
-        ]
-        self.command(ENTER, 'vd.push(cursorRow)', 'push this sheet')
+    columns = [
+        Column('sheet', getter=lambda r: r.name)
+    ]
+    commands = [
+        Command(ENTER, 'vd.push(cursorRow)', 'push this sheet')
+    ]
 
     def reload(self):
         self.rows = []
@@ -25,7 +25,7 @@ class AWSIndex(Sheet):
                 if v is not self:
                     self.addRow(v)
 
-g_aws_index = AWSIndex()
+g_aws_index = AWSIndex('aws')
 
 addGlobals(globals())
 
