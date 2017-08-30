@@ -2,8 +2,6 @@ from visidata import *
 
 globalCommand('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
-option('col_stats', False, 'include mean/median/etc on Column sheet')
-
 class OptionsSheet(Sheet):
     'options viewing and editing'
     commands = [Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edit this option')]
@@ -71,19 +69,6 @@ class ColumnsSheet(Sheet):
         self.rows = self.source.columns
         self.cursorRowIndex = self.source.cursorColIndex
 
-        if options.col_stats:
-            import statistics
-
-            self.columns.extend([
-                Column('nulls',  type=int, getter=lambda c,sheet=self.source: c.nEmpty(sheet.rows)),
-                Column('uniques',  type=int, getter=lambda c,sheet=self.source: len(set(c.values(sheet.rows)))),
-                Column('mode',   type=anytype, getter=lambda c,sheet=self.source: statistics.mode(c.values(sheet.rows))),
-                Column('min',    type=anytype, getter=lambda c,sheet=self.source: min(c.values(sheet.rows))),
-                Column('median', type=anytype, getter=lambda c,sheet=self.source: statistics.median(c.values(sheet.rows))),
-                Column('mean',   type=float, getter=lambda c,sheet=self.source: statistics.mean(c.values(sheet.rows))),
-                Column('max',    type=anytype, getter=lambda c,sheet=self.source: max(c.values(sheet.rows))),
-                Column('stddev', type=float, getter=lambda c,sheet=self.source: statistics.stdev(c.values(sheet.rows))),
-            ])
 
 
 #### slicing and dicing

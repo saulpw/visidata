@@ -9,6 +9,7 @@ from .data import *
 from .clipboard import *
 
 from .addons.freqtbl import *
+from .addons.describe import *
 from .addons.pyobj import *
 from .addons.metasheets import *
 from .addons.pivot import *
