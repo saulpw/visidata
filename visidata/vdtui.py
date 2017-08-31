@@ -2101,7 +2101,10 @@ class Path:
         return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
 
     def stat(self):
-        return os.stat(self.resolve())
+        try:
+            return os.stat(self.resolve())
+        except:
+            return None
 
     def resolve(self):
         'Resolve pathname shell variables and ~userdir'
