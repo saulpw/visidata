@@ -56,13 +56,13 @@ class ColumnsSheet(Sheet):
         self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
 
         self.columns = [
-            ColumnAttr('name', type=str),
+            ColumnAttr('name'),
             ColumnAttr('width', type=int),
-            ColumnAttrNamedObject('type'),
-            ColumnAttr('fmtstr', type=str),
-            ColumnAttrNamedObject('aggregator'),
-            ColumnAttr('expr', type=str),
-            Column('value',  type=anytype, getter=lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
+            ColumnEnum('type', globals()),
+            ColumnAttr('fmtstr'),
+            ColumnEnum('aggregator', aggregators),
+            ColumnAttr('expr'),
+            Column('value', getter=lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
         ]
 
     def reload(self):

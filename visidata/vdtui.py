@@ -109,9 +109,7 @@ option('curses_timeout', 100, 'curses timeout in ms')
 option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('num_colors', 0, 'force number of colors to use')
-option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 option('textwrap', True, 'wrap text to fit window width on TextSheet')
-option('force_valid_names', False, 'force column names to be valid Python identifiers')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
 
@@ -697,23 +695,20 @@ class VisiData:
 # end VisiData class
 
 class LazyMap:
-    'A lazily evaluated mapping'
-    def __init__(self, keys, getitem, setitem):
-        self._keys = keys
-        self._getitem = getitem
-        self._setitem = setitem
+    'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
+    def __init__(self, obj):
+        self.obj = obj
 
     def keys(self):
-        return self._keys
+        return dir(self.obj)
 
     def __getitem__(self, k):
-        if k not in self._keys:
+        if k not in dir(self.obj):
             raise KeyError(k)
-        return self._getitem(k)
+        return getattr(self.obj, k)
 
     def __setitem__(self, k, v):
-        self._keys.append(k)
-        self._setitem(k, v)
+        setattr(self.obj, k, v)
 
 class Sheet:
     columns = []  # list of Column
@@ -736,7 +731,10 @@ class Sheet:
         self.visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # all columns in display order
-        self.columns = kwargs.get('columns') or copy.deepcopy(self.columns) # list of Column objects
+        self.columns = kwargs.get('columns') or [c.copy() for c in self.columns]  # list of Column objects
+        for c in self.columns:
+            c.sheet = self
+
         self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
 
         # commands specific to this sheet
@@ -893,15 +891,10 @@ class Sheet:
 
         keystrokes, _, execstr = cmd
         self.sheet = self
-        locs = LazyMap(dir(self),
-                lambda k,s=self: getattr(s, k),
-                lambda k,v,s=self: setattr(s, k, v)
-                )
-
         self.vd.callHook('preexec', self, keystrokes)
 
         try:
-            exec(execstr, vdglobals, locs)
+            exec(execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
             self.vd.status(e.args[0])
             escaped = True
@@ -990,7 +983,7 @@ class Sheet:
     @property
     def cursorValue(self):
         'Calculated cell value at current row and column.'
-        return self.cellValue(self.cursorRowIndex, self.cursorColIndex)
+        return self.cellValue(self.cursorRowIndex, self.columns[self.cursorColIndex])
 
     @property
     def statusLine(self):
@@ -1130,16 +1123,14 @@ class Sheet:
 
     def cellValue(self, rownum, col):
         'Return cell value for given row number and Column object.'
-        if not isinstance(col, Column):
-            # assume it's the column number
-            col = self.columns[col]
         return col.getValue(self.rows[rownum])
 
     def addColumn(self, col, index=None):
         'Insert column at given index or after all columns.'
-        if index is None:
-            index = len(self.columns)
         if col:
+            if index is None:
+                index = len(self.columns)
+            col.sheet = self
             self.columns.insert(index, col)
 
     def toggleKeyColumn(self, colidx):
@@ -1305,13 +1296,8 @@ class Sheet:
 
                     _clipdraw(scr, y, x, options.disp_column_fill+cellval, attr, colwidth)
 
-                    annotation = ''
-                    if isinstance(cellval, CalcErrorStr):
-                        annotation = options.disp_getter_exc
-                        notecolor = colors[options.color_getter_exc]
-                    elif isinstance(cellval, WrongTypeStr):
-                        annotation = options.disp_format_exc
-                        notecolor = colors[options.color_format_exc]
+                    annotation = cellval.note
+                    notecolor = cellval.notecolor
 
                     if annotation:
                         _clipdraw(scr, y, x+colwidth-len(annotation), annotation, notecolor, len(annotation))
@@ -1330,9 +1316,8 @@ class Sheet:
 
 
     def editCell(self, vcolidx=None, rowidx=None):
-        '''Call `editText` on given cell after setting other parameters.
+        'Call `editText` at its place on the screen.  Returns the new value, properly typed'
 
-        Return row after editing cell.'''
         if options.readonly:
             status('readonly mode')
             return
@@ -1355,14 +1340,6 @@ class Sheet:
             r = col.type(r)  # convert input to column type
 
         return r
-
-class WrongTypeStr(str):
-    'Wrap `str` to indicate that type-conversion failed.'
-    pass
-
-class CalcErrorStr(str):
-    'Wrap `str` (perhaps with error message), indicating `getValue` failed.'
-    pass
 
 aggregators = collections.OrderedDict()
 
@@ -1402,7 +1379,9 @@ aggregator('count', int, len)
 
 class Column:
     def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, fmtstr=None, cache=False):
-        self.name = name      # use property setter from the get-go to strip spaces
+        self.sheet = None     # owning sheet, set in Sheet.addColumn
+        self._id = None       # identifier for this column, usable in expressions
+        self.name = name      # display visible name; uses setter from the get-go to fill in _id also
         self.type = type      # anytype/str/int/float/date/func
         self.getter = getter  # getter(r)
         self.setter = setter  # setter(sheet,col,row,value)
@@ -1420,15 +1399,16 @@ class Column:
 
     @property
     def name(self):
-        return self._name
+        def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
+            return re.sub('\W|^(?=\d)','_', s)
+        if not self._id:
+            self._id = clean_to_id(name) or defaultColNames[self.sheet.columns.index(self)]
+        return self._name or self._id
 
     @name.setter
     def name(self, name):
-        if options.force_valid_names:
-            name = ''.join(c for c in str(name) if unicodedata.category(c) not in ('Cc', 'Zs', 'Zl'))  # control char, space, line sep
         self._name = name
 
-#######  cut; move global-getting into columnssheet
     @property
     def type(self):
         return self._type
@@ -1436,14 +1416,12 @@ class Column:
     @type.setter
     def type(self, t):
         'Sets `_type` from t as either a typename or a callable. Revert to anytype if not callable.'
-        if isinstance(t, str):
-            t = globals()[t]
+        self._type = t or anytype
 
-        if t:
-            assert callable(t)
-            self._type = t
-        else:
-            self._type = anytype
+        if t is int:        self.fmtstr = '{:d}'
+        elif t is float:    self.fmtstr = '{:.02f}'
+        elif t is currency: self.fmtstr = '{:,.02f}'
+        else:               self.fmtstr = '{:}'
 
     @property
     def aggregator(self):
@@ -1451,17 +1429,7 @@ class Column:
 
     @aggregator.setter
     def aggregator(self, aggfunc):
-        'Set `_aggregator` to given `aggfunc`, which is either a function or a key in aggregators'
-        if isinstance(aggfunc, str):
-            if aggfunc:
-                aggfunc = aggregators[aggfunc]
-
-        if aggfunc:
-            assert callable(aggfunc)
-            self._aggregator = aggfunc
-        else:
-            self._aggregator = None
-###### end cut
+        self._aggregator = aggfunc
 
     def format(self, cellval):
         'Return displayable string of `cellval` according to our `Column.type` and `Column.fmtstr`'
@@ -1474,9 +1442,6 @@ class Column:
         val = t(cellval)
         if t is date:         return val.to_string(self.fmtstr)
         elif self.fmtstr is not None: return self.fmtstr.format(val)
-        elif t is int:        return '{:d}'.format(val)
-        elif t is float:      return '{:.02f}'.format(val)
-        elif t is currency:   return '{:,.02f}'.format(val)
         else: return str(val)
 
     @property
@@ -1486,28 +1451,29 @@ class Column:
 
     def values(self, rows):
         'Return a list of values for the given `rows` at this Column.'
-        return [self.getValue(r) for r in rows]
+        ret = []
+        for r in rows:
+            value, err = self._getValue(r)
+            if not err:
+                ret.append(value)
+        return ret
 
     def getValue(self, row):
+        v, e = self._getValue(row)
+        return v
+
+    def _getValue(self, row):
         '''Returns the properly-typed value for the given row at this column.
            Returns the type's default value if either the getter or the type conversion fails.'''
         try:
-            v = self.getter(row)
+            return self.type(self.getter(row)), None
         except EscapeException:
             raise
-        except Exception:
-            exceptionCaught(status=False)
-            return self.type()
-
-        try:
-            return self.type(v)  # convert type on-the-fly
-        except EscapeException:
-            raise
-        except Exception:
-            exceptionCaught(status=False)
-            return self.type()  # return a suitable value for this type
+        except Exception as e:  # provide type's default value for type
+            return self.type(), e
 
     def getDisplayValue(self, row, width=None):
+        'Memoize _getDisplayValue with key (id(row), width)'
         if self._cachedValues is None:
             return self._getDisplayValue(row, width)
 
@@ -1524,32 +1490,37 @@ class Column:
         return ret
 
     def _getDisplayValue(self, row, width=None):
-        'Format cell value for display and return.'
+        'Return ValueWrapperFormat cell value for display and return.'
         try:
             cellval = self.getter(row)
         except EscapeException:
             raise
-        except Exception as e:
+        except Exception as e:  # get
             exceptionCaught(status=False)
-            return CalcErrorStr(options.disp_error_val)
+            return ValueWrapper(None, error=e,
+                                display=options.disp_error_val,
+                                note=options.disp_getter_exc,
+                                notecolor=options.color_getter_exc)
 
         if cellval is None:
-            return options.disp_none
+            return ValueWrapper(cellval, display=options.disp_none)
 
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding, options.encoding_errors)
 
         try:
-            cellval = self.format(cellval)
+            dispval = self.format(cellval)
             if width and self._type in (int, float, currency):
-                cellval = cellval.rjust(width-1)
+                dispval = dispval.rjust(width-1)
+            return ValueWrapper(cellval, display=dispval)
         except EscapeException:
             raise
-        except Exception as e:
+        except Exception as e:  # type conversion or formatting failed
             exceptionCaught(status=False)
-            cellval = WrongTypeStr(str(cellval))
-
-        return cellval
+            return ValueWrapper(cellval, error=e,
+                                display=str(cellval),
+                                note=options.disp_format_exc,
+                                notecolor=options.color_format_exc)
 
     def setValues(self, sheet, rows, value):
         'Set given rows to `value`.'
@@ -1609,27 +1580,55 @@ def ArrayNamedColumns(columns):
     return [ColumnItem(colname, i) for i, colname in enumerate(columns)]
 
 def ArrayColumns(ncols):
-    '''Return list of Column objects.
-
-    Note: argument `ncols` is a count of columns,'''
+    'Return list of Columns that __getitem__ on the row'
     return [ColumnItem('', i, width=8) for i in range(ncols)]
 
-def SubrowColumn(origcol, subrowidx, **kwargs):
-    'Return Column object from sub-row.'
-    return Column(origcol.name, origcol.type,
-            getter=lambda r,i=subrowidx,f=origcol.getter: r[i] and f(r[i]) or None,
-            setter=lambda s,c,r,v,i=subrowidx,f=origcol.setter: r[i] and f(s, c, r[i], v) or None,
-            width=origcol.width,
-            **kwargs)
 
-def ColumnAttrNamedObject(name):
-    'Return an effective ColumnAttr which displays the __name__ of the object value.'
-    def _getattrname(o, k):
+class SubrowColumn(Column):
+    def __init__(self, origcol, subrowidx, **kwargs):
+        super().__init__(origcol.name, type=origcol.type, width=origcol.width, **kwargs)
+        self.origcol = origcol
+        self.subrowidx = subrowidx
+
+    def get(self, row):
+        subrow = row[self.subrowidx]
+        return subrow and self.origcol.get(subrow) or None
+
+    def set(self, row, value):
+        subrow = row[self.subrowidx]
+        return subrow and self.origcol.set(subrow, value) or None
+
+
+class ValueWrapper:
+    def __init__(self, value, display, **kwargs):
+        self.value = value
+        self.display = display
+        self.annotations = kwargs
+
+    def __str__(self):
+        return self.value.__name__
+
+    def is_error(self):
+        return False
+
+    def is_null(self):
+        return self.value is None or self.value is ''
+
+
+class ColumnEnum(Column):
+    'types and aggregators. row.<name> should be kept to the values in the mapping m, and can be set by the a string key into the mapping.'
+    def __init__(self, name, m):
+        super().__init__(self, name)
+        self.mapping = m
+
+    def get(self, row):
         v = getattr(o, k)
         return v.__name__ if v else None
 
-    return Column(name, getter=lambda r,name=name: _getattrname(r, name),
-                        setter=lambda s,c,r,v,name=name: setattr(r, name, v))
+    def set(self, row, value):
+        if isinstance(value, str):
+            value = self.mapping.get(value, value)
+        setattr(row, self.name, value)
 
 
 class LazyMapping:
@@ -1639,22 +1638,33 @@ class LazyMapping:
         self.sheet = sheet
 
     def keys(self):
-        return [c.name for c in self.sheet.columns if c.name.isidentifier()]
+        return [c._id for c in self.sheet.columns]
 
     def __call__(self, expr):
         return eval(expr, getGlobals(), self)
 
-    def __getitem__(self, colname):
-        colnames = [c.name for c in self.sheet.columns]
-        if colname in colnames:
-            colidx = colnames.index(colname)
-            return self.sheet.columns[colidx].getValue(self.row)
+    def __getitem__(self, colid):
+        colids = self.keys()
+        if colid in colids:
+            i = colids.index(colid)
+            return self.sheet.columns[i].getValue(self.row)
         else:
             raise KeyError(colname)
 
-    def __getattr__(self, colname):
-        return self.__getitem__(colname)
+    def __getattr__(self, colid):
+        return self.__getitem__(colid)
 
+
+class ColumnExpr(Column):
+    def __init__(self, expr):
+        self.expr = expr
+
+    @functools.lru_cache
+    def evalexpr(self):
+        return compile(expr, '<expr>', 'eval')
+
+    def get(self, row):
+        return LazyMapping(self.sheet, row)(self.expr)
 
 def ColumnExpr(sheet, expr):
     'Create new `Column` from Python expression.'
@@ -1776,11 +1786,11 @@ class ColumnsSheet(Sheet):
         self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
 
         self.columns = [
-            ColumnAttr('name', type=str),
+            ColumnAttr('name',)
             ColumnAttr('width', type=int),
-            ColumnAttrNamedObject('type'),
-            ColumnAttr('fmtstr', type=str),
-            Column('value',  type=anytype, getter=lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
+            ColumnEnum('type', globals()),
+            ColumnAttr('fmtstr')
+            Column('value', getter=lambda self,row: row.getDisplayValue(self.source.cursorRow)),
         ]
 
     def reload(self):
@@ -1789,7 +1799,7 @@ class ColumnsSheet(Sheet):
 
 class SheetsSheet(Sheet):
     commands = [Command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet')]
-    columns = [(ColumnAttr(name) for name in 'name nRows nCols nVisibleCols cursorValue keyColNames source'.split())]
+    columns = [ColumnAttr(name) for name in 'name nRows nCols nVisibleCols cursorValue keyColNames source'.split()]
     def reload(self):
         self.rows = vd().sheets
 
@@ -1841,11 +1851,8 @@ class OptionsSheet(Sheet):
 
 vd().optionsSheet = OptionsSheet(options)
 
-# A .. Z AA AB .. ZY ZZ
-defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)
-                             for j in itertools.product(string.ascii_uppercase,
-                                   repeat=i+1)
-                  )
+# A .. Z AA AB .. ZY ZZ  (max 702 unnamed columns)
+defaultColNames = list(string.ascii_uppercase) + list(''.join(j) for j in itertools.product(string.ascii_uppercase, repeat=2))
 
 ### Curses helpers
 
@@ -1898,7 +1905,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         'Insert `s` into string `v` at `i` (such that v[i] == s[0]).'
         return v if i < 0 else v[:i] + s + v[i:]
 
-    def clean(s):
+    def clean_printable(s):
         'Escape unprintable characters.'
         return ''.join(c if c.isprintable() else ('<%04X>' % ord(c)) for c in str(s))
 
@@ -1940,7 +1947,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
 
     while True:
         if display:
-            dispval = clean(v)
+            dispval = clean_printable(v)
         else:
             dispval = '*' * len(v)
 
