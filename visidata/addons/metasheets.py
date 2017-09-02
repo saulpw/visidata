@@ -40,7 +40,7 @@ class ColumnsSheet(Sheet):
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns'),
         Command('g!', 'for c in selectedRows: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet'),
-        Command('g+', 'columns[4].setValues(sheet, selectedRows, chooseOne(aggregators.keys()))', 'choose aggregator for this column'),
+        Command('g+', 'columns[4].setValues(selectedRows, chooseOne(aggregators.keys()))', 'choose aggregator for this column'),
         Command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet'),
         Command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen'),
         Command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float'),
