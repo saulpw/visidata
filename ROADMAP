@@ -4,13 +4,8 @@ A loose plan that is subject to change.
 
 ## v0.97
 - manpage
-- fixed-column detector
 - SheetDiff
-- `'` appends frozen column
-
-## maybe
 - vd --playerpiano
-- replace sample-data with people data
 
 ## after 1.0
 - Python expressions should be usable like regex for search, select, etc

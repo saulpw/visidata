@@ -83,4 +83,4 @@ twine upload dist/*
 git tag v#.#.#
 git push --tags
 ```
-14. Announce the release and have some ice cream
+14. Post the release notes on r/visidata and have some ice cream
