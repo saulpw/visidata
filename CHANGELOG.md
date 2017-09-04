@@ -8,6 +8,10 @@
 - `gh` moves cursor to leftmost column (instead of leftmost non-key column)
 - min_memory_mb now set to 100 by default.  If `free` reports less memory, loading (or any async task) will be automatically aborted to prevent thrashing.
 - theme options removed as CLI arguments (still available for .visidatarc or apps)
+- fixed-column detector
+- `'` appends frozen column
+- renamed toplevel command() to globalCommand(); removed Sheet.command(); sheet commands now specified in Sheet.commands list of Command() objects at class level
+- setter API now (sheet,col,row,value)
 
 ## 0.96 (2017-08-21)
 - data can be piped through stdin

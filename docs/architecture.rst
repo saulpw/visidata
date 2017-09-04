@@ -20,6 +20,14 @@ closer to an RDBMS.
 Constraining the data to fit within this architecture simplifies the
 implementation and allows for some radical optimizations to data workflow.
 
+The process of designing a sheet is:
+
+1. Instantiate the sheet from a toplevel command (or other sheet);
+2. Collect the rows from the sources in reload();
+3. Enumerate the available columns;
+4. Create commands to interact with the rows, columns, and cells.
+5. Try the resulting workflow and iterate until it feels like magic.
+
 ----
 
 One project, two licenses

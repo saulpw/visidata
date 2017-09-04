@@ -102,8 +102,6 @@ option('readonly', False, 'disable saving')
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
-option('field_joiner', ' ', 'character used to join string fields')
-option('sheetname_joiner', '~', 'string joining multiple sheet names')
 option('curses_timeout', 100, 'curses timeout in ms')
 
 option('default_width', 20, 'default column width')
@@ -239,7 +237,7 @@ globalCommand(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getVal
 globalCommand('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
 globalCommand('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows)', 'push duplicate sheet with only selected rows')
-globalCommand('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
+globalCommand('g"', 'vd.push(sheet.copy()); status("pushed duplicate sheet")', 'push duplicate sheet')
 
 globalCommand('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
@@ -321,8 +319,8 @@ typemap = {
 }
 
 def joinSheetnames(*sheetnames):
-    'Concatenate sheet names using `options.sheetname_joiner`.'
-    return options.sheetname_joiner.join(str(x) for x in sheetnames)
+    'Concatenate sheet names in a standard way'
+    return '_'.join(str(x) for x in sheetnames)
 
 def error(s):
     'Return custom exception as function, for use with `lambda` and `eval`.'
