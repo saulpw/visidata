@@ -25,7 +25,7 @@ $ <command> | vd [<options>]
 
 Unknown filetypes are by default viewed with a text browser.  Use `-f <filetype>` to force a particular filetype.  VisiData supports tsv, csv, xlsx, hdf5, sqlite, ...
 
-Here is the [options list]().
+Here is the [options list](https://visidata.org/man/vd#options).
 
 VisiData supports 256-color terminals.  Use [`vdcolor`](github.com/saulpw/visidata/stable/bin/vdcolor) to browse the available colors.
 

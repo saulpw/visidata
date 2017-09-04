@@ -1,0 +1,78 @@
+.Dd August 27, 2017
+.Dt vd 1 URM
+.Os Linux/MacOS
+.
+.
+.Sh NAME
+.
+.Nm VisiData
+.Nd a tui for exploring and arranging data
+.
+.
+.Sh SYNOPSIS
+.
+.Pp
+.Sy vd
+.Op <options>
+.Op Sy -f No filetype
+.Op <input>
+.
+.Pp
+<command> | 
+.Sy vd
+.Op <options>
+.
+.Pp
+.Sy vd
+.Op <options> 
+.Op Fl -play No <script.vd>
+.Op Fl -<format-field>=<value> 
+.
+.
+.Sh DESCRIPTION
+.
+.Nm VisiData
+is a console spreadsheet tool, built on the
+.Sy vdtui No platform, which enables radical optimizations to the cleaning, structuring and surveying of data. Supported file formats are tsv, csv, xlsx, hdf5, sqlite, ...
+.Pp
+Documentation for apps built on the 
+.Sy vdtui No framework can be found at
+.Xr vdtui 2 Ns . 
+.
+.Bl -tag -width XXXXXXXXXXXXXX 
+.
+.It Fl --play 
+Replays a previously saved .vd script, which may be parameterized with {format-field}s. <script.vd> should be `-` if piped through stdin.
+.It Fl "f  --filetype"
+specify file type
+.
+.Sh OPTIONS
+.
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.
+.so vd-cli.inc
+.
+.El
+.
+.Sh KEYSTROKES
+
+.so vd-keystrokes.inc
+.
+.Sh OPTIONS MENU
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.so vd-menu.inc
+.El
+.
+.Sh SEE ALSO
+.
+.Xr vdtui 1
+.Pp
+vdtutor
+.Pp
+.Pa /usr/share/doc/ascii-commands.txt
+.
+.Sh AUTHOR
+.
+.Nm VisiData
+was created by 
+.An Saul Pwanson Aq Mt visidata@saul.pw
