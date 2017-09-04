@@ -239,7 +239,7 @@ globalCommand(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getVal
 globalCommand('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
 globalCommand('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows)', 'push duplicate sheet with only selected rows')
-globalCommand('g"', 'vd.push(sheet.copy())', 'push duplicate sheet')
+globalCommand('g"', 'vd.push(sheet.copy()); status("pushed duplicate sheet")', 'push duplicate sheet')
 
 globalCommand('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 globalCommand('g=', 'cursorCol.setValuesFromExpr(sheet, selectedRows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
