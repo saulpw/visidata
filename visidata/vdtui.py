@@ -102,14 +102,11 @@ option('readonly', False, 'disable saving')
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
-option('field_joiner', ' ', 'character used to join string fields')
-option('sheetname_joiner', '~', 'string joining multiple sheet names')
 option('curses_timeout', 100, 'curses timeout in ms')
 
 option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('num_colors', 0, 'force number of colors to use')
-option('maxlen_col_hdr', 2, 'maximum length of column-header strings')
 option('textwrap', True, 'wrap text to fit window width on TextSheet')
 option('force_valid_names', False, 'force column names to be valid Python identifiers')
 
@@ -321,8 +318,8 @@ typemap = {
 }
 
 def joinSheetnames(*sheetnames):
-    'Concatenate sheet names using `options.sheetname_joiner`.'
-    return options.sheetname_joiner.join(str(x) for x in sheetnames)
+    'Concatenate sheet names in a standard way'
+    return '_'.join(str(x) for x in sheetnames)
 
 def error(s):
     'Return custom exception as function, for use with `lambda` and `eval`.'
@@ -1842,7 +1839,7 @@ class OptionsSheet(Sheet):
 vd().optionsSheet = OptionsSheet(options)
 
 # A .. Z AA AB .. ZY ZZ
-defaultColNames = list(''.join(j) for i in range(options.maxlen_col_hdr)
+defaultColNames = list(''.join(j) for i in range(2)
                              for j in itertools.product(string.ascii_uppercase,
                                    repeat=i+1)
                   )
