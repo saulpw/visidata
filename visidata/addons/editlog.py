@@ -11,8 +11,8 @@ def open_vd(p):
 class EditLog(Sheet):
     'Log of commands for current session.'
     commands = [
-        Command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this editlog'),
-        Command('g^A', 'sheet.replay()', 'replay this editlog')
+        Command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this row of the commandlog'),
+        Command('g^A', 'sheet.replay()', 'replay this entire commandlog')
     ]
 
     currentReplayRow = None  # must be global, to allow replay
@@ -52,8 +52,7 @@ class EditLog(Sheet):
         'Log keystrokes and args unless replaying.'
         assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.currentReplayRow is None:
-            self.currentActiveRow = [ sheet.name, keystrokes, args, None,
-                    sheet._commands[keystrokes][1] ]
+            self.currentActiveRow = [ sheet.name, keystrokes, args, '', sheet._commands[keystrokes][1] ]
             self.addRow(self.currentActiveRow)
 
     def afterExecSheet(self, vs, escaped):
@@ -75,7 +74,7 @@ class EditLog(Sheet):
 
     def openHook(self, vs, src):
         if vs:
-            self.addRow([ None, 'o', src, vs.name, 'open file' ])
+            self.addRow([ '', 'o', src, vs.name, 'open file' ])
             self.sheetmap[vs.name] = vs
 
     def replayOne(self, r):
@@ -86,7 +85,10 @@ class EditLog(Sheet):
         if beforeSheet:
             vs = self.sheetmap.get(beforeSheet)
             if not vs:
-                vs = [x for x in vd().sheets if x.name == beforeSheet][0]
+                matchingSheets = [x for x in vd().sheets if x.name == beforeSheet]
+                if not matchingSheets:
+                    error('no sheets named %s' % beforeSheet)
+                vs = matchingSheets[0]
         else:
             vs = self
 
