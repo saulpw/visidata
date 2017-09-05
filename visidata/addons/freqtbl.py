@@ -35,16 +35,16 @@ class SheetFreqTable(Sheet):
         self.nKeys = 1
 
         for c in self.source.visibleCols:
-            if c.aggregator:
+            if hasattr(c, 'aggregator'):
                 self.columns.append(Column(c.aggregator.__name__+'_'+c.name,
                                            type=c.aggregator.type or c.type,
                                            getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
 
         if len(self.columns) == 1:  # default has count and histogram
             self.columns.extend([
-                Column('count', int, lambda r: len(r[1])),
-                Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
-                Column('histogram', str, lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
+                Column('count', type=int, getter=lambda r: len(r[1])),
+                Column('percent', type=float, getter=lambda r: len(r[1])*100/self.source.nRows),
+                Column('histogram', type=str, getter=lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
             ])
 
 

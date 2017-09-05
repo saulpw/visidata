@@ -4,7 +4,7 @@ option('pyobj_show_hidden', False, 'show methods and _ properties')
 
 globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 # find new key
-#globalCommand('', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
+globalCommand('^A', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):

@@ -6,8 +6,17 @@ option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
 def open_fixed(p):
     return FixedWidthColumnsSheet(p.name, p)
 
-def FixedWidthColumn(name, i, j, **kwargs):
-    return Column(name, getter=lambda r,i=i,j=j: r[i:j], **kwargs)
+class FixedWidthColumn(Column):
+    def __init__(self, name, i, j, **kwargs):
+        super().__init__(name, **kwargs)
+        self.i, self.j = i, j
+        status(i, j)
+
+    def _getValue(self, row):
+        return row[0][self.i:self.j]
+
+    def setValue(self, row, value):
+        row[0] = row[:self.i] + '%*s' % (self.j-self.i, value) + row[self.j:]
 
 def columnize(rows):
     'Generate (i,j) indexes for fixed-width columns found in rows'
@@ -33,10 +42,10 @@ def columnize(rows):
 class FixedWidthColumnsSheet(Sheet):
     def reload(self):
         self.columns = []
-        self.rows = list(readlines(self.source.open_text()))
+        self.rows = list([x] for x in readlines(self.source.open_text()))
 
         # compute fixed width columns
-        for i, j in columnize(self.rows[:options.fixed_rows]):
+        for i, j in columnize(list(r[0] for r in self.rows[:options.fixed_rows])):
             c = FixedWidthColumn('', i, j)
             c.name = '_'.join(c.getValue(r) for r in self.rows[:options.headerlines])
             self.addColumn(c)

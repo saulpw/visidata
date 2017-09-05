@@ -110,6 +110,7 @@ option('num_colors', 0, 'force number of colors to use')
 option('textwrap', True, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
+option('aggr_null_filter', 'none', 'invalid values to filter out when aggregating: (n/e/f/"")')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -1347,29 +1348,10 @@ class Sheet:
 
 aggregators = collections.OrderedDict()
 
-def isNull(v, omitch=None):
-    if omitch is None:
-        omitch = options.aggr_null_filter[:1].lower()
-    if omitch == 'n':  # nones
-        return v is None
-    elif omitch == 'e':  # empties
-        return v is None or v == ''
-    elif omitch == 'f':  # falsies
-        return bool(v)
-    else:
-        return False
-
-option('aggr_null_filter', 'none', 'invalid values to filter out when aggregating: (n/e/f/"")')
-def filterNull(L):
-    omitch = options.aggr_null_filter[:1].lower()
-    if omitch:
-        return [v for v in L if isNull(v, omitch)]
-    else:
-        return L
 
 def aggregator(name, type, func):
     def _func(values):  # wrap builtins so they can have a .type
-        return func(filterNull(values))
+        return func(values)
     _func.type = type
     _func.__name__ = name
     aggregators[name] = _func
@@ -1386,11 +1368,11 @@ class Column:
         self.sheet = None     # owning sheet, set in Sheet.addColumn
         self._id = None       # identifier for this column, usable in expressions
         self.name = name      # display visible name; uses setter from the get-go to fill in _id also
+        self.fmtstr = ''      # by default, use str().  .type also sets to default based on type
         self.type = type      # anytype/str/int/float/date/func
         self.getter = getter  # getter(r)
         self.setter = setter  # setter(sheet,col,row,value)
         self.width = width    # == 0 if hidden, None if auto-compute next time
-        self.fmtstr = ''    # by default, use str()
 
         self._cachedValues = collections.OrderedDict() if cache else None
         for k, v in kwargs.items():
@@ -1412,7 +1394,7 @@ class Column:
 
     @name.setter
     def name(self, name):
-        self._name = name
+        self._name = name.strip()
 
     @property
     def type(self):
@@ -1446,11 +1428,19 @@ class Column:
         return self.width == 0
 
     def values(self, rows):
-        'Return a list of values for the given `rows` at this Column, excluding errors.'
+        'Return a list of values for the given `rows` at this Column, excluding errors and nulls.'
+        f = {
+                'n': lambda v: v is None,
+                'e': lambda v: v is None or v == '',
+                'f': lambda v: not bool(v)
+            }.get(options.aggr_null_filter[:1].lower(), lambda v: False)
+
         ret = []
         for r in rows:
             try:
-                ret.append(self._getValue(r))
+                v = self.type(self._getValue(r))
+                if not f(v):
+                    ret.append(v)
             except:
                 pass
         return ret
@@ -1520,7 +1510,7 @@ class Column:
                                 notecolor=options.color_format_exc)
 
     def getDisplayValue(self, row):
-        return self.getDisplayValue(row).display
+        return self.getDisplay(row).display
 
     def setValue(self, row, value):
         if not self.setter:
@@ -1620,7 +1610,7 @@ class ColumnEnum(Column):
         super().__init__(name)
         self.mapping = m
 
-    def get(self, row):
+    def _getValue(self, row):
         v = getattr(row, self.name, None)
         return v.__name__ if v else None
 
@@ -1639,38 +1629,25 @@ class LazyMapping:
     def keys(self):
         return [c._id for c in self.sheet.columns]
 
-    def __call__(self, expr):
-        return eval(expr, getGlobals(), self)
-
     def __getitem__(self, colid):
         colids = self.keys()
         if colid in colids:
             i = colids.index(colid)
             return self.sheet.columns[i].getValue(self.row)
         else:
-            raise KeyError(colname)
+            raise KeyError(colid)
 
-    def __getattr__(self, colid):
-        return self.__getitem__(colid)
+#    def __getattr__(self, colid):
+#        return self.__getitem__(colid)
 
 
 class ColumnExpr(Column):
     def __init__(self, expr):
-        self.expr = expr
+        super().__init__(expr)
+        self.compiledExpr = compile(expr, '<expr>', 'eval')
 
-    @functools.lru_cache()
-    def evalexpr(self):
-        return compile(expr, '<expr>', 'eval')
-
-    def get(self, row):
-        return LazyMapping(self.sheet, row)(self.expr)
-
-def ColumnExpr(sheet, expr):
-    'Create new `Column` from Python expression.'
-    if expr:
-        vc = Column(expr, expr=expr)  # or default name?
-        vc.getter = lambda r,c=vc,s=sheet: LazyMapping(s, r)(c.expr)
-        return vc
+    def _getValue(self, row):
+        return eval(self.compiledExpr, getGlobals(), LazyMapping(self.sheet, row))
 
 ###
 
