@@ -11,7 +11,7 @@ clipboard.clear()
 
 globalCommand('y', 'clipboard.append((sheet, cursorRowIndex, cursorRow))', 'yank (copy) this row to clipboard')
 globalCommand('d', 'clipboard.append((sheet, cursorRowIndex, rows.pop(cursorRowIndex)))', 'delete (cut) this row and move to clipboard')
-globalCommand('p', 'rows.insert(cursorRowIndex+1, sys.modules["copy"].copy(clipboard[-1][2])); cursorDown()', 'paste last clipboard row after cursor on this sheet')
+globalCommand('p', 'rows.insert(cursorRowIndex+1, deepcopy(clipboard[-1][2])); cursorDown()', 'paste last clipboard row after cursor on this sheet')
 
 globalCommand('gd', 'clipboard.extend((sheet, i, r) for i, r in enumerate(rows) if sheet.isSelected(r)); deleteSelected()', 'delete (cut) all selected rows and move to clipboard')
 globalCommand('gy', 'clipboard.extend((sheet, i, r) for i, r in enumerate(rows) if sheet.isSelected(r))', 'yank (copy) all selected rows to clipboard')
@@ -21,6 +21,7 @@ globalCommand('B', 'vd.push(ClipboardSheet("clipboard", clipboard))', 'push clip
 
 #globalCommand('', 'rows.insert(cursorRowIndex, clipboard.pop())', 'pop last clipboard row and paste after cursor')
 
+# ClipboardSheet row format: (source_sheet, source_row_idx, source_row)
 class ClipboardSheet(Sheet):
     columns = [
         Column('source', getter=lambda r: r[0].name),

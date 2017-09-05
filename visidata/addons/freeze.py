@@ -1,11 +1,12 @@
 from visidata import *
+from copy import deepcopy
 
 globalCommand("'", 'addColumn(StaticColumn(sheet, cursorCol), cursorColIndex+1)', 'add a frozen copy of this column')
 globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "_self.name)', 'push a frozen copy of this sheet')
 
 
 def StaticColumn(sheet, col):
-    c = col.copy()
+    c = deepcopy(col)
     frozenData = {}
     for r in sheet.rows:
         frozenData[id(r)] = c.getValue(r)

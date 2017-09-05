@@ -22,7 +22,7 @@ globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this c
 globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
 globalCommand('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
 
-globalCommand('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
+globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'push duplicate sheet with a random sample of <N> rows')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
 globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')

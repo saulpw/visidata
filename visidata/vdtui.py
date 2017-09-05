@@ -36,7 +36,7 @@ import sys
 import os
 import os.path
 import collections
-import copy
+from copy import copy, deepcopy
 import curses
 import datetime
 import functools
@@ -237,8 +237,8 @@ globalCommand('g\\', 'unselectByIdx(searchRegex(regex=input("g\\\\", type="regex
 globalCommand(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching by this column')
 globalCommand('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
-globalCommand('"', 'vd.push(sheet.copy("_selected")).rows = list(sheet.selectedRows)', 'push duplicate sheet with only selected rows')
-globalCommand('g"', 'vd.push(sheet.copy()); status("pushed duplicate sheet")', 'push duplicate sheet')
+globalCommand('"', 'vs = vd.push(copy(sheet)); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows)', 'push duplicate sheet with refs to only selected rows')
+globalCommand('g"', 'vs = vd.push(deepcopy(sheet)); vs.name += "_selectedcopy"; vs.rows = deepcopy(selectedRows or rows); status("pushed new sheet with copy of all rows")', 'push duplicate sheet with copy of all rows')
 
 globalCommand('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
@@ -736,7 +736,7 @@ class Sheet:
         self.visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # all columns in display order
-        self.columns = kwargs.get('columns') or [c.copy() for c in self.columns]  # list of Column objects
+        self.columns = kwargs.get('columns') or [copy(c) for c in self.columns]  # list of Column objects
         for c in self.columns:
             c.sheet = self
 
@@ -839,23 +839,34 @@ class Sheet:
         else:
             status('no reloader')
 
-    def copy(self, suffix="'"):
-        '''Return copy of this sheet, with `suffix` appended to `name`, and a deepcopy of `columns`,
-         so their display attributes (width, etc) may be adjusted independently.'''
-        c = copy.copy(self)
-        c.name += suffix
-        c.topRowIndex = c.cursorRowIndex = 0
-        c.columns = copy.deepcopy(self.columns)
-        c._selectedRows = self._selectedRows.copy()
-        c.progressMade = c.progressTotal = 0
-        c.currentThread = None
-        c.colorizers = self.colorizers.copy()
-        return c
+    def __copy__(self):
+        'copy sheet design (no rows).  deepcopy columns so their attributes (width, type, name) may be adjusted independently.'
+        cls = self.__class__
+        ret = cls.__new__(cls)
+        ret.__dict__.update(self.__dict__)
+        ret.sources = copy(self.sources)  # same sources in a fresh list
+        ret.rows = []                     # a fresh list without incurring any overhead
+#        ret.rows = copy(self.rows)       # same row objects in a fresh list
+        ret.columns = deepcopy(self.columns) # deepcopy columns even for shallow copy of sheet
+        for c in ret.columns:
+            c.sheet = ret
+        ret._selectedRows = {}
+        ret.topRowIndex = ret.cursorRowIndex = 0
+        ret.progressMade = ret.progressTotal = 0
+        ret.currentThread = None
+#        ret.colorizers = copy(self.colorizers)
+        return ret
+
+    def __deepcopy__(self, memo):
+        'same as Sheet.__copy__'
+        ret = self.__copy__()
+        memo[id(self)] = ret
+        return ret
 
     @async
     def deleteSelected(self):
         'Delete all selected rows.'
-        oldrows = copy.copy(self.rows)
+        oldrows = copy(self.rows)
         oldidx = self.cursorRowIndex
         ndeleted = 0
 
@@ -1378,11 +1389,16 @@ class Column:
         for k, v in kwargs.items():
             setattr(self, k, v)  # instead of __dict__.update(kwargs) to invoke property.setters
 
-    def copy(self):
-        r = copy.copy(self)
-        if r._cachedValues:
-            r._cachedValues.clear()
-        return r
+    def __copy__(self):
+        cls = self.__class__
+        ret = cls.__new__(cls)
+        ret.__dict__.update(self.__dict__)
+        if ret._cachedValues:
+            ret._cachedValues = collections.OrderedDict()  # a fresh cache
+        return ret
+
+    def __deepcopy__(self, memo):
+        return self.__copy__()  # no separate deepcopy
 
     @property
     def name(self):
@@ -1525,8 +1541,9 @@ class Column:
 
     @async
     def setValuesFromExpr(self, rows, expr):
-        for r in sheet.genProgress(rows):
-            self.setValue(r, LazyMapping(self.sheet, r)(expr))
+        compiledExpr = compile(expr, '<expr>', 'eval')
+        for row in self.sheet.genProgress(rows):
+            self.setValue(row, eval(compiledExpr, getGlobals(), LazyMapping(self.sheet, row)))
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'

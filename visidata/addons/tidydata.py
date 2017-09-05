@@ -18,7 +18,7 @@ class MeltedSheet(Sheet):
         self.columns.extend([Column(options.melt_var_colname, getter=lambda r: r[1].name),
                              Column(options.melt_value_colname, getter=lambda r: r[1].getValue(r[0]))])
 
-        colsToMelt = [c.copy() for c in sheet.nonKeyVisibleCols]
+        colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]
 
         self.rows = []
         self.progressMade = 0

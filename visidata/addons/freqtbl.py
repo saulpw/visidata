@@ -11,6 +11,7 @@ option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 
+# rowdef: (bin_value, source_rows)
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     commands = [
@@ -19,7 +20,7 @@ class SheetFreqTable(Sheet):
         Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet'),
         Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet'),
 
-        Command(ENTER, 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value'),
+        Command(ENTER, 'vs = vd.push(copy(source)); vs.name += "_"+cursorRow[0]; vs.rows = copy(cursorRow[1]) ', 'push new sheet with only source rows for this value'),
         Command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 
