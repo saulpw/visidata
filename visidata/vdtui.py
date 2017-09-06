@@ -800,7 +800,6 @@ class Sheet:
         return options.disp_status_fmt.format(sheet=self)
 
     def genProgress(self, L, total=None):
-        'Create generator (for for-loops), with `progressTotal` property.'
         self.progressTotal = total or len(L)
         self.progressMade = 0
         for i in L:
@@ -894,6 +893,9 @@ class Sheet:
 
     def __repr__(self):
         return self.name
+
+    def evalexpr(self, expr, row):
+        return eval(expr, getGlobals(), LazyMapping(self, row))
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
         return self.exec_command(self._commands[keystrokes], vdglobals)
@@ -1543,7 +1545,7 @@ class Column:
     def setValuesFromExpr(self, rows, expr):
         compiledExpr = compile(expr, '<expr>', 'eval')
         for row in self.sheet.genProgress(rows):
-            self.setValue(row, eval(compiledExpr, getGlobals(), LazyMapping(self.sheet, row)))
+            self.setValue(row, self.sheet.evalexpr(compiledExpr, row))
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'
@@ -1664,7 +1666,7 @@ class ColumnExpr(Column):
         self.compiledExpr = compile(expr, '<expr>', 'eval')
 
     def _getValue(self, row):
-        return eval(self.compiledExpr, getGlobals(), LazyMapping(self.sheet, row))
+        return self.sheet.evalexpr(self.compiledExpr, row)
 
 ###
 

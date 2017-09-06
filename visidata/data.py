@@ -30,7 +30,8 @@ globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)
 globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
 globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')
 
-globalCommand('g+', 'status(chooseOne(aggregators)(cursorCol.values(selectedRows or rows)))', 'aggregate selected rows in this column')
+globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol.values(selectedRows or rows)))', 'aggregate selected rows in this column')
+globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'show evaluated expression over current row')
 
 
 def readlines(linegen):
