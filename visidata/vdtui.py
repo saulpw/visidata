@@ -237,10 +237,10 @@ globalCommand('g\\', 'unselectByIdx(searchRegex(regex=input("g\\\\", type="regex
 globalCommand(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching by this column')
 globalCommand('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
-globalCommand('"', 'vs = vd.push(copy(sheet)); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows)', 'push duplicate sheet with refs to only selected rows')
-globalCommand('g"', 'vs = vd.push(deepcopy(sheet)); vs.name += "_selectedcopy"; vs.rows = deepcopy(selectedRows or rows); status("pushed new sheet with copy of all rows")', 'push duplicate sheet with copy of all rows')
+globalCommand('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)', 'push duplicate sheet with refs to selected or all rows')
+globalCommand('g"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows = deepcopy(selectedRows or rows); vd.push(vs); status("pushed sheet with deepcopy of all rows")', 'push duplicate sheet with copies of selected or all rows')
 
-globalCommand('=', 'addColumn(ColumnExpr(sheet, input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
+globalCommand('=', 'addColumn(ColumnExpr(input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
 
 globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
