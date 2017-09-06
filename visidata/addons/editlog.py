@@ -1,4 +1,7 @@
 from visidata import *
+import time
+
+option('piano', 0.0, '--play piano delay in seconds')
 
 globalCommand('D', 'vd.push(vd.editlog)', 'push the editlog')
 #globalCommand('KEY_BACKSPACE', 'vd.editlog.undo()', 'remove last action on editlog and replay')
@@ -77,7 +80,7 @@ class EditLog(Sheet):
             self.addRow([ '', 'o', src, vs.name, 'open file' ])
             self.sheetmap[vs.name] = vs
 
-    def replayOne(self, r):
+    def replayOne(self, r, expectedThreads=0):
         'Replay the command in one given row.'
         beforeSheet, keystrokes, args, afterSheet = r[:4]
 
@@ -92,23 +95,33 @@ class EditLog(Sheet):
         else:
             vs = self
 
+        vd().keystrokes = keystrokes
         escaped = vs.exec_keystrokes(keystrokes)
 
-        sync()
+        sync(expectedThreads)
 
         if afterSheet not in self.sheetmap:
             self.sheetmap[afterSheet] = vd().sheets[0]
 
         EditLog.currentReplayRow = None
 
-    def replay(self):
+    def replay_sync(self, live=False):
         'Replay all commands in log.'
         self.sheetmap = {}
 
         for r in self.rows:
-            self.replayOne(r)
+#            if live:
+            time.sleep(options.piano)
+            vd().statuses = []
+            # sync should expect this thread if playing live
+            self.replayOne(r, 1 if live else 0)
 
         status('replayed entire %s' % self.name)
+
+    @async
+    def replay(self):
+        'Inject commands into live execution with interface'
+        self.replay_sync(live=True)
 
     def getLastArgs(self):
         'Get last command, if any.'

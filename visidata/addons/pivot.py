@@ -26,7 +26,7 @@ class SheetPivot(Sheet):
         self.columns = copy(self.nonpivotKeyCols)
         self.nKeys = len(self.nonpivotKeyCols)
         for aggcol in self.source.columns:
-            if not aggcol.aggregator:
+            if not hasattr(aggcol, 'aggregator'):
                 continue
 
             for col in self.variableCols:

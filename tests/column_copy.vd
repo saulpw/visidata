@@ -1,0 +1,17 @@
+start_sheet	keystrokes	input	end_sheet	comment
+	o	sample_data/sample.tsv	sample	open file
+sample	gl		sample	go to rightmost column
+sample	%		sample	set column type to float
+sample	+	sum	sample	choose aggregator for this column
+sample	h		sample	go one column left
+sample	h		sample	go one column left
+sample	h		sample	go one column left
+sample	h		sample	go one column left
+sample	F		sample_Rep_freq	open frequency table from values in this column
+sample_Rep_freq	l		sample_Rep_freq	go one column right
+sample_Rep_freq	e	2000	sample_Rep_freq	edit this cell
+sample_Rep_freq	'		sample_Rep_freq	add a frozen copy of this column
+sample_Rep_freq	l		sample_Rep_freq	go one column right
+sample_Rep_freq	^	adj_sum_Total	sample_Rep_freq	rename this column
+sample_Rep_freq	e	2000.01		edit this cell
+sample_Rep_freq	^S	adjsum.tsv	sample_Rep_freq	save this sheet to new file

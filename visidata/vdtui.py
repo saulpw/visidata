@@ -376,9 +376,9 @@ def regex_flags():
     'Return flags to pass to regex functions from options'
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
-def sync():
+def sync(expectedThreads=0):
     'Wait for all async threads to finish.'
-    while len(vd().unfinishedThreads) > 0:
+    while len(vd().unfinishedThreads) > expectedThreads:
         vd().checkForFinishedThreads()
 
 def async(func):
@@ -480,11 +480,11 @@ class VisiData:
     def editText(self, y, x, w, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
         v = self.callHook('preedit')
-        if v is not None:
-            return v
-        cursorEnable(True)
-        v = editText(self.scr, y, x, w, **kwargs)
-        cursorEnable(False)
+        if v is None:
+            cursorEnable(True)
+            v = editText(self.scr, y, x, w, **kwargs)
+            cursorEnable(False)
+
         if kwargs.get('display', True):
             self.status('"%s"' % v)
             self.callHook('postedit', v)
