@@ -34,8 +34,9 @@ class DescribeSheet(Sheet):
             SourceColumn('stddev', type=float, getter=lambda sheet,c: statistics.stdev(c.values(sheet.rows)) if isNumeric(c) else None),
     ]
     commands = [
-        Command('zs', 'source.select(cursorCol._getValue(cursorRow))', 'select rows in this cell on source sheet'),
-        Command('zu', 'source.unselect(cursorValue)', 'unselect rows in this cell on source sheet')
+        Command('zs', 'source.select(cursorCell)', 'select rows in this cell on source sheet'),
+        Command('zu', 'source.unselect(cursorCell)', 'unselect rows in this cell on source sheet'),
+        Command('z^J', 'vs=copy(source); vs.rows=cursorCell; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'unselect rows in this cell on source sheet')
     ]
 
     def reload(self):

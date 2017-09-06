@@ -256,7 +256,8 @@ alias('KEY_F(1)', 'z?')
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
 #
 # A type T is used internally in these ways:
-#    o = T(str)   # for conversion from string
+#    o = T(val)   # for interpreting raw value
+#    o = T(str)   # for conversion from string (when setting)
 #    o = T()      # for default value to be used when conversion fails
 #
 # The resulting object o must be orderable and convertible to a string for display and certain outputs (like csv).
@@ -1002,13 +1003,18 @@ class Sheet:
 
     @property
     def cursorDisplay(self):
-        'Calculated cell value at current row and column.'
-        return self.columns[self.cursorColIndex].getDisplay(self.rows[self.cursorRowIndex])
+        'Displayed value (DisplayWrapper) at current row and column.'
+        return self.cursorCol.getDisplay(self.cursorRow)
 
     @property
     def cursorValue(self):
-        'Calculated cell value at current row and column.'
-        return self.columns[self.cursorColIndex].getValue(self.rows[self.cursorRowIndex])
+        'Typed value at current row and column.'
+        return self.cursorCol.getValue(self.cursorRow)
+
+    @property
+    def cursorCell(self):
+        'Untyped value at current row and column.'
+        return self.cursorCol._getValue(self.cursorRow)
 
     @property
     def statusLine(self):
@@ -1545,12 +1551,14 @@ class Column:
         value = self.type(value)
         for r in rows:
             self.setValue(r, value)
+        status('set %d values = %s' % (len(rows), value))
 
     @async
     def setValuesFromExpr(self, rows, expr):
         compiledExpr = compile(expr, '<expr>', 'eval')
         for row in self.sheet.genProgress(rows):
             self.setValue(row, self.sheet.evalexpr(compiledExpr, row))
+        status('set %d values = %s' % (len(rows), expr))
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'
