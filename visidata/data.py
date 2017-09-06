@@ -35,6 +35,13 @@ globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'sh
 
 globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'create new sheet with N columns')
 
+alias('gKEY_F(1)', 'z?')  # vdtui generic commands sheet
+alias('gz?', 'z?')  # vdtui generic commands sheet
+
+# in VisiData, F1/z? refer to the man page
+globalCommand('z?', 'with suspend_curses(): os.system("man vd")', 'launch VisiData manpage')
+alias('KEY_F(1)', 'z?')
+
 def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
