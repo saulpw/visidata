@@ -33,6 +33,10 @@ globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(s
 globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol.values(selectedRows or rows)))', 'aggregate selected rows in this column')
 globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'show evaluated expression over current row')
 
+globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'create new sheet with N columns')
+
+def newSheet(ncols):
+    return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
 def readlines(linegen):
     'Generate lines from linegen, skipping first options.skiplines lines and stripping trailing newline'
