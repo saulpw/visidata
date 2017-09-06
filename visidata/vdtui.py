@@ -314,6 +314,7 @@ typemap = {
     str: '~',
     date: '@',
     int: '#',
+    len: '#',
     currency: '$',
     float: '%',
     anytype: ' ',
@@ -830,9 +831,10 @@ class Sheet:
         for c in self.columns:
             if c._cachedValues:
                 c._cachedValues.clear()
+            c.sheet = self
 
     def reload(self):
-        'Default reloader, wrapping `loader` member function.'
+        'Default reloader wraps provided `loader` function'
         if self.loader:
             self.loader()
         else:
@@ -1359,6 +1361,13 @@ class Sheet:
 
         return r
 
+def isNullFunc():
+    return {
+                'n': lambda v: v is None,
+                'e': lambda v: v is None or v == '',
+                'f': lambda v: not bool(v)
+           }.get(options.aggr_null_filter[:1].lower(), lambda v: False)
+
 aggregators = collections.OrderedDict()
 
 
@@ -1447,11 +1456,7 @@ class Column:
 
     def values(self, rows):
         'Return a list of values for the given `rows` at this Column, excluding errors and nulls.'
-        f = {
-                'n': lambda v: v is None,
-                'e': lambda v: v is None or v == '',
-                'f': lambda v: not bool(v)
-            }.get(options.aggr_null_filter[:1].lower(), lambda v: False)
+        f = isNullFunc()
 
         ret = []
         for r in rows:
@@ -1741,7 +1746,6 @@ class TextSheet(Sheet):
 
     @async
     def reload(self):
-        'Populate sheet via `reload` function.'
         self.columns = (TextColumn(self.name, getter=lambda r: r[1]), )
         self.rows = []
         if isinstance(self.source, list):

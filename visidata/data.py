@@ -113,6 +113,8 @@ def openSource(p, filetype=None):
 
     if vs:
         status('opening %s as %s' % (p.name, filetype))
+        vs.recalc()  # set col.sheet
+
     return vs
 
 #### enable external addons
