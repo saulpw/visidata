@@ -19,7 +19,7 @@ vd().optionsSheet = OptionsSheet(options)
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
     return Column("+".join(c.name for c in cols),
-                  getter=lambda r,cols=cols,ch=' ': ch.join(c.getDisplayValue(r) for c in cols))))
+                  getter=lambda r,cols=cols,ch=' ': ch.join(c.getDisplayValue(r) for c in cols))
 
 
 class SheetsSheet(Sheet):
