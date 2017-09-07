@@ -72,7 +72,7 @@ class SheetFreqTable(Sheet):
             errorbin = []
             allbin = []
             for row in self.genProgress(self.source.rows):
-                v = self.origCol.getValue(row)
+                v = self.origCol.getTypedValue(row)
                 if not v:
                     errorbin.append(row)
                 else:

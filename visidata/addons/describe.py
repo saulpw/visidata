@@ -8,7 +8,7 @@ def isNumeric(col):
     return col.type in (int,float,currency,date)
 
 def isError(col, row):
-    return hasattr(col.getDisplay(row), 'error')
+    return hasattr(col.getCell(row), 'error')
 
 def isNull(v):
     return isNullFunc()(v)
@@ -17,7 +17,7 @@ class SourceColumn(Column):
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
 
-    def _getValue(self, row):
+    def getValue(self, row):
         return self.getter(self.sheet.source, row)
 
 class DescribeSheet(Sheet):

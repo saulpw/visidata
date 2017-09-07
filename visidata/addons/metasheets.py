@@ -19,7 +19,7 @@ vd().optionsSheet = OptionsSheet(options)
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
     return Column("+".join(c.name for c in cols),
-                  getter=lambda r,cols=cols,ch=' ': ch.join(filter(None, (c.getValue(r) for c in cols))))
+                  getter=lambda r,cols=cols,ch=' ': ch.join(c.getDisplayValue(r) for c in cols))))
 
 
 class SheetsSheet(Sheet):
@@ -30,7 +30,7 @@ class SheetsSheet(Sheet):
         Command('*', 'vd.replace(SheetJoin(selectedRows, jointype="*"))', 'open full join of selected sheets'),
         Command('~', 'vd.replace(SheetJoin(selectedRows, jointype="~"))', 'open diff join of selected sheets'),
     ]
-    columns = AttrColumns('name progressPct nRows nCols nVisibleCols cursorValue keyColNames source'.split())
+    columns = AttrColumns('name progressPct nRows nCols nVisibleCols cursorDisplay keyColNames source'.split())
     def reload(self):
         self.rows = vd().sheets
 
@@ -103,7 +103,7 @@ class SheetJoin(Sheet):
             rowsBySheetKey[vs] = {}
             for r in vs.rows:
                 self.progressMade += 1
-                key = tuple(c.getValue(r) for c in vs.keyCols)
+                key = tuple(c.getTypedValue(r) for c in vs.keyCols)
                 rowsBySheetKey[vs][key] = r
 
         for sheetnum, vs in enumerate(sheets):
@@ -111,7 +111,7 @@ class SheetJoin(Sheet):
             self.columns.extend(SubrowColumn(c, sheetnum+1) for c in vs.columns[vs.nKeys:])
             for r in vs.rows:
                 self.progressMade += 1
-                key = tuple(str(c.getValue(r)) for c in vs.keyCols)
+                key = tuple(c.getTypedValue(r) for c in vs.keyCols)
                 if key not in rowsByKey:
                     rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]  # combinedRow
 

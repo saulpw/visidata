@@ -12,7 +12,7 @@ class FixedWidthColumn(Column):
         self.i, self.j = i, j
         status(i, j)
 
-    def _getValue(self, row):
+    def getValue(self, row):
         return row[0][self.i:self.j]
 
     def setValue(self, row, value):

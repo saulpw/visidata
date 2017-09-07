@@ -41,7 +41,7 @@ class SheetPivot(Sheet):
         rowidx = {}
         self.rows = []
         for r in self.genProgress(self.source.rows):
-            keys = tuple(keycol.srccol.getValue(r) for keycol in self.nonpivotKeyCols)
+            keys = tuple(keycol.srccol.getTypedValue(r) for keycol in self.nonpivotKeyCols)
 
             pivotrow = rowidx.get(keys)
             if pivotrow is None:
@@ -50,7 +50,7 @@ class SheetPivot(Sheet):
                 self.addRow(pivotrow)
 
             for col in self.variableCols:
-                varval = col.getValue(r)
+                varval = col.getTypedValue(r)
                 matchingRows = pivotrow[1].get(varval)
                 if matchingRows is None:
                     pivotrow[1][varval] = [r]

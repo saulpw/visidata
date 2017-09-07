@@ -7,10 +7,10 @@ globalCommand('*', 'columns.insert(cursorColIndex+1, regexTransform(cursorCol, i
 option('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 
 def makeRegexSplitter(regex, origcol):
-    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getValue(row), maxsplit=0)
+    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=0)
 
 def makeRegexMatcher(regex, origcol):
-    return lambda row, regex=regex, origcol=origcol: regex.search(origcol.getValue(row)).groups()
+    return lambda row, regex=regex, origcol=origcol: regex.search(origcol.getDisplayValue(row)).groups()
 
 def addRegexColumns(regexMaker, columns, colIndex, origcol, exampleRow, regexstr):
     regex = re.compile(regexstr, regex_flags())
@@ -31,7 +31,7 @@ def regexTransform(col, instr):
         before = instr[:i]
         after = instr[i+1:]
     newCol = Column(col.name + '_re',
-                    getter=lambda row, col=col, before=before, after=after: re.sub(before, after, col.getValue(row), flags=regex_flags()))
+                    getter=lambda row, col=col, before=before, after=after: re.sub(before, after, col.getDisplayValue(row), flags=regex_flags()))
     return newCol
 
 def indexWithEscape(s, char, escape_char='\\'):

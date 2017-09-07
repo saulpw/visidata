@@ -190,10 +190,10 @@ globalCommand('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rena
 
 globalCommand('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
 
-globalCommand('[', 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r))', 'sort by this column ascending')
-globalCommand(']', 'rows.sort(key=lambda r,col=cursorCol: col.getValue(r), reverse=True)', 'sort by this column descending')
-globalCommand('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols))', 'sort by all key columns ascending')
-globalCommand('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
+globalCommand('[', 'rows.sort(key=lambda r,col=cursorCol: col.getTypedValue(r))', 'sort by this column ascending')
+globalCommand(']', 'rows.sort(key=lambda r,col=cursorCol: col.getTypedValue(r), reverse=True)', 'sort by this column descending')
+globalCommand('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(r) for c in cols))', 'sort by all key columns ascending')
+globalCommand('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'open stack trace for most recent error')
 globalCommand('z^E', 'vd.push(TextSheet("cell_error", cursorDisplay.error)) or status("no error")', 'open stack trace for most recent error')
@@ -214,7 +214,7 @@ globalCommand('g/', 'moveRegex(regex=input("g/", type="regex"), backward=False, 
 globalCommand('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search regex backward in all visible columns')
 
 globalCommand('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
-globalCommand('ge', 'cursorCol.setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
+globalCommand('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
 globalCommand('KEY_DC', 'cursorCol.setValues([cursorRow], None)', 'set this cell to None')
 globalCommand('gKEY_DC', 'cursorCol.setValues(selectedRows, None)', 'set this column to None for all selected rows')
 
@@ -239,9 +239,9 @@ globalCommand('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(
 globalCommand('g"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows = deepcopy(selectedRows or rows); vd.push(vs); status("pushed sheet with deepcopy of all rows")', 'push duplicate sheet with copies of selected or all rows')
 
 globalCommand('=', 'addColumn(ColumnExpr(input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
-globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
+globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
 
-globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorValue))', 'view readonly contents of this cell in a new sheet')
+globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplayValue))', 'view readonly contents of this cell in a new sheet')
 
 globalCommand('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheet stack')
@@ -510,9 +510,9 @@ class VisiData:
     def searchRegex(self, sheet, moveCursor=False, reverse=False, **kwargs):
         'Set row index if moveCursor, otherwise return list of row indexes.'
         def findMatchingColumn(sheet, row, columns, func):
-            'Find column for which func matches the value in this row'
+            'Find column for which func matches the displayed value in this row'
             for c in columns:
-                if func(c.getDisplay(row).value):
+                if func(c.getDisplayValue(row)):
                     return c
 
         self.searchContext.update(kwargs)
@@ -1002,17 +1002,17 @@ class Sheet:
     @property
     def cursorDisplay(self):
         'Displayed value (DisplayWrapper) at current row and column.'
-        return self.cursorCol.getDisplay(self.cursorRow)
+        return self.cursorCol.getDisplayValue(self.cursorRow)
+
+    @property
+    def cursorTypedValue(self):
+        'Typed value at current row and column.'
+        return self.cursorCol.getTypedValue(self.cursorRow)
 
     @property
     def cursorValue(self):
-        'Typed value at current row and column.'
-        return self.cursorCol.getValue(self.cursorRow)
-
-    @property
-    def cursorCell(self):
         'Untyped value at current row and column.'
-        return self.cursorCol._getValue(self.cursorRow)
+        return self.cursorCol.getValue(self.cursorRow)
 
     @property
     def statusLine(self):
@@ -1307,7 +1307,7 @@ class Sheet:
                     self.rowLayout[dispRowIdx] = y
 
                     row = self.rows[dispRowIdx]
-                    cellval = col.getDisplay(row, colwidth-1)
+                    cellval = col.getCell(row, colwidth-1)
 
                     attr = self.colorizeCell(col, row, cellval)
                     sepattr = self.colorizeRow(row)
@@ -1465,37 +1465,37 @@ class Column:
         ret = []
         for r in rows:
             try:
-                v = self.type(self._getValue(r))
+                v = self.type(self.getValue(r))
                 if not f(v):
                     ret.append(v)
             except:
                 pass
         return ret
 
-    def _getValue(self, row):
+    def getValue(self, row):
         return self.getter(row)
 
-    def getValue(self, row):
+    def getTypedValue(self, row):
         '''Returns the properly-typed value for the given row at this column.
            Returns the type's default value if either the getter or the type conversion fails.'''
         try:
-            return self.type(self._getValue(row))
+            return self.type(self.getValue(row))
         except EscapeException:
             raise
         except Exception as e:
             exceptionCaught(status=False)
             return self.type()
 
-    def getDisplay(self, row, width=None):
-        'Memoize _getDisplay with key (id(row), width)'
+    def getCell(self, row, width=None):
+        'Memoize _getCell with key (id(row), width)'
         if self._cachedValues is None:
-            return self._getDisplay(row, width)
+            return self._getCell(row, width)
 
         k = (id(row), width)
         if k in self._cachedValues:
             return self._cachedValues[k]
 
-        ret = self._getDisplay(row, width)
+        ret = self._getCell(row, width)
         self._cachedValues[k] = ret
 
         if len(self._cachedValues) > 256:  # max number of entries
@@ -1503,10 +1503,10 @@ class Column:
 
         return ret
 
-    def _getDisplay(self, row, width=None):
+    def _getCell(self, row, width=None):
         'Return DisplayWrapper for displayable cell value.'
         try:
-            cellval = self._getValue(row)
+            cellval = self.getValue(row)
         except EscapeException:
             raise
         except Exception as e:
@@ -1537,7 +1537,7 @@ class Column:
                                 notecolor=options.color_format_exc)
 
     def getDisplayValue(self, row):
-        return self.getDisplay(row).display
+        return self.getCell(row).display
 
     def setValue(self, row, value):
         if not self.setter:
@@ -1613,7 +1613,7 @@ class SubrowColumn(Column):
         self.origcol = origcol
         self.subrowidx = subrowidx
 
-    def _getValue(self, row):
+    def getValue(self, row):
         subrow = row[self.subrowidx]
         return subrow and self.origcol.get(subrow) or None
 
@@ -1640,7 +1640,7 @@ class ColumnEnum(Column):
         super().__init__(name)
         self.mapping = m
 
-    def _getValue(self, row):
+    def getValue(self, row):
         v = getattr(row, self.name, None)
         return v.__name__ if v else None
 
@@ -1663,7 +1663,7 @@ class LazyMapping:
         colids = self.keys()
         if colid in colids:
             i = colids.index(colid)
-            return self.sheet.columns[i].getValue(self.row)
+            return self.sheet.columns[i].getTypedValue(self.row)
         else:
             raise KeyError(colid)
 
@@ -1676,7 +1676,7 @@ class ColumnExpr(Column):
         super().__init__(expr)
         self.compiledExpr = compile(expr, '<expr>', 'eval')
 
-    def _getValue(self, row):
+    def getValue(self, row):
         return self.sheet.evalexpr(self.compiledExpr, row)
 
 ###
@@ -1794,7 +1794,7 @@ class ColumnsSheet(Sheet):
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals()),
             ColumnAttr('fmtstr'),
-            Column('value', getter=lambda row: row.getDisplay(self.source.cursorRow).display),
+            Column('value', getter=lambda row: row.getValue(self.source.cursorRow)),
         ]
 
     def reload(self):
@@ -1803,7 +1803,7 @@ class ColumnsSheet(Sheet):
 
 class SheetsSheet(Sheet):
     commands = [Command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet')]
-    columns = [ColumnAttr(name) for name in 'name nRows nCols nVisibleCols cursorValue keyColNames source'.split()]
+    columns = [ColumnAttr(name) for name in 'name nRows nCols nVisibleCols cursorDisplay keyColNames source'.split()]
     def reload(self):
         self.rows = vd().sheets
 
