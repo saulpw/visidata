@@ -28,7 +28,8 @@ def main():
     parser.add_argument('-d', dest='debug', action='store_true', default=False, help='abort on error')
     parser.add_argument('-r', dest='readonly', action='store_true', default=False, help='disable editing')
     parser.add_argument('-f', dest='filetype', default='', help='specify file type')
-    parser.add_argument('--play', dest='play', default=None, help='.vd file to replay')
+    parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='specify file type')
+    parser.add_argument('-p', '--play', dest='play', default=None, help='.vd file to replay')
 
     for optname, v in vdtui.baseOptions.items():
         name, optval, defaultval, helpstr = v
