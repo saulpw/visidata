@@ -795,7 +795,7 @@ class Sheet:
         attrpre = 0
 
         for colorizerType in colorizerTypes:
-            for colorizer in sorted(self._colorizers[colorizerType], key=lambda x: x[0]):
+            for colorizer in sorted(self._colorizers[colorizerType], key=lambda x: x.precedence):
                 color = colorizer.func(self, col, row, value)
                 if color:
                     attr, attrpre = colors.update(attr, attrpre, color, colorizer.precedence)
