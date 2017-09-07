@@ -196,7 +196,7 @@ globalCommand('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(
 globalCommand('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'open stack trace for most recent error')
-globalCommand('z^E', 'vd.push(TextSheet("cell_error", cursorDisplay.error)) or status("no error")', 'open stack trace for most recent error')
+globalCommand('z^E', 'vd.push(TextSheet("cell_error", cursorCell.error))', 'open stack trace for most recent error')
 
 
 globalCommand('^^', 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet')
@@ -1000,8 +1000,13 @@ class Sheet:
         return options.disp_key_sep.join(c.name for c in self.keyCols)
 
     @property
-    def cursorDisplay(self):
+    def cursorCell(self):
         'Displayed value (DisplayWrapper) at current row and column.'
+        return self.cursorCol.getCell(self.cursorRow)
+
+    @property
+    def cursorDisplay(self):
+        'Displayed value (DisplayWrapper.display) at current row and column.'
         return self.cursorCol.getDisplayValue(self.cursorRow)
 
     @property
