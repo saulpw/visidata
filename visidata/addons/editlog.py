@@ -1,7 +1,14 @@
 from visidata import *
 
 globalCommand('D', 'vd.push(vd.editlog)', 'push the editlog')
+globalCommand('^D', 'saveSheet(vd.editlog, input("save to: ", "filename", value=fnSuffix("editlog-{0}.vd") or "editlog.vd"))', 'save editlog to new file')
 #globalCommand('KEY_BACKSPACE', 'vd.editlog.undo()', 'remove last action on editlog and replay')
+
+def fnSuffix(template):
+    for i in range(1, 10):
+        fn = template.format(i)
+        if not Path(fn).exists():
+            return fn
 
 def open_vd(p):
     vs = EditLog(p.name, p)
