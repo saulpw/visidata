@@ -74,10 +74,10 @@ class DirSheet(Sheet):
         Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
     ]
     columns = [
-        Column('filename', str, lambda r: r[0].name + r[0].ext),
-        Column('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
-        Column('size', int, lambda r: r[1].st_size),
-        Column('mtime', date, lambda r: r[1].st_mtime)
+        Column('filename', getter=lambda r: r[0].name + r[0].ext),
+        Column('type', getter=lambda r: r[0].is_dir() and '/' or r[0].suffix),
+        Column('size', type=int, getter=lambda r: r[1].st_size),
+        Column('mtime', type=date, getter=lambda r: r[1].st_mtime)
     ]
 
     def reload(self):

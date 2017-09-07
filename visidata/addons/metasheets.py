@@ -2,19 +2,9 @@ from visidata import *
 
 globalCommand('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
 
-class OptionsSheet(Sheet):
-    'options viewing and editing'
-    commands = [Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edit this option')]
-    def __init__(self, d):
-        super().__init__('options', d)
-        self.columns = ArrayNamedColumns('option value default description'.split())
-        self.addColorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
-        self.nKeys = 1
-
-    def reload(self):
-        self.rows = list(self.source._opts.values())
-
-vd().optionsSheet = OptionsSheet(options)
+OptionsSheet.colorizers += [
+        Colorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
+    ]
 
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
@@ -22,21 +12,17 @@ def combineColumns(cols):
                   getter=lambda r,cols=cols,ch=' ': ch.join(c.getDisplayValue(r) for c in cols))
 
 
-class SheetsSheet(Sheet):
-    commands = [
-        Command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet'),
+SheetsSheet.commands += [
         Command('&', 'vd.replace(SheetJoin(selectedRows, jointype="&"))', 'open inner join of selected sheets'),
         Command('+', 'vd.replace(SheetJoin(selectedRows, jointype="+"))', 'open outer join of selected sheets'),
         Command('*', 'vd.replace(SheetJoin(selectedRows, jointype="*"))', 'open full join of selected sheets'),
         Command('~', 'vd.replace(SheetJoin(selectedRows, jointype="~"))', 'open diff join of selected sheets'),
     ]
-    columns = AttrColumns('name progressPct nRows nCols nVisibleCols cursorDisplay keyColNames source'.split())
-    def reload(self):
-        self.rows = vd().sheets
+
+SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
 
 
-class ColumnsSheet(Sheet):
-    commands = [
+ColumnsSheet.commands += [
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns'),
         Command('g!', 'for c in selectedRows: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet'),
@@ -50,26 +36,11 @@ class ColumnsSheet(Sheet):
         Command('g~', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string'),
     ]
 
-    def __init__(self, srcsheet):
-        super().__init__(srcsheet.name + '_columns', srcsheet)
 
-        self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
-
-        self.columns = [
-            ColumnAttr('name'),
-            ColumnAttr('width', type=int),
-            ColumnEnum('type', globals()),
-            ColumnAttr('fmtstr'),
-            ColumnEnum('aggregator', aggregators),
-            ColumnAttr('expr'),
-            Column('value', getter=lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
-        ]
-
-    def reload(self):
-        self.rows = self.source.columns
-        self.cursorRowIndex = self.source.cursorColIndex
-
-
+ColumnsSheet.columns += [
+        ColumnEnum('aggregator', aggregators),
+        ColumnAttr('expr'),
+    ]
 
 #### slicing and dicing
 class SheetJoin(Sheet):

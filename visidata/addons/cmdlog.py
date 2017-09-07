@@ -24,20 +24,19 @@ class CmdLog(Sheet):
         Command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this row of the commandlog'),
         Command('g^A', 'sheet.replay()', 'replay this entire commandlog')
     ]
+    columns = [
+            ColumnItem('start_sheet', 0),
+            ColumnItem('keystrokes', 1),
+            ColumnItem('input', 2),
+            ColumnItem('end_sheet', 3),
+            ColumnItem('comment', 4),
+    ]
 
     currentReplayRow = None  # must be global, to allow replay
 
     def __init__(self, name, *args):
         super().__init__(name, *args)
         self.currentActiveRow = None
-
-        self.columns = [
-            ColumnItem('start_sheet', 0),
-            ColumnItem('keystrokes', 1),
-            ColumnItem('input', 2),
-            ColumnItem('end_sheet', 3),
-            ColumnItem('comment', 4),
-        ]
 
         self.sheetmap = {}
         self.currentExecRow = None

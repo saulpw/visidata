@@ -245,7 +245,7 @@ globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, curso
 
 globalCommand('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheet stack')
-globalCommand('C', 'vd.push(ColumnsSheet(sheet))', 'open Columns for this sheet')
+globalCommand('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", sheet))', 'open Columns for this sheet')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
 globalCommand('z?', 'vd.push(HelpSheet(name + "_commands", sheet))', 'open command help sheet')
 alias('KEY_F(1)', 'z?')
@@ -715,9 +715,26 @@ class LazyMap:
     def __setitem__(self, k, v):
         setattr(self.obj, k, v)
 
+class Colorizer:
+    def __init__(self, colorizerType, precedence, colorfunc):
+        self.type = colorizerType
+        self.precedence = precedence
+        self.func = colorfunc
+
 class Sheet:
     columns = []  # list of Column
     commands = []  # list of (keystrokes, helpstr, execstr)
+    colorizers = [ # list of Colorizer
+        Colorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr),
+        Colorizer('hdr', 9, lambda s,c,r,v: options.color_current_hdr if c is s.cursorCol else None),
+        Colorizer('hdr', 8, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
+        Colorizer('col', 5, lambda s,c,r,v: options.color_current_col if c is s.cursorCol else None),
+        Colorizer('col', 7, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
+        Colorizer('cell', 2, lambda s,c,r,v: options.color_default),
+        Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
+    ]
+    nKeys = 0  # self.columns[:nKeys] are all pinned to the left and matched on join
+
     def __init__(self, name, *sources, **kwargs):
         self.name = name
         self.sources = list(sources)
@@ -737,10 +754,7 @@ class Sheet:
 
         # all columns in display order
         self.columns = kwargs.get('columns') or [copy(c) for c in self.columns]  # list of Column objects
-        for c in self.columns:
-            c.sheet = self
-
-        self.nKeys = 0           # self.columns[:nKeys] are all pinned to the left and matched on join
+        self.recalc()  # refresh columns
 
         # commands specific to this sheet
         sheetcmds = collections.OrderedDict()
@@ -757,18 +771,11 @@ class Sheet:
         # only allow one async task per sheet
         self.currentThread = None
 
-        self.colorizers = {'row': [], 'col': [], 'hdr': [], 'cell': []}
+        self._colorizers = {'row': [], 'col': [], 'hdr': [], 'cell': []}
 
-        self.addColorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr)
-        self.addColorizer('hdr', 9, lambda s,c,r,v: options.color_current_hdr if c is s.cursorCol else None)
-        self.addColorizer('hdr', 8, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None)
-        self.addColorizer('col', 5, lambda s,c,r,v: options.color_current_col if c is s.cursorCol else None)
-        self.addColorizer('col', 7, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None)
-        self.addColorizer('cell', 2, lambda s,c,r,v: options.color_default)
-        self.addColorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None)
-
-    def addColorizer(self, colorizerType, precedence, colorfunc):
-        self.colorizers[colorizerType].append((precedence, colorfunc))
+        for b in [self] + list(self.__class__.__bases__):
+            for c in getattr(b, 'colorizers', []):
+                self._colorizers[c.type].append(c)
 
     def colorizeRow(self, row):
         return self.colorize(['row'], None, row)
@@ -788,10 +795,10 @@ class Sheet:
         attrpre = 0
 
         for colorizerType in colorizerTypes:
-            for precedence, func in sorted(self.colorizers[colorizerType], key=lambda x: x[0]):
-                color = func(self, col, row, value)
+            for colorizer in sorted(self._colorizers[colorizerType], key=lambda x: x[0]):
+                color = colorizer.func(self, col, row, value)
                 if color:
-                    attr, attrpre = colors.update(attr, attrpre, color, precedence)
+                    attr, attrpre = colors.update(attr, attrpre, color, colorizer.precedence)
 
         return attr
 
@@ -854,7 +861,6 @@ class Sheet:
         ret.topRowIndex = ret.cursorRowIndex = 0
         ret.progressMade = ret.progressTotal = 0
         ret.currentThread = None
-#        ret.colorizers = copy(self.colorizers)
         return ret
 
     def __deepcopy__(self, memo):
@@ -1395,15 +1401,16 @@ aggregator('distinct', int, lambda values: len(set(values)))
 aggregator('count', int, len)
 
 class Column:
-    def __init__(self, name, type=anytype, getter=lambda r: r, setter=None, width=None, cache=False, **kwargs):
+    def __init__(self, name, cache=False, **kwargs):
         self.sheet = None     # owning sheet, set in Sheet.addColumn
         self._id = None       # identifier for this column, usable in expressions
         self.name = name      # display visible name; uses setter from the get-go to fill in _id also
         self.fmtstr = ''      # by default, use str().  .type also sets to default based on type
-        self.type = type      # anytype/str/int/float/date/func
-        self.getter = getter  # getter(r)
-        self.setter = setter  # setter(sheet,col,row,value)
-        self.width = width    # == 0 if hidden, None if auto-compute next time
+        self.type = anytype   # anytype/str/int/float/date/func
+        self.getter = lambda row: row
+        self.full_getter = lambda sheet,col,row: col.getter(row)
+        self.setter = None    # setter(sheet,col,row,value)
+        self.width = None     # == 0 if hidden, None if auto-compute next time
 
         self._cachedValues = collections.OrderedDict() if cache else None
         for k, v in kwargs.items():
@@ -1478,7 +1485,7 @@ class Column:
         return ret
 
     def getValue(self, row):
-        return self.getter(row)
+        return self.full_getter(self.sheet, self, row)
 
     def getTypedValue(self, row):
         '''Returns the properly-typed value for the given row at this column.
@@ -1789,40 +1796,39 @@ class TextSheet(Sheet):
             self.addRow((len(self.rows), text))
 
 class ColumnsSheet(Sheet):
-    def __init__(self, srcsheet):
-        super().__init__(srcsheet.name + '_columns', srcsheet)
-
-        self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
-
-        self.columns = [
+    columns = [
             ColumnAttr('name'),
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals()),
             ColumnAttr('fmtstr'),
-            Column('value', getter=lambda row: row.getValue(self.source.cursorRow)),
-        ]
+            Column('value', full_getter=lambda self,c,r: r.getDisplayValue(self.source.cursorRow)),
+    ]
+    colorizers = [
+            Colorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
+    ]
 
     def reload(self):
         self.rows = self.source.columns
+        self.cursorRowIndex = self.source.cursorColIndex
 
 
 class SheetsSheet(Sheet):
     commands = [Command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to this sheet')]
     columns = [ColumnAttr(name) for name in 'name nRows nCols nVisibleCols cursorDisplay keyColNames source'.split()]
+
     def reload(self):
         self.rows = vd().sheets
 
 
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
+    columns = [ColumnItem('keystrokes', 0),
+               ColumnItem('action', 1),
+               Column('with_g_prefix', full_getter=lambda s,c,r: s.source._commands.get('g'+r[0], (None,'-'))[1]),
+               ColumnItem('execstr', 2, width=0),
+    ]
+    nKeys = 1
     def reload(self):
-        self.columns = [ColumnItem('keystrokes', 0),
-                        ColumnItem('action', 1),
-                        Column('with_g_prefix', type=str, getter=lambda r,self=self: self.source._commands.get('g'+r[0], (None,'-'))[1]),
-                        ColumnItem('execstr', 2, width=0),
-                ]
-        self.nKeys = 1
-
         self.rows = []
         for src in self.source._commands.maps:
             self.rows.extend(src.values())
@@ -1854,15 +1860,13 @@ class OptionsSheet(Sheet):
                Column('value', getter=lambda r:r[1], setter=lambda s,c,r,v: setattr(options, r[0], v)),
                ColumnItem('default', 2),
                ColumnItem('description', 3)]
-
-    def __init__(self, d):
-        super().__init__('options', d)
-        self.nKeys = 1
+    colorizers = []
+    nKeys = 1
 
     def reload(self):
         self.rows = list(self.source._opts.values())
 
-vd().optionsSheet = OptionsSheet(options)
+vd().optionsSheet = OptionsSheet('options', options)
 
 # A .. Z AA AB .. ZY ZZ  (max 702 unnamed columns)
 defaultColNames = list(string.ascii_uppercase) + list(''.join(j) for j in itertools.product(string.ascii_uppercase, repeat=2))
