@@ -21,10 +21,7 @@ class MeltedSheet(Sheet):
         colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]
 
         self.rows = []
-        self.progressMade = 0
-        self.progressTotal = len(self.source.rows)
-        for r in self.source.rows:
+        for r in self.genProgress(self.source.rows):
             for c in colsToMelt:
                 if c.getValue(r) is not None:
                     self.addRow((r, c))
-            self.progressMade += 1

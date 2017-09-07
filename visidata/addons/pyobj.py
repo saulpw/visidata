@@ -1,6 +1,6 @@
 from visidata import *
 
-option('pyobj_show_hidden', False, 'show methods and _ properties')
+option('pyobj_show_hidden', False, 'show methods and _private properties')
 
 globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
 # find new key
