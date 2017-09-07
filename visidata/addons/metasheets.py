@@ -40,7 +40,7 @@ class ColumnsSheet(Sheet):
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns'),
         Command('g!', 'for c in selectedRows: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet'),
-        Command('g+', 'columns[4].setValues(sheet, selectedRows, chooseOne(aggregators.keys()))', 'choose aggregator for this column'),
+        Command('g+', 'columns[4].setValues(selectedRows, chooseOne(aggregators.keys()))', 'choose aggregator for this column'),
         Command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet'),
         Command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen'),
         Command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float'),
@@ -56,13 +56,13 @@ class ColumnsSheet(Sheet):
         self.addColorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
 
         self.columns = [
-            ColumnAttr('name', type=str),
+            ColumnAttr('name'),
             ColumnAttr('width', type=int),
-            ColumnAttrNamedObject('type'),
-            ColumnAttr('fmtstr', type=str),
-            ColumnAttrNamedObject('aggregator'),
-            ColumnAttr('expr', type=str),
-            Column('value',  type=anytype, getter=lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
+            ColumnEnum('type', globals()),
+            ColumnAttr('fmtstr'),
+            ColumnEnum('aggregator', aggregators),
+            ColumnAttr('expr'),
+            Column('value', getter=lambda c,sheet=self.source: c.getDisplayValue(sheet.cursorRow)),
         ]
 
     def reload(self):

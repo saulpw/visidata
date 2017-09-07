@@ -2,10 +2,12 @@ from visidata import *
 
 globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'push a sheet pivoted on the current column')
 
+# rowdef: (tuple(keyvalues), dict(variable_value -> list(rows)))
 class SheetPivot(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
-    commands = [ Command(ENTER, 'vd.push(source.copy(cursorCol.aggvalue)).rows=cursorRow[1].get(cursorCol.aggvalue, [])',
-                                'push sheet of source rows aggregated in this cell')
+    commands = [
+        Command(ENTER, 'vs = vd.push(copy(source)); vs.name += "_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, [])',
+                      'push sheet of source rows aggregated in this cell')
                ]
     def __init__(self, srcsheet, variableCols):
         super().__init__(srcsheet.name+'_pivot', srcsheet)
@@ -21,10 +23,10 @@ class SheetPivot(Sheet):
 
     @async
     def reload(self):
-        self.columns = copy.copy(self.nonpivotKeyCols)
+        self.columns = copy(self.nonpivotKeyCols)
         self.nKeys = len(self.nonpivotKeyCols)
         for aggcol in self.source.columns:
-            if not aggcol.aggregator:
+            if not hasattr(aggcol, 'aggregator'):
                 continue
 
             for col in self.variableCols:

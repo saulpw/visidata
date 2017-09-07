@@ -1,4 +1,7 @@
 from visidata import *
+import time
+
+option('piano', 0.0, '--play piano delay in seconds')
 
 globalCommand('D', 'vd.push(vd.editlog)', 'push the editlog')
 globalCommand('^D', 'saveSheet(vd.editlog, input("save to: ", "filename", value=fnSuffix("editlog-{0}.vd") or "editlog.vd"))', 'save editlog to new file')
@@ -18,8 +21,8 @@ def open_vd(p):
 class EditLog(Sheet):
     'Log of commands for current session.'
     commands = [
-        Command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this editlog'),
-        Command('g^A', 'sheet.replay()', 'replay this editlog')
+        Command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this row of the commandlog'),
+        Command('g^A', 'sheet.replay()', 'replay this entire commandlog')
     ]
 
     currentReplayRow = None  # must be global, to allow replay
@@ -59,8 +62,7 @@ class EditLog(Sheet):
         'Log keystrokes and args unless replaying.'
         assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if EditLog.currentReplayRow is None:
-            self.currentActiveRow = [ sheet.name, keystrokes, args, None,
-                    sheet._commands[keystrokes][1] ]
+            self.currentActiveRow = [ sheet.name, keystrokes, args, '', sheet._commands[keystrokes][1] ]
             self.addRow(self.currentActiveRow)
 
     def afterExecSheet(self, vs, escaped):
@@ -82,10 +84,10 @@ class EditLog(Sheet):
 
     def openHook(self, vs, src):
         if vs:
-            self.addRow([ None, 'o', src, vs.name, 'open file' ])
+            self.addRow([ '', 'o', src, vs.name, 'open file' ])
             self.sheetmap[vs.name] = vs
 
-    def replayOne(self, r):
+    def replayOne(self, r, expectedThreads=0):
         'Replay the command in one given row.'
         beforeSheet, keystrokes, args, afterSheet = r[:4]
 
@@ -93,27 +95,40 @@ class EditLog(Sheet):
         if beforeSheet:
             vs = self.sheetmap.get(beforeSheet)
             if not vs:
-                vs = [x for x in vd().sheets if x.name == beforeSheet][0]
+                matchingSheets = [x for x in vd().sheets if x.name == beforeSheet]
+                if not matchingSheets:
+                    error('no sheets named %s' % beforeSheet)
+                vs = matchingSheets[0]
         else:
             vs = self
 
+        vd().keystrokes = keystrokes
         escaped = vs.exec_keystrokes(keystrokes)
 
-        sync()
+        sync(expectedThreads)
 
         if afterSheet not in self.sheetmap:
             self.sheetmap[afterSheet] = vd().sheets[0]
 
         EditLog.currentReplayRow = None
 
-    def replay(self):
+    def replay_sync(self, live=False):
         'Replay all commands in log.'
         self.sheetmap = {}
 
         for r in self.rows:
-            self.replayOne(r)
+#            if live:
+            time.sleep(options.piano)
+            vd().statuses = []
+            # sync should expect this thread if playing live
+            self.replayOne(r, 1 if live else 0)
 
         status('replayed entire %s' % self.name)
+
+    @async
+    def replay(self):
+        'Inject commands into live execution with interface'
+        self.replay_sync(live=True)
 
     def getLastArgs(self):
         'Get last command, if any.'

@@ -11,6 +11,7 @@ option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 
+# rowdef: (bin_value, source_rows)
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     commands = [
@@ -19,7 +20,7 @@ class SheetFreqTable(Sheet):
         Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet'),
         Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet'),
 
-        Command(ENTER, 'vd.push(source.copy("_"+cursorRow[0])).rows = cursorRow[1].copy()', 'push new sheet with only source rows for this value'),
+        Command(ENTER, 'vs = vd.push(copy(source)); vs.name += "_"+cursorRow[0]; vs.rows = copy(cursorRow[1]) ', 'push new sheet with only source rows for this value'),
         Command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 
@@ -35,16 +36,16 @@ class SheetFreqTable(Sheet):
         self.nKeys = 1
 
         for c in self.source.visibleCols:
-            if c.aggregator:
+            if hasattr(c, 'aggregator'):
                 self.columns.append(Column(c.aggregator.__name__+'_'+c.name,
                                            type=c.aggregator.type or c.type,
                                            getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
 
         if len(self.columns) == 1:  # default has count and histogram
             self.columns.extend([
-                Column('count', int, lambda r: len(r[1])),
-                Column('percent', float, lambda r: len(r[1])*100/self.source.nRows),
-                Column('histogram', str, lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
+                Column('count', type=int, getter=lambda r: len(r[1])),
+                Column('percent', type=float, getter=lambda r: len(r[1])*100/self.source.nRows),
+                Column('histogram', type=str, getter=lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
             ])
 
 

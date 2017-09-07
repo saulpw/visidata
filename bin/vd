@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 #
 # Usage: $0 [-d] [-r] [-f <filetype>] [<visidata options>] [<input_source> ...]
+#        $0 [-d] [-r] [-f <filetype>] [<visidata options>] [--piano] --play <commandlog.vd> [--foo=value ...]
 
-__version__ = 'saul.pw/VisiData v0.96'
+__version__ = 'saul.pw/VisiData v0.97pre'
 
 import os
 from visidata import *
@@ -15,9 +16,8 @@ def eval_vd(logpath, *args, **kwargs):
     vs = openSource(src)
     vd().editlog.openHook(vs, src)
     vd().push(vs)
-    vd().status = print
     vs.vd = vd()
-    vs.replay()
+    return vs
 
 def main():
     'Open the given sources using the VisiData interface.'
@@ -106,7 +106,13 @@ def main():
     else:
         vdfile = Path(args.play)
 
-    eval_vd(vdfile, *fmtargs, **fmtkwargs)
+    vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
+    if args.piano:
+        vs.replay()
+        run([])
+    else:
+        vd().status = print
+        vs.replay_sync()
 
 if __name__ == '__main__':
     vdtui.status(__version__)

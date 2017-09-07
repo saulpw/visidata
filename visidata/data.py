@@ -22,7 +22,7 @@ globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this c
 globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
 globalCommand('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
 
-globalCommand('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
+globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'push duplicate sheet with a random sample of <N> rows')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
 globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
@@ -30,8 +30,20 @@ globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)
 globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
 globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')
 
-globalCommand('g+', 'status(chooseOne(aggregators)(cursorCol.values(selectedRows or rows)))', 'aggregate selected rows in this column')
+globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol.values(selectedRows or rows)))', 'aggregate selected rows in this column')
+globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'show evaluated expression over current row')
 
+globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'create new sheet with N columns')
+
+alias('gKEY_F(1)', 'z?')  # vdtui generic commands sheet
+alias('gz?', 'z?')  # vdtui generic commands sheet
+
+# in VisiData, F1/z? refer to the man page
+globalCommand('z?', 'with suspend_curses(): os.system("man vd")', 'launch VisiData manpage')
+alias('KEY_F(1)', 'z?')
+
+def newSheet(ncols):
+    return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
 def readlines(linegen):
     'Generate lines from linegen, skipping first options.skiplines lines and stripping trailing newline'
@@ -101,6 +113,8 @@ def openSource(p, filetype=None):
 
     if vs:
         status('opening %s as %s' % (p.name, filetype))
+        vs.recalc()  # set col.sheet
+
     return vs
 
 #### enable external addons
