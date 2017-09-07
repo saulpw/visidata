@@ -3,7 +3,7 @@ import math
 from visidata import *
 
 globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
-globalCommand('gF', 'vd.push(SheetFreqTable(sheet, combineColumns(columns[:nKeys])))', 'open frequency table for the combined key columns')
+globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open frequency table for the combined key columns')
 
 theme('disp_histogram', '*')
 option('disp_histolen', 80, 'width of histogram column')
@@ -11,7 +11,14 @@ option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 
-# rowdef: (bin_value, source_rows)
+def getValueOrError(c, r):
+    try:
+        return c.getValue(r)
+    except Exception as e:
+        return 'error: %s' % e
+
+
+# rowdef: ([bin_value], source_rows)
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     commands = [
@@ -24,16 +31,17 @@ class SheetFreqTable(Sheet):
         Command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 
-    def __init__(self, sheet, col):
-        fqcolname = '%s_%s_freq' % (sheet.name, col.name)
+    def __init__(self, sheet, *columns):
+        fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in columns))
         super().__init__(fqcolname, sheet)
-        self.origCol = col
+        self.origCols = columns
         self.largest = 100
 
+        self.nKeys = len(self.origCols)
+
         self.columns = [
-            ColumnItem(col.name, 0, type=col.type, width=30),
+            Column(col.name, type=col.type, width=30, getter=lambda r,i=i: r[0][i]) for i, col in enumerate(self.origCols)
         ]
-        self.nKeys = 1
 
         for c in self.source.visibleCols:
             if hasattr(c, 'aggregator'):
@@ -41,7 +49,7 @@ class SheetFreqTable(Sheet):
                                            type=c.aggregator.type or c.type,
                                            getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
 
-        if len(self.columns) == 1:  # default has count and histogram
+        if len(self.columns) == len(self.origCols):  # default has count and histogram
             self.columns.extend([
                 Column('count', type=int, getter=lambda r: len(r[1])),
                 Column('percent', type=float, getter=lambda r: len(r[1])*100/self.source.nRows),
@@ -65,14 +73,15 @@ class SheetFreqTable(Sheet):
 
         nbins = options.histogram_bins or int(len(self.source.rows) ** (1./2))
 
-        if nbins and self.origCol.type in (int, float, currency):
+        if nbins and len(self.origCols) == 1 and self.origCols[0].type in (int, float, currency):
+            origCol = self.origCols[0]
             self.columns[0]._type = str
 
             # separate rows with errors at the column from those without errors
             errorbin = []
             allbin = []
             for row in self.genProgress(self.source.rows):
-                v = self.origCol.getTypedValue(row)
+                v = origCol.getTypedValue(row)
                 if not v:
                     errorbin.append(row)
                 else:
@@ -108,8 +117,8 @@ class SheetFreqTable(Sheet):
                         break
                     binrows.append(row)
 
-                binMaxDispVal = self.origCol.format(binMax)
-                binMinDispVal = self.origCol.format(binMin)
+                binMaxDispVal = origCol.format(binMax)
+                binMinDispVal = origCol.format(binMin)
                 if binMinIdx == 0:
                     binName = '<=%s' % binMaxDispVal
                 elif binMax == binPivots[-2]:
@@ -128,10 +137,7 @@ class SheetFreqTable(Sheet):
             assert ntallied == len(self.source.rows), (ntallied, len(self.source.rows))
         else:
             for r in self.genProgress(self.source.rows):
-                try:
-                    v = self.origCol.getValue(r)
-                except Exception as e:
-                    v = 'error: %s' %e
+                v = tuple(getValueOrError(c, r) for c in self.origCols)
                 histrow = rowidx.get(v)
                 if histrow is None:
                     histrow = (v, [])
@@ -142,3 +148,4 @@ class SheetFreqTable(Sheet):
             self.rows.sort(key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
 
         self.largest = len(self.rows[0][1])+1
+
