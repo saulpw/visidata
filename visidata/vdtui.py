@@ -2165,10 +2165,11 @@ class UrlPath:
 
 class PathFd(Path):
     'minimal Path interface to satisfy a tsv loader'
-    def __init__(self, fqpn, fp):
+    def __init__(self, fqpn, fp, filesize=0):
         super().__init__(fqpn)
         self.fp = fp
         self.alreadyRead = []  # shared among all RepeatFile instances
+        self._filesize = filesize
 
     def read_text(self):
         return self.fp.read()
@@ -2178,7 +2179,7 @@ class PathFd(Path):
 
     @property
     def filesize(self):
-        return 0
+        return self._filesize
 
 
 class RepeatFile:

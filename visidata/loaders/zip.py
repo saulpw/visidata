@@ -1,3 +1,4 @@
+import codecs
 from visidata import *
 
 class open_zip(Sheet):
@@ -18,8 +19,6 @@ class open_zip(Sheet):
 
     def openZipFileEntry(self, zi):
         import zipfile
-        cachefn = zi.filename
-        if not os.path.exists(cachefn):
-            with zipfile.ZipFile(self.source.resolve(), 'r') as zfp:
-                zfp.extract(zi)
-        return openSource(cachefn)
+        zfp = zipfile.ZipFile(self.source.resolve(), 'r')
+        decodedfp = codecs.iterdecode(zfp.open(zi), encoding=options.encoding, errors=options.encoding_errors)
+        return openSource(PathFd(zi.filename, decodedfp, filesize=zi.file_size))
