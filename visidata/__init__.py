@@ -14,7 +14,7 @@ from .addons.pyobj import *
 from .addons.metasheets import *
 from .addons.pivot import *
 from .addons.tidydata import *
-from .addons.editlog import *
+from .addons.cmdlog import *
 from .addons.freeze import *
 from .addons.regex import *
 

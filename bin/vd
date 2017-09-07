@@ -14,7 +14,7 @@ def eval_vd(logpath, *args, **kwargs):
     log = logpath.read_text().format(*args, **kwargs)
     src = PathFd(logpath.fqpn, io.StringIO(log))
     vs = openSource(src)
-    vd().editlog.openHook(vs, src)
+    vd().cmdlog.openHook(vs, src)
     vd().push(vs)
     vs.vd = vd()
     return vs
@@ -67,7 +67,7 @@ def main():
         sources = []
         for src in inputs:
             vs = openSource(src)
-            vdtui.vd().editlog.openHook(vs, src)
+            vdtui.vd().cmdlog.openHook(vs, src)
             sources.append(vs)
 
         vdtui.run(sources)

@@ -344,7 +344,7 @@ display error messages (without traceback) on the left side of the status bar.
 Hooks
 -----
    
-Hooks for special functionality are stored in ``VisiData.hooks`` and supported with ``VisiData.addHook`` and ``VisiData.callHook``. At the moment, hooks are used mainly in ``editText``, the optional ``editlog`` addon, and before redrawing the screen.
+Hooks for special functionality are stored in ``VisiData.hooks`` and supported with ``VisiData.addHook`` and ``VisiData.callHook``. At the moment, hooks are used mainly in ``editText``, the optional ``cmdlog`` addon, and before redrawing the screen.
 
 
 Adding a new data source

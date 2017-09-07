@@ -65,9 +65,9 @@ Example query: using `birdsdiet.tsv <https://github.com/saulpw/visidata/tree/sta
 |**17. Save the current sheet to** ``.tsv`` **with** ``Ctrl-s`` **followed by** ``ENTER``       | .. image:: img/tour01/17.jpg        |
 +-----------------------------------------------------------------------------------------------+-------------------------------------+
 +------------------------------------------------------------------------------------------------+------------------------------------+
-|**18. View e'D'itlog with** ``D``                                                               | .. image:: img/tour01/18.png       |
+|**18. View cmdlog with** ``D``                                                                  | .. image:: img/tour01/18.png       |
 |                                                                                                |                                    |
-|The editlog lists every action taken since the program started.                                 |                                    |
+|The cmdlog lists every action taken since the program started.                                  |                                    |
 +------------------------------------------------------------------------------------------------+------------------------------------+
 +------------------------------------------------------------------+------------------------------------------------------------------+
 |**19. Exit VisiData with** ``gq``                                 | .. image:: img/tour01/19.jpg                                     |

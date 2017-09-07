@@ -3,9 +3,9 @@ import time
 
 option('piano', 0.0, '--play piano delay in seconds')
 
-globalCommand('D', 'vd.push(vd.editlog)', 'push the editlog')
-globalCommand('^D', 'saveSheet(vd.editlog, input("save to: ", "filename", value=fnSuffix("editlog-{0}.vd") or "editlog.vd"))', 'save editlog to new file')
-#globalCommand('KEY_BACKSPACE', 'vd.editlog.undo()', 'remove last action on editlog and replay')
+globalCommand('D', 'vd.push(vd.cmdlog)', 'push the cmdlog')
+globalCommand('^D', 'saveSheet(vd.cmdlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save cmdlog to new file')
+#globalCommand('KEY_BACKSPACE', 'vd.cmdlog.undo()', 'remove last action on cmdlog and replay')
 
 def fnSuffix(template):
     for i in range(1, 10):
@@ -14,11 +14,11 @@ def fnSuffix(template):
             return fn
 
 def open_vd(p):
-    vs = EditLog(p.name, p)
+    vs = CmdLog(p.name, p)
     vs.loader = lambda vs=vs: reload_tsv_sync(vs)
     return vs
 
-class EditLog(Sheet):
+class CmdLog(Sheet):
     'Log of commands for current session.'
     commands = [
         Command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this row of the commandlog'),
@@ -61,7 +61,7 @@ class EditLog(Sheet):
     def beforeExecHook(self, sheet, keystrokes, args=''):
         'Log keystrokes and args unless replaying.'
         assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
-        if EditLog.currentReplayRow is None:
+        if CmdLog.currentReplayRow is None:
             self.currentActiveRow = [ sheet.name, keystrokes, args, '', sheet._commands[keystrokes][1] ]
             self.addRow(self.currentActiveRow)
 
@@ -75,7 +75,7 @@ class EditLog(Sheet):
                 beforeName = self.currentActiveRow[0]
                 afterName = self.currentActiveRow[3]
 
-                # do not record actions on the editlog itself, only sheet movement to/from
+                # do not record actions on the cmdlog itself, only sheet movement to/from
                 if self.name in [beforeName, afterName]:
                     if beforeName == afterName:
                         del self.rows[-1]
@@ -91,7 +91,7 @@ class EditLog(Sheet):
         'Replay the command in one given row.'
         beforeSheet, keystrokes, args, afterSheet = r[:4]
 
-        EditLog.currentReplayRow = r
+        CmdLog.currentReplayRow = r
         if beforeSheet:
             vs = self.sheetmap.get(beforeSheet)
             if not vs:
@@ -110,7 +110,7 @@ class EditLog(Sheet):
         if afterSheet not in self.sheetmap:
             self.sheetmap[afterSheet] = vd().sheets[0]
 
-        EditLog.currentReplayRow = None
+        CmdLog.currentReplayRow = None
 
     def replay_sync(self, live=False):
         'Replay all commands in log.'
@@ -132,18 +132,18 @@ class EditLog(Sheet):
 
     def getLastArgs(self):
         'Get last command, if any.'
-        if EditLog.currentReplayRow is not None:
-            return EditLog.currentReplayRow[2]
+        if CmdLog.currentReplayRow is not None:
+            return CmdLog.currentReplayRow[2]
         else:
             return None
 
     def setLastArgs(self, args):
-        "Set args on any log but editlog (we don't log editlog commands)."
+        "Set args on any log but cmdlog (we don't log cmdlog commands)."
         if vd().sheets[0] is not self:
             self.rows[-1][2] = args
 
-vd().editlog = EditLog('__editlog__')
-vd().addHook('preexec', vd().editlog.beforeExecHook)
-vd().addHook('postexec', vd().editlog.afterExecSheet)
-vd().addHook('preedit', vd().editlog.getLastArgs)
-vd().addHook('postedit', vd().editlog.setLastArgs)
+vd().cmdlog = CmdLog('__cmdlog__')
+vd().addHook('preexec', vd().cmdlog.beforeExecHook)
+vd().addHook('postexec', vd().cmdlog.afterExecSheet)
+vd().addHook('preedit', vd().cmdlog.getLastArgs)
+vd().addHook('postedit', vd().cmdlog.setLastArgs)
