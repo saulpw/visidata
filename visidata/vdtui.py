@@ -1850,7 +1850,11 @@ options = OptionsObject(baseOptions)
 
 class OptionsSheet(Sheet):
     commands = [Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edit this option')]
-    columns = ArrayNamedColumns('option value default description'.split())
+    columns = [ColumnItem('option', 0),
+               Column('value', getter=lambda r:r[1], setter=lambda s,c,r,v: setattr(options, r[0], v)),
+               ColumnItem('default', 2),
+               ColumnItem('description', 3)]
+
     def __init__(self, d):
         super().__init__('options', d)
         self.nKeys = 1
