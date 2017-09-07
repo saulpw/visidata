@@ -128,7 +128,10 @@ class SheetFreqTable(Sheet):
             assert ntallied == len(self.source.rows), (ntallied, len(self.source.rows))
         else:
             for r in self.genProgress(self.source.rows):
-                v = str(self.origCol.getValue(r))
+                try:
+                    v = self.origCol.getValue(r)
+                except Exception as e:
+                    v = 'error: %s' %e
                 histrow = rowidx.get(v)
                 if histrow is None:
                     histrow = (v, [])

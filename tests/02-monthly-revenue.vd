@@ -8,12 +8,6 @@ sample	$		sample	set column type to currency
 sample	+	sum	sample	choose aggregator for this column
 sample	c	o	sample	go to visible column by regex of name
 sample	F		sample_OrderDate_freq	open frequency table from values in this column
-sample_OrderDate_freq	C		sample_OrderDate_freq_columns	open Columns for this sheet
-sample_OrderDate_freq_columns	j		sample_OrderDate_freq_columns	go one row down
-sample_OrderDate_freq_columns	s		sample_OrderDate_freq_columns	select this row
-sample_OrderDate_freq_columns	s		sample_OrderDate_freq_columns	select this row
-sample_OrderDate_freq_columns	g-		sample_OrderDate_freq_columns	hide all selected columns on source sheet
-sample_OrderDate_freq_columns	q		sample_OrderDate_freq	quit the current sheet
 sample_OrderDate_freq	[		sample_OrderDate_freq	sort by this column ascending
 sample_OrderDate_freq	l		sample_OrderDate_freq	go one column right
 sample_OrderDate_freq	^	Revenue	sample_OrderDate_freq	rename this column

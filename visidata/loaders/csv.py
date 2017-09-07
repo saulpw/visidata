@@ -5,6 +5,7 @@ import csv
 option('csv_dialect', 'excel', 'dialect passed to csv.reader')
 option('csv_delimiter', ',', 'delimiter passed to csv.reader')
 option('csv_quotechar', '"', 'quotechar passed to csv.reader')
+option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
 
 
 def open_csv(p):
@@ -28,7 +29,8 @@ def load_csv(vs):
         rdr = csv.reader(fp,
                          dialect=options.csv_dialect,
                          quotechar=options.csv_quotechar,
-                         delimiter=options.csv_delimiter)
+                         delimiter=options.csv_delimiter,
+                         skipinitialspace=options.csv_skipinitialspace)
 
         vs.rows = []
 

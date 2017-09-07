@@ -1420,8 +1420,8 @@ class Column:
         def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
             return re.sub(r'\W|^(?=\d)', '_', str(s))
         if not self._id:
-            self._id = clean_to_id(self._name) or defaultColNames[self.sheet.columns.index(self)]
-        return self._name or self._id
+            self._id = clean_to_id(self._name) or self.sheet and defaultColNames[self.sheet.columns.index(self)]
+        return self._name or self._id or ''
 
     @name.setter
     def name(self, name):
