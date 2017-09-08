@@ -18,7 +18,10 @@ def getValueOrError(c, r):
         return 'error: %s' % e
 
 
-# rowdef: ([bin_value], source_rows)
+def valueNames(vals):
+    return '-'.join(str(v) for v in vals)
+
+# rowdef: ([bin_values], source_rows)
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     commands = [
@@ -27,7 +30,7 @@ class SheetFreqTable(Sheet):
         Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet'),
         Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet'),
 
-        Command(ENTER, 'vs = vd.push(copy(source)); vs.name += "_"+cursorRow[0]; vs.rows = copy(cursorRow[1]) ', 'push new sheet with only source rows for this value'),
+        Command(ENTER, 'vs = vd.push(copy(source)); vs.name += "_"+valueNames(cursorRow[0]); vs.rows = copy(cursorRow[1]) ', 'push new sheet with only source rows for this value'),
         Command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 
@@ -40,21 +43,26 @@ class SheetFreqTable(Sheet):
         self.nKeys = len(self.origCols)
 
         self.columns = [
-            Column(col.name, type=col.type, width=30, getter=lambda r,i=i: r[0][i]) for i, col in enumerate(self.origCols)
+            Column(col.name, type=col.type, width=col.width, getter=lambda r,i=i: r[0][i]) for i, col in enumerate(self.origCols)
         ]
 
-        for c in self.source.visibleCols:
-            if hasattr(c, 'aggregator'):
-                self.columns.append(Column(c.aggregator.__name__+'_'+c.name,
-                                           type=c.aggregator.type or c.type,
-                                           getter=lambda r,c=c: c.aggregator(c.values(r[1]))))
+        self.columns.extend([
+            Column('count', type=int, getter=lambda r: len(r[1])),
+            Column('percent', type=float, getter=lambda r: len(r[1])*100/self.source.nRows),
+            Column('histogram', type=str, getter=lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
+        ])
 
-        if len(self.columns) == len(self.origCols):  # default has count and histogram
-            self.columns.extend([
-                Column('count', type=int, getter=lambda r: len(r[1])),
-                Column('percent', type=float, getter=lambda r: len(r[1])*100/self.source.nRows),
-                Column('histogram', type=str, getter=lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
-            ])
+        aggregatedCols = [Column(c.aggregator.__name__+'_'+c.name,
+                                 type=c.aggregator.type or c.type,
+                                 getter=lambda r,c=c: c.aggregator(c.values(r[1])))
+                             for c in self.source.visibleCols
+                                 if hasattr(c, 'aggregator')
+                         ]
+        self.columns.extend(aggregatedCols)
+
+        if aggregatedCols:  # hide count and histogram if aggregations added
+            for c in self.columns[self.nKeys:self.nKeys+3]:
+                c.width = 0
 
 
     def selectRow(self, row):
