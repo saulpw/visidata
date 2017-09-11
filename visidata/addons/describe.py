@@ -21,19 +21,21 @@ class SourceColumn(Column):
     def getValue(self, row):
         return self.getter(self.sheet.source, row)
 
+def values(c):
+    return c.values(c.sheet.rows)
 
 class DescribeSheet(Sheet):
     columns = [
-            Column('column', type=str, getter=lambda r: r[0].name),
-            SourceColumn('errors',  type=len, getter=lambda sheet,r: tuple(sr for sr in sheet.rows if isError(r[0], sr))),
-            SourceColumn('nulls',  type=len, getter=lambda sheet,r: tuple(sr for sr in sheet.rows if isNull(r[0].getValue(sr)))),
-            SourceColumn('distinct',type=len, getter=lambda sheet,r: set(r[1])),
-            SourceColumn('mode',   type=anytype, getter=lambda sheet,r: statistics.mode(r[1])),
-            SourceColumn('min',    type=anytype, getter=lambda sheet,r: min(r[1]) if isNumeric(r[0]) else None),
-            SourceColumn('median', type=anytype, getter=lambda sheet,r: statistics.median(r[1]) if isNumeric(r[0]) else None),
-            SourceColumn('mean',   type=float, getter=lambda sheet,r: statistics.mean(r[1]) if isNumeric(r[0]) else None),
-            SourceColumn('max',    type=anytype, getter=lambda sheet,r: max(r[1]) if isNumeric(r[0]) else None),
-            SourceColumn('stddev', type=float, getter=lambda sheet,r: statistics.stdev(r[1]) if isNumeric(r[0]) else None),
+            Column('column', type=str, getter=lambda r: r.name),
+            SourceColumn('errors',  type=len, getter=lambda sheet,r: tuple(sr for sr in sheet.rows if isError(r, sr))),
+            SourceColumn('nulls',  type=len, getter=lambda sheet,r: tuple(sr for sr in sheet.rows if isNull(r.getValue(sr)))),
+            SourceColumn('distinct',type=len, getter=lambda sheet,r: set(values(r))),
+            SourceColumn('mode',   type=anytype, getter=lambda sheet,r: statistics.mode(values(r))),
+            SourceColumn('min',    type=anytype, getter=lambda sheet,r: min(values(r)) if isNumeric(r) else None),
+            SourceColumn('median', type=anytype, getter=lambda sheet,r: statistics.median(values(r)) if isNumeric(r) else None),
+            SourceColumn('mean',   type=float, getter=lambda sheet,r: statistics.mean(values(r)) if isNumeric(r) else None),
+            SourceColumn('max',    type=anytype, getter=lambda sheet,r: max(values(r)) if isNumeric(r) else None),
+            SourceColumn('stddev', type=float, getter=lambda sheet,r: statistics.stdev(values(r)) if isNumeric(r) else None),
     ]
     commands = [
         Command('zs', 'source.select(cursorCell)', 'select rows in this cell on source sheet'),
@@ -43,6 +45,4 @@ class DescribeSheet(Sheet):
 
     @async
     def reload(self):
-        self.rows = []
-        for c in self.genProgress(self.source.columns):
-            self.addRow((c, c.values(self.source.rows)))
+        self.rows = self.source.columns  # allow for column deleting/reordering
