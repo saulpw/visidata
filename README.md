@@ -7,7 +7,7 @@ A terminal interface for exploring and arranging tabular data.
 ## Dependencies
 
 - OS/X or Linux
-- Python 3.3+
+- Python 3.4+
 - other modules are required for opening particular filetypes
 
 # Install

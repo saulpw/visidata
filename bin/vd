@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # Usage: $0 [-d] [-r] [-f <filetype>] [<visidata options>] [<input_source> ...]
-#        $0 [-d] [-r] [-f <filetype>] [<visidata options>] [--piano] --play <commandlog.vd> [--foo=value ...]
+#        $0 [-d] [-r] [-f <filetype>] [<visidata options>] [--piano] --play <cmdlog.vd> [--foo=value ...]
 
 __version__ = 'saul.pw/VisiData v0.97pre'
 
@@ -14,7 +14,7 @@ def eval_vd(logpath, *args, **kwargs):
     log = logpath.read_text().format(*args, **kwargs)
     src = PathFd(logpath.fqpn, io.StringIO(log))
     vs = openSource(src)
-    vd().cmdlog.openHook(vs, src)
+    vd().commandlog.openHook(vs, src)
     vd().push(vs)
     vs.vd = vd()
     return vs
@@ -28,7 +28,7 @@ def main():
     parser.add_argument('-d', dest='debug', action='store_true', default=False, help='abort on error')
     parser.add_argument('-r', dest='readonly', action='store_true', default=False, help='disable editing')
     parser.add_argument('-f', dest='filetype', default='', help='specify file type')
-    parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='specify file type')
+    parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='sets confirm_overwrite option to false')
     parser.add_argument('-p', '--play', dest='play', default=None, help='.vd file to replay')
 
     for optname, v in vdtui.baseOptions.items():
@@ -68,7 +68,7 @@ def main():
         sources = []
         for src in inputs:
             vs = openSource(src)
-            vdtui.vd().cmdlog.openHook(vs, src)
+            vdtui.vd().commandlog.openHook(vs, src)
             sources.append(vs)
 
         vdtui.run(sources)

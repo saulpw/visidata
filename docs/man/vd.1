@@ -6,70 +6,76 @@
 .Sh NAME
 .
 .Nm VisiData
-.Nd a tui for exploring and arranging data
+.Nd a terminal interface for exploring and arranging tabular data
 .
 .
 .Sh SYNOPSIS
 .
-.Pp
+.Bl -inset -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.It Ic vd
+.Op <options>
+<input> ...
+.
+.It Ic vd
+.Op <options>
+.Sy Fl p No <cmdlog.vd>
+.Op Fl -piano No <delay>
+--
+.Op Fl "-<field>=<value> ..."
+.
+.It <command> | 
 .Sy vd
 .Op <options>
-.Op Sy -f No filetype
-.Op <input>
-.
-.Pp
-<command> | 
-.Sy vd
-.Op <options>
-.
-.Pp
-.Sy vd
-.Op <options> 
-.Op Fl -play No <script.vd>
-.Op Fl -<format-field>=<value> 
-.
 .
 .Sh DESCRIPTION
 .
 .Nm VisiData
-is a console spreadsheet tool, built on the
-.Sy vdtui No platform, which enables radical optimizations to the cleaning, structuring and surveying of data. Supported file formats are tsv, csv, xlsx, hdf5, sqlite, ...
-.Pp
-Documentation for apps built on the 
-.Sy vdtui No framework can be found at
-.Xr vdtui 2 Ns . 
+is a text user interface for surveying, cleaning, editing, and restructuring data from any supported source, including tsv, csv, xlsx, hdf5, and sqlite.
+Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be documented, communicated, and replayed via the commandlog.
+.Nm VisiData No is built on the
+.Sy vdtui No platform.
 .
-.Bl -tag -width XXXXXXXXXXXXXX 
+.Sh REPLAY MODE
+.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.It Fl "p, --play"
+.No Replays a saved Ar cmdlog.vd No in batch mode (without curses).
+.No Python format strings (like \&"{ Ns Ar field Ns }\&") No are replaced with the Ar value No given on the command line.  These format options must be specified after the --.
+
+.It Fl -piano Ar delay
+causes
+.Sy --play No to replay via curses with Ar delay No seconds between commands
+.El
+.Sh COMMANDS
+.so vd-keystrokes.inc
 .
-.It Fl --play 
-Replays a previously saved .vd script, which may be parameterized with {format-field}s. <script.vd> should be `-` if piped through stdin.
-.It Fl "f  --filetype"
-specify file type
-.
-.Sh OPTIONS
-.
+.Sh MAJOR OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
-.so vd-cli.inc
-.
+.It Fl f, -filetype Ns = Ns Ar filetype
+use loader for
+.Ar filetype
+instead of file extension
+.It Fl "r, --readonly"
+disables editing
+.It Fl y, -confirm_overwrite Ns =F
+overwrites existing files without confirmation 
 .El
-.
-.Sh KEYSTROKES
-
-.so vd-keystrokes.inc
+.Sh MINOR OPTIONS
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.so vd-cli.inc
+.El
 .
 .Sh OPTIONS MENU
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .so vd-menu.inc
 .El
 .
+.
 .Sh SEE ALSO
 .
-.Xr vdtui 1
-.Pp
+.Xr vdtui 7
 vdtutor
-.Pp
-.Pa /usr/share/doc/ascii-commands.txt
+.Pa /usr/share/doc/visidata/ascii-commands.txt
 .
 .Sh AUTHOR
 .

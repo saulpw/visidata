@@ -1,7 +1,9 @@
 .Bl -tag -width XXXXXXXXXXXXXXXX -compact
 .
-.It Ic "F1  z?"
-displays commands available on the current sheet
+.It Ic " F1   z?"
+displays man page
+.It Ic "gF1  gz?"
+displays all commands available on current sheet
 .It Ic ^Q
 aborts program immediately
 .It Ic ^C
@@ -23,6 +25,8 @@ moves as expected
 moves left/down/up/right
 .It Ic "gh  gj  gk  gl"
 moves all the way to the left/bottom/top/right
+/It Ic "     G  gg"
+moves all the way to the top/bottom
 .It Ic "^B  ^F"
 scrolls one page up/down
 
@@ -56,9 +60,9 @@ edits name of current column
 sets type of current column to str/int/float/currency/date
 
 .It Ic " ="
-creates a new column from the given Python expression, which is computed for each row, using column names are as variables
+creates a new column from given Python expression, which is computed for each row, using column names are as variables
 .It Ic "g="
-sets the value in the current column for selected rows to the result of the given Python expression
+sets value in current column for selected rows to result of given Python expression
 
 .El
 .
@@ -104,7 +108,7 @@ opens duplicate sheet with all rows
 .Bl -tag -width XXXXXXXXXXXXXXXX -compact
 .
 .It Ic " e"
-edit contents of current cell
+edits contents of current cell
 .It Ic ge
 edits contents of current column for selected rows
 .It Ic " Delete"
@@ -116,10 +120,8 @@ sets contents of cells in current column to None for selected rows
 .
 .Sh "  Commands While Editing Input"
 .Bl -tag -width XXXXXXXXXXXXXXXX -compact 
-.It Ic ENTER
-accepts input
-.It Ic ^C
-aborts input
+.It Ic "ENTER  ^C"
+accepts/aborts input
 .It Ic ^Z
 launches external $EDITOR to edit contents
 .It Ic ^R
@@ -147,24 +149,13 @@ autocompletes input (when available)
 .
 .El
 .
-.
-.Sh Metasheets
+.Sh Other commands
 .
 .Bl -tag -width XXXXXXXXXXXXXXXX -compact
 .
-.It Ic Shift-S
-opens 
-.Sy S Ns heets sheet: manage and navigate the sheet stack
-.It Ic Shift-C
-opens
-.Sy C Ns olumns sheet: manage the columns of the current sheet
-.It Ic Shift-O
-opens
-.Sy O Ns ptions sheet: change style and behaviour
 .It Ic Shift-V
-opens readonly
-.Sy V Ns iew of contents of the current cell
-.It Ic Ctrl-^
+opens readonly view of contents of current cell
+.It Ic "^^ (Ctrl-^)"
 jumps to previous sheet
 .It Ic " ^E"
 opens traceback for most recent error
@@ -172,14 +163,6 @@ opens traceback for most recent error
 opens traceback for error in current cell
 .It Ic " ` (backtick)"
 opens source of current sheet
-.
-.El
-.
-.
-.Sh Other commands
-.
-.Bl -tag -width XXXXXXXXXXXXXXXX -compact
-.
 .It Ic ^L
 refreshes screen
 .It Ic ^G
@@ -188,8 +171,6 @@ shows cursor position and bounds of current sheet
 shows version information
 .It Ic ^R
 reloads current sheet
-.It Ic ^D
-toggles debug mode (aborts program on any exception)
 .
 .El
 .
@@ -209,7 +190,7 @@ reload an existing sheet from in-memory contents
 .It Ql move
 change layout of visible data
 .It Ql open
-push a sheet to the top of the sheets list (making it immediately visible)
+push a sheet to top of sheets list (making it immediately visible)
 .It Ql scroll
 change set of visible rows
 .It Ql show

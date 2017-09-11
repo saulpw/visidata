@@ -19,8 +19,8 @@ else:
 
 print(vd.__version__)
 
-options_cli_skel = '''.It Sy --{cli_optname} Ar {type}
-{description} (default '{default}')
+options_cli_skel = '''.It Sy --{cli_optname} Ns ={type}
+.No {description} (default Sy {default} Ns )
 '''
 
 options_menu_skel = '''.It Sy "{optname:<18}" No "{default:<16}"

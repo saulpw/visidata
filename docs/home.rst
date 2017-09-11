@@ -35,7 +35,7 @@ or clone from git
 Dependencies
 ~~~~~~~~~~~~
 
--  Python 3.3+
+-  Python 3.4+
 -  h5py and numpy (if opening .hdf5 files)
 
 **Remember to install the Python3 versions of these packages with e.g.
