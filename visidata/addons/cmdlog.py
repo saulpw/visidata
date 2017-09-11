@@ -14,9 +14,7 @@ def fnSuffix(template):
             return fn
 
 def open_vd(p):
-    vs = CmdLog(p.name, p)
-    vs.loader = lambda vs=vs: reload_tsv_sync(vs)
-    return vs
+    return CmdLog(p.name, p)
 
 class CmdLog(Sheet):
     'Log of commands for current session.'
@@ -40,6 +38,9 @@ class CmdLog(Sheet):
 
         self.sheetmap = {}
         self.currentExecRow = None
+
+    def reload(self):
+        reload_tsv_sync(self)
 
     def undo(self):
         'Delete last command, reload sources, and replay entire log.'

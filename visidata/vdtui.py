@@ -96,6 +96,26 @@ def option(name, default, helpstr=''):
 
 theme = option
 
+class OptionsObject:
+    'minimalist options framework'
+    def __init__(self, d):
+        object.__setattr__(self, '_opts', d)
+
+    def __getattr__(self, k):
+        name, value, default, helpstr = self._opts[k]
+        return value
+
+    def __setattr__(self, k, v):
+        self.__setitem__(k, v)
+
+    def __setitem__(self, k, v):
+        if k not in self._opts:
+            raise Exception('no such option "%s"' % k)
+        self._opts[k][1] = type(self._opts[k][1])(v)
+
+options = OptionsObject(baseOptions)
+
+
 option('debug', False, 'abort on error and display stacktrace')
 option('readonly', False, 'disable saving')
 
@@ -111,6 +131,7 @@ option('textwrap', True, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
 option('aggr_null_filter', 'none', 'invalid values to filter out when aggregating: (n/e/f/"")')
+option('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 
 theme('disp_truncator', '…')
 theme('disp_key_sep', '/')
@@ -346,6 +367,9 @@ def enumPivot(L, pivotIdx):
     rng2 = range(0, pivotIdx+1)
     for i in itertools.chain(rng, rng2):
         yield i, L[i]
+
+def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
+    return re.sub(r'\W|^(?=\d)', '_', str(s))
 
 
 # VisiData singleton contains all sheets
@@ -831,7 +855,7 @@ class Sheet:
         for i, c in enumPivot(self.visibleCols, self.cursorVisibleColIndex):
             if re.search(colregex, c.name, regex_flags()):
                 self.cursorVisibleColIndex = i
-                return
+                return c
 
     def recalc(self):
         for c in self.columns:
@@ -1401,12 +1425,12 @@ aggregator('distinct', int, lambda values: len(set(values)))
 aggregator('count', int, len)
 
 class Column:
-    def __init__(self, name, cache=False, **kwargs):
+    def __init__(self, name, type=anytype, cache=False, **kwargs):
         self.sheet = None     # owning sheet, set in Sheet.addColumn
         self._id = None       # identifier for this column, usable in expressions
         self.name = name      # display visible name; uses setter from the get-go to fill in _id also
-        self.fmtstr = ''      # by default, use str().  .type also sets to default based on type
-        self.type = anytype   # anytype/str/int/float/date/func
+        self.fmtstr = ''      # by default, use str()
+        self.type = type      # anytype/str/int/float/date/func
         self.getter = lambda row: row
         self.full_getter = lambda sheet,col,row: col.getter(row)
         self.setter = None    # setter(sheet,col,row,value)
@@ -1429,28 +1453,29 @@ class Column:
 
     @property
     def name(self):
-        def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
-            return re.sub(r'\W|^(?=\d)', '_', str(s))
-        if not self._id:
-            self._id = clean_to_id(self._name) or self.sheet and defaultColNames[self.sheet.columns.index(self)]
         return self._name or self._id or ''
 
     @name.setter
     def name(self, name):
-        self._name = name.strip()
+        name = name.strip()
+        if options.force_valid_colnames:
+            name = clean_to_id(name)
+        self._name = name
+        self._id = name or self.sheet and defaultColNames[self.sheet.columns.index(self)]
 
     @property
-    def type(self):
-        return self._type
+    def fmtstr(self):
+        if self._fmtstr:
+            return self._fmtstr
 
-    @type.setter
-    def type(self, t):
-        'Sets `_type` from t as either a typename or a callable. Revert to anytype if not callable.'
-        self._type = t or anytype
+        t = self.type
+        if t is int:      return '{:d}'
+        elif t is float:    return '{:.02f}'
+        elif t is currency: return '{:,.02f}'
 
-        if t is int:        self.fmtstr = '{:d}'
-        elif t is float:    self.fmtstr = '{:.02f}'
-        elif t is currency: self.fmtstr = '{:,.02f}'
+    @fmtstr.setter
+    def fmtstr(self, v):
+        self._fmtstr = v
 
     def format(self, cellval):
         'Return displayable string of `cellval` according to our `Column.type` and `Column.fmtstr`'
@@ -1484,7 +1509,7 @@ class Column:
                 pass
         return ret
 
-    def getValue(self, row):
+    def calcValue(self, row):
         return self.full_getter(self.sheet, self, row)
 
     def getTypedValue(self, row):
@@ -1498,16 +1523,16 @@ class Column:
             exceptionCaught(status=False)
             return self.type()
 
-    def getCell(self, row, width=None):
-        'Memoize _getCell with key (id(row), width)'
+    def getValue(self, row):
+        'Memoize calcValue with key id(row)'
         if self._cachedValues is None:
-            return self._getCell(row, width)
+            return self.calcValue(row)
 
-        k = (id(row), width)
+        k = id(row)
         if k in self._cachedValues:
             return self._cachedValues[k]
 
-        ret = self._getCell(row, width)
+        ret = self.calcValue(row)
         self._cachedValues[k] = ret
 
         if len(self._cachedValues) > 256:  # max number of entries
@@ -1515,7 +1540,7 @@ class Column:
 
         return ret
 
-    def _getCell(self, row, width=None):
+    def getCell(self, row, width=None):
         'Return DisplayWrapper for displayable cell value.'
         try:
             cellval = self.getValue(row)
@@ -1536,7 +1561,7 @@ class Column:
 
         try:
             dispval = self.format(cellval)
-            if width and self._type in (int, float, currency):
+            if width and self.type in (int, float, currency):
                 dispval = dispval.rjust(width-1)
             return DisplayWrapper(cellval, display=dispval)
         except EscapeException:
@@ -1627,7 +1652,7 @@ class SubrowColumn(Column):
 
     def getValue(self, row):
         subrow = row[self.subrowidx]
-        return subrow and self.origcol.get(subrow) or None
+        return subrow and self.origcol.getValue(subrow) or None
 
     def setValue(self, row, value):
         subrow = row[self.subrowidx]
@@ -1832,26 +1857,6 @@ class HelpSheet(Sheet):
         self.rows = []
         for src in self.source._commands.maps:
             self.rows.extend(src.values())
-
-
-class OptionsObject:
-    'minimalist options framework'
-    def __init__(self, d):
-        object.__setattr__(self, '_opts', d)
-
-    def __getattr__(self, k):
-        name, value, default, helpstr = self._opts[k]
-        return value
-
-    def __setattr__(self, k, v):
-        self.__setitem__(k, v)
-
-    def __setitem__(self, k, v):
-        if k not in self._opts:
-            raise Exception('no such option "%s"' % k)
-        self._opts[k][1] = type(self._opts[k][1])(v)
-
-options = OptionsObject(baseOptions)
 
 
 class OptionsSheet(Sheet):
@@ -2165,8 +2170,8 @@ class UrlPath:
 
 class PathFd(Path):
     'minimal Path interface to satisfy a tsv loader'
-    def __init__(self, fqpn, fp, filesize=0):
-        super().__init__(fqpn)
+    def __init__(self, pathname, fp, filesize=0):
+        super().__init__(pathname)
         self.fp = fp
         self.alreadyRead = []  # shared among all RepeatFile instances
         self._filesize = filesize

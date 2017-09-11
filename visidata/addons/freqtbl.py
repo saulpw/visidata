@@ -83,7 +83,7 @@ class SheetFreqTable(Sheet):
 
         if nbins and len(self.origCols) == 1 and self.origCols[0].type in (int, float, currency):
             origCol = self.origCols[0]
-            self.columns[0]._type = str
+            self.columns[0].type = str
 
             # separate rows with errors at the column from those without errors
             errorbin = []
