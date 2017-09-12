@@ -1,11 +1,37 @@
-from visidata import *
 import time
+import operator
 
-option('piano', 0.0, '--play piano delay in seconds')
+from visidata import *
+
+option('delay', 0.0, '--play delay between commands, in seconds')
 
 globalCommand('D', 'vd.push(vd.commandlog)', 'push the commandlog')
 globalCommand('^D', 'saveSheet(vd.commandlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save commandlog to new file')
 #globalCommand('KEY_BACKSPACE', 'vd.commandlog.undo()', 'remove last action on commandlog and replay')
+
+# not necessary to log movements and scrollers
+nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < > { } / ? n N g/ g?'.split()
+nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
+nonLogKeys += 'zk zj zt zz zb zL zH zh zl zs ze zKEY_END zKEY_HOME zKEY_LEFT zKEY_RIGHT kLFT5 kRIT5'.split()
+nonLogKeys += '^L ^C ^U ^D'.split()
+
+def itemsetter(i):
+    def g(obj, v):
+        obj[i] = v
+    return g
+
+def namedlist(objname, fieldnames):
+    class NamedListTemplate(list):
+        __name__ = objname
+        _fields = fieldnames
+
+    for i, attrname in enumerate(fieldnames):
+        # create property getter/setter for each field
+        setattr(NamedListTemplate, attrname, property(operator.itemgetter(i), itemsetter(i)))
+
+    return NamedListTemplate
+
+CommandLogRow = namedlist('CommandLogRow', 'sheet col row keystrokes input comment'.split())
 
 def fnSuffix(template):
     for i in range(1, 10):
@@ -16,19 +42,14 @@ def fnSuffix(template):
 def open_vd(p):
     return CommandLog(p.name, p)
 
+# rowdef: CommandLog
 class CommandLog(Sheet):
     'Log of commands for current session.'
     commands = [
-        Command('^A', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this row of the commandlog'),
-        Command('g^A', 'sheet.replay()', 'replay this entire commandlog')
+        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this row of the commandlog'),
+        Command('gx', 'sheet.replay()', 'replay this entire commandlog')
     ]
-    columns = [
-            ColumnItem('start_sheet', 0),
-            ColumnItem('keystrokes', 1),
-            ColumnItem('input', 2),
-            ColumnItem('end_sheet', 3),
-            ColumnItem('comment', 4),
-    ]
+    columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 
     currentReplayRow = None  # must be global, to allow replay
 
@@ -36,11 +57,12 @@ class CommandLog(Sheet):
         super().__init__(name, *args)
         self.currentActiveRow = None
 
-        self.sheetmap = {}
+        self.sheetmap = {}   # sheet.name -> vs
         self.currentExecRow = None
 
     def reload(self):
         reload_tsv_sync(self)
+        self.rows = [CommandLogRow(r) for r in self.rows]
 
     def undo(self):
         'Delete last command, reload sources, and replay entire log.'
@@ -48,7 +70,7 @@ class CommandLog(Sheet):
             error('no more to undo')
 
         deletedRow = self.rows[-2]   # the command to undo
-        del self.rows[-2:]            # delete the previous command and the undo command
+        del self.rows[-2:]           # delete the previous command and the undo command
 
         vd().sheets = [self]
 
@@ -56,59 +78,66 @@ class CommandLog(Sheet):
         for r in self.rows:
             self.replayOne(r)
 
-        status('undid "%s"' % deletedRow[1])
+        status('undid "%s"' % deletedRow.keystrokes)
 
     def beforeExecHook(self, sheet, keystrokes, args=''):
         'Log keystrokes and args unless replaying.'
         assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
         if CommandLog.currentReplayRow is None:
-            self.currentActiveRow = [ sheet.name, keystrokes, args, '', sheet._commands[keystrokes][1] ]
-            self.addRow(self.currentActiveRow)
+            self.currentActiveRow = CommandLogRow([sheet.name, sheet.cursorCol.name, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
 
     def afterExecSheet(self, vs, escaped):
         'Set end_sheet for the most recent command.'
-        if vs and self.currentActiveRow:
-            if escaped:  # remove user-aborted commands
-                del self.rows[-1]
-            else:
-                self.currentActiveRow[3] = vs.name
-                beforeName = self.currentActiveRow[0]
-                afterName = self.currentActiveRow[3]
+        if not vs or vs is self or not self.currentActiveRow:
+            return
 
-                # do not record actions on the commandlog itself, only sheet movement to/from
-                if self.name in [beforeName, afterName]:
-                    if beforeName == afterName:
-                        del self.rows[-1]
-
+        # remove user-aborted commands and simple movements
+        key = self.currentActiveRow.keystrokes
+        if escaped or key in nonLogKeys:
             self.currentActiveRow = None
+            return
+
+        # do not record actions to move away from the commandlog
+        if self.name != self.currentActiveRow.sheet:
+           self.addRow(self.currentActiveRow)
+
+        self.currentActiveRow = None
 
     def openHook(self, vs, src):
-        if vs:
-            self.addRow([ '', 'o', src, vs.name, 'open file' ])
-            self.sheetmap[vs.name] = vs
+        self.addRow(CommandLogRow(['', '', 0, 'o', src, 'open file']))
+
+    def getSheet(self, sheetname):
+        vs = self.sheetmap.get(sheetname)
+        if not vs:
+            matchingSheets = [x for x in vd().sheets if x.name == sheetname]
+            if not matchingSheets:
+                status(','.join(x.name for x in vd().sheets))
+                return None
+            vs = matchingSheets[0]
+        return vs
 
     def replayOne(self, r, expectedThreads=0):
         'Replay the command in one given row.'
-        beforeSheet, keystrokes, args, afterSheet = r[:4]
-
         CommandLog.currentReplayRow = r
-        if beforeSheet:
-            vs = self.sheetmap.get(beforeSheet)
-            if not vs:
-                matchingSheets = [x for x in vd().sheets if x.name == beforeSheet]
-                if not matchingSheets:
-                    error('no sheets named %s' % beforeSheet)
-                vs = matchingSheets[0]
+        if r.sheet:
+            vs = self.getSheet(r.sheet) or error('no sheets named %s' % r.sheet)
+
+            if r.col != vs.cursorCol.name:
+                vs.searchColumnNameRegex(r.col, moveCursor=True)
+                # delay with simulated movement?
+            vs.cursorRowIndex = int(r.row)
+            # delay if row changed?
+
         else:
             vs = self
 
-        vd().keystrokes = keystrokes
-        escaped = vs.exec_keystrokes(keystrokes)
+        vd().keystrokes = r.keystrokes
+        escaped = vs.exec_keystrokes(r.keystrokes)
+
+        if escaped:  # escapes should already have been filtered out
+            error('unexpected escape')
 
         sync(expectedThreads)
-
-        if afterSheet not in self.sheetmap:
-            self.sheetmap[afterSheet] = vd().sheets[0]
 
         CommandLog.currentReplayRow = None
 
@@ -117,8 +146,7 @@ class CommandLog(Sheet):
         self.sheetmap = {}
 
         for r in self.rows:
-#            if live:
-            time.sleep(options.piano)
+            time.sleep(options.delay)
             vd().statuses = []
             # sync should expect this thread if playing live
             self.replayOne(r, 1 if live else 0)
@@ -127,22 +155,24 @@ class CommandLog(Sheet):
 
     @async
     def replay(self):
-        'Inject commands into live execution with interface'
+        'Inject commands into live execution with interface.'
         self.replay_sync(live=True)
 
     def getLastArgs(self):
-        'Get last command, if any.'
+        'Get user input for the currently playing command.'
         if CommandLog.currentReplayRow is not None:
-            return CommandLog.currentReplayRow[2]
+            return CommandLog.currentReplayRow.input
         else:
             return None
 
     def setLastArgs(self, args):
-        "Set args on any log but commandlog (we don't log commandlog commands)."
-        if vd().sheets[0] is not self:
-            self.rows[-1][2] = args
+        'Set user input on last command, if not already set.'
+        # only set if not already set (second input usually confirmation)
+        if self.currentActiveRow is not None:
+            if not self.currentActiveRow.input:
+                self.currentActiveRow.input = args
 
-vd().commandlog = CommandLog('__commandlog__')
+vd().commandlog = CommandLog('commandlog')
 vd().addHook('preexec', vd().commandlog.beforeExecHook)
 vd().addHook('postexec', vd().commandlog.afterExecSheet)
 vd().addHook('preedit', vd().commandlog.getLastArgs)

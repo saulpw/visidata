@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
-# Usage: $0 [-d] [-r] [-f <filetype>] [<visidata options>] [<input_source> ...]
-#        $0 [-d] [-r] [-f <filetype>] [<visidata options>] [--piano] --play <cmdlog.vd> [--foo=value ...]
+# Usage: $0 [-d] [-r] [-f <filetype>] [<visidata_options>] [<input_source> ...]
+#        $0 [-d] [-r] [-f <filetype>] [<visidata_options>] [--delay <delay>] --play <cmdlog.vd> [-- --foo=value ...]
 
 __version__ = 'saul.pw/VisiData v0.97pre'
 
@@ -108,7 +108,7 @@ def main():
         vdfile = Path(args.play)
 
     vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
-    if args.piano:
+    if args.delay:
         vs.replay()
         run([])
     else:

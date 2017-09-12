@@ -839,8 +839,11 @@ class Sheet:
 
         self.progressMade = self.progressTotal
 
-    def addRow(self, row):
-        self.rows.append(row)
+    def addRow(self, row, index=None):
+        if index is None:
+            self.rows.append(row)
+        else:
+            self.rows.insert(index, row)
 
     def moveRegex(self, *args, **kwargs):
         'Wrap `VisiData.searchRegex`, with cursor additionally moved.'
@@ -850,11 +853,12 @@ class Sheet:
         'Wrap `VisiData.searchRegex`.'
         return self.vd.searchRegex(self, *args, **kwargs)
 
-    def searchColumnNameRegex(self, colregex):
+    def searchColumnNameRegex(self, colregex, moveCursor=False):
         'Select visible column matching `colregex`, if found.'
         for i, c in enumPivot(self.visibleCols, self.cursorVisibleColIndex):
             if re.search(colregex, c.name, regex_flags()):
-                self.cursorVisibleColIndex = i
+                if moveCursor:
+                    self.cursorVisibleColIndex = i
                 return c
 
     def recalc(self):
