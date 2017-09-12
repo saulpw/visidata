@@ -83,8 +83,7 @@ class CommandLog(Sheet):
     def beforeExecHook(self, sheet, keystrokes, args=''):
         'Log keystrokes and args unless replaying.'
         assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
-        if CommandLog.currentReplayRow is None:
-            self.currentActiveRow = CommandLogRow([sheet.name, sheet.cursorCol.name, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
+        self.currentActiveRow = CommandLogRow([sheet.name, sheet.cursorCol.name, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
 
     def afterExecSheet(self, vs, escaped):
         'Set end_sheet for the most recent command.'
