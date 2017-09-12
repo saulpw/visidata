@@ -20,7 +20,9 @@ globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all 
 globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
 
 globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'go to visible column by regex of name')
-globalCommand('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
+globalCommand('r', 'moveRegex(regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'go to row by regex of key columns')
+globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'go to visible column number')
+globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
 
 globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'push duplicate sheet with a random sample of <N> rows')
 

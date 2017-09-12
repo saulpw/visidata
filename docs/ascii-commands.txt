@@ -97,7 +97,7 @@
         `  (backtick) push source sheet
         a  'a'dd a blank row
         b
-        c  'c'olumn move by regex
+        c  'c'olumn move by name regex
         d  'd'elete row to clipboard
         e  'e'dit cell
         f
@@ -112,13 +112,13 @@
         o
         p  'p'aste row from clipboard
         q  'q'uit sheet
-        r  'r'ow move by number
+        r  'r'ow move by key regex
         s  's'elect row
         t
         u  'u'nselect row
         v
         w
-        x
+        x  e'x'ecute this row (meaning varies depending on sheet)
         y  'y'ank a row to clipbard [vim]
         z  scroll prefix [vim]
  Shift- }  move to next selected

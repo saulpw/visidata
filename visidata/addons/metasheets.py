@@ -1,7 +1,5 @@
 from visidata import *
 
-globalCommand('X', 'vd.push(SheetDict("lastInputs", vd.lastInputs))', 'push last inputs sheet')
-
 OptionsSheet.colorizers += [
         Colorizer('cell', 9, lambda s,c,r,v: v if c.name in ['value', 'default'] and r[0].startswith('color_') else None)
     ]
