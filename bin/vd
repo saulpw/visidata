@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # Usage: $0 [-d] [-r] [-f <filetype>] [<visidata_options>] [<input_source> ...]
-#        $0 [-d] [-r] [-f <filetype>] [<visidata_options>] [--delay <delay>] --play <cmdlog.vd> [-- --foo=value ...]
+#        $0 [-d] [-r] [-f <filetype>] [<visidata_options>] --play <cmdlog.vd> [--batch] [--delay <delay>] [-- --foo=value ...]
 
 __version__ = 'saul.pw/VisiData v0.97pre'
 
@@ -30,6 +30,7 @@ def main():
     parser.add_argument('-f', dest='filetype', default='', help='specify file type')
     parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='sets confirm_overwrite option to false')
     parser.add_argument('-p', '--play', dest='play', default=None, help='.vd file to replay')
+    parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replay without curses interface')
 
     for optname, v in vdtui.baseOptions.items():
         name, optval, defaultval, helpstr = v
@@ -49,7 +50,7 @@ def main():
 
     # command-line overrides
     for optname, optval in vars(args).items():
-        if optval is not None and optname not in ['inputs', 'play']:
+        if optval is not None and optname not in ['inputs', 'play', 'batch']:
             vdtui.options[optname] = optval
 
     inputs = list(args.inputs)
@@ -108,12 +109,12 @@ def main():
         vdfile = Path(args.play)
 
     vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
-    if args.delay:
-        vs.replay()
-        run([])
-    else:
+    if args.batch:
         vd().status = print
         vs.replay_sync()
+    else:
+        vs.replay()
+        run([])
 
 if __name__ == '__main__':
     vdtui.status(__version__)
