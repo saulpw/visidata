@@ -1663,9 +1663,10 @@ class DisplayWrapper:
 
 class ColumnEnum(Column):
     'types and aggregators. row.<name> should be kept to the values in the mapping m, and can be set by the a string key into the mapping.'
-    def __init__(self, name, m):
+    def __init__(self, name, m, default=None):
         super().__init__(name)
         self.mapping = m
+        self.default = default
 
     def getValue(self, row):
         v = getattr(row, self.name, None)
@@ -1674,7 +1675,7 @@ class ColumnEnum(Column):
     def setValue(self, row, value):
         if isinstance(value, str):  # first try to get the actual value from the mapping
             value = self.mapping.get(value, value)
-        setattr(row, self.name, value)
+        setattr(row, self.name, value or self.default)
 
 
 class LazyMapping:
@@ -1814,7 +1815,7 @@ class ColumnsSheet(Sheet):
     columns = [
             ColumnAttr('name'),
             ColumnAttr('width', type=int),
-            ColumnEnum('type', globals()),
+            ColumnEnum('type', globals(), default=anytype),
             ColumnAttr('fmtstr'),
             Column('value', full_getter=lambda self,c,r: r.getDisplayValue(self.source.cursorRow)),
     ]
