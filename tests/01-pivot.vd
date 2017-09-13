@@ -1,13 +1,9 @@
-start_sheet	keystrokes	input	end_sheet	comment
-	o	sample_data/sample.tsv	sample	open file
-sample	c	rep	sample	go to visible column by regex of name
-sample	!		sample	toggle this column as a key column
-sample	c	total	sample	go to visible column by regex of name
-sample	%		sample	set column type to float
-sample	+	sum	sample	choose aggregator for this column
-sample	c	item	sample	go to visible column by regex of name
-sample	W		sample_pivot	push a sheet pivoted on the current column
-sample_pivot	C		sample_pivot_columns	open Columns for this sheet
-sample_pivot_columns	]		sample_pivot_columns	sort by this column descending
-sample_pivot_columns	q		sample_pivot	quit the current sheet
-sample_pivot	^S	{output}	sample_pivot	save this sheet to new file
+sheet	col	row	keystrokes	input	comment
+		0	o	sample_data/sample.tsv	open file
+sample	Rep	0	!		toggle this column as a key column
+sample	Total	0	%		set column type to float
+sample	Total	0	+	sum	choose aggregator for this column
+sample	Item	0	W		push a sheet pivoted on the current column
+sample_pivot	Rep	0	C		open Columns for this sheet
+sample_pivot_columns	name	0	]		sort by this column descending
+sample_pivot_columns	name	0	q		quit the current sheet

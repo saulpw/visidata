@@ -491,7 +491,7 @@ class VisiData:
     @property
     def unfinishedThreads(self):
         'A list of unfinished threads (those without a recorded `endTime`).'
-        return [t for t in self.threads if t.endTime is None]
+        return [t for t in self.threads if getattr(t, 'endTime') is None]
 
     def checkForFinishedThreads(self):
         'Mark terminated threads with endTime.'
@@ -938,6 +938,7 @@ class Sheet:
     def exec_command(self, cmd, vdglobals=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
         escaped = False
+        err = ''
 
         if vdglobals is None:
             vdglobals = globals()
@@ -952,9 +953,9 @@ class Sheet:
             self.vd.status(e.args[0])
             escaped = True
         except Exception:
-            self.vd.exceptionCaught()
+            err = self.vd.exceptionCaught()
 
-        self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped)
+        self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
 
         return escaped
 

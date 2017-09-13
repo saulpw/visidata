@@ -22,6 +22,7 @@ class StaticSheet(Sheet):
         super().__init__(source.name + "'", source)
 
         self.columns = [ColumnItem(col.name, i, width=col.width, type=col.type) for i,col in enumerate(self.source.columns)]
+        self.nKeys = source.nKeys
 
     @async
     def reload(self):

@@ -1,15 +1,8 @@
-start_sheet	keystrokes	input	end_sheet	comment
-	o	sample_data/sample.tsv	sample	open file
-sample	l		sample	go one column right
-sample	l		sample	go one column right
-sample	l		sample	go one column right
-sample	l		sample	go one column right
-sample	#		sample	set column type to integer
-sample	=	Units > 10	sample	add column by expr
-sample	l		sample	go one column right
-sample	|	True	sample	select rows by regex matching this columns
-sample	"		sample_selected	push duplicate sheet with only selected rows
-sample_selected	h		sample_selected	go one column left
-sample_selected	h		sample_selected	go one column left
-sample_selected	F		sample_selected_Item_freq	open frequency table from values in this column
-sample_selected_Item_freq	^S	{output}	sample_selected_Item_freq	save this sheet to new file
+sheet	col	row	keystrokes	input	comment
+		0	o	sample_data/sample.tsv	open file
+sample	Units	0	#		set column type to integer
+sample	Units	0	=	Units > 10	add column by expr
+sample	Units > 10	0	|	True	select rows by regex matching this columns
+sample	Units > 10	0	"		push duplicate sheet with refs to selected or all rows
+sample_selectedref	Item	0	F		open frequency table from values in this column
+sample_selectedref_Item_freq	Item	0	^S	{output}	save this sheet to new file

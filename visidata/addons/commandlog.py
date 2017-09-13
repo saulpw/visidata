@@ -81,24 +81,27 @@ class CommandLog(Sheet):
         status('undid "%s"' % deletedRow.keystrokes)
 
     def beforeExecHook(self, sheet, keystrokes, args=''):
-        'Log keystrokes and args unless replaying.'
-        assert not sheet or sheet is vd().sheets[0], (sheet.name, vd().sheets[0].name)
+        if sheet is self:
+            return  # don't record editlog commands
+        if self.currentActiveRow:
+            self.afterExecSheet(sheet, False, '')
         self.currentActiveRow = CommandLogRow([sheet.name, sheet.cursorCol.name, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
 
-    def afterExecSheet(self, vs, escaped):
-        'Set end_sheet for the most recent command.'
-        if not vs or vs is self or not self.currentActiveRow:
+    def afterExecSheet(self, sheet, escaped, err):
+        'Records currentActiveRow'
+        if not self.currentActiveRow:  # nothing to record
             return
+
+        if sheet is self:  # don't record jumps to commandlog
+            return
+
+        if err:
+            self.currentActiveRow[-1] += ' [%s]' % err
 
         # remove user-aborted commands and simple movements
         key = self.currentActiveRow.keystrokes
-        if escaped or key in nonLogKeys:
-            self.currentActiveRow = None
-            return
-
-        # do not record actions to move away from the commandlog
-        if self.name != self.currentActiveRow.sheet:
-           self.addRow(self.currentActiveRow)
+        if not escaped and key not in nonLogKeys:
+            self.addRow(self.currentActiveRow)
 
         self.currentActiveRow = None
 
