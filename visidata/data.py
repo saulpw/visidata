@@ -7,8 +7,6 @@ option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('skiplines', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
 
-globalCommand('+', 'cursorCol.aggregator = chooseOne(aggregators)', 'choose aggregator for this column')
-
 # slide rows/columns around
 globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
 globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
@@ -32,7 +30,6 @@ globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)
 globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
 globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=name+".tsv"), options.confirm_overwrite)', 'save this sheet to new file')
 
-globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol.values(selectedRows or rows)))', 'aggregate selected rows in this column')
 globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'show evaluated expression over current row')
 
 globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'create new sheet with N columns')

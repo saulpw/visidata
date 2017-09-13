@@ -26,17 +26,15 @@ class SheetPivot(Sheet):
         self.columns = copy(self.nonpivotKeyCols)
         self.nKeys = len(self.nonpivotKeyCols)
         for aggcol in self.source.columns:
-            if not hasattr(aggcol, 'aggregator'):
-                continue
-
-            for col in self.variableCols:
-                allValues = set(col.values(self.source.rows))
-                for value in self.genProgress(allValues):
-                    c = Column('_'.join([value, aggcol.name, aggcol.aggregator.__name__]),
-                               type=aggcol.aggregator.type or aggcol.type,
-                               getter=lambda r,aggcol=aggcol,aggvalue=value: aggcol.aggregator(aggcol.values(r[1].get(aggvalue, []))))
-                    c.aggvalue = value
-                    self.columns.append(c)
+            for aggregator in getattr(aggcol, 'aggregators', []):
+                for col in self.variableCols:
+                    allValues = set(col.values(self.source.rows))
+                    for value in self.genProgress(allValues):
+                        c = Column('_'.join([value, aggcol.name, aggregator.__name__]),
+                                type=aggregator.type or aggcol.type,
+                                getter=lambda r,aggcol=aggcol,aggvalue=value: aggregator(aggcol.values(r[1].get(aggvalue, []))))
+                        c.aggvalue = value
+                        self.columns.append(c)
 
         rowidx = {}
         self.rows = []

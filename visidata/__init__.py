@@ -5,6 +5,7 @@ from .vdtui import __version__
 from .vdtui import *
 from .async import *
 from .zscroll import *
+from .aggregators import *
 from .data import *
 from .clipboard import *
 

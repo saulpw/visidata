@@ -1414,23 +1414,6 @@ def isNullFunc():
                 'f': lambda v: not bool(v)
            }.get(options.aggr_null_filter[:1].lower(), lambda v: False)
 
-aggregators = collections.OrderedDict()
-
-
-def aggregator(name, type, func):
-    def _func(values):  # wrap builtins so they can have a .type
-        return func(values)
-    _func.type = type
-    _func.__name__ = name
-    aggregators[name] = _func
-
-aggregator('min', None, min)
-aggregator('max', None, max)
-aggregator('avg', float, lambda values: float(sum(values))/len(values))
-aggregator('sum', None, sum)
-aggregator('distinct', int, lambda values: len(set(values)))
-aggregator('count', int, len)
-
 class Column:
     def __init__(self, name, type=anytype, cache=False, **kwargs):
         self.sheet = None     # owning sheet, set in Sheet.addColumn

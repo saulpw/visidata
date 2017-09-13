@@ -52,11 +52,11 @@ class SheetFreqTable(Sheet):
             Column('histogram', type=str, getter=lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
         ])
 
-        aggregatedCols = [Column(c.aggregator.__name__+'_'+c.name,
-                                 type=c.aggregator.type or c.type,
-                                 getter=lambda r,c=c: c.aggregator(c.values(r[1])))
+        aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
+                                 type=aggregator.type or c.type,
+                                 getter=lambda r,aggr=aggregator: aggr(c.values(r[1])))
                              for c in self.source.visibleCols
-                                 if hasattr(c, 'aggregator')
+                                for aggregator in getattr(c, 'aggregators', [])
                          ]
         self.columns.extend(aggregatedCols)
 
