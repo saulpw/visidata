@@ -40,7 +40,8 @@ class DescribeSheet(Sheet):
     commands = [
         Command('zs', 'source.select(cursorCell)', 'select rows in this cell on source sheet'),
         Command('zu', 'source.unselect(cursorCell)', 'unselect rows in this cell on source sheet'),
-        Command('z^J', 'vs=copy(source); vs.rows=cursorCell; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'unselect rows in this cell on source sheet')
+        Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'unselect rows in this cell on source sheet'),
+        Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open frequency table for this column in the source sheet')
     ]
 
     @async
