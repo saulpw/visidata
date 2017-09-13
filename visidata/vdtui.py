@@ -236,8 +236,10 @@ globalCommand('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, c
 
 globalCommand('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit this cell')
 globalCommand('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
-globalCommand('KEY_DC', 'cursorCol.setValues([cursorRow], None)', 'set this cell to None')
-globalCommand('gKEY_DC', 'cursorCol.setValues(selectedRows, None)', 'set this column to None for all selected rows')
+globalCommand('zd', 'cursorCol.setValues([cursorRow], None)', 'set this cell to None')
+globalCommand('gzd', 'cursorCol.setValues(selectedRows, None)', 'set this column to None for all selected rows')
+alias('KEY_DC', 'zd')
+alias('gKEY_DC', 'gzd')
 
 globalCommand(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 globalCommand('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
