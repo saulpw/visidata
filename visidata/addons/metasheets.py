@@ -23,14 +23,14 @@ SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
 ColumnsSheet.commands += [
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'join selected source columns'),
-        Command('g!', 'for c in selectedRows: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet'),
-        Command('g-', 'for c in selectedRows: c.width = 0', 'hide all selected columns on source sheet'),
-        Command('g_', 'for c in selectedRows: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen'),
-        Command('g%', 'for c in selectedRows: c.type = float', 'set type of all selected columns to float'),
-        Command('g#', 'for c in selectedRows: c.type = int', 'set type of all selected columns to int'),
-        Command('g@', 'for c in selectedRows: c.type = date', 'set type of all selected columns to date'),
-        Command('g$', 'for c in selectedRows: c.type = currency', 'set type of all selected columns to currency'),
-        Command('g~', 'for c in selectedRows: c.type = str', 'set type of all selected columns to string'),
+        Command('g!', 'for c in selectedRows or cursorRow: source.toggleKeyColumn(source.columns.index(c))', 'toggle all selected column as keys on source sheet'),
+        Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide all selected columns on source sheet'),
+        Command('g_', 'for c in selectedRows or cursorRow: c.width = c.getMaxWidth(source.visibleRows)', 'set widths of all selected columns to the max needed for the screen'),
+        Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'set type of all selected columns to float'),
+        Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'set type of all selected columns to int'),
+        Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'set type of all selected columns to date'),
+        Command('g$', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = currency', 'set type of all selected columns to currency'),
+        Command('g~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = str', 'set type of all selected columns to string'),
     ]
 
 ColumnsSheet.columns += [

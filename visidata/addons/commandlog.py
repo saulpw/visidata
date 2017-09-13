@@ -39,6 +39,11 @@ def fnSuffix(template):
         if not Path(fn).exists():
             return fn
 
+def getColVisibleIdxByFullName(sheet, name):
+    for i, c in enumerate(sheet.visibleCols):
+        if name == c.name:
+            return i
+
 def open_vd(p):
     return CommandLog(p.name, p)
 
@@ -122,7 +127,9 @@ class CommandLog(Sheet):
             vs = self.getSheet(r.sheet) or error('no sheets named %s' % r.sheet)
 
             if r.col != vs.cursorCol.name:
-                vs.searchColumnNameRegex(r.col, moveCursor=True)
+                vcolidx = getColVisibleIdxByFullName(vs, r.col)
+                if vcolidx is not None:
+                    vs.cursorVisibleColIndex = vcolidx
                 # delay with simulated movement?
             vs.cursorRowIndex = int(r.row)
             # delay if row changed?

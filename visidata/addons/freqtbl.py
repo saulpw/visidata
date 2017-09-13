@@ -4,6 +4,7 @@ from visidata import *
 
 globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
 globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open frequency table for the combined key columns')
+globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", lambda r: "Total"))', 'open sheet of summary aggregrations')
 
 theme('disp_histogram', '*')
 option('disp_histolen', 80, 'width of histogram column')
@@ -54,13 +55,13 @@ class SheetFreqTable(Sheet):
 
         aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
                                  type=aggregator.type or c.type,
-                                 getter=lambda r,aggr=aggregator: aggr(c.values(r[1])))
+                                 getter=lambda r,c=c,aggr=aggregator: aggr(c, r[1]))
                              for c in self.source.visibleCols
                                 for aggregator in getattr(c, 'aggregators', [])
                          ]
         self.columns.extend(aggregatedCols)
 
-        if aggregatedCols:  # hide count and histogram if aggregations added
+        if aggregatedCols:  # hide count/percent/histogram if aggregations added
             for c in self.columns[self.nKeys:self.nKeys+3]:
                 c.width = 0
 

@@ -28,11 +28,11 @@ class SheetPivot(Sheet):
         for aggcol in self.source.columns:
             for aggregator in getattr(aggcol, 'aggregators', []):
                 for col in self.variableCols:
-                    allValues = set(col.values(self.source.rows))
+                    allValues = set(col.getValues(self.source.rows))
                     for value in self.genProgress(allValues):
                         c = Column('_'.join([value, aggcol.name, aggregator.__name__]),
                                 type=aggregator.type or aggcol.type,
-                                getter=lambda r,aggcol=aggcol,aggvalue=value: aggregator(aggcol.values(r[1].get(aggvalue, []))))
+                                getter=lambda r,aggcol=aggcol,aggvalue=value: aggregator(aggcol, r[1].get(aggvalue, [])))
                         c.aggvalue = value
                         self.columns.append(c)
 

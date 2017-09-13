@@ -217,7 +217,7 @@ globalCommand('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(
 globalCommand('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'open stack trace for most recent error')
-globalCommand('z^E', 'vd.push(TextSheet("cell_error", cursorCell.error))', 'open stack trace for most recent error')
+globalCommand('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error") or error("no error this cell")))', 'open stack trace for most recent error')
 
 
 globalCommand('^^', 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet')
@@ -390,13 +390,15 @@ def stacktrace():
     return traceback.format_exc().strip()
 
 def chooseOne(choices):
-    '''Return `input` statement choices formatted with `/` as separator.
+    'Return one of `choices` elements (if list) or values (if dict).'
+    def choiceCompleter(v, i):
+        opts = [x for x in choices if x.startswith(v)]
+        return opts[i%len(opts)]
 
-    Choices can be list/tuple or dict (if dict, its keys will be used).'''
     if isinstance(choices, dict):
-        return choices[input('/'.join(choices.keys()) + ': ')]
+        return choices[input('/'.join(choices.keys()) + ': ', completer=choiceCompleter)]
     else:
-        return input('/'.join(str(x) for x in choices) + ': ')
+        return input('/'.join(str(x) for x in choices) + ': ', completer=choiceCompleter)
 
 def regex_flags():
     'Return flags to pass to regex functions from options'
@@ -720,6 +722,7 @@ class VisiData:
             elif len(vs.rows) == 0:  # first time
                 self.sheets.insert(0, vs)
                 vs.reload()
+                vs.recalc()  # set up Columns
             else:
                 self.sheets.insert(0, vs)
             return vs
@@ -780,7 +783,6 @@ class Sheet:
 
         # all columns in display order
         self.columns = kwargs.get('columns') or [copy(c) for c in self.columns]  # list of Column objects
-        self.recalc()  # refresh columns
 
         # commands specific to this sheet
         sheetcmds = collections.OrderedDict()
@@ -1485,19 +1487,21 @@ class Column:
         'A column is hidden if its width == 0.'
         return self.width == 0
 
-    def values(self, rows):
-        'Return a list of values for the given `rows` at this Column, excluding errors and nulls.'
+    def getValueRows(self, rows):
+        'Generate (val, row) for the given `rows` at this Column, excluding errors and nulls.'
         f = isNullFunc()
 
-        ret = []
         for r in rows:
             try:
                 v = self.type(self.getValue(r))
                 if not f(v):
-                    ret.append(v)
+                    yield v, r
             except:
                 pass
-        return ret
+
+    def getValues(self, rows):
+        for v, r in self.getValueRows(rows):
+            yield v
 
     def calcValue(self, row):
         return self.full_getter(self.sheet, self, row)

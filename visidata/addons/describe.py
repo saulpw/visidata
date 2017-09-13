@@ -22,7 +22,7 @@ class SourceColumn(Column):
         return self.getter(self.sheet.source, row)
 
 def values(c):
-    return c.values(c.sheet.rows)
+    return c.getValues(c.sheet.rows)
 
 class DescribeSheet(Sheet):
     columns = [
