@@ -92,16 +92,13 @@ class CommandLog(Sheet):
         if not self.currentActiveRow:  # nothing to record
             return
 
-        if sheet is self:  # don't record jumps to commandlog
-            return
-
         if err:
             self.currentActiveRow[-1] += ' [%s]' % err
 
-        # remove user-aborted commands and simple movements
-        key = self.currentActiveRow.keystrokes
-        if not escaped and key not in nonLogKeys:
-            self.addRow(self.currentActiveRow)
+        if sheet is not self:  # don't record jumps to commandlog
+            # remove user-aborted commands and simple movements
+            if not escaped and self.currentActiveRow.keystrokes not in nonLogKeys:
+                self.addRow(self.currentActiveRow)
 
         self.currentActiveRow = None
 

@@ -8,13 +8,11 @@ __version__ = 'saul.pw/VisiData v0.97pre'
 import os
 from visidata import *
 
-
 def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
     log = logpath.read_text().format(*args, **kwargs)
     src = PathFd(logpath.fqpn, io.StringIO(log))
     vs = openSource(src)
-    vd().commandlog.openHook(vs, src)
     vd().push(vs)
     vs.vd = vd()
     return vs
@@ -31,6 +29,7 @@ def main():
     parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='sets confirm_overwrite option to false')
     parser.add_argument('-p', '--play', dest='play', default=None, help='.vd file to replay')
     parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replay without curses interface')
+    parser.add_argument('-o', '--output', dest='output', default=None, help='tsv file to save final sheet as')
 
     for optname, v in vdtui.baseOptions.items():
         name, optval, defaultval, helpstr = v
@@ -50,7 +49,7 @@ def main():
 
     # command-line overrides
     for optname, optval in vars(args).items():
-        if optval is not None and optname not in ['inputs', 'play', 'batch']:
+        if optval is not None and optname not in ['inputs', 'play', 'batch', 'output']:
             vdtui.options[optname] = optval
 
     inputs = list(args.inputs)
@@ -112,6 +111,9 @@ def main():
     if args.batch:
         vd().status = print
         vs.replay_sync()
+        if args.output:
+            saveSheet(vd().sheets[0], args.output, confirm_overwrite=False)
+            sync()
     else:
         vs.replay()
         run([])
