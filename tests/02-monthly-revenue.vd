@@ -8,4 +8,3 @@ sample	Total	0	+	sum	choose aggregator for this column
 sample	OrderDate	0	F		open frequency table from values in this column
 sample_OrderDate_freq	OrderDate	0	[		sort by this column ascending
 sample_OrderDate_freq	sum_Total	0	^	Revenue	rename this column
-sample_OrderDate_freq	Revenue	0	^S	{output}	save this sheet to new file

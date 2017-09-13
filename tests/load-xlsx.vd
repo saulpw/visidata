@@ -1,4 +1,3 @@
 sheet	col	row	keystrokes	input	comment
 		0	o	sample_data/sample-sales-reps.xlsx	open file
 sample-sales-reps	name	0	^J		push this sheet
-sample-sales-reps_sample-salesv4		0	^S	{output}	save this sheet to new file

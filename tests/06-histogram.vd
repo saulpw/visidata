@@ -5,4 +5,3 @@ sample	Units	0	=	Units > 10	add column by expr
 sample	Units > 10	0	|	True	select rows by regex matching this columns
 sample	Units > 10	0	"		push duplicate sheet with refs to selected or all rows
 sample_selectedref	Item	0	F		open frequency table from values in this column
-sample_selectedref_Item_freq	Item	0	^S	{output}	save this sheet to new file

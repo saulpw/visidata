@@ -28,7 +28,7 @@ globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns)))
 globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
 
 globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
-globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=name+".tsv"), options.confirm_overwrite)', 'save this sheet to new file')
+globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save this sheet to new file')
 
 globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'show evaluated expression over current row')
 
@@ -52,6 +52,11 @@ def readlines(linegen):
             continue
         yield line[:-1]
 
+def getDefaultSaveName(sheet):
+    if isinstance(sheet.source, Path):
+        return str(sheet.source)
+    else:
+        return sheet.name+".tsv"
 
 def saveSheet(vs, fn, confirm_overwrite=False):
     'Save sheet `vs` with given filename `fn`.'
