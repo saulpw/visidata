@@ -10,7 +10,7 @@ def StaticColumn(sheet, col):
     frozenData = {}
     for r in sheet.rows:
         frozenData[id(r)] = c.getValue(r)
-    c.getter=lambda r,d=frozenData: d[id(r)]
+    c.full_getter=lambda s,c,r,d=frozenData: d[id(r)]
     c.setter=lambda s,c,r,v,d=frozenData: setitem(d, id(r), v)
     c.name = c.name + '_frozen'
     return c

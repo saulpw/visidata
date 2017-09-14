@@ -58,6 +58,8 @@ def load_csv(vs):
 
     vs.progressMade = 0
     vs.progressTotal = 0
+
+    vs.recalc()
     return vs
 
 
