@@ -4,13 +4,16 @@ from visidata import *
 
 globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open frequency table from values in this column')
 globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open frequency table for the combined key columns')
-globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", lambda r: "Total"))', 'open sheet of summary aggregrations')
+globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda r: "Total")))', 'open sheet of summary aggregrations')
 
 theme('disp_histogram', '*')
 option('disp_histolen', 80, 'width of histogram column')
 option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
+ColumnsSheet.commands += [
+    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open frequency table for this column in the source sheet')
+]
 
 def getValueOrError(c, r):
     try:
@@ -27,7 +30,7 @@ class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     commands = [
         # redefine these commands only to change the helpstr
-        Command(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet'),
+        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet'),
         Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet'),
         Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet'),
 

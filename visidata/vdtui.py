@@ -241,14 +241,14 @@ globalCommand('gzd', 'cursorCol.setValues(selectedRows, None)', 'set this column
 alias('KEY_DC', 'zd')
 alias('gKEY_DC', 'gzd')
 
-globalCommand(' ', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
+globalCommand('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 globalCommand('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
 globalCommand('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect this row')
 
 globalCommand('|', 'selectByIdx(searchRegex(regex=input("|", type="regex"), columns="cursorCol"))', 'select rows by regex matching this columns')
 globalCommand('\\', 'unselectByIdx(searchRegex(regex=input("\\\\", type="regex"), columns="cursorCol"))', 'unselect rows by regex matching this columns')
 
-globalCommand('g ', 'toggle(rows)', 'toggle select of all rows')
+globalCommand('gt', 'toggle(rows)', 'toggle select of all rows')
 globalCommand('gs', 'select(rows)', 'select all rows')
 globalCommand('gu', '_selectedRows.clear()', 'unselect all rows')
 
@@ -805,6 +805,8 @@ class Sheet:
         for b in [self] + list(self.__class__.__bases__):
             for c in getattr(b, 'colorizers', []):
                 self._colorizers[c.type].append(c)
+
+        self.__dict__.update(kwargs)
 
     def colorizeRow(self, row):
         return self.colorize(['row'], None, row)
@@ -1720,7 +1722,7 @@ class ColumnExpr(Column):
         super().__init__(expr)
         self.compiledExpr = compile(expr, '<expr>', 'eval')
 
-    def getValue(self, row):
+    def calcValue(self, row):
         return self.sheet.evalexpr(self.compiledExpr, row)
 
 ###
@@ -1829,6 +1831,7 @@ class TextSheet(Sheet):
 
 class ColumnsSheet(Sheet):
     columns = [
+            ColumnAttr('sheet', width=0),
             ColumnAttr('name'),
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals(), default=anytype),
