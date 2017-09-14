@@ -145,7 +145,7 @@ theme('disp_keycol_sep', '\u2016', 'chars between keys and rest of columns')
 
 theme('disp_error_val', '¿', 'displayed contents when getter fails due to exception')
 theme('disp_none', '',  'visible contents of a cell whose value was None')
-
+theme('color_type_note', '226 green', 'for the type annotation on cells in anytype columns')
 theme('color_current_row', 'reverse')
 theme('color_default', 'normal')
 theme('color_selected_row', '215 yellow')
@@ -333,13 +333,14 @@ class date:
 
 
 typemap = {
-    str: '~',
+    None: 'Ø',
+    str: '',
     date: '@',
     int: '#',
     len: '#',
     currency: '$',
     float: '%',
-    anytype: ' ',
+    anytype: '',
 }
 
 def joinSheetnames(*sheetnames):
@@ -949,9 +950,9 @@ class Sheet:
 
         keystrokes, _, execstr = cmd
         self.sheet = self
-        self.vd.callHook('preexec', self, keystrokes)
 
         try:
+            self.vd.callHook('preexec', self, keystrokes)
             exec(execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
             self.vd.status(e.args[0])
@@ -959,7 +960,10 @@ class Sheet:
         except Exception:
             err = self.vd.exceptionCaught()
 
-        self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
+        try:
+            self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
+        except Exception:
+            self.vd.exceptionCaught()
 
         return escaped
 
@@ -1354,11 +1358,12 @@ class Sheet:
                     cellval = col.getCell(row, colwidth-1)
 
                     attr = self.colorizeCell(col, row, cellval)
+                    attrpre = 0
                     sepattr = self.colorizeRow(row)
 
                     # must apply current row here, because this colorization requires cursorRowIndex
                     if dispRowIdx == self.cursorRowIndex:
-                        attr, _ = colors.update(attr, 0, options.color_current_row, 10)
+                        attr, attrpre = colors.update(attr, 0, options.color_current_row, 10)
                         sepattr, _ = colors.update(sepattr, 0, options.color_current_row, 10)
 
                     sepattr = sepattr or colors[options.color_column_sep]
@@ -1368,7 +1373,8 @@ class Sheet:
                     note = getattr(cellval, 'note', None)
 
                     if note:
-                        _clipdraw(scr, y, x+colwidth-len(note), note, colors[cellval.notecolor], len(note))
+                        noteattr, _ = colors.update(attr, attrpre, cellval.notecolor, 8)
+                        _clipdraw(scr, y, x+colwidth-len(note), note, noteattr, len(note))
 
                     sepchars = options.disp_column_sep
                     if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
@@ -1471,6 +1477,8 @@ class Column:
 
     def format(self, cellval):
         'Return displayable string of `cellval` according to our `Column.type` and `Column.fmtstr`'
+        if cellval is None:
+            return options.disp_none
 
         if isinstance(cellval, (list, dict)):
             # complex objects can be arbitrarily large (like sheet.rows)
@@ -1547,9 +1555,6 @@ class Column:
                                 note=options.disp_getter_exc,
                                 notecolor=options.color_getter_exc)
 
-        if cellval is None:
-            return DisplayWrapper(cellval, display=options.disp_none)
-
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding, options.encoding_errors)
 
@@ -1557,6 +1562,13 @@ class Column:
             dispval = self.format(cellval)
             if width and self.type in (int, float, currency):
                 dispval = dispval.rjust(width-1)
+
+            # annotate cells with raw value type in anytype columns
+            if self.type is anytype and options.color_type_note:
+                return DisplayWrapper(cellval, display=dispval,
+                        note=typemap.get(type(cellval), None),
+                        notecolor=options.color_type_note)
+
             return DisplayWrapper(cellval, display=dispval)
         except EscapeException:
             raise
