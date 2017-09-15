@@ -6,9 +6,9 @@
 edits contents of current cell
 .It Ic ge
 edits contents of current column for selected rows
-.It Ic " Delete"
+.It Ic " zd   Delete"
 sets contents of current cell to None
-.It Ic "gDelete"
+.It Ic "gzd  gDelete"
 sets contents of cells in current column to None for selected rows
 .
 .El

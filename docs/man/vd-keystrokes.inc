@@ -12,10 +12,10 @@ moves current row up/down
 .It Ic "gJ  gK"
 moves current row to the top/bottom of sheet
 
-.It Ic c Ar regex
-moves to a column whose name matches the given regex
-.It Ic r Ar number
-moves to the given row number
+.It Ic " c   r" Ar regex
+moves to a column/row whose name matches the given regex
+.It Ic "zc  zr" Ar number
+moves to the given column/row number
 
 .It Ic "zt  zz  zb"
 scrolls current row to top/center/bottom of screen
@@ -58,6 +58,8 @@ appends a blank row
 
 .Sh Clipboard
 .Bl -tag -width XXXXXXXXXXXXXXX -compact 
+.It Ic " y   d"
+copies/deletes current row and moves it to clipboard
 .It Ic "gy  gd"
 copies/deletes all selected rows and moves them to clipboard
 .It Ic " p"
@@ -72,6 +74,35 @@ undoes deletion of all rows which are referenced in the clipboard
 .El
 .so vdtui-editing.inc
 
+.Sh VisiData Sheets
+.Bl -tag -width xx -compact 
+.It Sy "\&."
+.Sy Clipboard Sheet (Shift-B)
+.It Sy "\&."
+.Sy Columns Sheet (Shift-C)
+.It Sy "\&."
+.Sy Commandlog Sheet (Shift-D)
+.It Sy "\&."
+.Sy Describe Sheet (Shift-I)
+.It Sy "\&."
+.Sy Error Sheet (^E)
+.It Sy "\&."
+.Sy Frequency Table (Shift-F)
+.It Sy "\&."
+.Sy Melted Sheet (Shift-M)
+.It Sy "\&."
+.Sy Options Sheet (Shift-O)
+.It Sy "\&."
+.Sy Pivot Sheet (Shift-W)
+.It Sy "\&."
+.Sy Sheets Sheet (Shift-S)
+.It Sy "\&."
+.Sy Status History Sheet (^P)
+.It Sy "\&."
+.Sy Tasks Sheet (^T)
+
+.El
+
 .Sh Sheets Sheet (Shift-S)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact 
 .It (sheet-specific commands)
@@ -80,13 +111,19 @@ undoes deletion of all rows which are referenced in the clipboard
 .It Ic "Enter"
 jumps to sheet referenced in current row
 .It Ic "&"
-inner join of selected sheets, keeping only rows which match keys on all sheets
-.It Ic "+"
-outer join of selected sheets, keeping all rows from first selected sheet
-.It Ic "*"
-full join of selected sheets, keeping all rows from all sheets
-.It Ic "~"
-joins selected sheets, keeping only rows NOT in all sheets (diff join)
+queries for method of joining selected sheets on key column
+.El
+.Bl -tag -width xx -compact -offset XXXXXXXXXXXXXXXXXXXX 
+.It Sy "\&."
+inner: keeps only rows which match keys on all sheets
+.It Sy "\&."
+outer: keeps all rows from first selected sheet
+.It Sy "\&."
+full: keeps all rows from all sheets (union)
+.It Sy "\&."
+diff: keeps only rows NOT in all sheets 
+.It Sy "\&."
+append: combines rows of selected sheets into single sheet
 .El
 .Sh Options Sheet (Shift-O)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact 
@@ -97,6 +134,8 @@ joins selected sheets, keeping only rows NOT in all sheets (diff join)
 edits option
 .El
 .Sh Columns Sheet (Shift-C)
+Standard editing commands
+.No ( Ns Sy e  ge Ns ) can be used to manually modify properties of columns on the source sheet. For example, multiple aggregators can be set by listing them (separated by spaces) in the aggregators column. 
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
 .El
@@ -114,8 +153,6 @@ hides selected columns on source sheet
 .It Ic "g~ g# g% g$ g@"
 Sets type of selected columns to str/int/float/currency/date
 .El
-.Sh Clipboard Sheet (Shift-B)
-
 .Sh Describe Sheet (Shift-I)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
@@ -123,6 +160,8 @@ Sets type of selected columns to str/int/float/currency/date
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "zs  zu"
 selects/unselects rows on source sheet which are being described in current cell
+.It Ic " Enter"
+pushes a frequency table sheet grouped on column referenced in current row
 .It Ic "zEnter"
 pushes a copy of rows from source sheet which are being described in current cell
 .El
@@ -131,21 +170,15 @@ pushes a copy of rows from source sheet which are being described in current cel
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic " ^A"
+.It Ic " x"
 replays command in current row
-.It Ic "g^A"
+.It Ic "gx"
 replays contents of entire commandlog
 .El
 .Sh Frequency Table (Shift-F)
 Groups rows by key, including columns for each aggregation of a source column.  Set aggregators on columns with '+' (or by 'e'dit on its 'C'olumns sheet) before pressing Shift-F to use the current column as the key.
 .Sy gF No groups by all key columns on the source sheet.
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
-
-.It (commands specific to the Frequency Table)
-.El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "s  u  Space"
-selects/unselects/toggles rows on source sheet which are being described in current cell
+.Sy zF No provides summary aggregation without groupingsheet which are being described in current cell
 .It Ic "w"
 for histograms of numeric value, toggles between bins with an even interval width and bins with an even frequency height
 .El
@@ -160,7 +193,6 @@ pushes sheet of source rows which comprise current pivot cell
 .El
 .Sh Melted Sheet (Shift-M)
 Pushes melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
-.Sh Tasks Sheet (^T)
 
 .Sh Data toolkit
 .Bl -tag -width XXXXXXXXXXXXXXX -compact

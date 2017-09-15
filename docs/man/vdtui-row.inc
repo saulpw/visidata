@@ -2,9 +2,9 @@
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " s   u   Space"
+.It Ic " s   u   t"
 selects/unselects/toggles current row
-.It Ic "gs  gu  gSpace"
+.It Ic "gs  gu  gt"
 selects/unselects/toggles all rows
 .It Ic " |   \e\ "
 selects/unselects rows matching by regex in current column

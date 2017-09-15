@@ -19,7 +19,9 @@
 .It Ic vd
 .Op <options>
 .Sy Fl p No <cmdlog.vd>
-.Op Fl -piano No <delay>
+.Op Fl -batch
+.Op Fl -delay No <delay>
+.Op Fl -output No <output>
 --
 .Op Fl "-<field>=<value> ..."
 .
@@ -38,12 +40,25 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .Sh REPLAY MODE
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Fl "p, --play"
-.No Replays a saved Ar cmdlog.vd No in batch mode (without curses).
+.No Replays a saved Ar cmdlog.vd No via curses.
 .No Python format strings (like \&"{ Ns Ar field Ns }\&") No are replaced with the Ar value No given on the command line.  These format options must be specified after the --.
 
-.It Fl -piano Ar delay
-causes
-.Sy --play No to replay via curses with Ar delay No seconds between commands
+.It Fl -batch
+replay in batch mode (without curses).
+
+.It Fl -delay Ar delay
+replay via curses with Ar delay No seconds between commands
+
+.It Fl -output
+save the final visible sheet to <output> at the end of the replay
+
+.It Sy While replaying
+.El
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact -offset XXX
+.It Sy ^U
+pauses/resumes replay
+.It Sy Space
+while plaused, transitions to next step in replay
 .El
 .Sh COMMANDS
 .so vd-keystrokes.inc
