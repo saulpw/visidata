@@ -225,6 +225,7 @@ globalCommand('^^', 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', '
 globalCommand('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'open most recent errors')
 
 globalCommand('^R', 'reload(); recalc(); status("reloaded")', 'reload sheet from source')
+globalCommand('z^R', 'cursorCol._cachedValues.clear()', 'clear cache on this column')
 
 globalCommand('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search this column forward for regex')
 globalCommand('?', 'moveRegex(regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search this column backward for regex')
@@ -463,11 +464,9 @@ class VisiData:
             return func(*args, **kwargs)
 
         currentSheet = self.sheets[0]
-        if currentSheet.currentThread:
-            confirm('replace task %s already in progress? ' % currentSheet.currentThread.name)
         thread = threading.Thread(target=self.toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
         self.threads.append(thread)
-        currentSheet.currentThread = thread
+        currentSheet.currentThreads.append(thread)
         thread.sheet = currentSheet
         thread.start()
         return thread
@@ -489,7 +488,7 @@ class VisiData:
             t.status += status('%s: %s' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
             exceptionCaught()
 
-        t.sheet.currentThread = None
+        t.sheet.currentThreads.remove(t)
         t.sheet.progressMade = t.sheet.progressTotal
         return ret
 
@@ -797,8 +796,8 @@ class Sheet:
         self.progressMade = 0
         self.progressTotal = 0
 
-        # only allow one async task per sheet
-        self.currentThread = None
+        # track all async tasks from sheet
+        self.currentThreads = []
 
         self._colorizers = {'row': [], 'col': [], 'hdr': [], 'cell': []}
 
@@ -895,7 +894,7 @@ class Sheet:
         ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
         ret.progressMade = ret.progressTotal = 0
-        ret.currentThread = None
+        ret.currentThreads = []
         return ret
 
     def __deepcopy__(self, memo):

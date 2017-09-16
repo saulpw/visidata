@@ -89,11 +89,12 @@ class DirSheet(Sheet):
 
 
 def openSource(p, filetype=None):
-    'calls open_ext(Path) or openurl_scheme(url)'
+    'calls open_ext(Path) or openurl_scheme(UrlPath)'
     if isinstance(p, str):
         if '://' in p:
             p = UrlPath(p)
-            openfunc = 'openurl_' + (filetype or p.scheme)
+            filetype = filetype or p.scheme
+            openfunc = 'openurl_' + p.scheme
             vs = getGlobals()[openfunc](p)
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
