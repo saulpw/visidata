@@ -9,7 +9,7 @@ option('profile_tasks', True, 'profile async tasks')
 option('min_task_time_s', 0.10, 'only keep tasks that take longer than this number of seconds')
 option('min_memory_mb', 0, 'stop loading and async processing unless this much memory is available')
 
-globalCommand('^C', 'if sheet.currentThread: ctypeAsyncRaise(sheet.currentThread, EscapeException)', 'cancel task on the current sheet')
+globalCommand('^C', 'if sheet.currentThreads: ctypeAsyncRaise(sheet.currentThreads[-1], EscapeException)', 'cancel most recent task on the current sheet')
 globalCommand('^T', 'vd.push(vd.tasksSheet)', 'push task history sheet')
 globalCommand('^U', 'toggleProfiling(vd)', 'turn profiling on for main process')
 

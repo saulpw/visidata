@@ -796,8 +796,9 @@ class Sheet:
 
         # commands specific to this sheet
         sheetcmds = collections.OrderedDict()
-        for ks, helpstr, execstr in self.commands:
-            _registerCommand(sheetcmds, ks, execstr, helpstr)
+        if hasattr(self, 'commands'):
+            for ks, helpstr, execstr in self.commands:
+                _registerCommand(sheetcmds, ks, execstr, helpstr)
         self._commands = collections.ChainMap(sheetcmds, baseCommands)
 
         self._selectedRows = {}  # id(row) -> row
