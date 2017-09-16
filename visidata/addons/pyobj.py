@@ -3,8 +3,9 @@ from visidata import *
 option('pyobj_show_hidden', False, 'show methods and _private properties')
 
 globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
-# find new key
-globalCommand('^A', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
+
+globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
+globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s.row[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'push sheet for this cell value as python object')
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):
