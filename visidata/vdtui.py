@@ -455,7 +455,10 @@ class VisiData:
         'Call all functions registered with `addHook` for the given hookname.'
         r = None
         for f in self.hooks.get(hookname, []):
-            r = r or f(*args, **kwargs)
+            try:
+                r = r or f(*args, **kwargs)
+            except:
+                exceptionCaught()
         return r
 
     def execAsync(self, func, *args, **kwargs):
@@ -700,7 +703,10 @@ class VisiData:
 
             self.checkForFinishedThreads()
             self.callHook('predraw')
-            sheet.checkCursor()
+            try:
+                sheet.checkCursor()
+            except:
+                exceptionCaught()
 
     def replace(self, vs):
         'Replace top sheet with the given sheet `vs`.'
@@ -1506,6 +1512,8 @@ class Column:
                 v = self.type(self.getValue(r))
                 if not f(v):
                     yield v, r
+            except GeneratorExit:
+                raise
             except:
                 pass
 
