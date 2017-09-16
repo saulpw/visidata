@@ -759,7 +759,7 @@ class Colorizer:
 
 class Sheet:
     columns = []  # list of Column
-    commands = []  # list of (keystrokes, helpstr, execstr)
+#    commands = []  # list of (keystrokes, helpstr, execstr)
     colorizers = [ # list of Colorizer
         Colorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr),
         Colorizer('hdr', 9, lambda s,c,r,v: options.color_current_hdr if c is s.cursorCol else None),
@@ -1849,6 +1849,7 @@ class ColumnsSheet(Sheet):
     colorizers = [
             Colorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
     ]
+    commands = []
 
     def reload(self):
         self.rows = self.source.columns
