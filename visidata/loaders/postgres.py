@@ -3,11 +3,6 @@ from visidata import *
 import psycopg2
 
 
-option('dbname', 'data_store_api', '')
-option('dbuser', 'jenkins', '')
-option('dbpasswd', '', '')
-
-
 def codeToType(type_code):
     tname = psycopg2._psycopg.string_types[type_code].name
     if 'INTEGER' in tname:
@@ -18,16 +13,15 @@ def codeToType(type_code):
 
 
 def openurl_postgres(url):
+    dbname = url.path[1:]
     conn = psycopg2.connect(
-                user=options.dbuser,
-                dbname=options.dbname,
+                user=url.username,
+                dbname=dbname,
                 host=url.hostname,
                 port=url.port,
-                password=options.dbpasswd)
+                password=url.password)
 
-#    conn.autocommit = True
-
-    return PgTablesSheet(options.dbname+"_tables", sql=SQL(conn))
+    return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
 
 class SQL:
@@ -68,7 +62,11 @@ class PgTablesSheet(Sheet):
         with self.sql.cur(qstr) as cur:
             self.nrowsPerTable = {}
 
-            self.rows = [cur.fetchone()]
+            self.rows = []
+            # try to get first row to make cur.description available
+            r = cur.fetchone()
+            if r:
+                self.addRow(r)
             self.columns = cursorToColumns(cur)
             self.addColumn(Column('nrows', type=int, getter=lambda r,self=self: self.getRowCount(r[0])))
 
@@ -88,12 +86,15 @@ class PgTablesSheet(Sheet):
         return self.nrowsPerTable[tablename]
 
 
-# rowdef: tuple(all columns in table)
+# rowdef: tuple of values as returned by fetchone()
 class PgTable(Sheet):
     @async
     def reload(self):
         with self.sql.cur("SELECT * FROM " + self.source) as cur:
-            self.rows = [cur.fetchone()]
+            self.rows = []
+            r = cur.fetchone()
+            if r:
+                self.addRow(r)
             self.columns = cursorToColumns(cur)
             for r in cur:
                 self.addRow(r)
