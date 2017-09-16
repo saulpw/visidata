@@ -290,15 +290,15 @@ def anytype(r=None):
 anytype.__name__ = ''
 
 option('float_chars', '+-0123456789.eE_', 'valid numeric characters')
-def currency(s):
+def currency(s=''):
     'a `float` with any leading and trailing non-numeric characters stripped'
     floatchars = options.float_chars
     if isinstance(s, str):
-        while s[0] not in floatchars:
+        while s and s[0] not in floatchars:
             s = s[1:]
-        while s[-1] not in floatchars:
+        while s and s[-1] not in floatchars:
             s = s[:-1]
-    return float(s)
+    return float(s) if s else float()
 
 class date:
     '`datetime` wrapper, constructing from time_t or from str with dateutil.parse'
@@ -315,6 +315,7 @@ class date:
             self.dt = s.dt
         else:
             assert isinstance(s, datetime.datetime), (type(s), s)
+            self.dt = s
 
     def to_string(self, fmtstr=None):
         'Convert datetime object to string, in ISO 8601 format by default.'
