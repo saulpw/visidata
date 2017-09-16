@@ -438,7 +438,7 @@ class VisiData:
         'Add status message to be shown until next action.'
         s = '; '.join(str(x) for x in args)
         self.statuses.append(s)
-        self.statusHistory.insert(0, s)
+        self.statusHistory.insert(0, args[0] if len(args) == 1 else args)
         return s
 
     def addHook(self, hookname, hookfunc):
@@ -1832,7 +1832,7 @@ class TextSheet(Sheet):
         'Handle text re-wrapping.'
         if options.textwrap:
             startingLine = len(self.rows)
-            for i, L in enumerate(textwrap.wrap(text, width=self.vd.windowWidth-2)):
+            for i, L in enumerate(textwrap.wrap(str(text), width=self.vd.windowWidth-2)):
                 self.addRow((startingLine+i, L))
         else:
             self.addRow((len(self.rows), text))
