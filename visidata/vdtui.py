@@ -164,6 +164,9 @@ theme('color_status', 'bold', 'status line color')
 theme('color_edit_cell', 'normal', 'edit cell color')
 theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
 theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
+theme('disp_pending', '', 'string to display in pending cells')
+theme('disp_note_pending', '⌛', 'note to display for pending cells')
+theme('color_note_pending', 'bold magenta', 'color of note of pending cells')
 
 ENTER='^J'
 ESC='^['
@@ -1564,6 +1567,12 @@ class Column:
                                 display=options.disp_error_val,
                                 note=options.disp_getter_exc,
                                 notecolor=options.color_getter_exc)
+
+        if isinstance(cellval, threading.Thread):
+            return DisplayWrapper(None,
+                                display=options.disp_pending,
+                                note=options.disp_note_pending,
+                                notecolor=options.color_note_pending)
 
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding, options.encoding_errors)
