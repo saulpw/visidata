@@ -3,6 +3,8 @@ from visidata import *
 
 clipboard = []
 
+globalCommand('B', 'vd.push(ClipboardSheet("clipboard", clipboard))', 'push clipboard sheet')
+
 globalCommand('^Z', 's,i,r = clipboard.pop(); s.rows.insert(i, r)', 'undo last delete on original sheet')
 globalCommand('g^Z', '''
 for s,i,r in clipboard: s.rows.insert(i, r)
@@ -17,7 +19,17 @@ globalCommand('gd', 'clipboard.extend((sheet, i, r) for i, r in enumerate(rows) 
 globalCommand('gy', 'clipboard.extend((sheet, i, r) for i, r in enumerate(rows) if sheet.isSelected(r))', 'yank (copy) all selected rows to clipboard')
 globalCommand('gp', 'rows[cursorRowIndex+1:cursorRowIndex+2] = list(r for s,i,r in clipboard)', 'paste all clipboard rows after cursor on this sheet')
 
-globalCommand('B', 'vd.push(ClipboardSheet("clipboard", clipboard))', 'push clipboard sheet')
+globalCommand('zd', 'clipboard.append(cursorCol); columns.pop(cursorColIndex)', 'delete this column and move to clipboard')
+globalCommand('zy', 'clipboard.append(cursorCol);', 'copy this column to clipboard')
+globalCommand('zp', 'addColumn(clipboard.pop(), cursorColIndex+1)', 'paste column from clipboard')
+
+globalCommand('zgd', 'for c in visibleCols: clipboard.append(c); columns.remove(c)', 'delete this column and move to clipboard')
+globalCommand('zgy', 'clipboard.extend(columns);', 'copy all columns to clipboard')
+globalCommand('zgp', 'columns.extend(clipboard); clipboard.clear(); recalc();', 'copy all columns to clipboard')
+
+globalCommand('gzd', 'zgd')
+globalCommand('gzy', 'zgy')
+globalCommand('gzp', 'zgp')
 
 #globalCommand('', 'rows.insert(cursorRowIndex, clipboard.pop())', 'pop last clipboard row and paste after cursor')
 
