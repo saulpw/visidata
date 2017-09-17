@@ -1,8 +1,5 @@
 from visidata import *
 
-import psycopg2
-
-
 def codeToType(type_code):
     tname = psycopg2._psycopg.string_types[type_code].name
     if 'INTEGER' in tname:
@@ -13,6 +10,8 @@ def codeToType(type_code):
 
 
 def openurl_postgres(url):
+    import psycopg2
+
     dbname = url.path[1:]
     conn = psycopg2.connect(
                 user=url.username,
