@@ -17,4 +17,4 @@ globalCommand('ze', 'tmp = cursorVisibleColIndex; pageLeft(); sheet.cursorVisibl
 globalCommand('zKEY_END',  'sheet.cursorRowIndex = len(rows)-1; sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to last row and last column')
 globalCommand('zKEY_HOME', 'sheet.topRowIndex = sheet.cursorRowIndex = 0; sheet.leftVisibleColIndex = sheet.cursorVisibleColIndex = 0', 'go to top row and top column')
 
-#alias('0', 'gh')
+#globalCommand('0', 'gh')

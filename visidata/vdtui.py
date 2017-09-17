@@ -65,13 +65,8 @@ def _registerCommand(cmddict, keystrokes, execstr, helpstr):
     for ks in keystrokes:
         cmddict[ks] = (ks, helpstr, execstr)
 
-def globalCommand(keystrokes, execstr, helpstr):
+def globalCommand(keystrokes, execstr, helpstr=''):
     _registerCommand(baseCommands, keystrokes, execstr, helpstr)
-
-def alias(new, existing):
-    _, helpstr, execstr = baseCommands[existing]
-    globalCommand(new, execstr, helpstr)
-
 
 class configbool:
     def __init__(self, v):
@@ -187,10 +182,10 @@ globalCommand('gk', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go to top r
 globalCommand('gj', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'go to bottom row')
 globalCommand('gl', 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to rightmost column')
 
-alias('gg', 'gk')
-alias('G', 'gj')
-alias('KEY_HOME', 'gk')
-alias('KEY_END', 'gj')
+globalCommand('gg', 'gk')
+globalCommand('G', 'gj')
+globalCommand('KEY_HOME', 'gk')
+globalCommand('KEY_END', 'gj')
 
 globalCommand('^L', 'vd.scr.clear()', 'redraw entire terminal screen')
 globalCommand('^G', 'status(statusLine)', 'show info for the current sheet')
@@ -242,8 +237,8 @@ globalCommand('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIn
 globalCommand('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorValue))', 'edit this column for all selected rows')
 globalCommand('zd', 'cursorCol.setValues([cursorRow], None)', 'set this cell to None')
 globalCommand('gzd', 'cursorCol.setValues(selectedRows, None)', 'set this column to None for all selected rows')
-alias('KEY_DC', 'zd')
-alias('gKEY_DC', 'gzd')
+globalCommand('KEY_DC', 'zd')
+globalCommand('gKEY_DC', 'gzd')
 
 globalCommand('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle select of this row')
 globalCommand('s', 'select([cursorRow]); cursorDown(1)', 'select this row')
@@ -275,7 +270,7 @@ globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheet stack')
 globalCommand('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", sheet))', 'open Columns for this sheet')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options for this sheet')
 globalCommand('z?', 'vd.push(HelpSheet(name + "_commands", sheet))', 'open command help sheet')
-alias('KEY_F(1)', 'z?')
+globalCommand('KEY_F(1)', 'z?')
 
 
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
@@ -949,8 +944,15 @@ class Sheet:
     def evalexpr(self, expr, row):
         return eval(expr, getGlobals(), LazyMapping(self, row))
 
+    def getCommand(self, keystrokes, default=None):
+        k = keystrokes
+        while k in self._commands:
+            cmd = self._commands.get(k, default)
+            k = cmd[2]  # see if execstr is actually just an alias for another keystroke
+        return cmd
+
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
-        return self.exec_command(self._commands[keystrokes], vdglobals)
+        return self.exec_command(self.getCommand(keystrokes), vdglobals)
 
     def exec_command(self, cmd, vdglobals=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
@@ -1878,7 +1880,7 @@ class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
     columns = [ColumnItem('keystrokes', 0),
                ColumnItem('action', 1),
-               Column('with_g_prefix', full_getter=lambda s,c,r: s.source._commands.get('g'+r[0], (None,'-'))[1]),
+               Column('with_g_prefix', full_getter=lambda s,c,r: s.source.getCommand('g'+r[0], (None,'-'))[1]),
                ColumnItem('execstr', 2, width=0),
     ]
     nKeys = 1
