@@ -20,4 +20,4 @@ class TsvSheet(vdtui.Sheet):
         self.rows = self.rows[1:]
 
 
-vdtui.run([TsvSheet(fn, vdtui.Path(fn)) for fn in sys.argv[1:]])
+vdtui.run(*(TsvSheet(fn, vdtui.Path(fn)) for fn in sys.argv[1:]))

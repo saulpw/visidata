@@ -14,6 +14,6 @@ def nextLevel(value, level=0):
     return open_txt(Path('docs/vdtutor%s.txt' % (int(level) + 1)))
 
 addGlobals(globals())
-run([nextLevel("ENTER")])
+run(nextLevel("ENTER"))
 
 

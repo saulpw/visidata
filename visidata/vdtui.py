@@ -2253,7 +2253,7 @@ class RepeatFileIter:
         return r
 
 
-def run(sheetlist=[]):
+def run(*sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
     # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
@@ -2269,7 +2269,7 @@ def cursorEnable(b):
     except:
         pass
 
-def cursesMain(_scr, sheetlist=[]):
+def cursesMain(_scr, sheetlist):
     'Populate VisiData object with sheets from a given list.'
 
     colors.setup()
@@ -2288,4 +2288,4 @@ def getGlobals():
     return globals()
 
 if __name__ == '__main__':
-    run(TextSheet('contents', Path(src)) for src in sys.argv[1:])
+    run(*(TextSheet('contents', Path(src)) for src in sys.argv[1:]))

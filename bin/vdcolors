@@ -17,4 +17,4 @@ class ColorSheet(Sheet):
         self.rows = colors.keys()
         self.exec_keystrokes('[')  # sort by the current column
 
-run([ColorSheet('colors')])
+run(ColorSheet('colors'))

@@ -71,7 +71,7 @@ def main():
             vdtui.vd().commandlog.openHook(vs, src)
             sources.append(vs)
 
-        vdtui.run(sources)
+        vdtui.run(*sources)
         return
 
     # replay mode, gather additional args
@@ -116,7 +116,7 @@ def main():
             sync()
     else:
         vs.replay()
-        run([])
+        run()
 
 if __name__ == '__main__':
     vdtui.status(__version__)
