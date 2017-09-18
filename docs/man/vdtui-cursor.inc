@@ -21,6 +21,6 @@ scrolls one page back/forward
 moves to next/previous match from last search
 
 .It Ic  " <   >"
-moves up/down this column to the next value
+moves up/down the current column to the next value
 .
 .El

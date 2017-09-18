@@ -16,87 +16,100 @@
 .Op <options>
 <input> ...
 .
-.It <command> | 
-.Sy vd
+.It <command>
+.Sy | vd
 .Op <options>
 
 
+.Sh Ns Sy "  replay mode" No
 .It Ic vd
 .Op <options>
 .Sy Fl -play No <cmdlog>
 .Op Fl -batch
-.Op Fl -delay No <delay>
+.Op Fl d No <delay>
 .Op Fl o No <output>
---
+.Sy -- No
 .Op Fl "-<field>=<value> ..."
 .El
-.Bl -inset -offset xx -compact
-.It Python format strings (like \&"{ Ns Ar field Ns }\&") No are replaced with the Ar value No given on the command line.  
-.It These format options must be specified after the --.
+
 .Sh DESCRIPTION
-.
 .Nm VisiData
-.No is a multipurpose tool for exploring, cleaning, editing, and restructuring data from Sx SUPPORTED SOURCES Ns .
-Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be documented, communicated, and replayed via the commandlog.
+.No is a multipurpose tool for exploring, cleaning, editing, and restructuring data (see Sx SUPPORTED SOURCES Ns ).
+.No Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be saved, documented, and replayed via the Sx Commandlog Ns .
 .Nm VisiData No is built on the
 .Sy vdtui No platform.
 .
+.Sh OPTIONS
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.
+.It Fl f, -filetype Ns = Ns Ar filetype
+uses loader for
+.Ar filetype
+.No (see Sy SUPPORTED SOURCES Ns )
+instead of file extension
+.
+.It Fl y, -confirm-overwrite Ns =F
+overwrites existing files without confirmation 
+.El
+
+.Bl -tag -width XXXXXXXXXXXXXXXXX
+.It See also Sx MINOR OPTIONS Ns .
+.El
+.
 .Sh REPLAY MODE
-.Bl -tag -width XXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .It Fl "p, --play" Ar cmdlog No
-.No replays a saved Ar cmdlog No within the interface.
+.No replays a saved Ar cmdlog No within the interface
 .
-.It Fl -batch
-replays in batch mode (with no interface and all output to stdout)
+.Bl -inset -offset xxxx -compact
+.No Python format strings in the Ar cmdlog No (like \&"{ Ns Ar field Ns }\&") No are replaced with the Ar value No given on the command line.  These format options must be specified after Sy -- Ns .
 .
-.It Fl -delay Ar seconds
-.No delays Ar seconds No between commands
+.El
+.It Fl "d, --delay" Ar seconds
+.No waits Ar seconds No between commands
+.
+.It Fl "b, --batch"
+replays in batch mode (with no interface and all status sent to stdout)
 .
 .It Fl "o, --output" Ar file No
 .No saves the final visible sheet to Ar file No (as .tsv) at the end of the replay
 
-.It Sy While Replaying
+.It Sy Commands During Replay
 .El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pauses/resumes replay
 .It Sy Space
 executes next row in the replaying sheet
 .El
-.Sh MAJOR OPTIONS
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
-.It Fl f, -filetype Ns = Ns Ar filetype
-use loader for
-.Ar filetype
-instead of file extension
-.
-.It Fl y, -confirm_overwrite Ns =F
-overwrites existing files without confirmation 
-.El
-.Sh COMMANDS
+.Sh GLOBAL COMMANDS
 .so vd-keystrokes.inc
 .
 .Sh MINOR OPTIONS
 .so vd-cli.inc
 .
-.Sh THEME OPTIONS
+.Sh DISPLAY OPTIONS
+.No Display options can only be set via Sx Options No or the Sx config file Ns .
+
 .so vd-menu.inc
 .
 
-.Sh Custom Settings
-At the start of every session, 
-.Nm VisiData No looks for, in order, Sy .visidatarc No in the current directory, Sy $XDG_CONFIG_HOME/visidata/config Ns , or Sy $HOME/.visidatarc Ns , and calls Python exec() on its contents.  Usually used to create command aliases and set persistent options.  For example:
+.Sh CONFIG FILE
+At the start of every session,
+.Nm VisiData No looks for, in order, Sy .visidatarc No in the current directory, Sy $XDG_CONFIG_HOME/visidata/config Ns , or Sy $HOME/.visidatarc Ns , and calls Python exec() on its contents.  For example:
 .Bd -literal
-globalCommand('0', 'gh')   # goes to first column like vim
-options.min_memory_mb=100  # stop processing without 100MB free
+   options.min_memory_mb=100  # stop processing without 100MB free
+
+   globalCommand('0', 'gh')   # alias '0' to move to first column, like vim
+
+   aggregator('median', lambda values: sorted(values)[len(values)/2])
 .Ed
 
 .so vd-input.inc
-.so glossary.inc
 .
 .Sh AUTHOR
 .
 .Nm VisiData
 was conceived and implemented by
-.An Saul Pwanson Aq Mt visidata@saul.pw
+.An Saul Pwanson Aq Mt visidata@saul.pw Ns .

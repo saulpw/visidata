@@ -111,56 +111,56 @@ class OptionsObject:
 options = OptionsObject(baseOptions)
 
 
-option('debug', False, 'abort on error and display stacktrace')
-
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
-option('curses_timeout', 100, 'curses timeout in ms')
-
-option('default_width', 20, 'default column width')
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
-option('num_colors', 0, 'force number of colors to use')
+option('default_width', 20, 'default column width')
 option('textwrap', True, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
 option('aggr_null_filter', 'none', 'invalid values to filter out when aggregating: (n/e/f/"")')
 option('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
+option('debug', False, 'exit on error and display stacktrace')
+option('curses_timeout', 100, 'curses timeout in ms')
+option('num_colors', 0, 'force number of colors to use')
 
-theme('disp_truncator', '…')
-theme('disp_key_sep', '/')
-theme('disp_format_exc', '?')
-theme('disp_getter_exc', '!')
-theme('disp_edit_fill', '_', 'edit field fill character')
-theme('disp_more_left', '<', 'display cue in header indicating more columns to the left')
-theme('disp_more_right', '>', 'display cue in header indicating more columns to the right')
-theme('disp_column_sep', '|', 'chars between columns')
-theme('disp_keycol_sep', '\u2016', 'chars between keys and rest of columns')
-
-theme('disp_error_val', '¿', 'displayed contents when getter fails due to exception')
+disp_column_fill = ' ' # pad chars after column value
 theme('disp_none', '',  'visible contents of a cell whose value was None')
-theme('color_type_note', '226 green', 'for the type annotation on cells in anytype columns')
-theme('color_current_row', 'reverse')
-theme('color_default', 'normal')
-theme('color_selected_row', '215 yellow')
-theme('color_format_exc', '48 bold yellow')
-theme('color_getter_exc', 'red bold')
-theme('color_current_col', 'bold')
-theme('color_current_hdr', 'reverse underline')
-theme('color_key_col', '81 cyan')
-theme('color_default_hdr', 'bold underline')
-theme('color_column_sep', '246 blue')
-theme('disp_status_sep', ' | ', 'string separating multiple statuses')
-theme('disp_unprintable', '.', 'a substitute character for unprintables')
-theme('disp_column_fill', ' ', 'pad chars after column value')
+theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
+theme('disp_unprintable', '.', 'substitute character for unprintables')
+theme('disp_column_sep', '|', 'separator between columns')
+theme('disp_keycol_sep', '\u2016', 'separator between keys and rest of columns')
+theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
+theme('disp_status_sep', ' | ', 'separator between statuses')
+theme('disp_edit_fill', '_', 'edit field fill character')
+theme('disp_more_left', '<', 'header note indicating more columns to the left')
+theme('disp_more_right', '>', 'header note indicating more columns to the right')
+theme('disp_error_val', '¿', 'displayed contents for computation exception')
+theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
+
+theme('color_default', 'normal', 'the default color')
+theme('color_default_hdr', 'bold underline', 'color of the column headers')
+theme('color_current_row', 'reverse', 'color of the cursor row')
+theme('color_current_col', 'bold', 'color of the cursor column')
+theme('color_current_hdr', 'reverse underline', 'color of the header for the cursor column')
+theme('color_column_sep', '246 blue', 'color of column separators')
+theme('color_key_col', '81 cyan', 'color of key columns')
+theme('color_selected_row', '215 yellow', 'color of selected rows')
+
 theme('color_status', 'bold', 'status line color')
 theme('color_edit_cell', 'normal', 'edit cell color')
-theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
-theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
+
 theme('disp_pending', '', 'string to display in pending cells')
-theme('disp_note_pending', '⌛', 'note to display for pending cells')
+theme('note_pending', '⌛', 'note to display for pending cells')
+theme('note_format_exc', '?', 'cell note for an exception during type conversion or formatting')
+theme('note_getter_exc', '!', 'cell note for an exception during computation')
+
 theme('color_note_pending', 'bold magenta', 'color of note of pending cells')
+theme('color_note_type', '226 green', 'cell note for numeric types in anytype columns')
+theme('color_format_exc', '48 bold yellow', 'color of formatting exception note')
+theme('color_getter_exc', 'red bold', 'color of computation exception note')
 
 ENTER='^J'
 ESC='^['
@@ -1061,7 +1061,7 @@ class Sheet:
     @property
     def keyColNames(self):
         'String of key column names.'
-        return options.disp_key_sep.join(c.name for c in self.keyCols)
+        return ' '.join(c.name for c in self.keyCols)
 
     @property
     def cursorCell(self):
@@ -1389,7 +1389,7 @@ class Sheet:
 
                     sepattr = sepattr or colors[options.color_column_sep]
 
-                    _clipdraw(scr, y, x, options.disp_column_fill+cellval.display, attr, colwidth)
+                    _clipdraw(scr, y, x, disp_column_fill+cellval.display, attr, colwidth)
 
                     note = getattr(cellval, 'note', None)
 
@@ -1571,13 +1571,13 @@ class Column:
         except Exception as e:
             return DisplayWrapper(None, error=stacktrace(),
                                 display=options.disp_error_val,
-                                note=options.disp_getter_exc,
+                                note=options.note_getter_exc,
                                 notecolor=options.color_getter_exc)
 
         if isinstance(cellval, threading.Thread):
             return DisplayWrapper(None,
                                 display=options.disp_pending,
-                                note=options.disp_note_pending,
+                                note=options.note_pending,
                                 notecolor=options.color_note_pending)
 
         if isinstance(cellval, bytes):
@@ -1593,16 +1593,16 @@ class Column:
             dw.display = dispval
 
             # annotate cells with raw value type in anytype columns
-            if self.type is anytype and options.color_type_note:
+            if self.type is anytype and options.color_note_type:
                 dw.note = typemap.get(type(cellval), None)
-                dw.notecolor = options.color_type_note
+                dw.notecolor = options.color_note_type
 
         except EscapeException:
             raise
         except Exception as e:  # type conversion or formatting failed
             dw.error = stacktrace()
             dw.display = str(cellval)
-            dw.note = options.disp_format_exc
+            dw.note = options.note_format_exc
             dw.notecolor = options.color_format_exc
 
         return dw
@@ -1929,7 +1929,7 @@ def _clipdraw(scr, y, x, s, attr, w):
 
         # convert to string just before drawing
         s, dispw = clipstr(str(s), w)
-        scr.addstr(y, x, options.disp_column_fill*w, attr)
+        scr.addstr(y, x, disp_column_fill*w, attr)
         scr.addstr(y, x, s, attr)
     except Exception as e:
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)

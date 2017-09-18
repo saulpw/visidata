@@ -15,8 +15,6 @@ slides current row/column left/down/up/right
 .It Ic "gH  gJ  gK  gL"
 slides current row/column all the way to the left/bottom/top/right of sheet
 .Pp
-.It Ic "zt    zz    zb"
-scrolls current row to top/center/bottom of screen
 
 .It Ic "zh  zj  zk  zl"
 scrolls one left/down/up/right
@@ -25,6 +23,8 @@ moves cursor one page left/right
 .It Ic "zs          ze"
 scrolls sheet to leftmost/rightmost column
 
+.It Ic "  zt  zz  zb  "
+scrolls current row to top/center/bottom of screen
 .El
 .
 .so vdtui-column.inc
@@ -52,29 +52,13 @@ opens a frozen copy of current sheet with all visible columns evaluated
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .El
 
-.Sh Clipboard
-.Bl -tag -width XXXXXXXXXXXXXXX -compact 
-.It Ic "Shift-B"
-opens clipboard sheet
-.It Ic " y  gy"
-copies current/all selected row(s) and appends to clipboard sheet
-.It Ic " p"
-pastes most recent clipboard row after current row
-.It Ic "gp"
-pastes all clipboard rows after current row
-.It Ic " ^Z"
-undoes most recent delete in clipboard sheet
-.It Ic "g^Z"
-undoes deletion of all rows in clipboard sheet
-
-.El
-.Sh Editing
+.Sh Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " a"
+.It Ic "  a"
 appends a blank row
-.It Ic " d  gd"
-deletes current/all selected row(s) and appends to clipboard sheet
+.It Ic "  d  gd"
+deletes current/all selected row(s) and appends to clipboard
 .so vdtui-editing.inc
 
 .Sh Data Toolkit
@@ -100,52 +84,51 @@ opens duplicate sheet with a random population subset of
 
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "^P"
-opens Sy Status History No
+.No opens Sy Status History No
 .It Ic "^X"
 evalutes Python expression and opens sheet for browsing resulting Python object
 .It Ic "^Y  z^Y"
 opens sheet of current row/cell as Python object
 .El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "Enter"
-dives further into Python object
-.It Ic "\&."
-toggles whether methods and hidden properties are shown
-
+.Sh Note:
+.Bl -inset -compact
+.It
+In most cases, commands that affect "selected rows" will affect all rows when no rows are selected.
 .El
-.Sh VisiData Sheets
+.Sh Non-source Sheets
 .Bl -tag -width Xx -compact
 
-.It Sy Static Sheets
+.It Sy Metasheets
 .It Sy " \&."
-.Sy Clipboard Sheet (Shift-B)
+.Sy Columns Sheet No (Shift-C) "    edit column properties"
 .It Sy " \&."
-.Sy Columns Sheet (Shift-C)
+.Sy Sheets Sheet No (Shift-S) "     jump between sheets or join them together"
 .It Sy " \&."
-.Sy Commandlog Sheet (Shift-D)
+.Sy Options No (Shift-O) "          edit all configurable options"
 .It Sy " \&."
-.Sy Error Sheet (^E)
+.Sy Commandlog No (Shift-D) "       modify and save commands for replay"
 .It Sy " \&."
-.Sy Options Sheet (Shift-O)
+.Sy Clipboard No (Shift-B) "        view copy/deleted rows"
 .It Sy " \&."
-.Sy Sheets Sheet (Shift-S) No "     view, traverse and join sheets"
+.Sy Error Sheet No (^E) "           view last error"
 .It Sy " \&."
-.Sy Status History Sheet (^P)
+.Sy Status History No (^P) "        view history of status messages"
 .It Sy " \&."
-.Sy Tasks Sheet (^T)
+.Sy Tasks Sheet No (^T) "           view, cancel, and profile asynchronous tasks"
 
 .It Sy Derived Sheets
 .It Sy " \&."
-.Sy Describe Sheet (Shift-I)
+.Sy Frequency Table No (Shift-F) "  group rows by column value, with aggregations of other columns"
 .It Sy " \&."
-.Sy Frequency Table (Shift-F)
+.Sy Describe Sheet No (Shift-I) "   view summary statistics for each column"
 .It Sy " \&."
-.Sy Melted Sheet (Shift-M)
+.Sy Pivot Table No (Shift-W) "      group rows by key and summarize the current column"
 .It Sy " \&."
-.Sy Pivot Sheet (Shift-W)
+.Sy Melted Sheet No (Shift-M) "     unpivot non-key columns into variable/value columns"
 
 .El
 
+.Sh METASHEETS
 .Sh Columns Sheet (Shift-C)
 Properties of columns on the source sheet can be changed with standard editing commands
 .No ( Ns Sy e  ge g= Del Ns ) on the Columns Sheet . multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
@@ -166,24 +149,7 @@ hides selected columns on source sheet
 .It Ic "g~ g# g% g$ g@"
 Sets type of selected columns to str/int/float/currency/date
 .El
-.Sh Commandlog Sheet (Shift-D)
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It (sheet-specific commands)
-.El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic " x"
-replays command in current row
-.It Ic "gx"
-replays contents of entire commandlog
-.El
-.Sh Options Sheet (Shift-O)
-.Bl -tag -width XXXXXXXXXXXXXXX -compact 
-.It (sheet-specific commands)
-.El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "Enter"
-edits option
-.El
+.
 .Sh Sheets Sheet (Shift-S)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact 
 .It (sheet-specific commands)
@@ -191,8 +157,8 @@ edits option
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter"
 jumps to sheet referenced in current row
-.It Ic "&" Ar jointype No
-.No where Ar jointype No is one of: 
+.It Ic "&" Ar jointype
+.No merges the selected sheets with visible columns from all, keeping rows according to the Ar jointype Ns :
 .El
 .Bl -tag -width x -compact -offset XXXXXXXXXXXXXXXXXXXX 
 .It Sy "\&."
@@ -202,10 +168,63 @@ jumps to sheet referenced in current row
 .It Sy "\&."
 .Sy full No "  keeps all rows from all sheets (union)"
 .It Sy "\&."
-.Sy diff No "  keeps only rows NOT in all sheets "
+.Sy diff No "  keeps only rows NOT in all sheets"
 .It Sy "\&."
-.Sy append No "combines rows of selected sheets into single sheet"
+.Sy append No "keeps all rows from all sheets (concatenation)"
 .El
+.
+.Sh Options (Shift-O)
+.Bl -tag -width XXXXXXXXXXXXXXX -compact 
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "Enter"
+edits option
+.El
+.
+.Sh Commandlog (Shift-D)
+.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic " x"
+replays command in current row
+.It Ic "gx"
+replays contents of entire commandlog
+.El
+.
+.Sh Clipboard
+.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "Shift-B"
+opens clipboard sheet
+.It Ic " y  gy"
+copies current/all selected row(s) and appends to clipboard
+.It Ic " p"
+pastes most recent clipboard row after current row
+.It Ic "gp"
+pastes all clipboard rows after current row
+.It Ic " ^Z"
+undoes most recent delete in clipboard
+.It Ic "g^Z"
+undoes deletion of all rows in clipboard
+.El
+.
+.Sh DERIVED SHEETS
+.Sh Frequency Table (Shift-F)
+A Frequency Table groups rows by one or more columns, and includes summary columns for those with aggregators.
+.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gF
+groups by all key columns on the source sheet
+.It Ic zF
+opens a one-line summary for all [selected] rows
+.El
+.
 .Sh Describe Sheet (Shift-I)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
@@ -218,13 +237,7 @@ selects/toggles/unselects rows on source sheet which are being described in curr
 .It Ic "zEnter"
 opens copy of source sheet with rows described in current cell
 .El
-.Sh Frequency Table (Shift-F)
-Groups rows by key, including columns for each aggregation of a source column.  Set aggregators on columns with '+' (or by 'e'dit on its 'C'olumns sheet) before pressing Shift-F to use the current column as the key.
-.Sy gF No groups by all key columns on the source sheet.
-.Sy zF No provides summary aggregation without groupingsheet which are being described in current cell
-.It Ic "w"
-for histograms of numeric value, toggles between bins with an even interval width and bins with an even frequency height
-.El
+.
 .Sh Melted Sheet (Shift-M)
 Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
 .Sh Pivot Sheet (Shift-W)
@@ -235,5 +248,16 @@ Set key column(s) and aggregators on column(s) before pressing Shift-W on the co
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Enter
 Opens sheet of source rows which comprise current pivot cell
+.El
+
+.Sh Python Object Sheet (^X ^Y)
+.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "Enter"
+dives further into Python object
+.It Ic "\&." No (period)
+toggles whether methods and hidden properties are shown
 .El
 

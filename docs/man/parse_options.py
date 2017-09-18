@@ -18,6 +18,7 @@ else:
     sys.exit()
 
 print(vd.__version__)
+padding = 26
 
 options_cli_skel = '''.It Sy --{cli_optname} Ns = Ns Ar "{type}" No {default}
 .No {description}
@@ -34,7 +35,7 @@ with open('{0}-cli.inc'.format(man), 'w') as cliOut:
         colwidth = max((len(optname)+len(str(default))) for optname, default, _, _ in vd.baseOptions.values())
         menuOut.write('.Bl -tag -width %s -compact\n' % ('X'*(colwidth+2)))
 
-        cliwidth = max(29+len(str(default)) for _, default, _, _ in vd.baseOptions.values())
+        cliwidth = max(padding+len(str(default)) for _, default, _, _ in vd.baseOptions.values())
         cliOut.write('.Bl -tag -width %s -compact\n' % ('X'*(cliwidth+2)))
 
         for optname in opts:
@@ -48,7 +49,7 @@ with open('{0}-cli.inc'.format(man), 'w') as cliOut:
                 optlen = len(cli_optname)+len(cli_type)+1
                 cliOut.write(options_cli_skel.format(cli_optname=cli_optname,
                                                 optname = optname,
-                                                type=cli_type+" "*(29-optlen),
+                                                type=cli_type+" "*(padding-optlen),
                                                  default=default,
                                                  description=desc))
 

@@ -6,7 +6,7 @@ globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol, selectedRows or ro
 
 aggregators = collections.OrderedDict()
 
-def aggregator(name, type, func):
+def aggregator(name, func, type=None):
     'Define simple aggregator `name` that calls func(values)'
     def _func(col, rows):  # wrap builtins so they can have a .type
         return func(col.getValues(rows))
@@ -25,13 +25,13 @@ def mean(vals):
     return float(sum(vals))/len(vals)
 
 
-aggregator('min', None, min)
-aggregator('max', None, max)
-aggregator('avg', float, mean)
-aggregator('mean', float, mean)
-aggregator('sum', None, sum)
-aggregator('distinct', int, lambda values: len(set(values)))
-aggregator('count', int, len)
+aggregator('min', min)
+aggregator('max', max)
+aggregator('avg', mean, float)
+aggregator('mean', mean, float)
+aggregator('sum', sum)
+aggregator('distinct', lambda values: len(set(values)), int)
+aggregator('count', len, int)
 
 def rowkeys(sheet, row):
     return ' '.join(c.getDisplayValue(row) for c in sheet.keyCols)

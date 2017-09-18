@@ -8,7 +8,7 @@ from .vdtui import *
 min_task_time_s = 0.10 # only keep tasks that take longer than this number of seconds
 
 option('profile_tasks', True, 'profile async tasks')
-option('min_memory_mb', 0, 'stop loading and async processing unless this much memory is available')
+option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
 globalCommand('^C', 'if sheet.currentThreads: ctypeAsyncRaise(sheet.currentThreads[-1], EscapeException)', 'cancel most recent task on the current sheet')
 globalCommand('^T', 'vd.push(vd.tasksSheet)', 'push task history sheet')
