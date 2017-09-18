@@ -1,12 +1,17 @@
 import time
 import operator
+import threading
 
 from visidata import *
 
 option('delay', 0.0, '--play delay between commands, in seconds')
+option('disp_replay_pause', '‖', '')
+option('disp_replay_play', '▶', '')
 
 globalCommand('D', 'vd.push(vd.commandlog)', 'push the commandlog')
 globalCommand('^D', 'saveSheet(vd.commandlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save commandlog to new file')
+globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume commandlog replay')
+globalCommand(' ', 'vd.commandlog.semaphore.release()', 'while paused, replay next action')
 #globalCommand('KEY_BACKSPACE', 'vd.commandlog.undo()', 'remove last action on commandlog and replay')
 
 # not necessary to log movements and scrollers
@@ -14,6 +19,7 @@ nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < 
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zL zH zh zl zs ze zKEY_END zKEY_HOME zKEY_LEFT zKEY_RIGHT kLFT5 kRIT5'.split()
 nonLogKeys += '^L ^C ^U ^D'.split()
+
 
 def itemsetter(i):
     def g(obj, v):
@@ -56,7 +62,10 @@ class CommandLog(Sheet):
     ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 
+    paused = False
+    currentReplay = None     # CommandLog replaying currently
     currentReplayRow = None  # must be global, to allow replay
+    semaphore = threading.Semaphore(0)
 
     def __init__(self, name, *args):
         super().__init__(name, *args)
@@ -120,7 +129,17 @@ class CommandLog(Sheet):
             vs = matchingSheets[0]
         return vs
 
-    def replayOne(self, r, expectedThreads=0):
+    @classmethod
+    def togglePause(self):
+        if not self.currentReplay:
+            status('no replay in progress')
+        else:
+            if self.paused:
+                self.semaphore.release()
+            self.paused = not self.paused
+            status('paused' if self.paused else 'resumed')
+
+    def replayOne(self, r):
         'Replay the command in one given row.'
         CommandLog.currentReplayRow = r
         if r.sheet:
@@ -143,21 +162,27 @@ class CommandLog(Sheet):
         if escaped:  # escapes should already have been filtered out
             error('unexpected escape')
 
-        sync(expectedThreads)
-
         CommandLog.currentReplayRow = None
+
 
     def replay_sync(self, live=False):
         'Replay all commands in log.'
-        self.sheetmap = {}
+        self.sheetmap.clear()
+        CommandLog.currentReplay = self
+        self.progressTotal = len(self.rows)
+        self.cursorRowIndex = 0
+        while self.cursorRowIndex < len(self.rows)-1:
+            self.progressMade = self.cursorRowIndex+1
 
-        for r in self.rows:
-            time.sleep(options.delay)
-            vd().statuses = []
-            # sync should expect this thread if playing live
-            self.replayOne(r, 1 if live else 0)
+            acquired = CommandLog.semaphore.acquire(timeout=options.delay if not self.paused else None)
+            if acquired or not self.paused:
+                vd().statuses = []
+                self.replayOne(self.cursorRow)
+                sync(1 if live else 0)  # expect this thread also if playing live
+                self.cursorRowIndex += 1
 
         status('replayed entire %s' % self.name)
+        CommandLog.currentReplay = None
 
     @async
     def replay(self):
@@ -166,10 +191,9 @@ class CommandLog(Sheet):
 
     def getLastArgs(self):
         'Get user input for the currently playing command.'
-        if CommandLog.currentReplayRow is not None:
-            return CommandLog.currentReplayRow.input
-        else:
-            return None
+        if CommandLog.currentReplay:
+            return CommandLog.currentReplay.cursorRow.input
+        return None
 
     def setLastArgs(self, args):
         'Set user input on last command, if not already set.'
@@ -178,8 +202,15 @@ class CommandLog(Sheet):
             if not self.currentActiveRow.input:
                 self.currentActiveRow.input = args
 
+    @property
+    def replayStatus(self):
+        x = options.disp_replay_pause if self.paused else options.disp_replay_play
+        return ' │ %s %s/%s' % (x, self.progressMade, self.progressTotal)
+
 vd().commandlog = CommandLog('commandlog')
 vd().addHook('preexec', vd().commandlog.beforeExecHook)
 vd().addHook('postexec', vd().commandlog.afterExecSheet)
 vd().addHook('preedit', vd().commandlog.getLastArgs)
 vd().addHook('postedit', vd().commandlog.setLastArgs)
+
+vd().addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'green'))
