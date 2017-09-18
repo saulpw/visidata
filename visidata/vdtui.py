@@ -797,6 +797,7 @@ class Sheet:
 
         # all columns in display order
         self.columns = kwargs.get('columns') or [copy(c) for c in self.columns]  # list of Column objects
+        self.recalc()
 
         # commands specific to this sheet
         sheetcmds = collections.OrderedDict()
@@ -904,8 +905,7 @@ class Sheet:
         ret.rows = []                     # a fresh list without incurring any overhead
 #        ret.rows = copy(self.rows)       # same row objects in a fresh list
         ret.columns = deepcopy(self.columns) # deepcopy columns even for shallow copy of sheet
-        for c in ret.columns:
-            c.sheet = ret
+        ret.recalc()  # set .sheet on columns
         ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
         ret.progressMade = ret.progressTotal = 0

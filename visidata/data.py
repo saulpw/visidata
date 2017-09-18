@@ -118,7 +118,6 @@ def openSource(p, filetype=None):
 
     if vs:
         status('opening %s as %s' % (p.name, filetype))
-        vs.recalc()  # set col.sheet
 
     return vs
 
@@ -173,6 +172,7 @@ def open_tsv(p, vs=None):
             # but that's a lot of work for a large dataset
             vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers[:header_lines]))
 
+    vs.recalc()
     return vs
 
 @async
