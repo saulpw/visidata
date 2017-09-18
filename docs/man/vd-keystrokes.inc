@@ -108,7 +108,7 @@ In most cases, commands that affect "selected rows" will affect all rows when no
 .It Sy " \&."
 .Sy Commandlog No (Shift-D) "       modify and save commands for replay"
 .It Sy " \&."
-.Sy Clipboard No (Shift-B) "        view copy/deleted rows"
+.Sy Clipboard No (Shift-B) "        view copied/deleted rows"
 .It Sy " \&."
 .Sy Error Sheet No (^E) "           view last error"
 .It Sy " \&."

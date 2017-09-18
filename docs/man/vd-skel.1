@@ -103,7 +103,11 @@ At the start of every session,
 
    globalCommand('0', 'gh')   # alias '0' to move to first column, like vim
 
-   aggregator('median', lambda values: sorted(values)[len(values)/2])
+   def median(values):
+       L = sorted(values)
+       return L[len(L)//2]
+
+   aggregator('median', median)
 .Ed
 
 .so vd-input.inc
