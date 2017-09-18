@@ -14,9 +14,9 @@ edits name of current column
 .It Ic "~  #  %  $  @"
 sets type of current column to str/int/float/currency/date
 
-.It Ic " ="
-creates a new column from given Python expression, which is computed for each row, using column names are as variables
-.It Ic "g="
-sets value in current column for selected rows to result of given Python expression
+.It Ic " =" Ar expr No
+.No creates new column from Python Ar expr Ns , with column names as variables
+.It Ic "g=" Ar expr No
+.No sets current column for selected rows to result of Python Ar expr No
 
 .El

@@ -6,7 +6,7 @@
 .Sh NAME
 .
 .Nm VisiData
-.Nd a terminal interface for exploring and arranging tabular data
+.Nd a terminal utility for exploring and arranging tabular data
 .
 .
 .Sh SYNOPSIS
@@ -21,9 +21,7 @@
 .Sy Fl p No <cmdlog.vd>
 .Op Fl -batch
 .Op Fl -delay No <delay>
-.Op Fl -output No <output>
---
-.Op Fl "-<field>=<value> ..."
+.Op Fl o No <output>
 .
 .It <command> | 
 .Sy vd
@@ -32,37 +30,33 @@
 .Sh DESCRIPTION
 .
 .Nm VisiData
-is a text user interface for surveying, cleaning, editing, and restructuring data from any supported source, including tsv, csv, xlsx, hdf5, and sqlite.
+is a multipurpose tool for exploring, cleaning, editing, and restructuring data from supported sources, including tsv, csv, xlsx, hdf5, and sqlite.
 Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be documented, communicated, and replayed via the commandlog.
 .Nm VisiData No is built on the
 .Sy vdtui No platform.
 .
 .Sh REPLAY MODE
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Fl "p, --play"
-.No Replays a saved Ar cmdlog.vd No via curses.
-.No Python format strings (like \&"{ Ns Ar field Ns }\&") No are replaced with the Ar value No given on the command line.  These format options must be specified after the --.
+.Bl -tag -width XXXXXXXXXXXXXXXXXX -compact
+.It Fl "p, --play" Ar cmdlog No
+.No replays a saved Ar cmdlog.vd No within the interface
 
 .It Fl -batch
-replay in batch mode (without curses).
+replays in batch mode (with no interface and all output to stdout)
 
-.It Fl -delay Ar delay
-replay via curses with Ar delay No seconds between commands
+.It Fl -delay Ar seconds
+.No delays Ar seconds No between commands
 
-.It Fl -output
-save the final visible sheet to <output> at the end of the replay
+.It Fl "o, --output" Ar file No
+.No saves the final visible sheet to Ar file No (as .tsv) at the end of the replay
 
-.It Sy While replaying
+.It Sy While Replaying
 .El
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact -offset XXX
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pauses/resumes replay
 .It Sy Space
-while plaused, transitions to next step in replay
+executes next row in the replaying sheet
 .El
-.Sh COMMANDS
-.so vd-keystrokes.inc
-.
 .Sh MAJOR OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
@@ -70,21 +64,42 @@ while plaused, transitions to next step in replay
 use loader for
 .Ar filetype
 instead of file extension
+
 .It Fl "r, --readonly"
 disables editing
+
 .It Fl y, -confirm_overwrite Ns =F
 overwrites existing files without confirmation 
 .El
+.Sh COMMANDS
+.so vd-keystrokes.inc
+.
 .Sh MINOR OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .so vd-cli.inc
 .El
 .
-.Sh OPTIONS MENU
+.Sh OPTIONS MENU (Shift-O)
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .so vd-menu.inc
 .El
 .
+
+.Sh .visidatarc
+For customizing
+.Nm VisiData
+settings which persist across every session.
+A sample
+.Sy .visidatarc
+is:
+.Bd -literal
+options.color_key_col="cyan"
+options.min_memory_mb=100
+.Ed
+
+This configures key coloumns to be colored 'cyan' and for visidata to stop loading and async processing unless 100 mb of memory are available.
+.so vd-input.inc
+.so glossary.inc
 .
 .Sh SEE ALSO
 .

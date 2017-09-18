@@ -20,6 +20,8 @@ chars between keys and rest of columns
 displayed contents when getter fails due to exception 
 .It Sy "disp_none         " No "                "
 visible contents of a cell whose value was None 
+.It Sy "color_type_note   " No "226 green       "
+for the type annotation on cells in anytype columns 
 .It Sy "color_current_row " No "reverse         "
  
 .It Sy "color_default     " No "normal          "
@@ -56,6 +58,12 @@ edit cell color
 status line prefix 
 .It Sy "disp_ambig_width  " No "1               "
 width to use for unicode chars marked ambiguous 
+.It Sy "disp_pending      " No "                "
+string to display in pending cells 
+.It Sy "disp_note_pending " No "⌛               "
+note to display for pending cells 
+.It Sy "color_note_pending" No "bold magenta    "
+color of note of pending cells 
 .It Sy "disp_histogram    " No "*               "
  
 .It Sy "disp_histolen     " No "80              "

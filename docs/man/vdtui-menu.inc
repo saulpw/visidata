@@ -1,7 +1,5 @@
 .It Sy "debug             " No "False           "
 abort on error and display stacktrace 
-.It Sy "readonly          " No "False           "
-disable saving 
 .It Sy "encoding          " No "utf-8           "
 as passed to codecs.open 
 .It Sy "encoding_errors   " No "surrogateescape "
@@ -20,6 +18,8 @@ wrap text to fit window width on TextSheet
 command keystroke to execute after successful edit 
 .It Sy "aggr_null_filter  " No "none            "
 invalid values to filter out when aggregating: (n/e/f/"") 
+.It Sy "force_valid_colnames" No "False           "
+clean column names to be valid Python identifiers 
 .It Sy "disp_truncator    " No "…               "
  
 .It Sy "disp_key_sep      " No "/               "
@@ -42,6 +42,8 @@ chars between keys and rest of columns
 displayed contents when getter fails due to exception 
 .It Sy "disp_none         " No "                "
 visible contents of a cell whose value was None 
+.It Sy "color_type_note   " No "226 green       "
+for the type annotation on cells in anytype columns 
 .It Sy "color_current_row " No "reverse         "
  
 .It Sy "color_default     " No "normal          "
@@ -78,5 +80,11 @@ edit cell color
 status line prefix 
 .It Sy "disp_ambig_width  " No "1               "
 width to use for unicode chars marked ambiguous 
+.It Sy "disp_pending      " No "                "
+string to display in pending cells 
+.It Sy "disp_note_pending " No "⌛               "
+note to display for pending cells 
+.It Sy "color_note_pending" No "bold magenta    "
+color of note of pending cells 
 .It Sy "float_chars       " No "+-0123456789.eE_"
 valid numeric characters 

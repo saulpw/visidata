@@ -56,7 +56,7 @@ Here is a [quick reference of all commands](https://github.com/saulpw/visidata/b
 
 # Developers
 
-If something doesn't appear to be working right, please create [an issue on Github]().  Include the full stack trace shown with `Ctrl-e`.
+If something doesn't appear to be working right, please create [an issue on Github](https://github.com/saulpw/visidata/issues).  Include the full stack trace shown with `Ctrl-e`.
 
 To contribute a bugfix or a loader for another file format, fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls).  Here is the [developer documentation for loaders]().
 
@@ -68,7 +68,7 @@ The core `vdtui.py` can be used to quickly create efficient terminal workflows.
 - [vgit](https://github.com/saulpw/vgit): a git interface
 - [vdgalcon](https://github.com/saulpw/vdgalcon): a port of the classic game [Galactic Conquest](https://www.galcon.com)
 
-Other workflows should be created as separate [apps using vdtui](docs/vdtui-dev.md).  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv) which is only one page of code.
+Other workflows should be created as separate [apps using vdtui](docs/architecture.rst).  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv) which is only one page of code.
 
 Designs for other tools are being considered.
 

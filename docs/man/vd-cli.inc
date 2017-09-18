@@ -1,7 +1,5 @@
 .It Sy --debug Ns =bool
 .No abort on error and display stacktrace (default Sy False Ns )
-.It Sy --readonly Ns =bool
-.No disable saving (default Sy False Ns )
 .It Sy --encoding Ns =str
 .No as passed to codecs.open (default Sy utf-8 Ns )
 .It Sy --encoding-errors Ns =str
@@ -20,6 +18,8 @@
 .No command keystroke to execute after successful edit (default Sy j Ns )
 .It Sy --aggr-null-filter Ns =str
 .No invalid values to filter out when aggregating: (n/e/f/"") (default Sy none Ns )
+.It Sy --force-valid-colnames Ns =bool
+.No clean column names to be valid Python identifiers (default Sy False Ns )
 .It Sy --float-chars Ns =str
 .No valid numeric characters (default Sy +-0123456789.eE_ Ns )
 .It Sy --profile-tasks Ns =bool
@@ -41,13 +41,13 @@
 .It Sy --histogram-even-interval Ns =bool
 .No if histogram bins should have even distribution of rows (default Sy False Ns )
 .It Sy --pyobj-show-hidden Ns =bool
-.No show methods and _ properties (default Sy False Ns )
+.No show methods and _private properties (default Sy False Ns )
 .It Sy --melt-var-colname Ns =str
 .No column name to use for the melted variable name (default Sy Variable Ns )
 .It Sy --melt-value-colname Ns =str
 .No column name to use for the melted value (default Sy Value Ns )
-.It Sy --piano Ns =float
-.No --play piano delay in seconds (default Sy 0.0 Ns )
+.It Sy --delay Ns =float
+.No --play delay between commands, in seconds (default Sy 0.0 Ns )
 .It Sy --regex-maxsplit Ns =int
 .No maxsplit to pass to regex.split (default Sy 0 Ns )
 .It Sy --csv-dialect Ns =str

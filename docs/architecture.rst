@@ -33,11 +33,11 @@ The process of designing a sheet is:
 One project, two licenses
 =========================
 
-``vd.py`` is a single-file stand-alone library, freely available for use in
+``vdtui.py`` is a single-file stand-alone library, freely available for use in
 other projects.  It is distributed under the MIT free software license.
 
 The rest of this repository is the VisiData application, runnable as ``vd``
-from the command-line.  Everything but ``vd.py``, including the data sources and
+from the command-line.  Everything but ``vdtui.py``, including the data sources and
 extensions and addons, are distributed under the more restrictive GPLv3 free
 software license.  Additional commercial licenses are negotiable.
 
@@ -124,7 +124,7 @@ Commands
 ========
 
 Keyboard commands are the primary interface for the user to control VisiData.
-Add new commands using the global ``command()`` function within a .py file.
+Add new commands using the global ``globalCommand()`` or ``Command()`` functions within a .py file.
 
 Syntax
 ------

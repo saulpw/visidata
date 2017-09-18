@@ -1,6 +1,6 @@
-.Sh Glossary
+.Sh GLOSSARY
 .
-.Bl -tag -width XXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXX -compact
 .It Ql abort
 exit program immediately
 .It Ql drop
@@ -19,5 +19,7 @@ push a sheet to top of sheets list (making it immediately visible)
 change set of visible rows
 .It Ql show
 output to status line
+.It Ql selected rows
+usually means 'selected rows or all rows if none selected'
 .It Ql this
 current [row/column/cell] ('current' is also used)

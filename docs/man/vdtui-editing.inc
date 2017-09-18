@@ -1,20 +1,17 @@
-.Sh Editing
-.
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic " e"
 edits contents of current cell
-.It Ic ge
-edits contents of current column for selected rows
-.It Ic " zd   Delete"
-sets contents of current cell to None
-.It Ic "gzd  gDelete"
-sets contents of cells in current column to None for selected rows
+.It Ic ge Ar text
+.No sets contents of current column for selected rows to Ar text No
+.It Ic " zd   Del"
+.No sets contents of current cell to Sy None
+.It Ic "gzd  gDel"
+.No sets contents of cells in current column to Sy None No for selected rows
 .
 .El
 .
 .Sh "  Commands While Editing Input"
-.Bl -tag -width XXXXXXXXXXXXXXX -compact 
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "ENTER  ^C"
 accepts/aborts input
 .It Ic ^Z
@@ -33,8 +30,6 @@ transposes previous and current characters
 clears from cursor to beginning/end of line
 .It Ic "Backspace  Del"
 deletes previous/current character
-.It Ic ^V
-inputs next character pressed as a literal
 .It Ic Insert
 toggles insert mode
 .It Ic "Up  Down"

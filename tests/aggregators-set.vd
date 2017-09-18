@@ -5,8 +5,7 @@ sample	Units	0	+	sum	add aggregator for this column
 sample	Unit_Cost	0	%		set column type to float
 sample	Total	0	%		set column type to float
 sample	Total	0	C		open Columns for this sheet
-sample_columns	name	5	 		toggle select of this row
-sample_columns	name	6	 		toggle select of this row
+sample_columns	name	2	zr	5	go to row number
 sample_columns	name	6	g+	sum	add aggregator to all selected source columns
 sample_columns	aggregators	6	e	sum avg	edit this cell
 sample_columns	aggregators	6	q		quit the current sheet

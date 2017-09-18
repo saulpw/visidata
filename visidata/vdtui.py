@@ -26,7 +26,7 @@
 # Just include this whole file in your project as-is.  If you do make
 # modifications, please keep the base vdtui version and append your own id and
 # version.
-__version__ = 'saul.pw/vdtui v0.97pre'
+__version__ = 'saul.pw/vdtui v0.97'
 __author__ = 'Saul Pwanson <vdtui@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Beta'
@@ -96,14 +96,14 @@ class OptionsObject:
     def __init__(self, d):
         object.__setattr__(self, '_opts', d)
 
-    def __getattr__(self, k):
+    def __getattr__(self, k):      # options.foo
         name, value, default, helpstr = self._opts[k]
         return value
 
-    def __setattr__(self, k, v):
+    def __setattr__(self, k, v):   # options.foo = v
         self.__setitem__(k, v)
 
-    def __setitem__(self, k, v):
+    def __setitem__(self, k, v):   # options[k] = v
         if k not in self._opts:
             raise Exception('no such option "%s"' % k)
         self._opts[k][1] = type(self._opts[k][1])(v)
@@ -112,7 +112,6 @@ options = OptionsObject(baseOptions)
 
 
 option('debug', False, 'abort on error and display stacktrace')
-option('readonly', False, 'disable saving')
 
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
@@ -1415,9 +1414,6 @@ class Sheet:
     def editCell(self, vcolidx=None, rowidx=None):
         'Call `editText` at its place on the screen.  Returns the new value, properly typed'
 
-        if options.readonly:
-            status('readonly mode')
-            return
         if vcolidx is None:
             vcolidx = self.cursorVisibleColIndex
         x, w = self.visibleColLayout.get(vcolidx, (0, 0))

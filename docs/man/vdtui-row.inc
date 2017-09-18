@@ -2,14 +2,14 @@
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " s   u   t"
-selects/unselects/toggles current row
-.It Ic "gs  gu  gt"
-selects/unselects/toggles all rows
-.It Ic " |   \e\ "
-selects/unselects rows matching by regex in current column
-.It Ic "g|  g\e\"
-selects/unselects rows matching by regex in any visible column
+.It Ic " s   t   u"
+selects/toggles/unselects current row
+.It Ic "gs  gt  gu"
+selects/toggles/unselects all rows
+.It Ic " |   \e\ " Ns Ar regex
+.No selects/unselects rows matching Ar regex No in current column
+.It Ic "g|  g\e\ " Ns Ar regex
+.No selects/unselects rows matching Ar regex No in any visible column
 .It Ic " \&,"
 selects rows matching current cell in current column
 .It Ic "g\&,"
@@ -18,7 +18,7 @@ selects rows matching in all visible columns
 .El
 .
 .
-.Sh Row Manipulation
+.Sh Row Sorting/Filtering
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
