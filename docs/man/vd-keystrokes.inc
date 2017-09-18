@@ -214,7 +214,7 @@ jumps to sheet referenced in current row
 .It Ic "zs  zt  zu"
 selects/toggles/unselects rows on source sheet which are being described in current cell
 .It Ic " Enter"
-pushes a Sy Frequency Table No sheet grouped on column referenced in current row
+.No pushes a Sy Frequency Table No sheet grouped on column referenced in current row
 .It Ic "zEnter"
 pushes copy of source sheet with rows described in current cell
 .El
