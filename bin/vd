@@ -24,7 +24,6 @@ def main():
 
     parser.add_argument('inputs', nargs='*', help='initial sources')
     parser.add_argument('-d', dest='debug', action='store_true', default=False, help='abort on error')
-    parser.add_argument('-r', dest='readonly', action='store_true', default=False, help='disable editing')
     parser.add_argument('-f', dest='filetype', default='', help='specify file type')
     parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='sets confirm_overwrite option to false')
     parser.add_argument('-p', '--play', dest='play', default=None, help='.vd file to replay')
