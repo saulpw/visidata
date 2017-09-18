@@ -286,10 +286,9 @@ def anytype(r=None):
     return r
 anytype.__name__ = ''
 
-option('float_chars', '+-0123456789.eE_', 'valid numeric characters')
+floatchars='+-0123456789.eE_'
 def currency(s=''):
     'a `float` with any leading and trailing non-numeric characters stripped'
-    floatchars = options.float_chars
     if isinstance(s, str):
         while s and s[0] not in floatchars:
             s = s[1:]

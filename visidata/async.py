@@ -5,8 +5,9 @@ import cProfile
 
 from .vdtui import *
 
+min_task_time_s = 0.10 # only keep tasks that take longer than this number of seconds
+
 option('profile_tasks', True, 'profile async tasks')
-option('min_task_time_s', 0.10, 'only keep tasks that take longer than this number of seconds')
 option('min_memory_mb', 0, 'stop loading and async processing unless this much memory is available')
 
 globalCommand('^C', 'if sheet.currentThreads: ctypeAsyncRaise(sheet.currentThreads[-1], EscapeException)', 'cancel most recent task on the current sheet')
@@ -44,7 +45,7 @@ def threadProfileCode(vdself, func, *args, **kwargs):
         ret = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
 
     # remove very-short-lived async actions
-    if elapsed_s(thread) < options.min_task_time_s:
+    if elapsed_s(thread) < min_task_time_s:
         vd().threads.remove(thread)
 
     return ret
