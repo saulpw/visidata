@@ -1565,7 +1565,6 @@ class Column:
         except EscapeException:
             raise
         except Exception as e:
-#            exceptionCaught(status=False)
             return DisplayWrapper(None, error=stacktrace(),
                                 display=options.disp_error_val,
                                 note=options.disp_getter_exc,
@@ -1580,26 +1579,29 @@ class Column:
         if isinstance(cellval, bytes):
             cellval = cellval.decode(options.encoding, options.encoding_errors)
 
+        dw = DisplayWrapper(cellval)
+
         try:
             dispval = self.format(cellval)
             if width and self.type in (int, float, currency):
                 dispval = dispval.rjust(width-1)
 
+            dw.display = dispval
+
             # annotate cells with raw value type in anytype columns
             if self.type is anytype and options.color_type_note:
-                return DisplayWrapper(cellval, display=dispval,
-                        note=typemap.get(type(cellval), None),
-                        notecolor=options.color_type_note)
+                dw.note = typemap.get(type(cellval), None)
+                dw.notecolor = options.color_type_note
 
-            return DisplayWrapper(cellval, display=dispval)
         except EscapeException:
             raise
         except Exception as e:  # type conversion or formatting failed
-#            exceptionCaught(status=False)
-            return DisplayWrapper(cellval, error=stacktrace(),
-                                display=str(cellval),
-                                note=options.disp_format_exc,
-                                notecolor=options.color_format_exc)
+            dw.error = stacktrace()
+            dw.display = str(cellval)
+            dw.note = options.disp_format_exc
+            dw.notecolor = options.color_format_exc
+
+        return dw
 
     def getDisplayValue(self, row):
         return self.getCell(row).display
@@ -1772,6 +1774,7 @@ def confirm(prompt):
         error('disconfirmed')
 
 import unicodedata
+@functools.lru_cache(maxsize=8192)
 def clipstr(s, dispw):
     '''Return clipped string and width in terminal display characters.
 
