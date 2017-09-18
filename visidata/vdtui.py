@@ -431,6 +431,8 @@ class VisiData:
         self.scr = None  # curses scr
         self.hooks = {}
         self.threads = []  # all threads, including finished
+        self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
+        self.addHook('rstatus', self.rightStatus)
 
     def status(self, *args):
         'Add status message to be shown until next action.'
@@ -447,14 +449,14 @@ class VisiData:
             hooklist = []
             self.hooks[hookname] = hooklist
 
-        hooklist.append(hookfunc)
+        hooklist.insert(0, hookfunc)
 
     def callHook(self, hookname, *args, **kwargs):
         'Call all functions registered with `addHook` for the given hookname.'
-        r = None
+        r = []
         for f in self.hooks.get(hookname, []):
             try:
-                r = r or f(*args, **kwargs)
+                r.append(f(*args, **kwargs))
             except:
                 exceptionCaught()
         return r
@@ -509,7 +511,7 @@ class VisiData:
 
     def editText(self, y, x, w, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
-        v = self.callHook('preedit')
+        v = self.callHook('preedit')[0]
         if v is None:
             cursorEnable(True)
             v = editText(self.scr, y, x, w, **kwargs)
@@ -615,12 +617,19 @@ class VisiData:
 
     def drawRightStatus(self, scr, vs):
         'Draw right side of status bar.'
-        try:
-            rstatus, attr = self.rightStatus(vs)
-            _clipdraw(scr, self.windowHeight-1, self.windowWidth-len(rstatus)-2, rstatus, attr, len(rstatus))
-            curses.doupdate()
-        except Exception as e:
-            self.exceptionCaught()
+        rightx = self.windowWidth-1
+        for rstatcolor in self.callHook('rstatus', vs):
+            if rstatcolor:
+                try:
+                    rstatus, color = rstatcolor
+                    rstatus = ' '+rstatus
+                    rightx -= len(rstatus)
+                    attr = colors[color]
+                    _clipdraw(scr, self.windowHeight-1, rightx, rstatus, attr, len(rstatus))
+                except Exception as e:
+                    self.exceptionCaught()
+
+        curses.doupdate()
 
     def leftStatus(self, vs):
         'Compose left side of status bar and add status messages.'
@@ -634,8 +643,8 @@ class VisiData:
             pctLoaded = 'rows'
         else:
             pctLoaded = ' %2d%%' % sheet.progressPct
-        status = '%s %9d %s' % (self.keystrokes, sheet.nRows, pctLoaded)
-        attr = colors[options.color_status]
+        status = '%9d %s' % (sheet.nRows, pctLoaded)
+        attr = options.color_status
         return status, attr
 
     @property
