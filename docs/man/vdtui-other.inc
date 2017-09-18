@@ -7,7 +7,7 @@ views contents of current cell in a new sheet
 .It Ic " ^^ (Ctrl-^)"
 jumps to previous sheet (swaps with current sheet)
 .It Ic "  ` (backtick)"
-pushes source of current sheet
+opens source of current sheet
 .It Ic " ^E"
 views traceback for most recent error
 .It Ic "z^E"

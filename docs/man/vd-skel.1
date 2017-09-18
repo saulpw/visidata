@@ -16,21 +16,27 @@
 .Op <options>
 <input> ...
 .
-.It Ic vd
-.Op <options>
-.Sy Fl p No <cmdlog.vd>
-.Op Fl -batch
-.Op Fl -delay No <delay>
-.Op Fl o No <output>
-.
 .It <command> | 
 .Sy vd
 .Op <options>
-.
+
+
+.It Ic vd
+.Op <options>
+.Sy Fl -play No <cmdlog>
+.Op Fl -batch
+.Op Fl -delay No <delay>
+.Op Fl o No <output>
+--
+.Op Fl "-<field>=<value> ..."
+.El
+.Bl -inset -offset xx -compact
+.It Python format strings (like \&"{ Ns Ar field Ns }\&") No are replaced with the Ar value No given on the command line.  
+.It These format options must be specified after the --.
 .Sh DESCRIPTION
 .
 .Nm VisiData
-is a multipurpose tool for exploring, cleaning, editing, and restructuring data from supported sources, including tsv, csv, xlsx, hdf5, and sqlite.
+.No is a multipurpose tool for exploring, cleaning, editing, and restructuring data from Sx SUPPORTED SOURCES Ns .
 Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be documented, communicated, and replayed via the commandlog.
 .Nm VisiData No is built on the
 .Sy vdtui No platform.
@@ -38,14 +44,14 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .Sh REPLAY MODE
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact
 .It Fl "p, --play" Ar cmdlog No
-.No replays a saved Ar cmdlog.vd No within the interface
-
+.No replays a saved Ar cmdlog No within the interface.
+.
 .It Fl -batch
 replays in batch mode (with no interface and all output to stdout)
-
+.
 .It Fl -delay Ar seconds
 .No delays Ar seconds No between commands
-
+.
 .It Fl "o, --output" Ar file No
 .No saves the final visible sheet to Ar file No (as .tsv) at the end of the replay
 
@@ -64,10 +70,7 @@ executes next row in the replaying sheet
 use loader for
 .Ar filetype
 instead of file extension
-
-.It Fl "r, --readonly"
-disables editing
-
+.
 .It Fl y, -confirm_overwrite Ns =F
 overwrites existing files without confirmation 
 .El
@@ -75,40 +78,25 @@ overwrites existing files without confirmation
 .so vd-keystrokes.inc
 .
 .Sh MINOR OPTIONS
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .so vd-cli.inc
-.El
 .
-.Sh OPTIONS MENU (Shift-O)
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Sh THEME OPTIONS
 .so vd-menu.inc
-.El
 .
 
-.Sh .visidatarc
-For customizing
-.Nm VisiData
-settings which persist across every session.
-A sample
-.Sy .visidatarc
-is:
+.Sh Custom Settings
+At the start of every session, 
+.Nm VisiData No looks for, in order, Sy .visidatarc No in the current directory, Sy $XDG_CONFIG_HOME/visidata/config Ns , or Sy $HOME/.visidatarc Ns , and calls Python exec() on its contents.  Usually used to create command aliases and set persistent options.  For example:
 .Bd -literal
-options.color_key_col="cyan"
-options.min_memory_mb=100
+globalCommand('0', 'gh')   # goes to first column like vim
+options.min_memory_mb=100  # stop processing without 100MB free
 .Ed
 
-This configures key coloumns to be colored 'cyan' and for visidata to stop loading and async processing unless 100 mb of memory are available.
 .so vd-input.inc
 .so glossary.inc
-.
-.Sh SEE ALSO
-.
-.Xr vdtui 7
-vdtutor
-.Pa /usr/share/doc/visidata/ascii-commands.txt
 .
 .Sh AUTHOR
 .
 .Nm VisiData
-was created by 
+was conceived and implemented by
 .An Saul Pwanson Aq Mt visidata@saul.pw

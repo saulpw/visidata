@@ -39,7 +39,7 @@ sets names of all visible columns to contents of current row
 adds a frozen copy of current column with all cells evaluated
 .
 .It Ic "g'"
-pushes a frozen copy of current sheet with all visible columns evaluated
+opens a frozen copy of current sheet with all visible columns evaluated
 
 .It Ic "\&:" Ar regex
 .No adds new columns from Ar regex No split; # columns determined by example row at cursor
@@ -87,24 +87,24 @@ opens
 .It Ic "^D" Ar filename.vd
 saves commandlog to new .vd file
 .It Ic "Shift-A" Ar number No
-.No pushes new blank sheet with Ar number No columns
+.No opens new blank sheet with Ar number No columns
 
 .It Ic " +" Ar aggregator
 .No adds Ar aggregator No to the current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
 .No displays result of Ar aggregator No over values in selected rows for the current column
 .It Ic "Shift-P" Ar number
-pushes duplicate sheet with a random population subset of
+opens duplicate sheet with a random population subset of
 .Ar number No rows
 .so vdtui-other.inc
 
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "^P"
-pushes Sy Status History No sheet
+opens Sy Status History No
 .It Ic "^X"
-evalutes Python expression and pushes sheet for browsing resulting Python object
+evalutes Python expression and opens sheet for browsing resulting Python object
 .It Ic "^Y  z^Y"
-pushes sheet for of current row/cell as Python object
+opens sheet of current row/cell as Python object
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter"
@@ -214,9 +214,9 @@ jumps to sheet referenced in current row
 .It Ic "zs  zt  zu"
 selects/toggles/unselects rows on source sheet which are being described in current cell
 .It Ic " Enter"
-.No pushes a Sy Frequency Table No sheet grouped on column referenced in current row
+.No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .It Ic "zEnter"
-pushes copy of source sheet with rows described in current cell
+opens copy of source sheet with rows described in current cell
 .El
 .Sh Frequency Table (Shift-F)
 Groups rows by key, including columns for each aggregation of a source column.  Set aggregators on columns with '+' (or by 'e'dit on its 'C'olumns sheet) before pressing Shift-F to use the current column as the key.
@@ -226,7 +226,7 @@ Groups rows by key, including columns for each aggregation of a source column.  
 for histograms of numeric value, toggles between bins with an even interval width and bins with an even frequency height
 .El
 .Sh Melted Sheet (Shift-M)
-Pushes melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
+Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
 .Sh Pivot Sheet (Shift-W)
 Set key column(s) and aggregators on column(s) before pressing Shift-W on the column to pivot.
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -234,6 +234,6 @@ Set key column(s) and aggregators on column(s) before pressing Shift-W on the co
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Enter
-pushes sheet of source rows which comprise current pivot cell
+Opens sheet of source rows which comprise current pivot cell
 .El
 

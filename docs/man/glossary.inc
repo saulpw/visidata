@@ -4,7 +4,7 @@
 .It Ql abort
 exit program immediately
 .It Ql drop
-drop top (current) sheet
+drop current sheet
 .It Ql go
 move cursor
 .It Ql jump
@@ -20,6 +20,6 @@ change set of visible rows
 .It Ql show
 output to status line
 .It Ql selected rows
-usually means 'selected rows or all rows if none selected'
+selected rows on this sheet, or all rows if none selected (usually)
 .It Ql this
-current [row/column/cell] ('current' is also used)
+current [row/column/cell]

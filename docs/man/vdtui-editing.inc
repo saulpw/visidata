@@ -12,7 +12,7 @@ edits contents of current cell
 .
 .Sh "  Commands While Editing Input"
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "ENTER  ^C"
+.It Ic "Enter  ^C"
 accepts/aborts input
 .It Ic ^Z
 launches external $EDITOR to edit contents
