@@ -37,6 +37,7 @@ import os
 import os.path
 import collections
 from copy import copy, deepcopy
+from contextlib import suppress
 import curses
 import datetime
 import functools
@@ -540,9 +541,8 @@ class VisiData:
         'Wrap global editText with `preedit` and `postedit` hooks.'
         v = self.callHook('preedit')[0]
         if v is None:
-            cursorEnable(True)
-            v = editText(self.scr, y, x, w, **kwargs)
-            cursorEnable(False)
+            with EnableCursor():
+                v = editText(self.scr, y, x, w, **kwargs)
 
         if kwargs.get('display', True):
             self.status('"%s"' % v)
@@ -688,7 +688,8 @@ class VisiData:
         'Manage execution of keystrokes and subsequent redrawing of screen.'
         global sheet
         scr.timeout(int(options.curses_timeout))
-        cursorEnable(False)
+        with suppress(curses.error):
+            curses.curs_set(0)
 
         self.scr = scr
 
@@ -1976,7 +1977,7 @@ def _clipdraw(scr, y, x, s, attr, w):
         pass
 
 # https://stackoverflow.com/questions/19833315/running-system-commands-in-python-using-curses-and-panel-and-come-back-to-previ
-class suspend_curses():
+class SuspendCurses:
     'Context Manager to temporarily leave curses mode'
     def __enter__(self):
         curses.endwin()
@@ -1985,6 +1986,15 @@ class suspend_curses():
         newscr = curses.initscr()
         newscr.refresh()
         curses.doupdate()
+
+class EnableCursor:
+    def __enter__(self):
+        with suppress(curses.error):
+            curses.curs_set(1)
+
+    def __exit__(self, exc_type, exc_val, tb):
+        with suppress(curses.error):
+            curses.curs_set(0)
 
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
@@ -2030,7 +2040,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         with open(fd, 'w') as fp:
             fp.write(v)
 
-        with suspend_curses():
+        with SuspendCurses():
             os.system('%s %s' % (editor, fqpn))
 
         with open(fqpn, 'r') as fp:
@@ -2310,12 +2320,6 @@ def run(*sheetlist):
     ret = wrapper(cursesMain, sheetlist)
     if ret:
         print(ret)
-
-def cursorEnable(b):
-    try:
-        curses.curs_set(1 if b else 0)
-    except:
-        pass
 
 def cursesMain(_scr, sheetlist):
     'Populate VisiData object with sheets from a given list.'

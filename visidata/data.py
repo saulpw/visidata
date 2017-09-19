@@ -38,7 +38,7 @@ globalCommand('gKEY_F(1)', 'z?')  # vdtui generic commands sheet
 globalCommand('gz?', 'z?')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
-globalCommand('z?', 'with suspend_curses(): os.system("man vd")', 'launch VisiData manpage')
+globalCommand('z?', 'with SuspendCurses(): os.system("man vd")', 'launch VisiData manpage')
 globalCommand('KEY_F(1)', 'z?')
 
 def newSheet(ncols):
