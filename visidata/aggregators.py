@@ -22,7 +22,8 @@ def fullAggregator(name, type, func):
 
 def mean(vals):
     vals = list(vals)
-    return float(sum(vals))/len(vals)
+    if vals:
+        return float(sum(vals))/len(vals)
 
 
 aggregator('min', min)
@@ -31,7 +32,7 @@ aggregator('avg', mean, float)
 aggregator('mean', mean, float)
 aggregator('sum', sum)
 aggregator('distinct', lambda values: len(set(values)), int)
-aggregator('count', len, int)
+aggregator('count', lambda values: sum(1 for v in values), int)
 
 def rowkeys(sheet, row):
     return ' '.join(c.getDisplayValue(row) for c in sheet.keyCols)

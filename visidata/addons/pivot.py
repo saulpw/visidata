@@ -6,11 +6,13 @@ globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'push a sheet pivo
 class SheetPivot(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     commands = [
-        Command(ENTER, 'vs = vd.push(copy(source)); vs.name += "_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, [])',
+        Command('z'+ENTER, 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, []); vd.push(vs)',
+                      'push sheet of source rows aggregated in this cell'),
+        Command(ENTER, 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow[0]); vs.rows=sum(cursorRow[1].values(), []); vd.push(vs)',
                       'push sheet of source rows aggregated in this cell')
                ]
     def __init__(self, srcsheet, variableCols):
-        super().__init__(srcsheet.name+'_pivot', srcsheet)
+        super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols), srcsheet)
 
         self.nonpivotKeyCols = []
         self.variableCols = variableCols

@@ -3,6 +3,9 @@ from copy import deepcopy
 
 globalCommand("'", 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', 'add a frozen copy of this column')
 globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'push a frozen copy of this sheet')
+globalCommand("z'", 'cursorCol._cachedValues = collections.OrderedDict(); status("added cache to " + cursorCol.name)', 'add/reset cache for this column')
+globalCommand("gz'", 'for c in visibleCols: c._cachedValues = collections.OrderedDict()', 'add/reset cache for all visible columns')
+globalCommand("zg'", "gz'")
 
 
 def StaticColumn(rows, col):

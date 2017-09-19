@@ -1774,10 +1774,19 @@ class LazyMapping:
 class ColumnExpr(Column):
     def __init__(self, expr):
         super().__init__(expr)
-        self.compiledExpr = compile(expr, '<expr>', 'eval')
+        self.expr = expr
 
     def calcValue(self, row):
         return self.sheet.evalexpr(self.compiledExpr, row)
+
+    @property
+    def expr(self):
+        return self._expr
+
+    @expr.setter
+    def expr(self, expr):
+        self._expr = expr
+        self.compiledExpr = compile(expr, '<expr>', 'eval')
 
 ###
 
@@ -1925,7 +1934,10 @@ class HelpSheet(Sheet):
 
 
 class OptionsSheet(Sheet):
-    commands = [Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edit this option')]
+    commands = [
+        Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edit this option'),
+        Command('e', ENTER)
+    ]
     columns = [ColumnItem('option', 0),
                Column('value', getter=lambda r:r[1], setter=lambda s,c,r,v: setattr(options, r[0], v)),
                ColumnItem('default', 2),
