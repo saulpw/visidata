@@ -56,7 +56,7 @@ class EscapeException(Exception):
 baseCommands = collections.OrderedDict()
 baseOptions = collections.OrderedDict()
 
-def Command(keystrokes, execstr, helpstr):
+def Command(keystrokes, execstr, helpstr='alias'):
     return (keystrokes, helpstr, execstr)
 
 def _registerCommand(cmddict, keystrokes, execstr, helpstr):
@@ -258,7 +258,7 @@ globalCommand(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getVal
 globalCommand('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select all rows that match this row')
 
 globalCommand('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)', 'push duplicate sheet with refs to selected or all rows')
-globalCommand('g"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows = deepcopy(selectedRows or rows); vd.push(vs); status("pushed sheet with deepcopy of all rows")', 'push duplicate sheet with copies of selected or all rows')
+globalCommand('g"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'push duplicate sheet with copies of selected or all rows')
 
 globalCommand('=', 'addColumn(ColumnExpr(input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
@@ -763,7 +763,7 @@ class VisiData:
             if vs in self.sheets:
                 self.sheets.remove(vs)
                 self.sheets.insert(0, vs)
-            elif len(vs.rows) == 0:  # first time
+            elif not vs.rows:  # first time
                 self.sheets.insert(0, vs)
                 vs.reload()
                 vs.recalc()  # set up Columns
@@ -930,7 +930,6 @@ class Sheet:
         ret.__dict__.update(self.__dict__)
         ret.sources = copy(self.sources)  # same sources in a fresh list
         ret.rows = []                     # a fresh list without incurring any overhead
-#        ret.rows = copy(self.rows)       # same row objects in a fresh list
         ret.columns = deepcopy(self.columns) # deepcopy columns even for shallow copy of sheet
         ret.recalc()  # set .sheet on columns
         ret._selectedRows = {}
@@ -1860,6 +1859,7 @@ class TextColumn(Column):
 ## text viewer and dir browser
 class TextSheet(Sheet):
     'Sheet displaying a string (one line per row) or a list of strings.'
+    commands = []
 
     @async
     def reload(self):
