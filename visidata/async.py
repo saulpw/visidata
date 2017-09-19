@@ -102,22 +102,22 @@ class TasksSheet(Sheet):
 def elapsed_s(t):
     return (t.endTime or time.process_time())-t.startTime
 
-@functools.wraps(vd().rightStatus)
 def checkMemoryUsage(vs):
-    ret, attr = checkMemoryUsage.__wrapped__(vs)   # prev rightStatus
     min_mem = options.min_memory_mb
     if min_mem and vd().unfinishedThreads:
         tot_m, used_m, free_m = map(int, os.popen('free --total --mega').readlines()[-1].split()[1:])
-        ret = '[%dMB] %s' % (free_m, ret)
+        ret = '[%dMB]' % free_m
         if free_m < min_mem:
-            attr = colors['red']
+            attr = 'red'
             status('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
             for t in vd().threads:
                 if t.is_alive():
                     ctypeAsyncRaise(t, EscapeException)
-    return ret, attr
+        else:
+            attr = 'green'
+        return ret, attr
 
 vd().tasksSheet = TasksSheet('task_history')
 vd().toplevelTryFunc = threadProfileCode
-vd().rightStatus = checkMemoryUsage
+vd().addHook('rstatus', checkMemoryUsage)
 
