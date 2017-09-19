@@ -26,10 +26,10 @@ class xlsxSheet(Sheet):
     def reload(self):
         worksheet = self.source
         self.columns = ArrayColumns(worksheet.max_column)
-        self.progressTotal = worksheet.max_row
-        for row in worksheet.iter_rows():
-            self.progressMade += 1
-            self.addRow([cell.value for cell in row])
+        with Progress(self, worksheet.max_row) as prog:
+            for row in worksheet.iter_rows():
+                self.addRow([cell.value for cell in row])
+                self.addProgress(1)
 
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
@@ -57,7 +57,7 @@ class xlsSheet(Sheet):
     def reload(self):
         worksheet = self.source
         self.columns = ArrayColumns(worksheet.ncols)
-        self.progressTotal = worksheet.nrows
-        for rownum in range(worksheet.nrows):
-            self.addRow([worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)])
-            self.progressMade += 1
+        with Progress(self, worksheet.nrows) as prog:
+            for rownum in range(worksheet.nrows):
+                self.addRow([worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)])
+                prog.addProgress(1)

@@ -188,20 +188,16 @@ def reload_tsv_sync(vs):
     with vs.source.open_text() as fp:
         _getTsvHeaders(fp, header_lines)  # discard header lines
 
-        vs.progressMade = 0
-        vs.progressTotal = vs.source.filesize
-        while True:
-            try:
-                L = next(fp)
-            except StopIteration:
-                break
-            L = L[:-1]
-            if L:
-                vs.addRow(L.split('\t'))
-            vs.progressMade += len(L)
-
-    vs.progressMade = 0
-    vs.progressTotal = 0
+        with Progress(vs, vs.source.filesize) as prog:
+            while True:
+                try:
+                    L = next(fp)
+                except StopIteration:
+                    break
+                L = L[:-1]
+                if L:
+                    vs.addRow(L.split('\t'))
+                prog.addProgress(len(L))
 
     status('loaded %s' % vs.name)
 

@@ -57,46 +57,43 @@ class SheetJoin(Sheet):
         rowsBySheetKey = {}
         rowsByKey = {}
 
-        self.progressMade = 0
-        self.progressTotal = sum(len(vs.rows) for vs in sheets)*2
+        with Progress(self, total=sum(len(vs.rows) for vs in sheets)*2) as prog:
+            for vs in sheets:
+                rowsBySheetKey[vs] = {}
+                for r in vs.rows:
+                    prog.addProgress(1)
+                    key = tuple(c.getTypedValue(r) for c in vs.keyCols)
+                    rowsBySheetKey[vs][key] = r
 
-        for vs in sheets:
-            rowsBySheetKey[vs] = {}
-            for r in vs.rows:
-                self.progressMade += 1
-                key = tuple(c.getTypedValue(r) for c in vs.keyCols)
-                rowsBySheetKey[vs][key] = r
-
-        for sheetnum, vs in enumerate(sheets):
-            # subsequent elements are the rows from each source, in order of the source sheets
-            self.columns.extend(SubrowColumn(c, sheetnum+1) for c in vs.columns[vs.nKeys:])
-            for r in vs.rows:
-                self.progressMade += 1
-                key = tuple(c.getTypedValue(r) for c in vs.keyCols)
-                if key not in rowsByKey:
-                    rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]  # combinedRow
+            for sheetnum, vs in enumerate(sheets):
+                # subsequent elements are the rows from each source, in order of the source sheets
+                self.columns.extend(SubrowColumn(c, sheetnum+1) for c in vs.columns[vs.nKeys:])
+                for r in vs.rows:
+                    self.addProgress += 1
+                    key = tuple(c.getTypedValue(r) for c in vs.keyCols)
+                    if key not in rowsByKey:
+                        rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]  # combinedRow
 
         self.rows = []
-        self.progressMade = 0
-        self.progressTotal = len(rowsByKey)
 
-        for k, combinedRow in rowsByKey.items():
-            self.progressMade += 1
+        with Progress(self, len(rowsByKey)) as prog:
+            for k, combinedRow in rowsByKey.items():
+                prog.addProgress(1)
 
-            if self.jointype == 'full':  # keep all rows from all sheets
-                self.addRow(combinedRow)
-
-            elif self.jointype == 'inner':  # only rows with matching key on all sheets
-                if all(combinedRow):
+                if self.jointype == 'full':  # keep all rows from all sheets
                     self.addRow(combinedRow)
 
-            elif self.jointype == 'outer':  # all rows from first sheet
-                if combinedRow[1]:
-                    self.addRow(combinedRow)
+                elif self.jointype == 'inner':  # only rows with matching key on all sheets
+                    if all(combinedRow):
+                        self.addRow(combinedRow)
 
-            elif self.jointype == 'diff':  # only rows without matching key on all sheets
-                if not all(combinedRow):
-                    self.addRow(combinedRow)
+                elif self.jointype == 'outer':  # all rows from first sheet
+                    if combinedRow[1]:
+                        self.addRow(combinedRow)
+
+                elif self.jointype == 'diff':  # only rows without matching key on all sheets
+                    if not all(combinedRow):
+                        self.addRow(combinedRow)
 
 # rowdef: (Sheet, row)
 class SheetConcat(Sheet):

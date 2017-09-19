@@ -58,7 +58,8 @@ class CommandLog(Sheet):
     'Log of commands for current session.'
     commands = [
         Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this row of the commandlog'),
-        Command('gx', 'sheet.replay()', 'replay this entire commandlog')
+        Command('gx', 'sheet.replay()', 'replay this entire commandlog'),
+        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay'),
     ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 
@@ -159,29 +160,31 @@ class CommandLog(Sheet):
         vd().keystrokes = r.keystrokes
         escaped = vs.exec_keystrokes(r.keystrokes)
 
-        if escaped:  # escapes should already have been filtered out
-            error('unexpected escape')
-
         CommandLog.currentReplayRow = None
+
+        if escaped:  # escape during replay aborts replay
+            status('replay aborted')
+        return escaped
 
 
     def replay_sync(self, live=False):
         'Replay all commands in log.'
         self.sheetmap.clear()
         CommandLog.currentReplay = self
-        self.progressTotal = len(self.rows)
-        self.cursorRowIndex = 0
-        while self.cursorRowIndex < len(self.rows)-1:
-            self.progressMade = self.cursorRowIndex+1
+        with Progress(self, len(self.rows)) as prog:
+            self.cursorRowIndex = 0
+            while self.cursorRowIndex < len(self.rows)-1:
+                acquired = CommandLog.semaphore.acquire(timeout=options.delay if not self.paused else None)
+                if acquired or not self.paused:
+                    vd().statuses = []
+                    if self.replayOne(self.cursorRow):
+                        CommandLog.currentReplay = None
+                        return
+                    sync(1 if live else 0)  # expect this thread also if playing live
+                    self.cursorRowIndex += 1
+                    self.addProgress(1)
 
-            acquired = CommandLog.semaphore.acquire(timeout=options.delay if not self.paused else None)
-            if acquired or not self.paused:
-                vd().statuses = []
-                self.replayOne(self.cursorRow)
-                sync(1 if live else 0)  # expect this thread also if playing live
-                self.cursorRowIndex += 1
-
-        status('replayed entire %s' % self.name)
+        status('replay complete')
         CommandLog.currentReplay = None
 
     @async

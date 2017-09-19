@@ -46,20 +46,13 @@ def load_csv(vs):
             vs.columns = ArrayColumns(len(vs.rows[0]))
 
         vs.recalc()  # make columns usable
-
-        vs.progressMade = 0
-        vs.progressTotal = vs.source.filesize
-
-        try:
-            while True:
-                vs.addRow(wrappedNext(rdr))
-                vs.progressMade += samplelen
-
-        except StopIteration:
-            pass
-
-    vs.progressMade = 0
-    vs.progressTotal = 0
+        with Progress(vs, vs.source.filesize) as prog:
+            try:
+                while True:
+                    vs.addRow(wrappedNext(rdr))
+                    prog.addProgress(samplelen)
+            except StopIteration:
+                pass
 
     vs.recalc()
     return vs

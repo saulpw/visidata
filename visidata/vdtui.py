@@ -414,6 +414,34 @@ def async(func):
         return vd().execAsync(func, *args, **kwargs)
     return _execAsync
 
+class Progress:
+    def __init__(self, sheet, total):
+        self.sheet = sheet
+        self.thisTotal = total
+        self.thisMade = 0
+
+    def __enter__(self):
+        self.sheet.progressTotal += self.thisTotal
+        return self
+
+    def addProgress(self, n):
+        self.sheet.progressMade += n
+        self.thisMade += n
+
+    def __exit__(self, exc_type, exc_val, tb):
+        self.sheet.progressMade += self.thisTotal-self.thisMade
+
+@async
+def _async_deepcopy(vs, newlist, oldlist):
+    for r in vs.genProgress(oldlist):
+        newlist.append(deepcopy(r))
+
+def async_deepcopy(vs, rowlist):
+    ret = []
+    _async_deepcopy(vs, ret, rowlist)
+    return ret
+
+
 class VisiData:
     allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
 
@@ -455,6 +483,8 @@ class VisiData:
         for f in self.hooks.get(hookname, []):
             try:
                 r.append(f(*args, **kwargs))
+            except EscapeException:
+                raise
             except:
                 exceptionCaught()
         return r
@@ -491,7 +521,6 @@ class VisiData:
             exceptionCaught()
 
         t.sheet.currentThreads.remove(t)
-        t.sheet.progressMade = t.sheet.progressTotal
         return ret
 
     @property
@@ -576,22 +605,21 @@ class VisiData:
             rng2 = range(0, sheet.cursorRowIndex+1)
 
         matchingRowIndexes = 0
-        sheet.progressTotal = sheet.nRows
-        sheet.progressMade = 0
 
-        for r in itertools.chain(rng, rng2):
-            sheet.progressMade += 1
-            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
-            if c:
-                if moveCursor:
-                    sheet.cursorRowIndex = r
-                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
-                    if r in rng2:
-                        status('search wrapped')
-                    return
-                else:
-                    matchingRowIndexes += 1
-                    yield r
+        with Progress(sheet, sheet.nRows) as prog:
+            for r in itertools.chain(rng, rng2):
+                prog.addProgress(1)
+                c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
+                if c:
+                    if moveCursor:
+                        sheet.cursorRowIndex = r
+                        sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
+                        if r in rng2:
+                            status('search wrapped')
+                        return
+                    else:
+                        matchingRowIndexes += 1
+                        yield r
 
         status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
@@ -638,6 +666,9 @@ class VisiData:
     def rightStatus(self, sheet):
         'Compose right side of status bar.'
         if sheet.progressMade == sheet.progressTotal:
+            made = sheet.progressMade
+            sheet.progressMade -= made
+            sheet.progressTotal -= made
             pctLoaded = 'rows'
         else:
             pctLoaded = ' %2d%%' % sheet.progressPct
@@ -851,13 +882,10 @@ class Sheet:
         return options.disp_status_fmt.format(sheet=self)
 
     def genProgress(self, L, total=None):
-        self.progressTotal = total or len(L)
-        self.progressMade = 0
-        for i in L:
-            self.progressMade += 1
-            yield i
-
-        self.progressMade = self.progressTotal
+        with Progress(self, total or len(L)) as prog:
+            for i in L:
+                prog.addProgress(1)
+                yield i
 
     def addRow(self, row, index=None):
         if index is None:
@@ -976,7 +1004,7 @@ class Sheet:
             self.vd.callHook('preexec', self, keystrokes)
             exec(execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
-            self.vd.status(e.args[0])
+            self.vd.status('aborted')
             escaped = True
         except Exception:
             err = self.vd.exceptionCaught()
@@ -1522,7 +1550,7 @@ class Column:
                 v = self.type(self.getValue(r))
                 if not f(v):
                     yield v, r
-            except GeneratorExit:
+            except (GeneratorExit, EscapeException):
                 raise
             except:
                 pass
@@ -1838,12 +1866,11 @@ class TextSheet(Sheet):
             for L in readlines(self.source):
                 self.addLine(L)
         elif isinstance(self.source, Path):
-            self.progressMade = 0
-            self.progressTotal = self.source.filesize
             with self.source.open_text() as fp:
-                for L in readlines(fp):
-                    self.addLine(L)
-                    self.progressMade += len(L)
+                with Progress(self, self.source.filesize) as prog:
+                    for L in readlines(fp):
+                        self.addLine(L)
+                        prog.addProgress(len(L))
         else:
             error('unknown text type ' + str(type(self.source)))
 
