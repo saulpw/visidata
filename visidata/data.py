@@ -6,39 +6,38 @@ option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation 
 option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('skiplines', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
-
 # slide rows/columns around
-globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
-globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
-globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
-globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
-globalCommand('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'move this column all the way to the left of the non-key columns')
-globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
-globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
-globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
+globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slides current column left')
+globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'moves current row down')
+globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'moves current row up')
+globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'moves current column right')
+globalCommand('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'slides current column all the way to the left of sheet')
+globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slides current row to the bottom of sheet')
+globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slides current row all the way to the top of sheet')
+globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slides current column all the way to the right of sheet')
 
-globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'go to visible column by regex of name')
-globalCommand('r', 'moveRegex(regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'go to row by regex of key columns')
-globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'go to visible column number')
-globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
+globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'moves to the next column with name matching regex')
+globalCommand('r', 'moveRegex(regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'moves to the next row with key matching regex')
+globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'moves to the given column number')
+globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'moves to the given row number')
 
-globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'push duplicate sheet with a random sample of <N> rows')
+globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'opens duplicate sheet with a random population subset of # rows')
 
-globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
-globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
+globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'appends a blank row')
+globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'sets names of all visible columns to contents of current row')
 
-globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
-globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save this sheet to new file')
+globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'opens input in VisiData')
+globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'saves current sheet to filename in format determined by extension (default .tsv)')
 
-globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'show evaluated expression over current row')
+globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluates Python expression on current row and displays result on status line')
 
-globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'create new sheet with N columns')
+globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'opens new blank sheet with number columns')
 
 globalCommand('gKEY_F(1)', 'z?')  # vdtui generic commands sheet
 globalCommand('gz?', 'z?')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
-globalCommand('z?', 'with SuspendCurses(): os.system("man vd")', 'launch VisiData manpage')
+globalCommand('z?', 'with SuspendCurses(): os.system("man vd")', 'launches VisiData manpage')
 globalCommand('KEY_F(1)', 'z?')
 
 def newSheet(ncols):

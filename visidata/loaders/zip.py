@@ -3,9 +3,8 @@ from visidata import *
 
 class open_zip(Sheet):
     'Provide wrapper around `zipfile` library for opening ZIP files.'
-
     commands = [
-        Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'open this file')
+        Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'loads the entire table into memory')
     ]
     columns = AttrColumns('filename file_size date_time compress_size'.split())
 

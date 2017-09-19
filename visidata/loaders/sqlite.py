@@ -8,7 +8,7 @@ def open_sqlite(path):
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     commands = [
-        Command(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'open this table')
+        Command(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'loads the entire table into memory')
     ]
     def __init__(self, name, pathOrSheet, tableName):
         super().__init__(name, pathOrSheet, tableName)

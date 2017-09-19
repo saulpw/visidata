@@ -2,7 +2,7 @@ import statistics
 
 from visidata import *
 
-globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", sheet))', 'push describe sheet for all numeric columns')
+globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", sheet))', 'opens Describe Sheet')
 
 def isNumeric(col):
     return col.type in (int,float,currency,date)
@@ -38,10 +38,10 @@ class DescribeSheet(Sheet):
             SourceColumn('stddev', type=float, getter=lambda sheet,r: statistics.stdev(values(r)) if isNumeric(r) else None),
     ]
     commands = [
-        Command('zs', 'source.select(cursorCell)', 'select rows in this cell on source sheet'),
-        Command('zu', 'source.unselect(cursorCell)', 'unselect rows in this cell on source sheet'),
-        Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'push copy of source sheet with only rows in this cell'),
-        Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open frequency table for this column in the source sheet')
+        Command('zs', 'source.select(cursorCell)', 'selects rows on source sheet which are being described in current cell'),
+        Command('zu', 'source.unselect(cursorCell)', 'unselects rows on source sheet which are being described in current cell'),
+        Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'opens copy of source sheet with rows described in current cell'),
+        Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'opens a Frequency Table sheet grouped on column referenced in current row')
     ]
 
     @async
