@@ -1900,8 +1900,10 @@ class ColumnsSheet(Sheet):
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals(), default=anytype),
             ColumnAttr('fmtstr'),
-            Column('value', full_getter=lambda self,c,r: r.getDisplayValue(self.source.cursorRow)),
+            Column('value', full_getter=lambda self,c,r: r.getDisplayValue(self.source.cursorRow),
+                            setter=lambda s,c,r,v: r.setValue(self.source.cursorRow, v)),
     ]
+    nKeys = 1
     colorizers = [
             Colorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
     ]
