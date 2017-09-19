@@ -69,7 +69,7 @@ class SheetJoin(Sheet):
                 # subsequent elements are the rows from each source, in order of the source sheets
                 self.columns.extend(SubrowColumn(c, sheetnum+1) for c in vs.columns[vs.nKeys:])
                 for r in vs.rows:
-                    self.addProgress += 1
+                    prog.addProgress(1)
                     key = tuple(c.getTypedValue(r) for c in vs.keyCols)
                     if key not in rowsByKey:
                         rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]  # combinedRow

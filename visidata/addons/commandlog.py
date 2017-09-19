@@ -182,7 +182,7 @@ class CommandLog(Sheet):
                         return
                     sync(1 if live else 0)  # expect this thread also if playing live
                     self.cursorRowIndex += 1
-                    self.addProgress(1)
+                    prog.addProgress(1)
 
         status('replay complete')
         CommandLog.currentReplay = None

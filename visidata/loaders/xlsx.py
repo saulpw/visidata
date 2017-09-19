@@ -29,7 +29,7 @@ class xlsxSheet(Sheet):
         with Progress(self, worksheet.max_row) as prog:
             for row in worksheet.iter_rows():
                 self.addRow([cell.value for cell in row])
-                self.addProgress(1)
+                prog.addProgress(1)
 
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
