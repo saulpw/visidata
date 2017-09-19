@@ -14,6 +14,14 @@ globalCommand('^C', 'if sheet.currentThreads: ctypeAsyncRaise(sheet.currentThrea
 globalCommand('^T', 'vd.push(vd.tasksSheet)', 'push task history sheet')
 globalCommand('^O', 'toggleProfiling(vd)', 'turn profiling on for main process')
 
+class ProfileSheet(TextSheet):
+    commands = TextSheet.commands + [
+        Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile'),
+    ]
+    def __init__(self, name, pr):
+        super().__init__(name, getProfileResults(pr))
+        self.profile = pr
+
 vd().profile = None
 def toggleProfiling(vd):
     if not vd.profile:
@@ -22,7 +30,8 @@ def toggleProfiling(vd):
         vd.status('profiling of main task enabled')
     else:
         vd.profile.disable()
-        vd.push(TextSheet("main_profile", getProfileResults(vd.profile)))
+        vs = ProfileSheet("main_profile", vd.profile)
+        vd.push(vs)
         vd.profile = None
         vd.status('profiling of main task disabled')
 
@@ -39,8 +48,8 @@ def threadProfileCode(vdself, func, *args, **kwargs):
         pr = cProfile.Profile()
         pr.enable()
         ret = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
+        thread.profile = pr
         pr.disable()
-        thread.profileResults = getProfileResults(pr)
     else:
         ret = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
 
@@ -79,8 +88,8 @@ def ctypeAsyncRaise(threadObj, exception):
 # each row is an augmented threading.Thread object
 class TasksSheet(Sheet):
     commands = [
-        Command('^C', 'ctypeAsyncRaise(cursorRow.thread, EscapeException)', 'cancel this action'),
-        Command(ENTER, 'vd.push(TextSheet(cursorRow.name+"_profile", cursorRow.profileResults))', 'push profile sheet for this action'),
+        Command('^C', 'ctypeAsyncRaise(cursorRow, EscapeException)', 'cancel this action'),
+        Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action'),
     ]
     columns = [
         ColumnAttr('name'),
