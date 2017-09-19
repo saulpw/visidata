@@ -1935,7 +1935,7 @@ class HelpSheet(Sheet):
 
 class OptionsSheet(Sheet):
     commands = [
-        Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edits option')
+        Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edits option'),
         Command('e', ENTER)
     ]
     columns = [ColumnItem('option', 0),

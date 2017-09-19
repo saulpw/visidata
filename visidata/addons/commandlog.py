@@ -58,7 +58,7 @@ class CommandLog(Sheet):
     'Log of commands for current session.'
     commands = [
         Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replays command in current row'),
-        Command('gx', 'sheet.replay()', 'replays contents of entire commandlog')
+        Command('gx', 'sheet.replay()', 'replays contents of entire commandlog'),
         Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'aborts replay'),
     ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
