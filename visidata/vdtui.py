@@ -263,7 +263,7 @@ globalCommand('g"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows =
 globalCommand('=', 'addColumn(ColumnExpr(input("new column expr=", "expr")), index=cursorColIndex+1)', 'add column by expr')
 globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, input("set selected=", "expr"))', 'set this column in selected rows by expr')
 
-globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplayValue))', 'view readonly contents of this cell in a new sheet')
+globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay))', 'view readonly contents of this cell in a new sheet')
 
 globalCommand('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'push source sheet')
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheet stack')
