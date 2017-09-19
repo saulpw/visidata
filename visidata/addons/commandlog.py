@@ -8,10 +8,10 @@ option('delay', 0.0, '--play delay between commands, in seconds')
 option('disp_replay_pause', '‖', '')
 option('disp_replay_play', '▶', '')
 
-globalCommand('D', 'vd.push(vd.commandlog)', 'push the commandlog')
-globalCommand('^D', 'saveSheet(vd.commandlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save commandlog to new file')
-globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume commandlog replay')
-globalCommand(' ', 'vd.commandlog.semaphore.release()', 'while paused, replay next action')
+globalCommand('D', 'vd.push(vd.commandlog)', 'opens Commandlog')
+globalCommand('^D', 'saveSheet(vd.commandlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'saves commandlog to new .vd file')
+globalCommand('^U', 'CommandLog.togglePause()', 'pauses/resumes replay')
+globalCommand(' ', 'vd.commandlog.semaphore.release()', 'executes next row in the replaying sheet')
 #globalCommand('KEY_BACKSPACE', 'vd.commandlog.undo()', 'remove last action on commandlog and replay')
 
 # not necessary to log movements and scrollers
@@ -57,9 +57,9 @@ def open_vd(p):
 class CommandLog(Sheet):
     'Log of commands for current session.'
     commands = [
-        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay this row of the commandlog'),
-        Command('gx', 'sheet.replay()', 'replay this entire commandlog'),
-        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay'),
+        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replays command in current row'),
+        Command('gx', 'sheet.replay()', 'replays contents of entire commandlog'),
+        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'aborts replay'),
     ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 

@@ -1,8 +1,7 @@
 import collections
 from visidata import *
-
-globalCommand('+', 'addAggregator([cursorCol], chooseOne(aggregators))', 'add aggregator for this column')
-globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol, selectedRows or rows))', 'aggregate selected rows in this column')
+globalCommand('+', 'addAggregator([cursorCol], chooseOne(aggregators))', 'adds aggregator to the current column')
+globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol, selectedRows or rows))', 'displays result of aggregator over values in selected rows for current column')
 
 aggregators = collections.OrderedDict()
 

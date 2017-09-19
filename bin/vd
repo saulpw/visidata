@@ -24,11 +24,11 @@ def main():
 
     parser.add_argument('inputs', nargs='*', help='initial sources')
     parser.add_argument('-d', dest='debug', action='store_true', default=False, help='abort on error')
-    parser.add_argument('-f', dest='filetype', default='', help='specify file type')
-    parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='sets confirm_overwrite option to false')
-    parser.add_argument('-p', '--play', dest='play', default=None, help='.vd file to replay')
-    parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replay without curses interface')
-    parser.add_argument('-o', '--output', dest='output', default=None, help='tsv file to save final sheet as')
+    parser.add_argument('-f', dest='filetype', default='', help='uses loader for filetype instead of file extension')
+    parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='overwrites existing files without confirmation')
+    parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
+    parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
+    parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output (as .tsv) at the end of replay')
 
     for optname, v in vdtui.baseOptions.items():
         name, optval, defaultval, helpstr = v

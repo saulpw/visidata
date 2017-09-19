@@ -2,10 +2,10 @@ from visidata import *
 
 option('pyobj_show_hidden', False, 'show methods and _private properties')
 
-globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'eval Python expression and open the result')
+globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'evaluates Python expression and opens sheet for browsing resulting Python object')
 
-globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'push sheet for this row as python object')
-globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s.row[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'push sheet for this cell value as python object')
+globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'opens sheet of current row as Python object')
+globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s.row[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'opens sheet of current cell as Python object')
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):
@@ -54,7 +54,7 @@ def DictKeyColumns(d):
 class SheetList(Sheet):
     'A sheet from a list of homogenous dicts or namedtuples.'
     commands = [
-        Command(ENTER, 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive into this row')
+        Command(ENTER, 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dives further into Python object')
     ]
 
     def __init__(self, name, *args, **kwargs):
@@ -77,7 +77,7 @@ class SheetList(Sheet):
 
 class SheetNamedTuple(Sheet):
     'a single namedtuple, with key and value columns'
-    commands = [Command(ENTER, 'dive()', 'dive into this value')]
+    commands = [Command(ENTER, 'dive()', 'dives further into Python object')]
     columns = [ColumnItem('name', 0), ColumnItem('value', 1)]
 
     def reload(self):
@@ -89,8 +89,8 @@ class SheetNamedTuple(Sheet):
 
 class SheetDict(Sheet):
     commands = [
-        Command('e', 'edit()', 'edit this value'),
-        Command(ENTER, 'dive()', 'dive into this value')
+        Command('e', 'edit()', 'edits contents of current cell'),
+        Command(ENTER, 'dive()', 'dives further into Python object')
     ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -132,9 +132,9 @@ def ColumnSourceAttr(name, source):
 
 class SheetObject(Sheet):
     commands = [
-        Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive into this value'),
-        Command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edit this value'),
-        Command('.', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle methods and hidden properties')
+        Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dives further into Python object'),
+        Command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edits contents of current cell'),
+        Command('.', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggles whether methods and hidden properties are shown')
     ]
     def reload(self):
         self.rows = []

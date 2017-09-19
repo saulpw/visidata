@@ -9,9 +9,8 @@ min_task_time_s = 0.10 # only keep tasks that take longer than this number of se
 
 option('profile_tasks', True, 'profile async tasks')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
-
-globalCommand('^C', 'if sheet.currentThreads: ctypeAsyncRaise(sheet.currentThreads[-1], EscapeException)', 'cancel most recent task on the current sheet')
-globalCommand('^T', 'vd.push(vd.tasksSheet)', 'push task history sheet')
+globalCommand('^C', 'if sheet.currentThreads: ctypeAsyncRaise(sheet.currentThreads[-1], EscapeException)', 'aborts user input or current task')
+globalCommand('^T', 'vd.push(vd.tasksSheet)', 'opens Tasks Sheet')
 globalCommand('^O', 'toggleProfiling(vd)', 'turn profiling on for main process')
 
 class ProfileSheet(TextSheet):
@@ -88,7 +87,7 @@ def ctypeAsyncRaise(threadObj, exception):
 # each row is an augmented threading.Thread object
 class TasksSheet(Sheet):
     commands = [
-        Command('^C', 'ctypeAsyncRaise(cursorRow, EscapeException)', 'cancel this action'),
+        Command('^C', 'ctypeAsyncRaise(cursorRow, EscapeException)', 'aborts current task'),
         Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action'),
     ]
     columns = [
