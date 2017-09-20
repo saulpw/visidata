@@ -1,18 +1,12 @@
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.It Sy "debug              " No "False"
-abort on error and display stacktrace 
 .It Sy "encoding           " No "utf-8"
 as passed to codecs.open 
 .It Sy "encoding_errors    " No "surrogateescape"
 as passed to codecs.open 
-.It Sy "curses_timeout     " No "100"
-curses timeout in ms 
-.It Sy "default_width      " No "20"
-default column width 
 .It Sy "regex_flags        " No "I"
 flags to pass to re.compile() [AILMSUX] 
-.It Sy "num_colors         " No "0"
-force number of colors to use 
+.It Sy "default_width      " No "20"
+default column width 
 .It Sy "textwrap           " No "True"
 wrap text to fit window width on TextSheet 
 .It Sy "cmd_after_edit     " No "j"
@@ -21,6 +15,12 @@ command keystroke to execute after successful edit
 invalid values to filter out when aggregating: (n/e/f/"") 
 .It Sy "force_valid_colnames" No "False"
 clean column names to be valid Python identifiers 
+.It Sy "debug              " No "False"
+exit on error and display stacktrace 
+.It Sy "curses_timeout     " No "100"
+curses timeout in ms 
+.It Sy "num_colors         " No "0"
+force number of colors to use 
 .It Sy "disp_none          " No ""
 visible contents of a cell whose value was None 
 .It Sy "disp_truncator     " No "…"

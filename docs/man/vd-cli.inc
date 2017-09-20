@@ -1,18 +1,12 @@
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.It Sy --debug Ns = Ns Ar "bool                " No False
-.No abort on error and display stacktrace
 .It Sy --encoding Ns = Ns Ar "str              " No utf-8
 .No as passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No surrogateescape
 .No as passed to codecs.open
-.It Sy --curses-timeout Ns = Ns Ar "int        " No 100
-.No curses timeout in ms
-.It Sy --default-width Ns = Ns Ar "int         " No 20
-.No default column width
 .It Sy --regex-flags Ns = Ns Ar "str           " No I
 .No flags to pass to re.compile() [AILMSUX]
-.It Sy --num-colors Ns = Ns Ar "int            " No 0
-.No force number of colors to use
+.It Sy --default-width Ns = Ns Ar "int         " No 20
+.No default column width
 .It Sy --textwrap Ns = Ns Ar "bool             " No True
 .No wrap text to fit window width on TextSheet
 .It Sy --cmd-after-edit Ns = Ns Ar "str        " No j
@@ -21,6 +15,12 @@
 .No invalid values to filter out when aggregating: (n/e/f/"")
 .It Sy --force-valid-colnames Ns = Ns Ar "bool " No False
 .No clean column names to be valid Python identifiers
+.It Sy --debug Ns = Ns Ar "bool                " No False
+.No exit on error and display stacktrace
+.It Sy --curses-timeout Ns = Ns Ar "int        " No 100
+.No curses timeout in ms
+.It Sy --num-colors Ns = Ns Ar "int            " No 0
+.No force number of colors to use
 .It Sy --note-pending Ns = Ns Ar "str          " No ⌛
 .No note to display for pending cells
 .It Sy --note-format-exc Ns = Ns Ar "str       " No ?
