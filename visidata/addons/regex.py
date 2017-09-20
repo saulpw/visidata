@@ -7,7 +7,7 @@ globalCommand('*', 'columns.insert(cursorColIndex+1, regexTransform(cursorCol, i
 option('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 
 def makeRegexSplitter(regex, origcol):
-    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=0)
+    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=maxsplit)
 
 def makeRegexMatcher(regex, origcol):
     return lambda row, regex=regex, origcol=origcol: regex.search(origcol.getDisplayValue(row)).groups()
