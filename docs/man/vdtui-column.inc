@@ -13,10 +13,9 @@ pins current column to the left as a key column
 edits name of current column
 .It Ic "~  #  %  $  @"
 sets type of current column to str/int/float/currency/date
-
-.It Ic " =" Ar expr No
+.Pp
+.It Ic " =" Ar expr
 .No creates new column from Python Ar expr Ns , with column names as variables
-.It Ic "g=" Ar expr No
-.No sets current column for selected rows to result of Python Ar expr No
-
+.It Ic "g=" Ar expr
+.No sets current column for selected rows to result of Python Ar expr
 .El

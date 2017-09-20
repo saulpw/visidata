@@ -20,12 +20,12 @@ else:
 print(vd.__version__)
 padding = 26
 
-options_cli_skel = '''.It Sy --{cli_optname} Ns = Ns Ar "{type}" No {default}
-.No {description}
+options_cli_skel = '''.It Sy --{cli_optname} Ns = Ns Ar "{type}" No "{default}"
+{description}
 '''
 
 options_menu_skel = '''.It Sy "{optname:<19}" No "{default}"
-{description} 
+{description}
 '''
 
 with open('{0}-cli.inc'.format(man), 'w') as cliOut:

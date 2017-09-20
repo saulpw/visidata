@@ -1,57 +1,53 @@
 .so vdtui-main.inc
 .so vdtui-cursor.inc
-
+.Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic " c" Ar regex
-.No moves to the next column with name matching Ar regex No
+.No moves to the next column with name matching Ar regex
 .It Ic " r" Ar regex
-.No moves to the next row with key matching Ar regex No
+.No moves to the next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No moves to the given column/row Ar number No
+.No moves to the given column/row Ar number
 .Pp
 .It Ic " H   J   K   L"
 slides current row/column left/down/up/right
 .It Ic "gH  gJ  gK  gL"
 slides current row/column all the way to the left/bottom/top/right of sheet
 .Pp
-
 .It Ic "zh  zj  zk  zl"
 scrolls one left/down/up/right
 .It Ic "zH          zL"
 moves cursor one page left/right
 .It Ic "zs          ze"
 scrolls sheet to leftmost/rightmost column
-
+.Pp
 .It Ic "  zt  zz  zb  "
 scrolls current row to top/center/bottom of screen
 .El
 .
 .so vdtui-column.inc
-
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "z=" Ar expr
 .No evaluates Python Ar expr No on current row and displays result on status line
+.Pp
 .It Ic "g^"
 sets names of all visible columns to contents of current row
-
+.Pp
 .It Ic " '"
 adds a frozen copy of current column with all cells evaluated
 .
 .It Ic "g'"
 opens a frozen copy of current sheet with all visible columns evaluated
-
+.Pp
 .It Ic "\&:" Ar regex
 .No adds new columns from Ar regex No split; # columns determined by example row at cursor
 .It Ic "\&;" Ar regex
 .No adds new columns from capture groups of Ar regex Ns ; also requires example row
-.It Ic "*" Ar regex Ns Sy / Ns Ar subst No
+.It Ic "*" Ar regex Ns Sy / Ns Ar subst
 .No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc)
-.so vdtui-row.inc
-
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
 .El
-
+.so vdtui-row.inc
 .Sh Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -60,7 +56,6 @@ appends a blank row
 .It Ic "  d  gd"
 deletes current/all selected row(s) and appends to clipboard
 .so vdtui-editing.inc
-
 .Ss Data Toolkit
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " o" Ar input
@@ -70,9 +65,9 @@ opens
 .No saves current sheet to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 saves commandlog to new .vd file
-.It Ic "Shift-A" Ar number No
+.It Ic "Shift-A" Ar number
 .No opens new blank sheet with Ar number No columns
-
+.Pp
 .It Ic " +" Ar aggregator
 .No adds Ar aggregator No to the current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
@@ -80,11 +75,12 @@ saves commandlog to new .vd file
 .It Ic "Shift-P" Ar number
 opens duplicate sheet with a random population subset of
 .Ar number No rows
+.El
 .so vdtui-other.inc
-
+.Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "^P"
-.No opens Sy Status History No
+.No opens Sy Status History
 .It Ic "^X"
 evalutes Python expression and opens sheet for browsing resulting Python object
 .It Ic "^Y  z^Y"
@@ -92,12 +88,11 @@ opens sheet of current row/cell as Python object
 .El
 .Sh Note:
 .Bl -inset -compact
-.It
-In most cases, commands that affect "selected rows" will affect all rows when no rows are selected.
+.It "In most cases, commands that affect 'selected rows' will affect all rows when no rows are selected."
 .El
 .Sh Non-source Sheets
 .Bl -tag -width Xx -compact
-
+.It " "
 .It Sy Metasheets
 .It Sy " \&."
 .Sy Columns Sheet No (Shift-C) "    edit column properties"
@@ -115,7 +110,7 @@ In most cases, commands that affect "selected rows" will affect all rows when no
 .Sy Status History No (^P) "        view history of status messages"
 .It Sy " \&."
 .Sy Tasks Sheet No (^T) "           view, cancel, and profile asynchronous tasks"
-
+.Pp
 .It Sy Derived Sheets
 .It Sy " \&."
 .Sy Frequency Table No (Shift-F) "  group rows by column value, with aggregations of other columns"
@@ -125,9 +120,7 @@ In most cases, commands that affect "selected rows" will affect all rows when no
 .Sy Pivot Table No (Shift-W) "      group rows by key and summarize the current column"
 .It Sy " \&."
 .Sy Melted Sheet No (Shift-M) "     unpivot non-key columns into variable/value columns"
-
 .El
-
 .Sh METASHEETS
 .Sh Columns Sheet (Shift-C)
 Properties of columns on the source sheet can be changed with standard editing commands
@@ -249,7 +242,6 @@ Set key column(s) and aggregators on column(s) before pressing Shift-W on the co
 .It Ic Enter
 Opens sheet of source rows which comprise current pivot cell
 .El
-
 .Sh Python Object Sheet (^X ^Y)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
@@ -260,4 +252,3 @@ dives further into Python object
 .It Ic "\&." No (period)
 toggles whether methods and hidden properties are shown
 .El
-

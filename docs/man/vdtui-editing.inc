@@ -2,7 +2,7 @@
 .It Ic "  e"
 edits contents of current cell
 .It Ic " ge" Ar text
-.No sets contents of current column for selected rows to Ar text No
+.No sets contents of current column for selected rows to Ar text
 .It Ic " zd   Del"
 .No sets contents of current cell to Sy None
 .It Ic "gzd  gDel"
