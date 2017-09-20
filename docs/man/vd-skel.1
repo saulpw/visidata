@@ -1,43 +1,39 @@
-.Dd August 27, 2017
+.Dd September 20, 2017
 .Dt vd 1 URM
 .Os Linux/MacOS
 .
-.
+.\" Long option with arg: .Lo f filetype format
+.\" Long flag: .Lo f filetype
+.de Lo
+.It Cm -\\$1 Ns , Cm --\\$2 Ns = Ns Ar \\$3
+..
+.de Lf
+.It Cm -\\$1 Ns , Cm --\\$2
+..
 .Sh NAME
 .
 .Nm VisiData
 .Nd a terminal utility for exploring and arranging tabular data
 .
-.
 .Sh SYNOPSIS
 .
-.Bl -inset -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.It Ic vd
-.Op <options>
-<input> ...
+.Nm vd
+.Op Ar options
+.Op Ar input No ...
 .
-.It <command>
-.Sy | vd
-.Op <options>
-
-
-.Sh Ns Sy "  replay mode" No
-.It Ic vd
-.Op <options>
-.Sy Fl -play No <cmdlog>
-.Op Fl -batch
-.Op Fl d No <delay>
-.Op Fl o No <output>
-.Sy -- No
-.Op Fl "-<field>=<value> ..."
-.El
-
+.Nm vd
+.Op Ar options
+.Cm --play Ar cmdlog
+.Op Cm --batch
+.Op Cm -d Ar delay
+.Op Cm -o Ar output
+.Op Ar field Ns Cm = Ns Ar value No ...
+.
 .Sh DESCRIPTION
 .Nm VisiData
-.No is a multipurpose tool for exploring, cleaning, editing, and restructuring data (see Sx SUPPORTED SOURCES Ns ).
-.No Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be saved, documented, and replayed via the Sx Commandlog Ns .
-.Nm VisiData No is built on the
-.Sy vdtui No platform.
+is a multipurpose tool for exploring, cleaning, editing, and restructuring data.
+Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be saved, documented, and replayed.
+.Nm VisiData No is built on the Sy vdtui No platform.
 .
 .Sh OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
@@ -58,24 +54,24 @@ overwrites existing files without confirmation
 .
 .Sh REPLAY MODE
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
-.It Fl "p, --play" Ar cmdlog No
+.Lo p play cmdlog
 .No replays a saved Ar cmdlog No within the interface
 .
-.Bl -inset -offset xxxx -compact
-.No Python format strings in the Ar cmdlog No (like \&"{ Ns Ar field Ns }\&") No are replaced with the Ar value No given on the command line.  These format options must be specified after Sy -- Ns .
-.
-.El
-.It Fl "d, --delay" Ar seconds
+.Lo d delay seconds
 .No waits Ar seconds No between commands
 .
-.It Fl "b, --batch"
-replays in batch mode (with no interface and all status sent to stdout)
+.Lf b batch
+replays in batch mode (with no interface)
 .
-.It Fl "o, --output" Ar file No
-.No saves the final visible sheet to Ar file No (as .tsv) at the end of the replay
-
-.It Sy Commands During Replay
+.Lo o output file
+.No saves the final visible sheet to Ar file No as .tsv
+.
+.It Ar field Ns Cm = Ns Ar value
+.No replace \&"{ Ns Ar field Ns }\&" in the Ar cmdlog No with Ar value
 .El
+.
+.Sp
+.Ss Commands During Replay
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pauses/resumes replay
@@ -91,13 +87,14 @@ executes next row in the replaying sheet
 .
 .Sh DISPLAY OPTIONS
 .No Display options can only be set via Sx Options No or the Sx config file Ns .
-
+.
 .so vd-menu.inc
 .
-
+.
 .Sh CONFIG FILE
 At the start of every session,
-.Nm VisiData No looks for, in order, Sy .visidatarc No in the current directory, Sy $XDG_CONFIG_HOME/visidata/config Ns , or Sy $HOME/.visidatarc Ns , and calls Python exec() on its contents.  For example:
+.Sy VisiData No looks for, in order, Pa $PWD/.visidatarc Ns , Pa $XDG_CONFIG_HOME/visidata/config Ns , or Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents.
+For example:
 .Bd -literal
    options.min_memory_mb=100  # stop processing without 100MB free
 
@@ -109,11 +106,17 @@ At the start of every session,
 
    aggregator('median', median)
 .Ed
-
+.
+.Sh EXAMPLES
+.Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
+.
 .so vd-input.inc
 .
 .Sh AUTHOR
-.
 .Nm VisiData
 was conceived and implemented by
 .An Saul Pwanson Aq Mt visidata@saul.pw Ns .
+.
+.Sh LICENSE
+Copyright (c) 2016-2017 Saul Pwanson
+GPL2+

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
-# Usage: $0 [-d] [-r] [-f <filetype>] [<visidata_options>] [<input_source> ...]
-#        $0 [-d] [-r] [-f <filetype>] [<visidata_options>] --play <cmdlog.vd> [--batch] [--delay <delay>] [-- --foo=value ...]
+# Usage: $0 [<options>] [<input> ...]
+#        $0 [<options>] --play <cmdlog> [--batch] [-d <delay>] [-o <output>] [field=value ...]
 
 __version__ = 'saul.pw/VisiData v0.97pre'
 
@@ -23,7 +23,6 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('inputs', nargs='*', help='initial sources')
-    parser.add_argument('-d', dest='debug', action='store_true', default=False, help='abort on error')
     parser.add_argument('-f', dest='filetype', default='', help='uses loader for filetype instead of file extension')
     parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='overwrites existing files without confirmation')
     parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
@@ -78,26 +77,13 @@ def main():
     fmtkwargs = {}
 
     args = parser.parse_args()
-    i=0
-    while i < len(args.inputs):
-        arg = args.inputs[i]
-
-        # parse either '--key value' or '--key=value'
-        if arg.startswith('-'):
-            arg = arg.lstrip('-')
-        else:
-            fmtargs.append(arg)
-            # goes into args
-            continue
-
+    for arg in args.inputs:
+        # parse 'key=value' pairs for formatting commandlog template
         if '=' in arg:
             k, v = arg.split('=')
             fmtkwargs[k] = v
-        else:  # either goes into args or key+nextarg
-            i += 1
-            fmtkwargs[arg] = args.inputs[i]
-
-        i += 1
+        else:
+            fmtargs.append(v)
 
     if args.play == '-':
         vdfile = inputs[0]
