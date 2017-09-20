@@ -3,18 +3,13 @@
 set -e
 
 VDDIR=~/git/visidata
+MANDIR=$VDDIR/docs/man
 
 export PYTHONPATH=$VDDIR:$VDDIR/visidata
 export PATH=$VDDIR/bin:$PATH
 
-$VDDIR/docs/man/parse_options.py vd
-$VDDIR/docs/man/parse_options.py
-#mv vd-cli.inc $VDDIR/docs/man
-#mv vd-menu.inc $VDDIR/docs/man
-#mv vdtui-cli.inc $VDDIR/docs/man
-#mv vdtui-menu.inc $VDDIR/docs/man
+$MANDIR/parse_options.py vd
+$MANDIR/parse_options.py
 
-MANDIR=$VDDIR/docs/man
-soelim $MANDIR/vd-skel.1 > $MANDIR/vd.1
-groff -mandoc -Thtml $MANDIR/vd.1 > $MANDIR/vd-man.html
-
+#groff -s -mandoc -Thtml $MANDIR/vd-skel.1
+MAN_KEEP_FORMATTING=1 COLUMNS=80 man $MANDIR/vd-skel.1 | ul | aha > $MANDIR/vd-man.html
