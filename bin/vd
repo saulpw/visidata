@@ -42,8 +42,10 @@ def main():
     for fnrc in ('.visidatarc', '$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
         p = Path(fnrc)
         if p.exists():
-            exec(open(p.resolve()).read())
+            exec(open(p.resolve()).read(), globals())
             break
+
+    vdtui.addGlobals(globals())
 
     # command-line overrides
     for optname, optval in vars(args).items():
@@ -105,6 +107,5 @@ def main():
 
 if __name__ == '__main__':
     vdtui.status(__version__)
-    vdtui.addGlobals(globals())
     main()
     os._exit(0)  # cleanup can be expensive with large datasets
