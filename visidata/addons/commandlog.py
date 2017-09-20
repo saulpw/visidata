@@ -100,7 +100,8 @@ class CommandLog(Sheet):
             return  # don't record editlog commands
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
-        self.currentActiveRow = CommandLogRow([sheet.name, sheet.cursorCol.name, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
+        sheetname = '' if keystrokes == 'o' else sheet.name
+        self.currentActiveRow = CommandLogRow([sheetname, sheet.cursorCol.name, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'

@@ -198,7 +198,7 @@ globalCommand('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row))
 
 globalCommand('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjusts width of current column')
 globalCommand('-', 'cursorCol.width = 0', 'hides current column (to unhide go to Columns sheet and edit its width)')
-globalCommand('!', 'toggleKeyColumn(cursorColIndex)', 'pins current column to the left as a key column')
+globalCommand('!', 'toggleKeyColumn(cursorColIndex); cursorRight(+1)', 'pins current column to the left as a key column')
 globalCommand('~', 'cursorCol.type = str', 'sets type of current column to str')
 globalCommand('@', 'cursorCol.type = date', 'sets type of current column to ISO8601 datetime')
 globalCommand('#', 'cursorCol.type = int', 'sets type of current column to int')
@@ -256,7 +256,7 @@ globalCommand('g\\', 'unselectByIdx(searchRegex(regex=input("g\\\\", type="regex
 globalCommand(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'selects rows matching current cell in current column')
 globalCommand('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'selects rows matching current cell in all visible columns')
 
-globalCommand('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)', 'opens duplicate sheet with only selected rows')
+globalCommand('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vs.select(vs.rows); vd.push(vs)', 'opens duplicate sheet with only selected rows')
 globalCommand('g"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'opens duplicate sheet with all rows')
 
 globalCommand('=', 'addColumn(ColumnExpr(input("new column expr=", "expr")), index=cursorColIndex+1)', 'creates new column from Python expression, with column names as variables')
@@ -1022,7 +1022,7 @@ class Sheet:
     @name.setter
     def name(self, name):
         'Set name without spaces.'
-        self._name = name.replace(' ', '_')
+        self._name = name.strip().replace(' ', '_')
 
     @property
     def source(self):
@@ -1904,7 +1904,8 @@ class ColumnsSheet(Sheet):
     ]
     nKeys = 1
     colorizers = [
-            Colorizer('row', 8, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None)
+            Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),
+            Colorizer('row', 8, lambda self,c,r,v: 'underline' if self.source.nKeys > 0 and r is self.source.keyCols[-1] else None)
     ]
     commands = []
 

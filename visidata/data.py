@@ -24,7 +24,7 @@ globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'moves 
 globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'opens duplicate sheet with a random population subset of # rows')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'appends a blank row')
-globalCommand('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'sets names of all visible columns to contents of current row')
+globalCommand('g^', 'for c in visibleCols: c.name = c._name+(c._name and "|" or "")+c.getDisplayValue(cursorRow)', 'sets names of all visible columns to contents of current row')
 
 globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'opens input in VisiData')
 globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'saves current sheet to filename in format determined by extension (default .tsv)')
