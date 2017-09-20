@@ -1,4 +1,4 @@
-.Sh Column Manipulation
+.Ss Column Manipulation
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .

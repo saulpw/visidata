@@ -79,19 +79,33 @@ pauses/resumes replay
 executes next row in the replaying sheet
 .El
 .
-.Sh GLOBAL COMMANDS
+.Ss GLOBAL COMMANDS
 .so vd-keystrokes.inc
 .
-.Sh MINOR OPTIONS
+.Sh OPTIONS
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.
+.It Fl f, -filetype Ns = Ns Ar filetype
+uses loader for
+.Ar filetype
+.No (see Sy SUPPORTED SOURCES Ns )
+instead of file extension
+.
+.It Fl y, -confirm-overwrite Ns =F
+overwrites existing files without confirmation 
+.El
+
 .so vd-cli.inc
 .
-.Sh DISPLAY OPTIONS
-.No Display options can only be set via Sx Options No or the Sx config file Ns .
+.Ss DISPLAY OPTIONS
+.No Display options can only be set via the Sx Options Sheet No or the Sx config file Ns .
 .
 .so vd-menu.inc
 .
+.Sh EXAMPLES
+.Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
 .
-.Sh CONFIG FILE
+.Sh FILES
 At the start of every session,
 .Sy VisiData No looks for, in order, Pa $PWD/.visidatarc Ns , Pa $XDG_CONFIG_HOME/visidata/config Ns , or Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents.
 For example:
@@ -106,9 +120,6 @@ For example:
 
    aggregator('median', median)
 .Ed
-.
-.Sh EXAMPLES
-.Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
 .
 .so vd-input.inc
 .

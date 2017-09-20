@@ -1,4 +1,4 @@
-.Sh Keystrokes For The Cautious
+.Ss Keystrokes For The Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " F1   z?"
 views this man page

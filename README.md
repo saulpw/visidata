@@ -8,7 +8,7 @@ A terminal interface for exploring and arranging tabular data.
 
 - OS/X or Linux
 - Python 3.4+
-- other modules are required for opening particular filetypes
+- other modules may be required for opening particular filetypes
 
 # Install
 
@@ -23,32 +23,25 @@ $ vd [<options>] <input> ...
 $ <command> | vd [<options>]
 ```
 
-Unknown filetypes are by default viewed with a text browser.  Use `-f <filetype>` to force a particular filetype.  VisiData supports tsv, csv, xlsx, hdf5, sqlite, ...
-
-Here is the [options list](https://visidata.org/man/vd#options).
+Unknown filetypes are by default viewed with a text browser.  Use `-f <filetype>` to force a particular filetype.  VisiData supports tsv, csv, xlsx, hdf5, sqlite, and more.
 
 VisiData supports 256-color terminals.  Use [`vdcolor`](github.com/saulpw/visidata/stable/bin/vdcolor) to browse the available colors.
 
 ## Replay Script
 
-To replay a previously [saved .vd script](https://github.com/saulpw/visidata/tree/develop/tests), which may be parameterized with `{format-field}`s:
+To replay a [.vd script](https://github.com/saulpw/visidata/tree/develop/tests) (saved previously with `^D`), which may be parameterized with Python string formatting `{field}`s:
 
 ```
-$ vd [<options>] --play <script.vd> [--<format-field>=<value> ...]
+$ vd [<options>] --play <script.vd> [<format>=<value> ...]
 ```
 
-`<script.vd>` should be `-` if piped through stdin.
-
-## User Documentation
+## [User's Reference Manual](http://visidata.org/man/vd)
 
 ```
 $ man vd
-$ man 2 vd 
 ```
 
-The contents of the man page are also available at [online](https://visidata.org/man).
-
-Here is a [quick reference of all commands](https://github.com/saulpw/visidata/blob/stable/docs/ascii-commands.txt).  A few interesting ones:
+The manual includes a list of all commands and options.  A few interesting commands:
 
 * `Shift-F` pushes a frequency analysis of the current column
 * `=` creates a new column from the given Python expression (use column names to refer to their contents)
@@ -58,8 +51,7 @@ Here is a [quick reference of all commands](https://github.com/saulpw/visidata/b
 
 If something doesn't appear to be working right, please create [an issue on Github](https://github.com/saulpw/visidata/issues).  Include the full stack trace shown with `Ctrl-e`.
 
-To contribute a bugfix or a loader for another file format, fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls).  Here is the [developer documentation for loaders]().
-
+To contribute a bugfix or a loader for another file format, fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls).  Here is the [developer documentation for loaders](http://visidata.org/dev#loaders).
 
 ## Other vdtui projects
 
@@ -68,23 +60,21 @@ The core `vdtui.py` can be used to quickly create efficient terminal workflows.
 - [vgit](https://github.com/saulpw/vgit): a git interface
 - [vdgalcon](https://github.com/saulpw/vdgalcon): a port of the classic game [Galactic Conquest](https://www.galcon.com)
 
-Other workflows should be created as separate [apps using vdtui](docs/architecture.rst).  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv) which is only one page of code.
-
-Designs for other tools are being considered.
+Other workflows should be created as separate [apps using vdtui](docs/architecture.rst).  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv).
 
 ## Community
 
-- [#visidata]() on freenode.net
 - [r/visidata](https://www.reddit.com/r/visidata/)
+- [#visidata]() on freenode.net
 - [mailing list]()
 
 ## License
 
 The innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT free software license, and freely available for inclusion in other projects.
 
-Other VisiData components, including the main `vd` application, addons, loaders, and other code in this repository, are available for reuse under licensed under GPLv3.
+Other VisiData components, including the main `vd` application, addons, loaders, and other code in this repository, are available for reuse under GPLv3.
 
 ## Credits
 
-VisiData was created by Saul Pwanson `<visidata@saul.pw>`.  Thanks to @anjakefala for test and release support, to @databranner for documentation, and to those wonderful users who contribute feedback and in any form, for helping to make VisiData the awesome tool that it is.
-
+VisiData was created by Saul Pwanson `<visidata@saul.pw>`.
+Thanks to @anjakefala for test and release support, to @databranner for documentation, and to those wonderful users who contribute feedback and in any form, for helping to make VisiData the awesome tool that it is.

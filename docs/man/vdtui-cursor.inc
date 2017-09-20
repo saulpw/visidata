@@ -1,4 +1,4 @@
-.Sh "Cursor Movement"
+.Ss "Cursor Movement"
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .

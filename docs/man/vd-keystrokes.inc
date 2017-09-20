@@ -61,7 +61,7 @@ appends a blank row
 deletes current/all selected row(s) and appends to clipboard
 .so vdtui-editing.inc
 
-.Sh Data Toolkit
+.Ss Data Toolkit
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " o" Ar input
 opens

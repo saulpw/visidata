@@ -1,4 +1,4 @@
-.Sh Row Selection
+.Ss Row Selection
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
@@ -13,12 +13,12 @@ selects/toggles/unselects all rows
 .It Ic " \&,"
 selects rows matching current cell in current column
 .It Ic "g\&,"
-selects rows matching in all visible columns
+selects rows matching this row in all visible columns
 .
 .El
 .
 .
-.Sh Row Sorting/Filtering
+.Ss Row Sorting/Filtering
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
