@@ -193,8 +193,8 @@ globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory))', 'op
 
 globalCommand('<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")', 'moves up the current column to the next value')
 globalCommand('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")', 'moves down the current column to the next value')
-globalCommand('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'move to previous selected row')
-globalCommand('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move to next selected row')
+globalCommand('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'moves up the current column to the next selected row')
+globalCommand('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'moves down the current column to the next selected row')
 
 globalCommand('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjusts width of current column')
 globalCommand('-', 'cursorCol.width = 0', 'hides current column (to unhide go to Columns sheet and edit its width)')
@@ -206,7 +206,7 @@ globalCommand('$', 'cursorCol.type = currency', 'sets type of current column to 
 globalCommand('%', 'cursorCol.type = float', 'sets type of current column to float')
 globalCommand('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edits name of current column')
 
-globalCommand('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'set width of all columns to fit visible cells')
+globalCommand('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'adjusts width of all columns')
 
 globalCommand('[', 'rows.sort(key=lambda r,col=cursorCol: col.getTypedValue(r))', 'sorts ascending by current column')
 globalCommand(']', 'rows.sort(key=lambda r,col=cursorCol: col.getTypedValue(r), reverse=True)', 'sorts descending by current column')
@@ -219,10 +219,10 @@ globalCommand('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error
 
 globalCommand('^^', 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jumps to previous sheet (swaps with current sheet)')
 
-globalCommand('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'open most recent errors')
+globalCommand('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'views trackeback for most recent errors')
 
 globalCommand('^R', 'reload(); recalc(); status("reloaded")', 'reloads current sheet')
-globalCommand('z^R', 'cursorCol._cachedValues.clear()', 'clear cache on this column')
+globalCommand('z^R', 'cursorCol._cachedValues.clear()', 'clears cache for current column')
 
 globalCommand('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'searches for regex forward in current column')
 globalCommand('?', 'moveRegex(regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'searches for regex backward in current column')

@@ -10,6 +10,8 @@ jumps to previous sheet (swaps with current sheet)
 opens source of current sheet
 .It Ic " ^E"
 views traceback for most recent error
+.It Ic "g^E"
+views traceback for most recent errors
 .It Ic "z^E"
 views traceback for error in current cell
 .It Ic " ^L"
@@ -20,5 +22,7 @@ shows cursor position and bounds of current sheet on status line
 shows version information on status line
 .It Ic " ^R"
 reloads current sheet
+.It Ic "g^R"
+clears cache for current column
 .
 .El

@@ -2,13 +2,15 @@
 .so vdtui-cursor.inc
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.
+.It Ic "zHome  zEnd"
+moves to top/bottom row and leftmost/rightmost column
+.Pp
 .It Ic " c" Ar regex
 .No moves to the next column with name matching Ar regex
 .It Ic " r" Ar regex
 .No moves to the next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No moves to the given column/row Ar number
+.No moves to given column/row Ar number
 .Pp
 .It Ic " H   J   K   L"
 slides current row/column left/down/up/right
@@ -67,14 +69,14 @@ opens
 saves commandlog to new .vd file
 .It Ic "Shift-A" Ar number
 .No opens new blank sheet with Ar number No columns
-.Pp
-.It Ic " +" Ar aggregator
-.No adds Ar aggregator No to the current column (see Sy "Frequency Table" Ns )
-.It Ic "z+" Ar aggregator
-.No displays result of Ar aggregator No over values in selected rows for the current column
 .It Ic "Shift-P" Ar number
 opens duplicate sheet with a random population subset of
 .Ar number No rows
+.Pp
+.It Ic " +" Ar aggregator
+.No adds Ar aggregator No to current column (see Sy "Frequency Table" Ns )
+.It Ic "z+" Ar aggregator
+.No displays result of Ar aggregator No over values in selected rows for current column
 .El
 .so vdtui-other.inc
 .Pp
@@ -117,14 +119,14 @@ opens sheet of current row/cell as Python object
 .It Sy " \&."
 .Sy Describe Sheet No (Shift-I) "   view summary statistics for each column"
 .It Sy " \&."
-.Sy Pivot Table No (Shift-W) "      group rows by key and summarize the current column"
+.Sy Pivot Table No (Shift-W) "      group rows by key and summarize current column"
 .It Sy " \&."
 .Sy Melted Sheet No (Shift-M) "     unpivot non-key columns into variable/value columns"
 .El
 .Sh METASHEETS
 .Sh Columns Sheet (Shift-C)
 Properties of columns on the source sheet can be changed with standard editing commands
-.No ( Ns Sy e  ge g= Del Ns ) on the Columns Sheet . multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
+.No ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
 .El
@@ -134,13 +136,15 @@ adds column from concatenating selected source columns
 .It Ic "g!"
 toggles selected columns as keys on source sheet
 .It Ic "g+"
-queries for selection of a data aggregator for current column
+adds aggregator to selected source columns
 .It Ic "g_" No (underscore)
 adjusts widths of selected columns on source sheet
 .It Ic "g-" No (hyphen)
 hides selected columns on source sheet
 .It Ic "g~ g# g% g$ g@"
-Sets type of selected columns to str/int/float/currency/date
+sets type of selected columns to str/int/float/currency/date
+.It Ic " Enter"
+.No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .El
 .
 .Sh Sheets Sheet (Shift-S)
@@ -151,13 +155,13 @@ Sets type of selected columns to str/int/float/currency/date
 .It Ic "Enter"
 jumps to sheet referenced in current row
 .It Ic "&" Ar jointype
-.No merges the selected sheets with visible columns from all, keeping rows according to the Ar jointype Ns :
+.No merges selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
 .Bl -tag -width x -compact -offset XXXXXXXXXXXXXXXXXXXX 
 .It Sy "\&."
 .Sy inner No " keeps only rows which match keys on all sheets"
 .It Sy "\&."
-.Sy outer No " keeps all rows from first selected sheet"
+.Sy left No " keeps all rows from first selected sheet"
 .It Sy "\&."
 .Sy full No "  keeps all rows from all sheets (union)"
 .It Sy "\&."
@@ -207,15 +211,15 @@ undoes deletion of all rows in clipboard
 .
 .Sh DERIVED SHEETS
 .Sh Frequency Table (Shift-F)
-A Frequency Table groups rows by one or more columns, and includes summary columns for those with aggregators.
+.No A Sy Frequency Table No groups rows by one or more columns, and includes summary columns for those with aggregators.
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gF
-groups by all key columns on the source sheet
+groups by all key columns on source sheet
 .It Ic zF
-opens a one-line summary for all [selected] rows
+opens a one-line summary for selected rows
 .El
 .
 .Sh Describe Sheet (Shift-I)
@@ -231,15 +235,15 @@ selects/toggles/unselects rows on source sheet which are being described in curr
 opens copy of source sheet with rows described in current cell
 .El
 .
-.Sh Melted Sheet (Shift-M)
-Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
-.Sh Pivot Sheet (Shift-W)
-Set key column(s) and aggregators on column(s) before pressing Shift-W on the column to pivot.
+.Sh Pivot Table (Shift-W)
+Set key column(s) and aggregators on column(s) before pressing Sy Shift-W No on the column to pivot.
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Enter
+.Sh Melted Sheet (Shift-M)
+Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
 Opens sheet of source rows which comprise current pivot cell
 .El
 .Sh Python Object Sheet (^X ^Y)
@@ -249,6 +253,8 @@ Opens sheet of source rows which comprise current pivot cell
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter"
 dives further into Python object
+.It Ic "e"
+edits contents of current cell
 .It Ic "\&." No (period)
 toggles whether methods and hidden properties are shown
 .El

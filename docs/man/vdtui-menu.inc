@@ -7,7 +7,7 @@ as passed to codecs.open
 flags to pass to re.compile() [AILMSUX]
 .It Sy "default_width      " No "20"
 default column width
-.It Sy "textwrap           " No "True"
+.It Sy "wrap               " No "False"
 wrap text to fit window width on TextSheet
 .It Sy "cmd_after_edit     " No "j"
 command keystroke to execute after successful edit

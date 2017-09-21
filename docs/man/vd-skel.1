@@ -38,17 +38,17 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .Sh OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
-.It Fl f, -filetype Ns = Ns Ar filetype
+.Lo f filetype filetype
 uses loader for
 .Ar filetype
 .No (see Sy SUPPORTED SOURCES Ns )
 instead of file extension
 .
-.It Fl y, -confirm-overwrite Ns =F
+.Lo y confirm-overwrite F
 overwrites existing files without confirmation 
 .El
 .Bl -tag -width XXXXXXXXXXXXXXXXX
-.It See also Sx MINOR OPTIONS Ns .
+.It See also Sy MINOR OPTIONS Ns .
 .El
 .
 .Sh REPLAY MODE
@@ -63,10 +63,10 @@ overwrites existing files without confirmation
 replays in batch mode (with no interface)
 .
 .Lo o output file
-.No saves the final visible sheet to Ar file No as .tsv
+.No saves final visible sheet to Ar file No as .tsv
 .
 .It Ar field Ns Cm = Ns Ar value
-.No replace \&"{ Ns Ar field Ns }\&" in the Ar cmdlog No with Ar value
+.No replaces \&"{ Ns Ar field Ns }\&" in Ar cmdlog No with Ar value
 .El
 .
 .Ss Commands During Replay
@@ -74,25 +74,24 @@ replays in batch mode (with no interface)
 .It Sy ^U
 pauses/resumes replay
 .It Sy Space
-executes next row in the replaying sheet
+executes next row in replaying sheet
 .El
 .
 .Ss GLOBAL COMMANDS
 .so vd-keystrokes.inc
 .
-.Sh OPTIONS
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Sh MINOR OPTIONS
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
-.It Fl f, -filetype Ns = Ns Ar filetype
+.It Sy -f, --filetype Ns = Ns Ar "filetype   " No ""
 uses loader for
 .Ar filetype
 .No (see Sy SUPPORTED SOURCES Ns )
 instead of file extension
 .
-.It Fl y, -confirm-overwrite Ns =F
+.It Fl y, -confirm-overwrite Ns = Ns Ar "bool" No "F"
 overwrites existing files without confirmation 
 .El
-
 .so vd-cli.inc
 .
 .Ss DISPLAY OPTIONS

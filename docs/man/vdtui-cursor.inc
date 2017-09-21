@@ -22,5 +22,7 @@ moves to next/previous match from last search
 .Pp
 .It Ic  " <   >"
 moves up/down the current column to the next value
+.It Ic " {   }"
+moves up/down the current column to the next selected row
 .
 .El

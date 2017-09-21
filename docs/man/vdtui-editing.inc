@@ -1,5 +1,5 @@
 .
-.It Ic "  e"
+.It Ic "  e" Ar text
 edits contents of current cell
 .It Ic " ge" Ar text
 .No sets contents of current column for selected rows to Ar text

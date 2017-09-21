@@ -40,7 +40,7 @@ def rowkeys(sheet, row):
 fullAggregator('keymax', anytype, lambda col, rows: rowkeys(col.sheet, max(col.getValueRows(rows))[1]))
 
 ColumnsSheet.commands += [
-    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'add aggregator to all selected source columns'),
+    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'adds aggregator to selected source columns'),
 ]
 ColumnsSheet.columns += [
         Column('aggregators',

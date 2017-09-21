@@ -2,8 +2,11 @@
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic _ Ns " (underscore)"
+.It Ic " _" Ns " (underscore)"
 adjusts width of current column
+.It Ic "g_" Ns " (underscore)"
+adjusts width of all columns
+.Pp
 .It Ic - Ns " (hyphen)"
 hides current column (to unhide, go to
 .Sy C Ns olumns sheet and Sy e Ns dit its width)
