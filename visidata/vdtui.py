@@ -1296,8 +1296,8 @@ class Sheet:
 
         if self.topRowIndex <= 0:
             self.topRowIndex = 0
-        elif self.topRowIndex > self.nRows-self.nVisibleRows:
-            self.topRowIndex = self.nRows-self.nVisibleRows
+        elif self.topRowIndex > self.nRows-1:
+            self.topRowIndex = self.nRows-1
 
         # (x,y) is relative cell within screen viewport
         x = self.cursorVisibleColIndex - self.leftVisibleColIndex
