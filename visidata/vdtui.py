@@ -1904,7 +1904,15 @@ class ColumnsSheet(Sheet):
 
 class SheetsSheet(Sheet):
     commands = [Command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jumps to sheet referenced in current row')]
-    columns = [ColumnAttr(name) for name in 'name nRows nCols nVisibleCols cursorDisplay keyColNames source'.split()]
+    columns = [
+        ColumnAttr('name'),
+        ColumnAttr('nRows', type=int),
+        ColumnAttr('nCols', type=int),
+        ColumnAttr('nVisibleCols', type=int),
+        ColumnAttr('cursorDisplay'),
+        ColumnAttr('keyColNames'),
+        ColumnAttr('source'),
+    ]
 
     def reload(self):
         self.rows = vd().sheets
