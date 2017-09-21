@@ -179,7 +179,7 @@ globalCommand('gq', 'vd.sheets.clear()', 'quits all sheets (clean exit)')
 globalCommand('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'moves all the way to the left')
 globalCommand('gk', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'moves all the way to the top')
 globalCommand('gj', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'moves all the way to the bottom')
-globalCommand('gl', 'sheet.cursorVisibleColIndex = len(visibleCols)-1', 'moves all the way to the right')
+globalCommand('gl', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'moves all the way to the right')
 
 globalCommand('gg', 'gk')
 globalCommand('G', 'gj')
@@ -239,7 +239,7 @@ globalCommand('gzd', 'cursorCol.setValues(selectedRows, None)', 'sets contents o
 globalCommand('KEY_DC', 'zd')
 globalCommand('gKEY_DC', 'gzd')
 
-globalCommand('t', 'toggle([cursorRow]); cursorDown(1)', 'togggles selection of current row')
+globalCommand('t', 'toggle([cursorRow]); cursorDown(1)', 'toggles selection of current row')
 globalCommand('s', 'select([cursorRow]); cursorDown(1)', 'selects current row')
 globalCommand('u', 'unselect([cursorRow]); cursorDown(1)', 'unselects current row')
 
@@ -1061,6 +1061,7 @@ class Sheet:
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
+    @functools.lru_cache()
     def visibleCols(self):  # non-hidden cols
         'List of unhidden Column objects.'
         return [c for c in self.columns if not c.hidden]
@@ -1325,18 +1326,21 @@ class Sheet:
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
+        minColWidth = len(options.disp_more_left)+len(options.disp_more_right)
+        sepColWidth = len(options.disp_column_sep)
+        winWidth = self.vd.windowWidth
         self.visibleColLayout = {}
         x = 0
         vcolidx = 0
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None and self.visibleRows:
-                col.width = col.getMaxWidth(self.visibleRows)+len(options.disp_more_left)+len(options.disp_more_right)
+                col.width = col.getMaxWidth(self.visibleRows)+minColWidth
             width = col.width if col.width is not None else col.getMaxWidth(self.visibleRows)  # handle delayed column width-finding
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self.visibleColLayout[vcolidx] = [x, min(width, self.vd.windowWidth-x)]
-                x += width+len(options.disp_column_sep)
-            if x > self.vd.windowWidth-1:
+                self.visibleColLayout[vcolidx] = [x, min(width, winWidth-x)]
+                x += width+sepColWidth
+            if x > winWidth-1:
                 break
 
         self.rightVisibleColIndex = vcolidx
@@ -1379,6 +1383,8 @@ class Sheet:
         'Draw entire screen onto the `scr` curses object.'
         numHeaderRows = 1
         scr.erase()  # clear screen before every re-draw
+
+        Sheet.visibleCols.fget.cache_clear()
 
         if not self.columns:
             return
