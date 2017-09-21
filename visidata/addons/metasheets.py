@@ -51,7 +51,9 @@ class SheetJoin(Sheet):
 
         # first item in joined row is the key tuple from the first sheet.
         # first columns are the key columns from the first sheet, using its row (0)
-        self.columns = [SubrowColumn(ColumnItem(c.name, i), 0) for i, c in enumerate(sheets[0].columns[:sheets[0].nKeys])]
+        self.columns = []
+        for i, c in enumerate(sheets[0].keyCols):
+            self.addColumn(SubrowColumn(ColumnItem(c.name, i), 0))
         self.nKeys = sheets[0].nKeys
 
         rowsBySheetKey = {}
@@ -67,7 +69,8 @@ class SheetJoin(Sheet):
 
             for sheetnum, vs in enumerate(sheets):
                 # subsequent elements are the rows from each source, in order of the source sheets
-                self.columns.extend(SubrowColumn(c, sheetnum+1) for c in vs.columns[vs.nKeys:])
+                for c in vs.keyCols:
+                    self.addColumn(SubrowColumn(c, sheetnum+1))
                 for r in vs.rows:
                     prog.addProgress(1)
                     key = tuple(c.getTypedValue(r) for c in vs.keyCols)
