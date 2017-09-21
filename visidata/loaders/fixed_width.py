@@ -10,7 +10,6 @@ class FixedWidthColumn(Column):
     def __init__(self, name, i, j, **kwargs):
         super().__init__(name, **kwargs)
         self.i, self.j = i, j
-        status(i, j)
 
     def getValue(self, row):
         return row[0][self.i:self.j]

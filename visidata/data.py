@@ -6,6 +6,7 @@ option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation 
 option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
 option('skiplines', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
+
 # slide rows/columns around
 globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slides current column left')
 globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'moves current row down')
@@ -24,7 +25,14 @@ globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'moves 
 globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'opens duplicate sheet with a random population subset of # rows')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'appends a blank row')
-globalCommand('g^', 'for c in visibleCols: c.name = c._name+(c._name and "|" or "")+c.getDisplayValue(cursorRow)', 'sets names of all visible columns to contents of current row')
+
+def updateColNames(sheet):
+    for c in sheet.visibleCols:
+        c.name = "_".join(c.getDisplayValue(r) for r in sheet.selectedRows or [sheet.cursorRow])
+globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'sets current column name to value in current cell')
+globalCommand('g^', 'updateColNames(sheet)', 'sets visible column names to values in selected rows (or current row)')
+globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'sets current column name to combined values in selected rows (or current row)')
+# gz^ with no selectedRows is same as z^
 
 globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'opens input in VisiData')
 globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'saves current sheet to filename in format determined by extension (default .tsv)')

@@ -28,7 +28,7 @@ class xlsxSheet(Sheet):
         self.columns = ArrayColumns(worksheet.max_column)
         with Progress(self, worksheet.max_row) as prog:
             for row in worksheet.iter_rows():
-                self.addRow([cell.value for cell in row])
+                self.addRow(list(cell.value for cell in row))
                 prog.addProgress(1)
 
 class open_xls(Sheet):
@@ -59,5 +59,5 @@ class xlsSheet(Sheet):
         self.columns = ArrayColumns(worksheet.ncols)
         with Progress(self, worksheet.nrows) as prog:
             for rownum in range(worksheet.nrows):
-                self.addRow([worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)])
+                self.addRow(list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)))
                 prog.addProgress(1)
