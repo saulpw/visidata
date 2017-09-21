@@ -69,7 +69,7 @@ class SheetList(Sheet):
             pass
         elif self.rows and isinstance(self.rows[0], dict):  # list of dict
             self.columns = DictKeyColumns(self.rows[0])
-        elif self.rows and isinstance(self.rows[0], tuple) and getattr(self.rows[0], '_fields'):  # list of namedtuple
+        elif self.rows and isinstance(self.rows[0], tuple) and getattr(self.rows[0], '_fields', None):  # list of namedtuple
             self.columns = [ColumnItem(k, i) for i, k in enumerate(self.rows[0]._fields)]
         else:
             self.columns = [Column(self.name)]
