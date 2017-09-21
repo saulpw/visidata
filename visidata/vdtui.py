@@ -1719,11 +1719,13 @@ class SubrowColumn(Column):
 
     def getValue(self, row):
         subrow = row[self.subrowidx]
-        return subrow and self.origcol.getValue(subrow) or None
+        if subrow is None:
+            return self.origcol.getValue(subrow)
 
     def setValue(self, row, value):
         subrow = row[self.subrowidx]
-        return subrow and self.origcol.setValue(subrow, value) or None
+        if subrow is None:
+           self.origcol.setValue(subrow, value)
 
 
 class DisplayWrapper:
