@@ -1856,7 +1856,7 @@ class TextSheet(Sheet):
 
     @async
     def reload(self):
-        self.columns = [Column(self.name, width=vd().windowWidth, getter=lambda r: r[1])]
+        self.columns = [Column(self.name, getter=lambda r: r[1])]
         self.rows = []
         if isinstance(self.source, list):
             for x in self.genProgress(self.source):
