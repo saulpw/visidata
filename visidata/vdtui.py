@@ -454,6 +454,7 @@ class VisiData:
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
         self.inInput = False
+        self.prefixWaiting = False
         self.scr = None  # curses scr
         self.hooks = {}
         self.threads = []  # all threads, including finished
@@ -709,8 +710,8 @@ class VisiData:
             self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
             keystroke = self.getkeystroke(scr, sheet)
-            if keystroke:
-                if self.keystrokes not in self.allPrefixes:
+            if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
+                if not self.prefixWaiting:
                     self.keystrokes = ''
 
                 self.statuses = []
@@ -732,10 +733,13 @@ class VisiData:
                     pass
             elif self.keystrokes in sheet._commands:
                 sheet.exec_keystrokes(self.keystrokes)
+                self.prefixWaiting = False
             elif keystroke in self.allPrefixes:
-                pass
+                self.keystrokes = ''.join(sorted(set(self.keystrokes)))  # prefix order/quantity does not matter
+                self.prefixWaiting = True
             else:
                 status('no command for "%s"' % (self.keystrokes))
+                self.prefixWaiting = False
 
             self.checkForFinishedThreads()
             self.callHook('predraw')
