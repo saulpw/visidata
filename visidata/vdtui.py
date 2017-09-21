@@ -1754,20 +1754,17 @@ class LazyMapping:
     def __init__(self, sheet, row):
         self.row = row
         self.sheet = sheet
+        self._keys = [c._id for c in self.sheet.columns]
 
     def keys(self):
-        return [c._id for c in self.sheet.columns]
+        return self._keys
 
     def __getitem__(self, colid):
-        colids = self.keys()
-        if colid in colids:
-            i = colids.index(colid)
+        try:
+            i = self._keys.index(colid)
             return self.sheet.columns[i].getTypedValue(self.row)
-        else:
+        except ValueError:
             raise KeyError(colid)
-
-#    def __getattr__(self, colid):
-#        return self.__getitem__(colid)
 
 
 class ColumnExpr(Column):
