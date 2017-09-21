@@ -7,6 +7,10 @@ globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr)
 globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'opens sheet of current row as Python object')
 globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s.row[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'opens sheet of current cell as Python object')
 
+# used as ENTER in several pyobj sheets
+globalCommand('pyobj-dive', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dives further into Python object')
+
+
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj, src=None):
     vs = load_pyobj(name, pyobj, src)
@@ -50,31 +54,45 @@ def DictKeyColumns(d):
     'Return a list of Column objects from dictionary keys.'
     return [ColumnItem(k, k) for k in d.keys()]
 
+def SheetList(src, *args, **kwargs):
+    'Creates a Sheet from a list of homogenous dicts or namedtuples.'
 
-class SheetList(Sheet):
-    'A sheet from a list of homogenous dicts or namedtuples.'
-    commands = [
-        Command(ENTER, 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dives further into Python object')
-    ]
+    if not src:
+        error('no content')
 
-    def __init__(self, name, *args, **kwargs):
-        # columns is a list of strings naming attributes on the objects within the obj
-        super().__init__(name, *args, **kwargs)
-        src = args[0]
-        assert isinstance(src, list) or isinstance(src, tuple), type(src)
+    if isinstance(src[0], dict):
+        return ListOfDictSheet(src, *args, **kwargs)
+    elif isinstance(src[0], tuple):
+        if getattr(src[0], '_fields', None):  # looks like a namedtuple
+            return ListOfNamedTupleSheet(src, *args, **kwargs)
 
+    # simple list
+    return ListOfPyobjSheet(src, *args, **kwargs)
+
+class ListOfPyobjSheet(Sheet):
+    commands = [Command(ENTER, 'pyobj-dive')]
     def reload(self):
+        self.rows = range(len(self.source))
+        self.columns = [Column(self.name,
+                               getter=lambda r,s=self: s.source[r],
+                               setter=lambda s,c,r,v: setitem(s.source, r, v))]
+
+# rowdef: dict
+class ListOfDictSheet(Sheet):
+    commands = [Command(ENTER, 'pyobj-dive')]
+    def reload(self):
+        self.columns = DictKeyColumns(self.source[0])
         self.rows = self.source
-        if self.columns:
-            pass
-        elif self.rows and isinstance(self.rows[0], dict):  # list of dict
-            self.columns = DictKeyColumns(self.rows[0])
-        elif self.rows and isinstance(self.rows[0], tuple) and getattr(self.rows[0], '_fields', None):  # list of namedtuple
-            self.columns = [ColumnItem(k, i) for i, k in enumerate(self.rows[0]._fields)]
-        else:
-            self.columns = [Column(self.name)]
+
+# rowdef: namedtuple
+class ListOfNamedTupleSheet(Sheet):
+    commands = [Command(ENTER, 'pyobj-dive')]
+    def reload(self):
+        self.columns = [ColumnItem(k, i) for i, k in enumerate(self.source[0]._fields)]
+        self.rows = self.source
 
 
+# rowdef: PyObj
 class SheetNamedTuple(Sheet):
     'a single namedtuple, with key and value columns'
     commands = [Command(ENTER, 'dive()', 'dives further into Python object')]
