@@ -117,7 +117,7 @@ option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
 
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('default_width', 20, 'default column width')
-option('textwrap', True, 'wrap text to fit window width on TextSheet')
+option('wrap', False, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
 option('aggr_null_filter', 'none', 'invalid values to filter out when aggregating: (n/e/f/"")')
@@ -1844,25 +1844,16 @@ def clipstr(s, dispw):
     return ret, w
 
 
-## Built-in sheets
-class TextColumn(Column):
-    'TextColumn always uses the terminal width'
-    @property
-    def width(self):
-        return vd().windowWidth
-
-    @width.setter
-    def width(self, v):
-        pass
-
 ## text viewer and dir browser
 class TextSheet(Sheet):
     'Sheet displaying a string (one line per row) or a list of strings.'
-    commands = []
+    commands = [
+        Command('w', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % (" NOT" if wrap else "")); reload()', 'toggle text wrap for this sheet')
+    ]
 
     @async
     def reload(self):
-        self.columns = [TextColumn(self.name, getter=lambda r: r[1])]
+        self.columns = [Column(self.name, width=vd().windowWidth, getter=lambda r: r[1])]
         self.rows = []
         if isinstance(self.source, list):
             for x in self.genProgress(self.source):
@@ -1885,7 +1876,7 @@ class TextSheet(Sheet):
 
     def addLine(self, text):
         'Handle text re-wrapping.'
-        if options.textwrap:
+        if getattr(self, 'wrap', options.wrap):
             startingLine = len(self.rows)
             for i, L in enumerate(textwrap.wrap(str(text), width=self.vd.windowWidth-2)):
                 self.addRow((startingLine+i, L))
