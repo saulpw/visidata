@@ -27,9 +27,9 @@ SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
 ColumnsSheet.commands += [
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'adds column from concatenating selected source columns'),
-        Command('g!', 'for c in selectedRows or cursorRow: source.toggleKeyColumn(source.columns.index(c))', 'toggles selected columns as keys on source sheet'),
+        Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'toggles selected columns as keys on source sheet'),
         Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hides selected columns on source sheet'),
-        Command('g_', 'for c in selectedRows or cursorRow: c.width = c.getMaxWidth(source.visibleRows)', 'adjusts widths of selected columns on source sheet'),
+        Command('g_', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjusts widths of selected columns on source sheet'),
         Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'sets type of selected columns to float'),
         Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'sets type of selected columns to int'),
         Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'sets type of selected columns to date'),
