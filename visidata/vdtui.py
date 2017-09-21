@@ -998,7 +998,7 @@ class Sheet:
         err = ''
 
         if vdglobals is None:
-            vdglobals = globals()
+            vdglobals = getGlobals()
 
         keystrokes, _, execstr = cmd
         self.sheet = self
