@@ -891,6 +891,9 @@ class Sheet:
                 prog.addProgress(1)
                 yield i
 
+    def newRow(self):
+        return list((None for c in columns))
+
     def addRow(self, row, index=None):
         if index is None:
             self.rows.append(row)
@@ -984,6 +987,7 @@ class Sheet:
 
     def getCommand(self, keystrokes, default=None):
         k = keystrokes
+        cmd = None
         while k in self._commands:
             cmd = self._commands.get(k, default)
             k = cmd[2]  # see if execstr is actually just an alias for another keystroke
