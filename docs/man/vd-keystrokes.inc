@@ -36,7 +36,7 @@ scrolls current row to top/center/bottom of screen
 .It Ic "g^"
 sets names of all visible columns to contents of current row
 .Pp
-.It Ic " '"
+.It Ic " '" Ns " (tick)"
 adds a frozen copy of current column with all cells evaluated
 .
 .It Ic "g'"
@@ -50,14 +50,23 @@ opens a frozen copy of current sheet with all visible columns evaluated
 .No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc)
 .El
 .so vdtui-row.inc
-.Sh Editing Rows and Cells
+.Ss Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a"
 appends a blank row
 .It Ic "  d  gd"
 deletes current/all selected row(s) and appends to clipboard
+.It Ic "  y  gy"
+copies current/all selected row(s) to clipboard
+.It Ic "  p"
+pastes clipboard rows after current row
+.It Ic " ^Z"
+undoes most recent delete
+.
 .so vdtui-editing.inc
+.El
+.
 .Ss Data Toolkit
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " o" Ar input
@@ -66,7 +75,7 @@ opens
 .It Ic "^S" Ar filename
 .No saves current sheet to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
-saves commandlog to new .vd file
+.No saves commandlog to Ar filename.vd No file
 .It Ic "Shift-A" Ar number
 .No opens new blank sheet with Ar number No columns
 .It Ic "Shift-P" Ar number
@@ -88,11 +97,8 @@ evalutes Python expression and opens sheet for browsing resulting Python object
 .It Ic "^Y  z^Y"
 opens sheet of current row/cell as Python object
 .El
-.Sh Note:
-.Bl -inset -compact
-.It "In most cases, commands that affect 'selected rows' will affect all rows when no rows are selected."
-.El
-.Sh Non-source Sheets
+.
+.Ss Internal Sheets List
 .Bl -tag -width Xx -compact
 .It " "
 .It Sy Metasheets
@@ -101,11 +107,9 @@ opens sheet of current row/cell as Python object
 .It Sy " \&."
 .Sy Sheets Sheet No (Shift-S) "     jump between sheets or join them together"
 .It Sy " \&."
-.Sy Options No (Shift-O) "          edit all configurable options"
+.Sy Options Sheet No (Shift-O) "    edit all configurable options"
 .It Sy " \&."
 .Sy Commandlog No (Shift-D) "       modify and save commands for replay"
-.It Sy " \&."
-.Sy Clipboard No (Shift-B) "        view copied/deleted rows"
 .It Sy " \&."
 .Sy Error Sheet No (^E) "           view last error"
 .It Sy " \&."
@@ -123,8 +127,8 @@ opens sheet of current row/cell as Python object
 .It Sy " \&."
 .Sy Melted Sheet No (Shift-M) "     unpivot non-key columns into variable/value columns"
 .El
-.Sh METASHEETS
-.Sh Columns Sheet (Shift-C)
+.Ss METASHEETS
+.Ss Columns Sheet (Shift-C)
 Properties of columns on the source sheet can be changed with standard editing commands
 .No ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -147,7 +151,7 @@ sets type of selected columns to str/int/float/currency/date
 .No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .El
 .
-.Sh Sheets Sheet (Shift-S)
+.Ss Sheets Sheet (Shift-S)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact 
 .It (sheet-specific commands)
 .El
@@ -170,7 +174,7 @@ jumps to sheet referenced in current row
 .Sy append No "keeps all rows from all sheets (concatenation)"
 .El
 .
-.Sh Options (Shift-O)
+.Ss Options Sheet (Shift-O)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact 
 .It (sheet-specific commands)
 .El
@@ -179,7 +183,7 @@ jumps to sheet referenced in current row
 edits option
 .El
 .
-.Sh Commandlog (Shift-D)
+.Ss Commandlog (Shift-D)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
 .El
@@ -190,27 +194,8 @@ replays command in current row
 replays contents of entire commandlog
 .El
 .
-.Sh Clipboard
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It (global commands)
-.El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "Shift-B"
-opens clipboard sheet
-.It Ic " y  gy"
-copies current/all selected row(s) and appends to clipboard
-.It Ic " p"
-pastes most recent clipboard row after current row
-.It Ic "gp"
-pastes all clipboard rows after current row
-.It Ic " ^Z"
-undoes most recent delete in clipboard
-.It Ic "g^Z"
-undoes deletion of all rows in clipboard
-.El
-.
-.Sh DERIVED SHEETS
-.Sh Frequency Table (Shift-F)
+.Ss DERIVED SHEETS
+.Ss Frequency Table (Shift-F)
 .No A Sy Frequency Table No groups rows by one or more columns, and includes summary columns for those with aggregators.
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (global commands)
@@ -222,7 +207,7 @@ groups by all key columns on source sheet
 opens a one-line summary for selected rows
 .El
 .
-.Sh Describe Sheet (Shift-I)
+.Ss Describe Sheet (Shift-I)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
 .El
@@ -235,18 +220,18 @@ selects/toggles/unselects rows on source sheet which are being described in curr
 opens copy of source sheet with rows described in current cell
 .El
 .
-.Sh Pivot Table (Shift-W)
+.Ss Pivot Table (Shift-W)
 Set key column(s) and aggregators on column(s) before pressing Sy Shift-W No on the column to pivot.
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Enter
-.Sh Melted Sheet (Shift-M)
+.El
+.Ss Melted Sheet (Shift-M)
 Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
 Opens sheet of source rows which comprise current pivot cell
-.El
-.Sh Python Object Sheet (^X ^Y)
+.Ss Python Object Sheet (^X ^Y)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It (sheet-specific commands)
 .El

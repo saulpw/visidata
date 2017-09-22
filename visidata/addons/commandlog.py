@@ -4,9 +4,9 @@ import threading
 
 from visidata import *
 
-option('delay', 0.0, '--play delay between commands, in seconds')
-option('disp_replay_pause', '‖', '')
-option('disp_replay_play', '▶', '')
+option('delay', 0.0, 'delay between replayed commands, in seconds')
+option('disp_replay_play', '▶', 'status indicator for active replay')
+option('disp_replay_pause', '‖', 'status indicator for paused replay')
 
 globalCommand('D', 'vd.push(vd.commandlog)', 'opens Commandlog')
 globalCommand('^D', 'saveSheet(vd.commandlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'saves commandlog to new .vd file')

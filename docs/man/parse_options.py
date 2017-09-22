@@ -33,10 +33,10 @@ with open('{0}-cli.inc'.format(man), 'w') as cliOut:
         opts = vd.baseOptions.keys()
 
         colwidth = max((len(optname)+len(str(default))) for optname, default, _, _ in vd.baseOptions.values())
-        menuOut.write('.Bl -tag -width %s -compact\n' % ('X'*(colwidth+2)))
+        menuOut.write('.Bl -tag -width %s -compact\n' % ('X'*(colwidth+3)))
 
         cliwidth = max(padding+len(str(default)) for _, default, _, _ in vd.baseOptions.values())
-        cliOut.write('.Bl -tag -width %s -compact\n' % ('X'*(cliwidth+2)))
+        cliOut.write('.Bl -tag -width %s -compact\n' % ('X'*(cliwidth+3)))
 
         for optname in opts:
             optname, default, value, desc = vd.baseOptions[optname]

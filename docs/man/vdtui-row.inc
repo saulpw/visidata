@@ -10,7 +10,7 @@ selects/toggles/unselects all rows
 .No selects/unselects rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
 .No selects/unselects rows matching Ar regex No in any visible column
-.It Ic " \&,"
+.It Ic " \&," Ns " (comma)"
 selects rows matching current cell in current column
 .It Ic "g\&,"
 selects rows matching this row in all visible columns

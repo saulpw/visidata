@@ -1,4 +1,4 @@
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy "encoding           " No "utf-8"
 as passed to codecs.open
 .It Sy "encoding_errors    " No "surrogateescape"

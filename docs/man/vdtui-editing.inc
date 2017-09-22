@@ -10,7 +10,7 @@ edits contents of current cell
 .
 .El
 .
-.Sh "  Commands While Editing Input"
+.Ss "  Commands While Editing Input"
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  ^C"
 accepts/aborts input

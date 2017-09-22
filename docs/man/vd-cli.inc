@@ -1,4 +1,4 @@
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 as passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
@@ -42,7 +42,7 @@ specify file type
 .It Sy --pyobj-show-hidden Ns = Ns Ar "bool    " No "False"
 show methods and _private properties
 .It Sy --delay Ns = Ns Ar "float               " No "0.0"
---play delay between commands, in seconds
+delay between replayed commands, in seconds
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
 maxsplit to pass to regex.split
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"

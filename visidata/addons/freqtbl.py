@@ -5,7 +5,7 @@ globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'opens Frequency
 globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'opens Frequency Table grouped by all key columns on the source sheet')
 globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda r: "Total")))', 'opens a one-line summary for all selected rows')
 
-theme('disp_histogram', '*')
+theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 80, 'width of histogram column')
 #option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')

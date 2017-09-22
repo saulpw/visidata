@@ -5,7 +5,7 @@
 .It Ic " _" Ns " (underscore)"
 adjusts width of current column
 .It Ic "g_" Ns " (underscore)"
-adjusts width of all columns
+adjusts width of all visible columns
 .Pp
 .It Ic - Ns " (hyphen)"
 hides current column (to unhide, go to

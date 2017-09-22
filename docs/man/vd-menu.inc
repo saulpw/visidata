@@ -1,4 +1,4 @@
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy "disp_none          " No ""
 visible contents of a cell whose value was None
 .It Sy "disp_truncator     " No "…"
@@ -56,11 +56,11 @@ color of formatting exception note
 .It Sy "color_getter_exc   " No "red bold"
 color of computation exception note
 .It Sy "disp_histogram     " No "*"
-
+histogram element character
 .It Sy "disp_histolen      " No "80"
 width of histogram column
-.It Sy "disp_replay_pause  " No "‖"
-
 .It Sy "disp_replay_play   " No "▶"
-
+status indicator for active replay
+.It Sy "disp_replay_pause  " No "‖"
+status indicator for paused replay
 .El

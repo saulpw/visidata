@@ -35,23 +35,7 @@ is a multipurpose tool for exploring, cleaning, editing, and restructuring data.
 Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be saved, documented, and replayed.
 .Nm VisiData No is built on the Sy vdtui No platform.
 .
-.Sh OPTIONS
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.
-.Lo f filetype filetype
-uses loader for
-.Ar filetype
-.No (see Sy SUPPORTED SOURCES Ns )
-instead of file extension
-.
-.Lo y confirm-overwrite F
-overwrites existing files without confirmation 
-.El
-.Bl -tag -width XXXXXXXXXXXXXXXXX
-.It See also Sy MINOR OPTIONS Ns .
-.El
-.
-.Sh REPLAY MODE
+.Ss REPLAY MODE
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .Lo p play cmdlog
 .No replays a saved Ar cmdlog No within the interface
@@ -66,7 +50,7 @@ replays in batch mode (with no interface)
 .No saves final visible sheet to Ar file No as .tsv
 .
 .It Ar field Ns Cm = Ns Ar value
-.No replaces \&"{ Ns Ar field Ns }\&" in Ar cmdlog No with Ar value
+.No replaces \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
 .El
 .
 .Ss Commands During Replay
@@ -78,28 +62,37 @@ executes next row in replaying sheet
 .El
 .
 .Ss GLOBAL COMMANDS
+In most cases, commands that affect 'selected rows' will affect all rows if no rows are selected.
+.Pp
 .so vd-keystrokes.inc
 .
-.Sh MINOR OPTIONS
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Sh OPTIONS
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
-.It Sy -f, --filetype Ns = Ns Ar "filetype   " No ""
+.Lo f filetype filetype
+.No "tsv              "
 uses loader for
 .Ar filetype
-.No (see Sy SUPPORTED SOURCES Ns )
 instead of file extension
 .
-.It Fl y, -confirm-overwrite Ns = Ns Ar "bool" No "F"
-overwrites existing files without confirmation 
+.Lo y confirm-overwrite F
+.No "True             "
+overwrites existing files without confirmation
+.
 .El
 .so vd-cli.inc
 .
 .Ss DISPLAY OPTIONS
-.No Display options can only be set via the Sx Options Sheet No or the Sx config file Ns .
+.No Display options can only be set via the Sx Options Sheet No or a config file (see Sx FILES Ns ).
+.Pp
 .
 .so vd-menu.inc
 .
 .Sh EXAMPLES
+.Dl Nm vd Cm foo.tsv
+.Pp
+.Dl Nm vd Cm -f sqlite bar.db
+.Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
 .
 .Sh FILES
@@ -124,7 +117,3 @@ For example:
 .Nm VisiData
 was conceived and implemented by
 .An Saul Pwanson Aq Mt visidata@saul.pw Ns .
-.
-.Sh LICENSE
-Copyright (c) 2016-2017 Saul Pwanson
-GPL2+

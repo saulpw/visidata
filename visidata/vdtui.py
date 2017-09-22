@@ -206,7 +206,7 @@ globalCommand('$', 'cursorCol.type = currency', 'sets type of current column to 
 globalCommand('%', 'cursorCol.type = float', 'sets type of current column to float')
 globalCommand('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edits name of current column')
 
-globalCommand('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'adjusts width of all columns')
+globalCommand('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'adjusts width of all visible columns')
 
 globalCommand('[', 'rows.sort(key=lambda r,col=cursorCol: col.getTypedValue(r))', 'sorts ascending by current column')
 globalCommand(']', 'rows.sort(key=lambda r,col=cursorCol: col.getTypedValue(r), reverse=True)', 'sorts descending by current column')
