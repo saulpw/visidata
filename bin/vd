@@ -28,7 +28,7 @@ def main():
     parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
     parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
     parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output (as .tsv) at the end of replay')
-    parser.add_argument('-d', '--delay', dest='delay', default=0, help='delay between replayed commands, in seconds')
+    parser.add_argument('-d', dest='delay', default=0, help='delay between replayed commands, in seconds')
 
     for optname, v in vdtui.baseOptions.items():
         name, optval, defaultval, helpstr = v
