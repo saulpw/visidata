@@ -4,7 +4,8 @@ from visidata import *
 class open_zip(Sheet):
     'Provide wrapper around `zipfile` library for opening ZIP files.'
     commands = [
-        Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'loads the entire table into memory')
+        Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'opens this file'),
+        Command('g'+ENTER, 'for r in selectedRows or rows: vd.push(openZipFileEntry(r))', 'opens all [selected] files')
     ]
     columns = AttrColumns('filename file_size date_time compress_size'.split())
 

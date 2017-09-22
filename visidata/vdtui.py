@@ -2296,6 +2296,10 @@ class RepeatFile:
     def __exit__(self, a,b,c):
         pass
 
+    def seek(self, n):
+        assert n == 0, 'RepeatFile can only seek to beginning'
+        self.iter = RepeatFileIter(self)
+
     def __iter__(self):
         return RepeatFileIter(self)
 
