@@ -67,7 +67,7 @@ In most cases, commands that affect 'selected rows' will affect all rows if no r
 .so vd-keystrokes.inc
 .
 .Sh OPTIONS
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
 .Lo f filetype filetype
 .No "tsv              "
@@ -86,15 +86,19 @@ overwrites existing files without confirmation
 .No Display options can only be set via the Sx Options Sheet No or a config file (see Sx FILES Ns ).
 .Pp
 .
-.so vd-menu.inc
+.so vd-opts.inc
 .
 .Sh EXAMPLES
 .Dl Nm vd Cm foo.tsv
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
 .Pp
+.Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
+.Pp
+.Dl Nm vd Cm --play tests/pivot.vd --delay 1 --output tests/pivot.tsv
+.Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
-.
+.Pp
 .Sh FILES
 At the start of every session,
 .Sy VisiData No looks for, in order, Pa $PWD/.visidatarc Ns , Pa $XDG_CONFIG_HOME/visidata/config Ns , or Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents.

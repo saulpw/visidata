@@ -1,4 +1,4 @@
-.Sh Other Commands
+.Ss Other Commands
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .

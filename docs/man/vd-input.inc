@@ -20,7 +20,7 @@
 .It Columns are autodetected from the first 1000 rows (adjustable with Sy --fixed-rows Ns ).
 .El
 .Pp
-.Bl -compact -offset xxx
+.Bl -inset -compact -offset xxx
 .It "  " For these multi-table sources, the first sheet is a directory of tables.
 .It "  " Sy Enter No loads the entire table into memory.
 .El
@@ -31,7 +31,4 @@
 .It Sy xls No (requires Sy xlrd Ns )
 .It Sy hdf5 No (requires Sy h5py Ns )
 .It Sy postgres No (requires Sy psycopg2 Ns ): 
-.Sy postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
-.El
-.Bl -inset -compact -offset xxxxxx
 .El

@@ -35,9 +35,12 @@ To replay a [.vd script](https://github.com/saulpw/visidata/tree/develop/tests) 
 $ vd [<options>] --play <script.vd> [<format>=<value> ...]
 ```
 
-## [User's Reference Manual](http://visidata.org/man/vd)
+## [User Reference Manual](http://visidata.org/man/vd)
+
+The comprehensive user reference is the [man page](http://visidata.org/man/vd), accessible from the terminal with:
 
 ```
+$ export MANPATH=~/.local/man   # PEP370 or wherever installed
 $ man vd
 ```
 
