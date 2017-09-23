@@ -1,9 +1,0 @@
-sheet	col	row	keystrokes	input	comment
-		0	o	sample_data/sample.tsv	open file
-sample	Rep	0	!		toggle this column as a key column
-sample	Total	0	%		set column type to float
-sample	Total	0	+	sum	choose aggregator for this column
-sample	Item	0	W		push a sheet pivoted on the current column
-sample_pivot	Rep	0	C		open Columns for this sheet
-sample_pivot_columns	name	0	]		sort by this column descending
-sample_pivot_columns	name	0	q		quit the current sheet

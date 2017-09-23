@@ -1,0 +1,6 @@
+sheet	col	row	keystrokes	input	comment
+		0	o	sample_data/sample.tsv	open file
+sample	Rep	0	!		pins current column to the left as a key column
+sample	Units	0	#		sets type of current column to int
+sample	Units	0	+	sum	adds aggregator to the current column
+sample	Item	0	W		opens Pivot Table

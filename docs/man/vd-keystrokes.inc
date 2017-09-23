@@ -56,16 +56,15 @@ opens a frozen copy of current sheet with all visible columns evaluated
 .It Ic "  a"
 appends a blank row
 .It Ic "  d  gd"
-deletes current/all selected row(s) and appends to clipboard
+deletes current/all selected row(s) and writes to clipboard
 .It Ic "  y  gy"
 copies current/all selected row(s) to clipboard
 .It Ic "  p"
-pastes clipboard rows after current row
+pastes most recent clipboard rows after current row
 .It Ic " ^Z"
 undoes most recent delete
 .
 .so vdtui-editing.inc
-.El
 .
 .Ss Data Toolkit
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -129,9 +128,8 @@ opens sheet of current row/cell as Python object
 .El
 .Ss METASHEETS
 .Ss Columns Sheet (Shift-C)
-Properties of columns on the source sheet can be changed with standard editing commands
-.No ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.Bl -inset -compact
+.It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -152,7 +150,7 @@ sets type of selected columns to str/int/float/currency/date
 .El
 .
 .Ss Sheets Sheet (Shift-S)
-.Bl -tag -width XXXXXXXXXXXXXXX -compact 
+.Bl -inset -compact 
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -175,7 +173,7 @@ jumps to sheet referenced in current row
 .El
 .
 .Ss Options Sheet (Shift-O)
-.Bl -tag -width XXXXXXXXXXXXXXX -compact 
+.Bl -inset -compact 
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -184,7 +182,7 @@ edits option
 .El
 .
 .Ss Commandlog (Shift-D)
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -196,8 +194,8 @@ replays contents of entire commandlog
 .
 .Ss DERIVED SHEETS
 .Ss Frequency Table (Shift-F)
-.No A Sy Frequency Table No groups rows by one or more columns, and includes summary columns for those with aggregators.
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.Bl -inset -compact
+.It A Sy Frequency Table No groups rows by one or more columns, and includes summary columns for those with aggregators.
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -208,7 +206,7 @@ opens a one-line summary for selected rows
 .El
 .
 .Ss Describe Sheet (Shift-I)
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -221,18 +219,20 @@ opens copy of source sheet with rows described in current cell
 .El
 .
 .Ss Pivot Table (Shift-W)
-Set key column(s) and aggregators on column(s) before pressing Sy Shift-W No on the column to pivot.
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.Bl -inset -compact
+.It Set key column(s) and aggregators on column(s) before pressing Sy Shift-W No on the column to pivot.
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Enter
+Opens sheet of source rows which comprise current pivot cell
 .El
 .Ss Melted Sheet (Shift-M)
-Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
-Opens sheet of source rows which comprise current pivot cell
+.Bl -inset -compact
+.It Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
+.El
 .Ss Python Object Sheet (^X ^Y)
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX

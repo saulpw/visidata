@@ -14,6 +14,9 @@ globalCommand('^U', 'CommandLog.togglePause()', 'pauses/resumes replay')
 globalCommand(' ', 'vd.commandlog.semaphore.release()', 'executes next row in the replaying sheet')
 #globalCommand('KEY_BACKSPACE', 'vd.commandlog.undo()', 'remove last action on commandlog and replay')
 
+
+globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
+
 # not necessary to log movements and scrollers
 nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < > { } / ? n N g/ g?'.split()
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
@@ -30,6 +33,10 @@ def namedlist(objname, fieldnames):
     class NamedListTemplate(list):
         __name__ = objname
         _fields = fieldnames
+        def __init__(self, L=None):
+            if L is None:
+                L = [None for f in fieldnames]
+            super().__init__(L)
 
     for i, attrname in enumerate(fieldnames):
         # create property getter/setter for each field
@@ -74,6 +81,9 @@ class CommandLog(Sheet):
 
         self.sheetmap = {}   # sheet.name -> vs
         self.currentExecRow = None
+
+    def newRow(self):
+        return CommandLogRow()
 
     def reload(self):
         reload_tsv_sync(self)
@@ -174,7 +184,7 @@ class CommandLog(Sheet):
         CommandLog.currentReplay = self
         with Progress(self, len(self.rows)) as prog:
             self.cursorRowIndex = 0
-            while self.cursorRowIndex < len(self.rows)-1:
+            while self.cursorRowIndex < len(self.rows):
                 acquired = CommandLog.semaphore.acquire(timeout=options.delay if not self.paused else None)
                 if acquired or not self.paused:
                     vd().statuses = []

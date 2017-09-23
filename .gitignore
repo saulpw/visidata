@@ -8,5 +8,3 @@ visidata.egg-info/
 *.swo
 *dist
 *_build
-*_static
-*_templates

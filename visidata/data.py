@@ -24,7 +24,7 @@ globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'moves 
 
 globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'opens duplicate sheet with a random population subset of # rows')
 
-globalCommand('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'appends a blank row')
+globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'appends a blank row')
 
 def updateColNames(sheet):
     for c in sheet.visibleCols:
