@@ -537,6 +537,9 @@ class VisiData:
                 if not t.status:
                     t.status = 'ended'
 
+    def refresh(self):
+        Sheet.visibleCols.fget.cache_clear()
+
     def editText(self, y, x, w, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
         v = self.callHook('preedit')[0]
@@ -1021,6 +1024,7 @@ class Sheet:
         except Exception:
             self.vd.exceptionCaught()
 
+        self.vd.refresh()
         return escaped
 
     @property
@@ -1392,7 +1396,7 @@ class Sheet:
         numHeaderRows = 1
         scr.erase()  # clear screen before every re-draw
 
-        Sheet.visibleCols.fget.cache_clear()
+        vd().refresh()
 
         if not self.columns:
             return
