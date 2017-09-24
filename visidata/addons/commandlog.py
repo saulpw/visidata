@@ -7,6 +7,7 @@ from visidata import *
 option('delay', 0.0, 'delay between replayed commands, in seconds')
 option('disp_replay_play', '▶', 'status indicator for active replay')
 option('disp_replay_pause', '‖', 'status indicator for paused replay')
+option('replay_movement', False, 'insert movements during replay')
 
 globalCommand('D', 'vd.push(vd.commandlog)', 'opens Commandlog')
 globalCommand('^D', 'saveSheet(vd.commandlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'saves commandlog to new .vd file')
@@ -156,28 +157,61 @@ class CommandLog(Sheet):
             self.paused = not self.paused
             status('paused' if self.paused else 'resumed')
 
-    def replayOne(self, r):
-        'Replay the command in one given row.'
-        CommandLog.currentReplayRow = r
+    def moveToReplayContext(self, r):
+        'set the sheet/row/col to the values in the replay row.  return sheet'
         if not r.sheet:
-            vs = self  # any old sheet should do
+#            assert not r.col and not r.row
+            return self  # any old sheet should do, row/column don't matter
         else:
             vs = self.getSheet(r.sheet) or error('no sheets named %s' % r.sheet)
 
-            if r.col != vs.cursorCol.name:
-                try:
-                    vcolidx = int(r.col)
-                except ValueError:
-                    vcolidx = getColVisibleIdxByFullName(vs, r.col)
-
-                vs.cursorVisibleColIndex = error('no column %s' % r.col) if vcolidx is None else vcolidx
-
+        if r.row:
             try:
                 rowidx = int(r.row)
             except ValueError:
                 rowidx = getRowIdxByKey(vs, r.row)
 
-            vs.cursorRowIndex = error('no row %s' % r.row) if rowidx is None else rowidx
+            if rowidx is None:
+                error('no row %s' % r.row)
+
+            if options.replay_movement:
+                while vs.cursorRowIndex != rowidx:
+                    vs.cursorRowIndex += 1 if (rowidx - vs.cursorRowIndex) > 0 else -1
+                    while not self.delay(0.5):
+                        pass
+            else:
+                vs.cursorRowIndex = rowidx
+
+        if r.col:
+            try:
+                vcolidx = int(r.col)
+            except ValueError:
+                vcolidx = getColVisibleIdxByFullName(vs, r.col)
+
+            if vcolidx is None:
+                error('no column %s' % r.col)
+
+            if options.replay_movement:
+                while vs.cursorVisibleColIndex != vcolidx:
+                    vs.cursorVisibleColIndex += 1 if (vcolidx - vs.cursorVisibleColIndex) > 0 else -1
+                    while not self.delay(0.5):
+                        pass
+
+                assert vs.cursorVisibleColIndex == vcolidx
+            else:
+                vs.cursorVisibleColIndex = vcolidx
+        return vs
+
+    def delay(self, factor=1):
+        'returns True if delay satisfied'
+        acquired = CommandLog.semaphore.acquire(timeout=options.delay*factor if not self.paused else None)
+        return acquired or not self.paused
+
+    def replayOne(self, r):
+        'Replay the command in one given row.'
+        CommandLog.currentReplayRow = r
+
+        vs = self.moveToReplayContext(r)
 
         vd().keystrokes = r.keystrokes
         escaped = vs.exec_keystrokes(r.keystrokes)
@@ -188,23 +222,24 @@ class CommandLog(Sheet):
             status('replay aborted')
         return escaped
 
-
     def replay_sync(self, live=False):
         'Replay all commands in log.'
         self.sheetmap.clear()
+        self.cursorRowIndex = 0
         CommandLog.currentReplay = self
         with Progress(self, len(self.rows)) as prog:
-            self.cursorRowIndex = 0
             while self.cursorRowIndex < len(self.rows):
-                acquired = CommandLog.semaphore.acquire(timeout=options.delay if not self.paused else None)
-                if acquired or not self.paused:
-                    vd().statuses = []
-                    if self.replayOne(self.cursorRow):
-                        CommandLog.currentReplay = None
-                        return
-                    sync(1 if live else 0)  # expect this thread also if playing live
-                    self.cursorRowIndex += 1
-                    prog.addProgress(1)
+                vd().statuses = []
+                if self.replayOne(self.cursorRow):
+                    CommandLog.currentReplay = None
+                    return
+
+                self.cursorRowIndex += 1
+                prog.addProgress(1)
+
+                sync(1 if live else 0)  # expect this thread also if playing live
+                while not self.delay():
+                    pass
 
         status('replay complete')
         CommandLog.currentReplay = None
