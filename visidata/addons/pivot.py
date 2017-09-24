@@ -38,11 +38,6 @@ class SheetPivot(Sheet):
             aggcols = [(c, aggregators["count"]) for c in self.variableCols]
 
         for col in self.variableCols:
-            c = Column('Total_count',
-                        type=int,
-                        getter=lambda r: len(sum(r[1].values(), [])))
-            self.addColumn(c)
-
             for aggcol, aggregator in aggcols:
                 aggname = '%s_%s' % (aggcol.name, aggregator.__name__)
                 if aggregator.__name__ != 'count':  # already have count above
@@ -60,6 +55,12 @@ class SheetPivot(Sheet):
                                 getter=lambda r,aggcol=aggcol,aggvalue=value: aggregator(aggcol, r[1].get(aggvalue, [])))
                         c.aggvalue = value
                         self.addColumn(c)
+
+            c = Column('Total_count',
+                        type=int,
+                        getter=lambda r: len(sum(r[1].values(), [])))
+            self.addColumn(c)
+
 
     @async
     def reloadRows(self):
