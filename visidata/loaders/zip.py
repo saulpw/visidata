@@ -7,7 +7,12 @@ class open_zip(Sheet):
         Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'opens this file'),
         Command('g'+ENTER, 'for r in selectedRows or rows: vd.push(openZipFileEntry(r))', 'opens all [selected] files')
     ]
-    columns = AttrColumns('filename file_size date_time compress_size'.split())
+    columns = [
+        ColumnAttr('filename'),
+        ColumnAttr('file_size', type=int),
+        ColumnAttr('date_time'),
+        ColumnAttr('compress_size', type=int)
+    ]
 
     def __init__(self, p):
         super().__init__(p.name, p)

@@ -57,6 +57,11 @@ def getColVisibleIdxByFullName(sheet, name):
         if name == c.name:
             return i
 
+def getRowIdxByKey(sheet, keyvals):
+    for i, r in enumerate(sheet.rows):
+        if sheet.keyvals(r) == keyvals:
+            return i
+
 def open_vd(p):
     return CommandLog(p.name, p)
 
@@ -154,19 +159,25 @@ class CommandLog(Sheet):
     def replayOne(self, r):
         'Replay the command in one given row.'
         CommandLog.currentReplayRow = r
-        if r.sheet:
+        if not r.sheet:
+            vs = self  # any old sheet should do
+        else:
             vs = self.getSheet(r.sheet) or error('no sheets named %s' % r.sheet)
 
             if r.col != vs.cursorCol.name:
-                vcolidx = getColVisibleIdxByFullName(vs, r.col)
-                if vcolidx is not None:
-                    vs.cursorVisibleColIndex = vcolidx
-                # delay with simulated movement?
-            vs.cursorRowIndex = int(r.row)
-            # delay if row changed?
+                try:
+                    vcolidx = int(r.col)
+                except ValueError:
+                    vcolidx = getColVisibleIdxByFullName(vs, r.col)
 
-        else:
-            vs = self
+                vs.cursorVisibleColIndex = error('no column %s' % r.col) if vcolidx is None else vcolidx
+
+            try:
+                rowidx = int(r.row)
+            except ValueError:
+                rowidx = getRowIdxByKey(vs, r.row)
+
+            vs.cursorRowIndex = error('no row %s' % r.row) if rowidx is None else rowidx
 
         vd().keystrokes = r.keystrokes
         escaped = vs.exec_keystrokes(r.keystrokes)
