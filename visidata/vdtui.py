@@ -769,7 +769,7 @@ class VisiData:
             if vs in self.sheets:
                 self.sheets.remove(vs)
                 self.sheets.insert(0, vs)
-            elif not vs.rows:  # first time
+            elif vs.rows is None:  # first time
                 self.sheets.insert(0, vs)
                 vs.reload()
                 vs.recalc()  # set up Columns
@@ -818,7 +818,7 @@ class Sheet:
         self.name = name
         self.sources = list(sources)
 
-        self.rows = []           # list of opaque row objects
+        self.rows = None         # list of opaque row objects
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
 
@@ -898,6 +898,8 @@ class Sheet:
         return list((None for c in columns))
 
     def addRow(self, row, index=None):
+        if self.rows is None:
+            self.rows = []
         if index is None:
             self.rows.append(row)
         else:
