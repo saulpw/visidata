@@ -1,0 +1,31 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>VisiData tutorial: {name}</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="manifest" href="site.webmanifest">
+        <link rel="apple-touch-icon" href="icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link rel="stylesheet" type="text/css" href="/css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="/css/main.css">
+        <link rel="stylesheet" type="text/css" href="../demo.css">
+        <link rel="stylesheet" type="text/css" href="../asciinema-player.css" />
+    </head>
+    <body>
+        <h1>VisiData tutorial: {name}</h1>
+        <h2>{question}</h2>
+        <asciinema-player {preview} src="../{name}.json"></asciinema-player>
+
+        <script type="text/javascript" src="../asciinema-player.js"></script>
+
+        <hr/>
+        {breakdown}
+        <hr/>
+
+    </body>
+</html>
