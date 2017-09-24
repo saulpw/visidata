@@ -1,0 +1,50 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>VisiData tutorial: pivot</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="manifest" href="site.webmanifest">
+        <link rel="apple-touch-icon" href="icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link rel="stylesheet" type="text/css" href="/css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="/css/main.css">
+        <link rel="stylesheet" type="text/css" href="../demo.css">
+        <link rel="stylesheet" type="text/css" href="../asciinema-player.css" />
+    </head>
+    <body>
+        <h1>VisiData tutorial: pivot</h1>
+        <h2>Using sample.tsv, how many of each item has been sold by each representative?</h2>
+        <asciinema-player poster="npt:0:09" src="../pivot-asciicast.json"></asciinema-player>
+
+        <script type="text/javascript" src="../asciinema-player.js"></script>
+
+        <hr/>
+        <table class="vd">
+ <tr>
+  <th>#</th>  <th>step</th>  <th>command</th>  <th>input</th>  <th>result</th> </tr>
+ <tr>
+  <td class="num">1</td>  <td class="step">open file</td>  <td class="command">o</td>  <td class="input">sample_data/sample.tsv</td>  <td class="screenshot"><img src="1.png" alt=""/></td>
+ </tr>
+ <tr>
+  <td class="num">2</td>  <td class="step">pins <span class="code">Rep</span> column to the left as a key column</td>  <td class="command">!</td>  <td class="input"></td>  <td class="screenshot"><img src="2.png" alt=""/></td>
+ </tr>
+ <tr>
+  <td class="num">3</td>  <td class="step">sets type of <span class="code">Units</span> column to int</td>  <td class="command">#</td>  <td class="input"></td>  <td class="screenshot"><img src="3.png" alt=""/></td>
+ </tr>
+ <tr>
+  <td class="num">4</td>  <td class="step">adds aggregator to the <span class="code">Units</span> column</td>  <td class="command">+</td>  <td class="input">sum</td>  <td class="screenshot"><img src="4.png" alt=""/></td>
+ </tr>
+ <tr>
+  <td class="num">5</td>  <td class="step">opens Pivot Table</td>  <td class="command">W</td>  <td class="input"></td>  <td class="screenshot"><img src="5.png" alt=""/></td>
+ </tr>
+</table>
+        <hr/>
+
+    </body>
+</html>
+

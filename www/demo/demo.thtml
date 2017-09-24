@@ -19,7 +19,7 @@
     <body>
         <h1>VisiData tutorial: {name}</h1>
         <h2>{question}</h2>
-        <asciinema-player {preview} src="../{name}.json"></asciinema-player>
+        <asciinema-player {preview} src="{name}/{name}-asciicast.json"></asciinema-player>
 
         <script type="text/javascript" src="../asciinema-player.js"></script>
 
