@@ -9,15 +9,15 @@ from .aggregators import *
 from .data import *
 from .clipboard import *
 
-from .addons.freqtbl import *
-from .addons.describe import *
-from .addons.pyobj import *
-from .addons.metasheets import *
-from .addons.pivot import *
-from .addons.tidydata import *
-from .addons.commandlog import *
-from .addons.freeze import *
-from .addons.regex import *
+from .freqtbl import *
+from .describe import *
+from .pyobj import *
+from .metasheets import *
+from .pivot import *
+from .tidydata import *
+from .commandlog import *
+from .freeze import *
+from .regex import *
 
 from .loaders.csv import *
 from .loaders.zip import *
