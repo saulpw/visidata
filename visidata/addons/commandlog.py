@@ -12,7 +12,9 @@ option('replay_movement', False, 'insert movements during replay')
 globalCommand('D', 'vd.push(vd.commandlog)', 'opens Commandlog')
 globalCommand('^D', 'saveSheet(vd.commandlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'saves commandlog to new .vd file')
 globalCommand('^U', 'CommandLog.togglePause()', 'pauses/resumes replay')
-globalCommand(' ', 'vd.commandlog.semaphore.release()', 'executes next row in the replaying sheet')
+globalCommand(' ', 'CommandLog.currentReplay.advance()', 'executes next row in the replaying sheet')
+globalCommand('^K', 'CommandLog.currentReplay.cancel()', 'cancel current replay')
+
 #globalCommand('KEY_BACKSPACE', 'vd.commandlog.undo()', 'remove last action on commandlog and replay')
 
 
@@ -86,7 +88,6 @@ class CommandLog(Sheet):
         self.currentActiveRow = None
 
         self.sheetmap = {}   # sheet.name -> vs
-        self.currentExecRow = None
 
     def newRow(self):
         return CommandLogRow()
@@ -149,13 +150,21 @@ class CommandLog(Sheet):
 
     @classmethod
     def togglePause(self):
-        if not self.currentReplay:
+        if not CommandLog.currentReplay:
             status('no replay in progress')
         else:
             if self.paused:
-                self.semaphore.release()
+                self.advance()
             self.paused = not self.paused
             status('paused' if self.paused else 'resumed')
+
+    def advance(self):
+        CommandLog.semaphore.release()
+
+    def cancel(self):
+        CommandLog.currentReplayRow = None
+        CommandLog.currentReplay = None
+        self.advance()
 
     def moveToReplayContext(self, r):
         'set the sheet/row/col to the values in the replay row.  return sheet'
@@ -229,6 +238,10 @@ class CommandLog(Sheet):
         CommandLog.currentReplay = self
         with Progress(self, len(self.rows)) as prog:
             while self.cursorRowIndex < len(self.rows):
+                if CommandLog.currentReplay is None:
+                    status('replay canceled')
+                    return
+
                 vd().statuses = []
                 if self.replayOne(self.cursorRow):
                     CommandLog.currentReplay = None
