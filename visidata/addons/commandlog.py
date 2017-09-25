@@ -251,8 +251,8 @@ class CommandLog(Sheet):
 
     def getLastArgs(self):
         'Get user input for the currently playing command.'
-        if CommandLog.currentReplay:
-            return CommandLog.currentReplay.cursorRow.input
+        if CommandLog.currentReplayRow:
+            return CommandLog.currentReplayRow.input
         return None
 
     def setLastArgs(self, args):
