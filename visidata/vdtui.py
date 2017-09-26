@@ -988,7 +988,7 @@ class Sheet:
         return self.name
 
     def evalexpr(self, expr, row):
-        return eval(expr, getGlobals(), LazyMapping(self, row))
+        return eval(expr, getGlobals(), LazyMapRow(self, row))
 
     def getCommand(self, keystrokes, default=None):
         k = keystrokes
@@ -1772,7 +1772,7 @@ class ColumnEnum(Column):
         setattr(row, self.name, value or self.default)
 
 
-class LazyMapping:
+class LazyMapRow:
     'Calculate column values as needed.'
     def __init__(self, sheet, row):
         self.row = row
@@ -1787,13 +1787,17 @@ class LazyMapping:
             i = self._keys.index(colid)
             return self.sheet.columns[i].getTypedValue(self.row)
         except ValueError:
+            if colid in ['row', '__row__']:
+                return self.row
+            elif colid in ['sheet', '__sheet__']:
+                return self.sheet
             raise KeyError(colid)
 
 
 class ColumnExpr(Column):
-    def __init__(self, expr):
-        super().__init__(expr)
-        self.expr = expr
+    def __init__(self, name, expr=None):
+        super().__init__(name)
+        self.expr = expr or name
 
     def calcValue(self, row):
         return self.sheet.evalexpr(self.compiledExpr, row)

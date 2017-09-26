@@ -142,18 +142,21 @@ class SheetDict(Sheet):
         else:
             push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
 
-def ColumnSourceAttr(name, source):
-    'Use row as attribute name on given object `source`.'
-    return Column(name, type=anytype,
-        getter=lambda r,b=source: getattr(b,r),
-        setter=lambda s,c,r,v,b=source: setattr(b,r,v))
+class ColumnSourceAttr(Column):
+    'Use row as attribute name on sheet source'
+    def calcValue(self, attrname):
+        return getattr(self.sheet.source, attrname)
+    def setValue(self, attrname, value):
+        return setattr(self.sheet.source, attrname, value)
 
+# rowdef: attrname
 class SheetObject(Sheet):
     commands = [
         Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dives further into Python object'),
         Command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edits contents of current cell'),
         Command('.', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggles whether methods and hidden properties are shown')
     ]
+
     def reload(self):
         self.rows = []
         for r in dir(self.source):
@@ -164,8 +167,11 @@ class SheetObject(Sheet):
 
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
-            ColumnSourceAttr('value', self.source)
+            ColumnSourceAttr('value'),
+            ColumnExpr('docstring', 'value.__doc__')
         ]
+        self.recalc()
+
         self.nKeys = 1
 
 
