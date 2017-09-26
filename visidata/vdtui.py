@@ -925,6 +925,7 @@ class Sheet:
             if c._cachedValues:
                 c._cachedValues.clear()
             c.sheet = self
+            c.name = c._name  # reset _id based on this sheet
 
     def reload(self):
         'Default reloader wraps provided `loader` function'
@@ -1267,6 +1268,7 @@ class Sheet:
                 index = len(self.columns)
             col.sheet = self
             self.columns.insert(index, col)
+            col.name = col._name   # reset column name to set _id once in self.columns
 
     def toggleKeyColumn(self, colidx):
         'Toggle column at given index as key column.'
@@ -1514,11 +1516,12 @@ class Column:
 
     @property
     def name(self):
-        return self._name or self._id or ''
+        return self._name
 
     @name.setter
     def name(self, name):
-        name = name.strip()
+        if isinstance(name, str):
+            name = name.strip()
         if options.force_valid_colnames:
             name = clean_to_id(name)
         self._name = name

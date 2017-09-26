@@ -28,7 +28,9 @@ globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'ap
 
 def updateColNames(sheet):
     for c in sheet.visibleCols:
-        c.name = "_".join(c.getDisplayValue(r) for r in sheet.selectedRows or [sheet.cursorRow])
+        if not c._name:
+            c.name = "_".join(c.getDisplayValue(r) for r in sheet.selectedRows or [sheet.cursorRow])
+
 globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'sets current column name to value in current cell')
 globalCommand('g^', 'updateColNames(sheet)', 'sets visible column names to values in selected rows (or current row)')
 globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'sets current column name to combined values in selected rows (or current row)')
