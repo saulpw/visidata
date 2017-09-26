@@ -15,7 +15,7 @@ from .pyobj import *
 from .metasheets import *
 from .pivot import *
 from .tidydata import *
-from .commandlog import *
+from .cmdlog import *
 from .freeze import *
 from .regex import *
 

@@ -69,7 +69,7 @@ def main():
         sources = []
         for src in inputs:
             vs = openSource(src)
-            vdtui.vd().commandlog.openHook(vs, src)
+            vdtui.vd().cmdlog.openHook(vs, src)
             sources.append(vs)
 
         vdtui.run(*sources)
@@ -81,7 +81,7 @@ def main():
 
     args = parser.parse_args()
     for arg in args.inputs:
-        # parse 'key=value' pairs for formatting commandlog template
+        # parse 'key=value' pairs for formatting cmdlog template
         if '=' in arg:
             k, v = arg.split('=')
             fmtkwargs[k] = v

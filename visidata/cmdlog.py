@@ -9,13 +9,13 @@ option('disp_replay_play', '▶', 'status indicator for active replay')
 option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 
-globalCommand('D', 'vd.push(vd.commandlog)', 'opens Commandlog')
-globalCommand('^D', 'saveSheet(vd.commandlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'saves commandlog to new .vd file')
+globalCommand('D', 'vd.push(vd.cmdlog)', 'opens commandlog')
+globalCommand('^D', 'saveSheet(vd.cmdlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'saves commandlog to new .vd file')
 globalCommand('^U', 'CommandLog.togglePause()', 'pauses/resumes replay')
 globalCommand(' ', 'CommandLog.currentReplay.advance()', 'executes next row in the replaying sheet')
 globalCommand('^K', 'CommandLog.currentReplay.cancel()', 'cancel current replay')
 
-#globalCommand('KEY_BACKSPACE', 'vd.commandlog.undo()', 'remove last action on commandlog and replay')
+#globalCommand('KEY_BACKSPACE', 'vd.cmdlog.undo()', 'remove last action on commandlog and replay')
 
 
 globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
@@ -128,7 +128,7 @@ class CommandLog(Sheet):
         if err:
             self.currentActiveRow[-1] += ' [%s]' % err
 
-        if sheet is not self:  # don't record jumps to commandlog
+        if sheet is not self:  # don't record jumps to cmdlog
             # remove user-aborted commands and simple movements
             if not escaped and self.currentActiveRow.keystrokes not in nonLogKeys:
                 self.addRow(self.currentActiveRow)
@@ -280,10 +280,10 @@ class CommandLog(Sheet):
         x = options.disp_replay_pause if self.paused else options.disp_replay_play
         return ' │ %s %s/%s' % (x, self.progressMade, self.progressTotal)
 
-vd().commandlog = CommandLog('commandlog')
-vd().addHook('preexec', vd().commandlog.beforeExecHook)
-vd().addHook('postexec', vd().commandlog.afterExecSheet)
-vd().addHook('preedit', vd().commandlog.getLastArgs)
-vd().addHook('postedit', vd().commandlog.setLastArgs)
+vd().cmdlog = CommandLog('cmdlog')
+vd().addHook('preexec', vd().cmdlog.beforeExecHook)
+vd().addHook('postexec', vd().cmdlog.afterExecSheet)
+vd().addHook('preedit', vd().cmdlog.getLastArgs)
+vd().addHook('postedit', vd().cmdlog.setLastArgs)
 
 vd().addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'green'))
