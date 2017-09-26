@@ -3,6 +3,7 @@ from visidata import *
 option('pyobj_show_hidden', False, 'show methods and _private properties')
 
 globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'evaluates Python expression and opens sheet for browsing resulting Python object')
+globalCommand('g^X', 'expr = input("exec: ", "expr"); exec(expr, getGlobals())', 'executes Python statement in the global scope')
 
 globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'opens sheet of current row as Python object')
 globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s.row[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'opens sheet of current cell as Python object')
