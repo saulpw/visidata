@@ -86,7 +86,6 @@ class CommandLog(Sheet):
     def __init__(self, name, *args):
         super().__init__(name, *args)
         self.currentActiveRow = None
-        self.rows = []
 
         self.sheetmap = {}   # sheet.name -> vs
 
@@ -119,7 +118,8 @@ class CommandLog(Sheet):
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
         sheetname = '' if keystrokes == 'o' else sheet.name
-        self.currentActiveRow = CommandLogRow([sheetname, sheet.cursorCol.name, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
+        colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+        self.currentActiveRow = CommandLogRow([sheetname, colname, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
@@ -282,6 +282,8 @@ class CommandLog(Sheet):
         return ' │ %s %s/%s' % (x, self.progressMade, self.progressTotal)
 
 vd().cmdlog = CommandLog('cmdlog')
+vd().cmdlog.rows = []  # so it can be added to immediately
+
 vd().addHook('preexec', vd().cmdlog.beforeExecHook)
 vd().addHook('postexec', vd().cmdlog.afterExecSheet)
 vd().addHook('preedit', vd().cmdlog.getLastArgs)
