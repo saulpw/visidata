@@ -154,7 +154,7 @@ class CommandLog(Sheet):
             status('no replay in progress')
         else:
             if self.paused:
-                self.advance()
+                CommandLog.currentReplay.advance()
             self.paused = not self.paused
             status('paused' if self.paused else 'resumed')
 
