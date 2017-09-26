@@ -268,8 +268,8 @@ globalCommand('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'op
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'opens Sheets Sheet')
 globalCommand('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", sheet))', 'opens Columns Sheet')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'opens Options')
-globalCommand('z?', 'vd.push(HelpSheet(name + "_commands", sheet))', 'views VisiData man page')
-globalCommand('KEY_F(1)', 'z?')
+globalCommand('help-commands', 'vd.push(HelpSheet(name + "_commands", sheet))', 'views VisiData man page')
+globalCommand(['KEY_F(1)', 'z?'], 'help-commands')
 
 
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
