@@ -86,6 +86,7 @@ class CommandLog(Sheet):
     def __init__(self, name, *args):
         super().__init__(name, *args)
         self.currentActiveRow = None
+        self.rows = []
 
         self.sheetmap = {}   # sheet.name -> vs
 
@@ -136,7 +137,7 @@ class CommandLog(Sheet):
         self.currentActiveRow = None
 
     def openHook(self, vs, src):
-        self.addRow(CommandLogRow(['', '', 0, 'o', src, 'open file']))
+        self.addRow(CommandLogRow(['', '', '', 'o', src, 'open file']))
 
     def getSheet(self, sheetname):
         vs = self.sheetmap.get(sheetname)
