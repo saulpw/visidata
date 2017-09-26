@@ -1494,7 +1494,6 @@ class Column:
         self.fmtstr = ''      # by default, use str()
         self.type = type      # anytype/str/int/float/date/func
         self.getter = lambda row: row
-        self.full_getter = lambda sheet,col,row: col.getter(row)
         self.setter = None    # setter(sheet,col,row,value)
         self.width = None     # == 0 if hidden, None if auto-compute next time
 
@@ -1578,7 +1577,7 @@ class Column:
             yield v
 
     def calcValue(self, row):
-        return self.full_getter(self.sheet, self, row)
+        return self.getter(row)
 
     def getTypedValue(self, row):
         '''Returns the properly-typed value for the given row at this column.
@@ -1902,14 +1901,20 @@ class TextSheet(Sheet):
             self.addRow((len(self.rows), text))
 
 class ColumnsSheet(Sheet):
+    class ValueColumn(Column):
+        def calcValue(self, srcCol):
+            return srcCol.getDisplayValue(self.sheet.source.cursorRow)
+        def setValue(self, srcCol, val):
+            srcCol.setValue(self.sheet.source.cursorRow, val)
+
     columns = [
-            ColumnAttr('sheet', width=0),
+#            ColumnAttr('sheet', width=0),
+            ColumnAttr('ident', '_id', width=0),
             ColumnAttr('name'),
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals(), default=anytype),
             ColumnAttr('fmtstr'),
-            Column('value', full_getter=lambda self,c,r: r.getDisplayValue(self.source.cursorRow),
-                            setter=lambda s,c,r,v: r.setValue(self.source.cursorRow, v)),
+            ValueColumn('value')
     ]
     nKeys = 1
     colorizers = [
@@ -1941,9 +1946,16 @@ class SheetsSheet(Sheet):
 
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
+
+    class HelpColumn(Column):
+        def calcValue(self, r):
+            cmd = self.sheet.source.getCommand(self.prefix+r[0], None)
+            return cmd[1] if cmd else '-'
+
     columns = [ColumnItem('keystrokes', 0),
                ColumnItem('action', 1),
-               Column('with_g_prefix', full_getter=lambda s,c,r: s.source.getCommand('g'+r[0], (None,'-'))[1]),
+               HelpColumn('with_g_prefix', prefix='g'),
+               HelpColumn('with_z_prefix', prefix='z'),
                ColumnItem('execstr', 2, width=0),
     ]
     nKeys = 1

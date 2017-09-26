@@ -98,8 +98,28 @@ class SheetJoin(Sheet):
                     if not all(combinedRow):
                         self.addRow(combinedRow)
 
+class ColumnConcat(Column):
+    def __init__(self, name, colsBySheet, **kwargs):
+        super().__init__(name, **kwargs)
+        self.colsBySheet = colsBySheet
+
+    def calcValue(self, row):
+        srcSheet, srcRow = row
+        srcCol = self.colsBySheet.get(srcSheet, None)
+        if srcCol:
+            return srcCol.calcValue(srcRow)
+
+    def setValue(self, row, v):
+        srcSheet, srcRow = row
+        srcCol = self.colsBySheet.get(srcSheet, None)
+        if srcCol:
+            srcCol.setValue(srcRow, v)
+        else:
+            error('column not on source sheet')
+
 # rowdef: (Sheet, row)
 class SheetConcat(Sheet):
+    'combination of multiple sheets by row concatenation'
     def reload(self):
         self.rows = []
         for sheet in self.sources:
@@ -117,9 +137,7 @@ class SheetConcat(Sheet):
                     if isinstance(srccol, ColumnExpr):
                         combinedCol = copy(srccol)
                     else:
-                        combinedCol = Column(srccol.name, type=srccol.type,
-                                             full_getter=lambda s,c,r,d=colsBySheet: d[r[0]].getValue(r[1]) if r[0] in d else None,
-                                             setter=lambda s,c,r,v,d=colsBySheet: d[r[0]].setValue(r[1], v) if r[0] in d else error('column not on source sheet'))
+                        combinedCol = ColumnConcat(srccol.name, colsBySheet, type=srccol.type)
                     self.addColumn(combinedCol)
 
                 if srcsheet in colsBySheet:
