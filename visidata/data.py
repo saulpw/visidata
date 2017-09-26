@@ -25,6 +25,24 @@ globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'moves 
 globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'opens duplicate sheet with a random population subset of # rows')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'appends a blank row')
+globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with previous non-null value')
+
+def fillNullValues(col, rows):
+    'Fill null cells in col with the previous non-null value'
+    lastval = None
+    nullfunc = isNullFunc()
+    n = 0
+    for r in rows:
+        val = col.getValue(r)
+        if nullfunc(val):
+            if lastval:
+                col.setValue(r, lastval)
+                n += 1
+        else:
+            lastval = val
+
+    status("filled %d values" % n)
+
 
 def updateColNames(sheet):
     for c in sheet.visibleCols:
