@@ -1516,7 +1516,7 @@ class Column:
 
     @property
     def name(self):
-        return self._name
+        return self._name or ''
 
     @name.setter
     def name(self, name):
