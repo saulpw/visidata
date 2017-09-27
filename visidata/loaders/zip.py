@@ -4,8 +4,8 @@ from visidata import *
 class open_zip(Sheet):
     'Provide wrapper around `zipfile` library for opening ZIP files.'
     commands = [
-        Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'opens this file'),
-        Command('g'+ENTER, 'for r in selectedRows or rows: vd.push(openZipFileEntry(r))', 'opens all [selected] files')
+        Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'open this file'),
+        Command('g'+ENTER, 'for r in selectedRows or rows: vd.push(openZipFileEntry(r))', 'open all selected files')
     ]
     columns = [
         ColumnAttr('filename'),

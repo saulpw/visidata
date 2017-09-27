@@ -1,8 +1,8 @@
 from visidata import *
 from copy import deepcopy
 
-globalCommand("'", 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', 'adds a frozen copy of current column with all cells evaluated')
-globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'opens a frozen copy of current sheet with all visible columns evaluated')
+globalCommand("'", 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated')
+globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated')
 globalCommand("z'", 'cursorCol._cachedValues = collections.OrderedDict(); status("added cache to " + cursorCol.name)', 'add/reset cache for this column')
 globalCommand("gz'", 'for c in visibleCols: c._cachedValues = collections.OrderedDict()', 'add/reset cache for all visible columns')
 globalCommand("zg'", "gz'")

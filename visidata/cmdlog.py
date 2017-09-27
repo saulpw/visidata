@@ -9,10 +9,10 @@ option('disp_replay_play', '▶', 'status indicator for active replay')
 option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 
-globalCommand('D', 'vd.push(vd.cmdlog)', 'opens commandlog')
-globalCommand('^D', 'saveSheet(vd.cmdlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'saves commandlog to new .vd file')
-globalCommand('^U', 'CommandLog.togglePause()', 'pauses/resumes replay')
-globalCommand(' ', 'CommandLog.currentReplay.advance()', 'executes next row in the replaying sheet')
+globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog')
+globalCommand('^D', 'saveSheet(vd.cmdlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save CommandLog to new .vd file')
+globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay')
+globalCommand(' ', 'CommandLog.currentReplay.advance()', 'execute next row in replaying sheet')
 globalCommand('^K', 'CommandLog.currentReplay.cancel()', 'cancel current replay')
 
 #globalCommand('KEY_BACKSPACE', 'vd.cmdlog.undo()', 'remove last action on commandlog and replay')
@@ -72,9 +72,9 @@ def open_vd(p):
 class CommandLog(Sheet):
     'Log of commands for current session.'
     commands = [
-        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replays command in current row'),
-        Command('gx', 'sheet.replay()', 'replays contents of entire commandlog'),
-        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'aborts replay'),
+        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row'),
+        Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog'),
+        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay'),
     ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 

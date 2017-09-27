@@ -1,8 +1,8 @@
 from visidata import *
 
-globalCommand(':', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex"))', 'adds new columns from regex split; # columns determined by example row at cursor')
-globalCommand(';', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex"))', 'adds new column from capture groups of regex; also requires example row')
-globalCommand('*', 'addColumn(regexTransform(cursorCol, input("transform column by regex: ", type="regex")), cursorColIndex+1)', 'regex/subst - replaces regex with subst, which may include backreferences (\\1 etc)')
+globalCommand(':', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex"))', 'add new columns from regex split; # columns determined by example row at cursor')
+globalCommand(';', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex"))', 'add new column from capture groups of regex; also requires example row')
+globalCommand('*', 'addColumn(regexTransform(cursorCol, input("transform column by regex: ", type="regex")), cursorColIndex+1)', 'regex/subst - replace regex with subst, which may include backreferences (\\1 etc)')
 
 option('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 

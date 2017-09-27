@@ -1,9 +1,9 @@
 import math
 
 from visidata import *
-globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'opens Frequency Table grouped on current column')
-globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'opens Frequency Table grouped by all key columns on the source sheet')
-globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda r: "Total")))', 'opens a one-line summary for all selected rows')
+globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column')
+globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet')
+globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda r: "Total")))', 'open a one-line summary for all selected rows')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 80, 'width of histogram column')
@@ -11,7 +11,7 @@ option('disp_histolen', 80, 'width of histogram column')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 ColumnsSheet.commands += [
-    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'opens a Frequency Table grouped on column referenced in current row')
+    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row')
 ]
 
 def getValueOrError(c, r):

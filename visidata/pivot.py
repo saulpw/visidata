@@ -1,6 +1,6 @@
 from visidata import *
 
-globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'opens Pivot Table')
+globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'open Pivot Table')
 
 # rowdef: (tuple(keyvalues), dict(variable_value -> list(rows)))
 class SheetPivot(Sheet):

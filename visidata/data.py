@@ -8,24 +8,24 @@ option('skiplines', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
 
 # slide rows/columns around
-globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slides current column left')
-globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'moves current row down')
-globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'moves current row up')
-globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'moves current column right')
-globalCommand('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'slides current column all the way to the left of sheet')
-globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slides current row to the bottom of sheet')
-globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slides current row all the way to the top of sheet')
-globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slides current column all the way to the right of sheet')
+globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left')
+globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down')
+globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move current row up')
+globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move current column right')
+globalCommand('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'slide current column all the way to the left of sheet')
+globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slide current row to the bottom of sheet')
+globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row all the way to the top of sheet')
+globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet')
 
-globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'moves to the next column with name matching regex')
-globalCommand('r', 'moveRegex(regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'moves to the next row with key matching regex')
-globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'moves to the given column number')
-globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'moves to the given row number')
+globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'move to the next column with name matching regex')
+globalCommand('r', 'moveRegex(regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex')
+globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'move to the given column number')
+globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'move to the given row number')
 
-globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'opens duplicate sheet with a random population subset of # rows')
+globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows')
 
-globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'appends a blank row')
-globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with previous non-null value')
+globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row')
+globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fill null cells in current column with previous non-null value')
 
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'
@@ -49,23 +49,23 @@ def updateColNames(sheet):
         if not c._name:
             c.name = "_".join(c.getDisplayValue(r) for r in sheet.selectedRows or [sheet.cursorRow])
 
-globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'sets current column name to value in current cell')
-globalCommand('g^', 'updateColNames(sheet)', 'sets visible column names to values in selected rows (or current row)')
-globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'sets current column name to combined values in selected rows (or current row)')
+globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set current column name to value in current cell')
+globalCommand('g^', 'updateColNames(sheet)', 'set visible column names to values in selected rows (or current row)')
+globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined values in selected rows (or current row)')
 # gz^ with no selectedRows is same as z^
 
-globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'opens input in VisiData')
-globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'saves current sheet to filename in format determined by extension (default .tsv)')
+globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open input in VisiData')
+globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
 
-globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluates Python expression on current row and displays result on status line')
+globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluate Python expression on current row and display result on status line')
 
-globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'opens new blank sheet with number columns')
+globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with number columns')
 
 globalCommand('gKEY_F(1)', 'help-commands')  # vdtui generic commands sheet
 globalCommand('gz?', 'help-commands')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
-globalCommand('z?', 'with SuspendCurses(): os.system("man vd")', 'launches VisiData manpage')
+globalCommand('z?', 'with SuspendCurses(): os.system("man vd")', 'launch VisiData manpage')
 globalCommand('KEY_F(1)', 'z?')
 
 def newSheet(ncols):

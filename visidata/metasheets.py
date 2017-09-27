@@ -18,7 +18,7 @@ def createJoinedSheet(sheets, jointype=''):
 jointypes = ["inner", "outer", "full", "diff", "append"]
 
 SheetsSheet.commands += [
-        Command('&', 'vd.replace(createJoinedSheet(selectedRows, jointype=chooseOne(jointypes)))', 'merges the selected sheets with visible columns from all, keeping rows accoring to jointype'),
+        Command('&', 'vd.replace(createJoinedSheet(selectedRows, jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype'),
     ]
 
 SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
@@ -26,15 +26,15 @@ SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
 
 ColumnsSheet.commands += [
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
-        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'adds column from concatenating selected source columns'),
-        Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'toggles selected columns as keys on source sheet'),
-        Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hides selected columns on source sheet'),
-        Command('g_', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjusts widths of selected columns on source sheet'),
-        Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'sets type of selected columns to float'),
-        Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'sets type of selected columns to int'),
-        Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'sets type of selected columns to date'),
-        Command('g$', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = currency', 'sets type of selected columns to currency'),
-        Command('g~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = str', 'sets type of selected columns to str'),
+        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'add column from concatenating selected source columns'),
+        Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'toggle selected columns as keys on source sheet'),
+        Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected columns on source sheet'),
+        Command('g_', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected columns on source sheet'),
+        Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'set type of selected columns to float'),
+        Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'set type of selected columns to int'),
+        Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'set type of selected columns to date'),
+        Command('g$', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = currency', 'set type of selected columns to currency'),
+        Command('g~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = str', 'set type of selected columns to str'),
     ]
 
 ColumnsSheet.columns += [

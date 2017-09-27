@@ -1,7 +1,7 @@
 import collections
 from visidata import *
-globalCommand('+', 'addAggregator([cursorCol], chooseOne(aggregators))', 'adds aggregator to the current column')
-globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol, selectedRows or rows))', 'displays result of aggregator over values in selected rows for current column')
+globalCommand('+', 'addAggregator([cursorCol], chooseOne(aggregators))', 'add aggregator to the current column')
+globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol, selectedRows or rows))', 'display result of aggregator over values in selected rows for current column')
 
 aggregators = collections.OrderedDict()
 
@@ -40,7 +40,7 @@ def rowkeys(sheet, row):
 fullAggregator('keymax', anytype, lambda col, rows: rowkeys(col.sheet, max(col.getValueRows(rows))[1]))
 
 ColumnsSheet.commands += [
-    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'adds aggregator to selected source columns'),
+    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'add aggregator to selected source columns'),
 ]
 ColumnsSheet.columns += [
         Column('aggregators',
