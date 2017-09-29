@@ -1,7 +1,7 @@
 sheet	col	row	keystrokes	input	comment
-		0	o	sample_data/sample.tsv	open file
-sample	Units	0	#		set column type to integer
-sample	Units	0	=	Units > 10	add column by expr
-sample	Units > 10	0	|	True	select rows by regex matching this columns
-sample	Units > 10	0	"		push duplicate sheet with refs to selected or all rows
-sample_selectedref	Item	0	F		open frequency table from values in this column
+	sheet	0	o	sample_data/sample.tsv	open input in VisiData
+sample	Units	0	#		set type of current column to int
+sample	Units	0	=	Units > 10	create new column from Python expression, with column names as variables
+sample	Units > 10	0	|	True	select rows matching regex in current column
+sample	Units > 10	0	"		open duplicate sheet with only selected rows
+sample_selectedref	Item	0	F		open Frequency Table grouped on current column

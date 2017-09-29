@@ -1,8 +1,8 @@
 sheet	col	row	keystrokes	input	comment
-describe-through	sheet	0	o	sample_data/birdsdiet.tsv	open local file or url
-birdsdiet	Family	0	|	bird	select rows by regex matching this columns
-birdsdiet	MaxAbund	0	g=	None	set this column in selected rows by expr
-birdsdiet	MaxAbund	0	I		push describe sheet for all numeric columns
-birdsdiet_describe	nulls	1	z^J		unselect rows in this cell on source sheet
-birdsdiet_MaxAbund_nulls	AvgAbund	1	%		set column type to float
-birdsdiet_MaxAbund_nulls	Mass	1	%		set column type to float
+	sheet	0	o	sample_data/birdsdiet.tsv	open input in VisiData
+birdsdiet	Family	0	|	bird	select rows matching regex in current column
+birdsdiet	MaxAbund	0	g=	None	set current column for selected rows to result of Python expression
+birdsdiet	MaxAbund	0	I		open Describe Sheet
+birdsdiet_describe	nulls	1	z^J		open copy of source sheet with rows described in current cell
+birdsdiet_MaxAbund_nulls	AvgAbund	1	%		set type of current column to float
+birdsdiet_MaxAbund_nulls	Mass	1	%		set type of current column to float

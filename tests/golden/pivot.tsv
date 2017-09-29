@@ -1,12 +1,12 @@
-Rep	Pencil_Total_sum	Pen_Total_sum	Pen Set_Total_sum	Desk_Total_sum	Binder_Total_sum
-Jones	363.70	575.36	565.22	0.00	858.76
-Kivell	0.00	0.00	1484.94	625.00	999.50
-Jardine	628.74	0.00	249.50	0.00	1933.95
-Gill	77.40	539.73	0.00	0.00	1132.74
-Sorvino	167.44	151.24	0.00	825.00	139.93
-Andrews	298.65	0.00	0.00	0.00	139.72
-Thompson	63.68	0.00	0.00	0.00	1139.43
-Morgan	449.10	0.00	686.95	0.00	251.72
-Howard	0.00	479.04	0.00	0.00	57.71
-Parent	0.00	299.85	1183.26	0.00	1619.19
-Smith	86.43	0.00	0.00	250.00	1305.00
+Rep	Total_Units_sum	Pencil_Units_sum	Binder_Units_sum	Pen_Units_sum	Desk_Units_sum	Pen Set_Units_sum	Total_count
+Jones	396	130	124	64	0	78	8
+Kivell	193	0	50	0	5	138	4
+Jardine	281	126	105	0	0	50	5
+Gill	213	60	126	27	0	0	5
+Sorvino	142	56	7	76	3	0	4
+Andrews	183	155	28	0	0	0	4
+Thompson	89	32	57	0	0	0	2
+Morgan	173	90	28	0	0	55	3
+Howard	125	0	29	96	0	0	2
+Parent	170	0	81	15	0	74	3
+Smith	156	67	87	0	2	0	3

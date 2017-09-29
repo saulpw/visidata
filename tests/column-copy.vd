@@ -1,9 +1,9 @@
 sheet	col	row	keystrokes	input	comment
-		0	o	sample_data/sample.tsv	open file
-sample	Total	0	%		set column type to float
-sample	Total	0	+	sum	choose aggregator for this column
-sample	Rep	0	F		open frequency table from values in this column
-sample_Rep_freq	sum_Total	0	e	2000	edit this cell [Exception: column cannot be changed]
-sample_Rep_freq	sum_Total	0	'		add a frozen copy of this column
-sample_Rep_freq	sum_Total_frozen	0	^	adj_sum_Total	rename this column
-sample_Rep_freq	adj_sum_Total	0	e	2000.01	edit this cell
+	sheet	0	o	sample_data/sample.tsv	open input in VisiData
+sample	Total	0	%		set type of current column to float
+sample	Total	0	+	sum	add aggregator to the current column
+sample	Rep	0	F		open Frequency Table grouped on current column
+sample_Rep_freq	sum_Total	0	e	2000	edit contents of current cell [Exception: column cannot be changed]
+sample_Rep_freq	sum_Total	0	'		add a frozen copy of current column with all cells evaluated
+sample_Rep_freq	sum_Total_frozen	0	^	adj_sum_Total	edit name of current column
+sample_Rep_freq	adj_sum_Total	0	e	2000.01	edit contents of current cell
