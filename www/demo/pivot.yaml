@@ -1,4 +1,4 @@
 name: pivot
-vd: ../../tests/pivot.vd
+vd: tests/pivot.vd
 preview: poster="npt:0:09"
 question: Using sample.tsv, how many of each item has been sold by each representative?

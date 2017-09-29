@@ -2,6 +2,12 @@
 
 import sys
 import yaml
+
+
+def htmlize(s):
+    return s.replace('\\n', '<br>')
+
+
 # step?, command, [additional] input, result
 def breakdown(rows):
     ret = '<table class="vd">\n'
@@ -18,9 +24,9 @@ def breakdown(rows):
         colname = '<span class="code">%s</span> column' % row[1]
         ret += ' <tr>\n'
         ret += '  <td class="num">%s</td>' % (i+1)
-        ret += '  <td class="step">%s</td>' % (row[5].replace("current column", colname))
-        ret += '  <td class="command">%s</td>' %  row[3]
-        ret += '  <td class="input">%s</td>' %  row[4]
+        ret += '  <td class="step">%s</td>' % (htmlize(row[5]).replace("current column", colname))
+        ret += '  <td class="command">%s</td>' %  htmlize(row[3])
+        ret += '  <td class="input">%s</td>' %  htmlize(row[4])
         ret += '  <td class="screenshot"><img src="%s.png" alt=""/></td>\n' % (i+1)
         ret += ' </tr>\n'
 
