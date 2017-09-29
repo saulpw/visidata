@@ -856,9 +856,12 @@ class Sheet:
 
         for b in [self] + list(self.__class__.__bases__):
             for c in getattr(b, 'colorizers', []):
-                self._colorizers[c.type].append(c)
+                self.addColorizer(c)
 
         self.__dict__.update(kwargs)
+
+    def addColorizer(self, c):
+        self._colorizers[c.type].append(c)
 
     def colorizeRow(self, row):
         return self.colorize(['row'], None, row)
@@ -1031,7 +1034,7 @@ class Sheet:
 
     @property
     def name(self):
-        return self._name
+        return self._name or ''
 
     @name.setter
     def name(self, name):

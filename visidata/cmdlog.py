@@ -117,9 +117,13 @@ class CommandLog(Sheet):
             return  # don't record editlog commands
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
-        sheetname = '' if keystrokes == 'o' else sheet.name
-        colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
-        self.currentActiveRow = CommandLogRow([sheetname, colname, sheet.cursorRowIndex, keystrokes, args, sheet._commands[keystrokes][1]])
+        if keystrokes == 'o':
+            sheetname, colname, rowname = '', '', ''
+        else:
+            sheetname = sheet.name
+            colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+            rowname = sheet.cursorRowIndex
+        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, sheet._commands[keystrokes][1]])
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
