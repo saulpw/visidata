@@ -1,5 +1,5 @@
-.lf 1 /home/anja/git/visidata/_build/vd-pre.1
-.lf 1 /home/anja/git/visidata/_build/vd-skel.1
+.lf 1 /home/saul/git/visidata/_build/vd-pre.1
+.lf 1 /home/saul/git/visidata/_build/vd-skel.1
 .Dd September 20, 2017
 .Dt vd 1 URM
 .Os Linux/MacOS
@@ -66,8 +66,8 @@ executes next row in replaying sheet
 .Ss GLOBAL COMMANDS
 In most cases, commands that affect 'selected rows' will affect all rows if no rows are selected.
 .Pp
-.lf 1 /home/anja/git/visidata/_build/vd-keystrokes.inc
-.lf 1 /home/anja/git/visidata/_build/vdtui-main.inc
+.lf 1 /home/saul/git/visidata/_build/vd-keystrokes.inc
+.lf 1 /home/saul/git/visidata/_build/vdtui-main.inc
 .Ss Keystrokes For The Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " F1   z?"
@@ -83,8 +83,8 @@ quits current sheet
 .It Ic "gq"
 quits all sheets (clean exit)
 .El
-.lf 2 /home/anja/git/visidata/_build/vd-keystrokes.inc
-.lf 1 /home/anja/git/visidata/_build/vdtui-cursor.inc
+.lf 2 /home/saul/git/visidata/_build/vd-keystrokes.inc
+.lf 1 /home/saul/git/visidata/_build/vdtui-cursor.inc
 .Ss "Cursor Movement"
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -113,7 +113,7 @@ moves up/down the current column to the next value
 moves up/down the current column to the next selected row
 .
 .El
-.lf 3 /home/anja/git/visidata/_build/vd-keystrokes.inc
+.lf 3 /home/saul/git/visidata/_build/vd-keystrokes.inc
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "zHome  zEnd"
@@ -142,7 +142,7 @@ scrolls sheet to leftmost/rightmost column
 scrolls current row to top/center/bottom of screen
 .El
 .
-.lf 1 /home/anja/git/visidata/_build/vdtui-column.inc
+.lf 1 /home/saul/git/visidata/_build/vdtui-column.inc
 .Ss Column Manipulation
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -167,7 +167,7 @@ sets type of current column to str/int/float/currency/date
 .It Ic "g=" Ar expr
 .No sets current column for selected rows to result of Python Ar expr
 .El
-.lf 32 /home/anja/git/visidata/_build/vd-keystrokes.inc
+.lf 32 /home/saul/git/visidata/_build/vd-keystrokes.inc
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "z=" Ar expr
 .No evaluates Python Ar expr No on current row and displays result on status line
@@ -188,7 +188,7 @@ opens a frozen copy of current sheet with all visible columns evaluated
 .It Ic "*" Ar regex Ns Sy / Ns Ar subst
 .No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc)
 .El
-.lf 1 /home/anja/git/visidata/_build/vdtui-row.inc
+.lf 1 /home/saul/git/visidata/_build/vdtui-row.inc
 .Ss Row Selection
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -222,7 +222,7 @@ opens duplicate sheet with only selected rows
 .It Ic "g\&""
 opens duplicate sheet with all rows
 .El
-.lf 53 /home/anja/git/visidata/_build/vd-keystrokes.inc
+.lf 53 /home/saul/git/visidata/_build/vd-keystrokes.inc
 .Ss Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -237,7 +237,7 @@ pastes most recent clipboard rows after current row
 .It Ic " ^Z"
 undoes most recent delete
 .
-.lf 1 /home/anja/git/visidata/_build/vdtui-editing.inc
+.lf 1 /home/saul/git/visidata/_build/vdtui-editing.inc
 .
 .It Ic "  e" Ar text
 edits contents of current cell
@@ -278,7 +278,7 @@ sets contents to previous/next in history
 autocompletes input (when available)
 .
 .El
-.lf 68 /home/anja/git/visidata/_build/vd-keystrokes.inc
+.lf 68 /home/saul/git/visidata/_build/vd-keystrokes.inc
 .
 .Ss Data Toolkit
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -300,7 +300,7 @@ opens duplicate sheet with a random population subset of
 .It Ic "z+" Ar aggregator
 .No displays result of Ar aggregator No over values in selected rows for current column
 .El
-.lf 1 /home/anja/git/visidata/_build/vdtui-other.inc
+.lf 1 /home/saul/git/visidata/_build/vdtui-other.inc
 .Ss Other Commands
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -329,7 +329,7 @@ reloads current sheet
 clears cache for current column
 .
 .El
-.lf 90 /home/anja/git/visidata/_build/vd-keystrokes.inc
+.lf 90 /home/saul/git/visidata/_build/vd-keystrokes.inc
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "^P"
@@ -486,23 +486,27 @@ edits contents of current cell
 .It Ic "\&." No (period)
 toggles whether methods and hidden properties are shown
 .El
-.lf 68 /home/anja/git/visidata/_build/vd-skel.1
+.lf 68 /home/saul/git/visidata/_build/vd-skel.1
 .
 .Sh OPTIONS
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
 .Lo f filetype filetype
-.No "tsv              "
+.No "tsv               "
 uses loader for
 .Ar filetype
 instead of file extension
 .
 .Lo y confirm-overwrite F
-.No "True             "
+.No "True              "
 overwrites existing files without confirmation
 .
+.It Cm --diff Ns = Ns Ar base
+.No "None              "
+.No adds colorizer for all sheets against Ar base
+.
 .El
-.lf 1 /home/anja/git/visidata/_build/vd-cli.inc
+.lf 1 /home/saul/git/visidata/_build/vd-cli.inc
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 as passed to codecs.open
@@ -548,6 +552,8 @@ specify file type
 show methods and _private properties
 .It Sy --delay Ns = Ns Ar "float               " No "0.0"
 delay between replayed commands, in seconds
+.It Sy --replay-movement Ns = Ns Ar "bool      " No "False"
+insert movements during replay
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
 maxsplit to pass to regex.split
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
@@ -561,13 +567,13 @@ skipinitialspace passed to csv.reader
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .El
-.lf 84 /home/anja/git/visidata/_build/vd-skel.1
+.lf 88 /home/saul/git/visidata/_build/vd-skel.1
 .
 .Ss DISPLAY OPTIONS
 .No Display options can only be set via the Sx Options Sheet No or a config file (see Sx FILES Ns ).
 .Pp
 .
-.lf 1 /home/anja/git/visidata/_build/vd-opts.inc
+.lf 1 /home/saul/git/visidata/_build/vd-opts.inc
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy "disp_none          " No ""
 visible contents of a cell whose value was None
@@ -634,7 +640,7 @@ status indicator for active replay
 .It Sy "disp_replay_pause  " No "\[u2016]"
 status indicator for paused replay
 .El
-.lf 90 /home/anja/git/visidata/_build/vd-skel.1
+.lf 94 /home/saul/git/visidata/_build/vd-skel.1
 .
 .Sh EXAMPLES
 .Dl Nm vd Cm foo.tsv
@@ -646,6 +652,8 @@ status indicator for paused replay
 .Dl Nm vd Cm --play tests/pivot.vd --delay 1 --output tests/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
+.Pp
+.Dl Nm vd --diff foo.tsv bar.tsv
 .Pp
 .Sh FILES
 At the start of every session,
@@ -663,7 +671,7 @@ For example:
    aggregator('median', median)
 .Ed
 .
-.lf 1 /home/anja/git/visidata/_build/vd-input.inc
+.lf 1 /home/saul/git/visidata/_build/vd-input.inc
 .Sh SUPPORTED SOURCES
 .Bl -inset -compact
 .It Sy tsv No (tab-separated value)
@@ -698,7 +706,7 @@ For example:
 .It Sy hdf5 No (requires Sy h5py Ns )
 .It Sy postgres No (requires Sy psycopg2 Ns ): 
 .El
-.lf 119 /home/anja/git/visidata/_build/vd-skel.1
+.lf 125 /home/saul/git/visidata/_build/vd-skel.1
 .
 .Sh AUTHOR
 .Nm VisiData
