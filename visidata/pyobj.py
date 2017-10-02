@@ -55,20 +55,20 @@ def DictKeyColumns(d):
     'Return a list of Column objects from dictionary keys.'
     return [ColumnItem(k, k) for k in d.keys()]
 
-def SheetList(src, *args, **kwargs):
+def SheetList(name, src, *args, **kwargs):
     'Creates a Sheet from a list of homogenous dicts or namedtuples.'
 
     if not src:
         error('no content')
 
     if isinstance(src[0], dict):
-        return ListOfDictSheet(src, *args, **kwargs)
+        return ListOfDictSheet(name, src, *args, **kwargs)
     elif isinstance(src[0], tuple):
         if getattr(src[0], '_fields', None):  # looks like a namedtuple
-            return ListOfNamedTupleSheet(src, *args, **kwargs)
+            return ListOfNamedTupleSheet(name, src, *args, **kwargs)
 
     # simple list
-    return ListOfPyobjSheet(src, *args, **kwargs)
+    return ListOfPyobjSheet(name, src, *args, **kwargs)
 
 class ListOfPyobjSheet(Sheet):
     commands = [Command(ENTER, 'pyobj-dive')]
