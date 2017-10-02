@@ -2,12 +2,11 @@
 
 A terminal interface for exploring and arranging tabular data.
 
-<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)</a>
-
 ## Dependencies
 
 - OS/X or Linux
 - Python 3.4+
+- python-dateutil
 - other modules may be required for opening particular filetypes
 
 # Install
@@ -35,16 +34,11 @@ To replay a [.vd script](https://github.com/saulpw/visidata/tree/develop/tests) 
 $ vd [<options>] --play <script.vd> [<format>=<value> ...]
 ```
 
-## [User Reference Manual](http://visidata.org/man/vd)
+## [Documentation](http://visidata.org/man/vd)
 
-The comprehensive user reference is the [man page](http://visidata.org/man/vd), accessible from the terminal with:
+`F1` (or `z?` if `F1` not available) will launch the [man page](http://visidata.org/man/vd), which has a comprehensive quick reference guide, including a list of all commands and options.
 
-```
-$ export MANPATH=~/.local/man   # PEP370 or wherever installed
-$ man vd
-```
-
-The manual includes a list of all commands and options.  A few interesting commands:
+A few interesting commands:
 
 * `Shift-F` pushes a frequency analysis of the current column
 * `=` creates a new column from the given Python expression (use column names to refer to their contents)
@@ -69,7 +63,6 @@ Other workflows should be created as separate [apps using vdtui](docs/architectu
 
 - [r/visidata](https://www.reddit.com/r/visidata/)
 - [#visidata]() on freenode.net
-- [mailing list]()
 
 ## License
 
