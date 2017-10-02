@@ -558,7 +558,7 @@ class VisiData:
         try:
             k = scr.get_wch()
             self.drawRightStatus(scr, vs or self.sheets[0]) # continue to display progress %
-        except Exception:
+        except curses.error:
             return ''  # curses timeout
 
         if isinstance(k, str):
@@ -2012,6 +2012,8 @@ def _clipdraw(scr, y, x, s, attr, w):
         s, dispw = clipstr(str(s), w)
         scr.addstr(y, x, disp_column_fill*w, attr)
         scr.addstr(y, x, s, attr)
+    except EscapeException as e:  # user aborted
+        raise
     except Exception as e:
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
 #                ).with_traceback(sys.exc_info()[2])
@@ -2046,7 +2048,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         while not ret:
             try:
                 ret = scr.get_wch()
-            except _curses.error:
+            except curses.error:
                 pass
 
         return ret
