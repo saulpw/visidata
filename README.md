@@ -4,51 +4,40 @@ A terminal interface for exploring and arranging tabular data.
 
 ## Dependencies
 
-- OS/X or Linux
+- Linux or OS/X
 - Python 3.4+
 - python-dateutil
-- other modules may be required for opening particular filetypes
+- other modules may be required for opening particular data sources
 
-# Install
+## Install
 
 ```
 $ pip3 install visidata
 ```
 
-# Run
+## Run
 
 ```
 $ vd [<options>] <input> ...
 $ <command> | vd [<options>]
 ```
 
-Unknown filetypes are by default viewed with a text browser.  Use `-f <filetype>` to force a particular filetype.  VisiData supports tsv, csv, xlsx, hdf5, sqlite, and more.
+VisiData supports tsv, csv, xlsx, hdf5, sqlite, and more.
+Use `-f <filetype>` to force a particular filetype.
 
-VisiData supports 256-color terminals.  Use [`vdcolor`](github.com/saulpw/visidata/stable/bin/vdcolor) to browse the available colors.
+## Documentation
 
-## Replay Script
+* Quick reference: `F1` (or `z?`) within `vd` will open the man page ([online version](http://visidata.org/man)), which has a list of all commands and options.
+* [visidata.org](http://visidata.org) has [tours](http://visidata.org/tour) and a [Developer's Guide](http://visidata.org/dev)
 
-To replay a [.vd script](https://github.com/saulpw/visidata/tree/develop/tests) (saved previously with `^D`), which may be parameterized with Python string formatting `{field}`s:
+## Support
 
-```
-$ vd [<options>] --play <script.vd> [<format>=<value> ...]
-```
-
-## [Documentation](http://visidata.org/man/vd)
-
-`F1` (or `z?` if `F1` not available) will launch the [man page](http://visidata.org/man/vd), which has a comprehensive quick reference guide, including a list of all commands and options.
-
-A few interesting commands:
-
-* `Shift-F` pushes a frequency analysis of the current column
-* `=` creates a new column from the given Python expression (use column names to refer to their contents)
-* `;` creates new columns from the match groups of the given regex
-
-# Developers
+- [r/visidata](https://www.reddit.com/r/visidata/) on reddit
+- [#visidata]() on freenode.net
 
 If something doesn't appear to be working right, please create [an issue on Github](https://github.com/saulpw/visidata/issues).  Include the full stack trace shown with `Ctrl-e`.
 
-To contribute a bugfix or a loader for another file format, fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls).  Here is the [developer documentation for loaders](http://visidata.org/dev#loaders).
+To contribute a bugfix or other code, fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls).
 
 ## Other vdtui projects
 
@@ -59,10 +48,6 @@ The core `vdtui.py` can be used to quickly create efficient terminal workflows.
 
 Other workflows should be created as separate [apps using vdtui](docs/architecture.rst).  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv).
 
-## Community
-
-- [r/visidata](https://www.reddit.com/r/visidata/)
-- [#visidata]() on freenode.net
 
 ## License
 
@@ -73,4 +58,4 @@ Other VisiData components, including the main `vd` application, addons, loaders,
 ## Credits
 
 VisiData was created by Saul Pwanson `<visidata@saul.pw>`.
-Thanks to @anjakefala for test and release support, to @databranner for documentation, and to those wonderful users who contribute feedback and in any form, for helping to make VisiData the awesome tool that it is.
+Thanks to @anjakefala for test and release support, to @databranner for documentation, and to those wonderful users who contribute feedback in any form, for helping to make VisiData the awesome tool that it is.

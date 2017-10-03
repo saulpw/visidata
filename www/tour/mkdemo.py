@@ -9,21 +9,25 @@ def htmlize(s):
 
 # step?, command, [additional] input, result
 def body(rows, meta):
-    ret = '<h2>{question}</h2>\n'.format(question=meta['question']) 
+    ret = '<section id="hero">'
+    ret += '<h2>{question}</h2>\n'.format(question=meta['question']) 
 
     # Add asciinema video
     ret += '<asciinema-player id="player" {preview} src="{name}-asciicast.json"></asciinema-player>\n'.format(preview=meta['preview'], name=meta['name'])
     ret += '<script type="text/javascript" src="../asciinema-player.js"></script>\n'
+    ret += '</section>'
     ret += '<hr/>\n'
+
+    ret += '<section id="feature">'
 
     # Add screenshot tutorial
     ret += '<table class="vd">\n'
     ret += ' <tr>\n'
     ret += '  <th>#</th>'
-    ret += '  <th>step</th>'
+    ret += '  <th>%s</th>' % meta.get('workflow', '')
+#    ret += '  <th>step</th>'
     ret += '  <th>command</th>'
     ret += '  <th>input</th>'
-    ret += '  <th>result</th>'
     ret += ' </tr>\n'
     for i, row in enumerate(rows[1:]):
         colname = '<span class="code">%s</span> column' % row[1]
@@ -32,12 +36,11 @@ def body(rows, meta):
         ret += '  <td class="step">%s</td>' % (htmlize(row[5]).replace("current column", colname))
         ret += '  <td class="command">%s</td>' %  htmlize(row[3])
         ret += '  <td class="input">%s</td>' %  htmlize(row[4])
-        #ret += '  <td class="screenshot"><img src="%s.png" alt=""/></td>\n' % (i+1)
 
         ret += ' </tr>\n'
     ret += '</table>\n'
-    ret += '<hr/>\n'
-    
+    ret += '</section>'
+
     return ret
 
 

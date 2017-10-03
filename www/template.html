@@ -11,15 +11,31 @@
         <link rel="apple-touch-icon" href="icon.png">
         <!-- Place favicon.ico in the root directory -->
 
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="/normalize.css">
         <link rel="stylesheet" type="text/css" href="/main.css">
+        <link rel="stylesheet" type="text/css" href="/tour/demo.css">
+        <link rel="stylesheet" type="text/css" href="/tour/asciinema-player.css">
         {head}
 
     </head>
     <body>
-        <h1>{title}</h1>
+     <section id="nav">
+      <nav>
+          <a href="http://visidata.org/"><img class="visidata-logo" src="/images/vdlogo.svg" alt="Logo" /></a>
+       <h2><a href="/tour">tours</a></h2>
+       <h2><a href="/man">manpage</a></h2>
+       <h2><a href="https://github.com/saulpw/visidata/issues">issues</a></h2>
+       <h2><a href="https://github.com/saulpw/visidata">github</a></h2>
+       <!--h2><a href="/vdtui">vdtui</a></h2-->
+      </nav>
+     </section>
 
         {body}
+
+     <section id="footer">
+        VisiData © 2017 <a href="saul.pw">saul.pw</a>, available on <a href="https://github.com/saulpw/visidata">Github</a> as <a href="https://github.com/saulpw/visidata/blob/stable/LICENSE">open source</a>
+     </section>
 
     </body>
 </html>
