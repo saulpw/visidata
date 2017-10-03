@@ -899,7 +899,7 @@ class Sheet:
                 yield i
 
     def newRow(self):
-        return list((None for c in columns))
+        return list((None for c in self.columns))
 
     def addRow(self, row, index=None):
         if index is None:
