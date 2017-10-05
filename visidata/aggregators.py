@@ -52,6 +52,7 @@ def addAggregator(cols, aggr):
     for c in cols:
         if not hasattr(c, 'aggregators'):
             c.aggregators = []
-        c.aggregators += [aggr]
+        if aggr not in c.aggregators:
+            c.aggregators += [aggr]
 
 addGlobals(globals())
