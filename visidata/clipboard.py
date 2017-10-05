@@ -4,12 +4,6 @@ from visidata import *
 # adds vd.clipvalue and vd.cliprows
 # vd.cliprows = [(source_sheet, source_row_idx, source_row)]
 
-globalCommand('^Z', 's,i,r = clipboard.pop(); s.rows.insert(i, r)', 'undo last delete on original sheet')
-globalCommand('^Z', '''
-for s,i,r in vd.cliprows: s.rows.insert(i, r)
-vd.cliprows.clear()
-''', 'undo all deletes on clipboard')
-
 globalCommand('y', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]', 'copy current row to clipboard')
 globalCommand('d', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', 'delete current row and move it to clipboard')
 globalCommand('p', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row')
