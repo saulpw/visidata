@@ -70,9 +70,9 @@ globalCommand('KEY_F(1)', 'z?')
 
 def openManPage():
     import subprocess
-    from pkg_resources import resource_stream
+    from pkg_resources import resource_filename
     with SuspendCurses():
-        subprocess.run(['man', '--local-file', '-'], stdin=resource_stream(__name__, 'man/vd.1'))
+        os.system(' '.join(['man', '--local-file', resource_filename(__name__, 'man/vd.1')]))
 
 def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
