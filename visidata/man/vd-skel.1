@@ -1,5 +1,5 @@
-.Dd September 20, 2017
-.Dt vd 1 URM
+.Dd October 5, 2017
+.Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
 .\" Long option with arg: .Lo f filetype format
@@ -24,8 +24,8 @@
 .Nm vd
 .Op Ar options
 .Cm --play Ar cmdlog
-.Op Cm --batch
 .Op Cm -d Ar delay
+.Op Cm --batch
 .Op Cm -o Ar output
 .Op Ar field Ns Cm = Ns Ar value No ...
 .
@@ -36,7 +36,7 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .Nm VisiData No is built on the Sy vdtui No platform.
 .
 .Ss REPLAY MODE
-.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXX -compact
 .Lo p play cmdlog
 .No replays a saved Ar cmdlog No within the interface
 .
@@ -49,6 +49,8 @@ replays in batch mode (with no interface)
 .Lo o output file
 .No saves final visible sheet to Ar file No as .tsv
 .
+.It Sy --replay-movement= Ns Ar bool
+.No toggles Sy --play No to move cursor cell-by-cell
 .It Ar field Ns Cm = Ns Ar value
 .No replaces \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
 .El
