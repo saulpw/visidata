@@ -113,35 +113,19 @@ class SheetDict(Sheet):
     ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.dictOfList = False
 
     def reload(self):
         self.columns = [ColumnItem('key', 0)]
         self.rows = list(list(x) for x in self.source.items())
-        if self.rows and isinstance(self.rows[0][1], list):
-            self.columns.extend(DictKeyColumns(self.rows[0]))
-            self.dictOfList = True
-        else:
-            self.columns.append(ColumnItem('value', 1))
-            self.dictOfList = False
+        self.columns.append(ColumnItem('value', 1))
 
     def edit(self):
-        if self.dictOfList:
-            if self.cursorColIndex > 0:
-                self.source[self.cursorRow[0]][self.cursorColIndex-1] = self.editCell(self.cursorColIndex)
-                self.cursorRowIndex += 1
-                self.reload()
-        else:
-            self.source[self.cursorRow[0]][1] = self.editCell(1)
-            self.cursorRowIndex += 1
-            self.reload()
+        self.source[self.cursorRow[0]][1] = self.editCell(1)
+        self.cursorRowIndex += 1
+        self.reload()
 
     def dive(self):
-        if self.dictOfList:
-            if self.cursorColIndex > 0:
-                push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[self.cursorColIndex-1])
-        else:
-            push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
+        push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
 
 class ColumnSourceAttr(Column):
     'Use row as attribute name on sheet source'
