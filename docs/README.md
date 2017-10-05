@@ -2,10 +2,6 @@
 
 ## User Guides
 
-* [README](https://visidata.readthedocs.io/en/stable/user-guide.html), an effective quickstart guide
+* [man](visidata.org/man), VisiData's manpage
 
-* [Tours](https://visidata.readthedocs.io/en/stable/tours.html)
-
-## Developer Guides
-
-* [Architecture](https://visidata.readthedocs.io/en/stable/architecture.html)
+* [tours of workflows](visidata.org/tour)

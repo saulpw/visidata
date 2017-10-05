@@ -3,7 +3,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-d <delay>] [-o <output>] [field=value ...]
 
-__version__ = 'saul.pw/VisiData v0.97pre'
+__version__ = 'saul.pw/VisiData v0.97'
 
 import os
 from visidata import *

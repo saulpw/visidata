@@ -1,17 +1,91 @@
 # VisiData version history
 
-## Unreleased
-
-- Move ~!@#$%^ column commands back into vdtui
-- Move g[ and g] also into vdtui
-- Remove TAB/Shift-TAB sheet cycling
-- `gh` moves cursor to leftmost column (instead of leftmost non-key column)
-- min_memory_mb now set to 100 by default.  If `free` reports less memory, loading (or any async task) will be automatically aborted to prevent thrashing.
-- theme options removed as CLI arguments (still available for .visidatarc or apps)
-- fixed-column detector
-- `'` appends frozen column
-- renamed toplevel command() to globalCommand(); removed Sheet.command(); sheet commands now specified in Sheet.commands list of Command() objects at class level
-- setter API now (sheet,col,row,value)
+## 0.97 (2017-09-17)
+- Features
+    - [replay]
+        - move vdplay into vd --play
+        - -p --play now replays scripts live
+        - --delay interspaces replay by delay seconds
+        - --batch to replay without interface
+        - --output to save at end of replay
+        - --replay-movement=True has --play move the cursor cell-by-cell
+        - -y --confirm-overwrite=False
+        - replay scripts can be strformatted with field=value
+        - add ^U command to pause/resume playback
+        - add ^K to cancel replay
+        - add Space command to go to next step of replay while paused
+    - [global]
+        - remap toggle to 't' (was Space)
+        - remap ^Y to push sheet of cursorRow
+        - 'A' creates new sheet with N empty columns
+        - remap 'r' to regex search of row key
+        - add zr/zc to go to row/col number
+        - F1/z? now launches man page
+        - gF1/gz? now launches commands sheet
+        - add `f` command to fill null values down current column
+        - add Del/gDel to set value(s) to None
+        - remove TAB/Shift-TAB sheet cycling
+        - add 'z=' to show computed expression over current row
+        - z' adds cache to current column (gz' for all columns)
+        - `gh` moves cursor to leftmost column (instead of leftmost non-key column)
+    - [aggregators]
+        - allow multiple aggregators
+        - 'g+ adds an aggregator to selected columns on columns sheets
+        - sets the exact set of aggregators on the column sheet with 'e'/'ge'
+        - 'z+' displays result of aggregation over selected rows for current column on status
+        - rework aggregators so multiple aggregators can be set
+    - [sheets sheet]
+        - '&' on Sheets sheet is now sole join sheet command; jointype is input directly
+        - add sheet concat
+    - [columns sheet]
+        - remap ~!@#$%^ on Columns sheet to behave like they do on other sheets
+        - add g prefix to ~!@#$%^ to operate on all 'selected rows' on Columns sheet (thus modifying column parameters on source sheet)
+    - [textsheet]
+        - add 'w' command on TextSheets to toggle wrap
+    - add z^ command to set current column name to current cell value
+    - add gz^ to set current column name to cell values in selected rows
+    - [cmdlog]
+        - editlog renamed to cmdlog
+        - cmdlog has a new format which minimises recordings of movement commands
+        - '^D' now saves cmdlog sheet
+    - [pivot]
+        - zEnter pushes this cell; Enter pushes whole row
+    - [describe]
+        - add DescribeSheet with 'I' command for viewing descriptive statistics
+        - add zs/zu/zt/zEnter commands to engage with rows on source sheet which are being described in current cell of describe sheet
+    - [frequency]
+        - 'zF' provides summary aggregation
+    - [metasheets]
+        - add hidden source column to metasheets
+        - ^P view status history
+    - [loaders]
+        - add 'postgres' schema for simple loader from postgres:// url
+        - add gEnter for .zip file mass open
+        - add 'fixed' filetype to use fixed column detector
+    - [clipboard]
+        - remove `B` clipboard sheet
+        - rework all d/y/p commands for only one buffer
+        - remove g^Z and gp
+    - [options]
+        - remove -d debug option
+        - add --diff to add colorizer against base sheet
+            - diffs a pair of tsvs cell-by-cell
+        - theme options removed as CLI arguments (still available for .visidatarc or apps)
+        - `'` appends frozen column
+        - rename and reorder options
+- Community
+    - [docs]
+        - replace .rst userguide with VisiData [man page](http://visidata.org/man)
+    - [visidata.org]
+        - update index.html
+        - automate creation of tour pages from tours.vd
+            - tours will be played and recorded using asciinema
+            - then compiled into a .html with mkdemo.py for http://visidata.org/tour
+        - upload html version of manpage
+- Internals
+    - renamed toplevel command() to globalCommand(); removed Sheet.command(); sheet commands now specified in Sheet.commands list of Command() objects at class level
+    - setter API now (sheet,col,row,value)
+    - move `visidata/addons/*.py` into toplevel package
 
 ## 0.96 (2017-08-21)
 - data can be piped through stdin
