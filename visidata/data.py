@@ -65,8 +65,14 @@ globalCommand('gKEY_F(1)', 'help-commands')  # vdtui generic commands sheet
 globalCommand('gz?', 'help-commands')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
-globalCommand('z?', 'with SuspendCurses(): os.system("man vd")', 'launch VisiData manpage')
+globalCommand('z?', 'openManPage()', 'launch VisiData manpage')
 globalCommand('KEY_F(1)', 'z?')
+
+def openManPage():
+    import subprocess
+    from pkg_resources import resource_stream
+    with SuspendCurses():
+        subprocess.run(['man', '--local-file', '-'], stdin=resource_stream(__name__, 'man/vd.1'))
 
 def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
