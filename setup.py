@@ -6,7 +6,7 @@ from setuptools import setup
 __version__ = '0.97'
 
 #manpath = "/usr/share/man/man1"
-manpath = "man/man1"
+#manpath = "man/man1"
 
 setup(name='visidata',
       version=__version__,
@@ -21,9 +21,9 @@ setup(name='visidata',
       include_package_data=True,
       scripts=['bin/vd'],
       py_modules = ['visidata'],
-      packages=['visidata'],
-      #package_data={'':['docs/man/vd.1']},
-      data_files=[(manpath,['docs/man/vd.1.gz'])],
+      packages=['visidata',  'visidata.loaders'],
+      package_data={'': ['man/vd.1']},
+      #data_files=[(manpath,['_build/vd.1.gz'])],
       license='GPLv3',
       classifiers=[
           'Development Status :: 4 - Beta',
@@ -45,9 +45,9 @@ setup(name='visidata',
                 'curses csv hdf5 h5 xlsx'),
       )
 
-try:
-    import os
-    import stat
-    os.chmod(os.path.join(manpath, 'vd.1'), stat.S_IRUSR|stat.S_IRGRP|stat.S_IROTH)
-except:
-    print("could not install manpage")
+#try:
+#    import os
+#    import stat
+#    os.chmod(os.path.join(manpath, 'vd.1'), stat.S_IRUSR|stat.S_IRGRP|stat.S_IROTH)
+#except:
+#    print("could not install manpage")
