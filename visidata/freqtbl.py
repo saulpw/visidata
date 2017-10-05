@@ -65,8 +65,8 @@ class SheetFreqTable(Sheet):
                          ]
         self.columns.extend(aggregatedCols)
 
-        if aggregatedCols:  # hide count/percent/histogram if aggregations added
-            for c in self.columns[self.nKeys:self.nKeys+3]:
+        if aggregatedCols:  # hide percent/histogram if aggregations added
+            for c in self.columns[self.nKeys+1:self.nKeys+3]:
                 c.width = 0
 
 
@@ -153,6 +153,7 @@ class SheetFreqTable(Sheet):
                 rowidx[v] = histrow
                 self.addRow(histrow)
             histrow[1].append(r)
+            self.largest = max(self.largest, len(histrow[1]))
 
         self.rows.sort(key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
 
@@ -167,5 +168,8 @@ class SheetFreqTable(Sheet):
 #        else:
         self.discreteBinning()
 
-        self.largest = len(self.rows[0][1])+1
+        # automatically add cache to all columns now that everything is binned
+        for c in self.visibleCols:
+            c._cachedValues = collections.OrderedDict()
+
 

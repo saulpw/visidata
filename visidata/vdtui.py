@@ -1272,6 +1272,7 @@ class Sheet:
             col.sheet = self
             self.columns.insert(index, col)
             col.name = col._name   # reset column name to set _id once in self.columns
+            return col
 
     def toggleKeyColumn(self, colidx):
         'Toggle column at given index as key column.'

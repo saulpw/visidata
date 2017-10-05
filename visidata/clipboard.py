@@ -14,8 +14,8 @@ globalCommand('y', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]', 'copy c
 globalCommand('d', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', 'delete current row and move it to clipboard')
 globalCommand('p', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row')
 
-globalCommand('gd', 'vd.cliprows = list((sheet, i, r) for i, r in enumerate(rows) if sheet.isSelected(r)); deleteSelected()', 'delete all selected rows and move them to clipboard')
-globalCommand('gy', 'vd.cliprows = list((sheet, i, r) for i, r in enumerate(rows) if sheet.isSelected(r))', 'copy all selected rows to clipboard')
+globalCommand('gd', 'vd.cliprows = list((sheet, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', 'delete all selected rows and move them to clipboard')
+globalCommand('gy', 'vd.cliprows = list((sheet, i, r) for i, r in enumerate(selectedRows))', 'copy all selected rows to clipboard')
 
 globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy this cell to clipboard')
 globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value')
