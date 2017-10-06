@@ -1,2 +1,2 @@
 include README.md
-recursive-include vd.1
+include visidata/man/vd.1

@@ -1,6 +1,6 @@
 # VisiData version history
 
-## 0.97 (2017-09-17)
+## 0.97 (2017-10-05)
 - Features
     - [replay]
         - move vdplay into vd --play
