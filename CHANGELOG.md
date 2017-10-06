@@ -22,9 +22,11 @@
         - add zr/zc to go to row/col number
         - F1/z? now launches man page
         - gF1/gz? now launches commands sheet
-        - add `f` command to fill null values down current column
+        - add `f` command to fill empty cells with the content of a non-empty cell up the current column
         - add Del/gDel to set value(s) to None
         - remove TAB/Shift-TAB sheet cycling
+        - add z^ command to set current column name to current cell value
+        - add gz^ to set current column name to cell values in selected rows
         - add 'z=' to show computed expression over current row
         - z' adds cache to current column (gz' for all columns)
         - `gh` moves cursor to leftmost column (instead of leftmost non-key column)
@@ -42,8 +44,6 @@
         - add g prefix to ~!@#$%^ to operate on all 'selected rows' on Columns sheet (thus modifying column parameters on source sheet)
     - [textsheet]
         - add 'w' command on TextSheets to toggle wrap
-    - add z^ command to set current column name to current cell value
-    - add gz^ to set current column name to cell values in selected rows
     - [cmdlog]
         - editlog renamed to cmdlog
         - cmdlog has a new format which minimises recordings of movement commands

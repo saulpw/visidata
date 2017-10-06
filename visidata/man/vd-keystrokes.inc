@@ -2,8 +2,6 @@
 .so vdtui-cursor.inc
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic "zHome  zEnd"
-moves to top/bottom row and leftmost/rightmost column
 .Pp
 .It Ic " c" Ar regex
 .No moves to the next column with name matching Ar regex
@@ -19,11 +17,6 @@ slides current row/column all the way to the left/bottom/top/right of sheet
 .Pp
 .It Ic "zh  zj  zk  zl"
 scrolls one left/down/up/right
-.It Ic "zH          zL"
-moves cursor one page left/right
-.It Ic "zs          ze"
-scrolls sheet to leftmost/rightmost column
-.Pp
 .It Ic "  zt  zz  zb  "
 scrolls current row to top/center/bottom of screen
 .El
@@ -35,6 +28,10 @@ scrolls current row to top/center/bottom of screen
 .Pp
 .It Ic "g^"
 sets names of all visible columns to contents of current row
+.It Ic "z^"
+sets name of current column to contents of current cell
+.It Ic "gz^"
+sets name of current column to combined contents of current cell in selected rows
 .Pp
 .It Ic " '" Ns " (tick)"
 adds a frozen copy of current column with all cells evaluated
@@ -47,7 +44,7 @@ opens a frozen copy of current sheet with all visible columns evaluated
 .It Ic "\&;" Ar regex
 .No adds new columns from capture groups of Ar regex Ns ; also requires example row
 .It Ic "*" Ar regex Ns Sy / Ns Ar subst
-.No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc)
+.No replaces Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc)
 .El
 .so vdtui-row.inc
 .Ss Editing Rows and Cells
@@ -61,8 +58,8 @@ deletes current/all selected row(s) and writes to clipboard
 copies current/all selected row(s) to clipboard
 .It Ic "  p"
 pastes most recent clipboard rows after current row
-.It Ic " ^Z"
-undoes most recent delete
+.It Ic "  f"
+fills null cells in current column with content of non-null cells up the current column
 .
 .so vdtui-editing.inc
 .
@@ -203,6 +200,9 @@ replays contents of entire commandlog
 groups by all key columns on source sheet
 .It Ic zF
 opens a one-line summary for selected rows
+.It (sheet-specific commands)
+.It Ic " s   t   u"
+selects/toggles/unselects these entries in source sheet
 .El
 .
 .Ss Describe Sheet (Shift-I)
@@ -224,8 +224,10 @@ opens copy of source sheet with rows described in current cell
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Enter
-Opens sheet of source rows which comprise current pivot cell
+.It Ic " Enter"
+opens sheet of source rows which comprise current pivot row
+.It Ic "zEnter"
+opens sheet of source rows which comprise current pivot cell
 .El
 .Ss Melted Sheet (Shift-M)
 .Bl -inset -compact

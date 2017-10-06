@@ -30,4 +30,6 @@ sorts ascending/descending by all key columns
 opens duplicate sheet with only selected rows
 .It Ic "g\&""
 opens duplicate sheet with all rows
+.It Ic "gz\&""
+opens duplicate sheet with deepcopy of selected rows
 .El

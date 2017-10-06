@@ -31,9 +31,9 @@ class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     commands = [
         # redefine these commands only to change the helpstr
-        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in the source sheet'),
-        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in the source sheet'),
-        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in the source sheet'),
+        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet'),
+        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet'),
+        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet'),
 
         Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'push new sheet with only source rows for this value'),
 #        Command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')

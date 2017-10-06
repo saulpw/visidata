@@ -4,10 +4,14 @@
 .
 .It Ic Shift-V
 views contents of current cell in a new sheet
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
+.It Ic "w"
+toggles text wrap for TextSheets
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^^ (Ctrl-^)"
 jumps to previous sheet (swaps with current sheet)
-.It Ic "  ` (backtick)"
-opens source of current sheet
 .It Ic " ^E"
 views traceback for most recent error
 .It Ic "g^E"
@@ -22,7 +26,7 @@ shows cursor position and bounds of current sheet on status line
 shows version information on status line
 .It Ic " ^R"
 reloads current sheet
-.It Ic "g^R"
+.It Ic "z^R"
 clears cache for current column
 .
 .El

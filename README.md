@@ -27,8 +27,9 @@ Use `-f <filetype>` to force a particular filetype.
 
 ## Documentation
 
-* Quick reference: `F1` (or `z?`) within `vd` will open the man page ([online version](http://visidata.org/man)), which has a list of all commands and options.
-* [visidata.org](http://visidata.org) has [tours](http://visidata.org/tour) and a [Developer's Guide](http://visidata.org/dev)
+* Quick reference: `F1` (or `z?`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
+* [visidata.org](http://visidata.org) has some [tours](http://visidata.org/tour)
+* [VisiData Architecture for Developers](docs/architecture.rst)
 
 ## Support
 
@@ -46,7 +47,7 @@ The core `vdtui.py` can be used to quickly create efficient terminal workflows.
 - [vgit](https://github.com/saulpw/vgit): a git interface
 - [vdgalcon](https://github.com/saulpw/vdgalcon): a port of the classic game [Galactic Conquest](https://www.galcon.com)
 
-Other workflows should be created as separate [apps using vdtui](docs/architecture.rst).  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv).
+Other workflows should also be created as separate apps using vdtui.  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv).
 
 
 ## License
