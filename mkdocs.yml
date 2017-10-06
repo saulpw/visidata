@@ -5,4 +5,4 @@ site_author: Saul Pwanson
 repo_url: http://github.com/saulpw/visidata
 
 pages:
-- Home: 'README.md'
+    - 'Home': 'README.md'
