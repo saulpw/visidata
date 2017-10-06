@@ -2,9 +2,13 @@
 
 A loose plan that is subject to change.
 
-## v1.0
+## v0.97
+- manpage
+- SheetDiff
+- vd --playerpiano
+
+## after 1.0
 - Python expressions should be usable like regex for search, select, etc
-- documented Python3 API for vd.py use by other scripts
 
 ## Future
 - delete regex match in cells
@@ -17,19 +21,17 @@ A loose plan that is subject to change.
   - ^Delete
   - only apply changes with ^S
 - checkpoint data for faster replay/undo
-- connect to larger datasets (via blaze?)
+- connect to larger datasets
+   - load larger than memory .csv/tsv files
 - load new .py plugins for inputs/outputs/sheets
    - git app that can streamline standard workflows
      - checkout branch or revision with TUI interface
      - browse through history
-- load larger than memory .csv/tsv files
-- fixed-column detector
 - '.' repeat command
 - save all sheets to .h5 file
 - reload derived sheets
 - html table parsing into columns
 - parse .xml
-- better csv/tsv sniffer
 - how to handle timezone for datetime
 
 # Applications

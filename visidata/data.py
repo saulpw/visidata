@@ -4,44 +4,94 @@ from .vdtui import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
+option('skiplines', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
 
-command('+', 'cursorCol.aggregator = chooseOne(aggregators)', 'choose aggregator for this column')
-
 # slide rows/columns around
-command('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'move this column one left')
-command('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move this row one down')
-command('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move this row one up')
-command('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move this column one right')
-command('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'move this column all the way to the left of the non-key columns')
-command('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'move this row all the way to the bottom')
-command('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'move this row all the way to the top')
-command('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'move this column all the way to the right')
+globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left')
+globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down')
+globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move current row up')
+globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move current column right')
+globalCommand('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'slide current column all the way to the left of sheet')
+globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slide current row to the bottom of sheet')
+globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row all the way to the top of sheet')
+globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet')
 
-command('c', 'searchColumnNameRegex(input("column name regex: ", "regex"))', 'go to visible column by regex of name')
-command('r', 'sheet.cursorRowIndex = int(input("row number: "))', 'go to row number')
+globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'move to the next column with name matching regex')
+globalCommand('r', 'moveRegex(regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex')
+globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'move to the given column number')
+globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'move to the given row number')
 
-command('P', 'vd.push(copy("_sample")).rows = random.sample(rows, int(input("random population size: ")))', 'push duplicate sheet with a random sample of <N> rows')
+globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows')
 
-command('a', 'rows.insert(cursorRowIndex+1, list((None for c in columns))); cursorDown(1)', 'insert a blank row')
-command('^I',  'moveListItem(vd.sheets, 0, len(vd.sheets))', 'cycle through sheet stack') # TAB
-command('KEY_BTAB', 'moveListItem(vd.sheets, -1, 0)', 'reverse cycle through sheet stack')
-command('~', 'cursorCol.type = str', 'set column type to string')
-command('@', 'cursorCol.type = date', 'set column type to ISO8601 datetime')
-command('#', 'cursorCol.type = int', 'set column type to integer')
-command('$', 'cursorCol.type = currency', 'set column type to currency')
-command('%', 'cursorCol.type = float', 'set column type to float')
+globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row')
+globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fill null cells in current column with previous non-null value')
 
-command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'rename this column')
-command('g^', 'for c in visibleCols: c.name = c.getDisplayValue(cursorRow)', 'set names of all visible columns to this row')
-command('!', 'toggleKeyColumn(cursorColIndex)', 'toggle this column as a key column')
-command('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols))', 'sort by all key columns ascending')
-command('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getValue(r) for c in cols), reverse=True)', 'sort by all key columns descending')
+def fillNullValues(col, rows):
+    'Fill null cells in col with the previous non-null value'
+    lastval = None
+    nullfunc = isNullFunc()
+    n = 0
+    for r in rows:
+        val = col.getValue(r)
+        if nullfunc(val):
+            if lastval:
+                col.setValue(r, lastval)
+                n += 1
+        else:
+            lastval = val
 
-command('o', 'vd.push(openSource(input("open: ", "filename")))', 'open local file or url')
-command('^S', 'saveSheet(sheet, input("save to: ", "filename", value=str(sheet.source)))', 'save this sheet to new file')
+    status("filled %d values" % n)
 
-def saveSheet(vs, fn):
+
+def updateColNames(sheet):
+    for c in sheet.visibleCols:
+        if not c._name:
+            c.name = "_".join(c.getDisplayValue(r) for r in sheet.selectedRows or [sheet.cursorRow])
+
+globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set current column name to value in current cell')
+globalCommand('g^', 'updateColNames(sheet)', 'set visible column names to values in selected rows (or current row)')
+globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined values in selected rows (or current row)')
+# gz^ with no selectedRows is same as z^
+
+globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open input in VisiData')
+globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
+
+globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluate Python expression on current row and display result on status line')
+
+globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with number columns')
+
+globalCommand('gKEY_F(1)', 'help-commands')  # vdtui generic commands sheet
+globalCommand('gz?', 'help-commands')  # vdtui generic commands sheet
+
+# in VisiData, F1/z? refer to the man page
+globalCommand('z?', 'openManPage()', 'launch VisiData manpage')
+globalCommand('KEY_F(1)', 'z?')
+
+def openManPage():
+    import subprocess
+    from pkg_resources import resource_filename
+    with SuspendCurses():
+        os.system(' '.join(['man', '--local-file', resource_filename(__name__, 'man/vd.1')]))
+
+def newSheet(ncols):
+    return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
+
+def readlines(linegen):
+    'Generate lines from linegen, skipping first options.skiplines lines and stripping trailing newline'
+    skiplines = options.skiplines
+    for i, line in enumerate(linegen):
+        if i < skiplines:
+            continue
+        yield line[:-1]
+
+def getDefaultSaveName(sheet):
+    if isinstance(sheet.source, Path):
+        return str(sheet.source)
+    else:
+        return sheet.name+".tsv"
+
+def saveSheet(vs, fn, confirm_overwrite=False):
     'Save sheet `vs` with given filename `fn`.'
     if Path(fn).exists():
         if options.confirm_overwrite:
@@ -54,25 +104,30 @@ def saveSheet(vs, fn):
     getGlobals().get(funcname)(vs, fn)
     status('saving to ' + fn)
 
+
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.'
+    commands = [
+        Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
+    ]
+    columns = [
+        Column('filename', getter=lambda r: r[0].name + r[0].ext),
+        Column('type', getter=lambda r: r[0].is_dir() and '/' or r[0].suffix),
+        Column('size', type=int, getter=lambda r: r[1].st_size),
+        Column('mtime', type=date, getter=lambda r: r[1].st_mtime)
+    ]
 
     def reload(self):
-        'Populate sheet via `reload` function.'
         self.rows = [(p, p.stat()) for p in self.source.iterdir()]  #  if not p.name.startswith('.')]
-        self.command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
-        self.columns = [Column('filename', str, lambda r: r[0].name + r[0].ext),
-                      Column('type', str, lambda r: r[0].is_dir() and '/' or r[0].suffix),
-                      Column('size', int, lambda r: r[1].st_size),
-                      Column('mtime', date, lambda r: r[1].st_mtime)]
 
 
 def openSource(p, filetype=None):
-    'open a Path or a str (converts to Path or calls some TBD openUrl)'
+    'calls open_ext(Path) or openurl_scheme(UrlPath)'
     if isinstance(p, str):
         if '://' in p:
-            filetype = url(p).schema.lower()
-            openfunc = 'openurl_' + filetype
+            p = UrlPath(p)
+            filetype = filetype or p.scheme
+            openfunc = 'openurl_' + p.scheme
             vs = getGlobals()[openfunc](p)
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
@@ -96,6 +151,7 @@ def openSource(p, filetype=None):
 
     if vs:
         status('opening %s as %s' % (p.name, filetype))
+
     return vs
 
 #### enable external addons
@@ -149,6 +205,7 @@ def open_tsv(p, vs=None):
             # but that's a lot of work for a large dataset
             vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers[:header_lines]))
 
+    vs.recalc()
     return vs
 
 @async
@@ -164,20 +221,16 @@ def reload_tsv_sync(vs):
     with vs.source.open_text() as fp:
         _getTsvHeaders(fp, header_lines)  # discard header lines
 
-        vs.progressMade = 0
-        vs.progressTotal = vs.source.filesize
-        while True:
-            try:
-                L = next(fp)
-            except StopIteration:
-                break
-            L = L[:-1]
-            if L:
-                vs.rows.append(L.split('\t'))
-            vs.progressMade += len(L)
-
-    vs.progressMade = 0
-    vs.progressTotal = 0
+        with Progress(vs, vs.source.filesize) as prog:
+            while True:
+                try:
+                    L = next(fp)
+                except StopIteration:
+                    break
+                L = L[:-1]
+                if L:
+                    vs.addRow(L.split('\t'))
+                prog.addProgress(len(L))
 
     status('loaded %s' % vs.name)
 
@@ -185,11 +238,16 @@ def reload_tsv_sync(vs):
 @async
 def save_tsv(vs, fn):
     'Write sheet to file `fn` as TSV.'
+
+    # replace tabs and newlines
+    replch = options.disp_oddspace
+    trdict = {9: replch, 10: replch, 13: replch}
+
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
-        colhdr = '\t'.join(col.name for col in vs.visibleCols) + '\n'
+        colhdr = '\t'.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
         for r in vs.genProgress(vs.rows):
-            fp.write('\t'.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
+            fp.write('\t'.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
     status('%s save finished' % fn)
 

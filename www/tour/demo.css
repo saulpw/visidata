@@ -1,0 +1,86 @@
+h1, h2, h3, h4 {
+    text-align: center;
+}
+
+.workflow {
+    text-align: center;
+}
+
+table {
+    border-spacing: 4px 4px;
+    padding: 1em;
+    margin: auto;
+}
+
+.table { display: table }
+.row { display: table-row }
+.cell { display: table-cell }
+.hdr { display: table-cell }
+
+table div.row, table tr {
+    background-color: #dddddd;
+}
+
+table div.cell, table td {
+    border: 1px solid black;
+    border-radius: 3px;
+    padding: 5px;
+    text-align: center;
+}
+
+.screenshot {
+    width: 50%;
+}
+
+.input, .command, .code {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+table div.cell.timestamp, table td.timestamp {
+    width: 2em;
+}
+
+table div.cell.command, table td.command {
+    width: 10%;
+}
+
+table div.cell.step, table td.step {
+    text-align: middle;
+}
+
+table div.cell.input, table td.input {
+    text-align: left;
+    width: 30%;
+}
+
+table div.cell.step, table td.step {
+    text-align: left;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+table div.row:nth-child(even), table tr:nth-child(even) {background: #CCC}
+table div.row:nth-child(odd), table tr:nth-child(odd) {background: #FFF}
+
+table div.cell, table td {
+    padding: 5px;
+}
+
+#index_container {
+    list-style: none;
+    margin-bottom: 20px;
+    width: auto;
+}
+
+#index_container li, #index_container ul, #index_container ul li{
+   padding-bottom: 2px;
+   overflow: hidden;
+   display: inline-block;
+   background: #fff;
+   position: relative;
+   float: left;
+ }

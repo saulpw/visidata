@@ -1,0 +1,16 @@
+sheet	col	row	keystrokes	input	comment
+	sheet	0	o	sample_data/sample.tsv	open input in VisiData
+sample	Units	0	#		set type of current column to int
+sample	Units	0	+	sum	add aggregator to the current column
+sample	Unit_Cost	0	%		set type of current column to float
+sample	Total	0	%		set type of current column to float
+sample	Total	0	C		open Columns Sheet
+sample_columns	name	6	g+	sum	add aggregator to selected source columns
+sample_columns	aggregators	6	e	sum avg	edit contents of current cell
+sample_columns	aggregators	6	q		quit current sheet
+sample	Item	0	F		open Frequency Table grouped on current column
+sample_Item_freq	Item	0	C		open Columns Sheet
+sample_Item_freq_columns	name	0	[		sort ascending by current column
+sample_Item_freq_columns	value	5	,		select rows matching current cell in current column
+sample_Item_freq_columns	value	5	g-		hide selected columns on source sheet
+sample_Item_freq_columns	name	5	q		quit current sheet

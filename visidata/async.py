@@ -5,13 +5,21 @@ import cProfile
 
 from .vdtui import *
 
-option('profile_tasks', True, 'profile async tasks')
-option('min_task_time_s', 0.10, 'only keep tasks that take longer than this number of seconds')
-option('min_memory_mb', 0, 'stop loading and async processing without this much memory available')
+min_task_time_s = 0.10 # only keep tasks that take longer than this number of seconds
 
-command('^C', 'if sheet.currentThread: ctypeAsyncRaise(sheet.currentThread, EscapeException)', 'cancel task on the current sheet')
-command('^T', 'vd.push(vd.tasksSheet)', 'push task history sheet')
-command('^U', 'toggleProfiling(vd)', 'turn profiling on for main process')
+option('profile_tasks', True, 'profile async tasks')
+option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
+globalCommand('^C', 'ctypeAsyncRaise(sheet.currentThreads[-1], EscapeException) if sheet.currentThreads else status("no async tasks on this sheet")', 'abort user input or current task')
+globalCommand('^T', 'vd.push(vd.tasksSheet)', 'open Tasks Sheet')
+globalCommand('^O', 'toggleProfiling(vd)', 'turn profiling on for main process')
+
+class ProfileSheet(TextSheet):
+    commands = TextSheet.commands + [
+        Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile'),
+    ]
+    def __init__(self, name, pr):
+        super().__init__(name, getProfileResults(pr))
+        self.profile = pr
 
 vd().profile = None
 def toggleProfiling(vd):
@@ -21,7 +29,8 @@ def toggleProfiling(vd):
         vd.status('profiling of main task enabled')
     else:
         vd.profile.disable()
-        vd.push(TextSheet("main_profile", getProfileResults(vd.profile)))
+        vs = ProfileSheet("main_profile", vd.profile)
+        vd.push(vs)
         vd.profile = None
         vd.status('profiling of main task disabled')
 
@@ -38,13 +47,13 @@ def threadProfileCode(vdself, func, *args, **kwargs):
         pr = cProfile.Profile()
         pr.enable()
         ret = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
+        thread.profile = pr
         pr.disable()
-        thread.profileResults = getProfileResults(pr)
     else:
         ret = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
 
     # remove very-short-lived async actions
-    if elapsed_s(thread) < options.min_task_time_s:
+    if elapsed_s(thread) < min_task_time_s:
         vd().threads.remove(thread)
 
     return ret
@@ -77,39 +86,37 @@ def ctypeAsyncRaise(threadObj, exception):
 
 # each row is an augmented threading.Thread object
 class TasksSheet(Sheet):
-    def __init__(self):
-        super().__init__('task_history')
-        self.command('^C', 'ctypeAsyncRaise(cursorRow.thread, EscapeException)', 'cancel this action')
-        self.command(ENTER, 'vd.push(TextSheet(cursorRow.name+"_profile", cursorRow.profileResults))', 'push profile sheet for this action')
-
-        self.columns = [
-            ColumnAttr('name'),
-            Column('elapsed_s', type=float, getter=lambda r: elapsed_s(r)),
-            Column('status', getter=lambda r: r.status),
-        ]
-
+    commands = [
+        Command('^C', 'ctypeAsyncRaise(cursorRow, EscapeException)', 'abort current task'),
+        Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action'),
+    ]
+    columns = [
+        ColumnAttr('name'),
+        Column('elapsed_s', type=float, getter=lambda r: elapsed_s(r)),
+        Column('status', getter=lambda r: r.status),
+    ]
     def reload(self):
         self.rows = vd().threads
 
 def elapsed_s(t):
     return (t.endTime or time.process_time())-t.startTime
 
-@functools.wraps(vd().rightStatus)
 def checkMemoryUsage(vs):
-    ret, attr = checkMemoryUsage.__wrapped__(vs)   # prev rightStatus
     min_mem = options.min_memory_mb
     if min_mem and vd().unfinishedThreads:
         tot_m, used_m, free_m = map(int, os.popen('free --total --mega').readlines()[-1].split()[1:])
-        ret = '[%dMB] %s' % (free_m, ret)
+        ret = '[%dMB]' % free_m
         if free_m < min_mem:
-            attr = colors['red']
+            attr = 'red'
             status('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
             for t in vd().threads:
                 if t.is_alive():
                     ctypeAsyncRaise(t, EscapeException)
-    return ret, attr
+        else:
+            attr = 'green'
+        return ret, attr
 
-vd().tasksSheet = TasksSheet()
+vd().tasksSheet = TasksSheet('task_history')
 vd().toplevelTryFunc = threadProfileCode
-vd().rightStatus = checkMemoryUsage
+vd().addHook('rstatus', checkMemoryUsage)
 

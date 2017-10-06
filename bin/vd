@@ -1,23 +1,41 @@
 #!/usr/bin/env python3
 #
-# Usage: $0 [-d] [-r] [-f <filetype>] [<visidata options>] [<input_source> ...]
+# Usage: $0 [<options>] [<input> ...]
+#        $0 [<options>] --play <cmdlog> [--batch] [-d <delay>] [-o <output>] [field=value ...]
 
-__version__ = 'saul.pw/VisiData v0.96'
+__version__ = 'saul.pw/VisiData v0.97'
 
 import os
 from visidata import *
 
 
+option('color_diff', 'red', 'color of values different from --diff source')
+option('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
+
+
+# for --play
 def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
     log = logpath.read_text().format(*args, **kwargs)
     src = PathFd(logpath.fqpn, io.StringIO(log))
     vs = openSource(src)
-    vd().editlog.openHook(vs, src)
     vd().push(vs)
-    vd().status = print
     vs.vd = vd()
-    vs.replay()
+    return vs
+
+# for --diff
+def makeDiffColorizer(othersheet):
+    def colorizeDiffs(sheet, col, row, cellval):
+        vcolidx = sheet.visibleCols.index(col)
+        rowidx = sheet.rows.index(row)
+        if vcolidx < len(othersheet.visibleCols) and rowidx < len(othersheet.rows):
+            otherval = othersheet.visibleCols[vcolidx].getValue(othersheet.rows[rowidx])
+            if cellval.value != otherval:
+                return options.color_diff
+        else:
+            return options.color_diff_add
+    return colorizeDiffs
+
 
 def main():
     'Open the given sources using the VisiData interface.'
@@ -25,15 +43,20 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('inputs', nargs='*', help='initial sources')
-    parser.add_argument('-d', dest='debug', action='store_true', default=False, help='abort on error')
-    parser.add_argument('-r', dest='readonly', action='store_true', default=False, help='disable editing')
-    parser.add_argument('-f', dest='filetype', default='', help='specify file type')
-    parser.add_argument('--play', dest='play', default=None, help='.vd file to replay')
+    parser.add_argument('-f', dest='filetype', default='', help='uses loader for filetype instead of file extension')
+    parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='overwrites existing files without confirmation')
+    parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
+    parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
+    parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output (as .tsv) at the end of replay')
+    parser.add_argument('-d', dest='delay', default=0, help='delay between replayed commands, in seconds')
+    parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
 
     for optname, v in vdtui.baseOptions.items():
         name, optval, defaultval, helpstr = v
+        if name.startswith('color_') or name.startswith('disp_'):
+            continue
         action = 'store_true' if optval is False else 'store'
-        parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=optval, help=helpstr)
+        parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=helpstr)
 
     args = parser.parse_args()
 
@@ -41,12 +64,14 @@ def main():
     for fnrc in ('.visidatarc', '$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
         p = Path(fnrc)
         if p.exists():
-            exec(open(p.resolve()).read())
+            exec(open(p.resolve()).read(), globals())
             break
+
+    vdtui.addGlobals(globals())
 
     # command-line overrides
     for optname, optval in vars(args).items():
-        if optname not in ['inputs', 'play']:
+        if optval is not None and optname not in ['inputs', 'play', 'batch', 'output', 'diff']:
             vdtui.options[optname] = optval
 
     inputs = list(args.inputs)
@@ -58,6 +83,11 @@ def main():
         f = open('/dev/tty')
         os.dup2(f.fileno(), 0)
 
+    if args.diff:
+        vs = openSource(args.diff)
+        vd().push(vs)
+        Sheet.colorizers.append(Colorizer("cell", 8, makeDiffColorizer(vs)))
+
     if not args.play:
         if not inputs:
             inputs = ['.']
@@ -65,10 +95,10 @@ def main():
         sources = []
         for src in inputs:
             vs = openSource(src)
-            vdtui.vd().editlog.openHook(vs, src)
+            vdtui.vd().cmdlog.openHook(vs, src)
             sources.append(vs)
 
-        vdtui.run(sources)
+        vdtui.run(*sources)
         return
 
     # replay mode, gather additional args
@@ -76,26 +106,13 @@ def main():
     fmtkwargs = {}
 
     args = parser.parse_args()
-    i=0
-    while i < len(args.inputs):
-        arg = args.inputs[i]
-
-        # parse either '--key value' or '--key=value'
-        if arg.startswith('-'):
-            arg = arg.lstrip('-')
-        else:
-            fmtargs.append(arg)
-            # goes into args
-            continue
-
+    for arg in args.inputs:
+        # parse 'key=value' pairs for formatting cmdlog template
         if '=' in arg:
             k, v = arg.split('=')
             fmtkwargs[k] = v
-        else:  # either goes into args or key+nextarg
-            i += 1
-            fmtkwargs[arg] = args.inputs[i]
-
-        i += 1
+        else:
+            fmtargs.append(v)
 
     if args.play == '-':
         vdfile = inputs[0]
@@ -104,10 +121,18 @@ def main():
     else:
         vdfile = Path(args.play)
 
-    eval_vd(vdfile, *fmtargs, **fmtkwargs)
+    vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
+    if args.batch:
+        vd().status = print
+        vs.replay_sync()
+        if args.output:
+            saveSheet(vd().sheets[0], args.output, confirm_overwrite=False)
+            sync()
+    else:
+        vs.replay()
+        run()
 
 if __name__ == '__main__':
     vdtui.status(__version__)
-    vdtui.addGlobals(globals())
     main()
     os._exit(0)  # cleanup can be expensive with large datasets

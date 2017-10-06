@@ -79,5 +79,8 @@ twine upload dist/*
    b. Ask someone else to test install
 
 13. Create a tag `v#.#.#` for that commit
-
-14. Announce the release and have some ice cream
+```
+git tag v#.#.#
+git push --tags
+```
+14. Post the release notes on r/visidata and have some ice cream

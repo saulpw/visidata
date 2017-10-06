@@ -1,0 +1,11 @@
+name: pivot
+vd: tests/pivot.vd
+preview: poster="npt:0:09"
+question: How many of each item has been sold by each representative?
+workflow: set Rep to be key column, add 'sum' aggregator to Total_Units and pivot on Item
+timestamps:
+    - 0.5
+    - 3.5
+    - 5.5
+    - 7.5
+    - 9.5

@@ -3,7 +3,7 @@
 from setuptools import setup
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 #from visidata import __version__
-__version__ = '0.96'
+__version__ = '0.97'
 
 setup(name='visidata',
       version=__version__,
@@ -11,12 +11,16 @@ setup(name='visidata',
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       author='Saul Pwanson',
-      author_email='vd@saul.pw',
+      author_email='visidata@saul.pw',
       url='http://github.com/saulpw/visidata',
       download_url='https://github.com/saulpw/visidata/tarball/' + __version__,
       test_suite='visidata.tests',
       scripts=['bin/vd'],
       py_modules = ['visidata'],
+      packages=['visidata',  'visidata.loaders'],
+      include_package_data=True,
+      package_data={'': ['man/vd.1']},
+      #data_files=[(manpath,['_build/vd.1.gz'])],
       license='GPLv3',
       classifiers=[
           'Development Status :: 4 - Beta',
@@ -36,5 +40,5 @@ setup(name='visidata',
       ],
       keywords=('console tabular data spreadsheet viewer textpunk'
                 'curses csv hdf5 h5 xlsx'),
-      packages=['visidata', 'visidata.addons'],
       )
+

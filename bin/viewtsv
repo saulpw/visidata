@@ -4,9 +4,7 @@ import sys
 import vdtui
 
 class TsvSheet(vdtui.Sheet):
-    def __init__(self, name, *sources):
-        super().__init__(name, *sources)
-        self.columns = [vdtui.ColumnItem('tsv', 0)]
+    columns = [vdtui.ColumnItem('tsv', 0)]
 
     @vdtui.async
     def reload(self):
@@ -16,10 +14,10 @@ class TsvSheet(vdtui.Sheet):
             for line in fp:
                 line = line[:-1]
                 if line:
-                    self.rows.append(line.split('\t'))
+                    self.addRow(line.split('\t'))
 
         self.columns = [vdtui.ColumnItem(colname, i) for i, colname in enumerate(self.rows[0])]
         self.rows = self.rows[1:]
 
 
-vdtui.run([TsvSheet(fn, vdtui.Path(fn)) for fn in sys.argv[1:]])
+vdtui.run(*(TsvSheet(fn, vdtui.Path(fn)) for fn in sys.argv[1:]))

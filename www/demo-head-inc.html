@@ -1,0 +1,14 @@
+<!-- For now template also contains these links -->
+
+<!-- <link rel="stylesheet" type="text/css" href="/tour/demo.css">
+
+<link rel="stylesheet" type="text/css" href="/tour/asciinema-player.css" /> -->
+
+
+<script type='text/javascript'>
+function setTime(t) {
+    // t - seconds
+    document.getElementById('player').currentTime = t;
+}
+</script>
+<a id="myLink" title="Click to jump to this timestamp in the video" href="#" onclick="setTime({timestamp});return false;">{timestamp}</a>

@@ -1,0 +1,10 @@
+sheet	col	row	keystrokes	input	comment
+	sheet	0	o	sample_data/sample.tsv	open input in VisiData
+sample	OrderDate	0	;	(\d+-\d+)	add new column from capture groups of regex; also requires example row
+sample	OrderDate	0	-		hide current column (to unhide go to Columns sheet and edit its width)
+sample	OrderDate_re0	0	^	OrderDate	edit name of current column
+sample	Total	0	$		set type of current column to currency
+sample	Total	0	+	sum	add aggregator to the current column
+sample	OrderDate	0	F		open Frequency Table grouped on current column
+sample_OrderDate_freq	OrderDate	0	[		sort ascending by current column
+sample_OrderDate_freq	sum_Total	0	^	Revenue	edit name of current column

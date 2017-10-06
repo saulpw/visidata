@@ -30,6 +30,7 @@ inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
                  'P': '50',
               }
 
+@unittest.skip('VisiData singleton not resettable due to addons')
 class CommandsTestCase(unittest.TestCase):
     def setUp(self):
         self.scr = Mock()

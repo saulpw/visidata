@@ -1,31 +1,17 @@
 
 from visidata import *
 
-clipboard = []
+# adds vd.clipvalue and vd.cliprows
+# vd.cliprows = [(source_sheet, source_row_idx, source_row)]
 
-command('^Z', 's,i,r = clipboard.pop(); s.rows.insert(i, r)', 'undo last delete on original sheet')
-command('g^Z', '''
-for s,i,r in clipboard: s.rows.insert(i, r)
-clipboard.clear()
-''', 'undo all deletes on clipboard')
+globalCommand('y', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]', 'copy current row to clipboard')
+globalCommand('d', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', 'delete current row and move it to clipboard')
+globalCommand('p', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row')
 
-command('y', 'clipboard.append((sheet, cursorRowIndex, cursorRow))', 'yank (copy) this row to clipboard')
-command('d', 'clipboard.append((sheet, cursorRowIndex, rows.pop(cursorRowIndex)))', 'delete (cut) this row and move to clipboard')
-command('p', 'rows.insert(cursorRowIndex+1, clipboard[-1][2]); cursorDown()', 'paste last clipboard row after cursor on this sheet')
+globalCommand('gd', 'vd.cliprows = list((sheet, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', 'delete all selected rows and move them to clipboard')
+globalCommand('gy', 'vd.cliprows = list((sheet, i, r) for i, r in enumerate(selectedRows))', 'copy all selected rows to clipboard')
 
-command('gd', 'clipboard.extend((sheet, i, r) for i, r in enumerate(rows) if sheet.isSelected(r)); deleteSelected()', 'delete (cut) all selected rows and move to clipboard')
-command('gy', 'clipboard.extend((sheet, i, r) for i, r in enumerate(rows) if sheet.isSelected(r))', 'yank (copy) all selected rows to clipboard')
-command('gp', 'rows[cursorRowIndex+1:cursorRowIndex+2] = list(r for s,i,r in clipboard)', 'paste all clipboard rows after cursor on this sheet')
+globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy this cell to clipboard')
+globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value')
+globalCommand('zp', 'cursorCol.setValue(cursorRow, vd.clipvalue)', 'set contents of current column for current row to last clipboard value')
 
-command('B', 'vd.push(ClipboardSheet("clipboard", clipboard))', 'push clipboard sheet')
-
-#command('', 'rows.insert(cursorRowIndex, clipboard.pop())', 'pop last clipboard row and paste after cursor')
-
-class ClipboardSheet(Sheet):
-    def reload(self):
-        self.columns = [
-            Column('source', getter=lambda r: r[0].name),
-            Column('rownum', getter=lambda r: r[1]),
-            Column('keys', getter=lambda r: ' '.join(c.getDisplayValue(r[2]) for c in r[0].keyCols)),
-        ]
-        self.rows = self.source

@@ -20,16 +20,24 @@ closer to an RDBMS.
 Constraining the data to fit within this architecture simplifies the
 implementation and allows for some radical optimizations to data workflow.
 
+The process of designing a sheet is:
+
+1. Instantiate the sheet from a toplevel command (or other sheet);
+2. Collect the rows from the sources in reload();
+3. Enumerate the available columns;
+4. Create commands to interact with the rows, columns, and cells.
+5. Try the resulting workflow and iterate until it feels like magic.
+
 ----
 
 One project, two licenses
 =========================
 
-``vd.py`` is a single-file stand-alone library, freely available for use in
+``vdtui.py`` is a single-file stand-alone library, freely available for use in
 other projects.  It is distributed under the MIT free software license.
 
 The rest of this repository is the VisiData application, runnable as ``vd``
-from the command-line.  Everything but ``vd.py``, including the data sources and
+from the command-line.  Everything but ``vdtui.py``, including the data sources and
 extensions and addons, are distributed under the more restrictive GPLv3 free
 software license.  Additional commercial licenses are negotiable.
 
@@ -116,7 +124,7 @@ Commands
 ========
 
 Keyboard commands are the primary interface for the user to control VisiData.
-Add new commands using the global ``command()`` function within a .py file.
+Add new commands using the global ``globalCommand()`` or ``Command()`` functions within a .py file.
 
 Syntax
 ------
@@ -336,7 +344,7 @@ display error messages (without traceback) on the left side of the status bar.
 Hooks
 -----
    
-Hooks for special functionality are stored in ``VisiData.hooks`` and supported with ``VisiData.addHook`` and ``VisiData.callHook``. At the moment, hooks are used mainly in ``editText``, the optional ``editlog`` addon, and before redrawing the screen.
+Hooks for special functionality are stored in ``VisiData.hooks`` and supported with ``VisiData.addHook`` and ``VisiData.callHook``. At the moment, hooks are used mainly in ``editText``, the optional ``commandlog`` addon, and before redrawing the screen.
 
 
 Adding a new data source

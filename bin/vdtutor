@@ -2,7 +2,7 @@
 
 from visidata import *
 
-command(ENTER, 'vd.replace(vd.nextLevel(cursorValue, int(name[-1])))', 'advance to next vdtutor level if ready')
+globalCommand(ENTER, 'vd.replace(nextLevel(cursorValue, int(name[-1])))', 'advance to next vdtutor level if ready')
 
 def nextLevel(value, level=0):
     if 'ENTER' not in value:
@@ -13,8 +13,7 @@ def nextLevel(value, level=0):
 
     return open_txt(Path('docs/vdtutor%s.txt' % (int(level) + 1)))
 
-vd().nextLevel = nextLevel
-
-run([vd().nextLevel("ENTER")])
+addGlobals(globals())
+run(nextLevel("ENTER"))
 
 

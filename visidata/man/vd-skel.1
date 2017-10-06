@@ -1,0 +1,133 @@
+.Dd October 5, 2017
+.Dt vd \&1 "Quick Reference Guide" 
+.Os Linux/MacOS
+.
+.\" Long option with arg: .Lo f filetype format
+.\" Long flag: .Lo f filetype
+.de Lo
+.It Cm -\\$1 Ns , Cm --\\$2 Ns = Ns Ar \\$3
+..
+.de Lf
+.It Cm -\\$1 Ns , Cm --\\$2
+..
+.Sh NAME
+.
+.Nm VisiData
+.Nd a terminal utility for exploring and arranging tabular data
+.
+.Sh SYNOPSIS
+.
+.Nm vd
+.Op Ar options
+.Op Ar input No ...
+.
+.Nm vd
+.Op Ar options
+.Cm --play Ar cmdlog
+.Op Cm -d Ar delay
+.Op Cm --batch
+.Op Cm -o Ar output
+.Op Ar field Ns Cm = Ns Ar value No ...
+.
+.Sh DESCRIPTION
+.Nm VisiData
+is a multipurpose tool for exploring, cleaning, editing, and restructuring data.
+Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be saved, documented, and replayed.
+.Nm VisiData No is built on the Sy vdtui No platform.
+.
+.Ss REPLAY MODE
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXX -compact
+.Lo p play cmdlog
+.No replays a saved Ar cmdlog No within the interface
+.
+.Lo d delay seconds
+.No waits Ar seconds No between commands
+.
+.Lf b batch
+replays in batch mode (with no interface)
+.
+.Lo o output file
+.No saves final visible sheet to Ar file No as .tsv
+.
+.It Sy --replay-movement= Ns Ar bool
+.No toggles Sy --play No to move cursor cell-by-cell
+.It Ar field Ns Cm = Ns Ar value
+.No replaces \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
+.El
+.
+.Ss Commands During Replay
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
+.It Sy ^U
+pauses/resumes replay
+.It Sy Space
+executes next row in replaying sheet
+.It Sy ^K
+cancels current replay
+.El
+.
+.Ss GLOBAL COMMANDS
+In most cases, commands that affect 'selected rows' will affect all rows if no rows are selected.
+.Pp
+.so vd-keystrokes.inc
+.
+.Sh OPTIONS
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.
+.Lo f filetype filetype
+.No "tsv               "
+uses loader for
+.Ar filetype
+instead of file extension
+.
+.Lo y confirm-overwrite F
+.No "True              "
+overwrites existing files without confirmation
+.
+.It Cm --diff Ns = Ns Ar base
+.No "None              "
+.No adds colorizer for all sheets against Ar base
+.
+.El
+.so vd-cli.inc
+.
+.Ss DISPLAY OPTIONS
+.No Display options can only be set via the Sx Options Sheet No or a config file (see Sx FILES Ns ).
+.Pp
+.
+.so vd-opts.inc
+.
+.Sh EXAMPLES
+.Dl Nm vd Cm foo.tsv
+.Pp
+.Dl Nm vd Cm -f sqlite bar.db
+.Pp
+.Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
+.Pp
+.Dl Nm vd Cm --play tests/pivot.vd --delay 1 --output tests/pivot.tsv
+.Pp
+.Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
+.Pp
+.Dl Nm vd --diff foo.tsv bar.tsv
+.Pp
+.Sh FILES
+At the start of every session,
+.Sy VisiData No looks for, in order, Pa $PWD/.visidatarc Ns , Pa $XDG_CONFIG_HOME/visidata/config Ns , or Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents.
+For example:
+.Bd -literal
+   options.min_memory_mb=100  # stop processing without 100MB free
+
+   globalCommand('0', 'gh')   # alias '0' to move to first column, like vim
+
+   def median(values):
+       L = sorted(values)
+       return L[len(L)//2]
+
+   aggregator('median', median)
+.Ed
+.
+.so vd-input.inc
+.
+.Sh AUTHOR
+.Nm VisiData
+was conceived and implemented by
+.An Saul Pwanson Aq Mt visidata@saul.pw Ns .

@@ -1,88 +1,62 @@
-# VisiData v0.96 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
+# VisiData v0.97 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
-A terminal interface for exploring and arranging tabular data
+A terminal interface for exploring and arranging tabular data.
 
-<a href="https://github.com/saulpw/visidata/blob/develop/docs/tours.rst">![VisiData silent demo](docs/img/birdsdiet_bymass.gif)</a>
+## Dependencies
 
-A few interesting commands:
+- Linux or OS/X
+- Python 3.4+
+- python-dateutil
+- other modules may be required for opening particular data sources
 
-* `Shift-F` pushes a frequency analysis of the current column
-* `=` creates a new column from the given Python expression (use column names to refer to their contents)
-* `;` creates new columns from the match groups of the given regex
-
-# Getting Started
-
-## Install VisiData
-
-### from pypi (`stable` branch)
+## Install
 
 ```
 $ pip3 install visidata
 ```
 
-### or clone from git
-
-```
-$ git clone http://github.com/saulpw/visidata.git
-$ cd visidata
-$ pip install -r requirements.txt
-$ python setup.py install
-```
-
-### Dependencies
-
-- Python 3.3+
-- h5py and numpy (if opening .hdf5 files)
-
-**Remember to install the Python3 versions of these packages with e.g. `pip3`**
-
-## Run VisiData
-
-If installed via pip3, `vd` should launch without issue.
+## Run
 
 ```
 $ vd [<options>] <input> ...
-$ <command> | vd
-$ vd [<options>] --play <script.vd> [--<format-field>=<value> ...]
-$ vd [<options>] --play - [--<format-field>=<value> ...] < <script.vd>
-$ vd [<options>] < <input>
+$ <command> | vd [<options>]
 ```
 
-If no inputs are given, `vd` opens the current directory.
-Unknown filetypes are by default viewed with a text browser.
+VisiData supports tsv, csv, xlsx, hdf5, sqlite, and more.
+Use `-f <filetype>` to force a particular filetype.
 
-If installed via `git clone`, first set up some environment variables (on terminal):
+## Documentation
 
-```
-$ export PYTHONPATH=<visidata_dir>:$PYTHONPATH
-$ export PATH=<visidata_dir>/bin:$PATH
-```
+* Quick reference: `F1` (or `z?`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
+* [visidata.org](http://visidata.org) has some [tours](http://visidata.org/tour)
+* [VisiData Architecture for Developers](docs/architecture.rst)
 
-Further documentation is available at [readthedocs](https://visidata.readthedocs.io/).
+## Support
 
-## Contributing
+- [r/visidata](https://www.reddit.com/r/visidata/) on reddit
+- [#visidata]() on freenode.net
 
-VisiData was created by Saul Pwanson `<vd@saul.pw>`.
+If something doesn't appear to be working right, please create [an issue on Github](https://github.com/saulpw/visidata/issues).  Include the full stack trace shown with `Ctrl-e`.
 
-VisiData needs lots of usage and testing to help it become useful and reliable.
-If you use VisiData, I would love it if you would send me a screencast!
-Maybe there is an easy way to improve the tool for both of us.
+To contribute a bugfix or other code, fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls).
 
-Also please create a GitHub issue if anything doesn't appear to be working right.
-If you get an unexpected error, please include the full stack trace that you get with `Ctrl-e`.
+## Other vdtui projects
 
-### Branch structure
+The core `vdtui.py` can be used to quickly create efficient terminal workflows.
 
-VisiData has two main branches:
-* [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (which should be on pypi).
-* [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
+- [vgit](https://github.com/saulpw/vgit): a git interface
+- [vdgalcon](https://github.com/saulpw/vdgalcon): a port of the classic game [Galactic Conquest](https://www.galcon.com)
 
-If you wish to contribute, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it.
+Other workflows should also be created as separate apps using vdtui.  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv).
 
-A developer's guide can be found [here](http://visidata.readthedocs.io/en/stable/architecture.html).
 
 ## License
 
 The innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT free software license, and freely available for inclusion in other projects.
 
-Other VisiData components, including the main `vd` application, addons, and other code in this repository, are licensed under GPLv3.
+Other VisiData components, including the main `vd` application, addons, loaders, and other code in this repository, are available for reuse under GPLv3.
+
+## Credits
+
+VisiData was created by Saul Pwanson `<visidata@saul.pw>`.
+Thanks to @anjakefala for test and release support, to @databranner for documentation, and to those wonderful users who contribute feedback in any form, for helping to make VisiData the awesome tool that it is.

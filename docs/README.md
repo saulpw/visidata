@@ -1,11 +1,10 @@
-# VisiData docs
+##VisiData docs
+
+VisiData documentation is now hosted [here](http://visidata.org).
 
 ## User Guides
 
-* [README](https://visidata.readthedocs.io/en/stable/user-guide.html), an effective quickstart guide
 
-* [Tours](https://visidata.readthedocs.io/en/stable/tours.html)
+* [man](http://visidata.org/man), VisiData's manpage
 
-## Developer Guides
-
-* [Architecture](https://visidata.readthedocs.io/en/stable/architecture.html)
+* [tours of workflows](http://visidata.org/tour)
