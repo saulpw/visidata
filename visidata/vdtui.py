@@ -1738,12 +1738,12 @@ class SubrowColumn(Column):
 
     def getValue(self, row):
         subrow = row[self.subrowidx]
-        if subrow is None:
+        if subrow is not None:
             return self.origcol.getValue(subrow)
 
     def setValue(self, row, value):
         subrow = row[self.subrowidx]
-        if subrow is None:
+        if subrow is not None:
            self.origcol.setValue(subrow, value)
 
 
