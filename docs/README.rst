@@ -1,8 +1,10 @@
-# VisiData docs
+VisiData docs
+=============
 
 VisiData documentation is now hosted [here](http://visidata.org).
 
-## User Guides
+User Guides
+-----------
 
 * [man](http://visidata.org/man), VisiData's manpage
 
