@@ -48,6 +48,7 @@ import string
 import re
 import textwrap
 import threading
+import traceback
 import time
 
 class EscapeException(Exception):
@@ -386,7 +387,6 @@ def exceptionCaught(status=True):
     return vd().exceptionCaught(status)
 
 def stacktrace():
-    import traceback
     return traceback.format_exc().strip()
 
 def chooseOne(choices):

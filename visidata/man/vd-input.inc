@@ -30,5 +30,5 @@
 .It Sy xlsx No (requires Sy openpyxl Ns )
 .It Sy xls No (requires Sy xlrd Ns )
 .It Sy hdf5 No (requires Sy h5py Ns )
-.It Sy postgres No (requires Sy psycopg2 Ns ): 
+.It Sy postgres No (requires Sy psycopg2 Ns )
 .El
