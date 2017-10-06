@@ -1,7 +1,9 @@
 # VisiData docs
 
+VisiData documentation is now hosted [here](http://visidata.org).
+
 ## User Guides
 
-* [man](visidata.org/man), VisiData's manpage
+* [man](http://visidata.org/man), VisiData's manpage
 
-* [tours of workflows](visidata.org/tour)
+* [tours of workflows](http://visidata.org/tour)
