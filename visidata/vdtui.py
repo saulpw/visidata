@@ -54,21 +54,24 @@ import time
 class EscapeException(Exception):
     pass
 
-baseCommands = collections.OrderedDict()
-baseOptions = collections.OrderedDict()
+baseCommands = collections.OrderedDict()  # [cmd.name] -> Command
+baseOptions = collections.OrderedDict()   # [opt.name] -> opt
 
-def Command(keystrokes, execstr, helpstr='alias'):
-    return (keystrokes, helpstr, execstr)
+class Command:
+    def __init__(self, name, execstr, helpstr=''):
+        self.name = name
+        self.execstr = execstr
+        self.helpstr = helpstr
 
-def _registerCommand(cmddict, keystrokes, execstr, helpstr):
+def globalCommand(keystrokes, execstr, helpstr=''):
     if isinstance(keystrokes, str):
         keystrokes = [keystrokes]
 
+    cmd = Command(keystrokes[0], execstr, helpstr)
     for ks in keystrokes:
-        cmddict[ks] = (ks, helpstr, execstr)
+        baseCommands[ks] = cmd
 
-def globalCommand(keystrokes, execstr, helpstr=''):
-    _registerCommand(baseCommands, keystrokes, execstr, helpstr)
+alias = globalCommand
 
 class configbool:
     def __init__(self, v):
@@ -187,7 +190,7 @@ globalCommand('G', 'gj')
 globalCommand('KEY_HOME', 'gk')
 globalCommand('KEY_END', 'gj')
 
-globalCommand('^L', 'vd.scr.clear()', 'refreshe screen')
+globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
 globalCommand('^G', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
 globalCommand('^V', 'status(__version__)', 'show version information on status line')
 globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory))', 'open Status History sheet')
@@ -804,7 +807,7 @@ class Colorizer:
 
 class Sheet:
     columns = []  # list of Column
-#    commands = []  # list of (keystrokes, helpstr, execstr)
+#    commands = []  # list of Command
     colorizers = [ # list of Colorizer
         Colorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr),
         Colorizer('hdr', 9, lambda s,c,r,v: options.color_current_hdr if c is s.cursorCol else None),
@@ -840,8 +843,8 @@ class Sheet:
         # commands specific to this sheet
         sheetcmds = collections.OrderedDict()
         if hasattr(self, 'commands'):
-            for ks, helpstr, execstr in self.commands:
-                _registerCommand(sheetcmds, ks, execstr, helpstr)
+            for cmd in self.commands:
+                sheetcmds[cmd.name] = cmd
         self._commands = collections.ChainMap(sheetcmds, baseCommands)
 
         self._selectedRows = {}  # id(row) -> row
@@ -999,7 +1002,7 @@ class Sheet:
         cmd = None
         while k in self._commands:
             cmd = self._commands.get(k, default)
-            k = cmd[2]  # see if execstr is actually just an alias for another keystroke
+            k = cmd.execstr  # see if execstr is actually just an alias for another keystroke
         return cmd
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
@@ -1013,12 +1016,11 @@ class Sheet:
         if vdglobals is None:
             vdglobals = getGlobals()
 
-        keystrokes, _, execstr = cmd
         self.sheet = self
 
         try:
-            self.vd.callHook('preexec', self, keystrokes)
-            exec(execstr, vdglobals, LazyMap(self))
+            self.vd.callHook('preexec', self, cmd.name)
+            exec(cmd.execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
             self.vd.status('aborted')
             escaped = True
@@ -1961,14 +1963,15 @@ class HelpSheet(Sheet):
 
     class HelpColumn(Column):
         def calcValue(self, r):
-            cmd = self.sheet.source.getCommand(self.prefix+r[0], None)
-            return cmd[1] if cmd else '-'
+            cmd = self.sheet.source.getCommand(self.prefix+r.name, None)
+            return cmd.helpstr if cmd else '-'
 
-    columns = [ColumnItem('keystrokes', 0),
-               ColumnItem('action', 1),
-               HelpColumn('with_g_prefix', prefix='g'),
-               HelpColumn('with_z_prefix', prefix='z'),
-               ColumnItem('execstr', 2, width=0),
+    columns = [
+        ColumnAttr('keystrokes', 'name'),
+        ColumnAttr('helpstr'),
+        HelpColumn('with_g_prefix', prefix='g'),
+        HelpColumn('with_z_prefix', prefix='z'),
+        ColumnAttr('execstr', width=0),
     ]
     nKeys = 1
     def reload(self):
@@ -2043,6 +2046,8 @@ class EnableCursor:
 
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
+    ESC='^['
+    ENTER='^J'
 
     def until_get_wch():
         'Ignores get_wch timeouts'

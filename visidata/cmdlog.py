@@ -123,7 +123,7 @@ class CommandLog(Sheet):
             sheetname = sheet.name
             colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
             rowname = sheet.cursorRowIndex
-        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, sheet._commands[keystrokes][1]])
+        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, sheet.getCommand(keystrokes).helpstr])
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
