@@ -18,7 +18,7 @@ globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row 
 globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet')
 
 globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'move to the next column with name matching regex')
-globalCommand('r', 'moveRegex(regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex')
+globalCommand('r', 'moveRegex(sheet, regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex')
 globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'move to the given column number')
 globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'move to the given row number')
 

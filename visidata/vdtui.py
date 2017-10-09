@@ -217,13 +217,13 @@ globalCommand('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErro
 globalCommand('^R', 'reload(); recalc(); status("reloaded")', 'reload current sheet')
 globalCommand('z^R', 'cursorCol._cachedValues.clear()', 'clear cache for current column')
 
-globalCommand('/', 'moveRegex(regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search for regex forwards in current column')
-globalCommand('?', 'moveRegex(regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search for regex backwards in current column')
-globalCommand('n', 'moveRegex(reverse=False)', 'move to next match from last search')
-globalCommand('N', 'moveRegex(reverse=True)', 'move to previous match from last search')
+globalCommand('/', 'moveRegex(sheet, regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search for regex forwards in current column')
+globalCommand('?', 'moveRegex(sheet, regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search for regex backwards in current column')
+globalCommand('n', 'moveRegex(sheet, reverse=False)', 'move to next match from last search')
+globalCommand('N', 'moveRegex(sheet, reverse=True)', 'move to previous match from last search')
 
-globalCommand('g/', 'moveRegex(regex=input("g/", type="regex"), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns')
-globalCommand('g?', 'moveRegex(regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns')
+globalCommand('g/', 'moveRegex(sheet, regex=input("g/", type="regex"), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns')
+globalCommand('g?', 'moveRegex(sheet, regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns')
 
 globalCommand('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit contents of current cell')
 globalCommand('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorValue))', 'set contents of current column for selected rows to input')
@@ -236,15 +236,15 @@ globalCommand('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle selection of cu
 globalCommand('s', 'select([cursorRow]); cursorDown(1)', 'select current row')
 globalCommand('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect current row')
 
-globalCommand('|', 'selectByIdx(searchRegex(regex=input("|", type="regex"), columns="cursorCol"))', 'select rows matching regex in current column')
-globalCommand('\\', 'unselectByIdx(searchRegex(regex=input("\\\\", type="regex"), columns="cursorCol"))', 'unselect rows matching regex in current column')
+globalCommand('|', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex"), columns="cursorCol"))', 'select rows matching regex in current column')
+globalCommand('\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex"), columns="cursorCol"))', 'unselect rows matching regex in current column')
 
 globalCommand('gt', 'toggle(rows)', 'toggle selection of all rows')
 globalCommand('gs', 'select(rows)', 'select all rows')
 globalCommand('gu', '_selectedRows.clear()', 'unselect all rows')
 
-globalCommand('g|', 'selectByIdx(searchRegex(regex=input("g|", type="regex"), columns="visibleCols"))', 'select rows matching regex in any visible column')
-globalCommand('g\\', 'unselectByIdx(searchRegex(regex=input("g\\\\", type="regex"), columns="visibleCols"))', 'unselect rows matching regex in any visible column')
+globalCommand('g|', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex"), columns="visibleCols"))', 'select rows matching regex in any visible column')
+globalCommand('g\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex"), columns="visibleCols"))', 'unselect rows matching regex in any visible column')
 
 globalCommand(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 globalCommand('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select rows matching current cell in all visible columns')
@@ -395,6 +395,9 @@ def chooseOne(choices):
 def regex_flags():
     'Return flags to pass to regex functions from options'
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
+
+def moveRegex(sheet, *args, **kwargs):
+    list(vd().searchRegex(sheet, *args, moveCursor=True, **kwargs))
 
 def sync(expectedThreads=0):
     'Wait for all async threads to finish.'
@@ -899,14 +902,6 @@ class Sheet:
             self.rows.append(row)
         else:
             self.rows.insert(index, row)
-
-    def moveRegex(self, *args, **kwargs):
-        'Wrap `VisiData.searchRegex`, with cursor additionally moved.'
-        list(self.searchRegex(*args, moveCursor=True, **kwargs))
-
-    def searchRegex(self, *args, **kwargs):
-        'Wrap `VisiData.searchRegex`.'
-        return self.vd.searchRegex(self, *args, **kwargs)
 
     def searchColumnNameRegex(self, colregex, moveCursor=False):
         'Select visible column matching `colregex`, if found.'
