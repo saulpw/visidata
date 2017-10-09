@@ -347,6 +347,9 @@ def status(*args):
     'Return status property via function call.'
     return vd().status(*args)
 
+def input(*args, **kwargs):
+    return vd().input(*args, **kwargs)
+
 def moveListItem(L, fromidx, toidx):
     "Move element within list `L` and return element's new index."
     r = L.pop(fromidx)
@@ -400,9 +403,7 @@ def moveRegex(sheet, *args, **kwargs):
     list(vd().searchRegex(sheet, *args, moveCursor=True, **kwargs))
 
 def sync(expectedThreads=0):
-    'Wait for all async threads to finish.'
-    while len(vd().unfinishedThreads) > expectedThreads:
-        vd().checkForFinishedThreads()
+    vd().sync(expectedThreads)
 
 def async(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
@@ -533,6 +534,11 @@ class VisiData:
                 if not t.status:
                     t.status = 'ended'
 
+    def sync(expectedThreads=0):
+        'Wait for all but expectedThreads async tasks to finish.'
+        while len(self.unfinishedThreads) > expectedThreads:
+            self.checkForFinishedThreads()
+
     def refresh(self):
         Sheet.visibleCols.fget.cache_clear()
 
@@ -547,6 +553,25 @@ class VisiData:
             self.status('"%s"' % v)
             self.callHook('postedit', v)
         return v
+
+    def input(self, prompt, type='', **kwargs):
+        'Compose input prompt.'
+        if type:
+            ret = self._inputLine(prompt, history=list(self.lastInputs[type].keys()), **kwargs)
+            self.lastInputs[type][ret] = ret
+        else:
+            ret = self._inputLine(prompt, **kwargs)
+        return ret
+
+    def _inputLine(self, prompt, **kwargs):
+        'Add prompt to bottom of screen and get line of input from user.'
+        scr = self.scr
+        if scr:
+            scr.addstr(self.windowHeight-1, 0, prompt)
+        self.inInput = True
+        ret = self.editText(self.windowHeight-1, len(prompt), self.windowWidth-len(prompt)-8, attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
+        self.inInput = False
+        return ret
 
     def getkeystroke(self, scr, vs=None):
         'Get keystroke and display it on status bar.'
@@ -1803,25 +1828,6 @@ class ColumnExpr(Column):
         self.compiledExpr = compile(expr, '<expr>', 'eval')
 
 ###
-
-def input(prompt, type='', **kwargs):
-    'Compose input prompt.'
-    if type:
-        ret = _inputLine(prompt, history=list(vd().lastInputs[type].keys()), **kwargs)
-        vd().lastInputs[type][ret] = ret
-    else:
-        ret = _inputLine(prompt, **kwargs)
-    return ret
-
-def _inputLine(prompt, **kwargs):
-    'Add prompt to bottom of screen and get line of input from user.'
-    scr = vd().scr
-    if scr:
-        scr.addstr(vd().windowHeight-1, 0, prompt)
-    vd().inInput = True
-    ret = vd().editText(vd().windowHeight-1, len(prompt), vd().windowWidth-len(prompt)-8, attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
-    vd().inInput = False
-    return ret
 
 def confirm(prompt):
     yn = input(prompt, value='n')[:1]
