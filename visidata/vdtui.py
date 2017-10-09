@@ -117,7 +117,7 @@ option('aggr_null_filter', 'none', 'invalid values to filter out when aggregatin
 option('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 option('debug', False, 'exit on error and display stacktrace')
 option('curses_timeout', 100, 'curses timeout in ms')
-option('num_colors', 0, 'force number of colors to use')
+theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 
 disp_column_fill = ' ' # pad chars after column value
 theme('disp_none', '',  'visible contents of a cell whose value was None')
@@ -2159,7 +2159,7 @@ class ColorMaker:
     def setup(self):
         self.color_attrs['black'] = curses.color_pair(0)
 
-        for c in range(0, int(options.num_colors) or curses.COLORS):
+        for c in range(0, options.force_256_colors and 256 or curses.COLORS):
             curses.init_pair(c+1, c, curses.COLOR_BLACK)
             self.color_attrs[str(c)] = curses.color_pair(c+1)
 
