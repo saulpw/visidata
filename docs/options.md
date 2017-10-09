@@ -1,79 +1,25 @@
-# A minimalistic internal options framework in Python
+# Options
 
-Pros:
+To declare an option:
 
-* implementation in very few lines of code
-* declaration and usage are very convenient
-* options are automatically typed (and Exception raised on set if conversion fails)
+option('num_burgers', 42, 'number of burgers to use')
 
-##
+To get the value of an option:
 
-```
-base_options = collections.OrderedDict()
+options.num_burgers or options['num_burgers']
 
-class configbool:
-    def __init__(self, v):
-        if isinstance(v, str):
-            self.val = v and (v[0].upper() not in "0FN")
-        else:
-            self.val = bool(v)
+To set the value of an option:
 
-    def __bool__(self):
-        return self.val
+options.num_burgers = 13
 
-    def __str__(self):
-        return str(self.val)
+The type of the default is respected, with an Exception raised if trying to set with a value that cannot be converted.  (A default value of None will allow any type.)
 
-def option(name, default, helpstr=''):
-    if isinstance(default, bool):
-        default = configbool(default)
+Option names should use the underscore for word breaks.  On the command-line, underscores must be converted to dashes:
 
-    base_options[name] = [name, default, default, helpstr]
+vd --num-burgers=23
 
-class OptionsObject:
-    'minimalist options framework'
-    def __init__(self, d):
-        object.__setattr__(self, '_opts', d)
+The maximum option name length should be 20.
 
-    def __getattr__(self, k):
-        name, value, default, helpstr = self._opts[k]
-        return value
-
-    def __setattr__(self, k, v):
-        self.__setitem__(k, v)
-
-    def __setitem__(self, k, v):
-        if k not in self._opts:
-            raise Exception('no such option "%s"' % k)
-        self._opts[k][1] = type(self._opts[k][1])(v)
-
-options = OptionsObject(base_options)
-```
-
-Now we have a generic options framework.  To define an option, call this at the top-level:
-
-```option('foo', 100, 'number of times to foo')```
-
-To get the value of an option, just use `options.foo` or `options['foo']`.
-
-To set an option programmatically, do `options.foo = 200` (after the `option()` has been defined).
-
-Finally, this options framework allows automatic generation of command-line arguments from the options:
-
-```
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    for optname, v in base_options.items():
-        name, optval, defaultval, helpstr = v
-        action = 'store_true' if optval is False else 'store'
-        parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=optval, help=helpstr)
-
-    args = parser.parse_args()
-
-    for optname, optval in vars(args).items():
-        if optname not in ['inputs']:  # any options not defined with option()
-            options[optname] = optval  # auto-converts to type of default
-```
-
+theme() should be used instead of option() if the option has no effect on the operation of the program, and can be overrided without affecting existing scripts.  The interfaces are identical.  (The implementation is also identical currently, but that may change in the future.)
 
 

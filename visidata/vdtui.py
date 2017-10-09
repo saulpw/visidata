@@ -71,30 +71,9 @@ def globalCommand(keystrokes, execstr, helpstr=''):
     for ks in keystrokes:
         baseCommands[ks] = cmd
 
-alias = globalCommand
-
-class configbool:
-    def __init__(self, v):
-        if isinstance(v, str):
-            self.val = v and (v[0] not in "0fFnN")
-        else:
-            self.val = bool(v)
-
-    def __bool__(self):
-        return self.val
-
-    def __str__(self):
-        return str(self.val)
-
-configbool.__name__ = 'bool'
-
 def option(name, default, helpstr=''):
-    if isinstance(default, bool):
-        default = configbool(default)
+    baseOptions[name] = [name, default, default, helpstr]
 
-    baseOptions[name] = [name, default, default, helpstr]  # see OptionsObject
-
-theme = option
 
 class OptionsObject:
     'minimalist options framework'
@@ -111,10 +90,20 @@ class OptionsObject:
     def __setitem__(self, k, v):   # options[k] = v
         if k not in self._opts:
             raise Exception('no such option "%s"' % k)
-        self._opts[k][1] = type(self._opts[k][1])(v)
+
+        curval = self._opts[k][1]
+        t = type(curval)
+        if isinstance(v, str) and isinstance(t, bool): # special case for bool options
+            v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
+        elif curval is not None:             # if None, do not apply type conversion
+            v = t(v)
+
+        self._opts[k][1] = v
 
 options = OptionsObject(baseOptions)
 
+alias = globalCommand
+theme = option
 
 option('encoding', 'utf-8', 'as passed to codecs.open')
 option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
