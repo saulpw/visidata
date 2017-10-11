@@ -1651,7 +1651,7 @@ class Column:
 
         try:
             dispval = self.format(cellval)
-            if width and self.type in (int, float, currency):
+            if width and self.type in (int, float, currency, len):
                 dispval = dispval.rjust(width-1)
 
             dw.display = dispval
