@@ -54,7 +54,7 @@ class SheetFreqTable(Sheet):
         self.columns.extend([
             Column('count', type=int, getter=lambda r: len(r[1])),
             Column('percent', type=float, getter=lambda r: len(r[1])*100/self.source.nRows),
-            Column('histogram', type=str, getter=lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=None),
+            Column('histogram', type=str, getter=lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=50),
         ])
 
         aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
