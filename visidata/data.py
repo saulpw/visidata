@@ -3,8 +3,8 @@ import random
 from .vdtui import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
-option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
-option('skiplines', 0, 'skip first N lines of text input')
+option('header', 1, 'parse first N rows of .csv/.tsv as column names')
+option('skip', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
 
 # slide rows/columns around
@@ -193,7 +193,7 @@ def open_tsv(p, vs=None):
         vs = Sheet(p.name, p)
         vs.loader = lambda vs=vs: reload_tsv(vs)
 
-    header_lines = int(options.headerlines)
+    header_lines = int(options.header)
 
     with vs.source.open_text() as fp:
         headers = _getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
@@ -215,7 +215,7 @@ def reload_tsv(vs):
 
 def reload_tsv_sync(vs):
     'Perform synchronous loading of TSV file, discarding header lines.'
-    header_lines = int(options.headerlines)
+    header_lines = int(options.header)
 
     vs.rows = []
     with vs.source.open_text() as fp:

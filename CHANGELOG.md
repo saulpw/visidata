@@ -1,5 +1,10 @@
 # VisiData version history
 
+# next
+
+- skiplines option renamed to skip
+- headerlines option renamed to header
+
 ## 0.97 (2017-10-05)
 - Features
     - [replay]

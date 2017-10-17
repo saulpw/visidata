@@ -2235,7 +2235,7 @@ class Path:
 
     def readlines(self):
         for i, line in enumerate(self.open_text()):
-            if i < options.skiplines:
+            if i < options.skip:
                 continue
             yield line[:-1]
 
