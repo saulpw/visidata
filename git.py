@@ -2,23 +2,32 @@ import sh
 
 from vdtui import *
 
+option('gitcmdlog', 'gitcmds.log', 'file to log all git commands run by vgit')
+
 git_commands = []
+
+def loggit(*args):
+    with open(options.gitcmdlog, 'a') as fp:
+        fp.write('git ' + '|'.join(args) + '\n')
 
 def git_all(*args, **kwargs):
     'Return entire output of git command.'
     try:
-        out = sh.git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
+        loggit(*args)
+        cmd = sh.git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
+        out = cmd.stdout
     except sh.ErrorReturnCode as e:
         status('exit_code=%s' % e.exit_code)
         out = e.stdout
 
-    return out
+    return out.decode('utf-8')
 
 
 def git_lines(*args, **kwargs):
     'Generator of stdout lines from given git command'
     err = io.StringIO()
     try:
+        loggit(*args)
         for line in sh.git('--no-pager', _err=err, *args, _decode_errors='replace', _iter=True, _bg_exc=False, **kwargs):
             yield line[:-1]  # remove EOL
     except sh.ErrorReturnCode as e:
@@ -39,6 +48,7 @@ def git_iter(sep, *args, **kwargs):
 
     chunks = []
     try:
+      loggit(*args)
       for data in sh.git('--no-pager', *args, _decode_errors='replace', _out_bufsize=bufsize, _iter=True, _err=err, **kwargs):
         while True:
             i = data.find(sep)
