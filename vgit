@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import random
 import sh
 from vdtui import *
 
@@ -51,16 +52,30 @@ class GitStashes(GitSheet):
             self.rows.append([stashid, starting_branch, sha1, msg])
 
 
+class GitUndo:
+    def __init__(self, *args):
+        self.cmdargs = args
+    def __enter__(self):
+        return self
+    def __exit__(self, exctype, exc, tb):
+        out = git_all(*self.cmdargs)
 
+def randomBranchName():
+    return ''.join(string.ascii_lowercase[random.randint(0, 25)] for i in range(10))
+
+
+# rowdef: (commit_hash, refnames, author, author_date, body, notes)
 class LogSheet(GitSheet):
-    # commit_hash, refnames, author, author_date, body, notes
+    # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
 
     commands = [
         Command(ENTER, 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit'),
         Command('Q', '', 'squash selected commits'),
         Command('c', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch'),
-#       Command('gc', '', 'cherry-pick selected commits onto current branch')
+#       Command('gc', '', 'cherry-pick selected commits onto current branch'),
+        Command('C', 'confirm("amend this commit with the index? "); vd.push(TextSheet("amendment", amendPrevious(cursorRow[0])))', 'amend this commit with changes in the index'),
+        Command('r', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit'),
     ]
 
     def __init__(self, name, branchname):
@@ -74,6 +89,26 @@ class LogSheet(GitSheet):
             Column('notes', getter=lambda r: r[5], setter=lambda r,v,s=self: s.git('notes', 'add', '--force', '--message', v, r[0])),
         ]
         self.addColorizer('row', 5, lambda s,c,r,v: 'cyan' if not s.inRemoteBranch(r[0]) else None)
+
+    def amendPrevious(self, targethash):
+        'amend targethash with current index, then rebase newer commits on top'
+
+        prevBranch = git_all('rev-parse', '--symbolic-full-name', '--abbrev-ref', 'HEAD').strip()
+
+        ret = git_all('commit', '-m', 'MERGE '+targethash) # commit index to viewed branch
+        newChanges = git_all('rev-parse', 'HEAD').strip()
+
+        ret += git_all('stash', 'save', '--keep-index') # stash everything else
+        with GitUndo('stash', 'pop'):
+            tmpBranch = randomBranchName()
+            ret += git_all('checkout', '-b', tmpBranch) # create/switch to tmp branch
+            with GitUndo('checkout', prevBranch), GitUndo('branch', '-D', tmpBranch):
+                ret += git_all('reset', '--hard', targethash) # tmpbranch now at targethash
+                ret += git_all('cherry-pick', '-n', newChanges)  # pick new change from original branch
+                ret += git_all('commit', '--amend', '--no-edit')  # recommit to fix targethash (which will change)
+                ret += git_all('rebase', '--onto', tmpBranch, 'HEAD@{1}', prevBranch)  # replay the rest
+
+        return ret.splitlines()
 
     @functools.lru_cache()
     def inRemoteBranch(self, commitid):
