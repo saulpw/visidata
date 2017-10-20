@@ -39,10 +39,14 @@ def columnize(rows):
         prev = i
 
 class FixedWidthColumnsSheet(Sheet):
+    columns = [ColumnItem('line', 0)]
+    @async
     def reload(self):
-        self.columns = []
-        self.rows = list([x] for x in readlines(self.source.open_text()))
+        self.rows = []
+        for line in self.source:
+            self.addRow([line])
 
+        self.columns = []
         # compute fixed width columns
         for i, j in columnize(list(r[0] for r in self.rows[:options.fixed_rows])):
             c = FixedWidthColumn('', i, j)
