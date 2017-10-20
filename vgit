@@ -35,7 +35,7 @@ class GitStashes(GitSheet):
         ColumnItem('sha1', 2),
         ColumnItem('msg', 3),
     ]
-    commands = [
+    commands = GitSheet.commands + [
         Command('a', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing'),
         Command('^P', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),
         Command('d', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change'),
@@ -69,7 +69,7 @@ class LogSheet(GitSheet):
     # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
 
-    commands = [
+    commands = GitSheet.commands + [
         Command(ENTER, 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit'),
         Command('Q', '', 'squash selected commits'),
         Command('c', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch'),
@@ -131,7 +131,7 @@ class GitBranches(GitSheet):
         ColumnItem('extra', 4, width=0),
         ColumnItem('head_commitmsg', 5, width=50),
     ]
-    commands = [
+    commands = GitSheet.commands + [
         Command('a', 'git("branch", input("create branch: ", type="branch"))', 'create a new branch off the current checkout'),
         Command('d', 'git("branch", "--delete", cursorRow[1])', 'delete this branch'),
         Command('e', 'git("branch", "-v", "--move", cursorRow[1], editCell(0))', 'rename this branch'),
@@ -203,7 +203,7 @@ class HunksSheet(GitSheet):
         ColumnItem('rightlinenum', 5),
         ColumnItem('rightcount', 6),
     ]
-    commands = [
+    commands = GitSheet.commands + [
         Command(ENTER, 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunks'),
         Command('g^J', 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks (or all hunks)'),
         Command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
@@ -255,7 +255,7 @@ class HunksSheet(GitSheet):
 
 
 class HunkViewer(GitSheet):
-    commands = [
+    commands = GitSheet.commands + [
         Command(['y', 'a', '2'], 'srchunks.git_apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk'),
 #        Command(['r','1'], 'git_apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff'),
         Command(['n', ENTER], 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk'),
@@ -331,7 +331,7 @@ class GitGrep(GitSheet):
 
 class GitOptions(GitSheet):
     CONFIG_CONTEXTS = ('local', 'local', 'global', 'system')
-    commands = [
+    commands = GitSheet.commands + [
         Command('d', 'git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], cursorRow[0])', 'unset this config value'),
         Command('gd', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset selected config values'),
         Command('e', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(sheet, [cursorRow], editCell(i)); sheet.cursorRowIndex += 1', 'edit this option'),
@@ -369,7 +369,7 @@ class GitOptions(GitSheet):
 
 # how to incorporate fetch/push/pull?
 class GitRemotes(GitSheet):
-    commands = [
+    commands = GitSheet.commands + [
         Command('d', 'git("remote", "rm", cursorRow[0])', 'delete remote'),
         Command('a', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
     ]

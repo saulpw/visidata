@@ -178,7 +178,7 @@ class GitSheet(Sheet):
 
 # each row is a GitFile
 class GitStatus(GitSheet):
-    commands = [
+    commands = GitSheet.commands + [
         Command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),
         Command('m', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file'),
         Command('d', 'git("rm", cursorRow.filename)', 'stage this file for deletion'),
