@@ -24,6 +24,8 @@ globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'move t
 globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row')
+globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows')
+
 globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fill null cells in current column with previous non-null value')
 
 def fillNullValues(col, rows):
@@ -58,7 +60,10 @@ globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDe
 
 globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluate Python expression on current row and display result on status line')
 
+globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr"))): cursorCol.setValue(r, v)', 'set selected rows in this column to the values in the given Python sequence expression')
+
 globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with number columns')
+
 
 globalCommand('gKEY_F(1)', 'help-commands')  # vdtui generic commands sheet
 globalCommand('gz?', 'help-commands')  # vdtui generic commands sheet
