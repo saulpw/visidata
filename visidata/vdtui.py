@@ -205,12 +205,12 @@ globalCommand('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(
 globalCommand('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(r) for c in cols), reverse=True)', 'sort descending by all key columns')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error')
-globalCommand('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error") or error("no error this cell")))', 'view traceback for error in current cell')
+globalCommand('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error", None) or error("no error this cell")))', 'view traceback for error in current cell')
 
 
 globalCommand('^^', 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet (swaps with current sheet)')
 
-globalCommand('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'view trackeback for most recent errors')
+globalCommand('g^E', 'vd.push(TextSheet("last_errors", sum(vd.lastErrors, [])))', 'view traceback for most recent errors')
 
 globalCommand('^R', 'reload(); recalc(); status("reloaded")', 'reload current sheet')
 globalCommand('z^R', 'cursorCol._cachedValues.clear()', 'clear cache for current column')
@@ -254,7 +254,7 @@ globalCommand('gz"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows 
 globalCommand('=', 'addColumn(ColumnExpr(input("new column expr=", "expr")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables')
 globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, input("set selected=", "expr"))', 'set current column for selected rows to result of Python expression')
 
-globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay))', 'view contents of current cell in a new sheet')
+globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet')
 
 globalCommand('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'open source of current sheet')
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet')
@@ -380,7 +380,7 @@ def exceptionCaught(status=True):
     return vd().exceptionCaught(status)
 
 def stacktrace():
-    return traceback.format_exc().strip()
+    return traceback.format_exc().strip().splitlines()
 
 def chooseOne(choices):
     'Return one of `choices` elements (if list) or values (if dict).'
@@ -648,9 +648,8 @@ class VisiData:
     def exceptionCaught(self, status=True):
         'Maintain list of most recent errors and return most recent one.'
         self.lastErrors.append(stacktrace())
-        self.lastErrors = self.lastErrors[-10:]  # keep most recent
         if status:
-            return self.status(self.lastErrors[-1].splitlines()[-1])
+            return self.status(self.lastErrors[-1][-1])  # last line of latest error
         if options.debug:
             raise
 
@@ -744,7 +743,7 @@ class VisiData:
             if not keystroke:  # timeout instead of keypress
                 pass
             elif keystroke == '^Q':
-                return self.lastErrors and self.lastErrors[-1]
+                return self.lastErrors and '\n'.join(self.lastErrors[-1])
             elif keystroke == 'KEY_RESIZE':
                 pass
             elif keystroke == 'KEY_MOUSE':
@@ -1864,8 +1863,9 @@ def clipstr(s, dispw):
 
 
 ## text viewer and dir browser
+# rowdef: str
 class TextSheet(Sheet):
-    'Sheet displaying a string (one line per row) or a list of strings.'
+    'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
     commands = [
         Command('w', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % (" NOT" if wrap else "")); reload()', 'toggle text wrap for this sheet')
     ]
@@ -1874,33 +1874,13 @@ class TextSheet(Sheet):
     def reload(self):
         self.columns = [Column(self.name, getter=lambda r: r[1])]
         self.rows = []
-        if isinstance(self.source, list):
-            for x in self.genProgress(self.source):
-                # copy so modifications don't change 'original'; also one iteration through generator
-                self.addLine(x)
-        elif isinstance(self.source, str):
-            for L in self.genProgress(self.source.splitlines()):
-                self.addLine(L)
-        elif isinstance(self.source, io.IOBase):
-            for L in readlines(self.source):
-                self.addLine(L)
-        elif isinstance(self.source, Path):
-            with self.source.open_text() as fp:
-                with Progress(self, self.source.filesize) as prog:
-                    for L in readlines(fp):
-                        self.addLine(L)
-                        prog.addProgress(len(L))
-        else:
-            error('unknown text type ' + str(type(self.source)))
-
-    def addLine(self, text):
-        'Handle text re-wrapping.'
-        if getattr(self, 'wrap', options.wrap):
-            startingLine = len(self.rows)
-            for i, L in enumerate(textwrap.wrap(str(text), width=self.vd.windowWidth-2)):
-                self.addRow((startingLine+i, L))
-        else:
-            self.addRow((len(self.rows), text))
+        for text in self.source:
+            if getattr(self, 'wrap', options.wrap):
+                startingLine = len(self.rows)
+                for i, L in enumerate(textwrap.wrap(str(text), width=self.vd.windowWidth-2)):
+                    self.addRow((startingLine+i, L))
+            else:
+                self.addRow((len(self.rows), text))
 
 class ColumnsSheet(Sheet):
     class ValueColumn(Column):
