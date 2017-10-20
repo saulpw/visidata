@@ -938,7 +938,7 @@ class Sheet:
             if c._cachedValues:
                 c._cachedValues.clear()
             c.sheet = self
-            c.name = c._name  # reset _id based on this sheet
+            c.name = c._name
 
     def reload(self):
         'Default reloader wraps provided `loader` function'
@@ -1280,7 +1280,6 @@ class Sheet:
                 index = len(self.columns)
             col.sheet = self
             self.columns.insert(index, col)
-            col.name = col._name   # reset column name to set _id once in self.columns
             return col
 
     def toggleKeyColumn(self, colidx):
@@ -1390,7 +1389,7 @@ class Sheet:
 
         # ANameTC
         T = typemap.get(col.type, '?')
-        N = ' ' + (col.name or defaultColNames[vcolidx])  # save room at front for LeftMore
+        N = ' ' + col.name  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
         _clipdraw(scr, y, x, N, hdrattr, colwidth)
@@ -1504,8 +1503,7 @@ def isNullFunc():
 class Column:
     def __init__(self, name, type=anytype, cache=False, **kwargs):
         self.sheet = None     # owning sheet, set in Sheet.addColumn
-        self._id = None       # identifier for this column, usable in expressions
-        self.name = name      # display visible name; uses setter from the get-go to fill in _id also
+        self.name = name      # display visible name
         self.fmtstr = ''      # by default, use str()
         self.type = type      # anytype/str/int/float/date/func
         self.getter = lambda row: row
@@ -1538,7 +1536,6 @@ class Column:
         if options.force_valid_colnames:
             name = clean_to_id(name)
         self._name = name
-        self._id = name or self.sheet and defaultColNames[self.sheet.columns.index(self)]
 
     @property
     def fmtstr(self):
@@ -1790,7 +1787,7 @@ class LazyMapRow:
     def __init__(self, sheet, row):
         self.row = row
         self.sheet = sheet
-        self._keys = [c._id for c in self.sheet.columns]
+        self._keys = [c.name for c in self.sheet.columns]
 
     def keys(self):
         return self._keys
@@ -1891,8 +1888,6 @@ class ColumnsSheet(Sheet):
             srcCol.setValue(self.sheet.source.cursorRow, val)
 
     columns = [
-#            ColumnAttr('sheet', width=0),
-            ColumnAttr('ident', '_id', width=0),
             ColumnAttr('name'),
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals(), default=anytype),
@@ -1965,9 +1960,6 @@ class OptionsSheet(Sheet):
         self.rows = list(self.source._opts.values())
 
 vd().optionsSheet = OptionsSheet('options', options)
-
-# A .. Z AA AB .. ZY ZZ  (max 702 unnamed columns)
-defaultColNames = list(string.ascii_uppercase) + list(''.join(j) for j in itertools.product(string.ascii_uppercase, repeat=2))
 
 ### Curses helpers
 

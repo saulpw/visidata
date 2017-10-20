@@ -7,6 +7,7 @@
 - move Path and subclasses out of vdtui
 - TextSheet source is any iterable of strings
 - Sheet.filetype provides default save filename extension
+- remove default names for unnamed columns
 
 ## 0.97 (2017-10-05)
 - Features
