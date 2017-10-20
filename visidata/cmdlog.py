@@ -94,7 +94,7 @@ class CommandLog(Sheet):
         return CommandLogRow()
 
     def reload(self):
-        reload_tsv_sync(self)
+        reload_tsv_sync(self, header=1)  # .vd files always have a header row, regardless of options
         self.rows = [CommandLogRow(r) for r in self.rows]
 
     def undo(self):

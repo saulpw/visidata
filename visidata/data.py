@@ -200,13 +200,13 @@ def open_tsv(p, vs=None):
     return vs
 
 @async
-def reload_tsv(vs):
+def reload_tsv(vs, **kwargs):
     'Asynchronous wrapper for `reload_tsv_sync`.'
     reload_tsv_sync(vs)
 
-def reload_tsv_sync(vs):
+def reload_tsv_sync(vs, **kwargs):
     'Perform synchronous loading of TSV file, discarding header lines.'
-    header_lines = int(options.header)
+    header_lines = kwargs.get('header', options.header)
 
     vs.rows = []
     with vs.source.open_text() as fp:
