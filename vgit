@@ -83,10 +83,10 @@ class LogSheet(GitSheet):
         self.columns = [
             ColumnItem('commitid', 0, width=8),
             ColumnItem('refnames', 1, width=12),
-            Column('message', getter=lambda r: r[4], setter=lambda r,v,s=self: s.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
-            Column('author', getter=lambda r: r[2], setter=lambda r,v,s=self: s.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
-            Column('author_date', type=date, getter=lambda r:r[3], setter=lambda r,v,s=self: s.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
-            Column('notes', getter=lambda r: r[5], setter=lambda r,v,s=self: s.git('notes', 'add', '--force', '--message', v, r[0])),
+            Column('message', getter=lambda r: r[4], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
+            Column('author', getter=lambda r: r[2], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
+            Column('author_date', type=date, getter=lambda r:r[3], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
+            Column('notes', getter=lambda r: r[5], setter=lambda s,c,r,v: s.git('notes', 'add', '--force', '--message', v, r[0])),
         ]
         self.addColorizer('row', 5, lambda s,c,r,v: 'cyan' if not s.inRemoteBranch(r[0]) else None)
 
