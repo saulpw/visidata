@@ -2,33 +2,53 @@ import sh
 
 from vdtui import *
 
-option('gitcmdlog', 'gitcmds.log', 'file to log all git commands run by vgit')
+option('gitcmdlogfile', '', 'file to log all git commands run by vgit')
 
-git_commands = []
+globalCommand('^D', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
 
-def loggit(*args):
-    with open(options.gitcmdlog, 'a') as fp:
-        fp.write('git ' + '|'.join(args) + '\n')
+# rowdef: CommandOutput
+class GitCmdLog(Sheet):
+    columns = [
+        ColumnItem('command', 0),
+        ColumnItem('output', 1),
+    ]
+    commands = [
+        Command(ENTER, 'vd.push(TextSheet(cursorRow[0], cursorRow[1]))', 'view output of this command'),
+    ]
+    def reload(self):
+        self.rows = []
 
-def git_all(*args, **kwargs):
+vd().gitcmdlog = GitCmdLog('gitcmdlog')
+
+def loggit(*args, **kwargs):
+    cmdstr = 'git ' + ' '.join(args)
+    if options.gitcmdlogfile:
+        with open(options.gitcmdlogfile, 'a') as fp:
+            fp.write(cmdstr + '\n')
+
+    r = sh.git(*args, **kwargs)
+
+    vd().gitcmdlog.addRow((cmdstr, r))
+    return r
+
+def git_all(*args, git=sh.git, **kwargs):
     'Return entire output of git command.'
     try:
-        loggit(*args)
-        cmd = sh.git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
+        cmd = git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
         out = cmd.stdout
     except sh.ErrorReturnCode as e:
         status('exit_code=%s' % e.exit_code)
         out = e.stdout
 
-    return out.decode('utf-8')
+    out = out.decode('utf-8')
 
+    return out
 
-def git_lines(*args, **kwargs):
+def git_lines(*args, git=sh.git, **kwargs):
     'Generator of stdout lines from given git command'
     err = io.StringIO()
     try:
-        loggit(*args)
-        for line in sh.git('--no-pager', _err=err, *args, _decode_errors='replace', _iter=True, _bg_exc=False, **kwargs):
+        for line in git('--no-pager', _err=err, *args, _decode_errors='replace', _iter=True, _bg_exc=False, **kwargs):
             yield line[:-1]  # remove EOL
     except sh.ErrorReturnCode as e:
         status('exit_code=%s' % e.exit_code)
@@ -41,15 +61,14 @@ def git_lines(*args, **kwargs):
         vd().push(TextSheet('git ' + ' '.join(args), errlines))
 
 
-def git_iter(sep, *args, **kwargs):
+def git_iter(sep, *args, git=sh.git, **kwargs):
     'Generator of chunks of stdout from given git command, delineated by sep character'
     bufsize = 512
     err = io.StringIO()
 
     chunks = []
     try:
-      loggit(*args)
-      for data in sh.git('--no-pager', *args, _decode_errors='replace', _out_bufsize=bufsize, _iter=True, _err=err, **kwargs):
+      for data in git('--no-pager', *args, _decode_errors='replace', _out_bufsize=bufsize, _iter=True, _err=err, **kwargs):
         while True:
             i = data.find(sep)
             if i < 0:
@@ -73,6 +92,15 @@ def git_iter(sep, *args, **kwargs):
             status(line)
     else:
         vd().push(TextSheet('git ' + ' '.join(args), errlines))
+
+def loggit_lines(*args, **kwargs):
+    return git_lines(*args, git=loggit, **kwargs)
+
+def loggit_all(*args, **kwargs):
+    return git_all(*args, git=loggit, **kwargs)
+
+def loggit_iter(*args, **kwargs):
+    return git_iter(*args, git=loggit, **kwargs)
 
 
 class GitFile:
@@ -98,9 +126,7 @@ class GitSheet(Sheet):
         args = list(args) + self.extra_args
         self.extra_args.clear()
 
-        git_commands.append('git ' + ' '.join(args))
-
-        for line in git_lines(*args, **kwargs):
+        for line in loggit_lines(*args, **kwargs):
             status(line)
 
         gitStatusSheet.reload()

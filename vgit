@@ -58,7 +58,7 @@ class GitUndo:
     def __enter__(self):
         return self
     def __exit__(self, exctype, exc, tb):
-        out = git_all(*self.cmdargs)
+        out = loggit_all(*self.cmdargs)
 
 def randomBranchName():
     return ''.join(string.ascii_lowercase[random.randint(0, 25)] for i in range(10))
