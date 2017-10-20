@@ -76,7 +76,7 @@ def openManPage():
     import subprocess
     from pkg_resources import resource_filename
     with SuspendCurses():
-        os.system(' '.join(['man', '--local-file', resource_filename(__name__, 'man/vd.1')]))
+        os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
 
 def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
