@@ -4,7 +4,6 @@ from .vdtui import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('header', 1, 'parse first N rows of .csv/.tsv as column names')
-option('skip', 0, 'skip first N lines of text input')
 option('filetype', '', 'specify file type')
 
 # slide rows/columns around
@@ -76,14 +75,6 @@ def openManPage():
 
 def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
-
-def readlines(linegen):
-    'Generate lines from linegen, skipping first options.skiplines lines and stripping trailing newline'
-    skiplines = options.skiplines
-    for i, line in enumerate(linegen):
-        if i < skiplines:
-            continue
-        yield line[:-1]
 
 def getDefaultSaveName(sheet):
     if isinstance(sheet.source, Path):
