@@ -1869,6 +1869,7 @@ class TextSheet(Sheet):
     commands = [
         Command('w', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % (" NOT" if wrap else "")); reload()', 'toggle text wrap for this sheet')
     ]
+    filetype = 'txt'
 
     @async
     def reload(self):

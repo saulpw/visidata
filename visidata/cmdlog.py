@@ -82,6 +82,7 @@ class CommandLog(Sheet):
     currentReplay = None     # CommandLog replaying currently
     currentReplayRow = None  # must be global, to allow replay
     semaphore = threading.Semaphore(0)
+    filetype = 'vd'
 
     def __init__(self, name, *args):
         super().__init__(name, *args)

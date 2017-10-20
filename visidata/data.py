@@ -80,7 +80,7 @@ def getDefaultSaveName(sheet):
     if isinstance(sheet.source, Path):
         return str(sheet.source)
     else:
-        return sheet.name+".tsv"
+        return sheet.name+'.'+getattr(sheet, 'filetype', 'tsv')
 
 def saveSheet(vs, fn, confirm_overwrite=False):
     'Save sheet `vs` with given filename `fn`.'
