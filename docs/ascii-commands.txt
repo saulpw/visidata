@@ -1,20 +1,20 @@
   Ctrl- @  NUL
   Ctrl- A
-  Ctrl- B  'B'ack one page [vim]
-  Ctrl- C  'C'ancel task on the current sheet
-  Ctrl- D  'D'ebug mode toggle
-  Ctrl- E  'E'rrors sheet
-  Ctrl- F  'F'orward one page [vim]
+  Ctrl- B  Back one page [vim]
+  Ctrl- C  Cancel async task on the current sheet
+  Ctrl- D  save current commanDlog
+  Ctrl- E  Errors sheet
+  Ctrl- F  Forward one page [vim]
   Ctrl- G  file information [vim]
   Ctrl- H
   Ctrl- I
   Ctrl- J  ENTER (dive into row/value) [sheet-specific]
   Ctrl- K
-  Ctrl- L  (should be redraw)
+  Ctrl- L  redraw screen
   Ctrl- M  (must be same as ENTER)
   Ctrl- N
-  Ctrl- O
-  Ctrl- P  Previous status [nethack]
+  Ctrl- O  toggle prOfiling of main task
+  Ctrl- P  Previous status sheet [nethack]
   Ctrl- Q  Quit
   Ctrl- R  Reload
   Ctrl- S  Save
@@ -23,15 +23,15 @@
   Ctrl- V  Version
   Ctrl- W
   Ctrl- X  push sheet with eval of python e'X'pression
-  Ctrl- Y
-  Ctrl- Z  Zoom into row as python object
+  Ctrl- Y  push sheet for this row object
+  Ctrl- Z
   Ctrl- [  ESC
   Ctrl- \
   Ctrl- ]
   Ctrl- ^  swap sheets [vim]
   Ctrl- _
-    SPACE  pause/resume commandlog replay
- Shift- !  make key column
+    SPACE  advance commandlog replay to next step
+ Shift- !  toggle key column
  Shift- "  duplicate sheet (keeping only selected rows)
  Shift- #  make int column
  Shift- $  make currency column
@@ -63,7 +63,7 @@
  Shift- <  move up to different value
  Shift- ?  reverse search by regex [vim]
  Shift- @  make column date
- Shift- A
+ Shift- A  Add blank sheet
  Shift- B  clipBoard sheet
  Shift- C  Columns sheet
  Shift- D  commandlog sheet
@@ -71,7 +71,7 @@
  Shift- F  Frequency sheet
  Shift- G  move to bottom row [vim]
  Shift- H  slide left
- Shift- I
+ Shift- I  descrIbe sheet
  Shift- J  slide down
  Shift- K  slide up
  Shift- L  slide right
@@ -100,7 +100,7 @@
         c  column move by name regex
         d  delete row to clipboard
         e  edit cell
-        f
+        f  fill null cells down this row
         g  global prefix
         h  move left
         i
@@ -109,7 +109,7 @@
         l  move right
         m
         n  next match [vim]
-        o
+        o  open input
         p  paste row from clipboard
         q  quit sheet
         r  row move by key regex
@@ -125,4 +125,4 @@
  Shift- |  select by regex
  Shift- {  move to prev selected
  Shift- ~  make string column
-        DEL
+        DEL set current cell to None
