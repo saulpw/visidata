@@ -7,6 +7,7 @@ option('csv_delimiter', ',', 'delimiter passed to csv.reader')
 option('csv_quotechar', '"', 'quotechar passed to csv.reader')
 option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
 
+csv.field_size_limit(sys.maxsize)
 
 def open_csv(p):
     vs = Sheet(p.name, p)
@@ -23,8 +24,11 @@ def wrappedNext(rdr):
 def load_csv(vs):
     'Convert from CSV, first handling header row specially.'
     with vs.source.open_text() as fp:
-        samplelen = min(len(wrappedNext(fp)) for i in range(10))
+        samplelen = min(len(wrappedNext(fp)) for i in range(10))  # for progress only
         fp.seek(0)
+
+        for i in range(options.skip):
+            wrappedNext(fp)  # discard initial lines
 
         rdr = csv.reader(fp,
                          dialect=options.csv_dialect,
@@ -35,7 +39,7 @@ def load_csv(vs):
         vs.rows = []
 
         # headers first, to setup columns before adding rows
-        headers = [wrappedNext(rdr) for i in range(int(options.headerlines))]
+        headers = [wrappedNext(rdr) for i in range(int(options.header))]
 
         if headers:
             # columns ideally reflect the max number of fields over all rows

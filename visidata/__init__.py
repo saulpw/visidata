@@ -3,6 +3,7 @@
 
 from .vdtui import __version__
 from .vdtui import *
+from .Path import *
 from .async import *
 from .zscroll import *
 from .aggregators import *

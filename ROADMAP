@@ -1,16 +1,7 @@
 # Feature Roadmap
 
-A loose plan that is subject to change.
-
-## v0.97
-- manpage
-- SheetDiff
-- vd --playerpiano
-
-## after 1.0
+## Post 1.0
 - Python expressions should be usable like regex for search, select, etc
-
-## Future
 - delete regex match in cells
 - maintain original ordering with implicit/hidden line# column
 - popup windows for enum selection
@@ -20,14 +11,14 @@ A loose plan that is subject to change.
   - mass rename with transform
   - ^Delete
   - only apply changes with ^S
-- checkpoint data for faster replay/undo
+- checkpoint data for replay/undo
 - connect to larger datasets
    - load larger than memory .csv/tsv files
 - load new .py plugins for inputs/outputs/sheets
    - git app that can streamline standard workflows
      - checkout branch or revision with TUI interface
      - browse through history
-- '.' repeat command
+- '.' repeat edit?
 - save all sheets to .h5 file
 - reload derived sheets
 - html table parsing into columns

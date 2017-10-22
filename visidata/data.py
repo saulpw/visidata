@@ -3,8 +3,7 @@ import random
 from .vdtui import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
-option('headerlines', 1, 'parse first N rows of .csv/.tsv as column names')
-option('skiplines', 0, 'skip first N lines of text input')
+option('header', 1, 'parse first N rows of .csv/.tsv as column names')
 option('filetype', '', 'specify file type')
 
 # slide rows/columns around
@@ -25,6 +24,8 @@ globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'move t
 globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row')
+globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows')
+
 globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fill null cells in current column with previous non-null value')
 
 def fillNullValues(col, rows):
@@ -59,7 +60,10 @@ globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDe
 
 globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluate Python expression on current row and display result on status line')
 
+globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr"))): cursorCol.setValue(r, v)', 'set selected rows in this column to the values in the given Python sequence expression')
+
 globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with number columns')
+
 
 globalCommand('gKEY_F(1)', 'help-commands')  # vdtui generic commands sheet
 globalCommand('gz?', 'help-commands')  # vdtui generic commands sheet
@@ -77,19 +81,11 @@ def openManPage():
 def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
-def readlines(linegen):
-    'Generate lines from linegen, skipping first options.skiplines lines and stripping trailing newline'
-    skiplines = options.skiplines
-    for i, line in enumerate(linegen):
-        if i < skiplines:
-            continue
-        yield line[:-1]
-
 def getDefaultSaveName(sheet):
     if isinstance(sheet.source, Path):
         return str(sheet.source)
     else:
-        return sheet.name+".tsv"
+        return sheet.name+'.'+getattr(sheet, 'filetype', 'tsv')
 
 def saveSheet(vs, fn, confirm_overwrite=False):
     'Save sheet `vs` with given filename `fn`.'
@@ -193,7 +189,7 @@ def open_tsv(p, vs=None):
         vs = Sheet(p.name, p)
         vs.loader = lambda vs=vs: reload_tsv(vs)
 
-    header_lines = int(options.headerlines)
+    header_lines = int(options.header)
 
     with vs.source.open_text() as fp:
         headers = _getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
@@ -209,13 +205,13 @@ def open_tsv(p, vs=None):
     return vs
 
 @async
-def reload_tsv(vs):
+def reload_tsv(vs, **kwargs):
     'Asynchronous wrapper for `reload_tsv_sync`.'
     reload_tsv_sync(vs)
 
-def reload_tsv_sync(vs):
+def reload_tsv_sync(vs, **kwargs):
     'Perform synchronous loading of TSV file, discarding header lines.'
-    header_lines = int(options.headerlines)
+    header_lines = kwargs.get('header', options.header)
 
     vs.rows = []
     with vs.source.open_text() as fp:

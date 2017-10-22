@@ -82,6 +82,7 @@ class CommandLog(Sheet):
     currentReplay = None     # CommandLog replaying currently
     currentReplayRow = None  # must be global, to allow replay
     semaphore = threading.Semaphore(0)
+    filetype = 'vd'
 
     def __init__(self, name, *args):
         super().__init__(name, *args)
@@ -93,7 +94,7 @@ class CommandLog(Sheet):
         return CommandLogRow()
 
     def reload(self):
-        reload_tsv_sync(self)
+        reload_tsv_sync(self, header=1)  # .vd files always have a header row, regardless of options
         self.rows = [CommandLogRow(r) for r in self.rows]
 
     def undo(self):

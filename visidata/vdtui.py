@@ -26,7 +26,7 @@
 # Just include this whole file in your project as-is.  If you do make
 # modifications, please keep the base vdtui version and append your own id and
 # version.
-__version__ = 'saul.pw/vdtui v0.97'
+__version__ = 'saul.pw/vdtui v0.98pre'
 __author__ = 'Saul Pwanson <vdtui@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Beta'
@@ -34,14 +34,12 @@ __status__ = 'Beta'
 from builtins import *
 import sys
 import os
-import os.path
 import collections
 from copy import copy, deepcopy
 from contextlib import suppress
 import curses
 import datetime
 import functools
-import gzip
 import io
 import itertools
 import string
@@ -207,12 +205,12 @@ globalCommand('g[', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(
 globalCommand('g]', 'rows.sort(key=lambda r,cols=keyCols: tuple(c.getTypedValue(r) for c in cols), reverse=True)', 'sort descending by all key columns')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error')
-globalCommand('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error") or error("no error this cell")))', 'view traceback for error in current cell')
+globalCommand('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error", None) or error("no error this cell")))', 'view traceback for error in current cell')
 
 
 globalCommand('^^', 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet (swaps with current sheet)')
 
-globalCommand('g^E', 'vd.push(TextSheet("last_errors", "\\n\\n".join(vd.lastErrors)))', 'view trackeback for most recent errors')
+globalCommand('g^E', 'vd.push(TextSheet("last_errors", sum(vd.lastErrors, [])))', 'view traceback for most recent errors')
 
 globalCommand('^R', 'reload(); recalc(); status("reloaded")', 'reload current sheet')
 globalCommand('z^R', 'cursorCol._cachedValues.clear()', 'clear cache for current column')
@@ -256,7 +254,7 @@ globalCommand('gz"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows 
 globalCommand('=', 'addColumn(ColumnExpr(input("new column expr=", "expr")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables')
 globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, input("set selected=", "expr"))', 'set current column for selected rows to result of Python expression')
 
-globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay))', 'view contents of current cell in a new sheet')
+globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet')
 
 globalCommand('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'open source of current sheet')
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet')
@@ -382,7 +380,7 @@ def exceptionCaught(status=True):
     return vd().exceptionCaught(status)
 
 def stacktrace():
-    return traceback.format_exc().strip()
+    return traceback.format_exc().strip().splitlines()
 
 def chooseOne(choices):
     'Return one of `choices` elements (if list) or values (if dict).'
@@ -650,9 +648,8 @@ class VisiData:
     def exceptionCaught(self, status=True):
         'Maintain list of most recent errors and return most recent one.'
         self.lastErrors.append(stacktrace())
-        self.lastErrors = self.lastErrors[-10:]  # keep most recent
         if status:
-            return self.status(self.lastErrors[-1].splitlines()[-1])
+            return self.status(self.lastErrors[-1][-1])  # last line of latest error
         if options.debug:
             raise
 
@@ -746,7 +743,7 @@ class VisiData:
             if not keystroke:  # timeout instead of keypress
                 pass
             elif keystroke == '^Q':
-                return self.lastErrors and self.lastErrors[-1]
+                return self.lastErrors and '\n'.join(self.lastErrors[-1])
             elif keystroke == 'KEY_RESIZE':
                 pass
             elif keystroke == 'KEY_MOUSE':
@@ -1866,43 +1863,25 @@ def clipstr(s, dispw):
 
 
 ## text viewer and dir browser
+# rowdef: str
 class TextSheet(Sheet):
-    'Sheet displaying a string (one line per row) or a list of strings.'
+    'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
     commands = [
         Command('w', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % (" NOT" if wrap else "")); reload()', 'toggle text wrap for this sheet')
     ]
+    filetype = 'txt'
 
     @async
     def reload(self):
         self.columns = [Column(self.name, getter=lambda r: r[1])]
         self.rows = []
-        if isinstance(self.source, list):
-            for x in self.genProgress(self.source):
-                # copy so modifications don't change 'original'; also one iteration through generator
-                self.addLine(x)
-        elif isinstance(self.source, str):
-            for L in self.genProgress(self.source.splitlines()):
-                self.addLine(L)
-        elif isinstance(self.source, io.IOBase):
-            for L in readlines(self.source):
-                self.addLine(L)
-        elif isinstance(self.source, Path):
-            with self.source.open_text() as fp:
-                with Progress(self, self.source.filesize) as prog:
-                    for L in readlines(fp):
-                        self.addLine(L)
-                        prog.addProgress(len(L))
-        else:
-            error('unknown text type ' + str(type(self.source)))
-
-    def addLine(self, text):
-        'Handle text re-wrapping.'
-        if getattr(self, 'wrap', options.wrap):
-            startingLine = len(self.rows)
-            for i, L in enumerate(textwrap.wrap(str(text), width=self.vd.windowWidth-2)):
-                self.addRow((startingLine+i, L))
-        else:
-            self.addRow((len(self.rows), text))
+        for text in self.source:
+            if getattr(self, 'wrap', options.wrap):
+                startingLine = len(self.rows)
+                for i, L in enumerate(textwrap.wrap(str(text), width=self.vd.windowWidth-2)):
+                    self.addRow((startingLine+i, L))
+            else:
+                self.addRow((len(self.rows), text))
 
 class ColumnsSheet(Sheet):
     class ValueColumn(Column):
@@ -2211,150 +2190,6 @@ def wrapper(f, *args):
 
 ### external interface
 
-class Path:
-    'File and path-handling class, modeled on `pathlib.Path`.'
-    def __init__(self, fqpn):
-        self.fqpn = fqpn
-        fn = os.path.split(fqpn)[-1]
-
-        # check if file is gzip-compressed
-        if fn.endswith('.gz'):
-            self.gzip_compressed = True
-            fn = fn[:-3]
-        else:
-            self.gzip_compressed = False
-
-        self.name, self.ext = os.path.splitext(fn)
-        self.suffix = self.ext[1:]
-
-    def open_text(self, mode='r'):
-        if self.gzip_compressed:
-            return gzip.open(self.resolve(), mode='rt', encoding=options.encoding, errors=options.encoding_errors)
-        else:
-            return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
-
-    def readlines(self):
-        for i, line in enumerate(self.open_text()):
-            if i < options.skiplines:
-                continue
-            yield line[:-1]
-
-    def read_text(self):
-        with self.open_text() as fp:
-            return fp.read()
-
-    def read_bytes(self):
-        with open(self.resolve(), 'rb') as fp:
-            return fp.read()
-
-    def is_dir(self):
-        return os.path.isdir(self.resolve())
-
-    def exists(self):
-        return os.path.exists(self.resolve())
-
-    def iterdir(self):
-        return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
-
-    def stat(self):
-        try:
-            return os.stat(self.resolve())
-        except:
-            return None
-
-    def resolve(self):
-        'Resolve pathname shell variables and ~userdir'
-        return os.path.expandvars(os.path.expanduser(self.fqpn))
-
-    def relpath(self, start):
-        return os.path.relpath(os.path.realpath(self.resolve()), start)
-
-    @property
-    def parent(self):
-        'Return Path to parent directory.'
-        return Path(self.fqpn + "/..")
-
-    @property
-    def filesize(self):
-        return self.stat().st_size
-
-    def __str__(self):
-        return self.fqpn
-
-class UrlPath:
-    def __init__(self, url):
-        from urllib.parse import urlparse
-        self.url = url
-        self.obj = urlparse(url)
-        self.name = self.obj.netloc
-
-    def __str__(self):
-        return self.url
-
-    def __getattr__(self, k):
-        return getattr(self.obj, k)
-
-
-class PathFd(Path):
-    'minimal Path interface to satisfy a tsv loader'
-    def __init__(self, pathname, fp, filesize=0):
-        super().__init__(pathname)
-        self.fp = fp
-        self.alreadyRead = []  # shared among all RepeatFile instances
-        self._filesize = filesize
-
-    def read_text(self):
-        return self.fp.read()
-
-    def open_text(self):
-        return RepeatFile(self)
-
-    @property
-    def filesize(self):
-        return self._filesize
-
-
-class RepeatFile:
-    def __init__(self, pathfd):
-        self.pathfd = pathfd
-        self.iter = None
-
-    def __enter__(self):
-        self.iter = RepeatFileIter(self)
-        return self
-
-    def __exit__(self, a,b,c):
-        pass
-
-    def seek(self, n):
-        assert n == 0, 'RepeatFile can only seek to beginning'
-        self.iter = RepeatFileIter(self)
-
-    def __iter__(self):
-        return RepeatFileIter(self)
-
-    def __next__(self):
-        return next(self.iter)
-
-class RepeatFileIter:
-    def __init__(self, rf):
-        self.rf = rf
-        self.nextIndex = 0
-
-    def __iter__(self):
-        return RepeatFileIter(self.rf)
-
-    def __next__(self):
-        if self.nextIndex < len(self.rf.pathfd.alreadyRead):
-            r = self.rf.pathfd.alreadyRead[self.nextIndex]
-        else:
-            r = next(self.rf.pathfd.fp)
-            self.rf.pathfd.alreadyRead.append(r)
-
-        self.nextIndex += 1
-        return r
-
-
 def run(*sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
@@ -2384,4 +2219,4 @@ def getGlobals():
     return globals()
 
 if __name__ == '__main__':
-    run(*(TextSheet('contents', Path(src)) for src in sys.argv[1:]))
+    run(*(TextSheet('contents', open(src)) for src in sys.argv[1:]))
