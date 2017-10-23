@@ -451,7 +451,7 @@ class VisiData:
         self.inInput = False
         self.prefixWaiting = False
         self.scr = None  # curses scr
-        self.hooks = {}
+        self.hooks = collections.defaultdict(list)  # [hookname] -> list(hooks)
         self.threads = []  # all threads, including finished
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
         self.addHook('rstatus', self.rightStatus)
@@ -465,18 +465,12 @@ class VisiData:
 
     def addHook(self, hookname, hookfunc):
         'Add hookfunc by hookname, to be called by corresponding `callHook`.'
-        if hookname in self.hooks:
-            hooklist = self.hooks[hookname]
-        else:
-            hooklist = []
-            self.hooks[hookname] = hooklist
-
-        hooklist.insert(0, hookfunc)
+        self.hooks[hookname].insert(0, hookfunc)
 
     def callHook(self, hookname, *args, **kwargs):
         'Call all functions registered with `addHook` for the given hookname.'
         r = []
-        for f in self.hooks.get(hookname, []):
+        for f in self.hooks[hookname]:
             try:
                 r.append(f(*args, **kwargs))
             except EscapeException:
@@ -542,10 +536,12 @@ class VisiData:
 
     def editText(self, y, x, w, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
-        v = self.callHook('preedit')[0]
-        if v is None:
+        v = self.callHook('preedit')
+        if not v or v[0] is None:
             with EnableCursor():
                 v = editText(self.scr, y, x, w, **kwargs)
+        else:
+            v = v[0]
 
         if kwargs.get('display', True):
             self.status('"%s"' % v)
