@@ -2,17 +2,17 @@
 
 
 ## Global Keystrokes
-- `H` opens the git log sheet (history) for the current branch
-- `B` opens the git branches sheet
-- `R` opens the remotes sheet
-- `T` opens the stashes sheet
-- `O` opens the git options sheet
-- `X` opens the list of git commands executed
-- `P`ushes the local refs to the currently set remote refs (`git push`)
-- `Ctrl-s` stashes all uncommited changes (`git stash`)
-- `Ctrl-p` pops the most recent stashed change and drops it (`git stash pop`)
-- `A` aborts the cherry-pick/rebase/merge in-progress action shown on status line
-- `L` opens the git blame sheet
+- `Shift-H` opens the git log sheet (history) for the current branch
+- `Shift-B` opens the git branches sheet
+- `Shift-R` opens the remotes sheet
+- `Shift-T` opens the stashes sheet
+- `Shift-O` opens the git options sheet
+- `Shift-X` opens the list of git commands executed
+- `Shift-P`ushes the local refs to the currently set remote refs (`git push`)
+- `^S` stashes all uncommited changes (`git stash`)
+- `^P` pops the most recent stashed change and drops it (`git stash pop`)
+- `Shift-A` aborts the cherry-pick/rebase/merge in-progress action shown on status line
+- `Shift-L` opens the git blame sheet
 
 ## Git Status Sheet
 - provides information about the working tree
@@ -21,21 +21,21 @@
 - `d` stages a file for deletion; `gd` stages all selected files for deletion
 - `r` unstages a file
 - `c` checks out a file
-- `C` commits all staged changes
-- `ENTER` pushes a hunks sheet for a file; `g<ENTER>` pushes hunks sheet for selected files (or all files, if none selected)
+- `Shift-C` commits all staged changes
+- `Enter` pushes a hunks sheet for a file; `gEnter` pushes hunks sheet for selected files (or all files, if none selected)
 - `g/` performs a search through all files
 - `x` executes an arbitrary git command
 - `f` adds a --force flag to the next git command
 - `i` adds a file to toplevel .gitignore; `gi` to add an input line to toplevel .gitignore
-- `V` opens selected file
-- `z<ENTER>` pushes hunks sheet for the staged diffs for the selected file; `zg<ENTER>` pushes hunks sheet for the staged diffs for selected files (or all files, if none selected)
+- `Shift-V` opens selected file in $Editor
+- `zEnter` pushes hunks sheet for the staged diffs for the selected file; `zgEnter` pushes hunks sheet for the staged diffs for selected files (or all files, if none selected)
 
 ## Hunks Sheet 
 - opens a view for the hunks of a file (pieces of diffs)
-- `ENTER` on a hunk shows you its diffs; `gENTER` scrolls through diffs for all of the selected hunks (or all hunks, if none selected)
+- `Enter` on a hunk shows you its diffs; `gEnter` scrolls through diffs for all of the selected hunks (or all hunks, if none selected)
 - `a` stages a hunk
 - `d` or `r` undoes this hunk
-- `V` views the raw patch for this hunk
+- `Shift-V` views the raw patch for this hunk
 
 ## Diff Viewer for Selected Hunks Sheet
 - opens a view for the diff of a hunk
@@ -47,7 +47,9 @@
 
 ## Git Log Sheet (`H`istory)
 - shows the git commit history for the selected branch
-- `<ENTER>` shows the diff for the selected commit
+- `Enter` shows the diff for the selected commit
+- `Shift-C` amends the selected commit to contain the currently staged changes
+- `r` resets the shown branch HEAD to the selected commit
 - `c` cherry-picks the selected commit onto the current branch
 
 ## Git `B`ranches Sheet
@@ -56,7 +58,7 @@
 - `c` checks out a branch
 - `d` removes a branch
 - `e` renames a branch
-- `<ENTER>` pushes the log sheet of the selected branch
+- `Enter` pushes the log sheet of the selected branch
 - `m` merges the selected branch into the current branch
 
 ## Git `R`emotes Sheet
@@ -66,9 +68,9 @@
 
 ## Git S`T`ashes Sheet
 - allows viewing of current stashed commits
-- `<ENTER>` shows the selected stashed change
+- `Enter` shows the selected stashed change
 - `a` applies a stashed change without removing it from the stash
-- `Ctrl-p` applies a stashed change and drops it
+- `^P` applies a stashed change and drops it
 - `d`rops a stashed change
 - `b` creates a new branch from the stashed change
 

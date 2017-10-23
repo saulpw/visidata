@@ -1,4 +1,9 @@
 # CHANGELOG
+## 0.3
+- log all git commands which vgit executes to gitcmd.log
+- git log sheet
+    - `Shift-C` amends the selected commit to contain the currently staged changes
+    - `r` resets the shown branch HEAD to the selected commit
 
 ## v0.2 (2017-08-23)
 - vgit auto pushes a full sheet of statuses if the status is more than 3 lines
