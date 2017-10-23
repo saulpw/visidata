@@ -76,18 +76,15 @@ class LogSheet(GitSheet):
         Command('C', 'confirm("amend this commit with the index? "); amendPrevious(cursorRow[0]); reload()', 'amend this commit with changes in the index'),
         Command('r', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit'),
     ]
-
-    def __init__(self, name, branchname):
-        super().__init__(name, branchname)
-        self.columns = [
+    columns = [
             ColumnItem('commitid', 0, width=8),
             ColumnItem('refnames', 1, width=12),
             Column('message', getter=lambda r: r[4], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
             Column('author', getter=lambda r: r[2], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
             Column('author_date', type=date, getter=lambda r:r[3], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
             Column('notes', getter=lambda r: r[5], setter=lambda s,c,r,v: s.git('notes', 'add', '--force', '--message', v, r[0])),
-        ]
-        self.addColorizer('row', 5, lambda s,c,r,v: 'cyan' if not s.inRemoteBranch(r[0]) else None)
+    ]
+    colorizers = [Colorizer('row', 5, lambda s,c,r,v: 'cyan' if not s.inRemoteBranch(r[0]) else None)]
 
     def amendPrevious(self, targethash):
         'amend targethash with current index, then rebase newer commits on top'
@@ -138,11 +135,14 @@ class GitBranches(GitSheet):
         Command('m', 'git("merge", cursorRow[1])', 'merge this branch into the current branch'),
         Command(ENTER, 'vd.push(LogSheet(cursorRow[1]+"_log", cursorRow[1]))', 'push log of this branch'),
     ]
+    colorizers = [
+        Colorizer('row', 10, lambda s,c,r,v: 'underline' if r[0] else None),
+        Colorizer('row', 10, lambda s,c,r,v: 'cyan' if not r[1].startswith('remotes/') else None),
+    ]
+    nKeys = 1
+
     def __init__(self):
         super().__init__('branches')
-        self.nKeys = 1
-        self.addColorizer('row', 10, lambda s,c,r,v: 'underline' if r[0] else None)
-        self.addColorizer('row', 10, lambda s,c,r,v: 'cyan' if not r[1].startswith('remotes/') else None)
 
     @async
     def reload(self):
@@ -255,9 +255,9 @@ class HunksSheet(GitSheet):
 
 class HunkViewer(GitSheet):
     commands = GitSheet.commands + [
-        Command(['y', 'a', '2'], 'srchunks.git_apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk'),
-#        Command(['r','1'], 'git_apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff'),
-        Command(['n', ENTER], 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk'),
+        Command('2', 'srchunks.git_apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk'),
+#        Command('1', 'git_apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff'),
+        Command(ENTER, 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk'),
         Command('d', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch'),
     ]
     def __init__(self, srchunks, *hunks):
@@ -267,7 +267,7 @@ class HunkViewer(GitSheet):
             ColumnItem('1', 1, width=vd().windowWidth//2-1),
             ColumnItem('2', 2, width=vd().windowWidth//2-1),
         ]
-        self.addColorizer('row', 4, HunkViewer.colorDiffRow)
+        self.addColorizer(Colorizer('row', 4, HunkViewer.colorDiffRow))
 
     def reload(self):
         if not self.sources:
@@ -317,7 +317,7 @@ class GitGrep(GitSheet):
         ColumnItem('line', 2),
     ]
     commands = [
-        Command(ENTER, 'vd.push(TextSheet(cursorRow[0], Path(cursorRow[0]))).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
+        Command(ENTER, 'vd.push(TextSheet(cursorRow[0], open(cursorRow[0]))).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
     ]
     def __init__(self, regex):
         super().__init__(regex, regex)
@@ -393,7 +393,7 @@ gitRemotesSheet = GitRemotes()
 
 
 def main():
-    options.textwrap = False
+    options.wrap = False
 
     status(__version__)
 
@@ -402,7 +402,7 @@ def main():
     fn = sys.argv[1] if sys.argv[1:] else '.'
     os.chdir(fn)
 
-    run([gitStatusSheet])
+    run(gitStatusSheet)
 
 
 main()

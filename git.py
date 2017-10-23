@@ -1,6 +1,7 @@
 import sh
 
 from vdtui import *
+from Path import Path
 
 option('gitcmdlogfile', '', 'file to log all git commands run by vgit')
 
@@ -15,7 +16,8 @@ class GitCmdLog(Sheet):
     commands = [
         Command(ENTER, 'vd.push(TextSheet(cursorRow[0], cursorRow[1]))', 'view output of this command'),
     ]
-    def reload(self):
+    def __init__(self, name):
+        super().__init__(name)
         self.rows = []
 
 vd().gitcmdlog = GitCmdLog('gitcmdlog')
@@ -196,10 +198,14 @@ class GitStatus(GitSheet):
         Command('g/', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
 
         Command('z^J', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
-        Command(['zg^J', 'gz^J'], 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
+        Command('gz^J', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
 
 #        Command('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file'),
         Command('L', 'vd.push(GitBlame(cursorRow))', 'push blame for this file'),
+    ]
+    colorizers = [
+        Colorizer('row', 6, lambda s,c,r,v: 'red underline' if 'U' in s.git_status(r)[0] else None),
+        Colorizer('cell', 7, lambda s,c,r,v: 'green' if c.name == 'staged' and s.git_status(r)[0][0] == 'M' else None),
     ]
 
     def __init__(self, p):
@@ -207,20 +213,17 @@ class GitStatus(GitSheet):
         self.branch = ''
         self.remotediff = ''  # ahead/behind status
 
-        self.columns = [Column('path', getter=lambda r,s=self: str(r)),
-                      Column('status', getter=lambda r,s=self: s.statusText(s.git_status(r)), width=8),
-                      Column('staged', getter=lambda r,s=self: s.git_status(r)[2]),
-                      Column('unstaged', getter=lambda r,s=self: s.git_status(r)[1]),
-                      Column('type', getter=lambda r: r.is_dir and '/' or r.path.suffix, width=0),
-                      Column('size', type=int, getter=lambda r: r.path.filesize),
-                      Column('mtime', type=date, getter=lambda r: r.path.stat().st_mtime),
-                    ]
-
-        self.addColorizer('row', 3, GitStatus.rowColor)
-        self.addColorizer('row', 6, lambda s,c,r,v: 'red underline' if 'U' in s.git_status(r)[0] else None)
-        self.addColorizer('cell', 7, lambda s,c,r,v: 'green' if c.name == 'staged' and s.git_status(r)[0][0] == 'M' else None)
-
         self._cachedStatus = {}
+        self.addColorizer(Colorizer('row', 3, GitStatus.rowColor))
+        self.columns = [
+            Column('path', getter=lambda r,s=self: str(r)),
+            Column('status', getter=lambda r,s=self: s.statusText(s.git_status(r)), width=8),
+            Column('staged', getter=lambda r,s=self: s.git_status(r)[2]),
+            Column('unstaged', getter=lambda r,s=self: s.git_status(r)[1]),
+            Column('type', getter=lambda r: r.is_dir and '/' or r.path.suffix, width=0),
+            Column('size', type=int, getter=lambda r: r.path.filesize),
+            Column('mtime', type=date, getter=lambda r: r.path.stat().st_mtime),
+        ]
 
     def statusText(self, st):
         vmod = {'A': 'add', 'D': 'rm', 'M': 'mod', 'T': 'chmod', '?': 'out', '!': 'ignored', 'U': 'unmerged'}

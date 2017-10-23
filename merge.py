@@ -73,17 +73,17 @@ def parseDiff(left, right, lines):
 
 
 class GitMerge(GitSheet):
-    def __init__(self, gf):
-        super().__init__(str(gf)+'_merge', gf)
-        self.columns = [
+    columns = [
             Column('1/remote', width=10, getter=lambda r: r[0][1]),
             Column('2/HEAD', getter=lambda r: r[1][1]),
             Column('3/index', getter=lambda r: r[2][1]),
             Column('4/working', getter=lambda r: r[3][1]),
-        ]
+    ]
 
-#        self.addColorizer('col', 4, lambda s,c,r,v: 'green' if c is s.columns[2] else None)
-        self.addColorizer('cell', 5, self.colorDiffCell)
+    def __init__(self, gf):
+        super().__init__(str(gf)+'_merge', gf)
+        self.addColorizer(Colorizer('cell', 5, self.colorDiffCell))
+#        Colorizer('col', 4, lambda s,c,r,v: 'green' if c is s.columns[2] else None)
 
     @staticmethod
     def colorDiffCell(sheet, col, row, val):
