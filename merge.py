@@ -82,11 +82,6 @@ class GitMerge(GitSheet):
             Column('4/working', getter=lambda r: r[3][1]),
         ]
 
-        self.command('1', '', '')
-        self.command('2', '', '')
-        self.command('3', '', '')
-        self.command('4', '', '')
-
 #        self.addColorizer('col', 4, lambda s,c,r,v: 'green' if c is s.columns[2] else None)
         self.addColorizer('cell', 5, self.colorDiffCell)
 

@@ -1,46 +1,46 @@
 #!/usr/bin/env python3
 
 import sys
+import random
 import sh
 from vdtui import *
 
 from git import *
 from merge import GitMerge
 
-__version__ = 'saul.pw/vgit v0.2'
+__version__ = 'saul.pw/vgit v0.3pre'
 
 option('vgit_show_ignored', False)
 option('diff_algorithm', 'minimal')
 
-command('x', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
-command('B', 'vd.push(gitBranchesSheet).reload()', 'push branches sheet')
-command('O', 'vd.push(gitOptionsSheet).reload()', 'push sheet of git options')
-command('P', 'git("push")', 'git push')
-command('A', 'abortWhatever()', 'abort the current in-progress action')
+globalCommand('x', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
+globalCommand('B', 'vd.push(gitBranchesSheet).reload()', 'push branches sheet')
+globalCommand('O', 'vd.push(gitOptionsSheet).reload()', 'push sheet of git options')
+globalCommand('P', 'git("push")', 'git push')
+globalCommand('A', 'abortWhatever()', 'abort the current in-progress action')
 
-command('H', 'vd.push(LogSheet(branch+"_log", branch))', 'push log of current branch')
-command('T', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
-command('R', 'vd.push(gitRemotesSheet).reload()', 'push remotes sheet')
-command('^S', 'git("stash", "save")', 'stash uncommitted changes')
-command('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
-command('1', 'vd.push(TextSheet("git_commands", git_commands))', 'push list of git commands executed')
+globalCommand('H', 'vd.push(LogSheet(branch+"_log", branch))', 'push log of current branch')
+globalCommand('T', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
+globalCommand('R', 'vd.push(gitRemotesSheet).reload()', 'push remotes sheet')
+globalCommand('^S', 'git("stash", "save")', 'stash uncommitted changes')
+globalCommand('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
+globalCommand('X', 'vd.push(TextSheet("git_commands", git_commands))', 'push list of git commands executed')
 
 
 class GitStashes(GitSheet):
-    def __init__(self):
-        super().__init__('stashes')
-        self.columns = [
-            ColumnItem('stashid', 0),
-            ColumnItem('start_branch', 1),
-            ColumnItem('sha1', 2),
-            ColumnItem('msg', 3),
-        ]
-        self.command('a', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing')
-        self.command('^P', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it')
-        self.command('d', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change')
-        self.command('b', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash')
-        self.command(ENTER, 'vd.push(HunksSheet(cursorRow[0]+"_diffs", sheet, "stash", "show", "--no-color", "--patch", cursorRow[0]))', 'show this stashed change')
-
+    columns = [
+        ColumnItem('stashid', 0),
+        ColumnItem('start_branch', 1),
+        ColumnItem('sha1', 2),
+        ColumnItem('msg', 3),
+    ]
+    commands = [
+        Command('a', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing'),
+        Command('^P', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),
+        Command('d', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change'),
+        Command('b', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash'),
+        Command(ENTER, 'vd.push(HunksSheet(cursorRow[0]+"_diffs", sheet, "stash", "show", "--no-color", "--patch", cursorRow[0]))', 'show this stashed change'),
+    ]
 
     def reload(self):
         self.rows = []
@@ -51,11 +51,31 @@ class GitStashes(GitSheet):
             self.rows.append([stashid, starting_branch, sha1, msg])
 
 
+class GitUndo:
+    def __init__(self, *args):
+        self.cmdargs = args
+    def __enter__(self):
+        return self
+    def __exit__(self, exctype, exc, tb):
+        out = git_all(*self.cmdargs)
 
+def randomBranchName():
+    return ''.join(string.ascii_lowercase[random.randint(0, 25)] for i in range(10))
+
+
+# rowdef: (commit_hash, refnames, author, author_date, body, notes)
 class LogSheet(GitSheet):
-    # commit_hash, refnames, author, author_date, body, notes
+    # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
 
+    commands = [
+        Command(ENTER, 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit'),
+        Command('Q', '', 'squash selected commits'),
+        Command('c', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch'),
+#       Command('gc', '', 'cherry-pick selected commits onto current branch'),
+        Command('C', 'confirm("amend this commit with the index? "); vd.push(TextSheet("amendment", amendPrevious(cursorRow[0])))', 'amend this commit with changes in the index'),
+        Command('r', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit'),
+    ]
 
     def __init__(self, name, branchname):
         super().__init__(name, branchname)
@@ -67,12 +87,27 @@ class LogSheet(GitSheet):
             Column('author_date', type=date, getter=lambda r:r[3], setter=lambda r,v,s=self: s.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
             Column('notes', getter=lambda r: r[5], setter=lambda r,v,s=self: s.git('notes', 'add', '--force', '--message', v, r[0])),
         ]
-        self.command(ENTER, 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit')
-#        self.command('Q', '', 'squash selected commits')
-        self.command('c', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch')
-#        self.command('gc', '', 'cherry-pick selected commits onto current branch')
-
         self.addColorizer('row', 5, lambda s,c,r,v: 'cyan' if not s.inRemoteBranch(r[0]) else None)
+
+    def amendPrevious(self, targethash):
+        'amend targethash with current index, then rebase newer commits on top'
+
+        prevBranch = git_all('rev-parse', '--symbolic-full-name', '--abbrev-ref', 'HEAD').strip()
+
+        ret = git_all('commit', '-m', 'MERGE '+targethash) # commit index to viewed branch
+        newChanges = git_all('rev-parse', 'HEAD').strip()
+
+        ret += git_all('stash', 'save', '--keep-index') # stash everything else
+        with GitUndo('stash', 'pop'):
+            tmpBranch = randomBranchName()
+            ret += git_all('checkout', '-b', tmpBranch) # create/switch to tmp branch
+            with GitUndo('checkout', prevBranch), GitUndo('branch', '-D', tmpBranch):
+                ret += git_all('reset', '--hard', targethash) # tmpbranch now at targethash
+                ret += git_all('cherry-pick', '-n', newChanges)  # pick new change from original branch
+                ret += git_all('commit', '--amend', '--no-edit')  # recommit to fix targethash (which will change)
+                ret += git_all('rebase', '--onto', tmpBranch, 'HEAD@{1}', prevBranch)  # replay the rest
+
+        return ret.splitlines()
 
     @functools.lru_cache()
     def inRemoteBranch(self, commitid):
@@ -86,26 +121,26 @@ class LogSheet(GitSheet):
 
 
 class GitBranches(GitSheet):
+    columns = [
+        Column('branch', getter=lambda r: r[1][8:] if r[1].startswith('remotes/') else r[1], width=20),
+        ColumnItem('head_commitid', 2, width=0),
+        ColumnItem('tracking', 3),
+        ColumnItem('upstream', 6),
+        ColumnItem('merge_base', 7, width=20),
+        ColumnItem('extra', 4, width=0),
+        ColumnItem('head_commitmsg', 5, width=50),
+    ]
+    commands = [
+        Command('a', 'git("branch", input("create branch: ", type="branch"))', 'create a new branch off the current checkout'),
+        Command('d', 'git("branch", "--delete", cursorRow[1])', 'delete this branch'),
+        Command('e', 'git("branch", "-v", "--move", cursorRow[1], editCell(0))', 'rename this branch'),
+        Command('c', 'git("checkout", cursorRow[1])', 'checkout this branch'),
+        Command('m', 'git("merge", cursorRow[1])', 'merge this branch into the current branch'),
+        Command(ENTER, 'vd.push(LogSheet(cursorRow[1]+"_log", cursorRow[1]))', 'push log of this branch'),
+    ]
     def __init__(self):
         super().__init__('branches')
-        self.columns = [
-            Column('branch', getter=lambda r: r[1][8:] if r[1].startswith('remotes/') else r[1], width=20),
-            ColumnItem('head_commitid', 2, width=0),
-            ColumnItem('tracking', 3),
-            ColumnItem('upstream', 6),
-            ColumnItem('merge_base', 7, width=20),
-            ColumnItem('extra', 4, width=0),
-            ColumnItem('head_commitmsg', 5, width=50),
-        ]
         self.nKeys = 1
-
-        self.command('a', 'git("branch", input("create branch: ", type="branch"))', 'create a new branch off the current checkout')
-        self.command('d', 'git("branch", "--delete", cursorRow[1])', 'delete this branch')
-        self.command('e', 'git("branch", "-v", "--move", cursorRow[1], editCell(0))', 'rename this branch')
-        self.command('c', 'git("checkout", cursorRow[1])', 'checkout this branch')
-        self.command('m', 'git("merge", cursorRow[1])', 'merge this branch into the current branch')
-        self.command(ENTER, 'vd.push(LogSheet(cursorRow[1]+"_log", cursorRow[1]))', 'push log of this branch')
-
         self.addColorizer('row', 10, lambda s,c,r,v: 'underline' if r[0] else None)
         self.addColorizer('row', 10, lambda s,c,r,v: 'cyan' if not r[1].startswith('remotes/') else None)
 
@@ -158,25 +193,27 @@ def getCommitSheet(name, parent, *refids):
 
 # source is arguments to git()
 class HunksSheet(GitSheet):
+    columns = [
+        ColumnItem('origfn', 0, width=0),
+        ColumnItem('filename', 1),
+        ColumnItem('context', 2),
+        ColumnItem('leftlinenum', 3),
+        ColumnItem('leftcount', 4),
+        ColumnItem('rightlinenum', 5),
+        ColumnItem('rightcount', 6),
+    ]
+    commands = [
+        Command(ENTER, 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunks'),
+        Command('g^J', 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks (or all hunks)'),
+        Command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
+#        Command('gV', '', 'view the raw patch for selected/all hunks'),
+        Command('a', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index'),
+#        Command(['d','r'], 'git_apply(cursorRow, "--reverse")', 'undo this hunk'),
+    ]
+
     def __init__(self, name, parent, *git_args):
         super().__init__(name, parent)
         self.git_args = git_args
-        self.columns = [
-            ColumnItem('origfn', 0, width=0),
-            ColumnItem('filename', 1),
-            ColumnItem('context', 2),
-            ColumnItem('leftlinenum', 3),
-            ColumnItem('leftcount', 4),
-            ColumnItem('rightlinenum', 5),
-            ColumnItem('rightcount', 6),
-        ]
-
-        self.command(ENTER, 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunks')
-        self.command('g^J', 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks (or all hunks)')
-        self.command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk')
-#        self.command('gV', '', 'view the raw patch for selected/all hunks')
-        self.command('a', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index')
-        self.command(['d','r'], 'git_apply(cursorRow, "--reverse")', 'undo this hunk')
 
     def reload(self):
         def _parseStartCount(s):
@@ -217,6 +254,12 @@ class HunksSheet(GitSheet):
 
 
 class HunkViewer(GitSheet):
+    commands = [
+        Command(['y', 'a', '2'], 'srchunks.git_apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk'),
+#        Command(['r','1'], 'git_apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff'),
+        Command(['n', ENTER], 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk'),
+        Command('d', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch'),
+    ]
     def __init__(self, srchunks, *hunks):
         super().__init__('hunk', *hunks)
         self.srchunks = srchunks
@@ -225,10 +268,6 @@ class HunkViewer(GitSheet):
             ColumnItem('2', 2, width=vd().windowWidth//2-1),
         ]
         self.addColorizer('row', 4, HunkViewer.colorDiffRow)
-        self.command(['y', 'a', '2'], 'srchunks.git_apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk')
-        self.command(['r','1'], 'git_apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff')
-        self.command(['n', ENTER], 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk')
-        self.command('d', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch')
 
     def reload(self):
         if not self.sources:
@@ -272,13 +311,16 @@ class HunkViewer(GitSheet):
 
 
 class GitGrep(GitSheet):
+    columns = [
+        ColumnItem('filename', 0),
+        ColumnItem('linenum', 1),
+        ColumnItem('line', 2),
+    ]
+    commands = [
+        Command(ENTER, 'vd.push(TextSheet(cursorRow[0], Path(cursorRow[0]))).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
+    ]
     def __init__(self, regex):
-        super().__init__(regex, regex, columns=[
-            ColumnItem('filename', 0),
-            ColumnItem('linenum', 1),
-            ColumnItem('line', 2),
-        ])
-        self.command(ENTER, 'vd.push(TextSheet(cursorRow[0], Path(cursorRow[0]))).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
+        super().__init__(regex, regex)
 
     def reload(self):
         self.rows = []
@@ -288,6 +330,13 @@ class GitGrep(GitSheet):
 
 class GitOptions(GitSheet):
     CONFIG_CONTEXTS = ('local', 'local', 'global', 'system')
+    commands = [
+        Command('d', 'git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], cursorRow[0])', 'unset this config value'),
+        Command('gd', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset selected config values'),
+        Command('e', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(sheet, [cursorRow], editCell(i)); sheet.cursorRowIndex += 1', 'edit this option'),
+        Command('ge', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(sheet, selectedRows, input("set selected to: ", value=cursorValue))', 'edit this option for all selected rows'),
+        Command('a', 'git("config", "--add", "--"+CONFIG_CONTEXTS[cursorColIndex], input("option to add: "), "added")', 'add new option'),
+    ]
     def __init__(self):
         super().__init__('git config')
         self.columns = [Column('option', getter=lambda r: r[0])]
@@ -295,12 +344,6 @@ class GitOptions(GitSheet):
             self.columns.append(Column(ctx, getter=lambda r, i=i: r[1][i], setter=self.config_setter(ctx)))
 
         self.nKeys = 1
-
-        self.command('d', 'git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], cursorRow[0])', 'unset this config value')
-        self.command('gd', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset selected config values')
-        self.command('e', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues([cursorRow], editCell(i)); sheet.cursorRowIndex += 1', 'edit this option')
-        self.command('ge', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(selectedRows, input("set selected to: ", value=cursorValue))', 'edit this option for all selected rows')
-        self.command('a', 'git("config", "--add", "--"+CONFIG_CONTEXTS[cursorColIndex], input("option to add: "), "added")', 'add new option')
 
     def config_setter(self, ctx):
         def setter(r, v):
@@ -325,6 +368,10 @@ class GitOptions(GitSheet):
 
 # how to incorporate fetch/push/pull?
 class GitRemotes(GitSheet):
+    commands = [
+        Command('d', 'git("remote", "rm", cursorRow[0])', 'delete remote'),
+        Command('a', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
+    ]
     def __init__(self, **kwargs):
         super().__init__('remotes', **kwargs)
         self.columns=[
@@ -332,8 +379,6 @@ class GitRemotes(GitSheet):
             Column('url', getter=lambda r: r[1], setter=lambda r,v,s=self: s.git('remote', 'set-url', r[0], v)),
             Column('type', getter=lambda r: r[2]),
         ]
-        self.command('d', 'git("remote", "rm", cursorRow[0])', 'delete remote')
-        self.command('a', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
 
     def reload(self):
         self.rows = []
@@ -343,7 +388,7 @@ class GitRemotes(GitSheet):
 
 gitBranchesSheet = GitBranches()
 gitOptionsSheet = GitOptions()
-gitStashesSheet = GitStashes()
+gitStashesSheet = GitStashes('stashes')
 gitRemotesSheet = GitRemotes()
 
 

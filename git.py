@@ -2,23 +2,32 @@ import sh
 
 from vdtui import *
 
+option('gitcmdlog', 'gitcmds.log', 'file to log all git commands run by vgit')
+
 git_commands = []
+
+def loggit(*args):
+    with open(options.gitcmdlog, 'a') as fp:
+        fp.write('git ' + '|'.join(args) + '\n')
 
 def git_all(*args, **kwargs):
     'Return entire output of git command.'
     try:
-        out = sh.git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
+        loggit(*args)
+        cmd = sh.git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
+        out = cmd.stdout
     except sh.ErrorReturnCode as e:
         status('exit_code=%s' % e.exit_code)
         out = e.stdout
 
-    return out
+    return out.decode('utf-8')
 
 
 def git_lines(*args, **kwargs):
     'Generator of stdout lines from given git command'
     err = io.StringIO()
     try:
+        loggit(*args)
         for line in sh.git('--no-pager', _err=err, *args, _decode_errors='replace', _iter=True, _bg_exc=False, **kwargs):
             yield line[:-1]  # remove EOL
     except sh.ErrorReturnCode as e:
@@ -39,6 +48,7 @@ def git_iter(sep, *args, **kwargs):
 
     chunks = []
     try:
+      loggit(*args)
       for data in sh.git('--no-pager', *args, _decode_errors='replace', _out_bufsize=bufsize, _iter=True, _err=err, **kwargs):
         while True:
             i = data.find(sep)
@@ -76,10 +86,12 @@ class GitFile:
 
 
 class GitSheet(Sheet):
+    commands = [
+        Command('f', 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
+    ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_args = []
-        self.command('f', 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
 
     @async
     def git(self, *args, **kwargs):
@@ -139,6 +151,31 @@ class GitSheet(Sheet):
 
 
 class GitStatus(GitSheet):
+    commands = [
+        Command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),
+        Command('m', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file'),
+        Command('d', 'git("rm", cursorRow.filename)', 'stage this file for deletion'),
+        Command('r', 'git("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file'),
+        Command('c', 'git("checkout", cursorRow.filename)', 'checkout this file'),
+        Command('ga', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging'),
+        Command('gd', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files'),
+        Command('C', 'git("commit", "-m", input("commit message: "))', 'commit changes'),
+        Command('V', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file'),
+        Command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
+        Command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
+
+        Command(ENTER, 'vd.push(getHunksSheet(sheet, cursorRow))', 'push unstaged diffs for this file'),
+        Command('g^J', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files'),
+
+        Command('g/', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
+
+        Command('z^J', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
+        Command(['zg^J', 'gz^J'], 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
+
+#        Command('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file'),
+        Command('L', 'vd.push(GitBlame(cursorRow))', 'push blame for this file'),
+    ]
+
     def __init__(self, p):
         super().__init__(p.relpath(''), p)
         self.branch = ''
@@ -155,28 +192,7 @@ class GitStatus(GitSheet):
 
         self.addColorizer('row', 3, GitStatus.rowColor)
         self.addColorizer('row', 6, lambda s,c,r,v: 'red underline' if 'U' in s.git_status(r)[0] else None)
-
-        self.command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging')
-        self.command('m', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file')
-        self.command('d', 'git("rm", cursorRow.filename)', 'stage this file for deletion')
-        self.command('r', 'git("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file')
-        self.command('c', 'git("checkout", cursorRow.filename)', 'checkout this file')
-        self.command('ga', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging')
-        self.command('gd', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files')
-        self.command('C', 'git("commit", "-m", input("commit message: "))', 'commit changes')
-        self.command('V', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file')
-        self.command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore')
-        self.command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')  # path, filename
-
-        self.command(ENTER, 'vd.push(getHunksSheet(sheet, cursorRow))', 'push unstaged diffs for this file')
-        self.command('g^J', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files')
-
-        self.command('g/', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files')
-
-        self.command('z^J', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file')
-        self.command(['zg^J', 'gz^J'], 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files')
-
-        self.command('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file')
+        self.addColorizer('cell', 7, lambda s,c,r,v: 'green' if c.name == 'staged' and s.git_status(r)[0][0] == 'M' else None)
 
         self._cachedStatus = {}
 
