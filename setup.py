@@ -7,7 +7,7 @@ __version__ = '0.98pre'
 
 setup(name='visidata',
       version=__version__,
-      install_requires='python-dateutil openpyxl'.split(),
+      install_requires=open('requirements.txt').read().split(),
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       author='Saul Pwanson',
@@ -20,7 +20,6 @@ setup(name='visidata',
       packages=['visidata',  'visidata.loaders'],
       include_package_data=True,
       package_data={'': ['man/vd.1']},
-      #data_files=[(manpath,['_build/vd.1.gz'])],
       license='GPLv3',
       classifiers=[
           'Development Status :: 4 - Beta',
@@ -38,7 +37,7 @@ setup(name='visidata',
           'Topic :: Scientific/Engineering :: Visualization',
           'Topic :: Utilities',
       ],
-      keywords=('console tabular data spreadsheet viewer textpunk'
-                'curses csv hdf5 h5 xlsx'),
+      keywords=('console tabular data spreadsheet terminal viewer textpunk'
+                'curses csv hdf5 h5 xlsx excel tsv'),
       )
 
