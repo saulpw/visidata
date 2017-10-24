@@ -1,1 +1,6 @@
 python-dateutil
+
+openpyxl
+xlrd
+h5py
+psycopg2

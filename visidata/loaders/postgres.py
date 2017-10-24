@@ -1,11 +1,15 @@
 from visidata import *
 
-def codeToType(type_code):
-    tname = psycopg2._psycopg.string_types[type_code].name
-    if 'INTEGER' in tname:
-        return int
-    if 'STRING' in tname:
-        return str
+def codeToType(type_code, colname):
+    import psycopg2
+    try:
+        tname = psycopg2._psycopg.string_types[type_code].name
+        if 'INTEGER' in tname:
+            return int
+        if 'STRING' in tname:
+            return str
+    except KeyError:
+        status('unknown postgres type_code %s for %s' % (type_code, colname))
     return anytype
 
 
@@ -43,7 +47,7 @@ class SQL:
 def cursorToColumns(cur):
     cols = []
     for i, coldesc in enumerate(cur.description):
-        c = ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code))
+        c = ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name))
         cols.append(c)
     return cols
 
