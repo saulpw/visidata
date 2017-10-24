@@ -1,23 +1,29 @@
 from vdtui import *
 from git import GitSheet
+from diff import DiffViewer
 
-# row is (hdr, orig, final, 
+# row is (hdr, orig_linenum, linenum, line)
+#   hdr = { 'sha': .., 'orig_linenum': .., 'final_linenum': .. }
 class GitBlame(GitSheet):
+    commands = GitSheet.commands + [
+        Command(ENTER, 'openDiff(str(source), cursorRow[0]["sha"]+"^", cursorRow[0]["sha"])', 'open diff of the commit when this line changed'),
+    ]
+
+    columns = [
+        Column('sha', width=8, getter=lambda r: r[0]['sha']),
+        Column('orig_linenum', width=0, getter=lambda r: r[0]['orig_linenum']),
+        Column('orig_linenum1', width=0, getter=lambda r: r[1]),
+        Column('final_linenum', width=0, getter=lambda r: r[0]['final_linenum']),
+        Column('author', width=10, getter=lambda r: '{author}'.format(**r[0])),
+        Column('author_date', width=13, type=date, getter=lambda r: int(r[0].get('author-time', 0))),
+        Column('committer', width=0, getter=lambda r: '{committer} {committer-mail}'.format(**r[0])),
+        Column('committer_date', width=0, type=date, getter=lambda r: int(r[0].get('committer-time', 0)) or None),
+        Column('linenum', width=5, getter=lambda r: r[2]),
+        Column('code', getter=lambda r: r[3]),
+    ]
+
     def __init__(self, gf, ref='HEAD'):
         super().__init__('blame_'+str(gf), gf)
-
-        self.columns = [
-            Column('sha', width=8, getter=lambda r: r[0]['sha']),
-            Column('orig_linenum', width=0, getter=lambda r: r[0]['orig_linenum']),
-            Column('orig_linenum1', width=0, getter=lambda r: r[1]),
-            Column('final_linenum', width=0, getter=lambda r: r[0]['final_linenum']),
-            Column('author', width=10, getter=lambda r: '{author}'.format(**r[0])),
-            Column('author_date', width=13, type=date, getter=lambda r: int(r[0].get('author-time', 0))),
-            Column('committer', width=0, getter=lambda r: '{committer} {committer-mail}'.format(**r[0])),
-            Column('committer_date', width=0, type=date, getter=lambda r: int(r[0].get('committer-time', 0)) or None),
-            Column('linenum', width=5, getter=lambda r: r[2]),
-            Column('code', getter=lambda r: r[3]),
-        ]
 
     def reload(self):
         self.rows = []
@@ -53,3 +59,4 @@ class GitBlame(GitSheet):
             self.rows.append((hdr, orig, final, lines[i][1:]))
             i += 1
 
+addGlobals(globals())

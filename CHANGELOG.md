@@ -5,18 +5,19 @@
     - `Shift-C` amends the selected commit to contain the currently staged changes
     - `r` resets the shown branch HEAD to the selected commit
 
-## v0.2 (2017-08-13)
+## v0.2 (2017-08-23)
 - vgit auto pushes a full sheet of statuses if the status is more than 3 lines
 - add async to some git commands
 - global keystrokes
     - `R` pushes the remotes sheet
     - `P`ushes the local refs to the currently set remote refs
-    - `1` pushes the list of git commands executed
+    - `X` pushes the list of git commands executed
     - `H` pushes the git log sheet (history) for the current branch
     - `Ctrl-s`tashes uncommited changes
     - `Ctrl-p`ops the most recent stashed change and drops it
     - `A`bort the current in-progress action
     - `T` pushes the stashes sheet
+    - `L` pushes the blame sheet
 - git status sheet
     - provides information about the working tree
     - `r` to unstage a file (instead of `w`)

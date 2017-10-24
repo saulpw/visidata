@@ -31,7 +31,7 @@ $ python setup.py install
 ### Dependencies
 
 - Python 3.3+
-- sh
+- [sh](https://amoffat.github.io/sh/)
 
 ## Running vgit
 

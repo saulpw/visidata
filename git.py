@@ -178,6 +178,7 @@ class GitSheet(Sheet):
         status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
 
+# rowdef: GitFile
 class GitStatus(GitSheet):
     commands = GitSheet.commands + [
         Command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),

@@ -7,6 +7,8 @@ from vdtui import *
 
 from git import *
 from merge import GitMerge
+from blame import GitBlame
+from diff import DiffViewer
 
 __version__ = 'saul.pw/vgit v0.3pre'
 
