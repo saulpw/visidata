@@ -23,18 +23,23 @@ class GitCmdLog(Sheet):
 vd().gitcmdlog = GitCmdLog('gitcmdlog')
 
 def loggit(*args, **kwargs):
+    r = maybeloggit(*args, **kwargs)
+
     cmdstr = 'git ' + ' '.join(args)
-    if options.gitcmdlogfile:
-        with open(options.gitcmdlogfile, 'a') as fp:
-            fp.write(cmdstr + '\n')
-
-    r = sh.git(*args, **kwargs)
-
     vd().gitcmdlog.addRow((cmdstr, r))
     return r
 
-def git_all(*args, git=sh.git, **kwargs):
+def maybeloggit(*args, **kwargs):
+    if options.gitcmdlogfile:
+        cmdstr = 'git ' + ' '.join(args)
+        with open(options.gitcmdlogfile, 'a') as fp:
+            fp.write(cmdstr + '\n')
+
+    return sh.git(*args, **kwargs)
+
+def git_all(*args, git=maybeloggit, **kwargs):
     'Return entire output of git command.'
+
     try:
         cmd = git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
         out = cmd.stdout
@@ -46,7 +51,7 @@ def git_all(*args, git=sh.git, **kwargs):
 
     return out
 
-def git_lines(*args, git=sh.git, **kwargs):
+def git_lines(*args, git=maybeloggit, **kwargs):
     'Generator of stdout lines from given git command'
     err = io.StringIO()
     try:
@@ -63,7 +68,7 @@ def git_lines(*args, git=sh.git, **kwargs):
         vd().push(TextSheet('git ' + ' '.join(args), errlines))
 
 
-def git_iter(sep, *args, git=sh.git, **kwargs):
+def git_iter(sep, *args, git=maybeloggit, **kwargs):
     'Generator of chunks of stdout from given git command, delineated by sep character'
     bufsize = 512
     err = io.StringIO()

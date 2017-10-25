@@ -26,7 +26,6 @@ globalCommand('T', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
 globalCommand('R', 'vd.push(gitRemotesSheet).reload()', 'push remotes sheet')
 globalCommand('^S', 'git("stash", "save")', 'stash uncommitted changes')
 globalCommand('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
-globalCommand('X', 'vd.push(TextSheet("git_commands", git_commands))', 'push list of git commands executed')
 
 
 class GitStashes(GitSheet):
