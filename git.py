@@ -198,7 +198,7 @@ class GitStatus(GitSheet):
         Command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
         Command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
 
-        Command(ENTER, 'vd.push(getHunksSheet(sheet, cursorRow))', 'push unstaged diffs for this file'),
+        Command(ENTER, 'vd.push(DifferSheet(cursorRow, "HEAD", "index", "working"))', 'push unstaged diffs for this file'),
         Command('g^J', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files'),
 
         Command('g/', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),

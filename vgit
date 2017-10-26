@@ -8,12 +8,11 @@ from vdtui import *
 from git import *
 from merge import GitMerge
 from blame import GitBlame
-from diff import DiffViewer
+from diff import DifferSheet
 
 __version__ = 'saul.pw/vgit v0.3pre'
 
 option('vgit_show_ignored', False)
-option('diff_algorithm', 'minimal')
 
 globalCommand('x', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
 globalCommand('B', 'vd.push(gitBranchesSheet).reload()', 'push branches sheet')

@@ -1,6 +1,5 @@
 from vdtui import *
 from git import GitSheet
-from diff import DiffViewer
 
 # row is (hdr, orig_linenum, linenum, line)
 #   hdr = { 'sha': .., 'orig_linenum': .., 'final_linenum': .. }
