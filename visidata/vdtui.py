@@ -1941,7 +1941,7 @@ class ColumnsSheet(Sheet):
 
 
 class SheetsSheet(Sheet):
-    commands = [Command(ENTER, 'moveListItem(vd.sheets, cursorRowIndex, 0); vd.sheets.pop(1)', 'jump to sheet referenced in current row')]
+    commands = [Command(ENTER, 'jumpTo(cursorRowIndex)', 'jump to sheet referenced in current row')]
     columns = [
         ColumnAttr('name'),
         ColumnAttr('nRows', type=int),
@@ -1954,6 +1954,11 @@ class SheetsSheet(Sheet):
 
     def reload(self):
         self.rows = vd().sheets
+
+    def jumpTo(self, sheetnum):
+        if sheetnum != 0:
+            moveListItem(self.rows, sheetnum, 0)
+            self.rows.pop(1)
 
 
 class HelpSheet(Sheet):
