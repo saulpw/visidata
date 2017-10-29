@@ -2001,6 +2001,7 @@ class EnableCursor:
         with suppress(curses.error):
             curses.curs_set(0)
 
+# history: earliest entry first
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
     ESC='^['
@@ -2053,12 +2054,40 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         with open(fqpn, 'r') as fp:
             return fp.read()
 
+    class HistoryState:
+        def __init__(self, history):
+            self.history = history
+            self.hist_idx = None
+            self.prev_val = None
+
+        def up(self, v, i):
+            if self.hist_idx is None:
+                self.hist_idx = len(self.history)
+                self.prev_val = v
+            if self.hist_idx > 0:
+                self.hist_idx -= 1
+                v = self.history[self.hist_idx]
+            i = len(v)
+            return v, i
+
+        def down(self, v, i):
+            if self.hist_idx is None:
+                return v, i
+            elif self.hist_idx < len(self.history)-1:
+                self.hist_idx += 1
+                v = self.history[self.hist_idx]
+            else:
+                v = self.prev_val
+                self.hist_idx = None
+            i = len(v)
+            return v, i
+
+    history_state = HistoryState(history)
     insert_mode = True
     first_action = True
     v = str(value)  # value under edit
     i = 0           # index into v
     comps_idx = -1
-    hist_idx = 0
     left_truncchar = right_truncchar = truncchar
 
     while True:
@@ -2104,8 +2133,8 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch()); i += 1  # literal character
         elif ch == '^Z':                           v = launchExternalEditor(v)
-        elif history and ch == 'KEY_UP':           hist_idx += 1; v = history[hist_idx % len(history)]
-        elif history and ch == 'KEY_DOWN':         hist_idx -= 1; v = history[hist_idx % len(history)]
+        elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
+        elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
         elif ch.startswith('KEY_'):                pass
         else:
             if first_action:
