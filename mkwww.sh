@@ -20,13 +20,19 @@ MAN_KEEP_FORMATTING=1 COLUMNS=100 man $MAN/vd.1 | ul | aha --no-header >> $BUILD
 echo '</pre></section>' >> $BUILD/vd-man-inc.html
 $VD/strformat.py body=$BUILD/vd-man-inc.html title="VisiData Quick Reference" head="" < $VD/www/template.html > $WWW/man/index.html
 
-### build front page from README
-
+### Build front page
 $VD/strformat.py body=$VD/www/frontpage-body.html title="VisiData" head='' < $VD/www/template.html > $WWW/index.html
-#markdown $VD/README.md > $WWW/index.html
-#
 
-# Builds tours
+### Build any .md in checked-in www/
+for fn in $VD/www/**/*.md ; do
+    outpath=${fn##$VD/www/}
+    outbase=${outpath%.md}
+    mkdir -p $WWW/$outbase
+    outfn=$WWW/$outbase/index.html
+    $VD/strformat.py body=<(markdown $fn) title="$fn" head='' < $VD/www/template.html > $outfn
+done
+
+### Build tours
 $TOUR/mkindex.py $TOUR/*.yaml > $BUILD/demo-index-body.html
 # Which main css file is it referencing?
 $VD/strformat.py body=$BUILD/demo-index-body.html title="Tour Index" head='' < $VD/www/template.html > $WWW/tour/index.html
