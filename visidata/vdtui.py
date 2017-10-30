@@ -2007,6 +2007,23 @@ class EnableCursor:
             curses.curs_set(0)
 
 # history: earliest entry first
+def launchExternalEditor(v, linenum=0):
+    editor = os.environ.get('EDITOR') or error('$EDITOR not set')
+
+    import tempfile
+    fd, fqpn = tempfile.mkstemp(text=True)
+    with open(fd, 'w') as fp:
+        fp.write(v)
+
+    with SuspendCurses():
+        cmd = '%s %s' % (editor, fqpn)
+        if linenum:
+            cmd += ' +%s' % linenum
+        os.system(cmd)
+
+    with open(fqpn, 'r') as fp:
+        return fp.read()
+
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
     ESC='^['
@@ -2044,20 +2061,6 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
                     return comps[i]
         # beep
         return v
-
-    def launchExternalEditor(v):
-        editor = os.environ.get('EDITOR') or error('$EDITOR not set')
-
-        import tempfile
-        fd, fqpn = tempfile.mkstemp(text=True)
-        with open(fd, 'w') as fp:
-            fp.write(v)
-
-        with SuspendCurses():
-            os.system('%s %s' % (editor, fqpn))
-
-        with open(fqpn, 'r') as fp:
-            return fp.read()
 
     class HistoryState:
         def __init__(self, history):
