@@ -526,7 +526,7 @@ class VisiData:
                 if not t.status:
                     t.status = 'ended'
 
-    def sync(expectedThreads=0):
+    def sync(self, expectedThreads=0):
         'Wait for all but expectedThreads async tasks to finish.'
         while len(self.unfinishedThreads) > expectedThreads:
             self.checkForFinishedThreads()
