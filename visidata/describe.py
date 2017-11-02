@@ -38,8 +38,8 @@ class DescribeSheet(Sheet):
             SourceColumn('stddev', type=float, getter=lambda sheet,r: statistics.stdev(values(r)) if isNumeric(r) else None),
     ]
     commands = [
-        Command('zs', 'source.select(cursorCell)', 'select rows on source sheet which are being described in current cell'),
-        Command('zu', 'source.unselect(cursorCell)', 'unselect rows on source sheet which are being described in current cell'),
+        Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell'),
+        Command('zu', 'source.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell'),
         Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell'),
         Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
     ]
