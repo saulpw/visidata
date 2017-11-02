@@ -10,12 +10,12 @@ def body():
     index = ''
     index += '<table class="index_list">\n'
 
-    # <li><a href='tour_url'>Tour Name</a></li>\n
+    # <li><a href='test_url'>test Name</a></li>\n
     for fnyaml in sys.argv[1:]:
-        tour = yaml.load(open(fnyaml).read())
+        test = yaml.load(open(fnyaml).read())
         index += '<tr>'
-        index += '<td><a href="{tour_url}">{tour_title}</a></td>\n'.format(tour_url=tour['name'], tour_title=tour['name'])
-        index += '<td>{workflow}</td>\n'.format(workflow=tour.get('workflow', ''))
+        index += '<td><a href="{test_url}">{test_title}</a></td>\n'.format(test_url=test['name'], test_title=test['name'])
+        index += '<td>{workflow}</td>\n'.format(workflow=test.get('workflow', ''))
         index += '</tr>'
     index += '</table>\n'
 #    index += '</div>\n'

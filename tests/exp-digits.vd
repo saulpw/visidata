@@ -1,0 +1,42 @@
+sheet	col	row	keystrokes	input	comment
+			A	1	open new blank sheet with number columns
+unnamed	0	0	^	x	edit name of current column
+unnamed	x	0	ga	100	add N blank rows
+unnamed	x	0	gz=	range(100)	set selected rows in this column to the values in the given Python sequence expression
+unnamed	x	0	g^X	import math	execute Python statement in the global scope
+unnamed	x	0	#		set type of current column to int
+unnamed	x	0	=	math.e**x	create new column from Python expression, with column names as variables
+unnamed	math.e**x	0	#		set type of current column to int
+unnamed	math.e**x	0	^	y	edit name of current column
+unnamed	y	0	=	1	create new column from Python expression, with column names as variables
+unnamed	y	0	#		set type of current column to int
+unnamed	y	0	C		open Columns Sheet
+unnamed_columns	name	2	y		copy current row to clipboard
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	p		paste clipboard rows after current row
+unnamed_columns	name	2	,		select rows matching current cell in current column
+unnamed_columns	name	2	gz=	('count_%s' % i for i in range(10))	set selected rows in this column to the values in the given Python sequence expression
+unnamed_columns	expr	2	gz=	('str(y).count("%s")' % i for i in range(10))	set selected rows in this column to the values in the given Python sequence expression
+unnamed_columns	name	2	g#		set type of selected columns to int
+unnamed_columns	name	0	q		quit current sheet
+unnamed	x	0	!		pin current column to the left as a key column
+unnamed	y	0	!		pin current column to the left as a key column
+unnamed	count_0	0	M		open melted sheet (unpivot)
+unnamed_melted	Value	0	#		set type of current column to int
+unnamed_melted	y	0	_		adjust width of current column
+unnamed_melted	Value	0	=	len(str(y))	create new column from Python expression, with column names as variables
+unnamed_melted	len(str(y))	0	#		set type of current column to int
+unnamed_melted	len(str(y))	1	^	ndigits	edit name of current column
+unnamed_melted	ndigits	1	=	Value/ndigits	create new column from Python expression, with column names as variables
+unnamed_melted	Value/ndigits	1	%		set type of current column to float
+unnamed_melted	Value/ndigits	1	]		sort descending by current column
+unnamed_melted	Value	1	,		select rows matching current cell in current column
+unnamed_melted	Value	1	gd		delete all selected rows and move them to clipboard
+unnamed_melted	y	0	_		adjust width of current column

@@ -526,7 +526,7 @@ class VisiData:
                 if not t.status:
                     t.status = 'ended'
 
-    def sync(expectedThreads=0):
+    def sync(self, expectedThreads=0):
         'Wait for all but expectedThreads async tasks to finish.'
         while len(self.unfinishedThreads) > expectedThreads:
             self.checkForFinishedThreads()
@@ -1964,7 +1964,7 @@ vd().optionsSheet = OptionsSheet('options', options)
 
 ### Curses helpers
 
-def _clipdraw(scr, y, x, s, attr, w):
+def clipdraw(scr, y, x, s, attr, w=None):
     'Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char.'
     _, windowWidth = scr.getmaxyx()
     dispw = 0
@@ -1985,6 +1985,8 @@ def _clipdraw(scr, y, x, s, attr, w):
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
 #                ).with_traceback(sys.exc_info()[2])
         pass
+
+_clipdraw = clipdraw
 
 # https://stackoverflow.com/questions/19833315/running-system-commands-in-python-using-curses-and-panel-and-come-back-to-previ
 class SuspendCurses:

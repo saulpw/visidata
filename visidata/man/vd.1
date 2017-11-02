@@ -523,24 +523,24 @@ clean column names to be valid Python identifiers
 exit on error and display stacktrace
 .It Sy --curses-timeout Ns = Ns Ar "int        " No "100"
 curses timeout in ms
-.It Sy --num-colors Ns = Ns Ar "int            " No "0"
-force number of colors to use
+.It Sy --force-256-colors Ns = Ns Ar "bool     " No "False"
+use 256 colors even if curses reports fewer
 .It Sy --note-pending Ns = Ns Ar "str          " No "\[u231B]"
 note to display for pending cells
 .It Sy --note-format-exc Ns = Ns Ar "str       " No "?"
 cell note for an exception during type conversion or formatting
 .It Sy --note-getter-exc Ns = Ns Ar "str       " No "!"
 cell note for an exception during computation
+.It Sy --skip Ns = Ns Ar "int                  " No "0"
+skip first N lines of text input
 .It Sy --profile-tasks Ns = Ns Ar "bool        " No "True"
 profile async tasks
 .It Sy --min-memory-mb Ns = Ns Ar "int         " No "0"
 minimum memory to continue loading and async processing
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
 whether to prompt for overwrite confirmation on save
-.It Sy --headerlines Ns = Ns Ar "int           " No "1"
+.It Sy --header Ns = Ns Ar "int                " No "1"
 parse first N rows of .csv/.tsv as column names
-.It Sy --skiplines Ns = Ns Ar "int             " No "0"
-skip first N lines of text input
 .It Sy --filetype Ns = Ns Ar "str              " No ""
 specify file type
 .It Sy --pyobj-show-hidden Ns = Ns Ar "bool    " No "False"
@@ -695,7 +695,7 @@ For example:
 .It Sy xlsx No (requires Sy openpyxl Ns )
 .It Sy xls No (requires Sy xlrd Ns )
 .It Sy hdf5 No (requires Sy h5py Ns )
-.It Sy postgres No (requires Sy psycopg2 Ns ): 
+.It Sy postgres No (requires Sy psycopg2 Ns )
 .El
 .
 .Sh AUTHOR

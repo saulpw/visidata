@@ -1,0 +1,17 @@
+sheet	col	row	keystrokes	input	comment
+	sheet	0	A	1	open new blank sheet with number columns
+unnamed	0	0	ga	360	add N blank rows
+unnamed	0	0	gz=	range(360)	set selected rows in this column to the values in the given Python sequence expression
+unnamed	0	0	^	xdeg	edit name of current column
+unnamed	xdeg	0	#		set type of current column to int
+unnamed	xdeg	0	=	xdeg*math.pi/180	create new column from Python expression, with column names as variables
+unnamed	xdeg*math.pi/180	0	^	xrad	edit name of current column
+unnamed	xrad	0	%		set type of current column to float
+unnamed	xrad	0	=	math.sin(xrad)	create new column from Python expression, with column names as variables
+unnamed	math.sin(xrad)	0	%		set type of current column to float
+unnamed	xdeg	0	!		pin current column to the left as a key column
+unnamed	math.sin(xrad)	0	=	math.cos(xrad)	create new column from Python expression, with column names as variables
+unnamed	math.sin(xrad)	0	%		set type of current column to float
+unnamed	math.cos(xrad)	0	%		set type of current column to float
+unnamed	xrad	0	-		hide current column (to unhide go to Columns sheet and edit its width)
+unnamed	math.sin(xrad)	0	gm		graph all numeric columns vs the first key column (or row number)

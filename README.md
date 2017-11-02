@@ -28,8 +28,8 @@ Use `-f <filetype>` to force a particular filetype.
 ## Documentation
 
 * Quick reference: `F1` (or `z?`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
-* [visidata.org](http://visidata.org) has some [tours](http://visidata.org/tour)
-* [VisiData Architecture for Developers](docs/architecture.rst)
+* [visidata.org](http://visidata.org) has [asciicasts of its tests](http://visidata.org/test), which serve as example workflows.
+* [The Design of VisiData](http://visidata.org/design), documentation of internals for developers and contributors.
 
 ## Support
 
