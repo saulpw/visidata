@@ -1,72 +1,60 @@
 from visidata import *
 
-unit_leftx = 0
-unit_rightx = 10.0
-unit_topy = 1.5
-unit_bottomy = -1.5
+option('color_graph_axis', 'white', 'color for graph axis labels')
+option('show_graph_labels', True, 'show axes and legend on graph')
 
-globalCommand('m', 'vd.push(makeGraph(rows, keyCols and keyCols[0], cursorCol))', 'graph the current column vs the first key column (or row number)')
-globalCommand('gm', 'vd.push(makeGraph(rows, keyCols and keyCols[0], *numericCols(nonKeyVisibleCols)))', 'graph all numeric columns vs the first key column (or row number)')
+left_margin_chars = 10
+right_margin_chars = 6
+bottom_margin_chars = 1  # reserve bottom line for x axis
 
-graphColors = 'green red yellow blue cyan magenta'.split()
+globalCommand('m', 'vd.push(GraphSheet(sheet.name+"_graph", selectedRows or rows, keyCols and keyCols[0], cursorCol))', 'graph the current column vs the first key column (or row number)')
+globalCommand('gm', 'vd.push(GraphSheet(sheet.name+"_graph", selectedRows or rows, keyCols and keyCols[0], *numericCols(nonKeyVisibleCols)))', 'graph all numeric columns vs the first key column (or row number)')
+
+graphColors = 'green red yellow cyan magenta white 38 136 168'.split()
 
 def numericCols(cols):
     # isNumeric from describe.py
     return [c for c in cols if isNumeric(c)]
 
-def datapoints(xcol, ycol, rows, color):
-    attr = colors[color]
-    if xcol:
-        return list((xcol.getTypedValue(row), ycol.getTypedValue(row), attr) for row in rows)
-    else:
-        return list((x, ycol.getTypedValue(row), attr) for x, row in enumerate(rows))
+# pixels covering whole real terminal
+#   (0,0) in upper left
+class BrailleCanvas(Sheet):
+    columns=[Column('')]  # to eliminate errors outside of draw()
 
-def makeGraph(rows, xcol, *ycols):
-    vs = BrailleCanvasSheet('graph', rows, xcol, *ycols)
-    vs.vd = vd()
-    return vs
-
-class BrailleCanvasSheet(Sheet):
-    columns=[Column('foo')]
     def __init__(self, name, *sources, **kwargs):
         super().__init__(name, *sources, **kwargs)
-        self.labels = []
-
-    def pixel_to_unit_x(self, pix_x):
-        return unit_leftx+pix_x*self.scale_x
-
-    def pixel_to_unit_y(self, pix_y):
-        return (unit_bottomy+pix_y*self.scale_y)
+        self.pixels = collections.defaultdict(dict) # [y][x] = colorname
+        self.labels = []  # (pix_x, pix_y, text, colorname)
 
     @property
-    def scale_x(self):
-        'number of units per horizontal pixel'
-        return (unit_rightx - unit_leftx)/(vd().windowWidth*2)
+    def pixel_width(self):
+        return vd().windowWidth*2
 
     @property
-    def scale_y(self):
-        'number of units per vertical pixel'
-        return (unit_topy - unit_bottomy)/(self.nVisibleRows*4)
+    def pixel_height(self):
+        return (vd().windowHeight-2)*4
+
+    def set_pixel(self, pix_x, pix_y, colorname):
+        self.pixels[pix_y][pix_x] = colors[colorname]
+
+    def label(self, pix_x, pix_y, txt, color):
+        self.labels.append((pix_x, pix_y, txt, color))
 
     def draw(self, scr):
-        pixels = collections.defaultdict(dict) # [y][x]
-        for unit_x, unit_y, color in self.rows:
-            pix_x = round((unit_x-unit_leftx)/self.scale_x)
-            pix_y = round((unit_topy-unit_y)/self.scale_y)
-            pixels[pix_y][pix_x] = color
-
+        if not self.pixels:
+            self.refresh()
         scr.erase()
         for y in range(0, self.nVisibleRows+1):
             for x in range(0, vd().windowWidth):
                 block_colors = [
-                    pixels[y*4  ].get(x*2, None),
-                    pixels[y*4+1].get(x*2, None),
-                    pixels[y*4+2].get(x*2, None),
-                    pixels[y*4  ].get(x*2+1, None),
-                    pixels[y*4+1].get(x*2+1, None),
-                    pixels[y*4+2].get(x*2+1, None),
-                    pixels[y*4+3].get(x*2, None),
-                    pixels[y*4+3].get(x*2+1, None)
+                    self.pixels[y*4  ].get(x*2, None),
+                    self.pixels[y*4+1].get(x*2, None),
+                    self.pixels[y*4+2].get(x*2, None),
+                    self.pixels[y*4  ].get(x*2+1, None),
+                    self.pixels[y*4+1].get(x*2+1, None),
+                    self.pixels[y*4+2].get(x*2+1, None),
+                    self.pixels[y*4+3].get(x*2, None),
+                    self.pixels[y*4+3].get(x*2+1, None)
                 ]
                 pow2 = 1
                 braille_num = 0
@@ -75,67 +63,136 @@ class BrailleCanvasSheet(Sheet):
                         braille_num += pow2
                     pow2 *= 2
 
-                only_colors = list(c for c in block_colors if c)
-                if only_colors:
+                if braille_num != 0:
+                    only_colors = list(c for c in block_colors if c)
                     colormode = collections.Counter(only_colors).most_common(1)[0][0]
                     scr.addstr(y, x, chr(0x2800+braille_num), colormode)
-                else:
-                    assert braille_num == 0
 
-        for unit_x, unit_y, txt, colorname in self.labels:
-            xpos = round((unit_x-unit_leftx)/(self.scale_x*2))
-            ypos = round((unit_topy-unit_y)/(self.scale_y*4))
-            if ypos >= 0 and ypos <= self.nVisibleRows:
-                clipdraw(scr, ypos, xpos, txt, colors[colorname], len(txt))
-            else:
-                status(ypos, xpos, txt, colorname)
+        if options.show_graph_labels:
+            for pix_x, pix_y, txt, colorname in self.labels:
+                clipdraw(scr, int(pix_y/4), int(pix_x/2), txt, colors[colorname], len(txt))
 
-    def plot(self, unit_x, unit_y, color):
-        self.addRow((unit_x, unit_y, color))
 
-    def label(self, unit_x, unit_y, txt, color):
-        self.labels.append((unit_x, unit_y, txt, color))
+# provides unit->pixel conversion, axis labels, legend
+class GraphSheet(BrailleCanvas):
+    commands=[
+        Command('^L', 'refresh()', 'redraw all pixels on canvas'),
+        Command('w', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels')
+    ]
+    def __init__(self, name, *sources, **kwargs):
+        super().__init__(name, *sources, **kwargs)
+        self.unit_leftx = None
+        self.unit_rightx = None
+        self.unit_topy = None
+        self.unit_bottomy = None
+        self.set_bounds()
+
+    def set_bounds(self):
+        self.pix_leftx = left_margin_chars*2
+        self.pix_rightx = self.pixel_width-right_margin_chars*2
+        self.pix_topy = 0
+        self.pix_bottomy = self.pixel_height-bottom_margin_chars*4
+
+    @async
+    def refresh(self):
+        'plot all points, scaled to the canvas'
+        self.set_bounds()
+        self.create_labels()
+        self.pixels.clear()
+        scale_x = (self.unit_rightx-self.unit_leftx)/(self.pix_rightx-self.pix_leftx)
+        scale_y = (self.unit_topy-self.unit_bottomy)/(self.pix_bottomy-self.pix_topy)
+        for unit_x, unit_y, color in self.genProgress(self.rows):
+            pix_x = self.pix_leftx + (unit_x-self.unit_leftx)/scale_x
+            pix_y = self.pix_topy + (self.unit_topy-unit_y)/scale_y  # invert y axis
+            self.pixels[round(pix_y)][round(pix_x)] = color
 
     def legend(self, i, txt, color):
-        self.label(self.pixel_to_unit_x(vd().windowWidth*2-30), self.pixel_to_unit_y((i+1)*4), txt, color)
+        self.label(self.pix_rightx-30, self.pix_topy+i*4, txt, color)
 
-    def setbounds(self):
-        global unit_leftx, unit_topy, unit_rightx, unit_bottomy
-        unit_leftx = min(x for x,y,c in self.rows)
-        unit_rightx = max(x for x,y,c in self.rows)
-        unit_topy = max(y for x,y,c in self.rows)
-        unit_bottomy = min(y for x,y,c in self.rows)
-        unit_leftx -= (unit_rightx-unit_leftx)*.05
-        unit_rightx += (unit_rightx-unit_leftx)*.05
-        unit_topy += (unit_topy-unit_bottomy)*.05
-        unit_bottomy -= (unit_topy-unit_bottomy)*.05
+    def plot(self, x, y, attr):
+        if self.unit_leftx is None or x < self.unit_leftx:     self.unit_leftx = x
+        if self.unit_rightx is None or x > self.unit_rightx:   self.unit_rightx = x
+        if self.unit_bottomy is None or y < self.unit_bottomy: self.unit_bottomy = y
+        if self.unit_topy is None or y > self.unit_topy:       self.unit_topy = y
+
+        self.addRow((x, y, attr))
 
     @async
     def reload(self):
-        self.rows = []
-        self.labels = []
-
         rows = self.sources[0]
         xcol = self.sources[1]
         ycols = self.sources[2:]
+
+        assert isNumeric(xcol)
+
+        self.rows = []
+        nerrors = 0
+        nplotted = 0
         for i, ycol in enumerate(ycols):
-            dp = datapoints(xcol, ycol, rows, graphColors[i])
-            self.rows.extend(list(dp))
+            colorname = graphColors[i]
+            attr = colors[colorname]
 
-        self.setbounds()
+            if xcol:
+                for row in self.genProgress(rows):
+                    try:
+                        unit_x = xcol.getTypedValue(row)
+                        unit_y = ycol.getTypedValue(row)
+                        self.plot(unit_x, unit_y, attr)
+                        nplotted += 1
+                    except Exception:
+                        nerrors += 1
+            else:
+                for unit_x, row in enumerate(self.genProgress(rows)):
+                    try:
+                        unit_y = ycol.getTypedValue(row)
+                        self.plot(unit_x, unit_y, attr)
+                        nplotted += 1
+                    except Exception:
+                        nerrors += 1
 
-        for i, ycol in enumerate(ycols):
-            self.legend(i, ycol.name, graphColors[i])
+        status('plotted %d points (%d errors)' % (nplotted, nerrors))
 
-        yrange = unit_topy-unit_bottomy
-        yincr = yrange/self.nVisibleRows  # vd().windowHeight
-        ndigits = len(str(int(yincr)))
-        yincr = int(round(yincr, -ndigits))
-        yval = int(round(unit_bottomy, -ndigits))
+    def add_y_axis_label(self, frac):
+        amt = self.unit_bottomy + frac*(self.unit_topy-self.unit_bottomy)
+        if isinstance(self.unit_bottomy, int):
+            txt = '%d' % amt
+        elif isinstance(self.unit_bottomy, float):
+            txt = '%.02f' % amt
+        else:
+            txt = str(frac)
+        self.label(0, (1.0-frac)*self.pix_bottomy, txt, options.color_graph_axis)
 
-        self.label(unit_leftx, unit_bottomy, str(int(unit_bottomy)), 'white')
-        for i in range(0, self.nVisibleRows):
-            ytop = self.pixel_to_unit_y(i*4+3)
-            self.label(unit_leftx, ytop, str(int(ytop)), "white")
+    def add_x_axis_label(self, frac):
+        amt = self.unit_leftx + frac*(self.unit_rightx-self.unit_leftx)
+        if isinstance(self.unit_leftx, int):
+            txt = '%d' % round(amt)
+        elif isinstance(self.unit_leftx, float):
+            txt = '%.02f' % amt
+        else:
+            txt = str(frac)
 
+        self.label(self.pix_leftx+frac*(self.pix_rightx-self.pix_leftx), self.pix_bottomy+4, txt, options.color_graph_axis)
+
+    def create_labels(self):
+        self.labels = []
+
+        for i, ycol in enumerate(self.sources[2:]):
+            colorname = graphColors[i]
+            self.legend(i, ycol.name, colorname)
+
+        # y-axis
+        self.add_y_axis_label(1.00)
+        self.add_y_axis_label(0.75)
+        self.add_y_axis_label(0.50)
+        self.add_y_axis_label(0.25)
+        self.add_y_axis_label(0.00)
+
+        # x-axis
+        self.add_x_axis_label(1.00)
+        self.add_x_axis_label(0.75)
+        self.add_x_axis_label(0.50)
+        self.add_x_axis_label(0.25)
+        self.add_x_axis_label(0.00)
+
+        self.label(0, self.pix_bottomy+4, '%*s»' % (left_margin_chars-2, self.sources[1].name), options.color_graph_axis)
 
