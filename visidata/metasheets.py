@@ -63,11 +63,12 @@ class SheetJoin(Sheet):
 
         with Progress(self, total=sum(len(vs.rows) for vs in sheets)*2) as prog:
             for vs in sheets:
-                rowsBySheetKey[vs] = {}
+                # tally rows by keys for each sheet
+                rowsBySheetKey[vs] = collections.defaultdict(list)
                 for r in vs.rows:
                     prog.addProgress(1)
                     key = tuple(c.getTypedValue(r) for c in vs.keyCols)
-                    rowsBySheetKey[vs][key] = r
+                    rowsBySheetKey[vs][key].append(r)
 
             for sheetnum, vs in enumerate(sheets):
                 # subsequent elements are the rows from each source, in order of the source sheets
@@ -76,29 +77,36 @@ class SheetJoin(Sheet):
                 for r in vs.rows:
                     prog.addProgress(1)
                     key = tuple(c.getTypedValue(r) for c in vs.keyCols)
-                    if key not in rowsByKey:
-                        rowsByKey[key] = [key] + [rowsBySheetKey[vs2].get(key) for vs2 in sheets]  # combinedRow
+                    if key not in rowsByKey: # gather for this key has not been done yet
+                        # multiplicative for non-unique keys
+                        rowsByKey[key] = []
+                        for crow in itertools.product(*[rowsBySheetKey[vs2].get(key, [None]) for vs2 in sheets]):
+                            rowsByKey[key].append([key] + list(crow))
 
         self.rows = []
 
         with Progress(self, len(rowsByKey)) as prog:
-            for k, combinedRow in rowsByKey.items():
+            for k, combinedRows in rowsByKey.items():
                 prog.addProgress(1)
 
                 if self.jointype == 'full':  # keep all rows from all sheets
-                    self.addRow(combinedRow)
+                    for combinedRow in combinedRows:
+                        self.addRow(combinedRow)
 
                 elif self.jointype == 'inner':  # only rows with matching key on all sheets
-                    if all(combinedRow):
-                        self.addRow(combinedRow)
+                    for combinedRow in combinedRows:
+                        if all(combinedRow):
+                            self.addRow(combinedRow)
 
                 elif self.jointype == 'outer':  # all rows from first sheet
-                    if combinedRow[1]:
-                        self.addRow(combinedRow)
+                    for combinedRow in combinedRows:
+                        if combinedRow[1]:
+                            self.addRow(combinedRow)
 
                 elif self.jointype == 'diff':  # only rows without matching key on all sheets
-                    if not all(combinedRow):
-                        self.addRow(combinedRow)
+                    for combinedRow in combinedRows:
+                        if not all(combinedRow):
+                            self.addRow(combinedRow)
 
 class ColumnConcat(Column):
     def __init__(self, name, colsBySheet, **kwargs):
