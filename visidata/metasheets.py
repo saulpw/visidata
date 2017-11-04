@@ -42,6 +42,8 @@ ColumnsSheet.columns += [
     ]
 
 #### slicing and dicing
+# rowdef: [(key, ...), sheet1_row, sheet2_row, ...]
+#   if a sheet does not have this key, sheet#_row is None
 class SheetJoin(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
 
@@ -69,7 +71,7 @@ class SheetJoin(Sheet):
 
             for sheetnum, vs in enumerate(sheets):
                 # subsequent elements are the rows from each source, in order of the source sheets
-                for c in vs.keyCols:
+                for c in vs.nonKeyVisibleCols:
                     self.addColumn(SubrowColumn(c, sheetnum+1))
                 for r in vs.rows:
                     prog.addProgress(1)
