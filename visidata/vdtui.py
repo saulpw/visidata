@@ -516,14 +516,14 @@ class VisiData:
     @property
     def unfinishedThreads(self):
         'A list of unfinished threads (those without a recorded `endTime`).'
-        return [t for t in self.threads if getattr(t, 'endTime') is None]
+        return [t for t in self.threads if getattr(t, 'endTime', None) is None]
 
     def checkForFinishedThreads(self):
         'Mark terminated threads with endTime.'
         for t in self.unfinishedThreads:
             if not t.is_alive():
                 t.endTime = time.process_time()
-                if not t.status:
+                if not getattr(t, 'status', None):
                     t.status = 'ended'
 
     def sync(self, expectedThreads=0):
