@@ -87,7 +87,8 @@ def ctypeAsyncRaise(threadObj, exception):
 # each row is an augmented threading.Thread object
 class TasksSheet(Sheet):
     commands = [
-        Command('^C', 'ctypeAsyncRaise(cursorRow, EscapeException)', 'abort current task'),
+        Command('d', 'ctypeAsyncRaise(cursorRow, EscapeException)', 'abort current task'),
+        Command('^C', 'd'),
         Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action'),
     ]
     columns = [
