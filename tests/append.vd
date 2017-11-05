@@ -1,0 +1,16 @@
+sheet	col	row	keystrokes	input	comment
+			o	tests/data1.tsv	open file
+			o	tests/data2.tsv	open file
+data2	Key	0	S		open Sheets Sheet
+sheets	name	1	s		select current row
+sheets	name	2	s		select current row
+sheets	name	2	&	append	merge the selected sheets with visible columns from all, keeping rows according to jointype
+data2&data1	A	0	H		slide current column left
+data2&data1	A	0	H		slide current column left
+data2&data1	B	0	H		slide current column left
+data2&data1	B	0	H		slide current column left
+data2&data1	Key	0	!		pin current column to the left as a key column
+data2&data1	A	0	!		pin current column to the left as a key column
+data2&data1	A	0	~		set type of current column to str
+data2&data1	A	0	g[		sort ascending by all key columns
+data2&data1	A	0	!		pin current column to the left as a key column
