@@ -61,7 +61,7 @@ class SheetJoin(Sheet):
         rowsBySheetKey = {}
         rowsByKey = {}
 
-        with Progress(self, total=sum(len(vs.rows) for vs in sheets)*2) as prog:
+        with Progress(total=sum(len(vs.rows) for vs in sheets)*2) as prog:
             for vs in sheets:
                 # tally rows by keys for each sheet
                 rowsBySheetKey[vs] = collections.defaultdict(list)
@@ -85,7 +85,7 @@ class SheetJoin(Sheet):
 
         self.rows = []
 
-        with Progress(self, len(rowsByKey)) as prog:
+        with Progress(total=len(rowsByKey)) as prog:
             for k, combinedRows in rowsByKey.items():
                 prog.addProgress(1)
 

@@ -217,7 +217,7 @@ def reload_tsv_sync(vs, **kwargs):
     with vs.source.open_text() as fp:
         _getTsvHeaders(fp, header_lines)  # discard header lines
 
-        with Progress(vs, vs.source.filesize) as prog:
+        with Progress(total=vs.source.filesize) as prog:
             while True:
                 try:
                     L = next(fp)

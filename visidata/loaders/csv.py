@@ -50,7 +50,7 @@ def load_csv(vs):
             vs.columns = ArrayColumns(len(vs.rows[0]))
 
         vs.recalc()  # make columns usable
-        with Progress(vs, vs.source.filesize) as prog:
+        with Progress(total=vs.source.filesize) as prog:
             try:
                 while True:
                     vs.addRow(wrappedNext(rdr))

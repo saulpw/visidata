@@ -29,10 +29,8 @@ class xlsxSheet(Sheet):
         for i in range(worksheet.max_column):
             self.addColumn(ColumnItem(None, i, width=8))
 
-        with Progress(self, worksheet.max_row) as prog:
-            for row in worksheet.iter_rows():
-                self.addRow(list(cell.value for cell in row))
-                prog.addProgress(1)
+        for row in Progress(worksheet.iter_rows(), worksheet.max_row):
+            self.addRow(list(cell.value for cell in row))
 
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
@@ -63,7 +61,5 @@ class xlsSheet(Sheet):
         for i in range(worksheet.ncols):
             self.addColumn(ColumnItem(None, i, width=8))
 
-        with Progress(self, worksheet.nrows) as prog:
-            for rownum in range(worksheet.nrows):
-                self.addRow(list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)))
-                prog.addProgress(1)
+        for rownum in Progress(range(worksheet.nrows)):
+            self.addRow(list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)))

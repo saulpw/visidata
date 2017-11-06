@@ -126,7 +126,7 @@ class GraphSheet(BrailleCanvas):
         self.pixels.clear()
         scale_x = (self.unit_rightx-self.unit_leftx)/(self.pix_rightx-self.pix_leftx)
         scale_y = (self.unit_topy-self.unit_bottomy)/(self.pix_bottomy-self.pix_topy)
-        for unit_x, unit_y, color in self.genProgress(self.rows):
+        for unit_x, unit_y, color in Progress(self.rows):
             pix_x = self.pix_leftx + (unit_x-self.unit_leftx)/scale_x
             pix_y = self.pix_topy + (self.unit_topy-unit_y)/scale_y  # invert y axis
             self.pixels[round(pix_y)][round(pix_x)] = color
@@ -153,7 +153,7 @@ class GraphSheet(BrailleCanvas):
             colorname = graphColors[i % len(graphColors)]
             attr = colors[colorname]
 
-            for rownum, row in enumerate(self.genProgress(self.source)):
+            for rownum, row in enumerate(Progress(self.source)):
                 try:
                     unit_x = self.xcol.getTypedValue(row) if self.xcol else rownum
                     unit_y = ycol.getTypedValue(row)

@@ -410,9 +410,11 @@ def async(func):
     return _execAsync
 
 class Progress:
-    def __init__(self, sheet, total):
-        self.sheet = sheet
-        self.thisTotal = total
+    def __init__(self, iterable=None, total=None):
+        assert threading.current_thread().daemon
+        self.sheet = threading.current_thread().sheet
+        self.iterable = iterable
+        self.thisTotal = total or len(iterable)
         self.thisMade = 0
 
     def __enter__(self):
@@ -425,6 +427,12 @@ class Progress:
 
     def __exit__(self, exc_type, exc_val, tb):
         self.sheet.progressMade += self.thisTotal-self.thisMade
+
+    def __iter__(self):
+        with self as prog:
+            for item in self.iterable:
+                yield item
+                prog.addProgress(1)
 
 @async
 def _async_deepcopy(vs, newlist, oldlist):
@@ -907,10 +915,8 @@ class Sheet:
         return options.disp_status_fmt.format(sheet=self)
 
     def genProgress(self, L, total=None):
-        with Progress(self, total or len(L)) as prog:
-            for i in L:
-                prog.addProgress(1)
-                yield i
+        for i in Progress(L, total):
+            yield i
 
     def newRow(self):
         return list((None for c in self.columns))

@@ -242,7 +242,7 @@ class CommandLog(Sheet):
         self.sheetmap.clear()
         self.cursorRowIndex = 0
         CommandLog.currentReplay = self
-        with Progress(self, len(self.rows)) as prog:
+        with Progress(total=len(self.rows)) as prog:
             while self.cursorRowIndex < len(self.rows):
                 if CommandLog.currentReplay is None:
                     status('replay canceled')
