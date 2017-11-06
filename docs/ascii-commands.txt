@@ -78,9 +78,9 @@
  Shift- M  Melt
  Shift- N  previous match [vim]
  Shift- O  Options
- Shift- P  Population sample
+ Shift- P  paste row from clipboard before [vim]
  Shift- Q
- Shift- R
+ Shift- R  Random sample
  Shift- S  Sheets sheet
  Shift- T
  Shift- U
@@ -110,7 +110,7 @@
         m
         n  next match [vim]
         o  open input
-        p  paste row from clipboard
+        p  paste row from clipboard after [vim]
         q  quit sheet
         r  row move by key regex
         s  select row

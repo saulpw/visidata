@@ -56,8 +56,8 @@ appends a blank row
 deletes current/all selected row(s) and writes to clipboard
 .It Ic "  y  gy"
 copies current/all selected row(s) to clipboard
-.It Ic "  p"
-pastes most recent clipboard rows after current row
+.It Ic "  p   P"
+pastes most recent clipboard rows after/before current row
 .It Ic "  f"
 fills null cells in current column with content of non-null cells up the current column
 .

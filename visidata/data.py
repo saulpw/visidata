@@ -21,7 +21,7 @@ globalCommand('r', 'moveRegex(sheet, regex=input("row key regex: ", "regex"), co
 globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'move to the given column number')
 globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'move to the given row number')
 
-globalCommand('P', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows')
+globalCommand('R', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row')
 globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows')
