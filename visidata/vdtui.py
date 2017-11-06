@@ -1220,6 +1220,8 @@ class Sheet:
     @property
     def selectedRows(self):
         'Return a list of selected rows in sheet order.'
+        if len(self._selectedRows) <= 1:
+            return list(self._selectedRows.values())
         return [r for r in self.rows if id(r) in self._selectedRows]
 
 ## end selection code
@@ -1558,13 +1560,17 @@ class Column:
         if cellval is None:
             return options.disp_none
 
+        # complex objects can be arbitrarily large (like sheet.rows)
+        #  this shortcut must be before self.type(cellval) (anytype will completely stringify)
+        if isinstance(cellval, list):
+            return '[%s]' % len(cellval)
+        if isinstance(cellval, dict):
+            return '{%s}' % len(cellval)
+
         t = self.type
         typedval = t(cellval)
         if t is date:         return typedval.to_string(self.fmtstr)
         elif self.fmtstr:     return self.fmtstr.format(typedval)
-        elif isinstance(typedval, (list, dict)):
-            # complex objects can be arbitrarily large (like sheet.rows)
-            return str(type(cellval))
         else:                 return str(typedval)
 
     @property

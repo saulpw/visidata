@@ -18,7 +18,7 @@ class ProfileSheet(TextSheet):
         Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile'),
     ]
     def __init__(self, name, pr):
-        super().__init__(name, getProfileResults(pr))
+        super().__init__(name, getProfileResults(pr).splitlines())
         self.profile = pr
 
 vd().profile = None
