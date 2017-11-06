@@ -84,6 +84,14 @@ def ctypeAsyncRaise(threadObj, exception):
         status('no thread to cancel')
 
 
+SheetsSheet.commands += [
+        Command('^C', 'for t in cursorRow.currentThreads: ctypeAsyncRaise(t, EscapeException)', 'abort all threads on current sheet'),
+]
+
+SheetsSheet.columns += [
+    ColumnAttr('threads', 'currentThreads', type=len),
+]
+
 # each row is an augmented threading.Thread object
 class TasksSheet(Sheet):
     commands = [

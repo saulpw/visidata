@@ -1558,14 +1558,13 @@ class Column:
         if cellval is None:
             return options.disp_none
 
-        if isinstance(cellval, (list, dict)):
-            # complex objects can be arbitrarily large (like sheet.rows)
-            return str(type(cellval))
-
         t = self.type
         typedval = t(cellval)
         if t is date:         return typedval.to_string(self.fmtstr)
         elif self.fmtstr:     return self.fmtstr.format(typedval)
+        elif isinstance(typedval, (list, dict)):
+            # complex objects can be arbitrarily large (like sheet.rows)
+            return str(type(cellval))
         else:                 return str(typedval)
 
     @property
