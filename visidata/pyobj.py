@@ -146,9 +146,14 @@ class SheetObject(Sheet):
         self.rows = []
         for r in dir(self.source):
             if not options.pyobj_show_hidden:
-                if r.startswith('_') or callable(getattr(self.source, r)):
-                    continue
-            self.addRow(r)
+                try:
+                    if r.startswith('_') or callable(getattr(self.source, r)):
+                        continue
+                    self.addRow(r)
+                except EscapeException:
+                    raise
+                except:
+                    pass
 
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
