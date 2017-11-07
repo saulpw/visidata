@@ -97,7 +97,7 @@ def saveSheet(vs, fn, confirm_overwrite=False):
     funcname = 'save_' + ext[1:]
     if funcname not in getGlobals():
         funcname = 'save_tsv'
-    getGlobals().get(funcname)(vs, fn)
+    getGlobals().get(funcname)(vs, Path(fn).resolve())
     status('saving to ' + fn)
 
 
