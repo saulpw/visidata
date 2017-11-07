@@ -3,7 +3,7 @@ import math
 from visidata import *
 globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column')
 globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet')
-globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda r: "Total")))', 'open a one-line summary for all selected rows')
+globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open a one-line summary for all selected rows')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 80, 'width of histogram column')
@@ -48,18 +48,18 @@ class SheetFreqTable(Sheet):
         self.nKeys = len(self.origCols)
 
         self.columns = [
-            Column(col.name, type=col.type, width=col.width, getter=lambda r,i=i: r[0][i]) for i, col in enumerate(self.origCols)
+            Column(c.name, type=c.type, width=c.width, getter=lambda col,row,i=i: row[0][i]) for i, c in enumerate(self.origCols)
         ]
 
         self.columns.extend([
-            Column('count', type=int, getter=lambda r: len(r[1])),
-            Column('percent', type=float, getter=lambda r: len(r[1])*100/self.source.nRows),
-            Column('histogram', type=str, getter=lambda r,s=self: options.disp_histogram*(options.disp_histolen*len(r[1])//s.largest), width=50),
+            Column('count', type=int, getter=lambda col,row: len(row[1])),
+            Column('percent', type=float, getter=lambda col,row: len(row[1])*100/col.sheet.source.nRows),
+            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=50),
         ])
 
         aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
                                  type=aggregator.type or c.type,
-                                 getter=lambda r,c=c,aggr=aggregator: aggr(c, r[1]))
+                                 getter=lambda col,row,origcol=c,aggr=aggregator: aggr(origcol, row[1]))
                              for c in self.source.visibleCols
                                 for aggregator in getattr(c, 'aggregators', [])
                          ]

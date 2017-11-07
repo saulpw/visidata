@@ -5,9 +5,9 @@ from visidata import *
 class ColorSheet(Sheet):
     columns = [
         Column('color', type=int),
-        Column('R', getter=lambda r: curses.color_content(curses.pair_number(colors[r])-1)[0]),
-        Column('G', getter=lambda r: curses.color_content(curses.pair_number(colors[r])-1)[1]),
-        Column('B', getter=lambda r: curses.color_content(curses.pair_number(colors[r])-1)[2]),
+        Column('R', getter=lambda col,row: curses.color_content(curses.pair_number(colors[row])-1)[0]),
+        Column('G', getter=lambda col,row: curses.color_content(curses.pair_number(colors[row])-1)[1]),
+        Column('B', getter=lambda col,row: curses.color_content(curses.pair_number(colors[row])-1)[2]),
         ]
     colorizers = [
         Colorizer('row', 7, lambda s,c,r,v: r)

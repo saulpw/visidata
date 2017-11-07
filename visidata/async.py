@@ -101,8 +101,8 @@ class TasksSheet(Sheet):
     ]
     columns = [
         ColumnAttr('name'),
-        Column('elapsed_s', type=float, getter=lambda r: elapsed_s(r)),
-        Column('status', getter=lambda r: r.status),
+        Column('elapsed_s', type=float, getter=lambda col,row: elapsed_s(row)),
+        Column('status', getter=lambda col,row: row.status),
     ]
     def reload(self):
         self.rows = vd().threads

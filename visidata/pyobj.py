@@ -75,8 +75,8 @@ class ListOfPyobjSheet(Sheet):
     def reload(self):
         self.rows = range(len(self.source))
         self.columns = [Column(self.name,
-                               getter=lambda r,s=self: s.source[r],
-                               setter=lambda s,c,r,v: setitem(s.source, r, v))]
+                               getter=lambda col,row: col.sheet.source[row],
+                               setter=lambda col,row,val: setitem(col.sheet.source, row, val))]
 
 # rowdef: dict
 class ListOfDictSheet(Sheet):

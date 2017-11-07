@@ -1509,8 +1509,8 @@ class Column:
         self.name = name      # display visible name
         self.fmtstr = ''      # by default, use str()
         self.type = type      # anytype/str/int/float/date/func
-        self.getter = lambda row: row
-        self.setter = None    # setter(sheet,col,row,value)
+        self.getter = lambda col, row: row
+        self.setter = None    # setter(col,row,value)
         self.width = None     # == 0 if hidden, None if auto-compute next time
 
         self._cachedValues = collections.OrderedDict() if cache else None
@@ -1596,7 +1596,7 @@ class Column:
             yield v
 
     def calcValue(self, row):
-        return self.getter(row)
+        return (self.getter)(self, row)
 
     def getTypedValue(self, row):
         '''Returns the properly-typed value for the given row at this column.
@@ -1677,7 +1677,7 @@ class Column:
     def setValue(self, row, value):
         if not self.setter:
             error('column cannot be changed')
-        self.setter(self.sheet, self, row, value)
+        self.setter(self, row, value)
 
     def setValues(self, rows, value):
         'Set given rows to `value`.'
@@ -1714,31 +1714,29 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
 
 def ColumnAttr(name, attr=None, **kwargs):
-    'Return Column object with `attrname` from current row Python object.'
+    'Column using getattr/setattr of given attr.'
     if attr is None:
         attr = name
     return Column(name,
-            getter=lambda r,b=attr: getattr(r,b,None),
-            setter=lambda s,c,r,v,b=attr: setattr(r,b,v),
+            getter=lambda col,row,attr=attr: getattr(row, attr, None),
+            setter=lambda col,row,val,attr=attr: setattr(row, attr, val),
             **kwargs)
 
 def ColumnItem(name, key=None, **kwargs):
-    'Return Column object (with getitem/setitem) on the row Python object.'
+    'Column using getitem/setitem of given key.'
     if key is None:
         key = name
     return Column(name,
-            getter=lambda r,i=key: r[i],
-            setter=lambda s,c,r,v,i=key,f=setitem: f(r,i,v),
+            getter=lambda col,row,key=key: row[key],
+            setter=lambda col,row,val,key=key: setitem(row, key, val),
             **kwargs)
 
 def ArrayNamedColumns(columns):
-    '''Return list of Column objects from named columns.
-
-    Note: argument `columns` is a list of column names, Mapping to r[0]..r[n].'''
+    'Return list of ColumnItems from given list of column names.'
     return [ColumnItem(colname, i) for i, colname in enumerate(columns)]
 
 def ArrayColumns(ncols):
-    'Return list of Columns that __getitem__ on the row'
+    'Return list of ColumnItems for given row length.'
     return [ColumnItem('', i, width=8) for i in range(ncols)]
 
 
@@ -1866,7 +1864,7 @@ def clipstr(s, dispw):
 
 
 ## text viewer and dir browser
-# rowdef: str
+# rowdef: (linenum, str)
 class TextSheet(Sheet):
     'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
     commands = [
@@ -1876,7 +1874,7 @@ class TextSheet(Sheet):
 
     @async
     def reload(self):
-        self.columns = [Column(self.name, getter=lambda r: r[1])]
+        self.columns = [Column(self.name, getter=lambda col,row: row[1])]
         self.rows = []
         for text in self.source:
             if getattr(self, 'wrap', options.wrap):
@@ -1961,7 +1959,7 @@ class OptionsSheet(Sheet):
         Command('e', ENTER)
     ]
     columns = [ColumnItem('option', 0),
-               Column('value', getter=lambda r:r[1], setter=lambda s,c,r,v: setattr(options, r[0], v)),
+               Column('value', getter=lambda col,row: row[1], setter=lambda col,row,val: setattr(options, row[0], val)),
                ColumnItem('default', 2),
                ColumnItem('description', 3)]
     colorizers = []

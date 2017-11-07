@@ -13,29 +13,22 @@ def isError(col, row):
 def isNull(v):
     return isNullFunc()(v)
 
-
-class SourceColumn(Column):
-    def __init__(self, name, **kwargs):
-        super().__init__(name, cache=True, **kwargs)
-
-    def getValue(self, row):
-        return self.getter(self.sheet.source, row)
-
 def values(c):
     return c.getValues(c.sheet.rows)
 
+# rowdef: Column from source sheet
 class DescribeSheet(Sheet):
     columns = [
-            Column('column', type=str, getter=lambda r: r.name),
-            SourceColumn('errors',  type=len, getter=lambda sheet,r: tuple(sr for sr in sheet.rows if isError(r, sr))),
-            SourceColumn('nulls',  type=len, getter=lambda sheet,r: tuple(sr for sr in sheet.rows if isNull(r.getValue(sr)))),
-            SourceColumn('distinct',type=len, getter=lambda sheet,r: set(values(r))),
-            SourceColumn('mode',   type=anytype, getter=lambda sheet,r: statistics.mode(values(r))),
-            SourceColumn('min',    type=anytype, getter=lambda sheet,r: min(values(r)) if isNumeric(r) else None),
-            SourceColumn('median', type=anytype, getter=lambda sheet,r: statistics.median(values(r)) if isNumeric(r) else None),
-            SourceColumn('mean',   type=float, getter=lambda sheet,r: statistics.mean(values(r)) if isNumeric(r) else None),
-            SourceColumn('max',    type=anytype, getter=lambda sheet,r: max(values(r)) if isNumeric(r) else None),
-            SourceColumn('stddev', type=float, getter=lambda sheet,r: statistics.stdev(values(r)) if isNumeric(r) else None),
+            Column('column', type=str, getter=lambda col,row: row.name),
+            Column('errors', cache=True, type=len, getter=lambda col,row: tuple(sr for sr in col.sheet.source.rows if isError(row, sr))),
+            Column('nulls',  cache=True, type=len, getter=lambda col,row: tuple(sr for sr in col.sheet.source.rows if isNull(row.getValue(sr)))),
+            Column('distinct',cache=True, type=len, getter=lambda col,row: set(values(row))),
+            Column('mode',   cache=True, type=anytype, getter=lambda col,row: statistics.mode(values(row))),
+            Column('min',    cache=True, type=anytype, getter=lambda col,row: min(values(row)) if isNumeric(row) else None),
+            Column('median', cache=True, type=anytype, getter=lambda col,row: statistics.median(values(row)) if isNumeric(row) else None),
+            Column('mean',   cache=True, type=float, getter=lambda col,row: statistics.mean(values(row)) if isNumeric(row) else None),
+            Column('max',    cache=True, type=anytype, getter=lambda col,row: max(values(row)) if isNumeric(row) else None),
+            Column('stddev', cache=True, type=float, getter=lambda col,row: statistics.stdev(values(row)) if isNumeric(row) else None),
     ]
     commands = [
         Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell'),

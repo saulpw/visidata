@@ -18,7 +18,7 @@ class SheetPivot(Sheet):
         self.variableCols = variableCols
         for colnum, col in enumerate(srcsheet.keyCols):
             if col not in variableCols:
-                newcol = Column(col.name, getter=lambda r, colnum=colnum: r[0][colnum])
+                newcol = Column(col.name, getter=lambda col,row,colnum=colnum: row[0][colnum])
                 newcol.srccol = col
                 self.nonpivotKeyCols.append(newcol)
 
@@ -43,7 +43,7 @@ class SheetPivot(Sheet):
                 if aggregator.__name__ != 'count':  # already have count above
                     c = Column('Total_' + aggname,
                                 type=aggregator.type or aggcol.type,
-                                getter=lambda r,aggcol=aggcol: aggregator(aggcol, sum(r[1].values(), [])))
+                                getter=lambda col,row,aggcol=aggcol: aggregator(aggcol, sum(row[1].values(), [])))
                     self.addColumn(c)
 
                 allValues = set()
@@ -52,13 +52,13 @@ class SheetPivot(Sheet):
                         allValues.add(value)
                         c = Column(value+'_'+aggname,
                                 type=aggregator.type or aggcol.type,
-                                getter=lambda r,aggcol=aggcol,aggvalue=value: aggregator(aggcol, r[1].get(aggvalue, [])))
+                                getter=lambda col,row,aggcol=aggcol,aggvalue=value: aggregator(aggcol, row[1].get(aggvalue, [])))
                         c.aggvalue = value
                         self.addColumn(c)
 
             c = Column('Total_count',
                         type=int,
-                        getter=lambda r: len(sum(r[1].values(), [])))
+                        getter=lambda col,row: len(sum(row[1].values(), [])))
             self.addColumn(c)
 
 

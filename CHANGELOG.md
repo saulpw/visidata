@@ -2,6 +2,7 @@
 
 # next
 
+- change main Column API to getter(col, row) and setter(col, row, val)
 - rename skiplines option to skip
 - rename headerlines option to header
 - move Path and subclasses out of vdtui

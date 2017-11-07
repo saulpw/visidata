@@ -15,8 +15,8 @@ class MeltedSheet(Sheet):
         sheet = self.source
         self.columns = [SubrowColumn(c, 0) for c in sheet.keyCols]
         self.nKeys = sheet.nKeys
-        self.columns.extend([Column(melt_var_colname, getter=lambda r: r[1].name),
-                             Column(melt_value_colname, getter=lambda r: r[1].getValue(r[0]))])
+        self.columns.extend([Column(melt_var_colname, getter=lambda col,row: row[1].name),
+                             Column(melt_value_colname, getter=lambda col,row: row[1].getValue(row[0]))])
 
         colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]
 

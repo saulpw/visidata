@@ -11,8 +11,8 @@ globalCommand("zg'", "gz'")
 def StaticColumn(rows, col):
     c = deepcopy(col)
     frozenData = {id(r):col.getValue(r) for r in rows}
-    c.calcValue=lambda r,d=frozenData: d[id(r)]
-    c.setter=lambda s,c,r,v,d=frozenData: setitem(d, id(r), v)
+    c.calcValue=lambda row,d=frozenData: d[id(row)]
+    c.setter=lambda col,row,val,d=frozenData: setitem(d, id(row), val)
     c.name = c.name + '_frozen'
     return c
 

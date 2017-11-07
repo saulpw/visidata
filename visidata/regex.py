@@ -19,11 +19,11 @@ def addRegexColumns(regexMaker, vs, colIndex, origcol, exampleRow, regexstr):
     result = func(exampleRow)
 
     for i, g in enumerate(result):
-        c = Column(origcol.name+'_re'+str(i), getter=lambda r,i=i,func=func: func(r)[i])
+        c = Column(origcol.name+'_re'+str(i), getter=lambda col,row,i=i,func=func: func(row)[i])
         vs.addColumn(c, index=colIndex+i+1)
 
 
-def regexTransform(col, instr):
+def regexTransform(origcol, instr):
     i = indexWithEscape(instr, '/')
     if i is None:
         before = instr
@@ -31,8 +31,8 @@ def regexTransform(col, instr):
     else:
         before = instr[:i]
         after = instr[i+1:]
-    newCol = Column(col.name + '_re',
-                    getter=lambda row, col=col, before=before, after=after: re.sub(before, after, col.getDisplayValue(row), flags=regex_flags()))
+    newCol = Column(origcol.name + '_re',
+                    getter=lambda col,row,origcol=origcol, before=before, after=after: re.sub(before, after, origcol.getDisplayValue(row), flags=regex_flags()))
     return newCol
 
 def indexWithEscape(s, char, escape_char='\\'):

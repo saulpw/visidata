@@ -44,8 +44,8 @@ ColumnsSheet.commands += [
 ]
 ColumnsSheet.columns += [
         Column('aggregators',
-               getter=lambda r: ' '.join(x.__name__ for x in getattr(r, 'aggregators', [])),
-               setter=lambda s,c,r,v: setattr(r, 'aggregators', list(aggregators[k] for k in (v or '').split())))
+               getter=lambda col,row: ' '.join(x.__name__ for x in getattr(row, 'aggregators', [])),
+               setter=lambda col,row,val: setattr(row, 'aggregators', list(aggregators[k] for k in (val or '').split())))
 ]
 
 def addAggregator(cols, aggr):

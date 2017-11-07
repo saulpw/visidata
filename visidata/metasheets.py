@@ -7,7 +7,7 @@ OptionsSheet.colorizers += [
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
     return Column("+".join(c.name for c in cols),
-                  getter=lambda r,cols=cols,ch=' ': ch.join(c.getDisplayValue(r) for c in cols))
+                  getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
 
 def createJoinedSheet(sheets, jointype=''):
     if jointype == 'append':
