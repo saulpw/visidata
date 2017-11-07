@@ -64,7 +64,7 @@
  Shift- ?  reverse search by regex [vim]
  Shift- @  make column date
  Shift- A  Add blank sheet
- Shift- B  clipBoard sheet
+ Shift- B
  Shift- C  Columns sheet
  Shift- D  commandlog sheet
  Shift- E
