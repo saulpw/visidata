@@ -411,8 +411,7 @@ def async(func):
 
 class Progress:
     def __init__(self, iterable=None, total=None):
-        assert threading.current_thread().daemon
-        self.sheet = threading.current_thread().sheet
+        self.sheet = threading.current_thread().sheet if threading.current_thread().daemon else Sheet('dummy')
         self.iterable = iterable
         self.thisTotal = total or len(iterable)
         self.thisMade = 0
