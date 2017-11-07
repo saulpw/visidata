@@ -23,12 +23,14 @@ scrolls current row to top/center/bottom of screen
 .
 .so vdtui-column.inc
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic "z=" Ar expr
+.It Ic " z=" Ar expr
 .No evaluates Python Ar expr No on current row and displays result on status line
+.It Ic "gz=" Ar iterable
+.No sets selected rows in current column to the results of a Python Ar iterable No
 .Pp
-.It Ic "g^"
+.It Ic " g^"
 sets names of all visible columns to contents of current row
-.It Ic "z^"
+.It Ic " z^"
 sets name of current column to contents of current cell
 .It Ic "gz^"
 sets name of current column to combined contents of current cell in selected rows
@@ -52,11 +54,13 @@ opens a frozen copy of current sheet with all visible columns evaluated
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a"
 appends a blank row
+.It Ic " ga" Ar number
+.No appends Ar number No blank rows
 .It Ic "  d  gd"
 deletes current/all selected row(s) and writes to clipboard
 .It Ic "  y  gy"
 copies current/all selected row(s) to clipboard
-.It Ic "  p   P"
+.It Ic "  p   Shift-P"
 pastes most recent clipboard rows after/before current row
 .It Ic "  f"
 fills null cells in current column with content of non-null cells up the current column
@@ -74,7 +78,11 @@ opens
 .No saves commandlog to Ar filename.vd No file
 .It Ic "Shift-A" Ar number
 .No opens new blank sheet with Ar number No columns
-.It Ic "Shift-P" Ar number
+.It Ic " m"
+.No opens a canvas graphing current column against key column
+.It Ic "gm"
+.No opens a canvas graphing all visible columns against key column
+.It Ic "Shift-R" Ar number
 opens duplicate sheet with a random population subset of
 .Ar number No rows
 .Pp

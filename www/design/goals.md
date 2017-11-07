@@ -6,6 +6,7 @@
 VisiData is the open source data multitool that I've been developing since 2016.
 
 ---
+
 When it comes to data wrangling:
 
     - Python is a powerful and ubiquitous platform for data processing, transformation and integration;

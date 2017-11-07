@@ -13,8 +13,8 @@ Create a GitHub issue if anything doesn't appear to be working right. If you get
 ### Code contributions
 
 VisiData has two main branches:
-* [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (which should be on pypi).
-* [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
+- [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (which should be on pypi).
+- [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
 
 If you wish to contribute code, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it.
 
@@ -60,5 +60,5 @@ If you would like to take a plunge into our mandocs, they are located in `visida
 If you want to chat about VisiData, learn how to use it to maximum effect, or discuss possibilities in the VisiData multiverse, here is where I and other contributors and users can be reached:
 
 - [r/visidata](http://reddit.com/r/visidata) on reddit
-- #visidata on [freenode IRC](https://webchat.freenode.net)
+- [#visidata](irc://frenode.net/#visidata) on [freenode IRC](https://webchat.freenode.net)
 - [saul@visidata.org](mailto:saul@visidata.org) via email

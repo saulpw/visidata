@@ -8,6 +8,15 @@
 - TextSheet source is any iterable of strings
 - Sheet.filetype provides default save filename extension
 - remove default names for unnamed columns
+- `Shift-R` now opens a new sheet with # randomly selected rows
+- `Shift-P` now pastes above the current row (like vim)
+- add threads column and `^C` to SheetsSheet
+- Bugfix: Joins
+- add `m` and `gm` commands to graph column(s) vs keys
+- history up/down in edit widget now feels right
+- remove default names for unnamed columns
+- add `ga` to add N new rows
+- add `gz=` to set selected/all rows to a Python sequence in this column
 
 ## 0.97 (2017-10-05)
 - Features

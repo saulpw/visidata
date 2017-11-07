@@ -157,12 +157,14 @@ sets type of current column to str/int/float/currency/date
 .No sets current column for selected rows to result of Python Ar expr
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic "z=" Ar expr
+.It Ic " z=" Ar expr
 .No evaluates Python Ar expr No on current row and displays result on status line
+.It Ic "gz=" Ar iterable
+.No sets selected rows in current column to the results of a Python Ar iterable No
 .Pp
-.It Ic "g^"
+.It Ic " g^"
 sets names of all visible columns to contents of current row
-.It Ic "z^"
+.It Ic " z^"
 sets name of current column to contents of current cell
 .It Ic "gz^"
 sets name of current column to combined contents of current cell in selected rows
@@ -220,12 +222,14 @@ opens duplicate sheet with deepcopy of selected rows
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a"
 appends a blank row
+.It Ic " ga" Ar number
+.No appends Ar number No blank rows
 .It Ic "  d  gd"
 deletes current/all selected row(s) and writes to clipboard
 .It Ic "  y  gy"
 copies current/all selected row(s) to clipboard
-.It Ic "  p"
-pastes most recent clipboard rows after current row
+.It Ic "  p   Shift-P"
+pastes most recent clipboard rows after/before current row
 .It Ic "  f"
 fills null cells in current column with content of non-null cells up the current column
 .
@@ -281,7 +285,11 @@ opens
 .No saves commandlog to Ar filename.vd No file
 .It Ic "Shift-A" Ar number
 .No opens new blank sheet with Ar number No columns
-.It Ic "Shift-P" Ar number
+.It Ic " m"
+.No opens a canvas graphing current column against key column
+.It Ic "gm"
+.No opens a canvas graphing all visible columns against key column
+.It Ic "Shift-R" Ar number
 opens duplicate sheet with a random population subset of
 .Ar number No rows
 .Pp
@@ -551,6 +559,8 @@ delay between replayed commands, in seconds
 insert movements during replay
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
 maxsplit to pass to regex.split
+.It Sy --show-graph-labels Ns = Ns Ar "bool    " No "True"
+show axes and legend on graph
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
@@ -632,6 +642,8 @@ width of histogram column
 status indicator for active replay
 .It Sy "disp_replay_pause  " No "\[u2016]"
 status indicator for paused replay
+.It Sy "color_graph_axis   " No "white"
+color for graph axis labels
 .El
 .
 .Sh EXAMPLES
