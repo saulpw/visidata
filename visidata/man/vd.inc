@@ -160,7 +160,7 @@ sets type of current column to str/int/float/currency/date
 .It Ic " z=" Ar expr
 .No evaluates Python Ar expr No on current row and displays result on status line
 .It Ic "gz=" Ar iterable
-.No sets selected rows in current column to the results of a Python Ar iterable No
+.No sets selected rows in current column to the results of a Python Ar iterable
 .Pp
 .It Ic " g^"
 sets names of all visible columns to contents of current row
