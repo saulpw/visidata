@@ -90,7 +90,7 @@ def getDefaultSaveName(sheet):
 def saveSheet(vs, fn, confirm_overwrite=False):
     'Save sheet `vs` with given filename `fn`.'
     if Path(fn).exists():
-        if options.confirm_overwrite:
+        if confirm_overwrite:
             confirm('%s already exists. overwrite? ' % fn)
 
     basename, ext = os.path.splitext(fn)
