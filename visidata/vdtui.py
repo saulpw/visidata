@@ -91,7 +91,7 @@ class OptionsObject:
 
         curval = self._opts[k][1]
         t = type(curval)
-        if isinstance(v, str) and isinstance(t, bool): # special case for bool options
+        if isinstance(v, str) and t is bool: # special case for bool options
             v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
         elif curval is not None:             # if None, do not apply type conversion
             v = t(v)
