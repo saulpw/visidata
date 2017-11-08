@@ -17,7 +17,7 @@ option('color_diff_add', 'yellow', 'color of rows/columns added to --diff source
 def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
     log = logpath.read_text().format(*args, **kwargs)
-    src = PathFd(logpath.fqpn, io.StringIO(log))
+    src = PathFd(logpath.fqpn, io.StringIO(log), filesize=len(log))
     vs = openSource(src)
     vd().push(vs)
     vs.vd = vd()
