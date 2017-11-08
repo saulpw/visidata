@@ -19,7 +19,8 @@ from .tidydata import *
 from .cmdlog import *
 from .freeze import *
 from .regex import *
-from .braille import *
+from .canvas import *
+from .graph import *
 
 from .loaders.csv import *
 from .loaders.zip import *
