@@ -413,19 +413,25 @@ class Progress:
     def __init__(self, iterable=None, total=None):
         self.sheet = threading.current_thread().sheet if threading.current_thread().daemon else Sheet('dummy')
         self.iterable = iterable
-        self.thisTotal = total or len(iterable)
+        if total is None:
+            self.thisTotal = len(iterable)
+        else:
+            self.thisTotal = total
         self.thisMade = 0
 
     def __enter__(self):
-        self.sheet.progressTotal += self.thisTotal
+        if self.thisTotal:
+            self.sheet.progressTotal += self.thisTotal
         return self
 
     def addProgress(self, n):
-        self.sheet.progressMade += n
-        self.thisMade += n
+        if self.thisTotal:
+            self.sheet.progressMade += n
+            self.thisMade += n
 
     def __exit__(self, exc_type, exc_val, tb):
-        self.sheet.progressMade += self.thisTotal-self.thisMade
+        if self.thisTotal:
+            self.sheet.progressMade += self.thisTotal-self.thisMade
 
     def __iter__(self):
         with self as prog:
