@@ -284,7 +284,7 @@ class CommandLog(Sheet):
     @property
     def replayStatus(self):
         x = options.disp_replay_pause if self.paused else options.disp_replay_play
-        return ' │ %s %s/%s' % (x, self.progressMade, self.progressTotal)
+        return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
 vd().cmdlog = CommandLog('cmdlog')
 vd().cmdlog.rows = []  # so it can be added to immediately
