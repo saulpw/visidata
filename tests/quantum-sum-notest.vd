@@ -1,0 +1,16 @@
+sheet	col	row	keystrokes	input	comment
+			A	1	open new blank sheet with number columns
+unnamed	0	0	ga	100000	add N blank rows
+unnamed	0	0	=	random.random()	create new column from Python expression, with column names as variables
+unnamed	0	0	%		set type of current column to float
+unnamed	random.random()	0	%		set type of current column to float
+unnamed	random.random()	1	^	x	edit name of current column
+unnamed	x	1	=	int(x*6+1)	create new column from Python expression, with column names as variables
+unnamed	x	1	-		hide current column (to unhide go to Columns sheet and edit its width)
+unnamed	int(x*6+1)	1	^	d6	edit name of current column
+unnamed		0	=	random.choice(string.ascii_uppercase)	create new column from Python expression, with column names as variables
+unnamed	random.choice(string.ascii_uppercase)	0	_		adjust width of current column
+unnamed	d6	0	+	sum	add aggregator to the current column
+unnamed	random.choice(string.ascii_uppercase)	0	F		open Frequency Table grouped on current column
+unnamed_random.choice(string.ascii_uppercase)_freq	random.choice(string.ascii_uppercase)	0	]		sort descending by current column
+unnamed_random.choice(string.ascii_uppercase)_freq	random.choice(string.ascii_uppercase)	0	[		sort ascending by current column

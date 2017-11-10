@@ -4,7 +4,12 @@
 for i in tests/*.vd ; do
     echo "--- $i"
     outbase=${i##tests/}
-    PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i --batch --output tests/golden/${outbase%.vd}.tsv
+    if [ "${i%-notest.vd}-notest" == "${i%.vd}" ]
+    then
+        PYTHONPATH=. bin/vd --play $i --batch
+    else
+        PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i --batch --output tests/golden/${outbase%.vd}.tsv
+    fi
 done
 echo '=== git diffs ==='
 git --no-pager diff --exit-code --numstat tests/
