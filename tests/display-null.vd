@@ -1,0 +1,11 @@
+sheet	col	row	keystrokes	input	comment
+			o	sample_data/surveys.csv	open file
+surveys	record_id	0	O		open Options
+options	value	11	^J	Null	edit option
+options	value	11	q		quit current sheet
+surveys	sex	24	,		select rows matching current cell in current column
+surveys	sex	24	gzd		set contents of cells in current column to None for selected rows
+surveys	sex	24	gu		unselect all rows
+surveys	hindfoot_length	24	,		select rows matching current cell in current column
+surveys	hindfoot_length	24	gzd		set contents of cells in current column to None for selected rows
+surveys	hindfoot_length	24	gu		unselect all rows
