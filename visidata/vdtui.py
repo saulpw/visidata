@@ -1085,38 +1085,33 @@ class Sheet:
 
     @property
     def visibleRows(self):  # onscreen rows
-        'Slice of rows visible in the window.'
+        'List of rows onscreen. '
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
     @functools.lru_cache()
     def visibleCols(self):  # non-hidden cols
-        'List of unhidden Column objects.'
+        'List of `Column` which are not hidden.'
         return [c for c in self.columns if not c.hidden]
 
     @property
-    def visibleColNames(self):
-        'String of visible column names.'
-        return ' '.join(c.name for c in self.visibleCols)
-
-    @property
     def cursorColIndex(self):
-        'Index of column into cursor.columns.'
+        'Index of current column into `columns`. Linear search; prefer `cursorCol` or `cursorVisibleColIndex`.'
         return self.columns.index(self.cursorCol)
 
     @property
     def keyCols(self):
-        'List of key columns.'
+        'List of the key columns (the first `nKeys` columns).'
         return self.columns[:self.nKeys]
 
     @property
     def nonKeyVisibleCols(self):
-        'List of unhidden non-key columns.'
+        'All columns which are not keysList of unhidden non-key columns.'
         return [c for c in self.columns[self.nKeys:] if not c.hidden]
 
     @property
     def keyColNames(self):
-        'String of key column names.'
+        'String of key column names, for SheetsSheet convenience.'
         return ' '.join(c.name for c in self.keyCols)
 
     @property
@@ -1136,12 +1131,12 @@ class Sheet:
 
     @property
     def cursorValue(self):
-        'Untyped value at current row and column.'
+        'Raw value at current row and column.'
         return self.cursorCol.getValue(self.cursorRow)
 
     @property
     def statusLine(self):
-        'Status-line element showing row and column stats.'
+        'String of row and column stats.'
         rowinfo = 'row %d/%d (%d selected)' % (self.cursorRowIndex, self.nRows, len(self._selectedRows))
         colinfo = 'col %d/%d (%d visible)' % (self.cursorColIndex, self.nCols, len(self.visibleCols))
         return '%s  %s' % (rowinfo, colinfo)
@@ -1162,23 +1157,23 @@ class Sheet:
         return len(self.visibleCols)
 
 ## selection code
-    def isSelected(self, r):
-        'Return boolean: is current row selected?'
-        return id(r) in self._selectedRows
+    def isSelected(self, row):
+        'True if given row is selected. O(log n).'
+        return id(row) in self._selectedRows
 
     @async
     def toggle(self, rows):
-        'Select any unselected rows.'
+        'Toggle selection of given `rows`.'
         for r in self.genProgress(rows, len(self.rows)):
             if not self.unselectRow(r):
                 self.selectRow(r)
 
     def selectRow(self, row):
-        'Select given row.'
+        'Select given row. O(log n)'
         self._selectedRows[id(row)] = row
 
     def unselectRow(self, row):
-        'Unselect given row, return True if selected; else return False.'
+        'Unselect given row, return True if selected; else return False. O(log n)'
         if id(row) in self._selectedRows:
             del self._selectedRows[id(row)]
             return True
@@ -1187,7 +1182,7 @@ class Sheet:
 
     @async
     def select(self, rows, status=True, progress=True):
-        'Select given rows with option for progress-tracking.'
+        "Select given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
         for r in (self.genProgress(rows) if progress else rows):
             self.selectRow(r)
@@ -1196,7 +1191,7 @@ class Sheet:
 
     @async
     def unselect(self, rows, status=True, progress=True):
-        'Unselect given rows with option for progress-tracking.'
+        "Unselect given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
         for r in (self.genProgress(rows) if progress else rows):
             self.unselectRow(r)
@@ -1204,22 +1199,22 @@ class Sheet:
             self.vd.status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
 
     def selectByIdx(self, rowIdxs):
-        'Select given rows by index numbers.'
+        'Select given row indexes, without progress bar.'
         self.select((self.rows[i] for i in rowIdxs), progress=False)
 
     def unselectByIdx(self, rowIdxs):
-        'Unselect given rows by index numbers.'
+        'Unselect given row indexes, without progress bar.'
         self.unselect((self.rows[i] for i in rowIdxs), progress=False)
 
     def gatherBy(self, func):
-        'Yield each row matching the cursor value '
+        'Generate only rows for which the given func returns True.'
         for r in self.genProgress(self.rows):
             if func(r):
                 yield r
 
     @property
     def selectedRows(self):
-        'Return a list of selected rows in sheet order.'
+        'List of selected rows in sheet order. [O(nRows*log(nSelected))]'
         if len(self._selectedRows) <= 1:
             return list(self._selectedRows.values())
         return [r for r in self.rows if id(r) in self._selectedRows]
@@ -1234,11 +1229,11 @@ class Sheet:
         return toVisColIdx
 
     def cursorDown(self, n=1):
-        "Increment cursor's row by `n`."
+        'Move cursor down `n` rows (or up if `n` is negative).'
         self.cursorRowIndex += n
 
     def cursorRight(self, n=1):
-        "Increment cursor's column by `n`."
+        'Move cursor right `n` visible columns (or left if `n` is negative).'
         self.cursorVisibleColIndex += n
         self.calcColLayout()
 
