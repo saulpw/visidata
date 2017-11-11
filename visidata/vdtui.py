@@ -262,6 +262,7 @@ globalCommand('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", sheet))', 'open 
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options')
 globalCommand('help-commands', 'vd.push(HelpSheet(name + "_commands", sheet))', 'view VisiData man page')
 globalCommand(['KEY_F(1)', 'z?'], 'help-commands')
+globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 
 
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
@@ -2022,7 +2023,6 @@ class EnableCursor:
         with suppress(curses.error):
             curses.curs_set(0)
 
-# history: earliest entry first
 def launchExternalEditor(v, linenum=0):
     editor = os.environ.get('EDITOR') or error('$EDITOR not set')
 
@@ -2040,6 +2040,12 @@ def launchExternalEditor(v, linenum=0):
     with open(fqpn, 'r') as fp:
         return fp.read()
 
+def suspend():
+    import signal
+    with SuspendCurses():
+        os.kill(os.getpid(), signal.SIGSTOP)
+
+# history: earliest entry first
 def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
     ESC='^['
@@ -2152,11 +2158,12 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = completer(v[:i], comps_idx) or v
         elif ch == ENTER:                          break
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
+        elif ch == '^O':                           v = launchExternalEditor(v)
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch()); i += 1  # literal character
-        elif ch == '^Z':                           v = launchExternalEditor(v)
+        elif ch == '^Z':                           v = suspend(v)
         elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
         elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
         elif ch.startswith('KEY_'):                pass
