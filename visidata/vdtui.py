@@ -274,23 +274,20 @@ globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 #
 # The resulting object o must be orderable and convertible to a string for display and certain outputs (like csv).
 
-## minimalist 'any' type
 def anytype(r=None):
+    'minimalist "any" type'
     return r
 anytype.__name__ = ''
 
-floatchars='+-0123456789.eE_'
+floatchars='+-0123456789.eE'
 def currency(s=''):
-    'a `float` with any leading and trailing non-numeric characters stripped'
+    'dirty float (strip non-numeric characters)'
     if isinstance(s, str):
-        while s and s[0] not in floatchars:
-            s = s[1:]
-        while s and s[-1] not in floatchars:
-            s = s[:-1]
+        s = ''.join(ch for ch in s if ch in floatchars)
     return float(s) if s else float()
 
 class date:
-    '`datetime` wrapper, constructing from time_t or from str with dateutil.parse'
+    'datetime wrapper, constructed from time_t or from str with dateutil.parse'
 
     def __init__(self, s=None):
         if s is None:
@@ -369,12 +366,9 @@ def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s))
 
 
-# VisiData singleton contains all sheets
 @functools.lru_cache()
 def vd():
-    '''Instantiate and return singleton instance of VisiData class.
-
-    Contains all sheets, and (as singleton) is unique instance..'''
+    'Return VisiData singleton, which contains all global context'
     return VisiData()
 
 def exceptionCaught(status=True):
@@ -452,7 +446,7 @@ def async_deepcopy(vs, rowlist):
 
 
 class VisiData:
-    allPrefixes = 'gz'  # 'g'lobal, 'z'scroll
+    allPrefixes = 'gz'  # embig'g'en, 'z'mallify
 
     def __init__(self):
         self.sheets = []
