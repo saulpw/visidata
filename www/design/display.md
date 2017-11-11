@@ -2,7 +2,25 @@
 
 ## Sheet
 
-Every displayed screen is a Sheet instance.  A Sheet has several members:
+Every displayed screen is an instance of the `Sheet` class, which has several members:
+
+- `rows`
+- `columns`
+- `topRowIndex` index of row just below header row
+- `cursorRowIndex`
+- `cursorColIndex` (computed, O(ncols)); index into .columns
+
+Computed properties:
+
+- `cursorRow`: rows[cursorRowIndex]
+- `cursorCol`: columns[cursorColIndex] (equivalent to visibleCols[cursorVisibleColIndex])
+- `nVisibleRows`: simply based on terminal height, the exact number of rows that can be displayed.
+- `visibleRows`: slice of onscreen rows; 'visible' has different meaning than visibleCols
+- `visibleCols`: (O(ncols), cached between frames): list of all non-hidden columns
+- `leftVisibleColIndex` is the first non-key column on the left.
+- `rightVisibleColIndex` (computed by `Sheet.calcColLayout()`, assignments ignored)
+- `cursorVisibleColIndex`
+
 
 - Sheet.rows
   - populated by `Sheet.reload()`.
@@ -14,19 +32,6 @@ Every displayed screen is a Sheet instance.  A Sheet has several members:
   - populated by init or copied from subclass
   - can be populated by reload if data dependent
 
-- `Sheet.topRowIndex` index of row just below header row
-- `Sheet.cursorRowIndex`
-- `Sheet.cursorColIndex` (computed, O(ncols)); index into .columns
-
-Computed properties:
-- `Sheet.cursorRow`: rows[cursorRowIndex]
-- `Sheet.cursorCol`: columns[cursorColIndex] (equivalent to visibleCols[cursorVisibleColIndex])
-- `Sheet.nVisibleRows`: simply based on terminal height, the exact number of rows that can be displayed.
-- `Sheet.visibleRows`: slice of onscreen rows; 'visible' has different meaning than visibleCols
-- `Sheet.visibleCols`: (O(ncols), cached between frames): list of all non-hidden columns
-- `Sheet.leftVisibleColIndex` is the first non-key column on the left.
-- `Sheet.rightVisibleColIndex` (computed by `Sheet.calcColLayout()`, assignments ignored)
-- `Sheet.cursorVisibleColIndex`
 
 Any `*VisibleCol*` property is an index into `visibleCols`.
 
@@ -80,16 +85,6 @@ Here is an extremely simple sheet that shows a list of all global variables with
 ```
 from vdtui import *
 
-# rowdef: key in source
-class DictSheet(Sheet):
-    def reload(self):
-        self.rows = list(self.source.keys())
-        self.columns = [
-            Column('key', getter=lambda r: r),
-            Column('value', getter=lambda r,d=self.source: d[r])
-        ]
-
-DictSheet('globals', globals())
 ```
 
 Notes:
