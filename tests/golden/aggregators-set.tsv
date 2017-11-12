@@ -1,6 +1,6 @@
-Item	avg_Total	count	sum_Total	sum_Unit_Cost	sum_Units
-Binder	638.51	15	9577.65	172.86	722
-Pencil	164.24	13	2135.14	36.07	716
-Pen Set	595.70	7	4169.87	83.39	395
-Pen	409.04	5	2045.22	55.95	278
-Desk	566.67	3	1700.00	525.00	10
+Item	avg_Total	count	sum_Total	sum_Units
+Binder	638.51	15	9577.65	722
+Pencil	164.24	13	2135.14	716
+Pen Set	595.70	7	4169.87	395
+Pen	409.04	5	2045.22	278
+Desk	566.67	3	1700.00	10
