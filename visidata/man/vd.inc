@@ -75,9 +75,9 @@ views this man page
 .It Ic "gF1  gz?"
 views all commands available on current sheet
 .It Ic ^Q
-exits program immediately
+aborts program immediately
 .It Ic ^C
-aborts user input or current task
+cancels user input or current task
 .It Ic " q"
 quits current sheet
 .It Ic "gq"
@@ -145,22 +145,22 @@ adjusts width of all visible columns
 hides current column (to unhide, go to
 .Sy C Ns olumns sheet and Sy e Ns dit its width)
 .It Ic \&! Ns
-pins current column to the left as a key column
+pins current column on the left as a key column
 .It Ic ^
 edits name of current column
 .It Ic "~  #  %  $  @"
 sets type of current column to str/int/float/currency/date
 .Pp
-.It Ic " =" Ar expr
+.It Ic "  =" Ar expr
 .No creates new column from Python Ar expr Ns , with column names as variables
-.It Ic "g=" Ar expr
+.It Ic " g=" Ar expr
 .No sets current column for selected rows to result of Python Ar expr
+.It Ic "gz=" Ar iterable
+.No sets selected rows in current column to the results of a Python Ar iterable
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " z=" Ar expr
 .No evaluates Python Ar expr No on current row and displays result on status line
-.It Ic "gz=" Ar iterable
-.No sets selected rows in current column to the results of a Python Ar iterable
 .Pp
 .It Ic " g^"
 sets names of all visible columns to contents of current row
@@ -176,7 +176,7 @@ adds a frozen copy of current column with all cells evaluated
 opens a frozen copy of current sheet with all visible columns evaluated
 .Pp
 .It Ic "\&:" Ar regex
-.No adds new columns from Ar regex No split; # columns determined by example row at cursor
+.No adds new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic "\&;" Ar regex
 .No adds new columns from capture groups of Ar regex Ns ; also requires example row
 .It Ic "*" Ar regex Ns Sy / Ns Ar subst
@@ -225,7 +225,7 @@ appends a blank row
 .It Ic " ga" Ar number
 .No appends Ar number No blank rows
 .It Ic "  d  gd"
-deletes current/all selected row(s) and writes to clipboard
+deletes current/all selected row(s) and moves to clipboard
 .It Ic "  y  gy"
 copies current/all selected row(s) to clipboard
 .It Ic "  p   Shift-P"
@@ -303,11 +303,11 @@ opens duplicate sheet with a random population subset of
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic Shift-V
-views contents of current cell in a new sheet
+views contents of current cell in a new TextSheet
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
 .It Ic "w"
-toggles text wrap for TextSheets
+toggles text wrap (only on TextSheet)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^^ (Ctrl-^)"
@@ -406,7 +406,7 @@ jumps to sheet referenced in current row
 .It Sy "\&."
 .Sy inner No " keeps only rows which match keys on all sheets"
 .It Sy "\&."
-.Sy left No " keeps all rows from first selected sheet"
+.Sy left No "  keeps all rows from first selected sheet"
 .It Sy "\&."
 .Sy full No "  keeps all rows from all sheets (union)"
 .It Sy "\&."
@@ -443,7 +443,7 @@ replays contents of entire commandlog
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gF
-groups by all key columns on source sheet
+opens a Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
 opens a one-line summary for selected rows
 .It (sheet-specific commands)

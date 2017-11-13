@@ -195,8 +195,8 @@ globalCommand('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row),
 globalCommand('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move down the current column to the next selected row')
 
 globalCommand('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjust width of current column')
-globalCommand('-', 'cursorCol.width = 0', 'hide current column (to unhide go to Columns sheet and edit its width)')
-globalCommand('!', 'toggleKeyColumn(cursorColIndex); cursorRight(+1)', 'pin current column to the left as a key column')
+globalCommand('-', 'cursorCol.width = 0', 'hide current column')
+globalCommand('!', 'toggleKeyColumn(cursorColIndex); cursorRight(+1)', 'pin current column on the left as a key column')
 globalCommand('~', 'cursorCol.type = str', 'set type of current column to str')
 globalCommand('@', 'cursorCol.type = date', 'set type of current column to ISO8601 datetime')
 globalCommand('#', 'cursorCol.type = int', 'set type of current column to int')
