@@ -293,6 +293,7 @@ def currency(s=''):
         s = ''.join(ch for ch in s if ch in floatchars)
     return float(s) if s else float()
 
+@functools.total_ordering
 class date:
     'datetime wrapper, constructed from time_t or from str with dateutil.parse'
 
@@ -323,9 +324,16 @@ class date:
     def __str__(self):
         return self.to_string()
 
+    def __float__(self):
+        return self.dt.timestamp()
     def __lt__(self, a):
         return self.dt < a.dt
-
+    def __eq__(self, a):
+        return self.dt == a.dt
+    def __sub__(self, a):
+        return (self.dt - a.dt).days
+    def __add__(self, a):
+        return date(self.dt + a)
 
 typemap = {
     None: 'Ø',
