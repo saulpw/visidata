@@ -148,10 +148,10 @@ class GridCanvas(PixelCanvas):
     bottomMarginPixels = 2*4  # reserve bottom line for x axis
 
     commands = PixelCanvas.commands + [
-        Command('cursor-left', 'sheet.cursorGridLeft -= cursorGridWidth', ''),
-        Command('cursor-right', 'sheet.cursorGridLeft += cursorGridWidth', ''),
-        Command('cursor-down', 'sheet.cursorGridTop += cursorGridHeight', ''),
-        Command('cursor-up', 'sheet.cursorGridTop -= cursorGridHeight', ''),
+        Command('move-left', 'sheet.cursorGridLeft -= cursorGridWidth', ''),
+        Command('move-right', 'sheet.cursorGridLeft += cursorGridWidth', ''),
+        Command('move-down', 'sheet.cursorGridTop += cursorGridHeight', ''),
+        Command('move-up', 'sheet.cursorGridTop -= cursorGridHeight', ''),
 
         Command('zh', 'sheet.cursorGridLeft -= charGridWidth', ''),
         Command('zl', 'sheet.cursorGridLeft += charGridWidth', ''),

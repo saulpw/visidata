@@ -65,6 +65,13 @@ def getRowIdxByKey(sheet, keyvals):
         if sheet.keyvals(r) == keyvals:
             return i
 
+def loggable(keystrokes):
+    if keystrokes in nonLogKeys:
+        return False
+    if keystrokes.startswith('move-'):
+        return False
+    return True
+
 def open_vd(p):
     return CommandLog(p.name, p)
 
@@ -136,7 +143,7 @@ class CommandLog(Sheet):
 
         if sheet is not self:  # don't record jumps to cmdlog
             # remove user-aborted commands and simple movements
-            if not escaped and self.currentActiveRow.keystrokes not in nonLogKeys:
+            if not escaped and loggable(self.currentActiveRow.keystrokes):
                 self.addRow(self.currentActiveRow)
 
         self.currentActiveRow = None

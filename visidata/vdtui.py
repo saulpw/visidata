@@ -159,12 +159,12 @@ ESC='^['
 globalCommand('KEY_RESIZE', '')  # no-op by default
 globalCommand('q',  'vd.sheets.pop(0)', 'quit current sheet')
 
-globalCommand('cursor-left',  'cursorRight(-1)', 'move one column left')
-globalCommand('cursor-down',  'cursorDown(+1)', 'move one row down')
-globalCommand('cursor-up',    'cursorDown(-1)', 'move one row up')
-globalCommand('cursor-right', 'cursorRight(+1)', 'move one column right')
-globalCommand('cursor-page-down', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows', 'scroll one page forward')
-globalCommand('cursor-page-up', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page backward')
+globalCommand('move-left',  'cursorRight(-1)', 'move one column left')
+globalCommand('move-down',  'cursorDown(+1)', 'move one row down')
+globalCommand('move-up',    'cursorDown(-1)', 'move one row up')
+globalCommand('move-right', 'cursorRight(+1)', 'move one column right')
+globalCommand('move-page-down', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows', 'scroll one page forward')
+globalCommand('move-page-up', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'scroll one page backward')
 
 globalCommand('gq', 'vd.sheets.clear()', 'quit all sheets (clean exit)')
 
@@ -173,12 +173,12 @@ globalCommand('gk', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'move all th
 globalCommand('gj', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'move all the way to the bottom')
 globalCommand('gl', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'move all the way to the right')
 
-globalCommand(['j', 'KEY_DOWN'],  'cursor-down')
-globalCommand(['k', 'KEY_UP'],    'cursor-up')
-globalCommand(['h', 'KEY_LEFT'],  'cursor-left')
-globalCommand(['l', 'KEY_RIGHT'], 'cursor-right')
-globalCommand(['^F', 'KEY_NPAGE', 'kDOWN'], 'cursor-page-down')
-globalCommand(['^B', 'KEY_PPAGE', 'kUP'], 'cursor-page-up')
+globalCommand(['j', 'KEY_DOWN'],  'move-down')
+globalCommand(['k', 'KEY_UP'],    'move-up')
+globalCommand(['h', 'KEY_LEFT'],  'move-left')
+globalCommand(['l', 'KEY_RIGHT'], 'move-right')
+globalCommand(['^F', 'KEY_NPAGE', 'kDOWN'], 'move-page-down')
+globalCommand(['^B', 'KEY_PPAGE', 'kUP'], 'move-page-up')
 globalCommand('gg', 'gk')
 globalCommand('G', 'gj')
 globalCommand('KEY_HOME', 'gk')

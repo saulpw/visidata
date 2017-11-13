@@ -16,8 +16,8 @@ class GraphSheet(GridCanvas):
     graphColornames = 'green red yellow cyan magenta white 38 136 168'.split()
     commands = GridCanvas.commands + [
         # swap directions of up/down
-        Command('cursor-up', 'sheet.cursorGridTop += cursorGridHeight', ''),
-        Command('cursor-down', 'sheet.cursorGridTop -= cursorGridHeight', ''),
+        Command('move-up', 'sheet.cursorGridTop += cursorGridHeight', ''),
+        Command('move-down', 'sheet.cursorGridTop -= cursorGridHeight', ''),
 
         Command('zj', 'sheet.cursorGridTop -= charGridHeight', ''),
         Command('zk', 'sheet.cursorGridTop += charGridHeight', ''),
