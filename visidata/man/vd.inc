@@ -249,8 +249,8 @@ edits contents of current cell
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  ^C"
 accepts/aborts input
-.It Ic ^Z
-launches external $EDITOR to edit contents
+.It Ic ^O
+opens external $EDITOR to edit contents
 .It Ic ^R
 reloads initial value
 .It Ic "^A  ^E"
