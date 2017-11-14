@@ -323,7 +323,8 @@ class date:
 
     def __str__(self):
         return self.to_string()
-
+    def __hash__(self):
+        return self.to_string()
     def __float__(self):
         return self.dt.timestamp()
     def __lt__(self, a):
