@@ -1,6 +1,6 @@
 sheet	col	row	keystrokes	input	comment
-	sheet	0	o	sample_data/sample.tsv	open input in VisiData
-sample	Rep	0	!		pin current column to the left as a key column
+			o	sample_data/sample.tsv	open input in VisiData
+sample	Rep	0	!		pin current column on the left as a key column
 sample	Units	0	#		set type of current column to int
 sample	Units	0	+	sum	add aggregator to the current column
-sample	Item	0	W		open Pivot Table
+sample	Item	0	W		Pivot the current column into a new sheet

@@ -1,5 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-			A	1	open new blank sheet with number columns
+exp-digits	sheet	0	A	1	open new blank sheet with number columns
 unnamed	0	0	^	x	edit name of current column
 unnamed	x	0	ga	100	add N blank rows
 unnamed	x	0	gz=	range(100)	set selected rows in this column to the values in the given Python sequence expression
@@ -26,8 +26,8 @@ unnamed_columns	name	2	gz=	('count_%s' % i for i in range(10))	set selected rows
 unnamed_columns	expr	2	gz=	('str(y).count("%s")' % i for i in range(10))	set selected rows in this column to the values in the given Python sequence expression
 unnamed_columns	name	2	g#		set type of selected columns to int
 unnamed_columns	name	0	q		quit current sheet
-unnamed	x	0	!		pin current column to the left as a key column
-unnamed	y	0	!		pin current column to the left as a key column
+unnamed	x	0	!		pin current column on the left as a key column
+unnamed	y	0	!		pin current column on the left as a key column
 unnamed	count_0	0	M		open melted sheet (unpivot)
 unnamed_melted	Value	0	#		set type of current column to int
 unnamed_melted	y	0	_		adjust width of current column

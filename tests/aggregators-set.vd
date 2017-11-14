@@ -1,5 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample.tsv	open file
+			o	sample_data/sample.tsv	open input in VisiData
 sample	Units	0	#		set type of current column to int
 sample	Unit_Cost	0	%		set type of current column to float
 sample	Total	0	%		set type of current column to float

@@ -1,5 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-			o	sample_data/surveys.csv	open file
+			o	sample_data/surveys.csv	open input in VisiData
 surveys	record_id	0	O		open Options
 options	value	11	^J	Null	edit option
 options	value	11	q		quit current sheet

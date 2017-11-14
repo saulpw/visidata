@@ -1,5 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-	sheet	0	o	sample_data/sample.tsv	open input in VisiData
+			o	sample_data/sample.tsv	open input in VisiData
 sample	Units	0	#		set type of current column to int
 sample	Units	0	=	Units > 10	create new column from Python expression, with column names as variables
 sample	Units > 10	0	|	True	select rows matching regex in current column

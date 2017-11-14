@@ -1,20 +1,20 @@
 sheet	col	row	keystrokes	input	comment
-			o	sample_data/surveys.csv	open file
+			o	sample_data/surveys.csv	open input in VisiData
 surveys	record_id	0	=	year+"-"+month+"-"+day	create new column from Python expression, with column names as variables
 surveys	year+"-"+month+"-"+day	0	^	date	edit name of current column
-surveys	month	0	-		hide current column (to unhide go to Columns sheet and edit its width)
-surveys	day	0	-		hide current column (to unhide go to Columns sheet and edit its width)
-surveys	year	0	-		hide current column (to unhide go to Columns sheet and edit its width)
+surveys	month	0	-		hide current column
+surveys	day	0	-		hide current column
+surveys	year	0	-		hide current column
 surveys	date	0	@		set type of current column to ISO8601 datetime
 surveys	date	0	:	 	add new columns from regex split; # columns determined by example row at cursor
-surveys	date_re1	0	-		hide current column (to unhide go to Columns sheet and edit its width)
-surveys	date	0	-		hide current column (to unhide go to Columns sheet and edit its width)
+surveys	date_re1	0	-		hide current column
+surveys	date	0	-		hide current column
 surveys	date_re0	0	^	date	edit name of current column
 surveys	hindfoot_length	0	#		set type of current column to int
 surveys	weight	0	#		set type of current column to int
 surveys	weight	0	I		open Describe Sheet
 surveys_describe	errors	10	q		quit current sheet
 surveys	weight	0	gd		delete all selected rows and move them to clipboard
-surveys	species_id	0	!		pin current column to the left as a key column
+surveys	species_id	0	!		pin current column on the left as a key column
 surveys	hindfoot_length	0	+	mean	add aggregator to the current column
 surveys	sex	0	W		Pivot the current column into a new sheet

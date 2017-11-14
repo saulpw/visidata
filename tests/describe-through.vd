@@ -1,5 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-	sheet	0	o	sample_data/birdsdiet.tsv	open input in VisiData
+			o	sample_data/birdsdiet.tsv	open input in VisiData
 birdsdiet	Family	0	|	bird	select rows matching regex in current column
 birdsdiet	MaxAbund	0	g=	None	set current column for selected rows to result of Python expression
 birdsdiet	MaxAbund	0	I		open Describe Sheet

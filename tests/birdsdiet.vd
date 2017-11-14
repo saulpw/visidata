@@ -1,13 +1,12 @@
 sheet	col	row	keystrokes	input	comment
-			o	sample_data/birdsdiet.tsv	open file
-birdsdiet	Family	0	!		pin current column to the left as a key column
-birdsdiet	MaxAbund	0	-		hide current column (to unhide go to Columns sheet and edit its width)
-birdsdiet	AvgAbund	0	-		hide current column (to unhide go to Columns sheet and edit its width)
+			o	sample_data/birdsdiet.tsv	open input in VisiData
+birdsdiet	Family	0	!		pin current column on the left as a key column
+birdsdiet	MaxAbund	0	-		hide current column
+birdsdiet	AvgAbund	0	-		hide current column
 birdsdiet	Mass	0	%		set type of current column to float
 birdsdiet	Passerine	0	|	1	select rows matching regex in current column
 birdsdiet	Passerine	0	"		open duplicate sheet with only selected rows
 birdsdiet_selectedref	Mass	0	+	mean	add aggregator to the current column
 birdsdiet_selectedref	Diet	0	F		open Frequency Table grouped on current column
 birdsdiet_selectedref_Diet_freq	mean_Mass	0	]		sort descending by current column
-birdsdiet_selectedref_Diet_freq	count	0	-		hide current column (to unhide go to Columns sheet and edit its width)
-birdsdiet_selectedref_Diet_freq	mean_Mass	0	^S	tests/golden/birdsdiet.tsv	save current sheet to filename in format determined by extension (default .tsv)
+birdsdiet_selectedref_Diet_freq	count	0	-		hide current column
