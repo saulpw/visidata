@@ -13,7 +13,7 @@ def body(rows, meta):
     ret += '<h2>{question}</h2>\n'.format(question=meta['question']) 
 
     # Add asciinema video
-    ret += '<asciinema-player id="player" {preview} src="{name}-asciicast.json"></asciinema-player>\n'.format(preview=meta['preview'], name=meta['name'])
+    ret += '<asciinema-player id="player" {preview} src="{name}-asciicast.cast"></asciinema-player>\n'.format(preview=meta['preview'], name=meta['name'])
     ret += '<script type="text/javascript" src="../asciinema-player.js"></script>\n'
     ret += '</section>'
     ret += '<hr/>\n'

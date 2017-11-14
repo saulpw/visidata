@@ -176,30 +176,31 @@
 .asciinema-terminal.font-big {
   font-size: 24px;
 }
-.asciinema-player:hover .control-bar {
-  color: #bbbbbb;
-}
-.asciinema-player:hover .control-bar .progressbar .bar .gutter span {
-  background-color: #bbbbbb;
-}
-.asciinema-player:hover .control-bar svg.icon path {
-  fill: #bbbbbb;
-}
 .asciinema-player .control-bar {
   width: 100%;
   height: 32px;
-  background-color: #000;
-  color: #999999;
-  border-top: 1px solid #222;
+  background: rgba(0, 0, 0, 0.8);
+  /* no gradient fallback */
+  background: -moz-linear-gradient(top, rgba(0, 0, 0, 0.5) 0%, #000000 25%, #000000 100%);
+  /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0.5) 0%, #000000 25%, #000000 100%);
+  /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, #000000 25%, #000000 100%);
+  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  color: #bbbbbb;
   box-sizing: content-box;
   line-height: 1;
+  position: absolute;
+  bottom: -35px;
+  left: 0;
+  transition: bottom 0.15s linear;
 }
 .asciinema-player .control-bar * {
   box-sizing: inherit;
   font-size: 0;
 }
 .asciinema-player .control-bar svg.icon path {
-  fill: #999999;
+  fill: #bbbbbb;
 }
 .asciinema-player .control-bar .playback-button {
   display: block;
@@ -259,7 +260,7 @@
 .asciinema-player .control-bar .progressbar .bar .gutter span {
   display: inline-block;
   height: 100%;
-  background-color: #999999;
+  background-color: #bbbbbb;
   border-radius: 3px;
 }
 .asciinema-player .control-bar.live .progressbar .bar {
@@ -283,20 +284,14 @@
 .asciinema-player .control-bar .fullscreen-button svg:last-child {
   display: none;
 }
+.asciinema-player-wrapper.hud .control-bar {
+  bottom: 0px;
+}
 .asciinema-player-wrapper:fullscreen .fullscreen-button svg:first-child {
   display: none;
 }
 .asciinema-player-wrapper:fullscreen .fullscreen-button svg:last-child {
   display: inline;
-}
-.asciinema-player-wrapper:fullscreen .control-bar {
-  position: absolute;
-  bottom: -35px;
-  left: 0;
-  transition: bottom 0.15s linear;
-}
-.asciinema-player-wrapper:fullscreen.hud .control-bar {
-  bottom: 0px;
 }
 .asciinema-player-wrapper:-webkit-full-screen .fullscreen-button svg:first-child {
   display: none;
@@ -304,44 +299,17 @@
 .asciinema-player-wrapper:-webkit-full-screen .fullscreen-button svg:last-child {
   display: inline;
 }
-.asciinema-player-wrapper:-webkit-full-screen .control-bar {
-  position: absolute;
-  bottom: -35px;
-  left: 0;
-  transition: bottom 0.15s linear;
-}
-.asciinema-player-wrapper:-webkit-full-screen.hud .control-bar {
-  bottom: 0px;
-}
 .asciinema-player-wrapper:-moz-full-screen .fullscreen-button svg:first-child {
   display: none;
 }
 .asciinema-player-wrapper:-moz-full-screen .fullscreen-button svg:last-child {
   display: inline;
 }
-.asciinema-player-wrapper:-moz-full-screen .control-bar {
-  position: absolute;
-  bottom: -35px;
-  left: 0;
-  transition: bottom 0.15s linear;
-}
-.asciinema-player-wrapper:-moz-full-screen.hud .control-bar {
-  bottom: 0px;
-}
 .asciinema-player-wrapper:-ms-fullscreen .fullscreen-button svg:first-child {
   display: none;
 }
 .asciinema-player-wrapper:-ms-fullscreen .fullscreen-button svg:last-child {
   display: inline;
-}
-.asciinema-player-wrapper:-ms-fullscreen .control-bar {
-  position: absolute;
-  bottom: -35px;
-  left: 0;
-  transition: bottom 0.15s linear;
-}
-.asciinema-player-wrapper:-ms-fullscreen.hud .control-bar {
-  bottom: 0px;
 }
 .asciinema-player .loading {
   z-index: 10;
