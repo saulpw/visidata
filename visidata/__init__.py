@@ -29,5 +29,6 @@ from .loaders.hdf5 import *
 from .loaders.sqlite import *
 from .loaders.fixed_width import *
 from .loaders.postgres import *
+from .loaders.shp import *
 
 addGlobals(globals())

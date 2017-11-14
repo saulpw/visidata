@@ -45,24 +45,56 @@ class PixelCanvas(Sheet):
     def plotpixel(self, x, y, attr, row=None):
         self.pixels[round(y)][round(x)][attr].append(row)
 
+    def clipline(self, x1, y1, x2, y2, xmin, ymin, xmax, ymax):
+        'Liang-Barsky algorithm'
+        dx = x2-x1
+        dy = y2-y1
+        pq = [
+            (-dx, x1-xmin),  # left
+            ( dx, xmax-x1),  # right
+            (-dy, y1-ymin),  # bottom
+            ( dy, ymax-y1),  # top
+        ]
+
+        u1, u2 = 0, 1
+        for p, q in pq:
+            if p == 0:  # parallel to bbox
+                if q < 0:  # completely outside bbox
+                    return None
+            elif p < 0:  # from outside to inside
+                u1 = max(u1, q/p)
+            elif p > 0:  # from inside to outside
+                u2 = min(u2, q/p)
+
+        if u1 > u2:  # completely outside bbox
+            return None
+
+        xn1 = x1 + pq[1][0]*u1
+        yn1 = y1 + pq[3][0]*u1
+
+        xn2 = x1 + pq[1][0]*u2
+        yn2 = y1 + pq[3][0]*u2
+
+        return xn1, yn1, xn2, yn2
+
     def plotline(self, x1, y1, x2, y2, attr, row=None):
         'Draws onscreen segment of line from (x1, y1) to (x2, y2)'
-        xdiff = max(x1, x2) - min(x1, x2)
-        ydiff = max(y1, y2) - min(y1, y2)
+        xdiff = abs(x2-x1)
+        ydiff = abs(y2-y1)
         xdir = 1 if x1 <= x2 else -1
         ydir = 1 if y1 <= y2 else -1
 
         r = round(max(xdiff, ydiff))
 
-        for i in range(r+1):
-            x = x1
-            y = y1
+        if r == 0:  # point, not line
+            self.plotpixel(round(x1), round(y1), attr, row)
+        else:
+            x, y = x1, y1
+            for i in range(r+1):
+                x += xdir * xdiff / r
+                y += ydir * ydiff / r
 
-            if r:
-                y += ydir * (i * ydiff) / r
-                x += xdir * (i * xdiff) / r
-
-            self.plotpixel(round(x), round(y), attr, row)
+                self.plotpixel(round(x), round(y), attr, row)
 
     def plotlabel(self, x, y, text, attr):
         self.labels.append((x, y, text, attr))
@@ -142,6 +174,7 @@ class PixelCanvas(Sheet):
 # - allows zooming in/out
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
 class GridCanvas(PixelCanvas):
+    aspectRatio = None
     leftMarginPixels = 10*2
     rightMarginPixels = 6*2
     topMarginPixels = 0
@@ -301,6 +334,22 @@ class GridCanvas(PixelCanvas):
         return self.gridCanvasLeft + self.gridCanvasWidth
 
     @property
+    def cursorGridBounds(self):
+        return [ self.cursorGridLeft,
+                 self.cursorGridTop,
+                 self.cursorGridRight,
+                 self.cursorGridBottom
+        ]
+
+    @property
+    def visibleGridBounds(self):
+        return [ self.visibleGridLeft,
+                 self.visibleGridTop,
+                 self.visibleGridLeft+self.visibleGridWidth,
+                 self.visibleGridTop+self.visibleGridHeight
+        ]
+
+    @property
     def visiblePixelBounds(self):
         return [ self.scaleX(self.visibleGridLeft),
                  self.scaleY(self.visibleGridTop),
@@ -338,10 +387,29 @@ class GridCanvas(PixelCanvas):
             self.zoomlevel = zoomlevel
 
         if not self.gridWidth or not self.gridHeight:
-            self.gridMinX = min(x for x, y, attr, row in self.gridpoints)
-            self.gridWidth = max(x for x, y, attr, row in self.gridpoints) - self.gridMinX
-            self.gridMinY = min(y for x, y, attr, row in self.gridpoints)
-            self.gridHeight = max(y for x, y, attr, row in self.gridpoints) - self.gridMinY
+            xmins = []
+            ymins = []
+            xmaxs = []
+            ymaxs = []
+            if self.gridpoints:
+                xmins.append(min(x for x, y, attr, row in self.gridpoints))
+                xmaxs.append(max(x for x, y, attr, row in self.gridpoints))
+                ymins.append(min(y for x, y, attr, row in self.gridpoints))
+                ymaxs.append(max(y for x, y, attr, row in self.gridpoints))
+            if self.gridlines:
+                xmins.append(min(min(x1, x2) for x1, y1, x2, y2, attr, row in self.gridlines))
+                xmaxs.append(max(max(x1, x2) for x1, y1, x2, y2, attr, row in self.gridlines))
+                ymins.append(min(min(y1, y2) for x1, y1, x2, y2, attr, row in self.gridlines))
+                ymaxs.append(max(max(y1, y2) for x1, y1, x2, y2, attr, row in self.gridlines))
+
+            if xmins:
+                self.gridMinX = min(xmins)
+                self.gridMinY = min(ymins)
+                self.gridWidth = max(xmaxs) - self.gridMinX
+                self.gridHeight = max(ymaxs) - self.gridMinY
+            else:
+                self.gridWidth = 1.0
+                self.gridHeight = 1.0
 
         if not self.visibleGridWidth or not self.visibleGridHeight:
             self.visibleGridWidth = self.gridWidth*self.zoomlevel
@@ -362,13 +430,31 @@ class GridCanvas(PixelCanvas):
         'scroll to make cursor visible'
         return False
 
+    @property
+    def xScaler(self):
+        xratio = self.gridCanvasWidth/self.visibleGridWidth
+        if self.aspectRatio:
+            yratio = self.gridCanvasHeight/self.visibleGridHeight
+            return self.aspectRatio*min(xratio, yratio)
+        else:
+            return xratio
+
+    @property
+    def yScaler(self):
+        yratio = self.gridCanvasHeight/self.visibleGridHeight
+        if self.aspectRatio:
+            xratio = self.gridCanvasWidth/self.visibleGridWidth
+            return self.aspectRatio*min(xratio, yratio)
+        else:
+            return yratio
+
     def scaleX(self, x):
         'returns canvas x coordinate'
-        return round(self.gridCanvasLeft+(x-self.visibleGridLeft)*self.gridCanvasWidth/self.visibleGridWidth)
+        return round(self.gridCanvasLeft+(x-self.visibleGridLeft)*self.xScaler)
 
     def scaleY(self, y):
         'returns canvas y coordinate'
-        return round(self.gridCanvasTop+(y-self.visibleGridTop)*self.gridCanvasHeight/self.visibleGridHeight)
+        return round(self.gridCanvasTop+(y-self.visibleGridTop)*self.yScaler)
 
     def gridW(self, canvas_width):
         'canvas X units to grid units'
@@ -395,16 +481,20 @@ class GridCanvas(PixelCanvas):
     def plotAll_async(self):
         'plots points and lines and text onto the PixelCanvas'
 
+#        if not self.visibleGridWidth or not self.visibleGridHeight:
         self.setZoom()
 
-        xmin, ymin = self.visibleGridLeft, self.visibleGridTop
-        xmax, ymax = self.visibleGridRight, self.visibleGridBottom
+        xmin, ymin, xmax, ymax = self.visibleGridBounds
+
         for x, y, attr, row in Progress(self.gridpoints):
             if ymin <= y and y <= ymax:
                 if xmin <= x and x <= xmax:
                     self.plotpixel(self.scaleX(x), self.scaleY(y), attr, row)
 
         for x1, y1, x2, y2, attr, row in Progress(self.gridlines):
+            r = self.clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax)
+            if r:
+                x1, y1, x2, y2 = r
             self.plotline(self.scaleX(x1), self.scaleY(y1), self.scaleX(x2), self.scaleY(y2), attr, row)
 
         for x, y, text, attr, row in Progress(self.gridlabels):

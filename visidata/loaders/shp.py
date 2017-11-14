@@ -11,38 +11,21 @@ def open_dbf(p):
     pass
 
 
-class ShapeSheet(VectorCanvas):
-    commands = VectorCanvas.commands + [
-        Command('+', 'zoom(0.90)', 'zoom in'),
-        Command('-', 'zoom(1.10)', 'zoom out'),
-    ]
+class ShapeSheet(GridCanvas):
+    aspectRatio = 1.0
 
-    @property
-    def cursorBounds(self):
-        'bounds of cursor in unit coords'
-        return None
-
-    def zoom(self, amt):
-        w = self.unit_rightx - self.unit_leftx
-        h = self.unit_bottomy - self.unit_topy
-        w *= amt  # new w/h
-        h *= amt
-
-        # new center at cursor
-        self.unit_leftx = self.cursorX - w/2
-        self.unit_rightx = self.cursorX + w/2
-        self.unit_topy = self.cursorY - h/2
-        self.unit_bottomy = self.cursorY + h/2
-
+    @async
     def reload(self):
+        attr = colors['blue']
         sf = shapefile.Reader(self.source.resolve())
+        self.gridlines.clear()
+
         for shaperec in sf.iterShapeRecords():
             shape = shaperec.shape
             prev_x, prev_y = None, None
             for x, y in shape.points:
-                if prev_x is None:
-                    prev_x, prev_y = x, y
-                else:
-                    self.line(prev_x, prev_y, x, y, 'red')
+                if prev_x is not None:
+                    self.line(prev_x, prev_y, x, y, attr)
+                prev_x, prev_y = x, y
 
-
+        self.refresh()
