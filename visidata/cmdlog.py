@@ -24,7 +24,7 @@ globalCommand('status', 'status(input("status: ", display=False))', 'show given 
 nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < > { } / ? n N g/ g?'.split()
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zL zH zh zl zs ze zKEY_END zKEY_HOME zKEY_LEFT zKEY_RIGHT kLFT5 kRIT5'.split()
-nonLogKeys += '^L ^C ^U ^D'.split()
+nonLogKeys += '^L ^C ^U ^D KEY_RESIZE'.split()
 
 
 def itemsetter(i):
