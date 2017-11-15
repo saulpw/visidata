@@ -208,7 +208,10 @@ globalCommand('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row),
 globalCommand('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move down the current column to the next selected row')
 
 globalCommand('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjust width of current column')
+globalCommand('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))', 'set current column width to given value')
+
 globalCommand('-', 'cursorCol.width = 0', 'hide current column')
+globalCommand('z-', 'cursorCol.width /= 2', 'reduce column width by half')
 globalCommand('!', 'toggleKeyColumn(cursorColIndex); cursorRight(+1)', 'pin current column on the left as a key column')
 globalCommand('~', 'cursorCol.type = str', 'set type of current column to str')
 globalCommand('@', 'cursorCol.type = date', 'set type of current column to ISO8601 datetime')
