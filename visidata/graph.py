@@ -165,4 +165,6 @@ class GraphSheet(GridCanvas):
         self.plotlabel(0, self.gridCanvasMaxY+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])
 
         for i, (k, attr) in enumerate(self.legends.items()):
-            self.plotlegend(i, '|'.join(k), attr)
+            if attr not in self.disabledAttrs:
+                self._commands[str(i+1)] = Command(str(i+1), 'togglePixelAttrs(%s)' % attr, '')
+                self.plotlegend(i, '|'.join(k), attr)

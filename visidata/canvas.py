@@ -33,6 +33,7 @@ class PixelCanvas(Sheet):
         super().__init__(name, *sources, **kwargs)
         self.pixels = defaultdict(lambda: defaultdict(lambda: defaultdict(list))) # [y][x] = { attr: list(rows), ... }
         self.labels = []  # (x, y, text, attr)
+        self.disabledAttrs = set()
         self.resetCanvasDimensions()
 
     def resetCanvasDimensions(self):
@@ -112,11 +113,18 @@ class PixelCanvas(Sheet):
                y < bottom
 
     def getPixelAttr(self, x, y):
-        r = self.pixels[y].get(x, None)
-        if not r:
+        r = self.pixels[y].get(x, {})
+        c = Counter({attr: len(rows) for attr, rows in r.items() if attr not in self.disabledAttrs})
+        if not c:
             return 0
-        c = Counter({attr: len(rows) for attr, rows in r.items()})
         return c.most_common(1)[0][0]
+
+    def togglePixelAttrs(self, attr):
+        if attr in self.disabledAttrs:
+            self.disabledAttrs.remove(attr)
+        else:
+            self.disabledAttrs.add(attr)
+        self.refresh()
 
     def getRowsInside(self, x1, y1, x2, y2):
         for y in range(y1, y2):
