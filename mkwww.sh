@@ -44,8 +44,8 @@ echo '</pre></section>' >> $BUILD/vd-man-inc.html
 $VD/strformat.py body=$BUILD/vd-man-inc.html title="VisiData Quick Reference" head="" < $WWW/template.html > $BUILDWWW/man/index.html
 
 # Build /tests
-$TEST/mkindex.py $TEST/*.yaml > $BUILD/test-index-body.html
-$VD/strformat.py body=$BUILD/test-index-body.html title="test Index" head='' < $WWW/template.html > $BUILDWWW/test/index.html
+$TEST/mkindex.py $TEST/*.yaml > $BUILD/test-index.body
+$VD/strformat.py body=$BUILD/test-index.body title="test Index" head='' < $WWW/template.html > $BUILDWWW/test/index.html
 for tpath in `find $TEST -name '*.yaml'`; do
     tyaml=${tpath##$TEST/}
     tfolder=${tyaml%.yaml}

@@ -1,7 +1,7 @@
 name: histogram
 vd: tests/histogram.vd
 preview: poster="npt:0:00"
-question: How frequently are more than 10 of each item sold in a day?
+question: How do I perform a frequency analysis on my data?
 workflow: filter rows by python expression and group by single column
 timestamps:
     - 0.5

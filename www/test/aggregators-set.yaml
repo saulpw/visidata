@@ -1,7 +1,7 @@
 name: aggregators-set
 vd: tests/aggregators-set.vd
 preview: poster="npt:0:34"
-question: How much profit have we made from the selling of each item?
+question: How do I look at multiple statistical aggregations of my data?
 workflow: set multiple statistical aggregators 
 timestamps:
     - 1
