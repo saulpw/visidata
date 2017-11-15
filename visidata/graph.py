@@ -79,6 +79,7 @@ class GraphSheet(GridCanvas):
 
         status('loading data points')
         catcols = [c for c in self.xcols if not isNumeric(c)]
+        numcol = numericCols(self.xcols)[0]
         for ycol in self.ycols:
             colattr = None
 
@@ -97,7 +98,7 @@ class GraphSheet(GridCanvas):
                             self.legends[(ycol.name,)] = colattr
                         attr = colattr
 
-                    graph_x = float(self.xcols[0].getTypedValue(row)) if self.xcols else rownum
+                    graph_x = float(numcol.getTypedValue(row)) if self.xcols else rownum
                     graph_y = ycol.getTypedValue(row)
 
                     self.point(graph_x, graph_y, attr, row)
