@@ -76,7 +76,7 @@ class GraphSheet(GridCanvas):
         status('loading data points')
         catcols = [c for c in self.xcols if not isNumeric(c)]
         for ycol in self.ycols:
-            colattr = next(self.graphColors)
+            colattr = None
 
             for rownum, row in enumerate(Progress(self.sourceRows)):  # rows being plotted from source
                 try:
@@ -88,6 +88,9 @@ class GraphSheet(GridCanvas):
                             self.plotlegend(len(self.legends), '|'.join(k), attr) # improve loading experience
                             self.legends[k] = attr
                     else:
+                        if colattr is None:
+                            colattr = next(self.graphColors)
+                            self.legends[(ycol.name,)] = colattr
                         attr = colattr
 
                     graph_x = float(self.xcols[0].getTypedValue(row)) if self.xcols else rownum
