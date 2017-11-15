@@ -112,7 +112,12 @@ option('default_width', 20, 'default column width')
 option('wrap', False, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
-option('aggr_null_filter', 'none', 'invalid values to filter out when aggregating: (n/e/f/"")')
+
+option('none_is_null', True, 'if Python None counts as null')
+option('empty_is_null', False, 'if empty string counts as null')
+option('false_is_null', False, 'if Python False counts as null')
+option('zero_is_null', False, 'if integer 0 counts as null')
+
 option('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 option('debug', False, 'exit on error and display stacktrace')
 option('curses_timeout', 100, 'curses timeout in ms')
@@ -1519,12 +1524,16 @@ class Sheet:
 
         return r
 
+
 def isNullFunc():
-    return {
-                'n': lambda v: v is None,
-                'e': lambda v: v is None or v == '',
-                'f': lambda v: not bool(v)
-           }.get(options.aggr_null_filter[:1].lower(), lambda v: False)
+    'Returns isNull function according to current options.'
+    nullset = []
+    if options.none_is_null:  nullset.append(None)
+    if options.empty_is_null: nullset.append('')
+    if options.false_is_null: nullset.append(False)
+    if options.zero_is_null:  nullset.append(0)
+    return lambda v,nullset=nullset: v in nullset
+
 
 class Column:
     def __init__(self, name, type=anytype, cache=False, **kwargs):
@@ -1776,12 +1785,6 @@ class DisplayWrapper:
     def __init__(self, value, **kwargs):
         self.value = value
         self.__dict__.update(kwargs)
-
-    def is_error(self):
-        return False
-
-    def is_null(self):
-        return self.value is None or self.value is ''
 
 
 class ColumnEnum(Column):
