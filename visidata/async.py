@@ -9,9 +9,11 @@ min_task_time_s = 0.10 # only keep tasks that take longer than this number of se
 
 option('profile_tasks', True, 'profile async tasks')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
-globalCommand('^C', 'ctypeAsyncRaise(sheet.currentThreads[-1], EscapeException) if sheet.currentThreads else status("no async tasks on this sheet")', 'abort user input or current task')
+
+globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all tasks on current sheet')
+globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary tasks')
 globalCommand('^T', 'vd.push(vd.tasksSheet)', 'open Tasks Sheet')
-globalCommand('^O', 'toggleProfiling(vd)', 'turn profiling on for main process')
+globalCommand('^_', 'toggleProfiling(vd)', 'turn profiling on for main process')
 
 class ProfileSheet(TextSheet):
     commands = TextSheet.commands + [
@@ -66,26 +68,14 @@ def getProfileResults(pr):
     ps.print_stats()
     return s.getvalue()
 
-def ctypeAsyncRaise(threadObj, exception):
+def cancelThread(*threads, exception=EscapeException):
     'Raise exception on another thread.'
-
-    def dictFind(D, value):
-        'Return first key in dict `D` corresponding to `value`.'
-        for k, v in D.items():
-            if v is value:
-                return k
-
-    # Following `ctypes call follows https://gist.github.com/liuw/2407154.
-    thread = dictFind(threading._active, threadObj)
-    if thread:
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(thread), ctypes.py_object(exception))
-        status('canceling %s' % threadObj.name)
-    else:
-        status('no thread to cancel')
+    for t in threads:
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(t.ident), ctypes.py_object(exception))
 
 
 SheetsSheet.commands += [
-        Command('^C', 'for t in cursorRow.currentThreads: ctypeAsyncRaise(t, EscapeException)', 'abort all threads on current sheet'),
+    Command('^C', 'cancelThread(*cursorRow.currentThreads)', 'abort all threads on sheet at cursor'),
 ]
 
 SheetsSheet.columns += [
@@ -95,7 +85,7 @@ SheetsSheet.columns += [
 # each row is an augmented threading.Thread object
 class TasksSheet(Sheet):
     commands = [
-        Command('d', 'ctypeAsyncRaise(cursorRow, EscapeException)', 'abort current task'),
+        Command('d', 'cancelThread(cursorRow)', 'abort task at current row'),
         Command('^C', 'd'),
         Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action'),
     ]
@@ -120,7 +110,7 @@ def checkMemoryUsage(vs):
             status('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
             for t in vd().threads:
                 if t.is_alive():
-                    ctypeAsyncRaise(t, EscapeException)
+                    cancelThread(t)
         else:
             attr = 'green'
         return ret, attr

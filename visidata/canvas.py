@@ -483,9 +483,7 @@ class GridCanvas(PixelCanvas):
         self.pixels.clear()
         self.labels.clear()
         self.resetCanvasDimensions()
-        for t in self.currentThreads:
-            if t.name == 'plotAll_async':
-                ctypeAsyncRaise(t, EscapeException)
+        cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
         self.plotAll_async()
 
     @async
