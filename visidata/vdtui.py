@@ -159,6 +159,7 @@ theme('color_note_pending', 'bold magenta', 'color of note of pending cells')
 theme('color_note_type', '226 green', 'cell note for numeric types in anytype columns')
 theme('color_format_exc', '48 bold yellow', 'color of formatting exception note')
 theme('color_getter_exc', 'red bold', 'color of computation exception note')
+theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
 ENTER='^J'
 ESC='^['
@@ -189,6 +190,12 @@ globalCommand('gg', 'gk')
 globalCommand('G', 'gj')
 globalCommand('KEY_HOME', 'gk')
 globalCommand('KEY_END', 'gj')
+globalCommand('BUTTON1_PRESSED', 'sheet.cursorRowIndex=topRowIndex+mouseY-1')
+globalCommand('BUTTON1_RELEASED', 'sheet.topRowIndex=cursorRowIndex-mouseY+1')
+globalCommand('scrollwheel-down', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll one page forward')
+globalCommand('scrollwheel-up', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll one page forward')
+globalCommand('BUTTON4_PRESSED', 'scrollwheel-up')
+globalCommand('REPORT_MOUSE_POSITION', 'scrollwheel-down')
 
 globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
 globalCommand('^G', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
