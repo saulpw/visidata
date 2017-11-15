@@ -25,8 +25,12 @@ class GraphSheet(GridCanvas):
         Command('J', 'sheet.cursorGridHeight -= charGridHeight', ''),
         Command('K', 'sheet.cursorGridHeight += charGridHeight', ''),
 
-        Command('zz', 'fixPoint(gridCanvasMinX, gridCanvasHeight, cursorGridMinX, cursorGridMinY); sheet.visibleGridWidth=cursorGridWidth; sheet.visibleGridHeight=cursorGridHeight', 'set bounds to cursor'),
+        Command('zz', 'zoomTo(cursorGridMinX, cursorGridMinY, cursorGridMaxX, cursorGridMaxY)', 'set visible bounds to cursor'),
     ]
+
+    def zoomTo(self, x1, y1, x2, y2):
+        self.fixPoint(self.gridCanvasMinX, self.gridCanvasMaxY, x1, y1)
+        self.zoomlevel=max(self.cursorGridWidth/self.gridWidth, self.cursorGridHeight/self.gridHeight)
 
     def __init__(self, name, sheet, rows, xcols, ycols, **kwargs):
         self.graphColors = itertools.cycle([colors[colorname] for colorname in self.graphColornames])

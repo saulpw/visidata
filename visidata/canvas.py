@@ -201,7 +201,7 @@ class GridCanvas(PixelCanvas):
         Command('J', 'sheet.cursorGridHeight += charGridHeight', ''),
         Command('K', 'sheet.cursorGridHeight -= charGridHeight', ''),
 
-        Command('zz', 'fixPoint(gridCanvasMinX, gridCanvasMinY, cursorGridMinX, cursorGridMinY); sheet.visibleGridWidth=cursorGridWidth; sheet.visibleGridHeight=cursorGridHeight', 'set bounds to cursor'),
+        Command('zz', 'zoomTo(cursorGridMinX, cursorGridMinY, cursorGridMaxX, cursorGridMaxY)', 'set visible bounds to cursor'),
 
         Command('+', 'setZoom(zoomlevel / 1.2); refresh()', 'zoom in 20%'),
         Command('-', 'setZoom(zoomlevel * 1.2); refresh()', 'zoom out 20%'),
@@ -392,6 +392,10 @@ class GridCanvas(PixelCanvas):
         self.visibleGridMinX = grid_x - self.gridW(canvas_x-self.gridCanvasMinX)
         self.visibleGridMinY = grid_y - self.gridH(self.gridCanvasMaxY-canvas_y)
         self.refresh()
+
+    def zoomTo(self, x1, y1, x2, y2):
+        self.fixPoint(self.gridCanvasMinX, self.gridCanvasMinY, x1, y1)
+        self.zoomlevel=max(self.cursorGridWidth/self.gridWidth, self.cursorGridHeight/self.gridHeight)
 
     def setZoom(self, zoomlevel=None):
         if zoomlevel:
