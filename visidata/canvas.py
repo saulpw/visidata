@@ -114,7 +114,11 @@ class PixelCanvas(Sheet):
 
     def getPixelAttr(self, x, y):
         r = self.pixels[y].get(x, {})
+        if not r:
+            return 0
         c = Counter({attr: len(rows) for attr, rows in r.items() if attr not in self.disabledAttrs})
+        for attr in self.disabledAttrs:
+            del c[attr]
         if not c:
             return 0
         return c.most_common(1)[0][0]
