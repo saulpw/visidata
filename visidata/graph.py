@@ -16,16 +16,16 @@ class GraphSheet(GridCanvas):
     graphColornames = 'green red yellow cyan magenta white 38 136 168'.split()
     commands = GridCanvas.commands + [
         # swap directions of up/down
-        Command('move-up', 'sheet.cursorGridTop += cursorGridHeight', ''),
-        Command('move-down', 'sheet.cursorGridTop -= cursorGridHeight', ''),
+        Command('move-up', 'sheet.cursorGridMinY += cursorGridHeight', ''),
+        Command('move-down', 'sheet.cursorGridMinY -= cursorGridHeight', ''),
 
-        Command('zj', 'sheet.cursorGridTop -= charGridHeight', ''),
-        Command('zk', 'sheet.cursorGridTop += charGridHeight', ''),
+        Command('zj', 'sheet.cursorGridMinY -= charGridHeight', ''),
+        Command('zk', 'sheet.cursorGridMinY += charGridHeight', ''),
 
         Command('J', 'sheet.cursorGridHeight -= charGridHeight', ''),
         Command('K', 'sheet.cursorGridHeight += charGridHeight', ''),
 
-        Command('zz', 'fixPoint(gridCanvasLeft, gridCanvasHeight, cursorGridLeft, cursorGridTop); sheet.visibleGridWidth=cursorGridWidth; sheet.visibleGridHeight=cursorGridHeight', 'set bounds to cursor'),
+        Command('zz', 'fixPoint(gridCanvasMinX, gridCanvasHeight, cursorGridMinX, cursorGridMinY); sheet.visibleGridWidth=cursorGridWidth; sheet.visibleGridHeight=cursorGridHeight', 'set bounds to cursor'),
     ]
 
     def __init__(self, name, sheet, rows, xcols, ycols, **kwargs):
@@ -42,19 +42,28 @@ class GraphSheet(GridCanvas):
     def scaleY(self, grid_y):
         'returns canvas y coordinate, with y-axis inverted'
         canvas_y = super().scaleY(grid_y)
-        return (self.gridCanvasBottom-canvas_y+4)
+        return (self.gridCanvasMaxY-canvas_y+4)
 
     def gridY(self, canvas_y):
-        return (self.gridCanvasBottom-canvas_y)*self.visibleGridHeight/self.gridCanvasHeight
+        return (self.gridCanvasMaxY-canvas_y)/self.yScaler
 
     @property
     def gridMouseY(self):
-        return self.visibleGridTop + (self.gridCanvasBottom-self.canvasMouseY)*self.visibleGridHeight/self.gridCanvasHeight
+        return self.visibleGridMinY + (self.gridCanvasMaxY-self.canvasMouseY)/self.yScaler
 
     @property
     def cursorPixelBounds(self):
         x1, y1, x2, y2 = super().cursorPixelBounds
         return x1, y2, x2, y1  # reverse top/bottom
+
+    @property
+    def visiblePixelBounds(self):
+        'invert y-axis'
+        return [ self.scaleX(self.visibleGridMinX),
+                 self.scaleY(self.visibleGridMaxY),
+                 self.scaleX(self.visibleGridMaxX),
+                 self.scaleY(self.visibleGridMinY),
+        ]
 
     @async
     def reload(self):
@@ -104,7 +113,7 @@ class GraphSheet(GridCanvas):
         self.createLabels()
 
     def add_y_axis_label(self, frac):
-        amt = self.visibleGridTop + frac*(self.visibleGridHeight)
+        amt = self.visibleGridMinY + frac*(self.visibleGridHeight)
         if isinstance(self.gridMinY, int):
             txt = '%d' % amt
         elif isinstance(self.gridMinY, float):
@@ -114,15 +123,15 @@ class GraphSheet(GridCanvas):
 
         # plot y-axis labels on the far left of the canvas, but within the gridCanvas height-wise
         attr = colors[options.color_graph_axis]
-        self.plotlabel(0, self.gridCanvasTop + (1.0-frac)*self.gridCanvasHeight, txt, attr)
+        self.plotlabel(0, self.gridCanvasMinY + (1.0-frac)*self.gridCanvasHeight, txt, attr)
 
     def add_x_axis_label(self, frac):
-        amt = self.visibleGridLeft + frac*self.visibleGridWidth
+        amt = self.visibleGridMinX + frac*self.visibleGridWidth
         txt = ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
 
-        # plot x-axis labels below the gridCanvasBottom, but within the gridCanvas width-wise
+        # plot x-axis labels below the gridCanvasMaxY, but within the gridCanvas width-wise
         attr = colors[options.color_graph_axis]
-        self.plotlabel(self.gridCanvasLeft+frac*self.gridCanvasWidth, self.gridCanvasBottom+4, txt, attr)
+        self.plotlabel(self.gridCanvasMinX+frac*self.gridCanvasWidth, self.gridCanvasMaxY+4, txt, attr)
 
     def plotAll(self):
         super().plotAll()
@@ -148,7 +157,7 @@ class GraphSheet(GridCanvas):
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
-        self.plotlabel(0, self.gridCanvasBottom+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])
+        self.plotlabel(0, self.gridCanvasMaxY+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])
 
         for i, (k, attr) in enumerate(self.legends.items()):
             self.plotlegend(i, '|'.join(k), attr)
