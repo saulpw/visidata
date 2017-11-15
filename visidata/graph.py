@@ -98,8 +98,6 @@ class GraphSheet(GridCanvas):
 
                     self.point(graph_x, graph_y, attr, row)
                     nplotted += 1
-                except EscapeException:
-                    raise
                 except Exception:
                     nerrors += 1
                     if options.debug:

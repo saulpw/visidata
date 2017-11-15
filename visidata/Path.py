@@ -54,7 +54,7 @@ class Path:
     def stat(self):
         try:
             return os.stat(self.resolve())
-        except:
+        except Exception:
             return None
 
     def resolve(self):

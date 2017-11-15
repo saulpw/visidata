@@ -13,16 +13,12 @@ def isError(col, row):
         if v is not None:
             col.type(v)
         return False
-    except EscapeException:
-        raise
     except Exception as e:
         return True
 
 def returnException(f, *args, **kwargs):
     try:
         return f(*args, **kwargs)
-    except EscapeException:
-        raise
     except Exception as e:
         return e
 
@@ -74,8 +70,6 @@ class DescribeSheet(Sheet):
                         v = srccol.type(v)
                         vals.append(v)
                     d['distinct'].add(v)
-                except EscapeException:
-                    raise
                 except Exception as e:
                     d['errors'].append(e)
 

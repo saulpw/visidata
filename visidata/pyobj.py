@@ -150,9 +150,7 @@ class SheetObject(Sheet):
                     if r.startswith('_') or callable(getattr(self.source, r)):
                         continue
                     self.addRow(r)
-                except EscapeException:
-                    raise
-                except:
+                except Exception:
                     pass
 
         self.columns = [

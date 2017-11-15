@@ -49,7 +49,8 @@ import threading
 import traceback
 import time
 
-class EscapeException(Exception):
+class EscapeException(BaseException):
+    'Inherits from BaseException to avoid "except Exception" clauses.  Do not use a blanket "except:" or the task will be uncancelable.'
     pass
 
 baseCommands = collections.OrderedDict()  # [cmd.name] -> Command
@@ -497,9 +498,7 @@ class VisiData:
         for f in self.hooks[hookname]:
             try:
                 r.append(f(*args, **kwargs))
-            except EscapeException:
-                raise
-            except:
+            except Exception:
                 exceptionCaught()
         return r
 
@@ -798,7 +797,7 @@ class VisiData:
             self.callHook('predraw')
             try:
                 sheet.checkCursor()
-            except:
+            except Exception:
                 exceptionCaught()
 
     def replace(self, vs):
@@ -1610,9 +1609,7 @@ class Column:
                 v = self.type(self.getValue(r))
                 if not f(v):
                     yield v, r
-            except (GeneratorExit, EscapeException):
-                raise
-            except:
+            except Exception:
                 pass
 
     def getValues(self, rows):
@@ -1627,8 +1624,6 @@ class Column:
            Returns the type's default value if either the getter or the type conversion fails.'''
         try:
             return self.type(self.getValue(row))
-        except EscapeException:
-            raise
         except Exception as e:
 #            exceptionCaught(status=False)
             return self.type()
@@ -1654,8 +1649,6 @@ class Column:
         'Return DisplayWrapper for displayable cell value.'
         try:
             cellval = self.getValue(row)
-        except EscapeException:
-            raise
         except Exception as e:
             return DisplayWrapper(None, error=stacktrace(),
                                 display=options.disp_error_val,
@@ -1685,8 +1678,6 @@ class Column:
                 dw.note = typemap.get(type(cellval), None)
                 dw.notecolor = options.color_note_type
 
-        except EscapeException:
-            raise
         except Exception as e:  # type conversion or formatting failed
             dw.error = stacktrace()
             dw.display = str(cellval)
@@ -2011,8 +2002,6 @@ def clipdraw(scr, y, x, s, attr, w=None):
         s, dispw = clipstr(str(s), w)
         scr.addstr(y, x, disp_column_fill*w, attr)
         scr.addstr(y, x, s, attr)
-    except EscapeException as e:  # user aborted
-        raise
     except Exception as e:
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
 #                ).with_traceback(sys.exc_info()[2])
