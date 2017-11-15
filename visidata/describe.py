@@ -2,33 +2,48 @@ import statistics
 
 from visidata import *
 
-globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", sheet))', 'open Describe Sheet')
+globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", sheet, sourceRows=selectedRows or rows))', 'open Describe Sheet')
 
 def isNumeric(col):
     return col.type in (int,float,currency,date)
 
 def isError(col, row):
-    return hasattr(col.getCell(row), 'error')
+    try:
+        v = col.getValue(row)
+        if v is not None:
+            col.type(v)
+        return False
+    except EscapeException:
+        raise
+    except Exception as e:
+        return True
 
-def isNull(v):
-    return isNullFunc()(v)
+def returnException(f, *args, **kwargs):
+    try:
+        return f(*args, **kwargs)
+    except EscapeException:
+        raise
+    except Exception as e:
+        return e
 
-def values(c):
-    return c.getValues(c.sheet.rows)
+
+class DescribeColumn(Column):
+    def __init__(self, name, **kwargs):
+        super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.name), **kwargs)
 
 # rowdef: Column from source sheet
 class DescribeSheet(Sheet):
     columns = [
             Column('column', type=str, getter=lambda col,row: row.name),
-            Column('errors', cache=True, type=len, getter=lambda col,row: tuple(sr for sr in col.sheet.source.rows if isError(row, sr))),
-            Column('nulls',  cache=True, type=len, getter=lambda col,row: tuple(sr for sr in col.sheet.source.rows if isNull(row.getValue(sr)))),
-            Column('distinct',cache=True, type=len, getter=lambda col,row: set(values(row))),
-            Column('mode',   cache=True, type=anytype, getter=lambda col,row: statistics.mode(values(row))),
-            Column('min',    cache=True, type=anytype, getter=lambda col,row: min(values(row)) if isNumeric(row) else None),
-            Column('median', cache=True, type=anytype, getter=lambda col,row: statistics.median(values(row)) if isNumeric(row) else None),
-            Column('mean',   cache=True, type=float, getter=lambda col,row: statistics.mean(values(row)) if isNumeric(row) else None),
-            Column('max',    cache=True, type=anytype, getter=lambda col,row: max(values(row)) if isNumeric(row) else None),
-            Column('stddev', cache=True, type=float, getter=lambda col,row: statistics.stdev(values(row)) if isNumeric(row) else None),
+            DescribeColumn('errors', type=len),
+            DescribeColumn('nulls',  type=len),
+            DescribeColumn('distinct',type=len),
+            DescribeColumn('mode',   type=anytype),
+            DescribeColumn('min',    type=anytype),
+            DescribeColumn('median', type=anytype),
+            DescribeColumn('mean',   type=float),
+            DescribeColumn('max',    type=anytype),
+            DescribeColumn('stddev', type=float),
     ]
     commands = [
         Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell'),
@@ -40,3 +55,35 @@ class DescribeSheet(Sheet):
     @async
     def reload(self):
         self.rows = self.source.columns  # allow for column deleting/reordering
+        self.describeData = { col: {} for col in self.source.columns }
+
+        for srccol in Progress(self.source.columns):
+            d = self.describeData[srccol]
+            isNull = isNullFunc()
+
+            vals = list()
+            d['errors'] = list()
+            d['nulls'] = list()
+            d['distinct'] = set()
+            for sr in self.sourceRows:
+                try:
+                    v = srccol.getValue(sr)
+                    if isNull(v):
+                        d['nulls'].append(sr)
+                    else:
+                        v = srccol.type(v)
+                        vals.append(v)
+                    d['distinct'].add(v)
+                except EscapeException:
+                    raise
+                except Exception as e:
+                    d['errors'].append(e)
+
+            d['mode'] = returnException(statistics.mode, vals)
+            if isNumeric(srccol):
+                d['min'] = min(vals)
+                d['median'] = statistics.median(vals)
+                d['mean'] = statistics.mean(vals)
+                d['max'] = max(vals)
+                d['stddev'] = statistics.stdev(vals)
+
