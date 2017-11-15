@@ -213,7 +213,7 @@ class GridCanvas(PixelCanvas):
 
         Command('+', 'setZoom(zoomlevel / 1.2); refresh()', 'zoom in 20%'),
         Command('-', 'setZoom(zoomlevel * 1.2); refresh()', 'zoom out 20%'),
-        Command('0', 'sheet.gridWidth = 0; sheet.visibleGridWidth = 0; setZoom(1.0); refresh()', 'zoom to fit full extent'),
+        Command('_', 'sheet.gridWidth = 0; sheet.visibleGridWidth = 0; setZoom(1.0); refresh()', 'zoom to fit full extent'),
 
         # set cursor box with left click
         Command('BUTTON1_PRESSED', 'sheet.cursorGridMinX, sheet.cursorGridMinY = gridMouseX, gridMouseY; sheet.cursorGridWidth=0', 'start cursor box with left mouse button press'),
