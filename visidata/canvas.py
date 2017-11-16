@@ -235,9 +235,13 @@ class GridCanvas(PixelCanvas):
         Command('s', 'source.select(list(getRowsInside(*cursorPixelBounds)))', 'select all points within cursor box'),
         Command('t', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'toggle selection of all points within cursor box'),
         Command('u', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'unselect all points within cursor box'),
+        Command(ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*cursorPixelBounds)); vd.push(vs)', ''),
+
+
         Command('gs', 'source.select(list(getRowsInside(*visiblePixelBounds)))', 'select all points visible onscreen'),
         Command('gt', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'toggle selection of all points visible onscreen'),
         Command('gu', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'unselect all points visible onscreen'),
+        Command('g'+ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*visiblePixelBounds)); vd.push(vs)', ''),
     ]
 
     def __init__(self, name, sourceSheet, **kwargs):
