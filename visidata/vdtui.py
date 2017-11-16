@@ -440,31 +440,24 @@ class Progress:
     def __init__(self, iterable=None, total=None):
         self.sheet = threading.current_thread().sheet if threading.current_thread().daemon else Sheet('dummy')
         self.iterable = iterable
-        if total is None:
-            self.thisTotal = len(iterable)
-        else:
-            self.thisTotal = total
-        self.thisMade = 0
+        self.total = len(iterable) if total is None else total:
+        self.made = 0
 
     def __enter__(self):
-        if self.thisTotal:
-            self.sheet.progressTotal += self.thisTotal
+        self.sheet.progresses.append(self)
         return self
 
     def addProgress(self, n):
-        if self.thisTotal:
-            self.sheet.progressMade += n
-            self.thisMade += n
+        self.made += n
 
     def __exit__(self, exc_type, exc_val, tb):
-        if self.thisTotal:
-            self.sheet.progressMade += self.thisTotal-self.thisMade
+        self.sheet.progresses.remove(self)
 
     def __iter__(self):
         with self as prog:
             for item in self.iterable:
                 yield item
-                prog.addProgress(1)
+                self.made += 1
 
 @async
 def _async_deepcopy(vs, newlist, oldlist):
@@ -720,16 +713,11 @@ class VisiData:
 
     def rightStatus(self, sheet):
         'Compose right side of status bar.'
-        if sheet.progressMade == sheet.progressTotal:
-            made = sheet.progressMade
-            sheet.progressMade -= made
-            sheet.progressTotal -= made
-            pctLoaded = 'rows'
+        if sheet.progressMade < sheet.progressTotal:
+            status = '%9d %2d%%' % (sheet.nRows, sheet.progressPct)
         else:
-            pctLoaded = ' %2d%%' % sheet.progressPct
-        status = '%9d %s' % (sheet.nRows, pctLoaded)
-        attr = options.color_status
-        return status, attr
+            status = '%9d rows' % sheet.nRows
+        return status, options.color_status
 
     @property
     def windowHeight(self):
@@ -909,8 +897,7 @@ class Sheet:
         self._selectedRows = {}  # id(row) -> row
 
         # for progress bar
-        self.progressMade = 0
-        self.progressTotal = 0
+        self.progresses = []  # list of Progress objects
 
         # track all async tasks from sheet
         self.currentThreads = []
@@ -1000,7 +987,7 @@ class Sheet:
         ret.recalc()  # set .sheet on columns
         ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
-        ret.progressMade = ret.progressTotal = 0
+        ret.progresses = []
         ret.currentThreads = []
         return ret
 
@@ -1091,6 +1078,14 @@ class Sheet:
     def name(self, name):
         'Set name without spaces.'
         self._name = name.strip().replace(' ', '_')
+
+    @property
+    def progressMade(self):
+        return sum(prog.made for prog in self.progresses)
+
+    @property
+    def progressTotal(self):
+        return sum(prog.total for prog in self.progresses)
 
     @property
     def progressPct(self):
