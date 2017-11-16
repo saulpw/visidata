@@ -1,4 +1,3 @@
-
 from visidata import *
 import shapefile
 
@@ -26,9 +25,10 @@ def shptype(ftype, declen):
 
 # rowdef: shaperec
 class ShapeSheet(Sheet):
-    columns = [ Column('') ]
+    columns = [Column('')]
     commands = [
-        Command('m', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows))', '')
+        Command('.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow]))', ''),
+        Command('g.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows))', ''),
     ]
     @async
     def reload(self):
@@ -51,12 +51,15 @@ class ShapeMap(GridCanvas):
     @async
     def reload(self):
         self.gridlines.clear()
+        self.reset()
 
-        attr = colors['cyan']
-        for shp in self.sourceRows:
-            if shp.shape.shapeType == 5:
-                self.polygon(shp.shape.points, attr, shp)
+        for row in Progress(self.sourceRows):
+            # color according to key
+            k = tuple(col.getValue(row) for col in self.source.keyCols)
+
+            if row.shape.shapeType == 5:
+                self.polygon(row.shape.points, self.plotColor(k), row)
             else:
-                status('notimpl shapeType %s' % shp.shape.shapeType)
+                status('notimpl shapeType %s' % row.shape.shapeType)
 
         self.refresh()

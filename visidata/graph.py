@@ -2,8 +2,8 @@ from visidata import *
 
 option('color_graph_axis', 'bold', 'color for graph axis labels')
 
-globalCommand('m', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, [cursorCol]))', 'graph the current column vs the first key column (or row number)')
-globalCommand('gm', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, numericCols(nonKeyVisibleCols)))', 'graph all numeric columns vs the first key column (or row number)')
+globalCommand('.', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, [cursorCol]))', 'graph the current column vs the first key column (or row number)')
+globalCommand('g.', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, numericCols(nonKeyVisibleCols)))', 'graph all numeric columns vs the first key column (or row number)')
 
 
 def numericCols(cols):
@@ -13,7 +13,6 @@ def numericCols(cols):
 
 # provides unit->pixel conversion, axis labels, legend
 class GraphSheet(GridCanvas):
-    graphColornames = 'green red yellow cyan magenta white 38 136 168'.split()
     commands = GridCanvas.commands + [
         # swap directions of up/down
         Command('move-up', 'sheet.cursorGridMinY += cursorGridHeight', ''),
@@ -33,15 +32,10 @@ class GraphSheet(GridCanvas):
         self.zoomlevel=max(self.cursorGridWidth/self.gridWidth, self.cursorGridHeight/self.gridHeight)
 
     def __init__(self, name, sheet, rows, xcols, ycols, **kwargs):
-        self.graphColors = itertools.cycle([colors[colorname] for colorname in self.graphColornames])
         super().__init__(name, sheet, sourceRows=rows, **kwargs)
 
         self.xcols = xcols
         self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or error('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
-        self.legends = {}  # txt: attr
-
-    def plotlegend(self, i, txt, attr):
-        self.plotlabel(self.canvasWidth-30, i*4, txt, attr)
 
     def plotpixel(self, x, y, attr, row=None):
         y = self.gridCanvasMaxY-y+4
@@ -79,28 +73,16 @@ class GraphSheet(GridCanvas):
         nplotted = 0
 
         self.gridpoints.clear()
-        self.legends.clear()
+        self.reset()
 
         status('loading data points')
         catcols = [c for c in self.xcols if not isNumeric(c)]
         numcol = numericCols(self.xcols)[0]
         for ycol in self.ycols:
-            colattr = None
-
             for rownum, row in enumerate(Progress(self.sourceRows)):  # rows being plotted from source
                 try:
-                    k = tuple(c.getValue(row) for c in catcols)
-                    if k:
-                        attr = self.legends.get(k, None)
-                        if attr is None:
-                            attr = next(self.graphColors)
-                            self.plotlegend(len(self.legends), '|'.join(k), attr) # improve loading experience
-                            self.legends[k] = attr
-                    else:
-                        if colattr is None:
-                            colattr = next(self.graphColors)
-                            self.legends[(ycol.name,)] = colattr
-                        attr = colattr
+                    k = tuple(c.getValue(row) for c in catcols) if catcols else (ycol.name,)
+                    attr = self.plotColor(k)
 
                     graph_x = float(numcol.getTypedValue(row)) if self.xcols else rownum
                     graph_y = ycol.getTypedValue(row)
@@ -168,8 +150,3 @@ class GraphSheet(GridCanvas):
 
         xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
         self.plotlabel(0, self.gridCanvasMaxY+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])
-
-        for i, (k, attr) in enumerate(self.legends.items()):
-            if attr not in self.disabledAttrs:
-                self._commands[str(i+1)] = Command(str(i+1), 'togglePixelAttrs(%s)' % attr, '')
-                self.plotlegend(i, '|'.join(k), attr)

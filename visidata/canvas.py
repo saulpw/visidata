@@ -15,7 +15,7 @@ from visidata import *
 # point()/line()/label() take Grid coordinates
 
 option('show_graph_labels', True, 'show axes and legend on graph')
-
+option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
 
 # pixels covering whole actual terminal
 #  - width/height are exactly equal to the number of pixels displayable, and can change at any time.
@@ -99,6 +99,9 @@ class PixelCanvas(Sheet):
 
     def plotlabel(self, x, y, text, attr):
         self.labels.append((x, y, text, attr))
+
+    def plotlegend(self, i, txt, attr):
+        self.plotlabel(self.canvasWidth-30, i*4, txt, attr)
 
     @property
     def cursorPixelBounds(self):
@@ -261,6 +264,28 @@ class GridCanvas(PixelCanvas):
         self.gridpoints = []  # list of (grid_x, grid_y, attr, row)
         self.gridlines = []   # list of (grid_x1, grid_y1, grid_x2, grid_y2, attr, row)
         self.gridlabels = []  # list of (grid_x, grid_y, label, attr, row)
+
+        self.legends = {}     # txt: attr  (visible legends only)
+        self.plotAttrs = {}   # key: attr  (all keys, for speed)
+        self.reset()
+
+    def reset(self):
+        self.legends.clear()
+        self.plotAttrs.clear()
+        self.unusedAttrs = list(colors[colorname] for colorname in options.plot_colors.split())
+
+    def plotColor(self, k):
+        attr = self.plotAttrs.get(k, None)
+        if attr is None:
+            if len(self.unusedAttrs) > 1:
+                attr = self.unusedAttrs.pop()
+                legend = ' '.join(k)
+                self.plotlegend(len(self.legends), legend, attr)
+                self.legends[legend] = attr
+            else:
+                attr = self.unusedAttrs[0]
+            self.plotAttrs[k] = attr
+        return attr
 
     def resetCanvasDimensions(self):
         super().resetCanvasDimensions()
@@ -453,8 +478,14 @@ class GridCanvas(PixelCanvas):
             self.cursorGridWidth = self.charGridWidth
             self.cursorGridHeight = self.charGridHeight
 
+        # display labels
+        for i, (legend, attr) in enumerate(self.legends.items()):
+            if attr not in self.disabledAttrs:
+                self._commands[str(i+1)] = Command(str(i+1), 'togglePixelAttrs(%s)' % attr, '')
+                self.plotlegend(i, legend, attr)
+
     def checkCursor(self):
-        'scroll to make cursor visible'
+        'override Sheet.checkCursor'
         return False
 
     @property
