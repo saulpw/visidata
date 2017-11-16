@@ -1,4 +1,4 @@
-import statistics
+from statistics import mode, median, mean, stdev
 
 from visidata import *
 
@@ -36,10 +36,10 @@ class DescribeSheet(Sheet):
             DescribeColumn('distinct',type=len),
             DescribeColumn('mode',   type=anytype),
             DescribeColumn('min',    type=anytype),
+            DescribeColumn('max',    type=anytype),
             DescribeColumn('median', type=anytype),
             DescribeColumn('mean',   type=float),
-            DescribeColumn('max',    type=anytype),
-            DescribeColumn('stddev', type=float),
+            DescribeColumn('stdev',  type=float),
     ]
     commands = [
         Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell'),
@@ -48,12 +48,15 @@ class DescribeSheet(Sheet):
         Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
     ]
 
-    @async
     def reload(self):
         self.rows = self.source.columns  # allow for column deleting/reordering
         self.describeData = { col: {} for col in self.source.columns }
 
         for srccol in Progress(self.source.columns):
+            self.reloadColumn(srccol)
+
+    @async
+    def reloadColumn(self, srccol):
             d = self.describeData[srccol]
             isNull = isNullFunc()
 
@@ -73,11 +76,12 @@ class DescribeSheet(Sheet):
                 except Exception as e:
                     d['errors'].append(e)
 
-            d['mode'] = returnException(statistics.mode, vals)
+            d['mode'] = self.calcStatistic(d, mode, vals)
             if isNumeric(srccol):
-                d['min'] = min(vals)
-                d['median'] = statistics.median(vals)
-                d['mean'] = statistics.mean(vals)
-                d['max'] = max(vals)
-                d['stddev'] = statistics.stdev(vals)
+                for func in [mode, min, max, median, mean, stdev]:
+                    d[func.__name__] = self.calcStatistic(d, func, vals)
 
+    def calcStatistic(self, d, func, *args, **kwargs):
+        r = returnException(func, *args, **kwargs)
+        d[func.__name__] = r
+        return r
