@@ -511,10 +511,7 @@ class VisiData:
         return r
 
     def execAsync(self, func, *args, **kwargs):
-        'Execute `func(*args, **kwargs)`, possibly in a separate thread.'
-        if threading.current_thread().daemon:
-            # Don't spawn a new thread from a subthread.
-            return func(*args, **kwargs)
+        'Execute `func(*args, **kwargs)` in a separate thread.'
 
         currentSheet = self.sheets[0]
         thread = threading.Thread(target=self.toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
