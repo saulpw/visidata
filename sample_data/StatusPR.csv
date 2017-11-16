@@ -1,0 +1,538 @@
+Month,Day,Resource,Location,Value,Unit,Source
+Sep,29,Electricity,Puerto Rico,5,percent,AEE
+Sep,29,Telecomunications,Puerto Rico,30.5,percent,JRTC
+Sep,29,People in shelters,Puerto Rico,11105,number,Vivienda
+Sep,29,Water,Metro,48.75,percent,AAA
+Sep,29,Water,Norte,25.47,percent,AAA
+Sep,29,Water,Oeste,29.95,percent,AAA
+Sep,29,Water,Sur,58.5,percent,AAA
+Sep,29,Water,Este,38.96,percent,AAA
+Sep,29,Hospitals,Puerto Rico,34,number,ASES
+Oct,1,Electricity,Puerto Rico,5,percent,AEE
+Oct,1,Cell antennas,Puerto Rico,300,number,FCC
+Oct,2,Telecomunications,Puerto Rico,40,percent,JRTC
+Oct,2,Cell towers,Puerto Rico,270,number,JRTC
+Oct,2,People in shelters,Puerto Rico,8867,number,Vivienda
+Oct,2,Hospitals,Puerto Rico,51,number,Departamento de Salud Federal y Local
+Oct,2,Hospitals with electricity,Puerto Rico,10,number,Departamento de Salud Federal y Local
+Oct,2,Water,Puerto Rico,47,percent,AAA
+Oct,2,Water,Metro,57.5,percent,AAA
+Oct,2,Water,Norte,29,percent,AAA
+Oct,2,Water,Oeste,20.8,percent,AAA
+Oct,2,Water,Sur,67,percent,AAA
+Oct,2,Water,Este,50,percent,AAA
+Oct,2,Cell antennas,Puerto Rico,312,number,FCC
+Oct,3,Electricity,Puerto Rico,6.89,percent,AEE
+Oct,3,Telecomunications,Puerto Rico,40,percent,JRTC
+Oct,3,Cell towers,Puerto Rico,365,number,JRTC
+Oct,3,People in shelters,Puerto Rico,9343,number,Vivienda
+Oct,3,Hospitals,Puerto Rico,51,number,Departamento de Salud Federal y Local
+Oct,3,Hospitals with electricity,Puerto Rico,17,number,Departamento de Salud Federal y Local
+Oct,3,Water,Puerto Rico,45,percent,AAA
+Oct,3,Water,Metro,57.6,percent,AAA
+Oct,3,Water,Norte,13,percent,AAA
+Oct,3,Water,Oeste,25,percent,AAA
+Oct,3,Water,Sur,73,percent,AAA
+Oct,3,Water,Este,45,percent,AAA
+Oct,4,Electricity,Puerto Rico,8.6,percent,AEE
+Oct,4,Telecomunications,Puerto Rico,43.32,percent,JRTC
+Oct,4,People in shelters,Puerto Rico,8802,number,Vivienda
+Oct,4,Water,Puerto Rico,48.2,percent,AAA
+Oct,4,Water,Metro,63.33,percent,AAA
+Oct,4,Water,Norte,14.67,percent,AAA
+Oct,4,Water,Oeste,30.31,percent,AAA
+Oct,4,Water,Sur,77.68,percent,AAA
+Oct,4,Water,Este,45.2,percent,AAA
+Oct,5,Electricity,Puerto Rico,9.2,percent,AEE
+Oct,5,Telecomunications,Puerto Rico,45,percent,JRTC
+Oct,5,Cell antennas,Puerto Rico,362,number,FCC
+Oct,5,Cell towers,Puerto Rico,423,number,JRTC
+Oct,5,People in shelters,Puerto Rico,8585,number,Vivienda
+Oct,5,Hospitals,Puerto Rico,64,number,Departamento de Salud Federal y Local
+Oct,5,Hospitals with electricity,Puerto Rico,25,number,Departamento de Salud Federal y Local
+Oct,5,Water,Puerto Rico,54.2,percent,AAA
+Oct,5,Water,Metro,63.87,percent,AAA
+Oct,5,Water,Norte,19.93,percent,AAA
+Oct,5,Water,Oeste,39.85,percent,AAA
+Oct,5,Water,Sur,77.23,percent,AAA
+Oct,5,Water,Este,62.73,percent,AAA
+Oct,6,Electricity,Puerto Rico,10.7,percent,AEE
+Oct,6,Telecomunications,Puerto Rico,42,percent,JRTC
+Oct,6,Cell antennas,Puerto Rico,406,number,FCC
+Oct,6,Cell towers,Puerto Rico,390,number,JRTC
+Oct,6,People in shelters,Puerto Rico,8349,number,Vivienda
+Oct,6,Hospitals,Puerto Rico,68,number,Departamento de Salud Federal y Local
+Oct,6,Hospitals with electricity,Puerto Rico,25,number,Departamento de Salud Federal y Local
+Oct,6,Water,Puerto Rico,55.5,percent,AAA
+Oct,6,Water,Metro,64,percent,AAA
+Oct,6,Water,Norte,28,percent,AAA
+Oct,6,Water,Oeste,69,percent,AAA
+Oct,6,Water,Sur,69,percent,AAA
+Oct,6,Water,Este,63,percent,AAA
+Oct,7,Electricity,Puerto Rico,11.7,percent,AEE
+Oct,7,Telecomunications,Puerto Rico,44,percent,JRTC
+Oct,7,Cell antennas,Puerto Rico,422,number,FCC
+Oct,7,Cell towers,Puerto Rico,390,number,JRTC
+Oct,7,Water,Puerto Rico,56.24,percent,AAA
+Oct,7,People in shelters,Puerto Rico,7442,number,Vivienda
+Oct,7,Water,Metro,65,percent,AAA
+Oct,7,Water,Norte,20,percent,AAA
+Oct,7,Water,Oeste,48,percent,AAA
+Oct,7,Water,Sur,78,percent,AAA
+Oct,7,Water,Este,64,percent,AAA
+Oct,7,Hospitals,Puerto Rico,66,number,Departamento de Salud Federal y Local
+Oct,7,Hospitals with electricity,Puerto Rico,25,number,Departamento de Salud Federal y Local
+Oct,8,Electricity,Puerto Rico,11.7,percent,AEE
+Oct,8,Telecomunications,Puerto Rico,52,percent,JRTC
+Oct,8,Cell antennas,Puerto Rico,505,number,FCC
+Oct,8,Cell towers,Puerto Rico,465,number,JRTC
+Oct,8,People in shelters,Puerto Rico,6908,number,Vivienda
+Oct,8,Hospitals,Puerto Rico,66,number,Departamento de Salud Federal y Local
+Oct,8,Hospitals with electricity,Puerto Rico,25,number,Departamento de Salud Federal y Local
+Oct,8,Water,Puerto Rico,56.87,percent,AAA
+Oct,8,Water,Metro,68,percent,AAA
+Oct,8,Water,Norte,23,percent,AAA
+Oct,8,Water,Oeste,45,percent,AAA
+Oct,8,Water,Sur,69,percent,AAA
+Oct,8,Water,Este,65,percent,AAA
+Oct,9,Electricity,Puerto Rico,15,percent,AEE
+Oct,9,Telecomunications,Puerto Rico,51,percent,JRTC
+Oct,9,Cell towers,Puerto Rico,459,number,JRTC
+Oct,9,People in shelters,Puerto Rico,6452,number,Vivienda
+Oct,9,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Oct,9,Hospitals with electricity,Puerto Rico,25,number,Departamento de Salud Federal y Local
+Oct,9,Water,Puerto Rico,59.5,percent,AAA
+Oct,9,Water,Metro,68,percent,AAA
+Oct,9,Water,Norte,31,percent,AAA
+Oct,9,Water,Oeste,51,percent,AAA
+Oct,9,Water,Sur,74,percent,AAA
+Oct,9,Water,Este,65,percent,AAA
+Oct,10,Electricity,Puerto Rico,16,percent,AEE
+Oct,10,Telecomunications,Puerto Rico,53,percent,JRTC
+Oct,10,Cell towers,Puerto Rico,531,number,JRTC
+Oct,10,People in shelters,Puerto Rico,6067,number,Vivienda
+Oct,10,Hospitals,Puerto Rico,70,number,Departamento de Salud Federal y Local
+Oct,10,Hospitals with electricity,Puerto Rico,25,number,Departamento de Salud Federal y Local
+Oct,10,Water,Puerto Rico,63.75,percent,AAA
+Oct,10,Water,Metro,84,percent,AAA
+Oct,10,Water,Norte,30,percent,AAA
+Oct,10,Water,Oeste,48,percent,AAA
+Oct,10,Water,Sur,77,percent,AAA
+Oct,10,Water,Este,64,percent,AAA
+Oct,11,Electricity,Puerto Rico,10.6,percent,AEE
+Oct,11,Telecomunications,Puerto Rico,53.6,percent,JRTC
+Oct,11,Cell towers,Puerto Rico,544,number,JRTC
+Oct,11,People in shelters,Puerto Rico,5742,number,Vivienda
+Oct,11,Hospitals,Puerto Rico,72,number,Departamento de Salud Federal y Local
+Oct,11,Hospitals with electricity,Puerto Rico,43,number,Departamento de Salud Federal y Local
+Oct,11,Water,Puerto Rico,64.22,percent,AAA
+Oct,11,Water,Metro,80,percent,AAA
+Oct,11,Water,Norte,32,percent,AAA
+Oct,11,Water,Oeste,45,percent,AAA
+Oct,11,Water,Sur,84,percent,AAA
+Oct,11,Water,Este,68,percent,AAA
+Oct,12,Electricity,Puerto Rico,17,percent,AEE
+Oct,12,Telecomunications,Puerto Rico,55,percent,JRTC
+Oct,12,Water,Puerto Rico,64,percent,AAA
+Oct,12,Water,Metro,82,percent,AAA
+Oct,12,Water,Norte,30,percent,AAA
+Oct,12,Water,Oeste,35,percent,AAA
+Oct,12,Water,Sur,81,percent,AAA
+Oct,12,Water,Este,70,percent,AAA
+Oct,12,Cell towers,Puerto Rico,601,number,JRTC
+Oct,12,People in shelters,Puerto Rico,5602,number,Vivienda
+Oct,12,Hospitals,Puerto Rico,72,number,Departamento de Salud Federal y Local
+Oct,12,Hospitals with electricity,Puerto Rico,43,number,Departamento de Salud Federal y Local
+Oct,13,Electricity,Puerto Rico,9,percent,AEE
+Oct,13,Telecomunications,Puerto Rico,56,percent,JRTC
+Oct,13,Water,Puerto Rico,63.2,percent,AAA
+Oct,13,Water,Metro,84,percent,AAA
+Oct,13,Water,Norte,29,percent,AAA
+Oct,13,Water,Oeste,39,percent,AAA
+Oct,13,Water,Sur,76,percent,AAA
+Oct,13,Water,Este,69,percent,AAA
+Oct,13,Cell towers,Puerto Rico,586,number,JRTC
+Oct,13,People in shelters,Puerto Rico,5414,number,Vivienda
+Oct,13,Hospitals,Puerto Rico,72,number,Departamento de Salud Federal y Local
+Oct,13,Hospitals with electricity,Puerto Rico,44,number,Departamento de Salud Federal y Local
+Oct,14,Electricity,Puerto Rico,14.6,percent,AEE
+Oct,14,Telecomunications,Puerto Rico,58,percent,JRTC
+Oct,14,Water,Puerto Rico,64,percent,AAA
+Oct,14,Water,Metro,81,percent,AAA
+Oct,14,Water,Norte,27,percent,AAA
+Oct,14,Water,Oeste,54,percent,AAA
+Oct,14,Water,Sur,80,percent,AAA
+Oct,14,Water,Este,67,percent,AAA
+Oct,14,Cell antennas,Puerto Rico,647,number,FCC
+Oct,14,Cell towers,Puerto Rico,652,number,JRTC
+Oct,14,People in shelters,Puerto Rico,5261,number,Vivienda
+Oct,15,Electricity,Puerto Rico,15,percent,AEE
+Oct,15,Telecomunications,Puerto Rico,59,percent,JRTC
+Oct,15,Water,Puerto Rico,69,percent,AAA
+Oct,15,Water,Metro,84,percent,AAA
+Oct,15,Water,Norte,38,percent,AAA
+Oct,15,Water,Oeste,53,percent,AAA
+Oct,15,Water,Sur,87,percent,AAA
+Oct,15,Water,Este,71,percent,AAA
+Oct,15,Cell antennas,Puerto Rico,672,number,FCC
+Oct,15,Cell towers,Puerto Rico,690,number,JRTC
+Oct,15,People in shelters,Puerto Rico,5141,number,Vivienda
+Oct,15,Hospitals,Puerto Rico,69,number,Departamento de Salud Federal y Local
+Oct,15,Hospitals with electricity,Puerto Rico,44,number,Departamento de Salud Federal y Local
+Oct,16,Electricity,Puerto Rico,13.7,percent,AEE
+Oct,16,Telecomunications,Puerto Rico,59,percent,JRTC
+Oct,16,Water,Puerto Rico,72,percent,AAA
+Oct,16,Water,Metro,84,percent,AAA
+Oct,16,Water,Norte,45,percent,AAA
+Oct,16,Water,Oeste,63,percent,AAA
+Oct,16,Water,Sur,88,percent,AAA
+Oct,16,Water,Este,70,percent,AAA
+Oct,16,People in shelters,Puerto Rico,5037,number,Vivienda
+Oct,16,Hospitals,Puerto Rico,70,number,Departamento de Salud Federal y Local
+Oct,16,Hospitals with electricity,Puerto Rico,45,number,Departamento de Salud Federal y Local
+Oct,17,Electricity,Puerto Rico,17.7,percent,AEE
+Oct,17,Telecomunications,Puerto Rico,59,percent,JRTC
+Oct,17,Water,Puerto Rico,65.43,percent,AAA
+Oct,17,Water,Metro,77,percent,AAA
+Oct,17,Water,Norte,39,percent,AAA
+Oct,17,Water,Oeste,49,percent,AAA
+Oct,17,Water,Sur,80,percent,AAA
+Oct,17,Water,Este,71,percent,AAA
+Oct,17,Cell towers,Puerto Rico,691,number,JRTC
+Oct,17,People in shelters,Puerto Rico,4842,number,Vivienda
+Oct,17,Hospitals,Puerto Rico,70,number,Departamento de Salud Federal y Local
+Oct,17,Hospitals with electricity,Puerto Rico,45,number,Departamento de Salud Federal y Local
+Oct,18,Electricity,Puerto Rico,19.1,percent,AEE
+Oct,18,Telecomunications,Puerto Rico,61,percent,JRTC
+Oct,18,Water,Puerto Rico,69.19,percent,AAA
+Oct,18,Water,Metro,86,percent,AAA
+Oct,18,Water,Norte,39,percent,AAA
+Oct,18,Water,Oeste,61,percent,AAA
+Oct,18,Water,Sur,75,percent,AAA
+Oct,18,Water,Este,69,percent,AAA
+Oct,18,Cell towers,Puerto Rico,744,number,JRTC
+Oct,18,People in shelters,Puerto Rico,4702,number,Vivienda
+Oct,18,Hospitals,Puerto Rico,70,number,Departamento de Salud Federal y Local
+Oct,18,Hospitals with electricity,Puerto Rico,45,number,Departamento de Salud Federal y Local
+Oct,19,Electricity,Puerto Rico,21.6,percent,AEE
+Oct,19,Telecomunications,Puerto Rico,61,percent,JRTC
+Oct,19,Water,Puerto Rico,71.58,percent,AAA
+Oct,19,Water,Metro,90,percent,AAA
+Oct,19,Water,Norte,37,percent,AAA
+Oct,19,Water,Oeste,63,percent,AAA
+Oct,19,Water,Sur,85,percent,AAA
+Oct,19,Water,Este,69,percent,AAA
+Oct,19,Cell towers,Puerto Rico,754,number,JRTC
+Oct,19,People in shelters,Puerto Rico,4374,number,Vivienda
+Oct,19,Hospitals,Puerto Rico,64,number,Departamento de Salud Federal y Local
+Oct,19,Hospitals with electricity,Puerto Rico,45,number,Departamento de Salud Federal y Local
+Oct,20,Electricity,Puerto Rico,12.33,percent,AEE
+Oct,20,Telecomunications,Puerto Rico,62,percent,JRTC
+Oct,20,Water,Puerto Rico,69.51,percent,AAA
+Oct,20,Water,Metro,90,percent,AAA
+Oct,20,Water,Norte,36,percent,AAA
+Oct,20,Water,Oeste,60,percent,AAA
+Oct,20,Water,Sur,77,percent,AAA
+Oct,20,Water,Este,69,percent,AAA
+Oct,20,Cell antennas,Puerto Rico,842,number,FCC
+Oct,20,Cell towers,Puerto Rico,795,number,JRTC
+Oct,20,People in shelters,Puerto Rico,4246,number,Vivienda
+Oct,20,Hospitals,Puerto Rico,66,number,Departamento de Salud Federal y Local
+Oct,20,Hospitals with electricity,Puerto Rico,45,number,Departamento de Salud Federal y Local
+Oct,21,Electricity,Puerto Rico,16.61,percent,AEE
+Oct,21,Telecomunications,Puerto Rico,63,percent,JRTC
+Oct,21,Water,Puerto Rico,71.74,percent,AAA
+Oct,21,Water,Metro,90,percent,AAA
+Oct,21,Water,Norte,42,percent,AAA
+Oct,21,Water,Oeste,58,percent,AAA
+Oct,21,Water,Sur,85,percent,AAA
+Oct,21,Water,Este,68,percent,AAA
+Oct,21,Cell antennas,Puerto Rico,842,number,FCC
+Oct,21,Cell towers,Puerto Rico,839,number,JRTC
+Oct,21,People in shelters,Puerto Rico,4154,number,Vivienda
+Oct,21,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,21,Hospitals with electricity,Puerto Rico,45,number,Departamento de Salud Federal y Local
+Oct,22,Electricity,Puerto Rico,20.22,percent,AEE
+Oct,22,Telecomunications,Puerto Rico,63,percent,JRTC
+Oct,22,Water,Puerto Rico,72.77,percent,AAA
+Oct,22,Water,Metro,86,percent,AAA
+Oct,22,Water,Norte,64,percent,AAA
+Oct,22,Water,Oeste,64,percent,AAA
+Oct,22,Water,Sur,81,percent,AAA
+Oct,22,Water,Este,74,percent,AAA
+Oct,22,Cell antennas,Puerto Rico,863,number,FCC
+Oct,22,Cell towers,Puerto Rico,864,number,JRTC
+Oct,22,People in shelters,Puerto Rico,4154,number,Vivienda
+Oct,22,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,22,Hospitals with electricity,Puerto Rico,49,number,Departamento de Salud Federal y Local
+Oct,23,Electricity,Puerto Rico,23,percent,AEE
+Oct,23,Telecomunications,Puerto Rico,63,percent,JRTC
+Oct,23,Water,Puerto Rico,73.65,percent,AAA
+Oct,23,Water,Metro,88,percent,AAA
+Oct,23,Water,Norte,48,percent,AAA
+Oct,23,Water,Oeste,64,percent,AAA
+Oct,23,Water,Sur,81,percent,AAA
+Oct,23,Water,Este,77,percent,AAA
+Oct,23,Cell antennas,Puerto Rico,884,number,FCC
+Oct,23,Cell towers,Puerto Rico,859,number,JRTC
+Oct,23,People in shelters,Puerto Rico,3966,number,Vivienda
+Oct,23,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,23,Hospitals with electricity,Puerto Rico,49,number,Departamento de Salud Federal y Local
+Oct,24,Electricity,Puerto Rico,24.4,percent,AEE
+Oct,24,Telecomunications,Puerto Rico,65,percent,JRTC
+Oct,24,Water,Puerto Rico,74.37,percent,AAA
+Oct,24,Water,Metro,88,percent,AAA
+Oct,24,Water,Norte,44,percent,AAA
+Oct,24,Water,Oeste,65,percent,AAA
+Oct,24,Water,Sur,87,percent,AAA
+Oct,24,Water,Este,77,percent,AAA
+Oct,24,Cell antennas,Puerto Rico,898,number,FCC
+Oct,24,Cell towers,Puerto Rico,911,number,JRTC
+Oct,24,People in shelters,Puerto Rico,3897,number,Vivienda
+Oct,24,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,24,Hospitals with electricity,Puerto Rico,49,number,Departamento de Salud Federal y Local
+Oct,25,Electricity,Puerto Rico,25,percent,AEE
+Oct,25,Telecomunications,Puerto Rico,65,percent,JRTC
+Oct,25,Water,Puerto Rico,75,percent,AAA
+Oct,25,Water,Metro,87,percent,AAA
+Oct,25,Water,Norte,46,percent,AAA
+Oct,25,Water,Oeste,68,percent,AAA
+Oct,25,Water,Sur,88,percent,AAA
+Oct,25,Water,Este,77,percent,AAA
+Oct,25,Cell antennas,Puerto Rico,958,number,FCC
+Oct,25,Cell towers,Puerto Rico,936,number,JRTC
+Oct,25,People in shelters,Puerto Rico,3758,number,Vivienda
+Oct,25,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,25,Hospitals with electricity,Puerto Rico,50,number,Departamento de Salud Federal y Local
+Oct,26,Electricity,Puerto Rico,26.2,percent,AEE
+Oct,26,Telecomunications,Puerto Rico,66,percent,JRTC
+Oct,26,Water,Puerto Rico,78,percent,AAA
+Oct,26,Water,Metro,88,percent,AAA
+Oct,26,Water,Norte,53,percent,AAA
+Oct,26,Water,Oeste,73,percent,AAA
+Oct,26,Water,Sur,88,percent,AAA
+Oct,26,Water,Este,78,percent,AAA
+Oct,26,Cell antennas,Puerto Rico,902,number,FCC
+Oct,26,Cell towers,Puerto Rico,967,number,JRTC
+Oct,26,People in shelters,Puerto Rico,3655,number,Vivienda
+Oct,26,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,26,Hospitals with electricity,Puerto Rico,50,number,Departamento de Salud Federal y Local
+Oct,27,Electricity,Puerto Rico,27.6,percent,AEE
+Oct,27,Telecomunications,Puerto Rico,67,percent,JRTC
+Oct,27,Water,Puerto Rico,77,percent,AAA
+Oct,27,Water,Metro,89,percent,AAA
+Oct,27,Water,Norte,58,percent,AAA
+Oct,27,Water,Oeste,67,percent,AAA
+Oct,27,Water,Sur,89,percent,AAA
+Oct,27,Water,Este,72,percent,AAA
+Oct,27,Cell antennas,Puerto Rico,902,number,FCC
+Oct,27,Cell towers,Puerto Rico,1019,number,JRTC
+Oct,27,People in shelters,Puerto Rico,3577,number,Vivienda
+Oct,27,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,27,Hospitals with electricity,Puerto Rico,54,number,Departamento de Salud Federal y Local
+Oct,28,Electricity,Puerto Rico,29.7,percent,AEE
+Oct,28,Telecomunications,Puerto Rico,69,percent,JRTC
+Oct,28,Water,Puerto Rico,80,percent,AAA
+Oct,28,Water,Metro,86,percent,AAA
+Oct,28,Water,Norte,74,percent,AAA
+Oct,28,Water,Oeste,68,percent,AAA
+Oct,28,Water,Sur,88,percent,AAA
+Oct,28,Water,Este,80,percent,AAA
+Oct,28,Cell antennas,Puerto Rico,1075,number,FCC
+Oct,28,Cell towers,Puerto Rico,1081,number,JRTC
+Oct,28,People in shelters,Puerto Rico,3502,number,Vivienda
+Oct,28,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,28,Hospitals with electricity,Puerto Rico,55,number,Departamento de Salud Federal y Local
+Oct,29,Electricity,Puerto Rico,29.7,percent,AEE
+Oct,29,Telecomunications,Puerto Rico,69,percent,JRTC
+Oct,29,Water,Puerto Rico,79.52,percent,AAA
+Oct,29,Water,Metro,84,percent,AAA
+Oct,29,Water,Norte,68,percent,AAA
+Oct,29,Water,Oeste,71,percent,AAA
+Oct,29,Water,Sur,87,percent,AAA
+Oct,29,Water,Este,84,percent,AAA
+Oct,29,Cell antennas,Puerto Rico,1101,number,FCC
+Oct,29,Cell towers,Puerto Rico,1092,number,JRTC
+Oct,29,People in shelters,Puerto Rico,3403,number,Vivienda
+Oct,29,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,29,Hospitals with electricity,Puerto Rico,55,number,Departamento de Salud Federal y Local
+Oct,30,Electricity,Puerto Rico,30.5,percent,AEE
+Oct,30,Telecomunications,Puerto Rico,69,percent,JRTC
+Oct,30,Water,Puerto Rico,81,percent,AAA
+Oct,30,Water,Metro,87,percent,AAA
+Oct,30,Water,Norte,69,percent,AAA
+Oct,30,Water,Oeste,71,percent,AAA
+Oct,30,Water,Sur,88,percent,AAA
+Oct,30,Water,Este,84,percent,AAA
+Oct,30,Cell antennas,Puerto Rico,1127,number,FCC
+Oct,30,Cell towers,Puerto Rico,1109,number,JRTC
+Oct,30,People in shelters,Puerto Rico,3348,number,Vivienda
+Oct,30,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,30,Hospitals with electricity,Puerto Rico,55,number,Departamento de Salud Federal y Local
+Oct,31,Electricity,Puerto Rico,33.4,percent,AEE
+Oct,31,Telecomunications,Puerto Rico,70,percent,JRTC
+Oct,31,Water,Puerto Rico,82,percent,AAA
+Oct,31,Water,Metro,91,percent,AAA
+Oct,31,Water,Norte,67,percent,AAA
+Oct,31,Water,Oeste,75,percent,AAA
+Oct,31,Water,Sur,87,percent,AAA
+Oct,31,Water,Este,85,percent,AAA
+Oct,31,Cell antennas,Puerto Rico,1540,number,FCC
+Oct,31,People in shelters,Puerto Rico,3304,number,Vivienda
+Oct,31,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Oct,31,Hospitals with electricity,Puerto Rico,57,number,Departamento de Salud Federal y Local
+Nov,1,Electricity,Puerto Rico,37.9,percent,AEE
+Nov,1,Telecomunications,Puerto Rico,70,percent,JRTC
+Nov,1,Water,Puerto Rico,82,percent,AAA
+Nov,1,Water,Metro,91,percent,AAA
+Nov,1,Water,Norte,68,percent,AAA
+Nov,1,Water,Oeste,71,percent,AAA
+Nov,1,Water,Sur,88,percent,AAA
+Nov,1,Water,Este,85,percent,AAA
+Nov,1,Cell towers,Puerto Rico,1164,number,JRTC
+Nov,1,People in shelters,Puerto Rico,3243,number,Vivienda
+Nov,1,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Nov,1,Hospitals with electricity,Puerto Rico,57,number,Departamento de Salud Federal y Local
+Nov,2,Electricity,Puerto Rico,36.9,percent,AEE
+Nov,2,Telecomunications,Puerto Rico,70,percent,JRTC
+Nov,2,Water,Puerto Rico,83.11,percent,AAA
+Nov,2,Water,Metro,94,percent,AAA
+Nov,2,Water,Norte,68,percent,AAA
+Nov,2,Water,Oeste,71,percent,AAA
+Nov,2,Water,Sur,88,percent,AAA
+Nov,2,Water,Este,84,percent,AAA
+Nov,2,Cell antennas,Puerto Rico,1481,number,FCC
+Nov,2,Cell towers,Puerto Rico,1165,number,JRTC
+Nov,2,People in shelters,Puerto Rico,3068,number,Vivienda
+Nov,2,Hospitals,Puerto Rico,65,number,Departamento de Salud Federal y Local
+Nov,2,Hospitals with electricity,Puerto Rico,57,number,Departamento de Salud Federal y Local
+Nov,3,Electricity,Puerto Rico,37.9,percent,AEE
+Nov,3,Telecomunications,Puerto Rico,71,percent,JRTC
+Nov,3,Water,Puerto Rico,80.38,percent,AAA
+Nov,3,Water,Metro,92,percent,AAA
+Nov,3,Water,Norte,56,percent,AAA
+Nov,3,Water,Oeste,73,percent,AAA
+Nov,3,Water,Sur,87,percent,AAA
+Nov,3,Water,Este,83,percent,AAA
+Nov,3,Cell antennas,Puerto Rico,1442,number,FCC
+Nov,3,Cell towers,Puerto Rico,1233,number,JRTC
+Nov,3,People in shelters,Puerto Rico,2942,number,Vivienda
+Nov,3,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,3,Hospitals with electricity,Puerto Rico,57,number,Departamento de Salud Federal y Local
+Nov,4,Electricity,Puerto Rico,39.2,percent,AEE
+Nov,4,Telecomunications,Puerto Rico,71,percent,JRTC
+Nov,4,Water,Puerto Rico,80.56,percent,AAA
+Nov,4,Water,Metro,95,percent,AAA
+Nov,4,Water,Norte,71,percent,AAA
+Nov,4,Water,Oeste,56,percent,AAA
+Nov,4,Water,Sur,88,percent,AAA
+Nov,4,Water,Este,80,percent,AAA
+Nov,4,Cell antennas,Puerto Rico,1302,number,FCC
+Nov,4,Cell towers,Puerto Rico,1297,number,JRTC
+Nov,4,People in shelters,Puerto Rico,2844,number,Vivienda
+Nov,4,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,4,Hospitals with electricity,Puerto Rico,58,number,Departamento de Salud Federal y Local
+Nov,5,Electricity,Puerto Rico,41.03,percent,AEE
+Nov,5,Telecomunications,Puerto Rico,71,percent,JRTC
+Nov,5,Water,Puerto Rico,83.09,percent,AAA
+Nov,5,Water,Metro,93,percent,AAA
+Nov,5,Water,Norte,72,percent,AAA
+Nov,5,Water,Oeste,73,percent,AAA
+Nov,5,Water,Sur,89,percent,AAA
+Nov,5,Water,Este,80,percent,AAA
+Nov,5,Cell antennas,Puerto Rico,1328,number,FCC
+Nov,5,Cell towers,Puerto Rico,1261,number,JRTC
+Nov,5,People in shelters,Puerto Rico,2844,number,Vivienda
+Nov,5,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,5,Hospitals with electricity,Puerto Rico,58,number,Departamento de Salud Federal y Local
+Nov,6,Electricity,Puerto Rico,42.2,percent,AEE
+Nov,6,Telecomunications,Puerto Rico,71.5,percent,JRTC
+Nov,6,Water,Puerto Rico,79.46,percent,AAA
+Nov,6,Water,Metro,91,percent,AAA
+Nov,6,Water,Norte,62,percent,AAA
+Nov,6,Water,Oeste,72,percent,AAA
+Nov,6,Water,Sur,91,percent,AAA
+Nov,6,Water,Este,79,percent,AAA
+Nov,6,Cell antennas,Puerto Rico,1374,number,FCC
+Nov,6,Cell towers,Puerto Rico,1337,number,JRTC
+Nov,6,People in shelters,Puerto Rico,2844,number,Vivienda
+Nov,6,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,6,Hospitals with electricity,Puerto Rico,59,number,Departamento de Salud Federal y Local
+Nov,7,Electricity,Puerto Rico,42.4,percent,AEE
+Nov,7,Telecomunications,Puerto Rico,72,percent,JRTC
+Nov,7,Water,Puerto Rico,83.3,percent,AAA
+Nov,7,Water,Metro,94,percent,AAA
+Nov,7,Water,Norte,70,percent,AAA
+Nov,7,Water,Oeste,75,percent,AAA
+Nov,7,Water,Sur,90,percent,AAA
+Nov,7,Water,Este,80,percent,AAA
+Nov,7,Cell antennas,Puerto Rico,1285,number,FCC
+Nov,7,Cell towers,Puerto Rico,1410,number,JRTC
+Nov,7,People in shelters,Puerto Rico,2844,number,Vivienda
+Nov,7,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,7,Hospitals with electricity,Puerto Rico,59,number,Departamento de Salud Federal y Local
+Nov,8,Electricity,Puerto Rico,42.4,percent,AEE
+Nov,8,Telecomunications,Puerto Rico,72,percent,JRTC
+Nov,8,Water,Puerto Rico,85.38,percent,AAA
+Nov,8,Water,Metro,95,percent,AAA
+Nov,8,Water,Norte,67,percent,AAA
+Nov,8,Water,Oeste,83,percent,AAA
+Nov,8,Water,Sur,90,percent,AAA
+Nov,8,Water,Este,84,percent,AAA
+Nov,8,Cell antennas,Puerto Rico,1272,number,FCC
+Nov,8,Cell towers,Puerto Rico,1418,number,JRTC
+Nov,8,People in shelters,Puerto Rico,2460,number,Vivienda
+Nov,8,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,8,Hospitals with electricity,Puerto Rico,59,number,Departamento de Salud Federal y Local
+Nov,9,Electricity,Puerto Rico,43.2,percent,AEE
+Nov,9,Telecomunications,Puerto Rico,73,percent,JRTC
+Nov,9,Water,Puerto Rico,87.81,percent,AAA
+Nov,9,Water,Metro,95,percent,AAA
+Nov,9,Water,Norte,72,percent,AAA
+Nov,9,Water,Oeste,85,percent,AAA
+Nov,9,Water,Sur,91,percent,AAA
+Nov,9,Water,Este,90,percent,AAA
+Nov,9,Cell antennas,Puerto Rico,1213,number,FCC
+Nov,9,Cell towers,Puerto Rico,1496,number,JRTC
+Nov,9,People in shelters,Puerto Rico,2239,number,Vivienda
+Nov,9,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,9,Hospitals with electricity,Puerto Rico,59,number,Departamento de Salud Federal y Local
+Nov,10,Electricity,Puerto Rico,31.2,percent,AEE
+Nov,10,Telecomunications,Puerto Rico,72,percent,JRTC
+Nov,10,Water,Puerto Rico,78.09,percent,AAA
+Nov,10,Water,Metro,67,percent,AAA
+Nov,10,Water,Norte,64,percent,AAA
+Nov,10,Water,Oeste,84,percent,AAA
+Nov,10,Water,Sur,92,percent,AAA
+Nov,10,Water,Este,91,percent,AAA
+Nov,10,Cell antennas,Puerto Rico,1182,number,FCC
+Nov,10,Cell towers,Puerto Rico,1474,number,JRTC
+Nov,10,People in shelters,Puerto Rico,2219,number,Vivienda
+Nov,10,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,10,Hospitals with electricity,Puerto Rico,59,number,Departamento de Salud Federal y Local
+Nov,11,Electricity,Puerto Rico,44.5,percent,AEE
+Nov,11,Telecomunications,Puerto Rico,73,percent,JRTC
+Nov,11,Water,Puerto Rico,87.82,percent,AAA
+Nov,11,Water,Metro,95,percent,AAA
+Nov,11,Water,Norte,70,percent,AAA
+Nov,11,Water,Oeste,83,percent,AAA
+Nov,11,Water,Sur,92,percent,AAA
+Nov,11,Water,Este,91,percent,AAA
+Nov,11,Cell antennas,Puerto Rico,1556,number,FCC
+Nov,11,Cell towers,Puerto Rico,1530,number,JRTC
+Nov,11,People in shelters,Puerto Rico,2169,number,Vivienda
+Nov,11,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,11,Hospitals with electricity,Puerto Rico,59,number,Departamento de Salud Federal y Local
+Nov,12,Electricity,Puerto Rico,47.8,percent,AEE
+Nov,12,Telecomunications,Puerto Rico,73,percent,JRTC
+Nov,12,Water,Puerto Rico,89.61,percent,AAA
+Nov,12,Water,Metro,95,percent,AAA
+Nov,12,Water,Norte,79,percent,AAA
+Nov,12,Water,Oeste,84,percent,AAA
+Nov,12,Water,Sur,92,percent,AAA
+Nov,12,Water,Este,92,percent,AAA
+Nov,12,Cell antennas,Puerto Rico,1556,number,FCC
+Nov,12,Cell towers,Puerto Rico,1554,number,JRTC
+Nov,12,People in shelters,Puerto Rico,2143,number,Vivienda
+Nov,12,Hospitals,Puerto Rico,67,number,Departamento de Salud Federal y Local
+Nov,12,Hospitals with electricity,Puerto Rico,59,number,Departamento de Salud Federal y Local

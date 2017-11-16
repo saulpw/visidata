@@ -1,0 +1,19 @@
+sheet	col	row	keystrokes	input	comment
+			o	sample_data/StatusPR.csv	open file
+StatusPR	Month	0	=	Month+Day	create new column from Python expression, with column names as variables
+StatusPR	Month+Day	0	@		set type of current column to ISO8601 datetime
+StatusPR	Month+Day	0	C		open Columns Sheet
+StatusPR_columns	fmtstr	1	e	%Y-%m-%d	edit contents of current cell
+StatusPR_columns	value	1	^^		jump to previous sheet (swaps with current sheet)
+StatusPR	Month+Day	0	!		pin current column on the left as a key column
+StatusPR	Month	0	-		hide current column
+StatusPR	Day	0	-		hide current column
+StatusPR	Resource	0	!		pin current column on the left as a key column
+StatusPR	Value	0	%		set type of current column to float
+StatusPR	Value	0	m		graph the current column vs the first key column (or row number)
+StatusPR_graph	0	0	q		quit current sheet
+StatusPR	Location	0	|	Puerto	select rows matching regex in current column
+StatusPR	Unit	0	\	number	unselect rows matching regex in current column
+StatusPR	Unit	0	"		open duplicate sheet with only selected rows
+StatusPR_selectedref	Unit	0	gu		unselect all rows
+StatusPR_selectedref	Value	0	m		graph the current column vs the first key column (or row number)
