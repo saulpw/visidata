@@ -710,8 +710,8 @@ class VisiData:
 
     def rightStatus(self, sheet):
         'Compose right side of status bar.'
-        if sheet.progressMade < sheet.progressTotal:
-            status = '%9d %2d%%' % (sheet.nRows, sheet.progressPct)
+        if sheet.currentThreads:
+            status = '%9d  %2d%%' % (sheet.nRows, sheet.progressPct)
         else:
             status = '%9d rows' % sheet.nRows
         return status, options.color_status
