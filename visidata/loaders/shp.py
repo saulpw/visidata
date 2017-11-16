@@ -25,7 +25,9 @@ def shptype(ftype, declen):
 
 # rowdef: shaperec
 class ShapeSheet(Sheet):
-    columns = [Column('')]
+    columns = [
+        Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
+    ]
     commands = [
         Command('.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow]))', ''),
         Command('g.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows))', ''),
@@ -33,15 +35,12 @@ class ShapeSheet(Sheet):
     @async
     def reload(self):
         sf = shapefile.Reader(self.source.resolve())
-        self.columns = [
-            Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
-        ]
         self.columns += [
             Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen))
                 for i, (fname, ftype, fieldlen, declen) in enumerate(sf.fields[1:])  # skip DeletionFlag
         ]
         self.rows = []
-        for shaperec in sf.iterShapeRecords():
+        for shaperec in Progress(sf.iterShapeRecords(), total=sf.numRecords):
             self.addRow(shaperec)
 
 
