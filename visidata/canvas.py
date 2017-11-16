@@ -269,7 +269,7 @@ class GridCanvas(PixelCanvas):
         self.gridlines = []   # list of (grid_x1, grid_y1, grid_x2, grid_y2, attr, row)
         self.gridlabels = []  # list of (grid_x, grid_y, label, attr, row)
 
-        self.legends = {}     # txt: attr  (visible legends only)
+        self.legends = collections.OrderedDict()   # txt: attr  (visible legends only)
         self.plotAttrs = {}   # key: attr  (all keys, for speed)
         self.reset()
 
@@ -284,10 +284,13 @@ class GridCanvas(PixelCanvas):
             if len(self.unusedAttrs) > 1:
                 attr = self.unusedAttrs.pop()
                 legend = ' '.join(k)
-                self.plotlegend(len(self.legends), legend, attr)
-                self.legends[legend] = attr
             else:
                 attr = self.unusedAttrs[0]
+                legend = '[other]'
+
+            i = len(self.legends)-1
+            self.plotlegend(i, '%s.%s' % (i,legend), attr)
+            self.legends[legend] = attr
             self.plotAttrs[k] = attr
         return attr
 
@@ -484,9 +487,10 @@ class GridCanvas(PixelCanvas):
 
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
-            if attr not in self.disabledAttrs:
-                self._commands[str(i+1)] = Command(str(i+1), 'togglePixelAttrs(%s)' % attr, '')
-                self.plotlegend(i, legend, attr)
+            self._commands[str(i+1)] = Command(str(i+1), 'togglePixelAttrs(%s)' % attr, '')
+            if attr in self.disabledAttrs:
+                attr = colors['238 blue']
+            self.plotlegend(i, '%s.%s'%(i+1,legend), attr)
 
     def checkCursor(self):
         'override Sheet.checkCursor'
