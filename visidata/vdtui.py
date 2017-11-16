@@ -652,7 +652,7 @@ class VisiData:
 
         matchingRowIndexes = 0
 
-        with Progress(sheet, sheet.nRows) as prog:
+        with Progress(total=sheet.nRows) as prog:
             for r in itertools.chain(rng, rng2):
                 prog.addProgress(1)
                 c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
