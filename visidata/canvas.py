@@ -420,13 +420,20 @@ class GridCanvas(PixelCanvas):
     def line(self, x1, y1, x2, y2, attr, row=None):
         self.gridlines.append((x1, y1, x2, y2, attr, row))
 
-    def polygon(self, vertices, attr, row=None):
+    def polyline(self, vertices, attr, row=None):
         'adds lines for (x,y) vertices of a polygon'
         prev_x, prev_y = None, None
         for x, y in vertices:
             if prev_x is not None:
                 self.line(prev_x, prev_y, x, y, attr, row)
             prev_x, prev_y = x, y
+
+    def polygon(self, vertices, attr, row=None):
+        'adds lines for (x,y) vertices of a polygon'
+        self.polyline(vertices, attr, row)
+        first_x, first_y = vertices[0]
+        last_x, last_y = vertices[-1]
+        self.line(first_x, first_y, last_x, last_y, attr, row)
 
     def label(self, x, y, text, attr, row=None):
         self.gridlabels.append((x, y, text, attr, row))
