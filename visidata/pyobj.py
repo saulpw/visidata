@@ -14,7 +14,7 @@ globalCommand('pyobj-dive', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), curso
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj):
-    vs = load_pyobj(name, pyobj, src)
+    vs = load_pyobj(name, pyobj)
     if vs:
         return vd().push(vs)
     else:
@@ -24,13 +24,13 @@ def load_pyobj(name, pyobj):
     'Return Sheet object of appropriate type for given sources in `args`.'
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
         if getattr(pyobj, '_fields', None):  # list of namedtuple
-            return SheetNamedTuple(name, pyobj)
+            return SheetNamedTuple(name, source=pyobj)
         else:
-            return SheetList(name, pyobj)
+            return SheetList(name, source=pyobj)
     elif isinstance(pyobj, dict):
-        return SheetDict(name, pyobj)
+        return SheetDict(name, source=pyobj)
     elif isinstance(pyobj, object):
-        return SheetObject(name, pyobj)
+        return SheetObject(name, source=pyobj)
     else:
         status('unknown type ' + type(pyobj))
 
