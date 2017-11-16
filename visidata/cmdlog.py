@@ -73,7 +73,7 @@ def loggable(keystrokes):
     return True
 
 def open_vd(p):
-    return CommandLog(p.name, p)
+    return CommandLog(p.name, source=p)
 
 # rowdef: CommandLog
 class CommandLog(Sheet):
@@ -91,8 +91,8 @@ class CommandLog(Sheet):
     semaphore = threading.Semaphore(0)
     filetype = 'vd'
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, source=None, **kwargs):
+        super().__init__(name, source=source, **kwargs)
         self.currentActiveRow = None
 
         self.sheetmap = {}   # sheet.name -> vs
