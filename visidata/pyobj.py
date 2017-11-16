@@ -24,13 +24,13 @@ def load_pyobj(name, pyobj):
     'Return Sheet object of appropriate type for given sources in `args`.'
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
         if getattr(pyobj, '_fields', None):  # list of namedtuple
-            return SheetNamedTuple(name, source=pyobj)
+            return SheetNamedTuple(name, pyobj)
         else:
-            return SheetList(name, source=pyobj)
+            return SheetList(name, pyobj)
     elif isinstance(pyobj, dict):
-        return SheetDict(name, source=pyobj)
+        return SheetDict(name, pyobj)
     elif isinstance(pyobj, object):
-        return SheetObject(name, source=pyobj)
+        return SheetObject(name, pyobj)
     else:
         status('unknown type ' + type(pyobj))
 
@@ -98,6 +98,9 @@ class SheetNamedTuple(Sheet):
     commands = [Command(ENTER, 'dive()', 'dive further into Python object')]
     columns = [ColumnItem('name', 0), ColumnItem('value', 1)]
 
+    def __init__(self, name, src, **kwargs):
+        super().__init__(name, source=src, **kwargs)
+
     def reload(self):
         self.rows = list(zip(self.source._fields, self.source))
 
@@ -140,6 +143,8 @@ class SheetObject(Sheet):
         Command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edit contents of current cell'),
         Command('.', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether methods and hidden properties are shown')
     ]
+    def __init__(self, name, obj, **kwargs):
+        super().__init__(name, source=obj, **kwargs)
 
     def reload(self):
         self.rows = []
