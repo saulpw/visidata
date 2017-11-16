@@ -2252,6 +2252,8 @@ def setupcolors(stdscr, f, *args):
     curses.mouseinterval(0) # very snappy but does not allow for [multi]click
     curses.mouseEvents = {}
 
+    curses.use_default_colors()
+
     for k in dir(curses):
         if k.startswith('BUTTON') or k == 'REPORT_MOUSE_POSITION':
             curses.mouseEvents[getattr(curses, k)] = k
