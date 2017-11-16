@@ -60,6 +60,9 @@ class ShapeMap(GridCanvas):
                 self.polygon(row.shape.points, self.plotColor(k), row)
             elif row.shape.shapeType == 3:
                 self.polyline(row.shape.points, self.plotColor(k), row)
+            elif row.shape.shapeType == 1:
+                x, y = row.shape.points[0]
+                self.point(x, y, self.plotColor(k), row)
             else:
                 status('notimpl shapeType %s' % row.shape.shapeType)
 
