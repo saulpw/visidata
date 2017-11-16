@@ -88,14 +88,14 @@ class PixelCanvas(Sheet):
         r = round(max(xdiff, ydiff))
 
         if r == 0:  # point, not line
-            self.plotpixel(round(x1), round(y1), attr, row)
+            self.plotpixel(x1, y1, attr, row)
         else:
             x, y = x1, y1
             for i in range(r+1):
                 x += xdir * xdiff / r
                 y += ydir * ydiff / r
 
-                self.plotpixel(round(x), round(y), attr, row)
+                self.plotpixel(x, y, attr, row)
 
     def plotlabel(self, x, y, text, attr):
         self.labels.append((x, y, text, attr))
@@ -506,21 +506,28 @@ class GridCanvas(PixelCanvas):
     def plotAll_async(self):
         'plots points and lines and text onto the PixelCanvas'
 
-#        if not self.visibleGridWidth or not self.visibleGridHeight:
         self.setZoom()
 
         xmin, ymin, xmax, ymax = self.visibleGridBounds
+        xfactor, yfactor = self.xScaler, self.yScaler
+        gridxmin, gridymin = self.gridCanvasMinX, self.gridCanvasMinY
 
         for x, y, attr, row in Progress(self.gridpoints):
             if ymin <= y and y <= ymax:
                 if xmin <= x and x <= xmax:
-                    self.plotpixel(self.scaleX(x), self.scaleY(y), attr, row)
+                    x = gridxmin+(x-xmin)*xfactor
+                    y = gridymin+(y-ymin)*yfactor
+                    self.plotpixel(x, y, attr, row)
 
         for x1, y1, x2, y2, attr, row in Progress(self.gridlines):
             r = self.clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax)
             if r:
                 x1, y1, x2, y2 = r
-            self.plotline(self.scaleX(x1), self.scaleY(y1), self.scaleX(x2), self.scaleY(y2), attr, row)
+                x1 = gridxmin+(x1-xmin)*xfactor
+                y1 = gridymin+(y1-ymin)*yfactor
+                x2 = gridxmin+(x2-xmin)*xfactor
+                y2 = gridymin+(y2-ymin)*yfactor
+                self.plotline(x1, y1, x2, y2, attr, row)
 
         for x, y, text, attr, row in Progress(self.gridlabels):
             self.plotlabel(self.scaleX(x), self.scaleY(y), text, attr, row)

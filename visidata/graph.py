@@ -43,6 +43,10 @@ class GraphSheet(GridCanvas):
     def plotlegend(self, i, txt, attr):
         self.plotlabel(self.canvasWidth-30, i*4, txt, attr)
 
+    def plotpixel(self, x, y, attr, row=None):
+        y = self.gridCanvasMaxY-y+4
+        self.pixels[round(y)][round(x)][attr].append(row)
+
     def scaleY(self, grid_y):
         'returns canvas y coordinate, with y-axis inverted'
         canvas_y = super().scaleY(grid_y)
