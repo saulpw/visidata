@@ -434,7 +434,7 @@ class GridCanvas(PixelCanvas):
     def fixPoint(self, canvas_x, canvas_y, grid_x, grid_y):
         'adjust visibleGrid so that (grid_x, grid_y) is plotted at (canvas_x, canvas_y)'
         self.visibleGridMinX = grid_x - self.gridW(canvas_x-self.gridCanvasMinX)
-        self.visibleGridMinY = grid_y - self.gridH(self.gridCanvasMaxY-canvas_y)
+        self.visibleGridMinY = grid_y - self.gridH(canvas_y-self.gridCanvasMinY)
         self.refresh()
 
     def zoomTo(self, x1, y1, x2, y2):
