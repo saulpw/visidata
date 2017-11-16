@@ -4,7 +4,7 @@ import shapefile
 
 
 def open_shp(p):
-    return ShapeSheet(p.name, p)
+    return ShapeSheet(p.name, source=p)
 
 # pyshp doesn't care about file extensions
 open_dbf = open_shp

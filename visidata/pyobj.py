@@ -13,31 +13,30 @@ globalCommand('pyobj-dive', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), curso
 
 
 #### generic list/dict/object browsing
-def push_pyobj(name, pyobj, src=None):
+def push_pyobj(name, pyobj):
     vs = load_pyobj(name, pyobj, src)
     if vs:
         return vd().push(vs)
     else:
         status('unknown type ' + type(pyobj))
 
-def load_pyobj(name, *args):
+def load_pyobj(name, pyobj):
     'Return Sheet object of appropriate type for given sources in `args`.'
-    pyobj = args[0]
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
         if getattr(pyobj, '_fields', None):  # list of namedtuple
-            return SheetNamedTuple(name, *args)
+            return SheetNamedTuple(name, pyobj)
         else:
-            return SheetList(name, *args)
+            return SheetList(name, pyobj)
     elif isinstance(pyobj, dict):
-        return SheetDict(name, *args)
+        return SheetDict(name, pyobj)
     elif isinstance(pyobj, object):
-        return SheetObject(name, *args)
+        return SheetObject(name, pyobj)
     else:
         status('unknown type ' + type(pyobj))
 
 def open_pyobj(path):
     'Provide wrapper for `load_pyobj`.'
-    return load_pyobj(path.name, eval(path.read_text()), path)
+    return load_pyobj(path.name, eval(path.read_text()))
 
 def getPublicAttrs(obj):
     'Return all public attributes (not methods or `_`-prefixed) on object.'
@@ -55,20 +54,20 @@ def DictKeyColumns(d):
     'Return a list of Column objects from dictionary keys.'
     return [ColumnItem(k, k) for k in d.keys()]
 
-def SheetList(name, src, *args, **kwargs):
+def SheetList(name, src, **kwargs):
     'Creates a Sheet from a list of homogenous dicts or namedtuples.'
 
     if not src:
         error('no content')
 
     if isinstance(src[0], dict):
-        return ListOfDictSheet(name, src, *args, **kwargs)
+        return ListOfDictSheet(name, source=src, **kwargs)
     elif isinstance(src[0], tuple):
         if getattr(src[0], '_fields', None):  # looks like a namedtuple
-            return ListOfNamedTupleSheet(name, src, *args, **kwargs)
+            return ListOfNamedTupleSheet(name, source=src, **kwargs)
 
     # simple list
-    return ListOfPyobjSheet(name, src, *args, **kwargs)
+    return ListOfPyobjSheet(name, source=src, **kwargs)
 
 class ListOfPyobjSheet(Sheet):
     commands = [Command(ENTER, 'pyobj-dive')]
@@ -111,8 +110,8 @@ class SheetDict(Sheet):
         Command('e', 'edit()', 'edit contents of current cell'),
         Command(ENTER, 'dive()', 'dive further into Python object')
     ]
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, name, src, **kwargs):
+        super().__init__(name, source=src, **kwargs)
 
     def reload(self):
         self.columns = [ColumnItem('key', 0)]

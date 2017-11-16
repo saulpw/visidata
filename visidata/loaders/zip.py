@@ -15,7 +15,7 @@ class open_zip(Sheet):
     ]
 
     def __init__(self, p):
-        super().__init__(p.name, p)
+        super().__init__(p.name, source=p)
 
     def reload(self):
         import zipfile

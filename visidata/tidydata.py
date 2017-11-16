@@ -8,7 +8,7 @@ melt_value_colname = 'Value'  # column name to use for the melted value
 class MeltedSheet(Sheet):
     "Perform 'melt', the reverse of 'pivot', on input sheet."
     def __init__(self, sheet):
-        super().__init__(sheet.name + '_melted', sheet)
+        super().__init__(sheet.name + '_melted', source=sheet)
 
     @async
     def reload(self):

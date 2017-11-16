@@ -2,7 +2,7 @@ import statistics
 
 from visidata import *
 
-globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", sheet, sourceRows=selectedRows or rows))', 'open Describe Sheet')
+globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=sheet, sourceRows=selectedRows or rows))', 'open Describe Sheet')
 
 def isNumeric(col):
     return col.type in (int,float,currency,date)

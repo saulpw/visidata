@@ -11,7 +11,7 @@ class SqliteSheet(Sheet):
         Command(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'load the entire table into memory')
     ]
     def __init__(self, name, pathOrSheet, tableName):
-        super().__init__(name, pathOrSheet, tableName)
+        super().__init__(name, source=pathOrSheet, tableName=tableName)
         if isinstance(pathOrSheet, Sheet):
             self.conn = pathOrSheet.conn
         elif isinstance(pathOrSheet, Path):
@@ -19,7 +19,7 @@ class SqliteSheet(Sheet):
             self.conn = sqlite3.connect(pathOrSheet.resolve())
 
     def reload(self):
-        tblname = self.sources[1]
+        tblname = self.tableName
         self.columns = self.getColumns(tblname)
         r = self.conn.execute('SELECT COUNT(*) FROM %s' % tblname).fetchall()
         self.rows = []

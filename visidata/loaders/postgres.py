@@ -56,7 +56,7 @@ def cursorToColumns(cur):
 class PgTablesSheet(Sheet):
     nKeys = 1
     commands = [
-        Command(ENTER, 'vd.push(PgTable(name+"."+cursorRow[0], cursorRow[0], sql=sql))', 'open this table'),
+        Command(ENTER, 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))', 'open this table'),
     ]
 
     def reload(self):

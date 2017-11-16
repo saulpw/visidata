@@ -10,7 +10,7 @@ option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
 csv.field_size_limit(sys.maxsize)
 
 def open_csv(p):
-    vs = Sheet(p.name, p)
+    vs = Sheet(p.name, source=p)
     vs.loader = lambda vs=vs: load_csv(vs)
     return vs
 

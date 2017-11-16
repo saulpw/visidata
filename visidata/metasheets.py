@@ -11,9 +11,9 @@ def combineColumns(cols):
 
 def createJoinedSheet(sheets, jointype=''):
     if jointype == 'append':
-        return SheetConcat('&'.join(vs.name for vs in sheets), *sheets)
+        return SheetConcat('&'.join(vs.name for vs in sheets), sources=sheets)
     else:
-        return SheetJoin('+'.join(vs.name for vs in sheets), *sheets, jointype=jointype)
+        return SheetJoin('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
 
 jointypes = ["inner", "outer", "full", "diff", "append"]
 

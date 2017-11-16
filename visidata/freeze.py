@@ -20,7 +20,7 @@ def StaticColumn(rows, col):
 class StaticSheet(Sheet):
     'A copy of the source sheet with all cells frozen.'
     def __init__(self, source):
-        super().__init__(source.name + "'", source)
+        super().__init__(source.name + "'", source=source)
 
         self.columns = [ColumnItem(col.name, i, width=col.width, type=col.type) for i,col in enumerate(self.source.columns)]
         self.nKeys = source.nKeys

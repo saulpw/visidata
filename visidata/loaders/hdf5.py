@@ -3,7 +3,7 @@ from visidata import *
 class SheetH5Obj(Sheet):
     'Support sheets in HDF5 format.'
     commands = [
-        Command(ENTER, 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), cursorRow))', 'open this group or dataset'),
+        Command(ENTER, 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), source=cursorRow))', 'open this group or dataset'),
         Command('A', 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))', 'open metadata sheet for this object')
     ]
 

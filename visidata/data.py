@@ -82,8 +82,9 @@ def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
 def getDefaultSaveName(sheet):
-    if isinstance(sheet.source, Path):
-        return str(sheet.source)
+    src = getattr(sheet, 'source', None)
+    if isinstance(src, Path):
+        return str(src)
     else:
         return sheet.name+'.'+getattr(sheet, 'filetype', 'tsv')
 
@@ -132,7 +133,7 @@ def openSource(p, filetype=None):
             filetype = options.filetype or p.suffix
 
         if os.path.isdir(p.resolve()):
-            vs = DirSheet(p.name, p)
+            vs = DirSheet(p.name, source=p)
             filetype = 'dir'
         else:
             openfunc = 'open_' + filetype.lower()
@@ -186,7 +187,7 @@ def open_tsv(p, vs=None):
     'Parse contents of Path `p` and populate columns.'
 
     if vs is None:
-        vs = Sheet(p.name, p)
+        vs = Sheet(p.name, source=p)
         vs.loader = lambda vs=vs: reload_tsv(vs)
 
     header_lines = int(options.header)

@@ -281,9 +281,9 @@ globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, curso
 
 globalCommand('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'open source of current sheet')
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet')
-globalCommand('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", sheet))', 'open Columns Sheet')
+globalCommand('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options')
-globalCommand('help-commands', 'vd.push(HelpSheet(name + "_commands", sheet))', 'view VisiData man page')
+globalCommand('help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view VisiData man page')
 globalCommand(['KEY_F(1)', 'z?'], 'help-commands')
 globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 
@@ -879,9 +879,8 @@ class Sheet:
     ]
     nKeys = 0  # self.columns[:nKeys] are all pinned to the left and matched on join
 
-    def __init__(self, name, *sources, **kwargs):
+    def __init__(self, name, **kwargs):
         self.name = name
-        self.sources = list(sources)
 
         self.rows = tuple()      # list of opaque row objects (tuple until first reload)
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
@@ -996,7 +995,6 @@ class Sheet:
         cls = self.__class__
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
-        ret.sources = copy(self.sources)  # same sources in a fresh list
         ret.rows = []                     # a fresh list without incurring any overhead
         ret.columns = deepcopy(self.columns) # deepcopy columns even for shallow copy of sheet
         ret.recalc()  # set .sheet on columns
@@ -1093,15 +1091,6 @@ class Sheet:
     def name(self, name):
         'Set name without spaces.'
         self._name = name.strip().replace(' ', '_')
-
-    @property
-    def source(self):
-        'Return first source, if any.'
-        if not self.sources:
-            return None
-        else:
-#            assert len(self.sources) == 1, len(self.sources)
-            return self.sources[0]
 
     @property
     def progressPct(self):
@@ -1900,6 +1889,9 @@ class TextSheet(Sheet):
     ]
     filetype = 'txt'
 
+    def __init__(self, name, source, **kwargs):
+        super().__init__(name, source=source, **kwargs)
+
     @async
     def reload(self):
         self.columns = [Column(self.name, getter=lambda col,row: row[1])]
@@ -1996,7 +1988,7 @@ class OptionsSheet(Sheet):
     def reload(self):
         self.rows = list(self.source._opts.values())
 
-vd().optionsSheet = OptionsSheet('options', options)
+vd().optionsSheet = OptionsSheet('options', source=options)
 
 ### Curses helpers
 

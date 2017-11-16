@@ -24,7 +24,7 @@ class DictSheet(Sheet):
     def reload(self):
         self.rows = list(self.source.keys())
 
-globalCommand('1', 'vd.push(DictSheet("globals", globals()))', 'push globals dict')
+globalCommand('1', 'vd.push(DictSheet("globals", source=globals()))', 'push globals dict')
 ```
 
 If this code is [loaded](/design/addons), pressing `1` will push a fresh instance of `DictSheet`, showing each key in the `globals()` dict with its corresponding value.

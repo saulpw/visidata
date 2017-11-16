@@ -12,7 +12,7 @@ class SheetPivot(Sheet):
                       'push sheet of source rows aggregated in this cell')
                ]
     def __init__(self, srcsheet, variableCols):
-        super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols), srcsheet)
+        super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols), source=srcsheet)
 
         self.nonpivotKeyCols = []
         self.variableCols = variableCols

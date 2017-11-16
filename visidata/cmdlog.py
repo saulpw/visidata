@@ -91,8 +91,8 @@ class CommandLog(Sheet):
     semaphore = threading.Semaphore(0)
     filetype = 'vd'
 
-    def __init__(self, name, *args):
-        super().__init__(name, *args)
+    def __init__(self, name):
+        super().__init__(name)
         self.currentActiveRow = None
 
         self.sheetmap = {}   # sheet.name -> vs

@@ -7,7 +7,7 @@ class open_xlsx(Sheet):
         Command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'load the entire table into memory')
     ]
     def __init__(self, path):
-        super().__init__(path.name, path)
+        super().__init__(path.name, source=path)
         self.workbook = None
 
     @async
@@ -19,7 +19,7 @@ class open_xlsx(Sheet):
 
     def getSheet(self, sheetname):
         worksheet = self.workbook.get_sheet_by_name(sheetname)
-        return xlsxSheet(joinSheetnames(self.name, sheetname), worksheet)
+        return xlsxSheet(joinSheetnames(self.name, sheetname), source=worksheet)
 
 class xlsxSheet(Sheet):
     @async
@@ -38,7 +38,7 @@ class open_xls(Sheet):
         Command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'load the entire table into memory')
     ]
     def __init__(self, path):
-        super().__init__(path.name, path)
+        super().__init__(path.name, source=path)
         self.workbook = None
 
     @async
@@ -50,7 +50,7 @@ class open_xls(Sheet):
 
     def getSheet(self, sheetname):
         worksheet = self.workbook.sheet_by_name(sheetname)
-        return xlsSheet(joinSheetnames(self.name, sheetname), worksheet)
+        return xlsSheet(joinSheetnames(self.name, sheetname), source=worksheet)
 
 
 class xlsSheet(Sheet):

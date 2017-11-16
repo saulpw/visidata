@@ -39,7 +39,7 @@ class SheetFreqTable(Sheet):
 
     def __init__(self, sheet, *columns):
         fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in columns))
-        super().__init__(fqcolname, sheet)
+        super().__init__(fqcolname, source=sheet)
         self.origCols = columns
         self.largest = 100
 

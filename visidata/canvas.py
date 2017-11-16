@@ -29,8 +29,8 @@ class PixelCanvas(Sheet):
         Command('w', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
         Command('KEY_RESIZE', 'refresh()', ''),
     ]
-    def __init__(self, name, *sources, **kwargs):
-        super().__init__(name, *sources, **kwargs)
+    def __init__(self, name, **kwargs):
+        super().__init__(name, **kwargs)
         self.pixels = defaultdict(lambda: defaultdict(lambda: defaultdict(list))) # [y][x] = { attr: list(rows), ... }
         self.labels = []  # (x, y, text, attr)
         self.disabledAttrs = set()
@@ -237,8 +237,8 @@ class GridCanvas(PixelCanvas):
         Command('gu', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'unselect all points visible onscreen'),
     ]
 
-    def __init__(self, name, *sources, **kwargs):
-        super().__init__(name, *sources, **kwargs)
+    def __init__(self, name, sourceSheet, **kwargs):
+        super().__init__(name, source=sourceSheet, **kwargs)
 
         # bounding box of entire grid in grid units, updated when adding point/line/label or recalcBounds
         self.gridMinX, self.gridMinY = None, None  # derive first bounds on first draw
