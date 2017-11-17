@@ -1446,6 +1446,7 @@ class Sheet:
 
         self.rowLayout = {}
         self.calcColLayout()
+        vcolidx = 0
         for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
             x, colwidth = colinfo
             col = self.visibleCols[vcolidx]

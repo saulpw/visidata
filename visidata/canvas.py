@@ -141,9 +141,10 @@ class PixelCanvas(Sheet):
                         yield r
 
     def draw(self, scr):
-        scr.erase()
         if self.needsRefresh:
             self.plotAll()
+
+        scr.erase()
 
         if self.pixels:
             cursorBBox = self.cursorPixelBounds
@@ -177,7 +178,8 @@ class PixelCanvas(Sheet):
                        self.withinBounds(char_x*2+1, char_y*4+3, cursorBBox):
                         attr, _ = colors.update(attr, 0, options.color_current_row, 10)
 
-                    scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)
+                    if attr:
+                        scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)
 
         if options.show_graph_labels:
             for pix_x, pix_y, txt, attr in self.labels:
@@ -544,8 +546,8 @@ class GridCanvas(PixelCanvas):
         self.needsRefresh = False
         self.pixels.clear()
         self.labels.clear()
-        self.resetCanvasDimensions()
         cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
+        self.resetCanvasDimensions()
         self.plotAll_async()
 
     @async
