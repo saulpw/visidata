@@ -14,4 +14,4 @@ unnamed	math.sin(xrad)	0	=	math.cos(xrad)	create new column from Python expressi
 unnamed	math.sin(xrad)	0	%		set type of current column to float
 unnamed	math.cos(xrad)	0	%		set type of current column to float
 unnamed	xrad	0	-		hide current column
-unnamed	math.sin(xrad)	0	gm		graph all numeric columns vs the first key column (or row number)
+unnamed	math.sin(xrad)	0	g.		graph all numeric columns vs the first key column (or row number)
