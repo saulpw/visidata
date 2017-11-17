@@ -478,13 +478,13 @@ class GridCanvas(PixelCanvas):
                 self.gridHeight = 1.0
 
         if not self.visibleGridWidth or not self.visibleGridHeight:
-            self.visibleGridWidth = self.gridWidth*self.zoomlevel
-            self.visibleGridHeight = self.gridHeight*self.zoomlevel
+            self.visibleGridWidth = self.gridCanvasWidth/self.xScaler
+            self.visibleGridHeight = self.gridCanvasHeight/self.yScaler
             self.visibleGridMinX = self.gridMinX + self.gridWidth/2 - self.visibleGridWidth/2
             self.visibleGridMinY = self.gridMinY + self.gridHeight/2 - self.visibleGridHeight/2
         else:
-            self.visibleGridWidth = self.gridWidth*self.zoomlevel
-            self.visibleGridHeight = self.gridHeight*self.zoomlevel
+            self.visibleGridWidth = self.gridCanvasWidth/self.xScaler
+            self.visibleGridHeight = self.gridCanvasHeight/self.yScaler
 
         if not self.cursorGridWidth or not self.cursorGridHeight:
             self.cursorGridMinX = self.visibleGridMinX
@@ -505,18 +505,18 @@ class GridCanvas(PixelCanvas):
 
     @property
     def xScaler(self):
-        xratio = self.gridCanvasWidth/self.visibleGridWidth
+        xratio = self.gridCanvasWidth/(self.gridWidth*self.zoomlevel)
         if self.aspectRatio:
-            yratio = self.gridCanvasHeight/self.visibleGridHeight
+            yratio = self.gridCanvasHeight/(self.gridHeight*self.zoomlevel)
             return self.aspectRatio*min(xratio, yratio)
         else:
             return xratio
 
     @property
     def yScaler(self):
-        yratio = self.gridCanvasHeight/self.visibleGridHeight
+        yratio = self.gridCanvasHeight/(self.gridHeight*self.zoomlevel)
         if self.aspectRatio:
-            xratio = self.gridCanvasWidth/self.visibleGridWidth
+            xratio = self.gridCanvasWidth/(self.gridWidth*self.zoomlevel)
             return self.aspectRatio*min(xratio, yratio)
         else:
             return yratio
