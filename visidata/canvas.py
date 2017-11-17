@@ -21,7 +21,7 @@ option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of
 #  - width/height are exactly equal to the number of pixels displayable, and can change at any time.
 #  - needs to refresh from source on resize
 #  - all x/y/w/h in PixelCanvas are pixel coordinates
-#  - override cursorPixelBounds to specify a cursor (none by default)
+#  - override cursorPixelBounds to specify a cursor
 class PixelCanvas(Sheet):
     columns=[Column('')]  # to eliminate errors outside of draw()
     commands=[
@@ -31,7 +31,6 @@ class PixelCanvas(Sheet):
     ]
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
-        self.pixels = defaultdict(lambda: defaultdict(lambda: defaultdict(list))) # [y][x] = { attr: list(rows), ... }
         self.labels = []  # (x, y, text, attr)
         self.disabledAttrs = set()
         self.resetCanvasDimensions()
@@ -42,6 +41,9 @@ class PixelCanvas(Sheet):
         self.canvasMinX = 0
         self.canvasWidth = vd().windowWidth*2
         self.canvasHeight = (vd().windowHeight-1)*4  # exclude status line
+
+        # pixels[y][x] = { attr: list(rows), ... }
+        self.pixels = [[defaultdict(list) for x in range(self.canvasWidth)] for y in range(self.canvasHeight)]
 
     def plotpixel(self, x, y, attr, row=None):
         self.pixels[round(y)][round(x)][attr].append(row)
@@ -116,15 +118,11 @@ class PixelCanvas(Sheet):
                y < bottom
 
     def getPixelAttr(self, x, y):
-        r = self.pixels[y].get(x, {})
-        if not r:
-            return 0
-        c = Counter({attr: len(rows) for attr, rows in r.items() if attr not in self.disabledAttrs})
-        for attr in self.disabledAttrs:
-            del c[attr]
+        r = self.pixels[y][x]
+        c = sorted((len(rows), attr) for attr, rows in r.items() if attr not in self.disabledAttrs)
         if not c:
             return 0
-        return c.most_common(1)[0][0]
+        return c[-1][1]
 
     def togglePixelAttrs(self, attr):
         if attr in self.disabledAttrs:
@@ -136,7 +134,7 @@ class PixelCanvas(Sheet):
     def getRowsInside(self, x1, y1, x2, y2):
         for y in range(y1, y2):
             for x in range(x1, x2):
-                for attr, rows in self.pixels[y].get(x, {}).items():
+                for attr, rows in self.pixels[y][x].items():
                     for r in rows:
                         yield r
 
