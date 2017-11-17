@@ -85,7 +85,7 @@ class SheetFreqTable(Sheet):
         # separate rows with errors at the column from those without errors
         errorbin = []
         allbin = []
-        for row in self.genProgress(self.source.rows):
+        for row in Progress(self.source.rows):
             v = origCol.getTypedValue(row)
             if not v:
                 errorbin.append(row)
@@ -143,7 +143,7 @@ class SheetFreqTable(Sheet):
 
     def discreteBinning(self):
         rowidx = {}
-        for r in self.genProgress(self.source.rows):
+        for r in Progress(self.source.rows):
             v = tuple(getValueOrError(c, r) for c in self.origCols)
             histrow = rowidx.get(v)
             if histrow is None:

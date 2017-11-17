@@ -18,12 +18,13 @@ class SqliteSheet(Sheet):
             import sqlite3
             self.conn = sqlite3.connect(pathOrSheet.resolve())
 
+    @async
     def reload(self):
         tblname = self.tableName
         self.columns = self.getColumns(tblname)
         r = self.conn.execute('SELECT COUNT(*) FROM %s' % tblname).fetchall()
         self.rows = []
-        for r in self.genProgress(self.conn.execute("SELECT * FROM %s" % tblname), r[0][0]-1):
+        for r in Progress(self.conn.execute("SELECT * FROM %s" % tblname), total=r[0][0]-1):
             self.addRow(r)
 
     def getColumns(self, tableName):

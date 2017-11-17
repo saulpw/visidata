@@ -5,6 +5,7 @@ globalCommand('M', 'vd.push(MeltedSheet(sheet))', 'open melted sheet (unpivot)')
 melt_var_colname = 'Variable' # column name to use for the melted variable name
 melt_value_colname = 'Value'  # column name to use for the melted value
 
+# rowdef: (sourceRow, sourceCol)
 class MeltedSheet(Sheet):
     "Perform 'melt', the reverse of 'pivot', on input sheet."
     def __init__(self, sheet):
@@ -21,7 +22,7 @@ class MeltedSheet(Sheet):
         colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]
 
         self.rows = []
-        for r in self.genProgress(self.source.rows):
+        for r in Progress(self.source.rows):
             for c in colsToMelt:
                 if c.getValue(r) is not None:
                     self.addRow((r, c))

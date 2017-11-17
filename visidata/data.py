@@ -244,7 +244,7 @@ def save_tsv(vs, fn):
         colhdr = '\t'.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
-        for r in vs.genProgress(vs.rows):
+        for r in Progress(vs.rows):
             fp.write('\t'.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
     status('%s save finished' % fn)
 

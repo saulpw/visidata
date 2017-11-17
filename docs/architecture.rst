@@ -243,7 +243,7 @@ The skeleton of an add-on, apart from its actual functionality, is as follows:
   sheets, such as the help sheet, cannot become that large and so there is
   no need for asynchronous handling. But if it may become large, then:
    
-  * Use ``genProgress`` to display a progress bar showing the percentage of
+  * Use ``Progress`` to display a progress bar showing the percentage of
     rows recomputed.
    
   * Decorate ``reload`` with `@async`_.

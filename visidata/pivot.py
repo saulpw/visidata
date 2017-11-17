@@ -47,7 +47,7 @@ class SheetPivot(Sheet):
                     self.addColumn(c)
 
                 allValues = set()
-                for value in self.genProgress(col.getValues(self.source.rows), total=len(self.source.rows)):
+                for value in Progress(col.getValues(self.source.rows), total=len(self.source.rows)):
                     if value not in allValues:
                         allValues.add(value)
                         c = Column(value+'_'+aggname,
@@ -66,7 +66,7 @@ class SheetPivot(Sheet):
     def reloadRows(self):
         rowidx = {}
         self.rows = []
-        for r in self.genProgress(self.source.rows):
+        for r in Progress(self.source.rows):
             keys = tuple(keycol.srccol.getTypedValue(r) for keycol in self.nonpivotKeyCols)
 
             pivotrow = rowidx.get(keys)

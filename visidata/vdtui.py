@@ -437,21 +437,23 @@ def async(func):
     return _execAsync
 
 class Progress:
-    def __init__(self, iterable=None, total=None):
-        self.sheet = threading.current_thread().sheet if threading.current_thread().daemon else Sheet('dummy')
+    def __init__(self, iterable=None, total=None, sheet=None):
         self.iterable = iterable
-        self.total = len(iterable) if total is None else total
+        self.total = total if total else len(iterable)
+        self.sheet = sheet if sheet else threading.current_thread().sheet
         self.made = 0
 
     def __enter__(self):
-        self.sheet.progresses.append(self)
+        if self.sheet:
+            self.sheet.progresses.append(self)
         return self
 
     def addProgress(self, n):
         self.made += n
 
     def __exit__(self, exc_type, exc_val, tb):
-        self.sheet.progresses.remove(self)
+        if self.sheet:
+            self.sheet.progresses.remove(self)
 
     def __iter__(self):
         with self as prog:
@@ -461,7 +463,7 @@ class Progress:
 
 @async
 def _async_deepcopy(vs, newlist, oldlist):
-    for r in vs.genProgress(oldlist):
+    for r in Progress(oldlist):
         newlist.append(deepcopy(r))
 
 def async_deepcopy(vs, rowlist):
@@ -945,10 +947,6 @@ class Sheet:
         'Compose left side of status bar for this sheet (overridable).'
         return options.disp_status_fmt.format(sheet=self)
 
-    def genProgress(self, L, total=None):
-        for i in Progress(L, total):
-            yield i
-
     def newRow(self):
         return list((None for c in self.columns))
 
@@ -1015,7 +1013,7 @@ class Sheet:
             oldidx += 1
 
         self.rows.clear()
-        for r in self.genProgress(oldrows):
+        for r in Progress(oldrows):
             if not self.isSelected(r):
                 self.rows.append(r)
                 if r is row:
@@ -1193,7 +1191,7 @@ class Sheet:
     @async
     def toggle(self, rows):
         'Toggle selection of given `rows`.'
-        for r in self.genProgress(rows, len(self.rows)):
+        for r in Progress(rows, len(self.rows)):
             if not self.unselectRow(r):
                 self.selectRow(r)
 
@@ -1213,7 +1211,7 @@ class Sheet:
     def select(self, rows, status=True, progress=True):
         "Select given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
-        for r in (self.genProgress(rows) if progress else rows):
+        for r in (Progress(rows) if progress else rows):
             self.selectRow(r)
         if status:
             self.vd.status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
@@ -1222,7 +1220,7 @@ class Sheet:
     def unselect(self, rows, status=True, progress=True):
         "Unselect given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
-        for r in (self.genProgress(rows) if progress else rows):
+        for r in (Progress(rows) if progress else rows):
             self.unselectRow(r)
         if status:
             self.vd.status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
@@ -1237,7 +1235,7 @@ class Sheet:
 
     def gatherBy(self, func):
         'Generate only rows for which the given func returns True.'
-        for r in self.genProgress(self.rows):
+        for r in Progress(self.rows):
             if func(r):
                 yield r
 
@@ -1711,7 +1709,7 @@ class Column:
     @async
     def setValuesFromExpr(self, rows, expr):
         compiledExpr = compile(expr, '<expr>', 'eval')
-        for row in self.sheet.genProgress(rows):
+        for row in Progress(rows):
             self.setValue(row, self.sheet.evalexpr(compiledExpr, row))
         status('set %d values = %s' % (len(rows), expr))
 
