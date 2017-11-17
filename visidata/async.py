@@ -13,7 +13,7 @@ option('min_memory_mb', 0, 'minimum memory to continue loading and async process
 globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all tasks on current sheet')
 globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary tasks')
 globalCommand('^T', 'vd.push(vd.tasksSheet)', 'open Tasks Sheet')
-globalCommand('^_', 'toggleProfiling(vd)', 'turn profiling on for main process')
+globalCommand('^_', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
 
 class ProfileSheet(TextSheet):
     commands = TextSheet.commands + [
@@ -23,42 +23,50 @@ class ProfileSheet(TextSheet):
         super().__init__(name, getProfileResults(pr).splitlines())
         self.profile = pr
 
-vd().profile = None
-def toggleProfiling(vd):
-    if not vd.profile:
-        vd.profile = cProfile.Profile()
-        vd.profile.enable()
-        vd.status('profiling of main task enabled')
+def toggleProfiling(t):
+    if not t.profile:
+        t.profile = cProfile.Profile()
+        t.profile.enable()
+        status('profiling of main task enabled')
     else:
-        vd.profile.disable()
-        vs = ProfileSheet("main_profile", vd.profile)
-        vd.push(vs)
-        vd.profile = None
-        vd.status('profiling of main task disabled')
+        t.profile.disable()
+        status('profiling of main task disabled')
 
 
 # define @async for potentially long-running functions
 #   when function is called, instead launches a thread
 #   ENTER on that row pushes a profile of the thread
 
+class ThreadProfiler:
+    def __init__(self, thread):
+        self.thread = thread
+        if options.profile_tasks:
+            self.thread.profile = cProfile.Profile()
+        else:
+            self.thread.profile = None
+
+    def __enter__(self):
+        if self.thread.profile:
+            self.thread.profile.enable()
+        return self
+
+    def __exit__(self, exc_type, exc_val, tb):
+        if self.thread.profile:
+            self.thread.profile.disable()
+
+        # remove very-short-lived async actions
+        if elapsed_s(self.thread) < min_task_time_s:
+            vd().threads.remove(self.thread)
+
+
 @functools.wraps(vd().toplevelTryFunc)
 def threadProfileCode(vdself, func, *args, **kwargs):
     'Profile @async tasks if `options.profile_tasks` is set.'
-    thread = threading.current_thread()
-    if options.profile_tasks:
-        pr = cProfile.Profile()
-        pr.enable()
-        ret = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
-        thread.profile = pr
-        pr.disable()
-    else:
-        ret = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
-
-    # remove very-short-lived async actions
-    if elapsed_s(thread) < min_task_time_s:
-        vd().threads.remove(thread)
-
-    return ret
+    with ThreadProfiler(threading.current_thread()) as prof:
+        try:
+            prof.thread.status = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
+        except EscapeException as e:
+            prof.thread.status = e
 
 def getProfileResults(pr):
     s = io.StringIO()
@@ -92,7 +100,8 @@ class TasksSheet(Sheet):
     columns = [
         ColumnAttr('name'),
         Column('elapsed_s', type=float, getter=lambda col,row: elapsed_s(row)),
-        Column('status', getter=lambda col,row: row.status),
+        ColumnAttr('profile'),
+        ColumnAttr('status'),
     ]
     def reload(self):
         self.rows = vd().threads

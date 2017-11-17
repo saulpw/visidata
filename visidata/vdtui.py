@@ -485,7 +485,8 @@ class VisiData:
         self.prefixWaiting = False
         self.scr = None  # curses scr
         self.hooks = collections.defaultdict(list)  # [hookname] -> list(hooks)
-        self.threads = []  # all threads, including finished
+        self.threads = [] # all long-running threads, including main and finished
+        self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
         self.addHook('rstatus', self.rightStatus)
 
@@ -510,12 +511,19 @@ class VisiData:
                 exceptionCaught()
         return r
 
+    def addThread(self, t, endTime=None):
+        t.startTime = time.process_time()
+        t.endTime = endTime
+        t.status = ''
+        t.profile = None
+        self.threads.append(t)
+
     def execAsync(self, func, *args, **kwargs):
         'Execute `func(*args, **kwargs)` in a separate thread.'
 
         currentSheet = self.sheets[0]
         thread = threading.Thread(target=self.toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
-        self.threads.append(thread)
+        self.addThread(thread)
         currentSheet.currentThreads.append(thread)
         thread.sheet = currentSheet
         thread.start()
@@ -525,9 +533,6 @@ class VisiData:
         'Thread entry-point for `func(*args, **kwargs)` with try/except wrapper'
         t = threading.current_thread()
         t.name = func.__name__
-        t.startTime = time.process_time()
-        t.endTime = None
-        t.status = ''
         ret = None
         try:
             ret = func(*args, **kwargs)
@@ -740,6 +745,7 @@ class VisiData:
                 return
 
             sheet = self.sheets[0]
+            threading.current_thread().sheet = sheet
 
             try:
                 sheet.draw(scr)
