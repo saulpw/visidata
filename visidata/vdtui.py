@@ -440,7 +440,7 @@ class Progress:
     def __init__(self, iterable=None, total=None, sheet=None):
         self.iterable = iterable
         self.total = total if total else len(iterable)
-        self.sheet = sheet if sheet else threading.current_thread().sheet
+        self.sheet = sheet if sheet else getattr(threading.current_thread(), 'sheet', None)
         self.made = 0
 
     def __enter__(self):
