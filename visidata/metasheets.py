@@ -23,10 +23,18 @@ SheetsSheet.commands += [
 
 SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
 
-
-ColumnsSheet.commands += [
+# used on both ColumnsSheet and DescribeSheet
+columnCommands = [
         # on the Columns sheet, these affect the 'row' (column in the source sheet)
-        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'add column from concatenating selected source columns'),
+
+        Command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'set type of source column to str'),
+        Command('-', 'cursorRow.width = 0', 'set type of source column to str'),
+        Command('%', 'cursorRow.type = float', 'set type of source column to float'),
+        Command('#', 'cursorRow.type = int', 'set type of source column to int'),
+        Command('@', 'cursorRow.type = date', 'set type of source column to date'),
+        Command('$', 'cursorRow.type = currency', 'set type of source column to currency'),
+        Command('~', 'cursorRow.type = str', 'set type of source column to str'),
+
         Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'toggle selected columns as keys on source sheet'),
         Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected columns on source sheet'),
         Command('g_', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected columns on source sheet'),
@@ -36,6 +44,13 @@ ColumnsSheet.commands += [
         Command('g$', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = currency', 'set type of selected columns to currency'),
         Command('g~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = str', 'set type of selected columns to str'),
     ]
+
+ColumnsSheet.commands += columnCommands + [
+        Command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'toggle key column on source sheet'),
+        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'add column from concatenating selected source columns'),
+]
+DescribeSheet.commands += columnCommands
+
 
 ColumnsSheet.columns += [
         ColumnAttr('expr'),
