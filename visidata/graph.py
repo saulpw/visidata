@@ -51,7 +51,7 @@ class GraphSheet(GridCanvas):
 
     @property
     def gridMouseY(self):
-        return self.visibleGridMinY + (self.gridCanvasMaxY-self.canvasMouseY)/self.yScaler
+        return self.visibleGridMinY + (self.gridCanvasMaxY-self.canvasMouseY+4)/self.yScaler
 
     @property
     def cursorPixelBounds(self):
