@@ -279,7 +279,6 @@ globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, input("se
 
 globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet')
 
-globalCommand('`', 'vd.push(source if isinstance(source, Sheet) else None)', 'open source of current sheet')
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet')
 globalCommand('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options')
