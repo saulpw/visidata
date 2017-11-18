@@ -28,21 +28,6 @@ The process of designing a sheet is:
 4. Create commands to interact with the rows, columns, and cells.
 5. Try the resulting workflow and iterate until it feels like magic.
 
-----
-
-One project, two licenses
-=========================
-
-``vdtui.py`` is a single-file stand-alone library, freely available for use in
-other projects.  It is distributed under the MIT free software license.
-
-The rest of this repository is the VisiData application, runnable as ``vd``
-from the command-line.  Everything but ``vdtui.py``, including the data sources and
-extensions and addons, are distributed under the more restrictive GPLv3 free
-software license.  Additional commercial licenses are negotiable.
-
-----
-
 Columns
 =======
 

@@ -40,11 +40,9 @@ B. [API Reference](/design/api)
 
 ## License
 
-The core module, `vdtui`, is one self-contained file, which implements the design described in part 1.
-`vdtui.py` is available for re-use according to the MIT open-source license.
-This is to encourage a decent TUI for any and every application.
+The core `vdtui` module is a single-file standalone framework, [available for reuse](/design/vdtui) according to the MIT open-source license.
+This is to encourage a profileration of modern terminal user interfaces for any and every application.
 
-The rest of VisiData is licensed under GPL2.
-This is to encourage extensions to remain public.
-VisiData amplifies the power of the Python ecosystem, and everyone benefits for every additional loader that unlocks another portion of it.
-
+The rest of VisiData (anything in the [saulpw/visidata](http://github.com/saulpw/visidata) repository) is licensed under GPL3.
+This is to encourage public extensions.
+Every additional loader and transformation unlocks latent power within the Python ecosystem.

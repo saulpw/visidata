@@ -15,14 +15,14 @@ def numericCols(cols):
 class GraphSheet(GridCanvas):
     commands = GridCanvas.commands + [
         # swap directions of up/down
-        Command('move-up', 'sheet.cursorGridMinY += cursorGridHeight', ''),
-        Command('move-down', 'sheet.cursorGridMinY -= cursorGridHeight', ''),
+        Command('move-up', 'sheet.cursorGridMinY += cursorGridHeight', 'move cursor up'),
+        Command('move-down', 'sheet.cursorGridMinY -= cursorGridHeight', 'move cursor down'),
 
-        Command('zj', 'sheet.cursorGridMinY -= charGridHeight', ''),
-        Command('zk', 'sheet.cursorGridMinY += charGridHeight', ''),
+        Command('zj', 'sheet.cursorGridMinY -= charGridHeight', 'move cursor down one line'),
+        Command('zk', 'sheet.cursorGridMinY += charGridHeight', 'move cursor up one line'),
 
-        Command('J', 'sheet.cursorGridHeight -= charGridHeight', ''),
-        Command('K', 'sheet.cursorGridHeight += charGridHeight', ''),
+        Command('J', 'sheet.cursorGridHeight -= charGridHeight', 'decrease cursor height'),
+        Command('K', 'sheet.cursorGridHeight += charGridHeight', 'increase cursor height'),
 
         Command('zz', 'zoomTo(cursorGridMinX, cursorGridMinY, cursorGridMaxX, cursorGridMaxY)', 'set visible bounds to cursor'),
     ]

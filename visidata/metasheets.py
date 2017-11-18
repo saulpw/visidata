@@ -23,12 +23,10 @@ SheetsSheet.commands += [
 
 SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
 
-# used on both ColumnsSheet and DescribeSheet
+# used on both ColumnsSheet and DescribeSheet, affecting the 'row' (source column)
 columnCommands = [
-        # on the Columns sheet, these affect the 'row' (column in the source sheet)
-
-        Command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'set type of source column to str'),
-        Command('-', 'cursorRow.width = 0', 'set type of source column to str'),
+        Command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'adjust width of source column'),
+        Command('-', 'cursorRow.width = 0', 'hide source column on source sheet'),
         Command('%', 'cursorRow.type = float', 'set type of source column to float'),
         Command('#', 'cursorRow.type = int', 'set type of source column to int'),
         Command('@', 'cursorRow.type = date', 'set type of source column to date'),
@@ -36,17 +34,17 @@ columnCommands = [
         Command('~', 'cursorRow.type = str', 'set type of source column to str'),
 
         Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'toggle selected columns as keys on source sheet'),
-        Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected columns on source sheet'),
-        Command('g_', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected columns on source sheet'),
-        Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'set type of selected columns to float'),
-        Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'set type of selected columns to int'),
-        Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'set type of selected columns to date'),
+        Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected source columns on source sheet'),
+        Command('g_', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
+        Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'set type of selected source columns to float'),
+        Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'set type of selected source columns to int'),
+        Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'set type of selected source columns to date'),
         Command('g$', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = currency', 'set type of selected columns to currency'),
         Command('g~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = str', 'set type of selected columns to str'),
     ]
 
 ColumnsSheet.commands += columnCommands + [
-        Command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'toggle key column on source sheet'),
+        Command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'toggle column as key on source sheet'),
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'add column from concatenating selected source columns'),
 ]
 DescribeSheet.commands += columnCommands
