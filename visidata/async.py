@@ -100,7 +100,7 @@ class TasksSheet(Sheet):
     ]
     columns = [
         ColumnAttr('name'),
-        Column('elapsed_s', type=float, getter=lambda col,row: elapsed_s(row)),
+        Column('process_time', type=float, getter=lambda col,row: elapsed_s(row)),
         ColumnAttr('profile'),
         ColumnAttr('status'),
     ]
@@ -118,9 +118,8 @@ def checkMemoryUsage(vs):
         if free_m < min_mem:
             attr = 'red'
             status('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
-            for t in vd().threads:
-                if t.is_alive():
-                    cancelThread(t)
+            cancelThread(*vd().unfinishedThreads)
+            curses.flash()
         else:
             attr = 'green'
         return ret, attr
