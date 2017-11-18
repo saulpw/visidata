@@ -49,9 +49,15 @@ class GraphSheet(GridCanvas):
     def gridY(self, canvas_y):
         return (self.gridCanvasMaxY-canvas_y)/self.yScaler
 
+    def fixPoint(self, canvas_x, canvas_y, grid_x, grid_y):
+        'adjust visibleGrid so that (grid_x, grid_y) is plotted at (canvas_x, canvas_y)'
+        self.visibleGridMinX = grid_x - self.gridW(canvas_x-self.gridCanvasMinX)
+        self.visibleGridMinY = grid_y - self.gridH(self.gridCanvasMaxY-canvas_y)
+        self.refresh()
+
     @property
     def gridMouseY(self):
-        return self.visibleGridMinY + (self.gridCanvasMaxY-self.canvasMouseY+4)/self.yScaler
+        return self.visibleGridMinY + (self.gridCanvasMaxY-self.canvasMouseY)/self.yScaler
 
     @property
     def cursorPixelBounds(self):
