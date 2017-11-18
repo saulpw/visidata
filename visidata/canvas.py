@@ -16,6 +16,7 @@ from visidata import *
 
 option('show_graph_labels', True, 'show axes and legend on graph')
 option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
+option('zoom_incr', 2.0, 'amount to multiply current zoomlevel by when zooming')
 
 # pixels covering whole actual terminal
 #  - width/height are exactly equal to the number of pixels displayable, and can change at any time.
@@ -222,8 +223,8 @@ class GridCanvas(PixelCanvas):
 
         Command('zz', 'zoomTo(cursorGridMinX, cursorGridMinY, cursorGridMaxX, cursorGridMaxY)', 'set visible bounds to cursor'),
 
-        Command('+', 'setZoom(zoomlevel / 1.2); refresh()', 'zoom in 20%'),
-        Command('-', 'setZoom(zoomlevel * 1.2); refresh()', 'zoom out 20%'),
+        Command('+', 'setZoom(zoomlevel / options.zoom_incr); refresh()', 'zoom in 20%'),
+        Command('-', 'setZoom(zoomlevel * options.zoom_incr); refresh()', 'zoom out 20%'),
         Command('_', 'sheet.gridWidth = 0; sheet.visibleGridWidth = 0; setZoom(1.0); refresh()', 'zoom to fit full extent'),
 
         # set cursor box with left click
@@ -233,8 +234,8 @@ class GridCanvas(PixelCanvas):
         Command('BUTTON3_PRESSED', 'sheet.gridAnchorXY = (gridMouseX, gridMouseY)', 'mark grid point to move'),
         Command('BUTTON3_RELEASED', 'fixPoint(canvasMouseX, canvasMouseY, *gridAnchorXY)', 'mark canvas anchor point'),
 
-        Command('BUTTON4_PRESSED', 'tmp=(gridMouseX,gridMouseY); setZoom(zoomlevel/1.2); fixPoint(canvasMouseX, canvasMouseY, *tmp)', 'zoom in with scroll wheel'),
-        Command('REPORT_MOUSE_POSITION', 'tmp=(gridMouseX,gridMouseY); setZoom(zoomlevel*1.2); fixPoint(canvasMouseX, canvasMouseY, *tmp)', 'zoom out with scroll wheel'),
+        Command('BUTTON4_PRESSED', 'tmp=(gridMouseX,gridMouseY); setZoom(zoomlevel/options.zoom_incr); fixPoint(canvasMouseX, canvasMouseY, *tmp)', 'zoom in with scroll wheel'),
+        Command('REPORT_MOUSE_POSITION', 'tmp=(gridMouseX,gridMouseY); setZoom(zoomlevel*options.zoom_incr); fixPoint(canvasMouseX, canvasMouseY, *tmp)', 'zoom out with scroll wheel'),
 
         Command('s', 'source.select(list(getRowsInside(*cursorPixelBounds)))', 'select all points within cursor box'),
         Command('t', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'toggle selection of all points within cursor box'),
