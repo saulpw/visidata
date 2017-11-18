@@ -718,9 +718,9 @@ class VisiData:
     def rightStatus(self, sheet):
         'Compose right side of status bar.'
         if sheet.currentThreads:
-            status = '%9d  %2d%%' % (sheet.nRows, sheet.progressPct)
+            status = '%9d  %2d%%' % (len(sheet), sheet.progressPct)
         else:
-            status = '%9d rows' % sheet.nRows
+            status = '%9d %s' % (len(sheet), sheet.contentType)
         return status, options.color_status
 
     @property
@@ -871,6 +871,7 @@ class Sheet:
         Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
     ]
     nKeys = 0  # self.columns[:nKeys] are all pinned to the left and matched on join
+    contentType = 'rows'
 
     def __init__(self, name, **kwargs):
         self.name = name
@@ -914,6 +915,13 @@ class Sheet:
                 self.addColorizer(c)
 
         self.__dict__.update(kwargs)
+
+    def __bool__(self):
+        'an instantiated Sheet always tests true'
+        return True
+
+    def __len__(self):
+        return self.nRows
 
     def addColorizer(self, c):
         self._colorizers[c.type].append(c)

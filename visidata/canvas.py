@@ -29,11 +29,15 @@ class PixelCanvas(Sheet):
         Command('w', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
         Command('KEY_RESIZE', 'refresh()', ''),
     ]
+    contentType = 'objects'
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self.labels = []  # (x, y, text, attr)
         self.disabledAttrs = set()
         self.resetCanvasDimensions()
+
+    def __len__(self):
+        return 0
 
     def resetCanvasDimensions(self):
         'sets total available canvas dimensions'
