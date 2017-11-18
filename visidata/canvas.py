@@ -147,7 +147,7 @@ class PixelCanvas(Sheet):
         if self.pixels:
             cursorBBox = self.cursorPixelBounds
 
-            for char_y in range(0, self.nVisibleRows+1):
+            for char_y in range(0, vd().windowHeight-1):  # save one line for status
                 for char_x in range(0, vd().windowWidth):
                     block_attrs = [
                         self.getPixelAttr(char_x*2  , char_y*4  ),
