@@ -92,6 +92,7 @@ SheetsSheet.columns += [
 
 # each row is an augmented threading.Thread object
 class TasksSheet(Sheet):
+    rowtype = 'threads'
     commands = [
         Command('d', 'cancelThread(cursorRow)', 'abort task at current row'),
         Command('^C', 'd'),

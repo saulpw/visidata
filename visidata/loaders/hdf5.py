@@ -10,6 +10,7 @@ class SheetH5Obj(Sheet):
     def reload(self):
         import h5py
         if isinstance(self.source, h5py.Group):
+            self.rowtype = 'objects'
             self.columns = [
                 Column(self.source.name, str, lambda r: r.name.split('/')[-1]),
                 Column('type', str, lambda r: type(r).__name__),

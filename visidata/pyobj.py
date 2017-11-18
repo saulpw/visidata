@@ -70,6 +70,7 @@ def SheetList(name, src, **kwargs):
     return ListOfPyobjSheet(name, source=src, **kwargs)
 
 class ListOfPyobjSheet(Sheet):
+    rowtype = 'python objects'
     commands = [Command(ENTER, 'pyobj-dive')]
     def reload(self):
         self.rows = range(len(self.source))
@@ -79,6 +80,7 @@ class ListOfPyobjSheet(Sheet):
 
 # rowdef: dict
 class ListOfDictSheet(Sheet):
+    rowtype = 'dicts'
     commands = [Command(ENTER, 'pyobj-dive')]
     def reload(self):
         self.columns = DictKeyColumns(self.source[0])
@@ -86,6 +88,7 @@ class ListOfDictSheet(Sheet):
 
 # rowdef: namedtuple
 class ListOfNamedTupleSheet(Sheet):
+    rowtype = 'namedtuples'
     commands = [Command(ENTER, 'pyobj-dive')]
     def reload(self):
         self.columns = [ColumnItem(k, i) for i, k in enumerate(self.source[0]._fields)]
@@ -94,6 +97,7 @@ class ListOfNamedTupleSheet(Sheet):
 
 # rowdef: PyObj
 class SheetNamedTuple(Sheet):
+    rowtype = 'values'
     'a single namedtuple, with key and value columns'
     commands = [Command(ENTER, 'dive()', 'dive further into Python object')]
     columns = [ColumnItem('name', 0), ColumnItem('value', 1)]
@@ -109,6 +113,7 @@ class SheetNamedTuple(Sheet):
 
 
 class SheetDict(Sheet):
+    rowtype = 'items'
     commands = [
         Command('e', 'edit()', 'edit contents of current cell'),
         Command(ENTER, 'dive()', 'dive further into Python object')
@@ -138,6 +143,7 @@ class ColumnSourceAttr(Column):
 
 # rowdef: attrname
 class SheetObject(Sheet):
+    rowtype = 'attributes'
     commands = [
         Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive further into Python object'),
         Command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edit contents of current cell'),

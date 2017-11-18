@@ -3,6 +3,7 @@ from visidata import *
 
 class open_zip(Sheet):
     'Provide wrapper around `zipfile` library for opening ZIP files.'
+    rowtype = 'files'
     commands = [
         Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'open this file'),
         Command('g'+ENTER, 'for r in selectedRows or rows: vd.push(openZipFileEntry(r))', 'open all selected files')

@@ -27,6 +27,7 @@ def valueNames(vals):
 # rowdef: ([bin_values], source_rows)
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
+    rowtype = 'bins'
     commands = [
         # redefine these commands only to change the helpstr
         Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet'),

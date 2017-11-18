@@ -29,6 +29,7 @@ class DescribeColumn(Column):
 
 # rowdef: Column from source sheet
 class DescribeSheet(Sheet):
+    rowtype = 'columns'
     columns = [
             Column('column', type=str, getter=lambda col,row: row.name),
             DescribeColumn('errors', type=len),

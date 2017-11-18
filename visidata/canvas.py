@@ -29,7 +29,6 @@ class PixelCanvas(Sheet):
         Command('w', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
         Command('KEY_RESIZE', 'refresh()', ''),
     ]
-    contentType = 'objects'
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self.labels = []  # (x, y, text, attr)
@@ -193,6 +192,7 @@ class PixelCanvas(Sheet):
 # - allows zooming in/out
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
 class GridCanvas(PixelCanvas):
+    rowtype = 'plots'
     aspectRatio = None
     leftMarginPixels = 10*2
     rightMarginPixels = 6*2

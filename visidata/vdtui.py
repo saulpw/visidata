@@ -720,7 +720,7 @@ class VisiData:
         if sheet.currentThreads:
             status = '%9d  %2d%%' % (len(sheet), sheet.progressPct)
         else:
-            status = '%9d %s' % (len(sheet), sheet.contentType)
+            status = '%9d %s' % (len(sheet), sheet.rowtype)
         return status, options.color_status
 
     @property
@@ -871,7 +871,7 @@ class Sheet:
         Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
     ]
     nKeys = 0  # self.columns[:nKeys] are all pinned to the left and matched on join
-    contentType = 'rows'
+    rowtype = 'rows'
 
     def __init__(self, name, **kwargs):
         self.name = name
@@ -1889,6 +1889,7 @@ def clipstr(s, dispw):
 # rowdef: (linenum, str)
 class TextSheet(Sheet):
     'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
+    rowtype = 'lines'
     commands = [
         Command('w', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % (" NOT" if wrap else "")); reload()', 'toggle text wrap for this sheet')
     ]
@@ -1910,6 +1911,7 @@ class TextSheet(Sheet):
                 self.addRow((len(self.rows), text))
 
 class ColumnsSheet(Sheet):
+    rowtype = 'columns'
     class ValueColumn(Column):
         def calcValue(self, srcCol):
             return srcCol.getDisplayValue(self.sheet.source.cursorRow)
@@ -1936,6 +1938,7 @@ class ColumnsSheet(Sheet):
 
 
 class SheetsSheet(Sheet):
+    rowtype = 'sheets'
     commands = [Command(ENTER, 'jumpTo(cursorRowIndex)', 'jump to sheet referenced in current row')]
     columns = [
         ColumnAttr('name'),
@@ -1958,6 +1961,7 @@ class SheetsSheet(Sheet):
 
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
+    rowtype = 'commands'
 
     class HelpColumn(Column):
         def calcValue(self, r):
@@ -1979,6 +1983,7 @@ class HelpSheet(Sheet):
 
 
 class OptionsSheet(Sheet):
+    rowtype = 'options'
     commands = [
         Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edit option'),
         Command('e', ENTER)

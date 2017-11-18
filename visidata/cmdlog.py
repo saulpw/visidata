@@ -78,6 +78,7 @@ def open_vd(p):
 # rowdef: CommandLog
 class CommandLog(Sheet):
     'Log of commands for current session.'
+    rowtype = 'commands'
     commands = [
         Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row'),
         Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog'),

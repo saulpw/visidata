@@ -25,6 +25,7 @@ def shptype(ftype, declen):
 
 # rowdef: shaperec
 class ShapeSheet(Sheet):
+    rowtype = 'shapes'
     columns = [
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]

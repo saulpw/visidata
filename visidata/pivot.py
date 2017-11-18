@@ -5,6 +5,7 @@ globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'Pivot the current
 # rowdef: (tuple(keyvalues), dict(variable_value -> list(rows)))
 class SheetPivot(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
+    rowtype = 'aggregated rows'
     commands = [
         Command('z'+ENTER, 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, []); vd.push(vs)',
                       'push sheet of source rows aggregated in this cell'),

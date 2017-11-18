@@ -104,6 +104,7 @@ def saveSheet(vs, fn, confirm_overwrite=False):
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.'
+    rowtype = 'files'
     commands = [
         Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
     ]

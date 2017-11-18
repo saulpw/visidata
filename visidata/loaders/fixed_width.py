@@ -39,6 +39,7 @@ def columnize(rows):
         prev = i
 
 class FixedWidthColumnsSheet(Sheet):
+    rowtype = 'lines'
     columns = [ColumnItem('line', 0)]
     @async
     def reload(self):

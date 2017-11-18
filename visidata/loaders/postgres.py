@@ -54,6 +54,7 @@ def cursorToColumns(cur):
 
 # rowdef: (table_name, ncols)
 class PgTablesSheet(Sheet):
+    rowtype = 'tables'
     nKeys = 1
     commands = [
         Command(ENTER, 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))', 'open this table'),

@@ -17,6 +17,7 @@ Here is the complete code for a simple DictSheet.
 ```
 # rowdef: source key
 class DictSheet(Sheet):
+    rowtype = 'items'
     columns = [
         Column('key'),
         Column('value', getter=lambda col,row: col.sheet.source[row])
