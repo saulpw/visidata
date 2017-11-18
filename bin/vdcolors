@@ -16,6 +16,6 @@ class ColorSheet(Sheet):
 
     def reload(self):
         self.rows = colors.keys()
-        self.exec_keystrokes('[')  # sort by the current column
+        self.exec_keystrokes('sort-curcol-asc')  # sort by the color column
 
 run(ColorSheet('vdcolors'))
