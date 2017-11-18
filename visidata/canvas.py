@@ -36,9 +36,6 @@ class PixelCanvas(Sheet):
         self.disabledAttrs = set()
         self.resetCanvasDimensions()
 
-    def __len__(self):
-        return 0
-
     def resetCanvasDimensions(self):
         'sets total available canvas dimensions'
         self.canvasMinY = 0
@@ -277,6 +274,9 @@ class GridCanvas(PixelCanvas):
         self.legends = collections.OrderedDict()   # txt: attr  (visible legends only)
         self.plotAttrs = {}   # key: attr  (all keys, for speed)
         self.reset()
+
+    def __len__(self):
+        return len(self.gridpoints) + len(self.gridlines)
 
     def reset(self):
         self.legends.clear()
