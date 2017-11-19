@@ -4,11 +4,11 @@ VisiData was written for those of us on the edge, with one foot necessarily in t
 
 ### Feature requests or enhancements
 
-If you use VisiData, I would love it if you reached out to me to discuss some of your common workflows and needs. This helps me better prioritize which functionality to add. Send me a [screencast](http://asciinema.org), or some sample data along with your desired output.  There is probably a way to tweak VisiData to get the job done even more to your liking.  Feature requests should be made as posts on [reddit/visidata](http://reddit.com/r/visidata), or by emailing me at [saul@visidata.org](mailto:saul@visidata.org).
+If you use VisiData, I would love it if you reached out to me to discuss some of your common workflows and needs. This helps me better prioritize which functionality to add. Send me a [screencast](http://asciinema.org), or some sample data along with your desired output.  There is probably a way to tweak VisiData to get the job done even more to your liking.  Feature requests should be made on any of the communication channels listed [here](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#community). 
 
 ### Filing issues or support
 
-Create a GitHub issue if anything doesn't appear to be working right. If you get an unexpected error, please include the full stack trace that you get with `^E`. If you are struggling with learning how to use the tool, or are unsure how something works, please also file an issue or write a comment in any of our community spaces. In addition to wanting to help users get the most out of the tool, this helps me gauge the holes in our documentation.
+Create a GitHub issue if anything doesn't appear to be working right. If you get an unexpected error, please include the full stack trace that you get with `^E`. Additionally, it would help me more quickly diagnose the problem if you could attach the saved Commandlog (`Ctrl-D`), which will show the steps that lead to the issue. If you are struggling with learning how to use the tool, or are unsure how something works, please also file an issue or write a comment in any of our [community spaces](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#community). In addition to wanting to help users get the most out of the tool, this helps us gauge the holes in our documentation.
 
 ### Code contributions
 
@@ -18,9 +18,9 @@ VisiData has two main branches:
 
 If you wish to contribute code, please fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls) against it.
 
-A guide to VisiData's architecture and internals can be found [here](http://visidata.org/design).
+A guide to VisiData's architecture and internals can be found [here](http://visidata.org/design). If you wish to make changes to existing code, please follow the [style guide](http://visidata.org/design/style). If anyone wishes to make a loader or other addon (even in the main VisiData repository) they can use whichever style they like. The code is structured such that addons and loaders are completely separate modules.
 
-In addition, the innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT free software license, and freely available for inclusion in other projects. If you develop any application using it, I would love to see it!
+In addition, the innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT open software license, and freely available for inclusion in other projects. If you develop any application using it, I would love to see it!
 
 ### Contributing to test development
 
@@ -53,7 +53,7 @@ If you notice a `globalCommand()` or `Command()` which does not have an entry in
 
 If you would like to contribute by building an asciicast, the process is shown at [visidata.org/test/meta](http://visidata.org/test/meta).
 
-If you would like to take a plunge into our mandocs, they are located in `visidata/man` and are divided based on the source of the functionality. `vdtui` keystrokes are split off based on functionality, while all of the rest of VisiData's keystrokes are in `vd-keystrokes.inc`. Please do not directly edit `vd.1`, as it is built automatically by stitching together the other files.
+If you would like to make changes directly to our mandocs, they are contained in `visidata/man/vd.inc`.
 
 ### Community
 
@@ -61,4 +61,4 @@ If you want to chat about VisiData, learn how to use it to maximum effect, or di
 
 - [r/visidata](http://reddit.com/r/visidata) on reddit
 - [#visidata](irc://frenode.net/#visidata) on [freenode IRC](https://webchat.freenode.net)
-- [saul@visidata.org](mailto:saul@visidata.org) via email
+ [saul@visidata.org](mailto:saul@visidata.org) via email

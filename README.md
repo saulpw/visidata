@@ -33,14 +33,14 @@ Use `-f <filetype>` to force a particular filetype.
 
 ## Support
 
+If you want to chat about VisiData, make a feature request, or submit a bug report, we can be reached on either IRC or Reddit:
+
 - [r/visidata](https://www.reddit.com/r/visidata/) on reddit
-- [#visidata]() on freenode.net
+- [#visidata](irc://freenode.net/#visidata) on [freenode.net](https://webchat.freenode.net)
 
-If something doesn't appear to be working right, please create [an issue on Github](https://github.com/saulpw/visidata/issues).  Include the full stack trace shown with `Ctrl-e`.
+For more detailed information about how you can contribute as a developer, influence the roadmap as a user, or provide us with sufficient information to better support you through any issues you come across see the [CONTRIBUTION.md](CONTRIBUTION.md).
 
-To contribute a bugfix or other code, fork from [develop](https://github.com/saulpw/visidata/tree/develop) and submit a [pull request](https://github.com/saulpw/visidata/pulls).
-
-## Other vdtui projects
+## vdtui
 
 The core `vdtui.py` can be used to quickly create efficient terminal workflows.
 
