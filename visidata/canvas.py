@@ -136,6 +136,7 @@ class PixelCanvas(Sheet):
             self.disabledAttrs.remove(attr)
         else:
             self.disabledAttrs.add(attr)
+        self.plotlegends()
 
     def getRowsInside(self, x1, y1, x2, y2):
         for y in range(y1, y2):
@@ -298,10 +299,9 @@ class GridCanvas(PixelCanvas):
                 attr = self.unusedAttrs[0]
                 legend = '[other]'
 
-            i = len(self.legends)-1
-            self.plotlegend(i, '%s.%s' % (i,legend), attr)
             self.legends[legend] = attr
             self.plotAttrs[k] = attr
+            self.plotlegends()
         return attr
 
     def resetCanvasDimensions(self):
@@ -461,6 +461,10 @@ class GridCanvas(PixelCanvas):
         if zoomlevel:
             self.zoomlevel = zoomlevel
 
+        self.resetBounds()
+        self.plotlegends()
+
+    def resetBounds(self):
         if not self.gridWidth or not self.gridHeight:
             xmins = []
             ymins = []
@@ -487,6 +491,7 @@ class GridCanvas(PixelCanvas):
                 self.gridHeight = 1.0
 
         if not self.visibleGridWidth or not self.visibleGridHeight:
+            # initialize minx/miny, but w/h must be set first
             self.visibleGridWidth = self.gridCanvasWidth/self.xScaler
             self.visibleGridHeight = self.gridCanvasHeight/self.yScaler
             self.visibleGridMinX = self.gridMinX + self.gridWidth/2 - self.visibleGridWidth/2
@@ -501,6 +506,7 @@ class GridCanvas(PixelCanvas):
             self.cursorGridWidth = self.charGridWidth
             self.cursorGridHeight = self.charGridHeight
 
+    def plotlegends(self):
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
             self._commands[str(i+1)] = Command(str(i+1), 'togglePixelAttrs(%s)' % attr, '')
@@ -551,9 +557,9 @@ class GridCanvas(PixelCanvas):
 
     def plotAll(self):
         self.needsRefresh = False
+        cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
         self.pixels.clear()
         self.labels.clear()
-        cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
         self.resetCanvasDimensions()
         self.plotAll_async()
 
