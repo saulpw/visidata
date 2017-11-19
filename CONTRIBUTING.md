@@ -31,7 +31,7 @@ The `tests` folder contains functional tests in the form of `.vd` scripts, each 
 To run a test manually:
 
 ```
-       $ bin/vd --play tests/foo.vd --delay 1
+       $ bin/vd --play tests/foo.vd --replay-wait 1
     or $ bin/vd -p tests/foo.vd -d 1
 ```
 

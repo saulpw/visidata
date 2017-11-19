@@ -24,7 +24,7 @@
 .Nm vd
 .Op Ar options
 .Cm --play Ar cmdlog
-.Op Cm -d Ar delay
+.Op Cm -w Ar waitsecs
 .Op Cm --batch
 .Op Cm -o Ar output
 .Op Ar field Ns Cm = Ns Ar value No ...
@@ -40,7 +40,7 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .Lo p play cmdlog
 .No replays a saved Ar cmdlog No within the interface
 .
-.Lo d delay seconds
+.Lo w replay-wait seconds
 .No waits Ar seconds No between commands
 .
 .Lf b batch
@@ -525,7 +525,7 @@ overwrites existing files without confirmation
 .Pp
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
 .Pp
-.Dl Nm vd Cm --play tests/pivot.vd --delay 1 --output tests/pivot.tsv
+.Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
 .Pp

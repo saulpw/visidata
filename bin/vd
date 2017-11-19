@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # Usage: $0 [<options>] [<input> ...]
-#        $0 [<options>] --play <cmdlog> [--batch] [-d <delay>] [-o <output>] [field=value ...]
+#        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
 __version__ = 'saul.pw/VisiData v0.98pre'
 
@@ -48,7 +48,8 @@ def main():
     parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
     parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
     parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output (as .tsv) at the end of replay')
-    parser.add_argument('-d', dest='delay', default=0, help='delay between replayed commands, in seconds')
+    parser.add_argument('-w', dest='replay_wait', default=0, help='time to wait between replayed commands, in seconds')
+    parser.add_argument('-d', dest='delimiter', help='delimiter to use for tsv filetype')
     parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
 
     for optname, v in vdtui.baseOptions.items():

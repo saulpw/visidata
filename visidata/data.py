@@ -4,6 +4,7 @@ from .vdtui import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('header', 1, 'parse first N rows of .csv/.tsv as column names')
+option('delimiter', '\t', 'delimiter to use for tsv filetype')
 option('filetype', '', 'specify file type')
 
 # slide rows/columns around
@@ -168,7 +169,7 @@ def open_py(p):
 def open_txt(p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     with p.open_text() as fp:
-        if '\t' in next(fp):    # peek at the first line
+        if options.delimiter in next(fp):    # peek at the first line
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, p)
 
@@ -179,7 +180,7 @@ def _getTsvHeaders(fp, nlines):
         L = next(fp)
         L = L[:-1]
         if L:
-            headers.append(L.split('\t'))
+            headers.append(L.split(options.delimiter))
             i += 1
 
     return headers
@@ -215,6 +216,7 @@ def reload_tsv_sync(vs, **kwargs):
     'Perform synchronous loading of TSV file, discarding header lines.'
     header_lines = kwargs.get('header', options.header)
 
+    delim = options.delimiter
     vs.rows = []
     with vs.source.open_text() as fp:
         _getTsvHeaders(fp, header_lines)  # discard header lines
@@ -227,7 +229,7 @@ def reload_tsv_sync(vs, **kwargs):
                     break
                 L = L[:-1]
                 if L:
-                    vs.addRow(L.split('\t'))
+                    vs.addRow(L.split(delim))
                 prog.addProgress(len(L))
 
     status('loaded %s' % vs.name)
@@ -238,14 +240,15 @@ def save_tsv(vs, fn):
     'Write sheet to file `fn` as TSV.'
 
     # replace tabs and newlines
+    delim = options.delimiter
     replch = options.disp_oddspace
-    trdict = {9: replch, 10: replch, 13: replch}
+    trdict = {ord(delim): replch, 10: replch, 13: replch}
 
     with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
-        colhdr = '\t'.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
+        colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
         for r in Progress(vs.rows):
-            fp.write('\t'.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
+            fp.write(delim.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
     status('%s save finished' % fn)
 

@@ -4,7 +4,7 @@ import threading
 
 from visidata import *
 
-option('delay', 0.0, 'delay between replayed commands, in seconds')
+option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds')
 option('disp_replay_play', '▶', 'status indicator for active replay')
 option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
@@ -227,7 +227,7 @@ class CommandLog(Sheet):
 
     def delay(self, factor=1):
         'returns True if delay satisfied'
-        acquired = CommandLog.semaphore.acquire(timeout=options.delay*factor if not self.paused else None)
+        acquired = CommandLog.semaphore.acquire(timeout=options.replay_wait*factor if not self.paused else None)
         return acquired or not self.paused
 
     def replayOne(self, r):
