@@ -130,7 +130,6 @@ class PixelCanvas(Sheet):
             self.disabledAttrs.remove(attr)
         else:
             self.disabledAttrs.add(attr)
-        self.refresh()
 
     def getRowsInside(self, x1, y1, x2, y2):
         for y in range(y1, y2):
