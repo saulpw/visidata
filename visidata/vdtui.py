@@ -122,6 +122,7 @@ option('empty_is_null', False, 'if empty string counts as null')
 option('false_is_null', False, 'if Python False counts as null')
 option('zero_is_null', False, 'if integer 0 counts as null')
 
+
 option('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 option('debug', False, 'exit on error and display stacktrace')
 option('curses_timeout', 100, 'curses timeout in ms')
@@ -129,6 +130,7 @@ theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 
 disp_column_fill = ' ' # pad chars after column value
 theme('disp_none', '',  'visible contents of a cell whose value was None')
+theme('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
 theme('disp_unprintable', '.', 'substitute character for unprintables')
@@ -326,9 +328,9 @@ class date:
             self.dt = s
 
     def to_string(self, fmtstr=None):
-        'Convert datetime object to string, in ISO 8601 format by default.'
+        'Convert datetime object to string, using options.disp_date_fmt.'
         if not fmtstr:
-            fmtstr = '%Y-%m-%d %H:%M:%S'
+            fmtstr = options.disp_date_fmt
         return self.dt.strftime(fmtstr)
 
     def __getattr__(self, k):
