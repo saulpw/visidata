@@ -101,6 +101,9 @@ def main():
             inputs.append(arg)
             fmtargs.append(arg)
 
+    if stdinSource and stdinSource not in inputs:  # '|vd' without explicit '-'
+        inputs.append(stdinSource)
+
     if args.diff:
         vs = openSource(args.diff)
         vd().push(vs)
