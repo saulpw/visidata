@@ -527,7 +527,7 @@ overwrites existing files without confirmation
 .Pp
 .Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
 .Pp
-.Dl Ic ls -l | Nm vd Cm -f fixed --skiplines 1 --headerlines 0
+.Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
 .Pp
 .Dl Nm vd --diff foo.tsv bar.tsv
 .Pp
