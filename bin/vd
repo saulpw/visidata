@@ -74,14 +74,32 @@ def main():
         if optval is not None and optname not in ['inputs', 'play', 'batch', 'output', 'diff']:
             vdtui.options[optname] = optval
 
-    inputs = list(args.inputs)
-
+    stdinSource = None
     if not sys.stdin.isatty():
         # duplicate stdin for input and reopen tty as stdin
-        src = PathFd('stdin', open(os.dup(0)))
-        inputs.append(src)
+        stdinSource = PathFd('stdin', open(os.dup(0)))
         f = open('/dev/tty')
         os.dup2(f.fileno(), 0)
+
+    startrow, startcol = None, None
+    fmtargs = []
+    fmtkwargs = {}
+    inputs = []
+    for arg in args.inputs:
+        if arg.startswith('+'):  # position cursor at start
+            if ':' in arg:
+                startrow, startcol = arg[1:].split(':')
+            else:
+                startrow = arg[1:]
+        elif '=' in arg:
+            # parse 'key=value' pairs for formatting cmdlog template in replay mode
+            k, v = arg.split('=')
+            fmtkwargs[k] = v
+        elif arg == '-':
+            inputs.append(stdinSource)
+        else:
+            inputs.append(arg)
+            fmtargs.append(arg)
 
     if args.diff:
         vs = openSource(args.diff)
@@ -97,25 +115,16 @@ def main():
             vs = openSource(src)
             vdtui.vd().cmdlog.openHook(vs, src)
             sources.append(vs)
+            if startrow is not None:
+                vs.cursorRowIndex = int(startrow)-1
+            if startcol is not None:
+                vs.cursorVisibleColIndex = int(startcol)-1
 
         vdtui.run(*sources)
         return
 
-    # replay mode, gather additional args
-    fmtargs = []
-    fmtkwargs = {}
-
-    args = parser.parse_args()
-    for arg in args.inputs:
-        # parse 'key=value' pairs for formatting cmdlog template
-        if '=' in arg:
-            k, v = arg.split('=')
-            fmtkwargs[k] = v
-        else:
-            fmtargs.append(v)
-
     if args.play == '-':
-        vdfile = inputs[0]
+        vdfile = stdinSource
         assert isinstance(vdfile, PathFd)
         vdfile.name = 'stdin.vd'
     else:
