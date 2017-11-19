@@ -49,7 +49,8 @@ class PixelCanvas(Sheet):
     def plotpixel(self, x, y, attr, row=None):
         self.pixels[round(y)][round(x)][attr].append(row)
 
-    def clipline(self, x1, y1, x2, y2, xmin, ymin, xmax, ymax):
+    @staticmethod
+    def clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax):
         'Liang-Barsky algorithm'
         dx = x2-x1
         dy = y2-y1
@@ -62,26 +63,31 @@ class PixelCanvas(Sheet):
 
         u1, u2 = 0, 1
         for p, q in pq:
-            if p == 0:  # parallel to bbox
-                if q < 0:  # completely outside bbox
-                    return None
-            elif p < 0:  # from outside to inside
+            if p < 0:  # from outside to inside
                 u1 = max(u1, q/p)
             elif p > 0:  # from inside to outside
                 u2 = min(u2, q/p)
+            else: #  p == 0:  # parallel to bbox
+                if q < 0:  # completely outside bbox
+                    return None
 
         if u1 > u2:  # completely outside bbox
             return None
 
-        xn1 = x1 + pq[1][0]*u1
-        yn1 = y1 + pq[3][0]*u1
+        xn1 = x1 + dx*u1
+        yn1 = y1 + dy*u1
 
-        xn2 = x1 + pq[1][0]*u2
-        yn2 = y1 + pq[3][0]*u2
+        xn2 = x1 + dx*u2
+        yn2 = y1 + dy*u2
 
         return xn1, yn1, xn2, yn2
 
     def plotline(self, x1, y1, x2, y2, attr, row=None):
+        for x, y in self.iterline(x1, y1, x2, y2):
+            self.plotpixel(x, y, attr, row)
+
+    @staticmethod
+    def iterline(x1, y1, x2, y2):
         'Draws onscreen segment of line from (x1, y1) to (x2, y2)'
         xdiff = abs(x2-x1)
         ydiff = abs(y2-y1)
@@ -91,14 +97,14 @@ class PixelCanvas(Sheet):
         r = round(max(xdiff, ydiff))
 
         if r == 0:  # point, not line
-            self.plotpixel(x1, y1, attr, row)
+            yield x1, y1
         else:
             x, y = x1, y1
             for i in range(r+1):
                 x += xdir * xdiff / r
                 y += ydir * ydiff / r
 
-                self.plotpixel(x, y, attr, row)
+                yield x, y
 
     def plotlabel(self, x, y, text, attr):
         self.labels.append((x, y, text, attr))
@@ -426,18 +432,17 @@ class GridCanvas(PixelCanvas):
 
     def polyline(self, vertices, attr, row=None):
         'adds lines for (x,y) vertices of a polygon'
-        prev_x, prev_y = None, None
-        for x, y in vertices:
-            if prev_x is not None:
-                self.line(prev_x, prev_y, x, y, attr, row)
+        prev_x, prev_y = vertices[0]
+        for x, y in vertices[1:]:
+            self.line(prev_x, prev_y, x, y, attr, row)
             prev_x, prev_y = x, y
 
     def polygon(self, vertices, attr, row=None):
         'adds lines for (x,y) vertices of a polygon'
-        self.polyline(vertices, attr, row)
-        first_x, first_y = vertices[0]
-        last_x, last_y = vertices[-1]
-        self.line(first_x, first_y, last_x, last_y, attr, row)
+        prev_x, prev_y = vertices[-1]
+        for x, y in vertices:
+            self.line(prev_x, prev_y, x, y, attr, row)
+            prev_x, prev_y = x, y
 
     def label(self, x, y, text, attr, row=None):
         self.gridlabels.append((x, y, text, attr, row))
