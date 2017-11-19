@@ -12,7 +12,7 @@ BUILDWWW=$BUILD/www
 MAN=$VD/visidata/man
 TEST=$WWW/test
 DESIGN=$WWW/design
-NEWS=$WWW/release
+NEWS=$WWW/news
 
 # Build directories
 mkdir -p $BUILD
