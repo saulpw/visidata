@@ -16,6 +16,7 @@ from visidata import *
 
 option('show_graph_labels', True, 'show axes and legend on graph')
 option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
+option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
 option('zoom_incr', 2.0, 'amount to multiply current zoomlevel by when zooming')
 
 # pixels covering whole actual terminal
@@ -124,12 +125,17 @@ class PixelCanvas(Sheet):
                y >= top and \
                y < bottom
 
-    def getPixelAttr(self, x, y):
+    def getPixelAttrRandom(self, x, y):
+        'weighted-random choice of attr at this pixel.'
+        c = list(attr for attr, rows in self.pixels[y][x].items()
+                         for r in rows if attr not in self.disabledAttrs)
+        return random.choice(c) if c else 0
+
+    def getPixelAttrMost(self, x, y):
+        'most common attr at this pixel.'
         r = self.pixels[y][x]
         c = sorted((len(rows), attr) for attr, rows in r.items() if attr not in self.disabledAttrs)
-        if not c:
-            return 0
-        return c[-1][1]
+        return c[-1][1] if c else 0
 
     def togglePixelAttrs(self, attr):
         if attr in self.disabledAttrs:
@@ -153,18 +159,18 @@ class PixelCanvas(Sheet):
 
         if self.pixels:
             cursorBBox = self.cursorPixelBounds
-
+            getPixelAttr = self.getPixelAttrRandom if options.disp_pixel_random else self.getPixelAttrMost
             for char_y in range(0, vd().windowHeight-1):  # save one line for status
                 for char_x in range(0, vd().windowWidth):
                     block_attrs = [
-                        self.getPixelAttr(char_x*2  , char_y*4  ),
-                        self.getPixelAttr(char_x*2  , char_y*4+1),
-                        self.getPixelAttr(char_x*2  , char_y*4+2),
-                        self.getPixelAttr(char_x*2+1, char_y*4  ),
-                        self.getPixelAttr(char_x*2+1, char_y*4+1),
-                        self.getPixelAttr(char_x*2+1, char_y*4+2),
-                        self.getPixelAttr(char_x*2  , char_y*4+3),
-                        self.getPixelAttr(char_x*2+1, char_y*4+3),
+                        getPixelAttr(char_x*2  , char_y*4  ),
+                        getPixelAttr(char_x*2  , char_y*4+1),
+                        getPixelAttr(char_x*2  , char_y*4+2),
+                        getPixelAttr(char_x*2+1, char_y*4  ),
+                        getPixelAttr(char_x*2+1, char_y*4+1),
+                        getPixelAttr(char_x*2+1, char_y*4+2),
+                        getPixelAttr(char_x*2  , char_y*4+3),
+                        getPixelAttr(char_x*2+1, char_y*4+3),
                     ]
 
                     pow2 = 1
