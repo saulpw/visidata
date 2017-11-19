@@ -9,24 +9,24 @@ I wanted to be able to focus on the task at hand, without having to spend unnece
 
 ## for Data Engineers and Hackers
 
-- Pragmatic behavior and defaults.
-- Expose internals, like error messages and types.
-- Optimize for fewest keystrokes.
+* Pragmatic behavior and defaults.
+* Expose internals, like error messages and types.
+* Optimize for fewest keystrokes.
 
 ## Universal Interface
 
-- One interface is sufficient for basic exploration of any kind of tabular data.
-- Internals can be viewed with the same interface.
+* One interface is sufficient for basic exploration of any kind of tabular data.
+* Internals can be viewed with the same interface.
 
 ## Lightweight
 
-- Few dependencies, minimal install steps, and no configuration required.
-- Launches with minimal delay, all commands feel snappy.
-- Easily integratable into existing workflows.
-- Workflow substantially faster and smoother than with existing tools.
+* Few dependencies, minimal install steps, and no configuration required.
+* Launches with minimal delay, all commands feel snappy.
+* Easily integratable into existing workflows.
+* Workflow substantially faster and smoother than with existing tools.
 
 ## Easy workflow customization, experimentation, and prototyping
 
-- Extensible with user-defined commands and views.
-- Entire new standalone applications can be created with minimal code.
+* Extensible with user-defined commands and views.
+* Entire new standalone applications can be created with minimal code.
 

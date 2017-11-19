@@ -1,42 +1,47 @@
-## The Design of VisiData: Foundations
+## The Design of VisiData: Foundations {#TOC}
 
 0. [About Visidata](/about)
 1. [Architecture Overview](/design/overview)
 2. [Design Goals](/design/goals)
 3. [Sheets](/design/sheets)
-  a. [Sources]
-  b. [Cursor]()
-  c. [Columns]()
-  d. [Compute]()
-  e. [Display]()
+    i. [Sources]
+    ii. [Cursor]()
+    iii. [Columns]()
+    iv. [Compute]()
+    v. [Display]()
 4. [Display and Computation Engine](/design/engine)
-4. [Commands](/design/commands)
-  a. [Python integration](/design/commands#python)
-  b. [Errors](/design/commands#errors)
-  c. [Status](/design/commands#status)
-5. [Command Log](/design/commandlog)
-6. [Loaders](/design/loaders)
-7. [Hooks](/design/hooks)
-8. [Row selection](/design/selected)
-9. [@async](/design/async)
-10. [Colorizers](/design/color)
-11. [Options](/design/options)
-A. [Builtin line editor](/design/editor)
-B. [API Reference](/design/api)
+5. [Commands](/design/commands)
+    i. [Python integration](/design/commands#python)
+    ii. [Errors](/design/commands#errors)
+    iii. [Status](/design/commands#status)
+6. [Command Log](/design/commandlog)
+7. [Loaders](/design/loaders)
+8. [Hooks](/design/hooks)
+9. [Row selection](/design/selected)
+10. [@async](/design/async)
+11. [Colorizers](/design/color)
+12. [Options](/design/options)
+    i. [Builtin line editor](/design/editor)
+    ii. [API Reference](/design/api)
 
-## The Design of VisiData, Part 2: Derived Sheets
+<!-- end of list -->
 
-2. [Frequency Table]()
-3. [Aggregators](/design/aggregators)
-4. [Pivot]()
-5. [Describe]()
+## The Design of VisiData, Part 2: Derived Sheets {#TOC}
 
+1. [Frequency Table]()
+2. [Aggregators](/design/aggregators)
+3. [Pivot]()
+4. [Describe]()
 5. [Graph]()
 6. [Map](/design/)
 
-## The Design of VisiData, Part 3: Custom Applications
+<!-- end of list -->
+
+## The Design of VisiData, Part 3: Custom Applications {#TOC}
 
 1. [How to make a sheet](/howto/sheet)
+
+<!-- end of list -->
 
 ## License
 

@@ -20,6 +20,7 @@ mkdir -p $BUILDWWW
 mkdir -p $BUILDWWW/man
 mkdir -p $BUILDWWW/test
 mkdir -p $BUILDWWW/design
+mkdir -p $BUILDWWW/about
 
 # Set up python and shell environment
 export PYTHONPATH=$VD:$VD/visidata
@@ -37,6 +38,11 @@ $VD/strformat.py body=$WWW/frontpage-body.html title="VisiData" head='' < $WWW/t
 for i in 404.html robots.txt main.css normalize.css ; do
     cp $WWW/$i $BUILDWWW/
 done
+
+# Build /about
+pandoc -r markdown -w html -o $BUILDWWW/about/index.body $WWW/about.md
+$VD/strformat.py body=$BUILDWWW/about/index.body title="About VisiData" head="" < $WWW/template.html > $BUILDWWW/about/index.html
+
 # Build /man
 echo '<section><pre>' > $BUILD/vd-man-inc.html
 MAN_KEEP_FORMATTING=1 COLUMNS=100 man $MAN/vd.1 | ul | aha --no-header >> $BUILD/vd-man-inc.html

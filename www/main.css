@@ -9,10 +9,37 @@
 
 body {
   margin: 0;
-  padding: 10px;
   width: 100%;
-  font-family: pxplus_ibm_vga9regular, monospace, 'Roboto', sans-serif;
+  font-family: pxplus_ibm_vga9regular, 'Roboto', sans-serif;
+  font-size: medium;
 }
+
+li {
+  display: list-item;
+  text-align: -webkit-match-parent;
+}
+
+ol {
+    display: block;
+    list-style-type: decimal;
+    max-width: 50em;
+    margin: 0px auto;
+    font-size: 1.05em;
+    line-height: 1.5;
+}
+
+#TOC {
+}
+
+p {
+  margin-bottom: 2em;
+  margin: 0px auto;
+  font-size: 1.05em;
+  display: block;
+  line-height: 1.5;
+  max-width: 50em;
+}
+
 /* animations go here */
 
 @keyframes floating {
@@ -36,8 +63,10 @@ body {
 /* start of styles */
 
  #nav {
-   background: #d7d7ff;
+   font-size: small;
+   background: #8764B8;
  }
+
 
 body {
   background: white;
@@ -51,19 +80,39 @@ body {
   background: white;
  }
 
- #footer {
-   background: #d7d7ff;
-  text-align: center;
-  padding: 10px
+#footer {
+background: #e0e0e0;
+ text-align: center;
+ padding: 10px;
+ /* We need a default text colour */
+ font-color: grey;
  }
+
+a {
+   color: #5a0046;
+    text-decoration: none;
+}
+
+a:hover {
+    /* color: #fff; */
+    text-decoration: underline;
+}
+
+nav a {
+    color: #d6cae7;
+}
+
+nav a:hover {
+    color: #fff;
+    text-decoration: none;
+}
 
  nav {
    display: flex;
    flex-direction: row;
    flex-wrap: nowrap;
    align-items: center;
-   justify-content: flex-start;
-
+   justify-content: center;
    text-align: center;
  }
 
@@ -232,8 +281,15 @@ footer {
   width: 100%;
 }
 
+h2 {
+    text-align: center;
+}
+
 /* start media queries */
-  nav h2 { padding-left: 30px; }
+  nav h2 { 
+      padding-left: 30px; 
+      font-weight: normal;
+  }
 
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
 
@@ -248,4 +304,43 @@ footer {
   .hero-install-tag
     { max-width: 100%; }
   .hero-cta-container { max-width: 80%; }
+}
+
+/* --- Code block ---- */
+
+pre, code
+{
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+pre > code {
+    border: none;
+    background-color: inherit;
+    box-shadow: none;
+}
+
+code {
+    background-color: #f4f4f4;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
+    box-shadow: inset 0px 0px 2px #bbb;
+}
+
+pre, pre > code {
+    background-color: #f4f4f4;
+    white-space: pre;
+    word-wrap: normal;
+    overflow: auto;
+}
+
+pre {
+    display: block;
+    padding: 0.5em;
+    border: none;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    line-height: 1.5;
 }
