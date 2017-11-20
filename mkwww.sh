@@ -1,7 +1,6 @@
 #!/bin/zsh
 
 # Stop the execution of a script if there is an error
-set -x
 set -e
 
 # Set up variables
@@ -35,7 +34,7 @@ preconv -r -e utf8 $BUILD/vd-pre.1 > $MAN/vd.1   # checked in
 
 # build front page of visidata.org
 $VD/strformat.py body=$WWW/frontpage-body.html title="VisiData" head='' < $WWW/template.html > $BUILDWWW/index.html
-for i in 404.html robots.txt main.css normalize.css ; do
+for i in 404.html robots.txt main.css ; do
     cp $WWW/$i $BUILDWWW/
 done
 
