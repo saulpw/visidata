@@ -79,7 +79,7 @@ class DescribeSheet(Sheet):
                         vals.append(v)
                     d['distinct'].add(v)
                 except Exception as e:
-                    d['errors'].append(e)
+                    d['errors'].append(sr)
 
             d['mode'] = self.calcStatistic(d, mode, vals)
             if isNumeric(srccol):
