@@ -116,6 +116,7 @@ option('default_width', 20, 'default column width')
 option('wrap', False, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
+option('cmdlog_longname', False, 'Use command longname in cmdlog if available')
 
 option('none_is_null', True, 'if Python None counts as null')
 option('empty_is_null', False, 'if empty string counts as null')
@@ -1050,9 +1051,9 @@ class Sheet:
         return cmd
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
-        return self.exec_command(self.getCommand(keystrokes), vdglobals)
+        return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
 
-    def exec_command(self, cmd, args='', vdglobals=None):
+    def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
         escaped = False
         err = ''
@@ -1063,7 +1064,7 @@ class Sheet:
         self.sheet = self
 
         try:
-            self.vd.callHook('preexec', self, cmd.name)
+            self.vd.callHook('preexec', self, cmd.name if options.cmdlog_longname else keystrokes)
             exec(cmd.execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
             self.vd.status('aborted')
