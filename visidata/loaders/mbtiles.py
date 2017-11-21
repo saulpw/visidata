@@ -10,12 +10,12 @@ def open_pbf(p):
 def open_mbtiles(p):
     return MbtilesSheet(p.name, source=p)
 
-def getDepth(L):
+def getListDepth(L):
     if not isinstance(L, list):
         return 0
     if len(L) == 0:
         return 0
-    return getDepth(L[0]) + 1
+    return getListDepth(L[0]) + 1
 
 def getTile(con, zoom_level, tile_col, tile_row):
     import mapbox_vector_tile
@@ -64,7 +64,7 @@ class PbfSheet(Sheet):
         ColumnItem('layer', 0),
         Column('geometry_type', getter=lambda col,row: row[1]['geometry']['type']),
         Column('geometry_coords', getter=lambda col,row: row[1]['geometry']['coordinates']),
-        Column('geometry_coords_depth', getter=lambda col,row: getDepth(row[1]['geometry']['coordinates'])),
+        Column('geometry_coords_depth', getter=lambda col,row: getListDepth(row[1]['geometry']['coordinates'])),
     ]
     commands = [
         Command('.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows))', 'plot as map'),
