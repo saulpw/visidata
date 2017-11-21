@@ -5,3 +5,4 @@ xlrd
 h5py
 psycopg2
 pyshp
+mapbox-vector-tile
