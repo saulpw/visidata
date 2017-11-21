@@ -11,8 +11,7 @@ def numericCols(cols):
     return [c for c in cols if isNumeric(c)]
 
 
-# provides unit->pixel conversion, axis labels, legend
-class GraphSheet(GridCanvas):
+class InvertedYGridCanvas(GridCanvas):
     commands = GridCanvas.commands + [
         # swap directions of up/down
         Command('move-up', 'sheet.cursorGridMinY += cursorGridHeight', 'move cursor up'),
@@ -30,12 +29,6 @@ class GraphSheet(GridCanvas):
     def zoomTo(self, x1, y1, x2, y2):
         self.fixPoint(self.gridCanvasMinX, self.gridCanvasMaxY, x1, y1)
         self.zoomlevel=max(self.cursorGridWidth/self.gridWidth, self.cursorGridHeight/self.gridHeight)
-
-    def __init__(self, name, sheet, rows, xcols, ycols, **kwargs):
-        super().__init__(name, sheet, sourceRows=rows, **kwargs)
-
-        self.xcols = xcols
-        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or error('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
 
     def plotpixel(self, x, y, attr, row=None):
         y = self.gridCanvasMaxY-y+4
@@ -72,6 +65,15 @@ class GraphSheet(GridCanvas):
                  self.scaleX(self.visibleGridMaxX),
                  self.scaleY(self.visibleGridMinY),
         ]
+
+
+# provides axis labels, legend
+class GraphSheet(InvertedYGridCanvas):
+    def __init__(self, name, sheet, rows, xcols, ycols, **kwargs):
+        super().__init__(name, sheet, sourceRows=rows, **kwargs)
+
+        self.xcols = xcols
+        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or error('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
 
     @async
     def reload(self):
