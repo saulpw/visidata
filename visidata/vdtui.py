@@ -1223,7 +1223,7 @@ class Sheet:
         for r in (Progress(rows) if progress else rows):
             self.selectRow(r)
         if status:
-            self.vd.status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
+            vd().status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
 
     @async
     def unselect(self, rows, status=True, progress=True):
@@ -1232,7 +1232,7 @@ class Sheet:
         for r in (Progress(rows) if progress else rows):
             self.unselectRow(r)
         if status:
-            self.vd.status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
+            vd().status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
 
     def selectByIdx(self, rowIdxs):
         'Select given row indexes, without progress bar.'
@@ -1906,10 +1906,11 @@ class TextSheet(Sheet):
     def reload(self):
         self.columns = [Column(self.name, getter=lambda col,row: row[1])]
         self.rows = []
+        winWidth = vd().windowWidth
         for text in self.source:
             if getattr(self, 'wrap', options.wrap):
                 startingLine = len(self.rows)
-                for i, L in enumerate(textwrap.wrap(str(text), width=self.vd.windowWidth-2)):
+                for i, L in enumerate(textwrap.wrap(str(text), width=winWidth-2)):
                     self.addRow((startingLine+i, L))
             else:
                 self.addRow((len(self.rows), text))
