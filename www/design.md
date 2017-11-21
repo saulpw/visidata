@@ -42,12 +42,3 @@
 1. [How to make a sheet](/howto/sheet)
 
 <!-- end of list -->
-
-## License
-
-The core `vdtui` module is a single-file standalone framework, [available for reuse](/design/vdtui) according to the MIT open-source license.
-This is to encourage a profileration of modern terminal user interfaces for any and every application.
-
-The rest of VisiData (anything in the [saulpw/visidata](http://github.com/saulpw/visidata) repository) is licensed under GPL3.
-This is to encourage public extensions.
-Every additional loader and transformation unlocks latent power within the Python ecosystem.
