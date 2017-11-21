@@ -4,8 +4,6 @@ import json
 import gzip
 import sqlite3
 
-import mapbox_vector_tile
-
 def open_pbf(p):
     return PbfSheet(p.name, tile_data=p.read_bytes())
 
@@ -20,6 +18,8 @@ def getDepth(L):
     return getDepth(L[0]) + 1
 
 def getTile(con, zoom_level, tile_col, tile_row):
+    import mapbox_vector_tile
+
     tile_data = con.execute('''
        SELECT tile_data FROM tiles
            WHERE zoom_level = ?
