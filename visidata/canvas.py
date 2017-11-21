@@ -35,6 +35,7 @@ class PixelCanvas(Sheet):
         super().__init__(name, **kwargs)
         self.labels = []  # (x, y, text, attr)
         self.disabledAttrs = set()
+        self.needsRefresh = False
         self.resetCanvasDimensions()
 
     def resetCanvasDimensions(self):
@@ -258,8 +259,8 @@ class GridCanvas(PixelCanvas):
         Command('g'+ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*visiblePixelBounds)); vd.push(vs)', ''),
     ]
 
-    def __init__(self, name, sourceSheet, **kwargs):
-        super().__init__(name, source=sourceSheet, **kwargs)
+    def __init__(self, name, source=None, **kwargs):
+        super().__init__(name, source=source, **kwargs)
 
         # bounding box of entire grid in grid units, updated when adding point/line/label or recalcBounds
         self.gridMinX, self.gridMinY = None, None  # derive first bounds on first draw
