@@ -101,6 +101,7 @@ nav h2 {
 
 nav a {
     color: #d6cae7;
+    transition: 0.75s linear;
 }
 
 nav a:hover {
@@ -117,7 +118,24 @@ a {
 a:hover {
     /* color: #fff; */
     text-decoration: underline;
-    -webkit-text-decoration-skip: objects; /* Remove gaps in links underline in IOS and Safari */
+    /* -webkit-text-decoration-skip: objects; */ /* Remove gaps in links underline in IOS and Safari */
+}
+
+.button {
+    background-color: #8764b8;
+    border-radius: 10px;
+    color: #d6cae7;
+    font-size: 1em;
+    padding: 0.5em;
+    transition: 1s linear;
+}
+
+.button:hover {
+    color: #fff;
+}
+
+a.button-hover:hover {
+    text-decoration: none;
 }
 
 /* --- Spreadsheet tables --- */
@@ -541,3 +559,4 @@ sub {
 sup {
     top: -.5em
 }
+
