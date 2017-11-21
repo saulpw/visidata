@@ -44,6 +44,7 @@ class MbtilesSheet(Sheet):
     commands = [
         Command(ENTER, 'vd.push(PbfSheet(tilename(cursorRow)+"_foo", tile_data=getTile(con, *cursorRow)))', 'view this tile'),
         Command('.', 'vd.push(PbfCanvas(tilename(cursorRow)+"_map", source=PbfSheet("foo"), sourceRows=list(getFeatures(getTile(con, *cursorRow)))))', 'view this tile'),
+        Command('g.', 'vd.push(PbfCanvas(tilename(cursorRow)+"_map", source=PbfSheet("foo"), sourceRows=sum((list(getFeatures(getTile(sheet.con, *r))) for r in selectedRows or rows), [])))', 'view selected tiles'),
 #        Command('1', 'vd.push(load_pyobj("foo", getTile(con, *cursorRow)))', 'push raw data for this tile'),
     ]
 
@@ -67,7 +68,8 @@ class PbfSheet(Sheet):
         Column('geometry_coords_depth', getter=lambda col,row: getListDepth(row[1]['geometry']['coordinates'])),
     ]
     commands = [
-        Command('.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows))', 'plot as map'),
+        Command('.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow]))', 'plot this row only'),
+        Command('g.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows))', 'plot as map'),
     ]
     @async
     def reload(self):
