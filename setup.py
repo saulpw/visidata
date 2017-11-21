@@ -19,6 +19,7 @@ setup(name='visidata',
       py_modules = ['visidata'],
       packages=['visidata',  'visidata.loaders'],
       include_package_data=True,
+      data_files = [('man/man1', ['visidata/man/vd.1'])],
       package_data={'': ['man/vd.1']},
       license='GPLv3',
       classifiers=[
