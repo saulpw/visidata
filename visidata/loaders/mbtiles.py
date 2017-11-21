@@ -73,15 +73,15 @@ class PbfSheet(Sheet):
     ]
     @async
     def reload(self):
-        props = {}  # [propname] -> Column
+        props = set()  # property names
         self.rows = []
         for r in getFeatures(self.tile_data):
             self.rows.append(r)
-            for k in r[1]['properties']:
-                if k not in props:
-                    c = Column(k, getter=lambda col,row,key=k: row[1]['properties'][key])
-                    self.addColumn(c)
-                    props[k] = c
+            props.update(r[1]['properties'].keys())
+
+        for key in props:
+            self.addColumn(Column(key, getter=lambda col,row,key=key: row[1]['properties'][key]))
+
 
 class PbfCanvas(InvertedYGridCanvas):
     aspectRatio = 1.0
