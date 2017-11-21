@@ -233,8 +233,8 @@ class GridCanvas(PixelCanvas):
 
         Command('zz', 'zoomTo(cursorGridMinX, cursorGridMinY, cursorGridMaxX, cursorGridMaxY)', 'set visible bounds to cursor'),
 
-        Command('+', 'setZoom(zoomlevel / options.zoom_incr); refresh()', 'zoom in 20%'),
-        Command('-', 'setZoom(zoomlevel * options.zoom_incr); refresh()', 'zoom out 20%'),
+        Command('-', 'tmp=(cursorGridCenterX, cursorGridCenterY); setZoom(zoomlevel*options.zoom_incr); fixPoint(gridCanvasCenterX, gridCanvasCenterY, *tmp)', 'zoom into cursor center'),
+        Command('+', 'tmp=(cursorGridCenterX, cursorGridCenterY); setZoom(zoomlevel/options.zoom_incr); fixPoint(gridCanvasCenterX, gridCanvasCenterY, *tmp)', 'zoom into cursor center'),
         Command('_', 'sheet.gridWidth = 0; sheet.visibleGridWidth = 0; setZoom(1.0); refresh()', 'zoom to fit full extent'),
 
         # set cursor box with left click
@@ -366,12 +366,28 @@ class GridCanvas(PixelCanvas):
         return self.visibleGridHeight*4/self.gridCanvasHeight
 
     @property
+    def gridCanvasCenterX(self):
+        return self.gridCanvasMinX + self.gridCanvasWidth/2
+
+    @property
+    def gridCanvasCenterY(self):
+        return self.gridCanvasMinY + self.gridCanvasHeight/2
+
+    @property
     def gridMaxX(self):
         return self.gridMinX + self.gridWidth
 
     @property
     def gridMaxY(self):
         return self.gridMinY + self.gridHeight
+
+    @property
+    def cursorGridCenterX(self):
+        return self.cursorGridMinX + self.cursorGridWidth/2
+
+    @property
+    def cursorGridCenterY(self):
+        return self.cursorGridMinY + self.cursorGridHeight/2
 
     @property
     def cursorGridMaxX(self):
