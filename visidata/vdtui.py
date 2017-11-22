@@ -274,7 +274,7 @@ globalCommand('g\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", t
 globalCommand(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 globalCommand('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select rows matching current cell in all visible columns')
 
-globalCommand('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vs.select(vs.rows); vd.push(vs)', 'open duplicate sheet with only selected rows')
+globalCommand('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with only selected rows')
 globalCommand('g"', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with all rows')
 globalCommand('gz"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with all rows')
 
