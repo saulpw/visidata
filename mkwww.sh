@@ -75,7 +75,7 @@ done
 # Build /design
 pandoc -r markdown -w html -o $BUILDWWW/design/index.body $WWW/design.md
 $VD/strformat.py body=$BUILDWWW/design/index.body title="VisiData Design and Internals" head="" < $WWW/template.html > $BUILDWWW/design/index.html
-rm -rf  $BUILDWWW/design/index.body
+rm -f $BUILDWWW/design/index.body
 for postpath in `find $DESIGN -name '*.md'`; do
     post=${postpath##$DESIGN/}
     postname=${post%.md}
@@ -83,7 +83,7 @@ for postpath in `find $DESIGN -name '*.md'`; do
     posthtml=$BUILDWWW/design/$postname/index
     pandoc -r markdown -w html -o $posthtml.body $postpath
     $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
-    rm -rf $posthtml.body
+    rm -f $posthtml.body
 done
 
 # Build /news
