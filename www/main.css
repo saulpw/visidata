@@ -307,6 +307,11 @@ div.youtube {
 
 }
 
+form {
+    padding: 3px;
+    text-align: center;
+    background-color: #f0e4ff;
+}
 
 /* --- animations go here --- */
 
