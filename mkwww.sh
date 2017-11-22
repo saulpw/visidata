@@ -12,6 +12,7 @@ MAN=$VD/visidata/man
 TEST=$WWW/test
 DESIGN=$WWW/design
 NEWS=$WWW/news
+VIDEOS=$WWW/videos
 
 # Build directories
 mkdir -p $BUILD
@@ -20,6 +21,8 @@ mkdir -p $BUILDWWW/man
 mkdir -p $BUILDWWW/test
 mkdir -p $BUILDWWW/design
 mkdir -p $BUILDWWW/about
+mkdir -p $BUILDWWW/contributing
+mkdir -p $BUILDWWW/videos
 
 # Set up python and shell environment
 export PYTHONPATH=$VD:$VD/visidata
@@ -48,6 +51,13 @@ MAN_KEEP_FORMATTING=1 COLUMNS=100 man $MAN/vd.1 | ul | aha --no-header >> $BUILD
 echo '</pre></section>' >> $BUILD/vd-man-inc.html
 $VD/strformat.py body=$BUILD/vd-man-inc.html title="VisiData Quick Reference" head="" < $WWW/template.html > $BUILDWWW/man/index.html
 
+# Build /contributing
+pandoc -r markdown -w html -o $BUILDWWW/contributing/index.body $VD/CONTRIBUTING.md
+$VD/strformat.py body=$BUILDWWW/contributing/index.body title="Contributing to VisiData" head="" < $WWW/template.html > $BUILDWWW/contributing/index.html
+
+# Build /videos
+$VD/strformat.py body=$VIDEOS/video-body.html title="VisiData Videos" head="" < $WWW/template.html > $BUILDWWW/videos/index.html
+
 # Build /tests
 $TEST/mkindex.py $TEST/*.yaml > $BUILD/test-index.body
 $VD/strformat.py body=$BUILD/test-index.body title="test Index" head='' < $WWW/template.html > $BUILDWWW/test/index.html
@@ -65,7 +75,7 @@ done
 # Build /design
 pandoc -r markdown -w html -o $BUILDWWW/design/index.body $WWW/design.md
 $VD/strformat.py body=$BUILDWWW/design/index.body title="VisiData Design and Internals" head="" < $WWW/template.html > $BUILDWWW/design/index.html
-mv $BUILDWWW/design/index.body /tmp
+rm -rf  $BUILDWWW/design/index.body
 for postpath in `find $DESIGN -name '*.md'`; do
     post=${postpath##$DESIGN/}
     postname=${post%.md}
@@ -73,7 +83,7 @@ for postpath in `find $DESIGN -name '*.md'`; do
     posthtml=$BUILDWWW/design/$postname/index
     pandoc -r markdown -w html -o $posthtml.body $postpath
     $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
-    mv $posthtml.body /tmp
+    rm -rf $posthtml.body
 done
 
 # Build /news

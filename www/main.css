@@ -301,6 +301,12 @@ svg:not(:root) {
     overflow: hidden; /* Hide the overflow in IE */
 }
 
+div.youtube {
+    padding-top: 20px;
+    padding-bottom: 20px;
+
+}
+
 
 /* --- animations go here --- */
 
