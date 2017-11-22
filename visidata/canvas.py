@@ -307,7 +307,7 @@ class GridCanvas(PixelCanvas):
         attr = self.plotAttrs.get(k, None)
         if attr is None:
             if len(self.unusedAttrs) > 1:
-                attr = self.unusedAttrs.pop()
+                attr = self.unusedAttrs.pop(0)
                 legend = ' '.join(str(x) for x in k)
             else:
                 attr = self.unusedAttrs[0]
