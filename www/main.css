@@ -41,9 +41,8 @@ h4 {
 }
 
 p {
-  margin: 0px auto;
+  margin: 1em auto 1em;
   font-size: 1.05em;
-  margin-bottom: 2em;
   display: block;
   line-height: 1.5;
   max-width: 50em;
@@ -136,6 +135,7 @@ a:hover {
 .button {
     background-color: #8764c8;
     border-radius: 10px;
+    opacity: 0.5;
     color: #d6cae7;
     font-size: 1em;
     padding: 0.5em;
@@ -144,6 +144,7 @@ a:hover {
 
 .button:hover {
     color: #fff;
+    opacity: 1.0;
 }
 
 a.button-hover:hover {
@@ -204,7 +205,7 @@ table div.cell, table td {
 }
 
 .input, .command, .code {
-    font-family: monospace;
+    font-family: Inconsolata;
     font-weight: bold;
     font-size: 16px;
 }
@@ -266,12 +267,12 @@ pre > code {
 code {
     background-color: #f4f4f4;
     box-shadow: inset 0px 0px 2px #bbb;
-    font-family: monospace, monospace; /* Correct the inheritance and scaling of font size in all browsers */
+    font-family: Inconsolata, monospace; /* Correct the inheritance and scaling of font size in all browsers */
     font-size: 1em; /* Correct the odd `em` font sizing in all browsers */
-    padding-left: 0.3em;
+/*    padding-left: 0.3em;
     padding-right: 0.3em;
     padding-top: 0.1em;
-    padding-bottom: 0.1em;
+    padding-bottom: 0.1em; */
 }
 
 pre, pre > code {
@@ -282,7 +283,7 @@ pre, pre > code {
 }
 
 pre {
-    font-family: monospace, monospace; /* Correct the inheritance and scaling of font size in all browsers */
+    font-family: Inconsolata, monospace; /* Correct the inheritance and scaling of font size in all browsers */
     font-size: 1em; /* Correct the odd `em` font sizing in all browsers */
     display: block;
     padding: 0.5em;
@@ -436,8 +437,9 @@ footer {
 }
 
 .cta-code {
-  font-family: monospace;
+  font-family: Inconsolata;
   text-align: center;
+  margin: auto;
 }
 
 .feature-container {
@@ -545,7 +547,7 @@ section {
 
 kbd,
 samp {
-    font-family: monospace, monospace;
+    font-family: Inconsolata, monospace;
     font-size: 1em;
 }
 
