@@ -24,8 +24,3 @@ Even at the time, I felt it had more potential, but I had to set it aside to wor
 
 So at the end of 2016, I decided to take a personal sabbatical and use my experience with data to write another version of this tool.
 One that could be used in any terminal, with any data source, with minimal requirements and zero configuration.
-
-## Additional docs
-
-## Help
-

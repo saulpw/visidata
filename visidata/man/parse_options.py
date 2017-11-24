@@ -20,12 +20,15 @@ options_menu_skel = '''.It Sy "{optname:<19}" No "{default}"
 {description}
 '''
 
+visidata.options.plot_colors = ''
+
 with open(fncli, 'w') as cliOut:
     with open(fnopts, 'w') as menuOut:
         opts = visidata.baseOptions.keys()
 
-        colwidth = max((len(optname)+len(str(default))) for optname, default, _, _ in visidata.baseOptions.values())
-        menuOut.write('.Bl -tag -width %s -compact\n' % ('X'*(colwidth+3)))
+        widestoptwidth, widestopt = sorted((len(optname)+len(str(default)), optname) for optname, default, _, _ in visidata.baseOptions.values())[-1]
+        print('widest option+default is "%s", width %d' % (widestopt, widestoptwidth))
+        menuOut.write('.Bl -tag -width %s -compact\n' % ('X'*(widestoptwidth+3)))
 
         cliwidth = max(padding+len(str(default)) for _, default, _, _ in visidata.baseOptions.values())
         cliOut.write('.Bl -tag -width %s -compact\n' % ('X'*(cliwidth+3)))

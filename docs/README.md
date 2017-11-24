@@ -14,4 +14,4 @@ VisiData's architecture is converging on an internal design and API, but it is n
 
 However, if you wish to expand VisiData so that it can work with a new beloved data format, it is not difficult, and we would love to work with you and provide support and direction.
 
-Currently, VisiData supports tsv, csv, hdf5, piping from stdin, mbtiles, postgres, shp, sqlite, xlsx, xls, and zip. We would love to find devs interested in creating loaders for xml, json, pandas dataframes, html, and many others. 
+Currently, VisiData supports tsv, csv, hdf5, piping from stdin, json, mbtiles, postgres, shp, sqlite, xlsx, xls, and zip. We would love to find devs interested in creating loaders for xml, pandas dataframes, html, and many others. 

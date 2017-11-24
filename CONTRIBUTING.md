@@ -5,6 +5,7 @@ VisiData was written for those of us on the edge, with one foot necessarily in t
 ### Code contributions
 
 VisiData has two main branches:
+
 - [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (which should be on pypi).
 - [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
 

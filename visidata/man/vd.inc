@@ -138,12 +138,17 @@ scrolls current row to top/center/bottom of screen
 .
 .It Ic " _" Ns " (underscore)"
 adjusts width of current column
-.It Ic "g_" Ns " (underscore)"
+.It Ic "g_"
 adjusts width of all visible columns
+.It Ic "z_" Ar number
+.No adjusts width of current column to Ar number
 .Pp
-.It Ic - Ns " (hyphen)"
+.It Ic " -" Ns " (hyphen)"
 hides current column (to unhide, go to
 .Sy C Ns olumns sheet and Sy e Ns dit its width)
+.It Ic "z-" Ns
+cuts width of current column in half
+.Pp
 .It Ic \&! Ns
 pins current column on the left as a key column
 .It Ic ^
@@ -285,10 +290,6 @@ opens
 .No saves commandlog to Ar filename.vd No file
 .It Ic "Shift-A" Ar number
 .No opens new blank sheet with Ar number No columns
-.It Ic " m"
-.No opens a canvas graphing current column against key column
-.It Ic "gm"
-.No opens a canvas graphing all visible columns against key column
 .It Ic "Shift-R" Ar number
 opens duplicate sheet with a random population subset of
 .Ar number No rows
@@ -297,6 +298,35 @@ opens duplicate sheet with a random population subset of
 .No adds Ar aggregator No to current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
 .No displays result of Ar aggregator No over values in selected rows for current column
+.Pp
+.El
+.Ss Data Visualization
+.Bl -tag -width XXXXXXXXXXXXX -compact
+.It Ic " ." No (dot)
+.No graphs current numeric column vs key columns. Numeric key column is on the x-axis, while categorical key columns determine color.
+.It Ic "g."
+.No opens a graph of all visible numeric columns vs key column
+.Pp
+.El
+.No If rows on the current sheet represent plottable coordinates (as in .shp or vector .mbtiles sources), Sy "." No plots the current row, and Ic "g." No plots all selected rows (or all rows if none selected).
+.Ss "  Canvas-specific Commands"
+.Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic " +   -"
+increase/decrease zoomlevel, centered on cursor
+.It Ic " s   u"
+selects/unselects rows on source sheet contained within canvas cursor
+.It Ic "gs  gu"
+selects/unselects rows visible on the screen
+.It Ic "Enter"
+pushes source sheet with only rows contained within canvas cursor
+.It Ic "1" No - Ic "9"
+toggles display of layers
+.It Ic "mouse scrollwheel"
+zooms in/out on a canvas
+.It Ic "left click-drag"
+sets canvas cursor
+.It Ic "right click-drag"
+scrolls canvas
 .El
 .Ss Other Commands
 .
@@ -310,7 +340,7 @@ views contents of current cell in a new TextSheet
 toggles text wrap (only on TextSheet)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " ^^ (Ctrl-^)"
+.It Ic " ^^" No (Ctrl-^)
 jumps to previous sheet (swaps with current sheet)
 .It Ic " ^E"
 views traceback for most recent error
@@ -328,6 +358,8 @@ shows version information on status line
 reloads current sheet
 .It Ic "z^R"
 clears cache for current column
+.It Ic " ^Z"
+sends a SIGSTOP
 .
 .El
 .Pp
@@ -378,6 +410,8 @@ opens sheet of current row/cell as Python object
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
 adds column from concatenating selected source columns
+.It Ic " !"
+toggles current column as key on source sheet
 .It Ic "g!"
 toggles selected columns as keys on source sheet
 .It Ic "g+"
@@ -386,6 +420,8 @@ adds aggregator to selected source columns
 adjusts widths of selected columns on source sheet
 .It Ic "g-" No (hyphen)
 hides selected columns on source sheet
+.It Ic " ~  #  %  $  @"
+sets type of current column to str/int/float/currency/date
 .It Ic "g~ g# g% g$ g@"
 sets type of selected columns to str/int/float/currency/date
 .It Ic " Enter"
@@ -429,6 +465,8 @@ edits option
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic " ^Z"
+sends a SIGSTOP
 .It Ic " x"
 replays command in current row
 .It Ic "gx"
@@ -488,7 +526,7 @@ opens sheet of source rows which comprise current pivot cell
 dives further into Python object
 .It Ic "e"
 edits contents of current cell
-.It Ic "\&." No (period)
+.It Ic "w"
 toggles whether methods and hidden properties are shown
 .El
 .
@@ -548,41 +586,45 @@ For example:
 .Ed
 .
 .Sh SUPPORTED SOURCES
-.Bl -inset -compact
-.It Sy tsv No (tab-separated value)
-.El
+These are the supported sources:
+
 .Bl -inset -compact -offset xxx
-.It Plain and simple.  Nm VisiData No writes tsv format by default.
+.It Sy tsv No (tab-separated value)
+.Bl -inset -compact -offset xxx
+.It Plain and simple.  Nm VisiData No writes tsv format by default.  See the Sy --delimiter No option.
+.El
 .El
 .Pp
-.Bl -inset -compact
+.Bl -inset -compact -offset xxx
 .It Sy csv No (comma-separated value)
-.El
 .Bl -inset -compact -offset xxx
 .It .csv files are a scourge upon the earth, and still regrettably common.  See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.
 .El
-.Pp
-.Bl -inset -compact
-.It Sy fixed No (fixed width text)
 .El
+.Pp
+.Bl -inset -compact -offset xxx
+.It Sy fixed No (fixed width text)
 .Bl -inset -compact -offset xxx
 .It Columns are autodetected from the first 1000 rows (adjustable with Sy --fixed-rows Ns ).
 .El
-.Pp
-.Bl -inset -compact -offset xxx
-.It "  " For these multi-table sources, the first sheet is a directory of tables.
-.It "  " Sy Enter No loads the entire table into memory.
 .El
 .Pp
-.Bl -inset -compact -offset xxxxxx
+.Bl -inset -compact
+.It For these multi-table sources, the first sheet is a directory of tables.
+.It Sy Enter No loads the entire table into memory.
+.El
+.Pp
+.Bl -inset -compact -offset xxx
 .It Sy sqlite
 .It Sy xlsx No (requires Sy openpyxl Ns )
 .It Sy xls No (requires Sy xlrd Ns )
 .It Sy hdf5 No (requires Sy h5py Ns )
 .It Sy postgres No (requires Sy psycopg2 Ns )
+.It Sy shp No (requires Sy pyshp Ns )
+.It Sy mbtiles No (vector only, requires Sy mapbox-vector-tile Ns )
 .El
 .
 .Sh AUTHOR
 .Nm VisiData
 was conceived and implemented by
-.An Saul Pwanson Aq Mt visidata@saul.pw Ns .
+.An Saul Pwanson Aq Mt vd@saul.pw Ns .

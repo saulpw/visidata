@@ -112,7 +112,7 @@ nav h2 {
 
 nav a {
     color: #d6cae7;
-    transition: 0.75s linear;
+    transition: 0.2s linear;
 }
 
 nav a:hover {
@@ -139,7 +139,9 @@ a:hover {
     color: #d6cae7;
     font-size: 1em;
     padding: 0.5em;
-    transition: 1s linear;
+    transition: .2s linear;
+    width: 30%;
+    margin: auto;
 }
 
 .button:hover {
@@ -288,7 +290,7 @@ pre {
     display: block;
     padding: 0.5em;
     border: none;
-    max-width: 50em;
+    max-width: 60em;  /* should be half of COLUMNS=### in mkwww.sh */
     margin: 0 auto;
     line-height: 1.5;
 }

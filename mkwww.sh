@@ -48,8 +48,10 @@ $VD/strformat.py body=$BUILDWWW/about/index.body title="About VisiData" head="" 
 
 # Build /man
 echo '<section><pre>' > $BUILD/vd-man-inc.html
-MAN_KEEP_FORMATTING=1 COLUMNS=100 man $MAN/vd.1 | ul | aha --no-header >> $BUILD/vd-man-inc.html
+# <pre> max-width in main.css should be half of COLUMNS=###
+MAN_KEEP_FORMATTING=1 COLUMNS=120 man $MAN/vd.1 | ul | aha --no-header >> $BUILD/vd-man-inc.html
 echo '</pre></section>' >> $BUILD/vd-man-inc.html
+#  Properties of columns on the source sheet can be changed with standard editing commands (e
 $VD/strformat.py body=$BUILD/vd-man-inc.html title="VisiData Quick Reference" head="" < $WWW/template.html > $BUILDWWW/man/index.html
 
 # Build /contributing
@@ -95,6 +97,16 @@ $VD/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" h
 mkdir -p $BUILDWWW/news
 $NEWS/mknews.py $NEWS/news.tsv > $BUILD/news.body
 $VD/strformat.py body=$BUILD/news.body title="VisiData News" head='' < $WWW/template.html > $BUILDWWW/news/index.html
+
+for postpath in `find $NEWS -name '*.md'`; do
+    post=${postpath##$NEWS/}
+    postname=${post%.md}
+    mkdir -p $BUILDWWW/news/$postname
+    posthtml=$BUILDWWW/news/$postname/index
+    pandoc -r markdown -w html -o $posthtml.body $postpath $VD/strformat.py
+    body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    rm -f $posthtml.body
+done
 
 # Build /help
 mkdir -p $BUILDWWW/help
