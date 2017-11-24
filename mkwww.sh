@@ -69,14 +69,14 @@ for tpath in `find $TEST -name '*.yaml'`; do
     tfolder=${tyaml%.yaml}
     mkdir -p $BUILDWWW/test/$tfolder
     $VD/strformat.py body=<($TEST/mkdemo.py $TEST/$tyaml) title="VisiData test: $tfolder" head=$TEST/test-head-inc.html < $WWW/template.html > $BUILDWWW/test/$tfolder/index.html
-# Rewrite this so I am only copying over the relevant html and css
+    # Rewrite this so I am only copying over the relevant html and css
     cp $TEST/$tfolder/*.* $BUILDWWW/test/$tfolder
     cp $TEST/asciinema-player.* $BUILDWWW/test
     cp $TEST/*.css $BUILDWWW/test
 done
 
 # build /docs
-pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $VD/docs/README.md
+pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/docs.md
 $VD/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
 
 # Build /design
