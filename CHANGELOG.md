@@ -1,28 +1,68 @@
 # VisiData version history
+
+# v0.98 (2017-11-23)
+
+- [visidata.org](http://visidata.org) revamp
+
+- [canvas] graphs and maps!
+    - `.` or `g.` to push a graph or a map from the current sheet (dot=plot)
+    - supports .shp and vector .mbtiles
+    - mouse left-click/drag to set cursor
+    - mouse right-click/drag to scroll canvas
+    - scrollwheel to zoom in/out on a canvas
+    - `s`/`u` to select/unselect rows at canvas cursor
+    - `ENTER` to push source sheet with only rows at canvas cursor
+    - 1-9 to toggle display of 'layers' (colors)
+    - `_` to zoom out to full width
+    - `disp_pixel_random` option chooses pixel attrs at random (weighted), instead of most common
+    - `+`/`-` to zoom in/out via keyboard
+
+- Updates to commands
+    - Remove ` (backtick) command
+    - Remove most zscroll commands (`zs`/`ze`)
+        - `zz` moves cursor to center, uncertain about the future of `zt` due to conflict with `t` for toggle
+    - `ga` adds N new rows
+    - `gz=` sets value for selected/all rows to a Python sequence in this column
+    - `z_` sets column width to given value
+    - `z-` cuts column width in half
+    - `P` is now "paste before" (like vim); `R` now pushes a random sample
+    - `^Z` now sends SIGSTOP; `^O` "opens" the external $EDITOR (from builtin line editor)
+    - [ColumnsSheet] Added `~!@#$` commands back, to set type of source columns
+    - `w` is becoming a more universal "visibility toggle"
+        - [TextSheet] `w` toggles wordwrap
+        - [canvas] `w` toggles display of the labels
+        - [pyobj] `w` toggles hidden properties and methods
+
+- Updates to command line args and options
+    - set initial row/col with `+<row#>:<col#>` (numeric only)
+    - `--delimiter`/`-d ` option (separate from `--csv-delimiter`) sets delimiter for tsv filetype
+    - `--replay-wait`/`-w` renamed from `--delay`/`-d`
+    - `disp_date_fmt` option for date display format string (default is date-only)
+    - `zero_is_null`/`empty_is_null`/`none_is_null`/`false_is_null` set which values are considered null (previously was `aggr_null_filter`)
+    - `--skiplines` option renamed to `--skip`, and `--headerlines` to `--header`
+
+- Design improvements
+    - Add specific rowtype for each sheet (see right status)
+    - dates are a kind of numeric type (useful for graphing as the x-axis)
+    - `use_default_colors` (at behest of @wavexx)
+    - more robust Progress indicator
+    - populate DescribeSheet in async thread
+    - remove default names for unnamed columns
+    - history up/down in edit widget now feels right
+
+- API changes
+    - change main Column API to getter(col, row) and setter(col, row, val)
+    - move Path and subclasses out of vdtui
+    - TextSheet source is any iterable of strings
+    - Sheet.filetype provides default save filename extension
+
+
 ## 0.97.1 (2017-10-29)
 - Fix postgres lazy import
 - BugFix: issue #83 - `z?` works on OSX
 - BugFix: <Enter> on SheetsSheets itself now does nothing
 - Move from readthedocs to visidata.org
 
-# next
-
-- change main Column API to getter(col, row) and setter(col, row, val)
-- rename skiplines option to skip
-- rename headerlines option to header
-- move Path and subclasses out of vdtui
-- TextSheet source is any iterable of strings
-- Sheet.filetype provides default save filename extension
-- remove default names for unnamed columns
-- `Shift-R` now opens a new sheet with # randomly selected rows
-- `Shift-P` now pastes above the current row (like vim)
-- add threads column and `^C` to SheetsSheet
-- Bugfix: Joins
-- add `m` and `gm` commands to graph column(s) vs keys
-- history up/down in edit widget now feels right
-- remove default names for unnamed columns
-- add `ga` to add N new rows
-- add `gz=` to set selected/all rows to a Python sequence in this column
 
 ## 0.97 (2017-10-05)
 - Features

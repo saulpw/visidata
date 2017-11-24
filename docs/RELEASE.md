@@ -6,7 +6,7 @@
 
 3. Verify that documentation/docstrings are up-to-date on features and functionality
 
-4. Run ./build.sh and ./mkwww.sh to build the manpage and updated website
+4. Run ./mkwww.sh to build the manpage and updated website
 
 5. Set version number to next most reasonable number (v#.#.#)
 
