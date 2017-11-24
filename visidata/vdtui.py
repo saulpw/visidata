@@ -214,7 +214,7 @@ globalCommand('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 
 globalCommand('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))', 'set current column width to given value', 'width-curcol-input')
 
 globalCommand('-', 'cursorCol.width = 0', 'hide current column', 'width-curcol-zero')
-globalCommand('z-', 'cursorCol.width /= 2', 'reduce column width by half', 'width-curcol-half')
+globalCommand('z-', 'cursorCol.width = cursorCol.width//2', 'reduce column width by half', 'width-curcol-half')
 globalCommand('!', 'toggleKeyColumn(cursorColIndex); cursorRight(+1)', 'pin current column on the left as a key column', 'toggle-curcol-key')
 globalCommand('~', 'cursorCol.type = str', 'set type of current column to str', 'type-curcol-str')
 globalCommand('@', 'cursorCol.type = date', 'set type of current column to date', 'type-curcol-date')
