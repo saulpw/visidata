@@ -1,14 +1,13 @@
 Date	Version	Version_href	Info	Info_href
-2017-10-29	0.97.1	https://github.com/saulpw/visidata/releases/tag/v0.97.1	Release Notes	http://visidata.org/news/0971
-2017-10-06	0.97	https://github.com/saulpw/visidata/releases/tag/v0.97		
+2017-11-23	0.98			
+2017-10-29	0.97.1	https://github.com/saulpw/visidata/releases/tag/v0.97.1	bugfixes	http://visidata.org/news/v0.97.1
+2017-10-06	0.97	https://github.com/saulpw/visidata/releases/tag/v0.97	manpage, replay	http://visidata.org/news/v0.97
 2017-08-23	0.96	https://github.com/saulpw/visidata/releases/tag/v0.96		
-2017-07-30	0.93	https://github.com/saulpw/visidata/releases/tag/v0.93		
+2017-07-30	0.93	https://github.com/saulpw/visidata/releases/tag/v0.93	colorizers	http://visidata.org/news/v0.93
 2017-07-11	0.92	https://github.com/saulpw/visidata/releases/tag/v0.92		
-2017-06-29	0.91	https://github.com/saulpw/visidata/releases/tag/v0.91		
-2017-06-28	0.90	https://github.com/saulpw/visidata/releases/tag/v0.90		
-2017-06-27	0.80	https://github.com/saulpw/visidata/releases/tag/v0.80		
+2017-06-29	0.91	https://github.com/saulpw/visidata/releases/tag/v0.91	public beta	
 2017-06-11	0.61	https://github.com/saulpw/visidata/releases/tag/v0.61		
-2017-06-11	0.60	https://github.com/saulpw/visidata/releases/tag/v0.60		
-2017-01-18	0.41	https://github.com/saulpw/visidata/releases/tag/v0.41		
-2016-11-29	0.31.1	https://github.com/saulpw/visidata/releases/tag/v0.31.1		
-2016-11-29	0.31	https://github.com/saulpw/visidata/releases/tag/v0.31		
+2017-01-18	0.41	https://github.com/saulpw/visidata/releases/tag/v0.41	async loading	
+2017-12-11	0.37	https://www.reddit.com/r/pystats/comments/5hpph6/please_help_test_my_new_cursestextmode_data/		
+2016-11-29	0.31.1	https://github.com/saulpw/visidata/releases/tag/v0.31.1	demo prototype	
+2016-11-13	0.14		first announcement	
