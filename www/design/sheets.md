@@ -1,12 +1,7 @@
 
 ## Sheets
 
-Every displayed screen is an instance of `Sheet`, which manages its:
-
-- [rows](#reload),
-- [columns](/column),
-- [cursor](#cursor), and
-- [display](#display).
+Every displayed screen is an instance of `Sheet`, which manages its [rows](#reload), [columns](/column), [cursor](#cursor), and [display](#display).
 
 These will each be described in detail below.  [See the API reference](/api/Sheet) for the full API.
 
@@ -34,21 +29,19 @@ If this code is [loaded](/design/addons), pressing `1` will push a fresh instanc
 
 #### 1. Gather the name and sources for the constructor
 
-##### `Sheet(name, *sources, **kwargs)`
+##### `Sheet(name, **kwargs)`
 
-The constructor of a sheet always takes a name (str), and usually one or more `sources`.  Additional Sheet parameters are passed via `kwargs`.  (In fact, any unknown kwargs are made available as attributes on the Sheet instance.)
+The constructor of a sheet should always take a `name` (str).  Additional Sheet parameters are passed via `kwargs`, and will be made available as attributes on the Sheet instance.
 
-##### sources
+The `source` of a Sheet is usually passed into the constructor.  For a sheet loaded from a file, the source will be a [`Path`](/api/Path) object.
 
-sources are available via self.sources, with self.source (no plural) being an alias for the first source.
-
-The `source` of a sheet loaded from a file is a [`Path`](/api/Path).
-
-Derived sheets will have other `Sheet`s as `sources`.
+Derived sheets will have other `Sheet` instances as their `source`.
 
 But really, the source needed is dependent on that Sheet's `reload()` which collects the data.
 
-#### 2. Collect `rows` in `Sheet.reload()` [name=reload]
+#### 2. Collect `rows` in `Sheet.reload()`
+
+The `reload()` member on a Sheet must populate the 
 
 #### 3. Enumerate the `columns`
 

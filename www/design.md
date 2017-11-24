@@ -1,6 +1,5 @@
 ## The Design of VisiData: Foundations {#TOC}
 
-0. [About Visidata](/about)
 1. [Architecture Overview](/design/overview)
 2. [Design Goals](/design/goals)
 3. [Sheets](/design/sheets)
@@ -18,11 +17,12 @@
 7. [Loaders](/design/loaders)
 8. [Hooks](/design/hooks)
 9. [Row selection](/design/selected)
-10. [@async](/design/async)
+10. [`@async`](/design/async)
 11. [Colorizers](/design/color)
 12. [Options](/design/options)
-    i. [Builtin line editor](/design/editor)
-    ii. [API Reference](/design/api)
+13. [Builtin line editor](/design/editor)
+
+II. [API Reference](/design/api)
 
 <!-- end of list -->
 

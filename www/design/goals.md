@@ -1,13 +1,18 @@
 # Primary Motivation
 
-The original impetus was to provide efficient workflows for text mode junkies like myself.
+The original impetus behind VisiData was to provide more efficient workflows for text mode junkies like myself.
 
 As a data worker, I wanted quick access to data at all stages of the pipeline, with support for all kinds of storage systems and formats.
-I wanted to be able to focus on the task at hand, without having to spend unnecessary energy juggling various tools.
+I wanted to be able to focus on the task at hand, without having to spend energy installing or configuring specialized tools just to get a glimpse of the underlying data.
+
+Often I would manage to get what I needed through a combination of UNIX utilities and ad-hoc Python scripts.
+But this is like trying to make a microscope from a series of magnifying glasses.
+
+I longed for something more powerful and more efficient.
 
 # Design Goals
 
-## for Data Engineers and Hackers
+## For Data Engineers and Hackers
 
 * Pragmatic behavior and defaults.
 * Expose internals, like error messages and types.
