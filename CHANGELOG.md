@@ -1,4 +1,9 @@
 # VisiData version history
+## 0.97.1 (2017-10-29)
+- Fix postgres lazy import
+- BugFix: issue #83 - `z?` works on OSX
+- BugFix: <Enter> on SheetsSheets itself now does nothing
+- Move from readthedocs to visidata.org
 
 # next
 
