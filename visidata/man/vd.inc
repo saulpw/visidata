@@ -154,7 +154,7 @@ pins current column on the left as a key column
 .It Ic ^
 edits name of current column
 .It Ic "~  #  %  $  @"
-sets type of current column to str/int/float/currency/date
+sets type of current column to untyped/int/float/currency/date
 .Pp
 .It Ic "  =" Ar expr
 .No creates new column from Python Ar expr Ns , with column names as variables
@@ -421,9 +421,9 @@ adjusts widths of selected columns on source sheet
 .It Ic "g-" No (hyphen)
 hides selected columns on source sheet
 .It Ic " ~  #  %  $  @"
-sets type of current column to str/int/float/currency/date
+sets type of current column to untyped/int/float/currency/date
 .It Ic "g~ g# g% g$ g@"
-sets type of selected columns to str/int/float/currency/date
+sets type of selected columns to untyped/int/float/currency/date
 .It Ic " Enter"
 .No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .El

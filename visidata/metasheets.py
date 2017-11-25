@@ -31,7 +31,7 @@ columnCommands = [
         Command('#', 'cursorRow.type = int', 'set type of source column to int'),
         Command('@', 'cursorRow.type = date', 'set type of source column to date'),
         Command('$', 'cursorRow.type = currency', 'set type of source column to currency'),
-        Command('~', 'cursorRow.type = str', 'set type of source column to str'),
+        Command('~', 'cursorRow.type = anytype', 'unset type of current column'),
 
         Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'toggle selected columns as keys on source sheet'),
         Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected source columns on source sheet'),
@@ -40,7 +40,7 @@ columnCommands = [
         Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'set type of selected source columns to int'),
         Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'set type of selected source columns to date'),
         Command('g$', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = currency', 'set type of selected columns to currency'),
-        Command('g~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = str', 'set type of selected columns to str'),
+        Command('g~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = anytype', 'unset type of selected columns'),
     ]
 
 ColumnsSheet.commands += columnCommands + [
