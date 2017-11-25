@@ -587,7 +587,7 @@ For example:
 .
 .Sh SUPPORTED SOURCES
 These are the supported sources:
-
+.
 .Bl -inset -compact -offset xxx
 .It Sy tsv No (tab-separated value)
 .Bl -inset -compact -offset xxx
