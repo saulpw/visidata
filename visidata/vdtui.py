@@ -1331,6 +1331,10 @@ class Sheet:
             moveListItem(self.columns, colidx, self.nKeys)
             return 0
 
+    def rowkey(self, row):
+        'returns a tuple of the key for the given row'
+        return tuple(c.getValue(row) for c in self.keyCols)
+
     def moveToNextRow(self, func, reverse=False):
         'Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria.'
         rng = range(self.cursorRowIndex-1, -1, -1) if reverse else range(self.cursorRowIndex+1, self.nRows)

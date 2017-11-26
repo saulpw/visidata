@@ -67,6 +67,7 @@ class PbfSheet(Sheet):
         Column('geometry_coords', getter=lambda col,row: row[1]['geometry']['coordinates']),
         Column('geometry_coords_depth', getter=lambda col,row: getListDepth(row[1]['geometry']['coordinates'])),
     ]
+    nKeys = 1  # layer
     commands = [
         Command('.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow]))', 'plot this row only'),
         Command('g.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows))', 'plot as map'),
@@ -92,22 +93,23 @@ class PbfCanvas(InvertedYGridCanvas):
             geom = feat['geometry']
             t = geom['type']
             coords = geom['coordinates']
+            key = self.source.rowkey(r)
 
             if t == 'LineString':
-                self.polyline(coords, self.plotColor((layername,)), r)
+                self.polyline(coords, self.plotColor(key), r)
             elif t == 'Point':
                 x, y = coords
-                self.point(x, y, self.plotColor((layername,)), r)
+                self.point(x, y, self.plotColor(key), r)
             elif t == 'Polygon':
                 for poly in coords:
-                    self.polygon(poly, self.plotColor((layername,)), r)
+                    self.polygon(poly, self.plotColor(key), r)
             elif t == 'MultiLineString':
                 for line in coords:
-                    self.polyline(line, self.plotColor((layername,)), r)
+                    self.polyline(line, self.plotColor(key), r)
             elif t == 'MultiPolygon':
                 for mpoly in coords:
                     for poly in mpoly:
-                        self.polygon(poly, self.plotColor((layername,)), r)
+                        self.polygon(poly, self.plotColor(key), r)
             else:
                 assert False, t
 
