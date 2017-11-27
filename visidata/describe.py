@@ -53,6 +53,7 @@ class DescribeSheet(Sheet):
         Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),
     ]
 
+    @async
     def reload(self):
         self.rows = list(self.source.columns)  # column deleting/reordering here does not affect actual columns
         self.describeData = { col: {} for col in self.source.columns }
