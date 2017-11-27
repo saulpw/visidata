@@ -19,6 +19,11 @@ option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of
 option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
 option('zoom_incr', 2.0, 'amount to multiply current zoomlevel by when zooming')
 
+def anySelected(vs, rows):
+    for r in rows:
+        if vs.isSelected(r):
+            return True
+
 # pixels covering whole actual terminal
 #  - width/height are exactly equal to the number of pixels displayable, and can change at any time.
 #  - needs to refresh from source on resize
@@ -136,8 +141,13 @@ class PixelCanvas(Sheet):
     def getPixelAttrMost(self, x, y):
         'most common attr at this pixel.'
         r = self.pixels[y][x]
-        c = sorted((len(rows), attr) for attr, rows in r.items() if attr not in self.disabledAttrs)
-        return c[-1][1] if c else 0
+        c = sorted((len(rows), attr, rows) for attr, rows in r.items() if attr not in self.disabledAttrs)
+        if not c:
+            return 0
+        _, attr, rows = c[-1]
+        if anySelected(self.source, rows):
+            attr, _ = colors.update(attr, 8, 'bold', 10)
+        return attr
 
     def togglePixelAttrs(self, attr):
         if attr in self.disabledAttrs:
