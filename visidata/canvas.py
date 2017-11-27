@@ -9,6 +9,40 @@ option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of
 option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
 option('zoom_incr', 2.0, 'amount to multiply current zoomlevel by when zooming')
 
+
+def clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax):
+    'Liang-Barsky algorithm, returns [xn1,yn1,xn2,yn2] of clipped line within given area, or None'
+    dx = x2-x1
+    dy = y2-y1
+    pq = [
+        (-dx, x1-xmin),  # left
+        ( dx, xmax-x1),  # right
+        (-dy, y1-ymin),  # bottom
+        ( dy, ymax-y1),  # top
+    ]
+
+    u1, u2 = 0, 1
+    for p, q in pq:
+        if p < 0:  # from outside to inside
+            u1 = max(u1, q/p)
+        elif p > 0:  # from inside to outside
+            u2 = min(u2, q/p)
+        else: #  p == 0:  # parallel to bbox
+            if q < 0:  # completely outside bbox
+                return None
+
+    if u1 > u2:  # completely outside bbox
+        return None
+
+    xn1 = x1 + dx*u1
+    yn1 = y1 + dy*u1
+
+    xn2 = x1 + dx*u2
+    yn2 = y1 + dy*u2
+
+    return xn1, yn1, xn2, yn2
+
+
 def anySelected(vs, rows):
     for r in rows:
         if vs.isSelected(r):
@@ -41,39 +75,6 @@ class Plotter(Sheet):
 
     def plotpixel(self, x, y, attr, row=None):
         self.pixels[y][x][attr].append(row)
-
-    @staticmethod
-    def clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax):
-        'Liang-Barsky algorithm'
-        dx = x2-x1
-        dy = y2-y1
-        pq = [
-            (-dx, x1-xmin),  # left
-            ( dx, xmax-x1),  # right
-            (-dy, y1-ymin),  # bottom
-            ( dy, ymax-y1),  # top
-        ]
-
-        u1, u2 = 0, 1
-        for p, q in pq:
-            if p < 0:  # from outside to inside
-                u1 = max(u1, q/p)
-            elif p > 0:  # from inside to outside
-                u2 = min(u2, q/p)
-            else: #  p == 0:  # parallel to bbox
-                if q < 0:  # completely outside bbox
-                    return None
-
-        if u1 > u2:  # completely outside bbox
-            return None
-
-        xn1 = x1 + dx*u1
-        yn1 = y1 + dy*u1
-
-        xn2 = x1 + dx*u2
-        yn2 = y1 + dy*u2
-
-        return xn1, yn1, xn2, yn2
 
     def plotline(self, x1, y1, x2, y2, attr, row=None):
         for x, y in self.iterline(x1, y1, x2, y2):
@@ -607,7 +608,7 @@ class Canvas(Plotter):
                     self.plotpixel(x, y, attr, row)
 
         for x1, y1, x2, y2, attr, row in Progress(self.gridlines):
-            r = self.clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax)
+            r = clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax)
             if r:
                 x1, y1, x2, y2 = r
                 x1 = gridxmin+(x1-xmin)*xfactor
