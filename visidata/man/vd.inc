@@ -598,7 +598,9 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy csv No (comma-separated value)
 .Bl -inset -compact -offset xxx
-.It .csv files are a scourge upon the earth, and still regrettably common.  See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.
+.It .csv files are a scourge upon the earth, and still regrettably common.  
+.It See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.  
+.It Accepted dialects are Ic excel-tab Ns , Ic unix Ns , and Ic excel Ns .
 .El
 .El
 .Pp
