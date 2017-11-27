@@ -59,7 +59,7 @@ replays in batch mode (with no interface)
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pauses/resumes replay
-.It Sy Space
+.It Sy Tab
 executes next row in replaying sheet
 .It Sy ^K
 cancels current replay
@@ -154,7 +154,7 @@ pins current column on the left as a key column
 .It Ic ^
 edits name of current column
 .It Ic "~  #  %  $  @"
-sets type of current column to str/int/float/currency/date
+sets type of current column to untyped/int/float/currency/date
 .Pp
 .It Ic "  =" Ar expr
 .No creates new column from Python Ar expr Ns , with column names as variables
@@ -421,9 +421,13 @@ adjusts widths of selected columns on source sheet
 .It Ic "g-" No (hyphen)
 hides selected columns on source sheet
 .It Ic " ~  #  %  $  @"
-sets type of current column to str/int/float/currency/date
+sets type of current column on source sheet to str/int/float/currency/date
 .It Ic "g~ g# g% g$ g@"
-sets type of selected columns to str/int/float/currency/date
+sets type of selected columns on source sheet to str/int/float/currency/date
+.It Ic "z~"
+sets type of current column on source sheet to anytype
+.It Ic "gz~"
+sets type of selected columns on source sheet to anytype
 .It Ic " Enter"
 .No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .El
@@ -746,7 +750,9 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy csv No (comma-separated value)
 .Bl -inset -compact -offset xxx
-.It .csv files are a scourge upon the earth, and still regrettably common.  See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.  Accepted dialects are Ic excel-tab Ns , Ic unix Ns , and Ic excel Ns .
+.It .csv files are a scourge upon the earth, and still regrettably common.  
+.It See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.  
+.It Accepted dialects are Ic excel-tab Ns , Ic unix Ns , and Ic excel Ns .
 .El
 .El
 .Pp

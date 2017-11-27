@@ -421,9 +421,13 @@ adjusts widths of selected columns on source sheet
 .It Ic "g-" No (hyphen)
 hides selected columns on source sheet
 .It Ic " ~  #  %  $  @"
-sets type of current column to untyped/int/float/currency/date
+sets type of current column on source sheet to str/int/float/currency/date
 .It Ic "g~ g# g% g$ g@"
-sets type of selected columns to untyped/int/float/currency/date
+sets type of selected columns on source sheet to str/int/float/currency/date
+.It Ic "z~"
+sets type of current column on source sheet to anytype
+.It Ic "gz~"
+sets type of selected columns on source sheet to anytype
 .It Ic " Enter"
 .No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .El
