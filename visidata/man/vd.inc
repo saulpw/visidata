@@ -59,7 +59,7 @@ replays in batch mode (with no interface)
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pauses/resumes replay
-.It Sy Space
+.It Sy Tab
 executes next row in replaying sheet
 .It Sy ^K
 cancels current replay
