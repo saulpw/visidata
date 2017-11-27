@@ -147,6 +147,12 @@ class PixelCanvas(Sheet):
         self.plotlegends()
 
     def getRowsInside(self, x1, y1, x2, y2):
+        ret = {}
+        for r in self.genRowsInside(x1, y1, x2, y2):
+            ret[id(r)] = r
+        return list(ret.values())
+
+    def genRowsInside(self, x1, y1, x2, y2):
         for y in range(y1, y2):
             for x in range(x1, x2):
                 for attr, rows in self.pixels[y][x].items():
