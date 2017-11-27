@@ -10,7 +10,16 @@ globalCommand("zg'", "gz'")
 
 def StaticColumn(rows, col):
     c = deepcopy(col)
-    frozenData = {id(r):col.getValue(r) for r in rows}
+    frozenData = {}
+    @async
+    def _calcRows(sheet):
+        for r in Progress(rows):
+            try:
+                frozenData[id(r)] = col.getValue(r)
+            except Exception as e:
+                frozenData[id(r)] = e
+
+    _calcRows(col.sheet)
     c.calcValue=lambda row,d=frozenData: d[id(row)]
     c.setter=lambda col,row,val,d=frozenData: setitem(d, id(row), val)
     c.name = c.name + '_frozen'
