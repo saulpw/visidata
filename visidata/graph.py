@@ -92,8 +92,9 @@ class GraphSheet(InvertedYGridCanvas):
                     k = tuple(c.getValue(row) for c in catcols) if catcols else (ycol.name,)
                     attr = self.plotColor(k)
 
-                    graph_x = float(numcol.getTypedValue(row)) if self.xcols else rownum
-                    graph_y = ycol.getTypedValue(row)
+                    # convert deliberately to float (to e.g. linearize date)
+                    graph_x = float(numcol.type(numcol.getValue(row))) if self.xcols else rownum
+                    graph_y = ycol.type(ycol.getValue(row))
 
                     self.point(graph_x, graph_y, attr, row)
                     nplotted += 1
