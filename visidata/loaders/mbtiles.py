@@ -84,7 +84,7 @@ class PbfSheet(Sheet):
             self.addColumn(Column(key, getter=lambda col,row,key=key: row[1]['properties'][key]))
 
 
-class PbfCanvas(InvertedYGridCanvas):
+class PbfCanvas(InvertedCanvas):
     aspectRatio = 1.0
     @async
     def reload(self):
