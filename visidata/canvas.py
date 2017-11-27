@@ -96,17 +96,18 @@ class PixelCanvas(Sheet):
         xdir = 1 if x1 <= x2 else -1
         ydir = 1 if y1 <= y2 else -1
 
-        r = round(max(xdiff, ydiff))
-
+        r = max(xdiff, ydiff)
         if r == 0:  # point, not line
             yield x1, y1
         else:
             x, y = x1, y1
-            for i in range(r+1):
+            i = 0
+            while i <= r:
                 x += xdir * xdiff / r
                 y += ydir * ydiff / r
 
                 yield x, y
+                i += 1
 
     def plotlabel(self, x, y, text, attr):
         self.labels.append((x, y, text, attr))
