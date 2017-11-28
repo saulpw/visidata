@@ -281,7 +281,7 @@ class Canvas(Plotter):
         Command('J', 'sheet.cursorBox.h += canvasCharHeight', ''),
         Command('K', 'sheet.cursorBox.h -= canvasCharHeight', ''),
 
-        Command('zz', 'zoomTo(cursorBox.xmin, cursorBox.ymin, cursorBox.xmax, cursorBox.ymax)', 'set visible bounds to cursor'),
+        Command('zz', 'zoomTo(cursorBox)', 'set visible bounds to cursor'),
 
         Command('-', 'tmp=(cursorBox.xcenter, cursorBox.ycenter); setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewCenterX, plotviewCenterY, *tmp)', 'zoom into cursor center'),
         Command('+', 'tmp=(cursorBox.xcenter, cursorBox.ycenter); setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewCenterX, plotviewCenterY, *tmp)', 'zoom into cursor center'),
@@ -456,9 +456,10 @@ class Canvas(Plotter):
         self.visibleBox.ymin = canvas_y - self.gridH(plotter_y-self.plotviewMinY)
         self.refresh()
 
-    def zoomTo(self, x1, y1, x2, y2):
-        self.fixPoint(self.plotviewMinX, self.plotviewMinY, x1, y1)
-        self.zoomlevel=max(self.cursorBox.w/self.canvasBox.w, self.cursorBox.h/self.canvasBox.h)
+    def zoomTo(self, bbox):
+        'set visible area to bbox, maintaining aspectRatio if applicable'
+        self.fixPoint(self.plotviewMinX, self.plotviewMinY, bbox.xmin, bbox.ymin)
+        self.zoomlevel=max(bbox.w/self.canvasBox.w, bbox.h/self.canvasBox.h)
 
     def setZoom(self, zoomlevel=None):
         if zoomlevel:
@@ -527,7 +528,7 @@ class Canvas(Plotter):
         yratio = self.plotviewHeight/(self.canvasBox.h*self.zoomlevel)
         if self.aspectRatio:
             xratio = self.plotviewWidth/(self.canvasBox.w*self.zoomlevel)
-            return self.aspectRatio*min(xratio, yratio)
+            return min(xratio, yratio)
         else:
             return yratio
 

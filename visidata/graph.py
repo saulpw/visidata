@@ -24,9 +24,9 @@ class InvertedCanvas(Canvas):
         Command('K', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height'),
     ]
 
-    def zoomTo(self, x1, y1, x2, y2):
-        self.fixPoint(self.plotviewMinX, self.plotviewMaxY, x1, y1)
-        self.zoomlevel=max(self.cursorBox.w/self.canvasBox.w, self.cursorBox.h/self.canvasBox.h)
+    def zoomTo(self, bbox):
+        super().zoomTo(bbox)
+        self.fixPoint(self.plotviewMinX, self.plotviewMaxY, bbox.xmin, bbox.ymin)
 
     def plotpixel(self, x, y, attr, row=None):
         y = self.plotviewMaxY-y+4
