@@ -59,7 +59,7 @@ globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplay
 globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open input in VisiData')
 globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
 
-globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluate Python expression on current row and display result on status line')
+globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(input("set cell=", "expr")))', 'evaluate Python expression and set current cell to result')
 
 globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr"))): cursorCol.setValue(r, v)', 'set selected rows in this column to the values in the given Python sequence expression')
 

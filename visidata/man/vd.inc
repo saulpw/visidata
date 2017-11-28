@@ -160,13 +160,12 @@ sets type of current column to untyped/int/float/currency/date
 .No creates new column from Python Ar expr Ns , with column names as variables
 .It Ic " g=" Ar expr
 .No sets current column for selected rows to result of Python Ar expr
-.It Ic "gz=" Ar iterable
-.No sets selected rows in current column to the results of a Python Ar iterable
+.It Ic "gz=" Ar expr
+.No sets current column for selected rows to the items in result of Python iterable Ar expr
+.It Ic " z=" Ar expr
+.No sets current cell to result of evaluated Python Ar expr No on current row
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " z=" Ar expr
-.No evaluates Python Ar expr No on current row and displays result on status line
-.Pp
 .It Ic " g^"
 sets names of all visible columns to contents of current row
 .It Ic " z^"
@@ -366,10 +365,14 @@ sends a SIGSTOP
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "^P"
 .No opens Sy Status History
-.It Ic "^X"
-evalutes Python expression and opens sheet for browsing resulting Python object
-.It Ic "^Y  z^Y"
-opens sheet of current row/cell as Python object
+.It Ic " ^Y  z^Y  g^Y"
+opens current row/cell/sheet as Python object
+.It Ic " ^X" Ar expr
+opens result of evaluated Python Ar expr as python object
+.It Ic "z^X" Ar expr
+.No evaluates Python Ar expr No on current row and shows result on status line
+.It Ic "g^X" Ar stmt
+.No executes Python Ar stmt No in the global context
 .El
 .
 .Ss Internal Sheets List
