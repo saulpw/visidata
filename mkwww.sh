@@ -103,8 +103,8 @@ for postpath in `find $NEWS -name '*.md'`; do
     postname=${post%.md}
     mkdir -p $BUILDWWW/news/$postname
     posthtml=$BUILDWWW/news/$postname/index
-    pandoc -r markdown -w html -o $posthtml.body $postpath $VD/strformat.py
-    body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    pandoc -r markdown -w html -o $posthtml.body $postpath
+    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
     rm -f $posthtml.body
 done
 
