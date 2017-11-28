@@ -26,31 +26,26 @@ class InvertedCanvas(Canvas):
 
     def zoomTo(self, bbox):
         super().zoomTo(bbox)
-        self.fixPoint(self.plotviewMinX, self.plotviewMaxY, bbox.xmin, bbox.ymin)
+        self.fixPoint(self.plotviewBox.xmin, self.plotviewBox.ymax, bbox.xymin)
 
     def plotpixel(self, x, y, attr, row=None):
-        y = self.plotviewMaxY-y+4
+        y = self.plotviewBox.ymax-y+4
         self.pixels[y][x][attr].append(row)
 
-    def scaleY(self, grid_y):
-        'returns canvas y coordinate, with y-axis inverted'
-        canvas_y = super().scaleY(grid_y)
-        return (self.plotviewMaxY-canvas_y+4)
+    def scaleY(self, canvasY):
+        'returns plotter y coordinate, with y-axis inverted'
+        plotterY = super().scaleY(canvasY)
+        return (self.plotviewBox.ymax-plotterY+4)
 
-    def gridY(self, canvas_y):
-        return (self.plotviewMaxY-canvas_y)/self.yScaler
-
-    def fixPoint(self, plotter_x, plotter_y, canvas_x, canvas_y):
-        'adjust visible so that (grid_x, grid_y) is plotted at (canvas_x, canvas_y)'
-        self.visibleBox.xmin = canvas_x - self.gridW(plotter_x-self.plotviewMinX)
-        self.visibleBox.ymin = canvas_y - self.gridH(self.plotviewMaxY-plotter_y)
-        self.refresh()
+    def canvasH(self, plotterY):
+        return (self.plotviewBox.ymax-plotterY)/self.yScaler
 
     @property
     def canvasMouseXY(self):
         p = super().canvasMouseXY
-        p.y = self.visibleBox.ymin + (self.plotviewMaxY-self.plotterMouseY)/self.yScaler
+        p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouseY)/self.yScaler
         return p
+
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
@@ -109,15 +104,15 @@ class GraphSheet(InvertedCanvas):
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors[options.color_graph_axis]
-        self.plotlabel(0, self.plotviewMinY + (1.0-frac)*self.plotviewHeight, txt, attr)
+        self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
 
     def add_x_axis_label(self, frac):
         amt = self.visibleBox.xmin + frac*self.visibleBox.w
         txt = ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
 
-        # plot x-axis labels below the plotviewMaxY, but within the plotview width-wise
+        # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors[options.color_graph_axis]
-        self.plotlabel(self.plotviewMinX+frac*self.plotviewWidth, self.plotviewMaxY+4, txt, attr)
+        self.plotlabel(self.plotviewBox.xmin+frac*self.plotviewBox.w, self.plotviewBox.ymax+4, txt, attr)
 
     def plotAll(self):
         super().plotAll()
@@ -143,4 +138,4 @@ class GraphSheet(InvertedCanvas):
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
-        self.plotlabel(0, self.plotviewMaxY+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])
+        self.plotlabel(0, self.plotviewBox.ymax+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])
