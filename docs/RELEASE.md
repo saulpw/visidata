@@ -65,25 +65,29 @@
 
     b. otherwise, clean out the branch
 
-12. Comb through issues and close the ones that have been solved, referencing the version number
 
-13. Push stable to pypi
+12. Push stable to pypi
 
 ```
 twine upload dist/*
 ```
 
-14. Test install/upgrade from pypi
+13. Test install/upgrade from pypi
 
    a. build and check readthedocs/stable
 
    b. Ask someone else to test install
 
-15. Create a tag `v#.#.#` for that commit
+14. Create a tag `v#.#.#` for that commit
 ```
 git tag v#.#.#
 git push --tags
 ```
+
+15. Push code to stable
+
 16. Write up the release notes and post at visidata.org/release/#.#
 
-17. Post link to release notes on r/visidata and have some ice cream
+17. Comb through issues and close the ones that have been solved, referencing the version number
+
+18. Post release notes on r/visidata and tinyletter and have some ice cream
