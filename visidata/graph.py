@@ -14,25 +14,23 @@ def numericCols(cols):
 class InvertedCanvas(Canvas):
     commands = Canvas.commands + [
         # swap directions of up/down
-        Command('move-up', 'sheet.cursorMinY += cursorHeight', 'move cursor up'),
-        Command('move-down', 'sheet.cursorMinY -= cursorHeight', 'move cursor down'),
+        Command('move-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up'),
+        Command('move-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down'),
 
-        Command('zj', 'sheet.cursorMinY -= charGridHeight', 'move cursor down one line'),
-        Command('zk', 'sheet.cursorMinY += charGridHeight', 'move cursor up one line'),
+        Command('zj', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor down one line'),
+        Command('zk', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor up one line'),
 
-        Command('J', 'sheet.cursorHeight -= charGridHeight', 'decrease cursor height'),
-        Command('K', 'sheet.cursorHeight += charGridHeight', 'increase cursor height'),
-
-        Command('zz', 'zoomTo(cursorMinX, cursorMinY, cursorMaxX, cursorMaxY)', 'set visible bounds to cursor'),
+        Command('J', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height'),
+        Command('K', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height'),
     ]
 
     def zoomTo(self, x1, y1, x2, y2):
         self.fixPoint(self.plotviewMinX, self.plotviewMaxY, x1, y1)
-        self.zoomlevel=max(self.cursorWidth/self.gridWidth, self.cursorHeight/self.gridHeight)
+        self.zoomlevel=max(self.cursorBox.w/self.canvasBox.w, self.cursorBox.h/self.canvasBox.h)
 
     def plotpixel(self, x, y, attr, row=None):
         y = self.plotviewMaxY-y+4
-        self.pixels[round(y)][round(x)][attr].append(row)
+        self.pixels[y][x][attr].append(row)
 
     def scaleY(self, grid_y):
         'returns canvas y coordinate, with y-axis inverted'
@@ -42,30 +40,17 @@ class InvertedCanvas(Canvas):
     def gridY(self, canvas_y):
         return (self.plotviewMaxY-canvas_y)/self.yScaler
 
-    def fixPoint(self, canvas_x, canvas_y, grid_x, grid_y):
+    def fixPoint(self, plotter_x, plotter_y, canvas_x, canvas_y):
         'adjust visible so that (grid_x, grid_y) is plotted at (canvas_x, canvas_y)'
-        self.visibleMinX = grid_x - self.gridW(canvas_x-self.plotviewMinX)
-        self.visibleMinY = grid_y - self.gridH(self.plotviewMaxY-canvas_y)
+        self.visibleBox.xmin = canvas_x - self.gridW(plotter_x-self.plotviewMinX)
+        self.visibleBox.ymin = canvas_y - self.gridH(self.plotviewMaxY-plotter_y)
         self.refresh()
 
     @property
-    def canvasMouseY(self):
-        return self.visibleMinY + (self.plotviewMaxY-self.plotterMouseY)/self.yScaler
-
-    @property
-    def cursorPixelBounds(self):
-        x1, y1, x2, y2 = super().cursorPixelBounds
-        return x1, y2, x2, y1  # reverse top/bottom
-
-    @property
-    def visiblePixelBounds(self):
-        'invert y-axis'
-        return [ self.scaleX(self.visibleMinX),
-                 self.scaleY(self.visibleMaxY),
-                 self.scaleX(self.visibleMaxX),
-                 self.scaleY(self.visibleMinY),
-        ]
-
+    def canvasMouseXY(self):
+        p = super().canvasMouseXY
+        p.y = self.visibleBox.ymin + (self.plotviewMaxY-self.plotterMouseY)/self.yScaler
+        return p
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
@@ -114,10 +99,10 @@ class GraphSheet(InvertedCanvas):
         self.createLabels()
 
     def add_y_axis_label(self, frac):
-        amt = self.visibleMinY + frac*(self.visibleHeight)
-        if isinstance(self.gridMinY, int):
+        amt = self.visibleBox.ymin + frac*self.visibleBox.h
+        if isinstance(self.canvasBox.ymin, int):
             txt = '%d' % amt
-        elif isinstance(self.gridMinY, float):
+        elif isinstance(self.canvasBox.ymin, float):
             txt = '%.02f' % amt
         else:
             txt = str(frac)
@@ -127,7 +112,7 @@ class GraphSheet(InvertedCanvas):
         self.plotlabel(0, self.plotviewMinY + (1.0-frac)*self.plotviewHeight, txt, attr)
 
     def add_x_axis_label(self, frac):
-        amt = self.visibleMinX + frac*self.visibleWidth
+        amt = self.visibleBox.xmin + frac*self.visibleBox.w
         txt = ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
 
         # plot x-axis labels below the plotviewMaxY, but within the plotview width-wise
