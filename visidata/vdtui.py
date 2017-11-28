@@ -53,6 +53,10 @@ class EscapeException(BaseException):
     'Inherits from BaseException to avoid "except Exception" clauses.  Do not use a blanket "except:" or the task will be uncancelable.'
     pass
 
+class ExpectedException(Exception):
+    'an expected exception'
+    pass
+
 baseCommands = collections.OrderedDict()  # [cmd.name] -> Command
 baseOptions = collections.OrderedDict()   # [opt.name] -> opt
 
@@ -203,7 +207,7 @@ globalCommand('REPORT_MOUSE_POSITION', 'cursorDown(-options.scroll_incr); sheet.
 globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
 globalCommand('^G', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
 globalCommand('^V', 'status(__version__)', 'show version information on status line')
-globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory))', 'open Status History sheet')
+globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses"))', 'open Status History sheet')
 
 globalCommand('<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")', 'move up the current column to the next value')
 globalCommand('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")', 'move down the current column to the next value')
@@ -370,8 +374,9 @@ def joinSheetnames(*sheetnames):
     return '_'.join(str(x) for x in sheetnames)
 
 def error(s):
-    'Return custom exception as function, for use with `lambda` and `eval`.'
-    raise Exception(s)
+    'Raise an expection.'
+    status(s)
+    raise ExpectedException(s)
 
 def status(*args):
     'Return status property via function call.'
@@ -405,8 +410,8 @@ def vd():
     'Return VisiData singleton, which contains all global context'
     return VisiData()
 
-def exceptionCaught(status=True):
-    return vd().exceptionCaught(status)
+def exceptionCaught(e, **kwargs):
+    return vd().exceptionCaught(e, **kwargs)
 
 def stacktrace():
     return traceback.format_exc().strip().splitlines()
@@ -511,8 +516,8 @@ class VisiData:
         for f in self.hooks[hookname]:
             try:
                 r.append(f(*args, **kwargs))
-            except Exception:
-                exceptionCaught()
+            except Exception as e:
+                exceptionCaught(e)
         return r
 
     def addThread(self, t, endTime=None):
@@ -544,8 +549,7 @@ class VisiData:
             t.status += 'aborted by user'
             status('%s aborted' % t.name)
         except Exception as e:
-            t.status += status('%s: %s' % (type(e).__name__, ' '.join(str(x) for x in e.args)))
-            exceptionCaught()
+            exceptionCaught(e)
 
         t.sheet.currentThreads.remove(t)
         return ret
@@ -678,8 +682,10 @@ class VisiData:
 
         status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
-    def exceptionCaught(self, status=True):
+    def exceptionCaught(self, exc=None, status=True):
         'Maintain list of most recent errors and return most recent one.'
+        if isinstance(exc, ExpectedException):  # already reported, don't log
+            return
         self.lastErrors.append(stacktrace())
         if status:
             return self.status(self.lastErrors[-1][-1])  # last line of latest error
@@ -693,7 +699,7 @@ class VisiData:
             attr = colors[options.color_status]
             _clipdraw(scr, self.windowHeight-1, 0, lstatus, attr, self.windowWidth)
         except Exception as e:
-            self.exceptionCaught()
+            self.exceptionCaught(e)
 
     def drawRightStatus(self, scr, vs):
         'Draw right side of status bar.'
@@ -707,7 +713,7 @@ class VisiData:
                     attr = colors[color]
                     _clipdraw(scr, self.windowHeight-1, rightx, rstatus, attr, len(rstatus))
                 except Exception as e:
-                    self.exceptionCaught()
+                    self.exceptionCaught(e)
 
         curses.doupdate()
 
@@ -754,7 +760,7 @@ class VisiData:
             try:
                 sheet.draw(scr)
             except Exception as e:
-                self.exceptionCaught()
+                self.exceptionCaught(e)
 
             self.drawLeftStatus(scr, sheet)
             self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
@@ -807,8 +813,8 @@ class VisiData:
             self.callHook('predraw')
             try:
                 sheet.checkCursor()
-            except Exception:
-                exceptionCaught()
+            except Exception as e:
+                exceptionCaught(e)
 
     def replace(self, vs):
         'Replace top sheet with the given sheet `vs`.'
@@ -1070,13 +1076,13 @@ class Sheet:
         except EscapeException as e:  # user aborted
             self.vd.status('aborted')
             escaped = True
-        except Exception:
-            err = self.vd.exceptionCaught()
+        except Exception as e:
+            err = self.vd.exceptionCaught(e)
 
         try:
             self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
         except Exception:
-            self.vd.exceptionCaught()
+            self.vd.exceptionCaught(e)
 
         self.vd.refresh()
         return escaped
@@ -1647,7 +1653,7 @@ class Column:
         try:
             return self.type(self.getValue(row))
         except Exception as e:
-#            exceptionCaught(status=False)
+#            exceptionCaught(e, status=False)
             return self.type()
 
     def getValue(self, row):
@@ -1712,12 +1718,13 @@ class Column:
         return self.getCell(row).display
 
     def setValue(self, row, value):
-        if not self.setter:
-            error('column cannot be changed')
+        'Set our column value for given row to `value`.'
+        self.setter or error(self.name+' column cannot be changed')
         self.setter(self, row, value)
 
     def setValues(self, rows, value):
-        'Set given rows to `value`.'
+        'Set our column value for given list of rows to `value`.'
+        self.setter or error(self.name+' column cannot be changed')
         value = self.type(value)
         for r in rows:
             self.setValue(r, value)
@@ -1725,6 +1732,7 @@ class Column:
 
     @async
     def setValuesFromExpr(self, rows, expr):
+        self.setter or error(self.name+' column cannot be changed')
         compiledExpr = compile(expr, '<expr>', 'eval')
         for row in Progress(rows):
             self.setValue(row, self.sheet.evalexpr(compiledExpr, row))
