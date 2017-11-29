@@ -23,7 +23,7 @@ SheetsSheet.commands += [
 
 SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
 
-# used on both ColumnsSheet and DescribeSheet, affecting the 'row' (source column)
+# used ColumnsSheet, affecting the 'row' (source column)
 columnCommands = [
         Command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'adjust width of source column'),
         Command('-', 'cursorRow.width = 0', 'hide source column on source sheet'),

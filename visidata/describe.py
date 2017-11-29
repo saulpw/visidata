@@ -42,7 +42,7 @@ class DescribeSheet(Sheet):
             DescribeColumn('mean',   type=float),
             DescribeColumn('stdev',  type=float),
     ]
-    commands = ColumnsSheet.commands + [
+    commands = [
         Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell'),
         Command('zu', 'source.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell'),
         Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell'),
