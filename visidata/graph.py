@@ -69,12 +69,12 @@ class GraphSheet(InvertedCanvas):
             for rownum, row in enumerate(Progress(self.sourceRows)):  # rows being plotted from source
                 try:
                     k = tuple(c.getValue(row) for c in catcols) if catcols else (ycol.name,)
-                    attr = self.plotColor(k)
 
                     # convert deliberately to float (to e.g. linearize date)
                     graph_x = float(numcol.type(numcol.getValue(row))) if self.xcols else rownum
                     graph_y = ycol.type(ycol.getValue(row))
 
+                    attr = self.plotColor(k)
                     self.point(graph_x, graph_y, attr, row)
                     nplotted += 1
                 except Exception:
