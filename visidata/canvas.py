@@ -325,7 +325,6 @@ class Canvas(Plotter):
         self.zoomlevel = 1.0
         self.needsRefresh = False
 
-        self.gridpoints = []  # list of (grid_x, grid_y, attr, row)
         self.gridlines = []   # list of (grid_x1, grid_y1, grid_x2, grid_y2, attr, row)
         self.gridlabels = []  # list of (grid_x, grid_y, label, attr, row)
 
@@ -334,9 +333,11 @@ class Canvas(Plotter):
         self.reset()
 
     def __len__(self):
-        return len(self.gridpoints) + len(self.gridlines)
+        return len(self.gridlines)
 
     def reset(self):
+        'clear everything in preparation for a fresh reload()'
+        self.gridlines.clear()
         self.legends.clear()
         self.plotAttrs.clear()
         self.unusedAttrs = list(colors[colorname] for colorname in options.plot_colors.split())
@@ -403,7 +404,7 @@ class Canvas(Plotter):
                            self.scaleY(self.cursorBox.ymax))
 
     def point(self, x, y, attr, row=None):
-        self.gridpoints.append((x, y, attr, row))
+        self.gridlines.append((x, y, x, y, attr, row))
 
     def line(self, x1, y1, x2, y2, attr, row=None):
         self.gridlines.append((x1, y1, x2, y2, attr, row))
@@ -445,23 +446,12 @@ class Canvas(Plotter):
 
     def resetBounds(self):
         if not self.canvasBox:
-            xmins = []
-            ymins = []
-            xmaxs = []
-            ymaxs = []
-            if self.gridpoints:
-                xmins.append(min(x for x, y, attr, row in self.gridpoints))
-                xmaxs.append(max(x for x, y, attr, row in self.gridpoints))
-                ymins.append(min(y for x, y, attr, row in self.gridpoints))
-                ymaxs.append(max(y for x, y, attr, row in self.gridpoints))
             if self.gridlines:
-                xmins.append(min(min(x1, x2) for x1, y1, x2, y2, attr, row in self.gridlines))
-                xmaxs.append(max(max(x1, x2) for x1, y1, x2, y2, attr, row in self.gridlines))
-                ymins.append(min(min(y1, y2) for x1, y1, x2, y2, attr, row in self.gridlines))
-                ymaxs.append(max(max(y1, y2) for x1, y1, x2, y2, attr, row in self.gridlines))
-
-            if xmins:
-                self.canvasBox = BoundingBox(min(xmins), min(ymins), max(xmaxs), max(ymaxs))
+                xmin = min(min(x1, x2) for x1, y1, x2, y2, attr, row in self.gridlines)
+                xmax = max(max(x1, x2) for x1, y1, x2, y2, attr, row in self.gridlines)
+                ymin = min(min(y1, y2) for x1, y1, x2, y2, attr, row in self.gridlines)
+                ymax = max(max(y1, y2) for x1, y1, x2, y2, attr, row in self.gridlines)
+                self.canvasBox = BoundingBox(xmin, ymin, xmax, ymax)
             else:
                 self.canvasBox = Box(0, 0, 1.0, 1.0)  # just something
 
@@ -544,24 +534,22 @@ class Canvas(Plotter):
         bb = self.visibleBox
         xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax
         xfactor, yfactor = self.xScaler, self.yScaler
-        gridxmin, gridymin = self.plotviewBox.xmin, self.plotviewBox.ymin
-
-        for x, y, attr, row in Progress(self.gridpoints):
-            if ymin <= y and y <= ymax:
-                if xmin <= x and x <= xmax:
-                    x = gridxmin+(x-xmin)*xfactor
-                    y = gridymin+(y-ymin)*yfactor
-                    self.plotpixel(round(x), round(y), attr, row)
+        plotxmin, plotymin = self.plotviewBox.xmin, self.plotviewBox.ymin
 
         for x1, y1, x2, y2, attr, row in Progress(self.gridlines):
             r = clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax)
             if r:
                 x1, y1, x2, y2 = r
-                x1 = gridxmin+(x1-xmin)*xfactor
-                y1 = gridymin+(y1-ymin)*yfactor
-                x2 = gridxmin+(x2-xmin)*xfactor
-                y2 = gridymin+(y2-ymin)*yfactor
-                self.plotline(x1, y1, x2, y2, attr, row)
+                if x1 == x2 and y1 == y2:  # single point
+                    x = plotxmin+(x1-xmin)*xfactor
+                    y = plotymin+(y1-ymin)*yfactor
+                    self.plotpixel(round(x), round(y), attr, row)
+                else:
+                    x1 = plotxmin+(x1-xmin)*xfactor
+                    y1 = plotymin+(y1-ymin)*yfactor
+                    x2 = plotxmin+(x2-xmin)*xfactor
+                    y2 = plotymin+(y2-ymin)*yfactor
+                    self.plotline(x1, y1, x2, y2, attr, row)
 
         for x, y, text, attr, row in Progress(self.gridlabels):
             self.plotlabel(self.scaleX(x), self.scaleY(y), text, attr, row)

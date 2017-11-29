@@ -60,7 +60,6 @@ class GraphSheet(InvertedCanvas):
         nerrors = 0
         nplotted = 0
 
-        self.gridpoints.clear()
         self.reset()
 
         status('loading data points')

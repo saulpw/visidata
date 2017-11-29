@@ -88,6 +88,7 @@ class PbfCanvas(InvertedCanvas):
     aspectRatio = 1.0
     @async
     def reload(self):
+        self.reset()
         for r in Progress(self.sourceRows):
             layername, feat = r
             geom = feat['geometry']
