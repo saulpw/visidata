@@ -250,8 +250,8 @@ class GridCanvas(PixelCanvas):
 
         Command('zz', 'zoomTo(cursorGridMinX, cursorGridMinY, cursorGridMaxX, cursorGridMaxY)', 'set visible bounds to cursor'),
 
-        Command('-', 'tmp=(cursorGridCenterX, cursorGridCenterY); setZoom(zoomlevel*options.zoom_incr); fixPoint(gridCanvasCenterX, gridCanvasCenterY, *tmp)', 'zoom into cursor center'),
-        Command('+', 'tmp=(cursorGridCenterX, cursorGridCenterY); setZoom(zoomlevel/options.zoom_incr); fixPoint(gridCanvasCenterX, gridCanvasCenterY, *tmp)', 'zoom into cursor center'),
+        Command('-', 'tmp=(cursorGridCenterX, cursorGridCenterY); setZoom(zoomlevel*options.zoom_incr); fixPoint(gridCanvasCenterX, gridCanvasCenterY, *tmp)', 'decrease zoomlevel, centered on cursor center'),
+        Command('+', 'tmp=(cursorGridCenterX, cursorGridCenterY); setZoom(zoomlevel/options.zoom_incr); fixPoint(gridCanvasCenterX, gridCanvasCenterY, *tmp)', 'increase zoomlevel, centered on cursor'),
         Command('_', 'sheet.gridWidth = 0; sheet.visibleGridWidth = 0; setZoom(1.0); refresh()', 'zoom to fit full extent'),
 
         # set cursor box with left click
@@ -264,16 +264,16 @@ class GridCanvas(PixelCanvas):
         Command('BUTTON4_PRESSED', 'tmp=(gridMouseX,gridMouseY); setZoom(zoomlevel/options.zoom_incr); fixPoint(canvasMouseX, canvasMouseY, *tmp)', 'zoom in with scroll wheel'),
         Command('REPORT_MOUSE_POSITION', 'tmp=(gridMouseX,gridMouseY); setZoom(zoomlevel*options.zoom_incr); fixPoint(canvasMouseX, canvasMouseY, *tmp)', 'zoom out with scroll wheel'),
 
-        Command('s', 'source.select(list(getRowsInside(*cursorPixelBounds)))', 'select all points within cursor box'),
-        Command('t', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'toggle selection of all points within cursor box'),
-        Command('u', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'unselect all points within cursor box'),
-        Command(ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*cursorPixelBounds)); vd.push(vs)', ''),
+        Command('s', 'source.select(list(getRowsInside(*cursorPixelBounds)))', 'select rows on source sheet contained within canvas cursor'),
+        Command('t', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'toggle selection of rows on source sheet contained within canvas cursor'),
+        Command('u', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'unselect rows on source sheet contained within canvas cursor'),
+        Command(ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*cursorPixelBounds)); vd.push(vs)', 'Open sheet of source rows contained within canvas cursor'),
 
 
-        Command('gs', 'source.select(list(getRowsInside(*visiblePixelBounds)))', 'select all points visible onscreen'),
-        Command('gt', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'toggle selection of all points visible onscreen'),
-        Command('gu', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'unselect all points visible onscreen'),
-        Command('g'+ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*visiblePixelBounds)); vd.push(vs)', ''),
+        Command('gs', 'source.select(list(getRowsInside(*visiblePixelBounds)))', 'select rows visible on screen'),
+        Command('gt', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'toggle selection of rows visible on screen'),
+        Command('gu', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'unselect rows visible on screen'),
+        Command('g'+ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*visiblePixelBounds)); vd.push(vs)', 'open sheet of source rows visible on screen'),
     ]
 
     def __init__(self, name, source=None, **kwargs):

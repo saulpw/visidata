@@ -12,7 +12,7 @@ globalCommand('P', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s
 globalCommand('gd', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', 'delete all selected rows and move them to clipboard')
 globalCommand('gy', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows))', 'copy all selected rows to clipboard')
 
-globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy this cell to clipboard')
+globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy current cell to clipboard')
 globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value')
 globalCommand('zp', 'cursorCol.setValue(cursorRow, vd.clipvalue)', 'set contents of current column for current row to last clipboard value')
 

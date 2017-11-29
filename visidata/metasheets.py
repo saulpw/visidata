@@ -34,7 +34,7 @@ columnCommands = [
         Command('~', 'cursorRow.type = str', 'set type of current column to str'),
         Command('z~', 'cursorRow.type = anytype', 'set type of current column to anytype'),
 
-        Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'toggle selected columns as keys on source sheet'),
+        Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'pin selected columns on the left as key columns on source sheet'),
         Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected source columns on source sheet'),
         Command('g_', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
         Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'set type of selected source columns to float'),
@@ -46,7 +46,7 @@ columnCommands = [
     ]
 
 ColumnsSheet.commands += columnCommands + [
-        Command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'toggle column as key on source sheet'),
+        Command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'pin current column on the left as a key column on source sheet'),
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'add column from concatenating selected source columns'),
 ]
 DescribeSheet.commands += columnCommands

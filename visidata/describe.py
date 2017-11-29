@@ -47,7 +47,7 @@ class DescribeSheet(Sheet):
         Command('zu', 'source.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell'),
         Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell'),
         Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row'),
-        Command('!', 'source.toggleKeyColumn(source.columns.index(cursorRow))', 'toggle key column on source sheet')
+        Command('!', 'source.toggleKeyColumn(source.columns.index(cursorRow))', 'pin current column on left as a key column on source sheet')
     ]
     colorizers = [
         Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),

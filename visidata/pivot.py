@@ -8,9 +8,9 @@ class SheetPivot(Sheet):
     rowtype = 'aggregated rows'
     commands = [
         Command('z'+ENTER, 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, []); vd.push(vs)',
-                      'push sheet of source rows aggregated in this cell'),
+                      'open sheet of source rows aggregated in current cell'),
         Command(ENTER, 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow[0]); vs.rows=sum(cursorRow[1].values(), []); vd.push(vs)',
-                      'push sheet of source rows aggregated in this cell')
+                      'open sheet of source rows aggregated in current cell')
                ]
     def __init__(self, srcsheet, variableCols):
         super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols), source=srcsheet)
