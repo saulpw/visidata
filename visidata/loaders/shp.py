@@ -50,7 +50,6 @@ class ShapeMap(Canvas):
 
     @async
     def reload(self):
-        self.gridlines.clear()
         self.reset()
 
         for row in Progress(self.sourceRows):
