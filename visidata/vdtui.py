@@ -1931,19 +1931,21 @@ class TextSheet(Sheet):
 class ColumnsSheet(Sheet):
     rowtype = 'columns'
     class ValueColumn(Column):
+        'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
             return srcCol.getDisplayValue(self.sheet.source.cursorRow)
         def setValue(self, srcCol, val):
             srcCol.setValue(self.sheet.source.cursorRow, val)
 
     columns = [
+            ColumnAttr('sheet', width=0),  # hidden key
             ColumnAttr('name'),
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals(), default=anytype),
             ColumnAttr('fmtstr'),
             ValueColumn('value')
     ]
-    nKeys = 1
+    nKeys = 2
     colorizers = [
             Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),
             Colorizer('row', 8, lambda self,c,r,v: 'underline' if self.source.nKeys > 0 and r is self.source.keyCols[-1] else None)
