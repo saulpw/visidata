@@ -260,7 +260,7 @@ class Plotter(Sheet):
 class Canvas(Plotter):
     'zoomable/scrollable virtual canvas with (x,y) coordinates in arbitrary units'
     rowtype = 'plots'
-    aspectRatio = None
+    aspectRatio = 0.0
     leftMarginPixels = 10*2
     rightMarginPixels = 6*2
     topMarginPixels = 0
@@ -292,6 +292,7 @@ class Canvas(Plotter):
         Command('-', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.xcenter, plotviewBox.ycenter, tmp)', 'zoom out from cursor center'),
         Command('+', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.xcenter, plotviewBox.ycenter, tmp)', 'zoom into cursor center'),
         Command('_', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()', 'zoom to fit full extent'),
+        Command('z_', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio'),
 
         # set cursor box with left click
         Command('BUTTON1_PRESSED', 'sheet.cursorBox = Box(*canvasMouseXY.xy)', 'start cursor box with left mouse button press'),
