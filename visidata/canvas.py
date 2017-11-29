@@ -515,7 +515,6 @@ class Canvas(Plotter):
         'resets plotter, cancels previous render threads, spawns a new render'
         self.needsRefresh = False
         cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
-        self.pixels.clear()
         self.labels.clear()
         self.resetCanvasDimensions()
         self.render_async()
