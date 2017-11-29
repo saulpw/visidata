@@ -86,32 +86,36 @@ class PbfSheet(Sheet):
 
 class PbfCanvas(InvertedCanvas):
     aspectRatio = 1.0
+    def iterpolylines(self, r):
+        layername, feat = r
+        geom = feat['geometry']
+        t = geom['type']
+        coords = geom['coordinates']
+        key = self.source.rowkey(r)
+
+        if t == 'LineString':
+            yield coords, self.plotColor(key), r
+        elif t == 'Point':
+            yield [coords], self.plotColor(key), r
+        elif t == 'Polygon':
+            for poly in coords:
+                yield poly+[poly[0]], self.plotColor(key), r
+        elif t == 'MultiLineString':
+            for line in coords:
+                yield line, self.plotColor(key), r
+        elif t == 'MultiPolygon':
+            for mpoly in coords:
+                for poly in mpoly:
+                    yield poly+[poly[0]], self.plotColor(key), r
+        else:
+            assert False, t
+
     @async
     def reload(self):
         self.reset()
-        for r in Progress(self.sourceRows):
-            layername, feat = r
-            geom = feat['geometry']
-            t = geom['type']
-            coords = geom['coordinates']
-            key = self.source.rowkey(r)
 
-            if t == 'LineString':
-                self.polyline(coords, self.plotColor(key), r)
-            elif t == 'Point':
-                x, y = coords
-                self.point(x, y, self.plotColor(key), r)
-            elif t == 'Polygon':
-                for poly in coords:
-                    self.polygon(poly, self.plotColor(key), r)
-            elif t == 'MultiLineString':
-                for line in coords:
-                    self.polyline(line, self.plotColor(key), r)
-            elif t == 'MultiPolygon':
-                for mpoly in coords:
-                    for poly in mpoly:
-                        self.polygon(poly, self.plotColor(key), r)
-            else:
-                assert False, t
+        for r in Progress(self.sourceRows):
+            for vertexes, attr, row in self.iterpolylines(r):
+                self.polyline(vertexes, attr, row)
 
         self.refresh()
