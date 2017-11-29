@@ -200,17 +200,15 @@ class Plotter(Sheet):
         self.plotlegends()
 
     def getRowsInside(self, bbox):
+        'return list of deduped rows within bbox'
         ret = {}
-        for r in self.genRowsInside(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax):
-            ret[id(r)] = r
-        return list(ret.values())
-
-    def genRowsInside(self, x1, y1, x2, y2):
-        for y in range(y1, y2):
-            for x in range(x1, x2):
+        for y in range(bbox.ymin, bbox.ymax+1):
+            for x in range(bbox.xmin, bbox.xmax+1):
                 for attr, rows in self.pixels[y][x].items():
-                    for r in rows:
-                        yield r
+                    if attr not in self.disabledAttrs:
+                        for r in rows:
+                            ret[id(r)] = r
+        return list(ret.values())
 
     def draw(self, scr):
         if self.needsRefresh:
