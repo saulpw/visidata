@@ -4,7 +4,7 @@ from visidata import *
 option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
 
 def open_fixed(p):
-    return FixedWidthColumnsSheet(p.name, p)
+    return FixedWidthColumnsSheet(p.name, source=p)
 
 class FixedWidthColumn(Column):
     def __init__(self, name, i, j, **kwargs):
