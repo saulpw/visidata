@@ -304,13 +304,13 @@ class Canvas(Plotter):
         Command('REPORT_MOUSE_POSITION', 'tmp=canvasMouseXY; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouseX, plotterMouseY, tmp)', 'zoom out with scroll wheel'),
 
         Command('s', 'source.select(list(getRowsInside(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor'),
-        Command('t', 'source.unselect(list(getRowsInside(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor'),
+        Command('t', 'source.toggle(list(getRowsInside(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor'),
         Command('u', 'source.unselect(list(getRowsInside(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor'),
         Command(ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(plotterCursorBox)); vd.push(vs)', 'Open sheet of source rows contained within canvas cursor'),
 
 
         Command('gs', 'source.select(list(getRowsInside(plotterVisibleBox)))', 'select rows visible on screen'),
-        Command('gt', 'source.unselect(list(getRowsInside(plotterVisibleBox)))', 'toggle selection of rows visible on screen'),
+        Command('gt', 'source.toggle(list(getRowsInside(plotterVisibleBox)))', 'toggle selection of rows visible on screen'),
         Command('gu', 'source.unselect(list(getRowsInside(plotterVisibleBox)))', 'unselect rows visible on screen'),
         Command('g'+ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen'),
     ]
