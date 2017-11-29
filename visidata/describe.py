@@ -70,7 +70,7 @@ class DescribeSheet(Sheet):
             d['errors'] = list()
             d['nulls'] = list()
             d['distinct'] = set()
-            for sr in self.sourceRows:
+            for sr in Progress(self.sourceRows):
                 try:
                     v = srccol.getValue(sr)
                     if isNull(v):
@@ -84,7 +84,7 @@ class DescribeSheet(Sheet):
 
             d['mode'] = self.calcStatistic(d, mode, vals)
             if isNumeric(srccol):
-                for func in [mode, min, max, median, mean, stdev]:
+                for func in [min, max, median, mean, stdev]:
                     d[func.__name__] = self.calcStatistic(d, func, vals)
 
     def calcStatistic(self, d, func, *args, **kwargs):
