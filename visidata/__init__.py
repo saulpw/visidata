@@ -31,5 +31,6 @@ from .loaders.fixed_width import *
 from .loaders.postgres import *
 from .loaders.shp import *
 from .loaders.mbtiles import *
+from .loaders.http import *
 
 addGlobals(globals())

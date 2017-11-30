@@ -13,7 +13,7 @@ def codeToType(type_code, colname):
     return anytype
 
 
-def openurl_postgres(url):
+def openurl_postgres(url, filetype=None):
     import psycopg2
 
     dbname = url.path[1:]

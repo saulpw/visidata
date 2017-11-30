@@ -74,7 +74,6 @@ globalCommand('z?', 'openManPage()', 'launch VisiData manpage')
 globalCommand('KEY_F(1)', 'z?')
 
 def openManPage():
-    import subprocess
     from pkg_resources import resource_filename
     with SuspendCurses():
         os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
@@ -121,15 +120,15 @@ class DirSheet(Sheet):
 
 
 def openSource(p, filetype=None):
-    'calls open_ext(Path) or openurl_scheme(UrlPath)'
+    'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
     if isinstance(p, str):
         if '://' in p:
-            p = UrlPath(p)
-            filetype = filetype or p.scheme
-            openfunc = 'openurl_' + p.scheme
-            vs = getGlobals()[openfunc](p)
+            return openSource(UrlPath(p), filetype)  # convert to Path and recurse
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
+    elif isinstance(p, UrlPath):
+        openfunc = 'openurl_' + p.scheme
+        vs = getGlobals()[openfunc](p, filetype=filetype)
     elif isinstance(p, Path):
         if not filetype:
             filetype = options.filetype or p.suffix
@@ -178,7 +177,7 @@ def _getTsvHeaders(fp, nlines):
     i = 0
     while i < nlines:
         L = next(fp)
-        L = L[:-1]
+        L = L.rstrip('\n')
         if L:
             headers.append(L.split(options.delimiter))
             i += 1
@@ -227,7 +226,7 @@ def reload_tsv_sync(vs, **kwargs):
                     L = next(fp)
                 except StopIteration:
                     break
-                L = L[:-1]
+                L = L.rstrip('\n')
                 if L:
                     vs.addRow(L.split(delim))
                 prog.addProgress(len(L))
