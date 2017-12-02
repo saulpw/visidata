@@ -1,8 +1,8 @@
 sheet	col	row	keystrokes	input	comment
 			o	sample_data/surveys.csv	open file
 surveys	record_id	0	O		open Options
-options	value	15	e	Null	edit option
-options	value	15	^^		jump to previous sheet (swaps with current sheet)
+options	value	16	e	Null	edit option
+options	value	16	^^		jump to previous sheet (swaps with current sheet)
 surveys	record_id	0	zr	24	move to the given row number
 surveys	sex	24	,		select rows matching current cell in current column
 surveys	sex	24	gzd		set contents of cells in current column to None for selected rows

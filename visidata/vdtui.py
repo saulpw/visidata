@@ -132,6 +132,7 @@ option('force_valid_colnames', False, 'clean column names to be valid Python ide
 option('debug', False, 'exit on error and display stacktrace')
 option('curses_timeout', 100, 'curses timeout in ms')
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
+theme('use_default_colors', False, 'set curses to use default terminal colors')
 
 disp_column_fill = ' ' # pad chars after column value
 theme('disp_none', '',  'visible contents of a cell whose value was None')
@@ -2274,7 +2275,8 @@ def setupcolors(stdscr, f, *args):
     curses.mouseinterval(0) # very snappy but does not allow for [multi]click
     curses.mouseEvents = {}
 
-    curses.use_default_colors()
+    if options.use_default_colors:
+        curses.use_default_colors()
 
     for k in dir(curses):
         if k.startswith('BUTTON') or k == 'REPORT_MOUSE_POSITION':
