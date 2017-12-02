@@ -898,8 +898,8 @@ class Sheet:
         self.rowLayout = {}      # [rowidx] -> y
         self.visibleColLayout = {}      # [vcolidx] -> (x, w)
 
-        # all columns in display order
-        self.columns = kwargs.get('columns') or [copy(c) for c in self.columns]  # list of Column objects
+        # list of all columns in display order
+        self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('')]
         self.recalc()
 
         # commands specific to this sheet
