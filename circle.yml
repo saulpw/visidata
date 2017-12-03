@@ -2,6 +2,10 @@ machine:
   post:
     - pyenv global 3.4.4 3.5.3
 
+dependencies:
+    pre:
+        - pip3 install openpyxl xlrd h5py psycopg2 pyshp mapbox-vector-tile requests lxml
+
 test:
   override:
     - tox
