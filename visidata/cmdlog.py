@@ -60,9 +60,9 @@ def getColVisibleIdxByFullName(sheet, name):
         if name == c.name:
             return i
 
-def getRowIdxByKey(sheet, keyvals):
+def getRowIdxByKey(sheet, keystr):
     for i, r in enumerate(sheet.rows):
-        if sheet.keyvals(r) == keyvals:
+        if str(sheet.rowkey(r)) == keystr:
             return i
 
 def loggable(keystrokes):
@@ -131,7 +131,7 @@ class CommandLog(Sheet):
         else:
             sheetname = sheet.name
             colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
-            rowname = sheet.cursorRowIndex
+            rowname = str(sheet.rowkey(sheet.cursorRow)) or sheet.cursorRowIndex
         self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, sheet.getCommand(keystrokes).helpstr])
 
     def afterExecSheet(self, sheet, escaped, err):
