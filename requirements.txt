@@ -7,3 +7,4 @@ psycopg2
 pyshp
 mapbox-vector-tile
 requests
+lxml

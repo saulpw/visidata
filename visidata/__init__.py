@@ -32,5 +32,6 @@ from .loaders.postgres import *
 from .loaders.shp import *
 from .loaders.mbtiles import *
 from .loaders.http import *
+from .loaders.html import *
 
 addGlobals(globals())
