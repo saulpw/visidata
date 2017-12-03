@@ -2,10 +2,14 @@ machine:
   post:
     - pyenv global 3.4.4 3.5.3
 
+checkout:
+    post:
+        - pip3 install -U setuptools
+
 dependencies:
     pre:
-        - pip3 install openpyxl xlrd h5py psycopg2 pyshp mapbox-vector-tile requests lxml
+        - pip3 install -r requirements.txt
 
 test:
   override:
-    - tox
+    - ./test.sh
