@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap "echo aborted; exit;" SIGINT SIGTERM
+
 # Usage $0
 for i in tests/*.vd ; do
     echo "--- $i"
