@@ -650,6 +650,8 @@ These are the supported sources:
 .It Sy postgres No (requires Sy psycopg2 Ns )
 .It Sy shp No (requires Sy pyshp Ns )
 .It Sy mbtiles No (vector only, requires Sy mapbox-vector-tile Ns )
+.It Sy http No (requires Sy requests Ns )
+.It Sy html No (requires Sy lxml Ns )
 .El
 .
 .Sh AUTHOR
