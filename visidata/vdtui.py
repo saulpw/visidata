@@ -290,6 +290,7 @@ globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, curso
 
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet')
 globalCommand('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet')
+globalCommand('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options')
 globalCommand(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view VisiData man page', 'help-commands')
 globalCommand('^Z', 'suspend()', 'suspend VisiData process')
@@ -1934,12 +1935,12 @@ class ColumnsSheet(Sheet):
     class ValueColumn(Column):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
-            return srcCol.getDisplayValue(self.sheet.source.cursorRow)
+            return srcCol.getDisplayValue(srcCol.sheet.cursorRow)
         def setValue(self, srcCol, val):
             srcCol.setValue(self.sheet.source.cursorRow, val)
 
     columns = [
-            ColumnAttr('sheet', width=0),  # hidden key
+            ColumnAttr('sheet'),
             ColumnAttr('name'),
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals(), default=anytype),
@@ -1948,15 +1949,20 @@ class ColumnsSheet(Sheet):
     ]
     nKeys = 2
     colorizers = [
-            Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),
-            Colorizer('row', 8, lambda self,c,r,v: 'underline' if self.source.nKeys > 0 and r is self.source.keyCols[-1] else None)
+            Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
     ]
     commands = []
 
     def reload(self):
-        self.rows = self.source.columns
-        self.cursorRowIndex = self.source.cursorColIndex
-
+        if isinstance(self.source, Sheet):
+            self.rows = self.source.columns
+            self.cursorRowIndex = self.source.cursorColIndex
+            self.columns[0].width = 0  # hide 'sheet' column if only one sheet
+        else:  # lists of Columns
+            self.rows = []
+            for src in self.source:
+                if src is not self:
+                    self.rows.extend(src.columns)
 
 class SheetsSheet(Sheet):
     rowtype = 'sheets'
