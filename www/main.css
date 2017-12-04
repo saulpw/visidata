@@ -267,7 +267,7 @@ pre > code {
 }
 
 code {
-    background-color: #f4f4f4;
+    background-color: #f0e4ff;
     box-shadow: inset 0px 0px 2px #bbb;
     font-family: Inconsolata, monospace; /* Correct the inheritance and scaling of font size in all browsers */
     font-size: 1em; /* Correct the odd `em` font sizing in all browsers */
@@ -380,7 +380,7 @@ footer {
    align-items: flex-start;
 
    background: #e0e0e0;
-   padding: 30px 0 30px 30px;
+   padding: 20px 0 20px 20px;
  }
 
  .signup {
@@ -395,7 +395,6 @@ footer {
    flex-direction: column;
    flex-wrap: wrap;
    max-width: 400px;
-   padding: 30px;
    margin: auto;
  }
 
@@ -455,7 +454,7 @@ footer {
 
 .feature {
   flex: 0 1 33%;
-  padding: 50px 0 20px 0;
+  padding: 15px 0 20px 0;
   display: flex;
   flex-direction: column;
   text-align: justify;
@@ -469,7 +468,7 @@ footer {
 
 .feature-headline {}
 
-.feature-description {
+.feature-description > p {
   margin: 0 30px 0 30px;
   text-align: center;
 }
