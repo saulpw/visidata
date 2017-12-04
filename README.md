@@ -16,6 +16,13 @@ A terminal interface for exploring and arranging tabular data.
 $ pip3 install visidata
 ```
 
+To install dependencies for all loaders:
+
+```
+pip3 install "visidata[full]"
+```
+
+
 ## Run
 
 ```
