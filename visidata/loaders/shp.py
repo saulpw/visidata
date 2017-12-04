@@ -1,5 +1,4 @@
 from visidata import *
-import shapefile
 
 
 def open_shp(p):
@@ -35,6 +34,7 @@ class ShapeSheet(Sheet):
     ]
     @async
     def reload(self):
+        import shapefile
         sf = shapefile.Reader(self.source.resolve())
         self.columns += [
             Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen))
