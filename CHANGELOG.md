@@ -1,5 +1,16 @@
 # VisiData version history
 
+# v0.98.1 (2017-12-04)
+
+- [packaging]
+    - make non Python standard library loader dependencies optional
+    - provide method for full installation via `pip3 install "visidata[full]"`
+- [visidata.org](http://visidata.org)  change copyright in footer
+- [docs] add csv dialects to manpage (closes issue #88)
+- [bugfix]
+    - fix for `^Z` in builtin line editor
+    - fixed-width loader needs source kwarg
+
 # v0.98 (2017-11-23)
 
 - [visidata.org](http://visidata.org) revamp

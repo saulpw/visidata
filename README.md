@@ -1,4 +1,4 @@
-# VisiData v0.98 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
+# VisiData v0.98.1 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A terminal interface for exploring and arranging tabular data.
 
@@ -7,12 +7,21 @@ A terminal interface for exploring and arranging tabular data.
 - Linux or OS/X
 - Python 3.4+
 - python-dateutil
-- other modules may be required for opening particular data sources
+- other [modules may be required](https://github.com/saulpw/visidata/blob/stable/requirements.txt) for opening particular data sources
+    - for a breakdown, see [supported sources](http://visidata.org/man/) in the VisiData manpage
 
 ## Install
 
+To install VisiData, with loaders for formats supported by the Python standard library (which includes csv, tsv, fixed-width text, json, sqlite and graphs):
+
 ```
 $ pip3 install visidata
+```
+
+To install VisiData, plus external dependencies for all available loaders:
+
+```
+pip3 install "visidata[full]"
 ```
 
 ## Run
