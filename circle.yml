@@ -2,6 +2,10 @@ machine:
   post:
     - pyenv global 3.4.4 3.5.3
 
+dependencies:
+    pre:
+        - pip3 install -r requirements.txt
+
 test:
   override:
-    - tox
+    - ./test.sh

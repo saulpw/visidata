@@ -7,12 +7,21 @@ A terminal interface for exploring and arranging tabular data.
 - Linux or OS/X
 - Python 3.4+
 - python-dateutil
-- other modules may be required for opening particular data sources
+- other [modules may be required](https://github.com/saulpw/visidata/blob/stable/requirements.txt) for opening particular data sources
+    - for a breakdown, see [supported sources](http://visidata.org/man/) in the VisiData manpage
 
 ## Install
 
+To install base VisiData (includes support for csv/tsv/fixed/json/sqlite/graphs):
+
 ```
 $ pip3 install visidata
+```
+
+To install dependencies for all remaining loaders:
+
+```
+pip3 install "visidata[full]"
 ```
 
 ## Run
