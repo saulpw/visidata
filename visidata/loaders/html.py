@@ -1,6 +1,4 @@
 import html
-import lxml.html
-from lxml import etree
 from visidata import *
 
 
@@ -18,6 +16,8 @@ class HtmlTablesSheet(Sheet):
     commands = [ Command(ENTER, 'vd.push(HtmlTableSheet(name=cursorRow.attrib.get("id", "table_" + str(cursorRowIndex)), source=cursorRow))', 'open this table') ]
     @async
     def reload(self):
+        import lxml.html
+        from lxml import etree
         utf8_parser = etree.HTMLParser(encoding='utf-8')
         html = lxml.html.etree.fromstring(self.source.read_text(), parser=utf8_parser)
         self.rows = []
