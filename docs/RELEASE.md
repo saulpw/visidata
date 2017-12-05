@@ -6,15 +6,15 @@
 
 3. Verify that documentation/docstrings are up-to-date on features and functionality
 
-4. Run ./mkwww.sh to build the manpage and updated website
-
-5. Set version number to next most reasonable number (v#.#.#)
+4. Set version number to next most reasonable number (v#.#.#)
 
    a. add to front of CHANGELOG, along with the release date and bullet points of major changes
 
    b. update version number on README and front page of website
 
    c. bump version in `__version__` in source code (bin/vd, visidata/vdtui.py) and setup.py
+
+5. Run ./mkwww.sh to build the manpage and updated website
 
 6. Push `develop` to testpypi
 
