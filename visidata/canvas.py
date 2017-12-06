@@ -8,6 +8,7 @@ option('show_graph_labels', True, 'show axes and legend on graph')
 option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
 option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
 option('zoom_incr', 2.0, 'amount to multiply current zoomlevel by when zooming')
+option('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
 
 class Point:
     def __init__(self, x, y):
@@ -55,7 +56,7 @@ class Box:
     def ycenter(self):
         return self.ymin + self.h/2
 
-    def within(self, x, y):
+    def contains(self, x, y):
         return x >= self.xmin and \
                x < self.xmax and \
                y >= self.ymin and \
@@ -136,7 +137,7 @@ class Plotter(Sheet):
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self.labels = []  # (x, y, text, attr)
-        self.disabledAttrs = set()
+        self.hiddenAttrs = set()
         self.needsRefresh = False
         self.resetCanvasDimensions()
 
@@ -167,24 +168,19 @@ class Plotter(Sheet):
         return Box(0,0,0,0)
 
     @property
-    def plotterMouseX(self):
-        return self.mouseX*2
-
-    @property
-    def plotterMouseY(self):
-        return self.mouseY*4
-
+    def plotterMouse(self):
+        return Point(self.mouseX*2, self.mouseY*4)
 
     def getPixelAttrRandom(self, x, y):
         'weighted-random choice of attr at this pixel.'
         c = list(attr for attr, rows in self.pixels[y][x].items()
-                         for r in rows if attr not in self.disabledAttrs)
+                         for r in rows if attr not in self.hiddenAttrs)
         return random.choice(c) if c else 0
 
     def getPixelAttrMost(self, x, y):
         'most common attr at this pixel.'
         r = self.pixels[y][x]
-        c = sorted((len(rows), attr, rows) for attr, rows in r.items() if attr not in self.disabledAttrs)
+        c = sorted((len(rows), attr, rows) for attr, rows in r.items() if attr not in self.hiddenAttrs)
         if not c:
             return 0
         _, attr, rows = c[-1]
@@ -192,20 +188,20 @@ class Plotter(Sheet):
             attr, _ = colors.update(attr, 8, 'bold', 10)
         return attr
 
-    def togglePixelAttrs(self, attr):
-        if attr in self.disabledAttrs:
-            self.disabledAttrs.remove(attr)
+    def hideAttr(self, attr, hide=True):
+        if hide:
+            self.hiddenAttrs.add(attr)
         else:
-            self.disabledAttrs.add(attr)
+            self.hiddenAttrs.remove(attr)
         self.plotlegends()
 
-    def getRowsInside(self, bbox):
+    def rowsWithin(self, bbox):
         'return list of deduped rows within bbox'
         ret = {}
         for y in range(bbox.ymin, bbox.ymax+1):
             for x in range(bbox.xmin, bbox.xmax+1):
                 for attr, rows in self.pixels[y][x].items():
-                    if attr not in self.disabledAttrs:
+                    if attr not in self.hiddenAttrs:
                         for r in rows:
                             ret[id(r)] = r
         return list(ret.values())
@@ -244,8 +240,8 @@ class Plotter(Sheet):
                     else:
                         attr = 0
 
-                    if cursorBBox.within(char_x*2, char_y*4) or \
-                       cursorBBox.within(char_x*2+1, char_y*4+3):
+                    if cursorBBox.contains(char_x*2, char_y*4) or \
+                       cursorBBox.contains(char_x*2+1, char_y*4+3):
                         attr, _ = colors.update(attr, 0, options.color_current_row, 10)
 
                     if attr:
@@ -289,31 +285,31 @@ class Canvas(Plotter):
 
         Command('zz', 'zoomTo(cursorBox)', 'set visible bounds to cursor'),
 
-        Command('-', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.xcenter, plotviewBox.ycenter, tmp)', 'zoom out from cursor center'),
-        Command('+', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.xcenter, plotviewBox.ycenter, tmp)', 'zoom into cursor center'),
+        Command('-', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center'),
+        Command('+', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center'),
         Command('_', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()', 'zoom to fit full extent'),
         Command('z_', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio'),
 
         # set cursor box with left click
-        Command('BUTTON1_PRESSED', 'sheet.cursorBox = Box(*canvasMouseXY.xy)', 'start cursor box with left mouse button press'),
-        Command('BUTTON1_RELEASED', 'setCursorSize(canvasMouseXY)', 'end cursor box with left mouse button release'),
+        Command('BUTTON1_PRESSED', 'sheet.cursorBox = Box(*canvasMouse.xy)', 'start cursor box with left mouse button press'),
+        Command('BUTTON1_RELEASED', 'setCursorSize(canvasMouse)', 'end cursor box with left mouse button release'),
 
-        Command('BUTTON3_PRESSED', 'sheet.gridAnchorXY = canvasMouseXY', 'mark grid point to move'),
-        Command('BUTTON3_RELEASED', 'fixPoint(plotterMouseX, plotterMouseY, gridAnchorXY)', 'mark canvas anchor point'),
+        Command('BUTTON3_PRESSED', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move'),
+        Command('BUTTON3_RELEASED', 'fixPoint(plotterMouse, anchorPoint)', 'mark canvas anchor point'),
 
-        Command('BUTTON4_PRESSED', 'tmp=canvasMouseXY; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouseX, plotterMouseY, tmp)', 'zoom in with scroll wheel'),
-        Command('REPORT_MOUSE_POSITION', 'tmp=canvasMouseXY; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouseX, plotterMouseY, tmp)', 'zoom out with scroll wheel'),
+        Command('BUTTON4_PRESSED', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel'),
+        Command('REPORT_MOUSE_POSITION', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel'),
 
-        Command('s', 'source.select(list(getRowsInside(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor'),
-        Command('t', 'source.toggle(list(getRowsInside(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor'),
-        Command('u', 'source.unselect(list(getRowsInside(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor'),
-        Command(ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(plotterCursorBox)); vd.push(vs)', 'Open sheet of source rows contained within canvas cursor'),
+        Command('s', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor'),
+        Command('t', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor'),
+        Command('u', 'source.unselect(list(rowsWithin(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor'),
+        Command(ENTER, 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)', 'Open sheet of source rows contained within canvas cursor'),
 
 
-        Command('gs', 'source.select(list(getRowsInside(plotterVisibleBox)))', 'select rows visible on screen'),
-        Command('gt', 'source.toggle(list(getRowsInside(plotterVisibleBox)))', 'toggle selection of rows visible on screen'),
-        Command('gu', 'source.unselect(list(getRowsInside(plotterVisibleBox)))', 'unselect rows visible on screen'),
-        Command('g'+ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen'),
+        Command('gs', 'source.select(list(rowsWithin(plotterVisibleBox)))', 'select rows visible on screen'),
+        Command('gt', 'source.toggle(list(rowsWithin(plotterVisibleBox)))', 'toggle selection of rows visible on screen'),
+        Command('gu', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect rows visible on screen'),
+        Command('g'+ENTER, 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen'),
     ]
 
     def __init__(self, name, source=None, **kwargs):
@@ -368,9 +364,9 @@ class Canvas(Plotter):
         return 'canvas %s visible %s cursor %s' % (self.canvasBox, self.visibleBox, self.cursorBox)
 
     @property
-    def canvasMouseXY(self):
-        return Point(self.visibleBox.xmin + (self.plotterMouseX-self.plotviewBox.xmin)/self.xScaler,
-                     self.visibleBox.ymin + (self.plotterMouseY-self.plotviewBox.ymin)/self.yScaler)
+    def canvasMouse(self):
+        return Point(self.visibleBox.xmin + (self.plotterMouse.x-self.plotviewBox.xmin)/self.xScaler,
+                     self.visibleBox.ymin + (self.plotterMouse.y-self.plotviewBox.ymin)/self.yScaler)
 
     def setCursorSize(self, p):
         'sets width based on diagonal corner p'
@@ -421,15 +417,15 @@ class Canvas(Plotter):
     def label(self, x, y, text, attr, row=None):
         self.gridlabels.append((x, y, text, attr, row))
 
-    def fixPoint(self, plotter_x, plotter_y, canvasXY):
-        'adjust visibleBox.xymin so that canvasXY is plotted at (plotter_x, plotter_y)'
-        self.visibleBox.xmin = canvasXY.x - self.canvasW(plotter_x-self.plotviewBox.xmin)
-        self.visibleBox.ymin = canvasXY.y - self.canvasH(plotter_y-self.plotviewBox.ymin)
+    def fixPoint(self, plotterPoint, canvasPoint):
+        'adjust visibleBox.xymin so that canvasPoint is plotted at plotterPoint'
+        self.visibleBox.xmin = canvasPoint.x - self.canvasW(plotterPoint.x-self.plotviewBox.xmin)
+        self.visibleBox.ymin = canvasPoint.y - self.canvasH(plotterPoint.y-self.plotviewBox.ymin)
         self.refresh()
 
     def zoomTo(self, bbox):
         'set visible area to bbox, maintaining aspectRatio if applicable'
-        self.fixPoint(self.plotviewBox.xmin, self.plotviewBox.ymin, bbox.xymin)
+        self.fixPoint(self.plotviewBox.xymin, bbox.xymin)
         self.zoomlevel=max(bbox.w/self.canvasBox.w, bbox.h/self.canvasBox.h)
 
     def setZoom(self, zoomlevel=None):
@@ -465,10 +461,10 @@ class Canvas(Plotter):
     def plotlegends(self):
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
-            self._commands[str(i+1)] = Command(str(i+1), 'togglePixelAttrs(%s)' % attr, '')
-            if attr in self.disabledAttrs:
-                attr = colors['238 blue']
-            self.plotlegend(i, '%s.%s'%(i+1,legend), attr)
+            self._commands[str(i+1)] = Command(str(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr), 'toggle display of "%s"' % legend)
+            if attr in self.hiddenAttrs:
+                attr = colors[options.color_graph_hidden]
+            self.plotlegend(i, '%s:%s'%(i+1,legend), attr)
 
     def checkCursor(self):
         'override Sheet.checkCursor'

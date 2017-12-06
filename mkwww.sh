@@ -20,7 +20,7 @@ mkdir -p $BUILDWWW
 mkdir -p $BUILDWWW/man
 mkdir -p $BUILDWWW/test
 mkdir -p $BUILDWWW/docs
-#mkdir -p $BUILDWWW/design
+mkdir -p $BUILDWWW/design
 mkdir -p $BUILDWWW/about
 mkdir -p $BUILDWWW/contributing
 mkdir -p $BUILDWWW/videos
@@ -83,18 +83,18 @@ pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/docs.md
 $VD/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
 
 # Build /design
-#pandoc -r markdown -w html -o $BUILDWWW/design/index.body $WWW/design.md
-#$VD/strformat.py body=$BUILDWWW/design/index.body title="VisiData Design and Internals" head="" < $WWW/template.html > $BUILDWWW/design/index.html
-#rm -f $BUILDWWW/design/index.body
-#for postpath in `find $DESIGN -name '*.md'`; do
-#    post=${postpath##$DESIGN/}
-#    postname=${post%.md}
-#    mkdir -p $BUILDWWW/design/$postname
-#    posthtml=$BUILDWWW/design/$postname/index
-#    pandoc -r markdown -w html -o $posthtml.body $postpath
-#    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
-#    rm -f $posthtml.body
-#done
+pandoc -r markdown -w html -o $BUILDWWW/design/index.body $WWW/design.md
+$VD/strformat.py body=$BUILDWWW/design/index.body title="VisiData Design and Internals" head="" < $WWW/template.html > $BUILDWWW/design/index.html
+rm -f $BUILDWWW/design/index.body
+for postpath in `find $DESIGN -name '*.md'`; do
+    post=${postpath##$DESIGN/}
+    postname=${post%.md}
+    mkdir -p $BUILDWWW/design/$postname
+    posthtml=$BUILDWWW/design/$postname/index
+    pandoc -r markdown -w html -o $posthtml.body $postpath
+    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    rm -f $posthtml.body
+done
 
 # Build /news
 mkdir -p $BUILDWWW/news

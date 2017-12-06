@@ -26,7 +26,7 @@ class InvertedCanvas(Canvas):
 
     def zoomTo(self, bbox):
         super().zoomTo(bbox)
-        self.fixPoint(self.plotviewBox.xmin, self.plotviewBox.ymax, bbox.xymin)
+        self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax), bbox.xymin)
 
     def plotpixel(self, x, y, attr, row=None):
         y = self.plotviewBox.ymax-y+4
@@ -41,9 +41,9 @@ class InvertedCanvas(Canvas):
         return (self.plotviewBox.ymax-plotterY)/self.yScaler
 
     @property
-    def canvasMouseXY(self):
-        p = super().canvasMouseXY
-        p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouseY)/self.yScaler
+    def canvasMouse(self):
+        p = super().canvasMouse
+        p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouse.y)/self.yScaler
         return p
 
 
