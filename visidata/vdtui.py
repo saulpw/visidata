@@ -2238,10 +2238,16 @@ class ColorMaker:
         self.color_attrs = {}
 
     def setup(self):
+        if options.use_default_colors:
+            curses.use_default_colors()
+            default_bg = -1
+        else:
+            default_bg = curses.COLOR_BLACK
+
         self.color_attrs['black'] = curses.color_pair(0)
 
         for c in range(0, options.force_256_colors and 256 or curses.COLORS):
-            curses.init_pair(c+1, c, curses.COLOR_BLACK)
+            curses.init_pair(c+1, c, default_bg)
             self.color_attrs[str(c)] = curses.color_pair(c+1)
 
         for c in 'red green yellow blue magenta cyan white'.split():
@@ -2280,9 +2286,6 @@ def setupcolors(stdscr, f, *args):
     curses.mousemask(-1) # even more than curses.ALL_MOUSE_EVENTS
     curses.mouseinterval(0) # very snappy but does not allow for [multi]click
     curses.mouseEvents = {}
-
-    if options.use_default_colors:
-        curses.use_default_colors()
 
     for k in dir(curses):
         if k.startswith('BUTTON') or k == 'REPORT_MOUSE_POSITION':
