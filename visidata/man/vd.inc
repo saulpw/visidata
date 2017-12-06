@@ -77,7 +77,7 @@ views all commands available on current sheet
 .It Ic ^Q
 aborts program immediately
 .It Ic ^C
-cancels user input or aborts all tasks on current sheet
+cancels user input or aborts all threads on current sheet
 .It Ic " q"
 quits current sheet
 .It Ic "gq"
@@ -405,7 +405,7 @@ opens current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Status History No (^P) "        view history of status messages"
 .It Sy " \&."
-.Sy Tasks Sheet No (^T) "           view, cancel, and profile asynchronous tasks"
+.Sy Threads Sheet No (^T) "         view, cancel, and profile asynchronous threads"
 .Pp
 .It Sy Derived Sheets
 .It Sy " \&."

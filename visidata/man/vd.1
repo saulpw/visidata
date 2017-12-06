@@ -77,7 +77,7 @@ views all commands available on current sheet
 .It Ic ^Q
 aborts program immediately
 .It Ic ^C
-cancels user input or aborts all tasks on current sheet
+cancels user input or aborts all threads on current sheet
 .It Ic " q"
 quits current sheet
 .It Ic "gq"
@@ -405,7 +405,7 @@ opens current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Status History No (^P) "        view history of status messages"
 .It Sy " \&."
-.Sy Tasks Sheet No (^T) "           view, cancel, and profile asynchronous tasks"
+.Sy Threads Sheet No (^T) "         view, cancel, and profile asynchronous threads"
 .Pp
 .It Sy Derived Sheets
 .It Sy " \&."
@@ -605,6 +605,8 @@ exit on error and display stacktrace
 curses timeout in ms
 .It Sy --force-256-colors Ns = Ns Ar "bool     " No "False"
 use 256 colors even if curses reports fewer
+.It Sy --use-default-colors Ns = Ns Ar "bool   " No "False"
+set curses to use default terminal colors
 .It Sy --note-pending Ns = Ns Ar "str          " No "\[u231B]"
 note to display for pending cells
 .It Sy --note-format-exc Ns = Ns Ar "str       " No "?"
@@ -615,8 +617,8 @@ cell note for an exception during computation
 amount to scroll with scrollwheel
 .It Sy --skip Ns = Ns Ar "int                  " No "0"
 skip first N lines of text input
-.It Sy --profile-tasks Ns = Ns Ar "bool        " No "True"
-profile async tasks
+.It Sy --profile-threads Ns = Ns Ar "bool      " No "True"
+profile async threads
 .It Sy --min-memory-mb Ns = Ns Ar "int         " No "0"
 minimum memory to continue loading and async processing
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
@@ -726,6 +728,8 @@ status indicator for active replay
 status indicator for paused replay
 .It Sy "disp_pixel_random  " No "False"
 randomly choose attr from set of pixels instead of most common
+.It Sy "color_graph_hidden " No "238 blue"
+color of legend for hidden attribute
 .It Sy "color_graph_axis   " No "bold"
 color for graph axis labels
 .El

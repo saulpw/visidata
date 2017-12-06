@@ -5,14 +5,14 @@ import cProfile
 
 from .vdtui import *
 
-min_task_time_s = 0.10 # only keep tasks that take longer than this number of seconds
+min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
-option('profile_tasks', True, 'profile async tasks')
+option('profile_threads', True, 'profile async threads')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
-globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all tasks on current sheet')
-globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary tasks')
-globalCommand('^T', 'vd.push(vd.tasksSheet)', 'open Tasks Sheet')
+globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet')
+globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary threads')
+globalCommand('^T', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')
 globalCommand('^_', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
 
 class ProfileSheet(TextSheet):
@@ -27,10 +27,10 @@ def toggleProfiling(t):
     if not t.profile:
         t.profile = cProfile.Profile()
         t.profile.enable()
-        status('profiling of main task enabled')
+        status('profiling of main thread enabled')
     else:
         t.profile.disable()
-        status('profiling of main task disabled')
+        status('profiling of main thread disabled')
 
 
 # define @async for potentially long-running functions
@@ -40,7 +40,7 @@ def toggleProfiling(t):
 class ThreadProfiler:
     def __init__(self, thread):
         self.thread = thread
-        if options.profile_tasks:
+        if options.profile_threads:
             self.thread.profile = cProfile.Profile()
         else:
             self.thread.profile = None
@@ -61,7 +61,7 @@ class ThreadProfiler:
 
 @functools.wraps(vd().toplevelTryFunc)
 def threadProfileCode(vdself, func, *args, **kwargs):
-    'Profile @async tasks if `options.profile_tasks` is set.'
+    'Profile @async threads if `options.profile_threads` is set.'
     with ThreadProfiler(threading.current_thread()) as prof:
         try:
             prof.thread.status = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
@@ -91,10 +91,10 @@ SheetsSheet.columns += [
 ]
 
 # each row is an augmented threading.Thread object
-class TasksSheet(Sheet):
+class ThreadsSheet(Sheet):
     rowtype = 'threads'
     commands = [
-        Command('d', 'cancelThread(cursorRow)', 'abort task at current row'),
+        Command('d', 'cancelThread(cursorRow)', 'abort thread at current row'),
         Command('^C', 'd'),
         Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action'),
     ]
@@ -124,7 +124,7 @@ def checkMemoryUsage(vs):
             attr = 'green'
         return ret, attr
 
-vd().tasksSheet = TasksSheet('task_history')
+vd().threadsSheet = ThreadsSheet('thread_history')
 vd().toplevelTryFunc = threadProfileCode
 vd().addHook('rstatus', checkMemoryUsage)
 

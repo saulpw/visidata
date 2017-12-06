@@ -28,10 +28,10 @@ This will only rarely be useful.
 
 # Threads Sheet (`^T`)
 
-All threads (active, aborted, and completed) are added to `VisiData.threads`, which can be viewed as the Task Sheets via `^T`.
-Threads which take less than `min_task_time_s` (hardcoded in `async.py` to 10ms) are removed, to reduce clutter.
+All threads (active, aborted, and completed) are added to `VisiData.threads`, which can be viewed as the ThreadsSheet via `^T`.
+Threads which take less than `min_thread_time_s` (hardcoded in `async.py` to 10ms) are removed, to reduce clutter.
 
-- Press `ENTER` (on the Threads Sheet) on a thread to view its performance profile (if `options.profile_tasks` was True when the thread started).
+- Press `ENTER` (on the Threads Sheet) on a thread to view its performance profile (if `options.profile_threads` was True when the thread started).
 - Press `^_` (anywhere) to toggle profiling of the main thread.
 
 ## Profiling

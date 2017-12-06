@@ -570,7 +570,7 @@ class VisiData:
                     t.status = 'ended'
 
     def sync(self, expectedThreads=0):
-        'Wait for all but expectedThreads async tasks to finish.'
+        'Wait for all but expectedThreads async threads to finish.'
         while len(self.unfinishedThreads) > expectedThreads:
             self.checkForFinishedThreads()
 
@@ -915,7 +915,7 @@ class Sheet:
         # for progress bar
         self.progresses = []  # list of Progress objects
 
-        # track all async tasks from sheet
+        # track all async threads from sheet
         self.currentThreads = []
 
         self._colorizers = {'row': [], 'col': [], 'hdr': [], 'cell': []}

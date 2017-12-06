@@ -18,7 +18,7 @@
   Ctrl- Q  Quit
   Ctrl- R  Reload
   Ctrl- S  Save
-  Ctrl- T  Tasks sheet
+  Ctrl- T  Threads sheet
   Ctrl- U  paUse/resUme
   Ctrl- V  Version
   Ctrl- W
