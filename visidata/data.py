@@ -128,7 +128,7 @@ def openSource(p, filetype=None):
             return openSource(Path(p), filetype)  # convert to Path and recurse
     elif isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
-        vs = getGlobals()[openfunc](p, filetype=filetype)
+        return getGlobals()[openfunc](p, filetype=filetype)
     elif isinstance(p, Path):
         if not filetype:
             filetype = options.filetype or p.suffix
