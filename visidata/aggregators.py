@@ -33,11 +33,8 @@ aggregator('sum', sum)
 aggregator('distinct', lambda values: len(set(values)), int)
 aggregator('count', lambda values: sum(1 for v in values), int)
 
-def rowkeys(sheet, row):
-    return ' '.join(c.getDisplayValue(row) for c in sheet.keyCols)
-
 # returns keys of the row with the max value
-fullAggregator('keymax', anytype, lambda col, rows: rowkeys(col.sheet, max(col.getValueRows(rows))[1]))
+fullAggregator('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
 
 ColumnsSheet.commands += [
     Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'add aggregator to selected source columns'),
