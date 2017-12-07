@@ -55,7 +55,7 @@ class ThreadProfiler:
             self.thread.profile.disable()
 
         # remove very-short-lived async actions
-        if elapsed_s(self.thread) < min_task_time_s:
+        if elapsed_s(self.thread) < min_thread_time_s:
             vd().threads.remove(self.thread)
 
 
