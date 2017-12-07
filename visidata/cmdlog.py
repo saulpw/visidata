@@ -26,6 +26,7 @@ nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
 nonLogKeys += '^L ^C ^U ^D KEY_RESIZE'.split()
 
+option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 
 def itemsetter(i):
     def g(obj, v):
@@ -60,9 +61,12 @@ def getColVisibleIdxByFullName(sheet, name):
         if name == c.name:
             return i
 
-def getRowIdxByKey(sheet, keystr):
+def keystr(k):
+    return  ','.join(map(str, k))
+
+def getRowIdxByKey(sheet, k):
     for i, r in enumerate(sheet.rows):
-        if str(sheet.rowkey(r)) == keystr:
+        if keystr(sheet.rowkey(r)) == k:
             return i
 
 def loggable(keystrokes):
@@ -132,7 +136,8 @@ class CommandLog(Sheet):
             sheetname = sheet.name
             colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
             if sheet.rows:
-                rowname = str(sheet.rowkey(sheet.cursorRow) or sheet.cursorRowIndex)
+                k = sheet.rowkey(sheet.cursorRow)
+                rowname = (options.rowkey_prefix + keystr(k)) if k else sheet.cursorRowIndex
             else:
                 rowname = ''
         self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, sheet.getCommand(keystrokes).helpstr])
@@ -195,7 +200,8 @@ class CommandLog(Sheet):
             try:
                 rowidx = int(r.row)
             except ValueError:
-                rowidx = getRowIdxByKey(vs, r.row)
+                k = r.row[1:]  # trim rowkey_prefix
+                rowidx = getRowIdxByKey(vs, k)
 
             if rowidx is None:
                 error('no row %s' % r.row)
