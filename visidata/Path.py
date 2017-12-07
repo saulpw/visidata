@@ -121,6 +121,17 @@ class RepeatFile:
     def __exit__(self, a,b,c):
         pass
 
+    def read(self, n=None):
+        r = ''
+        while len(r) < n:
+            try:
+                s = next(self.iter)
+                r += s + '\n'
+                n += len(r)
+            except StopIteration:
+                break  # end of file
+        return r
+
     def seek(self, n):
         assert n == 0, 'RepeatFile can only seek to beginning'
         self.iter = RepeatFileIter(self)

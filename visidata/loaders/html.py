@@ -19,7 +19,8 @@ class HtmlTablesSheet(Sheet):
         import lxml.html
         from lxml import etree
         utf8_parser = etree.HTMLParser(encoding='utf-8')
-        html = lxml.html.etree.fromstring(self.source.read_text(), parser=utf8_parser)
+        with self.source.open_text() as fp:
+            html = lxml.html.etree.parse(fp, parser=utf8_parser)
         self.rows = []
         for e in html.iter():
             if e.tag == 'table':
