@@ -131,7 +131,10 @@ class CommandLog(Sheet):
         else:
             sheetname = sheet.name
             colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
-            rowname = str(sheet.rowkey(sheet.cursorRow)) or sheet.cursorRowIndex
+            if sheet.rows:
+                rowname = str(sheet.rowkey(sheet.cursorRow) or sheet.cursorRowIndex)
+            else:
+                rowname = ''
         self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, sheet.getCommand(keystrokes).helpstr])
 
     def afterExecSheet(self, sheet, escaped, err):
