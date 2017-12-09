@@ -64,14 +64,14 @@ class GraphSheet(InvertedCanvas):
 
         status('loading data points')
         catcols = [c for c in self.xcols if not isNumeric(c)]
-        numcol = numericCols(self.xcols)[0]
+        numcols = numericCols(self.xcols)
         for ycol in self.ycols:
             for rownum, row in enumerate(Progress(self.sourceRows)):  # rows being plotted from source
                 try:
                     k = tuple(c.getValue(row) for c in catcols) if catcols else (ycol.name,)
 
                     # convert deliberately to float (to e.g. linearize date)
-                    graph_x = float(numcol.type(numcol.getValue(row))) if self.xcols else rownum
+                    graph_x = float(numcols[0].type(numcols[0].getValue(row))) if numcols else rownum
                     graph_y = ycol.type(ycol.getValue(row))
 
                     attr = self.plotColor(k)
