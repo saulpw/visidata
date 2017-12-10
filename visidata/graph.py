@@ -113,9 +113,6 @@ class GraphSheet(InvertedCanvas):
         attr = colors[options.color_graph_axis]
         self.plotlabel(self.plotviewBox.xmin+frac*self.plotviewBox.w, self.plotviewBox.ymax+4, txt, attr)
 
-    def plotAll(self):
-        super().plotAll()
-
     def createLabels(self):
         self.gridlabels = []
 

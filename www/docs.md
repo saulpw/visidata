@@ -1,12 +1,12 @@
 # VisiData documentation
 
-* VisiData's [manpage](/man) contains a comprehensive overview of all global and sheet-specific commands.
+* VisiData's [manpage](/man) contains a comprehensive quick reference of all global and sheet-specific commands.
 
 * The [system tests](/test) provide examples of how VisiData's atomic commands can be combined for complex workflows.
 
 * [CONTRIBUTING.md](/contributing) contains information on how to contribute to VisiData's ongoing development.
 
-* There are a few VisiData [demo videos](/videos). More are in the works, but please let us know if there are any features in particular you wish to learn more about.
+* There are a few VisiData [demo videos](/videos).  Please leave a note in any of the community spaces if there are any features in particular you want to know about.
 
 ## For developers
 
