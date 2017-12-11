@@ -18,7 +18,7 @@ def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
     log = logpath.read_text().format(*args, **kwargs)
     src = PathFd(logpath.fqpn, io.StringIO(log), filesize=len(log))
-    vs = openSource(src)
+    vs = openSource(src, filetype='vd')
     vd().push(vs)
     vs.vd = vd()
     return vs
