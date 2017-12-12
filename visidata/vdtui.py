@@ -1258,8 +1258,11 @@ class Sheet:
     def gatherBy(self, func):
         'Generate only rows for which the given func returns True.'
         for r in Progress(self.rows):
-            if func(r):
-                yield r
+            try:
+                if func(r):
+                    yield r
+            except Exception:
+                pass
 
     def orderBy(self, *cols, **kwargs):
         self.rows.sort(key=lambda r,cols=cols: tuple(c.getTypedValue(r) for c in cols), **kwargs)
