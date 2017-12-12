@@ -51,6 +51,7 @@ def main():
     parser.add_argument('-w', dest='replay_wait', default=0, help='time to wait between replayed commands, in seconds')
     parser.add_argument('-d', dest='delimiter', help='delimiter to use for tsv filetype')
     parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
 
     for optname, v in vdtui.baseOptions.items():
         name, optval, defaultval, helpstr = v
