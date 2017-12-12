@@ -271,10 +271,7 @@ code {
     box-shadow: inset 0px 0px 2px #bbb;
     font-family: Inconsolata, monospace; /* Correct the inheritance and scaling of font size in all browsers */
     font-size: 1em; /* Correct the odd `em` font sizing in all browsers */
-/*    padding-left: 0.3em;
-    padding-right: 0.3em;
-    padding-top: 0.1em;
-    padding-bottom: 0.1em; */
+    padding: 0.25em;
 }
 
 pre, pre > code {

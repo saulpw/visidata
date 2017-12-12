@@ -13,6 +13,7 @@ TEST=$WWW/test
 DESIGN=$WWW/design
 NEWS=$WWW/news
 VIDEOS=$WWW/videos
+HELP=$WWW/help
 
 # Build directories
 mkdir -p $BUILD
@@ -23,6 +24,7 @@ mkdir -p $BUILDWWW/docs
 mkdir -p $BUILDWWW/design
 mkdir -p $BUILDWWW/about
 mkdir -p $BUILDWWW/contributing
+mkdir -p $BUILDWWW/help
 mkdir -p $BUILDWWW/videos
 
 # Set up python and shell environment
@@ -60,6 +62,10 @@ sed -i -e "s#<span style=\"font-weight:bold;\">SUPPORTED</span> <span style=\"fo
 # Build /contributing
 pandoc -r markdown -w html -o $BUILDWWW/contributing/index.body $VD/CONTRIBUTING.md
 $VD/strformat.py body=$BUILDWWW/contributing/index.body title="Contributing to VisiData" head="" < $WWW/template.html > $BUILDWWW/contributing/index.html
+
+# Build /help
+pandoc -r markdown -w html -o $BUILDWWW/help/index.body $HELP/index.md
+$VD/strformat.py body=$BUILDWWW/help/index.body title="Support" head="" < $WWW/template.html > $BUILDWWW/help/index.html
 
 # Build /videos
 $VD/strformat.py body=$VIDEOS/video-body.html title="VisiData Videos" head="" < $WWW/template.html > $BUILDWWW/videos/index.html
@@ -110,11 +116,6 @@ for postpath in `find $NEWS -name '*.md'`; do
     $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
     rm -f $posthtml.body
 done
-
-# Build /help
-mkdir -p $BUILDWWW/help
-pandoc -r markdown -w html -o $BUILDWWW/help/index.body $VD/CONTRIBUTING.md
-$VD/strformat.py body=$BUILDWWW/help/index.body title="Contributing to VisiData as a user or developer" head="" < $WWW/template.html > $BUILDWWW/help/index.html
 
 #### At the end
 # add analytics to .html files
