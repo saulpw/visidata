@@ -7,9 +7,9 @@ __version__ = '0.98.1'
 
 setup(name='visidata',
       version=__version__,
-      install_requires=['python-dateutil'],
+      install_requires=['python-dateutil', 'openpyxl', 'xlrd', 'lxml', 'requests'],
       extras_require={
-        'full': 'openpyxl xlrd h5py psycopg2 pyshp mapbox-vector-tile requests lxml'.split()
+        'full': 'h5py psycopg2 pyshp mapbox-vector-tile'.split()
         },
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
