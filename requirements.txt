@@ -1,11 +1,12 @@
-python-dateutil # date type
+# included in visidata
+python-dateutil     # date type
+requests            # http
+lxml                # html
+openpyxl            # xlsx
+xlrd                # xls
 
-# for loaders
-openpyxl # xlsx
-xlrd # xls
-h5py # hdf5
-psycopg2 # postgres
-pyshp # shpp
-mapbox-vector-tile # mbtiles
-requests # http
-lxml # html
+# included in visidata[full]
+h5py                # hdf5
+psycopg2            # postgres
+pyshp               # shapefiles
+mapbox-vector-tile  # mbtiles
