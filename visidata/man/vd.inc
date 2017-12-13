@@ -151,10 +151,16 @@ reduces width of current column by half
 .Pp
 .It Ic \&! Ns
 pins current column on the left as a key column
-.It Ic ^
-edits name of current column
 .It Ic "~  #  %  $  @"
 sets type of current column to untyped/int/float/currency/date
+.It Ic "  ^"
+edits name of current column
+.It Ic " g^"
+sets names of all unnamed visible columns to contents of selected rows (or current row)
+.It Ic " z^"
+sets name of current column to contents of current cell
+.It Ic "gz^"
+sets name of current column to combined contents of current column for selected rows (or current row)
 .Pp
 .It Ic "  =" Ar expr
 .No creates new column from Python Ar expr Ns , with column names as variables
@@ -166,13 +172,6 @@ sets type of current column to untyped/int/float/currency/date
 .No sets current cell to result of evaluated Python Ar expr No on current row
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " g^"
-sets names of all visible columns to contents of selected rows (or current row)
-.It Ic " z^"
-sets name of current column to contents of current cell
-.It Ic "gz^"
-sets name of current column to combined contents of current cell in selected rows (or current row)
-.Pp
 .It Ic " '" Ns " (tick)"
 adds a frozen copy of current column with all cells evaluated
 .It Ic "g'"
@@ -235,7 +234,7 @@ deletes current/all selected row(s) and moves to clipboard
 copies current/all selected row(s) to clipboard
 .It Ic " zy"
 copies current cell to clipboard
-.It Ic "  p   Shift-P"
+.It Ic "  p    P"
 pastes clipboard rows after/before current row
 .It Ic " zp  gzp"
 sets contents of current column for current/all selected row(s) to last clipboard value
@@ -307,17 +306,18 @@ opens duplicate sheet with a random population subset of
 .Ss Data Visualization
 .Bl -tag -width XXXXXXXXXXXXX -compact
 .It Ic " ." No (dot)
-.No graphs current numeric column vs key columns. Numeric key column is on the x-axis, while categorical key columns determine color.
+.No plots current numeric column vs key columns. Numeric key column is used for the x-axis; categorical key column values determine color.
 .It Ic "g."
-.No opens a graph of all visible numeric columns vs key column
+.No plots a graph of all visible numeric columns vs key columns.
 .Pp
 .El
-.No If rows on the current sheet represent plottable coordinates (as in .shp or vector .mbtiles sources), Sy "." No plots the current row, and Ic "g." No plots all selected rows (or all rows if none selected).
+.No If rows on the current sheet represent plottable coordinates (as in .shp or vector .mbtiles sources),
+.Ic " ." No plots the current row, and Ic "g." No plots all selected rows (or all rows if none selected).
 .Ss "  Canvas-specific Commands"
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " +   -"
 increases/decreases zoomlevel, centered on cursor
-.It Ic "_" No (underscore)
+.It Ic " _" No (underscore)
 zooms to fit full extent
 .It Ic " s   t   u"
 selects/toggles/unselects rows on source sheet contained within canvas cursor
@@ -327,14 +327,14 @@ selects/toggles/unselects rows visible on screen
 opens sheet of source rows contained within canvas cursor
 .It Ic "gEnter"
 opens sheet of source rows visible on screen
-.It Ic "1" No - Ic "9"
+.It Ic " 1" No - Ic "9"
 toggles display of layers
 .It Ic "^L"
-redraws all pixeles on canvas
+redraws all pixels on canvas
 .It Ic " w"
-.No toggles Ic show_graph_labels
+.No toggles Ic show_graph_labels No option
 .It Ic "mouse scrollwheel"
-zooms in/out on a canvas
+zooms in/out of canvas
 .It Ic "left click-drag"
 sets canvas cursor
 .It Ic "right click-drag"
@@ -381,7 +381,7 @@ suspends VisiData process
 .It Ic " ^Y  z^Y  g^Y"
 opens current row/cell/sheet as Python object
 .It Ic " ^X" Ar expr
-.No evalutes Python Ar expr No and opens result as python object
+.No evaluates Python Ar expr No and opens result as python object
 .It Ic "z^X" Ar expr
 .No evaluates Python Ar expr No on current row and shows result on status line
 .It Ic "g^X" Ar stmt
@@ -485,13 +485,11 @@ edits option
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic " ^Z"
-sends a SIGSTOP
 .It Ic " x"
 replays command in current row
 .It Ic "gx"
 replays contents of entire CommandLog
-.It Ic "^C"
+.It Ic " ^C"
 aborts replay
 .El
 .
