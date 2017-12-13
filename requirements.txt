@@ -1,10 +1,11 @@
-python-dateutil
+python-dateutil # date type
 
-openpyxl
-xlrd
-h5py
-psycopg2
-pyshp
-mapbox-vector-tile
-requests
-lxml
+# for loaders
+openpyxl # xlsx
+xlrd # xls
+h5py # hdf5
+psycopg2 # postgres
+pyshp # shpp
+mapbox-vector-tile # mbtiles
+requests # http
+lxml # html
