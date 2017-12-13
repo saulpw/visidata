@@ -60,7 +60,8 @@ def SheetList(name, src, **kwargs):
     'Creates a Sheet from a list of homogenous dicts or namedtuples.'
 
     if not src:
-        error('no content')
+        status('no content in ' + name)
+        return
 
     if isinstance(src[0], dict):
         return ListOfDictSheet(name, source=src, **kwargs)
