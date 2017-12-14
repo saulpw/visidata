@@ -21,7 +21,7 @@ globalCommand('^K', 'CommandLog.currentReplay.cancel()', 'cancel current replay'
 globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
 
 # not necessary to log movements and scrollers
-nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < > { } / ? n N g/ g?'.split()
+nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < > { } / ? n N gg G g/ g?'.split()
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
 nonLogKeys += '^L ^C ^U ^D KEY_RESIZE'.split()

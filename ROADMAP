@@ -1,42 +1,64 @@
-# Feature Roadmap
+# Roadmap
 
-## Post 1.0
-- Python expressions should be usable like regex for search, select, etc
-- delete regex match in cells
-- maintain original ordering with implicit/hidden line# column
-- popup windows for enum selection
-- save as .json
-- simple file management in VSheetDir:
-  - rename with 'e'dit
-  - mass rename with transform
-  - ^Delete
-  - only apply changes with ^S
-- checkpoint data for replay/undo
-- connect to larger datasets
-   - load larger than memory .csv/tsv files
-- load new .py plugins for inputs/outputs/sheets
-   - git app that can streamline standard workflows
-     - checkout branch or revision with TUI interface
-     - browse through history
-- '.' repeat edit?
-- save all sheets to .h5 file
-- reload derived sheets
-- html table parsing into columns
-- parse .xml
-- how to handle timezone for datetime
+I. Interface
+- statusline menu for chooseOne
+- context-sensitive hierarchical menu system to discover commands
+- clickable column headers to set type/name, click-drag to move columns/rows
+
+II. Internals
+- break VisiData object into several smaller pseudo-classes, which can be plug-n-play.
+   - maybe provide a null functional implementation (raw interface).
+   - Progress, asyncjl
+- Sheet gets split into [Base]Sheet and Table
+   - Sheet is interface with draw, reload, exec_command
+   - Table inherits from Sheet, has rows/columns
+   - Plotter inherits from Sheet
+   - SourceSheet inherits from Table
+      - Enter as an alias for 'e' on SourceSheet
+      - newRow() (for 'a') on SourceSheet only
+- allow Table.rows to be an offline datastore
+
+II. Loaders
+- pandas dataframe
+- .xml
+- .sas
+- try fixed width first for unknown types, fallback to TextSheet if no columns detected
+
+III. Savers
+- '^S' saves as any input format depending on file extension
+- 'g^S' saves all sheets (or selected on SheetsSheets) to hdf5, xlsx, and other multisheet formats
+- 'z^S' saves just this cell
+- sqlite: allow in-memory edits, ^S to commit
+- upload to google sheets
+- save to .py: emit code to get current cell/row/sheet from source data
+- save canvas to .svg
+
+IV. Individual sheets
+  A. DirSheet
+     - add cached `file` type column
+     - rename file with any 'set' (allow mass rename with transform)
+     - 'd'elete file
+     - but only apply changes with ^S
+     - '^O' to open current file in external program (probably $EDITOR)
+
+## new commands and features
+
+
+- numeric binning for freq column and pivot table
+- Python expressions usable like regex for search, select, etc
+- add row number in hidden column on data sheets so that original (load) order can be restored
+- handle timezone for datetime
 
 # Applications
 
-- vdsh ('x' executes a shell command and creates a sheet from the output)
-   - vdtop (includes kill/killall/ps)
-   - vdls (rm/mv/cp/mount/find/grep/mkdir/rmdir/ln/touch)
-   - vdnet (netstat)
-   - vdproc (explore /proc filesystem with some added goodies)
-- vdgit
-- vdb (interface to gdb)
-- vdchat
-- vdmail
-- vdsearch
+- [vgit](http://github.com/saulpw/vgit) (currently v0.2)
+- [vsh](http://github.com/saulpw/vsh) (unreleased)
+   - vtop (includes kill/killall/ps)
+   - vls (rm/mv/cp/mount/find/grep/mkdir/rmdir/ln/touch)
+   - vnet (netstat)
+   - vping
+   - vproc (explore /proc filesystem with some added goodies)
+- vpy (python explorer/debugger)
+- vchat
 - [vdgalcon](http://github.com/saulpw/vdgalcon)
-- vdscrape
-- vdcalc
+- vscrape

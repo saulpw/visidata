@@ -21,7 +21,7 @@ If you use VisiData, I would love it if you reached out to me to discuss some of
 
 ### Filing issues or support
 
-Create a GitHub issue if anything doesn't appear to be working right. If you get an unexpected error, please include the full stack trace that you get with `^E`. Additionally, it would help me more quickly diagnose the problem if you could attach the saved Commandlog (`Ctrl-D`), which will show the steps that lead to the issue. If you are struggling with learning how to use the tool, or are unsure how something works, please also file an issue or write a comment in any of our [community spaces](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#community). In addition to wanting to help users get the most out of the tool, this helps us gauge the holes in our documentation.
+Create a GitHub issue if anything doesn't appear to be working right. If you get an unexpected error, please include the full stack trace that you get with `Ctrl-E`. Additionally, it would help me more quickly diagnose the problem if you could attach the saved Commandlog (`Ctrl-D`), which will show the steps that lead to the issue. If you are struggling with learning how to use the tool, or are unsure how something works, please also file an issue or write a comment in any of our [community spaces](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#community). In addition to wanting to help users get the most out of the tool, this helps us gauge the holes in our documentation.
 
 ### Contributing tests
 
@@ -33,7 +33,7 @@ To run a test manually:
 
 ```
        $ bin/vd --play tests/foo.vd --replay-wait 1
-    or $ bin/vd -p tests/foo.vd -d 1
+    or $ bin/vd -p tests/foo.vd -w 1
 ```
 
 To build a `.vd` file:
@@ -42,15 +42,17 @@ To build a `.vd` file:
 2. Press `Shift-D` to view the commandlog.
 3. Edit the commandlog to minimize the number of commands.  Cells may be parameterized like `{foo}`, to be specified on the commandline:
 
-    $ vd cmdlog.vd --foo=value  
+```
+    $ vd cmdlog.vd --foo=value
+```
 
-4. Press `^S` to save the commandlog to a `.vd` file.
+4. Press `Ctrl-S` to save the commandlog to a `.vd` file.
 
-As a shortcut, `^D` will save the current commandlog, by default to the next non-existing 'cmdlog-#.vd'
+As a shortcut, `Ctrl-D` will save the current commandlog, by default to the next non-existing 'cmdlog-#.vd'
 
 ### Contributing to documentation
 
-If you notice a `globalCommand()` or `Command()` which does not have an entry in the VisiData manpage, please file an issue. In addition, if something is not clear (and in fact, is confusing) let us know so that we can better improve on the documentation.
+If you notice a `globalCommand()` or `Command()` which does not have an entry in the vd manpage, please file an issue. In addition, if something is not clear (and in fact, is confusing) let us know so that we can better improve on the documentation.
 
 If you would like to contribute by building an asciicast, the process is shown at [visidata.org/test/meta](http://visidata.org/test/meta).
 

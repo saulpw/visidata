@@ -1733,7 +1733,6 @@ class Column:
 
     def setValues(self, rows, value):
         'Set our column value for given list of rows to `value`.'
-        self.setter or error(self.name+' column cannot be changed')
         value = self.type(value)
         for r in rows:
             self.setValue(r, value)
@@ -1741,7 +1740,6 @@ class Column:
 
     @async
     def setValuesFromExpr(self, rows, expr):
-        self.setter or error(self.name+' column cannot be changed')
         compiledExpr = compile(expr, '<expr>', 'eval')
         for row in Progress(rows):
             self.setValue(row, self.sheet.evalexpr(compiledExpr, row))

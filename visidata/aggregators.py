@@ -24,11 +24,15 @@ def mean(vals):
     if vals:
         return float(sum(vals))/len(vals)
 
+def median(values):
+    L = sorted(values)
+    return L[len(L)//2]
 
 aggregator('min', min)
 aggregator('max', max)
 aggregator('avg', mean, float)
 aggregator('mean', mean, float)
+aggregator('median', median)
 aggregator('sum', sum)
 aggregator('distinct', lambda values: len(set(values)), int)
 aggregator('count', lambda values: sum(1 for v in values), int)

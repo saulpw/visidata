@@ -7,12 +7,12 @@ A terminal interface for exploring and arranging tabular data.
 - Linux or OS/X
 - Python 3.4+
 - python-dateutil
-- other [modules may be required](https://github.com/saulpw/visidata/blob/stable/requirements.txt) for opening particular data sources
-    - for a breakdown, see [supported sources](http://visidata.org/man/#loaders) in the VisiData manpage
+- other modules may be required for opening particular data sources
+    - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](http://visidata.org/man/#loaders) in the vd manpage
 
-## Install
+## Install via pip
 
-To install VisiData, with loaders for formats supported by the Python standard library (which includes csv, tsv, fixed-width text, json, sqlite and graphs):
+To install VisiData, with loaders for the most common data file formats (including csv, tsv, fixed-width text, json, sqlite, and xls):
 
 ```
 $ pip3 install visidata
@@ -50,21 +50,23 @@ For more detailed information about how you can contribute as a developer, influ
 
 ## vdtui
 
-The core `vdtui.py` can be used to quickly create efficient terminal workflows.
+The core `vdtui.py` can be used to quickly create efficient terminal workflows. These have been prototyped as proof of this concept:
 
 - [vgit](https://github.com/saulpw/vgit): a git interface
+- [vsh](http://github.com/saulpw/vsh): a collection of utilities like `vping` and `vtop`.
 - [vdgalcon](https://github.com/saulpw/vdgalcon): a port of the classic game [Galactic Conquest](https://www.galcon.com)
 
-Other workflows should also be created as separate apps using vdtui.  These apps can be very small; for example, see the included [viewtsv](bin/viewtsv).
+Other workflows should also be created as separate apps using vdtui.  These apps can be very small and provide a lot of functionality; for example, see the included [viewtsv](bin/viewtsv).
 
 
 ## License
 
 The innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT free software license, and freely available for inclusion in other projects.
 
-Other VisiData components, including the main `vd` application, addons, loaders, and other code in this repository, are available for reuse under GPLv3.
+Other VisiData components, including the main `vd` application, addons, loaders, and other code in this repository, are available for use and distribution under GPLv3.
 
 ## Credits
 
-VisiData was created by Saul Pwanson `<visidata@saul.pw>`.
-Thanks to @anjakefala for test and release support, to @databranner for documentation, and to those wonderful users who contribute feedback in any form, for helping to make VisiData the awesome tool that it is.
+VisiData was created and developed by Saul Pwanson `<vd@saul.pw>`.
+
+Thanks to all the [contributors](CONTRIBUTING.md#contributors), and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.
