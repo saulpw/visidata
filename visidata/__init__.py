@@ -23,6 +23,7 @@ from .canvas import *
 from .graph import *
 
 from .loaders.csv import *
+from .loaders.json import *
 from .loaders.zip import *
 from .loaders.xlsx import *
 from .loaders.hdf5 import *
