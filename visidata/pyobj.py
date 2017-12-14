@@ -194,16 +194,17 @@ def open_jsonl(p):
 @async
 def save_json(vs, fn):
     import json
-    outrows = []
-
-    for r in Progress(vs.rows):
+    def rowdict(cols, row):
         d = {}
-        outrows.append(d)
-        for col in vs.visibleCols:
+        for col in cols:
             try:
-                d[col.name] = col.getValue(r)
+                d[col.name] = col.getValue(row)
             except Exception:
                 pass
+        return d
+
 
     with open(fn, 'w') as fp:
-        json.dump(outrows, fp)
+        vcols = vs.visibleCols
+        for chunk in json.JSONEncoder().iterencode([rowdict(vcols, r) for r in Progress(vs.rows)]):
+            fp.write(chunk)
