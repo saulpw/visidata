@@ -19,6 +19,7 @@ jointypes = ["inner", "outer", "full", "diff", "append"]
 
 SheetsSheet.commands += [
         Command('&', 'vd.replace(createJoinedSheet(selectedRows, jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype'),
+        Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets'),
     ]
 
 SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
