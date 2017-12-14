@@ -187,3 +187,20 @@ def open_jsonl(p):
     import json
     return load_pyobj(p.name, list(json.loads(L) for L in p.read_text().splitlines()))
 
+@async
+def save_json(vs, fn):
+    import json
+    outrows = []
+
+    for r in Progress(vs.rows):
+        d = {}
+        outrows.append(d)
+        for col in vs.visibleCols:
+            try:
+                d[col.name] = col.getValue(r)
+            except Exception:
+                pass
+
+
+    with open(fn, 'w') as fp:
+        json.dump(outrows, fp)
