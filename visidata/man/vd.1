@@ -421,6 +421,11 @@ opens current row/cell/sheet as Python object
 .Ss Columns Sheet (Shift-C)
 .Bl -inset -compact
 .It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gShift-C
+.No opens Sy Columns Sheet No with all columns from all sheets
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -455,6 +460,8 @@ sets type of selected columns on source sheet to anytype
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter"
 jumps to sheet referenced in current row
+.It Ic 'gShift-C"
+.No opens Sy Columns Sheet No with all columns from selected sheets
 .It Ic "&" Ar jointype
 .No merges selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
