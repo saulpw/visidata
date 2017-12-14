@@ -977,6 +977,7 @@ class Sheet:
             self.rows.append(row)
         else:
             self.rows.insert(index, row)
+        return row
 
     def searchColumnNameRegex(self, colregex, moveCursor=False):
         'Select visible column matching `colregex`, if found.'
@@ -1356,9 +1357,12 @@ class Sheet:
         rng = range(self.cursorRowIndex-1, -1, -1) if reverse else range(self.cursorRowIndex+1, self.nRows)
 
         for i in rng:
-            if func(self.rows[i]):
-                self.cursorRowIndex = i
-                return True
+            try:
+                if func(self.rows[i]):
+                    self.cursorRowIndex = i
+                    return True
+            except Exception:
+                pass
 
         return False
 
@@ -1420,8 +1424,9 @@ class Sheet:
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None and self.visibleRows:
-                col.width = col.getMaxWidth(self.visibleRows)+minColWidth
-            width = col.width if col.width is not None else col.getMaxWidth(self.visibleRows)  # handle delayed column width-finding
+                # handle delayed column width-finding
+                col.width = min(col.getMaxWidth(self.visibleRows), options.default_width)+minColWidth
+            width = col.width if col.width is not None else options.default_width
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self.visibleColLayout[vcolidx] = [x, min(width, winWidth-x)]
                 x += width+sepColWidth
