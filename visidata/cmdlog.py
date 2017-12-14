@@ -12,8 +12,8 @@ option('replay_movement', False, 'insert movements during replay')
 globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'open-cmdlog')
 globalCommand('^D', 'saveSheet(vd.cmdlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save CommandLog to new .vd file', 'save-cmdlog')
 globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'toggle-replay')
-globalCommand('^I', 'CommandLog.currentReplay.advance()', 'execute next row in replaying sheet', 'step-replay')
-globalCommand('^K', 'CommandLog.currentReplay.cancel()', 'cancel current replay', 'cancel-replay')
+globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'step-replay')
+globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'cancel-replay')
 
 #globalCommand('KEY_BACKSPACE', 'vd.cmdlog.undo()', 'remove last action on commandlog and replay')
 
@@ -173,7 +173,7 @@ class CommandLog(Sheet):
     @classmethod
     def togglePause(self):
         if not CommandLog.currentReplay:
-            status('no replay in progress')
+            status('no replay to pause')
         else:
             if self.paused:
                 CommandLog.currentReplay.advance()
