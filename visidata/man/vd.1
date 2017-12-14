@@ -312,12 +312,12 @@ opens duplicate sheet with a random population subset of
 .Pp
 .El
 .No If rows on the current sheet represent plottable coordinates (as in .shp or vector .mbtiles sources),
-.Ic "." No plots the current row, and Ic "g." No plots all selected rows (or all rows if none selected).
+.Ic " ." No plots the current row, and Ic "g." No plots all selected rows (or all rows if none selected).
 .Ss "  Canvas-specific Commands"
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " +   -"
 increases/decreases zoomlevel, centered on cursor
-.It Ic "_" No (underscore)
+.It Ic " _" No (underscore)
 zooms to fit full extent
 .It Ic " s   t   u"
 selects/toggles/unselects rows on source sheet contained within canvas cursor
@@ -327,14 +327,14 @@ selects/toggles/unselects rows visible on screen
 opens sheet of source rows contained within canvas cursor
 .It Ic "gEnter"
 opens sheet of source rows visible on screen
-.It Ic "1" No - Ic "9"
+.It Ic " 1" No - Ic "9"
 toggles display of layers
 .It Ic "^L"
-redraws all pixeles on canvas
+redraws all pixels on canvas
 .It Ic " w"
-.No toggles Ic show_graph_labels
+.No toggles Ic show_graph_labels No option
 .It Ic "mouse scrollwheel"
-zooms in/out on a canvas
+zooms in/out of canvas
 .It Ic "left click-drag"
 sets canvas cursor
 .It Ic "right click-drag"
@@ -381,7 +381,7 @@ suspends VisiData process
 .It Ic " ^Y  z^Y  g^Y"
 opens current row/cell/sheet as Python object
 .It Ic " ^X" Ar expr
-.No evalutes Python Ar expr No and opens result as python object
+.No evaluates Python Ar expr No and opens result as python object
 .It Ic "z^X" Ar expr
 .No evaluates Python Ar expr No on current row and shows result on status line
 .It Ic "g^X" Ar stmt
@@ -485,13 +485,11 @@ edits option
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic " ^Z"
-sends a SIGSTOP
 .It Ic " x"
 replays command in current row
 .It Ic "gx"
 replays contents of entire CommandLog
-.It Ic "^C"
+.It Ic " ^C"
 aborts replay
 .El
 .
