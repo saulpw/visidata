@@ -179,7 +179,11 @@ class SheetObject(Sheet):
 def open_json(p):
     'Handle JSON file as a single object, via `json.load`.'
     import json
-    return load_pyobj(p.name, json.load(p.open_text()))
+    try:
+        return load_pyobj(p.name, json.load(p.open_text()))
+    except json.decoder.JSONDecodeError:
+        status('trying jsonl')
+        return open_jsonl(p)
 
 # one json object per line
 def open_jsonl(p):
@@ -200,7 +204,6 @@ def save_json(vs, fn):
                 d[col.name] = col.getValue(r)
             except Exception:
                 pass
-
 
     with open(fn, 'w') as fp:
         json.dump(outrows, fp)
