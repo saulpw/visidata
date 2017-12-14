@@ -1,29 +1,30 @@
 # Support {#support}
 
-## How do I install VisiData? {#support}
+*How do I install VisiData?*
 
-Add installations instructions here.
+Add installation instructions here.
 
-## Where can I learn how to use VisiData? {#support}
+*Where can I learn how to use VisiData?*
 
 We have documentation in various levels of detail available at [visidata.org/docs](http://visidata.org/docs/) from [an overview of all commands](http://visidata.org/man/) to [workflow recipes](http://visidata.org/howto).
 
 If you have a workflow which you do not see covered, please don't hestitate to [file an issue](https://github.com/saulpw/visidata/issues/new) or post a comment in any of our [community spaces](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#community). Our documentation is an ongoing effort, and we wish to prioritise the writing of recipes around user needs.
 
-## I found a bug! {#support}
+*I found a bug!*
 
 [Create a GitHub issue](https://github.com/saulpw/visidata/issues/new) if something doesn't appear to be working right. If you get an unexpected error, please include the full stack trace that you get with `^E` and the saved Commandlog (`^D`).
 
-## Where can I go if I have further questions or requests? {#support}
+*Where can I go if I have further questions or requests?*
 
 - [r/visidata](http://reddit.com/r/visidata) on reddit
 - [#visidata](irc://freenode.net/#visidata) on [freenode IRC](https://webchat.freenode.net)
 - [saul@visidata.org](mailto:saul@visidata.org) to discuss feature requests and extensions
 - [anja@visidata.org](mailto:anja@visidata.org) to discuss documentation/tests or to request tutorials
 
-## Troubleshooting {#support}
 
-### Whenever I try graphing, I get an empty chart {#support}
+## Troubleshooting
+
+*Whenever I try graphing, I get an empty chart*
 
 Oh dear. Let us try to get to the bottom of this. Please run through the following options and contact us with the answers if the issue persists.
 

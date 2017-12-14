@@ -26,10 +26,17 @@ body {
   font-size: medium;
 }
 
+em {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
 
 h1 {
     /* Correct the font size and margin on `h1` elements */
     font-size: 2em;
+    text-decoration: underline;
     margin: .67em 0;
 }
 
@@ -68,6 +75,7 @@ strong {
 /* --- Bullets and Lists --- */
 li {
   display: list-item;
+  list-style-type: disc;
   margin: 0px auto;
   text-align: -webkit-match-parent;
 }
@@ -429,9 +437,8 @@ footer {
 
 .hero-cta-container {
   flex: 0 1 100%;
+  padding: 0.25em;
   background: #303B40;
-  box-shadow: inset 0 0 10px #000000;
-  border-radius: 10px;
 }
 
 .cta-code {
