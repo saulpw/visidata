@@ -10,7 +10,7 @@ option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 
 globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'open-cmdlog')
-globalCommand('^D', 'saveSheet(vd.cmdlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd", completer=completeFilename))', 'save CommandLog to new .vd file', 'save-cmdlog')
+globalCommand('^D', 'saveSheet(vd.cmdlog, inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save CommandLog to new .vd file', 'save-cmdlog')
 globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'toggle-replay')
 globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'step-replay')
 globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'cancel-replay')

@@ -56,8 +56,8 @@ globalCommand('g^', 'updateColNames(sheet)', 'set names of all visible columns t
 globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined contents of current cell in selected rows (or current row)')
 # gz^ with no selectedRows is same as z^
 
-globalCommand('o', 'vd.push(openSource(input("open: ", "filename", completer=completeFilename)))', 'open input in VisiData')
-globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet), completer=completeFilename), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
+globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
+globalCommand('^S', 'saveSheet(sheet, inputFilename("save to: ", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
 
 globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(input("set cell=", "expr")))', 'set current cell to result of evaluated Python expression on current row')
 
@@ -81,6 +81,9 @@ def openManPage():
 def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
+def inputFilename(prompt, *args, **kwargs):
+    return input(prompt, "filename", *args, **kwargs, completer=completeFilename)
+
 def completeFilename(val, state):
     i = val.rfind('/')
     if i == -1:  # no /
@@ -96,11 +99,8 @@ def completeFilename(val, state):
     files = []
     for f in os.listdir(Path(base or '.').resolve()):
         if f.startswith(partial):
-            fn = os.path.join(base, f)
-            try:
-                files.append(fn)
-            except Exception:
-                pass
+            files.append(os.path.join(base, f))
+
     files.sort()
     return files[state%len(files)]
 
