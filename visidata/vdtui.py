@@ -2180,6 +2180,13 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
     comps_idx = -1
     left_truncchar = right_truncchar = truncchar
 
+    def rfind_nonword(s, a, b):
+        while not s[b].isalnum() and b >= a:  # first skip non-word chars
+            b -= 1
+        while s[b].isalnum() and b >= a:
+            b -= 1
+        return b
+
     while True:
         if display:
             dispval = clean_printable(v)
@@ -2223,6 +2230,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch()); i += 1  # literal character
+        elif ch == '^W':                           j = rfind_nonword(v, 0, i-1); v = v[:j+1] + v[i:]; i = j+1
         elif ch == '^Z':                           v = suspend()
         elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
         elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
