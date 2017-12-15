@@ -2134,15 +2134,38 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         'Delete `remove` characters from str `s` beginning at position `i`.'
         return s if i < 0 else s[:i] + s[i+remove:]
 
-    def complete(v, comps, cidx):
-        'Complete keystroke `v` based on list `comps` of completions.'
-        if comps:
-            for i in range(cidx, cidx + len(comps)):
-                i %= len(comps)
-                if comps[i].startswith(v):
-                    return comps[i]
-        # beep
-        return v
+    class CompleteState:
+        def __init__(self, completer_func):
+            self.comps_idx = 0
+            self.completer_func = completer_func
+            self.former_i = None
+            self.just_completed = False
+
+        def complete(self, v, i, state_incr):
+            self.just_completed = True
+            self.comps_idx += state_incr
+
+            if self.former_i is None:
+                self.former_i = i
+            try:
+                r = self.completer_func(v[:self.former_i], self.comps_idx)
+            except Exception as e:
+                # beep/flash; how to report exception?
+                return v, i
+
+            if not r:
+                # beep/flash to indicate no matches?
+                return v, i
+
+            v = r + v[i:]
+            return v, len(v)
+
+        def reset(self):
+            if self.just_completed:
+                self.just_completed = False
+            else:
+                self.former_i = None
+                self.comps_idx = 0
 
     class HistoryState:
         def __init__(self, history):
@@ -2173,6 +2196,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
             return v, i
 
     history_state = HistoryState(history)
+    complete_state = CompleteState(completer)
     insert_mode = True
     first_action = True
     v = str(value)  # value under edit
@@ -2221,8 +2245,8 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
-        elif ch == '^I':                           comps_idx += 1; v = completer(v[:i], comps_idx) or v
-        elif ch == 'KEY_BTAB':                     comps_idx -= 1; v = completer(v[:i], comps_idx) or v
+        elif ch == '^I':                           v, i = complete_state.complete(v, i, +1)
+        elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
         elif ch == ENTER:                          break
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
         elif ch == '^O':                           v = launchExternalEditor(v)
@@ -2248,6 +2272,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         if i < 0: i = 0
         if i > len(v): i = len(v)
         first_action = False
+        complete_state.reset()
 
     return v
 
