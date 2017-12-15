@@ -4,19 +4,31 @@ from visidata import *
 
 
 def open_json(p):
-    'Handle JSON file as a single object, via `json.load`.'
-    try:
-        return load_pyobj(p.name, json.load(p.open_text()))
-    except json.decoder.JSONDecodeError:
-        status('trying jsonl')
-        return open_jsonl(p)
+    return JSONSheet(p.name, source=p)
 
-
-# one json object per line
 def open_jsonl(p):
-    'Handle JSON file as a list of objects, one per line, via `json.loads`.'
-    return load_pyobj(p.name, list(json.loads(L) for L in p.read_text().splitlines()))
+    return JSONSheet(p.name, source=p)
 
+
+class JSONSheet(Sheet):
+    @async
+    def reload(self):
+        self.rows = []
+        try:
+            with self.source.open_text() as fp:
+                self.rows = json.load(fp, object_hook=self.addRow)
+                self.columns = DictKeyColumns(self.rows[0])
+        except json.decoder.JSONDecodeError:
+            with self.source.open_text() as fp:
+                self.rows = []
+                for L in fp:
+                    self.addRow(json.loads(L))
+
+    def addRow(self, row):
+        if not self.rows:
+            self.columns = DictKeyColumns(row)
+        self.rows.append(row)
+        return row
 
 @async
 def save_json(vs, fn):
