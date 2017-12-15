@@ -2,9 +2,9 @@ from visidata import *
 
 option('pyobj_show_hidden', False, 'show methods and _private properties')
 
-globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'evaluate Python expression and open result as Python object')
-globalCommand('g^X', 'expr = input("exec: ", "expr"); exec(expr, getGlobals())', 'execute Python statement in the global scope')
-globalCommand('z^X', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluate Python expression on current row and show result on status line')
+globalCommand('^X', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, eval(expr))', 'evaluate Python expression and open result as Python object')
+globalCommand('g^X', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope')
+globalCommand('z^X', 'status(evalexpr(inputExpr("status="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
 globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'open current row as Python object')
 globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object')

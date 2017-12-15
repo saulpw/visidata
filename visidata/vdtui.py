@@ -287,8 +287,8 @@ globalCommand('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(
 globalCommand('g"', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with all rows')
 globalCommand('gz"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of selected rows')
 
-globalCommand('=', 'addColumn(ColumnExpr(input("new column expr=", "expr")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables')
-globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, input("set selected=", "expr"))', 'set current column for selected rows to result of Python expression')
+globalCommand('=', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables')
+globalCommand('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))', 'set current column for selected rows to result of Python expression')
 
 globalCommand('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet')
 
@@ -866,6 +866,31 @@ class LazyMap:
     def __setitem__(self, k, v):
         setattr(self.obj, k, v)
 
+class CompleteExpr:
+    def __init__(self, sheet=None):
+        self.sheet = sheet
+
+    def __call__(self, val, state):
+        i = len(val)-1
+        while val[i:].isidentifier() and i >= 0:
+            i -= 1
+
+        if i < 0:
+            base = ''
+            partial = val
+        elif val[i] == '.':  # no completion of attributes
+            return None
+        else:
+            base = val[:i+1]
+            partial = val[i+1:]
+
+        varnames = []
+        varnames.extend((base+x) for x in globals() if x.startswith(partial))
+        varnames.extend((base+col.name) for col in self.sheet.columns if col.name.startswith(partial))
+        varnames.sort()
+        return varnames[state%len(varnames)]
+
+
 class Colorizer:
     def __init__(self, colorizerType, precedence, colorfunc):
         self.type = colorizerType
@@ -1055,6 +1080,9 @@ class Sheet:
 
     def evalexpr(self, expr, row):
         return eval(expr, getGlobals(), LazyMapRow(self, row))
+
+    def inputExpr(self, prompt, *args, **kwargs):
+        return input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
 
     def getCommand(self, keystrokes, default=None):
         k = keystrokes
