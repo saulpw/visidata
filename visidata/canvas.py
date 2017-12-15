@@ -131,7 +131,7 @@ class Plotter(Sheet):
     columns=[Column('')]  # to eliminate errors outside of draw()
     commands=[
         Command('^L', 'refresh()', 'redraw all pixels on canvas'),
-        Command('w', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
+        Command('v', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
         Command('KEY_RESIZE', 'refresh()', ''),
     ]
     def __init__(self, name, **kwargs):

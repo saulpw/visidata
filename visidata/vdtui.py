@@ -1922,7 +1922,7 @@ class TextSheet(Sheet):
     'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
     rowtype = 'lines'
     commands = [
-        Command('w', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()', 'toggle text wrap for this sheet')
+        Command('v', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()', 'toggle text wrap for this sheet')
     ]
     filetype = 'txt'
 

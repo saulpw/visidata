@@ -35,7 +35,7 @@ class SheetFreqTable(Sheet):
         Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet'),
 
         Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell'),
-#        Command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
+#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 
     def __init__(self, sheet, *columns):

@@ -29,7 +29,6 @@ def save_json(vs, fn):
                 pass
         return d
 
-
     with open(fn, 'w') as fp:
         vcols = vs.visibleCols
         for chunk in json.JSONEncoder().iterencode([rowdict(vcols, r) for r in Progress(vs.rows)]):

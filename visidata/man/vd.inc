@@ -77,7 +77,7 @@ views all commands available on current sheet
 .It Ic ^Q
 aborts program immediately
 .It Ic ^C
-cancels user input or aborts all threads on current sheet
+cancels user input or aborts all async threads on current sheet
 .It Ic " q"
 quits current sheet
 .It Ic "gq"
@@ -348,8 +348,8 @@ scrolls canvas
 views contents of current cell in a new TextSheet
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
-.It Ic "w"
-toggles text wrap (only on TextSheet)
+.It Ic "v"
+toggles visibility (text wrap on TextSheet, legends/axes on Graph)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^^" No (Ctrl-^)
@@ -424,7 +424,7 @@ opens current row/cell/sheet as Python object
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic gShift-C
+.It Ic gC
 .No opens Sy Columns Sheet No with all columns from all sheets
 .It (sheet-specific commands)
 .El
@@ -445,10 +445,8 @@ hides selected columns on source sheet
 sets type of current column on source sheet to str/int/float/currency/date
 .It Ic "g~ g# g% g$ g@"
 sets type of selected columns on source sheet to str/int/float/currency/date
-.It Ic "z~"
-sets type of current column on source sheet to anytype
-.It Ic "gz~"
-sets type of selected columns on source sheet to anytype
+.It Ic "z~ gz~"
+sets type of current/selected column(s) on source sheet to anytype
 .It Ic " Enter"
 .No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .El
@@ -460,7 +458,7 @@ sets type of selected columns on source sheet to anytype
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter"
 jumps to sheet referenced in current row
-.It Ic 'gShift-C"
+.It Ic "gC"
 .No opens Sy Columns Sheet No with all columns from selected sheets
 .It Ic "&" Ar jointype
 .No merges selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
