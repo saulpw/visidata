@@ -1425,7 +1425,9 @@ class Sheet:
             col = self.visibleCols[vcolidx]
             if col.width is None and self.visibleRows:
                 # handle delayed column width-finding
-                col.width = min(col.getMaxWidth(self.visibleRows), options.default_width)+minColWidth
+                col.width = col.getMaxWidth(self.visibleRows)+minColWidth
+                if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
+                    col.width = min(col.width, options.default_width)
             width = col.width if col.width is not None else options.default_width
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self.visibleColLayout[vcolidx] = [x, min(width, winWidth-x)]
