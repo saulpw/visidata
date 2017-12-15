@@ -885,9 +885,8 @@ class CompleteExpr:
             partial = val[i+1:]
 
         varnames = []
-        varnames.extend((base+x) for x in globals() if x.startswith(partial))
-        varnames.extend((base+col.name) for col in self.sheet.columns if col.name.startswith(partial))
-        varnames.sort()
+        varnames.extend(sorted((base+col.name) for col in self.sheet.columns if col.name.startswith(partial)))
+        varnames.extend(sorted((base+x) for x in globals() if x.startswith(partial)))
         return varnames[state%len(varnames)]
 
 
@@ -2164,7 +2163,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
 
     class CompleteState:
         def __init__(self, completer_func):
-            self.comps_idx = 0
+            self.comps_idx = -1
             self.completer_func = completer_func
             self.former_i = None
             self.just_completed = False
@@ -2193,7 +2192,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
                 self.just_completed = False
             else:
                 self.former_i = None
-                self.comps_idx = 0
+                self.comps_idx = -1
 
     class HistoryState:
         def __init__(self, history):
@@ -2229,7 +2228,6 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
     first_action = True
     v = str(value)  # value under edit
     i = 0           # index into v
-    comps_idx = -1
     left_truncchar = right_truncchar = truncchar
 
     def rfind_nonword(s, a, b):
