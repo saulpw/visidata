@@ -291,9 +291,9 @@ opens
 .No saves current sheet to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No saves CommandLog to Ar filename.vd No file
-.It Ic "Shift-A" Ar number
+.It Ic "A" Ar number
 .No opens new blank sheet with Ar number No columns
-.It Ic "Shift-R" Ar number
+.It Ic "R" Ar number
 opens duplicate sheet with a random population subset of
 .Ar number No rows
 .Pp
@@ -344,7 +344,7 @@ scrolls canvas
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic Shift-V
+.It Ic V
 views contents of current cell in a new TextSheet
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
