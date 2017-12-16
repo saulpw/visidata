@@ -24,7 +24,7 @@ globalCommand('status', 'status(input("status: ", display=False))', 'show given 
 nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < > { } / ? n N gg G g/ g?'.split()
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
-nonLogKeys += '^L ^C ^U ^D KEY_RESIZE'.split()
+nonLogKeys += '^L ^C ^U ^K ^I ^D KEY_RESIZE'.split()
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 
@@ -130,17 +130,20 @@ class CommandLog(Sheet):
             return  # don't record editlog commands
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
-        if keystrokes == 'o':
-            sheetname, colname, rowname = '', '', ''
-        else:
+
+        cmd = sheet.getCommand(keystrokes)
+        sheetname, colname, rowname = '', '', ''
+        if sheet and keystrokes != 'o':
+            contains = lambda s, *substrs: any((a in s) for a in substrs)
             sheetname = sheet.name
-            colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
-            if sheet.rows:
+            if sheet.rows and contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorRow'):
                 k = sheet.rowkey(sheet.cursorRow)
                 rowname = (options.rowkey_prefix + keystr(k)) if k else sheet.cursorRowIndex
-            else:
-                rowname = ''
-        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, sheet.getCommand(keystrokes).helpstr])
+
+            if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
+                colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+
+        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, cmd.helpstr])
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'

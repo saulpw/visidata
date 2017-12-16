@@ -73,10 +73,11 @@ def globalCommand(keystrokes, execstr, helpstr='', longname=None):
     if longname:
         cmd = Command(longname, execstr, helpstr)
         baseCommands[longname] = cmd
+        assert helpstr or (execstr in baseCommands), 'unknown longname ' + execstr
+        helpstr = ''
 
     for ks in keystrokes:
-        baseCommands[ks] = Command(ks, longname or execstr, helpstr or 'alias')
-        assert helpstr or (execstr in baseCommands), 'unknown longname ' + execstr
+        baseCommands[ks] = Command(ks, longname or execstr, helpstr)
 
 def option(name, default, helpstr=''):
     baseOptions[name] = [name, default, default, helpstr]
