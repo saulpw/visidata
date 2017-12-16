@@ -82,11 +82,11 @@ def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
 def inputFilename(prompt, *args, **kwargs):
-    return input(prompt, "filename", *args, **kwargs, completer=completeFilename)
+    return input(prompt, "filename", *args, completer=completeFilename, **kwargs)
 
 def completeFilename(val, state):
     i = val.rfind('/')
-    if i == -1:  # no /
+    if i < 0:  # no /
         base = ''
         partial = val
     elif i == 0: # root /

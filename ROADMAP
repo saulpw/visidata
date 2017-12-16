@@ -4,11 +4,12 @@ I. Interface
 - statusline menu for chooseOne
 - context-sensitive hierarchical menu system to discover commands
 - clickable column headers to set type/name, click-drag to move columns/rows
+- keycols still pinned on display left (or maybe a disp_ option, which possibly affects col save order), but are not moved within columns list
 
 II. Internals
 - break VisiData object into several smaller pseudo-classes, which can be plug-n-play.
    - maybe provide a null functional implementation (raw interface).
-   - Progress, asyncjl
+   - Progress/async can be completely standalone
 - Sheet gets split into [Base]Sheet and Table
    - Sheet is interface with draw, reload, exec_command
    - Table inherits from Sheet, has rows/columns
@@ -16,6 +17,8 @@ II. Internals
    - SourceSheet inherits from Table
       - Enter as an alias for 'e' on SourceSheet
       - newRow() (for 'a') on SourceSheet only
+- all commands implemented on Sheet or children
+   - global key bindings like 'h' to 'move-left', and then each Sheet defines the semantics of its move-left
 - allow Table.rows to be an offline datastore
 
 II. Loaders
