@@ -1,5 +1,24 @@
 # VisiData version history
 
+# v0.99 (2017-12-22)
+
+- tab completion for filename and python expr
+- `v` now 'visibility toggle' (moved from `w`)
+- `^W` to erase a word in the line editor
+- `gC`
+- `--version` (thanks for the suggestion, @jsvine)
+- `options.use_default_colors`
+- `median` aggregator
+- .html loads tables (requires lxml)
+  - simple http works (requires requests)
+- json save
+- json incremental load
+- [cmdlog] use rowkey if available instead of row number; options.rowkey_prefix
+- [cmdlog] only set row/col when relevant
+- [vdtui] task renamed to thread
+- /howto/dev/loader
+- /design/graphics
+
 # v0.98.1 (2017-12-04)
 
 - [packaging]
