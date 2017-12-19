@@ -11,6 +11,6 @@ Package: visidata
 Architecture: all
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${python3:Depends}
-Description: VisiData (Python 3)
- This package is a terminal utility for exploring, arranging
+Description: rapidly explore columnar data in the terminal
+ VisiData is a terminal utility for exploring, arranging
  and analysing tabular data.
