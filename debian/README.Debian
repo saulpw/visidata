@@ -1,0 +1,5 @@
+VisiData for Debian
+
+This is the debian package for VisiData v0.98.1. It contains support for tsv, csv, fixed width, sqlite and graphs.
+
+ -- Anja Boskovic <anja@visidata.org>  Sat, 16 Dec 2017 15:41:18 -0500

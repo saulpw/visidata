@@ -1,0 +1,6 @@
+visidata (0.98.1-1) unstable; urgency=low
+
+  [ Anja Boskovic ]
+  * Initial release. Closes: #884565
+
+ -- Anja Boskovic <anja@visidata.org>  Sat, 16 Dec 2017 17:48:05 -0500

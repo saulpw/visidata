@@ -1,0 +1,11 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: VisiData
+Upstream-Contact: Saul Pwanson <saul@visidata.org>
+Source: https://github.com/saulpw/visidata
+
+Files: *
+Copyright: 2017 Saul Pwanson
+License: GPL-3+
+ On Debian systems, the full text of the GNU General Public
+ License version 3 can be found in the file
+ '/usr/share/common-licenses/GPL-3'.
