@@ -33,7 +33,7 @@ To install VisiData, plus external dependencies for all available loaders:
 pip3 install "visidata[full]"
 ```
 
-### Install via Homebrew
+### Install via brew
 
 Ideal for MacOS users who primarily want to engage with VisiData as an application. This is currently the most reliable way to install VisiData's manpage on MacOS.
 
@@ -43,7 +43,7 @@ brew install devotees/vd/visidata
 
 Further instructions available [here](https://github.com/devotees/homebrew-vd).
 
-### Instal via apt
+### Install via apt
 
 Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
 
