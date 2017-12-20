@@ -10,9 +10,18 @@ A terminal interface for exploring and arranging tabular data.
 - other modules may be required for opening particular data sources
     - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](http://visidata.org/man/#loaders) in the vd manpage
 
-## Install via pip
+## Installation
 
-To install VisiData, with loaders for the most common data file formats (including csv, tsv, fixed-width text, json, sqlite, and xls):
+There are three options for installing visidata:
+- [via pip](https://github.com/saulpw/visidata/tree/develop#install-via-pip)
+- [via Homebrew](https://github.com/saulpw/visidata/tree/develop#install-via-brew) on OS/X
+- [via apt](https://github.com/saulpw/visidata/tree/develop#install-via-apt) on Linux distributions
+
+### Install via pip
+
+Best installation method for users who wish to take advantage of VisiData in their own code, or integrate it into a Python3 virtual environment.
+
+To install VisiData, with loaders for the most common data file formats (including csv, tsv, fixed-width text, json, sqlite, http, html and xls):
 
 ```
 $ pip3 install visidata
@@ -22,6 +31,48 @@ To install VisiData, plus external dependencies for all available loaders:
 
 ```
 pip3 install "visidata[full]"
+```
+
+### Install via Homebrew
+
+Ideal for MacOS users who primarily want to engage with VisiData as an application. This is currently the most reliable way to install VisiData's manpage on MacOS.
+
+```
+brew install devotees/vd/visidata
+```
+
+Further instructions available [here](https://github.com/devotees/homebrew-vd).
+
+### Instal via apt
+
+Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
+
+Currently, VisiData is undergoing review for integration into the main Debian repository. Until then it is available in our [Debian repo](https://github.com/devotees/deb-vd).
+
+#### First time installation
+
+1. Grab our public key
+
+```
+wget http://visidata.org/devotees.gpg.key
+apt-key add devotees.gpg.key
+```
+
+2. Add our repository to apt's search list
+
+```
+sudo apt-get install apt-transport-https
+sudo vim /etc/apt/sources.list
+    deb[arch=amd64] https://raw.githubusercontent.com/devotees/deb-vd/master sid main
+sudo apt-get update
+```
+
+#### Subsequently
+
+3. Install VisiData
+
+```
+sudo apt-get install visidata
 ```
 
 ## Run
