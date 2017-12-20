@@ -13,11 +13,11 @@ A terminal interface for exploring and arranging tabular data.
 ## Installation
 
 There are three options for installing visidata:
-- [via pip](https://github.com/saulpw/visidata/tree/develop#install-via-pip)
+- [via pip3](https://github.com/saulpw/visidata/tree/develop#install-via-pip3)
 - [via Homebrew](https://github.com/saulpw/visidata/tree/develop#install-via-brew) on OS/X
 - [via apt](https://github.com/saulpw/visidata/tree/develop#install-via-apt) on Linux distributions
 
-### Install via pip
+### Install via pip3
 
 Best installation method for users who wish to take advantage of VisiData in their own code, or integrate it into a Python3 virtual environment.
 

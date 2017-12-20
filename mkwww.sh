@@ -14,6 +14,7 @@ DESIGN=$WWW/design
 NEWS=$WWW/news
 VIDEOS=$WWW/videos
 HELP=$WWW/help
+INSTALL=$WWW/install
 
 # Build directories
 mkdir -p $BUILD
@@ -25,6 +26,7 @@ mkdir -p $BUILDWWW/design
 mkdir -p $BUILDWWW/about
 mkdir -p $BUILDWWW/contributing
 mkdir -p $BUILDWWW/help
+mkdir -p $BUILDWWW/install
 mkdir -p $BUILDWWW/videos
 
 # Set up python and shell environment
@@ -66,6 +68,17 @@ $VD/strformat.py body=$BUILDWWW/contributing/index.body title="Contributing to V
 # Build /help
 pandoc -r markdown -w html -o $BUILDWWW/help/index.body $HELP/index.md
 $VD/strformat.py body=$BUILDWWW/help/index.body title="Support" head="" < $WWW/template.html > $BUILDWWW/help/index.html
+
+# Build /install
+pandoc -r markdown -w html -o $BUILDWWW/install/index.body $INSTALL/index.md
+$VD/strformat.py body=$BUILDWWW/install/index.body title="Installation" head="" < $WWW/template.html > $BUILDWWW/install/index.html
+
+# Create http://visidata.org/install/#pip3
+sed -i -e "s#<h2 id=\"install-via-pip3\">Install via pip3</h2>#<h2 id=\"install-via-pip3\"><a name=\"pip3\">Install via pip3</a></h2>#g" $BUILDWWW/install/index.html
+# Create http://visidata.org/install/#brew
+sed -i -e "s#<h2 id=\"install-via-brew\">Install via brew</h2>#<h2 id=\"install-via-brew\"><a name=\"brew\">Install via brew</a></h2>#g" $BUILDWWW/install/index.html
+# Create http://visidata.org/install/#apt
+sed -i -e "s#<h2 id=\"install-via-apt\">Install via apt</h2>#<h2 id=\"install-via-apt\"><a name=\"apt\">Install via apt</a></h2>#g" $BUILDWWW/install/index.html
 
 # Build /videos
 $VD/strformat.py body=$VIDEOS/video-body.html title="VisiData Videos" head="" < $WWW/template.html > $BUILDWWW/videos/index.html

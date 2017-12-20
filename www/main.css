@@ -36,7 +36,6 @@ em {
 h1 {
     /* Correct the font size and margin on `h1` elements */
     font-size: 2em;
-    text-decoration: underline;
     margin: .67em 0;
 }
 
@@ -52,7 +51,7 @@ p {
   font-size: 1.05em;
   display: block;
   line-height: 1.5;
-  max-width: 50em;
+  max-width: 60em;
 }
 
 hr {
@@ -83,7 +82,7 @@ li {
 ul,
 ol {
     display: block;
-    max-width: 50em;
+    max-width: 60em;
     margin: 0px auto;
     font-size: 1.05em;
     line-height: 1.5;
@@ -402,6 +401,28 @@ footer {
    max-width: 400px;
    margin: auto;
  }
+ 
+ .install-btns {
+     background-color: #8764c8;
+     border-radius: 3px;
+     font-size: 1em;
+     opacity: 0.5;
+     color: #d6cae7;
+     margin: auto;
+     text-align: center;
+     padding: 8px 15px;
+     transition: .2s linear;
+     display: inline-block;
+ }
+ 
+ .install{
+    text-align: center;
+ }
+
+.install-btns:hover {
+    color: #fff;
+    opacity: 1.0;
+}
 
  .hero-image {
    flex: 0 1 100%;
