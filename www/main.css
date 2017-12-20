@@ -51,7 +51,7 @@ p {
   font-size: 1.05em;
   display: block;
   line-height: 1.5;
-  max-width: 60em;
+  max-width: 50em;
 }
 
 hr {
@@ -82,7 +82,7 @@ li {
 ul,
 ol {
     display: block;
-    max-width: 60em;
+    max-width: 50em;
     margin: 0px auto;
     font-size: 1.05em;
     line-height: 1.5;

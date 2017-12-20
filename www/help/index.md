@@ -2,7 +2,11 @@
 
 *How do I install VisiData?*
 
-Add installation instructions here.
+There are three options for installing visidata:
+
+- [pip3](/install#pip3) for users who wish to import visidata into their own code or integrate it into their python virtual environment 
+- [brew](/install#brew) on MacOS/X for reliable installation of application components (such as the manpage)
+- [apt](/install#apt) on Linux distributions
 
 *Where can I learn how to use VisiData?*
 

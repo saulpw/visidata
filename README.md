@@ -13,9 +13,9 @@ A terminal interface for exploring and arranging tabular data.
 ## Installation
 
 There are three options for installing visidata:
-- [via pip3](https://github.com/saulpw/visidata/tree/develop#install-via-pip3)
-- [via Homebrew](https://github.com/saulpw/visidata/tree/develop#install-via-brew) on OS/X
-- [via apt](https://github.com/saulpw/visidata/tree/develop#install-via-apt) on Linux distributions
+- [pip3](https://github.com/saulpw/visidata/tree/develop#install-via-pip3)
+- [Homebrew](https://github.com/saulpw/visidata/tree/develop#install-via-brew) on OS/X
+- [apt](https://github.com/saulpw/visidata/tree/develop#install-via-apt) on Linux distributions
 
 ### Install via pip3
 
@@ -49,16 +49,14 @@ Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
 
 Currently, VisiData is undergoing review for integration into the main Debian repository. Until then it is available in our [Debian repo](https://github.com/devotees/deb-vd).
 
-#### First time installation
-
-1. Grab our public key
+Grab our public key
 
 ```
 wget http://visidata.org/devotees.gpg.key
 apt-key add devotees.gpg.key
 ```
 
-2. Add our repository to apt's search list
+Add our repository to apt's search list
 
 ```
 sudo apt-get install apt-transport-https
@@ -66,14 +64,13 @@ sudo vim /etc/apt/sources.list
     deb[arch=amd64] https://raw.githubusercontent.com/devotees/deb-vd/master sid main
 sudo apt-get update
 ```
-
-#### Subsequently
-
-3. Install VisiData
+You can then install VisiData by typing:
 
 ```
 sudo apt-get install visidata
 ```
+
+Further instructions available [here](https://github.com/devotees/deb-vd).
 
 ## Run
 
