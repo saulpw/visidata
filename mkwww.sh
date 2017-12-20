@@ -117,6 +117,9 @@ for postpath in `find $NEWS -name '*.md'`; do
     rm -f $posthtml.body
 done
 
+# Add the key
+cp $WWW/devotees.gpg.key $BUILDWWW
+
 #### At the end
 # add analytics to .html files
 for fn in `find $BUILDWWW -name '*.html'` ; do
