@@ -76,7 +76,7 @@ twine upload dist/*
 
 12. Test install/upgrade from pypi
 
-   a. build and check readthedocs/stable
+  a. Build and deploy the website
 
    b. Ask someone else to test install
 
@@ -93,3 +93,34 @@ git push --tags
 16. Comb through issues and close the ones that have been solved, referencing the version number
 
 17. Post release notes on r/visidata and tinyletter and have some ice cream
+
+
+# Homebrew
+
+1. Update the link in url to the new visidata tar.gz file.
+2. Download the tarfile and obtain its new sha256
+```
+shasum -a 256
+```
+3. Check each dependency and see if it has been updated. If so, update the url and sha256 for the newest version.
+4. Install visidata using `pip3 install visidata --upgrade` and note down all of the new dependencies. 
+5. Obtain their urls and sha256 and add them to the formula
+6. Change their urls from `pypi.python.org` to `files.pythonhosted.org`.
+7. Test the formula with `brew install --build-from-source visidata`. Fix as needed.
+8. Audit the formula with `brew audit --new-formula visidata`
+9. Add and commit the formula.
+
+## Debian
+1. Obtain the visidata tar.gz file from pypi
+2. tar -xzmf visidata.tar.gz
+3. cp visidata.ver.tar.gz visidata_ver.orig.tar.gz
+4. cd visidata/
+5. Place there the contents of the debian directory from github.com/saulpw/visidata
+6. Update changelog
+```
+dch -v version-revision
+```
+7. Run debuild. Fix errors as they come up
+8. If a package fails to import a module, it must be added to the build dependencies as python3-modules
+9. Enter saulpw/deb-vd.
+10. Run the command reprepro includeb sid new-vd.deb
