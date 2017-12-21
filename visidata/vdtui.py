@@ -2052,7 +2052,7 @@ class HelpSheet(Sheet):
 class OptionsSheet(Sheet):
     rowtype = 'options'
     commands = [
-        Command(ENTER, 'source[cursorRow[0]] = editCell(1)', 'edit option'),
+        Command(ENTER, 'editOption(cursorRow)', 'edit option'),
         Command('e', ENTER)
     ]
     columns = [ColumnItem('option', 0),
@@ -2061,6 +2061,12 @@ class OptionsSheet(Sheet):
                ColumnItem('description', 3)]
     colorizers = []
     nKeys = 1
+
+    def editOption(self, row):
+        if isinstance(row[2], bool):
+            self.source[row[0]] = not row[1]
+        else:
+            self.source[row[0]] = self.editCell(1)
 
     def reload(self):
         self.rows = list(self.source._opts.values())
