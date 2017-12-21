@@ -11,6 +11,7 @@ BUILDWWW=$BUILD/www
 MAN=$VD/visidata/man
 TEST=$WWW/test
 DESIGN=$WWW/design
+HOWTODEV=$WWW/howto/dev
 NEWS=$WWW/news
 VIDEOS=$WWW/videos
 HELP=$WWW/help
@@ -23,6 +24,7 @@ mkdir -p $BUILDWWW/man
 mkdir -p $BUILDWWW/test
 mkdir -p $BUILDWWW/docs
 mkdir -p $BUILDWWW/design
+mkdir -p $BUILDWWW/howto/dev
 mkdir -p $BUILDWWW/about
 mkdir -p $BUILDWWW/contributing
 mkdir -p $BUILDWWW/help
@@ -110,6 +112,17 @@ for postpath in `find $DESIGN -name '*.md'`; do
     postname=${post%.md}
     mkdir -p $BUILDWWW/design/$postname
     posthtml=$BUILDWWW/design/$postname/index
+    pandoc -r markdown -w html -o $posthtml.body $postpath
+    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    rm -f $posthtml.body
+done
+
+# Build /howto/dev
+for postpath in `find $HOWTODEV -name '*.md'`; do
+    post=${postpath##$HOWTODEV/}
+    postname=${post%.md}
+    mkdir -p $BUILDWWW/howto/dev/$postname
+    posthtml=$BUILDWWW/howto/dev/$postname/index
     pandoc -r markdown -w html -o $posthtml.body $postpath
     $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
     rm -f $posthtml.body

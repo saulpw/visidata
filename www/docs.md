@@ -16,4 +16,4 @@ Creating a loader for a new data source is easy and usually takes only an hour o
 
 Currently, VisiData supports [tsv, csv, json, html, sqlite, hdf5, xlsx, xls, shp, and mbtiles file formats.  We would love to find devs interested in creating interfaces for all other data sources.
 
-* [How to build a loader](/howto/loaders)
+* [How to build a loader](/howto/dev/loaders)
