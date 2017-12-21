@@ -27,16 +27,16 @@ pip3 install "visidata[full]"
 Ideal for MacOS users who primarily want to engage with VisiData as an application. This is currently the most reliable way to install VisiData's manpage on MacOS.
 
 ```
-brew install devotees/vd/visidata
+brew install saulpw/vd/visidata
 ```
 
-Further instructions available [here](https://github.com/devotees/homebrew-vd).
+Further instructions available [here](https://github.com/saulpw/homebrew-vd).
 
 ## Install via apt
 
 Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
 
-Currently, VisiData is undergoing review for integration into the main Debian repository. Until then it is available in our [Debian repo](https://github.com/devotees/deb-vd).
+Currently, VisiData is undergoing review for integration into the main Debian repository. Until then it is available in our [Debian repo](https://github.com/saulpw/deb-vd).
 
 Grab our public key
 
@@ -50,7 +50,7 @@ Add our repository to apt's search list
 ```
 sudo apt-get install apt-transport-https
 sudo vim /etc/apt/sources.list
-    deb[arch=amd64] https://raw.githubusercontent.com/devotees/deb-vd/master sid main
+    deb[arch=amd64] https://raw.githubusercontent.com/saulpw/deb-vd/master sid main
 sudo apt-get update
 ```
 
@@ -60,4 +60,4 @@ You can then install VisiData by typing:
 sudo apt-get install visidata
 ```
 
-Further instructions are available [here](https://github.com/devotees/deb-vd).
+Further instructions are available [here](https://github.com/saulpw/deb-vd).
