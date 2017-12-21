@@ -6,7 +6,9 @@
 
 3. Verify that documentation/docstrings are up-to-date on features and functionality
 
-4. Set version number to next most reasonable number (v#.#.#)
+4. Verify that setup.py is up-to-date with requirements.
+
+5. Set version number to next most reasonable number (v#.#.#)
 
    a. add to front of CHANGELOG, along with the release date and bullet points of major changes
 
@@ -14,9 +16,9 @@
 
    c. bump version in `__version__` in source code (bin/vd, visidata/vdtui.py) and setup.py
 
-5. Run ./mkwww.sh to build the manpage and updated website
+6. Run ./mkwww.sh to build the manpage and updated website
 
-6. Push `develop` to testpypi
+7. Push `develop` to testpypi
 
     a. set up a ~/.pypirc
 
@@ -43,7 +45,7 @@
     twine upload dist/* -r testpypi
     ```
 
-7. Test install from testpypi
+8. Test install from testpypi
 
    a. on virgin instance
 
@@ -57,37 +59,37 @@
    pip3 install --extra-index-url https://test.pypi.org/project visidata
    ```
 
-10. Merge `develop` to stable
+9. Merge `develop` to stable
 
-11. Merge `stable` back into other branches
+10. Merge `stable` back into other branches
 
     a. if the branch works with minimal conflicts, keep the branch
 
     b. otherwise, clean out the branch
 
 
-12. Push stable to pypi
+11. Push stable to pypi
 
 ```
 twine upload dist/*
 ```
 
-13. Test install/upgrade from pypi
+12. Test install/upgrade from pypi
 
    a. build and check readthedocs/stable
 
    b. Ask someone else to test install
 
-14. Create a tag `v#.#.#` for that commit
+13. Create a tag `v#.#.#` for that commit
 ```
 git tag v#.#.#
 git push --tags
 ```
 
-15. Push code to stable
+14. Push code to stable
 
-16. Write up the release notes and post at visidata.org/release/#.#
+15. Write up the release notes and post at visidata.org/release/#.#
 
-17. Comb through issues and close the ones that have been solved, referencing the version number
+16. Comb through issues and close the ones that have been solved, referencing the version number
 
-18. Post release notes on r/visidata and tinyletter and have some ice cream
+17. Post release notes on r/visidata and tinyletter and have some ice cream

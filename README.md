@@ -13,9 +13,9 @@ A terminal interface for exploring and arranging tabular data.
 ## Installation
 
 There are three options for installing visidata:
-- [pip3](https://github.com/saulpw/visidata/tree/develop#install-via-pip3) for users who wish to import visidata into their own code or wish to integrate it into a python virtual environment
-- [Homebrew](https://github.com/saulpw/visidata/tree/develop#install-via-brew) on MacOS/X for reliable installation of application components (such as the manpage)
-- [apt](https://github.com/saulpw/visidata/tree/develop#install-via-apt) on Linux distributions
+- [pip3](https://github.com/saulpw/visidata/tree/stable#install-via-pip3) for users who wish to import visidata into their own code or wish to integrate it into a python virtual environment
+- [Homebrew](https://github.com/saulpw/visidata/tree/stable#install-via-brew) on MacOS/X for reliable installation of application components (such as the manpage)
+- [apt](https://github.com/saulpw/visidata/tree/stable#install-via-apt) on Linux distributions
 
 ### Install via pip3
 
@@ -79,7 +79,7 @@ $ vd [<options>] <input> ...
 $ <command> | vd [<options>]
 ```
 
-VisiData supports tsv, csv, xlsx, hdf5, sqlite, and more.
+VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more.
 Use `-f <filetype>` to force a particular filetype.
 
 ## Documentation

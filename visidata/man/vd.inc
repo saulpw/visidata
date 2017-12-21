@@ -640,6 +640,13 @@ These are the supported sources:
 .El
 .El
 .Pp
+.Bl -inset -compact -offset xxx
+.It Sy json No (javascript object notation)
+.Bl -inset -compact -offset xxx
+.It Nested components of .json files are represented as cells containing lists ( Ns Sy [] Ns ). They can be further expanded with Sy z^Y.
+.El
+.El
+.Pp
 .Bl -inset -compact
 .It For these multi-table sources, the first sheet is a directory of tables.
 .It Sy Enter No loads the entire table into memory.

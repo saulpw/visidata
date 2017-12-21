@@ -17,11 +17,11 @@ In addition, the innermost core file, `vdtui.py`, is a single-file stand-alone l
 
 ### Feature requests or enhancements
 
-If you use VisiData, I would love it if you reached out to me to discuss some of your common workflows and needs. This helps me better prioritize which functionality to add. Send me a [screencast](http://asciinema.org), or some sample data along with your desired output.  There is probably a way to tweak VisiData to get the job done even more to your liking.  Feature requests should be made on any of the communication channels listed [here](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#community). 
+If you use VisiData, I would love it if you reached out to me to discuss some of your common workflows and needs. This helps me better prioritize which functionality to add. Send me a [screencast](http://asciinema.org), or some sample data along with your desired output.  There is probably a way to tweak VisiData to get the job done even more to your liking.  Feature requests should be made on any of the communication channels listed [here](https://github.com/saulpw/visidata/blob/stable/CONTRIBUTING.md#community). 
 
 ### Filing issues or support
 
-Create a GitHub issue if anything doesn't appear to be working right. If you get an unexpected error, please include the full stack trace that you get with `Ctrl-E`. Additionally, it would help me more quickly diagnose the problem if you could attach the saved Commandlog (`Ctrl-D`), which will show the steps that lead to the issue. If you are struggling with learning how to use the tool, or are unsure how something works, please also file an issue or write a comment in any of our [community spaces](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#community). In addition to wanting to help users get the most out of the tool, this helps us gauge the holes in our documentation.
+Create a GitHub issue if anything doesn't appear to be working right. If you get an unexpected error, please include the full stack trace that you get with `Ctrl-E`. Additionally, it would help me more quickly diagnose the problem if you could attach the saved Commandlog (`Ctrl-D`), which will show the steps that lead to the issue. If you are struggling with learning how to use the tool, or are unsure how something works, please also file an issue or write a comment in any of our [community spaces](https://github.com/saulpw/visidata/blob/stable/CONTRIBUTING.md#community). In addition to wanting to help users get the most out of the tool, this helps us gauge the holes in our documentation.
 
 ### Contributing tests
 

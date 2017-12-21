@@ -10,9 +10,9 @@ There are three options for installing visidata:
 
 *Where can I learn how to use VisiData?*
 
-We have documentation in various levels of detail available at [visidata.org/docs](http://visidata.org/docs/) from [an overview of all commands](http://visidata.org/man/) to [workflow recipes](http://visidata.org/howto).
+We have documentation in various levels of detail available at [visidata.org/docs](http://visidata.org/docs/) from [an overview of all commands](http://visidata.org/man/) to [workflow recipes](http://visidata.org/test).
 
-If you have a workflow which you do not see covered, please don't hestitate to [file an issue](https://github.com/saulpw/visidata/issues/new) or post a comment in any of our [community spaces](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#community). Our documentation is an ongoing effort, and we wish to prioritise the writing of recipes around user needs.
+If you have a workflow which you do not see covered, please don't hestitate to [file an issue](https://github.com/saulpw/visidata/issues/new) or post a comment in any of our [community spaces](https://github.com/saulpw/visidata/blob/stable/CONTRIBUTING.md#community). Our documentation is an ongoing effort, and we wish to prioritise the writing of recipes around user needs.
 
 *I found a bug!*
 
