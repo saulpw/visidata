@@ -63,7 +63,7 @@ def main():
     args = parser.parse_args()
 
     # user customisations in config file in standard location
-    for fnrc in ('.visidatarc', '$XDG_CONFIG_HOME/visidata/config', '~/.visidatarc'):
+    for fnrc in ('.visidatarc', '~/.visidatarc'):
         p = Path(fnrc)
         if p.exists():
             exec(open(p.resolve()).read(), globals())
