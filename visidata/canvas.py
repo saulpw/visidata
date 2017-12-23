@@ -2,164 +2,218 @@
 from collections import defaultdict, Counter
 from visidata import *
 
-# The Canvas covers the entire terminal (minus the status line).
-# The Grid is arbitrarily large (a virtual cartesian coordinate system).
-# The visibleGrid is what is actively drawn onto the terminal.
-# The gridCanvas is the area of the canvas that contains that visibleGrid.
-# The gridAxes are drawn outside the gridCanvas, on the left and bottom.
-
-# Canvas and gridCanvas coordinates are pixels at the same scale (gridCanvas are offset to leave room for axes).
-# Grid and visibleGrid coordinates are app-specific units.
-
-# plotpixel()/plotline()/plotlabel() take Canvas pixel coordinates
-# point()/line()/label() take Grid coordinates
+# see www/design/graphics.md
 
 option('show_graph_labels', True, 'show axes and legend on graph')
 option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
 option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
 option('zoom_incr', 2.0, 'amount to multiply current zoomlevel by when zooming')
+option('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
 
-# pixels covering whole actual terminal
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __str__(self):
+        if isinstance(self.x, int):
+            return '(%d,%d)' % (self.x, self.y)
+        else:
+            return '(%.02f,%.02f)' % (self.x, self.y)
+
+    @property
+    def xy(self):
+        return (self.x, self.y)
+
+class Box:
+    def __init__(self, x, y, w=0, h=0):
+        self.xmin = x
+        self.ymin = y
+        self.w = w
+        self.h = h
+
+    @property
+    def xymin(self):
+        return Point(self.xmin, self.ymin)
+
+    @property
+    def xmax(self):
+        return self.xmin + self.w
+
+    @property
+    def ymax(self):
+        return self.ymin + self.h
+
+    @property
+    def center(self):
+        return Point(self.xcenter, self.ycenter)
+
+    @property
+    def xcenter(self):
+        return self.xmin + self.w/2
+
+    @property
+    def ycenter(self):
+        return self.ymin + self.h/2
+
+    def contains(self, x, y):
+        return x >= self.xmin and \
+               x < self.xmax and \
+               y >= self.ymin and \
+               y < self.ymax
+
+def BoundingBox(x1, y1, x2, y2):
+    return Box(min(x1, x2), min(y1, y2), abs(x2-x1), abs(y2-y1))
+
+
+def clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax):
+    'Liang-Barsky algorithm, returns [xn1,yn1,xn2,yn2] of clipped line within given area, or None'
+    dx = x2-x1
+    dy = y2-y1
+    pq = [
+        (-dx, x1-xmin),  # left
+        ( dx, xmax-x1),  # right
+        (-dy, y1-ymin),  # bottom
+        ( dy, ymax-y1),  # top
+    ]
+
+    u1, u2 = 0, 1
+    for p, q in pq:
+        if p < 0:  # from outside to inside
+            u1 = max(u1, q/p)
+        elif p > 0:  # from inside to outside
+            u2 = min(u2, q/p)
+        else: #  p == 0:  # parallel to bbox
+            if q < 0:  # completely outside bbox
+                return None
+
+    if u1 > u2:  # completely outside bbox
+        return None
+
+    xn1 = x1 + dx*u1
+    yn1 = y1 + dy*u1
+
+    xn2 = x1 + dx*u2
+    yn2 = y1 + dy*u2
+
+    return xn1, yn1, xn2, yn2
+
+def iterline(x1, y1, x2, y2):
+    'Yields (x, y) coords of line from (x1, y1) to (x2, y2)'
+    xdiff = abs(x2-x1)
+    ydiff = abs(y2-y1)
+    xdir = 1 if x1 <= x2 else -1
+    ydir = 1 if y1 <= y2 else -1
+
+    r = max(xdiff, ydiff)
+    if r == 0:  # point, not line
+        yield x1, y1
+    else:
+        x, y = x1, y1
+        i = 0
+        while i <= r:
+            x += xdir * xdiff / r
+            y += ydir * ydiff / r
+
+            yield x, y
+            i += 1
+
+
+def anySelected(vs, rows):
+    for r in rows:
+        if vs.isSelected(r):
+            return True
+
 #  - width/height are exactly equal to the number of pixels displayable, and can change at any time.
 #  - needs to refresh from source on resize
-#  - all x/y/w/h in PixelCanvas are pixel coordinates
-#  - override cursorPixelBounds to specify a cursor
-class PixelCanvas(Sheet):
+class Plotter(Sheet):
+    'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
     columns=[Column('')]  # to eliminate errors outside of draw()
     commands=[
         Command('^L', 'refresh()', 'redraw all pixels on canvas'),
-        Command('w', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
+        Command('v', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
         Command('KEY_RESIZE', 'refresh()', ''),
     ]
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
         self.labels = []  # (x, y, text, attr)
-        self.disabledAttrs = set()
+        self.hiddenAttrs = set()
         self.needsRefresh = False
         self.resetCanvasDimensions()
 
     def resetCanvasDimensions(self):
         'sets total available canvas dimensions'
-        self.canvasMinY = 0
-        self.canvasMinX = 0
-        self.canvasWidth = vd().windowWidth*2
-        self.canvasHeight = (vd().windowHeight-1)*4  # exclude status line
+        self.plotwidth = vd().windowWidth*2
+        self.plotheight = (vd().windowHeight-1)*4  # exclude status line
 
         # pixels[y][x] = { attr: list(rows), ... }
-        self.pixels = [[defaultdict(list) for x in range(self.canvasWidth)] for y in range(self.canvasHeight)]
+        self.pixels = [[defaultdict(list) for x in range(self.plotwidth)] for y in range(self.plotheight)]
 
     def plotpixel(self, x, y, attr, row=None):
-        self.pixels[round(y)][round(x)][attr].append(row)
-
-    @staticmethod
-    def clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax):
-        'Liang-Barsky algorithm'
-        dx = x2-x1
-        dy = y2-y1
-        pq = [
-            (-dx, x1-xmin),  # left
-            ( dx, xmax-x1),  # right
-            (-dy, y1-ymin),  # bottom
-            ( dy, ymax-y1),  # top
-        ]
-
-        u1, u2 = 0, 1
-        for p, q in pq:
-            if p < 0:  # from outside to inside
-                u1 = max(u1, q/p)
-            elif p > 0:  # from inside to outside
-                u2 = min(u2, q/p)
-            else: #  p == 0:  # parallel to bbox
-                if q < 0:  # completely outside bbox
-                    return None
-
-        if u1 > u2:  # completely outside bbox
-            return None
-
-        xn1 = x1 + dx*u1
-        yn1 = y1 + dy*u1
-
-        xn2 = x1 + dx*u2
-        yn2 = y1 + dy*u2
-
-        return xn1, yn1, xn2, yn2
+        self.pixels[y][x][attr].append(row)
 
     def plotline(self, x1, y1, x2, y2, attr, row=None):
-        for x, y in self.iterline(x1, y1, x2, y2):
-            self.plotpixel(x, y, attr, row)
-
-    @staticmethod
-    def iterline(x1, y1, x2, y2):
-        'Draws onscreen segment of line from (x1, y1) to (x2, y2)'
-        xdiff = abs(x2-x1)
-        ydiff = abs(y2-y1)
-        xdir = 1 if x1 <= x2 else -1
-        ydir = 1 if y1 <= y2 else -1
-
-        r = round(max(xdiff, ydiff))
-
-        if r == 0:  # point, not line
-            yield x1, y1
-        else:
-            x, y = x1, y1
-            for i in range(r+1):
-                x += xdir * xdiff / r
-                y += ydir * ydiff / r
-
-                yield x, y
+        for x, y in iterline(x1, y1, x2, y2):
+            self.plotpixel(round(x), round(y), attr, row)
 
     def plotlabel(self, x, y, text, attr):
         self.labels.append((x, y, text, attr))
 
     def plotlegend(self, i, txt, attr):
-        self.plotlabel(self.canvasWidth-30, i*4, txt, attr)
+        self.plotlabel(self.plotwidth-30, i*4, txt, attr)
 
     @property
-    def cursorPixelBounds(self):
-        'Returns pixel bounds of cursor as [ left, top, right, bottom ]'
-        return [ 0, 0, 0, 0 ]
+    def plotterCursorBox(self):
+        'Returns pixel bounds of cursor as a Box.  Override to provide a cursor.'
+        return Box(0,0,0,0)
 
-    def withinBounds(self, x, y, bbox):
-        left, top, right, bottom = bbox
-        return x >= left and \
-               x < right and \
-               y >= top and \
-               y < bottom
+    @property
+    def plotterMouse(self):
+        return Point(self.mouseX*2, self.mouseY*4)
 
     def getPixelAttrRandom(self, x, y):
         'weighted-random choice of attr at this pixel.'
         c = list(attr for attr, rows in self.pixels[y][x].items()
-                         for r in rows if attr not in self.disabledAttrs)
+                         for r in rows if attr not in self.hiddenAttrs)
         return random.choice(c) if c else 0
 
     def getPixelAttrMost(self, x, y):
         'most common attr at this pixel.'
         r = self.pixels[y][x]
-        c = sorted((len(rows), attr) for attr, rows in r.items() if attr not in self.disabledAttrs)
-        return c[-1][1] if c else 0
+        c = sorted((len(rows), attr, rows) for attr, rows in r.items() if attr not in self.hiddenAttrs)
+        if not c:
+            return 0
+        _, attr, rows = c[-1]
+        if anySelected(self.source, rows):
+            attr, _ = colors.update(attr, 8, 'bold', 10)
+        return attr
 
-    def togglePixelAttrs(self, attr):
-        if attr in self.disabledAttrs:
-            self.disabledAttrs.remove(attr)
+    def hideAttr(self, attr, hide=True):
+        if hide:
+            self.hiddenAttrs.add(attr)
         else:
-            self.disabledAttrs.add(attr)
+            self.hiddenAttrs.remove(attr)
         self.plotlegends()
 
-    def getRowsInside(self, x1, y1, x2, y2):
-        for y in range(y1, y2):
-            for x in range(x1, x2):
+    def rowsWithin(self, bbox):
+        'return list of deduped rows within bbox'
+        ret = {}
+        for y in range(bbox.ymin, bbox.ymax+1):
+            for x in range(bbox.xmin, bbox.xmax+1):
                 for attr, rows in self.pixels[y][x].items():
-                    for r in rows:
-                        yield r
+                    if attr not in self.hiddenAttrs:
+                        for r in rows:
+                            ret[id(r)] = r
+        return list(ret.values())
 
     def draw(self, scr):
         if self.needsRefresh:
-            self.plotAll()
+            self.render()
 
         scr.erase()
 
         if self.pixels:
-            cursorBBox = self.cursorPixelBounds
+            cursorBBox = self.plotterCursorBox
             getPixelAttr = self.getPixelAttrRandom if options.disp_pixel_random else self.getPixelAttrMost
             for char_y in range(0, vd().windowHeight-1):  # save one line for status
                 for char_x in range(0, vd().windowWidth):
@@ -186,8 +240,8 @@ class PixelCanvas(Sheet):
                     else:
                         attr = 0
 
-                    if self.withinBounds(char_x*2, char_y*4, cursorBBox) or \
-                       self.withinBounds(char_x*2+1, char_y*4+3, cursorBBox):
+                    if cursorBBox.contains(char_x*2, char_y*4) or \
+                       cursorBBox.contains(char_x*2+1, char_y*4+3):
                         attr, _ = colors.update(attr, 0, options.color_current_row, 10)
 
                     if attr:
@@ -198,90 +252,77 @@ class PixelCanvas(Sheet):
                 clipdraw(scr, int(pix_y/4), int(pix_x/2), txt, attr, len(txt))
 
 
-# virtual display of arbitrary dimensions
-# - x/y/w/h are always in grid units (units convenient to the app)
-# - allows zooming in/out
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
-class GridCanvas(PixelCanvas):
+class Canvas(Plotter):
+    'zoomable/scrollable virtual canvas with (x,y) coordinates in arbitrary units'
     rowtype = 'plots'
-    aspectRatio = None
+    aspectRatio = 0.0
     leftMarginPixels = 10*2
     rightMarginPixels = 6*2
     topMarginPixels = 0
     bottomMarginPixels = 2*4  # reserve bottom line for x axis
 
-    commands = PixelCanvas.commands + [
-        Command('move-left', 'sheet.cursorGridMinX -= cursorGridWidth', ''),
-        Command('move-right', 'sheet.cursorGridMinX += cursorGridWidth', ''),
-        Command('move-down', 'sheet.cursorGridMinY += cursorGridHeight', ''),
-        Command('move-up', 'sheet.cursorGridMinY -= cursorGridHeight', ''),
+    commands = Plotter.commands + [
+        Command('move-left', 'sheet.cursorBox.xmin -= cursorBox.w', ''),
+        Command('move-right', 'sheet.cursorBox.xmin += cursorBox.w', ''),
+        Command('move-down', 'sheet.cursorBox.ymin += cursorBox.h', ''),
+        Command('move-up', 'sheet.cursorBox.ymin -= cursorBox.h', ''),
 
-        Command('zh', 'sheet.cursorGridMinX -= charGridWidth', ''),
-        Command('zl', 'sheet.cursorGridMinX += charGridWidth', ''),
-        Command('zj', 'sheet.cursorGridMinY += charGridHeight', ''),
-        Command('zk', 'sheet.cursorGridMinY -= charGridHeight', ''),
+        Command('zh', 'sheet.cursorBox.xmin -= canvasCharWidth', ''),
+        Command('zl', 'sheet.cursorBox.xmin += canvasCharWidth', ''),
+        Command('zj', 'sheet.cursorBox.ymin += canvasCharHeight', ''),
+        Command('zk', 'sheet.cursorBox.ymin -= canvasCharHeight', ''),
 
-        Command('gH', 'sheet.cursorGridWidth /= 2', ''),
-        Command('gL', 'sheet.cursorGridWidth *= 2', ''),
-        Command('gJ', 'sheet.cursorGridHeight /= 2', ''),
-        Command('gK', 'sheet.cursorGridHeight *= 2', ''),
+        Command('gH', 'sheet.cursorBox.w /= 2', ''),
+        Command('gL', 'sheet.cursorBox.w *= 2', ''),
+        Command('gJ', 'sheet.cursorBox.h /= 2', ''),
+        Command('gK', 'sheet.cursorBox.h *= 2', ''),
 
-        Command('H', 'sheet.cursorGridWidth -= charGridWidth', ''),
-        Command('L', 'sheet.cursorGridWidth += charGridWidth', ''),
-        Command('J', 'sheet.cursorGridHeight += charGridHeight', ''),
-        Command('K', 'sheet.cursorGridHeight -= charGridHeight', ''),
+        Command('H', 'sheet.cursorBox.w -= canvasCharWidth', ''),
+        Command('L', 'sheet.cursorBox.w += canvasCharWidth', ''),
+        Command('J', 'sheet.cursorBox.h += canvasCharHeight', ''),
+        Command('K', 'sheet.cursorBox.h -= canvasCharHeight', ''),
 
-        Command('zz', 'zoomTo(cursorGridMinX, cursorGridMinY, cursorGridMaxX, cursorGridMaxY)', 'set visible bounds to cursor'),
+        Command('zz', 'zoomTo(cursorBox)', 'set visible bounds to cursor'),
 
-        Command('-', 'tmp=(cursorGridCenterX, cursorGridCenterY); setZoom(zoomlevel*options.zoom_incr); fixPoint(gridCanvasCenterX, gridCanvasCenterY, *tmp)', 'zoom into cursor center'),
-        Command('+', 'tmp=(cursorGridCenterX, cursorGridCenterY); setZoom(zoomlevel/options.zoom_incr); fixPoint(gridCanvasCenterX, gridCanvasCenterY, *tmp)', 'zoom into cursor center'),
-        Command('_', 'sheet.gridWidth = 0; sheet.visibleGridWidth = 0; setZoom(1.0); refresh()', 'zoom to fit full extent'),
+        Command('-', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center'),
+        Command('+', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center'),
+        Command('_', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()', 'zoom to fit full extent'),
+        Command('z_', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio'),
 
         # set cursor box with left click
-        Command('BUTTON1_PRESSED', 'sheet.cursorGridMinX, sheet.cursorGridMinY = gridMouseX, gridMouseY; sheet.cursorGridWidth=0', 'start cursor box with left mouse button press'),
-        Command('BUTTON1_RELEASED', 'setCursorSize(gridMouseX, gridMouseY)', 'end cursor box with left mouse button release'),
+        Command('BUTTON1_PRESSED', 'sheet.cursorBox = Box(*canvasMouse.xy)', 'start cursor box with left mouse button press'),
+        Command('BUTTON1_RELEASED', 'setCursorSize(canvasMouse)', 'end cursor box with left mouse button release'),
 
-        Command('BUTTON3_PRESSED', 'sheet.gridAnchorXY = (gridMouseX, gridMouseY)', 'mark grid point to move'),
-        Command('BUTTON3_RELEASED', 'fixPoint(canvasMouseX, canvasMouseY, *gridAnchorXY)', 'mark canvas anchor point'),
+        Command('BUTTON3_PRESSED', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move'),
+        Command('BUTTON3_RELEASED', 'fixPoint(plotterMouse, anchorPoint)', 'mark canvas anchor point'),
 
-        Command('BUTTON4_PRESSED', 'tmp=(gridMouseX,gridMouseY); setZoom(zoomlevel/options.zoom_incr); fixPoint(canvasMouseX, canvasMouseY, *tmp)', 'zoom in with scroll wheel'),
-        Command('REPORT_MOUSE_POSITION', 'tmp=(gridMouseX,gridMouseY); setZoom(zoomlevel*options.zoom_incr); fixPoint(canvasMouseX, canvasMouseY, *tmp)', 'zoom out with scroll wheel'),
+        Command('BUTTON4_PRESSED', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel'),
+        Command('REPORT_MOUSE_POSITION', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel'),
 
-        Command('s', 'source.select(list(getRowsInside(*cursorPixelBounds)))', 'select all points within cursor box'),
-        Command('t', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'toggle selection of all points within cursor box'),
-        Command('u', 'source.unselect(list(getRowsInside(*cursorPixelBounds)))', 'unselect all points within cursor box'),
-        Command(ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*cursorPixelBounds)); vd.push(vs)', ''),
+        Command('s', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor'),
+        Command('t', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor'),
+        Command('u', 'source.unselect(list(rowsWithin(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor'),
+        Command(ENTER, 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)', 'Open sheet of source rows contained within canvas cursor'),
 
 
-        Command('gs', 'source.select(list(getRowsInside(*visiblePixelBounds)))', 'select all points visible onscreen'),
-        Command('gt', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'toggle selection of all points visible onscreen'),
-        Command('gu', 'source.unselect(list(getRowsInside(*visiblePixelBounds)))', 'unselect all points visible onscreen'),
-        Command('g'+ENTER, 'vs=copy(source); vs.rows=list(getRowsInside(*visiblePixelBounds)); vd.push(vs)', ''),
+        Command('gs', 'source.select(list(rowsWithin(plotterVisibleBox)))', 'select rows visible on screen'),
+        Command('gt', 'source.toggle(list(rowsWithin(plotterVisibleBox)))', 'toggle selection of rows visible on screen'),
+        Command('gu', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect rows visible on screen'),
+        Command('g'+ENTER, 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen'),
     ]
 
     def __init__(self, name, source=None, **kwargs):
         super().__init__(name, source=source, **kwargs)
 
-        # bounding box of entire grid in grid units, updated when adding point/line/label or recalcBounds
-        self.gridMinX, self.gridMinY = None, None  # derive first bounds on first draw
-        self.gridWidth, self.gridHeight = None, None
-
-        # bounding box of visible grid, in grid units
-        self.visibleGridMinX = None
-        self.visibleGridMinY = None
-        self.visibleGridWidth = None
-        self.visibleGridHeight = None
-
-        # bounding box of cursor (should be contained within visible grid?)
-        self.cursorGridMinX, self.cursorGridMinY = 0, 0
-        self.cursorGridWidth, self.cursorGridHeight = None, None
+        self.canvasBox = None   # bounding box of entire canvas, in canvas units
+        self.visibleBox = None  # bounding box of visible canvas, in canvas units
+        self.cursorBox = None   # bounding box of cursor, in canvas units
 
         self.zoomlevel = 1.0
         self.needsRefresh = False
 
-        # bounding box of gridCanvas, in pixels
-        self.gridpoints = []  # list of (grid_x, grid_y, attr, row)
-        self.gridlines = []   # list of (grid_x1, grid_y1, grid_x2, grid_y2, attr, row)
+        self.polylines = []   # list of ([(canvas_x, canvas_y), ...], attr, row)
         self.gridlabels = []  # list of (grid_x, grid_y, label, attr, row)
 
         self.legends = collections.OrderedDict()   # txt: attr  (visible legends only)
@@ -289,18 +330,20 @@ class GridCanvas(PixelCanvas):
         self.reset()
 
     def __len__(self):
-        return len(self.gridpoints) + len(self.gridlines)
+        return len(self.polylines)
 
     def reset(self):
+        'clear everything in preparation for a fresh reload()'
+        self.polylines.clear()
         self.legends.clear()
         self.plotAttrs.clear()
-        self.unusedAttrs = list(colors[colorname] for colorname in options.plot_colors.split())
+        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in options.plot_colors.split())[::-1]
 
     def plotColor(self, k):
         attr = self.plotAttrs.get(k, None)
         if attr is None:
             if len(self.unusedAttrs) > 1:
-                attr = self.unusedAttrs.pop()
+                attr = self.unusedAttrs.pop(0)
                 legend = ' '.join(str(x) for x in k)
             else:
                 attr = self.unusedAttrs[0]
@@ -313,172 +356,77 @@ class GridCanvas(PixelCanvas):
 
     def resetCanvasDimensions(self):
         super().resetCanvasDimensions()
-        self.gridCanvasMinX = self.leftMarginPixels
-        self.gridCanvasMinY = self.topMarginPixels
-        self.gridCanvasWidth = self.canvasWidth - self.rightMarginPixels - self.leftMarginPixels
-        self.gridCanvasHeight = self.canvasHeight - self.bottomMarginPixels - self.topMarginPixels
+        self.plotviewBox = BoundingBox(self.leftMarginPixels, self.topMarginPixels,
+                                       self.plotwidth-self.rightMarginPixels, self.plotheight-self.bottomMarginPixels)
 
     @property
     def statusLine(self):
-        gridstr = 'grid (%s,%s)-(%s,%s)' % (self.gridMinX, self.gridMinY, self.gridMaxX, self.gridMaxY)
-        vgridstr = 'visibleGrid (%s,%s)-(%s,%s)' % (self.visibleGridMinX, self.visibleGridMinY, self.visibleGridMaxX, self.visibleGridMaxY)
-        cursorstr = 'cursor (%s,%s)-(%s,%s)' % (self.cursorGridMinX, self.cursorGridMinY, self.cursorGridMaxX, self.cursorGridMaxY)
-        return ' '.join((gridstr, vgridstr, cursorstr))
+        return 'canvas %s visible %s cursor %s' % (self.canvasBox, self.visibleBox, self.cursorBox)
 
     @property
-    def canvasMouseX(self):
-        return self.mouseX*2
+    def canvasMouse(self):
+        return Point(self.visibleBox.xmin + (self.plotterMouse.x-self.plotviewBox.xmin)/self.xScaler,
+                     self.visibleBox.ymin + (self.plotterMouse.y-self.plotviewBox.ymin)/self.yScaler)
+
+    def setCursorSize(self, p):
+        'sets width based on diagonal corner p'
+        self.cursorBox = BoundingBox(self.cursorBox.xmin, self.cursorBox.ymin, p.x, p.y)
+        self.cursorBox.w = max(self.cursorBox.w, self.canvasCharWidth)
+        self.cursorBox.h = max(self.cursorBox.h, self.canvasCharHeight)
 
     @property
-    def canvasMouseY(self):
-        return self.mouseY*4
+    def canvasCharWidth(self):
+        'Width in canvas units of a single char in the terminal'
+        return self.visibleBox.w*2/self.plotviewBox.w
 
     @property
-    def gridMouseX(self):
-        return self.visibleGridMinX + (self.canvasMouseX-self.gridCanvasMinX)/self.xScaler
+    def canvasCharHeight(self):
+        'Height in canvas units of a single char in the terminal'
+        return self.visibleBox.h*4/self.plotviewBox.h
 
     @property
-    def gridMouseY(self):
-        return self.visibleGridMinY + (self.canvasMouseY-self.gridCanvasMinY)/self.yScaler
-
-    def setCursorSize(self, gridX, gridY):
-        'sets width based on other side x and y'
-        if gridX > self.cursorGridMinX:
-            self.cursorGridWidth = max(gridX - self.cursorGridMinX, self.charGridWidth)
-        else:
-            self.cursorGridWidth = max(self.cursorGridMinX - gridX, self.charGridWidth)
-            self.cursorGridMinX = gridX
-
-        if gridY > self.cursorGridMinY:
-            self.cursorGridHeight = max(gridY - self.cursorGridMinY, self.charGridHeight)
-        else:
-            self.cursorGridHeight = max(self.cursorGridMinY - gridY, self.charGridHeight)
-            self.cursorGridMinY = gridY
+    def plotterVisibleBox(self):
+        return BoundingBox(self.scaleX(self.visibleBox.xmin),
+                           self.scaleY(self.visibleBox.ymin),
+                           self.scaleX(self.visibleBox.xmax),
+                           self.scaleY(self.visibleBox.ymax))
 
     @property
-    def charGridWidth(self):
-        'Width in grid units of a single char in the terminal'
-        return self.visibleGridWidth*2/self.gridCanvasWidth
-
-    @property
-    def charGridHeight(self):
-        'Height in grid units of a single char in the terminal'
-        return self.visibleGridHeight*4/self.gridCanvasHeight
-
-    @property
-    def gridCanvasCenterX(self):
-        return self.gridCanvasMinX + self.gridCanvasWidth/2
-
-    @property
-    def gridCanvasCenterY(self):
-        return self.gridCanvasMinY + self.gridCanvasHeight/2
-
-    @property
-    def gridMaxX(self):
-        return self.gridMinX + self.gridWidth
-
-    @property
-    def gridMaxY(self):
-        return self.gridMinY + self.gridHeight
-
-    @property
-    def cursorGridCenterX(self):
-        return self.cursorGridMinX + self.cursorGridWidth/2
-
-    @property
-    def cursorGridCenterY(self):
-        return self.cursorGridMinY + self.cursorGridHeight/2
-
-    @property
-    def cursorGridMaxX(self):
-        return self.cursorGridMinX + self.cursorGridWidth
-
-    @property
-    def cursorGridMaxY(self):
-        return self.cursorGridMinY + self.cursorGridHeight
-
-    @property
-    def visibleGridMaxX(self):
-        return self.visibleGridMinX + self.visibleGridWidth
-
-    @property
-    def visibleGridMaxY(self):
-        return self.visibleGridMinY + self.visibleGridHeight
-
-    @property
-    def gridCanvasMaxY(self):
-        return self.gridCanvasMinY + self.gridCanvasHeight
-
-    @property
-    def gridCanvasMaxX(self):
-        return self.gridCanvasMinX + self.gridCanvasWidth
-
-    @property
-    def cursorGridBounds(self):
-        return [ self.cursorGridMinX,
-                 self.cursorGridMinY,
-                 self.cursorGridMaxX,
-                 self.cursorGridMaxY
-        ]
-
-    @property
-    def visibleGridBounds(self):
-        return [ self.visibleGridMinX,
-                 self.visibleGridMinY,
-                 self.visibleGridMinX+self.visibleGridWidth,
-                 self.visibleGridMinY+self.visibleGridHeight
-        ]
-
-    @property
-    def visiblePixelBounds(self):
-        return [ self.scaleX(self.visibleGridMinX),
-                 self.scaleY(self.visibleGridMinY),
-                 self.scaleX(self.visibleGridMinX+self.visibleGridWidth),
-                 self.scaleY(self.visibleGridMinY+self.visibleGridHeight)
-        ]
-
-    @property
-    def cursorPixelBounds(self):
-        if self.cursorGridWidth is None:
-            return [0,0,0,0]
-        return [ self.scaleX(self.cursorGridMinX),
-                 self.scaleY(self.cursorGridMinY),
-                 self.scaleX(self.cursorGridMinX+self.cursorGridWidth),
-                 self.scaleY(self.cursorGridMinY+self.cursorGridHeight)
-        ]
+    def plotterCursorBox(self):
+        if self.cursorBox is None:
+            return Box(0,0,0,0)
+        return BoundingBox(self.scaleX(self.cursorBox.xmin),
+                           self.scaleY(self.cursorBox.ymin),
+                           self.scaleX(self.cursorBox.xmax),
+                           self.scaleY(self.cursorBox.ymax))
 
     def point(self, x, y, attr, row=None):
-        self.gridpoints.append((x, y, attr, row))
+        self.polylines.append(([(x, y)], attr, row))
 
     def line(self, x1, y1, x2, y2, attr, row=None):
-        self.gridlines.append((x1, y1, x2, y2, attr, row))
+        self.polylines.append(([(x1, y1), (x2, y2)], attr, row))
 
-    def polyline(self, vertices, attr, row=None):
-        'adds lines for (x,y) vertices of a polygon'
-        prev_x, prev_y = vertices[0]
-        for x, y in vertices[1:]:
-            self.line(prev_x, prev_y, x, y, attr, row)
-            prev_x, prev_y = x, y
+    def polyline(self, vertexes, attr, row=None):
+        'adds lines for (x,y) vertexes of a polygon'
+        self.polylines.append((vertexes, attr, row))
 
-    def polygon(self, vertices, attr, row=None):
-        'adds lines for (x,y) vertices of a polygon'
-        prev_x, prev_y = vertices[-1]
-        for x, y in vertices:
-            self.line(prev_x, prev_y, x, y, attr, row)
-            prev_x, prev_y = x, y
+    def polygon(self, vertexes, attr, row=None):
+        'adds lines for (x,y) vertexes of a polygon'
+        self.polylines.append((vertexes + [vertexes[0]], attr, row))
 
     def label(self, x, y, text, attr, row=None):
         self.gridlabels.append((x, y, text, attr, row))
 
-    def fixPoint(self, canvas_x, canvas_y, grid_x, grid_y):
-        'adjust visibleGrid so that (grid_x, grid_y) is plotted at (canvas_x, canvas_y)'
-        self.visibleGridMinX = grid_x - self.gridW(canvas_x-self.gridCanvasMinX)
-        self.visibleGridMinY = grid_y - self.gridH(canvas_y-self.gridCanvasMinY)
+    def fixPoint(self, plotterPoint, canvasPoint):
+        'adjust visibleBox.xymin so that canvasPoint is plotted at plotterPoint'
+        self.visibleBox.xmin = canvasPoint.x - self.canvasW(plotterPoint.x-self.plotviewBox.xmin)
+        self.visibleBox.ymin = canvasPoint.y - self.canvasH(plotterPoint.y-self.plotviewBox.ymin)
         self.refresh()
 
-    def zoomTo(self, x1, y1, x2, y2):
-        self.fixPoint(self.gridCanvasMinX, self.gridCanvasMinY, x1, y1)
-        self.zoomlevel=max(self.cursorGridWidth/self.gridWidth, self.cursorGridHeight/self.gridHeight)
+    def zoomTo(self, bbox):
+        'set visible area to bbox, maintaining aspectRatio if applicable'
+        self.fixPoint(self.plotviewBox.xymin, bbox.xymin)
+        self.zoomlevel=max(bbox.w/self.canvasBox.w, bbox.h/self.canvasBox.h)
 
     def setZoom(self, zoomlevel=None):
         if zoomlevel:
@@ -488,54 +436,35 @@ class GridCanvas(PixelCanvas):
         self.plotlegends()
 
     def resetBounds(self):
-        if not self.gridWidth or not self.gridHeight:
-            xmins = []
-            ymins = []
-            xmaxs = []
-            ymaxs = []
-            if self.gridpoints:
-                xmins.append(min(x for x, y, attr, row in self.gridpoints))
-                xmaxs.append(max(x for x, y, attr, row in self.gridpoints))
-                ymins.append(min(y for x, y, attr, row in self.gridpoints))
-                ymaxs.append(max(y for x, y, attr, row in self.gridpoints))
-            if self.gridlines:
-                xmins.append(min(min(x1, x2) for x1, y1, x2, y2, attr, row in self.gridlines))
-                xmaxs.append(max(max(x1, x2) for x1, y1, x2, y2, attr, row in self.gridlines))
-                ymins.append(min(min(y1, y2) for x1, y1, x2, y2, attr, row in self.gridlines))
-                ymaxs.append(max(max(y1, y2) for x1, y1, x2, y2, attr, row in self.gridlines))
+        if not self.canvasBox:
+            xmin, ymin, xmax, ymax = None, None, None, None
+            for vertexes, attr, row in self.polylines:
+                for x, y in vertexes:
+                    if xmin is None or x < xmin: xmin = x
+                    if ymin is None or y < ymin: ymin = y
+                    if xmax is None or x > xmax: xmax = x
+                    if ymax is None or y > ymax: ymax = y
+            self.canvasBox = BoundingBox(xmin or 0, ymin or 0, xmax or 1, ymax or 1)
 
-            if xmins:
-                self.gridMinX = min(xmins)
-                self.gridMinY = min(ymins)
-                self.gridWidth = max(xmaxs) - self.gridMinX
-                self.gridHeight = max(ymaxs) - self.gridMinY
-            else:
-                self.gridWidth = 1.0
-                self.gridHeight = 1.0
-
-        if not self.visibleGridWidth or not self.visibleGridHeight:
-            # initialize minx/miny, but w/h must be set first
-            self.visibleGridWidth = self.gridCanvasWidth/self.xScaler
-            self.visibleGridHeight = self.gridCanvasHeight/self.yScaler
-            self.visibleGridMinX = self.gridMinX + self.gridWidth/2 - self.visibleGridWidth/2
-            self.visibleGridMinY = self.gridMinY + self.gridHeight/2 - self.visibleGridHeight/2
+        if not self.visibleBox:
+            # initialize minx/miny, but w/h must be set first to center properly
+            self.visibleBox = Box(0, 0, self.plotviewBox.w/self.xScaler, self.plotviewBox.h/self.yScaler)
+            self.visibleBox.xmin = self.canvasBox.xcenter - self.visibleBox.w/2
+            self.visibleBox.ymin = self.canvasBox.ycenter - self.visibleBox.h/2
         else:
-            self.visibleGridWidth = self.gridCanvasWidth/self.xScaler
-            self.visibleGridHeight = self.gridCanvasHeight/self.yScaler
+            self.visibleBox.w = self.plotviewBox.w/self.xScaler
+            self.visibleBox.h = self.plotviewBox.h/self.yScaler
 
-        if not self.cursorGridWidth or not self.cursorGridHeight:
-            self.cursorGridMinX = self.visibleGridMinX
-            self.cursorGridMinY = self.visibleGridMinY
-            self.cursorGridWidth = self.charGridWidth
-            self.cursorGridHeight = self.charGridHeight
+        if not self.cursorBox:
+            self.cursorBox = Box(self.visibleBox.xmin, self.visibleBox.ymin, self.canvasCharWidth, self.canvasCharHeight)
 
     def plotlegends(self):
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
-            self._commands[str(i+1)] = Command(str(i+1), 'togglePixelAttrs(%s)' % attr, '')
-            if attr in self.disabledAttrs:
-                attr = colors['238 blue']
-            self.plotlegend(i, '%s.%s'%(i+1,legend), attr)
+            self._commands[str(i+1)] = Command(str(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr), 'toggle display of "%s"' % legend)
+            if attr in self.hiddenAttrs:
+                attr = colors[options.color_graph_hidden]
+            self.plotlegend(i, '%s:%s'%(i+1,legend), attr)
 
     def checkCursor(self):
         'override Sheet.checkCursor'
@@ -543,75 +472,80 @@ class GridCanvas(PixelCanvas):
 
     @property
     def xScaler(self):
-        xratio = self.gridCanvasWidth/(self.gridWidth*self.zoomlevel)
+        xratio = self.plotviewBox.w/(self.canvasBox.w*self.zoomlevel)
         if self.aspectRatio:
-            yratio = self.gridCanvasHeight/(self.gridHeight*self.zoomlevel)
+            yratio = self.plotviewBox.h/(self.canvasBox.h*self.zoomlevel)
             return self.aspectRatio*min(xratio, yratio)
         else:
             return xratio
 
     @property
     def yScaler(self):
-        yratio = self.gridCanvasHeight/(self.gridHeight*self.zoomlevel)
+        yratio = self.plotviewBox.h/(self.canvasBox.h*self.zoomlevel)
         if self.aspectRatio:
-            xratio = self.gridCanvasWidth/(self.gridWidth*self.zoomlevel)
-            return self.aspectRatio*min(xratio, yratio)
+            xratio = self.plotviewBox.w/(self.canvasBox.w*self.zoomlevel)
+            return min(xratio, yratio)
         else:
             return yratio
 
     def scaleX(self, x):
-        'returns canvas x coordinate'
-        return round(self.gridCanvasMinX+(x-self.visibleGridMinX)*self.xScaler)
+        'returns plotter x coordinate'
+        return round(self.plotviewBox.xmin+(x-self.visibleBox.xmin)*self.xScaler)
 
     def scaleY(self, y):
-        'returns canvas y coordinate'
-        return round(self.gridCanvasMinY+(y-self.visibleGridMinY)*self.yScaler)
+        'returns plotter y coordinate'
+        return round(self.plotviewBox.ymin+(y-self.visibleBox.ymin)*self.yScaler)
 
-    def gridW(self, canvas_width):
-        'canvas X units to grid units'
-        return canvas_width/self.xScaler
+    def canvasW(self, plotter_width):
+        'plotter X units to canvas units'
+        return plotter_width/self.xScaler
 
-    def gridH(self, canvas_height):
-        'canvas Y units to grid units'
-        return canvas_height/self.yScaler
+    def canvasH(self, plotter_height):
+        'plotter Y units to canvas units'
+        return plotter_height/self.yScaler
 
     def refresh(self):
+        'triggers render() on next draw()'
         self.needsRefresh = True
 
-    def plotAll(self):
+    def render(self):
+        'resets plotter, cancels previous render threads, spawns a new render'
         self.needsRefresh = False
         cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
-        self.pixels.clear()
         self.labels.clear()
         self.resetCanvasDimensions()
-        self.plotAll_async()
+        self.render_async()
 
     @async
-    def plotAll_async(self):
-        'plots points and lines and text onto the PixelCanvas'
+    def render_async(self):
+        'plots points and lines and text onto the Plotter'
 
         self.setZoom()
-
-        xmin, ymin, xmax, ymax = self.visibleGridBounds
+        bb = self.visibleBox
+        xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax
         xfactor, yfactor = self.xScaler, self.yScaler
-        gridxmin, gridymin = self.gridCanvasMinX, self.gridCanvasMinY
+        plotxmin, plotymin = self.plotviewBox.xmin, self.plotviewBox.ymin
 
-        for x, y, attr, row in Progress(self.gridpoints):
-            if ymin <= y and y <= ymax:
-                if xmin <= x and x <= xmax:
-                    x = gridxmin+(x-xmin)*xfactor
-                    y = gridymin+(y-ymin)*yfactor
-                    self.plotpixel(x, y, attr, row)
+        for vertexes, attr, row in Progress(self.polylines):
+            if len(vertexes) == 1:  # single point
+                x1, y1 = vertexes[0]
+                if xmin <= x1 <= xmax and ymin <= y1 <= ymax:
+                    x = plotxmin+(x1-xmin)*xfactor
+                    y = plotymin+(y1-ymin)*yfactor
+                    self.plotpixel(round(x), round(y), attr, row)
+                continue
 
-        for x1, y1, x2, y2, attr, row in Progress(self.gridlines):
-            r = self.clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax)
-            if r:
-                x1, y1, x2, y2 = r
-                x1 = gridxmin+(x1-xmin)*xfactor
-                y1 = gridymin+(y1-ymin)*yfactor
-                x2 = gridxmin+(x2-xmin)*xfactor
-                y2 = gridymin+(y2-ymin)*yfactor
-                self.plotline(x1, y1, x2, y2, attr, row)
+            prev_x, prev_y = vertexes[0]
+            for x, y in vertexes[1:]:
+                r = clipline(prev_x, prev_y, x, y, xmin, ymin, xmax, ymax)
+                if r:
+                    x1, y1, x2, y2 = r
+                    x1 = plotxmin+(x1-xmin)*xfactor
+                    y1 = plotymin+(y1-ymin)*yfactor
+                    x2 = plotxmin+(x2-xmin)*xfactor
+                    y2 = plotymin+(y2-ymin)*yfactor
+                    self.plotline(x1, y1, x2, y2, attr, row)
+                prev_x, prev_y = x, y
 
         for x, y, text, attr, row in Progress(self.gridlabels):
             self.plotlabel(self.scaleX(x), self.scaleY(y), text, attr, row)

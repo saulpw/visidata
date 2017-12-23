@@ -27,7 +27,7 @@ globalCommand('R', 'nrows=int(input("random population size: ")); vs=vd.push(cop
 globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row')
 globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows')
 
-globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fill null cells in current column with previous non-null value')
+globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with contents of non-null cells up the current column')
 
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'
@@ -51,19 +51,19 @@ def updateColNames(sheet):
         if not c._name:
             c.name = "_".join(c.getDisplayValue(r) for r in sheet.selectedRows or [sheet.cursorRow])
 
-globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set current column name to value in current cell')
-globalCommand('g^', 'updateColNames(sheet)', 'set visible column names to values in selected rows (or current row)')
-globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined values in selected rows (or current row)')
+globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set name of current column to contents of current cell')
+globalCommand('g^', 'updateColNames(sheet)', 'set names of all visible columns to contents of selected rows (or current row)')
+globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined contents of current cell in selected rows (or current row)')
 # gz^ with no selectedRows is same as z^
 
-globalCommand('o', 'vd.push(openSource(input("open: ", "filename")))', 'open input in VisiData')
-globalCommand('^S', 'saveSheet(sheet, input("save to: ", "filename", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
+globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
+globalCommand('^S', 'saveSheet(sheet, inputFilename("save to: ", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
 
-globalCommand('z=', 'status(evalexpr(input("status=", "expr"), cursorRow))', 'evaluate Python expression on current row and display result on status line')
+globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell=")))', 'set current cell to result of evaluated Python expression on current row')
 
-globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr"))): cursorCol.setValue(r, v)', 'set selected rows in this column to the values in the given Python sequence expression')
+globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)', 'set current column for selected rows to the items in result of Python sequence expression')
 
-globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with number columns')
+globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with N columns')
 
 
 globalCommand('gKEY_F(1)', 'help-commands')  # vdtui generic commands sheet
@@ -74,13 +74,35 @@ globalCommand('z?', 'openManPage()', 'launch VisiData manpage')
 globalCommand('KEY_F(1)', 'z?')
 
 def openManPage():
-    import subprocess
     from pkg_resources import resource_filename
     with SuspendCurses():
         os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
 
 def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
+
+def inputFilename(prompt, *args, **kwargs):
+    return input(prompt, "filename", *args, completer=completeFilename, **kwargs)
+
+def completeFilename(val, state):
+    i = val.rfind('/')
+    if i < 0:  # no /
+        base = ''
+        partial = val
+    elif i == 0: # root /
+        base = '/'
+        partial = val[1:]
+    else:
+        base = val[:i]
+        partial = val[i+1:]
+
+    files = []
+    for f in os.listdir(Path(base or '.').resolve()):
+        if f.startswith(partial):
+            files.append(os.path.join(base, f))
+
+    files.sort()
+    return files[state%len(files)]
 
 def getDefaultSaveName(sheet):
     src = getattr(sheet, 'source', None)
@@ -121,15 +143,15 @@ class DirSheet(Sheet):
 
 
 def openSource(p, filetype=None):
-    'calls open_ext(Path) or openurl_scheme(UrlPath)'
+    'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
     if isinstance(p, str):
         if '://' in p:
-            p = UrlPath(p)
-            filetype = filetype or p.scheme
-            openfunc = 'openurl_' + p.scheme
-            vs = getGlobals()[openfunc](p)
+            return openSource(UrlPath(p), filetype)  # convert to Path and recurse
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
+    elif isinstance(p, UrlPath):
+        openfunc = 'openurl_' + p.scheme
+        return getGlobals()[openfunc](p, filetype=filetype)
     elif isinstance(p, Path):
         if not filetype:
             filetype = options.filetype or p.suffix
@@ -178,7 +200,7 @@ def _getTsvHeaders(fp, nlines):
     i = 0
     while i < nlines:
         L = next(fp)
-        L = L[:-1]
+        L = L.rstrip('\n')
         if L:
             headers.append(L.split(options.delimiter))
             i += 1
@@ -227,7 +249,7 @@ def reload_tsv_sync(vs, **kwargs):
                     L = next(fp)
                 except StopIteration:
                     break
-                L = L[:-1]
+                L = L.rstrip('\n')
                 if L:
                     vs.addRow(L.split(delim))
                 prog.addProgress(len(L))

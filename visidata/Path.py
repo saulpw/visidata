@@ -76,12 +76,12 @@ class Path:
     def __str__(self):
         return self.fqpn
 
-class UrlPath:
+class UrlPath(Path):
     def __init__(self, url):
         from urllib.parse import urlparse
         self.url = url
         self.obj = urlparse(url)
-        self.name = self.obj.netloc
+        super().__init__(self.obj.path)
 
     def __str__(self):
         return self.url
@@ -120,6 +120,17 @@ class RepeatFile:
 
     def __exit__(self, a,b,c):
         pass
+
+    def read(self, n=None):
+        r = ''
+        while len(r) < n:
+            try:
+                s = next(self.iter)
+                r += s + '\n'
+                n += len(r)
+            except StopIteration:
+                break  # end of file
+        return r
 
     def seek(self, n):
         assert n == 0, 'RepeatFile can only seek to beginning'

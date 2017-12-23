@@ -2,11 +2,13 @@ from visidata import *
 
 option('pyobj_show_hidden', False, 'show methods and _private properties')
 
-globalCommand('^X', 'expr = input("eval: ", "expr"); push_pyobj(expr, eval(expr))', 'evaluate Python expression and open sheet for browsing resulting Python object')
-globalCommand('g^X', 'expr = input("exec: ", "expr"); exec(expr, getGlobals())', 'execute Python statement in the global scope')
+globalCommand('^X', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, eval(expr))', 'evaluate Python expression and open result as Python object')
+globalCommand('g^X', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope')
+globalCommand('z^X', 'status(evalexpr(inputExpr("status="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
-globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s.row[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'open sheet of current row as Python object')
-globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s.row[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open sheet of current cell as Python object')
+globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'open current row as Python object')
+globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object')
+globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object')
 
 # used as ENTER in several pyobj sheets
 globalCommand('pyobj-dive', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object')
@@ -58,7 +60,8 @@ def SheetList(name, src, **kwargs):
     'Creates a Sheet from a list of homogenous dicts or namedtuples.'
 
     if not src:
-        error('no content')
+        status('no content in ' + name)
+        return
 
     if isinstance(src[0], dict):
         return ListOfDictSheet(name, source=src, **kwargs)
@@ -146,8 +149,8 @@ class SheetObject(Sheet):
     rowtype = 'attributes'
     commands = [
         Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive further into Python object'),
-        Command('e', 'setattr(source, cursorRow, editCell(1)); sheet.cursorRowIndex += 1; reload()', 'edit contents of current cell'),
-        Command('w', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether methods and hidden properties are shown')
+        Command('e', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', 'edit contents of current cell'),
+        Command('v', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether methods and hidden properties are shown')
     ]
     def __init__(self, name, obj, **kwargs):
         super().__init__(name, source=obj, **kwargs)
@@ -171,16 +174,3 @@ class SheetObject(Sheet):
         self.recalc()
 
         self.nKeys = 1
-
-
-def open_json(p):
-    'Handle JSON file as a single object, via `json.load`.'
-    import json
-    return load_pyobj(p.name, json.load(p.open_text()))
-
-# one json object per line
-def open_jsonl(p):
-    'Handle JSON file as a list of objects, one per line, via `json.loads`.'
-    import json
-    return load_pyobj(p.name, list(json.loads(L) for L in p.read_text().splitlines()))
-

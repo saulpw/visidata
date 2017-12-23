@@ -42,17 +42,18 @@ class DescribeSheet(Sheet):
             DescribeColumn('mean',   type=float),
             DescribeColumn('stdev',  type=float),
     ]
-    commands = ColumnsSheet.commands + [
+    commands = [
         Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell'),
         Command('zu', 'source.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell'),
         Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell'),
         Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row'),
-        Command('!', 'source.toggleKeyColumn(source.columns.index(cursorRow))', 'toggle key column on source sheet')
+        Command('!', 'source.toggleKeyColumn(source.columns.index(cursorRow))', 'pin current column on left as a key column on source sheet')
     ]
     colorizers = [
         Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),
     ]
 
+    @async
     def reload(self):
         self.rows = list(self.source.columns)  # column deleting/reordering here does not affect actual columns
         self.describeData = { col: {} for col in self.source.columns }
@@ -69,7 +70,7 @@ class DescribeSheet(Sheet):
             d['errors'] = list()
             d['nulls'] = list()
             d['distinct'] = set()
-            for sr in self.sourceRows:
+            for sr in Progress(self.sourceRows):
                 try:
                     v = srccol.getValue(sr)
                     if isNull(v):
@@ -83,7 +84,7 @@ class DescribeSheet(Sheet):
 
             d['mode'] = self.calcStatistic(d, mode, vals)
             if isNumeric(srccol):
-                for func in [mode, min, max, median, mean, stdev]:
+                for func in [min, max, median, mean, stdev]:
                     d[func.__name__] = self.calcStatistic(d, func, vals)
 
     def calcStatistic(self, d, func, *args, **kwargs):

@@ -9,11 +9,11 @@ option('disp_replay_play', '▶', 'status indicator for active replay')
 option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 
-globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog')
-globalCommand('^D', 'saveSheet(vd.cmdlog, input("save to: ", "filename", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save CommandLog to new .vd file')
-globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay')
-globalCommand(' ', 'CommandLog.currentReplay.advance()', 'execute next row in replaying sheet')
-globalCommand('^K', 'CommandLog.currentReplay.cancel()', 'cancel current replay')
+globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'open-cmdlog')
+globalCommand('^D', 'saveSheet(vd.cmdlog, inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save CommandLog to new .vd file', 'save-cmdlog')
+globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'toggle-replay')
+globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'step-replay')
+globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'cancel-replay')
 
 #globalCommand('KEY_BACKSPACE', 'vd.cmdlog.undo()', 'remove last action on commandlog and replay')
 
@@ -21,11 +21,12 @@ globalCommand('^K', 'CommandLog.currentReplay.cancel()', 'cancel current replay'
 globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
 
 # not necessary to log movements and scrollers
-nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < > { } / ? n N g/ g?'.split()
+nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE kDOWN kUP j k gj gk ^F ^B r < > { } / ? n N gg G g/ g?'.split()
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
-nonLogKeys += '^L ^C ^U ^D KEY_RESIZE'.split()
+nonLogKeys += '^L ^C ^U ^K ^I ^D KEY_RESIZE'.split()
 
+option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 
 def itemsetter(i):
     def g(obj, v):
@@ -60,9 +61,12 @@ def getColVisibleIdxByFullName(sheet, name):
         if name == c.name:
             return i
 
-def getRowIdxByKey(sheet, keyvals):
+def keystr(k):
+    return  ','.join(map(str, k))
+
+def getRowIdxByKey(sheet, k):
     for i, r in enumerate(sheet.rows):
-        if sheet.keyvals(r) == keyvals:
+        if keystr(sheet.rowkey(r)) == k:
             return i
 
 def loggable(keystrokes):
@@ -126,13 +130,20 @@ class CommandLog(Sheet):
             return  # don't record editlog commands
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
-        if keystrokes == 'o':
-            sheetname, colname, rowname = '', '', ''
-        else:
+
+        cmd = sheet.getCommand(keystrokes)
+        sheetname, colname, rowname = '', '', ''
+        if sheet and keystrokes != 'o':
+            contains = lambda s, *substrs: any((a in s) for a in substrs)
             sheetname = sheet.name
-            colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
-            rowname = sheet.cursorRowIndex
-        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, sheet.getCommand(keystrokes).helpstr])
+            if sheet.rows and contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorRow'):
+                k = sheet.rowkey(sheet.cursorRow)
+                rowname = (options.rowkey_prefix + keystr(k)) if k else sheet.cursorRowIndex
+
+            if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
+                colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+
+        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, cmd.helpstr])
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
@@ -165,7 +176,7 @@ class CommandLog(Sheet):
     @classmethod
     def togglePause(self):
         if not CommandLog.currentReplay:
-            status('no replay in progress')
+            status('no replay to pause')
         else:
             if self.paused:
                 CommandLog.currentReplay.advance()
@@ -192,7 +203,8 @@ class CommandLog(Sheet):
             try:
                 rowidx = int(r.row)
             except ValueError:
-                rowidx = getRowIdxByKey(vs, r.row)
+                k = r.row[1:]  # trim rowkey_prefix
+                rowidx = getRowIdxByKey(vs, k)
 
             if rowidx is None:
                 error('no row %s' % r.row)

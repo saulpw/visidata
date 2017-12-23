@@ -2,8 +2,8 @@ from visidata import *
 
 option('color_graph_axis', 'bold', 'color for graph axis labels')
 
-globalCommand('.', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, [cursorCol]))', 'graph the current column vs the first key column (or row number)')
-globalCommand('g.', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, numericCols(nonKeyVisibleCols)))', 'graph all numeric columns vs the first key column (or row number)')
+globalCommand('.', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, [cursorCol]))', 'graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determin color')
+globalCommand('g.', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, numericCols(nonKeyVisibleCols)))', 'open a graph of all visible numeric columns vs key column')
 
 
 def numericCols(cols):
@@ -11,64 +11,44 @@ def numericCols(cols):
     return [c for c in cols if isNumeric(c)]
 
 
-class InvertedYGridCanvas(GridCanvas):
-    commands = GridCanvas.commands + [
+class InvertedCanvas(Canvas):
+    commands = Canvas.commands + [
         # swap directions of up/down
-        Command('move-up', 'sheet.cursorGridMinY += cursorGridHeight', 'move cursor up'),
-        Command('move-down', 'sheet.cursorGridMinY -= cursorGridHeight', 'move cursor down'),
+        Command('move-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up'),
+        Command('move-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down'),
 
-        Command('zj', 'sheet.cursorGridMinY -= charGridHeight', 'move cursor down one line'),
-        Command('zk', 'sheet.cursorGridMinY += charGridHeight', 'move cursor up one line'),
+        Command('zj', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor down one line'),
+        Command('zk', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor up one line'),
 
-        Command('J', 'sheet.cursorGridHeight -= charGridHeight', 'decrease cursor height'),
-        Command('K', 'sheet.cursorGridHeight += charGridHeight', 'increase cursor height'),
-
-        Command('zz', 'zoomTo(cursorGridMinX, cursorGridMinY, cursorGridMaxX, cursorGridMaxY)', 'set visible bounds to cursor'),
+        Command('J', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height'),
+        Command('K', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height'),
     ]
 
-    def zoomTo(self, x1, y1, x2, y2):
-        self.fixPoint(self.gridCanvasMinX, self.gridCanvasMaxY, x1, y1)
-        self.zoomlevel=max(self.cursorGridWidth/self.gridWidth, self.cursorGridHeight/self.gridHeight)
+    def zoomTo(self, bbox):
+        super().zoomTo(bbox)
+        self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax), bbox.xymin)
 
     def plotpixel(self, x, y, attr, row=None):
-        y = self.gridCanvasMaxY-y+4
-        self.pixels[round(y)][round(x)][attr].append(row)
+        y = self.plotviewBox.ymax-y+4
+        self.pixels[y][x][attr].append(row)
 
-    def scaleY(self, grid_y):
-        'returns canvas y coordinate, with y-axis inverted'
-        canvas_y = super().scaleY(grid_y)
-        return (self.gridCanvasMaxY-canvas_y+4)
+    def scaleY(self, canvasY):
+        'returns plotter y coordinate, with y-axis inverted'
+        plotterY = super().scaleY(canvasY)
+        return (self.plotviewBox.ymax-plotterY+4)
 
-    def gridY(self, canvas_y):
-        return (self.gridCanvasMaxY-canvas_y)/self.yScaler
-
-    def fixPoint(self, canvas_x, canvas_y, grid_x, grid_y):
-        'adjust visibleGrid so that (grid_x, grid_y) is plotted at (canvas_x, canvas_y)'
-        self.visibleGridMinX = grid_x - self.gridW(canvas_x-self.gridCanvasMinX)
-        self.visibleGridMinY = grid_y - self.gridH(self.gridCanvasMaxY-canvas_y)
-        self.refresh()
+    def canvasH(self, plotterY):
+        return (self.plotviewBox.ymax-plotterY)/self.yScaler
 
     @property
-    def gridMouseY(self):
-        return self.visibleGridMinY + (self.gridCanvasMaxY-self.canvasMouseY)/self.yScaler
-
-    @property
-    def cursorPixelBounds(self):
-        x1, y1, x2, y2 = super().cursorPixelBounds
-        return x1, y2, x2, y1  # reverse top/bottom
-
-    @property
-    def visiblePixelBounds(self):
-        'invert y-axis'
-        return [ self.scaleX(self.visibleGridMinX),
-                 self.scaleY(self.visibleGridMaxY),
-                 self.scaleX(self.visibleGridMaxX),
-                 self.scaleY(self.visibleGridMinY),
-        ]
+    def canvasMouse(self):
+        p = super().canvasMouse
+        p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouse.y)/self.yScaler
+        return p
 
 
 # provides axis labels, legend
-class GraphSheet(InvertedYGridCanvas):
+class GraphSheet(InvertedCanvas):
     def __init__(self, name, sheet, rows, xcols, ycols, **kwargs):
         super().__init__(name, sheet, sourceRows=rows, **kwargs)
 
@@ -80,21 +60,21 @@ class GraphSheet(InvertedYGridCanvas):
         nerrors = 0
         nplotted = 0
 
-        self.gridpoints.clear()
         self.reset()
 
         status('loading data points')
         catcols = [c for c in self.xcols if not isNumeric(c)]
-        numcol = numericCols(self.xcols)[0]
+        numcols = numericCols(self.xcols)
         for ycol in self.ycols:
             for rownum, row in enumerate(Progress(self.sourceRows)):  # rows being plotted from source
                 try:
                     k = tuple(c.getValue(row) for c in catcols) if catcols else (ycol.name,)
+
+                    # convert deliberately to float (to e.g. linearize date)
+                    graph_x = float(numcols[0].type(numcols[0].getValue(row))) if numcols else rownum
+                    graph_y = ycol.type(ycol.getValue(row))
+
                     attr = self.plotColor(k)
-
-                    graph_x = float(numcol.getTypedValue(row)) if self.xcols else rownum
-                    graph_y = ycol.getTypedValue(row)
-
                     self.point(graph_x, graph_y, attr, row)
                     nplotted += 1
                 except Exception:
@@ -113,28 +93,25 @@ class GraphSheet(InvertedYGridCanvas):
         self.createLabels()
 
     def add_y_axis_label(self, frac):
-        amt = self.visibleGridMinY + frac*(self.visibleGridHeight)
-        if isinstance(self.gridMinY, int):
+        amt = self.visibleBox.ymin + frac*self.visibleBox.h
+        if isinstance(self.canvasBox.ymin, int):
             txt = '%d' % amt
-        elif isinstance(self.gridMinY, float):
+        elif isinstance(self.canvasBox.ymin, float):
             txt = '%.02f' % amt
         else:
             txt = str(frac)
 
-        # plot y-axis labels on the far left of the canvas, but within the gridCanvas height-wise
+        # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors[options.color_graph_axis]
-        self.plotlabel(0, self.gridCanvasMinY + (1.0-frac)*self.gridCanvasHeight, txt, attr)
+        self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
 
     def add_x_axis_label(self, frac):
-        amt = self.visibleGridMinX + frac*self.visibleGridWidth
+        amt = self.visibleBox.xmin + frac*self.visibleBox.w
         txt = ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
 
-        # plot x-axis labels below the gridCanvasMaxY, but within the gridCanvas width-wise
+        # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors[options.color_graph_axis]
-        self.plotlabel(self.gridCanvasMinX+frac*self.gridCanvasWidth, self.gridCanvasMaxY+4, txt, attr)
-
-    def plotAll(self):
-        super().plotAll()
+        self.plotlabel(self.plotviewBox.xmin+frac*self.plotviewBox.w, self.plotviewBox.ymax+4, txt, attr)
 
     def createLabels(self):
         self.gridlabels = []
@@ -153,8 +130,8 @@ class GraphSheet(InvertedYGridCanvas):
         self.add_x_axis_label(0.25)
         self.add_x_axis_label(0.00)
 
-        # TODO: if 0 line is within visibleGrid, explicitly draw on the axis
+        # TODO: if 0 line is within visible bounds, explicitly draw the axis
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
-        self.plotlabel(0, self.gridCanvasMaxY+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])
+        self.plotlabel(0, self.plotviewBox.ymax+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])

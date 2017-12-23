@@ -7,9 +7,9 @@
   Ctrl- F  Forward one page [vim]
   Ctrl- G  file information [vim]
   Ctrl- H
-  Ctrl- I
+  Ctrl- I  TAB (advance replay)
   Ctrl- J  ENTER (dive into row/value) [sheet-specific]
-  Ctrl- K
+  Ctrl- K  abort replay
   Ctrl- L  redraw screen
   Ctrl- M  (must be same as ENTER)
   Ctrl- N
@@ -18,18 +18,18 @@
   Ctrl- Q  Quit
   Ctrl- R  Reload
   Ctrl- S  Save
-  Ctrl- T  Tasks sheet
+  Ctrl- T  Threads sheet
   Ctrl- U  paUse/resUme
   Ctrl- V  Version
   Ctrl- W
   Ctrl- X  push sheet with eval of python e'X'pression
   Ctrl- Y  push sheet for this row object
-  Ctrl- Z
+  Ctrl- Z  send SIGSTOP
   Ctrl- [  ESC
   Ctrl- \
   Ctrl- ]
   Ctrl- ^  swap sheets [vim]
-  Ctrl- _
+  Ctrl- _  toggle profile of main interface thread
     SPACE  advance commandlog replay to next step
  Shift- !  toggle key column
  Shift- "  duplicate sheet (keeping only selected rows)
@@ -44,7 +44,7 @@
  Shift- +  set column aggregator
         ,  select matching rows ['pick up', from nethack]
         -  hide column
-        .
+        .  plot
         /  search forward
         0
         1
@@ -116,7 +116,7 @@
         s  select row
         t  toggle row select
         u  unselect row
-        v
+        v  visibility toggle
         w
         x  execute this row (meaning varies depending on sheet)
         y  yank a row to clipbard [vim]

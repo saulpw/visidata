@@ -59,7 +59,7 @@ replays in batch mode (with no interface)
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pauses/resumes replay
-.It Sy Space
+.It Sy Tab
 executes next row in replaying sheet
 .It Sy ^K
 cancels current replay
@@ -77,7 +77,7 @@ views all commands available on current sheet
 .It Ic ^Q
 aborts program immediately
 .It Ic ^C
-cancels user input or current task
+cancels user input or aborts all async threads on current sheet
 .It Ic " q"
 quits current sheet
 .It Ic "gq"
@@ -147,38 +147,37 @@ adjusts width of all visible columns
 hides current column (to unhide, go to
 .Sy C Ns olumns sheet and Sy e Ns dit its width)
 .It Ic "z-" Ns
-cuts width of current column in half
+reduces width of current column by half
 .Pp
 .It Ic \&! Ns
 pins current column on the left as a key column
-.It Ic ^
-edits name of current column
 .It Ic "~  #  %  $  @"
-sets type of current column to str/int/float/currency/date
+sets type of current column to untyped/int/float/currency/date
+.It Ic "  ^"
+edits name of current column
+.It Ic " g^"
+sets names of all unnamed visible columns to contents of selected rows (or current row)
+.It Ic " z^"
+sets name of current column to contents of current cell
+.It Ic "gz^"
+sets name of current column to combined contents of current column for selected rows (or current row)
 .Pp
 .It Ic "  =" Ar expr
 .No creates new column from Python Ar expr Ns , with column names as variables
 .It Ic " g=" Ar expr
 .No sets current column for selected rows to result of Python Ar expr
-.It Ic "gz=" Ar iterable
-.No sets selected rows in current column to the results of a Python Ar iterable
+.It Ic "gz=" Ar expr
+.No sets current column for selected rows to the items in result of Python sequence Ar expr
+.It Ic " z=" Ar expr
+.No sets current cell to result of evaluated Python Ar expr No on current row
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " z=" Ar expr
-.No evaluates Python Ar expr No on current row and displays result on status line
-.Pp
-.It Ic " g^"
-sets names of all visible columns to contents of current row
-.It Ic " z^"
-sets name of current column to contents of current cell
-.It Ic "gz^"
-sets name of current column to combined contents of current cell in selected rows
-.Pp
 .It Ic " '" Ns " (tick)"
 adds a frozen copy of current column with all cells evaluated
-.
 .It Ic "g'"
 opens a frozen copy of current sheet with all visible columns evaluated
+.It Ic "z'  gz'"
+adds/resets cache for current/all visible column(s)
 .Pp
 .It Ic "\&:" Ar regex
 .No adds new columns from Ar regex No split; number of columns determined by example row at cursor
@@ -229,14 +228,18 @@ opens duplicate sheet with deepcopy of selected rows
 appends a blank row
 .It Ic " ga" Ar number
 .No appends Ar number No blank rows
-.It Ic "  d  gd"
+.It Ic "  d   gd"
 deletes current/all selected row(s) and moves to clipboard
-.It Ic "  y  gy"
+.It Ic "  y   gy"
 copies current/all selected row(s) to clipboard
-.It Ic "  p   Shift-P"
-pastes most recent clipboard rows after/before current row
+.It Ic " zy"
+copies current cell to clipboard
+.It Ic "  p    P"
+pastes clipboard rows after/before current row
+.It Ic " zp  gzp"
+sets contents of current column for current/all selected row(s) to last clipboard value
 .It Ic "  f"
-fills null cells in current column with content of non-null cells up the current column
+fills null cells in current column with contents of non-null cells up the current column
 .
 .
 .It Ic "  e" Ar text
@@ -287,10 +290,10 @@ opens
 .It Ic "^S" Ar filename
 .No saves current sheet to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
-.No saves commandlog to Ar filename.vd No file
-.It Ic "Shift-A" Ar number
+.No saves CommandLog to Ar filename.vd No file
+.It Ic "A" Ar number
 .No opens new blank sheet with Ar number No columns
-.It Ic "Shift-R" Ar number
+.It Ic "R" Ar number
 opens duplicate sheet with a random population subset of
 .Ar number No rows
 .Pp
@@ -303,26 +306,35 @@ opens duplicate sheet with a random population subset of
 .Ss Data Visualization
 .Bl -tag -width XXXXXXXXXXXXX -compact
 .It Ic " ." No (dot)
-.No graphs current numeric column vs key columns. Numeric key column is on the x-axis, while categorical key columns determine color.
+.No plots current numeric column vs key columns. Numeric key column is used for the x-axis; categorical key column values determine color.
 .It Ic "g."
-.No opens a graph of all visible numeric columns vs key column
+.No plots a graph of all visible numeric columns vs key columns.
 .Pp
 .El
-.No If rows on the current sheet represent plottable coordinates (as in .shp or vector .mbtiles sources), Sy "." No plots the current row, and Ic "g." No plots all selected rows (or all rows if none selected).
+.No If rows on the current sheet represent plottable coordinates (as in .shp or vector .mbtiles sources),
+.Ic " ." No plots the current row, and Ic "g." No plots all selected rows (or all rows if none selected).
 .Ss "  Canvas-specific Commands"
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " +   -"
-increase/decrease zoomlevel, centered on cursor
-.It Ic " s   u"
-selects/unselects rows on source sheet contained within canvas cursor
-.It Ic "gs  gu"
-selects/unselects rows visible on the screen
-.It Ic "Enter"
-pushes source sheet with only rows contained within canvas cursor
-.It Ic "1" No - Ic "9"
+increases/decreases zoomlevel, centered on cursor
+.It Ic " _" No (underscore)
+zooms to fit full extent
+.It Ic " s   t   u"
+selects/toggles/unselects rows on source sheet contained within canvas cursor
+.It Ic "gs  gt  gu"
+selects/toggles/unselects rows visible on screen
+.It Ic " Enter"
+opens sheet of source rows contained within canvas cursor
+.It Ic "gEnter"
+opens sheet of source rows visible on screen
+.It Ic " 1" No - Ic "9"
 toggles display of layers
+.It Ic "^L"
+redraws all pixels on canvas
+.It Ic " w"
+.No toggles Ic show_graph_labels No option
 .It Ic "mouse scrollwheel"
-zooms in/out on a canvas
+zooms in/out of canvas
 .It Ic "left click-drag"
 sets canvas cursor
 .It Ic "right click-drag"
@@ -332,12 +344,12 @@ scrolls canvas
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic Shift-V
+.It Ic V
 views contents of current cell in a new TextSheet
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
-.It Ic "w"
-toggles text wrap (only on TextSheet)
+.It Ic "v"
+toggles visibility (text wrap on TextSheet, legends/axes on Graph)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^^" No (Ctrl-^)
@@ -359,17 +371,21 @@ reloads current sheet
 .It Ic "z^R"
 clears cache for current column
 .It Ic " ^Z"
-sends a SIGSTOP
+suspends VisiData process
+.It Ic " ^P"
+.No opens Sy Status History
 .
 .El
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic "^P"
-.No opens Sy Status History
-.It Ic "^X"
-evalutes Python expression and opens sheet for browsing resulting Python object
-.It Ic "^Y  z^Y"
-opens sheet of current row/cell as Python object
+.It Ic " ^Y  z^Y  g^Y"
+opens current row/cell/sheet as Python object
+.It Ic " ^X" Ar expr
+.No evaluates Python Ar expr No and opens result as python object
+.It Ic "z^X" Ar expr
+.No evaluates Python Ar expr No on current row and shows result on status line
+.It Ic "g^X" Ar stmt
+.No executes Python Ar stmt No in the global scope
 .El
 .
 .Ss Internal Sheets List
@@ -389,7 +405,7 @@ opens sheet of current row/cell as Python object
 .It Sy " \&."
 .Sy Status History No (^P) "        view history of status messages"
 .It Sy " \&."
-.Sy Tasks Sheet No (^T) "           view, cancel, and profile asynchronous tasks"
+.Sy Threads Sheet No (^T) "         view, cancel, and profile asynchronous threads"
 .Pp
 .It Sy Derived Sheets
 .It Sy " \&."
@@ -405,15 +421,20 @@ opens sheet of current row/cell as Python object
 .Ss Columns Sheet (Shift-C)
 .Bl -inset -compact
 .It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gC
+.No opens Sy Columns Sheet No with all columns from all sheets
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
 adds column from concatenating selected source columns
 .It Ic " !"
-toggles current column as key on source sheet
+pins current column on the left as a key column on source sheet
 .It Ic "g!"
-toggles selected columns as keys on source sheet
+pins selected columns on the left as key columns on source sheet
 .It Ic "g+"
 adds aggregator to selected source columns
 .It Ic "g_" No (underscore)
@@ -421,9 +442,11 @@ adjusts widths of selected columns on source sheet
 .It Ic "g-" No (hyphen)
 hides selected columns on source sheet
 .It Ic " ~  #  %  $  @"
-sets type of current column to str/int/float/currency/date
+sets type of current column on source sheet to str/int/float/currency/date
 .It Ic "g~ g# g% g$ g@"
-sets type of selected columns to str/int/float/currency/date
+sets type of selected columns on source sheet to str/int/float/currency/date
+.It Ic "z~ gz~"
+sets type of current/selected column(s) on source sheet to anytype
 .It Ic " Enter"
 .No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .El
@@ -435,6 +458,8 @@ sets type of selected columns to str/int/float/currency/date
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter"
 jumps to sheet referenced in current row
+.It Ic "gC"
+.No opens Sy Columns Sheet No with all columns from selected sheets
 .It Ic "&" Ar jointype
 .No merges selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
@@ -460,17 +485,17 @@ jumps to sheet referenced in current row
 edits option
 .El
 .
-.Ss Commandlog (Shift-D)
+.Ss CommandLog (Shift-D)
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic " ^Z"
-sends a SIGSTOP
 .It Ic " x"
 replays command in current row
 .It Ic "gx"
-replays contents of entire commandlog
+replays contents of entire CommandLog
+.It Ic " ^C"
+aborts replay
 .El
 .
 .Ss DERIVED SHEETS
@@ -481,12 +506,14 @@ replays contents of entire commandlog
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gF
-opens a Frequency Table, grouped by all key columns on source sheet
+opens Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-opens a one-line summary for selected rows
+opens one-line summary for selected rows
 .It (sheet-specific commands)
 .It Ic " s   t   u"
 selects/toggles/unselects these entries in source sheet
+.It Ic " Enter"
+opens sheet of source rows which are grouped in current cell
 .El
 .
 .Ss Describe Sheet (Shift-I)
@@ -494,8 +521,10 @@ selects/toggles/unselects these entries in source sheet
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "zs  zt  zu"
-selects/toggles/unselects rows on source sheet which are being described in current cell
+.It Ic "zs  zu"
+selects/unselects rows on source sheet which are being described in current cell
+.It Ic " !"
+pins current column on the left as a key column on source sheet
 .It Ic " Enter"
 .No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .It Ic "zEnter"
@@ -509,15 +538,15 @@ opens copy of source sheet with rows described in current cell
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
-opens sheet of source rows which comprise current pivot row
+opens sheet of source rows aggregated in current pivot row
 .It Ic "zEnter"
-opens sheet of source rows which comprise current pivot cell
+opens sheet of source rows aggregated in current pivot cell
 .El
 .Ss Melted Sheet (Shift-M)
 .Bl -inset -compact
 .It Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
 .El
-.Ss Python Object Sheet (^X ^Y)
+.Ss Python Object Sheet (^X ^Y g^Y z^Y)
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
@@ -587,7 +616,7 @@ For example:
 .
 .Sh SUPPORTED SOURCES
 These are the supported sources:
-
+.
 .Bl -inset -compact -offset xxx
 .It Sy tsv No (tab-separated value)
 .Bl -inset -compact -offset xxx
@@ -611,6 +640,13 @@ These are the supported sources:
 .El
 .El
 .Pp
+.Bl -inset -compact -offset xxx
+.It Sy json No (javascript object notation)
+.Bl -inset -compact -offset xxx
+.It Nested components of .json files are represented as cells containing lists ( Ns Sy [] Ns ). They can be further expanded with Sy z^Y.
+.El
+.El
+.Pp
 .Bl -inset -compact
 .It For these multi-table sources, the first sheet is a directory of tables.
 .It Sy Enter No loads the entire table into memory.
@@ -624,6 +660,8 @@ These are the supported sources:
 .It Sy postgres No (requires Sy psycopg2 Ns )
 .It Sy shp No (requires Sy pyshp Ns )
 .It Sy mbtiles No (vector only, requires Sy mapbox-vector-tile Ns )
+.It Sy http No (requires Sy requests Ns )
+.It Sy html No (requires Sy lxml Ns )
 .El
 .
 .Sh AUTHOR

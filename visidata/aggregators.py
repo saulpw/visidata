@@ -1,6 +1,6 @@
 import collections
 from visidata import *
-globalCommand('+', 'addAggregator([cursorCol], chooseOne(aggregators))', 'add aggregator to the current column')
+globalCommand('+', 'addAggregator([cursorCol], chooseOne(aggregators))', 'add aggregator to current column')
 globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol, selectedRows or rows))', 'display result of aggregator over values in selected rows for current column')
 
 aggregators = collections.OrderedDict()
@@ -24,20 +24,21 @@ def mean(vals):
     if vals:
         return float(sum(vals))/len(vals)
 
+def median(values):
+    L = sorted(values)
+    return L[len(L)//2]
 
 aggregator('min', min)
 aggregator('max', max)
 aggregator('avg', mean, float)
 aggregator('mean', mean, float)
+aggregator('median', median)
 aggregator('sum', sum)
 aggregator('distinct', lambda values: len(set(values)), int)
 aggregator('count', lambda values: sum(1 for v in values), int)
 
-def rowkeys(sheet, row):
-    return ' '.join(c.getDisplayValue(row) for c in sheet.keyCols)
-
 # returns keys of the row with the max value
-fullAggregator('keymax', anytype, lambda col, rows: rowkeys(col.sheet, max(col.getValueRows(rows))[1]))
+fullAggregator('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
 
 ColumnsSheet.commands += [
     Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'add aggregator to selected source columns'),

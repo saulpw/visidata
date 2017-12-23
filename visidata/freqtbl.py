@@ -3,7 +3,7 @@ import math
 from visidata import *
 globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column')
 globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet')
-globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open a one-line summary for all selected rows')
+globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 80, 'width of histogram column')
@@ -34,8 +34,8 @@ class SheetFreqTable(Sheet):
         Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet'),
         Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet'),
 
-        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'push new sheet with only source rows for this value'),
-#        Command('w', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
+        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell'),
+#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 
     def __init__(self, sheet, *columns):

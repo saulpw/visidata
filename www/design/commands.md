@@ -138,7 +138,7 @@ But they are not, in part because they are assumed to be used infrequently (and 
 - ^U - paUse/resUme replay
 - ^P - Previous status messages (like nethack)
 - ^Q - force quit
-- ^T - Tasks sheet (should this be Shift-T?)
+- ^T - Threads sheet
 - ^X - eval python eXpression; g^X exec python expression (for import)
 - ^Y - push object sheet of this row; z^Y push object sheet of this cell value
 

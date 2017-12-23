@@ -11,8 +11,11 @@ BUILDWWW=$BUILD/www
 MAN=$VD/visidata/man
 TEST=$WWW/test
 DESIGN=$WWW/design
+HOWTODEV=$WWW/howto/dev
 NEWS=$WWW/news
 VIDEOS=$WWW/videos
+HELP=$WWW/help
+INSTALL=$WWW/install
 
 # Build directories
 mkdir -p $BUILD
@@ -20,9 +23,12 @@ mkdir -p $BUILDWWW
 mkdir -p $BUILDWWW/man
 mkdir -p $BUILDWWW/test
 mkdir -p $BUILDWWW/docs
-#mkdir -p $BUILDWWW/design
+mkdir -p $BUILDWWW/design
+mkdir -p $BUILDWWW/howto/dev
 mkdir -p $BUILDWWW/about
 mkdir -p $BUILDWWW/contributing
+mkdir -p $BUILDWWW/help
+mkdir -p $BUILDWWW/install
 mkdir -p $BUILDWWW/videos
 
 # Set up python and shell environment
@@ -54,9 +60,27 @@ echo '</pre></section>' >> $BUILD/vd-man-inc.html
 #  Properties of columns on the source sheet can be changed with standard editing commands (e
 $VD/strformat.py body=$BUILD/vd-man-inc.html title="VisiData Quick Reference" head="" < $WWW/template.html > $BUILDWWW/man/index.html
 
+# Create http://visidata.org/man/#loaders
+sed -i -e "s#<span style=\"font-weight:bold;\">SUPPORTED</span> <span style=\"font-weight:bold;\">SOURCES</span>#<span style=\"font-weight-:bold;\"><a name=\"loaders\">SUPPORTED SOURCES</a></span>#g" $BUILDWWW/man/index.html
+
 # Build /contributing
 pandoc -r markdown -w html -o $BUILDWWW/contributing/index.body $VD/CONTRIBUTING.md
 $VD/strformat.py body=$BUILDWWW/contributing/index.body title="Contributing to VisiData" head="" < $WWW/template.html > $BUILDWWW/contributing/index.html
+
+# Build /help
+pandoc -r markdown -w html -o $BUILDWWW/help/index.body $HELP/index.md
+$VD/strformat.py body=$BUILDWWW/help/index.body title="Support" head="" < $WWW/template.html > $BUILDWWW/help/index.html
+
+# Build /install
+pandoc -r markdown -w html -o $BUILDWWW/install/index.body $INSTALL/index.md
+$VD/strformat.py body=$BUILDWWW/install/index.body title="Installation" head="" < $WWW/template.html > $BUILDWWW/install/index.html
+
+# Create http://visidata.org/install/#pip3
+sed -i -e "s#<h2 id=\"install-via-pip3\">Install via pip3</h2>#<h2 id=\"install-via-pip3\"><a name=\"pip3\">Install via pip3</a></h2>#g" $BUILDWWW/install/index.html
+# Create http://visidata.org/install/#brew
+sed -i -e "s#<h2 id=\"install-via-brew\">Install via brew</h2>#<h2 id=\"install-via-brew\"><a name=\"brew\">Install via brew</a></h2>#g" $BUILDWWW/install/index.html
+# Create http://visidata.org/install/#apt
+sed -i -e "s#<h2 id=\"install-via-apt\">Install via apt</h2>#<h2 id=\"install-via-apt\"><a name=\"apt\">Install via apt</a></h2>#g" $BUILDWWW/install/index.html
 
 # Build /videos
 $VD/strformat.py body=$VIDEOS/video-body.html title="VisiData Videos" head="" < $WWW/template.html > $BUILDWWW/videos/index.html
@@ -80,18 +104,29 @@ pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/docs.md
 $VD/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
 
 # Build /design
-#pandoc -r markdown -w html -o $BUILDWWW/design/index.body $WWW/design.md
-#$VD/strformat.py body=$BUILDWWW/design/index.body title="VisiData Design and Internals" head="" < $WWW/template.html > $BUILDWWW/design/index.html
-#rm -f $BUILDWWW/design/index.body
-#for postpath in `find $DESIGN -name '*.md'`; do
-#    post=${postpath##$DESIGN/}
-#    postname=${post%.md}
-#    mkdir -p $BUILDWWW/design/$postname
-#    posthtml=$BUILDWWW/design/$postname/index
-#    pandoc -r markdown -w html -o $posthtml.body $postpath
-#    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
-#    rm -f $posthtml.body
-#done
+pandoc -r markdown -w html -o $BUILDWWW/design/index.body $WWW/design.md
+$VD/strformat.py body=$BUILDWWW/design/index.body title="VisiData Design and Internals" head="" < $WWW/template.html > $BUILDWWW/design/index.html
+rm -f $BUILDWWW/design/index.body
+for postpath in `find $DESIGN -name '*.md'`; do
+    post=${postpath##$DESIGN/}
+    postname=${post%.md}
+    mkdir -p $BUILDWWW/design/$postname
+    posthtml=$BUILDWWW/design/$postname/index
+    pandoc -r markdown -w html -o $posthtml.body $postpath
+    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    rm -f $posthtml.body
+done
+
+# Build /howto/dev
+for postpath in `find $HOWTODEV -name '*.md'`; do
+    post=${postpath##$HOWTODEV/}
+    postname=${post%.md}
+    mkdir -p $BUILDWWW/howto/dev/$postname
+    posthtml=$BUILDWWW/howto/dev/$postname/index
+    pandoc -r markdown -w html -o $posthtml.body $postpath
+    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    rm -f $posthtml.body
+done
 
 # Build /news
 mkdir -p $BUILDWWW/news
@@ -108,10 +143,8 @@ for postpath in `find $NEWS -name '*.md'`; do
     rm -f $posthtml.body
 done
 
-# Build /help
-mkdir -p $BUILDWWW/help
-pandoc -r markdown -w html -o $BUILDWWW/help/index.body $VD/CONTRIBUTING.md
-$VD/strformat.py body=$BUILDWWW/help/index.body title="Contributing to VisiData as a user or developer" head="" < $WWW/template.html > $BUILDWWW/help/index.html
+# Add the key
+cp $WWW/devotees.gpg.key $BUILDWWW
 
 #### At the end
 # add analytics to .html files

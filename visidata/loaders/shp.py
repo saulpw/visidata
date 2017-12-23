@@ -45,12 +45,11 @@ class ShapeSheet(Sheet):
             self.addRow(shaperec)
 
 
-class ShapeMap(GridCanvas):
+class ShapeMap(Canvas):
     aspectRatio = 1.0
 
     @async
     def reload(self):
-        self.gridlines.clear()
         self.reset()
 
         for row in Progress(self.sourceRows):
