@@ -67,7 +67,6 @@ def main():
         p = Path(fnrc)
         if p.exists():
             exec(open(p.resolve()).read(), globals())
-            break
 
     vdtui.addGlobals(globals())
 
