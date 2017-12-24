@@ -215,20 +215,20 @@ class GitStatus(GitSheet):
     ]
 
     def __init__(self, p):
-        super().__init__(p.relpath(''), p)
+        super().__init__(p.relpath(''), source=p)
         self.branch = ''
         self.remotediff = ''  # ahead/behind status
 
         self._cachedStatus = {}
         self.addColorizer(Colorizer('row', 3, GitStatus.rowColor))
         self.columns = [
-            Column('path', getter=lambda r,s=self: str(r)),
-            Column('status', getter=lambda r,s=self: s.statusText(s.git_status(r)), width=8),
-            Column('staged', getter=lambda r,s=self: s.git_status(r)[2]),
-            Column('unstaged', getter=lambda r,s=self: s.git_status(r)[1]),
-            Column('type', getter=lambda r: r.is_dir and '/' or r.path.suffix, width=0),
-            Column('size', type=int, getter=lambda r: r.path.filesize),
-            Column('mtime', type=date, getter=lambda r: r.path.stat().st_mtime),
+            Column('path', getter=lambda c,r: str(r)),
+            Column('status', getter=lambda c,r: c.sheet.statusText(c.sheet.git_status(r)), width=8),
+            Column('staged', getter=lambda c,r: c.sheet.git_status(r)[2]),
+            Column('unstaged', getter=lambda c,r: c.sheet.git_status(r)[1]),
+            Column('type', getter=lambda c,r: r.is_dir and '/' or r.path.suffix, width=0),
+            Column('size', type=int, getter=lambda c,r: r.path.filesize),
+            Column('mtime', type=date, getter=lambda c,r: r.path.stat().st_mtime),
         ]
 
     def statusText(self, st):

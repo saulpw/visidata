@@ -13,6 +13,7 @@ def getDiffSheet(fn, *refs):
 
 
 def git_diff(fn, *args):
+    args = args + ['--', fn]
     return git_lines('diff',
             '--patch',
             '--inter-hunk-context=2',
@@ -21,7 +22,7 @@ def git_diff(fn, *args):
             '--no-prefix',
             '--diff-algorithm=' + options.diff_algorithm,
             '-U999999',
-            *args, '--', fn)
+            *args)
 
 
 def getDiffCmd(fn, base, ref):

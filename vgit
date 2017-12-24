@@ -79,10 +79,10 @@ class LogSheet(GitSheet):
     columns = [
             ColumnItem('commitid', 0, width=8),
             ColumnItem('refnames', 1, width=12),
-            Column('message', getter=lambda r: r[4], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
-            Column('author', getter=lambda r: r[2], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
-            Column('author_date', type=date, getter=lambda r:r[3], setter=lambda s,c,r,v: s.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
-            Column('notes', getter=lambda r: r[5], setter=lambda s,c,r,v: s.git('notes', 'add', '--force', '--message', v, r[0])),
+            Column('message', getter=lambda c,r: r[4], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
+            Column('author', getter=lambda c,r: r[2], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
+            Column('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
+            Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
     ]
     colorizers = [Colorizer('row', 5, lambda s,c,r,v: 'cyan' if not s.inRemoteBranch(r[0]) else None)]
 
@@ -119,7 +119,7 @@ class LogSheet(GitSheet):
 
 class GitBranches(GitSheet):
     columns = [
-        Column('branch', getter=lambda r: r[1][8:] if r[1].startswith('remotes/') else r[1], width=20),
+        Column('branch', getter=lambda c,r: r[1][8:] if r[1].startswith('remotes/') else r[1], width=20),
         ColumnItem('head_commitid', 2, width=0),
         ColumnItem('tracking', 3),
         ColumnItem('upstream', 6),
@@ -339,9 +339,9 @@ class GitOptions(GitSheet):
     ]
     def __init__(self):
         super().__init__('git config')
-        self.columns = [Column('option', getter=lambda r: r[0])]
+        self.columns = [Column('option', getter=lambda c,r: r[0])]
         for i, ctx in enumerate(self.CONFIG_CONTEXTS[1:]):
-            self.columns.append(Column(ctx, getter=lambda r, i=i: r[1][i], setter=self.config_setter(ctx)))
+            self.columns.append(Column(ctx, getter=lambda c,r, i=i: r[1][i], setter=self.config_setter(ctx)))
 
         self.nKeys = 1
 
@@ -375,9 +375,9 @@ class GitRemotes(GitSheet):
     def __init__(self, **kwargs):
         super().__init__('remotes', **kwargs)
         self.columns=[
-            Column('remote', getter=lambda r: r[0], setter=lambda r,v,s=self: s.git('remote', 'rename', r[0], v)),
-            Column('url', getter=lambda r: r[1], setter=lambda r,v,s=self: s.git('remote', 'set-url', r[0], v)),
-            Column('type', getter=lambda r: r[2]),
+            Column('remote', getter=lambda c,r: r[0], setter=lambda c,r,v: c.sheet.git('remote', 'rename', r[0], v)),
+            Column('url', getter=lambda c,r: r[1], setter=lambda c,r,v: c.sheet.git('remote', 'set-url', r[0], v)),
+            Column('type', getter=lambda c,r: r[2]),
         ]
 
     def reload(self):
