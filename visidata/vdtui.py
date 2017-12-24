@@ -2111,11 +2111,13 @@ class SuspendCurses:
 class EnableCursor:
     def __enter__(self):
         with suppress(curses.error):
+            curses.mousemask(0)
             curses.curs_set(1)
 
     def __exit__(self, exc_type, exc_val, tb):
         with suppress(curses.error):
             curses.curs_set(0)
+            curses.mousemask(-1)
 
 def launchExternalEditor(v, linenum=0):
     editor = os.environ.get('EDITOR') or error('$EDITOR not set')
