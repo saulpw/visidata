@@ -1,13 +1,18 @@
 # VisiData version history
 
+# future
+
+- `gy` now pastes to system clipboard in given format (options.clipboard_copy_cmd)
+
+
 # v0.99 (2017-12-22)
 
 - tab completion for filename and python expr
 - `v` now 'visibility toggle' (moved from `w`)
 - `^W` to erase a word in the line editor
 - `gC`
-- `--version` (thanks for the suggestion, @jsvine)
-- `options.use_default_colors`
+- `--version` (thanks to @jsvine)
+- `options.use_default_colors` (thanks to @wavexx)
 - `median` aggregator
 - .html loads tables (requires lxml)
   - simple http works (requires requests)

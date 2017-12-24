@@ -16,3 +16,27 @@ globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy current cell to clipbo
 globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value')
 globalCommand('zp', 'cursorCol.setValue(cursorRow, vd.clipvalue)', 'set contents of current column for current row to last clipboard value')
 
+# override gy to copy to system clipboard instead.
+#  to copy to internal clipboard (for use with 'p' commands): "gdq
+globalCommand('gy', 'copyToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank selected rows to system clipboard')
+
+option('clipboard_copy_cmd', 'pbcopy w', 'command to copy stdin to system clipboard')
+# or 'xsel --primary' for xsel
+# or 'xclip -selection primary'
+# or 'pbcopy w' for mac
+
+import tempfile
+import subprocess
+
+def copyToClipboard(sheet, rows, filetype=None):
+    cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
+    vs = copy(sheet)
+    vs.rows = rows
+    filetype = filetype or options.filetype
+    with tempfile.NamedTemporaryFile() as temp:
+        tempfn = temp.name + "." + filetype
+        saveSheet(vs, tempfn)
+        sync()
+        p = subprocess.Popen(cmd.split(), stdin=open(tempfn, 'r', encoding=options.encoding), close_fds=True)
+        p.communicate()
+    status('copied to clipboard')
