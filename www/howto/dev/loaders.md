@@ -5,7 +5,7 @@ Version: 1.0
 
 The process of designing a loader is:
 
-1. create an `open_foo` function that returns a **Sheet**;
+1. construct an initial **FooSheet** and create an `open_foo` function that returns it;
 2. write a reload() function to load the **rows**;
 3. enumerate the available **columns**;
 4. define sheet-specific **commands** to interact with the rows, columns, and cells.
@@ -32,7 +32,7 @@ Any other keyword arguments are set as attributes on the new instance.
 
 `reload()` is called when the Sheet is first pushed, and thereafter by the user with `^R`.
 
-Using the Sheet `source`, `reload` populates `rows`:
+Using the Sheet `source`, `reload` populates `rows`;
 
 ```
 class FooSheet(Sheet):
@@ -46,12 +46,12 @@ class FooSheet(Sheet):
 - A `rowdef` comment should declare the **internal structure of each row**.
 - `rows` must be set to a **new list object**; do **not** call `list.clear()`.
 
-### Make the loader asynchronous
+### Making the loader asynchronous
 
 The above code will probably work just fine for smaller datasets, but a large enough dataset will cause the interface to freeze.
 Fortunately, making an [async](/docs/async) loader is pretty straightforward:
 
-1. Add `@async` decorator on `reload`.  This causes the method to be launched in a new thread.
+1. Add `@async` decorator to `reload`.  This causes the method to be launched in a new thread.
 
 2. Wrap the iterator with [`Progress`](/api/Progress).  This updates the **progress percentage** as it passes each element through.
 
@@ -96,12 +96,12 @@ class FooSheet(Sheet):
     ]
 ```
 
-In general, set `columns` as a class member.  If the columns aren't known until the data is being loaded, 
-`reload()` should first call `columns.clear()`, and then call `addColumn(col)` for each column at the earliest opportunity.
+In general, set `columns` [as a class member](https://github.com/saulpw/visidata/blob/b5e506aa00ffa5b23ebc3dbdd7ade282a5a1cdc0/bin/viewtsv#L8).  If the columns aren't known until the data is being loaded, 
+`reload()` should first call `columns.clear()`, and then call `addColumn(col)` for each column at the [earliest opportunity](https://github.com/saulpw/visidata/blob/b5e506aa00ffa5b23ebc3dbdd7ade282a5a1cdc0/visidata/loaders/html.py#L42).
 
 ### Column properties
 
-Columns have a few properties, all optional arguments to the constructor except for `name`:
+Columns have a few properties, all arguments are optional except for `name`:
 
 * **`name`**: should be a valid Python identifier and unique among the column names on the sheet. (Otherwise the column cannot be used in an expression.)
 
@@ -147,7 +147,7 @@ There are several helpers for constructing `Column` objects:
 * `SubrowColumn(origcol, subrowidx, **kwargs)` delegates to the original column with some part of the row.
 This is useful for rows which are a list of references to other rows, like with joined sheets.
 
-A couple of recurring patterns:
+Recipes for a couple of recurring patterns:
 
 - columns from a list of names: `[ColumnItem(name, i) for i, name in enumerate(colnames)]`
 - columns from the first sample row, when rows are dicts: `[ColumnItem(k) for k in self.rows[0]]`
@@ -208,7 +208,7 @@ class FooSheet(Sheet):
 
 ## Extra Credit: create a saver
 
-  But a full-duplex loader requires a **saver**.  The saver iterates over all `rows` and `visibleCols`, calling `getValue` or `getTypedValue`, and saving the results.
+A full-duplex loader requires a **saver**.  The saver iterates over all `rows` and `visibleCols`, calling `getValue` or `getTypedValue`, and saves the results in the format of that filetype.
 
 ```
 @async
