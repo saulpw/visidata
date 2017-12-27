@@ -72,7 +72,7 @@ strong {
 }
 
 /* --- Bullets and Lists --- */
-li {
+ul li {
   display: list-item;
   list-style-type: disc;
   margin: 0px auto;
@@ -217,6 +217,7 @@ table div.cell, table td {
     font-family: Inconsolata;
     font-weight: bold;
     font-size: 16px;
+    margin: 20%;
 }
 
 table div.cell.timestamp, table td.timestamp {
@@ -282,7 +283,7 @@ code {
 }
 
 pre, pre > code {
-    background-color: #f4f4f4;
+    background-color: #b4b4f4;
     white-space: pre;
     word-wrap: normal;
     overflow: auto;
@@ -294,9 +295,15 @@ pre {
     display: block;
     padding: 0.5em;
     border: none;
-    max-width: 60em;  /* should be half of COLUMNS=### in mkwww.sh */
-    margin: 0 auto;
+    max-width: 40em;
+    margin: auto;
+    margin-top: 1em;
+    margin-bottom: 1em;
     line-height: 1.5;
+}
+
+pre#manpage {
+    max-width: 60em;  /* should be half of COLUMNS=### in mkwww.sh */
 }
 
 

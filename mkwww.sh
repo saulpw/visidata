@@ -10,7 +10,7 @@ BUILD=$VD/_build
 BUILDWWW=$BUILD/www
 MAN=$VD/visidata/man
 TEST=$WWW/test
-DESIGN=$WWW/design
+DOCS=$VD/docs
 HOWTODEV=$WWW/howto/dev
 NEWS=$WWW/news
 VIDEOS=$WWW/videos
@@ -53,7 +53,7 @@ pandoc -r markdown -w html -o $BUILDWWW/about/index.body $WWW/about.md
 $VD/strformat.py body=$BUILDWWW/about/index.body title="About VisiData" head="" < $WWW/template.html > $BUILDWWW/about/index.html
 
 # Build /man
-echo '<section><pre>' > $BUILD/vd-man-inc.html
+echo '<section><pre id="manpage">' > $BUILD/vd-man-inc.html
 # <pre> max-width in main.css should be half of COLUMNS=###
 MAN_KEEP_FORMATTING=1 COLUMNS=120 man $MAN/vd.1 | ul | aha --no-header >> $BUILD/vd-man-inc.html
 echo '</pre></section>' >> $BUILD/vd-man-inc.html
@@ -99,19 +99,19 @@ for tpath in `find $TEST -name '*.yaml'`; do
     cp $TEST/*.css $BUILDWWW/test
 done
 
-# build /docs
+# build /docs index
 pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/docs.md
 $VD/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
 
-# Build /design
-pandoc -r markdown -w html -o $BUILDWWW/design/index.body $WWW/design.md
-$VD/strformat.py body=$BUILDWWW/design/index.body title="VisiData Design and Internals" head="" < $WWW/template.html > $BUILDWWW/design/index.html
-rm -f $BUILDWWW/design/index.body
-for postpath in `find $DESIGN -name '*.md'`; do
-    post=${postpath##$DESIGN/}
+# Build /docs/*
+#pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/design.md
+$VD/strformat.py body=$BUILDWWW/docs/index.body title="VisiData Documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
+rm -f $BUILDWWW/docs/index.body
+for postpath in `find $DOCS -name '*.md'`; do
+    post=${postpath##$DOCS/}
     postname=${post%.md}
-    mkdir -p $BUILDWWW/design/$postname
-    posthtml=$BUILDWWW/design/$postname/index
+    mkdir -p $BUILDWWW/docs/$postname
+    posthtml=$BUILDWWW/docs/$postname/index
     pandoc -r markdown -w html -o $posthtml.body $postpath
     $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
     rm -f $posthtml.body

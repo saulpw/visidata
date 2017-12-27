@@ -1,32 +1,34 @@
 # How to create a loader for VisiData
 
+Date: 2017-12-27
+Version: 1.0
 
 The process of designing a loader is:
 
-1. Create a Sheet subclass;
-2. Collect the rows from the sources in reload();
-3. Enumerate the available columns;
-4. Create sheet-specific commands to interact with the rows, columns, and cells.
+1. create an `open_foo` function that returns a **Sheet**;
+2. write a reload() function to load the **rows**;
+3. enumerate the available **columns**;
+4. define sheet-specific **commands** to interact with the rows, columns, and cells.
 
 ## 1. Create a Sheet subclass
 
-When VisiData tries to open a source with filetype `foo`, it tries to call `open_foo(path)`.  `path` is a [Path](/api/Path) object of some kind.
-
-Sheet constructors should take a name as their first parameter, and pass their `**kwargs` along to the [Sheet superclass](/api/Sheet), which will use some of them and set the rest as attributes on the new instance.
-
-Besides the name, the main thing the constructor has to do is set its `source` for `reload()`:
+When VisiData tries to open a source with filetype `foo`, it tries to call `open_foo(path)`, which should return an instance of `Sheet`, or raise an error. `path` is a [`Path`](/api/Path) object of some kind.
 
 ```
 def open_foo(p):
     return FooSheet(p.name, source=p)
 
 class FooSheet(Sheet):
-    def __init__(self, name, **kwargs):
-        super().__init__(self, name, **kwargs)
-        self.gpg = generate_key()
+    rowtype = 'foobits'  # rowdef: foolib.Bar object
 ```
 
-## 2. Collect data into rows
+- The `Sheet` constructor takes the new sheet name as its first argument.
+Any other keyword arguments are set as attributes on the new instance.
+- Storing the `Path` as `source` is sufficient for most loaders, and so the subclass constructor can generally be omitted.
+- The `rowtype` is for display purposes only.  It should be **plural**.
+
+
+## 2. Load data into rows
 
 `reload()` is called when the Sheet is first pushed, and thereafter by the user with `^R`.
 
@@ -34,127 +36,196 @@ Using the Sheet `source`, `reload` populates `rows`:
 
 ```
 class FooSheet(Sheet):
-    rowtype = 'foobits'  # rowdef: Foo
-    # If the constructor does not have to do anything special, it can be omitted entirely.
+    ...
     def reload(self):
         self.rows = []
         for r in crack_foo(self.source):
-            self.addRow(r)
+            self.rows.append(r)
 ```
 
-The `rowtype` is for display purposes only.  It should be plural.
-The expected internal structure of the rows on this sheet always be declared in a comment with the searchable tag `rowdef`.
+- A `rowdef` comment should declare the **internal structure of each row**.
+- `rows` must be set to a **new list object**; do **not** call `list.clear()`.
 
-### making it async
+### Make the loader asynchronous
+
+The above code will probably work just fine for smaller datasets, but a large enough dataset will cause the interface to freeze.
+Fortunately, making an [async](/docs/async) loader is pretty straightforward:
 
 1. Add `@async` decorator on `reload`.  This causes the method to be launched in a new thread.
 
-2. Append each row one at a time.
-  - Use `addRow` in general, even though it merely calls `self.rows.append(r)`.
-  - Do not use a list comprehension, so that rows will be available before everything is loaded.
-  - Do not assume the order of the rows will be the allocate rows and then fill them in.  The user may change the order of the rows 
+2. Wrap the iterator with [`Progress`](/api/Progress).  This updates the **progress percentage** as it passes each element through.
 
-3. Wrap the iterator with [Progress](/api/Progress).  This updates the progress percentage as it passes each element through.
+3. Append each row **one at a time**.  Do not use a list comprehension; rows should become available as they are loaded.
+
+4. Do not depend on the order of `rows` after they are added; e.g. do not reference `rows[-1]`.  The order of rows may change during an asynchronous loader.
+
+5. Catch any `Exception`s that might be raised while handling a specific row, and add them as the row instead.  Never use a bare `except:` clause or the loader thread will not be killable.
 
 ```
 class FooSheet(Sheet):
-    rowtype = 'foobits'  # rowdef: Foo
+    ...
     @async
     def reload(self):
         self.rows = []
-        for r in Progress(crack_foo(self.source)):
-            self.addRow(r)
+        for bar in Progress(foolib.iterfoo(self.source.open_text())):
+            try:
+                r = foolib.parse(bar)
+            except Exception as e:
+                r = e
+            self.rows.append(r)
 ```
+
+Test the loader with a large dataset to make sure that:
+- the first rows appear immediately;
+- the progress percentage is being updated;
+- the loader can be cancelled (with `^C`).
 
 ## 3. Enumerate the columns
 
-Each `Column` provides a different view into the row.
+Each sheet has a unique list of `columns`. Each [`Column`](/api/Column) provides a different view into the row.
 
-In general, set the `columns` class member to a list of `Column`s:
 
 ```
 class FooSheet(Sheet):
-    rowtype = 'foobits'  # rowdef: Foo
+    ...
     columns = [
-        ColumnAttr('name'),
+        ColumnAttr('name'),  # foolib.Bar.name
         Column('bar', getter=lambda col,row: row.inside[2],
                       setter=lambda col,row,val: row.set_bar(val)),
         Column('baz', type=int, getter=lambda col,row: row.inside[1]*100)
     ]
-    ...
 ```
 
-If the columns aren't known beforehand (e.g. they have to be discovered while parsing the data), then they can be added with `addColumn` during `reload()`.
-If this mechanism is used, reload has to clear the existing columns list first, or every reload will add another full set of columns.
+In general, set `columns` as a class member.  If the columns aren't known until the data is being loaded, 
+`reload()` should first call `columns.clear()`, and then call `addColumn(col)` for each column at the earliest opportunity.
 
 ### Column properties
 
-Columns have a few properties, all optional in the constructor except for `name`:
+Columns have a few properties, all optional arguments to the constructor except for `name`:
 
-* **`name`**: should be a valid Python identifier and unique among the column names on the sheet.  Otherwise the column cannot be used in an expression.
+* **`name`**: should be a valid Python identifier and unique among the column names on the sheet. (Otherwise the column cannot be used in an expression.)
 
-* **`type`**: values can be `str` (`~`), `int` (`#`), `float` (`%`), `date` (`@`), `currency` (`$`).  It can also be `anytype`, which passes the original value through unmodified.
+* **`type`**: can be `str`, `int`, `float`, `date`, or `currency`.  By default it is `anytype`, which passes the original value through unmodified.
 
-* **`width`**: specifies the initial width for the column; `0` means hidden, `None` (default) means calculate on first draw.
+* **`width`**: the initial width for the column. `0` means hidden; `None` (default) means calculate on first draw.
 
-* **`fmtstr`**: format string for use with `type`.  May be [strftime-format]() for `date`, or `new-style format` for other types.
+* **`fmtstr`**: [strftime-format](https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior) for `date`, or a [new-style Python format string](https://docs.python.org/3/library/string.html#formatstrings) for all other types.
 
-#### `getter`
+* **`getter(col, row)`** and/or **`setter(col, row, value)`**: functions that get or set the value for a given row.
 
-The `Column` constructor is usually passed a `getter` lambda, at least.
-For complex getters, a Column subclass can override the base method `Column.calcValue` instead.
+#### The `getter` lambda
+
 The getter is the essential functionality of a `Column`.
 
-The `getter` lambda is passed the column instance (`col`) and the `row`, and returns the value of the cell.
-The sheet may be gotten from `col.sheet`; `row in col.sheet.rows` should always be true.
+In general, a `Column` constructor is passed a `getter` lambda.
+Columns with more complex functions should be subclasses and override `Column.calcValue` instead.
+
+The `getter` is passed the column instance `col` and the `row`, and returns the value of the cell.
+If the sheet itself is needed, it is available as `col.sheet`.
 
 The default getter returns the entire row.
 
+#### The `setter` lambda
 
-#### `setter`
-
-The `Column` may also be given a `setter` lambda, which allows a row to be modified (e.g. by a command that uses the `Sheet.editCell` method).
-The `setter` lambda is passed the column instance (`col`), the `row`, and the new `value` to be set.
-
-By default there is no `setter`, so the column is read-only.
+The `Column` may also be given a `setter` lambda, which allows the in-memory row to be modified.
+The `setter` lambda is passed the column instance `col`, the `row`, and the new `value` to be set.
 
 In a Column subclass, `Column.setValue(self, row, value)` may be overridden instead.
 
-### Builtin Columns
+By default there is no `setter`, which makes the column read-only.
+
+### Builtin Column Helpers
 
 There are several helpers for constructing `Column` objects:
 
-* `ColumnAttr(attrname, **kwargs)` gets/sets an attribute from the row object using `getattr`/`setattr`.
+* `ColumnAttr(colname, attrname=colname, **kwargs)` gets/sets an attribute from the row object using `getattr`/`setattr`.
   This is useful when the rows are Python objects.
 
-* `ColumnItem(colname, itemkey, **kwargs)` uses the builtin `getitem` and `setitem` on the row.
-  This is useful when the rows are Python mappings or sequences, like dicts, lists, and tuples.
+* `ColumnItem(colname, itemkey=colname, **kwargs)` uses the builtin `getitem` and `setitem` on the row.
+  This is useful when the rows are Python mappings or sequences, like dicts or lists.
 
 * `SubrowColumn(origcol, subrowidx, **kwargs)` delegates to the original column with some part of the row.
 This is useful for rows which are a list of references to other rows, like with joined sheets.
 
-A couple recurring patterns:
+A couple of recurring patterns:
 
 - columns from a list of names: `[ColumnItem(name, i) for i, name in enumerate(colnames)]`
 - columns from the first sample row, when rows are dicts: `[ColumnItem(k) for k in self.rows[0]]`
 
-## 4. Add Sheet-specific Commands
+## 4. Define Sheet-specific Commands
+
+`Command()` and `globalCommand()` have the same signature:
+
+`Command(keystrokes, execstr, helpstr, longname)`
+
+There is a [separate howto for Commands](/howto/dev/commands).
 
 ```
 class FooSheet(Sheet):
-    rowtype = 'foobits'  # rowdef: Foo
+    ...
     commands = [
         Command('b', 'cursorRow.set_bar(0)', 'reset bar to 0', 'reset-bar')
     ]
 ```
 
-A reasonably intuitive and mnemonic default keybinding should be chosen.
-The [`execstr` and `helpstr`](/api/Command)
-The longname allows the command to be rebound by a more descriptive name, and for the command to be redefined for other contexts (so all keys bound to that command will be redefined also).
+- Reasonably intuitive and mnemonic default keybindings should be chosen.
+- The longname allows the command to be rebound by a more descriptive name, and for the command to be redefined for other contexts (so all keystrokes bound to that command will take on the new action).
+
+## Full Example
+
+This would be a completely functional read-only viewer for the fictional foolib.  For a more realistic example, see the [annotated viewtsv](/docs/viewtsv) or any of the [included loaders](https://github.com/saulpw/visidata/tree/stable/visidata/loaders).
+
+```
+from visidata import *
+
+def open_foo(p):
+    return FooSheet(p.name, source=p)
+
+class FooSheet(Sheet):
+    rowtype = 'foobits'  # rowdef: foolib.Bar object
+    columns = [
+        ColumnAttr('name'),  # foolib.Bar.name
+        Column('bar', getter=lambda col,row: row.inside[2],
+                      setter=lambda col,row,val: row.set_bar(val)),
+        Column('baz', type=int, getter=lambda col,row: row.inside[1]*100)
+    ]
+    commands = [
+        Command('b', 'cursorRow.set_bar(0)', 'reset bar to 0', 'reset-bar')
+    ]
+
+    @async
+    def reload(self):
+        import foolib
+
+        self.rows = []
+        for bar in Progress(foolib.iterfoo(self.source.open_text())):
+            try:
+                r = foolib.parse(bar)
+            except Exception as e:
+                r = e
+            self.rows.append(r)
+```
+
+## Extra Credit: create a saver
+
+  But a full-duplex loader requires a **saver**.  The saver iterates over all `rows` and `visibleCols`, calling `getValue` or `getTypedValue`, and saving the results.
+
+```
+@async
+def save_foo(sheet, fn):
+    with open(fn, 'w') as fp:
+        for i, row in enumerate(Progress(sheet.rows)):
+            for col in sheet.visibleCols:
+                foolib.write(fp, i, col.name, col.getValue(row))
+```
+
+The saver should preserve the column names and translate their types into foolib semantics, but other attributes on the Columns should generally not be saved.
+
+---
 
 # Building a loader for a URL schemetype
 
-When VisiData tries to open a URL with schemetype of `foo` (i.e. starting with `foo://`), it calls `openurl_foo(urlpath, filetype)`.  `urlpath` is a [UrlPath](/api/Path#UrlPath) object, with attributes for each of the elements of the parsed URL.
+When VisiData tries to open a URL with schemetype of `foo` (i.e. starting with `foo://`), it calls `openurl_foo(urlpath, filetype)`.  `urlpath` is a [`UrlPath`](/api/Path#UrlPath) object, with attributes for each of the elements of the parsed URL.
 
 `openurl_foo` should return a Sheet or call `error()`.
 If the URL indicates a particular type of Sheet (like `magnet://`), then it should construct that Sheet itself.
@@ -165,7 +236,5 @@ def openurl_foo(p, filetype=None):
     return openSource(FooPath(p.url), filetype=filetype)
 ```
 
-# Tests
+---
 
-- `^R` reload
-- try with large dataset, make sure it stays responsive and updates progress
