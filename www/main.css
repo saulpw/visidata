@@ -275,7 +275,7 @@ pre > code {
 }
 
 code {
-    background-color: #f0e4ff;
+    background-color: #b4b4f4;
     box-shadow: inset 0px 0px 2px #bbb;
     font-family: Inconsolata, monospace; /* Correct the inheritance and scaling of font size in all browsers */
     font-size: 1em; /* Correct the odd `em` font sizing in all browsers */
@@ -405,7 +405,7 @@ footer {
    display: flex;
    flex-direction: column;
    flex-wrap: wrap;
-   max-width: 400px;
+   max-width: 500px;
    margin: auto;
  }
  
