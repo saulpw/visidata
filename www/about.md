@@ -1,8 +1,7 @@
 ## What is VisiData?
 
 VisiData is an open source multitool for data exploration and manipulation.
-It combines the clarity of a spreadsheet, the efficiency of the terminal, and the power of Python, into a lightweight utility which can handle half a million rows with ease.
-With enough memory it will happily chug through 5 million rows or more--all the while remaining totally responsive.
+It combines the clarity of a spreadsheet, the efficiency of the terminal, and the power of Python, into a lightweight utility which can handle millions of rows with ease.
 
 ## Who wrote it?
 
@@ -24,3 +23,9 @@ Even at the time, I felt it had more potential, but I had to set it aside to wor
 
 So at the end of 2016, I decided to take a personal sabbatical and use my experience with data to write another version of this tool.
 One that could be used in any terminal, with any data source, with minimal requirements and zero configuration.
+
+## Credits
+
+Thanks to all the [people who have contributed to VisiData](/help#contributors).
+
+In particular, many thanks to [@anjakefala](https://github.com/anjakefala) for significant help with tests, documentation, and releases.
