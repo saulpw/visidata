@@ -1,6 +1,7 @@
-# viewtsv
+- Date: 2017-12-27
+- Version: 1.0
 
-Date: 2017-12-27  Version: 1.0
+# viewtsv
 
 [viewtsv](https://github.com/saulpw/visidata/blob/stable/bin/viewtsv)
 is a great example of a minimal [vdtui](https://github.com/saulpw/visidata/blob/stable/visidata/vdtui.py) application.  This is an extremely functional utility in 25 lines of code.  Here it is in its entirety, with line by line annotations:
@@ -23,14 +24,14 @@ class TsvSheet(vdtui.Sheet):
     rowtype = 'rows'  # rowdef: tuple of values
 ```
 
-All tabular data sheets inherit from `Sheet`.  The rowtype is displayed in the lower right of the status line and provides a context for the user. The [rowdef](https://github.com/saulpw/visidata/blob/2673ae47f334e9e2b1fbd1afc4a28185440a66f7/visidata/loaders/postgres.py#L55) is a useful comment for every Sheet which outlines its initial structure.
+All tabular data sheets inherit from `Sheet`.  The rowtype is displayed on the right status bar.  The `rowdef` comment declares the structure of every row object, and should be present for every Sheet.
 
 ```
     columns = [vdtui.ColumnItem('tsv', 0)]
 ```
 
 An initial column.  Generally the class-level `columns` is set to the actual columns of the sheet, but in this case, the columns aren't known until the source is loaded.
-\(See the `reload()` function below where they are set with the contents of the source.\)  This line is not strictly necessary but makes loading feel a bit more responsive.
+(See the `reload()` function below where they are set from the contents of the first row.)  This line is not strictly necessary but makes loading feel a bit more responsive.
 
 
 ```

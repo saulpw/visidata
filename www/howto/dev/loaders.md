@@ -1,11 +1,11 @@
-# How to create a loader for VisiData
+- Date: 2017-12-27
+- Version: 1.0
 
-Date: 2017-12-27
-Version: 1.0
+# How to create a loader for VisiData
 
 The process of designing a loader is:
 
-1. construct an initial **FooSheet** and create an `open_foo` function that returns it;
+1. create an `open_foo` function that returns a new **Sheet**;
 2. write a reload() function to load the **rows**;
 3. enumerate the available **columns**;
 4. define sheet-specific **commands** to interact with the rows, columns, and cells.
@@ -32,7 +32,7 @@ Any other keyword arguments are set as attributes on the new instance.
 
 `reload()` is called when the Sheet is first pushed, and thereafter by the user with `^R`.
 
-Using the Sheet `source`, `reload` populates `rows`;
+Using the Sheet `source`, `reload` populates `rows`:
 
 ```
 class FooSheet(Sheet):
@@ -51,7 +51,7 @@ class FooSheet(Sheet):
 The above code will probably work just fine for smaller datasets, but a large enough dataset will cause the interface to freeze.
 Fortunately, making an [async](/docs/async) loader is pretty straightforward:
 
-1. Add `@async` decorator to `reload`.  This causes the method to be launched in a new thread.
+1. Add `@async` decorator on the `reload` method, which causes it to be launched in a new thread.
 
 2. Wrap the iterator with [`Progress`](/api/Progress).  This updates the **progress percentage** as it passes each element through.
 
@@ -96,12 +96,12 @@ class FooSheet(Sheet):
     ]
 ```
 
-In general, set `columns` [as a class member](https://github.com/saulpw/visidata/blob/b5e506aa00ffa5b23ebc3dbdd7ade282a5a1cdc0/bin/viewtsv#L8).  If the columns aren't known until the data is being loaded, 
-`reload()` should first call `columns.clear()`, and then call `addColumn(col)` for each column at the [earliest opportunity](https://github.com/saulpw/visidata/blob/b5e506aa00ffa5b23ebc3dbdd7ade282a5a1cdc0/visidata/loaders/html.py#L42).
+In general, set `columns` as a class member.  If the columns aren't known until the data is being loaded, 
+`reload()` should first call `columns.clear()`, and then call `addColumn(col)` for each column at the earliest opportunity.
 
 ### Column properties
 
-Columns have a few properties, all arguments are optional except for `name`:
+Columns have a few properties, all of which are optional arguments to the constructor except for `name`:
 
 * **`name`**: should be a valid Python identifier and unique among the column names on the sheet. (Otherwise the column cannot be used in an expression.)
 
