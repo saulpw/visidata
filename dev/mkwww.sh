@@ -5,6 +5,7 @@ set -e
 
 # Set up variables
 VD=~/git/visidata
+DEV=$VD/dev
 WWW=$VD/www
 BUILD=$VD/_build
 BUILDWWW=$BUILD/www
@@ -43,14 +44,14 @@ soelim -rt -I $BUILD $BUILD/vd.inc > $BUILD/vd-pre.1
 preconv -r -e utf8 $BUILD/vd-pre.1 > $MAN/vd.1   # checked in
 
 # build front page of visidata.org
-$VD/strformat.py body=$WWW/frontpage-body.html title="VisiData" head='' < $WWW/template.html > $BUILDWWW/index.html
+$DEV/strformat.py body=$WWW/frontpage-body.html title="VisiData" head='' < $WWW/template.html > $BUILDWWW/index.html
 for i in 404.html robots.txt main.css ; do
     cp $WWW/$i $BUILDWWW/
 done
 
 # Build /about
 pandoc -r markdown -w html -o $BUILDWWW/about/index.body $WWW/about.md
-$VD/strformat.py body=$BUILDWWW/about/index.body title="About VisiData" head="" < $WWW/template.html > $BUILDWWW/about/index.html
+$DEV/strformat.py body=$BUILDWWW/about/index.body title="About VisiData" head="" < $WWW/template.html > $BUILDWWW/about/index.html
 
 # Build /man
 echo '<section><pre id="manpage">' > $BUILD/vd-man-inc.html
@@ -58,22 +59,22 @@ echo '<section><pre id="manpage">' > $BUILD/vd-man-inc.html
 MAN_KEEP_FORMATTING=1 COLUMNS=120 man $MAN/vd.1 | ul | aha --no-header >> $BUILD/vd-man-inc.html
 echo '</pre></section>' >> $BUILD/vd-man-inc.html
 #  Properties of columns on the source sheet can be changed with standard editing commands (e
-$VD/strformat.py body=$BUILD/vd-man-inc.html title="VisiData Quick Reference" head="" < $WWW/template.html > $BUILDWWW/man/index.html
+$DEV/strformat.py body=$BUILD/vd-man-inc.html title="VisiData Quick Reference" head="" < $WWW/template.html > $BUILDWWW/man/index.html
 
 # Create http://visidata.org/man/#loaders
 sed -i -e "s#<span style=\"font-weight:bold;\">SUPPORTED</span> <span style=\"font-weight:bold;\">SOURCES</span>#<span style=\"font-weight-:bold;\"><a name=\"loaders\">SUPPORTED SOURCES</a></span>#g" $BUILDWWW/man/index.html
 
 # Build /contributing
 pandoc -r markdown -w html -o $BUILDWWW/contributing/index.body $VD/CONTRIBUTING.md
-$VD/strformat.py body=$BUILDWWW/contributing/index.body title="Contributing to VisiData" head="" < $WWW/template.html > $BUILDWWW/contributing/index.html
+$DEV/strformat.py body=$BUILDWWW/contributing/index.body title="Contributing to VisiData" head="" < $WWW/template.html > $BUILDWWW/contributing/index.html
 
 # Build /help
 pandoc -r markdown -w html -o $BUILDWWW/help/index.body $HELP/index.md
-$VD/strformat.py body=$BUILDWWW/help/index.body title="Support" head="" < $WWW/template.html > $BUILDWWW/help/index.html
+$DEV/strformat.py body=$BUILDWWW/help/index.body title="Support" head="" < $WWW/template.html > $BUILDWWW/help/index.html
 
 # Build /install
 pandoc -r markdown -w html -o $BUILDWWW/install/index.body $INSTALL/index.md
-$VD/strformat.py body=$BUILDWWW/install/index.body title="Installation" head="" < $WWW/template.html > $BUILDWWW/install/index.html
+$DEV/strformat.py body=$BUILDWWW/install/index.body title="Installation" head="" < $WWW/template.html > $BUILDWWW/install/index.html
 
 # Create http://visidata.org/install/#pip3
 sed -i -e "s#<h2 id=\"install-via-pip3\">Install via pip3</h2>#<h2 id=\"install-via-pip3\"><a name=\"pip3\">Install via pip3</a></h2>#g" $BUILDWWW/install/index.html
@@ -83,16 +84,16 @@ sed -i -e "s#<h2 id=\"install-via-brew\">Install via brew</h2>#<h2 id=\"install-
 sed -i -e "s#<h2 id=\"install-via-apt\">Install via apt</h2>#<h2 id=\"install-via-apt\"><a name=\"apt\">Install via apt</a></h2>#g" $BUILDWWW/install/index.html
 
 # Build /videos
-$VD/strformat.py body=$VIDEOS/video-body.html title="VisiData Videos" head="" < $WWW/template.html > $BUILDWWW/videos/index.html
+$DEV/strformat.py body=$VIDEOS/video-body.html title="VisiData Videos" head="" < $WWW/template.html > $BUILDWWW/videos/index.html
 
 # Build /tests
 $TEST/mkindex.py $TEST/*.yaml > $BUILD/test-index.body
-$VD/strformat.py body=$BUILD/test-index.body title="test Index" head='' < $WWW/template.html > $BUILDWWW/test/index.html
+$DEV/strformat.py body=$BUILD/test-index.body title="test Index" head='' < $WWW/template.html > $BUILDWWW/test/index.html
 for tpath in `find $TEST -name '*.yaml'`; do
     tyaml=${tpath##$TEST/}
     tfolder=${tyaml%.yaml}
     mkdir -p $BUILDWWW/test/$tfolder
-    $VD/strformat.py body=<($TEST/mkdemo.py $TEST/$tyaml) title="VisiData test: $tfolder" head=$TEST/test-head-inc.html < $WWW/template.html > $BUILDWWW/test/$tfolder/index.html
+    $DEV/strformat.py body=<($TEST/mkdemo.py $TEST/$tyaml) title="VisiData test: $tfolder" head=$TEST/test-head-inc.html < $WWW/template.html > $BUILDWWW/test/$tfolder/index.html
     # Rewrite this so I am only copying over the relevant html and css
     cp $TEST/$tfolder/*.* $BUILDWWW/test/$tfolder
     cp $TEST/asciinema-player.* $BUILDWWW/test
@@ -101,11 +102,11 @@ done
 
 # build /docs index
 pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/docs.md
-$VD/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
+$DEV/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
 
 # Build /docs/*
 #pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/design.md
-$VD/strformat.py body=$BUILDWWW/docs/index.body title="VisiData Documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
+$DEV/strformat.py body=$BUILDWWW/docs/index.body title="VisiData Documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
 rm -f $BUILDWWW/docs/index.body
 for postpath in `find $DOCS -name '*.md'`; do
     post=${postpath##$DOCS/}
@@ -113,7 +114,7 @@ for postpath in `find $DOCS -name '*.md'`; do
     mkdir -p $BUILDWWW/docs/$postname
     posthtml=$BUILDWWW/docs/$postname/index
     pandoc -r markdown -w html -o $posthtml.body $postpath
-    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    $DEV/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
     rm -f $posthtml.body
 done
 
@@ -124,14 +125,14 @@ for postpath in `find $HOWTODEV -name '*.md'`; do
     mkdir -p $BUILDWWW/howto/dev/$postname
     posthtml=$BUILDWWW/howto/dev/$postname/index
     pandoc -r markdown -w html -o $posthtml.body $postpath
-    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    $DEV/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
     rm -f $posthtml.body
 done
 
 # Build /news
 mkdir -p $BUILDWWW/news
 $NEWS/mknews.py $NEWS/news.tsv > $BUILD/news.body
-$VD/strformat.py body=$BUILD/news.body title="VisiData News" head='' < $WWW/template.html > $BUILDWWW/news/index.html
+$DEV/strformat.py body=$BUILD/news.body title="VisiData News" head='' < $WWW/template.html > $BUILDWWW/news/index.html
 
 for postpath in `find $NEWS -name '*.md'`; do
     post=${postpath##$NEWS/}
@@ -139,7 +140,7 @@ for postpath in `find $NEWS -name '*.md'`; do
     mkdir -p $BUILDWWW/news/$postname
     posthtml=$BUILDWWW/news/$postname/index
     pandoc -r markdown -w html -o $posthtml.body $postpath
-    $VD/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
+    $DEV/strformat.py body=$posthtml.body title=$postname head="" < $WWW/template.html > $posthtml.html
     rm -f $posthtml.body
 done
 
