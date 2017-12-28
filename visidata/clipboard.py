@@ -16,9 +16,9 @@ globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy current cell to clipbo
 globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value')
 globalCommand('zp', 'cursorCol.setValue(cursorRow, vd.clipvalue)', 'set contents of current column for current row to last clipboard value')
 
-# override gy to copy to system clipboard instead.
-#  to copy to internal clipboard (for use with 'p' commands): "gdq
-globalCommand('gy', 'copyToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank selected rows to system clipboard')
+globalCommand('Y', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank current row to system clipboard')
+globalCommand('gY', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank selected rows to system clipboard')
+globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank current value to system clipboard')
 
 option('clipboard_copy_cmd', 'pbcopy w', 'command to copy stdin to system clipboard')
 # or 'xsel --primary' for xsel
@@ -28,7 +28,17 @@ option('clipboard_copy_cmd', 'pbcopy w', 'command to copy stdin to system clipbo
 import tempfile
 import subprocess
 
-def copyToClipboard(sheet, rows, filetype=None):
+def copyToClipboard(val):
+    cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
+    with tempfile.NamedTemporaryFile() as temp:
+        with open(temp.name, 'w', encoding=options.encoding) as fp:
+            fp.write(str(val))
+
+        p = subprocess.Popen(cmd.split(), stdin=open(temp.name, 'r', encoding=options.encoding))
+        p.communicate()
+    status('copied value to clipboard')
+
+def saveToClipboard(sheet, rows, filetype=None):
     cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
     vs = copy(sheet)
     vs.rows = rows
@@ -39,4 +49,4 @@ def copyToClipboard(sheet, rows, filetype=None):
         sync()
         p = subprocess.Popen(cmd.split(), stdin=open(tempfn, 'r', encoding=options.encoding), close_fds=True)
         p.communicate()
-    status('copied to clipboard')
+    status('copied rows to clipboard')

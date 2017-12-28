@@ -229,15 +229,19 @@ appends a blank row
 .It Ic " ga" Ar number
 .No appends Ar number No blank rows
 .It Ic "  d   gd"
-deletes current/all selected row(s) and moves to clipboard
+deletes current/selected row(s) and moves to clipboard
 .It Ic "  y   gy"
-copies current/all selected row(s) to clipboard
+copies current/selected row(s) to clipboard
 .It Ic " zy"
-copies current cell to clipboard
+copies current cell value to clipboard
+.It Ic "  Y   gY"
+copies current/selected row(s) to system clipboard
+.It Ic " zY"
+copies current cell value to system clipboard
 .It Ic "  p    P"
 pastes clipboard rows after/before current row
 .It Ic " zp  gzp"
-sets contents of current column for current/all selected row(s) to last clipboard value
+sets contents of current column for current/selected row(s) to last clipboard value
 .It Ic "  f"
 fills null cells in current column with contents of non-null cells up the current column
 .
