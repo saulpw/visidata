@@ -119,7 +119,6 @@ nav h2 {
 
 nav a {
     color: #d6cae7;
-    transition: 0.2s linear;
 }
 
 nav a:hover {
@@ -146,7 +145,6 @@ a:hover {
     color: #d6cae7;
     font-size: 1em;
     padding: 0.5em;
-    transition: .2s linear;
     width: 30%;
     margin: auto;
 }
@@ -275,9 +273,8 @@ pre > code {
 }
 
 code {
-    background-color: #b4b4f4;
-    box-shadow: inset 0px 0px 2px #bbb;
     font-family: Inconsolata, monospace; /* Correct the inheritance and scaling of font size in all browsers */
+    font-weight: bold;
     font-size: 1em; /* Correct the odd `em` font sizing in all browsers */
     padding: 0.25em;
 }
@@ -418,7 +415,6 @@ footer {
      margin: auto;
      text-align: center;
      padding: 8px 15px;
-     transition: .2s linear;
      display: inline-block;
  }
  
