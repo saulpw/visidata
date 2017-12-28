@@ -1,3 +1,5 @@
+- Date: 2017-12-27
+- VisiData v1.0
 
 # Maintaining a responsive interface
 
@@ -22,7 +24,7 @@ An unqualified `except:` clause is bad practice (as always); when used in an asy
 
 ### Wait for threads to finish
 
-`sync(expectedThreads)` will wait for all but `expectedThreads` to finish.
+`sync(expectedThreads)` will wait for all but some number of `expectedThreads` to finish.
 
 This will only rarely be useful.
 
@@ -40,9 +42,9 @@ The view of a performance profile in VisiData is the output from `pstats.Stats.p
 - `z^S` on the performance profile will call `dump_stats()` and save the profile data to the given filename, for analysis with e.g. [pyprof2calltree]() and [kcachegrind]().
 - (`z^S` because the raw text can be saved with `^S` as usual.  Ideally, `^S` to a file with a `.pyprof` extension on a profile sheet would do this instead.)
 
-# Progress
+# Progress counters
 
-In `@async` functions, use `Progress` to easily provide a progress indicator for the user.
+In all `@async` functions, a `Progress` counter should be used to provide a progress percentage, which appears in the right-hand status.
 
 ## Progress as iterable
 
@@ -56,7 +58,8 @@ This is just like `for item in iterable`, but it also keeps track of progress, t
 - This only displays if used in another thread (but is harmless if not).
 - Use Progress around the innermost iterations for maximum granularity and apparent responsiveness.
 - But this incurs a small amount of overhead, so if a tight loop needs every last optimization, use it with an outer iterator instead (if there is one).
-- Using Progress on multiple iterators in sequence will make the progress indicator reset (which is better than having no indicator).
+- Multiple Progress objects used in parallel will stack properly.
+- Multiple Progress objects used serially will make the progress indicator reset (which is better than having no indicator at all).
 
 If `iterable` does not know its own length, it (or an approximation) should be passed as the `total` kwarg:
 
@@ -67,9 +70,9 @@ for item in Progress(iterable, total=approx_size):
 The `Progress` object contributes 1 towards the total for each iteration.
 To contribute a different amount, use `Progress.addProgress(n)` (n-1 if being used as an iterable, as 1 will be added automatically).
 
-## Progress as context handler
+## Progress as context manager
 
-To manage `Progress` without wrapping an iterable, use it as a context handler with only a `total` kwarg, and call `addProgress` as progress is made:
+To manage `Progress` without wrapping an iterable, use it as a context manager with only a `total` keyword argument, and call `addProgress` as progress is made:
 
 ```
 with Progress(total=amt) as prog:
@@ -79,6 +82,6 @@ with Progress(total=amt) as prog:
         amt -= some_amount
 ```
 
-- Using Progress() other than as an iterable or a context manager will have no effect.
+- Using `Progress()` other than as an iterable or a context manager will have no effect.
 
 ---
