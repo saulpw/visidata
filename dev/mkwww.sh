@@ -11,7 +11,7 @@ BUILD=$VD/_build
 BUILDWWW=$BUILD/www
 MAN=$VD/visidata/man
 DOCS=$WWW/docs
-HOWTO=$WWW/howto
+HOWTODEV=$WWW/howto/dev
 NEWS=$WWW/news
 VIDEOS=$WWW/videos
 HELP=$WWW/help
@@ -22,7 +22,6 @@ mkdir -p $BUILD
 mkdir -p $BUILDWWW
 mkdir -p $BUILDWWW/man
 mkdir -p $BUILDWWW/docs
-mkdir -p $BUILDWWW/design
 mkdir -p $BUILDWWW/howto/dev
 mkdir -p $BUILDWWW/about
 mkdir -p $BUILDWWW/contributing
@@ -87,11 +86,9 @@ $DEV/strformat.py body=$VIDEOS/video-body.html title="VisiData Videos" head="" <
 # build /docs index
 pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/docs.md
 $DEV/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
+rm -f $BUILDWWW/docs/index.body
 
 # Build /docs/*
-#pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/design.md
-$DEV/strformat.py body=$BUILDWWW/docs/index.body title="VisiData Documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
-rm -f $BUILDWWW/docs/index.body
 for postpath in `find $DOCS -name '*.md'`; do
     post=${postpath##$DOCS/}
     postname=${post%.md}

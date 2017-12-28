@@ -10,11 +10,13 @@
 
 5. Set version number to next most reasonable number (v#.#.#)
 
-   a. add to front of CHANGELOG, along with the release date and bullet points of major changes
+   a. add to front of CHANGELOG, along with the release date and bullet points of major changes;
 
-   b. update version number on README and front page of website
+   b. update the date in the manpage;
 
-   c. bump version in `__version__` in source code (bin/vd, visidata/vdtui.py) and setup.py
+   c. update version number on README and front page of website;
+
+   d. bump version in `__version__` in source code (bin/vd, visidata/vdtui.py) and setup.py;
 
 6. Run ./mkwww.sh to build the manpage and updated website
 
