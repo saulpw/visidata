@@ -10,9 +10,8 @@ WWW=$VD/www
 BUILD=$VD/_build
 BUILDWWW=$BUILD/www
 MAN=$VD/visidata/man
-TEST=$WWW/test
 DOCS=$WWW/docs
-HOWTODEV=$WWW/howto/dev
+HOWTO=$WWW/howto
 NEWS=$WWW/news
 VIDEOS=$WWW/videos
 HELP=$WWW/help
@@ -22,7 +21,6 @@ INSTALL=$WWW/install
 mkdir -p $BUILD
 mkdir -p $BUILDWWW
 mkdir -p $BUILDWWW/man
-mkdir -p $BUILDWWW/test
 mkdir -p $BUILDWWW/docs
 mkdir -p $BUILDWWW/design
 mkdir -p $BUILDWWW/howto/dev
@@ -85,20 +83,6 @@ sed -i -e "s#<h2 id=\"install-via-apt\">Install via apt</h2>#<h2 id=\"install-vi
 
 # Build /videos
 $DEV/strformat.py body=$VIDEOS/video-body.html title="VisiData Videos" head="" < $WWW/template.html > $BUILDWWW/videos/index.html
-
-# Build /tests
-$TEST/mkindex.py $TEST/*.yaml > $BUILD/test-index.body
-$DEV/strformat.py body=$BUILD/test-index.body title="test Index" head='' < $WWW/template.html > $BUILDWWW/test/index.html
-for tpath in `find $TEST -name '*.yaml'`; do
-    tyaml=${tpath##$TEST/}
-    tfolder=${tyaml%.yaml}
-    mkdir -p $BUILDWWW/test/$tfolder
-    $DEV/strformat.py body=<($TEST/mkdemo.py $TEST/$tyaml) title="VisiData test: $tfolder" head=$TEST/test-head-inc.html < $WWW/template.html > $BUILDWWW/test/$tfolder/index.html
-    # Rewrite this so I am only copying over the relevant html and css
-    cp $TEST/$tfolder/*.* $BUILDWWW/test/$tfolder
-    cp $TEST/asciinema-player.* $BUILDWWW/test
-    cp $TEST/*.css $BUILDWWW/test
-done
 
 # build /docs index
 pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/docs.md
