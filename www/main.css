@@ -50,6 +50,7 @@ p {
   margin: 1em auto 1em;
   font-size: 1.05em;
   display: block;
+  padding-bottom: 5px;
   line-height: 1.5;
   max-width: 50em;
 }
@@ -373,6 +374,8 @@ form {
     text-align: center;
     padding: 10px;
     font-color: grey; /* We need a default text colour */
+    width: 100%;
+    height: 20px;
 }
 
 footer {
