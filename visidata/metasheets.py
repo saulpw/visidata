@@ -22,7 +22,7 @@ SheetsSheet.commands += [
         Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets'),
     ]
 
-SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
+SheetsSheet.columns.append(ColumnAttr('progressPct'))
 
 # used ColumnsSheet, affecting the 'row' (source column)
 columnCommands = [
