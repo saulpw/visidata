@@ -26,8 +26,6 @@ SheetsSheet.columns.append(ColumnAttr('progressPct'))
 
 # used ColumnsSheet, affecting the 'row' (source column)
 columnCommands = [
-        Command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'adjust width of source column'),
-        Command('-', 'cursorRow.width = 0', 'hide source column on source sheet'),
         Command('%', 'cursorRow.type = float', 'set type of source column to float'),
         Command('#', 'cursorRow.type = int', 'set type of source column to int'),
         Command('@', 'cursorRow.type = date', 'set type of source column to date'),
@@ -37,7 +35,6 @@ columnCommands = [
 
         Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'pin selected columns on the left as key columns on source sheet'),
         Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected source columns on source sheet'),
-        Command('g_', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
         Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'set type of selected source columns to float'),
         Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'set type of selected source columns to int'),
         Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'set type of selected source columns to date'),
@@ -47,6 +44,9 @@ columnCommands = [
     ]
 
 ColumnsSheet.commands += columnCommands + [
+        Command('-', 'cursorRow.width = 0', 'hide source column on source sheet'),
+        Command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'adjust width of source column'),
+        Command('g_', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
         Command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'pin current column on the left as a key column on source sheet'),
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'add column from concatenating selected source columns'),
 ]
