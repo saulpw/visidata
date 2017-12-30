@@ -89,11 +89,14 @@ class OptionsObject:
         object.__setattr__(self, '_opts', d)
 
     def __getattr__(self, k):      # options.foo
-        name, value, default, helpstr = self._opts[k]
-        return value
+        return self.__getitem__(k)
 
     def __setattr__(self, k, v):   # options.foo = v
         self.__setitem__(k, v)
+
+    def __getitem__(self, k):      # options[k]
+         name, value, default, helpstr = self._opts[k]
+         return value
 
     def __setitem__(self, k, v):   # options[k] = v
         if k not in self._opts:
