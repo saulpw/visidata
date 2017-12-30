@@ -81,20 +81,16 @@ $ <command> | vd [<options>]
 
 VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more.
 Use `-f <filetype>` to force a particular filetype.
+(See the [list of supported sources](/formats)).
 
 ## Documentation
 
 * Quick reference: `F1` (or `z?`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
-* [visidata.org](http://visidata.org) has [asciicasts of its tests](http://visidata.org/test), which serve as example workflows.
+* [visidata.org/docs](http://visidata.org) has a complete list of links to all official documentation.
 
-## Support
+## Help and Support
 
-If you want to chat about VisiData, make a feature request, or submit a bug report, we can be reached on either IRC or Reddit:
-
-- [r/visidata](https://www.reddit.com/r/visidata/) on reddit
-- [#visidata](irc://freenode.net/#visidata) on [freenode.net](https://webchat.freenode.net)
-
-For more detailed information about how you can contribute as a developer, influence the roadmap as a user, or provide us with sufficient information to better support you through any issues you come across see the [CONTRIBUTING.md](CONTRIBUTING.md).
+For additional information, see the [help page](http://visidata.org/help).
 
 ## vdtui
 

@@ -76,6 +76,7 @@ class FooSheet(Sheet):
 ```
 
 Test the loader with a large dataset to make sure that:
+
 - the first rows appear immediately;
 - the progress percentage is being updated;
 - the loader can be cancelled (with `^C`).
