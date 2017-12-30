@@ -1985,11 +1985,11 @@ class ColumnsSheet(Sheet):
 
     columns = [
             ColumnAttr('sheet'),
-            ColumnAttr('name'),
+            ColumnAttr('name', width=options.default_width),
             ColumnAttr('width', type=int),
             ColumnEnum('type', globals(), default=anytype),
             ColumnAttr('fmtstr'),
-            ValueColumn('value')
+            ValueColumn('value', width=options.default_width)
     ]
     nKeys = 2
     colorizers = [
