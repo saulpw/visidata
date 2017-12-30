@@ -126,7 +126,7 @@ def anySelected(vs, rows):
 
 #  - width/height are exactly equal to the number of pixels displayable, and can change at any time.
 #  - needs to refresh from source on resize
-class Plotter(Sheet):
+class Plotter(BaseSheet):
     'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
     columns=[Column('')]  # to eliminate errors outside of draw()
     commands=[

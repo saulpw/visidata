@@ -402,7 +402,7 @@ class VisiData:
     allPrefixes = 'gz'  # embig'g'en, 'z'mallify
 
     def __init__(self):
-        self.sheets = []
+        self.sheets = []  # list of BaseSheet
         self.statuses = []  # statuses shown until next action
         self.lastErrors = []
         self.searchContext = {}
@@ -809,7 +809,10 @@ class Colorizer:
         self.precedence = precedence
         self.func = colorfunc
 
-class Sheet:
+class BaseSheet:
+    pass
+
+class Sheet(BaseSheet):
     commands = [
 Command('KEY_LEFT',  'cursorRight(-1)', 'move one column left',  'move-left'),
 Command('KEY_DOWN',  'cursorDown(+1)',  'move one row down',     'move-down'),
@@ -1055,7 +1058,7 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
         return ret
 
     def __deepcopy__(self, memo):
-        'same as Sheet.__copy__'
+        'same as __copy__'
         ret = self.__copy__()
         memo[id(self)] = ret
         return ret
@@ -1614,7 +1617,7 @@ def isNullFunc():
 
 class Column:
     def __init__(self, name, type=anytype, cache=False, **kwargs):
-        self.sheet = None     # owning sheet, set in Sheet.addColumn
+        self.sheet = None     # owning Sheet, set in Sheet.addColumn
         self.name = name      # display visible name
         self.fmtstr = ''      # by default, use str()
         self.type = type      # anytype/str/int/float/date/func
@@ -2012,7 +2015,7 @@ class ColumnsSheet(Sheet):
             self.rows = self.source.columns
             self.cursorRowIndex = self.source.cursorColIndex
             self.columns[0].width = 0  # hide 'sheet' column if only one sheet
-        else:  # lists of Columns
+        elif isinstance(self.source, list):  # lists of Columns
             self.rows = []
             for src in self.source:
                 if src is not self:
