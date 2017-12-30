@@ -38,6 +38,7 @@ def copyToClipboard(val):
         p.communicate()
     status('copied value to clipboard')
 
+@async
 def saveToClipboard(sheet, rows, filetype=None):
     cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
     vs = copy(sheet)
@@ -45,8 +46,9 @@ def saveToClipboard(sheet, rows, filetype=None):
     filetype = filetype or options.filetype
     with tempfile.NamedTemporaryFile() as temp:
         tempfn = temp.name + "." + filetype
+        status('copying rows to clipboard')
         saveSheet(vs, tempfn)
-        sync()
+        sync(1)
         p = subprocess.Popen(cmd.split(), stdin=open(tempfn, 'r', encoding=options.encoding), close_fds=True)
         p.communicate()
-    status('copied rows to clipboard')
+    status('done')
