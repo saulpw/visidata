@@ -922,7 +922,6 @@ class Sheet:
         self.topRowIndex = 0     # cursorRowIndex of topmost row
         self.leftVisibleColIndex = 0    # cursorVisibleColIndex of leftmost column
         self.rightVisibleColIndex = 0
-        self.loader = None
 
         # as computed during draw()
         self.rowLayout = {}      # [rowidx] -> y
@@ -1013,6 +1012,7 @@ class Sheet:
                 return c
 
     def recalc(self):
+        'Clear caches and set col.sheet to this sheet for all columns.'
         for c in self.columns:
             if c._cachedValues:
                 c._cachedValues.clear()
@@ -1020,11 +1020,15 @@ class Sheet:
             c.name = c._name
 
     def reload(self):
-        'Default reloader wraps provided `loader` function'
-        if self.loader:
-            self.loader()
-        else:
-            status('no reloader')
+        'Loads rows and/or columns.  Override in subclass.'
+        self.rows = []
+        for r in self.iterload():
+            self.addRow(r)
+
+    def iterload(self):
+        'Override this generator for loading, if columns can be predefined.'
+        for row in []:
+            yield row
 
     def __copy__(self):
         'copy sheet design (no rows).  deepcopy columns so their attributes (width, type, name) may be adjusted independently.'

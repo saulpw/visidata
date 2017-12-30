@@ -211,28 +211,28 @@ def open_tsv(p, vs=None):
     'Parse contents of Path `p` and populate columns.'
 
     if vs is None:
-        vs = Sheet(p.name, source=p)
-        vs.loader = lambda vs=vs: reload_tsv(vs)
+        vs = TsvSheet(p.name, source=p)
 
-    header_lines = int(options.header)
-
-    with vs.source.open_text() as fp:
-        headers = _getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
-
-        if header_lines == 0:
-            vs.columns = ArrayColumns(len(headers[0]))
-        else:
-            # columns ideally reflect the max number of fields over all rows
-            # but that's a lot of work for a large dataset
-            vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers[:header_lines]))
-
-    vs.recalc()
     return vs
 
-@async
-def reload_tsv(vs, **kwargs):
-    'Asynchronous wrapper for `reload_tsv_sync`.'
-    reload_tsv_sync(vs)
+class TsvSheet(Sheet):
+    @async
+    def reload(self):
+        header_lines = int(options.header)
+
+        with self.source.open_text() as fp:
+            headers = _getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
+
+            if header_lines == 0:
+                self.columns = ArrayColumns(len(headers[0]))
+            else:
+                # columns ideally reflect the max number of fields over all rows
+                # but that's a lot of work for a large dataset
+                self.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers[:header_lines]))
+
+        self.recalc()
+
+        reload_tsv_sync(self)
 
 def reload_tsv_sync(vs, **kwargs):
     'Perform synchronous loading of TSV file, discarding header lines.'
