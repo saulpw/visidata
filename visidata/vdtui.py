@@ -753,8 +753,7 @@ class VisiData:
             if vs in self.sheets:
                 self.sheets.remove(vs)
                 self.sheets.insert(0, vs)
-            elif vs.rows == tuple():  # empty tuple = first time sentinel
-                vs.rows = list(vs.rows)
+            elif not vs.loaded:
                 self.sheets.insert(0, vs)
                 vs.reload()
                 vs.recalc()  # set up Columns
@@ -810,7 +809,108 @@ class Colorizer:
         self.func = colorfunc
 
 class BaseSheet:
-    pass
+    def __init__(self, name, **kwargs):
+        self.name = name
+
+        # commands specific to this sheet
+        sheetcmds = collections.OrderedDict()
+        for cls in inspect.getmro(self.__class__)[::-1]:  # reverse of method-resolution-order
+            for cmd in getattr(cls, 'commands', []):
+                sheetcmds[cmd.name] = cmd
+                if cmd.longname:
+                    sheetcmds[cmd.longname] = cmd
+        self._commands = collections.ChainMap(sheetcmds, baseCommands)
+
+        # for progress bar
+        self.progresses = []  # list of Progress objects
+
+        # track all async threads from sheet
+        self.currentThreads = []
+        self.__dict__.update(kwargs)
+
+    def __bool__(self):
+        'an instantiated Sheet always tests true'
+        return True
+
+    @property
+    def loaded(self):
+        return False
+
+    def leftStatus(self):
+        'Compose left side of status bar for this sheet (overridable).'
+        return options.disp_status_fmt.format(sheet=self)
+
+    def getCommand(self, keystrokes, default=None):
+        k = keystrokes
+        cmd = None
+        while k in self._commands:
+            cmd = self._commands.get(k, default)
+            k = cmd.execstr  # see if execstr is actually just an alias for another keystroke
+        return cmd
+
+    def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
+        return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
+
+    def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
+        "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
+        escaped = False
+        err = ''
+
+        if vdglobals is None:
+            vdglobals = getGlobals()
+
+        self.sheet = self
+
+        try:
+            self.vd.callHook('preexec', self, cmd.name if options.cmdlog_longname else keystrokes)
+            exec(cmd.execstr, vdglobals, LazyMap(self))
+        except EscapeException as e:  # user aborted
+            self.vd.status('aborted')
+            escaped = True
+        except Exception as e:
+            err = self.vd.exceptionCaught(e)
+
+        try:
+            self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
+        except Exception:
+            self.vd.exceptionCaught(e)
+
+        self.vd.refresh()
+        return escaped
+
+    @property
+    def name(self):
+        return self._name or ''
+
+    @name.setter
+    def name(self, name):
+        'Set name without spaces.'
+        self._name = name.strip().replace(' ', '_')
+
+    @property
+    def progressMade(self):
+        return sum(prog.made for prog in self.progresses)
+
+    @property
+    def progressTotal(self):
+        return sum(prog.total for prog in self.progresses)
+
+    @property
+    def progressPct(self):
+        'Percent complete as indicated by async actions.'
+        if self.progressTotal != 0:
+            return int(self.progressMade*100/self.progressTotal)
+        return 0
+
+    def recalc(self):
+        'Clear any calculated value caches.'
+        pass
+
+    def draw(self, scr):
+        error('no draw')
+
+    def reload(self):
+        error('no reload')
 
 class Sheet(BaseSheet):
     commands = [
@@ -924,8 +1024,7 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
     rowtype = 'rows'
 
     def __init__(self, name, **kwargs):
-        self.name = name
-
+        super().__init__(name, **kwargs)
         self.rows = tuple()      # list of opaque row objects (tuple until first reload)
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
@@ -942,22 +1041,7 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
         self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('')]
         self.recalc()
 
-        # commands specific to this sheet
-        sheetcmds = collections.OrderedDict()
-        for cls in inspect.getmro(self.__class__)[::-1]:  # reverse of method-resolution-order
-            for cmd in getattr(cls, 'commands', []):
-                sheetcmds[cmd.name] = cmd
-                if cmd.longname:
-                    sheetcmds[cmd.longname] = cmd
-        self._commands = collections.ChainMap(sheetcmds, baseCommands)
-
         self._selectedRows = {}  # id(row) -> row
-
-        # for progress bar
-        self.progresses = []  # list of Progress objects
-
-        # track all async threads from sheet
-        self.currentThreads = []
 
         self._colorizers = {'row': [], 'col': [], 'hdr': [], 'cell': []}
 
@@ -965,14 +1049,17 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
             for c in getattr(b, 'colorizers', []):
                 self.addColorizer(c)
 
-        self.__dict__.update(kwargs)
-
-    def __bool__(self):
-        'an instantiated Sheet always tests true'
-        return True
+        self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
     def __len__(self):
         return self.nRows
+
+    @property
+    def loaded(self):
+        if self.rows == tuple():
+            self.rows = list()
+            return False
+        return True
 
     def addColorizer(self, c):
         self._colorizers[c.type].append(c)
@@ -1001,10 +1088,6 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
                     attr, attrpre = colors.update(attr, attrpre, color, colorizer.precedence)
 
         return attr
-
-    def leftStatus(self):
-        'Compose left side of status bar for this sheet (overridable).'
-        return options.disp_status_fmt.format(sheet=self)
 
     def newRow(self):
         return list((None for c in self.columns))
@@ -1100,68 +1183,6 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
 
     def inputExpr(self, prompt, *args, **kwargs):
         return input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
-
-    def getCommand(self, keystrokes, default=None):
-        k = keystrokes
-        cmd = None
-        while k in self._commands:
-            cmd = self._commands.get(k, default)
-            k = cmd.execstr  # see if execstr is actually just an alias for another keystroke
-        return cmd
-
-    def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
-        return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
-
-    def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
-        "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
-        escaped = False
-        err = ''
-
-        if vdglobals is None:
-            vdglobals = getGlobals()
-
-        self.sheet = self
-
-        try:
-            self.vd.callHook('preexec', self, cmd.name if options.cmdlog_longname else keystrokes)
-            exec(cmd.execstr, vdglobals, LazyMap(self))
-        except EscapeException as e:  # user aborted
-            self.vd.status('aborted')
-            escaped = True
-        except Exception as e:
-            err = self.vd.exceptionCaught(e)
-
-        try:
-            self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
-        except Exception:
-            self.vd.exceptionCaught(e)
-
-        self.vd.refresh()
-        return escaped
-
-    @property
-    def name(self):
-        return self._name or ''
-
-    @name.setter
-    def name(self, name):
-        'Set name without spaces.'
-        self._name = name.strip().replace(' ', '_')
-
-    @property
-    def progressMade(self):
-        return sum(prog.made for prog in self.progresses)
-
-    @property
-    def progressTotal(self):
-        return sum(prog.total for prog in self.progresses)
-
-    @property
-    def progressPct(self):
-        'Percent complete as indicated by async actions.'
-        if self.progressTotal != 0:
-            return int(self.progressMade*100/self.progressTotal)
-        return 0
 
     @property
     def nVisibleRows(self):
