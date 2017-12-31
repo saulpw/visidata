@@ -943,7 +943,8 @@ Command('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width)
 
 Command('-', 'cursorCol.width = 0', 'hide current column', 'width-curcol-zero'),
 Command('z-', 'cursorCol.width = cursorCol.width//2', 'reduce width of current column by half', 'width-curcol-half'),
-Command('!', 'toggleKeyColumn(cursorCol)', 'toggle the current column as a key column', 'toggle-curcol-key'),
+Command('!', 'toggleKeyColumn(cursorCol)', 'toggle current column as a key column', 'column-key-toggle'),
+Command('z!', 'keyCols.remove(cursorCol)', 'unset current column as a key column', 'column-key-unset'),
 Command('z~', 'cursorCol.type = anytype', 'set type of current column to anytype', 'type-curcol-any'),
 Command('~', 'cursorCol.type = str', 'set type of current column to str', 'type-curcol-str'),
 Command('@', 'cursorCol.type = date', 'set type of current column to date', 'type-curcol-date'),

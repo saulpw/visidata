@@ -149,8 +149,8 @@ hides current column (to unhide, go to
 .It Ic "z-" Ns
 reduces width of current column by half
 .Pp
-.It Ic \&! Ns
-pins current column on the left as a key column
+.It Ic "! z!" Ns
+toggles/unsets current column as a key column
 .It Ic "~  #  %  $  @"
 sets type of current column to untyped/int/float/currency/date
 .It Ic "  ^"
@@ -435,10 +435,10 @@ opens current row/cell/sheet as Python object
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
 adds column from concatenating selected source columns
-.It Ic " !"
-pins current column on the left as a key column on source sheet
-.It Ic "g!"
-pins selected columns on the left as key columns on source sheet
+.It Ic " ! z!"
+toggles/unsets current column as a key column on source sheet
+.It Ic "g! gz!"
+toggles/unsets selected columns as key columns on source sheet
 .It Ic "g+"
 adds aggregator to selected source columns
 .It Ic "g_" No (underscore)
@@ -528,7 +528,7 @@ opens sheet of source rows which are grouped in current cell
 .It Ic "zs  zu"
 selects/unselects rows on source sheet which are being described in current cell
 .It Ic " !"
-pins current column on the left as a key column on source sheet
+toggles/unsets current column as a key column on source sheet
 .It Ic " Enter"
 .No opens a Sy Frequency Table No sheet grouped on column referenced in current row
 .It Ic "zEnter"
