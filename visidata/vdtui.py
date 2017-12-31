@@ -943,7 +943,7 @@ Command('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width)
 
 Command('-', 'cursorCol.width = 0', 'hide current column', 'width-curcol-zero'),
 Command('z-', 'cursorCol.width = cursorCol.width//2', 'reduce width of current column by half', 'width-curcol-half'),
-Command('!', 'toggleKeyColumn(cursorColIndex); cursorRight(+1)', 'pin current column on the left as a key column', 'toggle-curcol-key'),
+Command('!', 'toggleKeyColumn(cursorCol)', 'toggle the current column as a key column', 'toggle-curcol-key'),
 Command('z~', 'cursorCol.type = anytype', 'set type of current column to anytype', 'type-curcol-any'),
 Command('~', 'cursorCol.type = str', 'set type of current column to str', 'type-curcol-str'),
 Command('@', 'cursorCol.type = date', 'set type of current column to date', 'type-curcol-date'),
@@ -1020,7 +1020,7 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
         Colorizer('cell', 2, lambda s,c,r,v: options.color_default),
         Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
     ]
-    nKeys = 0  # self.columns[:nKeys] are all pinned to the left and matched on join
+    nKeys = 0  # initial keyCols = columns[:nKeys]
     rowtype = 'rows'
 
     def __init__(self, name, **kwargs):
@@ -1040,6 +1040,8 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
         # list of all columns in display order
         self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('')]
         self.recalc()
+
+        self.keyCols = self.columns[:self.nKeys]  # initial list of key columns
 
         self._selectedRows = {}  # id(row) -> row
 
@@ -1208,7 +1210,7 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
     @functools.lru_cache()
     def visibleCols(self):  # non-hidden cols
         'List of `Column` which are not hidden.'
-        return [c for c in self.columns if not c.hidden]
+        return [c for c in self.keyCols if not c.hidden] + [c for c in self.columns if not c.hidden and c not in self.keyCols]
 
     @property
     def cursorColIndex(self):
@@ -1216,14 +1218,9 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
         return self.columns.index(self.cursorCol)
 
     @property
-    def keyCols(self):
-        'List of the key columns (the first `nKeys` columns).'
-        return self.columns[:self.nKeys]
-
-    @property
     def nonKeyVisibleCols(self):
         'All columns which are not keysList of unhidden non-key columns.'
-        return [c for c in self.columns[self.nKeys:] if not c.hidden]
+        return [c for c in self.columns if not c.hidden and c not in self.keyCols]
 
     @property
     def keyColNames(self):
@@ -1403,15 +1400,13 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
             self.columns.insert(index, col)
             return col
 
-    def toggleKeyColumn(self, colidx):
-        'Toggle column at given index as key column.'
-        if colidx >= self.nKeys: # if not a key, add it
-            moveListItem(self.columns, colidx, self.nKeys)
-            self.nKeys += 1
+    def toggleKeyColumn(self, col):
+        'Toggle col as key column.'
+        if col not in self.keyCols: # if not a key, add it
+            self.keyCols.append(col)
             return 1
-        else:  # otherwise move it after the last key
-            self.nKeys -= 1
-            moveListItem(self.columns, colidx, self.nKeys)
+        else:
+            self.keyCols.remove(col)
             return 0
 
     def rowkey(self, row):

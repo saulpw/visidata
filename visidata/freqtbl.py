@@ -44,11 +44,11 @@ class SheetFreqTable(Sheet):
         self.origCols = columns
         self.largest = 100
 
-        self.nKeys = len(self.origCols)
-
         self.columns = [
             Column(c.name, type=c.type, width=c.width, getter=lambda col,row,i=i: row[0][i]) for i, c in enumerate(self.origCols)
         ]
+        self.keyCols = self.columns[:]  # origCols are now key columns
+        nkeys = len(self.keyCols)
 
         self.columns.extend([
             Column('count', type=int, getter=lambda col,row: len(row[1])),
@@ -65,7 +65,7 @@ class SheetFreqTable(Sheet):
         self.columns.extend(aggregatedCols)
 
         if aggregatedCols:  # hide percent/histogram if aggregations added
-            for c in self.columns[self.nKeys+1:self.nKeys+3]:
+            for c in self.columns[nkeys+1:nkeys+3]:
                 c.width = 0
 
 

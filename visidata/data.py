@@ -12,7 +12,7 @@ globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIn
 globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down')
 globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move current row up')
 globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move current column right')
-globalCommand('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'slide current column all the way to the left of sheet')
+globalCommand('gH', 'moveListItem(columns, cursorColIndex, 0)', 'slide current column all the way to the left of sheet')
 globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slide current row to the bottom of sheet')
 globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row all the way to the top of sheet')
 globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet')

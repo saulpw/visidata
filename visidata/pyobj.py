@@ -173,4 +173,4 @@ class SheetObject(Sheet):
         ]
         self.recalc()
 
-        self.nKeys = 1
+        self.keyCols = self.columns[0:1]

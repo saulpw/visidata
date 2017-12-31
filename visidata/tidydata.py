@@ -16,7 +16,7 @@ class MeltedSheet(Sheet):
     def reload(self):
         sheet = self.source
         self.columns = [SubrowColumn(c, 0) for c in sheet.keyCols]
-        self.nKeys = sheet.nKeys
+        self.keyCols = self.columns[:]
         self.columns.extend([Column(melt_var_colname, getter=lambda col,row: row[1].name),
                              Column(melt_value_colname, getter=lambda col,row: row[1].getValue(row[0]))])
 

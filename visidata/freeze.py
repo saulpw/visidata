@@ -36,8 +36,12 @@ class StaticSheet(Sheet):
     def __init__(self, source):
         super().__init__(source.name + "'", source=source)
 
-        self.columns = [ColumnItem(col.name, i, width=col.width, type=col.type) for i,col in enumerate(self.source.columns)]
-        self.nKeys = source.nKeys
+        self.columns = []
+        for i, col in enumerate(self.source.columns):
+            colcopy = ColumnItem(col.name, i, width=col.width, type=col.type)
+            self.columns.append(colcopy)
+            if col in self.source.keyCols:
+                self.keyCols.append(colcopy)
 
     @async
     def reload(self):
