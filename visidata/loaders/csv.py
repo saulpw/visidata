@@ -10,9 +10,7 @@ option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
 csv.field_size_limit(sys.maxsize)
 
 def open_csv(p):
-    vs = Sheet(p.name, source=p)
-    vs.loader = lambda vs=vs: load_csv(vs)
-    return vs
+    return CsvSheet(p.name, source=p)
 
 def wrappedNext(rdr):
     try:
@@ -20,7 +18,11 @@ def wrappedNext(rdr):
     except csv.Error as e:
         return ['[csv.Error: %s]' % e]
 
-@async
+class CsvSheet(Sheet):
+    @async
+    def reload(self):
+        load_csv(self)
+
 def load_csv(vs):
     'Convert from CSV, first handling header row specially.'
     with vs.source.open_text() as fp:
