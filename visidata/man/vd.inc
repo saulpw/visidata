@@ -604,7 +604,7 @@ overwrites existing files without confirmation
 .Pp
 .Sh FILES
 At the start of every session,
-.Sy VisiData No looks for Pa $PWD/.visidatarc Ns and then Pa $HOME/.visidatarc Ns , and calls Python exec() on their contents.
+.Sy VisiData No looks for Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents if it exists.
 For example:
 .Bd -literal
    options.min_memory_mb=100  # stop processing without 100MB free
