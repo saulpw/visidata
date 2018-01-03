@@ -63,10 +63,11 @@ def main():
     args = parser.parse_args()
 
     # user customisations in config file in standard location
-    for fnrc in ('.visidatarc', '~/.visidatarc'):
-        p = Path(fnrc)
-        if p.exists():
-            exec(open(p.resolve()).read(), globals())
+    fnrc = '~/.visidatarc'
+    p = Path(fnrc)
+    if p.exists():
+        code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
+        exec(code, globals())
 
     vdtui.addGlobals(globals())
 
