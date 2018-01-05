@@ -322,6 +322,12 @@ def currency(s=''):
         s = ''.join(ch for ch in s if ch in floatchars)
     return float(s) if s else float()
 
+try:
+    import dateutil.parser
+except ImportError:
+    pass
+
+
 @functools.total_ordering
 class date:
     'datetime wrapper, constructed from time_t or from str with dateutil.parse'
@@ -332,7 +338,6 @@ class date:
         elif isinstance(s, int) or isinstance(s, float):
             self.dt = datetime.datetime.fromtimestamp(s)
         elif isinstance(s, str):
-            import dateutil.parser
             self.dt = dateutil.parser.parse(s)
         elif isinstance(s, date):
             self.dt = s.dt
