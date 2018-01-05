@@ -582,6 +582,7 @@ class VisiData:
     def sync(self, expectedThreads=0):
         'Wait for all but expectedThreads async threads to finish.'
         while len(self.unfinishedThreads) > expectedThreads:
+            time.sleep(.3)
             self.checkForFinishedThreads()
 
     def refresh(self):
