@@ -136,7 +136,7 @@ class CommandLog(Sheet):
         if sheet and keystrokes != 'o':
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             sheetname = sheet.name
-            if sheet.rows and contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorRow'):
+            if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorRow') and sheet.rows:
                 k = sheet.rowkey(sheet.cursorRow)
                 rowname = (options.rowkey_prefix + keystr(k)) if k else sheet.cursorRowIndex
 
