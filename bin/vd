@@ -138,6 +138,7 @@ def main():
     vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
     if args.batch:
         vd().status = print
+        vd().execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
         vs.replay_sync()
         if args.output:
             saveSheet(vd().sheets[0], args.output, confirm_overwrite=False)
