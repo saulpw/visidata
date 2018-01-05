@@ -7,7 +7,7 @@ from .vdtui import *
 
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
-option('profile_threads', True, 'profile async threads')
+option('profile_threads', False, 'profile async threads')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
 globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet')
