@@ -83,6 +83,7 @@ def globalCommand(keystrokes, execstr, helpstr='', longname=None):
 
 def option(name, default, helpstr=''):
     baseOptions[name] = [name, default, default, helpstr]
+    globals()['options_'+name] = default
 
 
 class OptionsObject:
@@ -112,6 +113,7 @@ class OptionsObject:
             v = t(v)
 
         self._opts[k][1] = v
+        globals()['options_'+k] = v
 
 options = OptionsObject(baseOptions)
 
