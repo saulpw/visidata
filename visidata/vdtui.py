@@ -1144,6 +1144,7 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
         ret.__dict__.update(self.__dict__)
         ret.rows = []                     # a fresh list without incurring any overhead
         ret.columns = deepcopy(self.columns) # deepcopy columns even for shallow copy of sheet
+        ret.keyCols = [ret.columns[i] for i, c in enumerate(self.columns) if c in self.keyCols]
         ret.recalc()  # set .sheet on columns
         ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
