@@ -143,7 +143,7 @@ theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 theme('use_default_colors', False, 'set curses to use default terminal colors')
 
 disp_column_fill = ' ' # pad chars after column value
-theme('disp_none', '',  'visible contents of a cell whose value was None')
+theme('disp_none', '',  'visible contents of a cell whose value is None')
 theme('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
