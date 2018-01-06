@@ -53,7 +53,7 @@ class SheetPivot(Sheet):
                         allValues.add(value)
                         c = Column(value+'_'+aggname,
                                 type=aggregator.type or aggcol.type,
-                                getter=lambda col,row,aggcol=aggcol,aggvalue=value: aggregator(aggcol, row[1].get(aggvalue, [])))
+                                getter=lambda col,row,aggcol=aggcol,aggvalue=value,agg=aggregator: agg(aggcol, row[1].get(aggvalue, [])))
                         c.aggvalue = value
                         self.addColumn(c)
 
