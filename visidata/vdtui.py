@@ -617,7 +617,8 @@ class VisiData:
         if scr:
             scr.addstr(self.windowHeight-1, 0, prompt)
         self.inInput = True
-        ret = self.editText(self.windowHeight-1, len(prompt), self.windowWidth-len(prompt)-8, attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
+        rstatus, _ = self.rightStatus(self.sheets[0])
+        ret = self.editText(self.windowHeight-1, len(prompt), self.windowWidth-len(prompt)-len(rstatus), attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
         self.inInput = False
         return ret
 
