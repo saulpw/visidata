@@ -193,7 +193,7 @@ globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtyp
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error')
 
-globalCommand('^^', 'vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet (swaps with current sheet)')
+globalCommand('^^', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet (swap with current sheet)')
 
 globalCommand('g^E', 'vd.push(TextSheet("last_errors", sum(vd.lastErrors[-10:], [])))', 'view traceback for most recent errors')
 
