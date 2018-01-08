@@ -7,7 +7,7 @@ from .vdtui import *
 
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
-option('profile_threads', False, 'profile async threads')
+option('profile', '', 'filename to save binary profiling data')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
 globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet')
@@ -38,12 +38,15 @@ def toggleProfiling(t):
 #   ENTER on that row pushes a profile of the thread
 
 class ThreadProfiler:
+    numProfiles = 0
     def __init__(self, thread):
         self.thread = thread
-        if options.profile_threads:
+        if options.profile:
             self.thread.profile = cProfile.Profile()
         else:
             self.thread.profile = None
+        ThreadProfiler.numProfiles += 1
+        self.profileNumber = ThreadProfiler.numProfiles
 
     def __enter__(self):
         if self.thread.profile:
@@ -53,15 +56,15 @@ class ThreadProfiler:
     def __exit__(self, exc_type, exc_val, tb):
         if self.thread.profile:
             self.thread.profile.disable()
+            self.thread.profile.dump_stats(options.profile + str(self.profileNumber))
 
         # remove very-short-lived async actions
         if elapsed_s(self.thread) < min_thread_time_s:
             vd().threads.remove(self.thread)
 
-
 @functools.wraps(vd().toplevelTryFunc)
 def threadProfileCode(vdself, func, *args, **kwargs):
-    'Profile @async threads if `options.profile_threads` is set.'
+    'Toplevel thread profile wrapper.'
     with ThreadProfiler(threading.current_thread()) as prof:
         try:
             prof.thread.status = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
