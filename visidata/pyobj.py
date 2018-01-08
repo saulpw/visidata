@@ -1,6 +1,7 @@
 from visidata import *
 
-option('pyobj_show_hidden', False, 'show methods and _private properties')
+option('pyobj_show_hidden', False, 'show _private properties on pyobjs')
+option('pyobj_show_methods', False, 'show methods on pyobjs')
 
 globalCommand('^X', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, eval(expr))', 'evaluate Python expression and open result as Python object')
 globalCommand('g^X', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope')
@@ -150,7 +151,9 @@ class SheetObject(Sheet):
     commands = [
         Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive further into Python object'),
         Command('e', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', 'edit contents of current cell'),
-        Command('v', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether methods and hidden properties are shown')
+        Command('v', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether methods and hidden properties are shown'),
+        Command('gv', 'options.pyobj_show_hidden = options.pyobj_show_methods = True; reload()', 'toggle whether methods and hidden properties are shown'),
+        Command('zv', 'options.pyobj_show_hidden = options.pyobj_show_methods = False; reload()', 'toggle whether methods and hidden properties are shown'),
     ]
     def __init__(self, name, obj, **kwargs):
         super().__init__(name, source=obj, **kwargs)
@@ -158,13 +161,13 @@ class SheetObject(Sheet):
     def reload(self):
         self.rows = []
         for r in dir(self.source):
-            if not options.pyobj_show_hidden:
-                try:
-                    if r.startswith('_') or callable(getattr(self.source, r)):
-                        continue
+            try:
+                if options.pyobj_show_hidden or not r.startswith('_'):
                     self.addRow(r)
-                except Exception:
-                    pass
+                elif options.pyobj_show_methods or not callable(getattr(self.source, r)):
+                    self.addRow(r)
+            except Exception:
+                pass
 
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
