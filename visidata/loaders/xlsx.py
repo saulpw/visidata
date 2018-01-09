@@ -25,12 +25,14 @@ class xlsxSheet(Sheet):
     @async
     def reload(self):
         worksheet = self.source
-        self.columns = []
-        for i in range(worksheet.max_column):
-            self.addColumn(ColumnItem(None, i, width=8))
 
-        for row in Progress(worksheet.iter_rows(), worksheet.max_row):
-            self.addRow(list(cell.value for cell in row))
+        self.columns = []
+        self.rows = []
+        for row in Progress(worksheet.iter_rows(), worksheet.max_row or 0):
+            L = list(cell.value for cell in row)
+            for i in range(len(self.columns), len(L)):  # no-op if already done
+                self.addColumn(ColumnItem(None, i, width=8))
+            self.addRow(L)
 
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
