@@ -182,12 +182,6 @@ def open_vd(p):
     vs.reload()
     return vs
 
-def open_py(p):
-    'Load a .py addon into the global context.'
-    contents = p.read_text()
-    exec(contents, getGlobals())
-    status('executed %s' % p)
-
 def open_txt(p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     with p.open_text() as fp:
