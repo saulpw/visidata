@@ -44,7 +44,7 @@ class SheetPivot(Sheet):
                 if aggregator.__name__ != 'count':  # already have count above
                     c = Column('Total_' + aggname,
                                 type=aggregator.type or aggcol.type,
-                                getter=lambda col,row,aggcol=aggcol: aggregator(aggcol, sum(row[1].values(), [])))
+                                getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, sum(row[1].values(), [])))
                     self.addColumn(c)
 
                 allValues = set()
