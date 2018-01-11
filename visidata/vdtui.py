@@ -229,7 +229,7 @@ def anytype(r=None):
     return r
 anytype.__name__ = ''
 
-floatchars='+-0123456789.eE'
+floatchars='+-0123456789.'
 def currency(s=''):
     'dirty float (strip non-numeric characters)'
     if isinstance(s, str):
