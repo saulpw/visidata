@@ -136,7 +136,7 @@ class Plotter(BaseSheet):
     ]
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
-        self.labels = []  # (x, y, text, attr)
+        self.labels = []  # (x, y, text, attr, row)
         self.hiddenAttrs = set()
         self.needsRefresh = False
         self.resetCanvasDimensions()
@@ -156,8 +156,8 @@ class Plotter(BaseSheet):
         for x, y in iterline(x1, y1, x2, y2):
             self.plotpixel(round(x), round(y), attr, row)
 
-    def plotlabel(self, x, y, text, attr):
-        self.labels.append((x, y, text, attr))
+    def plotlabel(self, x, y, text, attr, row=None):
+        self.labels.append((x, y, text, attr, row))
 
     def plotlegend(self, i, txt, attr):
         self.plotlabel(self.plotwidth-30, i*4, txt, attr)
@@ -247,9 +247,43 @@ class Plotter(BaseSheet):
                     if attr:
                         scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)
 
+        def _mark_overlap_text(labels, textobj):
+            def _overlaps(a, b):
+                a_x1, _, a_txt, _, _ = a
+                b_x1, _, b_txt, _, _ = b
+                a_x2 = a_x1 + len(a_txt)
+                b_x2 = b_x1 + len(b_txt)
+                if a_x1 < b_x1 < a_x2 or a_x1 < b_x2 < a_x2 or \
+                   b_x1 < a_x1 < b_x2 or b_x1 < a_x2 < b_x2:
+                   return True
+                else:
+                   return False
+
+            label_fldraw = [textobj, True]
+            labels.append(label_fldraw)
+            for o in labels:
+                if _overlaps(o[0], textobj):
+                    o[1] = False
+                    label_fldraw[1] = False
+
         if options.show_graph_labels:
-            for pix_x, pix_y, txt, attr in self.labels:
-                clipdraw(scr, int(pix_y/4), int(pix_x/2), txt, attr, len(txt))
+            labels_by_line = defaultdict(list) # y -> text labels
+
+            for pix_x, pix_y, txt, attr, row in self.labels:
+                if attr in self.hiddenAttrs:
+                    continue
+                if row is not None:
+                    pix_x -= len(txt)/2*2
+                char_y = int(pix_y/4)
+                char_x = int(pix_x/2)
+                o = (char_x, char_y, txt, attr, row)
+                _mark_overlap_text(labels_by_line[char_y], o)
+
+            for line in labels_by_line.values():
+                for o, fldraw in line:
+                    if fldraw:
+                        char_x, char_y, txt, attr, row = o
+                        clipdraw(scr, char_y, char_x, txt, attr, len(txt))
 
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)

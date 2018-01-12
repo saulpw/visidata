@@ -29,8 +29,8 @@ class ShapeSheet(Sheet):
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]
     commands = [
-        Command('.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow]))', ''),
-        Command('g.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows))', ''),
+        Command('.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', ''),
+        Command('g.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows, textCol=cursorCol))', ''),
     ]
     @async
     def reload(self):
@@ -65,5 +65,10 @@ class ShapeMap(Canvas):
                 self.point(x, y, self.plotColor(k), row)
             else:
                 status('notimpl shapeType %s' % row.shape.shapeType)
+
+            x1, y1, x2, y2 = row.shape.bbox
+            textx, texty = (x1+x2)/2, (y1+y2)/2
+            disptext = self.textCol.getDisplayValue(row)
+            self.label(textx, texty, disptext, self.plotColor(k), row)
 
         self.refresh()
