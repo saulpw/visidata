@@ -16,7 +16,7 @@ ColumnsSheet.commands += [
 
 def getValueOrError(c, r):
     try:
-        return c.getValue(r)
+        return c.getDisplayValue(r)
     except Exception as e:
         return 'error: %s' % e
 
