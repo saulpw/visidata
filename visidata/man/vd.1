@@ -231,13 +231,13 @@ appends a blank row
 .It Ic "  d   gd"
 deletes current/selected row(s) and moves to clipboard
 .It Ic "  y   gy"
-copies current/selected row(s) to clipboard
+yanks (copies) current/selected row(s) to clipboard
 .It Ic " zy"
-copies current cell value to clipboard
+yanks (copies) current cell value to clipboard
 .It Ic "  Y   gY"
-copies current/selected row(s) to system clipboard
+yanks (copies) current/selected row(s) to system clipboard
 .It Ic " zY"
-copies current cell value to system clipboard
+yanks (copies) current cell value to system clipboard
 .It Ic "  p    P"
 pastes clipboard rows after/before current row
 .It Ic " zp  gzp"
