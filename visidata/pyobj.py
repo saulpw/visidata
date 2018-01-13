@@ -151,9 +151,9 @@ class SheetObject(Sheet):
     commands = [
         Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive further into Python object'),
         Command('e', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', 'edit contents of current cell'),
-        Command('v', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether methods and hidden properties are shown'),
-        Command('gv', 'options.pyobj_show_hidden = options.pyobj_show_methods = True; reload()', 'toggle whether methods and hidden properties are shown'),
-        Command('zv', 'options.pyobj_show_hidden = options.pyobj_show_methods = False; reload()', 'toggle whether methods and hidden properties are shown'),
+        Command('v', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether hidden properties are shown'),
+        Command('gv', 'options.pyobj_show_hidden = options.pyobj_show_methods = True; reload()', 'show methods and hidden properties'),
+        Command('zv', 'options.pyobj_show_hidden = options.pyobj_show_methods = False; reload()', 'hide methods and hidden properties'),
     ]
     def __init__(self, name, obj, **kwargs):
         super().__init__(name, source=obj, **kwargs)
