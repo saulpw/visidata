@@ -33,7 +33,7 @@ class SheetPivot(Sheet):
     def reloadCols(self):
         self.columns = copy(self.nonpivotKeyCols)
         self.nKeys = len(self.nonpivotKeyCols)
-        aggcols = [(c, aggregator) for c in self.source.columns for aggregator in getattr(c, 'aggregators', [])]
+        aggcols = [(c, aggregator) for c in self.source.visibleCols for aggregator in getattr(c, 'aggregators', [])]
 
         if not aggcols:
             aggcols = [(c, aggregators["count"]) for c in self.variableCols]
