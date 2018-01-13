@@ -555,12 +555,16 @@ opens sheet of source rows aggregated in current pivot cell
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "Enter"
+.It Ic " Enter"
 dives further into Python object
-.It Ic "e"
+.It Ic " e"
 edits contents of current cell
-.It Ic "v"
+.It Ic " v"
 toggles whether methods and hidden properties are shown
+.It Ic "gv"
+shows methods and hidden properties
+.It Ic "zv"
+hides methods and hidden properties
 .El
 .
 .Sh OPTIONS
