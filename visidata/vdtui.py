@@ -366,7 +366,7 @@ class date:
     def __eq__(self, a):
         return self.dt == a.dt
     def __sub__(self, a):
-        return (self.dt - a.dt).days
+        return self.dt - a.dt
     def __add__(self, a):
         return date(self.dt + a)
 
