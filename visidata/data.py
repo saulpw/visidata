@@ -8,14 +8,14 @@ option('delimiter', '\t', 'delimiter to use for tsv filetype')
 option('filetype', '', 'specify file type')
 
 # slide rows/columns around
-globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left')
-globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down')
-globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move current row up')
-globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move current column right')
-globalCommand('gH', 'moveListItem(columns, cursorColIndex, 0)', 'slide current column all the way to the left of sheet')
-globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slide current row to the bottom of sheet')
-globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row all the way to the top of sheet')
-globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet')
+globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left', 'column-slide-left')
+globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down', 'row-slide-down')
+globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move current row up', 'row-slide-up')
+globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move current column right', 'column-slide-right')
+globalCommand('gH', 'moveListItem(columns, cursorColIndex, 0)', 'slide current column all the way to the left of sheet', 'column-slide-leftmost')
+globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slide current row to the bottom of sheet', 'row-slide-bottom')
+globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row all the way to the top of sheet', 'row-slide-top')
+globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet', 'column-slide-rightmost')
 
 globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'move to the next column with name matching regex')
 globalCommand('r', 'moveRegex(sheet, regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex')
@@ -28,6 +28,16 @@ globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'ap
 globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows')
 
 globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with contents of non-null cells up the current column')
+
+alias('KEY_SLEFT', 'column-slide-left')
+alias('kDN', 'J', 'row-slide-down')
+alias('kUP', 'K', 'row-slide-up')
+alias('KEY_SRIGHT', 'column-slide-right')
+
+alias('gKEY_SLEFT', 'column-slide-leftmost')
+alias('gkDN', 'gJ', 'row-slide-bottom')
+alias('gkUP', 'gK', 'row-slide-top')
+alias('gKEY_SRIGHT', 'column-slide-rightmost')
 
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'
