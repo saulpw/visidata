@@ -105,13 +105,13 @@ def iterline(x1, y1, x2, y2):
     xdir = 1 if x1 <= x2 else -1
     ydir = 1 if y1 <= y2 else -1
 
-    r = max(xdiff, ydiff)
+    r = math.ceil(max(xdiff, ydiff))
     if r == 0:  # point, not line
         yield x1, y1
     else:
-        x, y = x1, y1
+        x, y = math.floor(x1), math.floor(y1)
         i = 0
-        while i <= r:
+        while i < r:
             x += xdir * xdiff / r
             y += ydir * ydiff / r
 
@@ -154,7 +154,7 @@ class Plotter(BaseSheet):
 
     def plotline(self, x1, y1, x2, y2, attr, row=None):
         for x, y in iterline(x1, y1, x2, y2):
-            self.plotpixel(round(x), round(y), attr, row)
+            self.plotpixel(math.ceil(x), math.ceil(y), attr, row)
 
     def plotlabel(self, x, y, text, attr, row=None):
         self.labels.append((x, y, text, attr, row))
