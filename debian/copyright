@@ -4,7 +4,7 @@ Upstream-Contact: Saul Pwanson <saul@visidata.org>
 Source: https://github.com/saulpw/visidata
 
 Files: *
-Copyright: 2017 Saul Pwanson
+Copyright: 2017-2018 Saul Pwanson
 License: GPL-3+
  On Debian systems, the full text of the GNU General Public
  License version 3 can be found in the file
