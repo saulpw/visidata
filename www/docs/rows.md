@@ -27,7 +27,7 @@ An example usage follows.
 1. Press `s` or `t` on the rows to filter.
 2. Press
 
-    a. `gd` to delete the open a duplicate sheet with a deepcopy of selected rows.
+    a. `gd` to delete the selected rows.
 
     **or**
 

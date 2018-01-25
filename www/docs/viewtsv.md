@@ -13,7 +13,7 @@ VisiData 1.0 requires Python 3.4+.
     import sys
     import vdtui
 
-Copy `vdtui.py` into your application verbatim.  It's freely usable under the MIT license, and then you can just import it like this and use it without adding any external dependencies to your project.
+Copy `vdtui.py` into an application verbatim.  It's freely usable under the MIT license, and then it can just be imported like this and used without adding any external dependencies to the project.
 
     class TsvSheet(vdtui.Sheet):
         rowtype = 'rows'  # rowdef: tuple of values
