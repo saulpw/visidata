@@ -18,10 +18,6 @@ To install VisiData, with loaders for the most common data file formats (includi
 
     $ pip3 install visidata
 
-To install VisiData, plus external dependencies for all available loaders:
-
-    $ pip3 install "visidata[full]"
-
 ### Install via brew
 
 Ideal for MacOS users who primarily want to engage with VisiData as an application. This is currently the most reliable way to install VisiData's manpage on MacOS.
