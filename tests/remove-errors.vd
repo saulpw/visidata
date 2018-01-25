@@ -1,18 +1,17 @@
 sheet	col	row	keystrokes	input	comment
-			o	sample_data/surveys.csv	open file
-surveys	record_id	0	=	year+'-'+month+'-'+day	create new column from Python expression, with column names as variables
-surveys	year+'-'+month+'-'+day	0	@		set type of current column to date
-surveys	year+'-'+month+'-'+day	0	^	date	edit name of current column
-surveys	month	0	-		hide current column
-surveys	day	0	-		hide current column
-surveys	year	0	-		hide current column
-surveys	hindfoot_length	0	#		set type of current column to int
-surveys	weight	0	#		set type of current column to int
-surveys	weight	0	I		open Describe Sheet
+			o	sample_data/surveys.csv	open input in VisiData
+surveys	record_id		=	year+'-'+month+'-'+day	create new column from Python expression, with column names as variables
+surveys	year+'-'+month+'-'+day		@		set type of current column to date
+surveys	year+'-'+month+'-'+day		^	date	edit name of current column
+surveys	month		-		hide current column
+surveys	day		-		hide current column
+surveys	year		-		hide current column
+surveys	hindfoot_length		#		set type of current column to int
+surveys	weight		#		set type of current column to int
+surveys			I		open Describe Sheet
 surveys_describe	errors	8	zs		select rows on source sheet which are being described in current cell
-surveys_describe	errors	8	^^		jump to previous sheet (swaps with current sheet)
-surveys	weight	0	gd		delete all selected rows and move them to clipboard
-surveys	species_id	0	!		pin current column on the left as a key column
-surveys	hindfoot_length	0	+	mean	add aggregator to the current column
-surveys	sex	0	W		Pivot the current column into a new sheet
-surveys_pivot_sex	species_id	0	^S	tests/golden/remove-errors.tsv	save current sheet to filename in format determined by extension (default .tsv)
+surveys_describe			^^		jump to previous sheet (swaps with current sheet)
+surveys			gd		delete all selected rows and move them to clipboard
+surveys	species_id		!		pin current column on the left as a key column
+surveys	hindfoot_length		+	mean	add aggregator to current column
+surveys	sex		W		Pivot the current column into a new sheet

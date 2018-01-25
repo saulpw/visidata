@@ -4,13 +4,14 @@ import sys
 import vdtui
 
 class TsvSheet(vdtui.Sheet):
+    rowtype = 'rows'
     columns = [vdtui.ColumnItem('tsv', 0)]
 
     @vdtui.async
     def reload(self):
         self.rows = []
 
-        with self.source.open_text() as fp:
+        with open(self.source, encoding=vdtui.options.encoding) as fp:
             for line in fp:
                 line = line[:-1]
                 if line:
@@ -19,5 +20,4 @@ class TsvSheet(vdtui.Sheet):
         self.columns = [vdtui.ColumnItem(colname, i) for i, colname in enumerate(self.rows[0])]
         self.rows = self.rows[1:]
 
-
-vdtui.run(*(TsvSheet(fn, vdtui.Path(fn)) for fn in sys.argv[1:]))
+vdtui.run(*(TsvSheet(fn, source=fn) for fn in sys.argv[1:]))

@@ -8,4 +8,4 @@ dependencies:
 
 test:
   override:
-    - ./test.sh
+    - dev/test.sh

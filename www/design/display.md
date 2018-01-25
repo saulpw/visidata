@@ -82,10 +82,8 @@ This can be a problem when a getter or setter needs to know the sheet; it can't 
 
 Here is an extremely simple sheet that shows a list of all global variables with their values:
 
-```
-from vdtui import *
+    from vdtui import *
 
-```
 
 Notes:
 - `Sheet.__init__(name, *sources, **kwargs)` sets the name and sources, as well as adding kwargs as extra attributes for convenience.

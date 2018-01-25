@@ -3,14 +3,11 @@
 from setuptools import setup
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 #from visidata import __version__
-__version__ = '0.99'
+__version__ = '1.0'
 
 setup(name='visidata',
       version=__version__,
-      install_requires=['python-dateutil', 'openpyxl', 'xlrd', 'lxml', 'requests'],
-      extras_require={
-        'full': 'h5py psycopg2 pyshp mapbox-vector-tile'.split()
-        },
+      install_requires=['python-dateutil', 'openpyxl', 'xlrd', 'requests'],
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       author='Saul Pwanson',
@@ -18,7 +15,6 @@ setup(name='visidata',
       author_email='visidata@saul.pw',
       url='http://visidata.org',
       download_url='https://github.com/saulpw/visidata/tarball/' + __version__,
-      test_suite='visidata.tests',
       scripts=['bin/vd'],
       py_modules = ['visidata'],
       packages=['visidata',  'visidata.loaders'],
@@ -27,7 +23,7 @@ setup(name='visidata',
       package_data={'': ['man/vd.1']},
       license='GPLv3',
       classifiers=[
-          'Development Status :: 4 - Beta',
+          'Development Status :: 5 - Production/Stable',
           'Environment :: Console',
           'Environment :: Console :: Curses',
           'Intended Audience :: Developers',
