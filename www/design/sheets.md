@@ -9,19 +9,17 @@ These will each be described in detail below.  [See the API reference](/api/Shee
 
 Here is the complete code for a simple DictSheet.
 
-```
-# rowdef: source key
-class DictSheet(Sheet):
-    rowtype = 'items'
-    columns = [
-        Column('key'),
-        Column('value', getter=lambda col,row: col.sheet.source[row])
-    ]
-    def reload(self):
-        self.rows = list(self.source.keys())
+    # rowdef: source key
+    class DictSheet(Sheet):
+        rowtype = 'items'
+        columns = [
+            Column('key'),
+            Column('value', getter=lambda col,row: col.sheet.source[row])
+        ]
+        def reload(self):
+            self.rows = list(self.source.keys())
 
-globalCommand('1', 'vd.push(DictSheet("globals", source=globals()))', 'push globals dict')
-```
+    globalCommand('1', 'vd.push(DictSheet("globals", source=globals()))', 'push globals dict')
 
 If this code is [loaded](/design/addons), pressing `1` will push a fresh instance of `DictSheet`, showing each key in the `globals()` dict with its corresponding value.
 

@@ -1,0 +1,3 @@
+sheet	col	row	keystrokes	input	comment
+			o	sample_data/sunshinelist.html	open file
+sunshinelist		0	^J		open this table

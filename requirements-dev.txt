@@ -1,4 +1,0 @@
-aha  # ascii-html adaptor
-markdown
-pyyaml
-tox

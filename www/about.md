@@ -1,8 +1,7 @@
 ## What is VisiData?
 
 VisiData is an open source multitool for data exploration and manipulation.
-It combines the clarity of a spreadsheet, the efficiency of the terminal, and the power of Python, into a lightweight utility which can handle half a million rows with ease.
-With enough memory it will happily chug through 5 million rows or more--all the while remaining totally responsive.
+It combines the clarity of a spreadsheet, the efficiency of the terminal, and the power of Python, into a lightweight utility which can handle millions of rows with ease.
 
 ## Who wrote it?
 
@@ -24,3 +23,23 @@ Even at the time, I felt it had more potential, but I had to set it aside to wor
 
 So at the end of 2016, I decided to take a personal sabbatical and use my experience with data to write another version of this tool.
 One that could be used in any terminal, with any data source, with minimal requirements and zero configuration.
+
+## Credits
+
+Many thanks to [Anja](https://github.com/anjakefala) for significant help with documentation, releases, and tests.
+
+Thanks also to the following people for their support and contributions to VisiData:
+
+- [azag0](https://github.com/azag0)
+- [brannerchinese](https://github.com/brannerchinese)
+- [eliasdorneles](https://github.com/eliasdorneles)
+- [jamesroutley](https://github.com/jamesroutley)
+- [jsvine](https://github.com/jsvine)
+- [khughitt](https://github.com/khughitt)
+- [repjarms](https://github.com/repjarms)
+- [scl17](https://github.com/scl17)
+- [trentgill](https://github.com/trentgill)
+- [vbrown608](https://github.com/vbrown608)
+- [wavexx](https://github.com/wavexx)
+- [zormit](https://github.com/zormit)
+

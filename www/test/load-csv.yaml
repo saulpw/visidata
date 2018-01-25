@@ -1,8 +1,0 @@
-name: load-csv
-vd: tests/load-csv.vd
-preview: poster="npt:0:02"
-question: How do I load a csv file in visidata?
-workflow: just open it up :)
-timestamps:
-    - 0.5
-    - 2
