@@ -24,16 +24,18 @@ An example usage follows.
 
 ## How to filter rows
 
-1. Press `s` or `t` on the rows you wish to filter.
+1. Press `s` or `t` on the rows to filter.
 2. Press
 
-    a. `"` to open a duplicate sheet with a shallow copy of selected rows.
+    a. `gd` to delete the open a duplicate sheet with a deepcopy of selected rows.
 
     **or**
 
-    b. `gz"` to open a duplicate sheet with a deepcopy of selected rows.
+    b. `"` to open a duplicate sheet with references to the selected rows.  Edits performed within the duplicate sheet will also propagate to the source sheet.
 
-With rows that are shallowly copied, edits performed within the duplicate sheet will also propagate to the source sheet. This will not occur with deepcopied rows.
+    **or**
+
+    c. `gz"` to open a duplicate sheet with copies of the selected rows.  Any changes will not affect the source sheet.
 
 ---
 

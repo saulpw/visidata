@@ -12,11 +12,12 @@ Command         Operation
  `e`            edits contents of current cell
 `ge` *text*     sets contents of current column for selected rows to *text*
 
-While in editing mode, or anytime you are passing input to VisiData (with e.g. `=`, `;`), these are some commands which become available:
+While in editing mode, or anytime VisiData expects input (with e.g. `=`, `;`), these are some commands which become available:
 
 Command             Operation
 --------            ----------
-`Enter`  `^C`       accepts/aborts input
+`Enter`             accepts input
+`^C`  Esc           aborts input
 `^O`                opens external $EDITOR to edit contents
 `^R`                reloads initial value
 `^A`  `^E`          moves to beginning/end of line
@@ -38,7 +39,7 @@ Command     Operation
 In most cases, `^` is the preferred command. Examples which demo `^` can be seen in [Columns](/docs/columns#derived) and [Group](/docs/group#frequency).
 
 ###### How to set the header in an Excel sheet?
-For the standard filetypes (e.g. csv, tsv) the loaders assume that the dataset's first row is the header row. The Excel loader does not because an Excel file can have multiple sheets in it with a varying number of header rows.
+For the standard filetypes (e.g. csv, tsv) the loaders assume that the dataset's first `options.header` rows contain the column names. The Excel loader does not because an Excel file can have multiple sheets with varying number of header rows.
 
 1. Press `s` or `t` to select the rows which represent the header rows.
 2. Press `g^` to set the names of the headers to the contents of selected rows.
@@ -48,6 +49,6 @@ For the standard filetypes (e.g. csv, tsv) the loaders assume that the dataset's
 1. Press `C` to open the **Columns sheet**.
 2. Within the **name** column, move the cursor to the row which represents the source sheet.
 3. Type `e` and then input *the new column name*. Press `Enter`.
-4. Press `q` to return to the source sheet and see your renamed column.
+4. Press `q` to return to the source sheet and see the renamed column.
 
 ---

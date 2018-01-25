@@ -25,10 +25,10 @@ To build a `.vd` file:
 
 4. Save the cmdlog using *one* of the following options:
 
-    a. Press `^S` on the `CommandLog Sheet` and save it with a `.vd` suffix.
+    a. Press `D` to open the `commanDlog Sheet`, and press `^S` to save it with a `.vd` suffix.
 
     *or*
 
-    b. Press `^D` to save the current cmdlog to a `fn.vd` file regardless of your current context in VisiData.
+    b. Press `^D` to save the current cmdlog to a `fn.vd` file, regardless of the current VisiData context.
 
 ---

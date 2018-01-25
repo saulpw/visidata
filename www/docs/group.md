@@ -79,23 +79,23 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 ## How to filter for grouped or described rows
 
-###### How to filter for grouped roews
+###### How to filter for grouped rows
 
 1. Press `F` to open the **Frequency table**.
 2. Press `s` or `t` on the groups you are interested in to select those entries in the source sheet.
-3. Press `^^` or `q` to return to the source sheet.
+3. Press `q` or `Ctrl-^` to return to the source sheet.
 4. Press `"` to open a duplicate sheet with selected rows.
 
 **or**
 
 1. Press `F` to open the **Frequency table**.
-2. Press `Enter` on the grouping you are interested in to open a sheet of the source rows which part of that group.
+2. Press `Enter` on the grouping you are interested in to open a sheet of the source rows that are part of that group.
 
 ###### How to filter for described rows
 
 1. Press `I` to open the **Describe sheet**.
 2. Use `zs` to select rows on source sheet which are being described in the cells of interest.
-3. Press `^^` or `q` to return to the source sheet.
+3. Press `q` or `Ctrl-^` to return to the source sheet.
 4. Press `"` to open a duplicate sheet with selected rows.
 
 **or**

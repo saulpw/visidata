@@ -5,12 +5,16 @@
 
 ## How to configure VisiData (user)
 
-Within the application itself, press `O` to access the **Options sheet**. An option can be edited either by pressing `Enter` or by using [standard editing commands](/man#edit). Options can also be passed as arguments through the [commandline](/man#options).
+Within the application itself, press `O` to access the **Options sheet**. An option can be edited either by pressing `Enter` or by using [standard editing commands](/man#edit). Options can also be passed as arguments through the [commandline](/man#options).  For example
 
 ~~~
-vd --cmd-after-edit l
+vd --skip 2
+~~~
+
 or
-vd --cmd-after-edit=l
+
+~~~
+vd --skip=2
 ~~~
 
 ---
@@ -70,14 +74,14 @@ Both `globalCommand` and `Command` take the same parameters:
 
     Command(keystrokes, execstr, helpstr, longname)
 
-- To create a command alias:
+To define a new command:
+
+    globalCommand('^D', 'sheet.topRowIndex += nVisibleRows//2', 'scroll one half-page down', 'scroll-halfpage-down')
+
+To create a command alias:
 
     globalCommand('^D', 'd')
     globalCommand('^D', 'delete-row')
-
-- To define a new command:
-
-    globalCommand('^D', 'sheet.topRowIndex += nVisibleRows//2', 'scroll one half-page down', 'scroll-halfpage-down')
 
 or for sheet-level commands:
 
@@ -90,11 +94,11 @@ or
 
 `execstr` is resolved recursively, so it can be an existing keystroke or `longname` for those that have one.  The last in the chain is `exec()`ed.
 
-- To override a keybinding:
+To override a keybinding:
 
     globalCommand('^D', 'A', '')
 
-- To disable a keybinding:
+To disable a keybinding:
 
     globalCommand('^D', '')
 
