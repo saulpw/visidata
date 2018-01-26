@@ -53,11 +53,6 @@
     * How to have configurations persist
     * How to configure commands
 
-###
-
-- [demo videos](/videos)
-
-
 # For developers
 
 VisiData can interact with data from any source or in any format.

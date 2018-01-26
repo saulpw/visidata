@@ -51,7 +51,7 @@ Command(s)          Operation
 `gs`  `gt`  `gu`    selects/toggles/unselects rows visible on the screen
  `Enter`            opens sheet of source rows contained within the cursor
 `gEnter`            opens sheet of source rows which are visible on screen
-`w`                 toggles the visibility of graph labels
+`v`                 toggles the visibility of graph labels
 
 ###### With the mouse
 
