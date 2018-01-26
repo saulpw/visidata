@@ -1,16 +1,17 @@
 
-<!--iframe width="560" height="315" src="https://www.youtube.com/embed/N1CBDTgGtOU" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe-->
-<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLxu7QdBkC7drrAGfYzatPGVHIpv4Et46W" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<div class="screenshot">
+<a href="/screenshot.png"><img src="/screenshot.png" alt="screenshot of VisiData in action"/></a>
+</div>
 
-VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulpw/visidata) multitool for interacting with tabular data.
-
----
+VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulpw/visidata) multitool for interacting with tabular data.  It's great for investigative journalists, data scientists, terminal diehards, and anyone else who wants to quickly look at or manipulate data.
 
 ## Recent Updates
 
-- 2018-01-26: What features would you want in the next version of VisiData?  [Take a quick survey and give your opinion](https://www.surveymonkey.com/r/C97ZMRR).
+- 2018-01-26: How do you use VisiData?  <a href="https://www.surveymonkey.com/r/8JBN8BM" target="_blank" title="powered by SurveyMonkey">Take a quick survey and give your opinion</a>.
 
-- 2018-01-24: VisiData [v1.0](/releases/#v1.0) has been released!
+- **2018-01-24: [VisiData v1.0](/releases/#v1.0) has been released!**
+
+- 2018-01-22: I presented VisiData in a [lightning talk at PyCascades 2018](https://www.youtube.com/embed/N1CBDTgGtOU).
 
 - 2017-10-29: VisiData turns 1 year old with the [v0.97.1](/releases/#v0.97.1) release.
 

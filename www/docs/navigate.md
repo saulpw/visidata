@@ -7,6 +7,8 @@
 
 - To move the cursor by one row/column, use the arrow keys or `h`, `j`, `k` and `l` (like in vim).
 
+- To move the cursor all the way to the top/bottom/left/right, press `g` before the corresponding movement.
+
 - To quickly move through a categorical column, use `<` and `>`. They move the cursor up/down the current column to the subsequent value.
 
 - Use `{`/`}` to move up/down the current column to the next [selected](/docs/rows#subset) row.

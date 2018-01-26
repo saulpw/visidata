@@ -5,7 +5,7 @@
 
 ## How to specify a source
 
-In VisiData, [loaders](/docs/loaders) load files of a particular type. The following [sources](/man#loaders) are currently supported.
+In VisiData, [loaders](/docs/loaders) load files of a particular type. [These sources are currently supported](/man#loaders).
 
 On default, the file extension determines which loader is used. Unknown filetypes are loaded as **Text sheets**.
 
@@ -13,7 +13,7 @@ On default, the file extension determines which loader is used. Unknown filetype
 vd sample.tsv
 ~~~
 
-To enforce usage of a particular loader pass the `-f` flag, along with the name of the loader.
+To force a particular loader, pass `-f` with the filetype or format name.
 
 ~~~
 vd -f sqlite bar.db
@@ -30,9 +30,9 @@ Multiple files can be passed as inputs through the commandline.
 vd birdsdiet.tsv surveys.csv sunshinelist.html
 ~~~
 
-Upon launching, the most recent dataset which was loaded (e.g. sunshinelist.html) will be displayed.
+Upon launching, the last dataset to load (in this case, sunshinelist.html) will be displayed on top.
 
-To load additional datasets from within a session, press `o` and enter a filepath.
+To load another file, press `o` and enter a filepath.
 
 ---
 

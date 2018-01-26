@@ -11,16 +11,16 @@ VisiData 1.0 has been officially released!  Changes since the 0.99 release candi
 
 This is a huge milestone for VisiData.  I devoted my sabbatical (the entire year of 2017) to creating an open-source tool that would be useful for myself and other terminal users, and it was very important for me to release a stable and lasting 1.0 so that it could be set aside when I resumed working.
 
-We could have gotten away without certain features and with fewer [supported formats](http://visidata.org/man#loaders), but there is such tremendous breadth and depth included in 1.0 (as shown by demos like [this one at the PyCascades 2018 conference](https://www.youtube.com/watch?v=N1CBDTgGtOU)), that I'm hard-pressed to choose which features should have been omitted.
+We could have gotten away without certain features and with fewer [supported formats](http://visidata.org/man#loaders), but there is such breadth and depth included in 1.0 (as shown by demos like [this one at the PyCascades 2018 conference](https://www.youtube.com/watch?v=N1CBDTgGtOU)), that I'm hard-pressed to choose which features should have been omitted.
 
 I owe a great deal to many people who have helped and supported me through this process. VisiData would not be what it is without them.
 [The list of contributors](http://visidata.org/about#credits) includes everyone who has submitted to the repository, but there are some other groups to whom VisiData and I are eternally indebted:
 
 - the [Recurse Center](http://recurse.com), for maintaining an awesome space and incredibly supportive community that I am lucky to have become a part of;
 - [Office Nomads](http://officenomads.com/), my local co-working space where I could work without turning into [Jack Torrance](https://www.youtube.com/watch?v=4lQ_MjU4QHw);
-- and the [Python community](https://www.python.org/), for creating such a tremendously useful language and ecosystem, without which VisiData would not be nearly as powerful.
+- and the [Python community](https://www.python.org/), for creating such a broadly useful language and ecosystem, without which VisiData would not be nearly as powerful.
 
-Finally, a very special thanks to [Anja](https://github.com/anjakefala) for her tremendous help in putting together the website, documentation, tests, and various releases.
+Finally, a very special thanks to [Anja](https://github.com/anjakefala) for her incredible help in putting together the website, documentation, tests, and various releases.
 
 Share and enjoy!
 

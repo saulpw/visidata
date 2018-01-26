@@ -102,7 +102,7 @@ $DEV/strformat.py body=$BUILDWWW/releases/index.body title="VisiData documentati
 rm -f $BUILDWWW/releases/index.body
 
 # Add other toplevel static files
-for fn in devotees.gpg.key vdlogo.png ; do
+for fn in devotees.gpg.key vdlogo.png screenshot.png ; do
     cp $WWW/$fn $BUILDWWW/
 done
 

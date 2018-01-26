@@ -12,7 +12,7 @@ The process of designing a loader is:
 
 ## 1. Create a Sheet subclass
 
-When VisiData tries to open a source with filetype `foo`, it tries to call `open_foo(path)`, which should return an instance of `Sheet`, or raise an error. `path` is a [`Path`](/api/Path) object of some kind.
+When VisiData tries to open a source with filetype `foo`, it tries to call `open_foo(path)`, which should return an instance of `Sheet`, or raise an error. `path` is a `Path` object of some kind.
 
     def open_foo(p):
         return FooSheet(p.name, source=p)
@@ -49,7 +49,7 @@ Fortunately, making an [async](/docs/async) loader is pretty straightforward:
 
 1. Add `@async` decorator on the `reload` method, which causes it to be launched in a new thread.
 
-2. Wrap the iterator with [`Progress`](/api/Progress).  This updates the **progress percentage** as it passes each element through.
+2. Wrap the iterator with [`Progress`](/docs/async#Progress).  This updates the **progress percentage** as it passes each element through.
 
 3. Append each row **one at a time**.  Do not use a list comprehension; rows should become available as they are loaded.
 
@@ -212,7 +212,7 @@ The saver should preserve the column names and translate their types into foolib
 
 # Building a loader for a URL schemetype
 
-When VisiData tries to open a URL with schemetype of `foo` (i.e. starting with `foo://`), it calls `openurl_foo(urlpath, filetype)`.  `urlpath` is a [`UrlPath`](/api/Path#UrlPath) object, with attributes for each of the elements of the parsed URL.
+When VisiData tries to open a URL with schemetype of `foo` (i.e. starting with `foo://`), it calls `openurl_foo(urlpath, filetype)`.  `urlpath` is a `UrlPath` object, with attributes for each of the elements of the parsed URL.
 
 `openurl_foo` should return a Sheet or call `error()`.
 If the URL indicates a particular type of Sheet (like `magnet://`), then it should construct that Sheet itself.

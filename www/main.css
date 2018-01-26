@@ -233,7 +233,12 @@ table td, .table .cell {
 }
 
 .screenshot {
-    width: 50%;
+    margin: auto;
+    width: 400px;
+}
+
+.screenshot img {
+    width: 400px;
 }
 
 .input, .command, .code {
