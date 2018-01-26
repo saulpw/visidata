@@ -68,7 +68,7 @@ footer {
     height: 2em;
 }
 
-iframe {
+iframe.video {
     margin: auto;
     display: block;
     max-width: 100%;
@@ -234,11 +234,13 @@ table td, .table .cell {
 
 .screenshot {
     margin: auto;
-    width: 400px;
+    width: 70%;
+    max-width: 500px;
 }
 
 .screenshot img {
-    width: 400px;
+    width: 100%;
+    max-width: 500px;
 }
 
 .input, .command, .code {

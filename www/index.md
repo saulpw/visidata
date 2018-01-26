@@ -3,7 +3,7 @@
 <a href="/screenshot.png"><img src="/screenshot.png" alt="screenshot of VisiData in action"/></a>
 </div>
 
-VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulpw/visidata) multitool for interacting with tabular data.  It's great for investigative journalists, data scientists, terminal diehards, and anyone else who wants to quickly look at or manipulate data.
+VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulpw/visidata) multitool for interacting with tabular data from within the terminal.  It's great for investigative journalists, data scientists, unix command-line users, and anyone else who wants to quickly look at or manipulate data.
 
 ## Recent Updates
 
@@ -16,6 +16,8 @@ VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulp
 - 2017-10-29: VisiData turns 1 year old with the [v0.97.1](/releases/#v0.97.1) release.
 
 - <form action="https://tinyletter.com/visidata" method="post" target="popupwindow" onsubmit="window.open('https://tinyletter.com/visidata', 'popupwindow', 'scrollbars=yes,width=800,height=600');return true">Sign up for the email newsletter: <input type="text" style="width:140px" name="email" id="tlemail" /><input type="hidden" value="1" name="embed"/><input type="submit" value="Subscribe" /> (powered by <a href="https://tinyletter.com" target="_blank">TinyLetter</a>)</form>
+
+- Follow [\@saulfp](https://twitter.com/saulfp) on Twitter for more regular updates, tips, and tricks!
 
 ---
 

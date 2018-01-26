@@ -9,7 +9,7 @@ Commands(s)     Operation
 ------------    -----------
 `!`             pins the current column on the left as a key column
  `H`  `L`       slides the current column one position to the left/right
-`gG` `gL`       slides the current column all the way to the left/right of the sheet
+`gH` `gL`       slides the current column all the way to the left/right of the sheet
 
 ---
 
@@ -24,7 +24,7 @@ Commands(s)     Operation
 1. Press `C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
 3. Move the cursor down to the row which represents the column you wish to hide.
-4. Press `e` followed by *0* to set the width for that column to **0**.
+4. Press `e` followed by `0` to set the width for that column to **0**.
 5. Press `q` to return to the source sheet.
 
 ###### How to unhide columns
