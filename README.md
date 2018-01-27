@@ -1,4 +1,4 @@
-# VisiData v0.99 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
+# VisiData v1.0 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A terminal interface for exploring and arranging tabular data.
 
@@ -10,36 +10,19 @@ A terminal interface for exploring and arranging tabular data.
 - other modules may be required for opening particular data sources
     - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](http://visidata.org/man/#loaders) in the vd manpage
 
-## Installation
-
-There are three options for installing visidata:
-- [pip3](https://github.com/saulpw/visidata/tree/stable#install-via-pip3) for users who wish to import visidata into their own code or wish to integrate it into a python virtual environment
-- [Homebrew](https://github.com/saulpw/visidata/tree/stable#install-via-brew) on MacOS/X for reliable installation of application components (such as the manpage)
-- [apt](https://github.com/saulpw/visidata/tree/stable#install-via-apt) on Linux distributions
-
 ### Install via pip3
 
 Best installation method for users who wish to take advantage of VisiData in their own code, or integrate it into a Python3 virtual environment.
 
 To install VisiData, with loaders for the most common data file formats (including csv, tsv, fixed-width text, json, sqlite, http, html and xls):
 
-```
-$ pip3 install visidata
-```
-
-To install VisiData, plus external dependencies for all available loaders:
-
-```
-pip3 install "visidata[full]"
-```
+    $ pip3 install visidata
 
 ### Install via brew
 
 Ideal for MacOS users who primarily want to engage with VisiData as an application. This is currently the most reliable way to install VisiData's manpage on MacOS.
 
-```
-brew install saulpw/vd/visidata
-```
+    $ brew install saulpw/vd/visidata
 
 Further instructions available [here](https://github.com/saulpw/homebrew-vd).
 
@@ -51,46 +34,41 @@ Currently, VisiData is undergoing review for integration into the main Debian re
 
 Grab our public key
 
-```
-wget http://visidata.org/devotees.gpg.key
-apt-key add devotees.gpg.key
-```
+    $ wget http://visidata.org/devotees.gpg.key
+    $ apt-key add devotees.gpg.key
 
 Add our repository to apt's search list
 
-```
-sudo apt-get install apt-transport-https
-sudo vim /etc/apt/sources.list
-    deb[arch=amd64] https://raw.githubusercontent.com/saulpw/deb-vd/master sid main
-sudo apt-get update
-```
+    $ sudo apt-get install apt-transport-https
+    $ sudo vim /etc/apt/sources.list
+
+      deb[arch=amd64] https://raw.githubusercontent.com/saulpw/deb-vd/master sid main
+
+    $ sudo apt-get update
+
 You can then install VisiData by typing:
 
-```
-sudo apt-get install visidata
-```
+    sudo apt-get install visidata
 
 Further instructions available [here](https://github.com/saulpw/deb-vd).
 
-## Run
+## Usage
 
-```
-$ vd [<options>] <input> ...
-$ <command> | vd [<options>]
-```
+    $ vd [<options>] <input> ...
+    $ <command> | vd [<options>]
 
 VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more.
 Use `-f <filetype>` to force a particular filetype.
-(See the [list of supported sources](/formats)).
+(See the [list of supported sources](http://visidata.org/man#sources)).
 
 ## Documentation
 
 * Quick reference: `F1` (or `z?`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
-* [visidata.org/docs](http://visidata.org) has a complete list of links to all official documentation.
+* [visidata.org/docs](http://visidata.org/docs) has a complete list of links to all official documentation.
 
 ## Help and Support
 
-For additional information, see the [help page](http://visidata.org/help).
+For additional information, see the [support page](http://visidata.org/support).
 
 ## vdtui
 

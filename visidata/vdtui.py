@@ -26,7 +26,7 @@
 # Just include this whole file in your project as-is.  If you do make
 # modifications, please keep the base vdtui version and append your own id and
 # version.
-__version__ = 'saul.pw/vdtui v0.99'
+__version__ = 'saul.pw/vdtui v1.0'
 __author__ = 'Saul Pwanson <vdtui@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Beta'
@@ -190,6 +190,32 @@ globalCommand('gq', 'vd.sheets.clear()', 'quit all sheets (clean exit)', 'quit-a
 globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
 globalCommand('^V', 'status(__version__)', 'show version information on status line')
 globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses"))', 'open Status History')
+
+globalCommand('<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")', 'move up the current column to the next value')
+globalCommand('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")', 'move down the current column to the next value')
+globalCommand('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'move up the current column to the previous selected row')
+globalCommand('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move down the current column to the next selected row')
+
+globalCommand('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjust width of current column', 'width-curcol-max')
+globalCommand('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))', 'adjust current column width to given number', 'width-curcol-input')
+
+globalCommand('-', 'cursorCol.width = 0', 'hide current column', 'width-curcol-zero')
+globalCommand('z-', 'cursorCol.width = cursorCol.width//2', 'reduce width of current column by half', 'width-curcol-half')
+globalCommand('!', 'toggleKeyColumn(cursorColIndex); cursorRight(+1)', 'pin current column on the left as a key column', 'toggle-curcol-key')
+globalCommand('z~', 'cursorCol.type = anytype', 'set type of current column to anytype', 'type-curcol-any')
+globalCommand('~', 'cursorCol.type = str', 'set type of current column to str', 'type-curcol-str')
+globalCommand('@', 'cursorCol.type = date', 'set type of current column to date', 'type-curcol-date')
+globalCommand('#', 'cursorCol.type = int', 'set type of current column to int', 'type-curcol-int')
+globalCommand('$', 'cursorCol.type = currency', 'set type of current column to currency', 'type-curcol-currency')
+globalCommand('%', 'cursorCol.type = float', 'set type of current column to float', 'type-curcol-float')
+globalCommand('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column', 'edit-curcol-name')
+
+globalCommand('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'adjust width of all visible columns', 'width-cols-max')
+
+globalCommand('[', 'orderBy(cursorCol)', 'sort ascending by current column', 'sort-curcol-asc')
+globalCommand(']', 'orderBy(cursorCol, reverse=True)', 'sort descending by current column', 'sort-curcol-desc')
+globalCommand('g[', 'orderBy(*keyCols)', 'sort ascending by all key columns', 'sort-keycols-asc')
+globalCommand('g]', 'orderBy(*keyCols, reverse=True)', 'sort descending by all key columns', 'sort-keycols-desc')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error')
 

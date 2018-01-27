@@ -2,7 +2,7 @@
 
 1. Merge `stable` to `develop` (if necessary)
 
-2. Ensure `develop` automated tests run correctly with ./test.sh
+2. Ensure `develop` automated tests run correctly with dev/test.sh
 
 3. Verify that documentation/docstrings are up-to-date on features and functionality
 

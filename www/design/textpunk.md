@@ -2,7 +2,7 @@
 
 Textpunk is a computing style that upgrades the classic terminal interface with modern technology (unicode, 256-color, web, etc).
 
-Like steampunk renounces electricity to explore an alternate universe of steam and gears, textpunk abstains from graphics and develops a preferance for a keyboard and terminal.
+Like steampunk renounces electricity to explore an alternate universe of steam and gears, textpunk abstains from graphics and develops a preference for a keyboard and terminal.
 
 Textpunk is for anyone who loves [vim](http://vim.org), [irssi](http://irssi.org), [tmux](http://tmux.github.io), or [ohmyzsh](https://github.com/robbyrussell/oh-my-zsh). (Nethack?)
 

@@ -1,19 +1,65 @@
-# VisiData documentation
+# User Documentation
 
-* VisiData's [manpage](/man) contains a comprehensive quick reference of all global and sheet-specific commands.
+###### Reference
 
-* The [system tests](/test) provide examples of how VisiData's atomic commands can be combined for complex workflows.
+* [quick reference guide](/man)
+    * comprehensive overview of all available commands and options
+    * also available as a manpage via `man vd` and from inside VisiData with `F1` or `z?`
 
-* [CONTRIBUTING.md](/contributing) contains information on how to contribute to VisiData's ongoing development.
+###### How To
 
-* There are a few VisiData [demo videos](/videos).  Please leave a note in any of the community spaces if there are any features in particular you want to know about.
+* [Loading Data](/docs/loading)
+    * How to specify a source
+    * How to load multiple datasets simultaneously
+    * How to access other loaded or derived sheets
+* [Navigation](/docs/navigate)
+    * How to rapidly scroll through a sheet
+    * How to search within a sheet
+    * How to move between sheets
+* [Rows](/docs/rows)
+    * How to perform operations on a subset of rows
+    * How to filter rows
+    * How to move, copy and remove rows
+    * How to sort rows
+* [Columns](/docs/columns)
+    * How to manipulate columns
+    * How to hide and unhide columns
+    * How to specify column types
+    * How to split a column
+    * How to create derivative columns
+    * How to modify configuration for multiple columns
+* [Editing contents](/docs/edit)
+    * How to edit cells
+    * How to rename columns
+* [Grouping data and descriptive statistics](/docs/group)
+    * How to set statistical aggregators
+    * How to create a pivot table
+    * How to create a frequency chart
+    * How to calculate descriptive statistics
+    * How to filter for grouped or described rows
+* Creating sheets, rows and columns
+    * (A a ga gz=)
+* Combining datasets
+    * How to perform a join (include gC)
+    * How to append two datasets
+* [Drawing graphs](/docs/graph)
+    * How to graph a single column
+    * How to graph multiple columns
+    * How to interact with graphs
+* [How to save and replay a VisiData session](/docs/save-restore)
+* [Customizing VisiData](/docs/customize)
+    * How to configure VisiData (user)
+    * How to configure VisiData (dev)
+    * How to have configurations persist
+    * How to configure commands
 
-## For developers
+# For developers
 
-The dream is for VisiData to be able to interact with data from any source or in any format.
+VisiData can interact with data from any source or in any format.
 
-Creating a loader for a new data source is easy and usually takes only an hour or two.  It's fun and rewarding to create a great terminal interface for your favorite data source.
+* [guide to contributing](/contributing)
+* [how to develop a loader](/docs/loaders)
+* [viewtsv annotated](/docs/viewtsv)
+* [async](/docs/async)
+* [graphics reference](/docs/graphics)
 
-Currently, VisiData supports [tsv, csv, json, html, sqlite, hdf5, xlsx, xls, shp, and mbtiles file formats.  We would love to find devs interested in creating interfaces for all other data sources.
-
-* [How to build a loader](/howto/dev/loaders)

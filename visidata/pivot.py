@@ -32,7 +32,7 @@ class SheetPivot(Sheet):
     @async
     def reloadCols(self):
         self.columns = copy(self.nonpivotKeyCols)
-        self.keyCols = self.columns[:]
+        self.nKeys = len(self.nonpivotKeyCols)
         aggcols = [(c, aggregator) for c in self.source.visibleCols for aggregator in getattr(c, 'aggregators', [])]
 
         if not aggcols:

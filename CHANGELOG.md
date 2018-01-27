@@ -1,9 +1,15 @@
 # VisiData version history
 
-# future
+# v1.0 (2017-01-24)
 
-- `gy` now pastes to system clipboard in given format (options.clipboard_copy_cmd)
-
+- date.__sub__ returns timedelta object (was int days)
+- pivot table bugfixes
+- many cosmetic fixes
+- disable default profiling for perf improvements
+- remove .visidatarc support in PWD or XDG; only $HOME/.visidatarc supported now
+- website and docs complete overhaul
+- do not execute .py files
+- apt/brew packages submitted
 
 # v0.99 (2017-12-22)
 

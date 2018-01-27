@@ -1,3 +1,6 @@
+Updated: 2017-12-06
+Version: VisiData 1.0
+
 # Terminal Graphics in VisiData
 
 VisiData can display low-resolution terminal graphics with a reasonable amount of user interactivity.
@@ -60,7 +63,7 @@ A **`Canvas`** is a `Plotter` with a virtual surface on which lines and labels c
 
 The onscreen portion (the area within the visible bounds) is scaled and rendered onto the `Plotter`, with the minimum coordinates in the upper-left [same orientation as `Plotter`].
 
-The [`Canvas` user interface](/howto/graph#commands) supports zoom, scroll, cursor definition, and selection of the underlying rows.  The `source` attribute should be the Sheet which owns the plotted `row` objects.
+The [`Canvas` user interface](/docs/graph#commands) supports zoom, scroll, cursor definition, and selection of the underlying rows.  The `source` attribute should be the Sheet which owns the plotted `row` objects.
 
 A call to `Canvas.refresh()` will trigger `Canvas.render()`, which is decorated with `@async` as it may take a perceptible amount of time for larger datasets.  Any active `render` threads are cancelled first.
 

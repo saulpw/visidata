@@ -1,4 +1,4 @@
-.Dd December 28, 2017
+.Dd January 24, 2017
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -231,13 +231,9 @@ appends a blank row
 .It Ic "  d   gd"
 deletes current/selected row(s) and moves to clipboard
 .It Ic "  y   gy"
-yanks (copies) current/selected row(s) to clipboard
+yanks (copies) current/all selected row(s) to clipboard
 .It Ic " zy"
-yanks (copies) current cell value to clipboard
-.It Ic "  Y   gY"
-yanks (copies) current/selected row(s) to system clipboard
-.It Ic " zY"
-yanks (copies) current cell value to system clipboard
+yanks (copies) current cell to clipboard
 .It Ic "  p    P"
 pastes clipboard rows after/before current row
 .It Ic " zp  gzp"
@@ -559,7 +555,7 @@ opens sheet of source rows aggregated in current pivot cell
 dives further into Python object
 .It Ic " e"
 edits contents of current cell
-.It Ic " v"
+.It Ic "v"
 toggles whether methods and hidden properties are shown
 .It Ic "gv"
 shows methods and hidden properties
@@ -567,7 +563,7 @@ shows methods and hidden properties
 hides methods and hidden properties
 .El
 .
-.Sh OPTIONS
+.Sh COMMANDLINE OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .
 .Lo f filetype filetype
@@ -653,6 +649,12 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be opened into a new sheet with with Sy z^Y .
 .El
+.
+.Pp
+The following URL schemes are supported:
+.Bl -inset -compact -offset xxx
+.It Sy http No (requires Sy requests Ns ); can be used as transport for with another filetype
+.It Sy postgres No (requires Sy psycopg2 Ns )
 .El
 .
 .Pp
