@@ -39,13 +39,14 @@
     * How to filter for grouped or described rows
 * Creating sheets, rows and columns
     * (A a ga gz=)
-* Combining datasets
-    * How to perform a join (include gC)
+* [Combining datasets](/docs/join)
+    * How to perform a join
     * How to append two datasets
 * [Drawing graphs](/docs/graph)
     * How to graph a single column
     * How to graph multiple columns
     * How to interact with graphs
+* [Incorporating VisiData into a Unix toolkit]
 * [How to save and replay a VisiData session](/docs/save-restore)
 * [Customizing VisiData](/docs/customize)
     * How to configure VisiData (user)
