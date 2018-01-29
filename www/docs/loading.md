@@ -1,4 +1,4 @@
-- Update: 2018-01-22
+- Update: 2018-01-28
 - Version: VisiData 1.0
 
 # Loading data
@@ -11,6 +11,7 @@ On default, the file extension determines which loader is used. Unknown filetype
 
 ~~~
 vd sample.tsv
+ps aux | vd
 ~~~
 
 To force a particular loader, pass `-f` with the filetype or format name.
