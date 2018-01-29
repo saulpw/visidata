@@ -1,4 +1,4 @@
-- Update: 2018-01-22
+- Update: 2018-01-28
 - Version: VisiData 1.0
 
 # Columns
@@ -91,16 +91,16 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 **Question** On which days have we sold more than 10 **Item**s?
 
 1. Scroll to the **Units** column. Set the type of the **Units** column by pressing `#` (int).
-2. Type `=` followed by *Units > 10*. A new column will be created. The cells in this column will contain the value **True** in rows where the number of **Units** are greater than 10 and **False** otherwise.
+2. Type `=` followed by `Units > 10`. A new column will be created. The cells in this column will contain the value **True** in rows where the number of **Units** are greater than 10 and **False** otherwise.
 3. Move to the new derived column.
-4. Type `|` followed by *True* to select all rows where there were more than 10 **Units** sold.
+4. Type `|` followed by `True` to select all rows where there were more than 10 **Units** sold.
 5. Press `"` to open a duplicate sheet with only those selected rows.
 
 **Question** I have a dateset with separate columns for **Year**, **Month** and **Day**. How can I concatenate them into a single date column?
 
-1. Type `=` followed by *Year + '-' + Month + '-' + Day*.
+1. Type `=` followed by `Year + '-' + Month + '-' + Day`.
 2. Set the type of the new derived column by pressing `@` (date).
-3. Type `^` followed by *Date* to rename the column to **Date**.
+3. Type `^` followed by `Date` to rename the column to **Date**.
 
 ---
 
@@ -127,7 +127,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
     a. Type the source sheet **Total** column by pressing `%` (float).
     b. Press `s` or `t` to select it.
 
-4. Type `g+` followed by *avg* to add a **avg** statistical aggregator to the selected rows.
+4. Type `g+` followed by `avg` to add a **avg** statistical aggregator to the selected rows.
 5. Press `q` to exit and return to the source sheet.
 6. Scroll to the **Item** column. Press `F` to open the **Frequency table**.
 
