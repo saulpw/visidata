@@ -1,4 +1,4 @@
-- Update: 2018-01-22
+- Update: 2018-01-28
 - Version: VisiData 1.0
 
 # Grouping data and descriptive statistics
@@ -16,14 +16,14 @@ The following statistical aggregators are available:
 
 Aggregator      Description
 -----------     ------------
-*min*           smallest value in the group
-*max*           largest value in the group
-*avg*/*mean*    average value of the group
-*median*        median value in the group
-*sum*           total summation of all numbers in the group
-*distinct*      number of distinct values in the group
-*count*         number of values in the group
-*keymax*        key of the row with the largest value in the group
+`min`           smallest value in the group
+`max`           largest value in the group
+`avg`/`mean`    average value of the group
+`median`        median value in the group
+`sum`           total summation of all numbers in the group
+`distinct`      number of distinct values in the group
+`count`         number of values in the group
+`keymax`        key of the row with the largest value in the group
 
 The follow howtos will have examples of workflows involving grouping of data and statistical aggregation.
 
@@ -60,14 +60,14 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 **Question** What was the monthly revenue?
 
-1. On the **OrderDate** column, type `;` followed by *(\d+-\d+)* to create a column with only the year and the month using regex capture groups.
+1. On the **OrderDate** column, type `;` followed by `(\d+-\d+)` to create a column with only the year and the month using regex capture groups.
 2. Press `-` to hide the **OrderDate** column.
-3. On the **OrderDate_re0** column, type `^` followed by *OrderDate* to rename it.
+3. On the **OrderDate_re0** column, type `^` followed by `OrderDate` to rename it.
 4. On the **Total** column, press `$` to set its type to currency.
-5. Type `+` followed by *sum* to add a statistical aggregator to **Total**.
+5. Type `+` followed by `sum` to add a statistical aggregator to **Total**.
 6. On the **OrderDate** column type `F` to open the **Frequency table**.
 7. On the **OrderDate** column, press `[` to sort the table in chrononological order.
-8. On the **sum_Total** column, type `^` followed by *Revenue* to rename the column.
+8. On the **sum_Total** column, type `^` followed by `Revenue` to rename the column.
 
 ---
 

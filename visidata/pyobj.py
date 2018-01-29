@@ -1,18 +1,42 @@
 from visidata import *
 
-option('pyobj_show_hidden', False, 'show methods and _private properties')
+option('pyobj_show_hidden', False, 'show _private properties on pyobjs')
+option('pyobj_show_methods', False, 'show methods on pyobjs')
 
-globalCommand('^X', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, eval(expr))', 'evaluate Python expression and open result as Python object')
-globalCommand('g^X', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope')
-globalCommand('z^X', 'status(evalexpr(inputExpr("status="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
+globalCommand('^X', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, eval(expr))', 'evaluate Python expression and open result as Python object', 'python-eval-push')
+globalCommand('g^X', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope', 'python-exec')
+globalCommand('z^X', 'status(evalexpr(inputExpr("status="), cursorRow))', 'evaluate Python expression on current row and show result on status line', 'python-eval-status')
 
-globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'open current row as Python object')
-globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object')
-globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object')
+globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'open current row as Python object', 'python-push-row-object')
+globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object', 'python-push-cell-object')
+globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object', 'python-push-sheet-object')
+
+globalCommand('(', 'openColumn(cursorCol, cursorValue)', 'expand this column into multiple columns')
+globalCommand(')', 'closeColumn(sheet, cursorCol)', 'remove expanded columns')
+
+def closeColumn(sheet, col):
+    col.origCol.width = options.default_width
+    cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not getattr(col, "origCol", col)]
+    sheet.columns = cols
 
 # used as ENTER in several pyobj sheets
-globalCommand('pyobj-dive', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object')
+globalCommand('python-dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object')
 
+class ExpandedColumn(Column):
+    def calcValue(self, row):
+        return self.origCol.getValue(row)[self.key]
+
+def openColumn(col, val):
+    if isinstance(val, dict):
+        for k in val:
+            c = ExpandedColumn(col.name+'.'+k, origCol=col, key=k)
+            col.sheet.addColumn(c, col.sheet.cursorColIndex+1)
+            col.width = 0
+    elif isinstance(val, (list, tuple)):
+        for k in range(len(val)):
+            c = ExpandedColumn('%s[%s]' % (col.name, k), origCol=col, key=k)
+            col.sheet.addColumn(c, col.sheet.cursorColIndex+1)
+            col.width = 0
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj):
@@ -74,7 +98,7 @@ def SheetList(name, src, **kwargs):
 
 class ListOfPyobjSheet(Sheet):
     rowtype = 'python objects'
-    commands = [Command(ENTER, 'pyobj-dive')]
+    commands = [Command(ENTER, 'python-dive-row')]
     def reload(self):
         self.rows = self.source
         self.columns = [Column(self.name,
@@ -84,7 +108,7 @@ class ListOfPyobjSheet(Sheet):
 # rowdef: dict
 class ListOfDictSheet(Sheet):
     rowtype = 'dicts'
-    commands = [Command(ENTER, 'pyobj-dive')]
+    commands = [Command(ENTER, 'python-dive-row')]
     def reload(self):
         self.columns = DictKeyColumns(self.source[0])
         self.rows = self.source
@@ -92,7 +116,7 @@ class ListOfDictSheet(Sheet):
 # rowdef: namedtuple
 class ListOfNamedTupleSheet(Sheet):
     rowtype = 'namedtuples'
-    commands = [Command(ENTER, 'pyobj-dive')]
+    commands = [Command(ENTER, 'python-dive-row')]
     def reload(self):
         self.columns = [ColumnItem(k, i) for i, k in enumerate(self.source[0]._fields)]
         self.rows = self.source
@@ -102,7 +126,7 @@ class ListOfNamedTupleSheet(Sheet):
 class SheetNamedTuple(Sheet):
     rowtype = 'values'
     'a single namedtuple, with key and value columns'
-    commands = [Command(ENTER, 'dive()', 'dive further into Python object')]
+    commands = [Command(ENTER, 'dive()', 'dive further into Python object', 'python-dive-row')]
     columns = [ColumnItem('name', 0), ColumnItem('value', 1)]
 
     def __init__(self, name, src, **kwargs):
@@ -118,8 +142,8 @@ class SheetNamedTuple(Sheet):
 class SheetDict(Sheet):
     rowtype = 'items'
     commands = [
-        Command('e', 'edit()', 'edit contents of current cell'),
-        Command(ENTER, 'dive()', 'dive further into Python object')
+        Command('e', 'edit()', 'edit contents of current cell', 'modify-edit-cell'),
+        Command(ENTER, 'dive()', 'dive further into Python object', 'python-dive-row')
     ]
     def __init__(self, name, src, **kwargs):
         super().__init__(name, source=src, **kwargs)
@@ -149,8 +173,10 @@ class SheetObject(Sheet):
     rowtype = 'attributes'
     commands = [
         Command(ENTER, 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)', 'dive further into Python object'),
-        Command('e', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', 'edit contents of current cell'),
-        Command('v', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether methods and hidden properties are shown')
+        Command('e', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', 'edit contents of current cell', 'modify-edit-cell'),
+        Command('v', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()', 'toggle whether hidden properties are shown'),
+        Command('gv', 'options.pyobj_show_hidden = options.pyobj_show_methods = True; reload()', 'show methods and hidden properties'),
+        Command('zv', 'options.pyobj_show_hidden = options.pyobj_show_methods = False; reload()', 'hide methods and hidden properties'),
     ]
     def __init__(self, name, obj, **kwargs):
         super().__init__(name, source=obj, **kwargs)
@@ -158,13 +184,13 @@ class SheetObject(Sheet):
     def reload(self):
         self.rows = []
         for r in dir(self.source):
-            if not options.pyobj_show_hidden:
-                try:
-                    if r.startswith('_') or callable(getattr(self.source, r)):
-                        continue
+            try:
+                if options.pyobj_show_hidden or not r.startswith('_'):
                     self.addRow(r)
-                except Exception:
-                    pass
+                elif options.pyobj_show_methods or not callable(getattr(self.source, r)):
+                    self.addRow(r)
+            except Exception:
+                pass
 
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
@@ -173,4 +199,4 @@ class SheetObject(Sheet):
         ]
         self.recalc()
 
-        self.nKeys = 1
+        self.keyCols = self.columns[0:1]

@@ -7,7 +7,7 @@ from visidata import *
 option('show_graph_labels', True, 'show axes and legend on graph')
 option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
 option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
-option('zoom_incr', 2.0, 'amount to multiply current zoomlevel by when zooming')
+option('zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
 option('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
 
 class Point:
@@ -105,13 +105,13 @@ def iterline(x1, y1, x2, y2):
     xdir = 1 if x1 <= x2 else -1
     ydir = 1 if y1 <= y2 else -1
 
-    r = max(xdiff, ydiff)
+    r = math.ceil(max(xdiff, ydiff))
     if r == 0:  # point, not line
         yield x1, y1
     else:
-        x, y = x1, y1
+        x, y = math.floor(x1), math.floor(y1)
         i = 0
-        while i <= r:
+        while i < r:
             x += xdir * xdiff / r
             y += ydir * ydiff / r
 
@@ -126,9 +126,10 @@ def anySelected(vs, rows):
 
 #  - width/height are exactly equal to the number of pixels displayable, and can change at any time.
 #  - needs to refresh from source on resize
-class Plotter(Sheet):
+class Plotter(BaseSheet):
     'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
     columns=[Column('')]  # to eliminate errors outside of draw()
+    rowtype='pixels'
     commands=[
         Command('^L', 'refresh()', 'redraw all pixels on canvas'),
         Command('v', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
@@ -136,10 +137,13 @@ class Plotter(Sheet):
     ]
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
-        self.labels = []  # (x, y, text, attr)
+        self.labels = []  # (x, y, text, attr, row)
         self.hiddenAttrs = set()
         self.needsRefresh = False
         self.resetCanvasDimensions()
+
+    def __len__(self):
+        return (self.plotwidth* self.plotheight)
 
     def resetCanvasDimensions(self):
         'sets total available canvas dimensions'
@@ -154,10 +158,10 @@ class Plotter(Sheet):
 
     def plotline(self, x1, y1, x2, y2, attr, row=None):
         for x, y in iterline(x1, y1, x2, y2):
-            self.plotpixel(round(x), round(y), attr, row)
+            self.plotpixel(math.ceil(x), math.ceil(y), attr, row)
 
-    def plotlabel(self, x, y, text, attr):
-        self.labels.append((x, y, text, attr))
+    def plotlabel(self, x, y, text, attr, row=None):
+        self.labels.append((x, y, text, attr, row))
 
     def plotlegend(self, i, txt, attr):
         self.plotlabel(self.plotwidth-30, i*4, txt, attr)
@@ -184,7 +188,7 @@ class Plotter(Sheet):
         if not c:
             return 0
         _, attr, rows = c[-1]
-        if anySelected(self.source, rows):
+        if isinstance(self.source, BaseSheet) and anySelected(self.source, rows):
             attr, _ = colors.update(attr, 8, 'bold', 10)
         return attr
 
@@ -247,9 +251,43 @@ class Plotter(Sheet):
                     if attr:
                         scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)
 
+        def _mark_overlap_text(labels, textobj):
+            def _overlaps(a, b):
+                a_x1, _, a_txt, _, _ = a
+                b_x1, _, b_txt, _, _ = b
+                a_x2 = a_x1 + len(a_txt)
+                b_x2 = b_x1 + len(b_txt)
+                if a_x1 < b_x1 < a_x2 or a_x1 < b_x2 < a_x2 or \
+                   b_x1 < a_x1 < b_x2 or b_x1 < a_x2 < b_x2:
+                   return True
+                else:
+                   return False
+
+            label_fldraw = [textobj, True]
+            labels.append(label_fldraw)
+            for o in labels:
+                if _overlaps(o[0], textobj):
+                    o[1] = False
+                    label_fldraw[1] = False
+
         if options.show_graph_labels:
-            for pix_x, pix_y, txt, attr in self.labels:
-                clipdraw(scr, int(pix_y/4), int(pix_x/2), txt, attr, len(txt))
+            labels_by_line = defaultdict(list) # y -> text labels
+
+            for pix_x, pix_y, txt, attr, row in self.labels:
+                if attr in self.hiddenAttrs:
+                    continue
+                if row is not None:
+                    pix_x -= len(txt)/2*2
+                char_y = int(pix_y/4)
+                char_x = int(pix_x/2)
+                o = (char_x, char_y, txt, attr, row)
+                _mark_overlap_text(labels_by_line[char_y], o)
+
+            for line in labels_by_line.values():
+                for o, fldraw in line:
+                    if fldraw:
+                        char_x, char_y, txt, attr, row = o
+                        clipdraw(scr, char_y, char_x, txt, attr, len(txt))
 
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
@@ -337,7 +375,7 @@ class Canvas(Plotter):
         self.polylines.clear()
         self.legends.clear()
         self.plotAttrs.clear()
-        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in options.plot_colors.split())[::-1]
+        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in options.plot_colors.split())
 
     def plotColor(self, k):
         attr = self.plotAttrs.get(k, None)

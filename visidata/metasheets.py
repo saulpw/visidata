@@ -15,19 +15,17 @@ def createJoinedSheet(sheets, jointype=''):
     else:
         return SheetJoin('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
 
-jointypes = ["inner", "outer", "full", "diff", "append"]
+jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
 
 SheetsSheet.commands += [
-        Command('&', 'vd.replace(createJoinedSheet(selectedRows, jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype'),
-        Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets'),
+        Command('&', 'vd.replace(createJoinedSheet(selectedRows, jointype=choose(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
+        Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
     ]
 
-SheetsSheet.columns.insert(1, ColumnAttr('progressPct'))
+SheetsSheet.columns.append(ColumnAttr('progressPct'))
 
 # used ColumnsSheet, affecting the 'row' (source column)
 columnCommands = [
-        Command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'adjust width of source column'),
-        Command('-', 'cursorRow.width = 0', 'hide source column on source sheet'),
         Command('%', 'cursorRow.type = float', 'set type of source column to float'),
         Command('#', 'cursorRow.type = int', 'set type of source column to int'),
         Command('@', 'cursorRow.type = date', 'set type of source column to date'),
@@ -35,9 +33,8 @@ columnCommands = [
         Command('~', 'cursorRow.type = str', 'set type of current column to str'),
         Command('z~', 'cursorRow.type = anytype', 'set type of current column to anytype'),
 
-        Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(source.columns.index(c))', 'pin selected columns on the left as key columns on source sheet'),
+        Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(c)', 'pin selected columns on the left as key columns on source sheet'),
         Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected source columns on source sheet'),
-        Command('g_', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
         Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'set type of selected source columns to float'),
         Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'set type of selected source columns to int'),
         Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'set type of selected source columns to date'),
@@ -47,7 +44,10 @@ columnCommands = [
     ]
 
 ColumnsSheet.commands += columnCommands + [
-        Command('!', 'source.toggleKeyColumn(cursorRowIndex)', 'pin current column on the left as a key column on source sheet'),
+        Command('-', 'cursorRow.width = 0', 'hide source column on source sheet'),
+        Command('_', 'cursorRow.width = cursorRow.getMaxWidth(source.visibleRows)', 'adjust width of source column'),
+        Command('g_', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
+        Command('!', 'source.toggleKeyColumn(cursorRow)', 'pin current column on the left as a key column on source sheet'),
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'add column from concatenating selected source columns'),
 ]
 DescribeSheet.commands += columnCommands
@@ -72,7 +72,7 @@ class SheetJoin(Sheet):
         self.columns = []
         for i, c in enumerate(sheets[0].keyCols):
             self.addColumn(SubrowColumn(ColumnItem(c.name, i), 0))
-        self.nKeys = sheets[0].nKeys
+        self.keyCols = self.columns[:]
 
         rowsBySheetKey = {}
         rowsByKey = {}

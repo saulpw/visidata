@@ -1,4 +1,4 @@
-species_id	Total_hindfoot_length_mean	M_hindfoot_length_mean	F_hindfoot_length_mean	_hindfoot_length_mean	Total_count
+species_id	Total_hindfoot_length_mean	hindfoot_length_mean_M	hindfoot_length_mean_F	hindfoot_length_mean_	Total_count
 DM	36.10	36.35	35.81		517
 DO	33.91	34.44	33.27		33
 PF	14.95	15.00	14.90		55

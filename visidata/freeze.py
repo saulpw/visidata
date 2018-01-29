@@ -1,10 +1,10 @@
 from visidata import *
 from copy import deepcopy
 
-globalCommand("'", 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated')
-globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated')
-globalCommand("z'", 'resetCache(cursorCol)', 'add/reset cache for current column')
-globalCommand("gz'", 'resetCache(*visibleCols)', 'add/reset cache for all visible columns')
+globalCommand("'", 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated', 'column-freeze')
+globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated', 'sheet-freeze')
+globalCommand("z'", 'resetCache(cursorCol)', 'add/reset cache for current column', 'column-cache-clear')
+globalCommand("gz'", 'resetCache(*visibleCols)', 'add/reset cache for all visible columns', 'column-cache-clear-all')
 globalCommand("zg'", "gz'")
 
 def resetCache(self, *cols):
@@ -36,8 +36,12 @@ class StaticSheet(Sheet):
     def __init__(self, source):
         super().__init__(source.name + "'", source=source)
 
-        self.columns = [ColumnItem(col.name, i, width=col.width, type=col.type) for i,col in enumerate(self.source.columns)]
-        self.nKeys = source.nKeys
+        self.columns = []
+        for i, col in enumerate(self.source.columns):
+            colcopy = ColumnItem(col.name, i, width=col.width, type=col.type)
+            self.columns.append(colcopy)
+            if col in self.source.keyCols:
+                self.keyCols.append(colcopy)
 
     @async
     def reload(self):

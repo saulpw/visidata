@@ -55,7 +55,6 @@ def cursorToColumns(cur):
 # rowdef: (table_name, ncols)
 class PgTablesSheet(Sheet):
     rowtype = 'tables'
-    nKeys = 1
     commands = [
         Command(ENTER, 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))', 'open this table'),
     ]
@@ -72,6 +71,7 @@ class PgTablesSheet(Sheet):
             if r:
                 self.addRow(r)
             self.columns = cursorToColumns(cur)
+            self.keyCols = self.columns[0:1]  # table_name is the key
             self.addColumn(Column('nrows', type=int, getter=lambda col,row: col.sheet.getRowCount(row[0])))
 
             for r in cur:

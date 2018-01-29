@@ -2,7 +2,7 @@ from statistics import mode, median, mean, stdev
 
 from visidata import *
 
-globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=sheet, sourceRows=selectedRows or rows))', 'open Describe Sheet')
+globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=sheet, sourceRows=selectedRows or rows))', 'open Describe Sheet', 'aggregate-describe')
 
 def isNumeric(col):
     return col.type in (int,float,currency,date)
@@ -43,11 +43,12 @@ class DescribeSheet(Sheet):
             DescribeColumn('stdev',  type=float),
     ]
     commands = [
-        Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell'),
-        Command('zu', 'source.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell'),
-        Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell'),
-        Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row'),
-        Command('!', 'source.toggleKeyColumn(source.columns.index(cursorRow))', 'pin current column on left as a key column on source sheet')
+        Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell', 'filter-select-source-cell'),
+        Command('zu', 'source.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell', 'filter-unselect-source-cell'),
+        Command('z'+ENTER, 'vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell', 'push-cell-source'),
+        Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row', 'analyze-freq-source'),
+        Command('!', 'source.toggleKeyColumn(cursorRow)', 'toggle current column as a key column on source sheet', 'key-row-source-toggle'),
+        Command('z!', 'source.keyCols.remove(cursorRow)', 'unset current column as a key column on source sheet', 'key-row-source-remove')
     ]
     colorizers = [
         Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),

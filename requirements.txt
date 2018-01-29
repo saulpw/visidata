@@ -1,12 +1,13 @@
 # included in visidata
 python-dateutil     # date type
+
+# not included in visidata public package
 requests            # http
-lxml                # html
 openpyxl            # xlsx
 xlrd                # xls
-
-# included in visidata[full]
+lxml                # html
 h5py                # hdf5
 psycopg2            # postgres
 pyshp               # shapefiles
 mapbox-vector-tile  # mbtiles
+google-cloud-bigquery  # bigquery

@@ -1,5 +1,8 @@
 # VisiData version history
 
+# future
+- Added `za` and `gza` to add 1/N new blanks column
+
 # v1.0 (2017-01-24)
 
 - date.__sub__ returns timedelta object (was int days)
@@ -17,8 +20,8 @@
 - `v` now 'visibility toggle' (moved from `w`)
 - `^W` to erase a word in the line editor
 - `gC`
-- `--version` (thanks for the suggestion, @jsvine)
-- `options.use_default_colors`
+- `--version` (thanks to @jsvine)
+- `options.use_default_colors` (thanks to @wavexx)
 - `median` aggregator
 - .html loads tables (requires lxml)
   - simple http works (requires requests)

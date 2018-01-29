@@ -1,4 +1,4 @@
-- Update: 2018-01-11
+- Update: 2018-01-28
 - Version: VisiData 1.0
 
 # Contributing tests
@@ -23,7 +23,7 @@ To build a `.vd` file:
 
     $ vd cmdlog.vd --foo=value
 
-4. Save the cmdlog using *one* of the following options:
+4. Save the cmdlog using one of the following options:
 
     a. Press `D` to open the `commanDlog Sheet`, and press `^S` to save it with a `.vd` suffix.
 

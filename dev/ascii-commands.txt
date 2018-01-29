@@ -87,7 +87,7 @@
  Shift- V  View contents of cell in new sheet
  Shift- W  pivot (inverse of melt)
  Shift- X
- Shift- Y
+ Shift- Y  Yank row to system clipboard
  Shift- Z
         [  sort ascending
         \  unselect rows by regex
@@ -119,10 +119,10 @@
         v  visibility toggle
         w
         x  execute this row (meaning varies depending on sheet)
-        y  yank a row to clipbard [vim]
+        y  yank row to internal clipbard [vim]
         z  soften prefix [vim]
  Shift- }  move to next selected
  Shift- |  select by regex
  Shift- {  move to prev selected
  Shift- ~  make string column
-        DEL set current cell to None
+      DEL  set current cell to None

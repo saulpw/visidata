@@ -7,17 +7,17 @@ from .vdtui import *
 
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
-option('profile_threads', False, 'profile async threads')
+option('profile', '', 'filename to save binary profiling data')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
-globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet')
-globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary threads')
-globalCommand('^T', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')
-globalCommand('^_', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
+globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet', 'system-cancel-sheet')
+globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary threads', 'system-cancel-all')
+globalCommand('^T', 'vd.push(vd.threadsSheet)', 'open Threads Sheet', 'sheet-threads')
+globalCommand('^_', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process', 'system-profile-threads')
 
 class ProfileSheet(TextSheet):
     commands = TextSheet.commands + [
-        Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile'),
+        Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile', 'thread-profile-save'),
     ]
     def __init__(self, name, pr):
         super().__init__(name, getProfileResults(pr).splitlines())
@@ -38,12 +38,15 @@ def toggleProfiling(t):
 #   ENTER on that row pushes a profile of the thread
 
 class ThreadProfiler:
+    numProfiles = 0
     def __init__(self, thread):
         self.thread = thread
-        if options.profile_threads:
+        if options.profile:
             self.thread.profile = cProfile.Profile()
         else:
             self.thread.profile = None
+        ThreadProfiler.numProfiles += 1
+        self.profileNumber = ThreadProfiler.numProfiles
 
     def __enter__(self):
         if self.thread.profile:
@@ -53,15 +56,15 @@ class ThreadProfiler:
     def __exit__(self, exc_type, exc_val, tb):
         if self.thread.profile:
             self.thread.profile.disable()
+            self.thread.profile.dump_stats(options.profile + str(self.profileNumber))
 
         # remove very-short-lived async actions
         if elapsed_s(self.thread) < min_thread_time_s:
             vd().threads.remove(self.thread)
 
-
 @functools.wraps(vd().toplevelTryFunc)
 def threadProfileCode(vdself, func, *args, **kwargs):
-    'Profile @async threads if `options.profile_threads` is set.'
+    'Toplevel thread profile wrapper.'
     with ThreadProfiler(threading.current_thread()) as prof:
         try:
             prof.thread.status = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
@@ -83,7 +86,7 @@ def cancelThread(*threads, exception=EscapeException):
 
 
 SheetsSheet.commands += [
-    Command('^C', 'cancelThread(*cursorRow.currentThreads)', 'abort all threads on sheet at cursor'),
+    Command('^C', 'cancelThread(*cursorRow.currentThreads)', 'abort all threads on sheet at cursor', 'cancel-thread'),
 ]
 
 SheetsSheet.columns += [
@@ -94,9 +97,9 @@ SheetsSheet.columns += [
 class ThreadsSheet(Sheet):
     rowtype = 'threads'
     commands = [
-        Command('d', 'cancelThread(cursorRow)', 'abort thread at current row'),
+        Command('d', 'cancelThread(cursorRow)', 'abort thread at current row', 'cancel-thread'),
         Command('^C', 'd'),
-        Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action'),
+        Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action', 'sheet-profile'),
     ]
     columns = [
         ColumnAttr('name'),

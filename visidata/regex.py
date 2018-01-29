@@ -1,8 +1,8 @@
 from visidata import *
 
-globalCommand(':', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex"))', 'add new columns from regex split; # columns determined by example row at cursor')
-globalCommand(';', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex"))', 'add new column from capture groups of regex; also requires example row')
-globalCommand('*', 'addColumn(regexTransform(cursorCol, input("transform column by regex: ", type="regex")), cursorColIndex+1)', 'regex/subst - replace regex with subst, which may include backreferences (\\1 etc)')
+globalCommand(':', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex-split"))', 'add new columns from regex split; # columns determined by example row at cursor', 'add-column-regex-split')
+globalCommand(';', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', 'add-column-regex-capture')
+globalCommand('*', 'addColumn(regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst")), cursorColIndex+1)', 'regex/subst - replace regex with subst, which may include backreferences (\\1 etc)', 'add-column-regex-transform')
 
 option('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 
