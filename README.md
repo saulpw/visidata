@@ -42,7 +42,7 @@ Add our repository to apt's search list
     $ sudo apt-get install apt-transport-https
     $ sudo vim /etc/apt/sources.list
 
-      deb[arch=amd64] https://raw.githubusercontent.com/saulpw/deb-vd/master sid main
+      deb [arch=amd64] https://raw.githubusercontent.com/saulpw/deb-vd/master sid main
 
     $ sudo apt-get update
 
