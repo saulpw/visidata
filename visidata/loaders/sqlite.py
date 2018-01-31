@@ -39,7 +39,6 @@ class SqliteSheet(Sheet):
                 c.type = str
             elif t == 'blob':
                 c.type = str
-                c.width = 0
             elif t == 'real':
                 c.type = float
             else:
