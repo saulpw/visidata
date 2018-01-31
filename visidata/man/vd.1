@@ -224,10 +224,10 @@ opens duplicate sheet with deepcopy of selected rows
 .Ss Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic "  a"
-appends a blank row
-.It Ic " ga" Ar number
-.No appends Ar number No blank rows
+.It Ic "  a   za"
+appends a blank row/column
+.It Ic " ga  gza" Ar number
+.No appends Ar number No blank rows/columns
 .It Ic "  d   gd"
 deletes current/selected row(s) and moves to clipboard
 .It Ic "  y   gy"
