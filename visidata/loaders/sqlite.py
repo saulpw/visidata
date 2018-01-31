@@ -31,6 +31,8 @@ class SqliteSheet(Sheet):
         cols = []
         for i, r in enumerate(self.conn.execute('PRAGMA TABLE_INFO(%s)' % tableName)):
             c = ColumnItem(r[1], i)
+            if r[-1]:
+                self.keyCols.append(c)
 
             t = r[2].lower()
             if t == 'integer':
