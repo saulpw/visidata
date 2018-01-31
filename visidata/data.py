@@ -26,6 +26,8 @@ globalCommand('R', 'nrows=int(input("random population size: ")); vs=vd.push(cop
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row')
 globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows')
+globalCommand('za', 'addColumn(SettableColumn(""), cursorVisibleColIndex+1)', 'add an empty column', 'column-add-one')
+globalCommand('gza', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)', 'add N empty columns', 'column-add-many')
 
 globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with contents of non-null cells up the current column')
 
@@ -38,6 +40,18 @@ alias('gKEY_SLEFT', 'column-slide-leftmost')
 alias('gkDN', 'gJ', 'row-slide-bottom')
 alias('gkUP', 'gK', 'row-slide-top')
 alias('gKEY_SRIGHT', 'column-slide-rightmost')
+
+
+class SettableColumn(Column):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cache = {}
+
+    def setValue(self, row, value):
+        self.cache[id(row)] = self.type(value)
+
+    def calcValue(self, row):
+        return self.cache.get(id(row), '')
 
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'

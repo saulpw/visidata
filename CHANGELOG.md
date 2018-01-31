@@ -1,5 +1,8 @@
 # VisiData version history
 
+# future
+- Added `za` and `gza` to add 1/N new blanks column
+
 # v1.0 (2017-01-24)
 
 - date.__sub__ returns timedelta object (was int days)
