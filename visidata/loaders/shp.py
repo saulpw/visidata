@@ -45,7 +45,7 @@ class ShapeSheet(Sheet):
             self.addRow(shaperec)
 
 
-class ShapeMap(Canvas):
+class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
 
     @async
