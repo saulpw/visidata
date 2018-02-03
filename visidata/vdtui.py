@@ -542,13 +542,19 @@ class VisiData:
             self.callHook('postedit', v)
         return v
 
-    def input(self, prompt, type='', **kwargs):
-        'Compose input prompt.'
+    def input(self, prompt, type='', defaultLast=False, **kwargs):
+        'Get user input, with history of `type`, defaulting to last history item if no input and defaultLast is True.'
         if type:
-            ret = self._inputLine(prompt, history=list(self.lastInputs[type].keys()), **kwargs)
-            self.lastInputs[type][ret] = ret
+            histlist = list(self.lastInputs[type].keys())
+            ret = self._inputLine(prompt, history=histlist, **kwargs)
+            if ret:
+                self.lastInputs[type][ret] = ret
+            elif defaultLast:
+                histlist or error("no previous input")
+                ret = histlist[-1]
         else:
             ret = self._inputLine(prompt, **kwargs)
+
         return ret
 
     def _inputLine(self, prompt, **kwargs):
@@ -1001,13 +1007,13 @@ Command('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error", Non
 Command('^R', 'reload(); recalc(); status("reloaded")', 'reload current sheet'),
 Command('z^R', 'cursorCol._cachedValues.clear()', 'clear cache for current column'),
 
-Command('/', 'moveRegex(sheet, regex=input("/", type="regex"), columns="cursorCol", backward=False)', 'search for regex forwards in current column'),
-Command('?', 'moveRegex(sheet, regex=input("?", type="regex"), columns="cursorCol", backward=True)', 'search for regex backwards in current column'),
+Command('/', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)', 'search for regex forwards in current column'),
+Command('?', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)', 'search for regex backwards in current column'),
 Command('n', 'moveRegex(sheet, reverse=False)', 'move to next match from last search'),
 Command('N', 'moveRegex(sheet, reverse=True)', 'move to previous match from last search'),
 
-Command('g/', 'moveRegex(sheet, regex=input("g/", type="regex"), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns'),
-Command('g?', 'moveRegex(sheet, regex=input("g?", type="regex"), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns'),
+Command('g/', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns'),
+Command('g?', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns'),
 
 Command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit contents of current cell'),
 Command('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorValue))', 'set contents of current column for selected rows to input'),
@@ -1020,15 +1026,15 @@ Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle selection of current 
 Command('s', 'select([cursorRow]); cursorDown(1)', 'select current row'),
 Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect current row'),
 
-Command('|', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex"), columns="cursorCol"))', 'select rows matching regex in current column'),
-Command('\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex"), columns="cursorCol"))', 'unselect rows matching regex in current column'),
+Command('|', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex", defaultLast=True), columns="cursorCol"))', 'select rows matching regex in current column'),
+Command('\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex", defaultLast=True), columns="cursorCol"))', 'unselect rows matching regex in current column'),
 
 Command('gt', 'toggle(rows)', 'toggle selection of all rows'),
 Command('gs', 'select(rows)', 'select all rows'),
 Command('gu', '_selectedRows.clear()', 'unselect all rows'),
 
-Command('g|', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex"), columns="visibleCols"))', 'select rows matching regex in any visible column'),
-Command('g\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex"), columns="visibleCols"))', 'unselect rows matching regex in any visible column'),
+Command('g|', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex", defaultLast=True), columns="visibleCols"))', 'select rows matching regex in any visible column'),
+Command('g\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex", defaultLast=True), columns="visibleCols"))', 'unselect rows matching regex in any visible column'),
 
 Command(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching current cell in current column'),
 Command('g,', 'select(gatherBy(lambda r,v=cursorRow: r == v), progress=False)', 'select rows matching current cell in all visible columns'),
