@@ -125,4 +125,4 @@
  Shift- |  select by regex
  Shift- {  move to prev selected
  Shift- ~  make string column
-        DEL set current cell to None
+      DEL  set current cell to None
