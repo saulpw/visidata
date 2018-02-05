@@ -17,12 +17,11 @@ But it was a real slog sometimes, and my wrists were starting to hurt.
 
 So at the end of 2016, I decided to take a personal sabbatical and use my experience with data to create a useful tool.
 One that could be used in any terminal, with any data source, with minimal requirements and zero configuration.
+The result is VisiData.
 
 ## Credits
 
-Many thanks to [Anja](https://github.com/anjakefala) for significant help with documentation, releases, and tests.
-
-Thanks also to the following people for their support and contributions to VisiData:
+Many thanks also to the following people for their support and contributions to VisiData:
 
 - [azag0](https://github.com/azag0)
 - [brannerchinese](https://github.com/brannerchinese)
@@ -37,3 +36,4 @@ Thanks also to the following people for their support and contributions to VisiD
 - [wavexx](https://github.com/wavexx)
 - [zormit](https://github.com/zormit)
 
+Special thanks to [@anjakefala](https://github.com/anjakefala) for significant help with documentation, releases, and tests.
