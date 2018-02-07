@@ -120,8 +120,8 @@ options = OptionsObject(baseOptions)
 alias = globalCommand
 theme = option
 
-option('encoding', 'utf-8', 'as passed to codecs.open')
-option('encoding_errors', 'surrogateescape', 'as passed to codecs.open')
+option('encoding', 'utf-8', 'encoding passed to codecs.open')
+option('encoding_errors', 'surrogateescape', 'encoding errors passed to codecs.open')
 
 option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 option('default_width', 20, 'default column width')
@@ -140,7 +140,7 @@ option('force_valid_colnames', False, 'clean column names to be valid Python ide
 option('debug', False, 'exit on error and display stacktrace')
 option('curses_timeout', 100, 'curses timeout in ms')
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-theme('use_default_colors', False, 'set curses to use default terminal colors')
+theme('use_default_colors', False, 'curses use default terminal colors')
 
 disp_column_fill = ' ' # pad chars after column value
 theme('disp_none', '',  'visible contents of a cell whose value is None')
@@ -149,7 +149,7 @@ theme('disp_truncator', '…', 'indicator that the contents are only partially v
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
 theme('disp_unprintable', '.', 'substitute character for unprintables')
 theme('disp_column_sep', '|', 'separator between columns')
-theme('disp_keycol_sep', '\u2016', 'separator between keys and rest of columns')
+theme('disp_keycol_sep', '\u2016', 'separator between key columns and rest of columns')
 theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
 theme('disp_status_sep', ' | ', 'separator between statuses')
 theme('disp_edit_fill', '_', 'edit field fill character')
@@ -168,14 +168,14 @@ theme('color_key_col', '81 cyan', 'color of key columns')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
 
 theme('color_status', 'bold', 'status line color')
-theme('color_edit_cell', 'normal', 'edit cell color')
+theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 
 theme('disp_pending', '', 'string to display in pending cells')
 theme('note_pending', '⌛', 'note to display for pending cells')
 theme('note_format_exc', '?', 'cell note for an exception during type conversion or formatting')
 theme('note_getter_exc', '!', 'cell note for an exception during computation')
 
-theme('color_note_pending', 'bold magenta', 'color of note of pending cells')
+theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
 theme('color_note_type', '226 green', 'cell note for numeric types in anytype columns')
 theme('color_format_exc', '48 bold yellow', 'color of formatting exception note')
 theme('color_getter_exc', 'red bold', 'color of computation exception note')

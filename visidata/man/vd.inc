@@ -30,10 +30,8 @@
 .Op Ar field Ns Cm = Ns Ar value No ...
 .
 .Sh DESCRIPTION
-.Nm VisiData
-is a multipurpose tool for exploring, cleaning, editing, and restructuring data.
-Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; workflows can be saved, documented, and replayed.
-.Nm VisiData No is built on the Sy vdtui No platform.
+.Nm VisiData No is a multipurpose tool built on the Sy vdtui No platform that can be used to explore, clean, edit, and restructure data.
+Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; and workflows can be saved, documented, and replayed.
 .
 .Ss REPLAY MODE
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXX -compact
@@ -66,9 +64,9 @@ cancel current replay
 .El
 .
 .Ss GLOBAL COMMANDS
-In most cases, commands that affect 'selected rows' will affect all rows if no rows are selected.
+In most cases, commands that affect selected rows will affect all rows if no rows are selected.
 .Pp
-.Ss Keystrokes For The Cautious
+.Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " F1   z?"
 view this man page
@@ -92,9 +90,9 @@ move as expected
 .It Ic " h   j   k   l"
 move left/down/up/right
 .It Ic "gh  gj  gk  gl"
-move all the way to the left/bottom/top/right
+move all the way to the left/bottom/top/right of sheet
 .It Ic "     G  gg"
-move all the way to the bottom/top
+move all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
 .Pp
@@ -106,20 +104,20 @@ scroll one page back/forward
 move to next/previous match from last search
 .Pp
 .It Ic  " <   >"
-move up/down the current column to the next value
+move up/down in current column to the next value
 .It Ic " {   }"
-move up/down the current column to the next selected row
+move up/down in current column to the next selected row
 .
 .El
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .Pp
 .It Ic " c" Ar regex
-.No move to the next column with name matching Ar regex
+.No move to next column with name matching Ar regex
 .It Ic " r" Ar regex
-.No move to the next row with key matching Ar regex
+.No move to next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No move to given column/row Ar number
+.No move to column/row Ar number
 .Pp
 .It Ic " H   J   K   L"
 slide current row/column left/down/up/right
@@ -182,9 +180,9 @@ add/reset cache for current/all visible column(s)
 .It Ic "\&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic "\&;" Ar regex
-.No add new columns from capture groups of Ar regex Ns ; also requires example row
+.No add new columns from capture groups of Ar regex Ns (also requires example row)
 .It Ic "*" Ar regex Ns Sy / Ns Ar subst
-.No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc)
+.No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc.)
 .El
 .Ss Row Selection
 .
@@ -201,7 +199,7 @@ select/toggle/unselect all rows
 .It Ic " \&," Ns " (comma)"
 select rows matching current cell in current column
 .It Ic "g\&,"
-select rows matching this row in all visible columns
+select rows matching current row in all visible columns
 .
 .El
 .
@@ -229,7 +227,7 @@ append a blank row/column
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
-delete current/selected row(s) and moves to clipboard
+delete current/selected row(s) and move to clipboard
 .It Ic "  y   gy"
 yank (copy) current/all selected row(s) to clipboard
 .It Ic " zy"
@@ -277,7 +275,7 @@ delete previous/current character
 toggle insert mode
 .It Ic "Up  Down"
 set contents to previous/next in history
-.It Ic "Tab  Shift-Tab"
+.It Ic "Tab  Shift+Tab"
 autocomplete input (when available)
 .
 .El
@@ -306,7 +304,7 @@ open duplicate sheet with a random population subset of
 .Ss Data Visualization
 .Bl -tag -width XXXXXXXXXXXXX -compact
 .It Ic " ." No (dot)
-.No plot current numeric column vs key columns. Numeric key column is used for the x-axis; categorical key column values determine color.
+.No plot current numeric column vs key columns. The numeric key column is used for the x-axis; categorical key column values determine color.
 .It Ic "g."
 .No plot a graph of all visible numeric columns vs key columns.
 .Pp
@@ -316,7 +314,7 @@ open duplicate sheet with a random population subset of
 .Ss "  Canvas-specific Commands"
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " +   -"
-increase/decrease zoomlevel, centered on cursor
+increase/decrease zoom level, centered on cursor
 .It Ic " _" No (underscore)
 zoom to fit full extent
 .It Ic " s   t   u"
@@ -381,7 +379,7 @@ suspend VisiData process
 .It Ic " ^Y  z^Y  g^Y"
 open current row/cell/sheet as Python object
 .It Ic " ^X" Ar expr
-.No evaluate Python Ar expr No and opens result as python object
+.No evaluate Python Ar expr No and opens result as Python object
 .It Ic "z^X" Ar expr
 .No evaluate Python Ar expr No on current row and shows result on status line
 .It Ic "g^X" Ar stmt
@@ -393,13 +391,13 @@ open current row/cell/sheet as Python object
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
-.Sy Columns Sheet No (Shift-C) "    edit column properties"
+.Sy Columns Sheet No (Shift+C) "    edit column properties"
 .It Sy " \&."
-.Sy Sheets Sheet No (Shift-S) "     jump between sheets or join them together"
+.Sy Sheets Sheet No (Shift+S) "     jump between sheets or join them together"
 .It Sy " \&."
-.Sy Options Sheet No (Shift-O) "    edit all configurable options"
+.Sy Options Sheet No (Shift+O) "    edit all configurable options"
 .It Sy " \&."
-.Sy Commandlog No (Shift-D) "       modify and save commands for replay"
+.Sy Commandlog No (Shift+D) "       modify and save commands for replay"
 .It Sy " \&."
 .Sy Error Sheet No (^E) "           view last error"
 .It Sy " \&."
@@ -409,18 +407,18 @@ open current row/cell/sheet as Python object
 .Pp
 .It Sy Derived Sheets
 .It Sy " \&."
-.Sy Frequency Table No (Shift-F) "  group rows by column value, with aggregations of other columns"
+.Sy Frequency Table No (Shift+F) "  group rows by column value, with aggregations of other columns"
 .It Sy " \&."
-.Sy Describe Sheet No (Shift-I) "   view summary statistics for each column"
+.Sy Describe Sheet No (Shift+I) "   view summary statistics for each column"
 .It Sy " \&."
-.Sy Pivot Table No (Shift-W) "      group rows by key and summarize current column"
+.Sy Pivot Table No (Shift+W) "      group rows by key and summarize current column"
 .It Sy " \&."
-.Sy Melted Sheet No (Shift-M) "     unpivot non-key columns into variable/value columns"
+.Sy Melted Sheet No (Shift+M) "     unpivot non-key columns into variable/value columns"
 .El
 .Ss METASHEETS
-.Ss Columns Sheet (Shift-C)
+.Ss Columns Sheet (Shift+C)
 .Bl -inset -compact
-.It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are actually the literal columns on the source sheet.
+.It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are the literal columns on the source sheet.
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -448,10 +446,10 @@ set type of selected columns on source sheet to str/int/float/currency/date
 .It Ic "z~ gz~"
 set type of current/selected column(s) on source sheet to anytype
 .It Ic " Enter"
-.No open a Sy Frequency Table No sheet grouped on column referenced in current row
+.No open a Sy Frequency Table No sheet grouped by column referenced in current row
 .El
 .
-.Ss Sheets Sheet (Shift-S)
+.Ss Sheets Sheet (Shift+S)
 .Bl -inset -compact 
 .It (sheet-specific commands)
 .El
@@ -476,7 +474,7 @@ jump to sheet referenced in current row
 .Sy append No "keep all rows from all sheets (concatenation)"
 .El
 .
-.Ss Options Sheet (Shift-O)
+.Ss Options Sheet (Shift+O)
 .Bl -inset -compact 
 .It (sheet-specific commands)
 .El
@@ -485,7 +483,7 @@ jump to sheet referenced in current row
 edit option
 .El
 .
-.Ss CommandLog (Shift-D)
+.Ss CommandLog (Shift+D)
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
@@ -499,7 +497,7 @@ abort replay
 .El
 .
 .Ss DERIVED SHEETS
-.Ss Frequency Table (Shift-F)
+.Ss Frequency Table (Shift+F)
 .Bl -inset -compact
 .It A Sy Frequency Table No groups rows by one or more columns, and includes summary columns for those with aggregators.
 .It (global commands)
@@ -513,16 +511,16 @@ open one-line summary for selected rows
 .It Ic " s   t   u"
 select/toggle/unselect these entries in source sheet
 .It Ic " Enter"
-open sheet of source rows which are grouped in current cell
+open sheet of source rows that are grouped in current cell
 .El
 .
-.Ss Describe Sheet (Shift-I)
+.Ss Describe Sheet (Shift+I)
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "zs  zu"
-select/unselect rows on source sheet which are being described in current cell
+select/unselect rows on source sheet that are being described in current cell
 .It Ic " !"
 toggle/unset current column as a key column on source sheet
 .It Ic " Enter"
@@ -531,9 +529,9 @@ toggle/unset current column as a key column on source sheet
 open copy of source sheet with rows described in current cell
 .El
 .
-.Ss Pivot Table (Shift-W)
+.Ss Pivot Table (Shift+W)
 .Bl -inset -compact
-.It Set key column(s) and aggregators on column(s) before pressing Sy Shift-W No on the column to pivot.
+.It Set key column(s) and aggregators on column(s) before pressing Sy Shift+W No on the column to pivot.
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -542,7 +540,7 @@ open sheet of source rows aggregated in current pivot row
 .It Ic "zEnter"
 open sheet of source rows aggregated in current pivot cell
 .El
-.Ss Melted Sheet (Shift-M)
+.Ss Melted Sheet (Shift+M)
 .Bl -inset -compact
 .It Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
 .El
@@ -556,7 +554,7 @@ dive further into Python object
 .It Ic " e"
 edit contents of current cell
 .It Ic "v"
-toggle whether methods and hidden properties are shown
+toggle show/hide for methods and hidden properties
 .It Ic "gv"
 show methods and hidden properties
 .It Ic "zv"
@@ -568,7 +566,7 @@ hide methods and hidden properties
 .
 .Lo f filetype filetype
 .No "tsv               "
-uses loader for
+set loader to use for
 .Ar filetype
 instead of file extension
 .
@@ -681,7 +679,7 @@ The following URL schemes are supported:
 .It Sy html No (requires Sy lxml Ns )
 .El
 .
-In addition, .zip and .gz files are decompressed on-the-fly.
+In addition, .zip and .gz files are decompressed on the fly.
 .
 .Sh AUTHOR
 .Nm VisiData
