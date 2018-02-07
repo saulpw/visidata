@@ -14,8 +14,5 @@ Multi-Arch: foreign
 Depends: ${misc:Depends}, ${python3:Depends}
 Description: rapidly explore columnar data in the terminal
  VisiData is a multipurpose terminal utility for exploring, cleaning, restructuring
- and analysing tabular data. Rows can be selected, filtered, and grouped; 
- columns can be rearranged, transformed, and derived via regex or Python expressions; 
- workflows can be saved, documented, and replayed. 
- Current supported sources are tsv, csv, fixed-width text, json, sqlite, http, html, xls, and xlsx 
- (excel).
+ and analysing tabular data. Current supported sources are tsv, csv, fixed-width text,
+ json, sqlite, http, html, xls, and xlsx (excel).
