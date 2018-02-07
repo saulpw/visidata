@@ -38,31 +38,31 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .Ss REPLAY MODE
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXX -compact
 .Lo p play cmdlog
-.No replays a saved Ar cmdlog No within the interface
+.No replay a saved Ar cmdlog No within the interface
 .
 .Lo w replay-wait seconds
-.No waits Ar seconds No between commands
+.No wait Ar seconds No between commands
 .
 .Lf b batch
-replays in batch mode (with no interface)
+replay in batch mode (with no interface)
 .
 .Lo o output file
-.No saves final visible sheet to Ar file No as .tsv
+.No save final visible sheet to Ar file No as .tsv
 .
 .It Sy --replay-movement= Ns Ar bool
-.No toggles Sy --play No to move cursor cell-by-cell
+.No toggle Sy --play No to move cursor cell-by-cell
 .It Ar field Ns Cm = Ns Ar value
-.No replaces \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
+.No replace \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
 .El
 .
 .Ss Commands During Replay
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
-pauses/resumes replay
+pause/resume replay
 .It Sy Tab
-executes next row in replaying sheet
+execute next row in replaying sheet
 .It Sy ^K
-cancels current replay
+cancel current replay
 .El
 .
 .Ss GLOBAL COMMANDS
@@ -71,65 +71,65 @@ In most cases, commands that affect 'selected rows' will affect all rows if no r
 .Ss Keystrokes For The Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " F1   z?"
-views this man page
+view this man page
 .It Ic "gF1  gz?"
-views all commands available on current sheet
+view all commands available on current sheet
 .It Ic ^Q
-aborts program immediately
+abort program immediately
 .It Ic ^C
-cancels user input or aborts all async threads on current sheet
+cancel user input or aborts all async threads on current sheet
 .It Ic " q"
-quits current sheet
+quit current sheet
 .It Ic "gq"
-quits all sheets (clean exit)
+quit all sheets (clean exit)
 .El
 .Ss "Cursor Movement"
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic "Arrow PgUp Home"
-moves as expected
+move as expected
 .It Ic " h   j   k   l"
-moves left/down/up/right
+move left/down/up/right
 .It Ic "gh  gj  gk  gl"
-moves all the way to the left/bottom/top/right
+move all the way to the left/bottom/top/right
 .It Ic "     G  gg"
-moves all the way to the bottom/top
+move all the way to the bottom/top
 .It Ic "^B  ^F"
-scrolls one page back/forward
+scroll one page back/forward
 .Pp
 .It Ic  " /   ?" Ar regex
-.No searches for Ar regex No forward/backward in current column
+.No search for Ar regex No forward/backward in current column
 .It Ic  "g/  g?" Ar regex
-.No searches for Ar regex No forward/backward over all visible columns
+.No search for Ar regex No forward/backward over all visible columns
 .It Ic  " n   N"
-moves to next/previous match from last search
+move to next/previous match from last search
 .Pp
 .It Ic  " <   >"
-moves up/down the current column to the next value
+move up/down the current column to the next value
 .It Ic " {   }"
-moves up/down the current column to the next selected row
+move up/down the current column to the next selected row
 .
 .El
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .Pp
 .It Ic " c" Ar regex
-.No moves to the next column with name matching Ar regex
+.No move to the next column with name matching Ar regex
 .It Ic " r" Ar regex
-.No moves to the next row with key matching Ar regex
+.No move to the next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No moves to given column/row Ar number
+.No move to given column/row Ar number
 .Pp
 .It Ic " H   J   K   L"
-slides current row/column left/down/up/right
+slide current row/column left/down/up/right
 .It Ic "gH  gJ  gK  gL"
-slides current row/column all the way to the left/bottom/top/right of sheet
+slide current row/column all the way to the left/bottom/top/right of sheet
 .Pp
 .It Ic "zh  zj  zk  zl"
-scrolls one left/down/up/right
+scroll one left/down/up/right
 .It Ic "  zt  zz  zb  "
-scrolls current row to top/center/bottom of screen
+scroll current row to top/center/bottom of screen
 .El
 .
 .Ss Column Manipulation
@@ -137,71 +137,71 @@ scrolls current row to top/center/bottom of screen
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic " _" Ns " (underscore)"
-adjusts width of current column
+adjust width of current column
 .It Ic "g_"
-adjusts width of all visible columns
+adjust width of all visible columns
 .It Ic "z_" Ar number
-.No adjusts width of current column to Ar number
+.No adjust width of current column to Ar number
 .Pp
 .It Ic " -" Ns " (hyphen)"
-hides current column (to unhide, go to
+hide current column (to unhide, go to
 .Sy C Ns olumns sheet and Sy e Ns dit its width)
 .It Ic "z-" Ns
-reduces width of current column by half
+reduce width of current column by half
 .Pp
 .It Ic "! z!" Ns
-toggles/unsets current column as a key column
+toggle/unset current column as a key column
 .It Ic "~  #  %  $  @"
-sets type of current column to untyped/int/float/currency/date
+set type of current column to untyped/int/float/currency/date
 .It Ic "  ^"
-edits name of current column
+edit name of current column
 .It Ic " g^"
-sets names of all unnamed visible columns to contents of selected rows (or current row)
+set names of all unnamed visible columns to contents of selected rows (or current row)
 .It Ic " z^"
-sets name of current column to contents of current cell
+set name of current column to contents of current cell
 .It Ic "gz^"
-sets name of current column to combined contents of current column for selected rows (or current row)
+set name of current column to combined contents of current column for selected rows (or current row)
 .Pp
 .It Ic "  =" Ar expr
-.No creates new column from Python Ar expr Ns , with column names as variables
+.No create new column from Python Ar expr Ns , with column names as variables
 .It Ic " g=" Ar expr
-.No sets current column for selected rows to result of Python Ar expr
+.No set current column for selected rows to result of Python Ar expr
 .It Ic "gz=" Ar expr
-.No sets current column for selected rows to the items in result of Python sequence Ar expr
+.No set current column for selected rows to the items in result of Python sequence Ar expr
 .It Ic " z=" Ar expr
-.No sets current cell to result of evaluated Python Ar expr No on current row
+.No set current cell to result of evaluated Python Ar expr No on current row
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " '" Ns " (tick)"
-adds a frozen copy of current column with all cells evaluated
+add a frozen copy of current column with all cells evaluated
 .It Ic "g'"
-opens a frozen copy of current sheet with all visible columns evaluated
+open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
-adds/resets cache for current/all visible column(s)
+add/reset cache for current/all visible column(s)
 .Pp
 .It Ic "\&:" Ar regex
-.No adds new columns from Ar regex No split; number of columns determined by example row at cursor
+.No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic "\&;" Ar regex
-.No adds new columns from capture groups of Ar regex Ns ; also requires example row
+.No add new columns from capture groups of Ar regex Ns ; also requires example row
 .It Ic "*" Ar regex Ns Sy / Ns Ar subst
-.No replaces Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc)
+.No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc)
 .El
 .Ss Row Selection
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic " s   t   u"
-selects/toggles/unselects current row
+select/toggle/unselect current row
 .It Ic "gs  gt  gu"
-selects/toggles/unselects all rows
+select/toggle/unselect all rows
 .It Ic " |   \e\ " Ns Ar regex
-.No selects/unselects rows matching Ar regex No in current column
+.No select/unselect rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
-.No selects/unselects rows matching Ar regex No in any visible column
+.No select/unselect rows matching Ar regex No in any visible column
 .It Ic " \&," Ns " (comma)"
-selects rows matching current cell in current column
+select rows matching current cell in current column
 .It Ic "g\&,"
-selects rows matching this row in all visible columns
+select rows matching this row in all visible columns
 .
 .El
 .
@@ -211,104 +211,104 @@ selects rows matching this row in all visible columns
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic " [   ]"
-sorts ascending/descending by current column
+sort ascending/descending by current column
 .It Ic "g[  g]"
-sorts ascending/descending by all key columns
+sort ascending/descending by all key columns
 .It Ic " \&""
-opens duplicate sheet with only selected rows
+open duplicate sheet with only selected rows
 .It Ic "g\&""
-opens duplicate sheet with all rows
+open duplicate sheet with all rows
 .It Ic "gz\&""
-opens duplicate sheet with deepcopy of selected rows
+open duplicate sheet with deepcopy of selected rows
 .El
 .Ss Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a   za"
-appends a blank row/column
+append a blank row/column
 .It Ic " ga  gza" Ar number
-.No appends Ar number No blank rows/columns
+.No append Ar number No blank rows/columns
 .It Ic "  d   gd"
-deletes current/selected row(s) and moves to clipboard
+delete current/selected row(s) and moves to clipboard
 .It Ic "  y   gy"
-yanks (copies) current/all selected row(s) to clipboard
+yank (copy) current/all selected row(s) to clipboard
 .It Ic " zy"
-yanks (copies) current cell to clipboard
+yank (copy) current cell to clipboard
 .It Ic "  p    P"
-pastes clipboard rows after/before current row
+paste clipboard rows after/before current row
 .It Ic " zp  gzp"
-sets contents of current column for current/selected row(s) to last clipboard value
+set contents of current column for current/selected row(s) to last clipboard value
 .It Ic "  f"
-fills null cells in current column with contents of non-null cells up the current column
+fill null cells in current column with contents of non-null cells up the current column
 .
 .
 .It Ic "  e" Ar text
-edits contents of current cell
+edit contents of current cell
 .It Ic " ge" Ar text
-.No sets contents of current column for selected rows to Ar text
+.No set contents of current column for selected rows to Ar text
 .It Ic " zd   Del"
-.No sets contents of current cell to Sy None
+.No set contents of current cell to Sy None
 .It Ic "gzd  gDel"
-.No sets contents of cells in current column to Sy None No for selected rows
+.No set contents of cells in current column to Sy None No for selected rows
 .
 .El
 .
 .Ss "  Commands While Editing Input"
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  ^C"
-accepts/aborts input
+accept/abort input
 .It Ic ^O
-opens external $EDITOR to edit contents
+open external $EDITOR to edit contents
 .It Ic ^R
-reloads initial value
+reload initial value
 .It Ic "^A  ^E"
-moves to beginning/end of line
+move to beginning/end of line
 .It Ic "^B  ^F"
-moves back/forward one character
+move back/forward one character
 .It Ic "^H  ^D"
-deletes previous/current character
+delete previous/current character
 .It Ic ^T
-transposes previous and current characters
+transpose previous and current characters
 .It Ic "^U  ^K"
-clears from cursor to beginning/end of line
+clear from cursor to beginning/end of line
 .It Ic "Backspace  Del"
-deletes previous/current character
+delete previous/current character
 .It Ic Insert
-toggles insert mode
+toggle insert mode
 .It Ic "Up  Down"
-sets contents to previous/next in history
+set contents to previous/next in history
 .It Ic "Tab  Shift-Tab"
-autocompletes input (when available)
+autocomplete input (when available)
 .
 .El
 .
 .Ss Data Toolkit
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " o" Ar input
-opens
+open
 .Ar input No in Sy VisiData
 .It Ic "^S" Ar filename
-.No saves current sheet to Ar filename No in format determined by extension (default .tsv)
+.No save current sheet to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
-.No saves CommandLog to Ar filename.vd No file
+.No save CommandLog to Ar filename.vd No file
 .It Ic "A" Ar number
-.No opens new blank sheet with Ar number No columns
+.No open new blank sheet with Ar number No columns
 .It Ic "R" Ar number
-opens duplicate sheet with a random population subset of
+open duplicate sheet with a random population subset of
 .Ar number No rows
 .Pp
 .It Ic " +" Ar aggregator
-.No adds Ar aggregator No to current column (see Sy "Frequency Table" Ns )
+.No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
-.No displays result of Ar aggregator No over values in selected rows for current column
+.No display result of Ar aggregator No over values in selected rows for current column
 .Pp
 .El
 .Ss Data Visualization
 .Bl -tag -width XXXXXXXXXXXXX -compact
 .It Ic " ." No (dot)
-.No plots current numeric column vs key columns. Numeric key column is used for the x-axis; categorical key column values determine color.
+.No plot current numeric column vs key columns. Numeric key column is used for the x-axis; categorical key column values determine color.
 .It Ic "g."
-.No plots a graph of all visible numeric columns vs key columns.
+.No plot a graph of all visible numeric columns vs key columns.
 .Pp
 .El
 .No If rows on the current sheet represent plottable coordinates (as in .shp or vector .mbtiles sources),
@@ -316,76 +316,76 @@ opens duplicate sheet with a random population subset of
 .Ss "  Canvas-specific Commands"
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " +   -"
-increases/decreases zoomlevel, centered on cursor
+increase/decrease zoomlevel, centered on cursor
 .It Ic " _" No (underscore)
-zooms to fit full extent
+zoom to fit full extent
 .It Ic " s   t   u"
-selects/toggles/unselects rows on source sheet contained within canvas cursor
+select/toggle/unselect rows on source sheet contained within canvas cursor
 .It Ic "gs  gt  gu"
-selects/toggles/unselects rows visible on screen
+select/toggle/unselect rows visible on screen
 .It Ic " Enter"
-opens sheet of source rows contained within canvas cursor
+open sheet of source rows contained within canvas cursor
 .It Ic "gEnter"
-opens sheet of source rows visible on screen
+open sheet of source rows visible on screen
 .It Ic " 1" No - Ic "9"
-toggles display of layers
+toggle display of layers
 .It Ic "^L"
-redraws all pixels on canvas
+redraw all pixels on canvas
 .It Ic " w"
-.No toggles Ic show_graph_labels No option
+.No toggle Ic show_graph_labels No option
 .It Ic "mouse scrollwheel"
-zooms in/out of canvas
+zoom in/out of canvas
 .It Ic "left click-drag"
-sets canvas cursor
+set canvas cursor
 .It Ic "right click-drag"
-scrolls canvas
+scroll canvas
 .El
 .Ss Other Commands
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic V
-views contents of current cell in a new TextSheet
+view contents of current cell in a new TextSheet
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
 .It Ic "v"
-toggles visibility (text wrap on TextSheet, legends/axes on Graph)
+toggle visibility (text wrap on TextSheet, legends/axes on Graph)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^^" No (Ctrl-^)
-jumps to previous sheet (swaps with current sheet)
+jump to previous sheet (swaps with current sheet)
 .It Ic " ^E"
-views traceback for most recent error
+view traceback for most recent error
 .It Ic "g^E"
-views traceback for most recent errors
+view traceback for most recent errors
 .It Ic "z^E"
-views traceback for error in current cell
+view traceback for error in current cell
 .It Ic " ^L"
-refreshes screen
+refresh screen
 .It Ic " ^G"
-shows cursor position and bounds of current sheet on status line
+show cursor position and bounds of current sheet on status line
 .It Ic " ^V"
-shows version information on status line
+show version information on status line
 .It Ic " ^R"
-reloads current sheet
+reload current sheet
 .It Ic "z^R"
-clears cache for current column
+clear cache for current column
 .It Ic " ^Z"
-suspends VisiData process
+suspend VisiData process
 .It Ic " ^P"
-.No opens Sy Status History
+.No open Sy Status History
 .
 .El
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^Y  z^Y  g^Y"
-opens current row/cell/sheet as Python object
+open current row/cell/sheet as Python object
 .It Ic " ^X" Ar expr
-.No evaluates Python Ar expr No and opens result as python object
+.No evaluate Python Ar expr No and opens result as python object
 .It Ic "z^X" Ar expr
-.No evaluates Python Ar expr No on current row and shows result on status line
+.No evaluate Python Ar expr No on current row and shows result on status line
 .It Ic "g^X" Ar stmt
-.No executes Python Ar stmt No in the global scope
+.No execute Python Ar stmt No in the global scope
 .El
 .
 .Ss Internal Sheets List
@@ -425,30 +425,30 @@ opens current row/cell/sheet as Python object
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gC
-.No opens Sy Columns Sheet No with all columns from all sheets
+.No open Sy Columns Sheet No with all columns from all sheets
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
-adds column from concatenating selected source columns
+add column from concatenating selected source columns
 .It Ic " ! z!"
-toggles/unsets current column as a key column on source sheet
+toggle/unset current column as a key column on source sheet
 .It Ic "g! gz!"
-toggles/unsets selected columns as key columns on source sheet
+toggle/unset selected columns as key columns on source sheet
 .It Ic "g+"
-adds aggregator to selected source columns
+add aggregator to selected source columns
 .It Ic "g_" No (underscore)
-adjusts widths of selected columns on source sheet
+adjust widths of selected columns on source sheet
 .It Ic "g-" No (hyphen)
-hides selected columns on source sheet
+hide selected columns on source sheet
 .It Ic " ~  #  %  $  @"
-sets type of current column on source sheet to str/int/float/currency/date
+set type of current column on source sheet to str/int/float/currency/date
 .It Ic "g~ g# g% g$ g@"
-sets type of selected columns on source sheet to str/int/float/currency/date
+set type of selected columns on source sheet to str/int/float/currency/date
 .It Ic "z~ gz~"
-sets type of current/selected column(s) on source sheet to anytype
+set type of current/selected column(s) on source sheet to anytype
 .It Ic " Enter"
-.No opens a Sy Frequency Table No sheet grouped on column referenced in current row
+.No open a Sy Frequency Table No sheet grouped on column referenced in current row
 .El
 .
 .Ss Sheets Sheet (Shift-S)
@@ -457,23 +457,23 @@ sets type of current/selected column(s) on source sheet to anytype
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter"
-jumps to sheet referenced in current row
+jump to sheet referenced in current row
 .It Ic "gC"
-.No opens Sy Columns Sheet No with all columns from selected sheets
+.No open Sy Columns Sheet No with all columns from selected sheets
 .It Ic "&" Ar jointype
-.No merges selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
+.No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
 .Bl -tag -width x -compact -offset XXXXXXXXXXXXXXXXXXXX 
 .It Sy "\&."
-.Sy inner No " keeps only rows which match keys on all sheets"
+.Sy inner No " keep only rows which match keys on all sheets"
 .It Sy "\&."
-.Sy left No "  keeps all rows from first selected sheet"
+.Sy left No "  keep all rows from first selected sheet"
 .It Sy "\&."
-.Sy full No "  keeps all rows from all sheets (union)"
+.Sy full No "  keep all rows from all sheets (union)"
 .It Sy "\&."
-.Sy diff No "  keeps only rows NOT in all sheets"
+.Sy diff No "  keep only rows NOT in all sheets"
 .It Sy "\&."
-.Sy append No "keeps all rows from all sheets (concatenation)"
+.Sy append No "keep all rows from all sheets (concatenation)"
 .El
 .
 .Ss Options Sheet (Shift-O)
@@ -482,7 +482,7 @@ jumps to sheet referenced in current row
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter"
-edits option
+edit option
 .El
 .
 .Ss CommandLog (Shift-D)
@@ -491,11 +491,11 @@ edits option
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " x"
-replays command in current row
+replay command in current row
 .It Ic "gx"
-replays contents of entire CommandLog
+replay contents of entire CommandLog
 .It Ic " ^C"
-aborts replay
+abort replay
 .El
 .
 .Ss DERIVED SHEETS
@@ -506,14 +506,14 @@ aborts replay
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gF
-opens Frequency Table, grouped by all key columns on source sheet
+open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-opens one-line summary for selected rows
+open one-line summary for selected rows
 .It (sheet-specific commands)
 .It Ic " s   t   u"
-selects/toggles/unselects these entries in source sheet
+select/toggle/unselect these entries in source sheet
 .It Ic " Enter"
-opens sheet of source rows which are grouped in current cell
+open sheet of source rows which are grouped in current cell
 .El
 .
 .Ss Describe Sheet (Shift-I)
@@ -522,13 +522,13 @@ opens sheet of source rows which are grouped in current cell
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "zs  zu"
-selects/unselects rows on source sheet which are being described in current cell
+select/unselect rows on source sheet which are being described in current cell
 .It Ic " !"
-toggles/unsets current column as a key column on source sheet
+toggle/unset current column as a key column on source sheet
 .It Ic " Enter"
-.No opens a Sy Frequency Table No sheet grouped on column referenced in current row
+.No open a Sy Frequency Table No sheet grouped on column referenced in current row
 .It Ic "zEnter"
-opens copy of source sheet with rows described in current cell
+open copy of source sheet with rows described in current cell
 .El
 .
 .Ss Pivot Table (Shift-W)
@@ -538,9 +538,9 @@ opens copy of source sheet with rows described in current cell
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
-opens sheet of source rows aggregated in current pivot row
+open sheet of source rows aggregated in current pivot row
 .It Ic "zEnter"
-opens sheet of source rows aggregated in current pivot cell
+open sheet of source rows aggregated in current pivot cell
 .El
 .Ss Melted Sheet (Shift-M)
 .Bl -inset -compact
@@ -552,15 +552,15 @@ opens sheet of source rows aggregated in current pivot cell
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
-dives further into Python object
+dive further into Python object
 .It Ic " e"
-edits contents of current cell
+edit contents of current cell
 .It Ic "v"
-toggles whether methods and hidden properties are shown
+toggle whether methods and hidden properties are shown
 .It Ic "gv"
-shows methods and hidden properties
+show methods and hidden properties
 .It Ic "zv"
-hides methods and hidden properties
+hide methods and hidden properties
 .El
 .
 .Sh COMMANDLINE OPTIONS
@@ -574,11 +574,11 @@ instead of file extension
 .
 .Lo y confirm-overwrite F
 .No "True              "
-overwrites existing files without confirmation
+overwrite existing files without confirmation
 .
 .It Cm --diff Ns = Ns Ar base
 .No "None              "
-.No adds colorizer for all sheets against Ar base
+.No add colorizer for all sheets against Ar base
 .
 .El
 .so vd-cli.inc
