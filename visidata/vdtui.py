@@ -1597,7 +1597,7 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
                 self.drawColHeader(scr, headerRow, vcolidx)
 
                 y = headerRow + numHeaderRows
-
+                rows = self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
                 for rowidx in range(0, self.nVisibleRows):
                     dispRowIdx = self.topRowIndex + rowidx
                     if dispRowIdx >= self.nRows:
@@ -1605,7 +1605,7 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
 
                     self.rowLayout[dispRowIdx] = y
 
-                    row = self.rows[dispRowIdx]
+                    row = rows[rowidx]
                     cellval = col.getCell(row, colwidth-1)
 
                     attr = self.colorizeCell(col, row, cellval)
