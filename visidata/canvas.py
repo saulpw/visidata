@@ -7,7 +7,7 @@ from visidata import *
 option('show_graph_labels', True, 'show axes and legend on graph')
 option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
 option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
-option('zoom_incr', 2.0, 'amount to multiply current zoomlevel by when zooming')
+option('zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
 option('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
 
 class Point:
