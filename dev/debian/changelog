@@ -1,14 +1,6 @@
 visidata (0.99-1) unstable; urgency=low
 
   [Anja Boskovic]
-  * Bump to
-    [v0.99](https://github.com/saulpw/visidata/blob/stable/CHANGELOG.md#v099-2017-12-22)
-
- -- Anja Boskovic <anja@visidata.org>  Wed, 20 Dec 2017 23:26:05 -0500
-
-visidata (0.98.1-1) unstable; urgency=low
-
-  [ Anja Boskovic ]
   * Initial release. Closes: #884565
 
- -- Anja Boskovic <anja@visidata.org>  Sat, 16 Dec 2017 17:48:05 -0500
+ -- Anja Boskovic <anja@visidata.org>  Wed, 11 Jan 2018 10:50:05 -0500
