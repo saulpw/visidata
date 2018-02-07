@@ -51,14 +51,15 @@ class SheetFreqTable(Sheet):
         nkeys = len(self.keyCols)
 
         self.columns.extend([
-            Column('count', type=int, getter=lambda col,row: len(row[1])),
-            Column('percent', type=float, getter=lambda col,row: len(row[1])*100/col.sheet.source.nRows),
-            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=50),
+            Column('count', type=int, getter=lambda col,row: len(row[1]), sql='COUNT(*)'),
+            Column('percent', type=float, getter=lambda col,row: len(row[1])*100/col.sheet.source.nRows, sql=''),
+            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=50, sql=''),
         ])
 
         aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
                                  type=aggregator.type or c.type,
-                                 getter=lambda col,row,origcol=c,aggr=aggregator: aggr(origcol, row[1]))
+                                 getter=lambda col,row,origcol=c,aggr=aggregator: aggr(origcol, row[1]),
+                                 sql='%s(%s)' % (aggregator, c.name) )
                              for c in self.source.visibleCols
                                 for aggregator in getattr(c, 'aggregators', [])
                          ]
@@ -68,6 +69,8 @@ class SheetFreqTable(Sheet):
             for c in self.columns[nkeys+1:nkeys+3]:
                 c.width = 0
 
+        self.groupby = columns
+        self.orderby = [(self.columns[nkeys], -1)]  # count desc
 
     def selectRow(self, row):
         self.source.select(row[1])     # select all entries in the bin on the source sheet
