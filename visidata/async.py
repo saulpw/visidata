@@ -10,14 +10,14 @@ min_thread_time_s = 0.10 # only keep threads that take longer than this number o
 option('profile', '', 'filename to save binary profiling data')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
-globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet')
-globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary threads')
-globalCommand('^T', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')
-globalCommand('^_', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
+globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet', 'system-cancel-sheet')
+globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary threads', 'system-cancel-all')
+globalCommand('^T', 'vd.push(vd.threadsSheet)', 'open Threads Sheet', 'sheet-threads')
+globalCommand('^_', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process', 'system-profile-threads')
 
 class ProfileSheet(TextSheet):
     commands = TextSheet.commands + [
-        Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile'),
+        Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile', 'thread-profile-save'),
     ]
     def __init__(self, name, pr):
         super().__init__(name, getProfileResults(pr).splitlines())
@@ -86,7 +86,7 @@ def cancelThread(*threads, exception=EscapeException):
 
 
 SheetsSheet.commands += [
-    Command('^C', 'cancelThread(*cursorRow.currentThreads)', 'abort all threads on sheet at cursor'),
+    Command('^C', 'cancelThread(*cursorRow.currentThreads)', 'abort all threads on sheet at cursor', 'cancel-thread'),
 ]
 
 SheetsSheet.columns += [
@@ -97,9 +97,9 @@ SheetsSheet.columns += [
 class ThreadsSheet(Sheet):
     rowtype = 'threads'
     commands = [
-        Command('d', 'cancelThread(cursorRow)', 'abort thread at current row'),
+        Command('d', 'cancelThread(cursorRow)', 'abort thread at current row', 'cancel-thread'),
         Command('^C', 'd'),
-        Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action'),
+        Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action', 'sheet-profile'),
     ]
     columns = [
         ColumnAttr('name'),

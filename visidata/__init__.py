@@ -21,6 +21,7 @@ from .freeze import *
 from .regex import *
 from .canvas import *
 from .graph import *
+from .menu import *
 
 from .loaders.csv import *
 from .loaders.json import *
@@ -35,6 +36,5 @@ from .loaders.mbtiles import *
 from .loaders.http import *
 from .loaders.html import *
 from .loaders.markdown import *
-from .loaders.bigquery import *
 
 addGlobals(globals())

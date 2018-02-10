@@ -9,11 +9,11 @@ option('disp_replay_play', '▶', 'status indicator for active replay')
 option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 
-globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'open-cmdlog')
+globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'sheet-cmdlog')
 globalCommand('^D', 'saveSheet(vd.cmdlog, inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save CommandLog to new .vd file', 'save-cmdlog')
-globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'toggle-replay')
-globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'step-replay')
-globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'cancel-replay')
+globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'replay-toggle')
+globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'replay-step')
+globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'replay-cancel')
 
 #globalCommand('KEY_BACKSPACE', 'vd.cmdlog.undo()', 'remove last action on commandlog and replay')
 
@@ -83,9 +83,9 @@ class CommandLog(Sheet):
     'Log of commands for current session.'
     rowtype = 'commands'
     commands = [
-        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row'),
-        Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog'),
-        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay'),
+        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row', 'replay-row'),
+        Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog', 'replay-sheet'),
+        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay', 'replay-abort'),
     ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 
