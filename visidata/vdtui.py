@@ -951,6 +951,7 @@ class Colorizer:
         self.func = colorfunc
 
 class BaseSheet:
+    rowtype=''
     def __init__(self, name, **kwargs):
         self.name = name
 
@@ -973,6 +974,9 @@ class BaseSheet:
     def __bool__(self):
         'an instantiated Sheet always tests true'
         return True
+
+    def __len__(self):
+        return 0
 
     @property
     def loaded(self):
@@ -1058,6 +1062,8 @@ class BaseSheet:
     def reload(self):
         error('no reload')
 
+    def checkCursor(self):
+        pass
 
 class Sheet(BaseSheet):
     commands = [
