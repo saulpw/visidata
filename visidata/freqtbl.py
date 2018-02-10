@@ -1,8 +1,8 @@
 import math
 
 from visidata import *
-globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column')
-globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet')
+globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column', 'aggregate-column')
+globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet', 'aggregate-keys')
 globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows')
 
 theme('disp_histogram', '*', 'histogram element character')
@@ -11,7 +11,7 @@ option('disp_histolen', 80, 'width of histogram column')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 ColumnsSheet.commands += [
-    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row')
+    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'aggregate-source-column')
 ]
 
 def getValueOrError(c, r):
@@ -30,11 +30,11 @@ class SheetFreqTable(Sheet):
     rowtype = 'bins'
     commands = [
         # redefine these commands only to change the helpstr
-        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet'),
-        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet'),
-        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet'),
+        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet', 'filter-source-toggle-bin'),
+        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet', 'filter-source-select-bin'),
+        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet', 'filter-source-unselect-bin'),
 
-        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell'),
+        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell', 'open-source-bin'),
 #        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 

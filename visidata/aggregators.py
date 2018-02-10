@@ -1,7 +1,8 @@
 import collections
 from visidata import *
-globalCommand('+', 'addAggregator([cursorCol], chooseOne(aggregators))', 'add aggregator to current column')
-globalCommand('z+', 'status(chooseOne(aggregators)(cursorCol, selectedRows or rows))', 'display result of aggregator over values in selected rows for current column')
+
+globalCommand('+', 'addAggregator([cursorCol], choose(aggregators))', 'add aggregator to current column', 'column-aggregate-add')
+globalCommand('z+', 'status(choose(aggregators)(cursorCol, selectedRows or rows))', 'display result of aggregator over values in selected rows for current column', 'column-aggregate-show')
 
 aggregators = collections.OrderedDict()
 
@@ -41,7 +42,7 @@ aggregator('count', lambda values: sum(1 for v in values), int)
 fullAggregator('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
 
 ColumnsSheet.commands += [
-    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'add aggregator to selected source columns'),
+    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, choose(aggregators, lambda aggname, sheet: aggregators[aggname].__doc__))', 'add aggregator to selected source columns', 'column-aggregate-add-all'),
 ]
 ColumnsSheet.columns += [
         Column('aggregators',

@@ -579,7 +579,7 @@ overwrite existing files without confirmation
 .No add colorizer for all sheets against Ar base
 .
 .El
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 encoding passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
@@ -670,7 +670,7 @@ number of rows to check for fixed width columns
 .No Display options can only be set via the Sx Options Sheet No or a config file (see Sx FILES Ns ).
 .Pp
 .
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy "disp_none          " No ""
 visible contents of a cell whose value is None
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
@@ -729,6 +729,18 @@ cell note for numeric types in anytype columns
 color of formatting exception note
 .It Sy "color_getter_exc   " No "red bold"
 color of computation exception note
+.It Sy "color_menu_prefix  " No "green"
+color of accepted menu part
+.It Sy "color_menu_option  " No "white"
+default menu color
+.It Sy "color_menu_cursor  " No "bold reverse"
+color of menu cursor
+.It Sy "color_menu_help    " No "bold"
+color of menu help text
+.It Sy "disp_menu_helpfmt  " No "{bindings} \[u21E8] {helpstr}"
+string between command keybindings and helpstr in menu
+.It Sy "disp_menu_helpsep  " No " | "
+string between submenu options
 .It Sy "disp_histogram     " No "*"
 histogram element character
 .It Sy "disp_histolen      " No "80"
