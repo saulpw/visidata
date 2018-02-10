@@ -192,6 +192,7 @@ globalCommand('^V', 'status(__version__)', 'show version information on status l
 globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses"))', 'open Status History', 'status-history')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error', 'sheet-errors-last')
+globalCommand('^R', 'reload(); status("reloaded")', 'reload current sheet', 'sheet-reload')
 
 globalCommand('^^', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet (swap with current sheet)', 'move-sheet-swap')
 
@@ -1122,18 +1123,18 @@ Command('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error", Non
 Command('^R', 'reload(); recalc(); status("reloaded")', 'reload current sheet'),
 Command('z^R', 'cursorCol._cachedValues.clear()', 'clear cache for current column'),
 
-Command('/', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)', 'search for regex forwards in current column', 'find-row-forward-regex-column'),
-Command('?', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)', 'search for regex backwards in current column', 'find-row-backward-regex-column'),
+Command('/', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)', 'search for regex forwards in current column', 'find-forward-regex-column'),
+Command('?', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)', 'search for regex backwards in current column', 'find-backward-regex-column'),
 Command('n', 'moveRegex(sheet, reverse=False)', 'move to next match from last search', 'find-forward-repeat'),
 Command('N', 'moveRegex(sheet, reverse=True)', 'move to previous match from last search', 'find-backward-repeat'),
 
-Command('g/', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns', 'find-row-forward-regex-all'),
-Command('g?', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns', 'find-row-backward-regex-all'),
+Command('g/', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns', 'find-forward-regex-all'),
+Command('g?', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns', 'find-backward-regex-all'),
 
 Command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit contents of current cell', 'modify-edit-cell'),
 Command('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorValue))', 'set contents of current column for selected rows to same input', 'modify-edit-column-selected'),
-Command('zd', 'cursorCol.setValues([cursorRow], None)', 'set contents of current cell to None', 'delete-cell'),
-Command('gzd', 'cursorCol.setValues(selectedRows, None)', 'set contents of cells in current column to None for selected rows', 'delete-column-selected'),
+Command('zd', 'cursorCol.setValues([cursorRow], None)', 'set contents of current cell to None', 'modify-clear-cell'),
+Command('gzd', 'cursorCol.setValues(selectedRows, None)', 'set contents of cells in current column to None for selected rows', 'modify-clear-column-selected'),
 Command('KEY_DC', 'zd'),
 Command('gKEY_DC', 'gzd'),
 
