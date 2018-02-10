@@ -129,6 +129,7 @@ def anySelected(vs, rows):
 class Plotter(BaseSheet):
     'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
     columns=[Column('')]  # to eliminate errors outside of draw()
+    rowtype='pixels'
     commands=[
         Command('^L', 'refresh()', 'redraw all pixels on canvas'),
         Command('v', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
@@ -140,6 +141,9 @@ class Plotter(BaseSheet):
         self.hiddenAttrs = set()
         self.needsRefresh = False
         self.resetCanvasDimensions()
+
+    def __len__(self):
+        return (self.plotwidth* self.plotheight)
 
     def resetCanvasDimensions(self):
         'sets total available canvas dimensions'
@@ -184,7 +188,7 @@ class Plotter(BaseSheet):
         if not c:
             return 0
         _, attr, rows = c[-1]
-        if anySelected(self.source, rows):
+        if isinstance(self.source, BaseSheet) and anySelected(self.source, rows):
             attr, _ = colors.update(attr, 8, 'bold', 10)
         return attr
 
