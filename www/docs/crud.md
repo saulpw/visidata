@@ -1,5 +1,5 @@
-- Update: 2018-02-05
-- Version: VisiData 1.0
+- Update: 2018-02-10
+- Version: VisiData 1.1
 
 # Creating sheets, rows and columns
 
@@ -36,8 +36,13 @@
 
 ## How to add a new blank column
 
-1. Type `=` followed by `''`.
-2. Press `g'`.
+1. Press
+
+    a. `za` to add one blank column.
+
+    **or**
+
+    b. `gza` followed by a *number* to add *n* blank columns.
 
 ---
 
