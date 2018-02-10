@@ -36,5 +36,6 @@ from .loaders.mbtiles import *
 from .loaders.http import *
 from .loaders.html import *
 from .loaders.markdown import *
+from .loaders.png import *
 
 addGlobals(globals())

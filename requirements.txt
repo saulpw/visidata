@@ -11,3 +11,4 @@ psycopg2            # postgres
 pyshp               # shapefiles
 mapbox-vector-tile  # mbtiles
 google-cloud-bigquery  # bigquery
+pypng               # png
