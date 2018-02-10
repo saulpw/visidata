@@ -11,9 +11,32 @@ globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name,
 globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object')
 globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object')
 
+globalCommand('(', 'openColumn(cursorCol, cursorValue)', 'expand this column into multiple columns')
+globalCommand(')', 'closeColumn(sheet, cursorCol)', 'remove expanded columns')
+
+def closeColumn(sheet, col):
+    col.origCol.width = options.default_width
+    cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not getattr(col, "origCol", col)]
+    sheet.columns = cols
+
 # used as ENTER in several pyobj sheets
 globalCommand('pyobj-dive', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object')
 
+class ExpandedColumn(Column):
+    def calcValue(self, row):
+        return self.origCol.getValue(row)[self.key]
+
+def openColumn(col, val):
+    if isinstance(val, dict):
+        for k in val:
+            c = ExpandedColumn(col.name+'.'+k, origCol=col, key=k)
+            col.sheet.addColumn(c, col.sheet.cursorColIndex+1)
+            col.width = 0
+    elif isinstance(val, (list, tuple)):
+        for k in range(len(val)):
+            c = ExpandedColumn('%s[%s]' % (col.name, k), origCol=col, key=k)
+            col.sheet.addColumn(c, col.sheet.cursorColIndex+1)
+            col.width = 0
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj):
