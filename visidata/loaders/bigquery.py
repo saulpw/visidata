@@ -1,7 +1,5 @@
 from visidata import *
 
-from google.cloud import bigquery
-
 
 class LazyRowset(dict):
     def __init__(self, tbl, num=None):
@@ -61,6 +59,7 @@ class BigQueryTableList(Sheet):
     ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        from google.cloud import bigquery
         self.client = bigquery.Client()
         self.__dataset_ref = self.client.dataset(self.datasetName, project=self.project)
         self._dataset = None
@@ -115,6 +114,7 @@ class BigQueryResult(Sheet):
     @async
     def doQuery(self, start, limit):
         'partial query'
+        from google.cloud import bigquery
         job_config = bigquery.job.QueryJobConfig()
         job_config.dry_run = True
         my_job = self.client.query(self.query, job_config=job_config)
