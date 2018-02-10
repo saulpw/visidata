@@ -37,8 +37,11 @@
     * How to create a frequency chart
     * How to calculate descriptive statistics
     * How to filter for grouped or described rows
-* Creating sheets, rows and columns
-    * (A a ga gz=)
+* [Creating sheets, rows and columns](/docs/crud)
+    * How to configure the cursor to move right after a successful edit
+    * How to set up a sheet for data collection
+    * How to add a new blank column
+    * How to fill a column with a range of numbers
 * [Combining datasets](/docs/join)
     * How to perform a join
     * How to append two datasets
@@ -46,7 +49,6 @@
     * How to graph a single column
     * How to graph multiple columns
     * How to interact with graphs
-* [Incorporating VisiData into a Unix toolkit]
 * [How to save and replay a VisiData session](/docs/save-restore)
 * [Customizing VisiData](/docs/customize)
     * How to configure VisiData (user)
