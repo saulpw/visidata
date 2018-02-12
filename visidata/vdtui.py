@@ -217,6 +217,8 @@ alias('^F', 'move-page-down'),
 alias('^B', 'move-page-up'),
 alias(['gg', 'gk'], 'move-top'),
 alias(['G', 'gj'], 'move-bottom'),
+alias('gh', 'move-far-left'),
+alias('gl', 'move-far-right'),
 
 # VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
 #
