@@ -15,37 +15,78 @@ def open_png(p):
     return PNGSheet(p.name, source=p)
 
 
+# rowdef: tuple(x, y, r, g, b, a)
 class PNGSheet(Sheet):
-    commands = [
-        Command('.', 'vd.push(PNGDrawing(name+"_plot", source=sheet))', 'plot this png')
+    columns = [ColumnItem(name, i, type=int) for i, name in enumerate('x y R G B A'.split())] + [
+        Column('attr', type=int, getter=lambda col,row: rgb_to_attr(*row[2:]))
     ]
+    nKeys = 2
+    commands = [
+        Command('.', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=selectedRows or rows))', 'plot this png', 'plot-png')
+    ]
+    def newRow(self):
+        return list((None, None, 0, 0, 0, 0))
+
     @async
     def reload(self):
         import png
         r = png.Reader(bytes=self.source.read_bytes())
         self.width, self.height, pixels, md = r.asRGBA()
-        self.rows = list(pixels)
-        self.columns = []
-        for x in range(0, self.width*4, 4):
-            self.addColumn(ColumnItem('R%s' % (x//4), x, width=4))
-            self.addColumn(ColumnItem('G%s' % (x//4), x+1, width=4))
-            self.addColumn(ColumnItem('B%s' % (x//4), x+2, width=4))
-            self.addColumn(ColumnItem('A%s' % (x//4), x+3, width=4))
+        self.rows = []
+        for y, row in enumerate(pixels):
+            for i in range(0, len(row)-1, 4):
+                r,g,b,a = row[i:i+4]
+                self.addRow([i//4, y, r, g, b, a])
 
 
 class PNGDrawing(Plotter):
     commands = [
-        Command('.', 'vd.push(source)', 'push table of pixels for this png')
+        Command('.', 'vd.push(source)', 'push table of pixels for this png'),
+        Command('move-left', 'sheet.cursorX -= 1', ''),
+        Command('move-right', 'sheet.cursorX += 1', ''),
+        Command('move-up', 'sheet.cursorY -= 1', ''),
+        Command('move-down', 'sheet.cursorY += 1', ''),
+        Command('move-top', 'sheet.cursorY = 0', ''),
+        Command('move-bottom', 'sheet.cursorY = plotheight/4-1', ''),
+        Command('move-far-left', 'sheet.cursorX = 0', ''),
+        Command('move-far-right', 'sheet.cursorX = plotwidth/2-1', ''),
+        Command('0', 'setPixel(rowsWithin(Box(cursorX*2, cursorY*4, 1, 3)), 0)', ''),
+        Command('1', 'togglePixel(rowsWithin(Box(cursorX*2, cursorY*4, 0, 0)))', ''),
+        Command('2', 'togglePixel(rowsWithin(Box(cursorX*2, cursorY*4+1, 0, 0)))', ''),
+        Command('3', 'togglePixel(rowsWithin(Box(cursorX*2, cursorY*4+2, 0, 0)))', ''),
+        Command('4', 'togglePixel(rowsWithin(Box(cursorX*2+1, cursorY*4, 0, 0)))', ''),
+        Command('5', 'togglePixel(rowsWithin(Box(cursorX*2+1, cursorY*4+1, 0, 0)))', ''),
+        Command('6', 'togglePixel(rowsWithin(Box(cursorX*2+1, cursorY*4+2, 0, 0)))', ''),
+        Command('7', 'togglePixel(rowsWithin(Box(cursorX*2, cursorY*4+3, 0, 0)))', ''),
+        Command('8', 'togglePixel(rowsWithin(Box(cursorX*2+1, cursorY*4+3, 0, 0)))', ''),
+        Command('9', 'setPixel(rowsWithin(Box(cursorX*2, cursorY*4, 1, 3)), 255)', ''),
     ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cursorX = self.cursorY = 0
+
+    def togglePixel(self, rows):
+        for row in rows:
+            x,y,r,g,b,a = row
+            self.pixels[y][x][rgb_to_attr(r,g,b,a)].remove(row)
+            row[5] = a = 0 if row[5] else 255
+            self.plotpixel(x, y, rgb_to_attr(r,g,b,a), row)
+
+    def setPixel(self, rows, attr):
+        for row in rows:
+            x,y,r,g,b,a = row
+            self.pixels[y][x][rgb_to_attr(r,g,b,a)].remove(row)
+            row[5] = a = attr
+            self.plotpixel(x, y, rgb_to_attr(r,g,b,a), row)
+
+    @property
+    def plotterCursorBox(self):
+        return Box(self.cursorX*2, self.cursorY*4, 2, 4)
+
     @async
     def reload(self):
-        x_factor = self.plotwidth/self.source.width
-        y_factor = self.plotheight/self.source.height
-        x_factor = y_factor = min(x_factor, y_factor)
-        for y, row in enumerate(self.source.rows):
-            for i in range(0, len(row)-1, 4):
-                x = i//4
-                r,g,b,a = row[i:i+4]
-                attr = rgb_to_attr(r,g,b,a)
-                if attr != 0:
-                    self.plotpixel(x, y, attr)
+        self.resetCanvasDimensions()
+        for row in self.sourceRows:
+            x, y, r, g, b, a = row
+            self.plotpixel(x, y, rgb_to_attr(r,g,b,a), row)
