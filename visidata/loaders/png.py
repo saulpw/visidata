@@ -90,3 +90,33 @@ class PNGDrawing(Plotter):
         for row in self.sourceRows:
             x, y, r, g, b, a = row
             self.plotpixel(x, y, rgb_to_attr(r,g,b,a), row)
+
+@async
+def save_png(vs, fn):
+    if isinstance(vs, PNGSheet):
+        pass
+    elif isinstance(vs, PNGDrawing):
+        vs = vs.source
+    else:
+        error('sheet must be from png loader (for now)')
+
+    palette = collections.OrderedDict()
+    palette[(0,0,0,0)] = 0   # invisible black is 0
+
+    pixels = list([0]*vs.width for y in range(vs.height))
+
+    for x,y,r,g,b,a in Progress(sorted(vs.rows)):
+        color = tuple((r,g,b,a))
+        colornum = palette.get(color, None)
+        if colornum is None:
+            colornum = palette[color] = len(palette)
+        pixels[y][x] = colornum
+
+    status('saving %sx%sx%s' % (vs.width, vs.height, len(palette)))
+
+    import png
+    with open(fn, 'wb') as fp:
+        w = png.Writer(vs.width, vs.height, palette=list(palette.keys()))
+        w.write(fp, pixels)
+
+    status('saved')
