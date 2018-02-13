@@ -63,11 +63,11 @@ class ThreadProfiler:
             vd().threads.remove(self.thread)
 
 @functools.wraps(vd().toplevelTryFunc)
-def threadProfileCode(vdself, func, *args, **kwargs):
+def threadProfileCode(func, *args, **kwargs):
     'Toplevel thread profile wrapper.'
     with ThreadProfiler(threading.current_thread()) as prof:
         try:
-            prof.thread.status = threadProfileCode.__wrapped__(vdself, func, *args, **kwargs)
+            prof.thread.status = threadProfileCode.__wrapped__(func, *args, **kwargs)
         except EscapeException as e:
             prof.thread.status = e
 
