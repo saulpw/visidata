@@ -25,6 +25,7 @@ nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? 
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
 nonLogKeys += '^L ^C ^U ^K ^I ^D KEY_RESIZE KEY_F(1) z?'.split()
+nonLogKeys += [' ']
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 
 def itemsetter(i):
@@ -72,6 +73,10 @@ def loggable(keystrokes):
     if keystrokes in nonLogKeys:
         return False
     if keystrokes.startswith('move-'):
+        return False
+    if keystrokes.startswith('BUTTON'):  # mouse click
+        return False
+    if keystrokes.startswith('REPORT'):  # scrollwheel/mouse position
         return False
     return True
 
