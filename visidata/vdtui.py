@@ -1022,6 +1022,7 @@ class BaseSheet:
             escaped = True
         except Exception as e:
             err = self.vd.exceptionCaught(e)
+            escaped = True
 
         try:
             self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
