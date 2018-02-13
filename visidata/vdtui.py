@@ -581,15 +581,22 @@ class VisiData:
     def execAsync(self, func, *args, **kwargs):
         'Execute `func(*args, **kwargs)` in a separate thread.'
 
-        currentSheet = self.sheets[0]
         thread = threading.Thread(target=self.toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
         self.addThread(thread)
-        currentSheet.currentThreads.append(thread)
+
+        if self.sheets:
+            currentSheet = self.sheets[0]
+            currentSheet.currentThreads.append(thread)
+        else:
+            currentSheet = None
+
         thread.sheet = currentSheet
         thread.start()
+
         return thread
 
-    def toplevelTryFunc(self, func, *args, **kwargs):
+    @staticmethod
+    def toplevelTryFunc(func, *args, **kwargs):
         'Thread entry-point for `func(*args, **kwargs)` with try/except wrapper'
         t = threading.current_thread()
         t.name = func.__name__
@@ -602,7 +609,8 @@ class VisiData:
         except Exception as e:
             exceptionCaught(e)
 
-        t.sheet.currentThreads.remove(t)
+        if t.sheet:
+            t.sheet.currentThreads.remove(t)
         return ret
 
     @property

@@ -22,6 +22,7 @@ from .regex import *
 from .canvas import *
 from .graph import *
 from .menu import *
+from .motd import *
 
 from .loaders.csv import *
 from .loaders.json import *
