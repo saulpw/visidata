@@ -385,6 +385,16 @@ def choose(cmdtree, helpfunc=None, sheet=None):
     scr = vdobj.scr
     sheet = sheet or vdobj.sheets[0]
 
+    v = vd().callHook('preedit')
+    if v and v[0]:
+        for part in v[0].split('-'):
+            if part+'-' in cmdtree:
+                cmdtree = cmdtree[part+'-']
+            else:
+                cmdtree = cmdtree[part]
+                break
+        return cmdtree
+
     cmdpath = [[cmdtree, 0]]
     while cmdpath:
         curlevel = cmdpath[-1]
@@ -392,6 +402,7 @@ def choose(cmdtree, helpfunc=None, sheet=None):
 
         if not isinstance(curnode, dict): # leaf node
             longname = ''.join(sorted(n.keys())[i] for n,i in cmdpath[:-1])
+            vd().callHook('postedit', longname)
             return curnode
 
         menuy = vdobj.windowHeight-1
