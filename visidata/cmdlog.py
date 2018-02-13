@@ -15,8 +15,7 @@ globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'replay-t
 globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'replay-step')
 globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'replay-cancel')
 
-#globalCommand('KEY_BACKSPACE', 'vd.cmdlog.undo()', 'remove last action on commandlog and replay')
-
+globalCommand('KEY_BACKSPACE', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))', 'quit this sheet and remove it from the cmdlog')
 
 globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
 
@@ -24,7 +23,7 @@ globalCommand('status', 'status(input("status: ", display=False))', 'show given 
 nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g?'.split()
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
-nonLogKeys += '^L ^C ^U ^K ^I ^D KEY_RESIZE KEY_F(1) z?'.split()
+nonLogKeys += '^L ^C ^U ^K ^I ^D KEY_RESIZE KEY_F(1) z? KEY_BACKSPACE'.split()
 nonLogKeys += [' ']
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 
@@ -83,7 +82,7 @@ def loggable(keystrokes):
 def open_vd(p):
     return CommandLog(p.name, source=p)
 
-# rowdef: CommandLog
+# rowdef: CommandLogRow
 class CommandLog(Sheet):
     'Log of commands for current session.'
     rowtype = 'commands'
@@ -113,21 +112,10 @@ class CommandLog(Sheet):
         reload_tsv_sync(self, header=1)  # .vd files always have a header row, regardless of options
         self.rows = [CommandLogRow(r) for r in self.rows]
 
-    def undo(self):
-        'Delete last command, reload sources, and replay entire log.'
-        if len(self.rows) < 2:
-            error('no more to undo')
-
-        deletedRow = self.rows[-2]   # the command to undo
-        del self.rows[-2:]           # delete the previous command and the undo command
-
-        vd().sheets = [self]
-
-        self.sheetmap = {}
-        for r in self.rows:
-            self.replayOne(r)
-
-        status('undid "%s"' % deletedRow.keystrokes)
+    def removeSheet(self, vs):
+        'Remove all traces of sheets named vs.name from the cmdlog.'
+        self.rows = [r for r in self.rows if r.sheet != vs.name]
+        status('removed "%s" from cmdlog' % vs.name)
 
     def beforeExecHook(self, sheet, keystrokes, args=''):
         if sheet is self:
