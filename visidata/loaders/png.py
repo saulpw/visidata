@@ -22,7 +22,7 @@ class PNGSheet(Sheet):
     ]
     nKeys = 2
     commands = [
-        Command('.', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=selectedRows or rows))', 'plot this png', 'plot-png')
+        Command('.', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png', 'plot-png')
     ]
     def newRow(self):
         return list((None, None, 0, 0, 0, 0))
