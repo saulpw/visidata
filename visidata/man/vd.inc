@@ -429,22 +429,14 @@ open current row/cell/sheet as Python object
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
 add column from concatenating selected source columns
-.It Ic " ! z!"
-toggle/unset current column as a key column on source sheet
 .It Ic "g! gz!"
 toggle/unset selected columns as key columns on source sheet
 .It Ic "g+"
 add aggregator to selected source columns
-.It Ic "g_" No (underscore)
-adjust widths of selected columns on source sheet
 .It Ic "g-" No (hyphen)
 hide selected columns on source sheet
-.It Ic " ~  #  %  $  @"
-set type of current column on source sheet to str/int/float/currency/date
 .It Ic "g~ g# g% g$ g@"
 set type of selected columns on source sheet to str/int/float/currency/date
-.It Ic "z~ gz~"
-set type of current/selected column(s) on source sheet to anytype
 .It Ic " Enter"
 .No open a Sy Frequency Table No sheet grouped by column referenced in current row
 .El
