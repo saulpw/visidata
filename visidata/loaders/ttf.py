@@ -4,6 +4,7 @@ from visidata import *
 def open_ttf(p):
     return TTFTablesSheet(p.name, source=p)
 
+open_otf = open_ttf
 
 class TTFTablesSheet(Sheet):
     rowtype = 'font tables'
@@ -36,8 +37,8 @@ class TTFGlyphsSheet(Sheet):
     columns = [
         ColumnItem('codepoint', 0, type=int, fmtstr='{:X}'),
         ColumnItem('glyphid', 1),
-        SubrowColumn(ColumnAttr('height'), 2),
-        SubrowColumn(ColumnAttr('width'), 2),
+        SubrowColumn(ColumnAttr('height', type=int), 2),
+        SubrowColumn(ColumnAttr('width', type=int), 2),
         SubrowColumn(ColumnAttr('lsb'), 2),
         SubrowColumn(ColumnAttr('tsb'), 2),
     ]
@@ -57,18 +58,27 @@ class GlyphPen(InvertedCanvas):
     aspectRatio = 1.0
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
+        self.firstxy = None
         self.lastxy = None
         self.attr = self.plotColor(('line',))
     def moveTo(self, xy):
         self.lastxy = xy
     def lineTo(self, xy):
+        if not self.firstxy: self.firstxy = self.lastxy
         x1, y1 = self.lastxy
         x2, y2 = xy
         self.line(x1, y1, x2, y2, self.attr)
         self.lastxy = xy
     def closePath(self):
+        self.lineTo(self.firstxy)
+        self.firstxy = None
         self.lastxy = None
     def qCurveTo(self, *pts):
+        if not self.firstxy: self.firstxy = self.lastxy
+        self.curve([self.lastxy] + list(pts), self.plotColor(('curve',)))
+        self.lastxy = pts[-1]
+    def curveTo(self, *pts):
+        if not self.firstxy: self.firstxy = self.lastxy
         self.curve([self.lastxy] + list(pts), self.plotColor(('curve',)))
         self.lastxy = pts[-1]
     def reload(self):
