@@ -39,32 +39,14 @@ class PNGSheet(Sheet):
                 self.addRow([i//4, y, r, g, b, a])
 
 
-class PNGDrawing(Plotter):
+class PNGDrawing(Canvas):
+    aspectRatio = 1.0
     commands = [
         Command('.', 'vd.push(source)', 'push table of pixels for this png'),
-        Command('move-left', 'sheet.cursorX -= 1', ''),
-        Command('move-right', 'sheet.cursorX += 1', ''),
-        Command('move-up', 'sheet.cursorY -= 1', ''),
-        Command('move-down', 'sheet.cursorY += 1', ''),
-        Command('move-top', 'sheet.cursorY = 0', ''),
-        Command('move-bottom', 'sheet.cursorY = plotheight/4-1', ''),
-        Command('move-far-left', 'sheet.cursorX = 0', ''),
-        Command('move-far-right', 'sheet.cursorX = plotwidth/2-1', ''),
-        Command('0', 'setPixel(rowsWithin(Box(cursorX*2, cursorY*4, 1, 3)), 0)', ''),
-        Command('1', 'togglePixel(rowsWithin(Box(cursorX*2, cursorY*4, 0, 0)))', ''),
-        Command('2', 'togglePixel(rowsWithin(Box(cursorX*2, cursorY*4+1, 0, 0)))', ''),
-        Command('3', 'togglePixel(rowsWithin(Box(cursorX*2, cursorY*4+2, 0, 0)))', ''),
-        Command('4', 'togglePixel(rowsWithin(Box(cursorX*2+1, cursorY*4, 0, 0)))', ''),
-        Command('5', 'togglePixel(rowsWithin(Box(cursorX*2+1, cursorY*4+1, 0, 0)))', ''),
-        Command('6', 'togglePixel(rowsWithin(Box(cursorX*2+1, cursorY*4+2, 0, 0)))', ''),
-        Command('7', 'togglePixel(rowsWithin(Box(cursorX*2, cursorY*4+3, 0, 0)))', ''),
-        Command('8', 'togglePixel(rowsWithin(Box(cursorX*2+1, cursorY*4+3, 0, 0)))', ''),
-        Command('9', 'setPixel(rowsWithin(Box(cursorX*2, cursorY*4, 1, 3)), 255)', ''),
     ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.cursorX = self.cursorY = 0
 
     def togglePixel(self, rows):
         for row in rows:
@@ -80,16 +62,13 @@ class PNGDrawing(Plotter):
             row[5] = a = attr
             self.plotpixel(x, y, rgb_to_attr(r,g,b,a), row)
 
-    @property
-    def plotterCursorBox(self):
-        return Box(self.cursorX*2, self.cursorY*4, 2, 4)
-
     @async
     def reload(self):
-        self.resetCanvasDimensions()
+        self.reset()
         for row in self.sourceRows:
             x, y, r, g, b, a = row
-            self.plotpixel(x, y, rgb_to_attr(r,g,b,a), row)
+            self.point(x, y, rgb_to_attr(r,g,b,a), row)
+        self.refresh()
 
 @async
 def save_png(vs, fn):
