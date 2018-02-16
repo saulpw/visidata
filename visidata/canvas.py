@@ -453,7 +453,8 @@ class Canvas(Plotter):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes + [vertexes[0]], attr, row))
 
-    def curve(self, vertexes, attr, row=None):
+    def qcurve(self, vertexes, attr, row=None):
+        'quadratic curve from vertexes[0] to vertexes[2] with control point at vertexes[1]'
         assert len(vertexes) == 3, len(vertexes)
         x1, y1 = vertexes[0]
         x2, y2 = vertexes[1]
@@ -464,6 +465,7 @@ class Canvas(Plotter):
         self.point(x3, y3, attr, row)
 
     def _recursive_bezier(self, x1, y1, x2, y2, x3, y3, attr, row, level=0):
+        'from http://www.antigrain.com/research/adaptive_bezier/'
         m_approximation_scale = 10.0
         m_distance_tolerance = (0.5 / m_approximation_scale) ** 2
         m_angle_tolerance = 1 * 2*math.pi/360  # 15 degrees in rads

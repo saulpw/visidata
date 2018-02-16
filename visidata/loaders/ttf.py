@@ -6,6 +6,7 @@ def open_ttf(p):
 
 open_otf = open_ttf
 
+
 class TTFTablesSheet(Sheet):
     rowtype = 'font tables'
     columns = [
@@ -35,7 +36,7 @@ class TTFTablesSheet(Sheet):
 class TTFGlyphsSheet(Sheet):
     rowtype = 'glyphs'  # rowdef: (codepoint, glyphid, fontTools.ttLib.ttFont._TTGlyphGlyf)
     columns = [
-        ColumnItem('codepoint', 0, type=int, fmtstr='{:X}'),
+        ColumnItem('codepoint', 0, type=int, fmtstr='{:0X}'),
         ColumnItem('glyphid', 1),
         SubrowColumn(ColumnAttr('height', type=int), 2),
         SubrowColumn(ColumnAttr('width', type=int), 2),
@@ -43,7 +44,7 @@ class TTFGlyphsSheet(Sheet):
         SubrowColumn(ColumnAttr('tsb'), 2),
     ]
     commands = [
-        Command('.', 'vd.push(GlyphPen(name+"_"+cursorRow[1], source=cursorRow[2]))', 'push plot of this glyph')
+        Command('.', 'vd.push(makePen(name+"_"+cursorRow[1], source=cursorRow[2], glyphSet=ttf.getGlyphSet()))', 'push plot of this glyph')
     ]
     @async
     def reload(self):
@@ -54,34 +55,38 @@ class TTFGlyphsSheet(Sheet):
                 self.addRow((codepoint, glyphid, glyphs[glyphid]))
 
 
-class GlyphPen(InvertedCanvas):
-    aspectRatio = 1.0
-    def __init__(self, name, **kwargs):
-        super().__init__(name, **kwargs)
-        self.firstxy = None
-        self.lastxy = None
-        self.attr = self.plotColor(('line',))
-    def moveTo(self, xy):
-        self.lastxy = xy
-    def lineTo(self, xy):
-        if not self.firstxy: self.firstxy = self.lastxy
-        x1, y1 = self.lastxy
-        x2, y2 = xy
-        self.line(x1, y1, x2, y2, self.attr)
-        self.lastxy = xy
-    def closePath(self):
-        self.lineTo(self.firstxy)
-        self.firstxy = None
-        self.lastxy = None
-    def qCurveTo(self, *pts):
-        if not self.firstxy: self.firstxy = self.lastxy
-        self.curve([self.lastxy] + list(pts), self.plotColor(('curve',)))
-        self.lastxy = pts[-1]
-    def curveTo(self, *pts):
-        if not self.firstxy: self.firstxy = self.lastxy
-        self.curve([self.lastxy] + list(pts), self.plotColor(('curve',)))
-        self.lastxy = pts[-1]
-    def reload(self):
-        self.reset()
-        self.source.draw(self)
-        self.refresh()
+def makePen(*args, **kwargs):
+    try:
+        from fontTools.pens.basePen import BasePen
+    except ImportError as e:
+        error('fonttools not installed')
+
+    class GlyphPen(InvertedCanvas, BasePen):
+        aspectRatio = 1.0
+        def __init__(self, name, **kwargs):
+            super().__init__(name, **kwargs)
+            self.lastxy = None
+            self.attr = self.plotColor(('glyph',))
+
+        def _moveTo(self, xy):
+            self.lastxy = xy
+
+        def _lineTo(self, xy):
+            x1, y1 = self.lastxy
+            x2, y2 = xy
+            self.line(x1, y1, x2, y2, self.attr)
+            self._moveTo(xy)
+
+        def _curveToOne(self, xy1, xy2, xy3):
+            error('NotImplemented')
+
+        def _qCurveToOne(self, xy1, xy2):
+            self.qcurve([self.lastxy, xy1, xy2], self.attr)
+            self._moveTo(xy2)
+
+        def reload(self):
+            self.reset()
+            self.source.draw(self)
+            self.refresh()
+
+    return GlyphPen(*args, **kwargs)
