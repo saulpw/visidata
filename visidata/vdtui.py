@@ -143,7 +143,7 @@ theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 theme('use_default_colors', False, 'curses use default terminal colors')
 
 disp_column_fill = ' ' # pad chars after column value
-theme('disp_none', '',  'visible contents of a cell whose value is None')
+theme('disp_note_none', '∅',  'visible contents of a cell whose value is None')
 theme('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
@@ -176,8 +176,8 @@ theme('note_format_exc', '?', 'cell note for an exception during type conversion
 theme('note_getter_exc', '!', 'cell note for an exception during computation')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
-theme('color_note_type', '226 green', 'cell note for numeric types in anytype columns')
-theme('color_format_exc', '48 bold yellow', 'color of formatting exception note')
+theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
+theme('color_format_exc', '48 bold green', 'color of formatting exception note')
 theme('color_getter_exc', 'red bold', 'color of computation exception note')
 theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
@@ -1867,7 +1867,7 @@ class Column:
     def format(self, cellval):
         'Return displayable string of `cellval` according to our `Column.type` and `Column.fmtstr`'
         if cellval is None:
-            return options.disp_none
+            return None
 
         # complex objects can be arbitrarily large (like sheet.rows)
         #  this shortcut must be before self.type(cellval) (anytype will completely stringify)
@@ -1955,6 +1955,12 @@ class Column:
 
         try:
             dispval = self.format(cellval)
+            if dispval is None:
+                dw.display = ''
+                dw.note = options.disp_note_none
+                dw.notecolor = options.color_note_type
+                return dw
+
             if width and self.type in (int, float, currency, len):
                 dispval = dispval.rjust(width-1)
 
