@@ -102,15 +102,15 @@ class OptionsObject:
          return value
 
     def __setitem__(self, k, v):   # options[k] = v
-        if k not in self._opts:
-            raise Exception('no such option "%s"' % k)
-
-        curval = self._opts[k][1]
-        t = type(curval)
-        if isinstance(v, str) and t is bool: # special case for bool options
-            v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
-        elif curval is not None:             # if None, do not apply type conversion
-            v = t(v)
+        if k in self._opts:
+            curval = self._opts[k][1]
+            t = type(curval)
+            if isinstance(v, str) and t is bool: # special case for bool options
+                v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
+            elif curval is not None:             # if None, do not apply type conversion
+                v = t(v)
+        else:
+            option(k, v)
 
         self._opts[k][1] = v
         globals()['options_'+k] = v
