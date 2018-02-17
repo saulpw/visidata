@@ -1,7 +1,7 @@
 Source: visidata
 Section: devel
 Priority: optional
-Maintainer: Anja Boskovic <anja@visidata.org>
+Maintainer: Anja Boskovic <anja.kefala@gmail.com>
 Build-Depends: debhelper (>=10), dh-python, python3-all, python3-setuptools, python3-xlrd, python3-openpyxl, python3-dateutil, python3-requests
 Standards-Version: 4.1.3
 Homepage: https://pypi.python.org/pypi/visidata
