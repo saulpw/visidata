@@ -124,5 +124,16 @@ dch -v version-revision
 ```
 7. Run debuild. Fix errors as they come up
 8. If a package fails to import a module, it must be added to the build dependencies as python3-modules
+9. cd ..
+10. Sign the changes files
+```
+debsign -k keycode visidata_ver.changes
+```
+11. Upload to debian mentors
+```
+dput mentors visidata_ver.changes
+```
+
+## deb-vd
 9. Enter saulpw/deb-vd.
 10. Run the command reprepro includeb sid new-vd.deb
