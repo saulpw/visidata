@@ -11,8 +11,8 @@ class HtmlTablesSheet(Sheet):
     columns = [
         Column('tag', getter=lambda col,row: row[0].tag),
         Column('id', getter=lambda col,row: row[0].attrib.get('id')),
-        Column('ncols', type=int, getter=lambda col,row: len(row[1].columns)),
         Column('nrows', type=int, getter=lambda col,row: len(row[1].rows)),
+        Column('ncols', type=int, getter=lambda col,row: len(row[1].columns)),
         Column('classes', getter=lambda col,row: row[0].attrib.get('class')),
 
     ]
