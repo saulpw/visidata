@@ -150,7 +150,6 @@ def main():
             run()
 
     if args.output and vd().sheets:
-        status('foo')
         saveSheet(vd().sheets[0], args.output, confirm_overwrite=False)
         sync()
 

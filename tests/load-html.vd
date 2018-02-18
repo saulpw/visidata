@@ -1,3 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-			o	sample_data/sunshinelist.html	open file
+			o	sample_data/sunshinelist.html	open input in VisiData
 sunshinelist		0	^J		open this table
+datatable-disclosures	0		^	Year	edit name of current column
+datatable-disclosures	2		^	Sector	edit name of current column
