@@ -1,10 +1,20 @@
 
 from visidata import *
 
-class open_xlsx(Sheet):
+def open_xlsx(p):
+    vs = xlsxContents(p)
+    return vs
+
+
+class xlsxContents(Sheet):
     'Load XLSX file (in Excel Open XML format).'
+    columns = [
+        ColumnAttr('name'),
+        ColumnAttr('nRows', type=int),
+        ColumnAttr('nCols', type=int),
+    ]
     commands = [
-        Command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'load the entire table into memory')
+        Command(ENTER, 'vd.push(cursorRow)', 'load the entire table into memory')
     ]
     def __init__(self, path):
         super().__init__(path.name, source=path)
@@ -13,13 +23,13 @@ class open_xlsx(Sheet):
     @async
     def reload(self):
         import openpyxl
-        self.columns = [Column('name')]
         self.workbook = openpyxl.load_workbook(self.source.resolve(), data_only=True, read_only=True)
-        self.rows = list(self.workbook.sheetnames)
+        self.rows = []
+        for sheetname in self.workbook.sheetnames:
+            vs = xlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook.get_sheet_by_name(sheetname))
+            vs.reload()
+            self.rows.append(vs)
 
-    def getSheet(self, sheetname):
-        worksheet = self.workbook.get_sheet_by_name(sheetname)
-        return xlsxSheet(joinSheetnames(self.name, sheetname), source=worksheet)
 
 class xlsxSheet(Sheet):
     @async
@@ -34,10 +44,16 @@ class xlsxSheet(Sheet):
                 self.addColumn(ColumnItem(None, i, width=8))
             self.addRow(L)
 
+
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
     commands = [
-        Command(ENTER, 'vd.push(sheet.getSheet(cursorRow))', 'load the entire table into memory')
+        Command(ENTER, 'vd.push(cursorRow)', 'load the entire table into memory')
+    ]
+    columns = [
+        ColumnAttr('name'),
+        ColumnAttr('nRows', type=int),
+        ColumnAttr('nCols', type=int),
     ]
     def __init__(self, path):
         super().__init__(path.name, source=path)
@@ -46,13 +62,12 @@ class open_xls(Sheet):
     @async
     def reload(self):
         import xlrd
-        self.columns = [Column('name')]
         self.workbook = xlrd.open_workbook(self.source.resolve())
-        self.rows = list(self.workbook.sheet_names())
-
-    def getSheet(self, sheetname):
-        worksheet = self.workbook.sheet_by_name(sheetname)
-        return xlsSheet(joinSheetnames(self.name, sheetname), source=worksheet)
+        self.rows = []
+        for sheetname in self.workbook.sheet_names():
+            vs = xlsSheet(joinSheetnames(self.name, sheetname), source=self.workbook.sheet_by_name(sheetname))
+            vs.reload()
+            self.rows.append(vs)
 
 
 class xlsSheet(Sheet):
@@ -63,5 +78,6 @@ class xlsSheet(Sheet):
         for i in range(worksheet.ncols):
             self.addColumn(ColumnItem(None, i, width=8))
 
+        self.rows = []
         for rownum in Progress(range(worksheet.nrows)):
             self.addRow(list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)))
