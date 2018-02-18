@@ -86,7 +86,7 @@ class HtmlTableSheet(Sheet):
 
         self.columns = []
         if headers:
-            for i, names in enumerate(zip(*headers)):
+            for i, names in enumerate(itertools.zip_longest(*headers, fillvalue='')):
                 self.addColumn(ColumnItem('_'.join(x for x in names if x), i))
         else:
             for i, name in enumerate(self.rows[0]):
