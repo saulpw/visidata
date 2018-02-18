@@ -15,8 +15,8 @@ def open_png(p):
     return PNGSheet(p.name, source=p)
 
 
-# rowdef: tuple(x, y, r, g, b, a)
 class PNGSheet(Sheet):
+    rowtype = 'pixels'  # rowdef: tuple(x, y, r, g, b, a)
     columns = [ColumnItem(name, i, type=int) for i, name in enumerate('x y R G B A'.split())] + [
         Column('attr', type=int, getter=lambda col,row: rgb_to_attr(*row[2:]))
     ]
@@ -41,6 +41,7 @@ class PNGSheet(Sheet):
 
 class PNGDrawing(Canvas):
     aspectRatio = 1.0
+    rowtype = 'pixels'
     commands = [
         Command('.', 'vd.push(source)', 'push table of pixels for this png'),
     ]
