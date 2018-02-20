@@ -30,27 +30,28 @@ Further instructions available [here](https://github.com/saulpw/homebrew-vd).
 
 Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
 
-Currently, VisiData is undergoing review for integration into the main Debian repository. Until then it is available in our [Debian repo](https://github.com/saulpw/deb-vd).
+Currently, VisiData is in the Debian unstable's [main repository](https://launchpad.net/ubuntu/+source/visidata). If you want the most up-to-date version, we will also have it available in our own [Debian repo](https://github.com/saulpw/deb-vd).
 
-Grab our public key
+To install from Debian:
 
-    $ wget http://visidata.org/devotees.gpg.key
-    $ apt-key add devotees.gpg.key
+Obtain the public key
 
-Add our repository to apt's search list
+    $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B48AD6246925553
 
-    $ sudo apt-get install apt-transport-https
+Ensure the repository is in apt's search list
+
+    $ sudo apt install apt-transport-https
     $ sudo vim /etc/apt/sources.list
 
-      deb [arch=amd64] https://raw.githubusercontent.com/saulpw/deb-vd/master sid main
+      deb http://ftp.debian.org/debian/ unstable main
 
-    $ sudo apt-get update
+    $ sudo apt update
 
 You can then install VisiData by typing:
 
-    sudo apt-get install visidata
+    sudo apt install visidata
 
-Further instructions available [here](https://github.com/saulpw/deb-vd).
+Instructions for installing form our own personal repository are available [here](https://github.com/saulpw/deb-vd).
 
 ## Usage
 
