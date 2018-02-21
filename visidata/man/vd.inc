@@ -457,7 +457,7 @@ jump to sheet referenced in current row
 .It Sy "\&."
 .Sy inner No " keep only rows which match keys on all sheets"
 .It Sy "\&."
-.Sy left No "  keep all rows from first selected sheet"
+.Sy outer No "  keep all rows from first selected sheet"
 .It Sy "\&."
 .Sy full No "  keep all rows from all sheets (union)"
 .It Sy "\&."
@@ -638,6 +638,7 @@ These are the supported sources:
 .It Sy json No (single object) and Sy jsonl No (one object per line).
 .Bl -inset -compact -offset xxx
 .It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be opened into a new sheet with with Sy z^Y .
+.El
 .El
 .
 .Pp
