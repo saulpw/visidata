@@ -74,7 +74,7 @@ class SheetJoin(Sheet):
                 rowsBySheetKey[vs] = collections.defaultdict(list)
                 for r in vs.rows:
                     prog.addProgress(1)
-                    key = tuple(c.getTypedValue(r) for c in vs.keyCols)
+                    key = tuple(c.getTypedValueNoExceptions(r) for c in vs.keyCols)
                     rowsBySheetKey[vs][key].append(r)
 
             for sheetnum, vs in enumerate(sheets):
@@ -83,7 +83,7 @@ class SheetJoin(Sheet):
                     self.addColumn(SubrowColumn(c, sheetnum+1))
                 for r in vs.rows:
                     prog.addProgress(1)
-                    key = tuple(c.getTypedValue(r) for c in vs.keyCols)
+                    key = tuple(c.getTypedValueNoExceptions(r) for c in vs.keyCols)
                     if key not in rowsByKey: # gather for this key has not been done yet
                         # multiplicative for non-unique keys
                         rowsByKey[key] = []

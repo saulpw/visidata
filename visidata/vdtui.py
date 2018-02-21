@@ -1513,7 +1513,7 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
                 pass
 
     def orderBy(self, *cols, **kwargs):
-        self.rows.sort(key=lambda r,cols=cols: tuple(c.getTypedValue(r) for c in cols), **kwargs)
+        self.rows.sort(key=lambda r,cols=cols: tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
 
     @property
     def selectedRows(self):
@@ -1909,6 +1909,10 @@ class Column:
         return (self.getter)(self, row)
 
     def getTypedValue(self, row):
+        'Returns the properly-typed value for the given row at this column.'
+        return self.type(self.getValue(row))
+
+    def getTypedValueNoExceptions(self, row):
         '''Returns the properly-typed value for the given row at this column.
            Returns the type's default value if either the getter or the type conversion fails.'''
         try:

@@ -90,11 +90,11 @@ class SheetFreqTable(Sheet):
         errorbin = []
         allbin = []
         for row in Progress(self.source.rows):
-            v = origCol.getTypedValue(row)
-            if not v:
-                errorbin.append(row)
-            else:
+            try:
+                v = origCol.getTypedValue(row)
                 allbin.append((v, row))
+            except Exception as e:
+                errorbin.append((e, row))
 
         # find bin pivots from non-error values
         binPivots = []
