@@ -1,8 +1,8 @@
 import math
 
 from visidata import *
-globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column', 'aggregate-column')
-globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet', 'aggregate-keys')
+globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column', 'data-aggregate-column')
+globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet', 'data-aggregate-keys')
 globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows')
 
 theme('disp_histogram', '*', 'histogram element character')
@@ -11,7 +11,7 @@ option('disp_histolen', 80, 'width of histogram column')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 ColumnsSheet.commands += [
-    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'aggregate-source-column')
+    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
 ]
 
 def getValueOrError(c, r):

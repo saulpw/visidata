@@ -4,21 +4,21 @@ from visidata import *
 # adds vd.clipvalue and vd.cliprows
 # vd.cliprows = [(source_sheet, source_row_idx, source_row)]
 
-globalCommand('y', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]', 'copy current row to clipboard', 'clipboard-copy-row')
-globalCommand('d', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', 'delete current row and move it to clipboard', 'delete-row')
-globalCommand('p', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'clipboard-paste-after')
-globalCommand('P', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'clipboard-paste-before')
+globalCommand('y', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]', 'copy current row to clipboard', 'data-clipboard-copy-row')
+globalCommand('d', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', 'delete current row and move it to clipboard', 'modify-delete-row')
+globalCommand('p', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'data-clipboard-paste-after')
+globalCommand('P', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'data-clipboard-paste-before')
 
-globalCommand('gd', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', 'delete selected rows and move them to clipboard', 'delete-selected')
-globalCommand('gy', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows))', 'copy selected rows to clipboard', 'clipboard-copy-selected')
+globalCommand('gd', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', 'delete selected rows and move them to clipboard', 'modify-delete-selected')
+globalCommand('gy', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows))', 'copy selected rows to clipboard', 'data-clipboard-copy-selected')
 
-globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy current cell to clipboard', 'clipboard-copy-cell')
-globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value', 'clipboard-paste-selected')
-globalCommand('zp', 'cursorCol.setValue(cursorRow, vd.clipvalue)', 'set contents of current column for current row to last clipboard value', 'clipboard-paste-cell')
+globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy current cell to clipboard', 'data-clipboard-copy-cell')
+globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value', 'data-clipboard-paste-selected')
+globalCommand('zp', 'cursorCol.setValue(cursorRow, vd.clipvalue)', 'set contents of current column for current row to last clipboard value', 'data-clipboard-paste-cell')
 
-globalCommand('Y', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank current row to system clipboard', 'clipboard-system-copy-row')
-globalCommand('gY', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank selected rows to system clipboard', 'clipboard-system-copy-selected')
-globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank current value to system clipboard', 'clipboard-system-copy-cell')
+globalCommand('Y', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank current row to system clipboard', 'data-clipboard-copy-system-row')
+globalCommand('gY', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank selected rows to system clipboard', 'data-clipboard-copy-system-selected')
+globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank current value to system clipboard', 'data-clipboard-copy-system-cell')
 
 option('clipboard_copy_cmd', 'pbcopy w', 'command to copy stdin to system clipboard')
 # or 'xsel --primary' for xsel

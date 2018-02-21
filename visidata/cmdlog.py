@@ -9,13 +9,13 @@ option('disp_replay_play', '▶', 'status indicator for active replay')
 option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 
-globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'sheet-cmdlog')
-globalCommand('^D', 'saveSheet(vd.cmdlog, inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save CommandLog to new .vd file', 'save-cmdlog')
-globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'replay-toggle')
-globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'replay-step')
-globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'replay-cancel')
+globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'meta-cmdlog')
+globalCommand('^D', 'saveSheet(vd.cmdlog, inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"))', 'save CommandLog to new .vd file', 'meta-cmdlog-save')
+globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'meta-replay-toggle')
+globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'meta-replay-step')
+globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'meta-replay-cancel')
 
-globalCommand('KEY_BACKSPACE', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))', 'quit this sheet and remove it from the cmdlog')
+globalCommand('KEY_BACKSPACE', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))', 'quit this sheet and remove it from the cmdlog', 'sheet-quit-remove')
 
 globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
 
