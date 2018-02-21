@@ -25,5 +25,8 @@ class MeltedSheet(Sheet):
         self.rows = []
         for r in Progress(self.source.rows):
             for c in colsToMelt:
-                if c.getValue(r) is not None:
-                    self.addRow((r, c))
+                try:
+                    if not isNull(c.getValue(r)):
+                        self.addRow((r, c))
+                except Exception as e:
+                    pass
