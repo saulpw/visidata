@@ -14,6 +14,8 @@ class MeltedSheet(Sheet):
 
     @async
     def reload(self):
+        isNull = isNullFunc()
+
         sheet = self.source
         self.columns = [SubrowColumn(c, 0) for c in sheet.keyCols]
         self.keyCols = self.columns[:]
