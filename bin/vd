@@ -112,7 +112,7 @@ def main():
         Sheet.colorizers.append(Colorizer("cell", 8, makeDiffColorizer(vs)))
 
     if args.batch:
-        vd().status = print
+        vd().status = lambda *args: print(*args, file=sys.stderr)
         vd().execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
     if not args.play:

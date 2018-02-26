@@ -22,11 +22,23 @@ class Path:
         self.name, self.ext = os.path.splitext(fn)
         self.suffix = self.ext[1:]
 
-    def open_text(self, mode='r'):
+    def open_text(self, mode='rt'):
+        if 't' not in mode:
+            mode += 't'
+
+        if self.fqpn == '-':
+            if 'r' in mode:
+                return sys.stdin
+            elif 'w' in mode:
+                return sys.stdout
+            else:
+                error('invalid mode "%s" for Path.open_text()' % mode)
+                return sys.stderr
+
         if self.gzip_compressed:
-            return gzip.open(self.resolve(), mode='rt', encoding=options.encoding, errors=options.encoding_errors)
-        else:
-            return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+            return gzip.open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+
+        return open(self.resolve(), mode=mode, newline='', encoding=options.encoding, errors=options.encoding_errors)
 
     def __iter__(self):
         for i, line in enumerate(self.open_text()):

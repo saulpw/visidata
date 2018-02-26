@@ -296,7 +296,7 @@ def save_tsv(vs, fn):
     replch = options.disp_oddspace
     trdict = {ord(delim): replch, 10: replch, 13: replch}
 
-    with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
+    with Path(fn).open_text(mode='w') as fp:
         colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
