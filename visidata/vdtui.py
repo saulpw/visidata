@@ -1784,13 +1784,12 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
 
                     sepattr = sepattr or colors[options.color_column_sep]
 
-                    _clipdraw(scr, y, x, disp_column_fill+cellval.display, attr, colwidth)
-
                     note = getattr(cellval, 'note', None)
-
                     if note:
                         noteattr, _ = colors.update(attr, attrpre, cellval.notecolor, 8)
                         _clipdraw(scr, y, x+colwidth-len(note), note, noteattr, len(note))
+
+                    _clipdraw(scr, y, x, disp_column_fill+cellval.display, attr, colwidth-(1 if note else 0))
 
                     sepchars = options.disp_column_sep
                     if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
