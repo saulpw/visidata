@@ -487,7 +487,18 @@ def choose(cmdtree, helpfunc=None, sheet=None):
         else:
             pass
 
-chooseOne = choose # chooseOne deprecated in 1.1; use choose() instead
+
+def chooseOne(choices):
+    'Return one of `choices` elements (if list) or values (if dict).'
+    def choiceCompleter(v, i):
+        opts = [x for x in choices if x.startswith(v)]
+        return opts[i%len(opts)]
+
+    if isinstance(choices, dict):
+        return choices[input('/'.join(choices.keys()) + ': ', completer=choiceCompleter)]
+    else:
+        return input('/'.join(str(x) for x in choices) + ': ', completer=choiceCompleter)
+
 
 def regex_flags():
     'Return flags to pass to regex functions from options'

@@ -18,7 +18,7 @@ def createJoinedSheet(sheets, jointype=''):
 jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
 
 SheetsSheet.commands += [
-        Command('&', 'vd.replace(createJoinedSheet(selectedRows, jointype=choose(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
+        Command('&', 'vd.replace(createJoinedSheet(selectedRows, jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
         Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
     ]
 
