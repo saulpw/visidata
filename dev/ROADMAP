@@ -15,11 +15,11 @@ II. Internals
    + Sheet inherits from BaseSheet, has rows/columns
    + Plotter inherits from BaseSheet
    - SourceSheet inherits from Table
-      - Enter as an alias for 'e' on SourceSheet
+      + Enter as an alias for 'e' on SourceSheet
       - newRow() (for 'a') on SourceSheet only
 + most commands implemented on Sheet or children
    - global key bindings like 'h' to 'move-left', and then each Sheet defines the semantics of its move-left
-- allow Sheet.rows to be an offline datastore
++ allow Sheet.rows to be an offline datastore
 
 II. Loaders
 - pandas dataframe

@@ -1,9 +1,38 @@
 # VisiData version history
 
-# future
-- Added `za` and `gza` to add 1/N new blanks column
+# v1.1 (2018-03-??)
 
-# v1.0 (2017-01-24)
+- VisiData will be included in debian repository next release!
+- remove all install dependencies
+   - loaders not in the python3 stdlib have additional libraries that must be installed manually
+- hierarchical menu system with SPACE to explore commands
+  - existing chooseOne selections (aggregators/joins) still use simple input() for now
+  - most longnames changed
+    - let me know if anyone is using any longnames at all, and we will stabilize the names
+- randomized message/announcement/tip on startup; disable with `options.motd_url = None`
+   - cache messages in `$HOME/.visidata/`
+
+Command additions/changes:
+
+- [canvas] `d` and `gd` to delete points from source sheet
+- add `za` and `gza` to add 1/N new blanks column
+- add '(' and ')' commands to expand/collapse list/dict columns (a la nested json)
+- add `backspace` command to drop sheet like 'q' and also remove all traces from the cmdlog
+- remove `!@#$%-_` special actions on columns sheet
+- `ENTER` is now modify-edit-cell by default
+
+- `-` as filename should work (`-b -o -` will dump final sheet to stdout)
+- [canvas] draw quadratic curves with qcurve([(x,y)...])
+- search/select use most recent when not given any (as in vim/etc)
+- annotate None with use disp_note_none ('∅'); previously was not visually distinguishable from empty string
+
+- save to .md org-mode compatible table format
+- improvements/bugfixes: pivot, describe, melt, sqlite, shp, html
+- load/view/edit/save png, edit pixels in data form
+- load/view ttf/otf font files
+- load bigquery (on demand)
+
+# v1.0 (2018-01-24)
 
 - date.__sub__ returns timedelta object (was int days)
 - pivot table bugfixes
