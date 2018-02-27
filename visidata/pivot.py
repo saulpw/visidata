@@ -51,7 +51,7 @@ class SheetPivot(Sheet):
                 for value in Progress(col.getValues(self.source.rows), total=len(self.source.rows)):
                     if value not in allValues:
                         allValues.add(value)
-                        c = Column(aggname+'_'+value,
+                        c = Column('%s_%s' % (aggname, value),
                                 type=aggregator.type or aggcol.type,
                                 getter=lambda col,row,aggcol=aggcol,aggvalue=value,agg=aggregator: agg(aggcol, row[1].get(aggvalue, [])))
                         c.aggvalue = value
