@@ -9,10 +9,12 @@ def open_xlsx(p):
 class xlsxContents(Sheet):
     'Load XLSX file (in Excel Open XML format).'
     columns = [
-        ColumnAttr('name'),
+        Column('sheet', getter=lambda col,row: row.source.title),  # xlsx sheet title
+        ColumnAttr('name', width=0),  # visidata Sheet name
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
     ]
+    nKeys = 1
     commands = [
         Command(ENTER, 'vd.push(cursorRow)', 'load the entire table into memory')
     ]
@@ -26,7 +28,7 @@ class xlsxContents(Sheet):
         self.workbook = openpyxl.load_workbook(self.source.resolve(), data_only=True, read_only=True)
         self.rows = []
         for sheetname in self.workbook.sheetnames:
-            vs = xlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook.get_sheet_by_name(sheetname))
+            vs = xlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook[sheetname])
             vs.reload()
             self.rows.append(vs)
 
@@ -51,10 +53,12 @@ class open_xls(Sheet):
         Command(ENTER, 'vd.push(cursorRow)', 'load the entire table into memory')
     ]
     columns = [
-        ColumnAttr('name'),
+        Column('sheet', getter=lambda col,row: row.source.name),  # xls sheet name
+        ColumnAttr('name', width=0),  # visidata sheet name
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
     ]
+    nKeys = 1
     def __init__(self, path):
         super().__init__(path.name, source=path)
         self.workbook = None
