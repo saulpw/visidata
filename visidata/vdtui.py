@@ -1332,34 +1332,47 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
         memo[id(self)] = ret
         return ret
 
-    @async
-    def deleteSelected(self):
-        'Delete all selected rows.'
+    def deleteBy(self, func):
+        'Delete rows for which func(row) is true.  Returns number of deleted rows.'
         oldrows = copy(self.rows)
         oldidx = self.cursorRowIndex
         ndeleted = 0
 
         row = None   # row to re-place cursor after
         while oldidx < len(oldrows):
-            if not self.isSelected(oldrows[oldidx]):
+            if not func(oldrows[oldidx]):
                 row = self.rows[oldidx]
                 break
             oldidx += 1
 
         self.rows.clear()
         for r in Progress(oldrows):
-            if not self.isSelected(r):
+            if not func(r):
                 self.rows.append(r)
                 if r is row:
                     self.cursorRowIndex = len(self.rows)-1
             else:
                 ndeleted += 1
 
+        status('deleted %s rows' % ndeleted)
+        return ndeleted
+
+    @async
+    def deleteSelected(self):
+        'Delete all selected rows.'
+        ndeleted = self.deleteBy(self.isSelected)
         nselected = len(self._selectedRows)
         self._selectedRows.clear()
-        status('deleted %s rows' % ndeleted)
         if ndeleted != nselected:
             error('expected %s' % nselected)
+
+    @async
+    def delete(self, rows):
+        rowdict = {id(r): r for r in rows}
+        ndeleted = self.deleteBy(lambda r,rowdict=rowdict: id(r) in rowdict)
+        nrows = len(rows)
+        if ndeleted != nrows:
+            error('expected %s' % nrows)
 
     def __repr__(self):
         return self.name
