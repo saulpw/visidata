@@ -151,6 +151,7 @@ theme('disp_unprintable', '.', 'substitute character for unprintables')
 theme('disp_column_sep', '|', 'separator between columns')
 theme('disp_keycol_sep', '\u2016', 'separator between key columns and rest of columns')
 theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
+theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_more_left', '<', 'header note indicating more columns to the left')
@@ -335,6 +336,10 @@ def enumPivot(L, pivotIdx):
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s))
 
+def middleTruncate(s, w):
+    if len(s) <= w:
+        return s
+    return s[:w] + options.disp_truncator + s[-w:]
 
 @functools.lru_cache()
 def vd():
@@ -381,7 +386,6 @@ def cmdhelp(cmdname, sheet):
 def cmdsort(cmds):
     return list(cmds.keys())
 
-option('disp_lstatus_max', 20, 'maximum length of left status line')
 
 def choose(cmdtree, helpfunc=None, sheet=None):
     '''`cmdtree` is dict of str to nested dict or leaf. Returns leaf, or None, or raises Exception.
@@ -414,7 +418,7 @@ def choose(cmdtree, helpfunc=None, sheet=None):
         helpy = vdobj.windowHeight-2
         width = vdobj.windowWidth
         sheet.draw(scr)
-        lstatus = vdobj.drawLeftStatus(scr, sheet, maxwidth=options.disp_lstatus_max)
+        lstatus = vdobj.drawLeftStatus(scr, sheet)
         menux = len(lstatus)+2
 
         rstatus = vdobj.drawRightStatus(scr, sheet)
@@ -781,12 +785,10 @@ class VisiData:
         if options.debug:
             raise
 
-    def drawLeftStatus(self, scr, vs, maxwidth=None):
+    def drawLeftStatus(self, scr, vs):
         'Draw left side of status bar.'
         try:
             lstatus = self.leftStatus(vs)
-            if maxwidth and len(lstatus) > maxwidth:
-                lstatus = lstatus[:maxwidth] + options.disp_truncator + ' |'
             attr = colors[options.color_status]
             _clipdraw(scr, self.windowHeight-1, 0, lstatus, attr, self.windowWidth)
             return lstatus
@@ -816,6 +818,9 @@ class VisiData:
     def leftStatus(self, vs):
         'Compose left side of status bar and add status messages.'
         s = vs.leftStatus()
+        maxwidth = options.disp_lstatus_max
+        if maxwidth > 0:
+            s = middleTruncate(s, maxwidth//2)
         s += options.disp_status_sep.join(self.statuses)
         return s
 
