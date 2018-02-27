@@ -1,18 +1,22 @@
 from visidata import *
 
+option('motd_url', 'http://visidata.org/motd', 'source of randomized startup messages')
 
-@diskcache('motd', 3600*24)
-def motd():
+
+@diskcache('motd', 24*3600)
+def motd(url):
     import urllib.request
-    with urllib.request.urlopen('http://visidata.org/motd') as fp:
+    with urllib.request.urlopen(url) as fp:
         return fp.read().decode('utf-8').strip()
 
 
 @async
 def domotd():
     try:
-        status(*motd().splitlines())
-    except Exception as e:
+        if options.motd_url:
+            line = random.choice(motd(options.motd_url).splitlines())
+            status(line.split('\t')[0])
+    except Exception:
         pass
 
 
