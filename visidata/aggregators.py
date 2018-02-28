@@ -42,7 +42,7 @@ aggregator('count', lambda values: sum(1 for v in values), int)
 fullAggregator('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
 
 ColumnsSheet.commands += [
-    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators, lambda aggname, sheet: aggregators[aggname].__doc__))', 'add aggregator to selected source columns', 'column-aggregate-add-all'),
+    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'add aggregator to selected source columns', 'column-aggregate-add-all'),
 ]
 ColumnsSheet.columns += [
         Column('aggregators',
