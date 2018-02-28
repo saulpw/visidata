@@ -1,3 +1,11 @@
-# included in visidata
 python-dateutil     # date type
 
+# optional requirements
+requests            # http
+lxml                # html
+openpyxl            # xlsx
+xlrd                # xls
+h5py                # hdf5
+psycopg2            # postgres
+pyshp               # shapefiles
+mapbox-vector-tile  # mbtiles
