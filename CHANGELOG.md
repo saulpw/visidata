@@ -2,7 +2,7 @@
 
 # v1.1 (2018-03-??)
 
-- VisiData will be included in debian repository next release!
+- VisiData will be included in the next debian repository release!
 - remove all install dependencies
   - additional libraries must be installed manually for certain loaders; see requirements.txt
 - hierarchical menu system with SPACE to explore commands
