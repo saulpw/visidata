@@ -5,10 +5,14 @@
 - VisiData will be included in the next debian repository release!
 - remove all install dependencies
   - additional libraries must be installed manually for certain loaders; see requirements.txt
-- hierarchical menu system with SPACE to explore commands
-  - existing chooseOne selections (aggregators/joins) still use simple input() for now
-  - most longnames changed
-    - let me know if anyone is using any longnames at all, and we will stabilize the names
+- experimental hierarchical menu system with SPACE to explore commands
+    - use standard movement keys (`hjkl`/`arrows`) to navigate within a command level
+    - Use `Enter`/`q` to navigate down/up a command tree
+    - abort with `gq` or `^C`
+    - existing chooseOne selections (aggregators/joins) still use simple input() for now
+    - most longnames changed
+        - let me know if anyone is using any longnames at all, and we will stabilize the names
+    - if you do end up playing with it, please let me know what did and didn't work for you
 - randomized message/announcement/tip on startup; disable with `options.motd_url = None`
    - cache messages in `$HOME/.visidata/`
 
