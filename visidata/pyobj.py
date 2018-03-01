@@ -11,7 +11,7 @@ globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name,
 globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object', 'python-push-cell-object')
 globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object', 'python-push-sheet-object')
 
-globalCommand('(', 'openColumn(cursorCol, cursorValue)', 'expand this column into multiple columns')
+globalCommand('(', 'openColumn(cursorCol, cursorValue)', 'expand lists or dictionaries in current column into multiple columns')
 globalCommand(')', 'closeColumn(sheet, cursorCol)', 'remove expanded columns')
 
 def closeColumn(sheet, col):

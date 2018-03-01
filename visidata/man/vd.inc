@@ -547,10 +547,12 @@ dive further into Python object
 edit contents of current cell
 .It Ic "v"
 toggle show/hide for methods and hidden properties
-.It Ic "gv"
-show methods and hidden properties
-.It Ic "zv"
-hide methods and hidden properties
+.It Ic "gv  zv"
+show/hide methods and hidden properties
+.It Ic " ("
+expand lists (e.g [3]) or dictionaries (e.g. {3}) in current column into multiple columns
+.It Ic " )"
+remove expanded columns
 .El
 .
 .Sh COMMANDLINE OPTIONS
