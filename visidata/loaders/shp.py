@@ -36,10 +36,8 @@ class ShapeSheet(Sheet):
     def reload(self):
         import shapefile
         sf = shapefile.Reader(self.source.resolve())
-        self.columns += [
-            Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen))
-                for i, (fname, ftype, fieldlen, declen) in enumerate(sf.fields[1:])  # skip DeletionFlag
-        ]
+        for i, (fname, ftype, fieldlen, declen) in enumerate(sf.fields[1:]):  # skip DeletionFlag
+            self.addColumn(Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen)))
         self.rows = []
         for shaperec in Progress(sf.iterShapeRecords(), total=sf.numRecords):
             self.addRow(shaperec)
