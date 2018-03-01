@@ -1697,7 +1697,7 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
         vcolidx = 0
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
-            if col.width is None and self.visibleRows:
+            if col.width is None and len(self.visibleRows) > 0:
                 # handle delayed column width-finding
                 col.width = col.getMaxWidth(self.visibleRows)+minColWidth
                 if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
