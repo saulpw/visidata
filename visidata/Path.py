@@ -38,7 +38,7 @@ class Path:
         if self.gzip_compressed:
             return gzip.open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
-        return open(self.resolve(), mode=mode, newline='', encoding=options.encoding, errors=options.encoding_errors)
+        return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
     def __iter__(self):
         for i, line in enumerate(self.open_text()):
