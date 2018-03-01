@@ -649,13 +649,6 @@ The following URL schemes are supported:
 .El
 .
 .Pp
-The following URL schemes are supported:
-.Bl -inset -compact -offset xxx
-.It Sy http No (requires Sy requests Ns ); can be used as transport for with another filetype
-.It Sy postgres No (requires Sy psycopg2 Ns )
-.El
-.
-.Pp
 .Bl -inset -compact
 .It The following sources may include multiple tables.  The initial sheet is the table directory;
 .Sy Enter No loads the entire table into memory.

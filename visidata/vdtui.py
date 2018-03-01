@@ -29,7 +29,7 @@
 __version__ = 'saul.pw/vdtui v1.0+'
 __author__ = 'Saul Pwanson <vdtui@saul.pw>'
 __license__ = 'MIT'
-__status__ = 'Beta'
+__status__ = 'Production/Stable'
 
 from builtins import *
 import sys
