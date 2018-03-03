@@ -80,6 +80,8 @@ cancel user input or aborts all async threads on current sheet
 quit current sheet
 .It Ic "gq"
 quit all sheets (clean exit)
+.It Ic "Backspace"
+.No quit current sheet and remove it from the Sy CommandLog
 .El
 .Ss "Cursor Movement"
 .
@@ -236,6 +238,10 @@ yank (copy) current cell to clipboard
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
 set contents of current column for current/selected row(s) to last clipboard value
+.It Ic "  Y   gY"
+.No yank (copy) current/all selected row(s) to system clipboard (with Sy options.clipboard_copy_cmd Ns )
+.It Ic " zY"
+.No yank (copy) current cell to system clipboard (with Sy options.clipboard_copy_cmd Ns )
 .It Ic "  f"
 fill null cells in current column with contents of non-null cells up the current column
 .
@@ -320,7 +326,11 @@ zoom to fit full extent
 .It Ic " s   t   u"
 select/toggle/unselect rows on source sheet contained within canvas cursor
 .It Ic "gs  gt  gu"
-select/toggle/unselect rows visible on screen
+select/toggle/unselect rows on source sheet visible on screen
+.It Ic " d"
+delete rows on source sheet contained within canvas cursor
+.It Ic "gd"
+delete rows on source sheet visible on screen
 .It Ic " Enter"
 open sheet of source rows contained within canvas cursor
 .It Ic "gEnter"
@@ -547,10 +557,12 @@ dive further into Python object
 edit contents of current cell
 .It Ic "v"
 toggle show/hide for methods and hidden properties
-.It Ic "gv"
-show methods and hidden properties
-.It Ic "zv"
-hide methods and hidden properties
+.It Ic "gv  zv"
+show/hide methods and hidden properties
+.It Ic " ("
+expand lists (e.g [3]) or dictionaries (e.g. {3}) in current column into multiple columns
+.It Ic " )"
+remove expanded columns
 .El
 .
 .Sh COMMANDLINE OPTIONS
@@ -571,7 +583,7 @@ overwrite existing files without confirmation
 .No add colorizer for all sheets against Ar base
 .
 .El
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 encoding passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
@@ -646,6 +658,8 @@ show axes and legend on graph
 list of distinct colors to use for plotting distinct objects
 .It Sy --zoom-incr Ns = Ns Ar "float           " No "2.0"
 amount to multiply current zoomlevel when zooming
+.It Sy --motd-url Ns = Ns Ar "str              " No "http://visidata.org/motd"
+source of randomized startup messages
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
@@ -663,7 +677,7 @@ number of rows to check for fixed width columns
 .Pp
 .
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.It Sy "disp_note_none     " No "\[u2205]"
+.It Sy "disp_note_none     " No "\[u2300]"
 visible contents of a cell whose value is None
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
 default fmtstr to strftime for date values
@@ -679,6 +693,8 @@ separator between columns
 separator between key columns and rest of columns
 .It Sy "disp_status_fmt    " No "{sheet.name}| "
 status line prefix
+.It Sy "disp_lstatus_max   " No "0"
+maximum length of left status line
 .It Sy "disp_status_sep    " No " | "
 separator between statuses
 .It Sy "disp_edit_fill     " No "_"
@@ -733,8 +749,6 @@ color of menu help text
 string between command keybindings and helpstr in menu
 .It Sy "disp_menu_helpsep  " No " | "
 string between submenu options
-.It Sy "disp_lstatus_max   " No "20"
-maximum length of left status line
 .It Sy "disp_histogram     " No "*"
 histogram element character
 .It Sy "disp_histolen      " No "80"
@@ -756,11 +770,15 @@ color for graph axis labels
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
 .Pp
+.Dl Nm vd Cm -b countries.fixed -o countries.tsv
+.Pp
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
 .Pp
 .Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
+.Pp
+.Dl Nm vd Cm -p foo.vd -b -o - > foo.tsv
 .Pp
 .Dl Nm vd --diff foo.tsv bar.tsv
 .Pp
@@ -811,13 +829,6 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be opened into a new sheet with with Sy z^Y .
 .El
-.El
-.
-.Pp
-The following URL schemes are supported:
-.Bl -inset -compact -offset xxx
-.It Sy http No (requires Sy requests Ns ); can be used as transport for with another filetype
-.It Sy postgres No (requires Sy psycopg2 Ns )
 .El
 .
 .Pp

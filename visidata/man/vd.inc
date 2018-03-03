@@ -80,6 +80,8 @@ cancel user input or aborts all async threads on current sheet
 quit current sheet
 .It Ic "gq"
 quit all sheets (clean exit)
+.It Ic "Backspace"
+.No quit current sheet and remove it from the Sy CommandLog
 .El
 .Ss "Cursor Movement"
 .
@@ -236,6 +238,10 @@ yank (copy) current cell to clipboard
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
 set contents of current column for current/selected row(s) to last clipboard value
+.It Ic "  Y   gY"
+.No yank (copy) current/all selected row(s) to system clipboard (with Sy options.clipboard_copy_cmd Ns )
+.It Ic " zY"
+.No yank (copy) current cell to system clipboard (with Sy options.clipboard_copy_cmd Ns )
 .It Ic "  f"
 fill null cells in current column with contents of non-null cells up the current column
 .
@@ -320,7 +326,11 @@ zoom to fit full extent
 .It Ic " s   t   u"
 select/toggle/unselect rows on source sheet contained within canvas cursor
 .It Ic "gs  gt  gu"
-select/toggle/unselect rows visible on screen
+select/toggle/unselect rows on source sheet visible on screen
+.It Ic " d"
+delete rows on source sheet contained within canvas cursor
+.It Ic "gd"
+delete rows on source sheet visible on screen
 .It Ic " Enter"
 open sheet of source rows contained within canvas cursor
 .It Ic "gEnter"
@@ -586,11 +596,15 @@ overwrite existing files without confirmation
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
 .Pp
+.Dl Nm vd Cm -b countries.fixed -o countries.tsv
+.Pp
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
 .Pp
 .Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
+.Pp
+.Dl Nm vd Cm -p foo.vd -b -o - > foo.tsv
 .Pp
 .Dl Nm vd --diff foo.tsv bar.tsv
 .Pp

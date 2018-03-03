@@ -343,14 +343,14 @@ class Canvas(Plotter):
         Command('t', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor'),
         Command('u', 'source.unselect(list(rowsWithin(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor'),
         Command(ENTER, 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)', 'open sheet of source rows contained within canvas cursor'),
-        Command('d', 'source.delete(list(rowsWithin(plotterCursorBox))); reload()', 'delete source rows contained within canvas cursor'),
+        Command('d', 'source.delete(list(rowsWithin(plotterCursorBox))); reload()', 'delete rows on source sheet contained within canvas cursor'),
 
 
-        Command('gs', 'source.select(list(rowsWithin(plotterVisibleBox)))', 'select source rows visible on screen'),
-        Command('gt', 'source.toggle(list(rowsWithin(plotterVisibleBox)))', 'toggle selection of source rows visible on screen'),
-        Command('gu', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect source rows visible on screen'),
+        Command('gs', 'source.select(list(rowsWithin(plotterVisibleBox)))', 'select rows on source sheet visible on screen'),
+        Command('gt', 'source.toggle(list(rowsWithin(plotterVisibleBox)))', 'toggle selection of rows on source sheet visible on screen'),
+        Command('gu', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect rows on source sheet visible on screen'),
         Command('g'+ENTER, 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen'),
-        Command('gd', 'source.delete(list(rowsWithin(plotterVisibleBox))); reload()', 'delete source rows visible on screen'),
+        Command('gd', 'source.delete(list(rowsWithin(plotterVisibleBox))); reload()', 'delete rows on source sheet visible on screen'),
     ]
 
     def __init__(self, name, source=None, **kwargs):

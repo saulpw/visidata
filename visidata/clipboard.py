@@ -16,9 +16,9 @@ globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy current cell to clipbo
 globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value', 'data-clipboard-paste-selected')
 globalCommand('zp', 'cursorCol.setValue(cursorRow, vd.clipvalue)', 'set contents of current column for current row to last clipboard value', 'data-clipboard-paste-cell')
 
-globalCommand('Y', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank current row to system clipboard', 'data-clipboard-copy-system-row')
-globalCommand('gY', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank selected rows to system clipboard', 'data-clipboard-copy-system-selected')
-globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank current value to system clipboard', 'data-clipboard-copy-system-cell')
+globalCommand('Y', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank (copy) current row to system clipboard', 'data-clipboard-copy-system-row')
+globalCommand('gY', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank (copy) selected rows to system clipboard', 'data-clipboard-copy-system-selected')
+globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank (copy) current cell to system clipboard', 'data-clipboard-copy-system-cell')
 
 option('clipboard_copy_cmd', 'pbcopy w', 'command to copy stdin to system clipboard')
 # or 'xsel --primary' for xsel
