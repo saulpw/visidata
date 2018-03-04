@@ -156,4 +156,5 @@ def main():
 if __name__ == '__main__':
     vdtui.status(__version__)
     main()
+    sys.stderr.flush()
     os._exit(0)  # cleanup can be expensive with large datasets
