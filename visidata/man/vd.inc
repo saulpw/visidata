@@ -656,6 +656,13 @@ These are the supported sources:
 .It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be opened into a new sheet with with Sy z^Y .
 .El
 .El
+.Pp
+.Bl -inset -compact -offset xxx
+.It Sy png No (requires Sy pypng Ns )
+.Bl -inset -compact -offset xxx
+.It Pixels can be edited and saved in data form. Images can be plotted with Ic "\&." No (dot).
+.El
+.El
 .
 .Pp
 The following URL schemes are supported:
@@ -677,11 +684,12 @@ The following URL schemes are supported:
 .It Sy xls No (requires Sy xlrd Ns )
 .It Sy hdf5 No (requires Sy h5py Ns )
 .It Sy shp No (requires Sy pyshp Ns )
+.It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
 .It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
 .It Sy html No (requires Sy lxml Ns )
 .El
 .
-In addition, .zip and .gz files are decompressed on the fly.
+In addition, .zip and .gz files are decompressed on the fly and sheets can be saved as org-mode compatible markdown (.md) tables.
 .
 .Sh AUTHOR
 .Nm VisiData
