@@ -5,7 +5,6 @@ machine:
 dependencies:
     pre:
         - pip3 install -r requirements.txt
-        - pip3 install requests openpyxl xlrd lxml h5py psycopg2 pyshp mapbox-vector-tile google-cloud-bigquery pypng
 
 test:
   override:
