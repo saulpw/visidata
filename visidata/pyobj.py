@@ -29,6 +29,9 @@ class ExpandedColumn(Column):
     def calcValue(self, row):
         return self.origCol.getValue(row)[self.key]
 
+    def setValue(self, row, value):
+        self.origCol.getValue(row)[self.key] = value
+
 def openColumn(col, val):
     if isinstance(val, dict):
         for k in val:
