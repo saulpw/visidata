@@ -1,3 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample-sales-reps.xlsx	open input in VisiData
-sample-sales-reps	name	0	^J		load the entire table into memory
+			o	sample_data/sample-sales-reps.xlsx	open file
+sample-sales-reps		キsample-salesv4	^J		load the entire table into memory
+sample-sales-reps_sample-salesv4			g^		set names of all visible columns to contents of selected rows (or current row)
+sample-sales-reps_sample-salesv4		0	d		delete current row and move it to clipboard
