@@ -11,8 +11,8 @@ globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name,
 globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object', 'python-push-cell-object')
 globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object', 'python-push-sheet-object')
 
-globalCommand('(', 'openColumn(cursorCol, cursorValue)', 'expand lists or dictionaries in current column into multiple columns')
-globalCommand(')', 'closeColumn(sheet, cursorCol)', 'remove expanded columns')
+globalCommand('(', 'openColumn(cursorCol, cursorValue)', 'expand current column of lists or dict into multiple columns and hide the original column')
+globalCommand(')', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
 # used as ENTER in several pyobj sheets
 globalCommand('python-dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object')

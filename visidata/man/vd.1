@@ -560,9 +560,9 @@ toggle show/hide for methods and hidden properties
 .It Ic "gv  zv"
 show/hide methods and hidden properties
 .It Ic " ("
-expand lists (e.g [3]) or dictionaries (e.g. {3}) in current column into multiple columns
+expand current column of lists or dicts into multiple columns and hide original column
 .It Ic " )"
-remove expanded columns
+unexpand current column; restore original column and remove other columns at this level
 .El
 .
 .Sh COMMANDLINE OPTIONS
@@ -827,7 +827,14 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy json No (single object) and Sy jsonl No (one object per line).
 .Bl -inset -compact -offset xxx
-.It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be opened into a new sheet with with Sy z^Y .
+.It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be expanded into new columns with Sy "\&(" Ns and unexpanded with Sy "\&)" Ns .
+.El
+.El
+.Pp
+.Bl -inset -compact -offset xxx
+.It Sy png No (requires Sy pypng Ns )
+.Bl -inset -compact -offset xxx
+.It Pixels can be edited and saved in data form. Images can be plotted with Ic "\&." No (dot).
 .El
 .El
 .
@@ -851,11 +858,29 @@ The following URL schemes are supported:
 .It Sy xls No (requires Sy xlrd Ns )
 .It Sy hdf5 No (requires Sy h5py Ns )
 .It Sy shp No (requires Sy pyshp Ns )
+.It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
 .It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
 .It Sy html No (requires Sy lxml Ns )
 .El
+.Pp
+In addition, 
+.Sy .zip No and Sy .gz No files are decompressed on the fly.
 .
-In addition, .zip and .gz files are decompressed on the fly.
+.Sh SUPPORTED OUTPUT FORMATS
+These are the supported savers:
+.Pp
+.Bl -inset -compact -offset xxx
+.It Sy tsv No (tab-separated value)
+.It Sy csv No (comma-separated value)
+.It Sy json No (one object with all rows)
+.Bl -inset -compact -offset xxx
+.It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
+.El
+.It Sy md No (org-mode compatible markdown table)
+.It Sy html No (requires Sy lxml Ns )
+.It Sy png No (requires Sy pypng Ns )
+.El
+.Pp
 .
 .Sh AUTHOR
 .Nm VisiData
