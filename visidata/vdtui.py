@@ -1542,7 +1542,11 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
                 pass
 
     def orderBy(self, *cols, **kwargs):
-        self.rows.sort(key=lambda r,cols=cols: tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
+        try:
+            self.rows.sort(key=lambda r,cols=cols: tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
+        except TypeError as e:
+            status('sort incomplete due to TypeError; change column type')
+            exceptionCaught(e, status=False)
 
     @property
     def selectedRows(self):
