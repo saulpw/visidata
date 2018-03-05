@@ -14,13 +14,16 @@ globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet
 globalCommand('(', 'openColumn(cursorCol, cursorValue)', 'expand lists or dictionaries in current column into multiple columns')
 globalCommand(')', 'closeColumn(sheet, cursorCol)', 'remove expanded columns')
 
-def closeColumn(sheet, col):
-    col.origCol.width = options.default_width
-    cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not getattr(col, "origCol", col)]
-    sheet.columns = cols
-
 # used as ENTER in several pyobj sheets
 globalCommand('python-dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object')
+
+
+def deduceType(v):
+    if isinstance(v, (float,int,str)):
+        return type(v)
+    else:
+        return anytype
+
 
 class ExpandedColumn(Column):
     def calcValue(self, row):
@@ -29,14 +32,20 @@ class ExpandedColumn(Column):
 def openColumn(col, val):
     if isinstance(val, dict):
         for k in val:
-            c = ExpandedColumn(col.name+'.'+k, origCol=col, key=k)
+            c = ExpandedColumn(col.name+'.'+k, type=deduceType(val[k]), origCol=col, key=k)
             col.sheet.addColumn(c, col.sheet.cursorColIndex+1)
             col.width = 0
     elif isinstance(val, (list, tuple)):
         for k in range(len(val)):
-            c = ExpandedColumn('%s[%s]' % (col.name, k), origCol=col, key=k)
+            c = ExpandedColumn('%s[%s]' % (col.name, k), type=deduceType(val[k]), origCol=col, key=k)
             col.sheet.addColumn(c, col.sheet.cursorColIndex+1)
             col.width = 0
+
+def closeColumn(sheet, col):
+    col.origCol.width = options.default_width
+    cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not getattr(col, "origCol", col)]
+    sheet.columns = cols
+
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj):
@@ -78,7 +87,7 @@ def AttrColumns(attrnames):
 
 def DictKeyColumns(d):
     'Return a list of Column objects from dictionary keys.'
-    return [ColumnItem(k, k) for k in d.keys()]
+    return [ColumnItem(k, k, type=deduceType(d[k])) for k in d.keys()]
 
 def SheetList(name, src, **kwargs):
     'Creates a Sheet from a list of homogenous dicts or namedtuples.'
