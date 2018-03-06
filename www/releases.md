@@ -1,4 +1,66 @@
-# [1.0](https://github.com/saulpw/visidata/releases/tag/v1.0) (2018-01-25)
+# [v1.1](https://github.com/saulpw/visidata/releases/tag/v1.1) (2018-03-06)
+
+This is the first release since 1.0.  The major additions and changes:
+
+- All external loader dependencies have been removed from the PyPI, brew, and Debian packages.  This will make for much faster initial installation.
+   - The json, csv, tsv, and sqlite loaders are still available with the base installation as they are supported by the Python standard library.  Other loaders will need their dependencies to be installed manually.  See [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) for which external packages to install for each loader.
+
+- An experimental command menu is now available via `Space`. The goal is to make it easier for people to explore the available functionality, and to try commands without knowing their keybindings.
+   - Use the standard VisiData movement keys (`h`/`l`/Arrows, `q` to back out)
+   - The help strings are shown during navigation, along with the available keybindings, so this will hopefully help people learn the keybindings as they use commands, without having to break their flow to refer to the manpage.
+   - Commands are organized in a hierarchy according to their longnames.  This hierarchy may change in future releases, so these longnames are not yet stable enough to use for command aliases or in cmdlog replay.  The actual command keys are more stable and should be preferred for the time being.
+   - If you play with the menu system, please let me know what did or didn't work for you!
+
+- The `Y` command series was added to copy ("yank") to the system clipboard (with `options.clipboard_copy_cmd`, set to `pbclip` for MacOS by default) to conveniently paste data in any supported text output format.
+   - `Y` copies the current row, `zY` copies the current cell, and `gY` copies all selected rows (or all rows).
+   - This mirrors the existing `y` command series, which yanks to VisiData's internal clipboard.
+
+- `-` now works as a filename to specify stdin/stdout.  Useful especially in batch mode to dump final sheet to stdout (`-b -o -`).
+
+New supported formats:
+
+- markdown (`md`) is now supported for saving (but not loading, yet) to an org-mode compatible table format.
+
+- .png files can now be loaded and saved, and crudely viewed on the canvas with an overloaded `.`.  The pixels can be edited on the source sheet like any other data.
+
+- .ttf and .otf (font) files can be loaded and viewed on the canvas.  This is super useful for just about no one, but it was a great excuse to implement `Canvas.qcurve()`.
+
+These commands have been added or changed, and are expected to stay in future versions:
+
+- The `za` command adds an empty, editable column to any sheet.  `gza` adds N new columns.
+
+- The `(` and `)` commands will expand/collapse list/dict columns (e.g. in nested json).
+
+- In the canvas, `d` deletes points from source sheet that are contained within the cursor.  `gd` deletes all points shown on the screen.
+
+- The `!@#$%-_` special actions on the Columns Sheet and Describe Sheet have been removed.  They were sometimes convenient, but more often made it difficult to interact with the Columns Sheet itself.
+    - The `g` forms of these commands are still available and will operate on the source columns (with the exception of `g_`, which now works consistently on all sheets as expected).
+
+- The `Shift+Arrows` are aliased to `HJKL` (though these may not work in all environments).
+
+These additions are more experimental and may not stay in future versions:
+
+- The `Backspace` command drops the current sheet (like `q`), and also scrubs its history from the cmdlog.
+
+- `ENTER` is now aliased to `modify-edit-cell` by default.
+
+Other minor changes:
+
+- search and select with no input now uses the most recent input.  `n`/`N` do this already for row search (as before), but the new behavior works more like standard vim/less/etc tools, and also applies to non-row search (like `c`).
+
+- Many sheets (pivot, describe, melt, and many loaders) have improvements and bugfixes to make them even better.
+
+Finally, some other news:
+
+- VisiData has been accepted into Debian for the next release!  It is currently available if you've added the `unstable` repo; install with `apt install visidata`.
+
+- [Jeremy Singer-Vine has put together a great tutorial](https://jsvine.github.io/intro-to-visidata/) for people who want a smoother path to start using VisiData.
+
+Thanks to everyone who contributed to this release!  As always, feedback and suggestions are welcome and appreciated.
+
+---
+
+# [v1.0](https://github.com/saulpw/visidata/releases/tag/v1.0) (2018-01-25)
 
 VisiData 1.0 has been officially released!  Changes since the 0.99 release candidate:
 
