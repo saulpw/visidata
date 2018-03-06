@@ -1,4 +1,4 @@
-.Dd January 24, 2017
+.Dd March 05, 2018
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -298,7 +298,7 @@ open
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "R" Ar number
-open duplicate sheet with a random population subset of
+select a random population subset of
 .Ar number No rows
 .Pp
 .It Ic " +" Ar aggregator
@@ -481,7 +481,7 @@ jump to sheet referenced in current row
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "Enter"
+.It Ic "Enter  e"
 edit option
 .El
 .
