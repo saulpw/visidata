@@ -1,6 +1,5 @@
 import os
 import os.path
-import gzip
 
 from .vdtui import *
 
@@ -12,21 +11,32 @@ class Path:
         self.fqpn = fqpn
         fn = os.path.split(fqpn)[-1]
 
-        # check if file is gzip-compressed
-        if fn.endswith('.gz'):
-            self.gzip_compressed = True
-            fn = fn[:-3]
-        else:
-            self.gzip_compressed = False
-
         self.name, self.ext = os.path.splitext(fn)
+
+        # check if file is compressed
+        if self.ext in ['.gz', '.bz2', '.xz']:
+            self.compression = self.ext[1:]
+            self.name, self.ext = os.path.splitext(self.name)
+        else:
+            self.compression = None
+
         self.suffix = self.ext[1:]
 
-    def open_text(self, mode='r'):
-        if self.gzip_compressed:
-            return gzip.open(self.resolve(), mode='rt', encoding=options.encoding, errors=options.encoding_errors)
+    def _open(self, *args, **kwargs):
+        if self.compression == 'gz':
+            import gzip
+            return gzip.open(*args, **kwargs)
+        elif self.compression == 'bz2':
+            import bz2
+            return bz2.open(*args, **kwargs)
+        elif self.compression == 'xz':
+            import lzma
+            return lzma.open(*args, **kwargs)
         else:
-            return open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+            return open(*args, **kwargs)
+
+    def open_text(self, mode='rt'):
+        return self._open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
     def __iter__(self):
         for i, line in enumerate(self.open_text()):
@@ -39,7 +49,7 @@ class Path:
             return fp.read()
 
     def read_bytes(self):
-        with open(self.resolve(), 'rb') as fp:
+        with self._open(self.resolve(), 'rb') as fp:
             return fp.read()
 
     def is_dir(self):
