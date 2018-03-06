@@ -29,23 +29,21 @@ class ShapeSheet(Sheet):
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]
     commands = [
-        Command('.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow]))', ''),
-        Command('g.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows))', ''),
+        Command('.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', ''),
+        Command('g.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows, textCol=cursorCol))', ''),
     ]
     @async
     def reload(self):
         import shapefile
         sf = shapefile.Reader(self.source.resolve())
-        self.columns += [
-            Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen))
-                for i, (fname, ftype, fieldlen, declen) in enumerate(sf.fields[1:])  # skip DeletionFlag
-        ]
+        for i, (fname, ftype, fieldlen, declen) in enumerate(sf.fields[1:]):  # skip DeletionFlag
+            self.addColumn(Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen)))
         self.rows = []
         for shaperec in Progress(sf.iterShapeRecords(), total=sf.numRecords):
             self.addRow(shaperec)
 
 
-class ShapeMap(Canvas):
+class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
 
     @async
@@ -65,5 +63,10 @@ class ShapeMap(Canvas):
                 self.point(x, y, self.plotColor(k), row)
             else:
                 status('notimpl shapeType %s' % row.shape.shapeType)
+
+            x1, y1, x2, y2 = row.shape.bbox
+            textx, texty = (x1+x2)/2, (y1+y2)/2
+            disptext = self.textCol.getDisplayValue(row)
+            self.label(textx, texty, disptext, self.plotColor(k), row)
 
         self.refresh()

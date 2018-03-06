@@ -1,6 +1,6 @@
 from visidata import *
 
-globalCommand('M', 'vd.push(MeltedSheet(sheet))', 'open melted sheet (unpivot)')
+globalCommand('M', 'vd.push(MeltedSheet(sheet))', 'open melted sheet (unpivot)', 'data-melt')
 
 melt_var_colname = 'Variable' # column name to use for the melted variable name
 melt_value_colname = 'Value'  # column name to use for the melted value
@@ -14,9 +14,11 @@ class MeltedSheet(Sheet):
 
     @async
     def reload(self):
+        isNull = isNullFunc()
+
         sheet = self.source
         self.columns = [SubrowColumn(c, 0) for c in sheet.keyCols]
-        self.nKeys = sheet.nKeys
+        self.keyCols = self.columns[:]
         self.columns.extend([Column(melt_var_colname, getter=lambda col,row: row[1].name),
                              Column(melt_value_colname, getter=lambda col,row: row[1].getValue(row[0]))])
 
@@ -25,5 +27,8 @@ class MeltedSheet(Sheet):
         self.rows = []
         for r in Progress(self.source.rows):
             for c in colsToMelt:
-                if c.getValue(r) is not None:
-                    self.addRow((r, c))
+                try:
+                    if not isNull(c.getValue(r)):
+                        self.addRow((r, c))
+                except Exception as e:
+                    pass

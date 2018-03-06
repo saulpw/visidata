@@ -1,8 +1,8 @@
 import math
 
 from visidata import *
-globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column')
-globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet')
+globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column', 'data-aggregate-column')
+globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet', 'data-aggregate-keys')
 globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows')
 
 theme('disp_histogram', '*', 'histogram element character')
@@ -11,12 +11,12 @@ option('disp_histolen', 80, 'width of histogram column')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 ColumnsSheet.commands += [
-    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row')
+    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
 ]
 
 def getValueOrError(c, r):
     try:
-        return c.getValue(r)
+        return c.getDisplayValue(r)
     except Exception as e:
         return 'error: %s' % e
 
@@ -30,11 +30,11 @@ class SheetFreqTable(Sheet):
     rowtype = 'bins'
     commands = [
         # redefine these commands only to change the helpstr
-        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet'),
-        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet'),
-        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet'),
+        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet', 'filter-source-toggle-bin'),
+        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet', 'filter-source-select-bin'),
+        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet', 'filter-source-unselect-bin'),
 
-        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell'),
+        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell', 'open-source-bin'),
 #        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 
@@ -44,30 +44,33 @@ class SheetFreqTable(Sheet):
         self.origCols = columns
         self.largest = 100
 
-        self.nKeys = len(self.origCols)
-
         self.columns = [
             Column(c.name, type=c.type, width=c.width, getter=lambda col,row,i=i: row[0][i]) for i, c in enumerate(self.origCols)
         ]
+        self.keyCols = self.columns[:]  # origCols are now key columns
+        nkeys = len(self.keyCols)
 
         self.columns.extend([
-            Column('count', type=int, getter=lambda col,row: len(row[1])),
-            Column('percent', type=float, getter=lambda col,row: len(row[1])*100/col.sheet.source.nRows),
-            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=50),
+            Column('count', type=int, getter=lambda col,row: len(row[1]), sql='COUNT(*)'),
+            Column('percent', type=float, getter=lambda col,row: len(row[1])*100/col.sheet.source.nRows, sql=''),
+            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=50, sql=''),
         ])
 
         aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
                                  type=aggregator.type or c.type,
-                                 getter=lambda col,row,origcol=c,aggr=aggregator: aggr(origcol, row[1]))
+                                 getter=lambda col,row,origcol=c,aggr=aggregator: aggr(origcol, row[1]),
+                                 sql='%s(%s)' % (aggregator, c.name) )
                              for c in self.source.visibleCols
                                 for aggregator in getattr(c, 'aggregators', [])
                          ]
         self.columns.extend(aggregatedCols)
 
         if aggregatedCols:  # hide percent/histogram if aggregations added
-            for c in self.columns[self.nKeys+1:self.nKeys+3]:
+            for c in self.columns[nkeys+1:nkeys+3]:
                 c.width = 0
 
+        self.groupby = columns
+        self.orderby = [(self.columns[nkeys], -1)]  # count desc
 
     def selectRow(self, row):
         self.source.select(row[1])     # select all entries in the bin on the source sheet
@@ -87,11 +90,11 @@ class SheetFreqTable(Sheet):
         errorbin = []
         allbin = []
         for row in Progress(self.source.rows):
-            v = origCol.getTypedValue(row)
-            if not v:
-                errorbin.append(row)
-            else:
+            try:
+                v = origCol.getTypedValue(row)
                 allbin.append((v, row))
+            except Exception as e:
+                errorbin.append((e, row))
 
         # find bin pivots from non-error values
         binPivots = []

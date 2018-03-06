@@ -1,7 +1,7 @@
 Source: visidata
 Section: devel
 Priority: optional
-Maintainer: Anja Boskovic <anja@visidata.org>
+Maintainer: Anja Boskovic <anja.kefala@gmail.com>
 Build-Depends: debhelper (>=10), dh-python, python3-all, python3-setuptools, python3-xlrd, python3-openpyxl, python3-dateutil, python3-requests
 Standards-Version: 4.1.3
 Homepage: https://pypi.python.org/pypi/visidata
@@ -13,6 +13,7 @@ Architecture: all
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${python3:Depends}
 Description: rapidly explore columnar data in the terminal
- VisiData is a multipurpose terminal utility for exploring, cleaning, restructuring
- and analysing tabular data. Current supported sources are tsv, csv, fixed-width text,
- json, sqlite, http, html, xls, and xlsx (excel).
+ VisiData is a multipurpose terminal utility for exploring, cleaning,
+ restructuring and analysing tabular data. Current supported sources are
+ TSV, CSV, fixed-width text, JSON, SQLite, HTTP, HTML, .xls, and .xlsx
+ (Microsoft Excel).

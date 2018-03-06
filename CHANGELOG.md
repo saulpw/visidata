@@ -1,6 +1,43 @@
 # VisiData version history
 
-# v1.0 (2017-01-24)
+# v1.1 (2018-03-05)
+
+- VisiData will be included in the [next debian repository release](https://tracker.debian.org/pkg/visidata)!
+- remove all install dependencies
+  - additional libraries must be installed manually for certain loaders; see requirements.txt
+- experimental hierarchical menu system with SPACE to explore commands
+    - use standard movement keys (`hjkl`/`arrows`) to navigate within a command level
+    - Use `Enter`/`q` to navigate down/up a command tree
+    - abort with `gq` or `^C`
+    - existing chooseOne selections (aggregators/joins) still use simple input() for now
+    - most longnames changed
+        - let me know if anyone is using any longnames at all, and we will stabilize the names
+    - if you do end up playing with it, please let me know what did and didn't work for you
+- randomized message/announcement/tip on startup; disable with `options.motd_url = None`
+   - cache messages in `$HOME/.visidata/`
+
+Command additions/changes:
+
+- add `za` and `gza` to add 1/N new blanks column
+- add `(` and `)` commands to expand/collapse list/dict columns (e.g. in nested json)
+- add `Backspace` command to drop sheet like `q` and also scrub its history from the cmdlog
+- [canvas] add `d` and `gd` to delete points from source sheet
+- remove `!@#$%-_` special actions on columns sheet
+- alias Shift+Arrows to `HJKL` (may not work in all environments)
+- alias `ENTER` to modify-edit-cell by default
+- add `Y`/`gY`/`zY` to copy row/selected/cell to system clipboard (with options.clipboard_copy_cmd)
+
+- filename `-` works to specify stdin/stdout (`-b -o -` will dump final sheet to stdout)
+- search/select uses most recent when not given any (as in vim/etc)
+- annotate None with disp_note_none ('∅'); previously was not visually distinguishable from empty string
+
+- save to .md org-mode compatible table format
+- load/view/edit/save png, edit pixels in data form
+- load/view ttf/otf font files
+- [canvas] draw quadratic curves with qcurve([(x,y)...])
+- improvements/bugfixes: pivot, describe, melt, sqlite, shp, html
+
+# v1.0 (2018-01-24)
 
 - date.__sub__ returns timedelta object (was int days)
 - pivot table bugfixes
@@ -17,8 +54,8 @@
 - `v` now 'visibility toggle' (moved from `w`)
 - `^W` to erase a word in the line editor
 - `gC`
-- `--version` (thanks for the suggestion, @jsvine)
-- `options.use_default_colors`
+- `--version` (thanks to @jsvine)
+- `options.use_default_colors` (thanks to @wavexx)
 - `median` aggregator
 - .html loads tables (requires lxml)
   - simple http works (requires requests)

@@ -3,7 +3,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = 'saul.pw/VisiData v1.0'
+__version__ = 'saul.pw/VisiData v1.1'
 
 import os
 from visidata import *
@@ -44,7 +44,7 @@ def main():
 
     parser.add_argument('inputs', nargs='*', help='initial sources')
     parser.add_argument('-f', dest='filetype', default='', help='uses loader for filetype instead of file extension')
-    parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='overwrites existing files without confirmation')
+    parser.add_argument('-y', dest='confirm_overwrite', default=None, action='store_false', help='overwrites existing files without confirmation')
     parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
     parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
     parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output (as .tsv) at the end of replay')
@@ -111,6 +111,10 @@ def main():
         vd().push(vs)
         Sheet.colorizers.append(Colorizer("cell", 8, makeDiffColorizer(vs)))
 
+    if args.batch:
+        vd().status = lambda *args: print(*args, file=sys.stderr)
+        vd().execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
+
     if not args.play:
         if not inputs:
             inputs = ['.']
@@ -125,29 +129,32 @@ def main():
             if startcol is not None:
                 vs.cursorVisibleColIndex = int(startcol)-1
 
-        vdtui.run(*sources)
-        return
-
-    if args.play == '-':
-        vdfile = stdinSource
-        assert isinstance(vdfile, PathFd)
-        vdfile.name = 'stdin.vd'
+        if args.batch:
+            vd().sheets = sources
+            sources[0].reload()
+        else:
+            vdtui.run(*sources)
     else:
-        vdfile = Path(args.play)
+        if args.play == '-':
+            vdfile = stdinSource
+            assert isinstance(vdfile, PathFd)
+            vdfile.name = 'stdin.vd'
+        else:
+            vdfile = Path(args.play)
 
-    vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
-    if args.batch:
-        vd().status = print
-        vd().execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
-        vs.replay_sync()
-        if args.output:
-            saveSheet(vd().sheets[0], args.output, confirm_overwrite=False)
-            sync()
-    else:
-        vs.replay()
-        run()
+        vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
+        if args.batch:
+            vs.replay_sync()
+        else:
+            vs.replay()
+            run()
+
+    if args.output and vd().sheets:
+        saveSheet(vd().sheets[0], args.output, confirm_overwrite=False)
+        sync()
 
 if __name__ == '__main__':
     vdtui.status(__version__)
     main()
+    sys.stderr.flush()
     os._exit(0)  # cleanup can be expensive with large datasets

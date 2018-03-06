@@ -1,6 +1,6 @@
 from visidata import *
 
-globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'Pivot the current column into a new sheet')
+globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'Pivot the current column into a new sheet', 'data-pivot')
 
 # rowdef: (tuple(keyvalues), dict(variable_value -> list(rows)))
 class SheetPivot(Sheet):
@@ -8,9 +8,9 @@ class SheetPivot(Sheet):
     rowtype = 'aggregated rows'
     commands = [
         Command('z'+ENTER, 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, []); vd.push(vs)',
-                      'open sheet of source rows aggregated in current cell'),
+                      'open sheet of source rows aggregated in current cell', 'open-source-cell'),
         Command(ENTER, 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow[0]); vs.rows=sum(cursorRow[1].values(), []); vd.push(vs)',
-                      'open sheet of source rows aggregated in current cell')
+                      'open sheet of source rows aggregated in current cell', 'open-source-row')
                ]
     def __init__(self, srcsheet, variableCols):
         super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols), source=srcsheet)
@@ -51,7 +51,7 @@ class SheetPivot(Sheet):
                 for value in Progress(col.getValues(self.source.rows), total=len(self.source.rows)):
                     if value not in allValues:
                         allValues.add(value)
-                        c = Column(value+'_'+aggname,
+                        c = Column('%s_%s' % (aggname, value),
                                 type=aggregator.type or aggcol.type,
                                 getter=lambda col,row,aggcol=aggcol,aggvalue=value,agg=aggregator: agg(aggcol, row[1].get(aggvalue, [])))
                         c.aggvalue = value
@@ -68,7 +68,7 @@ class SheetPivot(Sheet):
         rowidx = {}
         self.rows = []
         for r in Progress(self.source.rows):
-            keys = tuple(keycol.srccol.getTypedValue(r) for keycol in self.nonpivotKeyCols)
+            keys = tuple(getValueOrError(keycol.srccol, r) for keycol in self.nonpivotKeyCols)
 
             pivotrow = rowidx.get(keys)
             if pivotrow is None:
@@ -77,7 +77,7 @@ class SheetPivot(Sheet):
                 self.addRow(pivotrow)
 
             for col in self.variableCols:
-                varval = col.getTypedValue(r)
+                varval = col.getTypedValueNoExceptions(r)
                 matchingRows = pivotrow[1].get(varval)
                 if matchingRows is None:
                     pivotrow[1][varval] = [r]

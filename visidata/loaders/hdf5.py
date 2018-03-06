@@ -12,9 +12,9 @@ class SheetH5Obj(Sheet):
         if isinstance(self.source, h5py.Group):
             self.rowtype = 'objects'
             self.columns = [
-                Column(self.source.name, str, lambda r: r.name.split('/')[-1]),
-                Column('type', str, lambda r: type(r).__name__),
-                Column('nItems', int, lambda r: len(r)),
+                Column(self.source.name, type=str, getter=lambda col,row: row.name.split('/')[-1]),
+                Column('type', type=str, getter=lambda col,row: type(row).__name__),
+                Column('nItems', type=int, getter=lambda col,row: len(row)),
             ]
             self.rows = [ self.source[objname] for objname in self.source.keys() ]
         elif isinstance(self.source, h5py.Dataset):
@@ -28,10 +28,11 @@ class SheetH5Obj(Sheet):
                 status('too many dimensions in shape %s' % str(self.source.shape))
         else:
             status('unknown h5 object type %s' % type(self.source))
+        self.recalc()
 
 class open_hdf5(SheetH5Obj):
     def __init__(self, p):
         import h5py
-        super().__init__(p.name, h5py.File(str(p), 'r'))
+        super().__init__(p.name, source=h5py.File(str(p), 'r'))
 
 open_h5 = open_hdf5

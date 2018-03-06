@@ -8,26 +8,62 @@ option('delimiter', '\t', 'delimiter to use for tsv filetype')
 option('filetype', '', 'specify file type')
 
 # slide rows/columns around
-globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left')
-globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down')
-globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move current row up')
-globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move current column right')
-globalCommand('gH', 'moveListItem(columns, cursorColIndex, nKeys)', 'slide current column all the way to the left of sheet')
-globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slide current row to the bottom of sheet')
-globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row all the way to the top of sheet')
-globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet')
+globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left', 'modify-move-column-left')
+globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down', 'modify-move-row-down')
+globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move current row up', 'modify-move-row-up')
+globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move current column right', 'modify-move-column-right')
+globalCommand('gH', 'moveListItem(columns, cursorColIndex, 0)', 'slide current column all the way to the left of sheet', 'modify-move-column-leftmost')
+globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slide current row to the bottom of sheet', 'modify-move-row-bottom')
+globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row all the way to the top of sheet', 'modify-move-row-top')
+globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet', 'modify-move-column-rightmost')
 
-globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", "regex"), moveCursor=True)', 'move to the next column with name matching regex')
-globalCommand('r', 'moveRegex(sheet, regex=input("row key regex: ", "regex"), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex')
-globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("column number: "))', 'move to the given column number')
-globalCommand('zr', 'sheet.cursorRowIndex = int(input("row number: "))', 'move to the given row number')
+globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)', 'move to the next column with name matching regex', 'view-go-column-regex')
+globalCommand('r', 'moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex', 'view-go-row-regex')
+globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'move to the given column number', 'view-go-column-number')
+globalCommand('zr', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'move to the given row number', 'view-go-row-number')
 
-globalCommand('R', 'nrows=int(input("random population size: ")); vs=vd.push(copy(sheet)); vs.name+="_sample"; vs.rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows')
+globalCommand('R', 'nrows=int(input("random number to select: ")); select(random.sample(rows, nrows))', 'open duplicate sheet with a random population subset of # rows', 'rows-select-random')
 
-globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row')
-globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows')
+globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row', 'modify-add-row-blank')
+globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows', 'modify-add-row-many')
+globalCommand('za', 'addColumn(SettableColumn(""), cursorVisibleColIndex+1)', 'add an empty column', 'modify-add-column-blank')
+globalCommand('gza', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)', 'add N empty columns', 'modify-add-column-manyblank')
 
-globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with contents of non-null cells up the current column')
+globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with contents of non-null cells up the current column', 'modify-fill-column')
+
+alias('KEY_SLEFT', 'modify-move-column-left')
+alias('kDN', 'J', 'modify-move-row-down')
+alias('kUP', 'K', 'modify-move-row-up')
+alias('KEY_SRIGHT', 'modify-move-column-right')
+
+alias('gKEY_SLEFT', 'modify-move-column-leftmost')
+alias('gkDN', 'gJ', 'modify-move-row-bottom')
+alias('gkUP', 'gK', 'modify-move-row-top')
+alias('gKEY_SRIGHT', 'modify-move-column-rightmost')
+
+
+class SettableColumn(Column):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cache = {}
+
+    def setValue(self, row, value):
+        self.cache[id(row)] = self.type(value)
+
+    def calcValue(self, row):
+        return self.cache.get(id(row), '')
+
+
+class SettableColumn(Column):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cache = {}
+
+    def setValue(self, row, value):
+        self.cache[id(row)] = self.type(value)
+
+    def calcValue(self, row):
+        return self.cache.get(id(row), '')
 
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'
@@ -51,26 +87,26 @@ def updateColNames(sheet):
         if not c._name:
             c.name = "_".join(c.getDisplayValue(r) for r in sheet.selectedRows or [sheet.cursorRow])
 
-globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set name of current column to contents of current cell')
-globalCommand('g^', 'updateColNames(sheet)', 'set names of all visible columns to contents of selected rows (or current row)')
-globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined contents of current cell in selected rows (or current row)')
+globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set name of current column to current cell', 'column-name-cell')
+globalCommand('g^', 'updateColNames(sheet)', 'set names of all visible columns to contents of selected rows (or current row)', 'column-name-all-selected')
+globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined contents of current cell in selected rows (or current row)', 'column-name-selected')
 # gz^ with no selectedRows is same as z^
 
-globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
-globalCommand('^S', 'saveSheet(sheet, inputFilename("save to: ", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
+globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData', 'sheet-open-path')
+globalCommand('^S', 'saveSheet(sheet, inputFilename("save to: ", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
 
-globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))', 'set current cell to result of evaluated Python expression on current row')
+globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))', 'set current cell to result of evaluated Python expression on current row', 'python-eval-row')
 
-globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)', 'set current column for selected rows to the items in result of Python sequence expression')
+globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)', 'set current column for selected rows to the items in result of Python sequence expression', 'modify-set-column-sequence')
 
-globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with N columns')
+globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with N columns', 'sheet-new')
 
 
-globalCommand('gKEY_F(1)', 'help-commands')  # vdtui generic commands sheet
-globalCommand('gz?', 'help-commands')  # vdtui generic commands sheet
+globalCommand('gKEY_F(1)', 'info-commands')  # vdtui generic commands sheet
+globalCommand('gz?', 'info-commands')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
-globalCommand('z?', 'openManPage()', 'launch VisiData manpage')
+globalCommand('z?', 'openManPage()', 'launch VisiData manpage', 'info-manpage')
 globalCommand('KEY_F(1)', 'z?')
 
 def openManPage():
@@ -129,7 +165,7 @@ class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.'
     rowtype = 'files'
     commands = [
-        Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open file')  # path, filename
+        Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open current row', 'sheet-open-row')  # path, filename
     ]
     columns = [
         Column('filename', getter=lambda col,row: row[0].name + row[0].ext),
@@ -205,28 +241,28 @@ def open_tsv(p, vs=None):
     'Parse contents of Path `p` and populate columns.'
 
     if vs is None:
-        vs = Sheet(p.name, source=p)
-        vs.loader = lambda vs=vs: reload_tsv(vs)
+        vs = TsvSheet(p.name, source=p)
 
-    header_lines = int(options.header)
-
-    with vs.source.open_text() as fp:
-        headers = _getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
-
-        if header_lines == 0:
-            vs.columns = ArrayColumns(len(headers[0]))
-        else:
-            # columns ideally reflect the max number of fields over all rows
-            # but that's a lot of work for a large dataset
-            vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers[:header_lines]))
-
-    vs.recalc()
     return vs
 
-@async
-def reload_tsv(vs, **kwargs):
-    'Asynchronous wrapper for `reload_tsv_sync`.'
-    reload_tsv_sync(vs)
+class TsvSheet(Sheet):
+    @async
+    def reload(self):
+        header_lines = int(options.header)
+
+        with self.source.open_text() as fp:
+            headers = _getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
+
+            if header_lines == 0:
+                self.columns = ArrayColumns(len(headers[0]))
+            else:
+                # columns ideally reflect the max number of fields over all rows
+                # but that's a lot of work for a large dataset
+                self.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers[:header_lines]))
+
+        self.recalc()
+
+        reload_tsv_sync(self)
 
 def reload_tsv_sync(vs, **kwargs):
     'Perform synchronous loading of TSV file, discarding header lines.'
@@ -260,7 +296,7 @@ def save_tsv(vs, fn):
     replch = options.disp_oddspace
     trdict = {ord(delim): replch, 10: replch, 13: replch}
 
-    with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
+    with Path(fn).open_text(mode='w') as fp:
         colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)

@@ -71,8 +71,8 @@ class PbfSheet(Sheet):
     ]
     nKeys = 1  # layer
     commands = [
-        Command('.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow]))', 'plot this row only'),
-        Command('g.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows))', 'plot as map'),
+        Command('.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot this row only'),
+        Command('g.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows, textCol=cursorCol))', 'plot as map'),
     ]
     @async
     def reload(self):
@@ -119,5 +119,12 @@ class PbfCanvas(InvertedCanvas):
         for r in Progress(self.sourceRows):
             for vertexes, attr, row in self.iterpolylines(r):
                 self.polyline(vertexes, attr, row)
+
+                if len(vertexes) == 1:
+                    textx, texty = vertexes[0]
+                    disptext = self.textCol.getDisplayValue(row)
+                    if disptext:
+                        self.label(textx, texty, disptext, attr, row)
+
 
         self.refresh()
