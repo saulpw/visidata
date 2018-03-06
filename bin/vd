@@ -44,7 +44,7 @@ def main():
 
     parser.add_argument('inputs', nargs='*', help='initial sources')
     parser.add_argument('-f', dest='filetype', default='', help='uses loader for filetype instead of file extension')
-    parser.add_argument('-y', dest='confirm_overwrite', default=True, action='store_false', help='overwrites existing files without confirmation')
+    parser.add_argument('-y', dest='confirm_overwrite', default=None, action='store_false', help='overwrites existing files without confirmation')
     parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
     parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
     parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output (as .tsv) at the end of replay')

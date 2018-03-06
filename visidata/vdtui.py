@@ -110,6 +110,7 @@ class OptionsObject:
             elif curval is not None:             # if None, do not apply type conversion
                 v = t(v)
         else:
+            status('setting unknown option %s' % k)
             option(k, v)
 
         self._opts[k][1] = v
