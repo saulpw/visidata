@@ -56,7 +56,7 @@ class DescribeSheet(Sheet):
 
     @async
     def reload(self):
-        self.rows = list(self.source.columns)  # column deleting/reordering here does not affect actual columns
+        self.rows = list(self.source.visibleCols)  # column deleting/reordering here does not affect actual columns
         self.describeData = { col: {} for col in self.source.visibleCols }
 
         for srccol in Progress(self.source.visibleCols):
