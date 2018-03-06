@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v1.1 (2018-03-??)
+# v1.1 (2018-03-05)
 
 - VisiData will be included in the [next debian repository release](https://tracker.debian.org/pkg/visidata)!
 - remove all install dependencies

@@ -70,8 +70,6 @@ In most cases, commands that affect selected rows will affect all rows if no row
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " F1   z?"
 view this man page
-.It Ic "gF1  gz?"
-view all commands available on current sheet
 .It Ic ^Q
 abort program immediately
 .It Ic ^C
