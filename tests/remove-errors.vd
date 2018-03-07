@@ -9,7 +9,7 @@ surveys	year		-		hide current column
 surveys	hindfoot_length		#		set type of current column to int
 surveys	weight		#		set type of current column to int
 surveys			I		open Describe Sheet
-surveys_describe	errors	8	zs		select rows on source sheet which are being described in current cell
+surveys_describe	errors	5	zs		select rows on source sheet which are being described in current cell
 surveys_describe			^^		jump to previous sheet (swaps with current sheet)
 surveys			gd		delete all selected rows and move them to clipboard
 surveys	species_id		!		pin current column on the left as a key column
