@@ -9,7 +9,7 @@ VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulp
 
 - **2018-03-05: [Visidata v1.1](/releases#v1.1) has been released!**
 
-- 2018-01-26: How do you use VisiData?  <a href="https://www.surveymonkey.com/r/8JBN8BM" target="_blank" title="powered by SurveyMonkey">Take a quick survey and give your opinion</a>.
+- 2018-01-26: How do you use VisiData?  <a href="/survey" target="_blank" title="powered by SurveyMonkey">Take a quick survey and give your opinion</a>.
 
 - **2018-01-24: [VisiData v1.0](/releases/#v1.0) has been released!**
 
