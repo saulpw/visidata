@@ -1027,6 +1027,11 @@ class BaseSheet:
         'Compose left side of status bar for this sheet (overridable).'
         return options.disp_status_fmt.format(sheet=self)
 
+    def addCommand(self, keystrokes, execstr, helpstr='', longname=None):
+        'Add a command specific to this Sheet instance'
+        cmd = Command(keystrokes, longname or execstr, helpstr, longname)
+        self._commands = self._commands.new_child({ keystrokes: cmd })
+
     def getCommand(self, keystrokes, default=None):
         k = keystrokes
         cmd = None

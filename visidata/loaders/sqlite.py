@@ -3,12 +3,13 @@ from visidata import *
 def open_sqlite(path):
     vs = SqliteSheet(path.name + '_tables', path, 'sqlite_master')
     vs.columns = vs.getColumns('sqlite_master')
+    vs.addCommand(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'load the entire table into memory')
     return vs
 
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     commands = [
-        Command(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'load the entire table into memory')
+        Command(ENTER, 'error("sqlite dbs are readonly")', 'no deeper engagement')
     ]
     def __init__(self, name, pathOrSheet, tableName):
         super().__init__(name, source=pathOrSheet, tableName=tableName)
@@ -23,9 +24,10 @@ class SqliteSheet(Sheet):
         tblname = self.tableName
         self.columns = self.getColumns(tblname)
         r = self.conn.execute('SELECT COUNT(*) FROM %s' % tblname).fetchall()
+        rowcount = r[0][0]
         self.rows = []
-        for r in Progress(self.conn.execute("SELECT * FROM %s" % tblname), total=r[0][0]-1):
-            self.addRow(r)
+        for row in Progress(self.conn.execute("SELECT * FROM %s" % tblname), total=rowcount-1):
+            self.addRow(row)
 
     def getColumns(self, tableName):
         cols = []
