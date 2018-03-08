@@ -4,6 +4,7 @@ from visidata import *
 
 def open_html(p):
     return HtmlTablesSheet(p.name, source=p)
+open_htm = open_html
 
 # rowdef: lxml.html.HtmlElement
 class HtmlTablesSheet(Sheet):
