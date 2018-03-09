@@ -1819,7 +1819,7 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
             scr.addstr(headerRow, self.vd.windowWidth-2, options.disp_more_right, colors[options.color_column_sep])
 
 
-    def editCell(self, vcolidx=None, rowidx=None):
+    def editCell(self, vcolidx=None, rowidx=None, **kwargs):
         'Call `editText` at its place on the screen.  Returns the new value, properly typed'
 
         if vcolidx is None:
@@ -1836,7 +1836,11 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
             y = self.rowLayout.get(rowidx, 0)
             currentValue = col.getValue(self.rows[self.cursorRowIndex])
 
-        r = self.vd.editText(y, x, w, value=currentValue, fillchar=options.disp_edit_fill, truncchar=options.disp_truncator)
+        editargs = dict(value=currentValue,
+                        fillchar=options.disp_edit_fill,
+                        truncchar=options.disp_truncator)
+        editargs.update(kwargs)  # update with user-specified args
+        r = self.vd.editText(y, x, w, **editargs)
         if rowidx >= 0:
             r = col.type(r)  # convert input to column type
 
