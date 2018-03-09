@@ -2411,7 +2411,7 @@ def suspend():
         os.kill(os.getpid(), signal.SIGSTOP)
 
 # history: earliest entry first
-def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
+def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, append=False):
     'A better curses line editing widget.'
     ESC='^['
     ENTER='^J'
@@ -2506,6 +2506,9 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
     first_action = True
     v = str(value)  # value under edit
     i = 0           # index into v
+    if append:
+        i = len(v)
+        first_action = False
     left_truncchar = right_truncchar = truncchar
 
     def rfind_nonword(s, a, b):
