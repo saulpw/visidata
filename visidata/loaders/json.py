@@ -51,7 +51,7 @@ def save_json(vs, fn):
         d = {}
         for col in cols:
             try:
-                d[col.name] = col.getValue(row)
+                d[col.name] = col.getTypedValue(row)
             except Exception:
                 pass
         return d
