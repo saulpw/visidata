@@ -32,7 +32,7 @@ class MbtilesSheet(Sheet):
 
     commands = [
         Command(ENTER, 'vd.push(PbfSheet(tilename(cursorRow), source=sheet, sourceRow=cursorRow))', 'open this tile'),
-        Command('.', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn, sourceRows=list(getFeatures(getTile(*cursorRow)))))', 'plot this tile'),
+        Command('.', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn, sourceRows=list(getFeatures(getTile(*cursorRow))))))', 'plot this tile'),
 #        Command('g.', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn), sourceRows=sum((list(getFeatures(getTile(*r))) for r in selectedRows or rows), [])))', 'plot selected tiles'),
     ]
 
