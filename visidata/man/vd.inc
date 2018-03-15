@@ -298,6 +298,8 @@ open
 .It Ic "R" Ar number
 select a random population subset of
 .Ar number No rows
+.It Ic "T"
+open new sheet with rows and columns transposed
 .Pp
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )

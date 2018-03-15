@@ -24,6 +24,7 @@ from .canvas import *
 from .graph import *
 from .menu import *
 from .motd import *
+from .transpose import *
 
 from .loaders.csv import *
 from .loaders.json import *
