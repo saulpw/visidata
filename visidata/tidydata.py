@@ -1,16 +1,21 @@
 from visidata import *
 
 globalCommand('M', 'vd.push(MeltedSheet(sheet))', 'open melted sheet (unpivot)', 'data-melt')
+globalCommand('gM', 'vd.push(MeltedSheet(sheet, regex=input("regex to split colname: ", value="(.*)_(.*)", type="regex-capture")))', 'open melted sheet (unpivot), factoring columns', 'data-melt-regex')
 
 melt_var_colname = 'Variable' # column name to use for the melted variable name
 melt_value_colname = 'Value'  # column name to use for the melted value
 
-# rowdef: (sourceRow, sourceCol)
+
+# rowdef: {0:sourceRow, 1:Category1, ..., N:CategoryN, ColumnName:Column, ...}
 class MeltedSheet(Sheet):
-    "Perform 'melt', the reverse of 'pivot', on input sheet."
+    "Perform 'melt', the inverse of 'pivot', on input sheet."
+
     rowtype = 'melted values'
-    def __init__(self, sheet):
-        super().__init__(sheet.name + '_melted', source=sheet)
+
+    def __init__(self, sheet, regex='(.*)', **kwargs):
+        super().__init__(sheet.name + '_melted', source=sheet, **kwargs)
+        self.regex = regex
 
     @async
     def reload(self):
@@ -19,16 +24,51 @@ class MeltedSheet(Sheet):
         sheet = self.source
         self.columns = [SubrowColumn(c, 0) for c in sheet.keyCols]
         self.keyCols = self.columns[:]
-        self.columns.extend([Column(melt_var_colname, getter=lambda col,row: row[1].name),
-                             Column(melt_value_colname, getter=lambda col,row: row[1].getValue(row[0]))])
 
         colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]
 
+        # break down Category1_Category2_ColumnName as per regex
+        valcols = collections.defaultdict(list)  # ('Category1', 'Category2') -> list of tuple('ColumnName', Column)
+        for c in colsToMelt:
+            m = re.match(self.regex, c.name)
+            if m:
+                if len(m.groups()) == 1:
+                    varvals = m.groups()
+                    valcolname = melt_value_colname
+                else:
+                    *varvals, valcolname = m.groups()
+                valcols[tuple(varvals)].append((valcolname, c))
+                ncats = len(varvals)
+            else:
+                status('"%s" column does not match regex, skipping' % c.name)
+
+        othercols = set()
+        for colnames, cols in valcols.items():
+            for cname, _ in cols:
+                othercols.add(cname)
+
+        for i in range(ncats):
+            self.columns.append(ColumnItem('%s%d' % (melt_var_colname, i+1), i+1))
+
+        for cname in othercols:
+            self.columns.append(Column(cname,
+                getter=lambda col,row,cname=cname: row[cname].getValue(row[0]),
+                setter=lambda col,row,val,cname=cname: row[cname].setValue(row[0], val)))
+
         self.rows = []
         for r in Progress(self.source.rows):
-            for c in colsToMelt:
-                try:
-                    if not isNull(c.getValue(r)):
-                        self.addRow((r, c))
-                except Exception as e:
-                    pass
+            for colnames, cols in valcols.items():
+                meltedrow = {}
+                for varval, c in cols:
+                    try:
+                        if not isNull(c.getValue(r)):
+                            meltedrow[varval] = c
+                    except Exception as e:
+                        meltedrow[varval] = e
+
+                if meltedrow:  # remove rows with no content (all nulls)
+                    meltedrow[0] = r
+                    for i, colname in enumerate(colnames):
+                        meltedrow[i+1] = colname
+
+                    self.addRow(meltedrow)
