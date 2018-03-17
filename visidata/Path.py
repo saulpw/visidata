@@ -99,6 +99,9 @@ class Path:
     def __str__(self):
         return self.fqpn
 
+    def __lt__(self, a):
+        return self.name < a.name
+
 class UrlPath(Path):
     def __init__(self, url):
         from urllib.parse import urlparse
