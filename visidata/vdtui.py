@@ -1211,7 +1211,7 @@ Command('g/', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True
 Command('g?', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns', 'view-find-row-viscol-backward'),
 
 Command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit contents of current cell', 'modify-edit-cell'),
-Command('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorValue))', 'set contents of current column for selected rows to same input', 'modify-edit-column-selected'),
+Command('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))', 'set contents of current column for selected rows to same input', 'modify-edit-column-selected'),
 Command('zd', 'cursorCol.setValues([cursorRow], None)', 'set contents of current cell to None', 'modify-clear-cell'),
 Command('gzd', 'cursorCol.setValues(selectedRows, None)', 'set contents of cells in current column to None for selected rows', 'modify-clear-column-selected'),
 Command('KEY_DC', 'zd'),
@@ -1867,7 +1867,7 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
             currentValue = col.name
         else:
             y = self.rowLayout.get(rowidx, 0)
-            currentValue = col.getValue(self.rows[self.cursorRowIndex])
+            currentValue = col.getDisplayValue(self.rows[self.cursorRowIndex])
 
         editargs = dict(value=currentValue,
                         fillchar=options.disp_edit_fill,
