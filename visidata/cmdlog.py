@@ -191,7 +191,7 @@ class CommandLog(Sheet):
                 rowidx = getRowIdxByKey(vs, k)
 
             if rowidx is None:
-                error('no row %s' % r.row)
+                error('no "%s" row' % r.row)
 
             if options.replay_movement:
                 while vs.cursorRowIndex != rowidx:
@@ -208,7 +208,7 @@ class CommandLog(Sheet):
                 vcolidx = getColVisibleIdxByFullName(vs, r.col)
 
             if vcolidx is None:
-                error('no column %s' % r.col)
+                error('no "%s" column' % r.col)
 
             if options.replay_movement:
                 while vs.cursorVisibleColIndex != vcolidx:
@@ -252,8 +252,14 @@ class CommandLog(Sheet):
                     return
 
                 vd().statuses = []
-                if self.replayOne(self.cursorRow):
-                    CommandLog.currentReplay = None
+                try:
+                    if self.replayOne(self.cursorRow):
+                        self.cancel()
+                        return
+                except Exception as e:
+                    self.cancel()
+                    exceptionCaught(e)
+                    status('replay canceled')
                     return
 
                 self.cursorRowIndex += 1

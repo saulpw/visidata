@@ -1079,7 +1079,7 @@ class BaseSheet:
     def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
         if not cmd:
-            status('no command')
+            status('no command "%s"' % keystrokes)
             return True
 
         escaped = False
