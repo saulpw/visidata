@@ -54,11 +54,10 @@ def main():
     parser.add_argument('-v', '--version', action='version', version=__version__)
 
     for optname, v in vdtui.baseOptions.items():
-        name, optval, defaultval, helpstr = v
-        if name.startswith('color_') or name.startswith('disp_'):
+        if optname.startswith('color_') or optname.startswith('disp_'):
             continue
-        action = 'store_true' if optval is False else 'store'
-        parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=helpstr)
+        action = 'store_true' if v.value is False else 'store'
+        parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=v.helpstr)
 
     args = parser.parse_args()
 

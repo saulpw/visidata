@@ -81,9 +81,22 @@ def globalCommand(keystrokes, execstr, helpstr='', longname=None):
     for ks in keystrokes:
         baseCommands[ks] = Command(ks, longname or execstr, helpstr, longname)
 
-def option(name, default, helpstr=''):
-    baseOptions[name] = [name, default, default, helpstr]
-    globals()['options_'+name] = default
+
+class Option:
+    def __init__(self, name, default, helpstr=''):
+        self.name = name
+        self.default = self.value = default
+        self.helpstr = helpstr
+        self.replayable = False
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, val):
+        self._value = val
+        globals()['options_'+self.name] = val
 
 
 class OptionsObject:
@@ -98,12 +111,11 @@ class OptionsObject:
         self.__setitem__(k, v)
 
     def __getitem__(self, k):      # options[k]
-         name, value, default, helpstr = self._opts[k]
-         return value
+         return self._opts[k].value
 
     def __setitem__(self, k, v):   # options[k] = v
         if k in self._opts:
-            curval = self._opts[k][1]
+            curval = self._opts[k].value
             t = type(curval)
             if isinstance(v, str) and t is bool: # special case for bool options
                 v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
@@ -113,10 +125,16 @@ class OptionsObject:
             status('setting unknown option %s' % k)
             option(k, v)
 
-        self._opts[k][1] = v
-        globals()['options_'+k] = v
+        if self._opts[k].replayable:
+            vd().callHook('set_option', k, v)
+        self._opts[k].value = v
 
 options = OptionsObject(baseOptions)
+
+def option(name, default, helpstr=''):
+    baseOptions[name] = Option(name, default, helpstr)
+    return baseOptions[name]
+
 
 alias = globalCommand
 theme = option
@@ -2321,21 +2339,21 @@ class HelpSheet(Sheet):
 class OptionsSheet(Sheet):
     rowtype = 'options'
     commands = [
-        Command(ENTER, 'editOption(cursorRow)', 'edit option'),
-        Command('e', ENTER)
+        Command(ENTER, 'editOption(cursorRow)', 'edit option', 'set-option'),
+        Command('e', 'set-option')
     ]
-    columns = [ColumnItem('option', 0),
-               Column('value', getter=lambda col,row: row[1], setter=lambda col,row,val: setattr(options, row[0], val)),
-               ColumnItem('default', 2),
-               ColumnItem('description', 3)]
+    columns = [ColumnAttr('option', 'name'),
+               ColumnAttr('value'),
+               ColumnAttr('default'),
+               ColumnAttr('description')]
     colorizers = []
     nKeys = 1
 
     def editOption(self, row):
-        if isinstance(row[2], bool):
-            self.source[row[0]] = not row[1]
+        if isinstance(row.default, bool):
+            self.source[row.name] = not row.value
         else:
-            self.source[row[0]] = self.editCell(1)
+            self.source[row.name] = self.editCell(1)
 
     def reload(self):
         self.rows = list(self.source._opts.values())
