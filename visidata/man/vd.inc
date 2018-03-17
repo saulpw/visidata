@@ -73,7 +73,7 @@ view this man page
 .It Ic ^Q
 abort program immediately
 .It Ic ^C
-cancel user input or aborts all async threads on current sheet
+cancel user input or abort all async threads on current sheet
 .It Ic " q"
 quit current sheet
 .It Ic "gq"
