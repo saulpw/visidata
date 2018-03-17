@@ -78,7 +78,7 @@ def main():
     stdinSource = None
     if not sys.stdin.isatty():
         # duplicate stdin for input and reopen tty as stdin
-        stdinSource = PathFd('stdin', open(os.dup(0)))
+        stdinSource = PathFd('-', open(os.dup(0)))
         f = open('/dev/tty')
         os.dup2(f.fileno(), 0)
 
