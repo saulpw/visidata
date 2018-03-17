@@ -2,10 +2,10 @@
 from visidata import *
 import csv
 
-option('csv_dialect', 'excel', 'dialect passed to csv.reader')
-option('csv_delimiter', ',', 'delimiter passed to csv.reader')
-option('csv_quotechar', '"', 'quotechar passed to csv.reader')
-option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
+replayableOption('csv_dialect', 'excel', 'dialect passed to csv.reader')
+replayableOption('csv_delimiter', ',', 'delimiter passed to csv.reader')
+replayableOption('csv_quotechar', '"', 'quotechar passed to csv.reader')
+replayableOption('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
 
 csv.field_size_limit(sys.maxsize)
 

@@ -4,7 +4,7 @@ import sys
 
 from .vdtui import *
 
-option('skip', 0, 'skip first N lines of text input')
+replayableOption('skip', 0, 'skip first N lines of text input')
 
 class Path:
     'File and path-handling class, modeled on `pathlib.Path`.'

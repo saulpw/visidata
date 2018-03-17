@@ -3,9 +3,9 @@ import random
 from .vdtui import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
-option('header', 1, 'parse first N rows of .csv/.tsv as column names')
-option('delimiter', '\t', 'delimiter to use for tsv filetype')
-option('filetype', '', 'specify file type')
+replayableOption('header', 1, 'parse first N rows of .csv/.tsv as column names')
+replayableOption('delimiter', '\t', 'delimiter to use for tsv filetype')
+replayableOption('filetype', '', 'specify file type')
 
 # slide rows/columns around
 globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left', 'modify-move-column-left')

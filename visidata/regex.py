@@ -4,7 +4,7 @@ globalCommand(':', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cu
 globalCommand(';', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', 'modify-add-column-regex-capture')
 globalCommand('*', 'addColumn(regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst")), cursorColIndex+1)', 'regex/subst - replace regex with subst, which may include backreferences (\\1 etc)', 'modify-add-column-regex-transform')
 
-option('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
+replayableOption('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 
 def makeRegexSplitter(regex, origcol):
     return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=maxsplit)

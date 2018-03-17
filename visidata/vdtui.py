@@ -138,24 +138,27 @@ def option(name, default, helpstr=''):
 
 alias = globalCommand
 theme = option
+def replayableOption(*args):
+    option(*args).replayable = True
 
-option('encoding', 'utf-8', 'encoding passed to codecs.open')
-option('encoding_errors', 'surrogateescape', 'encoding errors passed to codecs.open')
 
-option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
-option('default_width', 20, 'default column width')
+replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
+replayableOption('encoding_errors', 'surrogateescape', 'encoding errors passed to codecs.open')
+
+replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
+replayableOption('default_width', 20, 'default column width')
 option('wrap', False, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
 option('cmdlog_longname', False, 'Use command longname in cmdlog if available')
 
-option('none_is_null', True, 'if Python None counts as null')
-option('empty_is_null', False, 'if empty string counts as null')
-option('false_is_null', False, 'if Python False counts as null')
-option('zero_is_null', False, 'if integer 0 counts as null')
+replayableOption('none_is_null', True, 'if Python None counts as null')
+replayableOption('empty_is_null', False, 'if empty string counts as null')
+replayableOption('false_is_null', False, 'if Python False counts as null')
+replayableOption('zero_is_null', False, 'if integer 0 counts as null')
 
 
-option('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
+replayableOption('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 option('debug', False, 'exit on error and display stacktrace')
 option('curses_timeout', 100, 'curses timeout in ms')
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
@@ -579,7 +582,7 @@ class VisiData:
     allPrefixes = 'gz'  # embig'g'en, 'z'mallify
 
     def __init__(self):
-        self.sheets = []  # list of BaseSheet
+        self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
         self.statuses = []  # statuses shown until next action
         self.lastErrors = []
         self.searchContext = {}
@@ -594,6 +597,18 @@ class VisiData:
         self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
         self.addHook('rstatus', self.rightStatus)
+
+    def getSheet(self, sheetname):
+        matchingSheets = [x for x in vd().sheets if x.name == sheetname]
+        if matchingSheets:
+            if len(matchingSheets) > 1:
+                status('more than one sheet named "%s"' % sheetname)
+            return matchingSheets[0]
+        if sheetname == 'options':
+            vs = self.optionsSheet
+            vs.reload()
+            vs.vd = vd()
+            return vs
 
     def status(self, *args):
         'Add status message to be shown until next action.'

@@ -103,8 +103,6 @@ class CommandLog(Sheet):
         super().__init__(name, source=source, **kwargs)
         self.currentActiveRow = None
 
-        self.sheetmap = {}   # sheet.name -> vs
-
     def newRow(self):
         return CommandLogRow()
 
@@ -155,16 +153,6 @@ class CommandLog(Sheet):
     def openHook(self, vs, src):
         self.addRow(CommandLogRow(['', '', '', 'o', src, 'open file']))
 
-    def getSheet(self, sheetname):
-        vs = self.sheetmap.get(sheetname)
-        if not vs:
-            matchingSheets = [x for x in vd().sheets if x.name == sheetname]
-            if not matchingSheets:
-                status(','.join(x.name for x in vd().sheets))
-                return None
-            vs = matchingSheets[0]
-        return vs
-
     @classmethod
     def togglePause(self):
         if not CommandLog.currentReplay:
@@ -188,8 +176,12 @@ class CommandLog(Sheet):
         if not r.sheet:
 #            assert not r.col and not r.row
             return self  # any old sheet should do, row/column don't matter
-        else:
-            vs = self.getSheet(r.sheet) or error('no sheets named %s' % r.sheet)
+
+        try:
+            sheetidx = int(r.sheet)
+            vs = vd().sheets[sheetidx]
+        except ValueError:
+            vs = vd().getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
 
         if r.row:
             try:
@@ -251,7 +243,6 @@ class CommandLog(Sheet):
 
     def replay_sync(self, live=False):
         'Replay all commands in log.'
-        self.sheetmap.clear()
         self.cursorRowIndex = 0
         CommandLog.currentReplay = self
         with Progress(total=len(self.rows)) as prog:
@@ -298,6 +289,10 @@ class CommandLog(Sheet):
         x = options.disp_replay_pause if self.paused else options.disp_replay_play
         return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
+    def setOption(self, optname, optval):
+        self.addRow(CommandLogRow(['options', 'value', options.rowkey_prefix + optname, 'set-option', str(optval), 'set option']))
+
+
 vd().cmdlog = CommandLog('cmdlog')
 vd().cmdlog.rows = []  # so it can be added to immediately
 
@@ -307,3 +302,4 @@ vd().addHook('preedit', vd().cmdlog.getLastArgs)
 vd().addHook('postedit', vd().cmdlog.setLastArgs)
 
 vd().addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'green'))
+vd().addHook('set_option', vd().cmdlog.setOption)
