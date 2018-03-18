@@ -200,8 +200,8 @@ theme('note_getter_exc', '!', 'cell note for an exception during computation')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
 theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
-theme('color_format_exc', '48 bold green', 'color of formatting exception note')
-theme('color_getter_exc', 'red bold', 'color of computation exception note')
+theme('color_format_exc', '48 green', 'color of formatting exception note')
+theme('color_getter_exc', 'red ', 'color of computation exception note')
 theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
 ENTER='^J'
