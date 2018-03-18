@@ -178,7 +178,7 @@ theme('disp_status_sep', ' | ', 'separator between statuses')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_more_left', '<', 'header note indicating more columns to the left')
 theme('disp_more_right', '>', 'header note indicating more columns to the right')
-theme('disp_error_val', '¿', 'displayed contents for computation exception')
+theme('disp_error_val', '', 'displayed contents for computation exception')
 theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
 
 theme('color_default', 'normal', 'the default color')
