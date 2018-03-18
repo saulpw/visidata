@@ -172,18 +172,18 @@ class DirSheet(Sheet):
 #        Command('modify-delete-row', 'path, _ = rows.pop(cursorRowIndex); os.rmdir(path.resolve()) if path.is_dir() else os.remove(path.resolve())'),
     ]
     columns = [
-        # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a reload
+        # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
         Column('filename', getter=lambda col,row: row[0].name + row[0].ext,
                            setter=lambda col,row,val: os.rename(row[0].resolve(), val)),  # BUG
         Column('type', getter=lambda col,row: row[0].is_dir() and '/' or row[0].suffix),
         Column('size', type=int, getter=lambda col,row: row[1].st_size,
-                                 setter=lambda col,row,val: os.truncate(row[0].resolve(), int(val)) or col.sheet.reload()),
-        Column('mtime', type=date, getter=lambda col,row: row[1].st_mtime,
-               setter=lambda col,row,val: os.utime(row[0].resolve(), times=((row[1].st_atime, float(val)))) or col.sheet.reload()),
+                                 setter=lambda col,row,val: os.truncate(row[0].resolve(), int(val)) or col.sheet.restat(row)),
+        Column('modtime', type=date, getter=lambda col,row: row[1].st_mtime,
+               setter=lambda col,row,val: os.utime(row[0].resolve(), times=((row[1].st_atime, float(val)))) or col.sheet.restat(row)),
         Column('owner', width=0, cache=True, getter=lambda col,row: pwd.getpwuid(row[1].st_uid).pw_name,
-            setter=lambda col,row,val: os.chown(row[0].resolve(), pwd.getpwnam(val).pw_uid, -1) or col.sheet.reload()),
+            setter=lambda col,row,val: os.chown(row[0].resolve(), pwd.getpwnam(val).pw_uid, -1) or col.sheet.restat(row)),
         Column('group', width=0, cache=True, getter=lambda col,row: grp.getgrgid(row[1].st_gid).gr_name,
-            setter=lambda col,row,val: os.chown(row[0].resolve(), -1, grp.getgrnam(val).pw_gid) or col.sheet.reload()),
+            setter=lambda col,row,val: os.chown(row[0].resolve(), -1, grp.getgrnam(val).pw_gid) or col.sheet.restat(row)),
         Column('mode', width=0, type=int, fmtstr='{:o}', getter=lambda col,row: row[1].st_mode),
     ]
     colorizers = [
@@ -197,7 +197,10 @@ class DirSheet(Sheet):
     nKeys = 1
 
     def reload(self):
-        self.rows = sorted((p, p.stat()) for p in self.source.iterdir())  #  if not p.name.startswith('.')]
+        self.rows = sorted([p, p.stat()] for p in self.source.iterdir())  #  if not p.name.startswith('.')]
+
+    def restat(self, row):
+        row[1] = row[0].stat()
 
 def openSource(p, filetype=None):
     'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
