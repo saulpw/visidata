@@ -5,6 +5,8 @@
 * [quick reference guide](/man)
     * comprehensive overview of all available commands and options
     * also available as a manpage via `man vd` and from inside VisiData with `F1` or `z?`
+* [VisiData v1.0 Getting Started Tutorial](https://jsvine.github.io/intro-to-visidata/)
+    - written by [Jeremy Singer-Vine](https://www.jsvine.com/)
 
 ###### How To
 

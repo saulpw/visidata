@@ -92,4 +92,4 @@ Other VisiData components, including the main `vd` application, addons, loaders,
 
 VisiData was created and developed by Saul Pwanson `<vd@saul.pw>`.
 
-Thanks to all the [contributors](CONTRIBUTING.md#contributors), and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.
+Thanks to all the contributors, and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.
