@@ -1,3 +1,4 @@
 sheet	col	row	keystrokes	input	comment
-			o	sample_data/oscar_age_female.csv	open input in VisiData
-oscar_age_female	Index	0	-		hide current column
+options	value	キfiletype	set-option		set option
+			o	sample_data/oscar_age_female.csv	open file
+oscar_age_female	Index		-		hide current column
