@@ -1,5 +1,5 @@
-- Update: 2018-01-22
-- Version: VisiData 1.0
+- Update: 2018-03-17
+- Version: VisiData 1.1
 
 # Navigation
 
@@ -35,7 +35,7 @@
 
 ###### Jumping away from sheets
 
-- Press `^^` to jump to the previous sheet, without quitting the current one.
+- Press `Ctrl+^` to jump to the previous sheet, without quitting the current one.
 
 - Press `q` to quit the current sheet.
 

@@ -1,5 +1,5 @@
-- Update: 2018-01-28
-- Version: VisiData 1.0
+- Update: 2018-03-17
+- Version: VisiData 1.1
 
 # Combining datasets
 
@@ -14,17 +14,20 @@
     b. Press `o` and enter a filepath for each file.
 
 2. Press `S` to open the **Sheets sheet**.
-3. Use `s` or `t` to select the sheets to merge.
-4. Press `gC` to open a **Columns sheet** with all columns from selected sheets.
-5. Press `!` on the rows that refrences the indices on which the join will be performed. At least one key column, per sheet, should be set.
-6. Press `q` to return to the **Sheets sheet**.
-7. Optional: If performing a left outer join, use `J` or `K` to reorder the sheets. The first sheet will be the one for whom all rows will be retained.
-8. Type `&` followed by the *jointype* to execute the join
+3. For each sheet that will be merged:
+
+    a. Move the cursor to the row referencing the desired sheet.
+    b. Press `Enter` to jump to the sheet referenced in that current cursor row.
+    c. Press `!` on the rows that refrences the indices on which the join will be performed. At least one key column, per sheet, should be set.
+    d. Press `Ctrl+^` or `S` to return to the **Sheets sheet**.
+
+4. Optional: If performing a left outer join, use `J` or `K` to reorder the sheets. The first sheet will be the one for whom all rows will be retained.
+5. Type `&` followed by the *jointype* to execute the join
 
 jointype            description
 ---------           -------------
 `inner`             keeps only rows which match keys on all sheets
-`left outer`        keeps all rows from first selected sheets
+`outer`             keeps all rows from first selected sheet
 `full`              keeps all rows from all sheets (union)
 `diff`              keeps only rows NOT in all sheets
 
