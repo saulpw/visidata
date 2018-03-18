@@ -14,10 +14,13 @@ class JSONSheet(Sheet):
     commands = [Command(ENTER, 'pyobj-dive')]
     @async
     def reload(self):
+        self.colnames = {}  # [colname] -> Column
+        self.columns.clear()
+
         if not self.jsonlines:
             try:
                 self.reload_json()
-            except json.decoder.JSONDecodeError:
+            except ValueError as e:
                 status('trying jsonl')
                 self.jsonlines = True
 
@@ -27,10 +30,14 @@ class JSONSheet(Sheet):
     def reload_json(self):
         self.rows = []
         with self.source.open_text() as fp:
-            r = json.load(fp, object_hook=self.addRow)
-            self.rows = [r] if isinstance(r, dict) else r
-            self.columns = DictKeyColumns(self.rows[0])
-            self.recalc()
+            ret = json.load(fp, object_hook=self.addRow)
+
+        if isinstance(ret, dict):
+            self.rows = [ret]
+        else:
+            self.rows = []
+            for row in Progress(ret):
+                self.addRow(row)
 
     def reload_jsonl(self):
         with self.source.open_text() as fp:
@@ -39,10 +46,12 @@ class JSONSheet(Sheet):
                 self.addRow(json.loads(L))
 
     def addRow(self, row):
-        if not self.rows:
-            self.columns = DictKeyColumns(row)
-            self.recalc()
-        self.rows.append(row)
+        self.rows.append(row)  # just during loading until final assignment
+        for k in row:
+            if k not in self.colnames:
+                c = ColumnItem(k, type=deduceType(row[k]))
+                self.colnames[k] = c
+                self.addColumn(c)
         return row
 
 @async

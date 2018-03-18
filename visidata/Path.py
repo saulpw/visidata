@@ -149,6 +149,8 @@ class RepeatFile:
 
     def read(self, n=None):
         r = ''
+        if n is None:
+            n = 10**12  # some too huge number
         while len(r) < n:
             try:
                 s = next(self.iter)
