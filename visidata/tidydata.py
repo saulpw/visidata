@@ -28,7 +28,7 @@ class MeltedSheet(Sheet):
         colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]
 
         # break down Category1_Category2_ColumnName as per regex
-        valcols = collections.defaultdict(list)  # ('Category1', 'Category2') -> list of tuple('ColumnName', Column)
+        valcols = collections.OrderedDict()  # ('Category1', 'Category2') -> list of tuple('ColumnName', Column)
         for c in colsToMelt:
             m = re.match(self.regex, c.name)
             if m:
@@ -37,7 +37,10 @@ class MeltedSheet(Sheet):
                     valcolname = melt_value_colname
                 else:
                     *varvals, valcolname = m.groups()
-                valcols[tuple(varvals)].append((valcolname, c))
+                cats = tuple(varvals)
+                if cats not in valcols:
+                    valcols[cats] = []
+                valcols[cats].append((valcolname, c))
                 ncats = len(varvals)
             else:
                 status('"%s" column does not match regex, skipping' % c.name)
@@ -47,8 +50,11 @@ class MeltedSheet(Sheet):
             for cname, _ in cols:
                 othercols.add(cname)
 
-        for i in range(ncats):
-            self.columns.append(ColumnItem('%s%d' % (melt_var_colname, i+1), i+1))
+        if ncats == 1:
+            self.columns.append(ColumnItem(melt_var_colname, 1))
+        else:
+            for i in range(ncats):
+                self.columns.append(ColumnItem('%s%d' % (melt_var_colname, i+1), i+1))
 
         for cname in othercols:
             self.columns.append(Column(cname,
