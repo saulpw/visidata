@@ -8,7 +8,7 @@ A terminal interface for exploring and arranging tabular data.
 - Python 3.4+
 - python-dateutil
 - other modules may be required for opening particular data sources
-    - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](https://visidata.org/man/#loaders) in the vd manpage
+    - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](http://visidata.org/man/#loaders) in the vd manpage
 
 ### Install via pip3
 
@@ -60,16 +60,16 @@ Instructions for installing form our own personal repository are available [here
 
 VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more.
 Use `-f <filetype>` to force a particular filetype.
-(See the [list of supported sources](https://visidata.org/man#sources)).
+(See the [list of supported sources](http://visidata.org/man#sources)).
 
 ## Documentation
 
-* Quick reference: `F1` (or `z?`) within `vd` will open the [man page](https://visidata.org/man), which has a list of all commands and options.
-* [visidata.org/docs](https://visidata.org/docs) has a complete list of links to all official documentation.
+* Quick reference: `F1` (or `z?`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
+* [visidata.org/docs](http://visidata.org/docs) has a complete list of links to all official documentation.
 
 ## Help and Support
 
-For additional information, see the [support page](https://visidata.org/support).
+For additional information, see the [support page](http://visidata.org/support).
 
 ## vdtui
 
@@ -92,4 +92,4 @@ Other VisiData components, including the main `vd` application, addons, loaders,
 
 VisiData was created and developed by Saul Pwanson `<vd@saul.pw>`.
 
-Thanks to all the contributors, and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.
+Thanks to all the [contributors](CONTRIBUTING.md#contributors), and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.
