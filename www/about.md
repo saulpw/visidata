@@ -36,8 +36,4 @@ Many thanks also to the following people for their support and contributions to 
 - [wavexx](https://github.com/wavexx)
 - [zormit](https://github.com/zormit)
 
-Special thanks to [@anjakefala](https://github.com/anjakefala) for significant help with documentation, releases, and tests.
-
-# About the site
-
-The font used is Inconsolata by [Raph Levien](http://levien.com/).
+Special thanks to [anjakefala](https://github.com/anjakefala) for significant help with documentation, releases, and tests.

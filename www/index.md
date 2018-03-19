@@ -7,15 +7,13 @@ VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulp
 
 ## Recent Updates
 
+- 2018-03-10: [Jeremy Singer-Vine](https://www.jsvine.com) hosted a [an introduction to VisiData](https://jsvine.github.io/intro-to-visidata/) tutorial at NICAR 2018.
+
 - **2018-03-05: [Visidata v1.1](/releases#v1.1) has been released!**
 
 - 2018-01-26: How do you use VisiData?  <a href="/survey" target="_blank" title="powered by SurveyMonkey">Take a quick survey and give your opinion</a>.
 
-- **2018-01-24: [VisiData v1.0](/releases/#v1.0) has been released!**
-
-- 2018-01-22: I presented VisiData in a [lightning talk at PyCascades 2018](https://www.youtube.com/embed/N1CBDTgGtOU).
-
-- 2017-10-29: VisiData turns 1 year old with the [v0.97.1](/releases/#v0.97.1) release.
+- 2018-01-22: Saul presented VisiData in a [lightning talk at PyCascades 2018](https://www.youtube.com/watch?v=N1CBDTgGtOU).
 
 - <form action="https://tinyletter.com/visidata" method="post" target="popupwindow" onsubmit="window.open('https://tinyletter.com/visidata', 'popupwindow', 'scrollbars=yes,width=800,height=600');return true">Sign up for the email newsletter: <input type="text" style="width:140px" name="email" id="tlemail" /><input type="hidden" value="1" name="embed"/><input type="submit" value="Subscribe" /> (powered by <a href="https://tinyletter.com" target="_blank">TinyLetter</a>)</form>
 

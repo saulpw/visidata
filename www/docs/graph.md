@@ -1,5 +1,5 @@
-- Update: 2018-01-22
-- Version: VisiData 1.0
+- Update: 2018-03-17
+- Version: VisiData 1.1
 
 # Drawing graphs
 
@@ -28,7 +28,7 @@ This example uses the file [StatusPR.csv](https://raw.githubusercontent.com/saul
 
 1. Press `!` to set a column as the x-axis. This column must be numeric.
 2. Set that column to a numeric type.
-3. Optinal: Press `!` on a categorical key column to add it as an additional independent variable.
+3. Optional: Press `!` on a categorical key column to add it as an additional independent variable.
 4. Type all of the columns you wish to set as the dependent variables with a numeric type.
 5. Press `-` (dash) to hide any numeric columns you don't wish graphed.
 6. Press `g.`.
@@ -48,7 +48,9 @@ Command(s)          Operation
 `zz`                zooms into the cursor
 `_` (underscore)    zooms to fit the full extent
  `s`   `t`   `u`    selects/toggles/unselects rows on the source sheet contained within the cursor
-`gs`  `gt`  `gu`    selects/toggles/unselects rows visible on the screen
+`gs`  `gt`  `gu`    selects/toggles/unselects rows visible as points on the screen
+` d`                deletes rows on the source sheet contained within the cursor
+`gd`                deletes all rows visible as points on the screen
  `Enter`            opens sheet of source rows contained within the cursor
 `gEnter`            opens sheet of source rows which are visible on screen
 `v`                 toggles the visibility of graph labels

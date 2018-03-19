@@ -1,5 +1,5 @@
-- Update: 2018-01-28
-- Version: VisiData 1.0
+- Update: 2018-03-17
+- Version: VisiData 1.1
 
 # Grouping data and descriptive statistics
 
@@ -83,7 +83,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 1. Press `F` to open the **Frequency table**.
 2. Press `s` or `t` on the groups you are interested in to select those entries in the source sheet.
-3. Press `q` or `Ctrl-^` to return to the source sheet.
+3. Press `q` or `Ctrl+^` to return to the source sheet.
 4. Press `"` to open a duplicate sheet with selected rows.
 
 **or**
@@ -95,7 +95,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 1. Press `I` to open the **Describe sheet**.
 2. Use `zs` to select rows on source sheet which are being described in the cells of interest.
-3. Press `q` or `Ctrl-^` to return to the source sheet.
+3. Press `q` or `Ctrl+^` to return to the source sheet.
 4. Press `"` to open a duplicate sheet with selected rows.
 
 **or**
