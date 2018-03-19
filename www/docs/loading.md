@@ -43,4 +43,13 @@ To load another file, press `o` and enter a filepath.
 2. Move the cursor to the row containing the desired sheet.
 3. Press `Enter` to jump to the sheet referenced in that current cursor row.
 
+## How to convert a dataset from one supported filetype into another
+
+~~~
+vd -b countries.fixed -o countries.tsv
+~~~
+
+**Note**: Not all filetypes which are supported as loaders are also supported as savers. See the [manpage](/man#loaders) for the supported output formats.
+
+
 ---

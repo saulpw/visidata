@@ -30,7 +30,7 @@ Further instructions available [here](https://github.com/saulpw/homebrew-vd).
 
 Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
 
-Currently, VisiData is in the Debian unstable's [main repository](https://launchpad.net/ubuntu/+source/visidata). If you want the most up-to-date version of VisiData, it will be available in our own [Debian repo](https://github.com/saulpw/deb-vd).
+Currently, VisiData v1.0 is in Debian unstable's [main repository](https://launchpad.net/ubuntu/+source/visidata). If you want the most up-to-date version of VisiData (v1.1), it will be available in our own [Debian repo](https://github.com/saulpw/deb-vd).
 
 To install from Debian:
 
@@ -92,4 +92,4 @@ Other VisiData components, including the main `vd` application, addons, loaders,
 
 VisiData was created and developed by Saul Pwanson `<vd@saul.pw>`.
 
-Thanks to all the [contributors](CONTRIBUTING.md#contributors), and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.
+Thanks to all the contributors, and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.

@@ -1,5 +1,5 @@
-- Update: 2018-01-28
-- Version: VisiData 1.0
+- Update: 2018-03-17
+- Version: VisiData 1.1
 
 # Columns
 
@@ -116,29 +116,23 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 **Question** What is the average daily revenue from sales of each **Item**?
 
-1. Press `C` to open the **Columns sheet**.
-2. Move the cursor to the row referencing the source sheet **Units** column.
-
-    a. Type the source sheet **Units** column by pressing `#` (int).
-    b. Press `s` or `t` to select it.
-
-3. Move the cursor to the row referencing the source sheet **Total** column.
-
-    a. Type the source sheet **Total** column by pressing `%` (float).
-    b. Press `s` or `t` to select it.
-
-4. Type `g+` followed by `avg` to add a **avg** statistical aggregator to the selected rows.
-5. Press `q` to exit and return to the source sheet.
-6. Scroll to the **Item** column. Press `F` to open the **Frequency table**.
+1. Type the **Units** column by pressing `#` (int).
+2. Type the **Total** column by pressing `%` (float).
+3. Press `C` to open the **Columns sheet**.
+4. Press `s` or `t` on the rows referencing the source sheet **Units** column and the **Total** column to select them.
+5. Type `g+` followed by `avg` to add a **avg** statistical aggregator to the selected rows.
+6. Press `q` to exit and return to the source sheet.
+7. Scroll to the **Item** column. Press `F` to open the **Frequency table**.
 
 **Question** What are the daily average and sum total number of **Units** sold for each **Item**?
 
 1. Press `C` to open the **Columns sheet**.
 2. Move the cursor to the row referencing the source sheet **Units** column.
 
-    a. Set the type for the source sheet **Units** columns by pressing `#` (int).
-    b. Move the cursor to the **aggregators** column.
-    c. Type `e` to enter edit mode, followed by *sum avg*.
+    a. Press `s` or `t` to select it.
+    b. Set the type for the source sheet **Units** columns by pressing `g#` (int).
+    c. Move the cursor to the **aggregators** column.
+    d. Type `e` to enter edit mode, followed by *sum avg*.
 
 3. Press `q` to exit and return to the source sheet.
 4. Move the cursor to the **Item** column. Press `F` to open the **Frequency table**.
