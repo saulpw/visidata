@@ -207,6 +207,8 @@ def openSource(p, filetype=None):
     if isinstance(p, str):
         if '://' in p:
             return openSource(UrlPath(p), filetype)  # convert to Path and recurse
+        elif p == '-':
+            return openSource(PathFd('-', vd().stdin), filetype)
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
     elif isinstance(p, UrlPath):

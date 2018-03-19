@@ -114,6 +114,13 @@ class OptionsObject:
          return self._opts[k].value
 
     def __setitem__(self, k, v):   # options[k] = v
+        prevval = self.set(k, v)
+
+        if prevval != v and self._opts[k].replayable:
+            vd().callHook('set_option', k, v)
+
+    def set(self, k, v):
+        'sets option k to value v'
         if k in self._opts:
             curval = self._opts[k].value
             t = type(curval)
@@ -122,12 +129,12 @@ class OptionsObject:
             elif curval is not None:             # if None, do not apply type conversion
                 v = t(v)
         else:
+            curval = None
             status('setting unknown option %s' % k)
             option(k, v)
 
-        if self._opts[k].replayable:
-            vd().callHook('set_option', k, v)
         self._opts[k].value = v
+        return curval
 
 options = OptionsObject(baseOptions)
 
@@ -2354,21 +2361,21 @@ class HelpSheet(Sheet):
 class OptionsSheet(Sheet):
     rowtype = 'options'
     commands = [
-        Command(ENTER, 'editOption(cursorRow)', 'edit option', 'set-option'),
-        Command('e', 'set-option')
+        Command(ENTER, 'editOption(cursorRow)', 'edit option', 'set-row-input'),
+        Command('e', 'set-row-input')
     ]
-    columns = [ColumnAttr('option', 'name'),
+    columns = (ColumnAttr('option', 'name'),
                ColumnAttr('value'),
                ColumnAttr('default'),
-               ColumnAttr('description')]
+               ColumnAttr('description'))
     colorizers = []
     nKeys = 1
 
     def editOption(self, row):
         if isinstance(row.default, bool):
-            self.source[row.name] = not row.value
+            self.source.set(row.name, not row.value)
         else:
-            self.source[row.name] = self.editCell(1)
+            self.source.set(row.name, self.editCell(1))
 
     def reload(self):
         self.rows = list(self.source._opts.values())

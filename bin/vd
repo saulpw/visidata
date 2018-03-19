@@ -75,12 +75,19 @@ def main():
         if optval is not None and optname not in ['inputs', 'play', 'batch', 'output', 'diff']:
             vdtui.options[optname] = optval
 
-    stdinSource = None
-    if not sys.stdin.isatty():
-        # duplicate stdin for input and reopen tty as stdin
-        stdinSource = PathFd('-', open(os.dup(0)))
+    flPipedData = not sys.stdin.isatty()
+
+    # always duplicate stdin for input and reopen tty as stdin
+    try:
+        stdin = open(os.dup(0))
         f = open('/dev/tty')
         os.dup2(f.fileno(), 0)
+        vd().stdin = stdin
+    except Exception as e:
+        print(e)
+        vd().stdin = sys.stdin
+
+    stdinSource = PathFd('-', vd().stdin)
 
     startrow, startcol = None, None
     fmtargs = []
@@ -102,9 +109,6 @@ def main():
             inputs.append(arg)
             fmtargs.append(arg)
 
-    if stdinSource and stdinSource not in inputs:  # '|vd' without explicit '-'
-        inputs.append(stdinSource)
-
     if args.diff:
         vs = openSource(args.diff)
         vd().push(vs)
@@ -115,6 +119,9 @@ def main():
         vd().execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
     if not args.play:
+        if flPipedData and stdinSource not in inputs:  # '|vd' without explicit '-'
+            inputs.append(stdinSource)
+
         if not inputs:
             inputs = ['.']
 

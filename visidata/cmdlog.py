@@ -296,7 +296,7 @@ class CommandLog(Sheet):
         return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
     def setOption(self, optname, optval):
-        self.addRow(CommandLogRow(['options', 'value', options.rowkey_prefix + optname, 'set-option', str(optval), 'set option']))
+        self.addRow(CommandLogRow(['options', '', options.rowkey_prefix + optname, 'set-row-input', str(optval), 'set option']))
 
 
 vd().cmdlog = CommandLog('cmdlog')
