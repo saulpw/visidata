@@ -1,4 +1,3 @@
 sheet	col	row	keystrokes	input	comment
-options	value	キfiletype	set-option		set option
 			o	sample_data/oscar_age_female.csv	open file
 oscar_age_female	Index		-		hide current column
