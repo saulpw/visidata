@@ -18,7 +18,7 @@ def createJoinedSheet(sheets, jointype=''):
 jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
 
 SheetsSheet.commands += [
-        Command('&', 'vd.replace(createJoinedSheet(selectedRows, jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
+        Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
         Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
     ]
 
@@ -26,20 +26,20 @@ SheetsSheet.columns.append(ColumnAttr('progressPct'))
 
 # used ColumnsSheet, affecting the 'row' (source column)
 columnCommands = [
-        Command('g!', 'for c in selectedRows or [cursorRow]: source.toggleKeyColumn(c)', 'toggle selected rows as key columns on source sheet'),
-        Command('gz!', 'for c in selectedRows or [cursorRow]: source.keyCols.remove(c)', 'unset selected rows as key columns on source sheet'),
-        Command('g-', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = 0', 'hide selected source columns on source sheet'),
-        Command('g%', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = float', 'set type of selected source columns to float'),
-        Command('g#', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = int', 'set type of selected source columns to int'),
-        Command('g@', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = date', 'set type of selected source columns to date'),
-        Command('g$', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = currency', 'set type of selected columns to currency'),
-        Command('g~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = str', 'set type of selected columns to str'),
-        Command('gz~', 'for c in selectedRows or source.nonKeyVisibleCols: c.type = anytype', 'set type of selected columns to anytype'),
+        Command('g!', 'for c in selectedRows or [cursorRow]: c.sheet.toggleKeyColumn(c)', 'toggle selected rows as key columns on source sheet'),
+        Command('gz!', 'for c in selectedRows or [cursorRow]: c.sheet.keyCols.remove(c)', 'unset selected rows as key columns on source sheet'),
+        Command('g-', 'for c in selectedRows or [cursorRow]: c.width = 0', 'hide selected source columns on source sheet'),
+        Command('g%', 'for c in selectedRows or [cursorRow]: c.type = float', 'set type of selected source columns to float'),
+        Command('g#', 'for c in selectedRows or [cursorRow]: c.type = int', 'set type of selected source columns to int'),
+        Command('g@', 'for c in selectedRows or [cursorRow]: c.type = date', 'set type of selected source columns to date'),
+        Command('g$', 'for c in selectedRows or [cursorRow]: c.type = currency', 'set type of selected columns to currency'),
+        Command('g~', 'for c in selectedRows or [cursorRow]: c.type = str', 'set type of selected columns to str'),
+        Command('gz~', 'for c in selectedRows or [cursorRow]: c.type = anytype', 'set type of selected columns to anytype'),
     ]
 
 ColumnsSheet.commands += columnCommands + [
-        Command('column-source-width-max', 'for c in selectedRows or source.nonKeyVisibleCols: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
-        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows))', 'add column from concatenating selected source columns'),
+        Command('column-source-width-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
+        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or error("no columns selected to concatenate")))', 'add column from concatenating selected source columns'),
 ]
 DescribeSheet.commands += columnCommands
 

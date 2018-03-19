@@ -1330,9 +1330,12 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
 
         for colorizerType in colorizerTypes:
             for colorizer in sorted(self._colorizers[colorizerType], key=lambda x: x.precedence):
-                color = colorizer.func(self, col, row, value)
-                if color:
-                    attr, attrpre = colors.update(attr, attrpre, color, colorizer.precedence)
+                try:
+                    color = colorizer.func(self, col, row, value)
+                    if color:
+                        attr, attrpre = colors.update(attr, attrpre, color, colorizer.precedence)
+                except Exception as e:
+                    exceptionCaught(e)
 
         return attr
 
