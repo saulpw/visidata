@@ -232,6 +232,7 @@ globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet', 'meta-
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
 globalCommand(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 globalCommand('^Z', 'suspend()', 'suspend VisiData process')
+globalCommand(' ', 'cmd=choose(mkmenu(*_commands.maps), cmdhelp, sheet); cmd and exec_command(cmd, keystrokes=cmd.longname)', 'start menu command')
 
 alias(ENTER, 'modify-edit-cell')  # ENTER is this by default
 alias('delete-column-hide', 'schema-column-hide')
@@ -1032,6 +1033,7 @@ class Colorizer:
         self.func = colorfunc
 
 class BaseSheet:
+    commands = []
     rowtype=''
     def __init__(self, name, **kwargs):
         self.name = name
@@ -1154,7 +1156,6 @@ class BaseSheet:
 
 class Sheet(BaseSheet):
     commands = [
-Command(' ', 'cmd=choose(mkmenu(*_commands.maps), cmdhelp, sheet); cmd and exec_command(cmd, keystrokes=cmd.longname)', 'start menu command'),
 Command('KEY_LEFT',  'cursorRight(-1)', 'move one column left',  'view-go-left'),
 Command('KEY_DOWN',  'cursorDown(+1)',  'move one row down',     'view-go-down'),
 Command('KEY_UP',    'cursorDown(-1)',  'move one row up',       'view-go-up'),
@@ -1255,7 +1256,6 @@ Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Co
 Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column permanently from the list of columns'),
     ]
     columns = []  # list of Column
-#    commands = []  # list of Command
     colorizers = [ # list of Colorizer
         Colorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr),
         Colorizer('hdr', 9, lambda s,c,r,v: options.color_current_hdr if c is s.cursorCol else None),
