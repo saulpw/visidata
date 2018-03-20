@@ -35,9 +35,11 @@ globalCommand('gza', 'for c in range(int(input("add columns: "))): addColumn(Set
 globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with contents of non-null cells up the current column', 'modify-fill-column')
 
 alias('KEY_SLEFT', 'modify-move-column-left')
+alias('KEY_SR', 'modify-move-column-left')
 alias('kDN', 'J', 'modify-move-row-down')
 alias('kUP', 'K', 'modify-move-row-up')
 alias('KEY_SRIGHT', 'modify-move-column-right')
+alias('KEY_SF', 'modify-move-column-right')
 
 alias('gKEY_SLEFT', 'modify-move-column-leftmost')
 alias('gkDN', 'gJ', 'modify-move-row-bottom')
