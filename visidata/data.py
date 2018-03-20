@@ -59,17 +59,6 @@ class SettableColumn(Column):
         return self.cache.get(id(row), '')
 
 
-class SettableColumn(Column):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cache = {}
-
-    def setValue(self, row, value):
-        self.cache[id(row)] = self.type(value)
-
-    def calcValue(self, row):
-        return self.cache.get(id(row), '')
-
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'
     lastval = None
