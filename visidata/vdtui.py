@@ -27,9 +27,10 @@
 # modifications, please keep the base vdtui version and append your own id and
 # version.
 __version__ = 'saul.pw/vdtui v1.1'
-__author__ = 'Saul Pwanson <vdtui@saul.pw>'
+__author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Production/Stable'
+__copyright__ = 'Copyright (c) 2016-2018 ' + __author__
 
 from builtins import *
 import sys
@@ -218,7 +219,7 @@ globalCommand('q',  'vd.sheets.pop(0)', 'quit current sheet', 'sheet-quit-curren
 globalCommand('gq', 'vd.sheets.clear()', 'quit all sheets (clean exit)', 'sheet-quit-all')
 
 globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
-globalCommand('^V', 'status(__version__)', 'show version information on status line', 'info-version')
+globalCommand('^V', 'status(__version__); status(__copyright__)', 'show version information on status line', 'info-version')
 globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses"))', 'open Status History', 'meta-status-history')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error', 'info-errors-last')
