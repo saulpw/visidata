@@ -379,8 +379,10 @@ def vd():
 def exceptionCaught(e, **kwargs):
     return vd().exceptionCaught(e, **kwargs)
 
-def stacktrace():
-    return traceback.format_exc().strip().splitlines()
+def stacktrace(e=None):
+    if not e:
+        return traceback.format_exc().strip().splitlines()
+    return traceback.format_exception(type(e), e).strip().splitlines()
 
 option('color_menu_prefix', 'green', 'color of accepted menu part')
 option('color_menu_option', 'white', 'default menu color')
