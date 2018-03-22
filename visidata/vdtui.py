@@ -154,7 +154,7 @@ replayableOption('encoding_errors', 'surrogateescape', 'encoding errors passed t
 
 replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('default_width', 20, 'default column width')
-option('wrap', False, 'wrap text to fit window width on TextSheet')
+option('wrap', True, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
 option('cmdlog_longname', False, 'Use command longname in cmdlog if available')
