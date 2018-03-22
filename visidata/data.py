@@ -242,6 +242,16 @@ def open_txt(p):
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, p)
 
+@async
+def save_txt(vs, fn):
+    assert len(vs.visibleCols) == 1, 'can only save one column as txt'
+    col = vs.visibleCols[0]
+    with Path(fn).open_text(mode='w') as fp:
+        for r in Progress(vs.rows):
+            fp.write(col.getValue(r))
+            fp.write('\n')
+    status('%s save finished' % fn)
+
 def _getTsvHeaders(fp, nlines):
     headers = []
     i = 0
