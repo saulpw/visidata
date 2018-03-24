@@ -3,7 +3,7 @@ from visidata import *
 option('pyobj_show_hidden', False, 'show _private properties on pyobjs')
 option('pyobj_show_methods', False, 'show methods on pyobjs')
 
-globalCommand('^X', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, eval(expr))', 'evaluate Python expression and open result as Python object', 'python-eval-push')
+globalCommand('^X', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, cursorRow))', 'evaluate Python expression and open result as Python object', 'python-eval-push')
 globalCommand('g^X', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope', 'python-exec')
 globalCommand('z^X', 'status(evalexpr(inputExpr("status="), cursorRow))', 'evaluate Python expression on current row and show result on status line', 'python-eval-status')
 
