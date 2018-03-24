@@ -527,14 +527,21 @@ def choose(cmdtree, helpfunc=None, sheet=None):
 
 def chooseOne(choices):
     'Return one of `choices` elements (if list) or values (if dict).'
+    ret = chooseMany(choices)
+    assert len(ret) == 1, 'need one choice only'
+    return ret[0]
+
+def chooseMany(choices):
+    'Return list of `choices` elements (if list) or values (if dict).'
     def choiceCompleter(v, i):
         opts = [x for x in choices if x.startswith(v)]
         return opts[i%len(opts)]
 
     if isinstance(choices, dict):
-        return choices[input('/'.join(choices.keys()) + ': ', completer=choiceCompleter)]
+        choosed = input('/'.join(choices.keys()) + ': ', completer=choiceCompleter).split()
+        return [choices[c] for c in choosed]
     else:
-        return input('/'.join(str(x) for x in choices) + ': ', completer=choiceCompleter)
+        return input('/'.join(str(x) for x in choices) + ': ', completer=choiceCompleter).split()
 
 
 def regex_flags():

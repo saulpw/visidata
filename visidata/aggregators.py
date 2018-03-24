@@ -1,7 +1,7 @@
 import collections
 from visidata import *
 
-globalCommand('+', 'addAggregator([cursorCol], chooseOne(aggregators))', 'add aggregator to current column', 'column-aggregator-add')
+globalCommand('+', 'addAggregators([cursorCol], chooseMany(aggregators))', 'add aggregator to current column', 'column-aggregator-add')
 globalCommand('z+', 'status(cursorCol.format(chooseOne(aggregators)(cursorCol, selectedRows or rows)))', 'display result of aggregator over values in selected rows for current column', 'column-aggregator-show')
 
 aggregators = collections.OrderedDict()
@@ -42,7 +42,7 @@ aggregator('count', lambda values: sum(1 for v in values), int)
 fullAggregator('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
 
 ColumnsSheet.commands += [
-    Command('g+', 'addAggregator(selectedRows or source.nonKeyVisibleCols, chooseOne(aggregators))', 'add aggregator to selected source columns', 'column-aggregate-add-all'),
+    Command('g+', 'addAggregators(selectedRows or source.nonKeyVisibleCols, chooseMany(aggregators))', 'add aggregator to selected source columns', 'column-aggregate-add-all'),
 ]
 ColumnsSheet.columns += [
         Column('aggregators',
@@ -50,11 +50,13 @@ ColumnsSheet.columns += [
                setter=lambda col,row,val: setattr(row, 'aggregators', list(aggregators[k] for k in (val or '').split())))
 ]
 
-def addAggregator(cols, aggr):
-    for c in cols:
-        if not hasattr(c, 'aggregators'):
-            c.aggregators = []
-        if aggr not in c.aggregators:
-            c.aggregators += [aggr]
+def addAggregators(cols, aggrs):
+    'add space-separated aggrs to each of cols'
+    for aggr in aggrs:
+        for c in cols:
+            if not hasattr(c, 'aggregators'):
+                c.aggregators = []
+            if aggr not in c.aggregators:
+                c.aggregators += [aggr]
 
 addGlobals(globals())
