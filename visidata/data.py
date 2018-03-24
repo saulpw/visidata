@@ -36,14 +36,14 @@ globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills nul
 
 alias('KEY_SLEFT', 'modify-move-column-left')
 alias('KEY_SR', 'modify-move-column-left')
-alias('kDN', 'J', 'modify-move-row-down')
-alias('kUP', 'K', 'modify-move-row-up')
+alias('kDN', 'modify-move-row-down')
+alias('kUP', 'modify-move-row-up')
 alias('KEY_SRIGHT', 'modify-move-column-right')
 alias('KEY_SF', 'modify-move-column-right')
 
 alias('gKEY_SLEFT', 'modify-move-column-leftmost')
-alias('gkDN', 'gJ', 'modify-move-row-bottom')
-alias('gkUP', 'gK', 'modify-move-row-top')
+alias('gkDN', 'modify-move-row-bottom')
+alias('gkUP', 'modify-move-row-top')
 alias('gKEY_SRIGHT', 'modify-move-column-rightmost')
 
 

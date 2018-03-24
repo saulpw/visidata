@@ -1,9 +1,10 @@
 import math
 
 from visidata import *
+
 globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column', 'data-aggregate-column')
 globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet', 'data-aggregate-keys')
-globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows')
+globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows', 'data-aggregate-summary')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 80, 'width of histogram column')
