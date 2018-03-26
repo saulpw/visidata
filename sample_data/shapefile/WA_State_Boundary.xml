@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+<idinfo>
+<citation>
+<citeinfo>
+<title>WA State Boundary</title>
+<onlink>https://fortress.wa.gov/dnr/arcgisext/weba_ext_prod4/rest/services/Cadastre/WADNR_Cadastre_OpenData/MapServer/10</onlink>
+<onlink>https://fortress.wa.gov/dnr/adminsa/gisdata/datadownload/WA_State_Bndy.zip</onlink>
+<onlink>https://fortress.wa.gov/dnr/adminsa/GisData/metadata/cadastre_jurisdiction.htm</onlink>
+</citeinfo>
+</citation>
+<descript>
+<abstract>Official Washington State boundary.WA State Boundary Metadata</abstract>
+</descript>
+<keywords>
+<theme>
+<themekt>None</themekt>
+<themekey>WA</themekey>
+<themekey>Washington</themekey>
+<themekey>boundary</themekey>
+<themekey>Cadastre</themekey>
+<themekey>public land survey</themekey>
+</theme>
+</keywords>
+<accconst>None</accconst>
+<useconst>None</useconst>
+<datacred>Washington State Department of Natural Resources</datacred>
+</idinfo>
+<metainfo>
+<metd>20170314</metd>
+<metc>
+<cntinfo>
+<!--no contact person or organization name available-->
+</cntinfo>
+</metc>
+<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+<metstdv>FGDC-STD-001-1998</metstdv>
+<mettc>local time</mettc>
+</metainfo>
+</metadata>
