@@ -1738,17 +1738,18 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
                 if self.leftVisibleColIndex == self.cursorVisibleColIndex:  # not much more we can do
                     break
                 self.calcColLayout()
-                if self.cursorVisibleColIndex < min(self.visibleColLayout.keys()):
-                    self.leftVisibleColIndex -= 1
+                mincolidx, maxcolidx = min(self.visibleColLayout.keys()), max(self.visibleColLayout.keys())
+                if self.cursorVisibleColIndex < mincolidx:
+                    self.leftVisibleColIndex -= max((self.cursorVisibleColIndex - mincolid)//2, 1)
                     continue
-                elif self.cursorVisibleColIndex > max(self.visibleColLayout.keys()):
-                    self.leftVisibleColIndex += 1
+                elif self.cursorVisibleColIndex > maxcolidx:
+                    self.leftVisibleColIndex += max((maxcolidx - self.cursorVisibleColIndex)//2, 1)
                     continue
 
                 cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
                 if cur_x+cur_w < self.vd.windowWidth:  # current columns fit entirely on screen
                     break
-                self.leftVisibleColIndex += 1
+                self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
@@ -2284,8 +2285,9 @@ class TextSheet(Sheet):
         self.columns = [Column(self.name, getter=lambda col,row: row[1])]
         self.rows = []
         winWidth = vd().windowWidth
+        wrap = getattr(self, 'wrap', options.wrap)
         for text in self.source:
-            if getattr(self, 'wrap', options.wrap):
+            if wrap:
                 startingLine = len(self.rows)
                 for i, L in enumerate(textwrap.wrap(str(text), width=winWidth-2)):
                     self.addRow((startingLine+i, L))
