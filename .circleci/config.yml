@@ -6,26 +6,12 @@ jobs:
       - image: circleci/python:3.4
     steps:
       - checkout
-      - restore_cache:
-        key: deps1-{{ .Branch }}-{{ checksum "requirements.txt"
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.4/site-packages
       - run:
           name: dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
             pip3 install -r requirements.txt
-      - save_cache:
-          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
-          paths:
-            - "venv"
-
       - run:
           command: |
-            . venv/bin/activate
             dev/test.sh
-
-workflows:
-  version: 2
-  build_and_test:
-  jobs:
-    - build
