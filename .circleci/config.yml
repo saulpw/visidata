@@ -1,14 +1,28 @@
 version: 2
 jobs:
     build:
+        working_directory: ~/visidata
         docker:
             - image: circleci/python:3.4
         steps:
             - checkout
+            - restore_cache:
+                key: deps1-{{ .Branch }}-{{ checksum "requirements.txt"
             - run:
                 name: dependencies
-                command: pip3 install -r requirements.txt
-            - run: dev/test.sh
+                command: |
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip3 install -r requirements.txt
+            - save_cache:
+                  key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+                paths:
+                    - "venv"
+
+            - run: 
+              command: |
+                  . venv/bin/activate
+                  dev/test.sh
 
 workflows:
     version: 2
