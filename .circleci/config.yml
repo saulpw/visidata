@@ -2,10 +2,10 @@ version: 2
 jobs:
     build:
         docker:
-            - image: circleci/python:3.4.4
+            - image: circleci/python:3.4
         steps:
             - checkout
-            - run: 
+            - run:
                 name: dependencies
                 command: pip3 install -r requirements.txt
 
