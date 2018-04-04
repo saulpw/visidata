@@ -43,4 +43,6 @@ from .loaders.markdown import *
 from .loaders.png import *
 from .loaders.ttf import *
 
+from math import *
+
 addGlobals(globals())
