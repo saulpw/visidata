@@ -1300,12 +1300,6 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
 
         self._selectedRows = {}  # id(row) -> row
 
-        self._colorizers = {'row': [], 'col': [], 'hdr': [], 'cell': []}
-
-        for b in [self] + list(self.__class__.__bases__):
-            for c in getattr(b, 'colorizers', []):
-                self.addColorizer(c)
-
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
     def __len__(self):
@@ -1319,27 +1313,33 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
         return True
 
     def addColorizer(self, c):
-        self._colorizers[c.type].append(c)
+        self.colorizers.append(c)
 
     def colorizeRow(self, row):
-        return self.colorize(['row'], None, row)
+        return self.colorize(('row',), None, row)
 
     def colorizeColumn(self, col):
-        return self.colorize(['col'], col, None)
+        return self.colorize(('col',), col, None)
 
     def colorizeHdr(self, col):
-        return self.colorize(['hdr'], col, None)
+        return self.colorize(('hdr',), col, None)
 
     def colorizeCell(self, col, row, value):
-        return self.colorize(['col', 'row', 'cell'], col, row, value)
+        return self.colorize(('col', 'row', 'cell'), col, row, value)
 
     def colorize(self, colorizerTypes, col, row, value=None):
         'Returns curses attribute for the given col/row/value'
         attr = 0
         attrpre = 0
+        _colorizers = collections.defaultdict(list)
 
-        for colorizerType in colorizerTypes:
-            for colorizer in sorted(self._colorizers[colorizerType], key=lambda x: x.precedence):
+        for b in [self] + list(self.__class__.__bases__):
+            for c in getattr(b, 'colorizers', []):
+                if c.type in colorizerTypes:
+                    _colorizers[c.type].append(c)
+
+        for t in colorizerTypes:
+            for colorizer in sorted(_colorizers[t], key=lambda x: x.precedence):
                 try:
                     color = colorizer.func(self, col, row, value)
                     if color:

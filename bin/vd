@@ -9,10 +9,6 @@ import os
 from visidata import *
 
 
-option('color_diff', 'red', 'color of values different from --diff source')
-option('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
-
-
 # for --play
 def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
@@ -22,19 +18,6 @@ def eval_vd(logpath, *args, **kwargs):
     vd().push(vs)
     vs.vd = vd()
     return vs
-
-# for --diff
-def makeDiffColorizer(othersheet):
-    def colorizeDiffs(sheet, col, row, cellval):
-        vcolidx = sheet.visibleCols.index(col)
-        rowidx = sheet.rows.index(row)
-        if vcolidx < len(othersheet.visibleCols) and rowidx < len(othersheet.rows):
-            otherval = othersheet.visibleCols[vcolidx].getValue(othersheet.rows[rowidx])
-            if cellval.value != otherval:
-                return options.color_diff
-        else:
-            return options.color_diff_add
-    return colorizeDiffs
 
 
 def main():
@@ -112,7 +95,7 @@ def main():
     if args.diff:
         vs = openSource(args.diff)
         vd().push(vs)
-        Sheet.colorizers.append(Colorizer("cell", 8, makeDiffColorizer(vs)))
+        setDiffSheet(vs)
 
     if args.batch:
         vd().status = lambda *args: print(*args, file=sys.stderr)
