@@ -2382,7 +2382,7 @@ class OptionsSheet(Sheet):
     columns = (ColumnAttr('option', 'name'),
                ColumnAttr('value'),
                ColumnAttr('default'),
-               ColumnAttr('description'))
+               ColumnAttr('helpstr'))
     colorizers = []
     nKeys = 1
 
