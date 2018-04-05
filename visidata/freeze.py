@@ -5,7 +5,6 @@ globalCommand("'", 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColInde
 globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated', 'sheet-freeze')
 globalCommand("z'", 'resetCache(cursorCol)', 'add/reset cache for current column', 'column-cache-clear')
 globalCommand("gz'", 'resetCache(*visibleCols)', 'add/reset cache for all visible columns', 'column-cache-clear-all')
-globalCommand("zg'", "gz'")
 
 def resetCache(self, *cols):
     for col in cols:
@@ -47,4 +46,10 @@ class StaticSheet(Sheet):
     def reload(self):
         self.rows = []
         for r in Progress(self.source.rows):
-            self.addRow([col.getValue(r) for col in self.source.columns])
+            row = []
+            self.rows.append(row)
+            for col in self.source.columns:
+                try:
+                    row.append(col.getValue(r))
+                except Exception as e:
+                    row.append(None)
