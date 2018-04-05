@@ -2247,9 +2247,10 @@ def clipstr(s, dispw):
     ambig_width = options.disp_ambig_width
     for c in s:
         if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
-            ret += options.disp_oddspace
-            w += len(options.disp_oddspace)
-        else:
+            c = options.disp_oddspace
+
+        if c:
+            c = c[0]  # multi-char disp_oddspace just uses the first char
             ret += c
             eaw = unicodedata.east_asian_width(c)
             if eaw == 'A':  # ambiguous
