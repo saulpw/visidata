@@ -6,6 +6,7 @@ replayableOption('csv_dialect', 'excel', 'dialect passed to csv.reader')
 replayableOption('csv_delimiter', ',', 'delimiter passed to csv.reader')
 replayableOption('csv_quotechar', '"', 'quotechar passed to csv.reader')
 replayableOption('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
+replayableOption('csv_escapechar', None, 'escapechar passed to csv.reader')
 
 csv.field_size_limit(sys.maxsize)
 
@@ -23,6 +24,9 @@ class CsvSheet(Sheet):
     def reload(self):
         load_csv(self)
 
+def csvoptions():
+    return {opt.name[4:]: opt.value for opt in baseOptions.values() if opt.name.startswith('csv_')}
+
 def load_csv(vs):
     'Convert from CSV, first handling header row specially.'
     with vs.source.open_text() as fp:
@@ -32,11 +36,7 @@ def load_csv(vs):
         for i in range(options.skip):
             wrappedNext(fp)  # discard initial lines
 
-        rdr = csv.reader(fp,
-                         dialect=options.csv_dialect,
-                         quotechar=options.csv_quotechar,
-                         delimiter=options.csv_delimiter,
-                         skipinitialspace=options.csv_skipinitialspace)
+        rdr = csv.reader(fp, **csvoptions())
 
         vs.rows = []
 
@@ -67,9 +67,9 @@ def load_csv(vs):
 def save_csv(sheet, fn):
     'Save as single CSV file, handling column names as first line.'
     with Path(fn).open_text(mode='w') as fp:
-        cw = csv.writer(fp, dialect=options.csv_dialect, delimiter=options.csv_delimiter, quotechar=options.csv_quotechar)
+        cw = csv.writer(fp, **csvoptions())
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):
             cw.writerow(colnames)
-        for r in sheet.rows:
+        for r in Progress(sheet.rows):
             cw.writerow([col.getDisplayValue(r) for col in sheet.visibleCols])
