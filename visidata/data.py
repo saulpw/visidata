@@ -9,6 +9,8 @@ option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation 
 replayableOption('header', 1, 'parse first N rows of .csv/.tsv as column names')
 replayableOption('delimiter', '\t', 'delimiter to use for tsv filetype')
 replayableOption('filetype', '', 'specify file type')
+replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
+replayableOption('tsv_safe_char', '⸳', 'replacement string for all tabs and newlines when saving to tsv')
 
 # slide rows/columns around
 globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left', 'modify-move-column-left')
@@ -87,7 +89,8 @@ globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplay
 # gz^ with no selectedRows is same as z^
 
 globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData', 'sheet-open-path')
-globalCommand('^S', 'saveSheet(sheet, inputFilename("save to: ", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
+globalCommand('^S', 'saveSheets([sheet], inputFilename("save to: ", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
+globalCommand('g^S', 'saveSheets(vd.sheets, inputFilename("save all sheets to: "), options.confirm_overwrite)', 'save all sheets to given file or directory)', 'sheet-save-all')
 
 globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))', 'set current cell to result of evaluated Python expression on current row', 'python-eval-row')
 
@@ -139,21 +142,35 @@ def getDefaultSaveName(sheet):
     if isinstance(src, Path):
         return str(src)
     else:
-        return sheet.name+'.'+getattr(sheet, 'filetype', 'tsv')
+        return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype)
 
-def saveSheet(vs, fn, confirm_overwrite=False):
+def saveSheets(vsheets, fn, confirm_overwrite=False):
     'Save sheet `vs` with given filename `fn`.'
     if Path(fn).exists():
         if confirm_overwrite:
             confirm('%s already exists. overwrite? ' % fn)
 
-    basename, ext = os.path.splitext(fn)
-    funcname = 'save_' + ext[1:]
-    if funcname not in getGlobals():
-        funcname = 'save_tsv'
-    getGlobals().get(funcname)(vs, Path(fn).resolve())
-    status('saving to ' + fn)
+    filetype = ''
+    if fn.endswith('/'):
+        try:
+            os.mkdir(fn)
+        except Exception:
+            exceptionCaught()
+            pass
+    else:
+        basename, ext = os.path.splitext(fn)
+        filetype = ext[1:]
 
+    funcname = 'save_' + filetype
+
+    if funcname not in getGlobals():
+        funcname = 'save_' + options.save_filetype
+
+    status('saving to ' + fn)
+    getGlobals().get(funcname)(vsheets, Path(fn).resolve())
+
+def saveSheet(vs, fn, **kwargs):
+    saveSheets([vs], fn, **kwargs)
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
@@ -315,19 +332,35 @@ def reload_tsv_sync(vs, **kwargs):
 
 
 @async
-def save_tsv(vs, fn):
+def save_tsv(sheets, fn):
     'Write sheet to file `fn` as TSV.'
 
     # replace tabs and newlines
     delim = options.delimiter
-    replch = options.disp_oddspace
+    replch = options.tsv_safe_char
     trdict = {ord(delim): replch, 10: replch, 13: replch}
 
+    p = Path(fn)
+    if p.is_dir():
+        for vs in sheets:
+            save_tsv([vs], os.path.join(p.resolve(), vs.name+'.tsv'))
+        return
+
     with Path(fn).open_text(mode='w') as fp:
-        colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
-        if colhdr.strip():  # is anything but whitespace
-            fp.write(colhdr)
-        for r in Progress(vs.rows):
-            fp.write(delim.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
+        for vs in sheets:
+            if len(sheets) > 1:
+                fp.write('--- %s\n' % vs.name)
+
+            colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
+            if colhdr.strip():  # is anything but whitespace
+                fp.write(colhdr)
+
+            if replch:
+                for r in Progress(vs.rows):
+                    fp.write(delim.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
+            else:
+                for r in Progress(vs.rows):
+                    fp.write(delim.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
+
     status('%s save finished' % fn)
 
