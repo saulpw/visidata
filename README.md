@@ -51,7 +51,7 @@ You can then install VisiData by typing:
 
     sudo apt install visidata
 
-Instructions for installing form our own personal repository are available [here](https://github.com/saulpw/deb-vd).
+Instructions for installing from our own personal repository are available [here](https://github.com/saulpw/deb-vd).
 
 ## Usage
 
