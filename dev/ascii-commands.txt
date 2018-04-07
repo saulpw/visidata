@@ -1,5 +1,5 @@
   Ctrl- @  NUL
-  Ctrl- A
+  Ctrl- A  Execute command by name
   Ctrl- B  Back one page [vim]
   Ctrl- C  Cancel async task on the current sheet
   Ctrl- D  save current commanDlog

@@ -234,6 +234,7 @@ globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
 globalCommand(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 globalCommand(' ', 'cmd=choose(mkmenu(*_commands.maps), cmdhelp, sheet); cmd and exec_command(cmd, keystrokes=cmd.longname)', 'start menu command')
+globalCommand('^A', 'cmdnames=sorted(set(cmd.longname for cmd in _commands.values() if cmd.longname)); cmd=input("command name: ", completer=CompleteKey(cmdnames)); exec_keystrokes(cmd);', 'execute command by name')
 
 alias(ENTER, 'modify-edit-cell')  # ENTER is this by default
 alias('delete-column-hide', 'schema-column-hide')
@@ -533,15 +534,11 @@ def chooseOne(choices):
 
 def chooseMany(choices):
     'Return list of `choices` elements (if list) or values (if dict).'
-    def choiceCompleter(v, i):
-        opts = [x for x in choices if x.startswith(v)]
-        return opts[i%len(opts)]
-
     if isinstance(choices, dict):
-        choosed = input('/'.join(choices.keys()) + ': ', completer=choiceCompleter).split()
+        choosed = input('/'.join(choices.keys()) + ': ', completer=CompleteKey(choices)).split()
         return [choices[c] for c in choosed]
     else:
-        return input('/'.join(str(x) for x in choices) + ': ', completer=choiceCompleter).split()
+        return input('/'.join(str(x) for x in choices) + ': ', completer=CompleteKey(choices)).split()
 
 
 def regex_flags():
@@ -1035,6 +1032,13 @@ class CompleteExpr:
         varnames.extend(sorted((base+x) for x in globals() if x.startswith(partial)))
         return varnames[state%len(varnames)]
 
+class CompleteKey:
+    def __init__(self, items):
+        self.items = items
+
+    def __call__(self, val, state):
+        opts = [x for x in self.items if x.startswith(val)]
+        return opts[state%len(opts)]
 
 class Colorizer:
     def __init__(self, colorizerType, precedence, colorfunc):
