@@ -38,8 +38,8 @@
  Shift- %  make float column
  Shift- &  join on Sheets and Columns metasheets
         '  freeze column
- Shift- (
- Shift- )
+ Shift- (  expand list/dict column
+ Shift- )  close expanded list/dict columns
  Shift- *  new regex transform column
  Shift- +  set column aggregator
         ,  select matching rows ['pick up', from nethack]
@@ -94,7 +94,7 @@
         ]  sort descending
  Shift- ^  change column name
  Shift- _  change column width
-        `  (backtick) push source sheet
+        `  (backtick)
         a  add a blank row
         b
         c  column move by name regex
