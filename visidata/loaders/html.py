@@ -15,9 +15,8 @@ class HtmlTablesSheet(Sheet):
         Column('nrows', type=int, getter=lambda col,row: len(row.rows)),
         Column('ncols', type=int, getter=lambda col,row: len(row.columns)),
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
-
     ]
-    commands = [ Command(ENTER, 'vd.push(cursorRow[1])', 'open this table') ]
+    commands = [ Command(ENTER, 'vd.push(cursorRow)', 'open this table') ]
     @async
     def reload(self):
         import lxml.html
@@ -120,6 +119,3 @@ def save_html(sheet, fn):
 
         fp.write('</table>')
         status('%s save finished' % fn)
-
-
-
