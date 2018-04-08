@@ -5,7 +5,16 @@
 
 VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulpw/visidata) multitool for interacting with tabular data from within the terminal.  It's great for investigative journalists, data scientists, unix command-line users, and anyone else who wants to quickly look at or manipulate data.
 
+## Testimonials
+
+- "VisiData is indispensable for data engineering tasks...such a breath of fresh air!" - [@soaxelbrooke](https://news.ycombinator.com/item?id=16516297)
+- "the first tool I reach for when examining/exploring a new dataset" -- [@jsvine](https://news.ycombinator.com/item?id=16515925)
+- "Lordy, what a pleasure to use." -- [@dN0t](https://twitter.com/dN0t/status/970445038349058048)
+- "VisiData has changed my life" - [@AlexMahadevan](https://twitter.com/AlexMahadevan/status/976436539638116352)
+
 ## Recent Updates
+
+- 2018-04-01: Released the [first VisiData case study video](https://www.youtube.com/watch?v=yhunJc8Nu4g) of a series.
 
 - 2018-03-10: [Jeremy Singer-Vine](https://www.jsvine.com) hosted a [an introduction to VisiData](https://jsvine.github.io/intro-to-visidata/) tutorial at NICAR 2018.
 
