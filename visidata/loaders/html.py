@@ -63,7 +63,7 @@ class HtmlTableSheet(Sheet):
             for cell in r.getchildren():
                 colspan = int(cell.attrib.get('colspan', 1))
                 rowspan = int(cell.attrib.get('rowspan', 1))
-                cellval = ' '.join(cell.itertext()).strip()  # text only without markup
+                cellval = ' '.join(x.strip() for x in cell.itertext())  # text only without markup
 
                 if is_header(cell):
                     for k in range(rownum, rownum+rowspan):
