@@ -234,7 +234,7 @@ globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
 globalCommand(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 globalCommand(' ', 'cmd=choose(mkmenu(*_commands.maps), cmdhelp, sheet); cmd and exec_command(cmd, keystrokes=cmd.longname)', 'start menu command')
-globalCommand('^A', 'cmdnames=sorted(set(cmd.longname for cmd in _commands.values() if cmd.longname)); cmd=input("command name: ", completer=CompleteKey(cmdnames)); exec_keystrokes(cmd);', 'execute command by name')
+globalCommand('^A', 'cmdnames=sorted(set(cmd.longname for cmd in _commands.values() if cmd.longname)); cmd=input("command name: ", completer=CompleteKey(cmdnames)); exec_keystrokes(cmd);', 'execute command by name', 'meta-exec-cmd')
 
 alias(ENTER, 'modify-edit-cell')  # ENTER is this by default
 alias('delete-column-hide', 'schema-column-hide')
