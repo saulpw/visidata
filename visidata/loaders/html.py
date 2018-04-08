@@ -6,15 +6,15 @@ def open_html(p):
     return HtmlTablesSheet(p.name, source=p)
 open_htm = open_html
 
-# rowdef: lxml.html.HtmlElement
+
 class HtmlTablesSheet(Sheet):
-    rowtype = 'tables'
+    rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
     columns = [
-        Column('tag', getter=lambda col,row: row[0].tag),
-        Column('id', getter=lambda col,row: row[0].attrib.get('id')),
-        Column('nrows', type=int, getter=lambda col,row: len(row[1].rows)),
-        Column('ncols', type=int, getter=lambda col,row: len(row[1].columns)),
-        Column('classes', getter=lambda col,row: row[0].attrib.get('class')),
+        Column('tag', getter=lambda col,row: row.html.tag),
+        Column('id', getter=lambda col,row: row.html.attrib.get('id')),
+        Column('nrows', type=int, getter=lambda col,row: len(row.rows)),
+        Column('ncols', type=int, getter=lambda col,row: len(row.columns)),
+        Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
 
     ]
     commands = [ Command(ENTER, 'vd.push(cursorRow[1])', 'open this table') ]
@@ -30,7 +30,8 @@ class HtmlTablesSheet(Sheet):
             if e.tag == 'table':
                 vs = HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e)
                 vs.reload()
-                self.addRow((e, vs))
+                vs.html = e
+                self.addRow(vs)
 
 def is_header(elem):
     scope = elem.attrib.get('scope', '')
