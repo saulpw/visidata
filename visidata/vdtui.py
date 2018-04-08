@@ -1051,6 +1051,7 @@ class BaseSheet:
     rowtype=''
     def __init__(self, name, **kwargs):
         self.name = name
+        self.vd = vd()
 
         # commands specific to this sheet
         sheetcmds = collections.OrderedDict()
@@ -1110,6 +1111,9 @@ class BaseSheet:
 
         if vdglobals is None:
             vdglobals = getGlobals()
+
+        if not self.vd:
+            self.vd = vd()
 
         self.sheet = self
 
