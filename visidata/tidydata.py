@@ -30,6 +30,7 @@ class MeltedSheet(Sheet):
         # break down Category1_Category2_ColumnName as per regex
         valcols = collections.OrderedDict()  # ('Category1', 'Category2') -> list of tuple('ColumnName', Column)
         for c in colsToMelt:
+            c.aggregators = [aggregators['max']]
             m = re.match(self.regex, c.name)
             if m:
                 if len(m.groups()) == 1:
@@ -59,7 +60,8 @@ class MeltedSheet(Sheet):
         for cname in othercols:
             self.columns.append(Column(cname,
                 getter=lambda col,row,cname=cname: row[cname].getValue(row[0]),
-                setter=lambda col,row,val,cname=cname: row[cname].setValue(row[0], val)))
+                setter=lambda col,row,val,cname=cname: row[cname].setValue(row[0], val),
+                aggregators=[aggregators['max']]))
 
         self.rows = []
         for r in Progress(self.source.rows):
