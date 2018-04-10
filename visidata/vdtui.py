@@ -164,6 +164,7 @@ replayableOption('none_is_null', True, 'if Python None counts as null')
 replayableOption('empty_is_null', False, 'if empty string counts as null')
 replayableOption('false_is_null', False, 'if Python False counts as null')
 replayableOption('zero_is_null', False, 'if integer 0 counts as null')
+replayableOption('error_is_null', False, 'if error counts as null')
 
 
 replayableOption('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
@@ -1916,6 +1917,7 @@ def isNullFunc():
     if options.empty_is_null: nullset.append('')
     if options.false_is_null: nullset.append(False)
     if options.zero_is_null:  nullset.append(0)
+    if options.error_is_null: return lambda v,nullset=nullset: isinstance(v, Exception) or v in nullset
     return lambda v,nullset=nullset: v in nullset
 
 

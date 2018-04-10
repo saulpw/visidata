@@ -67,7 +67,11 @@ def fillNullValues(col, rows):
     nullfunc = isNullFunc()
     n = 0
     for r in rows:
-        val = col.getValue(r)
+        try:
+            val = col.getValue(r)
+        except Exception as e:
+            val = e
+
         if nullfunc(val):
             if lastval:
                 col.setValue(r, lastval)

@@ -72,7 +72,8 @@ class MeltedSheet(Sheet):
                         if not isNull(c.getValue(r)):
                             meltedrow[varval] = c
                     except Exception as e:
-                        meltedrow[varval] = e
+                        if not options_error_is_null:
+                            meltedrow[varval] = e
 
                 if meltedrow:  # remove rows with no content (all nulls)
                     meltedrow[0] = r
