@@ -2341,7 +2341,10 @@ class ColumnsSheet(Sheet):
 
 class SheetsSheet(Sheet):
     rowtype = 'sheets'
-    commands = [Command(ENTER, 'jumpTo(cursorRowIndex)', 'jump to sheet referenced in current row')]
+    commands = [
+        Command(ENTER, 'jumpTo(cursorRowIndex)', 'jump to sheet referenced in current row'),
+        Command('g^R', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets', 'reload-all'),
+    ]
     columns = [
         ColumnAttr('name'),
         ColumnAttr('nRows', type=int),
