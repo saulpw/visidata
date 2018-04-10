@@ -1,12 +1,12 @@
-Rep	Total_Units_sum	Units_sum_Pencil	Units_sum_Binder	Units_sum_Pen	Units_sum_Desk	Units_sum_Pen Set	Total_count
-Jones	396	130	124	64	0	78	8
-Kivell	193	0	50	0	5	138	4
-Jardine	281	126	105	0	0	50	5
-Gill	213	60	126	27	0	0	5
-Sorvino	142	56	7	76	3	0	4
-Andrews	183	155	28	0	0	0	4
-Thompson	89	32	57	0	0	0	2
-Morgan	173	90	28	0	0	55	3
-Howard	125	0	29	96	0	0	2
-Parent	170	0	81	15	0	74	3
-Smith	156	67	87	0	2	0	3
+Rep	Units_sum_Pencil	Units_sum_Binder	Units_sum_Pen	Units_sum_Desk	Units_sum_Pen Set	Total_Units_sum	Total_count
+Jones	130	124	64	0	78	396	8
+Kivell	0	50	0	5	138	193	4
+Jardine	126	105	0	0	50	281	5
+Gill	60	126	27	0	0	213	5
+Sorvino	56	7	76	3	0	142	4
+Andrews	155	28	0	0	0	183	4
+Thompson	32	57	0	0	0	89	2
+Morgan	90	28	0	0	55	173	3
+Howard	0	29	96	0	0	125	2
+Parent	0	81	15	0	74	170	3
+Smith	67	87	0	2	0	156	3

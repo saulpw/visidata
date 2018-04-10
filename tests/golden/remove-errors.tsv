@@ -1,14 +1,14 @@
-species_id	Total_hindfoot_length_mean	hindfoot_length_mean_M	hindfoot_length_mean_F	hindfoot_length_mean_	Total_count
-DM	36.10	36.35	35.81		517
-DO	33.91	34.44	33.27		33
-PF	14.95	15.00	14.90		55
-OX	20.00	19.00	21.00		2
-PP	21.35	21.77	20.92		26
-PE	21.07	20.89	21.40		14
-OL	20.57	20.60	20.56	20.00	37
-OT	19.41	19.55	19.36	18.00	46
-RM	17.00	17.50	16.50		4
-DS	49.84	50.82	49.31		301
-NL	32.43	32.46	32.40		23
-PM	20.00	20.00	20.00		2
-SH	29.00	29.00			1
+species_id	hindfoot_length_mean_M	hindfoot_length_mean_F	hindfoot_length_mean_	Total_hindfoot_length_mean	Total_count
+DM	36.35	35.81		36.10	517
+DO	34.44	33.27		33.91	33
+PF	15.00	14.90		14.95	55
+OX	19.00	21.00		20.00	2
+PP	21.77	20.92		21.35	26
+PE	20.89	21.40		21.07	14
+OL	20.60	20.56	20.00	20.57	37
+OT	19.55	19.36	18.00	19.41	46
+RM	17.50	16.50		17.00	4
+DS	50.82	49.31		49.84	301
+NL	32.46	32.40		32.43	23
+PM	20.00	20.00		20.00	2
+SH	29.00			29.00	1
