@@ -18,7 +18,7 @@
 
     a. Move the cursor to the row referencing the desired sheet.
     b. Press `Enter` to jump to the sheet referenced in that current cursor row.
-    c. Press `!` on the rows that refrences the indices on which the join will be performed. At least one key column, per sheet, should be set.
+    c. Press `!` on the rows that reference the indices on which the join will be performed. At least one key column, per sheet, should be set.
     d. Press `Ctrl+^` or `S` to return to the **Sheets sheet**.
 
 4. Optional: If performing a left outer join, use `J` or `K` to reorder the sheets. The first sheet will be the one for whom all rows will be retained.
