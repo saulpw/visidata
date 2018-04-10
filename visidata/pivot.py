@@ -32,7 +32,8 @@ class SheetPivot(Sheet):
     @async
     def reloadCols(self):
         self.columns = copy(self.nonpivotKeyCols)
-        self.nKeys = len(self.nonpivotKeyCols)
+        self.keyCols = copy(self.columns)
+
         aggcols = [(c, aggregator) for c in self.source.visibleCols for aggregator in getattr(c, 'aggregators', [])]
 
         if not aggcols:
@@ -41,11 +42,6 @@ class SheetPivot(Sheet):
         for col in self.variableCols:
             for aggcol, aggregator in aggcols:
                 aggname = '%s_%s' % (aggcol.name, aggregator.__name__)
-                if aggregator.__name__ != 'count':  # already have count above
-                    c = Column('Total_' + aggname,
-                                type=aggregator.type or aggcol.type,
-                                getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, sum(row[1].values(), [])))
-                    self.addColumn(c)
 
                 allValues = set()
                 for value in Progress(col.getValues(self.source.rows), total=len(self.source.rows)):
@@ -56,6 +52,12 @@ class SheetPivot(Sheet):
                                 getter=lambda col,row,aggcol=aggcol,aggvalue=value,agg=aggregator: agg(aggcol, row[1].get(aggvalue, [])))
                         c.aggvalue = value
                         self.addColumn(c)
+
+                if aggregator.__name__ != 'count':  # already have count above
+                    c = Column('Total_' + aggname,
+                                type=aggregator.type or aggcol.type,
+                                getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, sum(row[1].values(), [])))
+                    self.addColumn(c)
 
             c = Column('Total_count',
                         type=int,
