@@ -1,5 +1,24 @@
 # VisiData version history
 
+- `^A` to specify a command longname to execute
+- `g^R` on SheetsSheet to reload all [selected] sheets
+- `options.error_is_null` to treat errors as nulls when applicable
+- `g,` fixed to compare by visible column values, not by row objects
+- Shift-Up/Down aliases for mac
+- options.wrap now true by default on TextSheet (`v` to toggle)
+- save_txt with single column concatenates all values to single file
+- `+` can add multiple aggregators
+- .shp can save as geojson
+- ^X bugfix: use evalexpr over cursorRow
+- `"` no longer reselects all rows
+- bin/vsh initial commit
+- sheet-set-diff command to act like --diff
+- `from math import *` to put math functions like sin/cos at toplevel
+- `g^S` to save all sheets
+- bugfix: freeze
+- all csv_ options sent to csv.reader/writer
+- options.tsv_safe_char to replace \t and \n in tsv files; set to empty for speedup during tsv save
+
 # v1.1 (2018-03-05)
 
 - VisiData will be included in the [next debian repository release](https://tracker.debian.org/pkg/visidata)!
