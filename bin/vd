@@ -48,8 +48,11 @@ def main():
     fnrc = '~/.visidatarc'
     p = Path(fnrc)
     if p.exists():
-        code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
-        exec(code, globals())
+        try:
+            code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
+            exec(code, globals())
+        except Exception as e:
+            exceptionCaught(e)
 
     vdtui.addGlobals(globals())
 
