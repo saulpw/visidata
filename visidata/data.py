@@ -82,13 +82,13 @@ def fillNullValues(col, rows):
     status("filled %d values" % n)
 
 
-def updateColNames(sheet):
+def updateColNames(sheet, rows):
     for c in sheet.visibleCols:
         if not c._name:
-            c.name = "_".join(c.getDisplayValue(r) for r in sheet.selectedRows or [sheet.cursorRow])
+            c.name = "_".join(c.getDisplayValue(r) for r in rows)
 
 globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set name of current column to current cell', 'column-name-cell')
-globalCommand('g^', 'updateColNames(sheet)', 'set names of all visible columns to contents of selected rows (or current row)', 'column-name-all-selected')
+globalCommand('g^', 'updateColNames(sheet, selectedRows or [cursorRow])', 'set names of all visible columns to contents of selected rows (or current row)', 'column-name-all-selected')
 globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined contents of current cell in selected rows (or current row)', 'column-name-selected')
 # gz^ with no selectedRows is same as z^
 
