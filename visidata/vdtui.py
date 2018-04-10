@@ -223,12 +223,12 @@ globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
 globalCommand('^V', 'status(__version__); status(__copyright__)', 'show version information on status line', 'info-version')
 globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses"))', 'open Status History', 'meta-status-history')
 
-globalCommand('^E', 'vd.lastErrors and vd.push(TextSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error', 'info-errors-last')
+globalCommand('^E', 'vd.lastErrors and vd.push(ErrorSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error', 'info-errors-last')
 globalCommand('^R', 'reload(); status("reloaded")', 'reload current sheet', 'sheet-reload')
 
 globalCommand('^^', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet (swap with current sheet)', 'view-go-sheet-swap')
 
-globalCommand('g^E', 'vd.push(TextSheet("last_errors", sum(vd.lastErrors[-10:], [])))', 'view traceback for most recent errors', 'info-errors-all')
+globalCommand('g^E', 'vd.push(ErrorSheet("last_errors", sum(vd.lastErrors[-10:], [])))', 'view traceback for most recent errors', 'info-errors-all')
 
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet', 'meta-sheets')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
@@ -1223,7 +1223,7 @@ Command(']', 'orderBy(cursorCol, reverse=True)', 'sort descending by current col
 Command('g[', 'orderBy(*keyCols)', 'sort ascending by all key columns', 'rows-sort-keys-asc'),
 Command('g]', 'orderBy(*keyCols, reverse=True)', 'sort descending by all key columns', 'rows-sort-keys-desc'),
 
-Command('z^E', 'vd.push(TextSheet("cell_error", getattr(cursorCell, "error", None) or error("no error this cell")))', 'view traceback for error in current cell'),
+Command('z^E', 'vd.push(ErrorSheet("cell_error", getattr(cursorCell, "error", None) or error("no error this cell")))', 'view traceback for error in current cell'),
 
 
 Command('^R', 'reload(); recalc(); status("reloaded")', 'reload current sheet'),
@@ -2304,6 +2304,9 @@ class TextSheet(Sheet):
                     self.addRow((startingLine+i, L))
             else:
                 self.addRow((len(self.rows), text))
+
+class ErrorSheet(TextSheet):
+    pass
 
 class ColumnsSheet(Sheet):
     rowtype = 'columns'

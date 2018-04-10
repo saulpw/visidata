@@ -68,7 +68,10 @@ def getRowIdxByKey(sheet, k):
         if keystr(sheet.rowkey(r)) == k:
             return i
 
-def loggable(keystrokes):
+def isLoggableSheet(sheet):
+    return not isinstance(sheet, (CommandLog, OptionsSheet, ErrorSheet))
+
+def isLoggableCommand(keystrokes):
     if keystrokes in nonLogKeys:
         return False
     if keystrokes.startswith('move-'):
@@ -85,7 +88,7 @@ def open_vd(p):
 # rowdef: CommandLogRow
 class CommandLog(Sheet):
     'Log of commands for current session.'
-    rowtype = 'commands'
+    rowtype = 'logged commands'
     commands = [
         Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row', 'replay-row'),
         Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog', 'replay-sheet'),
@@ -116,7 +119,7 @@ class CommandLog(Sheet):
         status('removed "%s" from cmdlog' % vs.name)
 
     def beforeExecHook(self, sheet, keystrokes, args=''):
-        if sheet is self:
+        if not isLoggableSheet(sheet):
             return  # don't record editlog commands
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
@@ -143,9 +146,9 @@ class CommandLog(Sheet):
         if err:
             self.currentActiveRow[-1] += ' [%s]' % err
 
-        if sheet is not self:  # don't record jumps to cmdlog
+        if isLoggableSheet(sheet):  # don't record jumps to cmdlog or other internal sheets
             # remove user-aborted commands and simple movements
-            if not escaped and loggable(self.currentActiveRow.keystrokes):
+            if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes):
                 self.addRow(self.currentActiveRow)
 
         self.currentActiveRow = None
