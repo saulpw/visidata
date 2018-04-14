@@ -15,6 +15,7 @@ def eval_vd(logpath, *args, **kwargs):
     log = logpath.read_text().format(*args, **kwargs)
     src = PathFd(logpath.fqpn, io.StringIO(log), filesize=len(log))
     vs = openSource(src, filetype='vd')
+    vs.name += '_vd'
     vd().push(vs)
     vs.vd = vd()
     return vs
