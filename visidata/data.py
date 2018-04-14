@@ -93,8 +93,8 @@ globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplay
 # gz^ with no selectedRows is same as z^
 
 globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData', 'sheet-open-path')
-globalCommand('^S', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
-globalCommand('g^S', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, options.confirm_overwrite)', 'save all sheets to given file or directory)', 'sheet-save-all')
+globalCommand('^S', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
+globalCommand('g^S', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)', 'sheet-save-all')
 
 globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))', 'set current cell to result of evaluated Python expression on current row', 'python-eval-row')
 

@@ -85,6 +85,8 @@ def isLoggableCommand(keystrokes):
 def open_vd(p):
     return CommandLog(p.name, source=p)
 
+save_vd = save_tsv
+
 # rowdef: CommandLogRow
 class CommandLog(Sheet):
     'Log of commands for current session.'
