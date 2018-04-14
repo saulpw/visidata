@@ -63,10 +63,11 @@ def load_csv(vs):
     vs.recalc()
     return vs
 
+
 @async
-def save_csv(sheet, fn):
+def save_csv(p, sheet):
     'Save as single CSV file, handling column names as first line.'
-    with Path(fn).open_text(mode='w') as fp:
+    with p.open_text(mode='w') as fp:
         cw = csv.writer(fp, **csvoptions())
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):

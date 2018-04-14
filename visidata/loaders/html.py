@@ -94,28 +94,36 @@ class HtmlTableSheet(Sheet):
                 self.addColumn(ColumnItem(name, i))
             self.rows = self.rows[1:]
 
+
 @async
-def save_html(sheet, fn):
-    'Save sheet as <table></table> in an HTML file.'
+def save_html(p, *vsheets):
+    'Save vsheets as HTML tables in a single file'
 
-    with open(fn, 'w', encoding='ascii', errors='xmlcharrefreplace') as fp:
-        fp.write('<table id="{sheetname}">\n'.format(sheetname=sheet.name))
+    with open(p.resolve(), 'w', encoding='ascii', errors='xmlcharrefreplace') as fp:
+        for sheet in vsheets:
 
-        # headers
-        fp.write('<tr>')
-        for col in sheet.visibleCols:
-            contents = html.escape(col.name)
-            fp.write('<th>{colname}</th>'.format(colname=contents))
-        fp.write('</tr>\n')
+            fp.write('<h2 class="sheetname">%s</h2>\n'.format(sheetname=html.escape(sheet.name)))
 
-        # rows
-        for r in Progress(sheet.rows):
+            fp.write('<table id="{sheetname}">\n'.format(sheetname=html.escape(sheet.name)))
+
+            # headers
             fp.write('<tr>')
             for col in sheet.visibleCols:
-                fp.write('<td>')
-                fp.write(html.escape(col.getDisplayValue(r)))
-                fp.write('</td>')
+                contents = html.escape(col.name)
+                fp.write('<th>{colname}</th>'.format(colname=contents))
             fp.write('</tr>\n')
 
-        fp.write('</table>')
-        status('%s save finished' % fn)
+            # rows
+            for r in Progress(sheet.rows):
+                fp.write('<tr>')
+                for col in sheet.visibleCols:
+                    fp.write('<td>')
+                    fp.write(html.escape(col.getDisplayValue(r)))
+                    fp.write('</td>')
+                fp.write('</tr>\n')
+
+            fp.write('</table>')
+            status('%s save finished' % p)
+
+
+save_htm = multisave_htm = multisave_html = save_html

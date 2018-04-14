@@ -93,8 +93,8 @@ globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplay
 # gz^ with no selectedRows is same as z^
 
 globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData', 'sheet-open-path')
-globalCommand('^S', 'saveSheets([sheet], inputFilename("save to: ", value=getDefaultSaveName(sheet)), options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
-globalCommand('g^S', 'saveSheets(vd.sheets, inputFilename("save all sheets to: "), options.confirm_overwrite)', 'save all sheets to given file or directory)', 'sheet-save-all')
+globalCommand('^S', 'saveSheets(Path(inputFilename("save to: ", value=getDefaultSaveName(sheet))), sheet, options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
+globalCommand('g^S', 'saveSheets(Path(inputFilename("save all sheets to: ")), *vd.sheets, options.confirm_overwrite)', 'save all sheets to given file or directory)', 'sheet-save-all')
 
 globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))', 'set current cell to result of evaluated Python expression on current row', 'python-eval-row')
 
@@ -148,33 +148,57 @@ def getDefaultSaveName(sheet):
     else:
         return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype)
 
-def saveSheets(vsheets, fn, confirm_overwrite=False):
+def saveSheets(fn, *vsheets, confirm_overwrite=False):
     'Save sheet `vs` with given filename `fn`.'
-    if Path(fn).exists():
+    givenpath = Path(fn)
+    if givenpath.exists():
         if confirm_overwrite:
             confirm('%s already exists. overwrite? ' % fn)
 
+    # determine filetype to save as
     filetype = ''
-    if fn.endswith('/'):
-        try:
-            os.mkdir(fn)
-        except Exception:
-            exceptionCaught()
-            pass
-    else:
-        basename, ext = os.path.splitext(fn)
+    basename, ext = os.path.splitext(fn)
+    if ext:
         filetype = ext[1:]
 
-    funcname = 'save_' + filetype
+    filetype = filetype or options.save_filetype
 
-    if funcname not in getGlobals():
-        funcname = 'save_' + options.save_filetype
+    if len(vsheets) > 1:
+        if not fn.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
+            savefunc = getGlobals().get('multisave_' + filetype, None)
+            if savefunc:
+                # use specific multisave function
+                return savefunc(givenpath, *vsheets)
 
-    status('saving to ' + fn)
-    getGlobals().get(funcname)(vsheets, Path(fn).resolve())
+        # more than one sheet; either no specific multisave for save filetype, or path ends with /
 
-def saveSheet(vs, fn, **kwargs):
-    saveSheets([vs], fn, **kwargs)
+        # save as individual files in the givenpath directory
+        if not givenpath.exists():
+            try:
+                os.mkdir(givenpath.resolve())
+            except FileExistsError:
+                pass
+
+        assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
+
+        # get save function to call
+        if ('save_' + filetype) not in getGlobals():
+            filetype = options.save_filetype
+        savefunc = getGlobals().get('save_' + filetype)
+
+        status('saving %s sheets to %s' % (len(vsheets), givenpath.fqpn))
+        for vs in vsheets:
+            p = Path(os.path.join(givenpath.fqpn, vs.name+'.'+filetype))
+            savefunc(p, vs)
+    else:
+        # get save function to call
+        if ('save_' + filetype) not in getGlobals():
+            filetype = options.save_filetype
+        savefunc = getGlobals().get('save_' + filetype)
+
+        status('saving to ' + givenpath.fqpn)
+        savefunc(givenpath, vsheets[0])
+
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
@@ -264,14 +288,16 @@ def open_txt(p):
         return TextSheet(p.name, p)
 
 @async
-def save_txt(vs, fn):
-    assert len(vs.visibleCols) == 1, 'can only save one column as txt'
-    col = vs.visibleCols[0]
-    with Path(fn).open_text(mode='w') as fp:
-        for r in Progress(vs.rows):
-            fp.write(col.getValue(r))
-            fp.write('\n')
-    status('%s save finished' % fn)
+def save_txt(p, *vsheets):
+    with p.open_text(mode='w') as fp:
+        for vs in vsheets:
+            col = vs.visibleCols[0]
+            for r in Progress(vs.rows):
+                fp.write(col.getValue(r))
+                fp.write('\n')
+    status('%s save finished' % p)
+
+multisave_txt = save_txt
 
 def _getTsvHeaders(fp, nlines):
     headers = []
@@ -336,7 +362,7 @@ def reload_tsv_sync(vs, **kwargs):
 
 
 @async
-def save_tsv(sheets, fn):
+def save_tsv(vs, p):
     'Write sheet to file `fn` as TSV.'
 
     # replace tabs and newlines
@@ -344,27 +370,17 @@ def save_tsv(sheets, fn):
     replch = options.tsv_safe_char
     trdict = {ord(delim): replch, 10: replch, 13: replch}
 
-    p = Path(fn)
-    if p.is_dir():
-        for vs in sheets:
-            save_tsv([vs], os.path.join(p.resolve(), vs.name+'.tsv'))
-        return
+    with p.open_text(mode='w') as fp:
+        colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
+        if colhdr.strip():  # is anything but whitespace
+            fp.write(colhdr)
 
-    with Path(fn).open_text(mode='w') as fp:
-        for vs in sheets:
-            if len(sheets) > 1:
-                fp.write('--- %s\n' % vs.name)
+        if replch:
+            for r in Progress(vs.rows):
+                fp.write(delim.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
+        else:
+            for r in Progress(vs.rows):
+                fp.write(delim.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
 
-            colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
-            if colhdr.strip():  # is anything but whitespace
-                fp.write(colhdr)
-
-            if replch:
-                for r in Progress(vs.rows):
-                    fp.write(delim.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
-            else:
-                for r in Progress(vs.rows):
-                    fp.write(delim.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
-
-    status('%s save finished' % fn)
+    status('%s save finished' % p)
 

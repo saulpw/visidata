@@ -55,7 +55,7 @@ class JSONSheet(Sheet):
         return row
 
 @async
-def save_json(vs, fn):
+def save_json(p, vs):
     def rowdict(cols, row):
         d = {}
         for col in cols:
@@ -65,7 +65,7 @@ def save_json(vs, fn):
                 pass
         return d
 
-    with open(fn, 'w') as fp:
+    with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
         for chunk in json.JSONEncoder().iterencode([rowdict(vcols, r) for r in Progress(vs.rows)]):
             fp.write(chunk)

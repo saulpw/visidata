@@ -15,16 +15,19 @@ def markdown_colhdr(col):
     else:
         return '-' * (col.width or options.default_width)
 
-@async
-def save_md(vs, fn):
+def save_md(p, *vsheets):
     'pipe tables compatible with org-mode'
+    with p.open_text(mode='w') as fp:
+        for vs in vsheets:
+            if len(vsheets) > 1:
+                fp.write('# %s\n\n' % vs.name)
+            fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.name)) for col in vs.visibleCols) + '|\n')
+            fp.write('|' + '+'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
 
-    with open(fn, 'w', encoding=options.encoding, errors=options.encoding_errors) as fp:
-        fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.name)) for col in vs.visibleCols) + '|\n')
-        fp.write('|' + '+'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
+            for row in Progress(vs.rows):
+                fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.getDisplayValue(row))) for col in vs.visibleCols) + '|\n')
+            fp.write('\n')
 
-        for row in Progress(vs.rows):
-            fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.getDisplayValue(row))) for col in vs.visibleCols) + '|\n')
+    status('%s save finished' % p)
 
-    status('%s save finished' % fn)
-
+multisave_md = save_md
