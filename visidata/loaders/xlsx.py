@@ -8,6 +8,7 @@ def open_xlsx(p):
 
 class xlsxContents(Sheet):
     'Load XLSX file (in Excel Open XML format).'
+    rowtype = 'sheets'  # rowdef: xlsxSheet
     columns = [
         Column('sheet', getter=lambda col,row: row.source.title),  # xlsx sheet title
         ColumnAttr('name', width=0),  # visidata Sheet name
@@ -49,6 +50,7 @@ class xlsxSheet(Sheet):
 
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
+    rowtype = 'sheets'  # rowdef: xlsSheet
     commands = [
         Command(ENTER, 'vd.push(cursorRow)', 'load the entire table into memory')
     ]
