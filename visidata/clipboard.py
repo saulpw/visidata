@@ -47,7 +47,7 @@ def saveToClipboard(sheet, rows, filetype=None):
     with tempfile.NamedTemporaryFile() as temp:
         tempfn = temp.name + "." + filetype
         status('copying rows to clipboard')
-        saveSheets(Path(tempfn), vs)
+        saveSheets(tempfn, vs)
         sync(1)
         p = subprocess.Popen(cmd.split(), stdin=open(tempfn, 'r', encoding=options.encoding), close_fds=True)
         p.communicate()

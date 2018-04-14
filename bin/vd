@@ -142,7 +142,7 @@ def main():
             run()
 
     if args.output and vd().sheets:
-        saveSheets(Path(args.output), vd().sheets[0], confirm_overwrite=False)
+        saveSheets(args.output, vd().sheets[0], confirm_overwrite=False)
         sync()
 
 if __name__ == '__main__':
