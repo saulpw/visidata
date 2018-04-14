@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
+# Usage: test.sh [testname]
+
 trap "echo aborted; exit;" SIGINT SIGTERM
 
-# Usage $0
-for i in tests/*.vd ; do
+if [ -z "$1" ] ; then
+    TESTS=tests/*.vd
+else
+    TESTS=tests/$1.vd
+fi
+
+for i in $TESTS ; do
     echo "--- $i"
     outbase=${i##tests/}
     if [ "${i%-notest.vd}-notest" == "${i%.vd}" ]
