@@ -80,7 +80,8 @@ def globalCommand(keystrokes, execstr, helpstr='', longname=None):
         helpstr = ''
 
     for ks in keystrokes:
-        baseCommands[ks] = Command(ks, longname or execstr, helpstr, longname)
+        if ks:
+            baseCommands[ks] = Command(ks, longname or execstr, helpstr, longname)
 
 
 class Option:
