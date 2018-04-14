@@ -1,5 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-exp-digits	sheet	0	A	1	open new blank sheet with number columns
+exp-digits_vd	sheet	0	A	1	open new blank sheet with number columns
 unnamed	0	0	^	x	edit name of current column
 unnamed	x	0	ga	100	add N blank rows
 unnamed	x	0	gz=	range(100)	set selected rows in this column to the values in the given Python sequence expression
