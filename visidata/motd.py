@@ -1,9 +1,10 @@
 from visidata import *
+from visidata import __version__
 
-option('motd_url', 'http://visidata.org/motd', 'source of randomized startup messages')
+option('motd_url', 'http://visidata.org/motd-'+__version__, 'source of randomized startup messages')
 
 
-@diskcache('motd', 24*3600)
+@diskcache('motd-'+__version__, 24*3600)
 def motd(url):
     import urllib.request
     with urllib.request.urlopen(url) as fp:

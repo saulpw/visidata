@@ -26,7 +26,8 @@
 # Just include this whole file in your project as-is.  If you do make
 # modifications, please keep the base vdtui version and append your own id and
 # version.
-__version__ = 'saul.pw/vdtui v1.1'
+__version__ = '1.1'
+__version_info__ = 'saul.pw/vdtui v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'MIT'
 __status__ = 'Production/Stable'
@@ -221,7 +222,7 @@ globalCommand('q',  'vd.sheets.pop(0)', 'quit current sheet', 'sheet-quit-curren
 globalCommand('gq', 'vd.sheets.clear()', 'quit all sheets (clean exit)', 'sheet-quit-all')
 
 globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
-globalCommand('^V', 'status(__version__); status(__copyright__)', 'show version information on status line', 'info-version')
+globalCommand('^V', 'status(__version_info__); status(__copyright__)', 'show version information on status line', 'info-version')
 globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses"))', 'open Status History', 'meta-status-history')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(ErrorSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error', 'info-errors-last')

@@ -9,7 +9,7 @@ import visidata
 
 fncli, fnopts = sys.argv[1:]
 
-print(visidata.__version__)
+print(visidata.__version_info__)
 padding = 26
 
 options_cli_skel = '''.It Sy --{cli_optname} Ns = Ns Ar "{type}" No "{default}"

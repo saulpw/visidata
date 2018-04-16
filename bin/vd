@@ -3,7 +3,8 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = 'saul.pw/VisiData v1.1'
+__version__ = '1.1'
+__version_info__ = 'saul.pw/VisiData v' + __version__
 
 import os
 from visidata import *
@@ -35,7 +36,7 @@ def main():
     parser.add_argument('-w', dest='replay_wait', default=0, help='time to wait between replayed commands, in seconds')
     parser.add_argument('-d', dest='delimiter', help='delimiter to use for tsv filetype')
     parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
-    parser.add_argument('-v', '--version', action='version', version=__version__)
+    parser.add_argument('-v', '--version', action='version', version=__version_info__)
 
     for optname, v in vdtui.baseOptions.items():
         if optname.startswith('color_') or optname.startswith('disp_'):
@@ -147,7 +148,7 @@ def main():
         sync()
 
 if __name__ == '__main__':
-    vdtui.status(__version__)
+    vdtui.status(__version_info__)
     main()
     sys.stderr.flush()
     os._exit(0)  # cleanup can be expensive with large datasets
