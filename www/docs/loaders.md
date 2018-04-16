@@ -200,8 +200,8 @@ This would be a completely functional read-only viewer for the fictional foolib.
 A full-duplex loader requires a **saver**.  The saver iterates over all `rows` and `visibleCols`, calling `getValue` or `getTypedValue`, and saves the results in the format of that filetype.
 
     @async
-    def save_foo(sheet, fn):
-        with open(fn, 'w') as fp:
+    def save_foo(path, sheet):
+        with p.open_text(mode='w') as fp:
             for i, row in enumerate(Progress(sheet.rows)):
                 for col in sheet.visibleCols:
                     foolib.write(fp, i, col.name, col.getValue(row))

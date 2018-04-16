@@ -46,7 +46,7 @@ class ShapeSheet(Sheet):
 class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
     commands = [
-        Command('^S', 'save_geojson(sheet, input("json to save: ", value=name+".geojson"))', ''),
+        Command('^S', 'save_geojson(Path(input("json to save: ", value=name+".geojson")), sheet)', 'save in geojson format'),
     ]
     @async
     def reload(self):
@@ -74,7 +74,7 @@ class ShapeMap(InvertedCanvas):
         self.refresh()
 
 
-def save_geojson(vs, fn):
+def save_geojson(p, vs):
     assert isinstance(vs, Canvas), 'need Canvas to save geojson'
 
     features = []
@@ -95,6 +95,6 @@ def save_geojson(vs, fn):
         'type': 'FeatureCollection',
         'features': features,
     }
-    with Path(fn).open_text(mode='w') as fp:
+    with p.open_text(mode='w') as fp:
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)

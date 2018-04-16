@@ -72,7 +72,7 @@ class PNGDrawing(Canvas):
         self.refresh()
 
 @async
-def save_png(vs, fn):
+def save_png(p, vs):
     if isinstance(vs, PNGSheet):
         pass
     elif isinstance(vs, PNGDrawing):
@@ -95,7 +95,7 @@ def save_png(vs, fn):
     status('saving %sx%sx%s' % (vs.width, vs.height, len(palette)))
 
     import png
-    with open(fn, 'wb') as fp:
+    with open(p.resolve(), 'wb') as fp:
         w = png.Writer(vs.width, vs.height, palette=list(palette.keys()))
         w.write(fp, pixels)
 
