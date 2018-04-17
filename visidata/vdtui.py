@@ -2696,7 +2696,7 @@ class ColorMaker:
             for colorname in colornamestr.split(' '):
                 if colorname in self.color_attrs:
                     if newcolor_prec > attr_prec:
-                        attr &= ~2047
+                        attr &= ~curses.A_COLOR
                         attr |= self.color_attrs[colorname.lower()]
                         attr_prec = newcolor_prec
                 elif colorname in self.attrs:
