@@ -12,6 +12,9 @@ replayableOption('filetype', '', 'specify file type')
 replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
 replayableOption('tsv_safe_char', '\u00b7', 'replacement string for all tabs and newlines when saving to tsv')
 
+option('color_change_pending', 'reverse yellow', 'DirSheet color for attributes pending modification')
+option('color_delete_pending', 'red', 'DirSheet color for files pending delete')
+
 # slide rows/columns around
 globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left', 'modify-move-column-left')
 globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down', 'modify-move-row-down')
@@ -200,43 +203,135 @@ def saveSheets(fn, *vsheets, confirm_overwrite=False):
         savefunc(givenpath, vsheets[0])
 
 
+class DeferredSetColumn(Column):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, cache=True, **kwargs)
+        self.realsetter = self.setter
+        self.setter = self.deferredSet
+
+    @staticmethod
+    def deferredSet(col, row, val):
+        col._cachedValues[id(row)] = val
+
+    def changed(self, row):
+        curval = self.calcValue(row)
+        newval = self._cachedValues.get(id(row), curval)
+        return self.type(newval) != self.type(curval)
+
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: (Path, stat)
     commands = [
         Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open current row', 'sheet-open-row'),
-#        Command('modify-delete-row', 'path, _ = rows.pop(cursorRowIndex); os.rmdir(path.resolve()) if path.is_dir() else os.remove(path.resolve())'),
+        Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
+        Command('z^S', 'save(cursorRow)', 'apply changes to current row', 'sheet-specific-apply-edits'),
+        Command('z^R', 'undoMod(cursorRow); restat(cursorRow)', 'undo pending changes to current row', 'sheet-specific-apply-edits'),
+        Command('modify-delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow)'),
+        Command('modify-delete-selected', 'deleteFiles(selectedRows)')
     ]
     columns = [
         # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
-        Column('filename', getter=lambda col,row: row[0].name + row[0].ext,
-                           setter=lambda col,row,val: os.rename(row[0].resolve(), val)),  # BUG
+        DeferredSetColumn('filename',
+            getter=lambda col,row: row[0].name + row[0].ext,
+            setter=lambda col,row,val: col.sheet.renameFile(row, val)),
         Column('type', getter=lambda col,row: row[0].is_dir() and '/' or row[0].suffix),
-        Column('size', type=int, getter=lambda col,row: row[1].st_size,
-                                 setter=lambda col,row,val: os.truncate(row[0].resolve(), int(val)) or col.sheet.restat(row)),
-        Column('modtime', type=date, getter=lambda col,row: row[1].st_mtime,
-               setter=lambda col,row,val: os.utime(row[0].resolve(), times=((row[1].st_atime, float(val)))) or col.sheet.restat(row)),
-        Column('owner', width=0, cache=True, getter=lambda col,row: pwd.getpwuid(row[1].st_uid).pw_name,
-            setter=lambda col,row,val: os.chown(row[0].resolve(), pwd.getpwnam(val).pw_uid, -1) or col.sheet.restat(row)),
-        Column('group', width=0, cache=True, getter=lambda col,row: grp.getgrgid(row[1].st_gid).gr_name,
-            setter=lambda col,row,val: os.chown(row[0].resolve(), -1, grp.getgrnam(val).pw_gid) or col.sheet.restat(row)),
-        Column('mode', width=0, type=int, fmtstr='{:o}', getter=lambda col,row: row[1].st_mode),
+        DeferredSetColumn('size', type=int,
+            getter=lambda col,row: row[1].st_size,
+            setter=lambda col,row,val: os.truncate(row[0].resolve(), int(val))),
+        DeferredSetColumn('modtime', type=date,
+            getter=lambda col,row: row[1].st_mtime,
+            setter=lambda col,row,val: os.utime(row[0].resolve(), times=((row[1].st_atime, float(val))))),
+        DeferredSetColumn('owner', width=0,
+            getter=lambda col,row: pwd.getpwuid(row[1].st_uid).pw_name,
+            setter=lambda col,row,val: os.chown(row[0].resolve(), pwd.getpwnam(val).pw_uid, -1)),
+        DeferredSetColumn('group', width=0,
+            getter=lambda col,row: grp.getgrgid(row[1].st_gid).gr_name,
+            setter=lambda col,row,val: os.chown(row[0].resolve(), -1, grp.getgrnam(val).pw_gid)),
+        DeferredSetColumn('mode', width=0, type=int, fmtstr='{:o}', getter=lambda col,row: row[1].st_mode),
     ]
     colorizers = [
-        Colorizer('cell', 4, lambda s,c,r,v: 'yellow' if c.name=='group' and r[1].st_mode & stat.S_IRGRP else None),
-        Colorizer('cell', 5, lambda s,c,r,v: 'green' if c.name=='group' and r[1].st_mode & stat.S_IWGRP else None),
-        Colorizer('cell', 4, lambda s,c,r,v: 'yellow' if c.name=='owner' and r[1].st_mode & stat.S_IRUSR else None),
-        Colorizer('cell', 5, lambda s,c,r,v: 'green' if c.name=='owner' and r[1].st_mode & stat.S_IWUSR else None),
-        Colorizer('cell', 5, lambda s,c,r,v: 'bold' if c.name=='owner' and r[1].st_mode & stat.S_IXUSR else None),
-        Colorizer('cell', 5, lambda s,c,r,v: 'bold' if c.name=='group' and r[1].st_mode & stat.S_IXGRP else None),
+        Colorizer('cell', 4, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
+        Colorizer('cell', 8, lambda s,c,r,v: options.color_change_pending if s.changed(c, r) else None),
+        Colorizer('row', 9, lambda s,c,r,v: options.color_delete_pending if r in s.toBeDeleted else None),
     ]
     nKeys = 1
 
+    @staticmethod
+    def colorOwner(sheet, col, row, val):
+        path, st = row
+        mode = st.st_mode
+        ret = ''
+        if col.name == 'group':
+            if mode & stat.S_IXGRP: ret = 'bold '
+            if mode & stat.S_IWGRP: return ret + 'green'
+            if mode & stat.S_IRGRP: return ret + 'yellow'
+        elif col.name == 'owner':
+            if mode & stat.S_IXUSR: ret = 'bold '
+            if mode & stat.S_IWUSR: return ret + 'green'
+            if mode & stat.S_IRUSR: return ret + 'yellow'
+
+    def changed(self, col, row):
+        return isinstance(col, DeferredSetColumn) and col.changed(row)
+
+    def deleteFiles(self, rows):
+        for r in rows:
+            if r not in self.toBeDeleted:
+                self.toBeDeleted.append(r)
+
+    def renameFile(self, row, val):
+        newpath = row[0].with_name(val)
+        os.rename(row[0].resolve(), newpath.resolve())
+        row[0] = newpath
+
+    def undoMod(self, row):
+        for col in self.visibleCols:
+            if col._cachedValues and id(row) in col._cachedValues:
+                del col._cachedValues[id(row)]
+
+        if row in self.toBeDeleted:
+            self.toBeDeleted.remove(row)
+
+    def commitChanges(self, r):
+        if r in self.toBeDeleted:
+            path, _ = r
+            if path.is_dir():
+                os.rmdir(path.resolve())
+            else:
+                os.remove(path.resolve())
+            self.rows.remove(r)
+            return -1
+
+        nchanged = 0
+        for col in self.visibleCols:
+            if self.changed(col, r):
+                col.realsetter(col, r, col._cachedValues[id(r)])
+                nchanged += 1
+        return nchanged
+
+    def save(self, *rows):
+        nchanged = 0
+        ndeleted = 0
+        for r in list(rows or self.rows):  # copy list because elements may be removed
+            rowchanges = self.commitChanges(r)
+            if rowchanges < 0:
+                ndeleted += 1
+            elif rowchanges > 0:
+                nchanged += rowchanges
+                self.restat(r)
+
+        if nchanged:
+            status('%s file attributes changed' % nchanged)
+
+        if ndeleted:
+            status('%s files deleted' % ndeleted)
+
     def reload(self):
         self.rows = sorted([p, p.stat()] for p in self.source.iterdir())  #  if not p.name.startswith('.')]
+        self.toBeDeleted = []
 
     def restat(self, row):
         row[1] = row[0].stat()
+
 
 def openSource(p, filetype=None):
     'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'

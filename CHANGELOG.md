@@ -1,5 +1,12 @@
 # VisiData version history
 
+- [DirSheet] edits make deferred changes to any field
+   - note: only 256 changes maintained per column (same as column cache size)
+   - `^S` saves all deferred changes
+   - `z^S` saves changes for the current file only
+   - `^R` clears all changes (reload)
+   - `z^R` clears changes on the current file only
+   - `d`/`gd` marks the current/selected file for deletion
 - `^A` to specify a command longname to execute
 - `g^R` on SheetsSheet to reload all [selected] sheets
 - `options.error_is_null` to treat errors as nulls when applicable
@@ -12,12 +19,12 @@
 - ^X bugfix: use evalexpr over cursorRow
 - `"` no longer reselects all rows
 - bin/vsh initial commit
-- sheet-set-diff command to act like --diff
-- `from math import *` to put math functions like sin/cos at toplevel
+- `sheet-set-diff` command to act like `--diff`
+- math functions (like sin/cos) now at toplevel
 - `g^S` to save all sheets
 - bugfix: freeze
-- all csv_ options sent to csv.reader/writer
-- options.tsv_safe_char to replace \t and \n in tsv files; set to empty for speedup during tsv save
+- all `csv_` options sent to csv.reader/writer
+- `options.tsv_safe_char` to replace \t and \n in tsv files; set to empty for speedup during tsv save
 
 # v1.1 (2018-03-05)
 

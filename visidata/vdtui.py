@@ -1342,21 +1342,20 @@ Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column pe
         'Returns curses attribute for the given col/row/value'
         attr = 0
         attrpre = 0
-        _colorizers = collections.defaultdict(list)
+        _colorizers = []
 
         for b in [self] + list(self.__class__.__bases__):
             for c in getattr(b, 'colorizers', []):
                 if c.type in colorizerTypes:
-                    _colorizers[c.type].append(c)
+                    _colorizers.append(c)
 
-        for t in colorizerTypes:
-            for colorizer in sorted(_colorizers[t], key=lambda x: x.precedence):
-                try:
-                    color = colorizer.func(self, col, row, value)
-                    if color:
-                        attr, attrpre = colors.update(attr, attrpre, color, colorizer.precedence)
-                except Exception as e:
-                    exceptionCaught(e)
+        for colorizer in sorted(_colorizers, key=lambda x: x.precedence):
+            try:
+                color = colorizer.func(self, col, row, value)
+                if color:
+                    attr, attrpre = colors.update(attr, attrpre, color, colorizer.precedence)
+            except Exception as e:
+                exceptionCaught(e)
 
         return attr
 

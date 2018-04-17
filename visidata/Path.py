@@ -87,6 +87,10 @@ class Path:
     def relpath(self, start):
         return os.path.relpath(os.path.realpath(self.resolve()), start)
 
+    def with_name(self, name):
+        fn = os.path.join(*os.path.split(self.fqpn)[:-1], name)
+        return Path(fn)
+
     @property
     def parent(self):
         'Return Path to parent directory.'
