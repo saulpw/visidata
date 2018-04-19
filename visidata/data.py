@@ -12,8 +12,8 @@ replayableOption('filetype', '', 'specify file type')
 replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
 replayableOption('tsv_safe_char', '\u00b7', 'replacement string for all tabs and newlines when saving to tsv')
 
-option('color_change_pending', 'reverse yellow', 'DirSheet color for attributes pending modification')
-option('color_delete_pending', 'red', 'DirSheet color for files pending delete')
+option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
+option('color_delete_pending', 'red', 'color for files pending delete')
 
 # slide rows/columns around
 globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left', 'modify-move-column-left')
