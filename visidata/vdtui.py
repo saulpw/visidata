@@ -1257,6 +1257,13 @@ Command('gt', 'toggle(rows)', 'toggle selection of all rows', 'rows-toggle-all')
 Command('gs', 'select(rows)', 'select all rows', 'rows-select-all'),
 Command('gu', '_selectedRows.clear()', 'unselect all rows', 'rows-unselect-all'),
 
+Command('zt', 'toggle(rows[:cursorRowIndex])', 'toggle select rows from top to cursor', 'rows-toggle-to-cursor'),
+Command('zs', 'select(rows[:cursorRowIndex])', 'select all rows from top to cursor', 'rows-select-to-cursor'),
+Command('zu', 'unselect(rows[:cursorRowIndex])', 'unselect all rows from top to cursor', 'rows-unselect-to-cursor'),
+Command('gzt', 'toggle(rows[cursorRowIndex:])', 'toggle select rows from cursor to bottom', 'rows-toggle-from-cursor'),
+Command('gzs', 'select(rows[cursorRowIndex:])', 'select all rows from cursor to bottom', 'rows-select-from-cursor'),
+Command('gzu', 'unselect(rows[cursorRowIndex:])', 'unselect all rows from cursor to bottom', 'rows-unselect-from-cursor'),
+
 Command('g|', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex", defaultLast=True), columns="visibleCols"))', 'select rows matching regex in any visible column', 'rows-select-regex-all'),
 Command('g\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex", defaultLast=True), columns="visibleCols"))', 'unselect rows matching regex in any visible column', 'rows-unselect-regex-all'),
 
