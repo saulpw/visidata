@@ -11,3 +11,5 @@ pyshp               # shapefiles
 mapbox-vector-tile  # mbtiles
 pypng               # png
 fonttools           # ttf/otf
+sas7bdat            # sas7bdat (SAS)
+xport               # xpt (SAS)

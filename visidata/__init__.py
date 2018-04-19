@@ -42,6 +42,7 @@ from .loaders.html import *
 from .loaders.markdown import *
 from .loaders.png import *
 from .loaders.ttf import *
+from .loaders.sas import *
 
 from math import *
 
