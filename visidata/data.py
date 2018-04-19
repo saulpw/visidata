@@ -223,7 +223,10 @@ class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: (Path, stat)
     commands = [
-        Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open current row', 'sheet-open-row'),
+        Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open current file as a new sheet', 'sheet-open-row'),
+        Command('go', 'list([vd.push(openSource(r[0].resolve())) for r in selectedRows])', 'open selected files as new sheets', 'sheet-open-rows'),
+        Command('^O', 'launchEditor(cursorRow[0].resolve())', 'open current file in external $EDITOR', 'edit-row-external'),
+        Command('g^O', 'launchEditor(*(r[0].resolve() for r in selectedRows))', 'open selected files in external $EDITOR', 'edit-rows-external'),
         Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
         Command('z^S', 'save(cursorRow)', 'apply changes to current row', 'sheet-specific-apply-edits'),
         Command('z^R', 'undoMod(cursorRow); restat(cursorRow)', 'undo pending changes to current row', 'sheet-specific-apply-edits'),

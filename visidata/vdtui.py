@@ -2468,19 +2468,22 @@ class EnableCursor:
             curses.curs_set(0)
             curses.mousemask(-1)
 
-def launchExternalEditor(v, linenum=0):
+def launchEditor(*args):
     editor = os.environ.get('EDITOR') or error('$EDITOR not set')
+    args = [editor] + list(args)
+    with SuspendCurses():
+        return subprocess.call(args)
 
+def launchExternalEditor(v, linenum=0):
     import tempfile
     fd, fqpn = tempfile.mkstemp(text=True)
     with open(fd, 'w') as fp:
         fp.write(v)
 
-    with SuspendCurses():
-        cmd = '%s %s' % (editor, fqpn)
-        if linenum:
-            cmd += ' +%s' % linenum
-        os.system(cmd)
+    if linenum:
+        launchEditor(fqpn, '+%s' % linenum)
+    else:
+        launchEditor(fqpn)
 
     with open(fqpn, 'r') as fp:
         return fp.read()
