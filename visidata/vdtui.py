@@ -1274,7 +1274,7 @@ Command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.n
 
 Command('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet', 'meta-columns-sheet'),
 Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
-Command('delete-column-really', 'columns.pop(cursorColIndex)', 'remove column permanently from the list of columns'),
+Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the list of columns', 'delete-column-really'),
     ]
     columns = []  # list of Column
     colorizers = [ # list of Colorizer
