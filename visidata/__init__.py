@@ -43,6 +43,7 @@ from .loaders.markdown import *
 from .loaders.png import *
 from .loaders.ttf import *
 from .loaders.sas import *
+from .loaders.spss import *
 
 from math import *
 
