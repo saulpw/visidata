@@ -2366,6 +2366,9 @@ class SheetsSheet(Sheet):
         ColumnAttr('source'),
     ]
 
+    def newRow(self):
+        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
+
     def reload(self):
         self.rows = vd().sheets
 
