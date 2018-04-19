@@ -88,7 +88,8 @@ class Path:
         return os.path.relpath(os.path.realpath(self.resolve()), start)
 
     def with_name(self, name):
-        fn = os.path.join(*os.path.split(self.fqpn)[:-1], name)
+        args = list(os.path.split(self.fqpn)[:-1]) + [name]
+        fn = os.path.join(*args)
         return Path(fn)
 
     @property
