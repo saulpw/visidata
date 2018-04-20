@@ -10,7 +10,7 @@ replayableOption('header', 1, 'parse first N rows of .csv/.tsv as column names')
 replayableOption('delimiter', '\t', 'delimiter to use for tsv filetype')
 replayableOption('filetype', '', 'specify file type')
 replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
-replayableOption('tsv_safe_char', '\u00b7', 'replacement string for all tabs and newlines when saving to tsv')
+replayableOption('tsv_safe_char', '\u00b7', 'replacement for all tabs and newlines when saving to tsv')
 
 option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
 option('color_delete_pending', 'red', 'color for files pending delete')

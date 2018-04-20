@@ -128,8 +128,6 @@ slide current row/column all the way to the left/bottom/top/right of sheet
 .Pp
 .It Ic "zh  zj  zk  zl"
 scroll one left/down/up/right
-.It Ic "  zt  zz  zb  "
-scroll current row to top/center/bottom of screen
 .El
 .
 .Ss Column Manipulation
@@ -148,11 +146,13 @@ hide current column (to unhide, go to
 .Sy C Ns olumns sheet and Sy e Ns dit its width)
 .It Ic "z-" Ns
 reduce width of current column by half
+.It Ic "g-" Ns
+delete this column (cannot be undone)
 .Pp
 .It Ic "! z!" Ns
 toggle/unset current column as a key column
 .It Ic "~  #  %  $  @"
-set type of current column to untyped/int/float/currency/date
+set type of current column to str/int/float/currency/date
 .It Ic "  ^"
 edit name of current column
 .It Ic " g^"
@@ -177,23 +177,29 @@ add a frozen copy of current column with all cells evaluated
 .It Ic "g'"
 open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
-add/reset cache for current/all visible column(s)
+reset cache for current/all visible column(s)
 .Pp
 .It Ic "\&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic "\&;" Ar regex
-.No add new columns from capture groups of Ar regex Ns (also requires example row)
+.No add new columns from capture groups of Ar regex No (also requires example row)
 .It Ic "*" Ar regex Ns Sy / Ns Ar subst
-.No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc.)
+.No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
+.It Ic "g*" Ar regex Ns Sy / Ns Ar subst
+.No modify selected rows in current column, replacing Ar regex No with Ar subst
 .El
 .Ss Row Selection
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " s   t   u"
+.It Ic "  s   t   u"
 select/toggle/unselect current row
-.It Ic "gs  gt  gu"
+.It Ic " gs  gt  gu"
 select/toggle/unselect all rows
+.It Ic " zs  zt  zu"
+select/toggle/unselect rows from top to cursor
+.It Ic "gzs gzt gzu"
+select/toggle/unselect rows from cursor to bottom
 .It Ic " |   \e\ " Ns Ar regex
 .No select/unselect rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
@@ -239,9 +245,9 @@ paste clipboard rows after/before current row
 .It Ic " zp  gzp"
 set contents of current column for current/selected row(s) to last clipboard value
 .It Ic "  Y   gY"
-.No yank (copy) current/all selected row(s) to system clipboard (with Sy options.clipboard_copy_cmd Ns )
+.No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic " zY"
-.No yank (copy) current cell to system clipboard (with Sy options.clipboard_copy_cmd Ns )
+.No yank (copy) current cell to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic "  f"
 fill null cells in current column with contents of non-null cells up the current column
 .
@@ -291,8 +297,11 @@ autocomplete input (when available)
 .It Ic " o" Ar input
 open
 .Ar input No in Sy VisiData
-.It Ic "^S" Ar filename
-.No save current sheet to Ar filename No in format determined by extension (default .tsv)
+.It Ic "^S g^S" Ar filename
+.No save current/all sheet(s) to Ar filename No in format determined by extension (default .tsv)
+.It Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
+.It Ic "z^S" Ar filename
+.No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save CommandLog to Ar filename.vd No file
 .It Ic "A" Ar number
@@ -354,16 +363,18 @@ scroll canvas
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic V
+.It Ic "  V"
 view contents of current cell in a new TextSheet
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
-.It Ic "v"
+.It Ic " v"
 toggle visibility (text wrap on TextSheet, legends/axes on Graph)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^^" No (Ctrl-^)
 jump to previous sheet (swaps with current sheet)
+.It Ic " ^A" Ar longname
+.No execute command by its Ar longname
 .It Ic " ^E"
 view traceback for most recent error
 .It Ic "g^E"
@@ -400,10 +411,13 @@ open current row/cell/sheet as Python object
 .
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
+.It Sy " \&."
+.Sy Directory Sheet No "            browse files in a directory"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
 .Sy Columns Sheet No (Shift+C) "    edit column properties"
+.No ( Ns Ic gC No for all columns from all sheets)
 .It Sy " \&."
 .Sy Sheets Sheet No (Shift+S) "     jump between sheets or join them together"
 .It Sy " \&."
@@ -427,15 +441,32 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Melted Sheet No (Shift+M) "     unpivot non-key columns into variable/value columns"
 .El
+.
+.Ss INTERNAL SHEETS
+.Ss Directory Sheet
+.Bl -inset -compact
+.It (sheet-specific commands)
+.It modifying any cell changes the in-memory value, only applied to the filesystem with Ic ^S
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "Enter  gEnter"
+open current/selected file(s) as new sheets
+.It Ic " ^O  g^O"
+open current/selected file(s) in external $EDITOR
+.It Ic " d   gd"
+schedule current/selected file(s) for deletion
+.It Ic "z^R   ^R"
+reload current/all file(s) information, undoing any pending changes
+.It Ic "z^S   ^S"
+apply changes to current/all file(s)
+.El
+.
 .Ss METASHEETS
 .Ss Columns Sheet (Shift+C)
 .Bl -inset -compact
 .It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are the literal columns on the source sheet.
-.It (global commands)
 .El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic gC
-.No open Sy Columns Sheet No with all columns from all sheets
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -443,8 +474,8 @@ open current row/cell/sheet as Python object
 add column from concatenating selected source columns
 .It Ic "g! gz!"
 toggle/unset selected columns as key columns on source sheet
-.It Ic "g+"
-add aggregator to selected source columns
+.It Ic "g+" Ar aggregator
+add Ar aggregator No to selected source columns
 .It Ic "g-" No (hyphen)
 hide selected columns on source sheet
 .It Ic "g~ g# g% g$ g@"
@@ -454,7 +485,7 @@ set type of selected columns on source sheet to str/int/float/currency/date
 .El
 .
 .Ss Sheets Sheet (Shift+S)
-.Bl -inset -compact 
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -462,6 +493,8 @@ set type of selected columns on source sheet to str/int/float/currency/date
 jump to sheet referenced in current row
 .It Ic "gC"
 .No open Sy Columns Sheet No with all columns from selected sheets
+.It Ic "g^R"
+.No reload all selected sheets
 .It Ic "&" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
@@ -557,7 +590,7 @@ open sheet of source rows aggregated in current pivot cell
 dive further into Python object
 .It Ic " e"
 edit contents of current cell
-.It Ic "v"
+.It Ic " v"
 toggle show/hide for methods and hidden properties
 .It Ic "gv  zv"
 show/hide methods and hidden properties
@@ -588,7 +621,7 @@ overwrite existing files without confirmation
 .so vd-cli.inc
 .
 .Ss DISPLAY OPTIONS
-.No Display options can only be set via the Sx Options Sheet No or a config file (see Sx FILES Ns ).
+.No Display options can only be set via the Sx Options Sheet No or a Pa .visidatarc No (see Sx FILES Ns ).
 .Pp
 .
 .so vd-opts.inc
@@ -711,6 +744,8 @@ These are the supported savers:
 .It Sy html No (requires Sy lxml Ns )
 .It Sy png No (requires Sy pypng Ns )
 .El
+.Pp
+.No multisave is supported by Sy html Ns , Sy md Ns , and Sy txt Ns ; Sy g^S No will save all sheets into a single output file.
 .Pp
 .
 .Sh AUTHOR
