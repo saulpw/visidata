@@ -1201,6 +1201,8 @@ Command('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue
 Command('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'move up the current column to the previous selected row', 'view-go-prev-selected'),
 Command('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move down the current column to the next selected row', 'view-go-next-selected'),
 
+Command('z<', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")', 'move up the current column to the next null value', 'view-go-prev-null'),
+Command('z>', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")', 'move down the current column to the next null value', 'view-go-next-null'),
 
 Command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjust width of current column to full', 'column-width-full'),
 Command('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))', 'adjust current column width to given number', 'column-width-input'),

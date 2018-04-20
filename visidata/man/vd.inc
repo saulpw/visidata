@@ -105,6 +105,8 @@ move to next/previous match from last search
 .Pp
 .It Ic  " <   >"
 move up/down in current column to the next value
+.It Ic  "z<  z>"
+move up/down in current column to the next null
 .It Ic " {   }"
 move up/down in current column to the next selected row
 .
