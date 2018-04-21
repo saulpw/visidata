@@ -224,7 +224,7 @@ class DirSheet(Sheet):
     rowtype = 'files' # rowdef: (Path, stat)
     commands = [
         Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open current file as a new sheet', 'sheet-open-row'),
-        Command('go', 'list([vd.push(openSource(r[0].resolve())) for r in selectedRows])', 'open selected files as new sheets', 'sheet-open-rows'),
+        Command('g'+ENTER, 'list([vd.push(openSource(r[0].resolve())) for r in selectedRows])', 'open selected files as new sheets', 'sheet-open-rows'),
         Command('^O', 'launchEditor(cursorRow[0].resolve())', 'open current file in external $EDITOR', 'edit-row-external'),
         Command('g^O', 'launchEditor(*(r[0].resolve() for r in selectedRows))', 'open selected files in external $EDITOR', 'edit-rows-external'),
         Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
@@ -235,6 +235,9 @@ class DirSheet(Sheet):
     ]
     columns = [
         # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
+        DeferredSetColumn('dir',
+            getter=lambda col,row: row[0].parent.relpath(col.sheet.source.resolve()),
+            setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         DeferredSetColumn('filename',
             getter=lambda col,row: row[0].name + row[0].ext,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
@@ -258,7 +261,7 @@ class DirSheet(Sheet):
         Colorizer('cell', 8, lambda s,c,r,v: options.color_change_pending if s.changed(c, r) else None),
         Colorizer('row', 9, lambda s,c,r,v: options.color_delete_pending if r in s.toBeDeleted else None),
     ]
-    nKeys = 1
+    nKeys = 2
 
     @staticmethod
     def colorOwner(sheet, col, row, val):
@@ -281,6 +284,16 @@ class DirSheet(Sheet):
         for r in rows:
             if r not in self.toBeDeleted:
                 self.toBeDeleted.append(r)
+
+    def moveFile(self, row, val):
+        fn = row[0].name + row[0].ext
+        newpath = os.path.join(val, fn)
+        if not newpath.startswith('/'):
+            newpath = os.path.join(self.source.resolve(), newpath)
+
+        os.rename(row[0].resolve(), newpath)
+        row[0] = Path(newpath)
+        self.restat(row)
 
     def renameFile(self, row, val):
         newpath = row[0].with_name(val)
@@ -329,9 +342,19 @@ class DirSheet(Sheet):
         if ndeleted:
             status('%s files deleted' % ndeleted)
 
+    @async
     def reload(self):
-        self.rows = sorted([p, p.stat()] for p in self.source.iterdir())  #  if not p.name.startswith('.')]
         self.toBeDeleted = []
+        self.rows = []
+        basepath = self.source.resolve()
+        for folder, subdirs, files in os.walk(basepath):
+            subfolder = folder[len(basepath)+1:]
+            if subfolder.startswith('.'): continue
+            for fn in files:
+                if fn.startswith('.'): continue
+                p = Path(os.path.join(folder, fn))
+                self.rows.append([p, p.stat()])
+        self.rows.sort()
 
     def restat(self, row):
         row[1] = row[0].stat()

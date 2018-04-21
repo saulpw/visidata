@@ -10,7 +10,7 @@ class Path:
     'File and path-handling class, modeled on `pathlib.Path`.'
     def __init__(self, fqpn):
         self.fqpn = fqpn
-        fn = os.path.split(fqpn)[-1]
+        fn = self.parts[-1]
 
         self.name, self.ext = os.path.splitext(fn)
 
@@ -85,17 +85,25 @@ class Path:
         return os.path.expandvars(os.path.expanduser(self.fqpn))
 
     def relpath(self, start):
-        return os.path.relpath(os.path.realpath(self.resolve()), start)
+        ourpath = self.resolve()
+        if ourpath == start:
+            return ''
+        return os.path.relpath(os.path.realpath(ourpath), start)
 
     def with_name(self, name):
-        args = list(os.path.split(self.fqpn)[:-1]) + [name]
+        args = list(self.parts[:-1]) + [name]
         fn = os.path.join(*args)
         return Path(fn)
 
     @property
+    def parts(self):
+        'Return list of path parts'
+        return os.path.split(self.fqpn)
+
+    @property
     def parent(self):
         'Return Path to parent directory.'
-        return Path(self.fqpn + "/..")
+        return Path(os.path.join(*self.parts[:-1]))
 
     @property
     def filesize(self):
