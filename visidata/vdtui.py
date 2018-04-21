@@ -1851,7 +1851,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
 
                 y = headerRow + numHeaderRows
                 rows = self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
-                for rowidx in range(0, self.nVisibleRows):
+                for rowidx in range(0, min(len(rows), self.nVisibleRows)):
                     dispRowIdx = self.topRowIndex + rowidx
                     if dispRowIdx >= self.nRows:
                         break
