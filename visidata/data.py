@@ -2,6 +2,7 @@ import random
 import stat
 import pwd
 import grp
+import subprocess
 
 from .vdtui import *
 
@@ -241,7 +242,7 @@ class DirSheet(Sheet):
         DeferredSetColumn('filename',
             getter=lambda col,row: row[0].name + row[0].ext,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
-        Column('type', getter=lambda col,row: row[0].is_dir() and '/' or row[0].suffix),
+        Column('ext', getter=lambda col,row: row[0].is_dir() and '/' or row[0].suffix),
         DeferredSetColumn('size', type=int,
             getter=lambda col,row: row[1].st_size,
             setter=lambda col,row,val: os.truncate(row[0].resolve(), int(val))),
@@ -255,6 +256,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: grp.getgrgid(row[1].st_gid).gr_name,
             setter=lambda col,row,val: os.chown(row[0].resolve(), -1, grp.getgrnam(val).pw_gid)),
         DeferredSetColumn('mode', width=0, type=int, fmtstr='{:o}', getter=lambda col,row: row[1].st_mode),
+        Column('filetype', width=40, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row[0].resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     colorizers = [
         Colorizer('cell', 4, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
@@ -300,6 +302,13 @@ class DirSheet(Sheet):
         os.rename(row[0].resolve(), newpath.resolve())
         row[0] = newpath
 
+    def removeFile(self, row):
+        path, _ = row
+        if path.is_dir():
+            os.rmdir(path.resolve())
+        else:
+            os.remove(path.resolve())
+
     def undoMod(self, row):
         for col in self.visibleCols:
             if col._cachedValues and id(row) in col._cachedValues:
@@ -308,39 +317,51 @@ class DirSheet(Sheet):
         if row in self.toBeDeleted:
             self.toBeDeleted.remove(row)
 
-    def commitChanges(self, r):
-        if r in self.toBeDeleted:
-            path, _ = r
-            if path.is_dir():
-                os.rmdir(path.resolve())
-            else:
-                os.remove(path.resolve())
-            self.rows.remove(r)
-            return -1
-
-        nchanged = 0
-        for col in self.visibleCols:
-            if self.changed(col, r):
-                col.realsetter(col, r, col._cachedValues[id(r)])
-                nchanged += 1
-        return nchanged
-
     def save(self, *rows):
-        nchanged = 0
-        ndeleted = 0
+        changes = []
+        deletes = {}
         for r in list(rows or self.rows):  # copy list because elements may be removed
-            rowchanges = self.commitChanges(r)
-            if rowchanges < 0:
-                ndeleted += 1
-            elif rowchanges > 0:
-                nchanged += rowchanges
+            if r in self.toBeDeleted:
+                deletes[id(r)] = r
+            else:
+                for col in self.visibleCols:
+                    if self.changed(col, r):
+                        changes.append((col, r))
+
+        if not changes and not deletes:
+            error('nothing to save')
+
+        cstr = ''
+        if changes:
+            cstr += 'change %d' % len(changes)
+
+        if deletes:
+            if cstr: cstr += ' and '
+            cstr += 'delete %d' % len(deletes)
+
+        confirm('really %s? ' % cstr)
+
+        self._commit(changes, deletes)
+
+    @async
+    def _commit(self, changes, deletes):
+        oldrows = self.rows
+        self.rows = []
+        for r in oldrows:
+            try:
+                if id(r) in deletes:
+                    self.removeFile(r)
+                else:
+                    self.rows.append(r)
+            except Exception as e:
+                exceptionCaught(e)
+
+        for col, row in changes:
+            try:
+                col.realsetter(col, row, col._cachedValues[id(row)])
                 self.restat(r)
-
-        if nchanged:
-            status('%s file attributes changed' % nchanged)
-
-        if ndeleted:
-            status('%s files deleted' % ndeleted)
+            except Exception as e:
+                exceptionCaught(e)
 
     @async
     def reload(self):
