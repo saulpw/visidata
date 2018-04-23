@@ -161,6 +161,7 @@ option('wrap', True, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
 option('cmdlog_longname', False, 'Use command longname in cmdlog if available')
+option('col_cache_size', 0, 'max number of cache entries in each cached column')
 
 replayableOption('none_is_null', True, 'if Python None counts as null')
 replayableOption('empty_is_null', False, 'if empty string counts as null')
@@ -2049,7 +2050,8 @@ class Column:
         ret = self.calcValue(row)
         self._cachedValues[k] = ret
 
-        if len(self._cachedValues) > 256:  # max number of entries
+        cachesize = options.col_cache_size
+        if cachesize > 0 and len(self._cachedValues) > cachesize:
             self._cachedValues.popitem(last=False)
 
         return ret
