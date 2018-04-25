@@ -1,6 +1,7 @@
 python-dateutil     # date type
 
 # optional requirements
+numpy>=1.12.1       # dependency resolution
 requests            # http
 lxml                # html
 openpyxl            # xlsx
@@ -15,4 +16,3 @@ sas7bdat            # sas7bdat (SAS)
 xport               # xpt (SAS)
 savReaderWriter     # sav (SPSS)
 pandas              # dta (Stata)
-numpy>=1.12.1       # dependency resolution
