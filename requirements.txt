@@ -1,11 +1,11 @@
 python-dateutil     # date type
 
 # optional requirements
+pandas              # dta (Stata)
 requests            # http
 lxml                # html
 openpyxl            # xlsx
 xlrd                # xls
-pandas              # dta (Stata)
 h5py                # hdf5
 psycopg2            # postgres
 pyshp               # shapefiles
