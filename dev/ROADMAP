@@ -1,56 +1,37 @@
 # Roadmap
 
 I. Interface
-+ statusline menu for chooseOne
-+ context-sensitive hierarchical menu system to discover commands
-- clickable column headers to set type/name, click-drag to move columns/rows
-+ keycols still pinned on display left (or maybe a disp_ option, which possibly affects col save order), but are not moved within columns list
+- mouse-ability
+    - allow user to disable mouse for system copy/paste
+    - clickable column headers to set type/name, click-drag to move columns/rows
 
 II. Internals
-- break VisiData object into several smaller pseudo-classes, which can be plug-n-play.
-   - maybe provide a null functional implementation (raw interface).
-   - Progress/async can be completely standalone
-+ Sheet gets split into [Base]Sheet and Table
-   + BaseSheet is interface with draw, reload, exec_command
-   + Sheet inherits from BaseSheet, has rows/columns
-   + Plotter inherits from BaseSheet
-   - SourceSheet inherits from Table
-      + Enter as an alias for 'e' on SourceSheet
-      - newRow() (for 'a') on SourceSheet only
-+ most commands implemented on Sheet or children
-   - global key bindings like 'h' to 'move-left', and then each Sheet defines the semantics of its move-left
-+ allow Sheet.rows to be an offline datastore
+- break out into library, usable standalone by other apps
+   - Progress/async
+   - Canvas
+- SourceSheet inherits from Sheet
+- the great command longnaming
+   - solidify command names separate from menu hierarchy
 
-II. Loaders
-- pandas dataframe
+III. Loaders and Savers
 - .xml
-- .sas
-- try fixed width first for unknown types, fallback to TextSheet if no columns detected
-
-III. Savers
-- '^S' saves as any input format depending on file extension
-- 'g^S' saves all sheets (or selected on SheetsSheets) to hdf5, xlsx, and other multisheet formats
-- 'z^S' saves just this cell
-- sqlite: allow in-memory edits, ^S to commit
+- .mdb, .accdb
+- vsql: allow in-memory edits, ^S to commit
 - upload to google sheets
 - save to .py: emit code to get current cell/row/sheet from source data
 - save canvas to .svg
 
-IV. Individual sheets
-  A. DirSheet
-     - add cached `file` type column
-     - rename file with any 'set' (allow mass rename with transform)
-     - 'd'elete file
-     - but only apply changes with ^S
-     - '^O' to open current file in external program (probably $EDITOR)
-
-## new commands and features
-
+IV. other commands and features
 
 - numeric binning for freq column and pivot table
 - Python expressions usable like regex for search, select, etc
 - add row number in hidden column on data sheets so that original (load) order can be restored
 - handle timezone for datetime
+
+V. website
+
+- /features grid
+- front page redesign
 
 # Applications
 
@@ -65,3 +46,4 @@ IV. Individual sheets
 - vchat
 - [vdgalcon](http://github.com/saulpw/vdgalcon)
 - vscrape
+
