@@ -41,12 +41,19 @@ VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulp
 See [our homebrew repository](https://github.com/saulpw/homebrew-vd) for more information.
 </div>
 <!--div>
-### Linux (requires [apt](https://wiki.debian.org/Apt))
+### Linux (requires [debian's unstable repo](https://github.com/saulpw/visidata#install-via-apt))
 
     $ apt install visidata
 
 See [our Debian repository](https://github.com/saulpw/deb-vd) for more information.
 </div-->
+<div>
+### conda (requires [conda-forge](https://conda-forge.org/))
+
+    $ conda install visidata
+
+See our [the Github repository](https://github.com/conda-forge/visidata-feedstock) for more information.
+</div>
 <div>
 ### Other (requires [pip3](https://stackoverflow.com/questions/6587507/how-to-install-pip-with-python-3))
 

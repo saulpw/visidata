@@ -96,6 +96,14 @@ git push --tags
 
 17. Post release notes on r/visidata and tinyletter and have some ice cream
 
+# conda
+
+1. Fork https://github.com/conda-forge/visidata-feedstock
+
+2. Update the VisiData version and sha256.
+
+3. Make any necessary removals, additions or modifications to the dependencies -> note that a dependency must be part of conda.
+
 
 # Homebrew
 

@@ -18,6 +18,22 @@ To install VisiData, with loaders for the most common data file formats (includi
 
     $ pip3 install visidata
 
+### Install via conda
+
+To install from [conda-forge](https://github.com/conda-forge/visidata-feedstock):
+
+Add the `conda-forge` channel.
+
+    $ conda config --add channels conda-forge
+
+You can then install VisiData by typing:
+
+    $ conda install visidata
+
+And update VisiData with:
+
+    $ conda update visidata
+
 ### Install via brew
 
 Ideal for MacOS users who primarily want to engage with VisiData as an application. This is currently the most reliable way to install VisiData's manpage on MacOS.
