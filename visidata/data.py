@@ -231,7 +231,7 @@ class DirSheet(Sheet):
         Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
         Command('z^S', 'save(cursorRow)', 'apply changes to current row', 'sheet-specific-apply-edits'),
         Command('z^R', 'undoMod(cursorRow); restat(cursorRow)', 'undo pending changes to current row', 'sheet-specific-apply-edits'),
-        Command('modify-delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow)'),
+        Command('modify-delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1'),
         Command('modify-delete-selected', 'deleteFiles(selectedRows)')
     ]
     columns = [
@@ -333,11 +333,11 @@ class DirSheet(Sheet):
 
         cstr = ''
         if changes:
-            cstr += 'change %d' % len(changes)
+            cstr += 'change %d attributes' % len(changes)
 
         if deletes:
             if cstr: cstr += ' and '
-            cstr += 'delete %d' % len(deletes)
+            cstr += 'delete %d files' % len(deletes)
 
         confirm('really %s? ' % cstr)
 
