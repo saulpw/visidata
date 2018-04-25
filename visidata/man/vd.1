@@ -73,7 +73,7 @@ view this man page
 .It Ic ^Q
 abort program immediately
 .It Ic ^C
-cancel user input or aborts all async threads on current sheet
+cancel user input or abort all async threads on current sheet
 .It Ic " q"
 quit current sheet
 .It Ic "gq"
@@ -105,6 +105,8 @@ move to next/previous match from last search
 .Pp
 .It Ic  " <   >"
 move up/down in current column to the next value
+.It Ic  "z<  z>"
+move up/down in current column to the next null
 .It Ic " {   }"
 move up/down in current column to the next selected row
 .
@@ -126,8 +128,6 @@ slide current row/column all the way to the left/bottom/top/right of sheet
 .Pp
 .It Ic "zh  zj  zk  zl"
 scroll one left/down/up/right
-.It Ic "  zt  zz  zb  "
-scroll current row to top/center/bottom of screen
 .El
 .
 .Ss Column Manipulation
@@ -146,11 +146,13 @@ hide current column (to unhide, go to
 .Sy C Ns olumns sheet and Sy e Ns dit its width)
 .It Ic "z-" Ns
 reduce width of current column by half
+.It Ic "g-" Ns
+delete this column (cannot be undone)
 .Pp
 .It Ic "! z!" Ns
 toggle/unset current column as a key column
 .It Ic "~  #  %  $  @"
-set type of current column to untyped/int/float/currency/date
+set type of current column to str/int/float/currency/date
 .It Ic "  ^"
 edit name of current column
 .It Ic " g^"
@@ -175,23 +177,29 @@ add a frozen copy of current column with all cells evaluated
 .It Ic "g'"
 open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
-add/reset cache for current/all visible column(s)
+reset cache for current/all visible column(s)
 .Pp
 .It Ic "\&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic "\&;" Ar regex
-.No add new columns from capture groups of Ar regex Ns (also requires example row)
+.No add new columns from capture groups of Ar regex No (also requires example row)
 .It Ic "*" Ar regex Ns Sy / Ns Ar subst
-.No replace Ar regex No with Ar subst Ns , which may include backreferences ( Ns Sy \e1 No etc.)
+.No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
+.It Ic "g*" Ar regex Ns Sy / Ns Ar subst
+.No modify selected rows in current column, replacing Ar regex No with Ar subst
 .El
 .Ss Row Selection
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " s   t   u"
+.It Ic "  s   t   u"
 select/toggle/unselect current row
-.It Ic "gs  gt  gu"
+.It Ic " gs  gt  gu"
 select/toggle/unselect all rows
+.It Ic " zs  zt  zu"
+select/toggle/unselect rows from top to cursor
+.It Ic "gzs gzt gzu"
+select/toggle/unselect rows from cursor to bottom
 .It Ic " |   \e\ " Ns Ar regex
 .No select/unselect rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
@@ -237,9 +245,9 @@ paste clipboard rows after/before current row
 .It Ic " zp  gzp"
 set contents of current column for current/selected row(s) to last clipboard value
 .It Ic "  Y   gY"
-.No yank (copy) current/all selected row(s) to system clipboard (with Sy options.clipboard_copy_cmd Ns )
+.No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic " zY"
-.No yank (copy) current cell to system clipboard (with Sy options.clipboard_copy_cmd Ns )
+.No yank (copy) current cell to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic "  f"
 fill null cells in current column with contents of non-null cells up the current column
 .
@@ -289,8 +297,11 @@ autocomplete input (when available)
 .It Ic " o" Ar input
 open
 .Ar input No in Sy VisiData
-.It Ic "^S" Ar filename
-.No save current sheet to Ar filename No in format determined by extension (default .tsv)
+.It Ic "^S g^S" Ar filename
+.No save current/all sheet(s) to Ar filename No in format determined by extension (default .tsv)
+.It Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
+.It Ic "z^S" Ar filename
+.No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save CommandLog to Ar filename.vd No file
 .It Ic "A" Ar number
@@ -298,6 +309,8 @@ open
 .It Ic "R" Ar number
 select a random population subset of
 .Ar number No rows
+.It Ic "T"
+open new sheet with rows and columns transposed
 .Pp
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
@@ -350,16 +363,18 @@ scroll canvas
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic V
+.It Ic "  V"
 view contents of current cell in a new TextSheet
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
-.It Ic "v"
+.It Ic " v"
 toggle visibility (text wrap on TextSheet, legends/axes on Graph)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^^" No (Ctrl-^)
 jump to previous sheet (swaps with current sheet)
+.It Ic " ^A" Ar longname
+.No execute command by its Ar longname
 .It Ic " ^E"
 view traceback for most recent error
 .It Ic "g^E"
@@ -396,10 +411,13 @@ open current row/cell/sheet as Python object
 .
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
+.It Sy " \&."
+.Sy Directory Sheet No "            browse files in a directory"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
 .Sy Columns Sheet No (Shift+C) "    edit column properties"
+.No ( Ns Ic gC No for all columns from all sheets)
 .It Sy " \&."
 .Sy Sheets Sheet No (Shift+S) "     jump between sheets or join them together"
 .It Sy " \&."
@@ -423,15 +441,32 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Melted Sheet No (Shift+M) "     unpivot non-key columns into variable/value columns"
 .El
+.
+.Ss INTERNAL SHEETS
+.Ss Directory Sheet
+.Bl -inset -compact
+.It (sheet-specific commands)
+.It modifying any cell changes the in-memory value, only applied to the filesystem with Ic ^S
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "Enter  gEnter"
+open current/selected file(s) as new sheets
+.It Ic " ^O  g^O"
+open current/selected file(s) in external $EDITOR
+.It Ic " d   gd"
+schedule current/selected file(s) for deletion
+.It Ic "z^R   ^R"
+reload current/all file(s) information, undoing any pending changes
+.It Ic "z^S   ^S"
+apply changes to current/all file(s)
+.El
+.
 .Ss METASHEETS
 .Ss Columns Sheet (Shift+C)
 .Bl -inset -compact
 .It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are the literal columns on the source sheet.
-.It (global commands)
 .El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic gC
-.No open Sy Columns Sheet No with all columns from all sheets
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -439,8 +474,8 @@ open current row/cell/sheet as Python object
 add column from concatenating selected source columns
 .It Ic "g! gz!"
 toggle/unset selected columns as key columns on source sheet
-.It Ic "g+"
-add aggregator to selected source columns
+.It Ic "g+" Ar aggregator
+add Ar aggregator No to selected source columns
 .It Ic "g-" No (hyphen)
 hide selected columns on source sheet
 .It Ic "g~ g# g% g$ g@"
@@ -450,7 +485,7 @@ set type of selected columns on source sheet to str/int/float/currency/date
 .El
 .
 .Ss Sheets Sheet (Shift+S)
-.Bl -inset -compact 
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -458,6 +493,8 @@ set type of selected columns on source sheet to str/int/float/currency/date
 jump to sheet referenced in current row
 .It Ic "gC"
 .No open Sy Columns Sheet No with all columns from selected sheets
+.It Ic "g^R"
+.No reload all selected sheets
 .It Ic "&" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
@@ -553,7 +590,7 @@ open sheet of source rows aggregated in current pivot cell
 dive further into Python object
 .It Ic " e"
 edit contents of current cell
-.It Ic "v"
+.It Ic " v"
 toggle show/hide for methods and hidden properties
 .It Ic "gv  zv"
 show/hide methods and hidden properties
@@ -581,7 +618,7 @@ overwrite existing files without confirmation
 .No add colorizer for all sheets against Ar base
 .
 .El
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 encoding passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
@@ -590,12 +627,14 @@ encoding errors passed to codecs.open
 flags to pass to re.compile() [AILMSUX]
 .It Sy --default-width Ns = Ns Ar "int         " No "20"
 default column width
-.It Sy --wrap Ns = Ns Ar "bool                 " No "False"
+.It Sy --wrap Ns = Ns Ar "bool                 " No "True"
 wrap text to fit window width on TextSheet
 .It Sy --cmd-after-edit Ns = Ns Ar "str        " No "j"
 command keystroke to execute after successful edit
 .It Sy --cmdlog-longname Ns = Ns Ar "bool      " No "False"
 Use command longname in cmdlog if available
+.It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
+max number of cache entries in each cached column
 .It Sy --none-is-null Ns = Ns Ar "bool         " No "True"
 if Python None counts as null
 .It Sy --empty-is-null Ns = Ns Ar "bool        " No "False"
@@ -604,6 +643,8 @@ if empty string counts as null
 if Python False counts as null
 .It Sy --zero-is-null Ns = Ns Ar "bool         " No "False"
 if integer 0 counts as null
+.It Sy --error-is-null Ns = Ns Ar "bool        " No "False"
+if error counts as null
 .It Sy --force-valid-colnames Ns = Ns Ar "bool " No "False"
 clean column names to be valid Python identifiers
 .It Sy --debug Ns = Ns Ar "bool                " No "False"
@@ -636,6 +677,10 @@ parse first N rows of .csv/.tsv as column names
 delimiter to use for tsv filetype
 .It Sy --filetype Ns = Ns Ar "str              " No ""
 specify file type
+.It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
+specify default file type to save as
+.It Sy --tsv-safe-char Ns = Ns Ar "str         " No "\[u00B7]"
+replacement for all tabs and newlines when saving to tsv
 .It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No "pbcopy w"
 command to copy stdin to system clipboard
 .It Sy --pyobj-show-hidden Ns = Ns Ar "bool    " No "False"
@@ -652,11 +697,11 @@ string prefix for rowkey in the cmdlog
 maxsplit to pass to regex.split
 .It Sy --show-graph-labels Ns = Ns Ar "bool    " No "True"
 show axes and legend on graph
-.It Sy --plot-colors Ns = Ns Ar "str           " No ""
+.It Sy --plot-colors Ns = Ns Ar "str           " No "green red yellow cyan magenta white 38 136 168"
 list of distinct colors to use for plotting distinct objects
 .It Sy --zoom-incr Ns = Ns Ar "float           " No "2.0"
 amount to multiply current zoomlevel when zooming
-.It Sy --motd-url Ns = Ns Ar "str              " No "http://visidata.org/motd"
+.It Sy --motd-url Ns = Ns Ar "str              " No "http://visidata.org/motd-1.1"
 source of randomized startup messages
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
@@ -666,15 +711,17 @@ delimiter passed to csv.reader
 quotechar passed to csv.reader
 .It Sy --csv-skipinitialspace Ns = Ns Ar "bool " No "True"
 skipinitialspace passed to csv.reader
+.It Sy --csv-escapechar Ns = Ns Ar "NoneType   " No "None"
+escapechar passed to csv.reader
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .El
 .
 .Ss DISPLAY OPTIONS
-.No Display options can only be set via the Sx Options Sheet No or a config file (see Sx FILES Ns ).
+.No Display options can only be set via the Sx Options Sheet No or a Pa .visidatarc No (see Sx FILES Ns ).
 .Pp
 .
-.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy "disp_note_none     " No "\[u2300]"
 visible contents of a cell whose value is None
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
@@ -701,7 +748,7 @@ edit field fill character
 header note indicating more columns to the left
 .It Sy "disp_more_right    " No ">"
 header note indicating more columns to the right
-.It Sy "disp_error_val     " No "\[u00BF]"
+.It Sy "disp_error_val     " No ""
 displayed contents for computation exception
 .It Sy "disp_ambig_width   " No "1"
 width to use for unicode chars marked ambiguous
@@ -731,9 +778,9 @@ string to display in pending cells
 color of note in pending cells
 .It Sy "color_note_type    " No "226 yellow"
 cell note for numeric types in anytype columns
-.It Sy "color_format_exc   " No "48 bold green"
+.It Sy "color_format_exc   " No "48 green"
 color of formatting exception note
-.It Sy "color_getter_exc   " No "red bold"
+.It Sy "color_getter_exc   " No "red "
 color of computation exception note
 .It Sy "color_menu_prefix  " No "green"
 color of accepted menu part
@@ -747,6 +794,10 @@ color of menu help text
 string between command keybindings and helpstr in menu
 .It Sy "disp_menu_helpsep  " No " | "
 string between submenu options
+.It Sy "color_change_pending" No "reverse yellow"
+color for file attributes pending modification
+.It Sy "color_delete_pending" No "red"
+color for files pending delete
 .It Sy "disp_histogram     " No "*"
 histogram element character
 .It Sy "disp_histolen      " No "80"
@@ -761,6 +812,10 @@ randomly choose attr from set of pixels instead of most common
 color of legend for hidden attribute
 .It Sy "color_graph_axis   " No "bold"
 color for graph axis labels
+.It Sy "color_diff         " No "red"
+color of values different from --diff source
+.It Sy "color_diff_add     " No "yellow"
+color of rows/columns added to --diff source
 .El
 .
 .Sh EXAMPLES
@@ -855,15 +910,13 @@ The following URL schemes are supported:
 .It Sy xlsx No (requires Sy openpyxl Ns )
 .It Sy xls No (requires Sy xlrd Ns )
 .It Sy hdf5 No (requires Sy h5py Ns )
+.It Sy xpt No (requires Sy xport Ns )
+.It Sy sas7bdat No (requires Sy sas7bdat Ns )
+.It Sy sav No (requires Sy savReaderWriter Ns )
+.It Sy shp No (requires Sy pyshp Ns )
 .It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
 .It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
 .It Sy html No (requires Sy lxml Ns )
-
-.It Sy xpt No (SAS; requires Sy xport Ns )
-.It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
-.It Sy sav No (SPSS; requires Sy savReaderWriter Ns )
-.It Sy dta No (Stata; requires Sy pandas Ns )
-.It Sy shp No (requires Sy pyshp Ns )
 .El
 .Pp
 In addition,
@@ -883,6 +936,8 @@ These are the supported savers:
 .It Sy html No (requires Sy lxml Ns )
 .It Sy png No (requires Sy pypng Ns )
 .El
+.Pp
+.No multisave is supported by Sy html Ns , Sy md Ns , and Sy txt Ns ; Sy g^S No will save all sheets into a single output file.
 .Pp
 .
 .Sh AUTHOR
