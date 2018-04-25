@@ -302,10 +302,14 @@ class Canvas(Plotter):
     bottomMarginPixels = 2*4  # reserve bottom line for x axis
 
     commands = Plotter.commands + [
-        Command('move-left', 'sheet.cursorBox.xmin -= cursorBox.w', ''),
-        Command('move-right', 'sheet.cursorBox.xmin += cursorBox.w', ''),
-        Command('move-down', 'sheet.cursorBox.ymin += cursorBox.h', ''),
-        Command('move-up', 'sheet.cursorBox.ymin -= cursorBox.h', ''),
+        Command('view-go-left', 'sheet.cursorBox.xmin -= cursorBox.w', ''),
+        Command('view-go-right', 'sheet.cursorBox.xmin += cursorBox.w', ''),
+        Command('view-go-up', 'sheet.cursorBox.ymin += cursorBox.h', ''),
+        Command('view-go-down', 'sheet.cursorBox.ymin -= cursorBox.h', ''),
+        Command('view-go-far-left', 'sheet.cursorBox.xmin = visibleBox.xmin', ''),
+        Command('view-go-far-right', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w', ''),
+        Command('view-go-far-up', 'sheet.cursorBox.ymin = cursorBox.ymin', ''),
+        Command('view-go-far-down', 'sheet.cursorBox.ymin = cursorBox.ymax-cursorBox.h', ''),
 
         Command('zh', 'sheet.cursorBox.xmin -= canvasCharWidth', ''),
         Command('zl', 'sheet.cursorBox.xmin += canvasCharWidth', ''),

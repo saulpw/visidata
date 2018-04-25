@@ -240,6 +240,9 @@ globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 globalCommand(' ', 'cmd=choose(mkmenu(*_commands.maps), cmdhelp, sheet); cmd and exec_command(cmd, keystrokes=cmd.longname)', 'start menu command')
 globalCommand('^A', 'cmdnames=sorted(set(cmd.longname for cmd in _commands.values() if cmd.longname)); cmd=input("command name: ", completer=CompleteKey(cmdnames)); exec_keystrokes(cmd);', 'execute command by name', 'meta-exec-cmd')
 
+def StubCommand(longname):
+    return Command('', 'error("command %s not defined for this sheet")' % longname, 'stub', longname)
+
 alias(ENTER, 'modify-edit-cell')  # ENTER is this by default
 alias('delete-column-hide', 'schema-column-hide')
 alias('h', 'view-go-left'),
@@ -248,8 +251,8 @@ alias('k', 'view-go-up'),
 alias('l', 'view-go-right'),
 alias('gKEY_LEFT', 'view-go-far-left'),
 alias('gKEY_RIGHT', 'view-go-far-right'),
-alias('gKEY_UP', 'view-go-top'),
-alias('gKEY_DOWN', 'view-go-bottom'),
+alias('gKEY_UP', 'view-go-far-top'),
+alias('gKEY_DOWN', 'view-go-far-bottom'),
 alias('^F', 'view-go-page-down'),
 alias('^B', 'view-go-page-up'),
 alias(['gg', 'gk'], 'view-go-far-top'),
@@ -1051,7 +1054,24 @@ class Colorizer:
         self.func = colorfunc
 
 class BaseSheet:
-    commands = []
+    commands = [
+StubCommand('modify-edit-cell'),
+StubCommand('schema-column-hide'),
+StubCommand('view-go-left'),
+StubCommand('view-go-down'),
+StubCommand('view-go-up'),
+StubCommand('view-go-right'),
+StubCommand('view-go-far-left'),
+StubCommand('view-go-far-right'),
+StubCommand('view-go-far-top'),
+StubCommand('view-go-far-bottom'),
+StubCommand('view-go-page-down'),
+StubCommand('view-go-page-up'),
+StubCommand('view-go-far-top'),
+StubCommand('view-go-far-bottom'),
+StubCommand('view-go-far-left'),
+StubCommand('view-go-far-right'),
+]
     rowtype=''
     def __init__(self, name, **kwargs):
         self.name = name
