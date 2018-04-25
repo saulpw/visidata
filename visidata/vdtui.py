@@ -2521,10 +2521,11 @@ def suspend():
         os.kill(os.getpid(), signal.SIGSTOP)
 
 # history: earliest entry first
-def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, append=False):
+def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, append=False):
     'A better curses line editing widget.'
     ESC='^['
     ENTER='^J'
+    TAB='^I'
 
     def until_get_wch():
         'Ignores get_wch timeouts'
@@ -2615,10 +2616,14 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
     insert_mode = True
     first_action = True
     v = str(value)  # value under edit
-    i = 0           # index into v
+
+    # i = 0  # index into v, initial value can be passed in as argument as of 1.2
     if append:
         i = len(v)
+
+    if i != 0:
         first_action = False
+
     left_truncchar = right_truncchar = truncchar
 
     def rfind_nonword(s, a, b):
@@ -2657,12 +2662,12 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
         elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
-        elif ch == '^C' or ch == ESC:              raise EscapeException(ch)
+        elif ch in ('^C', '^Q', ESC):              raise EscapeException(ch)
         elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
-        elif ch == '^I':                           v, i = complete_state.complete(v, i, +1)
+        elif ch == TAB:                            v, i = complete_state.complete(v, i, +1)
         elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
         elif ch == ENTER:                          break
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
@@ -2671,7 +2676,7 @@ def editText(scr, y, x, w, attr=curses.A_NORMAL, value='', fillchar=' ', truncch
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch()); i += 1  # literal character
-        elif ch == '^W':                           j = rfind_nonword(v, 0, i-1); v = v[:j+1] + v[i:]; i = j+1
+        elif ch == '^W':                           j = rfind_nonword(v, 0, i-1); v = v[:j+1] + v[i:]; i = j+1  # erase word
         elif ch == '^Z':                           v = suspend()
         elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
         elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
