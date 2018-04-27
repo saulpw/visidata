@@ -237,7 +237,7 @@ class DirSheet(Sheet):
     ]
     columns = [
         # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
-        DeferredSetColumn('dir',
+        DeferredSetColumn('directory',
             getter=lambda col,row: row[0].parent.relpath(col.sheet.source.resolve()),
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         DeferredSetColumn('filename',
