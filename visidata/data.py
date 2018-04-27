@@ -529,12 +529,13 @@ def save_tsv_header(p, vs):
 @async
 def save_tsv(p, vs):
     'Write sheet to file `fn` as TSV.'
+    delim = options.delimiter
     trdict = tsv_trdict()
 
     with p.open_text(mode='w') as fp:
         save_tsv_header(p, vs)
 
-        if replch:
+        if trdict:
             for r in Progress(vs.rows):
                 fp.write(delim.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
         else:
