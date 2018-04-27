@@ -8,7 +8,9 @@ option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds')
 option('disp_replay_play', '▶', 'status indicator for active replay')
 option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
+option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
+globalCommand('gD', 'p=Path(options.visidata_dir); vd.push(DirSheet(p.name, source=p))', 'open .visidata directory', 'meta-visidata-dir')
 globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'meta-cmdlog')
 globalCommand('^D', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)', 'save CommandLog to new .vd file', 'meta-cmdlog-save')
 globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'meta-replay-toggle')
@@ -50,7 +52,7 @@ def namedlist(objname, fieldnames):
 CommandLogRow = namedlist('CommandLogRow', 'sheet col row keystrokes input comment'.split())
 
 def fnSuffix(template):
-    for i in range(1, 10):
+    for i in range(1, 1000):
         fn = template.format(i)
         if not Path(fn).exists():
             return fn
@@ -95,6 +97,7 @@ class CommandLog(Sheet):
         Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row', 'replay-row'),
         Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog', 'replay-sheet'),
         Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay', 'replay-abort'),
+        Command('z^S', 'sheet.saveMacro(selectedRows or error("no rows selected"), input("save macro for keystroke: "))', 'save macro', 'meta-macro-save'),
     ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 
@@ -119,6 +122,14 @@ class CommandLog(Sheet):
         'Remove all traces of sheets named vs.name from the cmdlog.'
         self.rows = [r for r in self.rows if r.sheet != vs.name]
         status('removed "%s" from cmdlog' % vs.name)
+
+    def saveMacro(self, rows, ks):
+        vs = copy(self)
+        vs.rows = self.selectedRows
+        macropath = Path(options.visidata_dir+fnSuffix("macro-{0}")+".vd")
+        save_vd(macropath, vs)
+        vd().macros[ks] = vs
+        append_tsv_row(vd().macrosheet, (ks, macropath.resolve()))
 
     def beforeExecHook(self, sheet, keystrokes, args=''):
         if not isLoggableSheet(sheet):
@@ -152,6 +163,7 @@ class CommandLog(Sheet):
             # remove user-aborted commands and simple movements
             if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes):
                 self.addRow(self.currentActiveRow)
+                append_tsv_row(vd().sessionlog, self.currentActiveRow)
 
         self.currentActiveRow = None
 
@@ -314,3 +326,15 @@ vd().addHook('postedit', vd().cmdlog.setLastArgs)
 
 vd().addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'green'))
 vd().addHook('set_option', vd().cmdlog.setOption)
+
+def loadMacros():
+    macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
+    macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('keystrokes', 0), ColumnItem('filename', 1))) or error('error loading macros')
+
+    for ks, fn in macrosheet.rows:
+        vd().macros[ks] = loadInternalSheet(CommandLog, Path(fn))
+
+    return macrosheet
+
+vd().sessionlog = loadInternalSheet(CommandLog, Path(os.path.join(options.visidata_dir, 'history', date().to_string('%Y%m%d-%H%M%S.vd'))))
+vd().macrosheet = loadMacros()

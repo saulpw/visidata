@@ -3,6 +3,7 @@ import stat
 import pwd
 import grp
 import subprocess
+import contextlib
 
 from .vdtui import *
 
@@ -446,7 +447,10 @@ def _getTsvHeaders(fp, nlines):
     headers = []
     i = 0
     while i < nlines:
-        L = next(fp)
+        try:
+            L = next(fp)
+        except StopIteration:  # not enough lines for headers
+            return headers
         L = L.rstrip('\n')
         if L:
             headers.append(L.split(options.delimiter))
@@ -504,19 +508,30 @@ def reload_tsv_sync(vs, **kwargs):
     status('loaded %s' % vs.name)
 
 
-@async
-def save_tsv(p, vs):
-    'Write sheet to file `fn` as TSV.'
-
+def tsv_trdict(delim=None):
     # replace tabs and newlines
-    delim = options.delimiter
+    delim = delim or options.delimiter
     replch = options.tsv_safe_char
-    trdict = {ord(delim): replch, 10: replch, 13: replch}
+    return {ord(delim): replch, 10: replch, 13: replch}
+
+
+def save_tsv_header(p, vs):
+    'Write tsv header for Sheet `vs` to Path `p`.'
+    trdict = tsv_trdict()
 
     with p.open_text(mode='w') as fp:
         colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
+
+
+@async
+def save_tsv(p, vs):
+    'Write sheet to file `fn` as TSV.'
+    trdict = tsv_trdict()
+
+    with p.open_text(mode='w') as fp:
+        save_tsv_header(p, vs)
 
         if replch:
             for r in Progress(vs.rows):
@@ -527,3 +542,24 @@ def save_tsv(p, vs):
 
     status('%s save finished' % p)
 
+
+def append_tsv_row(vs, row):
+    'Append `row` to vs.source, creating file with correct headers if necessary. For internal use only.'
+    if not vs.source.exists():
+        with contextlib.suppress(FileExistsError):
+            os.makedirs(vs.source.parent.resolve())
+
+        save_tsv_header(vs.source, vs)
+
+    trdict = tsv_trdict(delim='\t')
+
+    with vs.source.open_text(mode='a') as fp:
+        fp.write(delim.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')
+
+
+def loadInternalSheet(klass, p, **kwargs):
+    'Load internal sheet of given klass.  Internal sheets are always tsv.'
+    vs = klass(p.name, source=p, **kwargs)
+    if p.exists():
+        reload_tsv_sync(vs)
+    return vs

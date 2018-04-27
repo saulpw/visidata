@@ -1,19 +1,26 @@
 # VisiData version history
 
+- macro system
+   - `gD` goes to directory browser of `options.visidata_dir` (default to `~/.visidata/`) which contains saved commandlogs and macros
+   - `z^S` on CommandLog saves selected rows to macro for given keystroke, saving to `.visidata/macro/command-longname.vd`
+   - macro list saved at `.visidata/macros.vd` (keystroke, filename)
+- commands auto-appended cmdlog to files in `.visidata/history/`
 - [DirSheet] edits make deferred changes to any field
+   - add dir and filetype
    - note: only 256 changes maintained per column (same as column cache size)
    - `^S` saves all deferred changes
    - `z^S` saves changes for the current file only
    - `^R` clears all changes (reload)
    - `z^R` clears changes on the current file only
    - `d`/`gd` marks the current/selected file for deletion
+- `g^S` for multisave to single file (for formats that support it) or directory
 - `^A` to specify a command longname to execute
 - `g^R` on SheetsSheet to reload all [selected] sheets
 - `options.error_is_null` to treat errors as nulls when applicable
 - `g,` fixed to compare by visible column values, not by row objects
 - Shift-Up/Down aliases for mac
 - options.wrap now true by default on TextSheet (`v` to toggle)
-- save_txt with single column concatenates all values to single file
+- `save_txt` with single column concatenates all values to single file
 - `+` can add multiple aggregators
 - .shp can save as geojson
 - ^X bugfix: use evalexpr over cursorRow

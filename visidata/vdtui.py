@@ -616,6 +616,7 @@ class VisiData:
         self.scr = None  # curses scr
         self.hooks = collections.defaultdict(list)  # [hookname] -> list(hooks)
         self.threads = [] # all long-running threads, including main and finished
+        self.macros = {}  # [keystrokes] -> CommandLog
         self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
         self.addHook('rstatus', self.rightStatus)
@@ -1081,10 +1082,11 @@ StubCommand('view-go-far-right'),
         sheetcmds = collections.OrderedDict()
         for cls in inspect.getmro(self.__class__)[::-1]:  # reverse of method-resolution-order
             for cmd in getattr(cls, 'commands', []):
-                sheetcmds[cmd.name] = cmd
+                if cmd.name:
+                    sheetcmds[cmd.name] = cmd
                 if cmd.longname:
                     sheetcmds[cmd.longname] = cmd
-        self._commands = collections.ChainMap(sheetcmds, baseCommands)
+        self._commands = collections.ChainMap(vd().macros, sheetcmds, baseCommands)
 
         # for progress bar
         self.progresses = []  # list of Progress objects
@@ -1118,6 +1120,8 @@ StubCommand('view-go-far-right'),
         cmd = None
         while k in self._commands:
             cmd = self._commands.get(k, default)
+            if isinstance(cmd, CommandLog):
+                return cmd
             k = cmd.execstr  # see if execstr is actually just an alias for another keystroke
         return cmd
 
@@ -1129,6 +1133,10 @@ StubCommand('view-go-far-right'),
         if not cmd:
             status('no command "%s"' % keystrokes)
             return True
+
+        if isinstance(cmd, CommandLog):
+            cmd.replay()
+            return False
 
         escaped = False
         err = ''
