@@ -518,6 +518,7 @@ def tsv_trdict(delim=None):
 def save_tsv_header(p, vs):
     'Write tsv header for Sheet `vs` to Path `p`.'
     trdict = tsv_trdict()
+    delim = options.delimiter
 
     with p.open_text(mode='w') as fp:
         colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
@@ -554,7 +555,7 @@ def append_tsv_row(vs, row):
     trdict = tsv_trdict(delim='\t')
 
     with vs.source.open_text(mode='a') as fp:
-        fp.write(delim.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')
+        fp.write('\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')
 
 
 def loadInternalSheet(klass, p, **kwargs):
