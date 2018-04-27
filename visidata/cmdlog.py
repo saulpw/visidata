@@ -336,5 +336,5 @@ def loadMacros():
 
     return macrosheet
 
-vd().sessionlog = loadInternalSheet(CommandLog, Path(os.path.join(options.visidata_dir, 'history', date().to_string('%Y%m%d-%H%M%S.vd'))))
+vd().sessionlog = loadInternalSheet(CommandLog, Path(os.path.join(options.visidata_dir, 'history', date().to_string('%Y%m%d.vd'))))
 vd().macrosheet = loadMacros()
