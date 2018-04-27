@@ -532,9 +532,9 @@ def save_tsv(p, vs):
     delim = options.delimiter
     trdict = tsv_trdict()
 
-    with p.open_text(mode='w') as fp:
-        save_tsv_header(p, vs)
+    save_tsv_header(p, vs)
 
+    with p.open_text(mode='a') as fp:
         if trdict:
             for r in Progress(vs.rows):
                 fp.write(delim.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
