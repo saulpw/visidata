@@ -163,7 +163,8 @@ class CommandLog(Sheet):
             # remove user-aborted commands and simple movements
             if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes):
                 self.addRow(self.currentActiveRow)
-                append_tsv_row(vd().sessionlog, self.currentActiveRow)
+                if options.visidata_dir:
+                    append_tsv_row(vd().sessionlog, self.currentActiveRow)
 
         self.currentActiveRow = None
 
