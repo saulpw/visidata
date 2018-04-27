@@ -294,6 +294,14 @@ class DirSheet(Sheet):
         if not newpath.startswith('/'):
             newpath = os.path.join(self.source.resolve(), newpath)
 
+        parent = Path(newpath).parent
+        if parent.exists():
+            if not parent.is_dir():
+                error('destination %s not a directory' % parent)
+        else:
+            with contextlib.suppress(FileExistsError):
+                os.makedirs(parent.resolve())
+
         os.rename(row[0].resolve(), newpath)
         row[0] = Path(newpath)
         self.restat(row)
