@@ -2397,6 +2397,7 @@ class SheetsSheet(Sheet):
         ColumnAttr('keyColNames'),
         ColumnAttr('source'),
     ]
+    nKeys = 1
 
     def newRow(self):
         return Sheet('', columns=[ColumnItem('', 0)], rows=[])
