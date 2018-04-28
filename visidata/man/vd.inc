@@ -142,12 +142,13 @@ adjust width of all visible columns
 .No adjust width of current column to Ar number
 .Pp
 .It Ic " -" Ns " (hyphen)"
-hide current column (to unhide, go to
-.Sy C Ns olumns sheet and Sy e Ns dit its width)
+hide current column
 .It Ic "z-" Ns
 reduce width of current column by half
 .It Ic "g-" Ns
-delete this column (cannot be undone)
+delete this column (cannot be undeleted)
+.It Ic "gv" Ns
+unhide all columns
 .Pp
 .It Ic "! z!" Ns
 toggle/unset current column as a key column

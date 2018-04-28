@@ -1238,6 +1238,7 @@ Command('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width)
 
 Command('-', 'cursorCol.width = 0', 'hide current column', 'column-hide'),
 Command('z-', 'cursorCol.width = cursorCol.width//2', 'reduce width of current column by half', 'column-width-half'),
+Command('gv', 'for c in columns: c.width = c.width or c.getMaxWidth(visibleRows)', 'unhide all columns', 'column-unhide-all'),
 
 Command('!', 'toggleKeyColumn(cursorCol)', 'toggle current column as a key column', 'column-key-toggle'),
 Command('z!', 'keyCols.remove(cursorCol)', 'unset current column as a key column', 'column-key-unset'),
