@@ -560,6 +560,7 @@ def sync(expectedThreads=0):
 
 def async(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
+    @functools.wraps(func)
     def _execAsync(*args, **kwargs):
         return vd().execAsync(func, *args, **kwargs)
     return _execAsync

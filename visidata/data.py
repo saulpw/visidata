@@ -571,5 +571,5 @@ def loadInternalSheet(klass, p, **kwargs):
     'Load internal sheet of given klass.  Internal sheets are always tsv.'
     vs = klass(p.name, source=p, **kwargs)
     if p.exists():
-        reload_tsv_sync(vs)
+        vs.reload.__wrapped__(vs)
     return vs
