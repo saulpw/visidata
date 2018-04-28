@@ -29,7 +29,7 @@ class InvertedCanvas(Canvas):
         self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax), bbox.xymin)
 
     def plotpixel(self, x, y, attr, row=None):
-        y = self.plotviewBox.ymax-y+4
+        y = self.plotviewBox.ymax-y
         self.pixels[y][x][attr].append(row)
 
     def scaleY(self, canvasY):

@@ -299,7 +299,7 @@ class Canvas(Plotter):
     leftMarginPixels = 10*2
     rightMarginPixels = 6*2
     topMarginPixels = 0
-    bottomMarginPixels = 2*4  # reserve bottom line for x axis
+    bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
     commands = Plotter.commands + [
         Command('view-go-left', 'sheet.cursorBox.xmin -= cursorBox.w', ''),
@@ -402,7 +402,7 @@ class Canvas(Plotter):
     def resetCanvasDimensions(self):
         super().resetCanvasDimensions()
         self.plotviewBox = BoundingBox(self.leftMarginPixels, self.topMarginPixels,
-                                       self.plotwidth-self.rightMarginPixels, self.plotheight-self.bottomMarginPixels)
+                                       self.plotwidth-self.rightMarginPixels, self.plotheight-self.bottomMarginPixels-1)
 
     @property
     def statusLine(self):
