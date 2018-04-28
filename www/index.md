@@ -1,16 +1,23 @@
 
+# VisiData
+
+## Latest Version: [1.1 (released 2018-03-05)](/releases)
+
+VisiData is an interactive multitool for tabular data.  It combines the clarity of a spreadsheet, the efficiency of the terminal, and the power of Python, into a lightweight utility which can handle millions of rows with ease.
+
 <div class="screenshot">
 <a href="/screenshot.png"><img src="/screenshot.png" alt="screenshot of VisiData in action"/></a>
 </div>
 
-VisiData (`vd` on the command-line) is an [open-source](https://github.com/saulpw/visidata) multitool for interacting with tabular data from within the terminal.  It's great for investigative journalists, data scientists, unix command-line users, and anyone else who wants to quickly look at or manipulate data.
+It's great for investigative journalists, data scientists, unix command-line users, and anyone else who wants to quickly look at or manipulate data.
 
 ## Testimonials
 
-- "VisiData is indispensable for data engineering tasks...such a breath of fresh air!" - [@soaxelbrooke](https://news.ycombinator.com/item?id=16516297)
+- "VisiData is indispensable for data engineering tasks...such a breath of fresh air!" -- [@soaxelbrooke](https://news.ycombinator.com/item?id=16516297)
 - "the first tool I reach for when examining/exploring a new dataset" -- [@jsvine](https://news.ycombinator.com/item?id=16515925)
 - "Lordy, what a pleasure to use." -- [@dN0t](https://twitter.com/dN0t/status/970445038349058048)
-- "VisiData has changed my life" - [@AlexMahadevan](https://twitter.com/AlexMahadevan/status/976436539638116352)
+- "VisiData has changed my life" -- [@AlexMahadevan](https://twitter.com/AlexMahadevan/status/976436539638116352)
+
 
 ## Recent Updates
 

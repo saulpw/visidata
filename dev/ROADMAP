@@ -4,6 +4,7 @@ I. Interface
 - mouse-ability
     - allow user to disable mouse for system copy/paste
     - clickable column headers to set type/name, click-drag to move columns/rows
+    - clickable motd
 
 II. Internals
 - break out into library, usable standalone by other apps
