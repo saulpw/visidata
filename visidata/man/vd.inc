@@ -78,8 +78,6 @@ cancel user input or abort all async threads on current sheet
 quit current sheet
 .It Ic "gq"
 quit all sheets (clean exit)
-.It Ic "Backspace"
-.No quit current sheet and remove it from the Sy CommandLog
 .El
 .Ss "Cursor Movement"
 .
@@ -305,12 +303,12 @@ open
 .No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save CommandLog to Ar filename.vd No file
-.It Ic "A" Ar number
+.It Ic "Shift+A" Ar number
 .No open new blank sheet with Ar number No columns
-.It Ic "R" Ar number
-select a random population subset of
+.It Ic "Shift+R" Ar number
+open new sheet with random population subset of
 .Ar number No rows
-.It Ic "T"
+.It Ic "Shift+T"
 open new sheet with rows and columns transposed
 .Pp
 .It Ic " +" Ar aggregator
@@ -363,15 +361,12 @@ scroll canvas
 .Ss Other Commands
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.
-.It Ic "  V"
+.It Ic "Shift+Q"
+.No quit current sheet and remove it from the Sy CommandLog
+.It Ic "Shift+V"
 view contents of current cell in a new TextSheet
-.El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset xxx
-.It Ic " v"
+.It Ic "  v"
 toggle visibility (text wrap on TextSheet, legends/axes on Graph)
-.El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " ^^" No (Ctrl-^)
 jump to previous sheet (swaps with current sheet)
 .It Ic " ^A" Ar longname

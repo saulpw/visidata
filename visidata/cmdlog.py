@@ -17,7 +17,7 @@ globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'meta-rep
 globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'meta-replay-step')
 globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'meta-replay-cancel')
 
-globalCommand('KEY_BACKSPACE', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))', 'quit current sheet and remove it from the cmdlog', 'sheet-quit-remove')
+globalCommand('Q', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))', 'quit current sheet and remove it from the cmdlog', 'sheet-quit-remove')
 
 globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
 
