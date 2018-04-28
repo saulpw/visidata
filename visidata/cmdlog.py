@@ -127,7 +127,7 @@ class CommandLog(Sheet):
     def saveMacro(self, rows, ks):
         vs = copy(self)
         vs.rows = self.selectedRows
-        macropath = Path(options.visidata_dir+fnSuffix("macro-{0}")+".vd")
+        macropath = Path(fnSuffix(options.visidata_dir+"macro-{0}.vd"))
         save_vd(macropath, vs)
         vd().macros[ks] = vs
         append_tsv_row(vd().macrosheet, (ks, macropath.resolve()))
