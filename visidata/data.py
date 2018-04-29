@@ -226,7 +226,7 @@ class DirSheet(Sheet):
     rowtype = 'files' # rowdef: (Path, stat)
     commands = [
         Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open current file as a new sheet', 'sheet-open-row'),
-        Command('g'+ENTER, 'list([vd.push(openSource(r[0].resolve())) for r in selectedRows])', 'open selected files as new sheets', 'sheet-open-rows'),
+        Command('g'+ENTER, 'for r in selectedRows: vd.push(openSource(r[0].resolve()))', 'open selected files as new sheets', 'sheet-open-rows'),
         Command('^O', 'launchEditor(cursorRow[0].resolve())', 'open current file in external $EDITOR', 'edit-row-external'),
         Command('g^O', 'launchEditor(*(r[0].resolve() for r in selectedRows))', 'open selected files in external $EDITOR', 'edit-rows-external'),
         Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
