@@ -1,0 +1,29 @@
+sheet	col	row	keystrokes	input	comment
+			o	sample_data/sample.tsv	open file
+sample	Unit_Cost		g=	'$'+Unit_Cost	set current column for selected rows to result of Python expression
+sample	Unit_Cost	3	e	AUD$19.99	edit contents of current cell
+sample	Unit_Cost	9	e	E8.99	edit contents of current cell
+sample			^R		reload current sheet
+sample	Unit_Cost		=	'$'	create new column from Python expression, with column names as variables
+sample	'$'		^	Unit_Currency	edit name of current column
+sample	Unit_Currency		_		adjust width of current column to full
+sample	Unit_Currency		'		add a frozen copy of current column with all cells evaluated
+sample	Unit_Currency		g-		remove column permanently from the list of columns
+sample	Unit_Currency_frozen		_		adjust width of current column to full
+sample	Unit_Currency_frozen		^	Unit_Currency	edit name of current column
+sample	Unit_Currency		_		adjust width of current column to full
+sample	Unit_Currency	7	e	AUD$	edit contents of current cell
+sample	Unit_Currency	12	e	EUR	edit contents of current cell
+sample	Unit_Currency	17	e	PES	edit contents of current cell
+sample	Total		=	'$'	create new column from Python expression, with column names as variables
+sample	'$'		^	Total_Currency	edit name of current column
+sample	Total_Currency		_		adjust width of current column to full
+sample	OrderDate		!		toggle current column as a key column
+sample	Region		!		toggle current column as a key column
+sample	Rep		!		toggle current column as a key column
+sample	Item		!		toggle current column as a key column
+sample	Total		^	Total_Cost	edit name of current column
+sample	Total_Cost		_		adjust width of current column to full
+sample			M		open melted sheet (unpivot)
+sample_melted			q		quit current sheet
+sample			gM	(.*)_(.*)	open melted sheet (unpivot), factoring columns
