@@ -1,14 +1,14 @@
 sheet	col	row	keystrokes	input	comment
-			o	tests/data1.tsv	open input in VisiData
-			o	tests/data2.tsv	open input in VisiData
-data2	Key	0	!		pin current column on the left as a key column
-data2	C	0	S		open Sheets Sheet
-sheets	name	2	^J		jump to sheet referenced in current row
-data1	Key	0	!		pin current column on the left as a key column
-data1	A	0	S		open Sheets Sheet
-sheets	name	1	s		select current row
-sheets	name	2	s		select current row
-sheets	name	2	&	full	merge the selected sheets with visible columns from all, keeping rows according to jointype
-data1+data2	A	0	!		pin current column on the left as a key column
-data1+data2	B	0	g[		sort ascending by all key columns
-data1+data2	A	0	!		unpin current column as a key column
+			o	tests/data1.tsv	open file
+			o	tests/data2.tsv	open file
+data2			S		open Sheets Sheet
+sheets		キdata2	s		select current row
+sheets		キdata1	s		select current row
+sheets			gC		open Columns Sheet with all columns from selected sheets
+all_columns		キdata2,Key	g!		toggle selected rows as key columns on source sheet
+all_columns		キdata1,Key	g!		toggle selected rows as key columns on source sheet
+all_columns			q		quit current sheet
+sheets			&	full	merge the selected sheets with visible columns from all, keeping rows according to jointype
+data2+data1	A		!		toggle current column as a key column
+data2+data1			g[		sort ascending by all key columns
+data2+data1	A		!		toggle current column as a key column
