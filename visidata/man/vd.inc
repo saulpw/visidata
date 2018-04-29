@@ -1,4 +1,4 @@
-.Dd March 05, 2018
+.Dd April 29, 2018
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -78,6 +78,8 @@ cancel user input or abort all async threads on current sheet
 quit current sheet
 .It Ic "gq"
 quit all sheets (clean exit)
+.It Ic "^^" No (Ctrl-^)
+jump to previous sheet (swaps with current sheet)
 .El
 .Ss "Cursor Movement"
 .
@@ -298,15 +300,16 @@ open
 .Ar input No in Sy VisiData
 .It Ic "^S g^S" Ar filename
 .No save current/all sheet(s) to Ar filename No in format determined by extension (default .tsv)
-.It Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
+.It ""
+.No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
 .It Ic "z^S" Ar filename
 .No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save CommandLog to Ar filename.vd No file
 .It Ic "Shift+A" Ar number
 .No open new blank sheet with Ar number No columns
-.It Ic "Shift+R" Ar number
-open new sheet with random population subset of
+.It Ic "R" Ar number
+select a random population subset of
 .Ar number No rows
 .It Ic "Shift+T"
 open new sheet with rows and columns transposed
@@ -367,28 +370,31 @@ scroll canvas
 view contents of current cell in a new TextSheet
 .It Ic "  v"
 toggle visibility (text wrap on TextSheet, legends/axes on Graph)
-.It Ic " ^^" No (Ctrl-^)
-jump to previous sheet (swaps with current sheet)
+.Pp
+.It Ic "Space"
+open command selection menu
 .It Ic " ^A" Ar longname
 .No execute command by its Ar longname
+.Pp
 .It Ic " ^E"
 view traceback for most recent error
 .It Ic "g^E"
 view traceback for most recent errors
 .It Ic "z^E"
 view traceback for error in current cell
+.Pp
 .It Ic " ^L"
 refresh screen
-.It Ic " ^G"
-show cursor position and bounds of current sheet on status line
-.It Ic " ^V"
-show version information on status line
 .It Ic " ^R"
 reload current sheet
 .It Ic "z^R"
 clear cache for current column
 .It Ic " ^Z"
 suspend VisiData process
+.It Ic " ^G"
+show cursor position and bounds of current sheet on status line
+.It Ic " ^V"
+show version and copyright information on status line
 .It Ic " ^P"
 .No open Sy Status History
 .
@@ -408,7 +414,7 @@ open current row/cell/sheet as Python object
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
 .It Sy " \&."
-.Sy Directory Sheet No "            browse files in a directory"
+.Sy Directory Sheet No "            browse and modify properties of files in a directory"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -442,19 +448,19 @@ open current row/cell/sheet as Python object
 .Ss Directory Sheet
 .Bl -inset -compact
 .It (sheet-specific commands)
-.It modifying any cell changes the in-memory value, only applied to the filesystem with Ic ^S
+.It Modifying any cell changes the in-memory value. Changes are only applied to the filesystem with Ic ^S
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  gEnter"
-open current/selected file(s) as new sheets
+open current/selected file(s) as new sheet(s)
 .It Ic " ^O  g^O"
 open current/selected file(s) in external $EDITOR
 .It Ic " d   gd"
 schedule current/selected file(s) for deletion
 .It Ic "z^R   ^R"
-reload current/all file(s) information, undoing any pending changes
+reload information for current/all file(s), undoing any pending changes
 .It Ic "z^S   ^S"
-apply changes to current/all file(s)
+apply all deferred changes to current/all file(s)
 .El
 .
 .Ss METASHEETS
@@ -485,13 +491,15 @@ set type of selected columns on source sheet to str/int/float/currency/date
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "Enter"
+.It Ic " Enter"
 jump to sheet referenced in current row
+.It Ic " a"
+add row to reference a new blank sheet
 .It Ic "gC"
 .No open Sy Columns Sheet No with all columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
-.It Ic "&" Ar jointype
+.It Ic " &" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
 .Bl -tag -width x -compact -offset XXXXXXXXXXXXXXXXXXXX 
@@ -518,15 +526,22 @@ edit option
 .
 .Ss CommandLog (Shift+D)
 .Bl -inset -compact
-.It (sheet-specific commands)
+.It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic " x"
+.It Ic gD
+.No open Sy Directory Sheet No for Sy options.visidata_dir No (default: Sy ~/.visidata/ Ns ), which contains saved commandlogs and macros
+.It (sheet-specific commands)
+.It Ic "  x"
 replay command in current row
-.It Ic "gx"
+.It Ic " gx"
 replay contents of entire CommandLog
 .It Ic " ^C"
 abort replay
+.It Ic "z^S" Ar keystroke
+.No save selected rows to macro mapped to Ar keystroke
+.It ""
+.No Macros are saved to Sy .visidata/macro/command-longname.vd Ns . The list of macros is saved at Sy .visidata/macros.vd No (keystroke, filename).
 .El
 .
 .Ss DERIVED SHEETS
@@ -575,7 +590,12 @@ open sheet of source rows aggregated in current pivot cell
 .El
 .Ss Melted Sheet (Shift+M)
 .Bl -inset -compact
-.It Opens melted sheet (unpivot), with all non-key columns reduced to Variable-Value rows.
+.It Open melted sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows.
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "gM" Ar regex
+.No open melted sheet (unpivot), with key columns retained and Ar regex No capture groups determining how the non-key columns will be reduced to Variable-Value rows.
 .El
 .Ss Python Object Sheet (^X ^Y g^Y z^Y)
 .Bl -inset -compact
@@ -714,13 +734,14 @@ The following URL schemes are supported:
 .It Sy xlsx No (requires Sy openpyxl Ns )
 .It Sy xls No (requires Sy xlrd Ns )
 .It Sy hdf5 No (requires Sy h5py Ns )
-.It Sy xpt No (requires Sy xport Ns )
-.It Sy sas7bdat No (requires Sy sas7bdat Ns )
-.It Sy sav No (requires Sy savReaderWriter Ns )
-.It Sy shp No (requires Sy pyshp Ns )
 .It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
 .It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
-.It Sy html No (requires Sy lxml Ns )
+.It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
+.It Sy xpt No (SAS; requires Sy xport Ns )
+.It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
+.It Sy sav No (SPSS; requires Sy savReaderWriter Ns )
+.It Sy dta No (Stata; requires Sy pandas Ns )
+.It Sy shp No (requires Sy pyshp Ns )
 .El
 .Pp
 In addition,
@@ -735,13 +756,14 @@ These are the supported savers:
 .It Sy json No (one object with all rows)
 .Bl -inset -compact -offset xxx
 .It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
+.It Sy .shp No files can be saved as Sy geoJSON Ns .
 .El
 .It Sy md No (org-mode compatible markdown table)
-.It Sy html No (requires Sy lxml Ns )
+.It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
 .It Sy png No (requires Sy pypng Ns )
 .El
 .Pp
-.No multisave is supported by Sy html Ns , Sy md Ns , and Sy txt Ns ; Sy g^S No will save all sheets into a single output file.
+.No Multisave is supported by Sy html Ns , Sy md Ns , and Sy txt Ns ; Sy g^S No will save all sheets into a single output file.
 .Pp
 .
 .Sh AUTHOR
