@@ -27,3 +27,6 @@ sample	Total_Cost		_		adjust width of current column to full
 sample			M		open melted sheet (unpivot)
 sample_melted			q		quit current sheet
 sample			gM	(.*)_(.*)	open melted sheet (unpivot), factoring columns
+sample_melted			C		open Columns Sheet
+sample_melted_columns	name		]		sort descending by current column
+sample_melted_columns			q		quit current sheet
