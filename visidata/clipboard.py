@@ -9,7 +9,7 @@ globalCommand('d', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowInd
 globalCommand('p', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'data-clipboard-paste-after')
 globalCommand('P', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'data-clipboard-paste-before')
 
-globalCommand('gd', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected(); status("%d %s deleted" % (len(vd.cliprows), rowtype))', 'delete selected rows and move them to clipboard', 'modify-delete-selected')
+globalCommand('gd', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', 'delete selected rows and move them to clipboard', 'modify-delete-selected')
 globalCommand('gy', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))', 'copy selected rows to clipboard', 'data-clipboard-copy-selected')
 
 globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy current cell to clipboard', 'data-clipboard-copy-cell')

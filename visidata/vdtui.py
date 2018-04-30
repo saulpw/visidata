@@ -1484,7 +1484,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
             else:
                 ndeleted += 1
 
-        status('deleted %s rows' % ndeleted)
+        status('deleted %s %s' % (ndeleted, self.rowtype))
         return ndeleted
 
     @async
