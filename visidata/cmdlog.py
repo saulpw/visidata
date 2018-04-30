@@ -29,7 +29,7 @@ nonLogKeys += '^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) z? KEY_BACKSPACE'.split(
 nonLogKeys += [' ']
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
-option('cmdlog_histfile', '', 'autorecords each cmdlog action to the given file')
+option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 
 def itemsetter(i):
     def g(obj, v):
