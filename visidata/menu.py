@@ -51,18 +51,19 @@ def collapse_single_children(tree):
 def mkmenu(*cmdmaps):
     cmdtree = deepcopy(commandMenu)
     for commands in cmdmaps:
-      for cmd in commands.values():
-         if cmd.longname and cmd.execstr not in commands:
-            longname = cmd.longname
-            parts = longname.split('-')
-            cmdnode = cmdtree
-            for p in parts[:-1]:
-                p += '-'
-                if p not in cmdnode:
-                    cmdnode[p] = collections.OrderedDict()
-                cmdnode = cmdnode[p]
-            assert isinstance(cmdnode, collections.OrderedDict), longname # parent cannot also be leaf
-            cmdnode[parts[-1]] = cmd
+        for cmd in commands.values():
+            if isinstance(cmd, Command):
+                if cmd.longname and cmd.execstr not in commands:
+                    longname = cmd.longname
+                    parts = longname.split('-')
+                    cmdnode = cmdtree
+                    for p in parts[:-1]:
+                        p += '-'
+                        if p not in cmdnode:
+                            cmdnode[p] = collections.OrderedDict()
+                        cmdnode = cmdnode[p]
+                    assert isinstance(cmdnode, collections.OrderedDict), longname # parent cannot also be leaf
+                    cmdnode[parts[-1]] = cmd
 
     cmdtree = collapse_single_children(cmdtree)
 

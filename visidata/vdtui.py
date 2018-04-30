@@ -420,7 +420,12 @@ def cmdhelp(cmdname, sheet):
     helpstr = helpstr.replace("rows", '[%s]' % sheet.rowtype)
 
     # get all keybindings to cmdname
-    bindings = set(cmd.name for cmd in sheet._commands.values() if sheet.getCommand(cmd.name).longname == cmdname and cmd.name != cmdname)
+    bindings = set()
+    for cmd in sheet._commands.values():
+        othercmd = sheet.getCommand(cmd.name)
+        if othercmd and othercmd.longname == cmdname and cmd.name != cmdname:
+            bindings.add(cmd.name)
+
     bindings = ' '.join(bindings)
     return options.disp_menu_helpfmt.format(**locals())
 
