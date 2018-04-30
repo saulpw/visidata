@@ -27,7 +27,9 @@ nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
 nonLogKeys += '^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) z? KEY_BACKSPACE'.split()
 nonLogKeys += [' ']
+
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
+option('cmdlog_histfile', '', 'autorecords each cmdlog action to the given file')
 
 def itemsetter(i):
     def g(obj, v):
@@ -164,7 +166,9 @@ class CommandLog(Sheet):
             # remove user-aborted commands and simple movements
             if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes):
                 self.addRow(self.currentActiveRow)
-                if options.visidata_dir:
+                if options.cmdlog_histfile:
+                    if not getattr(vd(), 'sessionlog', None):
+                        vd().sessionlog = loadInternalSheet(CommandLog, Path(date().to_string(options.cmdlog_histfile)))
                     append_tsv_row(vd().sessionlog, self.currentActiveRow)
 
         self.currentActiveRow = None
@@ -338,5 +342,4 @@ def loadMacros():
 
     return macrosheet
 
-vd().sessionlog = loadInternalSheet(CommandLog, Path(os.path.join(options.visidata_dir, 'history', date().to_string('%Y%m%d.vd'))))
 vd().macrosheet = loadMacros()
