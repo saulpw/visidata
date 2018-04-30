@@ -724,9 +724,9 @@ class VisiData:
     def refresh(self):
         Sheet.visibleCols.fget.cache_clear()
 
-    def editText(self, y, x, w, **kwargs):
+    def editText(self, y, x, w, record=True, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
-        v = self.callHook('preedit')
+        v = self.callHook('preedit') if record else None
         if not v or v[0] is None:
             with EnableCursor():
                 v = editText(self.scr, y, x, w, **kwargs)
@@ -735,7 +735,7 @@ class VisiData:
 
         if kwargs.get('display', True):
             self.status('"%s"' % v)
-            self.callHook('postedit', v)
+            self.callHook('postedit', v) if record else None
         return v
 
     def input(self, prompt, type='', defaultLast=False, **kwargs):
@@ -2289,7 +2289,7 @@ class ColumnExpr(Column):
 ###
 
 def confirm(prompt):
-    yn = input(prompt, value='n')[:1]
+    yn = input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
         error('disconfirmed')
 
