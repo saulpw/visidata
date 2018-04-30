@@ -7,7 +7,7 @@ globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency 
 globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows', 'data-aggregate-summary')
 
 theme('disp_histogram', '*', 'histogram element character')
-option('disp_histolen', 80, 'width of histogram column')
+option('disp_histolen', 50, 'width of histogram column')
 #option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
@@ -54,7 +54,7 @@ class SheetFreqTable(Sheet):
         self.columns.extend([
             Column('count', type=int, getter=lambda col,row: len(row[1]), sql='COUNT(*)'),
             Column('percent', type=float, getter=lambda col,row: len(row[1])*100/col.sheet.source.nRows, sql=''),
-            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=50, sql=''),
+            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=options.disp_histolen+2, sql=''),
         ])
 
         aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
