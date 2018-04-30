@@ -73,7 +73,7 @@ def getRowIdxByKey(sheet, k):
             return i
 
 def isLoggableSheet(sheet):
-    return not isinstance(sheet, (CommandLog, OptionsSheet, ErrorSheet))
+    return sheet is not vd().cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
 
 def isLoggableCommand(keystrokes):
     if keystrokes in nonLogKeys:
