@@ -78,8 +78,6 @@ cancel user input or abort all async threads on current sheet
 quit current sheet
 .It Ic "gq"
 quit all sheets (clean exit)
-.It Ic "^^" No (Ctrl-^)
-jump to previous sheet (swaps with current sheet)
 .El
 .Ss "Cursor Movement"
 .
@@ -95,6 +93,9 @@ move all the way to the left/bottom/top/right of sheet
 move all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
+.Pp
+.It Ic "^^" No (Ctrl-^)
+jump to previous sheet (swaps with current sheet)
 .Pp
 .It Ic  " /   ?" Ar regex
 .No search for Ar regex No forward/backward in current column

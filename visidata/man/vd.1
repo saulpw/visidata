@@ -78,8 +78,6 @@ cancel user input or abort all async threads on current sheet
 quit current sheet
 .It Ic "gq"
 quit all sheets (clean exit)
-.It Ic "^^" No (Ctrl-^)
-jump to previous sheet (swaps with current sheet)
 .El
 .Ss "Cursor Movement"
 .
@@ -95,6 +93,9 @@ move all the way to the left/bottom/top/right of sheet
 move all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
+.Pp
+.It Ic "^^" No (Ctrl-^)
+jump to previous sheet (swaps with current sheet)
 .Pp
 .It Ic  " /   ?" Ar regex
 .No search for Ar regex No forward/backward in current column
@@ -711,6 +712,8 @@ insert movements during replay
 directory to load and store macros
 .It Sy --rowkey-prefix Ns = Ns Ar "str         " No "\[u30AD]"
 string prefix for rowkey in the cmdlog
+.It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
+autorecords each cmdlog action to the given file
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
 maxsplit to pass to regex.split
 .It Sy --show-graph-labels Ns = Ns Ar "bool    " No "True"
