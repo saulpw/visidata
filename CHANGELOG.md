@@ -1,5 +1,7 @@
 # VisiData version history
 
+# v1.2 (2018-04-30)
+
 - macro system
    - `gD` goes to directory browser of `options.visidata_dir` (default to `~/.visidata/`) which contains saved commandlogs and macros
    - `z^S` on CommandLog saves selected rows to macro for given keystroke, saving to `.visidata/macro/command-longname.vd`
@@ -17,7 +19,7 @@
 - [New conda package](https://github.com/conda-forge/visidata-feedstock)
 - add .visidatarc [snippets](https://github.com/saulpw/visidata/tree/stable/snippets) with examples of extra functionality
 - add replayable options [#97](https://github.com/saulpw/visidata/issues/97)
-- `g^S` for multisave to single file (for formats that support it) or directory
+- `g^S` for multisave to single file (`.html`, `.md` and `.txt` are currently supported) or directory
 - `z^S` to save selected rows of current column only (along with key columns)
 - `T` to transpose rows and columns [#129](https://github.com/saulpw/visidata/issues/129)
 - `^A` to specify a command longname to execute

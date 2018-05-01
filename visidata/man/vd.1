@@ -1,4 +1,4 @@
-.Dd April 29, 2018
+.Dd April 30, 2018
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -713,7 +713,7 @@ directory to load and store macros
 .It Sy --rowkey-prefix Ns = Ns Ar "str         " No "\[u30AD]"
 string prefix for rowkey in the cmdlog
 .It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
-autorecords each cmdlog action to the given file
+file to autorecord each cmdlog action to
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
 maxsplit to pass to regex.split
 .It Sy --show-graph-labels Ns = Ns Ar "bool    " No "True"
@@ -722,7 +722,7 @@ show axes and legend on graph
 list of distinct colors to use for plotting distinct objects
 .It Sy --zoom-incr Ns = Ns Ar "float           " No "2.0"
 amount to multiply current zoomlevel when zooming
-.It Sy --motd-url Ns = Ns Ar "str              " No "http://visidata.org/motd-1.1"
+.It Sy --motd-url Ns = Ns Ar "str              " No "http://visidata.org/motd-1.2"
 source of randomized startup messages
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
@@ -821,7 +821,7 @@ color for file attributes pending modification
 color for files pending delete
 .It Sy "disp_histogram     " No "*"
 histogram element character
-.It Sy "disp_histolen      " No "80"
+.It Sy "disp_histolen      " No "50"
 width of histogram column
 .It Sy "disp_replay_play   " No "\[u25B6]"
 status indicator for active replay
