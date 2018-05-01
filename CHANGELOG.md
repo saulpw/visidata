@@ -4,18 +4,18 @@
    - `gD` goes to directory browser of `options.visidata_dir` (default to `~/.visidata/`) which contains saved commandlogs and macros
    - `z^S` on CommandLog saves selected rows to macro for given keystroke, saving to `.visidata/macro/command-longname.vd`
    - macro list saved at `.visidata/macros.vd` (keystroke, filename)
-- option for auto-appended cmdlog to files in `.visidata/history/` (default: off)
+- `options.cmdlog_histfile` for auto-appended (default: empty means disabled)
 - [DirSheet] edits make deferred changes to any field
-   - add directory and filetype
+   - add `directory` and `filetype` columns
    - note: only 256 changes maintained per column (same as column cache size)
    - `^S` saves all deferred changes
    - `z^S` saves changes for the current file only
    - `^R` clears all changes (reload)
    - `z^R` clears changes on the current file only
    - `d`/`gd` marks the current/selected file for deletion
-   - if directory is edited, upon save file is either moved to an already existing folder or a new folder is created
+   - if `directory` is edited, on `^S` (save) file is moved (if directory not existing, a new directory is created)
 - [New conda package](https://github.com/conda-forge/visidata-feedstock)
-- add snippets folder with example .visidatarc snippets of extra functionality
+- add .visidatarc [snippets](https://github.com/saulpw/visidata/tree/stable/snippets) with examples of extra functionality
 - add replayable options [#97](https://github.com/saulpw/visidata/issues/97)
 - `g^S` for multisave to single file (for formats that support it) or directory
 - `z^S` to save selected rows of current column only (along with key columns)
@@ -43,12 +43,12 @@
 - `options.tsv_safe_char` to replace \t and \n in tsv files; set to empty for speedup during tsv save
 - loaders and savers
     - support bz2 and xz (LZMA) compression (thanks @jpgrayson)
-    - add loaders for 
-        - sas7bda (SAS; requires sas7bdat
-        - xpt (SAS; requires xport)
-        - sav (SPSS; requires savReaderWriter)
-        - dta (Stata; requires pandas)
-    - .shp can save as geojson
+    - add loaders for:
+        - sas7bda (SAS; requires `sas7bdat`)
+        - xpt (SAS; requires `xport`)
+        - sav (SPSS; requires `savReaderWriter`)
+        - dta (Stata; requires `pandas`)
+    - .shp can save as .geojson
     - add htm as alias for html filetype
     - json bugfix: fix [#133](https://github.com/saulpw/visidata/issues/133) json loader column deduction
 - [experimental] bin/vsh initial commit
