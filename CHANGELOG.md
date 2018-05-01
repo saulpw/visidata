@@ -4,34 +4,53 @@
    - `gD` goes to directory browser of `options.visidata_dir` (default to `~/.visidata/`) which contains saved commandlogs and macros
    - `z^S` on CommandLog saves selected rows to macro for given keystroke, saving to `.visidata/macro/command-longname.vd`
    - macro list saved at `.visidata/macros.vd` (keystroke, filename)
-- commands auto-appended cmdlog to files in `.visidata/history/`
+- option for auto-appended cmdlog to files in `.visidata/history/` (default: off)
 - [DirSheet] edits make deferred changes to any field
-   - add dir and filetype
+   - add directory and filetype
    - note: only 256 changes maintained per column (same as column cache size)
    - `^S` saves all deferred changes
    - `z^S` saves changes for the current file only
    - `^R` clears all changes (reload)
    - `z^R` clears changes on the current file only
    - `d`/`gd` marks the current/selected file for deletion
+   - if directory is edited, upon save file is either moved to an already existing folder or a new folder is created
+- [New conda package](https://github.com/conda-forge/visidata-feedstock)
+- add snippets folder with example .visidatarc snippets of extra functionality
+- add replayable options [#97](https://github.com/saulpw/visidata/issues/97)
 - `g^S` for multisave to single file (for formats that support it) or directory
+- `z^S` to save selected rows of current column only (along with key columns)
+- `T` to transpose rows and columns [#129](https://github.com/saulpw/visidata/issues/129)
 - `^A` to specify a command longname to execute
 - `g^R` on SheetsSheet to reload all [selected] sheets
 - `options.error_is_null` to treat errors as nulls when applicable
 - `g,` fixed to compare by visible column values, not by row objects
-- Shift-Up/Down aliases for mac
+- `gv` to unhide all columns
+- `gM` open melted sheet (unpivot) with key columns retained and *regex* capture groups determining how the non-key columns will be reduced to Variable-Value rows
+- `g*` replace selected row cells in current column with regex transform
+- Shift-Up/Down aliases for mac [#135](https://github.com/saulpw/visidata/issues/135)
 - options.wrap now true by default on TextSheet (`v` to toggle)
 - `save_txt` with single column concatenates all values to single file
 - `+` can add multiple aggregators
-- .shp can save as geojson
 - ^X bugfix: use evalexpr over cursorRow
+- `z`/`gz` `s`/`t`/`u` to select to/from cursorRow
+- `z<` and `z>` to move up/down to next null cell
 - `"` no longer reselects all rows
-- bin/vsh initial commit
 - `sheet-set-diff` command to act like `--diff`
 - math functions (like sin/cos) now at toplevel
-- `g^S` to save all sheets
 - bugfix: freeze
 - all `csv_` options sent to csv.reader/writer
 - `options.tsv_safe_char` to replace \t and \n in tsv files; set to empty for speedup during tsv save
+- loaders and savers
+    - support bz2 and xz (LZMA) compression (thanks @jpgrayson)
+    - add loaders for 
+        - sas7bda (SAS; requires sas7bdat
+        - xpt (SAS; requires xport)
+        - sav (SPSS; requires savReaderWriter)
+        - dta (Stata; requires pandas)
+    - .shp can save as geojson
+    - add htm as alias for html filetype
+    - json bugfix: fix [#133](https://github.com/saulpw/visidata/issues/133) json loader column deduction
+- [experimental] bin/vsh initial commit
 
 # v1.1 (2018-03-05)
 
