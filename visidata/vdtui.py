@@ -2537,7 +2537,7 @@ def suspend():
         os.kill(os.getpid(), signal.SIGSTOP)
 
 # history: earliest entry first
-def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, append=False):
+def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
     ESC='^['
     ENTER='^J'
@@ -2634,9 +2634,6 @@ def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
     v = str(value)  # value under edit
 
     # i = 0  # index into v, initial value can be passed in as argument as of 1.2
-    if append:
-        i = len(v)
-
     if i != 0:
         first_action = False
 
