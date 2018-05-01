@@ -21,6 +21,7 @@
 - `z^S` to save selected rows of current column only (along with key columns)
 - `T` to transpose rows and columns [#129](https://github.com/saulpw/visidata/issues/129)
 - `^A` to specify a command longname to execute
+- `^O`/`g^O` to open current/selected files in external editor
 - `g^R` on SheetsSheet to reload all [selected] sheets
 - `options.error_is_null` to treat errors as nulls when applicable
 - `g,` fixed to compare by visible column values, not by row objects
