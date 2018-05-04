@@ -152,4 +152,4 @@ dput mentors visidata_ver.changes
 
 ## deb-vd
 9. Enter saulpw/deb-vd.
-10. Run the command reprepro includeb sid new-vd.deb
+10. Run the command reprepro includedeb sid new-vd.deb
