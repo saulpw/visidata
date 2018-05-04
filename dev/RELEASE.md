@@ -2,9 +2,9 @@
 
 1. Merge `stable` to `develop` (if necessary)
 
-2. Ensure `develop` automated tests run correctly with dev/test.sh
+2. Verify that documentation/docstrings are up-to-date on features and functionality
 
-3. Verify that documentation/docstrings are up-to-date on features and functionality
+3. Ensure `develop` automated tests run correctly with dev/test.sh
 
 4. Verify that setup.py is up-to-date with requirements.
 
@@ -94,7 +94,11 @@ git push --tags
 
 16. Comb through issues and close the ones that have been solved, referencing the version number
 
-17. Post release notes on r/visidata and tinyletter and have some ice cream
+17. Post github release notes on tinyletter.
+
+18. Deploy the newer version of visidata.org.
+
+19. Update the other distributions.
 
 # conda
 
@@ -103,6 +107,10 @@ git push --tags
 2. Update the VisiData version and sha256.
 
 3. Make any necessary removals, additions or modifications to the dependencies -> note that a dependency must be part of conda.
+
+4. Make a PR.
+
+5. Comment `@conda-forge-admin, please rerender` in the PR.
 
 
 # Homebrew
