@@ -1,3 +1,9 @@
+visidata (1.2-1) unstable; urgency=low
+
+  * Update package to 1.2-0
+
+ -- Anja Boskovic <anja.kefala@gmail.com>  Thu, 03 May 2018 20:11:31 -0400
+
 visidata (1.1-1) unstable; urgency=low
 
   * Update package to 1.1-0
