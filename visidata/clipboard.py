@@ -58,7 +58,8 @@ class _Clipboard:
 
             p = subprocess.Popen(
                 self._command,
-                stdin=open(temp.name, 'r', encoding=options.encoding))
+                stdin=open(temp.name, 'r', encoding=options.encoding),
+                stdout=subprocess.DEVNULL)
             p.communicate()
 
     def save(self, vs, filetype):
@@ -73,6 +74,7 @@ class _Clipboard:
             p = subprocess.Popen(
                 self._command,
                 stdin=open(tempfn, 'r', encoding=options.encoding),
+                stdout=subprocess.DEVNULL,
                 close_fds=True)
             p.communicate()
 
