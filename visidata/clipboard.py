@@ -1,5 +1,6 @@
 import shutil
 import subprocess
+import sys
 import tempfile
 
 from visidata import *
@@ -26,27 +27,25 @@ globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank (copy) current cell 
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
 
 commands = {
-    'clip': [],                                       # Windows Vista+
-    'pbcopy': ['w'],                                  # macOS
-    'xclip': ['-selection', 'clipboard', '-filter'],  # Linux etc.
-    'xsel': ['--clipboard', '--input'],               # Linux etc.
+    ('clip', 'win32'):    [],                                      # Windows Vista+
+    ('pbcopy', 'darwin'): ['w'],                                   # macOS
+    ('xclip', None):      ['-selection', 'clipboard', '-filter'],  # Linux etc.
+    ('xsel', None):       ['--clipboard', '--input'],              # Linux etc.
 }
 
 
 class _Clipboard:
     'Cross-platform helper to copy a cell or multiple rows to the system clipboard.'
 
-    def __init__(self, custom_command):
-        if custom_command:
-            self._command = custom_command.split()
-        else:
-            self._command = self.__default_command()
+    def __init__(self):
+        self._command = options.clipboard_copy_cmd or self.__default_command()
 
     def __default_command(self):
-        for command, options in commands.items():
-            path = shutil.which(command)
-            if path:
-                return [path] + options
+        for (command, platform), options in commands.items():
+            if platform is None or sys.platform == platform:
+                path = shutil.which(command)
+                if path:
+                    return [path] + options
 
     def copy(self, value):
         'Copy a cell to the system clipboard.'
@@ -83,7 +82,7 @@ clipboard = None
 
 def copyToClipboard(value):
     global clipboard
-    clipboard = clipboard or _Clipboard(options.clipboard_copy_cmd)
+    clipboard = clipboard or _Clipboard()
     clipboard.copy(value)
     status('copied value to clipboard')
 
@@ -91,7 +90,7 @@ def copyToClipboard(value):
 @async
 def saveToClipboard(sheet, rows, filetype=None):
     global clipboard
-    clipboard = clipboard or _Clipboard(options.clipboard_copy_cmd)
+    clipboard = clipboard or _Clipboard()
     filetype = filetype or options.filetype
     vs = copy(sheet)
     vs.rows = rows
