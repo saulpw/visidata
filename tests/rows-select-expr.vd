@@ -1,0 +1,5 @@
+sheet	col	row	keystrokes	input	comment
+			o	sample_data/StatusPR.csv	open file
+StatusPR			rows-select-expr	'Puerto Rico' in Location	select rows with a Python expression
+StatusPR			rows-unselect-expr	'number' in Unit	unselect rows with a Python expression
+StatusPR			"		open duplicate sheet with only selected rows

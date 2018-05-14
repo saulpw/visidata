@@ -1315,6 +1315,9 @@ Command('gz"', 'vs = deepcopy(sheet); vs.name += "_selectedcopy"; vs.rows = asyn
 Command('=', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables', 'modify-add-column-expr'),
 Command('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))', 'set current column for selected rows to result of Python expression', 'modify-set-column-selected-expr'),
 
+Command('', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'select rows with a Python expression', 'rows-select-expr'),
+Command('', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'unselect rows with a Python expression', 'rows-unselect-expr'),
+
 Command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet', 'sheet-open-cell'),
 
 Command('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet', 'meta-columns-sheet'),
