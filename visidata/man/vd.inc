@@ -759,6 +759,7 @@ These are the supported savers:
 .It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
 .It Sy .shp No files can be saved as Sy geoJSON Ns .
 .El
+.It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
 .It Sy md No (org-mode compatible markdown table)
 .It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
 .It Sy png No (requires Sy pypng Ns )

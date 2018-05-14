@@ -45,6 +45,7 @@ from .loaders.ttf import *
 from .loaders.sas import *
 from .loaders.spss import *
 from .loaders.stata import *
+from .loaders.yaml import *
 
 from math import *
 
