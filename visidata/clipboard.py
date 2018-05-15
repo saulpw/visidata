@@ -1,3 +1,7 @@
+import shutil
+import subprocess
+import sys
+import tempfile
 
 from visidata import *
 
@@ -20,35 +24,78 @@ globalCommand('Y', 'saveToClipboard(sheet, [cursorRow], input("copy current row 
 globalCommand('gY', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank (copy) selected rows to system clipboard', 'data-clipboard-copy-system-selected')
 globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank (copy) current cell to system clipboard', 'data-clipboard-copy-system-cell')
 
-option('clipboard_copy_cmd', 'pbcopy w', 'command to copy stdin to system clipboard')
-# or 'xsel --primary' for xsel
-# or 'xclip -selection primary'
-# or 'pbcopy w' for mac
+option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
 
-import tempfile
-import subprocess
+commands = {
+    ('clip', 'win32'):    [],                                      # Windows Vista+
+    ('pbcopy', 'darwin'): ['w'],                                   # macOS
+    ('xclip', None):      ['-selection', 'clipboard', '-filter'],  # Linux etc.
+    ('xsel', None):       ['--clipboard', '--input'],              # Linux etc.
+}
 
-def copyToClipboard(val):
-    cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
-    with tempfile.NamedTemporaryFile() as temp:
-        with open(temp.name, 'w', encoding=options.encoding) as fp:
-            fp.write(str(val))
 
-        p = subprocess.Popen(cmd.split(), stdin=open(temp.name, 'r', encoding=options.encoding))
-        p.communicate()
+class _Clipboard:
+    'Cross-platform helper to copy a cell or multiple rows to the system clipboard.'
+
+    def __init__(self):
+        self._command = options.clipboard_copy_cmd or self.__default_command()
+
+    def __default_command(self):
+        for (command, platform), options in commands.items():
+            if platform is None or sys.platform == platform:
+                path = shutil.which(command)
+                if path:
+                    return [path] + options
+
+    def copy(self, value):
+        'Copy a cell to the system clipboard.'
+        if not self._command:
+            error('options.clipboard_copy_cmd not set')
+
+        with tempfile.NamedTemporaryFile() as temp:
+            with open(temp.name, 'w', encoding=options.encoding) as fp:
+                fp.write(str(value))
+
+            p = subprocess.Popen(
+                self._command,
+                stdin=open(temp.name, 'r', encoding=options.encoding),
+                stdout=subprocess.DEVNULL)
+            p.communicate()
+
+    def save(self, vs, filetype):
+        'Copy rows to the system clipboard.'
+        if not self._command:
+            error('options.clipboard_copy_cmd not set')
+
+        with tempfile.NamedTemporaryFile() as temp:
+            tempfn = temp.name + "." + filetype
+            saveSheets(tempfn, vs)
+            sync(1)
+            p = subprocess.Popen(
+                self._command,
+                stdin=open(tempfn, 'r', encoding=options.encoding),
+                stdout=subprocess.DEVNULL,
+                close_fds=True)
+            p.communicate()
+
+
+clipboard = None
+
+
+def copyToClipboard(value):
+    global clipboard
+    clipboard = clipboard or _Clipboard()
+    clipboard.copy(value)
     status('copied value to clipboard')
+
 
 @async
 def saveToClipboard(sheet, rows, filetype=None):
-    cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
+    global clipboard
+    clipboard = clipboard or _Clipboard()
+    filetype = filetype or options.filetype
     vs = copy(sheet)
     vs.rows = rows
-    filetype = filetype or options.filetype
-    with tempfile.NamedTemporaryFile() as temp:
-        tempfn = temp.name + "." + filetype
-        status('copying rows to clipboard')
-        saveSheets(tempfn, vs)
-        sync(1)
-        p = subprocess.Popen(cmd.split(), stdin=open(tempfn, 'r', encoding=options.encoding), close_fds=True)
-        p.communicate()
+    status('copying rows to clipboard')
+    clipboard.save(vs, filetype)
     status('done')
