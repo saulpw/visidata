@@ -25,6 +25,7 @@ Many thanks also to the following people for their support and contributions to 
 
 - [azag0](https://github.com/azag0)
 - [brannerchinese](https://github.com/brannerchinese)
+- [chocolateboy](https://github.com/chocolateboy)
 - [eliasdorneles](https://github.com/eliasdorneles)
 - [jamesroutley](https://github.com/jamesroutley)
 - [jsvine](https://github.com/jsvine)
