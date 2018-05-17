@@ -1,7 +1,7 @@
 from visidata import *
 from visidata import __version__
 
-option('motd_url', 'http://visidata.org/motd-'+__version__, 'source of randomized startup messages')
+option('motd_url', 'https://visidata.org/motd-'+__version__, 'source of randomized startup messages')
 
 
 @diskcache('motd-'+__version__, 24*3600)
