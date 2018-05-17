@@ -33,7 +33,7 @@ It's great for investigative journalists, data scientists, unix command-line use
 
 - <form action="https://tinyletter.com/visidata" method="post" target="popupwindow" onsubmit="window.open('https://tinyletter.com/visidata', 'popupwindow', 'scrollbars=yes,width=800,height=600');return true">Sign up for the email newsletter: <input type="text" style="width:140px" name="email" id="tlemail" /><input type="hidden" value="1" name="embed"/><input type="submit" value="Subscribe" /> (powered by <a href="https://tinyletter.com" target="_blank">TinyLetter</a>)</form>
 
-- Follow [\@saulfp](https://twitter.com/saulfp) on Twitter for more regular updates, tips, and tricks!
+- Follow [\@VisiData_](https://twitter.com/VisiData_) on Twitter for more regular updates, tips, and tricks!
 
 ---
 
