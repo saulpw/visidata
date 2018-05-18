@@ -38,7 +38,7 @@ class _Clipboard:
     'Cross-platform helper to copy a cell or multiple rows to the system clipboard.'
 
     def __init__(self):
-        self._command = options.clipboard_copy_cmd or self.__default_command()
+        self._command = options.clipboard_copy_cmd.split() or self.__default_command()
 
     def __default_command(self):
         for (command, platform), options in commands.items():
