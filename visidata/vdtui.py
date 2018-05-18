@@ -331,7 +331,7 @@ class date:
 
 typemap = {
     None: 'Ø',
-    str: '',
+    str: '~',
     date: '@',
     int: '#',
     len: '#',
@@ -2128,8 +2128,8 @@ class Column:
 
             dw.display = dispval
 
-            # annotate cells with raw value type in anytype columns
-            if self.type is anytype and options.color_note_type:
+            # annotate cells with raw value type in anytype columns, except for strings
+            if self.type is anytype and type(cellval) is not str and options.color_note_type:
                 dw.note = typemap.get(type(cellval), None)
                 dw.notecolor = options.color_note_type
 
