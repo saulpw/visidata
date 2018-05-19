@@ -16,7 +16,7 @@ def domotd():
     try:
         if options.motd_url:
             line = random.choice(motd(options.motd_url).splitlines())
-            status(line.split('\t')[0])
+            status(line.split('\t')[0], priority=-1)
     except Exception:
         pass
 

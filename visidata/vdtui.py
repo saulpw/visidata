@@ -351,13 +351,16 @@ def joinSheetnames(*sheetnames):
     return '_'.join(str(x) for x in sheetnames)
 
 def error(s):
-    'Raise an expection.'
-    status(s)
+    'Raise an expected exception.'
+    status(s, priority=2)
     raise ExpectedException(s)
 
-def status(*args):
+def warning(s):
+    status(s, priority=1)
+
+def status(*args, **kwargs):
     'Return status property via function call.'
-    return vd().status(*args)
+    return vd().status(*args, **kwargs)
 
 def input(*args, **kwargs):
     return vd().input(*args, **kwargs)
@@ -617,7 +620,7 @@ class VisiData:
 
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
-        self.statuses = []  # statuses shown until next action
+        self.statuses = []  # (priority, statuses) shown until next action
         self.lastErrors = []
         self.searchContext = {}
         self.statusHistory = []
@@ -645,10 +648,10 @@ class VisiData:
             vs.vd = vd()
             return vs
 
-    def status(self, *args):
+    def status(self, *args, priority=0):
         'Add status message to be shown until next action.'
         s = '; '.join(str(x) for x in args)
-        self.statuses.append(s)
+        self.statuses.append((priority, s))
         self.statusHistory.insert(0, args[0] if len(args) == 1 else args)
         return s
 
@@ -890,7 +893,7 @@ class VisiData:
         maxwidth = options.disp_lstatus_max
         if maxwidth > 0:
             s = middleTruncate(s, maxwidth//2)
-        s += options.disp_status_sep.join(self.statuses)
+        s += options.disp_status_sep.join([x for _, x in sorted(self.statuses, key=lambda y: -y[0])])
         return s
 
     def rightStatus(self, sheet):

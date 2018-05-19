@@ -412,7 +412,7 @@ def openSource(p, filetype=None):
         else:
             openfunc = 'open_' + filetype.lower()
             if openfunc not in getGlobals():
-                status('no %s function' % openfunc)
+                warning('no %s function' % openfunc)
                 filetype = 'txt'
                 openfunc = 'open_txt'
             vs = getGlobals()[openfunc](p)
