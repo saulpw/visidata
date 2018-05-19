@@ -238,7 +238,13 @@ globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
 globalCommand(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 globalCommand(' ', 'cmd=choose(mkmenu(*_commands.maps), cmdhelp, sheet); cmd and exec_command(cmd, keystrokes=cmd.longname)', 'start menu command')
-globalCommand('^A', 'cmdnames=sorted(set(cmd.longname for cmd in _commands.values() if cmd.longname)); cmd=input("command name: ", completer=CompleteKey(cmdnames)); exec_keystrokes(cmd);', 'execute command by name', 'meta-exec-cmd')
+
+globalCommand('^A', 'exec_keystrokes(input_longname(sheet))', 'execute command by name', 'meta-exec-cmd')
+
+def input_longname(sheet):
+    longnames = [cmd.longname for cmd in sheet._commands.values() if getattr(cmd, 'longname', None)]
+    cmd = input("command name: ", completer=CompleteKey(sorted(set(longnames))));
+    return cmd
 
 def StubCommand(longname):
     return Command('', 'error("command %s not defined for this sheet")' % longname, 'stub', longname)
