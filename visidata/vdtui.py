@@ -501,7 +501,7 @@ def choose(cmdtree, helpfunc=None, sheet=None):
         regattr = colors[options.color_menu_prefix]
         for cmdnode, cmdidx in cmdpath[:-1]:
             s = cmdsort(cmdnode)[cmdidx]
-            _clipdraw(scr, helpy, menux, s, regattr, len(s))
+            clipdraw(scr, helpy, menux, s, regattr, len(s))
             menux += len(s)
 
         # then the options under the latest node
@@ -513,7 +513,7 @@ def choose(cmdtree, helpfunc=None, sheet=None):
                 attr, attrpre = colors.update(attr, 0, options.color_menu_cursor, 9)
                 curx = menux
 
-            _clipdraw(scr, menuy, menux, k, attr, maxitemwidth) # min(width-len(rstatus)-menux, len(k)))
+            clipdraw(scr, menuy, menux, k, attr, maxitemwidth) # min(width-len(rstatus)-menux, len(k)))
             menux += maxitemwidth
             if menux > width-len(rstatus):
                 break
@@ -530,7 +530,7 @@ def choose(cmdtree, helpfunc=None, sheet=None):
                 helpstr = options.disp_menu_helpsep.join(cmdsort(submenu))
             if helpstr:
                 helpx = max(width-len(helpstr)-2, 0)
-                _clipdraw(scr, helpy, helpx, helpstr, colors[options.color_menu_help])
+                clipdraw(scr, helpy, helpx, helpstr, colors[options.color_menu_help])
         else:
             helpstr = curnode[cmdkeys[curidx]].__doc__
 
@@ -743,7 +743,7 @@ class VisiData:
             v = v[0]
 
         if kwargs.get('display', True):
-            self.status('"%s"' % v)
+            status('"%s"' % v)
             self.callHook('postedit', v) if record else None
         return v
 
@@ -847,13 +847,13 @@ class VisiData:
 
         status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
-    def exceptionCaught(self, exc=None, status=True):
+    def exceptionCaught(self, exc=None, **kwargs):
         'Maintain list of most recent errors and return most recent one.'
         if isinstance(exc, ExpectedException):  # already reported, don't log
             return
         self.lastErrors.append(stacktrace())
-        if status:
-            return self.status(self.lastErrors[-1][-1])  # last line of latest error
+        if kwargs.get('status', False):
+            return status(self.lastErrors[-1][-1])  # last line of latest error
         if options.debug:
             raise
 
@@ -862,7 +862,7 @@ class VisiData:
         try:
             lstatus = self.leftStatus(vs)
             attr = colors[options.color_status]
-            _clipdraw(scr, self.windowHeight-1, 0, lstatus, attr, self.windowWidth)
+            clipdraw(scr, self.windowHeight-1, 0, lstatus, attr, self.windowWidth)
             return lstatus
         except Exception as e:
             self.exceptionCaught(e)
@@ -879,7 +879,7 @@ class VisiData:
                     rstatus = ' '+rstatus
                     rightx -= len(rstatus)
                     attr = colors[color]
-                    _clipdraw(scr, self.windowHeight-1, rightx, rstatus, attr, len(rstatus))
+                    clipdraw(scr, self.windowHeight-1, rightx, rstatus, attr, len(rstatus))
                     ret += rstatus
                 except Exception as e:
                     self.exceptionCaught(e)
@@ -1168,7 +1168,7 @@ StubCommand('view-go-far-right'),
             self.vd.callHook('preexec', self, cmd.name if options.cmdlog_longname else keystrokes)
             exec(cmd.execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
-            self.vd.status('aborted')
+            status('aborted')
             escaped = True
         except Exception as e:
             err = self.vd.exceptionCaught(e)
@@ -1862,8 +1862,8 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         N = ' ' + col.name  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
-        _clipdraw(scr, y, x, N, hdrattr, colwidth)
-        _clipdraw(scr, y, x+colwidth-len(T), T, hdrattr, len(T))
+        clipdraw(scr, y, x, N, hdrattr, colwidth)
+        clipdraw(scr, y, x+colwidth-len(T), T, hdrattr, len(T))
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.disp_more_left
@@ -1923,9 +1923,9 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
                     note = getattr(cellval, 'note', None)
                     if note:
                         noteattr, _ = colors.update(attr, attrpre, cellval.notecolor, 8)
-                        _clipdraw(scr, y, x+colwidth-len(note), note, noteattr, len(note))
+                        clipdraw(scr, y, x+colwidth-len(note), note, noteattr, len(note))
 
-                    _clipdraw(scr, y, x, disp_column_fill+cellval.display, attr, colwidth-(1 if note else 0))
+                    clipdraw(scr, y, x, disp_column_fill+cellval.display, attr, colwidth-(1 if note else 0))
 
                     sepchars = options.disp_column_sep
                     if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
@@ -2499,7 +2499,6 @@ def clipdraw(scr, y, x, s, attr, w=None):
 #                ).with_traceback(sys.exc_info()[2])
         pass
 
-_clipdraw = clipdraw
 
 # https://stackoverflow.com/questions/19833315/running-system-commands-in-python-using-curses-and-panel-and-come-back-to-previ
 class SuspendCurses:
