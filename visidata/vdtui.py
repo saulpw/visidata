@@ -298,12 +298,10 @@ vdtype(int, '#', '{:d}')
 vdtype(float, '%', '{:.02f}')
 vdtype(len, '#')
 
-def joinSheetnames(*sheetnames):
-    'Concatenate sheet names in a standard way'
-    return '_'.join(str(x) for x in sheetnames)
+###
 
 def error(s):
-    'Raise an expected exception.'
+    'Log an error and raise an exception.'
     status(s, priority=2)
     raise ExpectedException(s)
 

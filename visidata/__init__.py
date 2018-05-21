@@ -29,6 +29,7 @@ from .transpose import *
 from .diff import *
 
 from .vimkeys import *
+from .utils import *
 
 from .loaders.csv import *
 from .loaders.json import *
