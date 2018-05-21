@@ -178,7 +178,6 @@ theme('use_default_colors', False, 'curses use default terminal colors')
 
 disp_column_fill = ' ' # pad chars after column value
 theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
-theme('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
 theme('disp_unprintable', '.', 'substitute character for unprintables')
@@ -266,85 +265,49 @@ alias(['G', 'gj'], 'view-go-far-bottom'),
 alias('gh', 'view-go-far-left'),
 alias('gl', 'view-go-far-right'),
 
-# VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
+# _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
 #
-# A type T is used internally in these ways:
-#    o = T(val)   # for interpreting raw value
-#    o = T(str)   # for conversion from string (when setting)
-#    o = T()      # for default value to be used when conversion fails
+#    o = typetype(val)   # for interpreting raw value
+#    o = typetype(str)   # for conversion from string (when setting)
+#    o = typetype()      # for default value to be used when conversion fails
 #
 # The resulting object o must be orderable and convertible to a string for display and certain outputs (like csv).
+#
+# .icon is a single character that appears in the notes field of cells and column headers.
+# .formatter(fmtstr, typedvalue) returns a string of the formatted typedvalue according to fmtstr.
+# .fmtstr is the default fmtstr passed to .formatter.
+
+_vdtype = collections.namedtuple('type', 'typetype icon fmtstr formatter')
 
 def anytype(r=None):
-    'minimalist "any" type'
+    'minimalist "any" passthrough type'
     return r
 anytype.__name__ = ''
 
-floatchars='+-0123456789.'
-def currency(s=''):
-    'dirty float (strip non-numeric characters)'
-    if isinstance(s, str):
-        s = ''.join(ch for ch in s if ch in floatchars)
-    return float(s) if s else float()
+def _defaultFormatter(fmtstr, typedval):
+    if fmtstr:
+        return fmtstr.format(typedval)
+    return str(typedval)
 
-try:
-    import dateutil.parser
-except ImportError:
-    pass
+def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
+    t = _vdtype(typetype, icon, fmtstr, formatter)
+    typemap[typetype] = t
+    return t
 
+# typemap [typetype] -> _vdtype
+typemap = collections.defaultdict(lambda: _vdtype(anytype, '?', '', _defaultFormatter))
 
-@functools.total_ordering
-class date:
-    'datetime wrapper, constructed from time_t or from str with dateutil.parse'
+def typeIcon(typetype):
+    t = typemap.get(typetype, None)
+    if t:
+        return t.icon
 
-    def __init__(self, s=None):
-        if s is None:
-            self.dt = datetime.datetime.now()
-        elif isinstance(s, int) or isinstance(s, float):
-            self.dt = datetime.datetime.fromtimestamp(s)
-        elif isinstance(s, str):
-            self.dt = dateutil.parser.parse(s)
-        elif isinstance(s, date):
-            self.dt = s.dt
-        else:
-            assert isinstance(s, datetime.datetime), (type(s), s)
-            self.dt = s
-
-    def to_string(self, fmtstr=None):
-        'Convert datetime object to string, using options.disp_date_fmt.'
-        if not fmtstr:
-            fmtstr = options.disp_date_fmt
-        return self.dt.strftime(fmtstr)
-
-    def __getattr__(self, k):
-        'Forward unknown attributes to inner datetime object'
-        return getattr(self.dt, k)
-
-    def __str__(self):
-        return self.to_string()
-    def __hash__(self):
-        return hash(self.dt)
-    def __float__(self):
-        return self.dt.timestamp()
-    def __lt__(self, a):
-        return self.dt < a.dt
-    def __eq__(self, a):
-        return self.dt == a.dt
-    def __sub__(self, a):
-        return self.dt - a.dt
-    def __add__(self, a):
-        return date(self.dt + a)
-
-typemap = {
-    None: 'Ø',
-    str: '~',
-    date: '@',
-    int: '#',
-    len: '#',
-    currency: '$',
-    float: '%',
-    anytype: '',
-}
+vdtype(None, '∅')
+vdtype(anytype, '')
+vdtype(str, '~')
+vdtype(int, '#', '{:d}')
+vdtype(float, '%', '{:.02f}')
+vdtype(len, '#')
 
 def joinSheetnames(*sheetnames):
     'Concatenate sheet names in a standard way'
@@ -1858,7 +1821,9 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         x, colwidth = self.visibleColLayout[vcolidx]
 
         # ANameTC
-        T = typemap.get(col.type, '?')
+        T = typemap[col.type].icon
+        if T is None:  # still allow icon to be explicitly non-displayed ''
+            T = '?'
         N = ' ' + col.name  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
@@ -2018,13 +1983,7 @@ class Column:
 
     @property
     def fmtstr(self):
-        if self._fmtstr:
-            return self._fmtstr
-
-        t = self.type
-        if t is int:      return '{:d}'
-        elif t is float:    return '{:.02f}'
-        elif t is currency: return '{:,.02f}'
+        return self._fmtstr or typemap[self.type].fmtstr
 
     @fmtstr.setter
     def fmtstr(self, v):
@@ -2044,9 +2003,7 @@ class Column:
 
         t = self.type
         typedval = t(cellval)
-        if t is date:         return typedval.to_string(self.fmtstr)
-        elif self.fmtstr:     return self.fmtstr.format(typedval)
-        else:                 return str(typedval)
+        return typemap[t].formatter(self.fmtstr, typedval)
 
     @property
     def hidden(self):
@@ -2139,7 +2096,7 @@ class Column:
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str and options.color_note_type:
-                dw.note = typemap.get(type(cellval), None)
+                dw.note = typemap[type(cellval)].icon
                 dw.notecolor = options.color_note_type
 
         except Exception as e:  # type conversion or formatting failed

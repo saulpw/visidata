@@ -7,6 +7,7 @@ from .Path import *
 from .async import *
 from .diskcache import *
 from .zscroll import *
+from .types import *
 from .aggregators import *
 from .data import *
 from .clipboard import *
