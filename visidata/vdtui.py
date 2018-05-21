@@ -250,20 +250,10 @@ def StubCommand(longname):
 
 alias(ENTER, 'modify-edit-cell')  # ENTER is this by default
 alias('delete-column-hide', 'schema-column-hide')
-alias('h', 'view-go-left'),
-alias('j', 'view-go-down'),
-alias('k', 'view-go-up'),
-alias('l', 'view-go-right'),
 alias('gKEY_LEFT', 'view-go-far-left'),
 alias('gKEY_RIGHT', 'view-go-far-right'),
 alias('gKEY_UP', 'view-go-far-top'),
 alias('gKEY_DOWN', 'view-go-far-bottom'),
-alias('^F', 'view-go-page-down'),
-alias('^B', 'view-go-page-up'),
-alias(['gg', 'gk'], 'view-go-far-top'),
-alias(['G', 'gj'], 'view-go-far-bottom'),
-alias('gh', 'view-go-far-left'),
-alias('gl', 'view-go-far-right'),
 
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
 #

@@ -28,6 +28,8 @@ from .motd import *
 from .transpose import *
 from .diff import *
 
+from .vimkeys import *
+
 from .loaders.csv import *
 from .loaders.json import *
 from .loaders.zip import *
