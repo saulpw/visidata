@@ -12,6 +12,8 @@ from .selection import *
 from .aggregators import *
 from .data import *
 from .clipboard import *
+from .utils import *
+from .slide import *
 
 from .freqtbl import *
 from .describe import *
@@ -30,7 +32,6 @@ from .transpose import *
 from .diff import *
 
 from .vimkeys import *
-from .utils import *
 
 from .loaders.csv import *
 from .loaders.json import *

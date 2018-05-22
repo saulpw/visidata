@@ -17,16 +17,6 @@ replayableOption('tsv_safe_char', '\u00b7', 'replacement for all tabs and newlin
 option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
 option('color_delete_pending', 'red', 'color for files pending delete')
 
-# slide rows/columns around
-globalCommand('H', 'moveVisibleCol(cursorVisibleColIndex, max(cursorVisibleColIndex-1, 0)); sheet.cursorVisibleColIndex -= 1', 'slide current column left', 'modify-move-column-left')
-globalCommand('J', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, min(cursorRowIndex+1, nRows-1))', 'move current row down', 'modify-move-row-down')
-globalCommand('K', 'sheet.cursorRowIndex = moveListItem(rows, cursorRowIndex, max(cursorRowIndex-1, 0))', 'move current row up', 'modify-move-row-up')
-globalCommand('L', 'moveVisibleCol(cursorVisibleColIndex, min(cursorVisibleColIndex+1, nVisibleCols-1)); sheet.cursorVisibleColIndex += 1', 'move current column right', 'modify-move-column-right')
-globalCommand('gH', 'moveListItem(columns, cursorColIndex, 0)', 'slide current column all the way to the left of sheet', 'modify-move-column-leftmost')
-globalCommand('gJ', 'moveListItem(rows, cursorRowIndex, nRows)', 'slide current row to the bottom of sheet', 'modify-move-row-bottom')
-globalCommand('gK', 'moveListItem(rows, cursorRowIndex, 0)', 'slide current row all the way to the top of sheet', 'modify-move-row-top')
-globalCommand('gL', 'moveListItem(columns, cursorColIndex, nCols)', 'slide current column all the way to the right of sheet', 'modify-move-column-rightmost')
-
 globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)', 'move to the next column with name matching regex', 'view-go-column-regex')
 globalCommand('r', 'moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex', 'view-go-row-regex')
 globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'move to the given column number', 'view-go-column-number')

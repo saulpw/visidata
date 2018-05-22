@@ -315,12 +315,6 @@ def status(*args, **kwargs):
 def input(*args, **kwargs):
     return vd().input(*args, **kwargs)
 
-def moveListItem(L, fromidx, toidx):
-    "Move element within list `L` and return element's new index."
-    r = L.pop(fromidx)
-    L.insert(toidx, r)
-    return toidx
-
 def enumPivot(L, pivotIdx):
     '''Model Python `enumerate()` but starting midway through sequence `L`.
 
@@ -1148,6 +1142,12 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
+    @classmethod
+    def bind(cls, keystrokes, func):
+        cmd = Command(keystrokes, '%s(sheet)' % func.__name__, func.__doc__, func.__name__.replace('_', '-'))
+        cls.commands += [cmd]
+        return cmd
+
     def __len__(self):
         return self.nRows
 
@@ -1460,13 +1460,6 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         return [r for r in self.rows if id(r) in self._selectedRows]
 
 ## end selection code
-
-    def moveVisibleCol(self, fromVisColIdx, toVisColIdx):
-        'Move column to another position in sheet.'
-        fromColIdx = self.columns.index(self.visibleCols[fromVisColIdx])
-        toColIdx = self.columns.index(self.visibleCols[toVisColIdx])
-        moveListItem(self.columns, fromColIdx, toColIdx)
-        return toVisColIdx
 
     def cursorDown(self, n=1):
         'Move cursor down `n` rows (or up if `n` is negative).'
