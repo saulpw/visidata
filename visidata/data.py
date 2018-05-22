@@ -5,7 +5,7 @@ import grp
 import subprocess
 import contextlib
 
-from .vdtui import *
+from visidata import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 replayableOption('header', 1, 'parse first N rows of .csv/.tsv as column names')

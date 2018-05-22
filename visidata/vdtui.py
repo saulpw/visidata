@@ -232,9 +232,6 @@ globalCommand('^^', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], 
 
 globalCommand('g^E', 'vd.push(ErrorSheet("last_errors", sum(vd.lastErrors[-10:], [])))', 'view traceback for most recent errors', 'info-errors-all')
 
-globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet', 'meta-sheets')
-globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
-globalCommand(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 
 globalCommand('^A', 'exec_keystrokes(input_longname(sheet))', 'execute command by name', 'meta-exec-cmd')
@@ -1110,8 +1107,6 @@ Command('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set 
 
 Command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet', 'sheet-open-cell'),
 
-Command('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet', 'meta-columns-sheet'),
-Command('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
 Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the list of columns', 'delete-column-really'),
     ]
     columns = []  # list of Column
@@ -2134,116 +2129,6 @@ class TextSheet(Sheet):
 
 class ErrorSheet(TextSheet):
     pass
-
-class ColumnsSheet(Sheet):
-    rowtype = 'columns'
-    class ValueColumn(Column):
-        'passthrough to the value on the source cursorRow'
-        def calcValue(self, srcCol):
-            return srcCol.getDisplayValue(srcCol.sheet.cursorRow)
-        def setValue(self, srcCol, val):
-            srcCol.setValue(self.sheet.source.cursorRow, val)
-
-    columns = [
-            ColumnAttr('sheet'),
-            ColumnAttr('name', width=options.default_width),
-            ColumnAttr('width', type=int),
-            ColumnEnum('type', globals(), default=anytype),
-            ColumnAttr('fmtstr'),
-            ValueColumn('value', width=options.default_width)
-    ]
-    nKeys = 2
-    colorizers = [
-            Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
-    ]
-    commands = []
-
-    def reload(self):
-        if isinstance(self.source, Sheet):
-            self.rows = self.source.columns
-            self.cursorRowIndex = self.source.cursorColIndex
-            self.columns[0].width = 0  # hide 'sheet' column if only one sheet
-        elif isinstance(self.source, list):  # lists of Columns
-            self.rows = []
-            for src in self.source:
-                if src is not self:
-                    self.rows.extend(src.columns)
-
-class SheetsSheet(Sheet):
-    rowtype = 'sheets'
-    commands = [
-        Command(ENTER, 'jumpTo(cursorRowIndex)', 'jump to sheet referenced in current row'),
-        Command('g^R', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets', 'reload-all'),
-    ]
-    columns = [
-        ColumnAttr('name'),
-        ColumnAttr('nRows', type=int),
-        ColumnAttr('nCols', type=int),
-        ColumnAttr('nVisibleCols', type=int),
-        ColumnAttr('cursorDisplay'),
-        ColumnAttr('keyColNames'),
-        ColumnAttr('source'),
-    ]
-    nKeys = 1
-
-    def newRow(self):
-        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
-
-    def reload(self):
-        self.rows = vd().sheets
-
-    def jumpTo(self, sheetnum):
-        if sheetnum != 0:
-            moveListItem(self.rows, sheetnum, 0)
-            self.rows.pop(1)
-
-
-class HelpSheet(Sheet):
-    'Show all commands available to the source sheet.'
-    rowtype = 'commands'
-
-    class HelpColumn(Column):
-        def calcValue(self, r):
-            cmd = self.sheet.source.getCommand(self.prefix+r.name, None)
-            return cmd.helpstr if cmd else '-'
-
-    columns = [
-        ColumnAttr('keystrokes', 'name'),
-        ColumnAttr('helpstr'),
-        HelpColumn('with_g_prefix', prefix='g'),
-        HelpColumn('with_z_prefix', prefix='z'),
-        ColumnAttr('execstr', width=0),
-    ]
-    nKeys = 1
-    def reload(self):
-        self.rows = []
-        for src in self.source._commands.maps:
-            self.rows.extend(src.values())
-
-
-class OptionsSheet(Sheet):
-    rowtype = 'options'
-    commands = [
-        Command(ENTER, 'editOption(cursorRow)', 'edit option', 'set-row-input'),
-        Command('e', 'set-row-input')
-    ]
-    columns = (ColumnAttr('option', 'name'),
-               ColumnAttr('value'),
-               ColumnAttr('default'),
-               ColumnAttr('helpstr'))
-    colorizers = []
-    nKeys = 1
-
-    def editOption(self, row):
-        if isinstance(row.default, bool):
-            self.source.set(row.name, not row.value)
-        else:
-            self.source.set(row.name, self.editCell(1))
-
-    def reload(self):
-        self.rows = list(self.source._opts.values())
-
-vd().optionsSheet = OptionsSheet('options', source=options)
 
 ### Curses helpers
 

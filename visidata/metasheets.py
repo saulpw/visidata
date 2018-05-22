@@ -1,8 +1,137 @@
-from visidata import *
+from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, vd, error, anytype, ENTER, async
+from visidata import ColumnAttr, ColumnEnum, ColumnItem, DescribeSheet
+from visidata import moveListItem
 
-OptionsSheet.colorizers += [
+
+globalCommand('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
+globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet', 'meta-sheets')
+globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
+globalCommand(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
+
+Sheet.commands += [
+    Command('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet', 'meta-columns-sheet'),
+]
+
+
+class ColumnsSheet(Sheet):
+    rowtype = 'columns'
+    class ValueColumn(Column):
+        'passthrough to the value on the source cursorRow'
+        def calcValue(self, srcCol):
+            return srcCol.getDisplayValue(srcCol.sheet.cursorRow)
+        def setValue(self, srcCol, val):
+            srcCol.setValue(self.sheet.source.cursorRow, val)
+
+    columns = [
+            ColumnAttr('sheet'),
+            ColumnAttr('name', width=options.default_width),
+            ColumnAttr('width', type=int),
+            ColumnEnum('type', globals(), default=anytype),
+            ColumnAttr('fmtstr'),
+            ValueColumn('value', width=options.default_width),
+            ColumnAttr('expr'),
+    ]
+    nKeys = 2
+    colorizers = Sheet.colorizers + [
+            Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
+    ]
+    commands = [
+        Command('column-source-width-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
+        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or error("no columns selected to concatenate")))', 'add column from concatenating selected source columns'),
+    ]
+    def reload(self):
+        if isinstance(self.source, Sheet):
+            self.rows = self.source.columns
+            self.cursorRowIndex = self.source.cursorColIndex
+            self.columns[0].width = 0  # hide 'sheet' column if only one sheet
+        elif isinstance(self.source, list):  # lists of Columns
+            self.rows = []
+            for src in self.source:
+                if src is not self:
+                    self.rows.extend(src.columns)
+
+class SheetsSheet(Sheet):
+    rowtype = 'sheets'
+    commands = [
+        Command(ENTER, 'jumpTo(cursorRowIndex)', 'jump to sheet referenced in current row'),
+        Command('g^R', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets', 'reload-all'),
+        Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
+        Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
+    ]
+    columns = [
+        ColumnAttr('name'),
+        ColumnAttr('nRows', type=int),
+        ColumnAttr('nCols', type=int),
+        ColumnAttr('nVisibleCols', type=int),
+        ColumnAttr('cursorDisplay'),
+        ColumnAttr('keyColNames'),
+        ColumnAttr('source'),
+        ColumnAttr('progressPct'),
+    ]
+    nKeys = 1
+
+    def newRow(self):
+        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
+
+    def reload(self):
+        self.rows = vd().sheets
+
+    def jumpTo(self, sheetnum):
+        if sheetnum != 0:
+            moveListItem(self.rows, sheetnum, 0)
+            self.rows.pop(1)
+
+
+class HelpSheet(Sheet):
+    'Show all commands available to the source sheet.'
+    rowtype = 'commands'
+
+    class HelpColumn(Column):
+        def calcValue(self, r):
+            cmd = self.sheet.source.getCommand(self.prefix+r.name, None)
+            return cmd.helpstr if cmd else '-'
+
+    columns = [
+        ColumnAttr('keystrokes', 'name'),
+        ColumnAttr('helpstr'),
+        HelpColumn('with_g_prefix', prefix='g'),
+        HelpColumn('with_z_prefix', prefix='z'),
+        ColumnAttr('execstr', width=0),
+    ]
+    nKeys = 1
+    def reload(self):
+        self.rows = []
+        for src in self.source._commands.maps:
+            self.rows.extend(src.values())
+
+
+class OptionsSheet(Sheet):
+    rowtype = 'options'
+    commands = [
+        Command(ENTER, 'editOption(cursorRow)', 'edit option', 'set-row-input'),
+        Command('e', 'set-row-input')
+    ]
+    columns = (ColumnAttr('option', 'name'),
+               ColumnAttr('value'),
+               ColumnAttr('default'),
+               ColumnAttr('helpstr'))
+    colorizers = Sheet.colorizers + [
         Colorizer('cell', 9, lambda s,c,r,v: v.value if c.name in ['value', 'default'] and r.name.startswith('color_') else None)
     ]
+
+    nKeys = 1
+
+    def editOption(self, row):
+        if isinstance(row.default, bool):
+            self.source.set(row.name, not row.value)
+        else:
+            self.source.set(row.name, self.editCell(1))
+
+    def reload(self):
+        self.rows = list(self.source._opts.values())
+
+vd().optionsSheet = OptionsSheet('options', source=options)
+
 
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
@@ -17,13 +146,6 @@ def createJoinedSheet(sheets, jointype=''):
 
 jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
 
-SheetsSheet.commands += [
-        Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
-        Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
-    ]
-
-SheetsSheet.columns.append(ColumnAttr('progressPct'))
-
 # used ColumnsSheet, affecting the 'row' (source column)
 columnCommands = [
         Command('g!', 'for c in selectedRows or [cursorRow]: c.sheet.toggleKeyColumn(c)', 'toggle selected rows as key columns on source sheet'),
@@ -37,16 +159,9 @@ columnCommands = [
         Command('gz~', 'for c in selectedRows or [cursorRow]: c.type = anytype', 'set type of selected columns to anytype'),
     ]
 
-ColumnsSheet.commands += columnCommands + [
-        Command('column-source-width-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
-        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or error("no columns selected to concatenate")))', 'add column from concatenating selected source columns'),
-]
+ColumnsSheet.commands += columnCommands
 DescribeSheet.commands += columnCommands
 
-
-ColumnsSheet.columns += [
-        ColumnAttr('expr'),
-    ]
 
 #### slicing and dicing
 # rowdef: [(key, ...), sheet1_row, sheet2_row, ...]

@@ -4,21 +4,21 @@
 from .vdtui import __version__, __version_info__
 from .vdtui import *
 from .Path import *
-from .async import *
 from .diskcache import *
 from .zscroll import *
 from .types import *
 from .selection import *
-from .aggregators import *
 from .data import *
 from .clipboard import *
 from .utils import *
 from .slide import *
 
-from .freqtbl import *
 from .describe import *
 from .pyobj import *
 from .metasheets import *
+from .freqtbl import *
+from .aggregators import *
+from .async import *
 from .pivot import *
 from .tidydata import *
 from .cmdlog import *
