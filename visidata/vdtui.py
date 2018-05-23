@@ -284,7 +284,7 @@ def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
     return t
 
 # typemap [typetype] -> _vdtype
-typemap = collections.defaultdict(lambda: _vdtype(anytype, '?', '', _defaultFormatter))
+typemap = collections.defaultdict(lambda: _vdtype(anytype, '¿', '', _defaultFormatter))
 
 def typeIcon(typetype):
     t = typemap.get(typetype, None)
@@ -297,6 +297,8 @@ vdtype(str, '~')
 vdtype(int, '#', '{:d}')
 vdtype(float, '%', '{:.02f}')
 vdtype(len, '#')
+vdtype(dict, '')
+vdtype(list, '')
 
 ###
 
@@ -910,8 +912,8 @@ StubCommand('view-go-far-right'),
         self.__dict__.update(kwargs)
 
     @classmethod
-    def bind(cls, keystrokes, func):
-        cmd = Command(keystrokes, '%s(sheet)' % func.__name__, func.__doc__, func.__name__.replace('_', '-'))
+    def Command(cls, keystrokes, execstr, helpstr='', longname=''):
+        cmd = Command(keystrokes, execstr, helpstr, longname)
         cls.commands += [cmd]
         return cmd
 

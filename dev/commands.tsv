@@ -39,7 +39,7 @@ Keystroke	action	g	z	gz
  Shift- %	type-col-float			
  Shift- &	join-sheets			
         '	freeze-col			
- Shift- (	expand-col			
+ Shift- (	expand-col	expand-all-cols		
  Shift- )	collapse-col			
  Shift- *	addcol-transform-regex	set-col-regex-transform		
  Shift- +	add-col-aggr		show-col-aggr	

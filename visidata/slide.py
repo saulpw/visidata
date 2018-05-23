@@ -34,7 +34,7 @@ def slide_col_leftmost(sheet):
     moveListItem(sheet.columns, sheet.cursorColIndex, 0)
 
 def slide_col_rightmost(sheet):
-    'slide current columns all the way to the right of sheet'
+    'slide current column all the way to the right of sheet'
     moveListItem(sheet.columns, sheet.cursorColIndex, sheet.nCols)
 
 def slide_row_bottom(sheet):
@@ -42,7 +42,7 @@ def slide_row_bottom(sheet):
     moveListItem(sheet.rows, sheet.cursorRowIndex, sheet.nRows)
 
 def slide_row_top(sheet):
-    'slide curren row the top of sheet'
+    'slide current row the top of sheet'
     moveListItem(sheet.rows, sheet.cursorRowIndex, 0)
 
 

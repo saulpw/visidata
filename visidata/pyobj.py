@@ -11,11 +11,44 @@ globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name,
 globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object', 'python-push-cell-object')
 globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object', 'python-push-sheet-object')
 
-globalCommand('(', 'openColumn(cursorCol, cursorValue)', 'expand current column of lists or dict into multiple columns and hide the original column')
+Sheet.Command('(', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=1)', 'expand current column of containers one level', 'expand_col')
+Sheet.Command('g(', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=1)', 'expand all visible columns of containers one level', 'expand_vcols')
+Sheet.Command('z(', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=0)))', 'expand current column of containers to given depth (0=fully)', 'expand_col_deep')
+Sheet.Command('gz(', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=0)))', 'expand all visible columns of containers to given depth (0=fully)', 'expand_vcols_deep')
+
 globalCommand(')', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
 # used as ENTER in several pyobj sheets
 globalCommand('python-dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object')
+
+def expand_cols_deep(sheet, cols, row, depth=0):  # depth == 0 means drill all the way
+    'expand all visible columns of containers to the given depth (0=fully)'
+    ret = []
+    for col in cols:
+        newcols = _addExpandedColumns(col, row, sheet.columns.index(col))
+        if depth != 1:  # countdown not yet complete, or negative (indefinite)
+            ret.extend(expand_cols_deep(sheet, newcols, row, depth-1))
+    return ret
+
+def _addExpandedColumns(col, row, idx):
+    val = col.getTypedValueNoExceptions(row)
+    if isinstance(val, dict):
+        ret = [
+            ExpandedColumn('%s.%s' % (col.name, k), type=deduceType(val[k]), origCol=col, key=k)
+                for k in val
+        ]
+    elif isinstance(val, (list, tuple)):
+        ret = [
+            ExpandedColumn('%s[%s]' % (col.name, k), type=deduceType(val[k]), origCol=col, key=k)
+                for k in range(len(val))
+        ]
+    else:
+        return []
+
+    for i, c in enumerate(ret):
+        col.sheet.addColumn(c, idx+i+1)
+    col.width = 0
+    return ret
 
 
 def deduceType(v):
@@ -32,22 +65,12 @@ class ExpandedColumn(Column):
     def setValue(self, row, value):
         self.origCol.getValue(row)[self.key] = value
 
-def openColumn(col, val):
-    if isinstance(val, dict):
-        for k in val:
-            c = ExpandedColumn(col.name+'.'+k, type=deduceType(val[k]), origCol=col, key=k)
-            col.sheet.addColumn(c, col.sheet.cursorColIndex+1)
-            col.width = 0
-    elif isinstance(val, (list, tuple)):
-        for k in range(len(val)):
-            c = ExpandedColumn('%s[%s]' % (col.name, k), type=deduceType(val[k]), origCol=col, key=k)
-            col.sheet.addColumn(c, col.sheet.cursorColIndex+1)
-            col.width = 0
 
 def closeColumn(sheet, col):
     col.origCol.width = options.default_width
     cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not getattr(col, "origCol", col)]
     sheet.columns = cols
+
 
 
 #### generic list/dict/object browsing

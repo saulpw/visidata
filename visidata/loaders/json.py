@@ -34,6 +34,9 @@ class JSONSheet(Sheet):
 
         if isinstance(ret, dict):
             self.rows = [ret]
+            self.columns = []
+            for k in self.rows[0]:
+                self.addColumn(ColumnItem(k, type=deduceType(self.rows[0][k])))
         else:
             self.rows = []
             for row in Progress(ret):
