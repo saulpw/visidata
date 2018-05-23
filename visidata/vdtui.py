@@ -909,6 +909,12 @@ StubCommand('view-go-far-right'),
         self.currentThreads = []
         self.__dict__.update(kwargs)
 
+    @classmethod
+    def bind(cls, keystrokes, func):
+        cmd = Command(keystrokes, '%s(sheet)' % func.__name__, func.__doc__, func.__name__.replace('_', '-'))
+        cls.commands += [cmd]
+        return cmd
+
     def __bool__(self):
         'an instantiated Sheet always tests true'
         return True
@@ -1141,12 +1147,6 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         self._selectedRows = {}  # id(row) -> row
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
-
-    @classmethod
-    def bind(cls, keystrokes, func):
-        cmd = Command(keystrokes, '%s(sheet)' % func.__name__, func.__doc__, func.__name__.replace('_', '-'))
-        cls.commands += [cmd]
-        return cmd
 
     def __len__(self):
         return self.nRows
