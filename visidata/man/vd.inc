@@ -105,11 +105,11 @@ jump to previous sheet (swaps with current sheet)
 move to next/previous match from last search
 .Pp
 .It Ic  " <   >"
-move up/down in current column to the next value
+move up/down to next value in current column
 .It Ic  "z<  z>"
-move up/down in current column to the next null
+move up/down to next null in current column
 .It Ic " {   }"
-move up/down in current column to the next selected row
+move up/down to next selected row
 .
 .El
 .Pp
@@ -307,12 +307,14 @@ open
 .No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save CommandLog to Ar filename.vd No file
-.It Ic "Shift+A" Ar number
+.It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "R" Ar number
 select a random population subset of
+.It Ic "zR" Ar number
+select a random population subset of
 .Ar number No rows
-.It Ic "Shift+T"
+.It Ic "T"
 open new sheet with rows and columns transposed
 .Pp
 .It Ic " +" Ar aggregator
@@ -353,7 +355,7 @@ open sheet of source rows visible on screen
 toggle display of layers
 .It Ic "^L"
 redraw all pixels on canvas
-.It Ic " w"
+.It Ic " v"
 .No toggle Ic show_graph_labels No option
 .It Ic "mouse scrollwheel"
 zoom in/out of canvas
@@ -365,12 +367,12 @@ scroll canvas
 .Ss Other Commands
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic "Shift+Q"
+.It Ic "Q"
 .No quit current sheet and remove it from the Sy CommandLog
-.It Ic "Shift+V"
+.It Ic "V"
 view contents of current cell in a new TextSheet
 .It Ic "  v"
-toggle visibility (text wrap on TextSheet, legends/axes on Graph)
+toggle sheet-specific visibility (text wrap on TextSheet, legends/axes on Graph)
 .Pp
 .It Ic "Space"
 open command selection menu
@@ -675,6 +677,8 @@ For example:
 
    aggregator('median', median)
 .Ed
+.
+Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).
 .
 .Sh SUPPORTED SOURCES
 These are the supported sources:
