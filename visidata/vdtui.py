@@ -504,7 +504,7 @@ class VisiData:
             ret = func(*args, **kwargs)
         except EscapeException as e:  # user aborted
             t.status += 'aborted by user'
-            status('%s aborted' % t.name)
+            status('%s aborted' % t.name, priority=2)
         except Exception as e:
             exceptionCaught(e)
 
@@ -653,8 +653,8 @@ class VisiData:
         if isinstance(exc, ExpectedException):  # already reported, don't log
             return
         self.lastErrors.append(stacktrace())
-        if kwargs.get('status', False):
-            return status(self.lastErrors[-1][-1])  # last line of latest error
+        if kwargs.get('status', True):
+            return status(self.lastErrors[-1][-1], priority=2)  # last line of latest error
         if options.debug:
             raise
 
@@ -869,6 +869,7 @@ class Colorizer:
         self.type = colorizerType
         self.precedence = precedence
         self.func = colorfunc
+
 
 class BaseSheet:
     commands = [
