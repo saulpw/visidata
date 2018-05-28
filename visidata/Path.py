@@ -22,6 +22,7 @@ class Path:
             self.compression = None
 
         self.suffix = self.ext[1:]
+        self._stat = None
 
     def open_text(self, mode='rt'):
         if 't' not in mode:
@@ -74,11 +75,13 @@ class Path:
     def iterdir(self):
         return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
 
-    def stat(self):
-        try:
-            return os.stat(self.resolve())
-        except Exception:
-            return None
+    def stat(self, force=False):
+        if force or self._stat is None:
+            try:
+                self._stat = os.stat(self.resolve())
+            except Exception as e:
+                self._stat = e
+        return self._stat
 
     def resolve(self):
         'Resolve pathname shell variables and ~userdir'

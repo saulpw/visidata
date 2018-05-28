@@ -215,10 +215,10 @@ class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: (Path, stat)
     commands = [
-        Command(ENTER, 'vd.push(openSource(cursorRow[0]))', 'open current file as a new sheet', 'sheet-open-row'),
-        Command('g'+ENTER, 'for r in selectedRows: vd.push(openSource(r[0].resolve()))', 'open selected files as new sheets', 'sheet-open-rows'),
-        Command('^O', 'launchEditor(cursorRow[0].resolve())', 'open current file in external $EDITOR', 'edit-row-external'),
-        Command('g^O', 'launchEditor(*(r[0].resolve() for r in selectedRows))', 'open selected files in external $EDITOR', 'edit-rows-external'),
+        Command(ENTER, 'vd.push(openSource(cursorRow))', 'open current file as a new sheet', 'sheet-open-row'),
+        Command('g'+ENTER, 'for r in selectedRows: vd.push(openSource(r.resolve()))', 'open selected files as new sheets', 'sheet-open-rows'),
+        Command('^O', 'launchEditor(cursorRow.resolve())', 'open current file in external $EDITOR', 'edit-row-external'),
+        Command('g^O', 'launchEditor(*(r.resolve() for r in selectedRows))', 'open selected files in external $EDITOR', 'edit-rows-external'),
         Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
         Command('z^S', 'save(cursorRow)', 'apply changes to current row', 'sheet-specific-apply-edits'),
         Command('z^R', 'undoMod(cursorRow); restat(cursorRow)', 'undo pending changes to current row', 'sheet-specific-apply-edits'),
@@ -228,26 +228,26 @@ class DirSheet(Sheet):
     columns = [
         # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
         DeferredSetColumn('directory',
-            getter=lambda col,row: row[0].parent.relpath(col.sheet.source.resolve()),
+            getter=lambda col,row: row.parent.relpath(col.sheet.source.resolve()),
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         DeferredSetColumn('filename',
-            getter=lambda col,row: row[0].name + row[0].ext,
+            getter=lambda col,row: row.name + row.ext,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
-        Column('ext', getter=lambda col,row: row[0].is_dir() and '/' or row[0].suffix),
+        Column('ext', getter=lambda col,row: row.is_dir() and '/' or row.suffix),
         DeferredSetColumn('size', type=int,
-            getter=lambda col,row: row[1].st_size,
-            setter=lambda col,row,val: os.truncate(row[0].resolve(), int(val))),
+            getter=lambda col,row: row.stat().st_size,
+            setter=lambda col,row,val: os.truncate(row.resolve(), int(val))),
         DeferredSetColumn('modtime', type=date,
-            getter=lambda col,row: row[1].st_mtime,
-            setter=lambda col,row,val: os.utime(row[0].resolve(), times=((row[1].st_atime, float(val))))),
+            getter=lambda col,row: row.stat().st_mtime,
+            setter=lambda col,row,val: os.utime(row.resolve(), times=((row.stat().st_atime, float(val))))),
         DeferredSetColumn('owner', width=0,
-            getter=lambda col,row: pwd.getpwuid(row[1].st_uid).pw_name,
-            setter=lambda col,row,val: os.chown(row[0].resolve(), pwd.getpwnam(val).pw_uid, -1)),
+            getter=lambda col,row: pwd.getpwuid(row.stat().st_uid).pw_name,
+            setter=lambda col,row,val: os.chown(row.resolve(), pwd.getpwnam(val).pw_uid, -1)),
         DeferredSetColumn('group', width=0,
-            getter=lambda col,row: grp.getgrgid(row[1].st_gid).gr_name,
-            setter=lambda col,row,val: os.chown(row[0].resolve(), -1, grp.getgrnam(val).pw_gid)),
-        DeferredSetColumn('mode', width=0, type=int, fmtstr='{:o}', getter=lambda col,row: row[1].st_mode),
-        Column('filetype', width=40, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row[0].resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
+            getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name,
+            setter=lambda col,row,val: os.chown(row.resolve(), -1, grp.getgrnam(val).pw_gid)),
+        DeferredSetColumn('mode', width=0, type=int, fmtstr='{:o}', getter=lambda col,row: row.stat().st_mode),
+        Column('filetype', width=40, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     colorizers = [
         Colorizer('cell', 4, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
@@ -258,8 +258,7 @@ class DirSheet(Sheet):
 
     @staticmethod
     def colorOwner(sheet, col, row, val):
-        path, st = row
-        mode = st.st_mode
+        mode = row.stat().st_mode
         ret = ''
         if col.name == 'group':
             if mode & stat.S_IXGRP: ret = 'bold '
@@ -279,7 +278,7 @@ class DirSheet(Sheet):
                 self.toBeDeleted.append(r)
 
     def moveFile(self, row, val):
-        fn = row[0].name + row[0].ext
+        fn = row.name + row.ext
         newpath = os.path.join(val, fn)
         if not newpath.startswith('/'):
             newpath = os.path.join(self.source.resolve(), newpath)
@@ -292,14 +291,15 @@ class DirSheet(Sheet):
             with contextlib.suppress(FileExistsError):
                 os.makedirs(parent.resolve())
 
-        os.rename(row[0].resolve(), newpath)
-        row[0] = Path(newpath)
+        os.rename(row.resolve(), newpath)
+        row.fqpn = newpath
         self.restat(row)
 
     def renameFile(self, row, val):
-        newpath = row[0].with_name(val)
-        os.rename(row[0].resolve(), newpath.resolve())
-        row[0] = newpath
+        newpath = row.with_name(val)
+        os.rename(row.resolve(), newpath.resolve())
+        row.fqpn = newpath
+        self.restat(row)
 
     def removeFile(self, row):
         path, _ = row
@@ -373,11 +373,11 @@ class DirSheet(Sheet):
             for fn in files:
                 if fn.startswith('.'): continue
                 p = Path(os.path.join(folder, fn))
-                self.rows.append([p, p.stat()])
+                self.rows.append(p)
         self.rows.sort()
 
     def restat(self, row):
-        row[1] = row[0].stat()
+        row.stat(force=True)
 
 
 def openSource(p, filetype=None):
