@@ -2,6 +2,8 @@
 
 # Usage: test.sh [testname]
 
+set -e
+
 trap "echo aborted; exit;" SIGINT SIGTERM
 
 if [ -z "$1" ] ; then
