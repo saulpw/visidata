@@ -1,6 +1,6 @@
 # provides USD() function to convert string like '£300' or '205 AUD' to equivalent US$ as float
 # uses data from fixer.io
-from visidata import diskcache
+from visidata import urlcache
 import functools
 import json
 
@@ -15,11 +15,9 @@ currency_symbols = {
     '₫': 'VND',
 }
 
-@diskcache('fixer.io-currency-rates.json', 3600*24)
 def currency_rates_json(base='USD', date='latest'):
-    import urllib.request
-    with urllib.request.urlopen('https://api.fixer.io/%s?base=USD' % date) as fp:
-        return fp.read().decode('utf-8')
+    url = 'https://api.fixer.io/%s?base=USD' % date
+    return urlcache(url)
 
 @functools.lru_cache()
 def currency_rates(base='USD'):
@@ -43,5 +41,3 @@ def USD(s):
 
     amtstr, currcode = s.split(' ')
     return float(amtstr) * currency_multiplier(currcode, 'USD')
-
-

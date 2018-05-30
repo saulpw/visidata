@@ -4,7 +4,7 @@
 from .vdtui import __version__, __version_info__
 from .vdtui import *
 from .Path import *
-from .diskcache import *
+from .urlcache import *
 from .zscroll import *
 from .types import *
 from .selection import *

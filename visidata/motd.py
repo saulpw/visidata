@@ -4,18 +4,13 @@ from visidata import __version__
 option('motd_url', 'https://visidata.org/motd-'+__version__, 'source of randomized startup messages')
 
 
-@diskcache('motd-'+__version__, 24*3600)
-def motd(url):
-    import urllib.request
-    with urllib.request.urlopen(url) as fp:
-        return fp.read().decode('utf-8').strip()
-
+earthdays = lambda n: n*24*60*60
 
 @async
 def domotd():
     try:
         if options.motd_url:
-            line = random.choice(motd(options.motd_url).splitlines())
+            line = random.choice(urlcache(options.motd_url, earthdays(1)).splitlines())  # 1 earth day
             status(line.split('\t')[0], priority=-1)
     except Exception:
         pass
