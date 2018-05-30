@@ -281,7 +281,7 @@ def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
     return t
 
 # typemap [typetype] -> _vdtype
-typemap = collections.defaultdict(lambda: _vdtype(anytype, '¿', '', _defaultFormatter))
+typemap = collections.defaultdict(lambda: _vdtype(anytype, '', '', _defaultFormatter))
 
 def typeIcon(typetype):
     t = typemap.get(typetype, None)
