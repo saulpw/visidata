@@ -28,6 +28,6 @@ Command(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) 
 Command('g,', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getValue(r) == c.getValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns', 'rows-select-like-row'),
 
 
-Command('', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'select rows with a Python expression', 'rows-select-expr'),
-Command('', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'unselect rows with a Python expression', 'rows-unselect-expr')
+Command('z|', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'select rows with a Python expression', 'rows-select-expr'),
+Command('z\\', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'unselect rows with a Python expression', 'rows-unselect-expr')
 ])
