@@ -14,7 +14,7 @@ Keystroke	action	g	z	gz
   Ctrl- L	redraw			
   Ctrl- M	(must be same as ENTER)			
   Ctrl- N				
-  Ctrl- O	toggle-profile			
+  Ctrl- O	edit-row-external			
   Ctrl- P	open-statuses			
   Ctrl- Q	(Quit immediately)			
   Ctrl- R	reload-sheet	reload-all-sheets	clear-col-cache	clear-viscols-cache
@@ -33,16 +33,16 @@ Keystroke	action	g	z	gz
   Ctrl- _	toggle-interface-profile			
     SPACE	menu			
  Shift- !	toggle-keycol	set-keycol	unset-keycol	
- Shift- "	duplicate-sheet-selected-rows	duplicate-sheet-all-rows		
+ Shift- "	duplicate-sheet-selected-rows	duplicate-sheet-all-rows		duplicate-shee-deepcopy
  Shift- #	type-col-int			
  Shift- $	type-col-currency			
  Shift- %	type-col-float			
  Shift- &	join-sheets			
         '	freeze-col			
- Shift- (	expand-col	expand-all-cols		
+ Shift- (	expand-col	expand-vcols	expand-col-deep	expand-vcols-deep
  Shift- )	collapse-col			
  Shift- *	addcol-transform-regex	set-col-regex-transform		
- Shift- +	add-col-aggr		show-col-aggr	
+ Shift- +	add-aggr-col	add-aggr-all-cols	show-aggr-col	
         ,	select-equal-cells	select-equal-rows		
         -	hide-col	delete-col	resize-col-half	
         .	plot-col	plot-numeric-cols		
