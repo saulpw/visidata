@@ -301,8 +301,7 @@ class DirSheet(Sheet):
         row.fqpn = newpath
         self.restat(row)
 
-    def removeFile(self, row):
-        path, _ = row
+    def removeFile(self, path):
         if path.is_dir():
             os.rmdir(path.resolve())
         else:
