@@ -1,12 +1,15 @@
-from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, vd, error, anytype, ENTER, async
-from visidata import ColumnAttr, ColumnEnum, ColumnItem, DescribeSheet
-from visidata import moveListItem
+import collections
+import itertools
 
+from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, vd, error, anytype, ENTER, async, status, Progress
+from visidata import ColumnAttr, ColumnEnum, ColumnItem, DescribeSheet, ColumnExpr, SubrowColumn
+from visidata import moveListItem
 
 globalCommand('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
 globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet', 'meta-sheets')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
-globalCommand(['KEY_F(1)', 'z?'], 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
+
+globalCommand('zKEY_F(1)', 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 
 Sheet.commands += [
     Command('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet', 'meta-columns-sheet'),
