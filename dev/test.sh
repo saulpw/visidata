@@ -15,7 +15,7 @@ fi
 for i in $TESTS ; do
     echo "--- $i"
     outbase=${i##tests/}
-    if [ "${i%-notest.vd}-notest" == "${i%.vd}" ]
+    if [ "${i%-nosave.vd}-nosave" == "${i%.vd}" ]
     then
         PYTHONPATH=. bin/vd --play $i --batch
     else
