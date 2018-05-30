@@ -133,7 +133,7 @@ class OptionsObject:
                 v = t(v)
         else:
             curval = None
-            status('setting unknown option %s' % k)
+            warning('setting unknown option %s' % k)
             option(k, v)
 
         self._opts[k].value = v

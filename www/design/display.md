@@ -59,6 +59,7 @@ The Column object has other associated niceties (any of which may be passed as k
 - [type](/design/types): int, str, float, date, currency, anytype (default)
    set with ~@#$% (cannot be reset to anytype from interface)
 - fmtstr
+   strftime style format for date columns: `%Y-%m-%d` by default
    new style python format: `{:}`
 
 name, type, width, and fmtstr can all be edited on the Columns metasheet.
