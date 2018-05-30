@@ -1,0 +1,14 @@
+sheet	col	row	keystrokes	input	comment
+			o	dev/commands.tsv	open file
+commands	Keystroke		!		toggle current column as a key column
+commands			M		open melted sheet (unpivot)
+commands_melted	Variable		^	Prefix	edit name of current column
+commands_melted	Prefix	キ  Ctrl- A	,		select rows matching current cell in current column
+commands_melted	Prefix		gzd		set contents of cells in current column to None for selected rows
+commands_melted			gu		unselect all rows
+commands_melted	Value		gza	1	add N empty columns
+commands_melted	3		_		adjust width of current column to full
+commands_melted	3		_		adjust width of current column to full
+commands_melted	Value		^	longname	edit name of current column
+commands_melted	Prefix		^	prefix	edit name of current column
+commands_melted	3		^	video	edit name of current column
