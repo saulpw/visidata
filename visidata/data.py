@@ -12,7 +12,8 @@ replayableOption('header', 1, 'parse first N rows of .csv/.tsv as column names')
 replayableOption('delimiter', '\t', 'delimiter to use for tsv filetype')
 replayableOption('filetype', '', 'specify file type')
 replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
-replayableOption('tsv_safe_char', '\u00b7', 'replacement for all tabs and newlines when saving to tsv')
+replayableOption('tsv_safe_newline', '\u001e', 'replacement for tab character when saving to tsv')
+replayableOption('tsv_safe_tab', '\u001f', 'replacement for newline character when saving to tsv')
 
 option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
 option('color_delete_pending', 'red', 'color for files pending delete')
@@ -506,10 +507,12 @@ def reload_tsv_sync(vs, **kwargs):
 
 
 def tsv_trdict(delim=None):
-    # replace tabs and newlines
+    'returns string.translate dictionary for replacing tabs and newlines'
     delim = delim or options.delimiter
-    replch = options.tsv_safe_char
-    return {ord(delim): replch, 10: replch, 13: replch}
+    return {ord(delim): options.tsv_safe_tab, # \t
+            10: options.tsv_safe_newline,  # \n
+            13: options.tsv_safe_newline,  # \r
+            }
 
 
 def save_tsv_header(p, vs):
