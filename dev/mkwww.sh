@@ -17,6 +17,7 @@ mkdir -p $BUILD
 mkdir -p $BUILDWWW
 mkdir -p $BUILDWWW/man
 mkdir -p $BUILDWWW/docs
+mkdir -p $BUILDWWW/install
 mkdir -p $BUILDWWW/about
 mkdir -p $BUILDWWW/releases
 mkdir -p $BUILDWWW/contributing
@@ -66,6 +67,10 @@ sed -i -e "s#<span style=\"font-weight:bold;\">Columns</span> <span style=\"font
 # Build /contributing
 pandoc -r markdown -w html -o $BUILDWWW/contributing/index.body $VD/CONTRIBUTING.md
 $DEV/strformat.py body=$BUILDWWW/contributing/index.body title="Contributing to VisiData" head="" < $WWW/template.html > $BUILDWWW/contributing/index.html
+
+# Build /install
+pandoc -r markdown -w html -o $BUILDWWW/install/index.body $WWW/install.md
+$DEV/strformat.py body=$BUILDWWW/install/index.body title="Quick Install" head="" < $WWW/template.html > $BUILDWWW/install/index.html
 
 # Build /support
 pandoc -r markdown -w html -o $BUILDWWW/support/index.body $WWW/support.md
