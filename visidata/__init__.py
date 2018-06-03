@@ -6,7 +6,7 @@ from .vdtui import *
 from .Path import *
 from .urlcache import *
 from .zscroll import *
-from .types import *
+from ._types import *
 from .selection import *
 from .data import *
 from .clipboard import *
