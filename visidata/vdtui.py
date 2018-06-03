@@ -1923,7 +1923,6 @@ class Column:
 
     def setValues(self, rows, value):
         'Set our column value for given list of rows to `value`.'
-        value = self.type(value)
         for r in rows:
             self.setValue(r, value)
         status('set %d values = %s' % (len(rows), value))
