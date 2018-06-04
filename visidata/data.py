@@ -213,7 +213,7 @@ class DeferredSetColumn(Column):
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
-    rowtype = 'files' # rowdef: (Path, stat)
+    rowtype = 'files' # rowdef: Path
     commands = [
         Command(ENTER, 'vd.push(openSource(cursorRow))', 'open current file as a new sheet', 'sheet-open-row'),
         Command('g'+ENTER, 'for r in selectedRows: vd.push(openSource(r.resolve()))', 'open selected files as new sheets', 'sheet-open-rows'),
@@ -247,7 +247,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name,
             setter=lambda col,row,val: os.chown(row.resolve(), -1, grp.getgrnam(val).pw_gid)),
         DeferredSetColumn('mode', width=0, type=int, fmtstr='{:o}', getter=lambda col,row: row.stat().st_mode),
-        Column('filetype', width=40, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
+        Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     colorizers = [
         Colorizer('cell', 4, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
