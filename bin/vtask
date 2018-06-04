@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+
+'Full terminal interface for TaskWarrior (task).' 
+
+import collections
+import tasklib
+from visidata import *
+
+options.disp_date_fmt = '%Y-%m-%d %H:%M'
+
+class TodoSheet(Sheet):
+    rowtype = 'tasks'  # rowdef: tasklib.Task
+    commands = [
+        Command('^O', 'cursorRow.notes = launchExternalEditor(cursorRow.notes)', 'edit notes in external $EDITOR', 'edit-notes'),
+        Command('a', 't=newRow(description=input("new task: ")); rows.insert(cursorRowIndex+1, t); t.save(); cursorDown()', 'add new task', 'add-task'),
+        Command('d', 'cursorRow.done(); cursorRow.refresh()', 'mark task as done', 'complete-task'),
+        Command('gd', 'cursorRow.delete(); cursorRow.refresh()', 'delete task', 'delete-task'),
+        Command('z^R', 'cursorRow.refresh()', '', 'refresh-tasks'),
+        Command('z^S', 'cursorRow.save()', '', 'save-task'),
+        Command('^S', 'list(r.save() for r in rows if r.modified)', '', 'save-modified-tasks'),
+        Command(' ', 'cursorRow.stop() if cursorRow["start"] else cursorRow.start()', '', 'start-task'),
+        Command(ENTER, 'cursorRow.add_annotation(input("note: "))', '', ''),
+    ]
+    columns = [
+         ColumnItem('id', type=int, width=4),
+         ColumnItem('project'),
+         ColumnItem('description'),
+         ColumnItem('status'),
+         ColumnItem('urgency', type=float, fmtstr='{:.01f}'),
+         ColumnItem('start', type=date),
+         ColumnItem('due', type=date),
+         ColumnItem('entry', type=date, width=0),
+         ColumnItem('modified', type=date, width=0),
+         ColumnItem('completed', type=date, width=0),
+         Column('annotations', getter=lambda c,r: '\n'.join(str(s) for s in r['annotations']),
+                               setter=lambda c,r,v: setitem(r['annotations'], 0, v))
+#        Column('age', width=3, getter=lambda c,r: date()-r.date_entered), # formatter=duration
+    ]
+    nKeys=1
+    colorizers = Sheet.colorizers + [
+        Colorizer('cell', 8, lambda s,c,r,v: 'reverse yellow' if r._data.get(c.name, None) != r._original_data.get(c.name, None) else None),
+    ]
+    def newRow(self, **kwargs):
+        return tasklib.Task(self.tw, **kwargs)
+
+    def reload(self):
+        self.tw = tasklib.TaskWarrior(data_location=self.source.resolve(), create=True)
+        self.rows = list(self.tw.tasks.pending())
+
+run(TodoSheet('todos', source=Path('~/.task')))
