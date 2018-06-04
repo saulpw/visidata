@@ -47,5 +47,5 @@ class date(datetime.datetime):
         return self.timestamp()
 
 
-vdtype(date, '@', '%Y-%m-%d', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
+vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
 vdtype(currency, '$', '{:,.02f}')
