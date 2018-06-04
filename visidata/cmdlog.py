@@ -168,7 +168,7 @@ class CommandLog(Sheet):
                 self.addRow(self.currentActiveRow)
                 if options.cmdlog_histfile:
                     if not getattr(vd(), 'sessionlog', None):
-                        vd().sessionlog = loadInternalSheet(CommandLog, Path(date().to_string(options.cmdlog_histfile)))
+                        vd().sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
                     append_tsv_row(vd().sessionlog, self.currentActiveRow)
 
         self.currentActiveRow = None
