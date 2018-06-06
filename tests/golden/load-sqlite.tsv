@@ -1,5 +1,5 @@
-type	name	tbl_name	rootpage	sql
-table	dept	dept	2	CREATE TABLE dept(  deptno number(2,0),  dname  varchar2(14),  loc    varchar2(13),  constraint pk_dept primary key (deptno))
-index	sqlite_autoindex_dept_1	dept	4	
-table	emp	emp	5	CREATE TABLE emp(  empno    number(4,0),  ename    varchar2(10),  job      varchar2(9),  mgr      number(4,0),  hiredate date,  sal      number(7,2),  comm     number(7,2),  deptno   number(2,0),  constraint pk_emp primary key (empno),  constraint fk_deptno foreign key (deptno) references dept (deptno))
-index	sqlite_autoindex_emp_1	emp	3	
+deptno	dname	loc
+10	ACCOUNTING	NEW YORK
+20	RESEARCH	DALLAS
+30	SALES	CHICAGO
+40	OPERATIONS	BOSTON

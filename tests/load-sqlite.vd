@@ -1,2 +1,3 @@
 sheet	col	row	keystrokes	input	comment
 			o	sample_data/employees.sqlite	open file
+employees_tables		0	^J		load the entire table into memory
