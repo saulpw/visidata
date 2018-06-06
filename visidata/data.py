@@ -251,7 +251,7 @@ class DirSheet(Sheet):
         Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     colorizers = [
-        Colorizer('cell', 4, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
+#        Colorizer('cell', 4, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
         Colorizer('cell', 8, lambda s,c,r,v: options.color_change_pending if s.changed(c, r) else None),
         Colorizer('row', 9, lambda s,c,r,v: options.color_delete_pending if r in s.toBeDeleted else None),
     ]
@@ -259,13 +259,14 @@ class DirSheet(Sheet):
 
     @staticmethod
     def colorOwner(sheet, col, row, val):
-        mode = row.stat().st_mode
         ret = ''
         if col.name == 'group':
+            mode = row.stat().st_mode
             if mode & stat.S_IXGRP: ret = 'bold '
             if mode & stat.S_IWGRP: return ret + 'green'
             if mode & stat.S_IRGRP: return ret + 'yellow'
         elif col.name == 'owner':
+            mode = row.stat().st_mode
             if mode & stat.S_IXUSR: ret = 'bold '
             if mode & stat.S_IWUSR: return ret + 'green'
             if mode & stat.S_IRUSR: return ret + 'yellow'
