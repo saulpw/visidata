@@ -46,6 +46,29 @@ class date(datetime.datetime):
     def __float__(self):
         return self.timestamp()
 
+    def __radd__(self, n):
+        return self.__add__(n)
+
+    def __add__(self, n):
+        'add n days (int or float) to the date'
+        if isinstance(n, (int, float)):
+            n = datetime.timedelta(days=n)
+        return super().__add__(n)
+
+    def __sub__(self, n):
+        'subtract n days (int or float) from the date'
+        if isinstance(n, (int, float)):
+            n = datetime.timedelta(days=n)
+        return super().__sub__(n)
 
 vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
 vdtype(currency, '$', '{:,.02f}')
+
+# simple constants, for expressions like 'timestamp+15*minutes'
+years=365.25
+months=30.0
+weeks=7.0
+days=1.0
+hours=days/24
+minutes=days/(24*60)
+seconds=days/(24*60*60)
