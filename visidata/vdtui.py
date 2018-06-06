@@ -418,7 +418,7 @@ class VisiData:
 
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
-        self.statuses = []  # (priority, statuses) shown until next action
+        self.statuses = []  # (priority, num_repeats, statuses) shown until next action
         self.lastErrors = []
         self.searchContext = {}
         self.statusHistory = []
@@ -449,7 +449,12 @@ class VisiData:
     def status(self, *args, priority=0):
         'Add status message to be shown until next action.'
         s = '; '.join(str(x) for x in args)
-        self.statuses.append((priority, s))
+        for i, (pri, n, msg) in enumerate(self.statuses):
+            if s == msg:
+                self.statuses[i][1] += 1
+                break
+        else:
+            self.statuses.append([priority, 1, s])
         self.statusHistory.insert(0, args[0] if len(args) == 1 else args)
         return s
 
@@ -691,7 +696,13 @@ class VisiData:
         maxwidth = options.disp_lstatus_max
         if maxwidth > 0:
             s = middleTruncate(s, maxwidth//2)
-        s += options.disp_status_sep.join([x for _, x in sorted(self.statuses, key=lambda y: -y[0])])
+
+        for _, n, x in sorted(self.statuses, key=lambda y: -y[0]):
+            if n == 1:
+                s += '%s' % x
+            else:
+                s += '[%sx] %s' % (n, x)
+            s += options.disp_status_sep
         return s
 
     def rightStatus(self, sheet):
