@@ -1,20 +1,50 @@
 #!/usr/bin/env python3
 
-'Full terminal interface for TaskWarrior (task).' 
+'Full terminal interface for TaskWarrior (task).'
 
-import collections
 import tasklib
 from visidata import *
 
 options.disp_date_fmt = '%Y-%m-%d %H:%M'
 
+
+def editTask(task):
+    taskdesc = ''
+
+    # pack "key: value" metadata
+    for k in 'description project status'.split():
+        taskdesc += '%s: %s\n' % (k, task[k])
+
+    # pack annotations separated by ---
+    for note in task["annotations"]:
+        taskdesc += "\n---\n"
+        taskdesc += note.description
+
+    # add final sentinel to indicate how to separate if no notes
+    taskdesc += "\n---\n"
+    ret = launchExternalEditor(taskdesc)
+
+    # unpack annotations separated by ---
+    newnotes = ret.split("\n---\n")
+    task["annotations"] = newnotes[1:]
+
+    # unpack "key: value" metadata
+    for line in newnotes[0].splitlines():
+        k, v = line.split(': ', maxsplit=1)
+        task[k] = v
+
+#    task.save()
+
+
 class TodoSheet(Sheet):
     rowtype = 'tasks'  # rowdef: tasklib.Task
     commands = [
-        Command('^O', 'cursorRow.notes = launchExternalEditor(cursorRow.notes)', 'edit notes in external $EDITOR', 'edit-notes'),
+        Command('^O', 'editTask(cursorRow)', 'edit notes in external $EDITOR', 'edit-notes'),
         Command('a', 't=newRow(description=input("new task: ")); rows.insert(cursorRowIndex+1, t); t.save(); cursorDown()', 'add new task', 'add-task'),
         Command('d', 'cursorRow.done(); cursorRow.refresh()', 'mark task as done', 'complete-task'),
-        Command('gd', 'cursorRow.delete(); cursorRow.refresh()', 'delete task', 'delete-task'),
+        Command('gd', 'for r in selectedRows: r.done() or r.refresh()', 'mark task as done', 'complete-task'),
+        Command('zd', 'cursorRow.delete(); cursorRow.refresh()', 'delete task', 'delete-task'),
+        Command('gzd', 'for r in selectedRows: r.delete() or r.refresh()', 'delete task', 'delete-task'),
         Command('z^R', 'cursorRow.refresh()', '', 'refresh-tasks'),
         Command('z^S', 'cursorRow.save()', '', 'save-task'),
         Command('^S', 'list(r.save() for r in rows if r.modified)', '', 'save-modified-tasks'),
@@ -29,16 +59,22 @@ class TodoSheet(Sheet):
          ColumnItem('urgency', type=float, fmtstr='{:.01f}'),
          ColumnItem('start', type=date),
          ColumnItem('due', type=date),
+         ColumnItem('wait', type=date, width=0),
+         ColumnItem('scheduled', type=date, width=0),
+         ColumnItem('until', type=date, width=0),
          ColumnItem('entry', type=date, width=0),
          ColumnItem('modified', type=date, width=0),
          ColumnItem('completed', type=date, width=0),
-         Column('annotations', getter=lambda c,r: '\n'.join(str(s) for s in r['annotations']),
-                               setter=lambda c,r,v: setitem(r['annotations'], 0, v))
+#         ColumnItem('depends'),
+         Column('tags', getter=lambda c,r: ' '.join(r["tags"]),
+                        setter=lambda c,r: r["tags"].tags.split(' ')),
+#         ColumnItem('tags'),
+         ColumnItem('annotations'),
 #        Column('age', width=3, getter=lambda c,r: date()-r.date_entered), # formatter=duration
     ]
-    nKeys=1
+    nKeys = 1
     colorizers = Sheet.colorizers + [
-        Colorizer('cell', 8, lambda s,c,r,v: 'reverse yellow' if r._data.get(c.name, None) != r._original_data.get(c.name, None) else None),
+        Colorizer('cell', 8, lambda s,c,r,v: 'reverse yellow' if isChanged(r, c.name) else None),
     ]
     def newRow(self, **kwargs):
         return tasklib.Task(self.tw, **kwargs)
@@ -46,5 +82,12 @@ class TodoSheet(Sheet):
     def reload(self):
         self.tw = tasklib.TaskWarrior(data_location=self.source.resolve(), create=True)
         self.rows = list(self.tw.tasks.pending())
+        self.orderBy(self.searchColumnNameRegex('urgency'), reverse=True)
+
+def isChanged(r, key):
+    return r._data.get(key, None) != r._original_data.get(key, None)
+
+
+addGlobals(globals())
 
 run(TodoSheet('todos', source=Path('~/.task')))
