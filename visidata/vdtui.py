@@ -697,13 +697,14 @@ class VisiData:
         if maxwidth > 0:
             s = middleTruncate(s, maxwidth//2)
 
+        sep = options.disp_status_sep
         for _, n, x in sorted(self.statuses, key=lambda y: -y[0]):
             if n == 1:
                 s += '%s' % x
             else:
                 s += '[%sx] %s' % (n, x)
-            s += options.disp_status_sep
-        return s
+            s += sep
+        return s[:-len(sep)]
 
     def rightStatus(self, sheet):
         'Compose right side of status bar.'
