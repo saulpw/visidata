@@ -218,7 +218,7 @@ theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 ENTER='^J'
 ESC='^['
 globalCommand('KEY_RESIZE', '', 'no-op by default')
-globalCommand('q',  'vd.sheets.pop(0)', 'quit current sheet', 'sheet-quit-current')
+globalCommand('q',  'vd.sheets[1:] or confirm("quit last sheet? "); vd.sheets.pop(0)', 'quit current sheet', 'sheet-quit-current')
 globalCommand('gq', 'vd.sheets.clear()', 'quit all sheets (clean exit)', 'sheet-quit-all')
 
 globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
