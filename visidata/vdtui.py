@@ -1079,9 +1079,9 @@ Command('z>', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnul
 Command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjust width of current column to full', 'column-width-full'),
 Command('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))', 'adjust current column width to given number', 'column-width-input'),
 
-Command('-', 'cursorCol.width = 0', 'hide current column', 'column-hide'),
+Command('-', 'cursorCol.hide()', 'hide current column', 'column-hide'),
 Command('z-', 'cursorCol.width = cursorCol.width//2', 'reduce width of current column by half', 'column-width-half'),
-Command('gv', 'for c in columns: c.width = c.width or c.getMaxWidth(visibleRows)', 'unhide all columns', 'column-unhide-all'),
+Command('gv', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)', 'unhide all columns', 'column-unhide-all'),
 
 Command('!', 'toggleKeyColumn(cursorCol)', 'toggle current column as a key column', 'column-key-toggle'),
 Command('z!', 'keyCols.remove(cursorCol)', 'unset current column as a key column', 'column-key-unset'),
@@ -1834,10 +1834,15 @@ class Column:
         typedval = t(cellval)
         return typemap[t].formatter(self.fmtstr, typedval)
 
+    def hide(self):
+        self.width = -abs(self.width or 0)
+
     @property
     def hidden(self):
-        'A column is hidden if its width == 0.'
-        return self.width == 0
+        'A column is hidden if its width <= 0. (width==None means not-yet-autocomputed).'
+        if self.width is None:
+            return False
+        return self.width <= 0
 
     def getValueRows(self, rows):
         'Generate (val, row) for the given `rows` at this Column, excluding errors and nulls.'

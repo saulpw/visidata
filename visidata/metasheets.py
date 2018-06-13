@@ -48,7 +48,7 @@ class ColumnsSheet(Sheet):
         if isinstance(self.source, Sheet):
             self.rows = self.source.columns
             self.cursorRowIndex = self.source.cursorColIndex
-            self.columns[0].width = 0  # hide 'sheet' column if only one sheet
+            self.columns[0].hide()  # hide 'sheet' column if only one sheet
         elif isinstance(self.source, list):  # lists of Columns
             self.rows = []
             for src in self.source:
@@ -154,7 +154,7 @@ jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
 columnCommands = [
         Command('g!', 'for c in selectedRows or [cursorRow]: c.sheet.toggleKeyColumn(c)', 'toggle selected rows as key columns on source sheet'),
         Command('gz!', 'for c in selectedRows or [cursorRow]: c.sheet.keyCols.remove(c)', 'unset selected rows as key columns on source sheet'),
-        Command('g-', 'for c in selectedRows or [cursorRow]: c.width = 0', 'hide selected source columns on source sheet'),
+        Command('g-', 'for c in selectedRows or [cursorRow]: c.hide()', 'hide selected source columns on source sheet'),
         Command('g%', 'for c in selectedRows or [cursorRow]: c.type = float', 'set type of selected source columns to float'),
         Command('g#', 'for c in selectedRows or [cursorRow]: c.type = int', 'set type of selected source columns to int'),
         Command('g@', 'for c in selectedRows or [cursorRow]: c.type = date', 'set type of selected source columns to date'),

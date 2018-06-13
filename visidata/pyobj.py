@@ -47,7 +47,7 @@ def _addExpandedColumns(col, row, idx):
 
     for i, c in enumerate(ret):
         col.sheet.addColumn(c, idx+i+1)
-    col.width = 0
+    col.hide()
     return ret
 
 

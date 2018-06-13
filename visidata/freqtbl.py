@@ -68,7 +68,7 @@ class SheetFreqTable(Sheet):
 
         if aggregatedCols:  # hide percent/histogram if aggregations added
             for c in self.columns[nkeys+1:nkeys+3]:
-                c.width = 0
+                c.hide()
 
         self.groupby = columns
         self.orderby = [(self.columns[nkeys], -1)]  # count desc
