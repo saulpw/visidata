@@ -10,7 +10,7 @@ option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
-globalCommand('gD', 'p=Path(options.visidata_dir); vd.push(DirSheet(p.name, source=p))', 'open .visidata directory', 'meta-visidata-dir')
+globalCommand('gD', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))', 'open .visidata directory', 'meta-visidata-dir')
 globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'meta-cmdlog')
 globalCommand('^D', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)', 'save CommandLog to new .vd file', 'meta-cmdlog-save')
 globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'meta-replay-toggle')
