@@ -2089,6 +2089,8 @@ def confirm(prompt):
     yn = input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
         error('disconfirmed')
+    return True
+
 
 import unicodedata
 @functools.lru_cache(maxsize=8192)
