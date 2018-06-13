@@ -59,18 +59,14 @@ def fnSuffix(template):
         if not Path(fn).exists():
             return fn
 
-def getColVisibleIdxByFullName(sheet, name):
-    for i, c in enumerate(sheet.visibleCols):
-        if name == c.name:
+def indexMatch(L, func):
+    'returns the smallest i for which func(L[i]) is true'
+    for i, x in enumerate(L):
+        if func(x):
             return i
 
 def keystr(k):
     return  ','.join(map(str, k))
-
-def getRowIdxByKey(sheet, k):
-    for i, r in enumerate(sheet.rows):
-        if keystr(sheet.rowkey(r)) == k:
-            return i
 
 def isLoggableSheet(sheet):
     return sheet is not vd().cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
@@ -212,7 +208,7 @@ class CommandLog(Sheet):
                 rowidx = int(r.row)
             except ValueError:
                 k = r.row[1:]  # trim rowkey_prefix
-                rowidx = getRowIdxByKey(vs, k)
+                rowidx = indexMatch(vs.rows, lambda r,vs=vs,k=k: keystr(vs.rowkey(r)) == k)
 
             if rowidx is None:
                 error('no "%s" row' % r.row)
@@ -229,7 +225,7 @@ class CommandLog(Sheet):
             try:
                 vcolidx = int(r.col)
             except ValueError:
-                vcolidx = getColVisibleIdxByFullName(vs, r.col)
+                vcolidx = indexMatch(vs.visibleCols, lambda c,name=r.col: name == c.name)
 
             if vcolidx is None:
                 error('no "%s" column' % r.col)
