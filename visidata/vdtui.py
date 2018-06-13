@@ -51,6 +51,7 @@ import threading
 import traceback
 import time
 import inspect
+import weakref
 
 class EscapeException(BaseException):
     'Inherits from BaseException to avoid "except Exception" clauses.  Do not use a blanket "except:" or the task will be uncancelable.'
@@ -223,7 +224,7 @@ globalCommand('gq', 'vd.sheets.clear()', 'quit all sheets (clean exit)', 'sheet-
 
 globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
 globalCommand('^V', 'status(__version_info__); status(__copyright__)', 'show version information on status line', 'info-version')
-globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses"))', 'open Status History', 'meta-status-history')
+globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))', 'open Status History', 'meta-status-history')
 
 globalCommand('^E', 'vd.lastErrors and vd.push(ErrorSheet("last_error", vd.lastErrors[-1])) or status("no error")', 'view traceback for most recent error', 'info-errors-last')
 globalCommand('^R', 'reload(); status("reloaded")', 'reload current sheet', 'sheet-reload')
@@ -418,6 +419,7 @@ class VisiData:
 
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
+        self.allSheets = weakref.WeakKeyDictionary()  # [BaseSheet] -> sheetname (all non-precious sheets ever pushed)
         self.statuses = []  # (priority, num_repeats, statuses) shown until next action
         self.lastErrors = []
         self.searchContext = {}
@@ -823,6 +825,9 @@ class VisiData:
                 vs.recalc()  # set up Columns
             else:
                 self.sheets.insert(0, vs)
+
+            if vs.precious and vs not in vs.vd.allSheets:
+                vs.vd.allSheets[vs] = vs.name
             return vs
 # end VisiData class
 
@@ -881,6 +886,7 @@ class Colorizer:
 
 
 class BaseSheet:
+    precious = True
     commands = [
 StubCommand('modify-edit-cell'),
 StubCommand('schema-column-hide'),

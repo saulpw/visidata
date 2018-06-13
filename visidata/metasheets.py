@@ -6,7 +6,8 @@ from visidata import ColumnAttr, ColumnEnum, ColumnItem, DescribeSheet, ColumnEx
 from visidata import moveListItem
 
 globalCommand('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
-globalCommand('S', 'vd.push(SheetsSheet("sheets"))', 'open Sheets Sheet', 'meta-sheets')
+globalCommand('S', 'vd.push(vd.sheetsSheet)', 'open Sheets Sheet', 'meta-sheets')
+globalCommand('gS', 'vd.push(SheetsSheet("all_sheets", source=list(vd.allSheets.keys())))', 'open global Sheets Sheet', 'meta-sheets-all')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
 
 globalCommand('zKEY_F(1)', 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
@@ -18,6 +19,7 @@ Sheet.commands += [
 
 class ColumnsSheet(Sheet):
     rowtype = 'columns'
+    precious = False
     class ValueColumn(Column):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
@@ -55,8 +57,10 @@ class ColumnsSheet(Sheet):
 
 class SheetsSheet(Sheet):
     rowtype = 'sheets'
+    precious = False
     commands = [
-        Command(ENTER, 'jumpTo(cursorRowIndex)', 'jump to sheet referenced in current row'),
+        Command(ENTER, 'vd.push(cursorRow)', 'jump to sheet referenced in current row'),
+        Command('g'+ENTER, 'for vs in selectedRows: vd.push(vs)', 'push selected sheets to top of sheets stack'),
         Command('g^R', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets', 'reload-all'),
         Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
         Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
@@ -77,17 +81,13 @@ class SheetsSheet(Sheet):
         return Sheet('', columns=[ColumnItem('', 0)], rows=[])
 
     def reload(self):
-        self.rows = vd().sheets
-
-    def jumpTo(self, sheetnum):
-        if sheetnum != 0:
-            moveListItem(self.rows, sheetnum, 0)
-            self.rows.pop(1)
+        self.rows = self.source
 
 
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
     rowtype = 'commands'
+    precious = False
 
     class HelpColumn(Column):
         def calcValue(self, r):
@@ -110,6 +110,7 @@ class HelpSheet(Sheet):
 
 class OptionsSheet(Sheet):
     rowtype = 'options'
+    precious = False
     commands = [
         Command(ENTER, 'editOption(cursorRow)', 'edit option', 'set-row-input'),
         Command('e', 'set-row-input')
@@ -134,7 +135,7 @@ class OptionsSheet(Sheet):
         self.rows = list(self.source._opts.values())
 
 vd().optionsSheet = OptionsSheet('options', source=options)
-
+vd().sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
 
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
