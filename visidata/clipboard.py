@@ -11,7 +11,7 @@ from visidata import *
 globalCommand('y', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]', 'copy current row to clipboard', 'data-clipboard-copy-row')
 globalCommand('d', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', 'delete current row and move it to clipboard', 'modify-delete-row')
 globalCommand('p', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'data-clipboard-paste-after')
-globalCommand('P', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'data-clipboard-paste-before')
+globalCommand('P', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows before current row', 'data-clipboard-paste-before')
 
 globalCommand('gd', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', 'delete selected rows and move them to clipboard', 'modify-delete-selected')
 globalCommand('gy', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))', 'copy selected rows to clipboard', 'data-clipboard-copy-selected')
