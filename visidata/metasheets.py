@@ -66,7 +66,7 @@ class SheetsSheet(Sheet):
         Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
     ]
     columns = [
-        ColumnAttr('name'),
+        ColumnAttr('name', width=30),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
         ColumnAttr('nVisibleCols', type=int),
