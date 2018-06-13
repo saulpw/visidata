@@ -694,19 +694,24 @@ class VisiData:
 
     def leftStatus(self, vs):
         'Compose left side of status bar and add status messages.'
-        s = vs.leftStatus()
+        ret = vs.leftStatus()
         maxwidth = options.disp_lstatus_max
         if maxwidth > 0:
-            s = middleTruncate(s, maxwidth//2)
+            ret = middleTruncate(ret, maxwidth//2)
 
         sep = options.disp_status_sep
+        msgs = ''
         for _, n, x in sorted(self.statuses, key=lambda y: -y[0]):
+            if msgs:
+                msgs += sep
+
             if n == 1:
-                s += '%s' % x
+                msgs += '%s' % x
             else:
-                s += '[%sx] %s' % (n, x)
-            s += sep
-        return s[:-len(sep)]
+                msgs += '[%sx] %s' % (n, x)
+
+        ret += msgs
+        return ret
 
     def rightStatus(self, sheet):
         'Compose right side of status bar.'
