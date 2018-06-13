@@ -157,7 +157,7 @@ replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
 replayableOption('encoding_errors', 'surrogateescape', 'encoding errors passed to codecs.open')
 
 replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
-replayableOption('default_width', 20, 'default column width')
+replayableOption('default_width', 25, 'default column width')
 option('wrap', True, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
