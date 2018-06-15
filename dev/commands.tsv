@@ -33,7 +33,7 @@ Keystroke	action	g	z	gz
   Ctrl- _	toggle-interface-profile			
     SPACE	menu			
  Shift- !	toggle-keycol	set-keycol	unset-keycol	
- Shift- "	duplicate-sheet-selected-rows	duplicate-sheet-all-rows		duplicate-shee-deepcopy
+ Shift- ＂	duplicate-sheet-selected-rows	duplicate-sheet-all-rows		duplicate-sheet-deepcopy
  Shift- #	type-col-int			
  Shift- $	type-col-currency			
  Shift- %	type-col-float			
