@@ -30,6 +30,7 @@ Many thanks also to the following people for their support and contributions to 
 - [jamesroutley](https://github.com/jamesroutley)
 - [jsvine](https://github.com/jsvine)
 - [khughitt](https://github.com/khughitt)
+- [jpgrayson](https://github.com/jpgrayson)
 - [repjarms](https://github.com/repjarms)
 - [scl17](https://github.com/scl17)
 - [trentgill](https://github.com/trentgill)
