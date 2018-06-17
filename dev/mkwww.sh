@@ -12,6 +12,7 @@ BUILDWWW=$BUILD/www
 MAN=$VD/visidata/man
 DOCS=$WWW/docs
 
+
 # Build directories
 mkdir -p $BUILD
 mkdir -p $BUILDWWW
@@ -26,6 +27,10 @@ mkdir -p $BUILDWWW/support
 # Set up python and shell environment
 export PYTHONPATH=$VD:$VD/visidata
 export PATH=$VD/bin:$PATH
+
+
+make_subfolder () {
+}
 
 ### Build manpage
 cp $MAN/* $BUILD/
@@ -43,9 +48,15 @@ done
 pandoc -r markdown -w html -o $BUILDWWW/index.body $WWW/index.md
 $DEV/strformat.py body=$BUILDWWW/index.body title="VisiData" head="" < $WWW/template.html > $BUILDWWW/index.html
 
+make_page () {
+    # $1 -> name of page
+    # $2 -> title of page
+    pandoc -r markdown -w html -o $BUILDWWW/$1/index.body $WWW/$1.md
+    $DEV/strformat.py body=$BUILDWWW/$1/index.body title=$2 head="" < $WWW/template.html > $BUILDWWW/$1/index.html
+}
+
 # Build /about
-pandoc -r markdown -w html -o $BUILDWWW/about/index.body $WWW/about.md
-$DEV/strformat.py body=$BUILDWWW/about/index.body title="About VisiData" head="" < $WWW/template.html > $BUILDWWW/about/index.html
+make_page() "about" "About Visidata"
 
 # Build /man
 echo '<section><pre id="manpage">' > $BUILD/vd-man-inc.html
@@ -69,16 +80,13 @@ pandoc -r markdown -w html -o $BUILDWWW/contributing/index.body $VD/CONTRIBUTING
 $DEV/strformat.py body=$BUILDWWW/contributing/index.body title="Contributing to VisiData" head="" < $WWW/template.html > $BUILDWWW/contributing/index.html
 
 # Build /install
-pandoc -r markdown -w html -o $BUILDWWW/install/index.body $WWW/install.md
-$DEV/strformat.py body=$BUILDWWW/install/index.body title="Quick Install" head="" < $WWW/template.html > $BUILDWWW/install/index.html
+make_page() "install" "Quick Install"
 
 # Build /support
-pandoc -r markdown -w html -o $BUILDWWW/support/index.body $WWW/support.md
-$DEV/strformat.py body=$BUILDWWW/support/index.body title="Support for VisiData" head="" < $WWW/template.html > $BUILDWWW/support/index.html
+make_page() "support" "Support for VisiData"
 
 # build /docs index
-pandoc -r markdown -w html -o $BUILDWWW/docs/index.body $WWW/docs.md
-$DEV/strformat.py body=$BUILDWWW/docs/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/docs/index.html
+make_page() "docs" "VisiData documentation"
 rm -f $BUILDWWW/docs/index.body
 
 # Build /docs/*
@@ -102,8 +110,7 @@ sed -i -e "s#<h2>How to create a frequency chart</h2>#<h2><a name=\"frequency\">
 sed -i -e "s#<h2>How to create derivative columns</h2>#<h2><a name=\"derived\">How to create derivative columns</a></h2>#g" $BUILDWWW/docs/columns/index.html
 
 # Build /releases
-pandoc -r markdown -w html -o $BUILDWWW/releases/index.body $WWW/releases.md
-$DEV/strformat.py body=$BUILDWWW/releases/index.body title="VisiData documentation" head="" < $WWW/template.html > $BUILDWWW/releases/index.html
+make_page() "releases" "Releases"
 rm -f $BUILDWWW/releases/index.body
 
 # Add other toplevel static files
