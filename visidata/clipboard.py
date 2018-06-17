@@ -46,6 +46,7 @@ class _Clipboard:
                 path = shutil.which(command)
                 if path:
                     return [path] + options
+        error('no available clipboard copy command')
 
     def copy(self, value):
         'Copy a cell to the system clipboard.'
@@ -83,6 +84,7 @@ clipboard = None
 
 
 def copyToClipboard(value):
+    'copy single value to system clipboard'
     global clipboard
     clipboard = clipboard or _Clipboard()
     clipboard.copy(value)
@@ -91,6 +93,7 @@ def copyToClipboard(value):
 
 @async
 def saveToClipboard(sheet, rows, filetype=None):
+    'copy rows from sheet to system clipboard'
     global clipboard
     clipboard = clipboard or _Clipboard()
     filetype = filetype or options.filetype
@@ -98,4 +101,3 @@ def saveToClipboard(sheet, rows, filetype=None):
     vs.rows = rows
     status('copying rows to clipboard')
     clipboard.save(vs, filetype)
-    status('done')

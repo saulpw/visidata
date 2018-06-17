@@ -504,8 +504,6 @@ def reload_tsv_sync(vs, **kwargs):
                     vs.addRow(L.split(delim))
                 prog.addProgress(len(L))
 
-    status('loaded %s' % vs.name)
-
 
 def tsv_trdict(delim=None):
     'returns string.translate dictionary for replacing tabs and newlines'
