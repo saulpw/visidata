@@ -1,3 +1,40 @@
+# [v1.2](https://github.com/saulpw/visidata/releases/tag/v1.2) (2018-05-03)
+
+Here are the major feature enhancements for v1.2.  Please see the [CHANGELOG](https://github.com/saulpw/visidata/blob/stable/CHANGELOG.md) for the complete list.
+
+## Major features
+
+* DirSheet enhancements (modify file metadata, move/delete files)
+* multisave (single file multisave to html, md, and txt format, or into a directory for other formats)
+* prototype macro system with `z^S` on the commandlog
+* [New conda package](https://github.com/conda-forge/visidata-feedstock)
+
+## New commands and options
+
+* `T` to push derived sheet with transposed rows/columns
+* `zs`/`zt`/`zu` to select/unselect/toggle rows from top of sheet to cursor (thanks @SteveJSteiner for the suggestion)
+* `gzs`/`gzt`/`gzu` to select/unselect/toggle rows from bottom to cursor
+* `gv` to unhide all columns
+* `gM` to melt into multiple value columns
+* `g*` to transform selected rows in place
+* `z<`/`z>' to move up/down to next null cell
+* `^A` to execute a command by its longname
+* `gD` to open the directory at `options.visidata_dir` (default `~/.visidata`)
+
+### options
+
+* `options.cmdlog_histfile` to specify a file to auto-append commandlog to (default empty means disabled)
+* `options.tsv_safe_char` to replace tabs and newlines when writing .tsv format (default empty means disabled, for faster saving)
+* `options.error_is_null` to count errors as null (default false)
+
+## New supported formats and sources
+
+* sas7bda (SAS; requires `sas7bdat`)
+* xpt (SAS; requires `xport`)
+* sav (SPSS; requires `savReaderWriter`)
+* dta (Stata; requires `pandas`)
+* bz2 and xz (LZMA) compression (thanks @jpgrayson)
+
 # [v1.1](https://github.com/saulpw/visidata/releases/tag/v1.1) (2018-03-06)
 
 This is the first release since 1.0.  The major additions and changes:
