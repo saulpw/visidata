@@ -2212,17 +2212,17 @@ def launchEditor(*args):
 
 def launchExternalEditor(v, linenum=0):
     import tempfile
-    fd, fqpn = tempfile.mkstemp(text=True)
-    with open(fd, 'w') as fp:
-        fp.write(v)
+    with tempfile.NamedTemporaryFile() as temp:
+        with open(temp.name, 'w') as fp:
+            fp.write(v)
 
-    if linenum:
-        launchEditor(fqpn, '+%s' % linenum)
-    else:
-        launchEditor(fqpn)
+        if linenum:
+            launchEditor(temp.name, '+%s' % linenum)
+        else:
+            launchEditor(temp.name)
 
-    with open(fqpn, 'r') as fp:
-        return fp.read()
+        with open(temp.name, 'r') as fp:
+            return fp.read()
 
 def suspend():
     import signal

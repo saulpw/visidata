@@ -67,13 +67,13 @@ class _Clipboard:
         if not self._command:
             error('options.clipboard_copy_cmd not set')
 
-        with tempfile.NamedTemporaryFile() as temp:
-            tempfn = temp.name + "." + filetype
-            saveSheets(tempfn, vs)
+        # using NTF to generate filename and delete file on context exit
+        with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
+            saveSheets(temp.name, vs)
             sync(1)
             p = subprocess.Popen(
                 self._command,
-                stdin=open(tempfn, 'r', encoding=options.encoding),
+                stdin=open(temp.name, 'r', encoding=options.encoding),
                 stdout=subprocess.DEVNULL,
                 close_fds=True)
             p.communicate()
