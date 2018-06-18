@@ -27,77 +27,80 @@ globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank (copy) current cell 
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
 
 commands = {
-    ('clip', 'win32'):    [],                                      # Windows Vista+
-    ('pbcopy', 'darwin'): ['w'],                                   # macOS
-    ('xclip', None):      ['-selection', 'clipboard', '-filter'],  # Linux etc.
-    ('xsel', None):       ['--clipboard', '--input'],              # Linux etc.
+    ('clip', 'win32'):    '',                                      # Windows Vista+
+    ('pbcopy', 'darwin'): 'w',                                     # macOS
+    ('xclip', None):      '-selection clipboard -filter',          # Linux etc.
+    ('xsel', None):       '--clipboard --input',                   # Linux etc.
 }
+
+def detect_clipboard_command():
+    'Detect available clipboard util and return cmdline to copy data to the system clipboard.'
+    for (command, platform), options in commands.items():
+        if platform is None or sys.platform == platform:
+            path = shutil.which(command)
+            if path:
+                return ' '.join([path, options])
+
+    return ''
+
+@functools.lru_cache()
+def clipboard():
+    'Detect cmd and set option at first use, to allow option to be changed by user later.'
+    if not options.clipboard_copy_cmd:
+        options.clipboard_copy_cmd = detect_clipboard_command()
+    return _Clipboard()
 
 
 class _Clipboard:
     'Cross-platform helper to copy a cell or multiple rows to the system clipboard.'
 
-    def __init__(self):
-        self._command = options.clipboard_copy_cmd.split() or self.__default_command()
-
-    def __default_command(self):
-        for (command, platform), options in commands.items():
-            if platform is None or sys.platform == platform:
-                path = shutil.which(command)
-                if path:
-                    return [path] + options
-        error('no available clipboard copy command')
+    @property
+    def command(self):
+        'Return cmdline cmd+args (as list for Popen) to copy data to the system clipboard.'
+        cmd = options.clipboard_copy_cmd
+        if not cmd:
+            error('options.clipboard_copy_cmd not set')
+        return cmd.split()
 
     def copy(self, value):
         'Copy a cell to the system clipboard.'
-        if not self._command:
-            error('options.clipboard_copy_cmd not set')
 
         with tempfile.NamedTemporaryFile() as temp:
             with open(temp.name, 'w', encoding=options.encoding) as fp:
                 fp.write(str(value))
 
             p = subprocess.Popen(
-                self._command,
+                self.command,
                 stdin=open(temp.name, 'r', encoding=options.encoding),
                 stdout=subprocess.DEVNULL)
             p.communicate()
 
     def save(self, vs, filetype):
         'Copy rows to the system clipboard.'
-        if not self._command:
-            error('options.clipboard_copy_cmd not set')
 
-        # using NTF to generate filename and delete file on context exit
+        # use NTF to generate filename and delete file on context exit
         with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
             saveSheets(temp.name, vs)
             sync(1)
             p = subprocess.Popen(
-                self._command,
+                self.command,
                 stdin=open(temp.name, 'r', encoding=options.encoding),
                 stdout=subprocess.DEVNULL,
                 close_fds=True)
             p.communicate()
 
 
-clipboard = None
-
-
 def copyToClipboard(value):
     'copy single value to system clipboard'
-    global clipboard
-    clipboard = clipboard or _Clipboard()
-    clipboard.copy(value)
+    clipboard().copy(value)
     status('copied value to clipboard')
 
 
 @async
 def saveToClipboard(sheet, rows, filetype=None):
     'copy rows from sheet to system clipboard'
-    global clipboard
-    clipboard = clipboard or _Clipboard()
     filetype = filetype or options.filetype
     vs = copy(sheet)
     vs.rows = rows
     status('copying rows to clipboard')
-    clipboard.save(vs, filetype)
+    clipboard().save(vs, filetype)
