@@ -200,6 +200,7 @@ theme('color_current_col', 'bold', 'color of the cursor column')
 theme('color_current_hdr', 'reverse underline', 'color of the header for the cursor column')
 theme('color_column_sep', '246 blue', 'color of column separators')
 theme('color_key_col', '81 cyan', 'color of key columns')
+theme('color_hidden_col', '8', 'color of key columns')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
 
 theme('color_status', 'bold', 'status line color')

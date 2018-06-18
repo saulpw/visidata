@@ -39,6 +39,7 @@ class ColumnsSheet(Sheet):
     nKeys = 2
     colorizers = Sheet.colorizers + [
             Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
+            Colorizer('row', 6, lambda self,c,r,v: options.color_hidden_col if r.hidden else None),
     ]
     commands = [
         Command('column-source-width-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
