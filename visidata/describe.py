@@ -2,6 +2,8 @@ from statistics import mode, median, mean, stdev
 
 from visidata import *
 
+max_threads = 2
+
 Sheet.commands += [
     Command('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet], sourceRows=selectedRows or rows))', 'open descriptive statistics for all visible columns', 'data-describe')
 ]
@@ -64,6 +66,7 @@ class DescribeSheet(ColumnsSheet):
 
         for srccol in Progress(self.rows):
             self.reloadColumn(srccol)
+            sync(max_threads)
 
     @async
     def reloadColumn(self, srccol):

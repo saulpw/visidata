@@ -5,6 +5,8 @@ def open_sqlite(path):
     vs.columns = vs.getColumns('sqlite_master')
     vs.addCommand(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'load the entire table into memory')
     return vs
+open_db = open_sqlite
+
 
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
