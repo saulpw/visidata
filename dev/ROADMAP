@@ -85,6 +85,10 @@ refactor Canvas into reusable component
 - zip/unzip from dirsheet
 - status rework: use logging module; color status items; use multiple lines on overflow
 
+##### technical debt
+
+- either remove all asserts; possibly replace with error()
+
 #### V. website
 
 - /features grid
