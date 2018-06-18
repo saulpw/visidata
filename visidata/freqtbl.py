@@ -15,13 +15,6 @@ ColumnsSheet.commands += [
     Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
 ]
 
-def getValueOrError(c, r):
-    try:
-        return c.getDisplayValue(r)
-    except Exception as e:
-        return 'error: %s' % e
-
-
 def valueNames(vals):
     return '-'.join(str(v) for v in vals)
 
@@ -149,7 +142,7 @@ class SheetFreqTable(Sheet):
     def discreteBinning(self):
         rowidx = {}
         for r in Progress(self.source.rows):
-            v = tuple(getValueOrError(c, r) for c in self.origCols)
+            v = tuple(c.getTypedValueOrException(r) for c in self.origCols)
             histrow = rowidx.get(v)
             if histrow is None:
                 histrow = (v, [])

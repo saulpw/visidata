@@ -1868,6 +1868,13 @@ class Column:
         'Returns the properly-typed value for the given row at this column.'
         return self.type(self.getValue(row))
 
+    def getTypedValueOrException(self, row):
+        'Returns the properly-typed value for the given row at this column, or an Exception object.'
+        try:
+            return self.type(self.getValue(row))
+        except Exception as e:
+            return e
+
     def getTypedValueNoExceptions(self, row):
         '''Returns the properly-typed value for the given row at this column.
            Returns the type's default value if either the getter or the type conversion fails.'''

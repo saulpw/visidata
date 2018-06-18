@@ -70,7 +70,7 @@ class SheetPivot(Sheet):
         rowidx = {}
         self.rows = []
         for r in Progress(self.source.rows):
-            keys = tuple(getValueOrError(keycol.srccol, r) for keycol in self.nonpivotKeyCols)
+            keys = tuple(keycol.srccol.getTypedValueOrException(r) for keycol in self.nonpivotKeyCols)
 
             pivotrow = rowidx.get(keys)
             if pivotrow is None:
