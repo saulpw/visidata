@@ -13,9 +13,9 @@ from .clipboard import *
 from .utils import *
 from .slide import *
 
-from .describe import *
 from .pyobj import *
 from .metasheets import *
+from .describe import *
 from .freqtbl import *
 from .aggregators import *
 from .async import *

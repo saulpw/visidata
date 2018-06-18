@@ -2,7 +2,7 @@ import collections
 import itertools
 
 from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, vd, error, anytype, ENTER, async, status, Progress
-from visidata import ColumnAttr, ColumnEnum, ColumnItem, DescribeSheet, ColumnExpr, SubrowColumn
+from visidata import ColumnAttr, ColumnEnum, ColumnItem, ColumnExpr, SubrowColumn
 from visidata import getGlobals
 
 globalCommand('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
@@ -13,7 +13,7 @@ globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
 globalCommand('zKEY_F(1)', 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 
 Sheet.commands += [
-    Command('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=sheet))', 'open Columns Sheet', 'meta-columns-sheet'),
+    Command('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=[sheet]))', 'open Columns Sheet', 'meta-columns-sheet'),
 ]
 
 
@@ -46,15 +46,12 @@ class ColumnsSheet(Sheet):
         Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or error("no columns selected to concatenate")))', 'add column from concatenating selected source columns'),
     ]
     def reload(self):
-        if isinstance(self.source, Sheet):
-            self.rows = self.source.columns
-            self.cursorRowIndex = self.source.cursorColIndex
+        if len(self.source) == 1:
+            self.rows = self.source[0].columns
+            self.cursorRowIndex = self.source[0].cursorColIndex
             self.columns[0].hide()  # hide 'sheet' column if only one sheet
-        elif isinstance(self.source, list):  # lists of Columns
-            self.rows = []
-            for src in self.source:
-                if src is not self:
-                    self.rows.extend(src.columns)
+        else:
+            self.rows = [col for vs in self.source for col in vs.visibleCols if vs is not self]
 
 class SheetsSheet(Sheet):
     rowtype = 'sheets'
@@ -65,6 +62,7 @@ class SheetsSheet(Sheet):
         Command('g^R', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets', 'reload-all'),
         Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
         Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
+        Command('gI', 'vd.push(DescribeSheet("describe_all", source=selectedRows or rows[1:]))', 'open Describe Sheet with all columns from selected sheets', 'sheet-describe-selected'),
     ]
     columns = [
         ColumnAttr('name', width=30),
@@ -165,7 +163,6 @@ columnCommands = [
     ]
 
 ColumnsSheet.commands += columnCommands
-DescribeSheet.commands += columnCommands
 
 
 #### slicing and dicing

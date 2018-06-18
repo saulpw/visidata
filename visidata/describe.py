@@ -2,7 +2,11 @@ from statistics import mode, median, mean, stdev
 
 from visidata import *
 
-globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=sheet, sourceRows=selectedRows or rows))', 'open sheet with descriptive statistics of all visible columns', 'data-describe')
+Sheet.commands += [
+    Command('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet], sourceRows=selectedRows or rows))', 'open descriptive statistics for all visible columns', 'data-describe')
+]
+
+globalCommand('gI', 'vd.push(DescribeSheet("describe_all", source=vd.sheets, sourceRows=selectedRows or rows))', 'open descriptive statistics for all visible columns on all sheets', 'data-describe-all')
 
 def isNumeric(col):
     return col.type in (int,float,currency,date)
@@ -28,10 +32,11 @@ class DescribeColumn(Column):
         super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.name), **kwargs)
 
 # rowdef: Column from source sheet
-class DescribeSheet(Sheet):
-    rowtype = 'columns'
+class DescribeSheet(ColumnsSheet):
+#    rowtype = 'columns'
     columns = [
-            Column('column', type=str, getter=lambda col,row: row.name),
+            ColumnAttr('sheet', 'sheet'),
+            ColumnAttr('column', 'name'),
             DescribeColumn('errors', type=len),
             DescribeColumn('nulls',  type=len),
             DescribeColumn('distinct',type=len),
@@ -49,15 +54,15 @@ class DescribeSheet(Sheet):
         Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row', 'data-aggregate-source-column'),
     ]
     colorizers = [
-        Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),
+        Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
     ]
 
     @async
     def reload(self):
-        self.rows = list(self.source.visibleCols)  # column deleting/reordering here does not affect actual columns
-        self.describeData = { col: {} for col in self.source.visibleCols }
+        super().reload()
+        self.describeData = { col: {} for col in self.rows }
 
-        for srccol in Progress(self.source.visibleCols):
+        for srccol in Progress(self.rows):
             self.reloadColumn(srccol)
 
     @async

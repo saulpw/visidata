@@ -12,7 +12,7 @@ option('disp_histolen', 50, 'width of histogram column')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
 ColumnsSheet.commands += [
-    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
+    Command(ENTER, 'vd.push(SheetFreqTable(source[0], cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
 ]
 
 def valueNames(vals):
