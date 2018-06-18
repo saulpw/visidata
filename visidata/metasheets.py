@@ -3,7 +3,7 @@ import itertools
 
 from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, vd, error, anytype, ENTER, async, status, Progress
 from visidata import ColumnAttr, ColumnEnum, ColumnItem, DescribeSheet, ColumnExpr, SubrowColumn
-from visidata import moveListItem
+from visidata import getGlobals
 
 globalCommand('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
 globalCommand('S', 'vd.push(vd.sheetsSheet)', 'open Sheets Sheet', 'meta-sheets')
@@ -31,7 +31,7 @@ class ColumnsSheet(Sheet):
             ColumnAttr('sheet'),
             ColumnAttr('name', width=options.default_width),
             ColumnAttr('width', type=int),
-            ColumnEnum('type', globals(), default=anytype),
+            ColumnEnum('type', getGlobals(), default=anytype),
             ColumnAttr('fmtstr'),
             ValueColumn('value', width=options.default_width),
             ColumnAttr('expr'),
