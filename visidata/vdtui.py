@@ -2223,7 +2223,10 @@ def launchExternalEditor(v, linenum=0):
             launchEditor(temp.name)
 
         with open(temp.name, 'r') as fp:
-            return fp.read()
+            r = fp.read()
+            if r[-1] == '\n':  # trim inevitable trailing newline
+                r = r[:-1]
+            return r
 
 def suspend():
     import signal
