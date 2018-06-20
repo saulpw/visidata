@@ -126,9 +126,9 @@ class OptionsSheet(Sheet):
 
     def editOption(self, row):
         if isinstance(row.default, bool):
-            self.source.set(row.name, not row.value)
+            options[row.name] = not row.value
         else:
-            self.source.set(row.name, self.editCell(1))
+            options[row.name] = self.editCell(1)
 
     def reload(self):
         self.rows = list(self.source._opts.values())
