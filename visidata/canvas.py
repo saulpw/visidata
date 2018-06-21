@@ -136,35 +136,35 @@ class Plotter(BaseSheet):
         Command('v', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
         Command('KEY_RESIZE', 'refresh()', ''),
     ]
-    def __init__(self, name, **kwargs):
+    def __init__(self, name='plotter', **kwargs):
         super().__init__(name, **kwargs)
         self.labels = []  # (x, y, text, attr, row)
         self.hiddenAttrs = set()
         self.needsRefresh = False
-        self.resetCanvasDimensions()
+        self.resetCanvasDimensions(25, 80)
 
     def __len__(self):
         return (self.plotwidth* self.plotheight)
 
-    def resetCanvasDimensions(self):
-        'sets total available canvas dimensions'
-        self.plotwidth = vd().windowWidth*2
-        self.plotheight = (vd().windowHeight-1)*4  # exclude status line
+    def resetCanvasDimensions(self, windowHeight, windowWidth):
+        'sets total available canvas dimensions to (windowHeight, windowWidth) (in char cells)'
+        self.plotwidth = windowWidth*2
+        self.plotheight = (windowHeight-1)*4  # exclude status line
 
         # pixels[y][x] = { attr: list(rows), ... }
         self.pixels = [[defaultdict(list) for x in range(self.plotwidth)] for y in range(self.plotheight)]
 
-    def plotpixel(self, x, y, attr, row=None):
+    def plotpixel(self, x, y, attr=0, row=None):
         self.pixels[y][x][attr].append(row)
 
-    def plotline(self, x1, y1, x2, y2, attr, row=None):
+    def plotline(self, x1, y1, x2, y2, attr=0, row=None):
         for x, y in iterline(x1, y1, x2, y2):
             self.plotpixel(math.ceil(x), math.ceil(y), attr, row)
 
-    def plotlabel(self, x, y, text, attr, row=None):
+    def plotlabel(self, x, y, text, attr=0, row=None):
         self.labels.append((x, y, text, attr, row))
 
-    def plotlegend(self, i, txt, attr):
+    def plotlegend(self, i, txt, attr=0):
         self.plotlabel(self.plotwidth-30, i*4, txt, attr)
 
     @property
@@ -174,7 +174,10 @@ class Plotter(BaseSheet):
 
     @property
     def plotterMouse(self):
-        return Point(self.mouseX*2, self.mouseY*4)
+        return Point(*self.plotterFromTerminalCoord(self.mouseX, self.mouseY))
+
+    def plotterFromTerminalCoord(self, x, y):
+        return x*2, y*4
 
     def getPixelAttrRandom(self, x, y):
         'weighted-random choice of attr at this pixel.'
@@ -212,16 +215,19 @@ class Plotter(BaseSheet):
         return list(ret.values())
 
     def draw(self, scr):
+        windowHeight, windowWidth = scr.getmaxyx()
+
         if self.needsRefresh:
-            self.render()
+            self.render(windowHeight, windowWidth)
 
         scr.erase()
+
 
         if self.pixels:
             cursorBBox = self.plotterCursorBox
             getPixelAttr = self.getPixelAttrRandom if options.disp_pixel_random else self.getPixelAttrMost
-            for char_y in range(0, vd().windowHeight-1):  # save one line for status
-                for char_x in range(0, vd().windowWidth):
+            for char_y in range(0, windowHeight-1):  # save one line for status
+                for char_x in range(0, windowWidth):
                     block_attrs = [
                         getPixelAttr(char_x*2  , char_y*4  ),
                         getPixelAttr(char_x*2  , char_y*4+1),
@@ -357,7 +363,7 @@ class Canvas(Plotter):
         Command('gd', 'source.delete(list(rowsWithin(plotterVisibleBox))); reload()', 'delete rows on source sheet visible on screen'),
     ]
 
-    def __init__(self, name, source=None, **kwargs):
+    def __init__(self, name='canvas', source=None, **kwargs):
         super().__init__(name, source=source, **kwargs)
 
         self.canvasBox = None   # bounding box of entire canvas, in canvas units
@@ -399,8 +405,8 @@ class Canvas(Plotter):
             self.plotlegends()
         return attr
 
-    def resetCanvasDimensions(self):
-        super().resetCanvasDimensions()
+    def resetCanvasDimensions(self, windowHeight, windowWidth):
+        super().resetCanvasDimensions(windowHeight, windowWidth)
         self.plotviewBox = BoundingBox(self.leftMarginPixels, self.topMarginPixels,
                                        self.plotwidth-self.rightMarginPixels, self.plotheight-self.bottomMarginPixels-1)
 
@@ -410,8 +416,13 @@ class Canvas(Plotter):
 
     @property
     def canvasMouse(self):
-        return Point(self.visibleBox.xmin + (self.plotterMouse.x-self.plotviewBox.xmin)/self.xScaler,
-                     self.visibleBox.ymin + (self.plotterMouse.y-self.plotviewBox.ymin)/self.yScaler)
+        return self.canvasFromPlotterCoord(self.plotterMouse.x, self.plotterMouse.y)
+
+    def canvasFromPlotterCoord(self, plotter_x, plotter_y):
+        return self.visibleBox.xmin + (plotter_x-self.plotviewBox.xmin)/self.xScaler, self.visibleBox.ymin + (plotter_y-self.plotviewBox.ymin)/self.yScaler
+
+    def canvasFromTerminalCoord(self, x, y):
+        return self.canvasFromPlotterCoord(*self.plotterFromTerminalCoord(x, y))
 
     def setCursorSize(self, p):
         'sets width based on diagonal corner p'
@@ -445,21 +456,21 @@ class Canvas(Plotter):
                            self.scaleX(self.cursorBox.xmax),
                            self.scaleY(self.cursorBox.ymax))
 
-    def point(self, x, y, attr, row=None):
+    def point(self, x, y, attr=0, row=None):
         self.polylines.append(([(x, y)], attr, row))
 
-    def line(self, x1, y1, x2, y2, attr, row=None):
+    def line(self, x1, y1, x2, y2, attr=0, row=None):
         self.polylines.append(([(x1, y1), (x2, y2)], attr, row))
 
-    def polyline(self, vertexes, attr, row=None):
+    def polyline(self, vertexes, attr=0, row=None):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes, attr, row))
 
-    def polygon(self, vertexes, attr, row=None):
+    def polygon(self, vertexes, attr=0, row=None):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes + [vertexes[0]], attr, row))
 
-    def qcurve(self, vertexes, attr, row=None):
+    def qcurve(self, vertexes, attr=0, row=None):
         'quadratic curve from vertexes[0] to vertexes[2] with control point at vertexes[1]'
         assert len(vertexes) == 3, len(vertexes)
         x1, y1 = vertexes[0]
@@ -524,7 +535,7 @@ class Canvas(Plotter):
         self._recursive_bezier(x1, y1, x12, y12, x123, y123, attr, row, level + 1)
         self._recursive_bezier(x123, y123, x23, y23, x3, y3, attr, row, level + 1)
 
-    def label(self, x, y, text, attr, row=None):
+    def label(self, x, y, text, attr=0, row=None):
         self.gridlabels.append((x, y, text, attr, row))
 
     def fixPoint(self, plotterPoint, canvasPoint):
@@ -618,12 +629,12 @@ class Canvas(Plotter):
         'triggers render() on next draw()'
         self.needsRefresh = True
 
-    def render(self):
+    def render(self, h, w):
         'resets plotter, cancels previous render threads, spawns a new render'
         self.needsRefresh = False
         cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
         self.labels.clear()
-        self.resetCanvasDimensions()
+        self.resetCanvasDimensions(h, w)
         self.render_async()
 
     @async
