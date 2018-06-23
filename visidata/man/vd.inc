@@ -746,6 +746,7 @@ The following URL schemes are supported:
 .It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
 .It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
 .It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
+.It Sy xml Ns / Ns Sy html No (requires Sy xml Ns )
 .It Sy xpt No (SAS; requires Sy xport Ns )
 .It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
 .It Sy sav No (SPSS; requires Sy savReaderWriter Ns )
