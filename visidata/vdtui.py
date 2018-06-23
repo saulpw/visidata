@@ -1835,8 +1835,11 @@ class Column:
         typedval = t(cellval)
         return typemap[t].formatter(self.fmtstr, typedval)
 
-    def hide(self):
-        self.width = -abs(self.width or 0)
+    def hide(self, hide=True):
+        if hide:
+            self.width = -abs(self.width or 0)
+        else:
+            self.width = abs(self.width or self.getMaxWidth(self.sheet.visibleRows))
 
     @property
     def hidden(self):
