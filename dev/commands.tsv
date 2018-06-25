@@ -1,129 +1,129 @@
-Keystroke	action	g	z	gz
-  Ctrl- @ (NUL)				
-  Ctrl- A	exec-longname			
-  Ctrl- B	page-reverse			
-  Ctrl- C	cancel-threads	cancel-all-threads		
-  Ctrl- D	save-cmdlog	submit-issue		
-  Ctrl- E	open-errors	open-all-errors	open-cell-error	
-  Ctrl- F	page-forward			
-  Ctrl- G	show-info			
-  Ctrl- H				
-  Ctrl- I (TAB)	advance-replay			
-  Ctrl- J (ENTER)	dive-row		dive-cell	
-  Ctrl- K	cancel-replay			
-  Ctrl- L	redraw			
-  Ctrl- M	(must be same as ENTER)			
-  Ctrl- N				
-  Ctrl- O	edit-row-external			
-  Ctrl- P	open-statuses			
-  Ctrl- Q	(Quit immediately)			
-  Ctrl- R	reload-sheet	reload-all-sheets	clear-col-cache	clear-viscols-cache
-  Ctrl- S	save-sheet	save-all-sheets		
-  Ctrl- T	open-threads			
-  Ctrl- U	toggle-replay			
-  Ctrl- V	show-version			
-  Ctrl- W				
-  Ctrl- X	open-eval-obj	exec-python	show-eval	
-  Ctrl- Y	open-row-obj	open-sheet-obj	open-cell-obj	
-  Ctrl- Z	signal-suspend			
-  Ctrl- [ (ESC)				
-  Ctrl- \				
-  Ctrl- ]				
-  Ctrl- ^	goto-prev-sheet			
-  Ctrl- _	toggle-interface-profile			
-    SPACE	menu			
- Shift- !	toggle-keycol	set-keycol	unset-keycol	
- Shift- ＂	duplicate-sheet-selected-rows	duplicate-sheet-all-rows		duplicate-sheet-deepcopy
- Shift- #	type-col-int			
- Shift- $	type-col-currency			
- Shift- %	type-col-float			
- Shift- &	join-sheets			
-        '	freeze-col			
- Shift- (	expand-col	expand-vcols	expand-col-deep	expand-vcols-deep
- Shift- )	collapse-col			
- Shift- *	addcol-transform-regex	set-col-regex-transform		
- Shift- +	add-aggr-col	add-aggr-all-cols	show-aggr-col	
-        ,	select-equal-cells	select-equal-rows		
-        -	hide-col	delete-col	resize-col-half	
-        .	plot-col	plot-numeric-cols		
-        /	search-regex-forward	search-all-regex-reverse		
-        0				
-        1				
-        2				
-        3				
-        4				
-        5				
-        6				
-        7				
-        8				
-        9				
- Shift- :	split-regex			
-        ;	capture-regex			
- Shift- >	goto-next-value		move-next-null	
-        =	addcol-expr	set-selected-cells-expr	show-eval-expr	set-selected-cells-sequence
- Shift- <	goto-prev-value		move-prev-null	
- Shift- ?	search-regex-reverse	search-all-regex-reverse	open-manpage	
- Shift- @	type-col-date			
- Shift- A	open-new			
- Shift- B				
- Shift- C	open-columns	open-all-columns		
- Shift- D	open-cmdlog	open-visidata-dir		
- Shift- E				
- Shift- F	open-freq-col	open-freq-keycols		
- Shift- G	goto-bottom			
- Shift- H	slide-col-left	slide-col-farleft		
- Shift- I	open-describe			
- Shift- J	slide-row-down	slide-row-bottom		
- Shift- K	slide-row-up	slide-row-top		
- Shift- L	slide-col-right	slide-row-farright		
- Shift- M	open-melt	open-multimelt		
- Shift- N	search-prev			
- Shift- O	open-options	open-global-options		
- Shift- P	insert-clipboard-before	replace/swap selected rows with clipboard rows?	set-cell-clipboard	
- Shift- Q	quit-destroy			
- Shift- R	open-sample			
- Shift- S	open-active-sheets	open-all-sheets		
- Shift- T	transpose-sheet			
- Shift- U				
- Shift- V	open-cell			
- Shift- W	pivot-col			
- Shift- X				
- Shift- Y	copy-row-sysclip	copy-selected-sysclip	copy-cell-sysclip	
- Shift- Z				
-        [	sort-col-asc	sort-keycols-asc		
-        \	unselect-col-regex	unselect-viscols-regex	unselect-expr	
-        ]	sort-col-desc	sort-keycols-desc		
- Shift- ^	rename-col-input	rename-viscols-selected	rename-col-cell	rename-col-selected
- Shift- _	resize-col-max	resize-viscols-max	resize-col-input	
-        `				
-        a	insert-new-row	insert-bulk-rows	addcol-new	addcol-bulk
-        b				
-        c	goto-col-regex		goto-col-num	
-        d	delete-row	delete-selected-rows	set-cell-none	set-selected-cells-none
-        e	edit-cell	set-selected-cells-expr		
-        f	fill-cells			
-        g	(global/giant/big prefix)	goto-bottom vim	--	--
-        h	move-left	goto-farleft	scroll-left	
-        i				
-        j	move-down	goto-bottom	scroll-down	
-        k	move-up	goto-top	scroll-up	
-        l	move-right	goto-farright	scroll-right	
-        m				
-        n	search-next			
-        o	open-source			
-        p	insert-clipboard-after		set-cell-clipboard	
-        q	quit-sheet	quit-all		
-        r	move-row-regex		goto-row-num	
-        s	select-row	select-all-rows	select-rows-to-cursor	select-rows-from-cursor
-        t	stoggle-row	stoggle-all-rows	stoggle-rows-to-cursor	stoggle-rows-from-cursor
-        u	unselect-row	unselect-all-rows	unselect-rows-to-cursor	unselect-rows-from-cursor
-        v	toggle-visibility	unhide-all-cols		
-        w				
-        x				
-        y	copy-row-clipboard	copy-selected-clipboard	copy-cell-clipboard	copy-selected-cells-clipboard
-        z	(soften/smallify prefix)	--	scroll-middle	--
- Shift- }	goto-next-selected			
- Shift- |	select-regex	select-viscols-regex	select-expr	
- Shift- {	goto-prev-selected			
- Shift- ~	type-col-str		type-col-any	
-      DEL	set-cell-none	set-selected-cells-none		
+shift	key	mnemonic	action	g	z	gz	notes
+Ctrl	^@						(NUL)
+Ctrl	^A	exec-command	exec-longname				
+Ctrl	^B	page-back	page-reverse				
+Ctrl	^C	cancel-thread	cancel-threads	cancel-all-threads			
+Ctrl	^D	save-cmdlog	save-cmdlog	submit-issue			
+Ctrl	^E	open-error	open-errors	open-all-errors	open-cell-error		
+Ctrl	^F	page-forward	page-forward				
+Ctrl	^G	info-sheet	show-info				
+Ctrl	^H						
+Ctrl	^I	advance-replay	advance-replay				(TAB)
+Ctrl	^J	dive-into	dive-row		dive-cell		(ENTER)
+Ctrl	^K	cancel-replay	cancel-replay				
+Ctrl	^L	redraw	redraw				
+Ctrl	^M						(ENTER)
+Ctrl	^N						
+Ctrl	^O	open-external	edit-row-external				
+Ctrl	^P	prev-statuses	open-statuses				
+Ctrl	^Q	quit-immed	(Quit immediately)				
+Ctrl	^R	reload-sheet	reload-sheet	reload-all-sheets	clear-col-cache	clear-viscols-cache	
+Ctrl	^S	save-sheet	save-sheet	save-all-sheets			
+Ctrl	^T	threads-sheet	open-threads				
+Ctrl	^U	toggle-replay	toggle-replay				
+Ctrl	^V	version	show-version				
+Ctrl	^W						
+Ctrl	^X	eval-python	open-eval-obj	exec-python	show-eval		
+Ctrl	^Y	python-object	open-row-obj	open-sheet-obj	open-cell-obj		
+Ctrl	^Z	suspend	signal-suspend				
+Ctrl	^[						(ESC)
+Ctrl	^\						
+Ctrl	^]						
+Ctrl	^^	prev-sheet	goto-prev-sheet				
+Ctrl	^_	toggle-profile	toggle-interface-profile				
+	SPACE	menu	menu				
+Shift	!	key-column	toggle-keycol	set-keycol	unset-keycol		
+Shift	＂	copy-sheet	duplicate-sheet-selected-rows	duplicate-sheet-all-rows		duplicate-sheet-deepcopy	
+Shift	#	int	type-col-int				
+Shift	$	currency	type-col-currency				
+Shift	%	float	type-col-float				
+Shift	&	join	join-sheets				
+	'	freeze	freeze-column				
+Shift	(	expand	expand-col	expand-vcols	expand-col-deep	expand-vcols-deep	
+Shift	)	collapse	collapse-col				
+Shift	*	subst	transform	set-col-regex-transform			
+Shift	+	aggregate	aggregate	add-aggr-all-cols	show-aggr-col		
+	,	select-similar	select-equal	select-equal-rows			
+	-	hide-column	hide-column	delete-col	resize-col-half		
+	.	plot	plot-column	plot-numeric-cols			
+	/	find	search-column	search-viscols			
+	0						
+	1						
+	2						
+	3						
+	4						
+	5						
+	6						
+	7						
+	8						
+	9						
+Shift	:	split	split-regex				
+	;	capture-regex	capture-regex				
+Shift	>	next-value	goto-next-value		move-next-null		
+	=	python-expr	add-expr	set-cells-expr	show-eval-expr	set-selected-cells-sequence	
+Shift	?	help	search-regex-reverse	search-all-regex-reverse	open-manpage		
+Shift	<	prev-value	goto-prev-value		move-prev-null		
+Shift	@	date	type-col-date				
+Shift	A	add-sheet	open-new				
+Shift	B						
+Shift	C	columns	open-columns	open-all-columns			
+Shift	D	cmdlog	open-cmdlog	open-visidata-dir			
+Shift	E						
+Shift	F	freq-histogram	open-freq-col	open-freq-keycols			
+Shift	G	goto-bottom	goto-bottom				
+Shift	H	slide-left	slide-col-left	slide-col-farleft			
+Shift	I	describe	open-describe				
+Shift	J	slide-down	slide-row-down	slide-row-bottom			
+Shift	K	slide-up	slide-row-up	slide-row-top			
+Shift	L	slide-right	slide-col-right	slide-row-farright			
+Shift	M	melt	open-melt	open-multimelt			
+Shift	N	find-prev	search-prev				
+Shift	O	options	open-options	open-global-options			
+Shift	P	paste-before	insert-clipboard-before	replace/swap selected rows with clipboard rows?	set-cell-clipboard		
+Shift	Q	forget-sheet	quit-destroy				
+Shift	R	random-sample	open-sample				
+Shift	S	sheets	open-active-sheets	open-all-sheets			
+Shift	T	transpose	transpose-sheet				
+Shift	U						
+Shift	V	View-cell	open-cell				
+Shift	W	pivot	pivot-col				
+Shift	X						
+Shift	Y	copy-system	copy-row-sysclip	copy-selected-sysclip	copy-cell-sysclip		
+Shift	Z						
+	[	sort-asc	sort-asc	sort-keycols-asc			
+	\	unselect-regex	unselect-regex	unselect-viscols-regex	unselect-expr		
+	]	sort-desc	sort-desc	sort-keycols-desc			
+Shift	^	rename-column	rename-col-input	rename-viscols-selected	rename-col-cell	rename-col-selected	
+Shift	_	widen-column	resize-col-max	resize-viscols-max	resize-col-input		
+	`						
+	a	add	add-row	insert-bulk-rows	addcol-new	addcol-bulk	
+	b						
+	c	goto-column	goto-column		goto-col-num		
+	d	delete	delete-row	delete-selected-rows	set-cell-none	set-selected-cells-none	
+	e	edit	edit-cell	set-selected-cells-expr			
+	f	fill	fill-cells				
+	g	bigger	big-prefix	goto-bottom vim	--	--	
+	h	move-left	move-left	goto-farleft	scroll-left		
+	i						
+	j	move-down	move-down	goto-bottom	scroll-down		
+	k	move-up	move-up	goto-top	scroll-up		
+	l	move-right	move-right	goto-farright	scroll-right		
+	m						
+	n	find-next	search-next				
+	o	open	open-file				
+	p	paste	paste-after		set-cell-clipboard		
+	q	quit-sheet	quit-sheet	quit-all			
+	r	goto-row	goto-row		goto-row-num		
+	s	select	select-row	select-all-rows	select-rows-to-cursor	select-rows-from-cursor	
+	t	toggle	toggle-row	stoggle-all-rows	stoggle-rows-to-cursor	stoggle-rows-from-cursor	
+	u	unselect	unselect-row	unselect-all-rows	unselect-rows-to-cursor	unselect-rows-from-cursor	
+	v	visibility	toggle-visibility	unhide-all-cols			
+	w						
+	x						
+	y	copy	copy-row	copy-selected-clipboard	copy-cell-clipboard	copy-selected-cells-clipboard	
+	z	precise	precise-prefix	--	scroll-middle	--	
+Shift	}	next-selected	goto-next-selected				
+Shift	|	select-regex	select-regex	select-viscols-regex	select-expr		
+Shift	{	prev-selected	goto-prev-selected				
+Shift	~	string	type-col-str		type-col-any		
+	DEL		set-cell-none	set-selected-cells-none			
