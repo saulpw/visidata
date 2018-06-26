@@ -17,11 +17,8 @@ class DataFrameAdapter:
         return getattr(self.df, k)
 
 
+# source=DataFrame
 class PandasSheet(Sheet):
     def reload(self):
         self.rows = DataFrameAdapter(self.source)
         self.columns = [ColumnItem(col) for col in self.source.columns]
-
-
-def load_pandas(df):
-    return PandasSheet('pandas', source=df)
