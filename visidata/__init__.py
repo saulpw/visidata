@@ -53,6 +53,7 @@ from .loaders.spss import *
 from .loaders.stata import *
 from .loaders.xml import *
 from .loaders.yaml import *
+from .loaders.pandas import *
 
 from math import *
 

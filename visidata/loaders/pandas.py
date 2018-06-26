@@ -1,3 +1,6 @@
+from visidata import *
+
+
 class DataFrameAdapter:
     def __init__(self, df):
         self.df = df
@@ -12,3 +15,13 @@ class DataFrameAdapter:
 
     def __getattr__(self, k):
         return getattr(self.df, k)
+
+
+class PandasSheet(Sheet):
+    def reload(self):
+        self.rows = DataFrameAdapter(self.source)
+        self.columns = [ColumnItem(col) for col in self.source.columns]
+
+
+def load_pandas(df):
+    return PandasSheet('pandas', source=df)
