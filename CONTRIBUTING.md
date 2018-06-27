@@ -8,6 +8,6 @@ Also please attach the commandlog (saved with `Ctrl-D`) to show the steps that l
 VisiData has two main branches:
 
 - [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (what is in pypi/brew/apt).
-- [dev](https://github.com/saulpw/visidata/tree/dev) has the most up-to-date version of VisiData (which will eventually be merged to stable).
+- [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
 
-Please submit a pull request against the `dev` branch with code improvements.
+Please submit a pull request against the `develop` branch with code improvements.
