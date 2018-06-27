@@ -18,6 +18,12 @@ To install VisiData, with loaders for the most common data file formats (includi
 
     $ pip3 install visidata
 
+### Install via pipsi
+
+For the best results in a platform-agnostic way, use [pipsi](https://github.com/mitsuhiko/pipsi) to create a virtualenv entirely for visidata. It's all the benefits of sandboxing with virtualenv without having to do that pesky `. {dir}/bin/activate` step.
+
+    $ pipsi install --python=python3 visidata
+
 ### Install via conda
 
 To install from [conda-forge](https://github.com/conda-forge/visidata-feedstock):
