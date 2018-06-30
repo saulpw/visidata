@@ -310,7 +310,6 @@ def warning(s):
     status(s, priority=1)
 
 def status(*args, **kwargs):
-    'Return status property via function call.'
     return vd().status(*args, **kwargs)
 
 def input(*args, **kwargs):
@@ -1439,7 +1438,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         for r in (Progress(rows) if progress else rows):
             self.selectRow(r)
         if status:
-            vd().status('selected %s%s rows' % (len(self._selectedRows)-before, ' more' if before > 0 else ''))
+            vd().status('selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype))
 
     @async
     def unselect(self, rows, status=True, progress=True):
@@ -1448,7 +1447,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         for r in (Progress(rows) if progress else rows):
             self.unselectRow(r)
         if status:
-            vd().status('unselected %s/%s rows' % (before-len(self._selectedRows), before))
+            vd().status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
 
     def selectByIdx(self, rowIdxs):
         'Select given row indexes, without progress bar.'
