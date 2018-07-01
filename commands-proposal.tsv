@@ -11,23 +11,23 @@ z^E	errors-cell	z	Ctrl	^E		meta	n	n	n	y
 ^G	show-cursor		Ctrl	^G	show-sheet-info	n	n	n	n	y
 ^H	sysopen-help		Ctrl	^H		external	n	n	n	y
 g^H	commands-sheet		Ctrl	^H		static	n	n	n	y
-^I	advance-replay		Ctrl	^I	next-replay	?	?	?	n	y
+^I	advance-replay		Ctrl	^I		?	?	?	n	y
 ^J	dive-row		Ctrl	^J		derived	n	n	y	y
 z^J	dive-cell	z	Ctrl	^J		derived	n	n	y	y
 ^K	stop-replay		Ctrl	^K		n	n	n	n	y
 ^L	redraw		Ctrl	^L		n	n	n	n	y
-^O	sysopen-row		Ctrl	^O	open-external	external	n	y	y	y
+^O	sysopen-row		Ctrl	^O		external	n	y	y	y
 z^O	sysopen-cell	z	Ctrl	^O		external	n	y	y	y
 ^P	statuses		Ctrl	^P		static meta	n	n	n	y
-^R	reload-sheet		Ctrl	^R	reload	n	n	should confirm if modified; marks as unmodified	y	y
+^R	reload-sheet		Ctrl	^R		n	n	should confirm if modified; marks as unmodified	y	y
 g^R	reload-all	g	Ctrl	^R		n	n		y	y
 z^R	reload-row	z	Ctrl	^R		n	n	unmodifies	y	y
 gz^R	reload-selected	gz	Ctrl	^R		n	n	unmodifies	y	y
 ^S	save-sheet		Ctrl	^S	save	n	n	n	y	y
 g^S	save-all	g	Ctrl	^S		n	n	n	y	y
 z^S	save-col	z	Ctrl	^S		n	n	n	y	y
-^T	threads-all		Ctrl	^T	threads	meta	n	n	n	y
-^U	pause-replay		Ctrl	^U	replay-toggle, toggle-replay, replay-pause, replay-pause-resume	?	?	?	n	y
+^T	threads-all		Ctrl	^T		meta	n	n	n	y
+^U	pause-replay		Ctrl	^U		?	?	?	n	y
 ^V	show-version		Ctrl	^V		n	n	n	n	y
 ^X	pyobj-eval		Ctrl	^X		y	n	n	y	y
 g^X	exec-python	g	Ctrl	^X		n	n	n	y	y
@@ -39,9 +39,9 @@ z^Y	pyobj-cell	z	Ctrl	^Y		meta	n	n	y	y
 ^^	prev-sheet		Ctrl	^^		swap	n	n	ideally not	y
 ^_	toggle-profile		Ctrl	^_		n	n	n	n	y
 SPACE	menu			SPACE		modal	?	?	n	y
-!	toggle-keycol		Shift	!	key-column	n	n	n	y	y
-g!	set-keycol	g	Shift	!	key-col-on	n	n	n	y	y
-z!	unset-keycol	z	Shift	!	key-col-off	n	n	n	y	y
+!	key-col		Shift	!		n	n	n	y	y
+g!	key-col-on	g	Shift	!		n	n	n	y	y
+z!	key-col-off	z	Shift	!		n	n	n	y	y
 "	dup-selected		Shift	"		derived	y	n	y	y
 g"	dup-rows	g	Shift	"		derived	y	n	y	y
 gz"	dup-rows-deep	gz	Shift	"		copy	y	n	y	y
@@ -56,11 +56,11 @@ gz'	cache-cols	gz		'		n	n	n	y	y
 g(	expand-cols	g	Shift	(		n	n	n	y	y
 z(	expand-col-depth	z	Shift	(		n	n	n	y	y
 gz(	expand-cols-depth	gz	Shift	(		n	n	n	y	y
-)	close-col		Shift	)	contract-column	n	n	n	y	y
-*	subst-col		Shift	*	addcol-subst, translate-col	n	n	y	y	y
-g*	setcol-subst	g	Shift	*	translate-cells	n	y	y	y	y
+)	contract-col		Shift	)		n	n	n	y	y
+*	addcol-subst		Shift	*		n	n	y	y	y
+g*	setcol-subst	g	Shift	*		n	y	y	y	y
 +	aggregate-col		Shift	+		n	n	n	y	y
-g+	aggregate-cols	g	Shift	+	aggregate-numerics	n	n	n	y	y
+g+	aggregate-numerics	g	Shift	+		n	n	n	y	y
 z+	show-aggregate	z	Shift	+		n	y	n	y	y
 ,	select-equal-cell			,		n	y	n	y	y
 g,	select-equal-row	g		,		n	y	n	y	y
@@ -112,7 +112,7 @@ zP	paste-cell-before	z	Shift	P		n	n	y	y	y
 Q	forget-sheet		Shift	Q		quit	n	n	n	y
 R	random-rows		Shift	R		derived	n	n	y	y
 S	sheets		Shift	S		static meta	n	n	y	y
-gS	sheets-graveyard	g	Shift	S	sheets-trash	static meta	n	n	y	y
+gS	sheets-graveyard	g	Shift	S		static meta	n	n	y	y
 T	transpose		Shift	T		derived	n	n	y	y
 V	view-cell		Shift	V		derived	n	?	y	y
 W	pivot		Shift	W		derived	n	n	y	y
@@ -139,10 +139,10 @@ za	add-col	z		a		n	n	y	y	y
 gza	add-cols	gz		a		n	n	y	y	y
 c	go-col-regex			c		n	n	n	n	y
 zc	go-col-number	z		c		n	n	n	n	y
-d	delete-row			d	cut-row	n	n	y	y	y
-gd	delete-selected	g		d	cut-selected	n	y	y	y	y
-zd	delete-cell	z		d	set-cell-none	n	n	y	y	y
-gzd	setcol-none	gz		d	setcol-selected-none	n	y	y	y	y
+d	cut-row			d		n	n	y	y	y
+gd	cut-selected	g		d		n	y	y	y	y
+zd	setcell-none	z		d		n	n	y	y	y
+gzd	setcol-selected-none	gz		d		n	y	y	y	y
 e	edit-cell			e		n	n	y	y	y
 ge	edit-cells	g		e		n	y	y	y	y
 f	fill-nulls			f		n	n	y	y	y
@@ -160,7 +160,7 @@ gl	go-rightmost	g		l		n	n	n	n	y
 zl	scroll-right	z		l		n	n	n	n	y
 n	next-search			n		n	n	n	n	y
 o	open-file			o		y	n	n	y	y
-p	paste-after			p	paste-row-after	n	n	y	y	y
+p	paste-after			p		n	n	y	y	y
 zp	paste-cell	z		p		n	n	y	y	y
 q	quit-sheet			q		quit	n	n	y	y
 gq	quit-all	g		q		quit	n	n	n	y
@@ -170,10 +170,10 @@ s	select-row			s		n	y	n	y	y
 gs	select-rows	g		s		n	y	n	y	y
 zs	select-before	z		s		n	y	n	y	y
 gzs	select-after	gz		s		n	y	n	y	y
-t	toggle-row			t	stoggle-row	n	y	n	y	y
-gt	toggle-rows	g		t		n	y	n	y	y
-zt	toggle-before	z		t		n	y	n	y	y
-gzt	toggle-after	gz		t		n	y	n	y	y
+t	stoggle-row			t		n	y	n	y	y
+gt	stoggle-rows	g		t		n	y	n	y	y
+zt	stoggle-before	z		t		n	y	n	y	y
+gzt	stoggle-after	gz		t		n	y	n	y	y
 u	unselect-row			u		n	y	n	y	y
 gu	unselect-rows	g		u		n	y	n	y	y
 zu	unselect-before	z		u		n	y	n	y	y
