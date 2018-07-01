@@ -25,7 +25,7 @@ globalCommand('zr', 'sheet.cursorRowIndex = int(input("move to row number: "))',
 
 globalCommand('R', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows', 'rows-select-random')
 
-globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row', 'modify-add-row-blank')
+globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'insert a blank row', 'modify-add-row-blank')
 globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows', 'modify-add-row-many')
 globalCommand('za', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)', 'add an empty column', 'modify-add-column-blank')
 
