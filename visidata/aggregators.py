@@ -2,7 +2,7 @@ import collections
 from visidata import *
 
 globalCommand('+', 'addAggregators([cursorCol], chooseMany(aggregators))', 'add aggregator to current column', 'column-aggregator-add')
-globalCommand('z+', 'status(cursorCol.format(chooseOne(aggregators)(cursorCol, selectedRows or rows)))', 'display result of aggregator over values in selected rows for current column', 'column-aggregator-show')
+globalCommand('z+', 'status(cursorCol.format(chooseOne(aggregators)(cursorCol, rows)))', 'display result of aggregator over all values in current column', 'column-aggregator-show')
 
 aggregators = collections.OrderedDict()
 
