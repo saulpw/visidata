@@ -19,7 +19,7 @@ option('color_change_pending', 'reverse yellow', 'color for file attributes pend
 option('color_delete_pending', 'red', 'color for files pending delete')
 
 globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)', 'move to the next column with name matching regex', 'view-go-column-regex')
-globalCommand('r', 'moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]])', 'move to the next row with key matching regex', 'view-go-row-regex')
+globalCommand('r', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'move to the next row with key matching regex', 'view-go-row-regex')
 globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'move to the given column number', 'view-go-column-number')
 globalCommand('zr', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'move to the given row number', 'view-go-row-number')
 
