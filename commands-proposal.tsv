@@ -1,194 +1,195 @@
-longname	keystrokes	prefix	shift	key	sheet_change	selection	modifies_sheet	logged	sheet	menu_path
-exec-longname	^A		Ctrl	^A	n	n	n	n	global	
-prev-page	^B		Ctrl	^B	n	n	n	n	Sheet	
-cancel-sheet	^C		Ctrl	^C	n	n	n	n	Sheet	
-cancel-all	g^C	g	Ctrl	^C	n	n	n	n	global	
-save-cmdlog	^D		Ctrl	^D	n	n	n	n	global	
-errors-recent	^E		Ctrl	^E	meta	n	n	n	global	
-errors-all	g^E	g	Ctrl	^E	meta	n	n	n	global	
-errors-cell	z^E	z	Ctrl	^E	meta	n	n	n	Sheet	
-next-page	^F		Ctrl	^F	n	n	n	n	Sheet	
-show-cursor	^G		Ctrl	^G	n	n	n	n	Sheet	
-sysopen-help	^H		Ctrl	^H	external	n	n	n	global	
-commands-sheet	g^H		Ctrl	^H	static	n	n	n	Sheet	
-advance-replay	^I		Ctrl	^I	n	n	n	n	global	
-dive-row	^J		Ctrl	^J	derived	n	n	y	Sheet	
-dive-cell	z^J	z	Ctrl	^J	derived	n	n	y	Sheet	
-stop-replay	^K		Ctrl	^K	n	n	n	n	global	
-redraw	^L		Ctrl	^L	n	n	n	n	global	
-sysopen-row	^O		Ctrl	^O	external	n	y	y	Sheet	
-sysopen-cell	z^O	z	Ctrl	^O	external	n	y	y	Sheet	
-statuses	^P		Ctrl	^P	static meta	n	n	n	global	
-reload-sheet	^R		Ctrl	^R	n	n	should confirm if modified; marks as unmodified	y	Sheet	
-reload-all	g^R	g	Ctrl	^R	n	n		y	global	
-reload-row	z^R	z	Ctrl	^R	n	n	unmodifies	y	TodoSheet	
-reload-selected	gz^R	gz	Ctrl	^R	n	n	unmodifies	y	TodoSheet	
-save-sheet	^S		Ctrl	^S	n	n	n	y	Sheet	
-save-all	g^S	g	Ctrl	^S	n	n	n	y	global	
-save-col	z^S	z	Ctrl	^S	n	n	n	y	Sheet	
-threads-all	^T		Ctrl	^T	meta	n	n	n	global	
-pause-replay	^U		Ctrl	^U	n	n	n	n	global	
-show-version	^V		Ctrl	^V	n	n	n	n	global	
-pyobj-eval	^X		Ctrl	^X	y	n	n	y	global	
-exec-python	g^X	g	Ctrl	^X	n	n	n	y	global	
-show-eval	z^X	z	Ctrl	^X	n	n	n	y	global	
-pyobj-row	^Y		Ctrl	^Y	meta	n	n	y	Sheet	
-pyobj-sheet	g^Y	g	Ctrl	^Y	meta	n	n	y	global	
-pyobj-cell	z^Y	z	Ctrl	^Y	meta	n	n	y	Sheet	
-suspend	^Z		Ctrl	^Z	suspend	n	n	n	global	
-prev-sheet	^^		Ctrl	^^	swap	n	n	ideally not	global	
-toggle-profile	^_		Ctrl	^_	n	n	n	n	global	
-menu	SPACE			SPACE	modal	n	n	n	global	
-key-col	!		Shift	!	n	n	n	y	Sheet	
-key-col-on	g!	g	Shift	!	n	n	n	y	Sheet	
-key-col-off	z!	z	Shift	!	n	n	n	y	Sheet	
-dup-selected	"		Shift	"	derived	y	n	y	Sheet	
-dup-rows	g"	g	Shift	"	derived	y	n	y	Sheet	
-dup-rows-deep	gz"	gz	Shift	"	copy	y	n	y	Sheet	
-type-int	#		Shift	#	n	n	n	y	Sheet	
-type-currency	$		Shift	$	n	n	n	y	Sheet	
-type-float	%		Shift	%	n	n	n	y	Sheet	
-freeze-col	'			'	n	n	n	y	Sheet	
-freeze-sheet	g'	g		'	copy	n	n	y	Sheet	
-cache-col	z'	z		'	n	n	n	y	Sheet	
-cache-cols	gz'	gz		'	n	n	n	y	Sheet	
-expand-col	(		Shift	(	n	n	n	y	Sheet	
-expand-cols	g(	g	Shift	(	n	n	n	y	Sheet	
-expand-col-depth	z(	z	Shift	(	n	n	n	y	Sheet	
-expand-cols-depth	gz(	gz	Shift	(	n	n	n	y	Sheet	
-contract-col	)		Shift	)	n	n	n	y	Sheet	
-addcol-subst	*		Shift	*	n	n	y	y	Sheet	
-setcol-subst	g*	g	Shift	*	n	y	y	y	Sheet	
-aggregate-col	+		Shift	+	n	n	n	y	Sheet	
-aggregate-numerics	g+	g	Shift	+	n	n	n	y	Sheet	
-show-aggregate	z+	z	Shift	+	n	y	n	y	Sheet	
-select-equal-cell	,			,	n	y	n	y	Sheet	
-select-equal-row	g,	g		,	n	y	n	y	Sheet	
-hide-col	-			-	n	n	n	y	Sheet	
-delete-col	g-	g		-	n	n	n	y	Sheet	
-resize-col-half	z-	z		-	n	n	n	n	Sheet	
-plot-column	.			.	canvas	y	n	y	Sheet	
-plot-numerics	g.	g		.	canvas	y	n	y	Sheet	
-search-col	/			/	n	n	n	n	Sheet	
-search-cols	g/	g		/	n	n	n	n	Sheet	
-search-expr	z/	z		/	n	n	n	n	Sheet	
-split-col	:		Shift	:	n	n	n	y	Sheet	
-capture-col	;			;	n	n	n	y	Sheet	
-next-value	>		Shift	>	n	n	n	n	Sheet	
-next-null	z>	z	Shift	>	n	n	n	n	Sheet	
-addcol-expr	=			=	n	n	y	y	Sheet	
-setcol-expr	g=	g		=	n	y	y	y	Sheet	
-show-expr	z=	z		=	n	n	n	y	Sheet	
-setcol-range	gz=	gz		=	n	y	y	y	Sheet	
-searchr-col	?		Shift	?	n	n	n	n	Sheet	
-searchr-cols	g?	g	Shift	?	n	n	n	n	Sheet	
-searchr-expr	z?	z	Shift	?	n	n	n	n	Sheet	
-prev-value	<		Shift	<	n	n	n	n	Sheet	
-prev-null	z<	z	Shift	<	n	n	n	n	Sheet	
-type-date	@		Shift	@	n	n	n	y	Sheet	
-add-sheet	A		Shift	A	new	n	n	y	global	
-columns-sheet	C		Shift	C	meta	n	n	y	Sheet	
-columns-all	gC	g	Shift	C	meta	n	n	y	global	
-cmdlog	D		Shift	D	meta	n	n	n	global	
-visidata-dir	gD	g	Shift	D	static	n	n	y	global	
-freq-col	F		Shift	F	derived	n	n	y	Sheet	
-freq-keys	gF	g	Shift	F	derived	n	n	y	Sheet	
-slide-left	H		Shift	H	n	n	n	y	Sheet	
-slide-leftmost	gH	g	Shift	H	n	n	n	y	Sheet	
-describe	I		Shift	I	derived	n	n	y	Sheet	
-describe-all	gI	g	Shift	I	derived	n	n	y	Sheet	
-slide-down	J		Shift	J	n	n	n	y	Sheet	
-slide-bottom	gJ	g	Shift	J	n	n	n	y	Sheet	
-slide-up	K		Shift	K	n	n	n	y	Sheet	
-slide-top	gK	g	Shift	K	n	n	n	y	Sheet	
-slide-right	L		Shift	L	n	n	n	y	Sheet	
-slide-rightmost	gL	g	Shift	L	n	n	n	y	Sheet	
-melt	M		Shift	M	derived	n	n	y	Sheet	
-melt-regex	gM	g	Shift	M	derived	n	n	y	Sheet	
-prev-search	N		Shift	N	n	n	n	n	Sheet	
-options	O		Shift	O	meta static	n	n	n	global	
-paste-before	P		Shift	P	n	n	y	y	Sheet	
-paste-cell-before	zP	z	Shift	P	n	n	y	y	Sheet	
-forget-sheet	Q		Shift	Q	quit	n	n	n	global	
-random-rows	R		Shift	R	derived	n	n	y	Sheet	
-sheets	S		Shift	S	static meta	n	n	y	global	
-sheets-graveyard	gS	g	Shift	S	static meta	n	n	y	global	
-transpose	T		Shift	T	derived	n	n	y	Sheet	
-view-cell	V		Shift	V	derived	n	?	y	Sheet	
-pivot	W		Shift	W	derived	n	n	y	Sheet	
-syscopy-row	Y		Shift	Y	n	n	n	n	Sheet	
-syscopy-selected	gY	g	Shift	Y	n	y	n	n	Sheet	
-syscopy-cell	zY	z	Shift	Y	n	n	n	n	Sheet	
-sort-asc	[			[	n	n	n	y	Sheet	
-sort-keys-asc	g[	g		[	n	n	n	y	Sheet	
-unselect-col-regex	\			\	n	y	n	y	Sheet	
-unselect-cols-regex	g\	g		\	n	y	n	y	Sheet	
-unselect-expr	z\	z		\	n	y	n	y	Sheet	
-sort-desc	]			]	n	n	n	y	Sheet	
-sort-keys-desc	g]	g		]	n	n	n	y	Sheet	
-rename-col	^		Shift	^	n	n	y	y	Sheet	
-rename-cols-row	g^	g	Shift	^	n	n	y	y	Sheet	
-rename-col-cell	z^	z	Shift	^	n	n	y	y	Sheet	
-rename-cols-selected	gz^	gz	Shift	^	n	y	y	y	Sheet	
-resize-col-max	_		Shift	_	n	n	n	n	Sheet	
-resize-cols-max	g_	g	Shift	_	n	n	n	n	Sheet	
-resize-col	z_	z	Shift	_	n	n	n	n	Sheet	
-add-row	a			a	n	n	y	y	Sheet	
-add-rows	ga	g		a	n	n	y	y	Sheet	
-add-col	za	z		a	n	n	y	y	Sheet	
-add-cols	gza	gz		a	n	n	y	y	Sheet	
-go-col-regex	c			c	n	n	n	n	Sheet	
-go-col-number	zc	z		c	n	n	n	n	Sheet	
-cut-row	d			d	n	n	y	y	Sheet	
-cut-selected	gd	g		d	n	y	y	y	Sheet	
-setcell-none	zd	z		d	n	n	y	y	Sheet	
-setcol-selected-none	gzd	gz		d	n	y	y	y	Sheet	
-edit-cell	e			e	n	n	y	y	Sheet	
-edit-cells	ge	g		e	n	y	y	y	Sheet	
-fill-nulls	f			f	n	n	y	y	Sheet	
-go-left	h			h	n	n	n	n	Sheet	
-go-leftmost	gh	g		h	n	n	n	n	Sheet	
-scroll-left	zh	z		h	n	n	n	n	Sheet	
-go-down	j			j	n	n	n	n	Sheet	
-go-bottom	gj	g		j	n	n	n	n	Sheet	
-scroll-down	zj	z		j	n	n	n	n	Sheet	
-go-up	k			k	n	n	n	n	Sheet	
-go-top	gk	g		k	n	n	n	n	Sheet	
-scroll-up	zk	z		k	n	n	n	n	Sheet	
-go-right	l			l	n	n	n	n	Sheet	
-go-rightmost	gl	g		l	n	n	n	n	Sheet	
-scroll-right	zl	z		l	n	n	n	n	Sheet	
-next-search	n			n	n	n	n	n	Sheet	
-open-file	o			o	y	n	n	y	global	
-paste-after	p			p	n	n	y	y	Sheet	
-paste-cell	zp	z		p	n	n	y	y	Sheet	
-quit-sheet	q			q	quit	n	n	y	global	
-quit-all	gq	g		q	quit	n	n	n	global	
-search-keys	r			r	n	n	n	n	Sheet	
-go-row-number	zr	z		r	n	n	n	n	Sheet	
-select-row	s			s	n	y	n	y	Sheet	
-select-rows	gs	g		s	n	y	n	y	Sheet	
-select-before	zs	z		s	n	y	n	y	Sheet	
-select-after	gzs	gz		s	n	y	n	y	Sheet	
-stoggle-row	t			t	n	y	n	y	Sheet	
-stoggle-rows	gt	g		t	n	y	n	y	Sheet	
-stoggle-before	zt	z		t	n	y	n	y	Sheet	
-stoggle-after	gzt	gz		t	n	y	n	y	Sheet	
-unselect-row	u			u	n	y	n	y	Sheet	
-unselect-rows	gu	g		u	n	y	n	y	Sheet	
-unselect-before	zu	z		u	n	y	n	y	Sheet	
-unselect-after	gzu	gz		u	n	y	n	y	Sheet	
-visibility	v			v	n	n	n	y	Sheet	
-unhide-cols	gv	g		v	n	n	n	y	Sheet	
-copy-row	y			y	n	n	n	y	Sheet	
-copy-selected	gy	g		y	n	y	n	y	Sheet	
-copy-cell	zy	z		y	n	n	n	y	Sheet	
-copy-cells	gzy	gz		y	n	y	n	y	Sheet	
-scroll-middle	zz	z		z	n	n	n	n	Sheet	
-next-selected	}		Shift	}	n	y	n	n	Sheet	
-select-col-regex	|		Shift	|	n	y	n	y	Sheet	
-select-cols-regex	g|	g	Shift	|	n	y	n	y	Sheet	
-select-expr	z|	z	Shift	|	n	y	n	y	Sheet	
-prev-selected	{		Shift	{	n	y	n	n	Sheet	
-type-string	~		Shift	~	n	n	n	y	Sheet	
-type-any	z~	z	Shift	~	n	n	n	y	Sheet	
+keystrokes	longname	prefix	shift	key	sheet_change	selection	modifies_sheet	logged	sheet	menu_path	helpstr	execstr
+^A	exec-longname		Ctrl	^A	n	n	n	n	global			
+^B	prev-page		Ctrl	^B	n	n	n	n	Sheet			
+^C	cancel-sheet		Ctrl	^C	n	n	n	n	Sheet			
+g^C	cancel-all	g	Ctrl	^C	n	n	n	n	global			
+^D	save-cmdlog		Ctrl	^D	n	n	n	n	global			
+^E	errors-recent		Ctrl	^E	meta	n	n	n	global			
+g^E	errors-all	g	Ctrl	^E	meta	n	n	n	global			
+z^E	errors-cell	z	Ctrl	^E	meta	n	n	n	Sheet			
+^F	next-page		Ctrl	^F	n	n	n	n	Sheet			
+^G	show-cursor		Ctrl	^G	n	n	n	n	Sheet			
+^H	sysopen-help		Ctrl	^H	external	n	n	n	global			
+g^H	commands-sheet		Ctrl	^H	static	n	n	n	Sheet			
+^I	advance-replay		Ctrl	^I	n	n	n	n	global			
+^J	dive-row		Ctrl	^J	derived	n	n	y	Sheet			
+z^J	dive-cell	z	Ctrl	^J	derived	n	n	y	Sheet			
+^K	stop-replay		Ctrl	^K	n	n	n	n	global			
+^L	redraw		Ctrl	^L	n	n	n	n	global			
+^O	sysopen-row		Ctrl	^O	external	n	y	y	Sheet			
+z^O	sysopen-cell	z	Ctrl	^O	external	n	y	y	Sheet			
+^P	statuses		Ctrl	^P	static meta	n	n	n	global			
+^R	reload-sheet		Ctrl	^R	n	n	should confirm if modified; marks as unmodified	y	Sheet			
+g^R	reload-all	g	Ctrl	^R	n	n		y	global			
+z^R	reload-row	z	Ctrl	^R	n	n	unmodifies	y	TodoSheet			
+gz^R	reload-selected	gz	Ctrl	^R	n	n	unmodifies	y	TodoSheet			
+^S	save-sheet		Ctrl	^S	n	n	n	y	Sheet			
+g^S	save-all	g	Ctrl	^S	n	n	n	y	global			
+z^S	save-col	z	Ctrl	^S	n	n	n	y	Sheet			
+^T	threads-all		Ctrl	^T	meta	n	n	n	global			
+^U	pause-replay		Ctrl	^U	n	n	n	n	global			
+^V	show-version		Ctrl	^V	n	n	n	n	global			
+^X	pyobj-eval		Ctrl	^X	y	n	n	y	global			
+g^X	exec-python	g	Ctrl	^X	n	n	n	y	global			
+z^X	show-eval	z	Ctrl	^X	n	n	n	y	global			
+^Y	pyobj-row		Ctrl	^Y	meta	n	n	y	Sheet			
+g^Y	pyobj-sheet	g	Ctrl	^Y	meta	n	n	y	global			
+z^Y	pyobj-cell	z	Ctrl	^Y	meta	n	n	y	Sheet			
+^Z	suspend		Ctrl	^Z	suspend	n	n	n	global			
+^^	prev-sheet		Ctrl	^^	swap	n	n	ideally not	global			
+^_	toggle-profile		Ctrl	^_	n	n	n	n	global			
+SPACE	menu			SPACE	modal	n	n	n	global			
+!	key-col		Shift	!	n	n	n	y	Sheet			
+g!	key-col-on	g	Shift	!	n	n	n	y	Sheet			
+z!	key-col-off	z	Shift	!	n	n	n	y	Sheet			
+"	dup-selected		Shift	"	derived	use	n	y	Sheet			
+z"	dup-selected-deep	z	Shift	"	copy	use	n	y	Sheet			
+g"	dup-rows	g	Shift	"	derived	use/set	n	y	Sheet			
+gz"	dup-rows-deep	gz	Shift	"	copy	use/set	n	y	Sheet			
+#	type-int		Shift	#	n	n	n	y	Sheet			
+$	type-currency		Shift	$	n	n	n	y	Sheet			
+%	type-float		Shift	%	n	n	n	y	Sheet			
+'	freeze-col			'	n	n	n	y	Sheet			
+g'	freeze-sheet	g		'	copy	n	n	y	Sheet			
+z'	cache-col	z		'	n	n	n	y	Sheet			
+gz'	cache-cols	gz		'	n	n	n	y	Sheet			
+(	expand-col		Shift	(	n	n	n	y	Sheet			
+g(	expand-cols	g	Shift	(	n	n	n	y	Sheet			
+z(	expand-col-depth	z	Shift	(	n	n	n	y	Sheet			
+gz(	expand-cols-depth	gz	Shift	(	n	n	n	y	Sheet			
+)	contract-col		Shift	)	n	n	n	y	Sheet			
+*	addcol-subst		Shift	*	n	n	y	y	Sheet			
+g*	setcol-subst	g	Shift	*	n	use	y	y	Sheet			
++	aggregate-col		Shift	+	n	n	n	y	Sheet			
+g+	aggregate-numerics	g	Shift	+	n	n	n	y	Sheet			
+z+	show-aggregate	z	Shift	+	n	n	n	y	Sheet			
+,	select-equal-cell			,	n	change	n	y	Sheet			
+g,	select-equal-row	g		,	n	change	n	y	Sheet			
+-	hide-col			-	n	n	n	y	Sheet			
+g-	remove-col	g		-	n	n	n	y	Sheet			
+z-	resize-col-half	z		-	n	n	n	n	Sheet			
+.	plot-column			.	canvas	n	n	y	Sheet			
+g.	plot-numerics	g		.	canvas	n	n	y	Sheet			
+/	search-col			/	n	n	n	n	Sheet			
+g/	search-cols	g		/	n	n	n	n	Sheet			
+z/	search-expr	z		/	n	n	n	n	Sheet			
+:	split-col		Shift	:	n	n	n	y	Sheet			
+;	capture-col			;	n	n	n	y	Sheet			
+>	next-value		Shift	>	n	n	n	n	Sheet			
+z>	next-null	z	Shift	>	n	n	n	n	Sheet			
+=	addcol-expr			=	n	n	y	y	Sheet			
+g=	setcol-expr	g		=	n	use	y	y	Sheet			
+z=	show-expr	z		=	n	n	n	y	Sheet			
+gz=	setcol-range	gz		=	n	use	y	y	Sheet			
+?	searchr-col		Shift	?	n	n	n	n	Sheet			
+g?	searchr-cols	g	Shift	?	n	n	n	n	Sheet			
+z?	searchr-expr	z	Shift	?	n	n	n	n	Sheet			
+<	prev-value		Shift	<	n	n	n	n	Sheet			
+z<	prev-null	z	Shift	<	n	n	n	n	Sheet			
+@	type-date		Shift	@	n	n	n	y	Sheet			
+A	add-sheet		Shift	A	new	n	n	y	global			
+C	columns-sheet		Shift	C	meta	n	n	y	Sheet			
+gC	columns-all	g	Shift	C	meta	n	n	y	global			
+D	cmdlog		Shift	D	meta	n	n	n	global			
+gD	visidata-dir	g	Shift	D	static	n	n	y	global			
+F	freq-col		Shift	F	derived	n	n	y	Sheet			
+gF	freq-keys	g	Shift	F	derived	n	n	y	Sheet			
+H	slide-left		Shift	H	n	n	n	y	Sheet			
+gH	slide-leftmost	g	Shift	H	n	n	n	y	Sheet			
+I	describe		Shift	I	derived	n	n	y	Sheet			
+gI	describe-all	g	Shift	I	derived	n	n	y	Sheet			
+J	slide-down		Shift	J	n	n	n	y	Sheet			
+gJ	slide-bottom	g	Shift	J	n	n	n	y	Sheet			
+K	slide-up		Shift	K	n	n	n	y	Sheet			
+gK	slide-top	g	Shift	K	n	n	n	y	Sheet			
+L	slide-right		Shift	L	n	n	n	y	Sheet			
+gL	slide-rightmost	g	Shift	L	n	n	n	y	Sheet			
+M	melt		Shift	M	derived	n	n	y	Sheet			
+gM	melt-regex	g	Shift	M	derived	n	n	y	Sheet			
+N	prev-search		Shift	N	n	n	n	n	Sheet			
+O	options		Shift	O	meta static	n	n	n	global			
+P	paste-before		Shift	P	n	n	y	y	Sheet			
+zP	paste-cell-before	z	Shift	P	n	n	y	y	Sheet			
+Q	forget-sheet		Shift	Q	quit	n	n	n	global			
+R	random-rows		Shift	R	derived	n	n	y	Sheet			
+S	sheets		Shift	S	static meta	n	n	y	global			
+gS	sheets-graveyard	g	Shift	S	static meta	n	n	y	global			
+T	transpose		Shift	T	derived	n	n	y	Sheet			
+V	view-cell		Shift	V	derived	n	?	y	Sheet			
+W	pivot		Shift	W	derived	n	n	y	Sheet			
+Y	syscopy-row		Shift	Y	n	n	n	n	Sheet			
+gY	syscopy-selected	g	Shift	Y	n	use	n	n	Sheet			
+zY	syscopy-cell	z	Shift	Y	n	n	n	n	Sheet			
+[	sort-asc			[	n	n	n	y	Sheet			
+g[	sort-keys-asc	g		[	n	n	n	y	Sheet			
+\	unselect-col-regex			\	n	change	n	y	Sheet			
+g\	unselect-cols-regex	g		\	n	change	n	y	Sheet			
+z\	unselect-expr	z		\	n	change	n	y	Sheet			
+]	sort-desc			]	n	n	n	y	Sheet			
+g]	sort-keys-desc	g		]	n	n	n	y	Sheet			
+^	rename-col		Shift	^	n	n	y	y	Sheet			
+g^	rename-cols-row	g	Shift	^	n	n	y	y	Sheet			
+z^	rename-col-cell	z	Shift	^	n	n	y	y	Sheet			
+gz^	rename-cols-selected	gz	Shift	^	n	use	y	y	Sheet			
+_	resize-col-max		Shift	_	n	n	n	n	Sheet			
+g_	resize-cols-max	g	Shift	_	n	n	n	n	Sheet			
+z_	resize-col	z	Shift	_	n	n	n	n	Sheet			
+a	add-row			a	n	n	y	y	Sheet			
+ga	add-rows	g		a	n	n	y	y	Sheet			
+za	addcol-new	z		a	n	n	y	y	Sheet			
+gza	addcol-bulk	gz		a	n	n	y	y	Sheet			
+c	go-col-regex			c	n	n	n	n	Sheet			
+zc	go-col-number	z		c	n	n	n	n	Sheet			
+d	delete-row			d	n	n	y	y	Sheet			
+gd	delete-selected	g		d	n	use	y	y	Sheet			
+zd	setcell-none	z		d	n	n	y	y	Sheet			
+gzd	setcol-none	gz		d	n	use	y	y	Sheet			
+e	edit-cell			e	n	n	y	y	Sheet			
+ge	edit-cells	g		e	n	use	y	y	Sheet			
+f	fill-nulls			f	n	n	y	y	Sheet			
+h	go-left			h	n	n	n	n	Sheet			
+gh	go-leftmost	g		h	n	n	n	n	Sheet			
+zh	scroll-left	z		h	n	n	n	n	Sheet			
+j	go-down			j	n	n	n	n	Sheet			
+gj	go-bottom	g		j	n	n	n	n	Sheet			
+zj	scroll-down	z		j	n	n	n	n	Sheet			
+k	go-up			k	n	n	n	n	Sheet			
+gk	go-top	g		k	n	n	n	n	Sheet			
+zk	scroll-up	z		k	n	n	n	n	Sheet			
+l	go-right			l	n	n	n	n	Sheet			
+gl	go-rightmost	g		l	n	n	n	n	Sheet			
+zl	scroll-right	z		l	n	n	n	n	Sheet			
+n	next-search			n	n	n	n	n	Sheet			
+o	open-file			o	y	n	n	y	global			
+p	paste-after			p	n	n	y	y	Sheet			
+zp	paste-cell	z		p	n	n	y	y	Sheet			
+q	quit-sheet			q	quit	n	n	y	global			
+gq	quit-all	g		q	quit	n	n	n	global			
+r	search-keys			r	n	n	n	n	Sheet			
+zr	go-row-number	z		r	n	n	n	n	Sheet			
+s	select-row			s	n	change	n	y	Sheet			
+gs	select-rows	g		s	n	change	n	y	Sheet			
+zs	select-before	z		s	n	change	n	y	Sheet			
+gzs	select-after	gz		s	n	change	n	y	Sheet			
+t	stoggle-row			t	n	change	n	y	Sheet			
+gt	stoggle-rows	g		t	n	change	n	y	Sheet			
+zt	stoggle-before	z		t	n	change	n	y	Sheet			
+gzt	stoggle-after	gz		t	n	change	n	y	Sheet			
+u	unselect-row			u	n	change	n	y	Sheet			
+gu	unselect-rows	g		u	n	change	n	y	Sheet			
+zu	unselect-before	z		u	n	change	n	y	Sheet			
+gzu	unselect-after	gz		u	n	change	n	y	Sheet			
+v	visibility			v	n	n	n	y	Sheet			
+gv	unhide-cols	g		v	n	n	n	y	Sheet			
+y	copy-row			y	n	n	n	y	Sheet			
+gy	copy-selected	g		y	n	use	n	y	Sheet			
+zy	copy-cell	z		y	n	n	n	y	Sheet			
+gzy	copy-cells	gz		y	n	use	n	y	Sheet			
+zz	scroll-middle	z		z	n	n	n	n	Sheet			
+}	next-selected		Shift	}	n	use	n	n	Sheet			
+|	select-col-regex		Shift	|	n	change	n	y	Sheet			
+g|	select-cols-regex	g	Shift	|	n	change	n	y	Sheet			
+z|	select-expr	z	Shift	|	n	change	n	y	Sheet			
+{	prev-selected		Shift	{	n	use	n	n	Sheet			
+~	type-string		Shift	~	n	n	n	y	Sheet			
+z~	type-any	z	Shift	~	n	n	n	y	Sheet			
