@@ -23,7 +23,7 @@ globalCommand('r', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row
 globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'move to the given column number', 'view-go-column-number')
 globalCommand('zr', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'move to the given row number', 'view-go-row-number')
 
-globalCommand('R', 'nrows=int(input("random number to select: ")); select(random.sample(rows, nrows))', 'open duplicate sheet with a random population subset of # rows', 'rows-select-random')
+globalCommand('R', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows', 'rows-select-random')
 
 globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'append a blank row', 'modify-add-row-blank')
 globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows', 'modify-add-row-many')
