@@ -36,7 +36,7 @@ $ pip3 install visidata
 To update VisiData:
 
 ~~~
-pip3 install --upgrade visidata
+$ pip3 install --upgrade visidata
 ~~~
 
 VisiData supports [many sources](http://visidata.org/man/#loaders), but not all dependencies are installed automatically.
@@ -127,28 +127,28 @@ NOTE: There is no method, which is known to the package maintainer, to install a
 
 ### apt
 
-Requirements:
+Requires:
 
-* Linux distribution (tested on Ubuntu 16+ and Debian (Jessie 8, Stretch 9, Buster 10) `amd64` architecture)
+* Linux distribution
 * `apt`
 
 Install `apt-transport-https`, which `apt` requires to communicate with a repository using https:
 
 ~~~
-sudo apt install apt-transport-https
+$ sudo apt install apt-transport-https
 ~~~
 
 Grab our public key:
 
 ~~~
-wget https://visidata.org/devotees.gpg.key
-sudo apt-key add devotees.gpg.key
+$ wget https://visidata.org/devotees.gpg.key
+$ sudo apt-key add devotees.gpg.key
 ~~~
 
 Add our repository to `apt`'s search list:
 
 ~~~
-sudo add-apt-repository \
+$ sudo add-apt-repository \
     "deb [arch=amd64] https://raw.githubusercontent.com/saulpw/deb-vd/master \
     sid \
     main"
@@ -157,15 +157,15 @@ sudo add-apt-repository \
 To install VisiData:
 
 ~~~
-sudo apt update
-sudo apt install visidata
+$ sudo apt update
+$ sudo apt install visidata
 ~~~
 
 To update VisiData:
 
 ~~~
-sudo apt update
-sudo apt install visidata
+$ sudo apt update
+$ sudo apt install visidata
 ~~~
 
 Note, that the VisiData `.deb` comes preloaded with additional dependencies.
@@ -174,7 +174,7 @@ Out-of-box, you can load csv, tsv, fixed-width text, json, sqlite, http, html, .
 
 ### dpkg
 
-Requirements:
+Requires:
 * Linux distribution
 * [dpkg](https://help.ubuntu.com/lts/serverguide/dpkg.html.en)
 
@@ -185,14 +185,18 @@ First, go to our [repository](https://github.com/saulpw/deb-vd/tree/master/pool/
 To install VisiData:
 
 ~~~
-sudo dpkg -i /path/to/visidata_version_all.deb
+$ sudo dpkg -i /path/to/visidata_version_all.deb
 ~~~
 
 To uninstall VisiData:
 
 ~~~
-sudo dpkg -r visidata
+$ sudo dpkg -r visidata
 ~~~
+
+Note, that the VisiData `.deb` comes preloaded with additional dependencies.
+
+Out-of-box, you can load csv, tsv, fixed-width text, json, sqlite, http, html, .xls, and .xlsx (Microsoft Excel).
 
 ### wsl
 
@@ -206,7 +210,7 @@ If you want to use bleeding edge unreleased features (which may not always work)
 To install VisiData:
 
 ~~~
-pip3 install git+https://github.com/saulpw/visidata.git@develop
+$ pip3 install git+https://github.com/saulpw/visidata.git@develop
 ~~~
 
 See [pip](#pip) above for further information on loaders and dependency management.
