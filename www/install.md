@@ -12,7 +12,7 @@ This guide will cover the steps for installing VisiData and provide troubleshoot
 |Linux (Debian/Ubuntu)|[apt](#apt)      |`apt install visidata`            |
 |Linux (Debian/Ubuntu)|[dpkg](#dpkg)      |`dpkg -i visidata_ver_all.deb`            |
 |Windows    |[WSL](#wsl)    |Windows is not yet directly supported (use WSL)   |
-|Python3.4+ |[github](#git) |`git clone https://github.com/saulpw/visidata.git`|
+|Python3.4+ |[github](#git) |`pip3 install git+https://github.com/saulpw/visidata.git@develop`|
 
 If the one-line install commands above do not work, see below for detailed instructions and troubleshooting.
 
@@ -41,12 +41,12 @@ pip3 install --upgrade visidata
 
 VisiData supports [many sources](http://visidata.org/man/#loaders), but not all dependencies are installed automatically.
 
-Out-of-box, you can load all file formats supported by the Python3 standard library including csv, tsv, fixed-width text, json, and sqlite. Additional Python modules may be required for opening other [supported data sources](https://visidata.org/man/#loaders).
+Out-of-box, you can load all file formats supported by the Python3 standard library including csv, tsv, fixed-width text, json, and sqlite. Additional Python packages may be required for opening other [supported data sources](https://visidata.org/man/#loaders).
 
 To install any of one the dependencies:
 
 ~~~
-$ pip3 install <module>
+$ pip3 install <package>
 ~~~
 
 To install dependencies for all loaders (which might take some time and disk space): 
@@ -85,12 +85,12 @@ Note, that the VisiData feedstock comes preloaded with additional dependencies.
 
 Out-of-box, you can load csv, tsv, fixed-width text, json, sqlite, http, html, .xls, and .xlsx (Microsoft Excel).
 
-Additional Python modules will be required for opening other [supported data sources](https://visidata.org/man/#loaders). 
+Additional Python packages will be required for opening other [supported data sources](https://visidata.org/man/#loaders). 
 
-If these modules are included in the conda environment, they can be installed with
+If these packages are included in the conda environment, they can be installed with
 
 ~~~
-$ conda install <module>
+$ conda install <package>
 ~~~
 
 ### brew
@@ -194,15 +194,19 @@ To uninstall VisiData:
 sudo dpkg -r visidata
 ~~~
 
-## Windows is not directly supported: use WSL
-https://github.com/saulpw/visidata/issues/117
+### wsl
 
-## Build from source
+Windows is not directly supported. We recommend trying to use [ConEmu](https://conemu.github.io/) as your terminal on [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (Windows Subsystem for Linux).
+You can find discussion on this topic [here](https://github.com/saulpw/visidata/issues/117).
 
-If you want to make local changes to VisiData, or use bleeding edge unreleased features (which may not always work), use git:
+### Build from source
 
-- git clone
-- add to PATH
-- add to PYTHONPATH
-### To use the bleeding edge or submit pull requests:
-- git checkout develop
+If you want to use bleeding edge unreleased features (which may not always work), you can do so by installing from the development branch on git.
+
+To install VisiData:
+
+~~~
+pip3 install git+https://github.com/saulpw/visidata.git@develop
+~~~
+
+See [pip](#pip) above for further information on loaders and dependency management.
