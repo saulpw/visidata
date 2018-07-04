@@ -47,7 +47,7 @@ Using the Sheet `source`, `reload` populates `rows`:
 The above code will probably work just fine for smaller datasets, but a large enough dataset will cause the interface to freeze.
 Fortunately, making an [async](/docs/async) loader is pretty straightforward:
 
-1. Add `@async` decorator on the `reload` method, which causes it to be launched in a new thread.
+1. Add `@asyncthread` decorator on the `reload` method, which causes it to be launched in a new thread.
 
 2. Wrap the iterator with [`Progress`](/docs/async#Progress).  This updates the **progress percentage** as it passes each element through.
 
@@ -60,7 +60,7 @@ Fortunately, making an [async](/docs/async) loader is pretty straightforward:
 #### async example
     class FooSheet(Sheet):
         ...
-        @async
+        @asyncthread
         def reload(self):
             self.rows = []
             for bar in Progress(foolib.iterfoo(self.source.open_text())):
@@ -183,7 +183,7 @@ This would be a completely functional read-only viewer for the fictional foolib.
             Command('b', 'cursorRow.set_bar(0)', 'reset bar to 0', 'reset-bar')
         ]
 
-        @async
+        @asyncthread
         def reload(self):
             import foolib
 
@@ -199,7 +199,7 @@ This would be a completely functional read-only viewer for the fictional foolib.
 
 A full-duplex loader requires a **saver**.  The saver iterates over all `rows` and `visibleCols`, calling `getValue` or `getTypedValue`, and saves the results in the format of that filetype.
 
-    @async
+    @asyncthread
     def save_foo(path, sheet):
         with p.open_text(mode='w') as fp:
             for i, row in enumerate(Progress(sheet.rows)):

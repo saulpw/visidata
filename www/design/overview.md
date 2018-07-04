@@ -65,7 +65,7 @@ A custom line editor is included, with [readline command control keys](/design/e
 
 ### async computation
 
-Functions decorated with [`@async`](/design/async) will run in a separate thread; this keeps the main user interface responsive (primarily during row loading).
+Functions decorated with [`@asyncthread`](/design/async) will run in a separate thread; this keeps the main user interface responsive (primarily during row loading).
 
 ---
 

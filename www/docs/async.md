@@ -3,9 +3,9 @@
 
 # Maintaining a responsive interface
 
-## `@async`
+## `@asyncthread`
 
-Use the `@async` decorator on a function to make it execute in a thread.
+Use the `@asyncthread` decorator on a function to make it execute in a thread.
 The return value is the spawned thread (which can often be ignored by the caller); the return value of the original function is effectively lost.
 
 Cells which are being computed in a separate thread should have that thread as their value until their result is available.
@@ -31,7 +31,7 @@ This will only rarely be useful.
 # Threads Sheet (`^T`)
 
 All threads (active, aborted, and completed) are added to `VisiData.threads`, which can be viewed as the ThreadsSheet via `^T`.
-Threads which take less than `min_thread_time_s` (hardcoded in `async.py` to 10ms) are removed, to reduce clutter.
+Threads which take less than `min_thread_time_s` (hardcoded in `asyncthread.py` to 10ms) are removed, to reduce clutter.
 
 - Press `ENTER` (on the Threads Sheet) on a thread to view its performance profile (if `options.profile_threads` was True when the thread started).
 - Press `^_` (anywhere) to toggle profiling of the main thread.
@@ -45,7 +45,7 @@ The view of a performance profile in VisiData is the output from `pstats.Stats.p
 
 # Progress counters
 
-In all `@async` functions, a `Progress` counter should be used to provide a progress percentage, which appears in the right-hand status.
+In all `@asyncthread` functions, a `Progress` counter should be used to provide a progress percentage, which appears in the right-hand status.
 
 ## Progress as iterable
 
