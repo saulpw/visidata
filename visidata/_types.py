@@ -33,9 +33,10 @@ class date(datetime.datetime):
             r = datetime.datetime.fromtimestamp(s)
         elif isinstance(s, str):
             r = dateutil.parser.parse(s)
-        else:
-            assert isinstance(s, datetime.datetime), type(s)
+        elif isinstance(s, datetime.datetime):
             r = s
+        else:
+            raise Exception('invalid type for date')
 
         t = r.timetuple()
         return super().__new__(cls, *t[:6], tzinfo=r.tzinfo)
