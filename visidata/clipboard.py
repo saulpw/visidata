@@ -38,7 +38,7 @@ def copyToClipboard(val):
         p.communicate()
     status('copied value to clipboard')
 
-@async
+@asyncthread
 def saveToClipboard(sheet, rows, filetype=None):
     cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
     vs = copy(sheet)

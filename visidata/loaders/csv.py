@@ -20,7 +20,7 @@ def wrappedNext(rdr):
         return ['[csv.Error: %s]' % e]
 
 class CsvSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         load_csv(self)
 
@@ -64,7 +64,7 @@ def load_csv(vs):
     return vs
 
 
-@async
+@asyncthread
 def save_csv(p, sheet):
     'Save as single CSV file, handling column names as first line.'
     with p.open_text(mode='w') as fp:

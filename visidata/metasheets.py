@@ -54,7 +54,7 @@ ColumnsSheet.columns += [
 class SheetJoin(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
 
-    @async
+    @asyncthread
     def reload(self):
         sheets = self.sources
 

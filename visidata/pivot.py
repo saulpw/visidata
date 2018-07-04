@@ -29,7 +29,7 @@ class SheetPivot(Sheet):
         self.reloadCols()
         self.reloadRows()
 
-    @async
+    @asyncthread
     def reloadCols(self):
         self.columns = copy(self.nonpivotKeyCols)
         self.keyCols = copy(self.columns)
@@ -65,7 +65,7 @@ class SheetPivot(Sheet):
             self.addColumn(c)
 
 
-    @async
+    @asyncthread
     def reloadRows(self):
         rowidx = {}
         self.rows = []

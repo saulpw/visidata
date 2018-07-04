@@ -6,7 +6,7 @@ open_sav = open_spss
 
 
 class SpssSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         import savReaderWriter
         self.rdr = savReaderWriter.SavReader(self.source.resolve())

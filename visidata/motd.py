@@ -11,7 +11,7 @@ def motd(url):
         return fp.read().decode('utf-8').strip()
 
 
-@async
+@asyncthread
 def domotd():
     try:
         if options.motd_url:

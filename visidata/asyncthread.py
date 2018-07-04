@@ -33,7 +33,7 @@ def toggleProfiling(t):
         status('profiling of main thread disabled')
 
 
-# define @async for potentially long-running functions
+# define @asyncthread for potentially long-running functions
 #   when function is called, instead launches a thread
 #   ENTER on that row pushes a profile of the thread
 

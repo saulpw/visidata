@@ -54,7 +54,7 @@ class DescribeSheet(Sheet):
         Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),
     ]
 
-    @async
+    @asyncthread
     def reload(self):
         self.rows = list(self.source.visibleCols)  # column deleting/reordering here does not affect actual columns
         self.describeData = { col: {} for col in self.source.visibleCols }
@@ -62,7 +62,7 @@ class DescribeSheet(Sheet):
         for srccol in Progress(self.source.visibleCols):
             self.reloadColumn(srccol)
 
-    @async
+    @asyncthread
     def reloadColumn(self, srccol):
             d = self.describeData[srccol]
             isNull = isNullFunc()

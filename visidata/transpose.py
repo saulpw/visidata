@@ -6,7 +6,7 @@ globalCommand('T', 'vd.push(TransposeSheet(name+"_T", source=sheet))', 'open new
 
 # rowdef: Column
 class TransposeSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         # key rows become column names
         self.columns = [
