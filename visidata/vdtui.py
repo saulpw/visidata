@@ -344,7 +344,7 @@ def exceptionCaught(e, **kwargs):
 def stacktrace(e=None):
     if not e:
         return traceback.format_exc().strip().splitlines()
-    return traceback.format_exception(type(e), e).strip().splitlines()
+    return traceback.format_exception_only(type(e), e)
 
 def chooseOne(choices):
     'Return one of `choices` elements (if list) or values (if dict).'
@@ -1912,6 +1912,13 @@ class Column:
         except Exception as e:
             return DisplayWrapper(None, error=stacktrace(),
                                 display=options.disp_error_val,
+                                note=options.note_getter_exc,
+                                notecolor=options.color_getter_exc)
+
+        if isinstance(cellval, BaseException):
+            return DisplayWrapper(cellval,
+                                error=stacktrace(cellval),
+                                display=traceback.format_exception_only(type(cellval), cellval)[-1].strip(),
                                 note=options.note_getter_exc,
                                 notecolor=options.color_getter_exc)
 
