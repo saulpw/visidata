@@ -19,7 +19,7 @@ class SqliteSheet(Sheet):
             import sqlite3
             self.conn = sqlite3.connect(pathOrSheet.resolve())
 
-    # must not be @async due to sqlite lib being single-threaded
+    # must not be @asyncthread due to sqlite lib being single-threaded
     def reload(self):
         tblname = self.tableName
         self.columns = self.getColumns(tblname)

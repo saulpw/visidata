@@ -352,7 +352,7 @@ class DirSheet(Sheet):
 
         self._commit(changes, deletes)
 
-    @async
+    @asyncthread
     def _commit(self, changes, deletes):
         oldrows = self.rows
         self.rows = []
@@ -372,7 +372,7 @@ class DirSheet(Sheet):
             except Exception as e:
                 exceptionCaught(e)
 
-    @async
+    @asyncthread
     def reload(self):
         self.toBeDeleted = []
         self.rows = []
@@ -439,7 +439,7 @@ def open_txt(p):
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, p)
 
-@async
+@asyncthread
 def save_txt(p, *vsheets):
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
@@ -475,7 +475,7 @@ def open_tsv(p, vs=None):
     return vs
 
 class TsvSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         header_lines = int(options.header)
 
@@ -534,7 +534,7 @@ def save_tsv_header(p, vs):
             fp.write(colhdr)
 
 
-@async
+@asyncthread
 def save_tsv(p, vs):
     'Write sheet to file `fn` as TSV.'
     delim = options.delimiter

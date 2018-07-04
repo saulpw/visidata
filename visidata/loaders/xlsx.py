@@ -23,7 +23,7 @@ class xlsxContents(Sheet):
         super().__init__(path.name, source=path)
         self.workbook = None
 
-    @async
+    @asyncthread
     def reload(self):
         import openpyxl
         self.workbook = openpyxl.load_workbook(self.source.resolve(), data_only=True, read_only=True)
@@ -35,7 +35,7 @@ class xlsxContents(Sheet):
 
 
 class xlsxSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         worksheet = self.source
 
@@ -65,7 +65,7 @@ class open_xls(Sheet):
         super().__init__(path.name, source=path)
         self.workbook = None
 
-    @async
+    @asyncthread
     def reload(self):
         import xlrd
         self.workbook = xlrd.open_workbook(self.source.resolve())
@@ -77,7 +77,7 @@ class open_xls(Sheet):
 
 
 class xlsSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         worksheet = self.source
         self.columns = []

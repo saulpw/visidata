@@ -17,7 +17,7 @@ class MeltedSheet(Sheet):
         super().__init__(sheet.name + '_melted', source=sheet, **kwargs)
         self.regex = regex
 
-    @async
+    @asyncthread
     def reload(self):
         isNull = isNullFunc()
 

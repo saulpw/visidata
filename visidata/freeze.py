@@ -15,7 +15,7 @@ Sheet.resetCache = resetCache
 def StaticColumn(rows, col):
     c = deepcopy(col)
     frozenData = {}
-    @async
+    @asyncthread
     def _calcRows(sheet):
         for r in Progress(rows):
             try:
@@ -42,7 +42,7 @@ class StaticSheet(Sheet):
             if col in self.source.keyCols:
                 self.keyCols.append(colcopy)
 
-    @async
+    @asyncthread
     def reload(self):
         self.rows = []
         for r in Progress(self.source.rows):

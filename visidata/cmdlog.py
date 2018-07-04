@@ -116,7 +116,7 @@ class CommandLog(Sheet):
     def newRow(self):
         return CommandLogRow()
 
-    @async
+    @asyncthread
     def reload(self):
         reload_tsv_sync(self, header=1)  # .vd files always have a header row, regardless of options
         self.rows = [CommandLogRow(r) for r in self.rows]
@@ -295,7 +295,7 @@ class CommandLog(Sheet):
         status('replay complete')
         CommandLog.currentReplay = None
 
-    @async
+    @asyncthread
     def replay(self):
         'Inject commands into live execution with interface.'
         self.replay_sync(live=True)

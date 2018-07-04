@@ -32,7 +32,7 @@ class ShapeSheet(Sheet):
         Command('.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', ''),
         Command('g.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows, textCol=cursorCol))', ''),
     ]
-    @async
+    @asyncthread
     def reload(self):
         import shapefile
         sf = shapefile.Reader(self.source.resolve())
@@ -48,7 +48,7 @@ class ShapeMap(InvertedCanvas):
     commands = [
         Command('^S', 'save_geojson(Path(input("json to save: ", value=name+".geojson")), sheet)', 'save in geojson format'),
     ]
-    @async
+    @asyncthread
     def reload(self):
         self.reset()
 

@@ -626,7 +626,7 @@ class Canvas(Plotter):
         self.resetCanvasDimensions()
         self.render_async()
 
-    @async
+    @asyncthread
     def render_async(self):
         'plots points and lines and text onto the Plotter'
 

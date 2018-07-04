@@ -46,7 +46,7 @@ class ShellHistorySheet(Sheet):
         ColumnAttr('ctty', width=0),
     ]
 
-    @async
+    @asyncthread
     def execute(self, cmdstr):
         cmdparts = shlex.split(cmdstr)
         cmd = sh.Command(cmdparts[0])
