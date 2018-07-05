@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+'Usage: $0 dev/commands.tsv > www/layout.html'
+
 import sys
 import unicodedata
 
 html_template = open('www/template.html').read()
 
 layouts = {
-'unshifted': '''Esc F1- F2- F3- F4- F5- F6- F7- F8- F9- F10- F11- F12- \u23cf-
+'': '''Esc F1- F2- F3- F4- F5- F6- F7- F8- F9- F10- F11- F12- \u23cf-
 ` 1 2 3 4 5 6 7 8 9 0 - = Backspace
 Tab q w e r t y u i o p [ ] \\
 CapsLock- a s d f g h j k l ; ' Enter
@@ -30,7 +32,7 @@ Ctrl- Alt- Cmd- Space- Cmd2- Alt2- Ctrl2-
 '''
 }
 
-widths = {
+pixel_widths = {
     '\u23cf': 63,
     'Backspace': 102,
     'Tab': 72,
@@ -49,7 +51,8 @@ widths = {
     'Ctrl2': 89,
 }
 
-
+#widths = {k: '%.02f%%' % (v/9.50) for k, v in pixel_widths.items()}
+widths = {k: '%spx' % v for k, v in pixel_widths.items()}
 
 cmds = {}
 try:
@@ -57,16 +60,17 @@ try:
         hdrs = next(fp).strip().split('\t')
         for line in fp:
             d = dict(zip(hdrs, line.split('\t')))
-            cmds[(d['shift'], d['key'])] = d
+            cmds[(d.get('prefix', ''), d['shift'], d['key'])] = d
 except Exception:
     raise
 
 
 def get_action(shift, key, prefix=''):
-    cmd = cmds.get((shift, key), None)
+    cmd = cmds.get((prefix, shift, key), None)
     if not cmd:
         return ''
-    return cmd.get(prefix or 'action').replace('-', '<br/>')
+    longname = cmd['longname']
+    return longname
 
 
 def print_keyboard(layout, prefix='', shownkeys=''):
@@ -90,29 +94,32 @@ def print_keyboard(layout, prefix='', shownkeys=''):
                 key = key[:-1]
                 class_ = ' na'
 
-            if layout == 'unshifted':
-                mnemonic = get_action('', key, 'mnemonic')
+            if layout == '':
                 action = get_action('', key, prefix)
             elif layout == 'Shift':
-                mnemonic = get_action('Shift', key, 'mnemonic')
                 action = get_action('Shift', key, prefix)
             elif layout == 'Ctrl':
-                mnemonic = get_action('Ctrl', '^' + key, 'mnemonic')
                 action = get_action('Ctrl', '^' + key, prefix)
+            else:
+                action = ''
+
+            if action.count('-') > 1 or max((len(p) for p in action.split('-'))) > 8:
+                action = action.replace('-', ' ')
+                class_ += ' tri'
+            else:
+                action = action.replace('-', '<br/>')
 
             keyname = key[:-1] if len(key) > 2 and key[-1] == '2' else key
-            style = ('style="width: %spx"' % widths[key]) if key in widths else ''
+            style = ('style="width: %s"' % widths[key]) if key in widths else ''
 
             ret += '''
             <div class="key {keyname} {fullkeyname} {class_}" {style}>
                 <div class="keylabel">{keylabel}</div>
-                <div class="mnemonic">{mnemonic}</div>
                 <div class="action">{action}</div>
             </div>
     '''.format(keylabel=keyname,
                keyname=keyname if len(keyname) > 1 else '',
                fullkeyname=unicodedata.name(key[0]).replace(' ', '-') if len(key) == 1 else '',
-               mnemonic=mnemonic,
                action=action,
                style=style,
                class_=class_)
@@ -121,26 +128,32 @@ def print_keyboard(layout, prefix='', shownkeys=''):
     ret += '</div>'  # id=keyboard
     return ret
 
+def keyboard_layouts(prefix, shown=''):
+    ret = '<table>'
+    ret += '<tr><td><h2></h2></td><td>'
+    ret += print_keyboard('', prefix, shown)
+    ret += '</td></tr>'
+
+    ret += '<tr><td><h2>Shift+</h2></td><td>'
+    ret += print_keyboard('Shift', prefix, shown)
+    ret += '</td></tr>'
+
+    ret += '<td><h2>Ctrl+</h2></td><td>'
+    ret += print_keyboard('Ctrl', prefix, shown)
+    ret += '</td></tr>'
+    ret += '</table>'
+    return ret
+
 body = '<h1>VisiData Commands Chart</h1>'
-body += '<table>'
 
-body += '<tr><td><h2></h2></td><td>'
-body += print_keyboard('unshifted', '')
-body += '</td></tr>'
-
-body += '<tr><td><h2>Shift+</h2></td><td>'
-body += print_keyboard('Shift', '')
-body += '</td></tr>'
-
-body += '<td><h2>Ctrl+</h2></td><td>'
-body += print_keyboard('Ctrl', '')
-body += '</td></tr>'
-body += '</table>'
-
+body += keyboard_layouts('')
+body += keyboard_layouts('g')
+body += keyboard_layouts('z')
+body += keyboard_layouts('gz')
 
 body += '<h2>Basics and Movement</h2><table>'
 body += '<td><h2></h2></td><td>'
-body += print_keyboard('unshifted', '', 'hjkl/ngqe-rc')
+body += print_keyboard('', '', 'hjkl/ngqe-rc')
 body += '</td></tr>'
 
 body += '<td><h2>Shift+</h2></td><td>'
@@ -154,9 +167,10 @@ body += '</td></tr>'
 body += '</table>'
 
 
+'''
 body += '<h2>Selections</h2><table>'
 body += '<td><h2></h2></td><td>'
-body += print_keyboard('unshifted', '', 'stu\\,')
+body += print_keyboard('', '', 'stu\\,')
 body += '</td></tr>'
 
 body += '<td><h2>Shift+</h2></td><td>'
@@ -168,7 +182,7 @@ body += '</table>'
 
 body += '<h2>Modifying and Clipboard</h2><table>'
 body += '<td><h2></h2></td><td>'
-body += print_keyboard('unshifted', '', 'adypPYe')
+body += print_keyboard('', '', 'adypPYe')
 body += '</td></tr>'
 
 body += '<td><h2>Shift+</h2></td><td>'
@@ -176,6 +190,7 @@ body += print_keyboard('Shift', '', 'PY^')
 body += '</td></tr>'
 
 body += '</table>'
+'''
 
 vimkeys = 'hjklnNpP/dy'
 

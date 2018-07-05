@@ -11,6 +11,7 @@
 ### bugs
 
 - hidden columns should stay hidden on join
+- min width of key columns should be 1 or 2 (avoid hidden keycols, they act weird)
 
 ## Future
 
@@ -21,7 +22,8 @@
 
 ### stable apis
 
-refactor Canvas into reusable component
+- refactor Canvas into reusable component
+- longterm longnames
 
 ### productization
 
@@ -32,6 +34,10 @@ refactor Canvas into reusable component
 - design blog posts
 - putting together a talk on visidata design/internals
 - make separate webpages for: devops, sysadmins, hackers, git users, bioinfers, etc
+
+### misc
+
+- 'v' hide cols which have errors on cursor row
 
 
 ### features
@@ -48,7 +54,7 @@ refactor Canvas into reusable component
     - replay all but last command
 
 - skip to next error
-- weakref for all Sheets, viewable with gS (partial guard against losing intermediate steps)
++ weakref for all Sheets, viewable with gS (partial guard against losing intermediate steps)
    - start/drop datetimes
    - number of derivative sheets (two columns, for immediate children and to any depth)
    - number of commands executed on that sheet (as a list so they can be viewed separately)
@@ -63,7 +69,7 @@ refactor Canvas into reusable component
 #### III. Loaders and Savers
 
 - parquet
-- .xml
++ .xml
 - .mdb, .accdb
 - google sheets
 - save to .py: emit code to get current cell/row/sheet from source data

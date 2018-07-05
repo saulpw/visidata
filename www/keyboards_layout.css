@@ -8,17 +8,20 @@ div#keyboard div.na
     background-color: #eeeeee;
     color: #cccccc;
 }
-.key.na .mnemonic, .key.na .action {
+.key.na .action {
     color: #eeeeee;
 }
 
-.key .mnemonic, .key .action {
+.key .action {
     color: purple;
-    font-size: 14px;
+    font-size: 13px;
+}
+
+.key.tri .action {
+    font-size: 12px;
 }
 
 .key {
-    font-size: 14px;
     font-weight: bold;
 }
 
@@ -66,14 +69,6 @@ div#keyboard .key.wide {
 div#keyboard .key div {
     padding-top: 2px;
 }
-
-.key .mnemonic { display: block; }
-.key .action { display: none; }
-.key .ctrl { display: none; }
-.key .shift { display: none; }
-
-.key:hover .action { display: block; }
-.key:hover .mnemonic { display: none; }
 
 div#keyboard .key:hover {
     background-color: #dddddd;
