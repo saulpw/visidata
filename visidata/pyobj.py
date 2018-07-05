@@ -52,7 +52,7 @@ def _addExpandedColumns(col, row, idx):
 
 
 def deduceType(v):
-    if isinstance(v, (float,int,str)):
+    if isinstance(v, (float, int)):
         return type(v)
     else:
         return anytype
