@@ -1,0 +1,8 @@
+sheet	col	row	keystrokes	input	comment
+			o	sample_data/y77d-th95.json.gz	open file
+y77d-th95	:@computed_region_nnqa_25f4		!		toggle current column as a key column
+y77d-th95	reclat		%		set type of current column to float
+y77d-th95	reclat		+	avg	add aggregator to current column
+y77d-th95	reclong		+	avg	add aggregator to current column
+y77d-th95	reclong		%		set type of current column to float
+y77d-th95	fall		W		Pivot the current column into a new sheet
