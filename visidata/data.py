@@ -379,7 +379,9 @@ class DirSheet(Sheet):
                 if fn.startswith('.'): continue
                 p = Path(os.path.join(folder, fn))
                 self.rows.append(p)
-        self.rows.sort()
+
+        # sort by modtime initially
+        self.rows.sort(key=lambda row: row.stat().st_mtime, reverse=True)
 
     def restat(self, row):
         row.stat(force=True)
