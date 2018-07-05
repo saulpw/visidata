@@ -6,4 +6,3 @@ sample_columns	fmtstr	キsample,OrderDate	e	%Y	edit contents of current cell
 sample_columns			q		quit current sheet
 sample	OrderDate		F		open Frequency Table grouped on current column
 sample_OrderDate_freq	histogram		-		hide current column
-sample_OrderDate_freq			^S	tests/freq-fmtstr.vd	save current sheet to filename in format determined by extension (default .tsv)

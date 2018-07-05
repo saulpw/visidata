@@ -7,9 +7,8 @@ from visidata import getGlobals
 
 globalCommand('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
 globalCommand('S', 'vd.push(vd.sheetsSheet)', 'open Sheets Sheet', 'meta-sheets')
-globalCommand('gS', 'vd.push(SheetsSheet("all_sheets", source=list(vd.allSheets.keys())))', 'open global Sheets Sheet', 'meta-sheets-all')
+globalCommand('gS', 'vd.push(vd.graveyardSheet).reload()', 'open Sheets Graveyard', 'sheets-graveyard')
 globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
-
 globalCommand('zKEY_F(1)', 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 
 Sheet.commands += [
@@ -57,7 +56,7 @@ class SheetsSheet(Sheet):
     rowtype = 'sheets'
     precious = False
     commands = [
-        Command(ENTER, 'vd.push(cursorRow)', 'jump to sheet referenced in current row'),
+        Command(ENTER, 'dest=cursorRow; vd.sheets.remove(sheet); vd.push(dest)', 'replace this sheet with sheet referenced in current row'),
         Command('g'+ENTER, 'for vs in selectedRows: vd.push(vs)', 'push selected sheets to top of sheets stack'),
         Command('g^R', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets', 'reload-all'),
         Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
@@ -81,6 +80,13 @@ class SheetsSheet(Sheet):
 
     def reload(self):
         self.rows = self.source
+
+
+# source: vd.allSheets (with BaseSheet as weakref keys)
+class GraveyardSheet(SheetsSheet):
+    rowtype = 'dead sheets'  # rowdef: BaseSheet
+    def reload(self):
+        self.rows = list(vs for vs in self.source.keys() if vs not in vd().sheets)
 
 
 class HelpSheet(Sheet):
@@ -135,6 +141,8 @@ class OptionsSheet(Sheet):
 
 vd().optionsSheet = OptionsSheet('options', source=options)
 vd().sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
+vd().graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd().allSheets)
+
 
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'

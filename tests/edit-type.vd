@@ -1,0 +1,3 @@
+sheet	col	row	keystrokes	input	comment
+			C		open Columns Sheet
+	type		e	int	edit contents of current cell
