@@ -18,6 +18,12 @@ ColumnsSheet.commands += [
 def valueNames(vals):
     return '-'.join(str(v) for v in vals)
 
+def copy_update(obj, **kwargs):
+    'Returns copy of obj, with any kwargs set in the __dict__'
+    newobj = copy(obj)
+    newobj.__dict__.update(kwargs)
+    return newobj
+
 # rowdef: ([bin_values], source_rows)
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
@@ -39,7 +45,8 @@ class SheetFreqTable(Sheet):
         self.largest = 100
 
         self.columns = [
-            Column(c.name, type=c.type, width=c.width, getter=lambda col,row,i=i: row[0][i]) for i, c in enumerate(self.origCols)
+            copy_update(c, getter=lambda col,row,i=i: row[0][i])
+                for i, c in enumerate(self.origCols)
         ]
         self.keyCols = self.columns[:]  # origCols are now key columns
         nkeys = len(self.keyCols)
@@ -142,11 +149,12 @@ class SheetFreqTable(Sheet):
     def discreteBinning(self):
         rowidx = {}
         for r in Progress(self.source.rows):
-            v = tuple(c.getTypedValueOrException(r) for c in self.origCols)
-            histrow = rowidx.get(v)
+            keys = tuple(c.getTypedValueOrException(r) for c in self.origCols)
+            formatted_keys = tuple(c.format(v) for v, c in zip(keys, self.origCols))
+            histrow = rowidx.get(formatted_keys)
             if histrow is None:
-                histrow = (v, [])
-                rowidx[v] = histrow
+                histrow = (keys, [])
+                rowidx[formatted_keys] = histrow
                 self.addRow(histrow)
             histrow[1].append(r)
             self.largest = max(self.largest, len(histrow[1]))
