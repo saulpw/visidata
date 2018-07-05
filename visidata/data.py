@@ -273,7 +273,10 @@ class DirSheet(Sheet):
             if mode & stat.S_IRUSR: return ret + 'yellow'
 
     def changed(self, col, row):
-        return isinstance(col, DeferredSetColumn) and col.changed(row)
+        try:
+            return isinstance(col, DeferredSetColumn) and col.changed(row)
+        except Exception:
+            return False
 
     def deleteFiles(self, rows):
         for r in rows:
