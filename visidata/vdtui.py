@@ -239,9 +239,13 @@ globalCommand('^Z', 'suspend()', 'suspend VisiData process')
 globalCommand('^A', 'exec_keystrokes(input_longname(sheet))', 'execute command by name', 'meta-exec-cmd')
 
 def input_longname(sheet):
-    longnames = [cmd.longname for cmd in sheet._commands.values() if getattr(cmd, 'longname', None)]
-    cmd = input("command name: ", completer=CompleteKey(sorted(set(longnames))));
-    return cmd
+    longnames = [
+        longname
+            for cmdmap in sheet._commands.maps
+                for longname, cmd in cmdmap.items()
+                    if getattr(cmd, 'longname', None)
+    ]
+    return input("command name: ", completer=CompleteKey(sorted(set(longnames))))
 
 def StubCommand(longname):
     return Command('', 'error("command %s not defined for this sheet")' % longname, 'stub', longname)
