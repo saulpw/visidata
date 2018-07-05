@@ -14,8 +14,8 @@ def numericCols(cols):
 class InvertedCanvas(Canvas):
     commands = Canvas.commands + [
         # swap directions of up/down
-        Command('move-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up'),
-        Command('move-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down'),
+        Command('', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up', 'move-up'),
+        Command('', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down', 'move-down'),
 
         Command('zj', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor down one line'),
         Command('zk', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor up one line'),

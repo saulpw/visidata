@@ -19,7 +19,7 @@ Sheet.Command('gz(', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(
 globalCommand(')', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
 # used as ENTER in several pyobj sheets
-globalCommand('python-dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object')
+globalCommand('', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object', 'python-dive-row')
 
 def expand_cols_deep(sheet, cols, row, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'

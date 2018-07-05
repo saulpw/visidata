@@ -308,14 +308,14 @@ class Canvas(Plotter):
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
     commands = Plotter.commands + [
-        Command('view-go-left', 'sheet.cursorBox.xmin -= cursorBox.w', ''),
-        Command('view-go-right', 'sheet.cursorBox.xmin += cursorBox.w', ''),
-        Command('view-go-up', 'sheet.cursorBox.ymin += cursorBox.h', ''),
-        Command('view-go-down', 'sheet.cursorBox.ymin -= cursorBox.h', ''),
-        Command('view-go-far-left', 'sheet.cursorBox.xmin = visibleBox.xmin', ''),
-        Command('view-go-far-right', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w', ''),
-        Command('view-go-far-up', 'sheet.cursorBox.ymin = cursorBox.ymin', ''),
-        Command('view-go-far-down', 'sheet.cursorBox.ymin = cursorBox.ymax-cursorBox.h', ''),
+        Command('', 'sheet.cursorBox.xmin -= cursorBox.w', '', 'view-go-left'),
+        Command('', 'sheet.cursorBox.xmin += cursorBox.w', '', 'view-go-right'),
+        Command('', 'sheet.cursorBox.ymin += cursorBox.h', '', 'view-go-up'),
+        Command('', 'sheet.cursorBox.ymin -= cursorBox.h', '', 'view-go-down'),
+        Command('', 'sheet.cursorBox.xmin = visibleBox.xmin', '', 'view-go-far-left'),
+        Command('', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w', '', 'view-go-far-right'),
+        Command('', 'sheet.cursorBox.ymin = cursorBox.ymin', '', 'view-go-far-up'),
+        Command('', 'sheet.cursorBox.ymin = cursorBox.ymax-cursorBox.h', '', 'view-go-far-down'),
 
         Command('zh', 'sheet.cursorBox.xmin -= canvasCharWidth', ''),
         Command('zl', 'sheet.cursorBox.xmin += canvasCharWidth', ''),

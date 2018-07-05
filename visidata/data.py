@@ -224,8 +224,8 @@ class DirSheet(Sheet):
         Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
         Command('z^S', 'save(cursorRow)', 'apply changes to current row', 'sheet-specific-apply-edits'),
         Command('z^R', 'undoMod(cursorRow); restat(cursorRow)', 'undo pending changes to current row', 'sheet-specific-apply-edits'),
-        Command('modify-delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1'),
-        Command('modify-delete-selected', 'deleteFiles(selectedRows)')
+        Command('', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1', '', 'modify-delete-row'),
+        Command('', 'deleteFiles(selectedRows)', '', 'modify-delete-selected')
     ]
     columns = [
         # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
