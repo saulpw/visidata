@@ -30,7 +30,7 @@ class JSONSheet(Sheet):
     def reload_json(self):
         self.rows = []
         with self.source.open_text() as fp:
-            ret = json.load(fp, object_hook=self.addRow)
+            ret = json.load(fp)
 
         if isinstance(ret, dict):
             self.rows = [ret]
