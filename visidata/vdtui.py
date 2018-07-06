@@ -61,6 +61,12 @@ class ExpectedException(Exception):
     'an expected exception'
     pass
 
+def returnException(f, *args, **kwargs):
+    try:
+        return f(*args, **kwargs)
+    except Exception as e:
+        return e
+
 baseCommands = collections.OrderedDict()  # [cmd.name] -> Command
 baseOptions = collections.OrderedDict()   # [opt.name] -> opt
 

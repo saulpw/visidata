@@ -22,12 +22,6 @@ def isError(col, row):
     except Exception as e:
         return True
 
-def returnException(f, *args, **kwargs):
-    try:
-        return f(*args, **kwargs)
-    except Exception as e:
-        return e
-
 
 class DescribeColumn(Column):
     def __init__(self, name, **kwargs):
