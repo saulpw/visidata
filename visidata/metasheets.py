@@ -27,7 +27,7 @@ class ColumnsSheet(Sheet):
             srcCol.setValue(self.sheet.source.cursorRow, val)
 
     columns = [
-            ColumnAttr('sheet'),
+            ColumnAttr('sheet', type=str),
             ColumnAttr('name', width=options.default_width),
             ColumnAttr('width', type=int),
             ColumnEnum('type', getGlobals(), default=anytype),
