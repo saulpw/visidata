@@ -1241,10 +1241,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
     def recalc(self):
         'Clear caches and set col.sheet to this sheet for all columns.'
         for c in self.columns:
-            if c._cachedValues:
-                c._cachedValues.clear()
-            c.sheet = self
-            c.name = c._name
+            c.recalc(self)
 
     def reload(self):
         'Loads rows and/or columns.  Override in subclass.'
@@ -1803,6 +1800,14 @@ class Column:
     def __deepcopy__(self, memo):
         return self.__copy__()  # no separate deepcopy
 
+    def recalc(self, sheet=None):
+        'reset column cache, attach to sheet, and reify name'
+        if self._cachedValues:
+            self._cachedValues.clear()
+        if sheet:
+            self.sheet = sheet
+        self.name = self._name
+
     @property
     def name(self):
         return self._name or ''
@@ -1969,13 +1974,13 @@ class Column:
     def setValue(self, row, value):
         'Set our column value for given row to `value`.'
         self.setter or error(self.name+' column cannot be changed')
-        self.setter(self, row, value)
+        return self.setter(self, row, value)
 
     def setValues(self, rows, value):
         'Set our column value for given list of rows to `value`.'
         for r in rows:
             self.setValue(r, value)
-        status('set %d values = %s' % (len(rows), value))
+        return status('set %d values = %s' % (len(rows), value))
 
     @asyncthread
     def setValuesFromExpr(self, rows, expr):
@@ -2003,6 +2008,7 @@ class Column:
 
 def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
+    return True
 
 def ColumnAttr(name, attr=None, **kwargs):
     'Column using getattr/setattr of given attr.'

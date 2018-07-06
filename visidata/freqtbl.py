@@ -24,7 +24,7 @@ def copy_update(obj, **kwargs):
     newobj.__dict__.update(kwargs)
     return newobj
 
-# rowdef: ([bin_values], source_rows)
+# rowdef: (keys, source_rows)
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     rowtype = 'bins'
@@ -45,7 +45,8 @@ class SheetFreqTable(Sheet):
         self.largest = 100
 
         self.columns = [
-            copy_update(c, getter=lambda col,row,i=i: row[0][i])
+            copy_update(c, getter=lambda col,row,i=i: row[0][i],
+                           setter=lambda col,row,v,c=c,i=i: setitem(row[0], i, v) and c.setValues(row[1], v) and col.recalc())
                 for i, c in enumerate(self.origCols)
         ]
         self.keyCols = self.columns[:]  # origCols are now key columns
@@ -149,8 +150,8 @@ class SheetFreqTable(Sheet):
     def discreteBinning(self):
         rowidx = {}
         for r in Progress(self.source.rows):
-            keys = tuple(c.getTypedValueOrException(r) for c in self.origCols)
-            formatted_keys = tuple(c.format(v) for v, c in zip(keys, self.origCols))
+            keys = list(c.getTypedValueOrException(r) for c in self.origCols)
+            formatted_keys = tuple(str(c.format(v)) for v, c in zip(keys, self.origCols))
             histrow = rowidx.get(formatted_keys)
             if histrow is None:
                 histrow = (keys, [])
