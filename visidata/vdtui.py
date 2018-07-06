@@ -1347,7 +1347,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
-    @functools.lru_cache()
+    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in .refresh()
     def visibleCols(self):  # non-hidden cols
         'List of `Column` which are not hidden.'
         return [c for c in self.keyCols if not c.hidden] + [c for c in self.columns if not c.hidden and c not in self.keyCols]
@@ -1891,10 +1891,13 @@ class Column:
         '''Returns the properly-typed value for the given row at this column.
            Returns the type's default value if either the getter or the type conversion fails.'''
         try:
-            return self.type(self.getValue(row))
+            v = self.getValue(row)
+            if not isinstance(Exception):
+                return self.type(v)
         except Exception as e:
-#            exceptionCaught(e, status=False)
-            return self.type()
+            pass
+
+        return self.type()
 
     def getValue(self, row):
         'Memoize calcValue with key id(row)'
