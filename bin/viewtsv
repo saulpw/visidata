@@ -7,7 +7,7 @@ class TsvSheet(vdtui.Sheet):
     rowtype = 'rows'
     columns = [vdtui.ColumnItem('tsv', 0)]
 
-    @vdtui.async
+    @vdtui.asyncthread
     def reload(self):
         self.rows = []
 
