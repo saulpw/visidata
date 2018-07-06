@@ -26,9 +26,9 @@ An initial column.  Generally the class-level `columns` is set to the actual col
 (See the `reload()` function below where they are set from the contents of the first row.)  This line is not strictly necessary but makes loading feel a bit more responsive.
 
 
-        @vdtui.async
+        @vdtui.asyncthread
 
-@[async](/docs/async) marks the function to spawn a new thread whenever it is called.
+@[asyncthread](/docs/async) marks the function to spawn a new thread whenever it is called.
 
         def reload(self):
 
