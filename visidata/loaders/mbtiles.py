@@ -51,7 +51,7 @@ class MbtilesSheet(Sheet):
 
         return mapbox_vector_tile.decode(gzip.decompress(tile_data))
 
-    @async
+    @asyncthread
     def reload(self):
         con = sqlite3.connect(self.source.resolve())
 
@@ -74,7 +74,7 @@ class PbfSheet(Sheet):
         Command('.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot this row only'),
         Command('g.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows, textCol=cursorCol))', 'plot as map'),
     ]
-    @async
+    @asyncthread
     def reload(self):
         props = set()  # property names
         self.rows = []
@@ -112,7 +112,7 @@ class PbfCanvas(InvertedCanvas):
         else:
             assert False, t
 
-    @async
+    @asyncthread
     def reload(self):
         self.reset()
 

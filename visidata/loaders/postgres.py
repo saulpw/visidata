@@ -37,7 +37,7 @@ class SQL:
         cur.execute(qstr)
         return cur
 
-    @async
+    @asyncthread
     def query_async(self, qstr, callback=None):
         with self.cur(qstr) as cur:
             callback(cur)
@@ -92,7 +92,7 @@ class PgTablesSheet(Sheet):
 
 # rowdef: tuple of values as returned by fetchone()
 class PgTable(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         with self.sql.cur("SELECT * FROM " + self.source) as cur:
             self.rows = []

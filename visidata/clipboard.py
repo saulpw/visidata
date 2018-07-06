@@ -96,7 +96,7 @@ def copyToClipboard(value):
     status('copied value to clipboard')
 
 
-@async
+@asyncthread
 def saveToClipboard(sheet, rows, filetype=None):
     'copy rows from sheet to system clipboard'
     filetype = filetype or options.filetype

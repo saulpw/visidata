@@ -59,7 +59,7 @@ class DescribeSheet(ColumnsSheet):
         Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
     ]
 
-    @async
+    @asyncthread
     def reload(self):
         super().reload()
         self.describeData = { col: {} for col in self.rows }
@@ -68,7 +68,7 @@ class DescribeSheet(ColumnsSheet):
             self.reloadColumn(srccol)
             sync(max_threads)
 
-    @async
+    @asyncthread
     def reloadColumn(self, srccol):
             d = self.describeData[srccol]
             isNull = isNullFunc()

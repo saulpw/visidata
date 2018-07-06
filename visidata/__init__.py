@@ -18,7 +18,7 @@ from .metasheets import *
 from .describe import *
 from .freqtbl import *
 from .aggregators import *
-from .async import *
+from .asyncthread import *
 from .pivot import *
 from .tidydata import *
 from .cmdlog import *

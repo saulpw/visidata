@@ -162,7 +162,7 @@ class SheetFreqTable(Sheet):
         self.rows.sort(key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
 
 
-    @async
+    @asyncthread
     def reload(self):
         'Generate histrow for each row and then reverse-sort by length.'
         self.rows = []

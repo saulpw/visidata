@@ -23,7 +23,7 @@ class TTFTablesSheet(Sheet):
         Command(ENTER, 'vd.push(TTFGlyphsSheet(name+str(cursorRowIndex), source=sheet, sourceRows=[cursorRow], ttf=ttf))', '', ''),
     ]
 
-    @async
+    @asyncthread
     def reload(self):
         import fontTools.ttLib
 
@@ -46,7 +46,7 @@ class TTFGlyphsSheet(Sheet):
     commands = [
         Command('.', 'vd.push(makePen(name+"_"+cursorRow[1], source=cursorRow[2], glyphSet=ttf.getGlyphSet()))', 'push plot of this glyph')
     ]
-    @async
+    @asyncthread
     def reload(self):
         self.rows = []
         glyphs = self.ttf.getGlyphSet()

@@ -17,7 +17,7 @@ class HtmlTablesSheet(Sheet):
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
     ]
     commands = [ Command(ENTER, 'vd.push(cursorRow)', 'open this table') ]
-    @async
+    @asyncthread
     def reload(self):
         import lxml.html
         from lxml import etree
@@ -45,7 +45,7 @@ class HtmlTableSheet(Sheet):
     rowtype = 'rows'
     columns = []
 
-    @async
+    @asyncthread
     def reload(self):
         self.rows = []
         headers = []
@@ -95,7 +95,7 @@ class HtmlTableSheet(Sheet):
             self.rows = self.rows[1:]
 
 
-@async
+@asyncthread
 def save_html(p, *vsheets):
     'Save vsheets as HTML tables in a single file'
 

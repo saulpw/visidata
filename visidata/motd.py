@@ -6,7 +6,7 @@ option('motd_url', 'https://visidata.org/motd-'+__version__, 'source of randomiz
 
 earthdays = lambda n: n*24*60*60
 
-@async
+@asyncthread
 def domotd():
     try:
         if options.motd_url:

@@ -375,7 +375,7 @@ def moveRegex(sheet, *args, **kwargs):
 def sync(expectedThreads=0):
     vd().sync(expectedThreads)
 
-def async(func):
+def asyncthread(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
     @functools.wraps(func)
     def _execAsync(*args, **kwargs):
@@ -407,7 +407,7 @@ class Progress:
                 yield item
                 self.made += 1
 
-@async
+@asyncthread
 def _async_deepcopy(vs, newlist, oldlist):
     for r in Progress(oldlist):
         newlist.append(deepcopy(r))
@@ -1303,7 +1303,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         status('deleted %s %s' % (ndeleted, self.rowtype))
         return ndeleted
 
-    @async
+    @asyncthread
     def deleteSelected(self):
         'Delete all selected rows.'
         ndeleted = self.deleteBy(self.isSelected)
@@ -1312,7 +1312,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         if ndeleted != nselected:
             error('expected %s' % nselected)
 
-    @async
+    @asyncthread
     def delete(self, rows):
         rowdict = {id(r): r for r in rows}
         ndeleted = self.deleteBy(lambda r,rowdict=rowdict: id(r) in rowdict)
@@ -1417,7 +1417,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         'True if given row is selected. O(log n).'
         return id(row) in self._selectedRows
 
-    @async
+    @asyncthread
     def toggle(self, rows):
         'Toggle selection of given `rows`.'
         for r in Progress(rows, len(self.rows)):
@@ -1436,7 +1436,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         else:
             return False
 
-    @async
+    @asyncthread
     def select(self, rows, status=True, progress=True):
         "Select given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
@@ -1445,7 +1445,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         if status:
             vd().status('selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype))
 
-    @async
+    @asyncthread
     def unselect(self, rows, status=True, progress=True):
         "Unselect given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
@@ -1977,7 +1977,7 @@ class Column:
             self.setValue(r, value)
         status('set %d values = %s' % (len(rows), value))
 
-    @async
+    @asyncthread
     def setValuesFromExpr(self, rows, expr):
         compiledExpr = compile(expr, '<expr>', 'eval')
         for row in Progress(rows):
@@ -2164,7 +2164,7 @@ class TextSheet(Sheet):
     def __init__(self, name, source, **kwargs):
         super().__init__(name, source=source, **kwargs)
 
-    @async
+    @asyncthread
     def reload(self):
         self.columns = [Column(self.name, getter=lambda col,row: row[1])]
         self.rows = []

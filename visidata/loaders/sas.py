@@ -15,7 +15,7 @@ def open_sas7bdat(p):
 
 
 class XptSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         import xport
         with open(self.source.resolve(), 'rb') as fp:
@@ -31,7 +31,7 @@ class XptSheet(Sheet):
 
 
 class SasSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         import sas7bdat
         self.dat = sas7bdat.SAS7BDAT(self.source.resolve(), skip_header=True, log_level=logging.CRITICAL)

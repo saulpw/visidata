@@ -27,7 +27,7 @@ class PNGSheet(Sheet):
     def newRow(self):
         return list((None, None, 0, 0, 0, 0))
 
-    @async
+    @asyncthread
     def reload(self):
         import png
         r = png.Reader(bytes=self.source.read_bytes())
@@ -63,7 +63,7 @@ class PNGDrawing(Canvas):
             row[5] = a = attr
             self.plotpixel(x, y, rgb_to_attr(r,g,b,a), row)
 
-    @async
+    @asyncthread
     def reload(self):
         self.reset()
         for row in self.sourceRows:
@@ -71,7 +71,7 @@ class PNGDrawing(Canvas):
             self.point(x, y, rgb_to_attr(r,g,b,a), row)
         self.refresh()
 
-@async
+@asyncthread
 def save_png(p, vs):
     if isinstance(vs, PNGSheet):
         pass

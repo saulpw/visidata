@@ -12,7 +12,7 @@ def open_jsonl(p):
 
 class JSONSheet(Sheet):
     commands = [Command(ENTER, 'pyobj-dive')]
-    @async
+    @asyncthread
     def reload(self):
         self.colnames = {}  # [colname] -> Column
         self.columns.clear()
@@ -57,7 +57,7 @@ class JSONSheet(Sheet):
                 self.addColumn(c)
         return row
 
-@async
+@asyncthread
 def save_json(p, vs):
     def rowdict(cols, row):
         d = {}

@@ -6,7 +6,7 @@ def open_dta(p):
 
 
 class StataSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         import pandas
         self.df = pandas.read_stata(self.source.resolve())

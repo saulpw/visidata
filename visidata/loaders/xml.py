@@ -11,7 +11,7 @@ def open_xml(p):
 open_svg = open_xml
 
 
-@async
+@asyncthread
 def save_xml(p, vs):
     from lxml import etree, objectify
     vs.source.write(p.resolve(), encoding=options.encoding, standalone=False, pretty_print=True)

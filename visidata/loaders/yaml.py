@@ -6,7 +6,7 @@ def open_yaml(p):
 open_yml = open_yaml
 
 class YamlSheet(Sheet):
-    @async
+    @asyncthread
     def reload(self):
         import yaml
         with self.source.open_text() as fp:

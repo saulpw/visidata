@@ -1,7 +1,7 @@
 import collections
 import itertools
 
-from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, vd, error, anytype, ENTER, async, status, Progress
+from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, vd, error, anytype, ENTER, asyncthread, status, Progress
 from visidata import ColumnAttr, ColumnEnum, ColumnItem, ColumnExpr, SubrowColumn
 from visidata import getGlobals
 
@@ -179,7 +179,7 @@ ColumnsSheet.commands += columnCommands
 class SheetJoin(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
 
-    @async
+    @asyncthread
     def reload(self):
         sheets = self.sources
 
