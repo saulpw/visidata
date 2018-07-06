@@ -1267,6 +1267,7 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
         ret.topRowIndex = ret.cursorRowIndex = 0
         ret.progresses = []
         ret.currentThreads = []
+        ret.precious = True  # copies can be precious even if originals aren't
         return ret
 
     def __deepcopy__(self, memo):

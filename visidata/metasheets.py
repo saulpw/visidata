@@ -56,7 +56,7 @@ class SheetsSheet(Sheet):
     rowtype = 'sheets'
     precious = False
     commands = [
-        Command(ENTER, 'dest=cursorRow; vd.sheets.remove(sheet); vd.push(dest)', 'replace this sheet with sheet referenced in current row'),
+        Command(ENTER, 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)', 'replace this sheet with sheet referenced in current row'),
         Command('g'+ENTER, 'for vs in selectedRows: vd.push(vs)', 'push selected sheets to top of sheets stack'),
         Command('g^R', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets', 'reload-all'),
         Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
