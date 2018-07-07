@@ -3,7 +3,7 @@
 # v1.2.1 (2018-07-05)
 
 - python 3.7
-    - Change `async` decorator to `asyncthread` and rename `async.py` for Python 3.7 support
+    - Change `async` decorator to `asyncthread` and rename `async.py` to avoid using Python 3.7 keyword
 
 # v1.2 (2018-04-30)
 
