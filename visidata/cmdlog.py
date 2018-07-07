@@ -23,9 +23,9 @@ globalCommand('status', 'status(input("status: ", display=False))', 'show given 
 
 # not necessary to log movements and scrollers
 nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g?'.split()
-nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
+nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c Q'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
-nonLogKeys += '^Z ^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) z? KEY_BACKSPACE'.split()
+nonLogKeys += '^Z ^A ^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) z? KEY_BACKSPACE'.split()
 nonLogKeys += [' ']
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
