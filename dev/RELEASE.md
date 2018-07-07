@@ -94,7 +94,7 @@ git push --tags
 
 16. Comb through issues and close the ones that have been solved, referencing the version number
 
-17. Post release notes on r/visidata and tinyletter and have some ice cream
+17. Post release notes on tinyletter and twitter and have some ice cream
 
 # conda
 
