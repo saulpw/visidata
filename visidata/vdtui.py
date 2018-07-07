@@ -1899,7 +1899,7 @@ class Column:
            Returns the type's default value if either the getter or the type conversion fails.'''
         try:
             v = self.getValue(row)
-            if not isinstance(Exception):
+            if not isinstance(v, Exception):
                 return self.type(v)
         except Exception as e:
             pass
