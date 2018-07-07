@@ -42,10 +42,13 @@ class xlsxSheet(Sheet):
         self.columns = []
         self.rows = []
         for row in Progress(worksheet.iter_rows(), worksheet.max_row or 0):
-            L = list(cell.value for cell in row)
-            for i in range(len(self.columns), len(L)):  # no-op if already done
-                self.addColumn(ColumnItem(None, i, width=8))
-            self.addRow(L)
+            try:
+                L = list(cell.value for cell in row)
+                for i in range(len(self.columns), len(L)):  # no-op if already done
+                    self.addColumn(ColumnItem(None, i, width=8))
+                self.addRow(L)
+            except Exception as e:
+                self.addRow(e)
 
 
 class open_xls(Sheet):
