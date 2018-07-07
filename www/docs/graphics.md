@@ -65,7 +65,7 @@ The onscreen portion (the area within the visible bounds) is scaled and rendered
 
 The [`Canvas` user interface](/docs/graph#commands) supports zoom, scroll, cursor definition, and selection of the underlying rows.  The `source` attribute should be the Sheet which owns the plotted `row` objects.
 
-A call to `Canvas.refresh()` will trigger `Canvas.render()`, which is decorated with `@async` as it may take a perceptible amount of time for larger datasets.  Any active `render` threads are cancelled first.
+A call to `Canvas.refresh()` will trigger `Canvas.render()`, which is decorated with `@asyncthread` as it may take a perceptible amount of time for larger datasets.  Any active `render` threads are cancelled first.
 
 #### `Box` and `Point` helper classes
 

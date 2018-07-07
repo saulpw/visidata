@@ -1,4 +1,4 @@
-# VisiData v1.2 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
+# VisiData v1.2.1 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A terminal interface for exploring and arranging tabular data.
 
@@ -46,7 +46,7 @@ Further instructions available [here](https://github.com/saulpw/homebrew-vd).
 
 Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
 
-Currently, VisiData v1.0 is in Debian unstable's [main repository](https://launchpad.net/ubuntu/+source/visidata). If you want the most up-to-date version of VisiData (v1.1), it will be available in our own [Debian repo](https://github.com/saulpw/deb-vd).
+Currently, VisiData v1.0 is in Debian unstable's [main repository](https://launchpad.net/ubuntu/+source/visidata). If you want more up-to-date versions of VisiData, it will be available in our own [Debian repo](https://github.com/saulpw/deb-vd).
 
 To install from Debian:
 

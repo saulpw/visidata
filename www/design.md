@@ -17,7 +17,7 @@
 7. [Loaders](/design/loaders)
 8. [Hooks](/design/hooks)
 9. [Row selection](/design/selected)
-10. [`@async`](/design/async)
+10. [`@asyncthread`](/design/async)
 11. [Colorizers](/design/color)
 12. [Options](/design/options)
 13. [Builtin line editor](/design/editor)
