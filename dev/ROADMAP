@@ -12,6 +12,8 @@
 
 - hidden columns should stay hidden on join
 - min width of key columns should be 1 or 2 (avoid hidden keycols, they act weird)
+- single status longer than window causes error (long fn)
+- 'za' created columns don't work with Freq
 
 ## Future
 
@@ -38,6 +40,15 @@
 ### misc
 
 - 'v' hide cols which have errors on cursor row
+- modified indicator on status bar, also enables quitguard
+- ColumnsSheet should show subcolumns and their parent column (for expand/contract)
+   - also need better way to unhide columns?
+   - set width w 'ge' should work
+- sheet join with only *visible* keycols
+- fill on join nulls should cause error
+- 'zd' move contents to clipboard
+- tab completion of macros in ^A, requires command overhaul
+- csv with NUL bytes should parse.  safe_mode? (slow but handles these kinds of things)
 
 
 ### features
@@ -92,6 +103,7 @@
 - g^D bug report
 - zip/unzip from dirsheet
 - status rework: use logging module; color status items; use multiple lines on overflow
+- proper dive on json
 
 ##### technical debt
 

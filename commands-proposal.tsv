@@ -1,12 +1,12 @@
-keystrokes	longname	prefix	shift	key	sheet_change	selection	modifies_sheet	logged	sheet	menu_path	helpstr	execstr
+keystrokes	longname	prefix	shift	key	jump	selection	modifies	logged	sheet	menupath	execstr	helpstr_en
 ^A	exec-longname		Ctrl	^A	n	n	n	n	global			
 ^B	prev-page		Ctrl	^B	n	n	n	n	Sheet			
 ^C	cancel-sheet		Ctrl	^C	n	n	n	n	Sheet			
 g^C	cancel-all	g	Ctrl	^C	n	n	n	n	global			
 ^D	save-cmdlog		Ctrl	^D	n	n	n	n	global			
-^E	errors-recent		Ctrl	^E	meta	n	n	n	global			
+^E	errors-recent		Ctrl	^E	meta	n	n	n	global	info-errors-last		
 g^E	errors-all	g	Ctrl	^E	meta	n	n	n	global			
-z^E	errors-cell	z	Ctrl	^E	meta	n	n	n	Sheet			
+z^E	error-cell	z	Ctrl	^E	meta	n	n	n	Sheet			
 ^F	next-page		Ctrl	^F	n	n	n	n	Sheet			
 ^G	show-cursor		Ctrl	^G	n	n	n	n	Sheet			
 ^H	sysopen-help		Ctrl	^H	external	n	n	n	global			
@@ -36,7 +36,7 @@ z^X	show-eval	z	Ctrl	^X	n	n	n	y	global
 g^Y	pyobj-sheet	g	Ctrl	^Y	meta	n	n	y	global			
 z^Y	pyobj-cell	z	Ctrl	^Y	meta	n	n	y	Sheet			
 ^Z	suspend		Ctrl	^Z	suspend	n	n	n	global			
-^^	prev-sheet		Ctrl	^^	swap	n	n	ideally not	global			
+^^	prev-sheet		Ctrl	^^	swap	n	n	n	global			
 ^_	toggle-profile		Ctrl	^_	n	n	n	n	global			
 SPACE	menu			SPACE	modal	n	n	n	global			
 !	key-col		Shift	!	n	n	n	y	Sheet			
@@ -44,8 +44,8 @@ g!	key-col-on	g	Shift	!	n	n	n	y	Sheet
 z!	key-col-off	z	Shift	!	n	n	n	y	Sheet			
 "	dup-selected		Shift	"	derived	use	n	y	Sheet			
 z"	dup-selected-deep	z	Shift	"	copy	use	n	y	Sheet			
-g"	dup-rows	g	Shift	"	derived	use/set	n	y	Sheet			
-gz"	dup-rows-deep	gz	Shift	"	copy	use/set	n	y	Sheet			
+g"	dup-rows	g	Shift	"	derived	use	n	y	Sheet			
+gz"	dup-rows-deep	gz	Shift	"	copy	use	n	y	Sheet			
 #	type-int		Shift	#	n	n	n	y	Sheet			
 $	type-currency		Shift	$	n	n	n	y	Sheet			
 %	type-float		Shift	%	n	n	n	y	Sheet			
