@@ -4,6 +4,12 @@
 
 2. Verify that documentation/docstrings are up-to-date on features and functionality
 
+    a. manpage;
+
+    b. visidata.org;
+
+    c. CHANGELOG;
+
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 
 4. Verify that setup.py is up-to-date with requirements.
@@ -83,6 +89,7 @@ twine upload dist/*
    b. Ask someone else to test install
 
 13. Create a tag `v#.#.#` for that commit
+
 ```
 git tag v#.#.#
 git push --tags
@@ -90,15 +97,17 @@ git push --tags
 
 14. Push code to stable
 
-15. Write up the release notes and post at visidata.org/release/#.#
+15. Write up the release notes and add it to `www/releases.md`
 
-16. Comb through issues and close the ones that have been solved, referencing the version number
+16. Upload new motd
 
-17. Post github release notes on tinyletter.
+17. Run dev/mkwww.sh to rebuild the website and deploy with dev/deploy_www.sh
 
-18. Deploy the newer version of visidata.org.
+18. Comb through issues and close the ones that have been solved, referencing the version number
 
-19. Update the other distributions.
+19. Post github release notes on tinyletter.
+
+20. Update the other distributions.
 
 # conda
 
