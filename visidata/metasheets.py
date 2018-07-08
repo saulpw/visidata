@@ -5,14 +5,14 @@ from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, 
 from visidata import ColumnAttr, ColumnEnum, ColumnItem, ColumnExpr, SubrowColumn
 from visidata import getGlobals
 
-globalCommand('gC', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))', 'open Columns Sheet with all columns from all sheets', 'meta-columns-all'),
-globalCommand('S', 'vd.push(vd.sheetsSheet)', 'open Sheets Sheet', 'meta-sheets')
-globalCommand('gS', 'vd.push(vd.graveyardSheet).reload()', 'open Sheets Graveyard', 'sheets-graveyard')
-globalCommand('O', 'vd.push(vd.optionsSheet)', 'open Options', 'meta-options')
+globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
+globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
+globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
+globalCommand('O', 'options', 'vd.push(vd.optionsSheet)')
 globalCommand('zKEY_F(1)', 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
 
 Sheet.commands += [
-    Command('C', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=[sheet]))', 'open Columns Sheet', 'meta-columns-sheet'),
+    Command('C', 'columns-sheet', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=[sheet]))'),
 ]
 
 
