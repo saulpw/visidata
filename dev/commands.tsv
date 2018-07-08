@@ -100,6 +100,7 @@ Sheet	paste-after		p	p	n	n	y	y	5	data-clipboard-paste-after	paste clipboard rows
 Sheet	paste-before		P	P	n	n	y	y		data-clipboard-paste-before	paste clipboard rows before current row
 Sheet	paste-cell	z	p	zp	n	n	y	y		data-clipboard-paste-cell	set contents of current column for current row to last clipboard value
 Sheet	paste-cell-before	z	P	zP	n	n	y	y			
+Sheet	paste-selected	gz	p	gzp	n	change	y	y		data-clipboard-paste-selected	set contents of current column for selected rows to last clipboard value
 Sheet	pivot		W	W	derived	n	n	y	5	data-pivot	Pivot the current column into a new sheet
 Sheet	plot-column		.	.	canvas	n	n	y	2,3	data-plot-column	graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determine color
 Sheet	plot-numerics	g	.	g.	canvas	n	n	y		data-plot-allnumeric	open a graph of all visible numeric columns vs key column
@@ -220,7 +221,6 @@ Canvas				_							zoom to fit full extent
 				zL						slide-col-right-n	slide current column right n
 				BUTTON4_PRESSED						view-scroll-up	move scroll_incr forward
 				zH						slide-col-left-n	slide current column left n
-				gzp						data-clipboard-paste-selected	set contents of current column for selected rows to last clipboard value
 				z^R							clear cache for current column
 				 							start menu command
 				zKEY_F(1)						meta-commands	view sheet of commands and keybindings
