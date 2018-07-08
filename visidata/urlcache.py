@@ -18,7 +18,8 @@ def urlcache(url, cachesecs=24*60*60):
 
     assert p.parent.is_dir(), p.parent
 
-    with urllib.request.urlopen(url) as fp:
+    req = urllib.request.Request(url, headers={'User-Agent': __version_info__})
+    with urllib.request.urlopen(req) as fp:
         ret = fp.read().decode('utf-8').strip()
         with p.open_text(mode='w') as fpout:
             fpout.write(ret)
