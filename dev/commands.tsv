@@ -1,231 +1,231 @@
-sheet	longname	prefix	key	keystrokes	jump	selection	modifies	logged	menupath	helpstr
-global	add-sheet		A	A	new	n	n	y	sheet-new	open new blank sheet with N columns
-global	advance-replay		^I	^I	n	n	n	n	meta-replay-step	execute next row in replaying sheet
-global	cancel-all	g	^C	g^C	n	n	n	n	meta-threads-cancel-all	abort all secondary threads
-global	cmdlog		D	D	meta	n	n	n	meta-cmdlog	open CommandLog
-global	columns-all	g	C	gC	meta	n	n	y	meta-columns-all	open Columns Sheet with all columns from all sheets
-global	errors-all	g	^E	g^E	meta	n	n	n	info-errors-all	view traceback for most recent errors
-global	errors-recent		^E	^E	meta	n	n	n	errors-recent	view traceback for most recent error
-global	exec-longname		^A	^A	n	n	n	n	meta-exec-cmd	execute command by name
-global	exec-python	g	^X	g^X	n	n	n	y	python-exec	execute Python statement in the global scope
-global	forget-sheet		Q	Q	quit	n	n	n	sheet-quit-remove	quit current sheet and remove it from the cmdlog
-global	menu		SPACE	SPACE	modal	n	n	n		
-global	open-file		o	o	y	n	n	y	sheet-open-path	open input in VisiData
-global	options		O	O	meta static	n	n	n	meta-options	open Options
-global	pause-replay		^U	^U	n	n	n	n	meta-replay-toggle	pause/resume replay
-global	prev-sheet		^^	^^	swap	n	n	n	view-go-sheet-swap	jump to previous sheet (swap with current sheet)
-global	pyobj-eval		^X	^X	y	n	n	y	python-eval-push	evaluate Python expression and open result as Python object
-global	pyobj-sheet	g	^Y	g^Y	meta	n	n	y	python-push-sheet-object	open current sheet as Python object
-global	quit-all	g	q	gq	quit	n	n	n	sheet-quit-all	quit all sheets (clean exit)
-global	quit-sheet		q	q	quit	n	n	y	sheet-quit-current	quit current sheet
-global	redraw		^L	^L	n	n	n	n		refresh screen
-global	reload-all	g	^R	g^R	n	n		y		
-global	save-all	g	^S	g^S	n	n	n	y	sheet-save-all	save all sheets to given file or directory)
-global	save-cmdlog		^D	^D	n	n	n	n	meta-cmdlog-save	save CommandLog to new .vd file
-global	sheets		S	S	static meta	n	n	y	meta-sheets	open Sheets Sheet
-global	sheets-graveyard	g	S	gS	static meta	n	n	y	sheets-graveyard	open Sheets Graveyard
-global	show-eval	z	^X	z^X	n	n	n	y	python-eval-status	evaluate Python expression on current row and show result on status line
-global	show-version		^V	^V	n	n	n	n	info-version	show version information on status line
-global	statuses		^P	^P	static meta	n	n	n	meta-status-history	open Status History
-global	stop-replay		^K	^K	n	n	n	n	meta-replay-cancel	cancel current replay
-global	suspend		^Z	^Z	suspend	n	n	n		suspend VisiData process
-global	sysopen-help		^H	^H	external	n	n	n		
-global	threads-all		^T	^T	meta	n	n	n	meta-threads	open Threads Sheet
-global	toggle-profile		^_	^_	n	n	n	n	meta-threads-profile	turn profiling on for main process
-global	visidata-dir	g	D	gD	static	n	n	y	meta-visidata-dir	open .visidata directory
-Sheet	reload-row	z	^R	z^R	n	n	unmodifies	y		
-Sheet	reload-selected	gz	^R	gz^R	n	n	unmodifies	y		
-Sheet	add-row		a	a	n	n	y	y	modify-add-row-blank	insert a blank row
-Sheet	add-rows	g	a	ga	n	n	y	y	modify-add-row-many	add N blank rows
-Sheet	addcol-bulk	gz	a	gza	n	n	y	y	modify-add-column-manyblank	add N empty columns
-Sheet	addcol-expr		=	=	n	n	y	y	modify-add-column-expr	create new column from Python expression, with column names as variables
-Sheet	addcol-new	z	a	za	n	n	y	y	modify-add-column-blank	add an empty column
-Sheet	addcol-subst		*	*	n	n	y	y	modify-add-column-regex-transform	regex/subst - replace regex with subst, which may include backreferences (\1 etc)
-Sheet	aggregate-col		+	+	n	n	n	y	column-aggregator-add	add aggregator to current column
-Sheet	aggregate-numerics	g	+	g+	n	n	n	y		
-Sheet	cache-col	z	'	z'	n	n	n	y	column-cache-clear	add/reset cache for current column
-Sheet	cache-cols	gz	'	gz'	n	n	n	y	column-cache-clear-all	add/reset cache for all visible columns
-Sheet	cancel-sheet		^C	^C	n	n	n	n	meta-threads-cancel-sheet	abort all threads on current sheet
-Sheet	capture-col		;	;	n	n	n	y	modify-add-column-regex-capture	add new column from capture groups of regex; requires example row
-Sheet	columns-sheet		C	C	meta	n	n	y	meta-columns-sheet	open Columns Sheet
-Sheet	commands-sheet	g	^H	g^H	static	n	n	n		
-Sheet	contract-col		)	)	n	n	n	y		unexpand current column; restore original column and remove other columns at this level
-Sheet	copy-cell	z	y	zy	n	n	n	y	data-clipboard-copy-cell	copy current cell to clipboard
-Sheet	copy-cells	gz	y	gzy	n	use	n	y		
-Sheet	copy-row		y	y	n	n	n	y	data-clipboard-copy-row	copy current row to clipboard
-Sheet	copy-selected	g	y	gy	n	use	n	y	data-clipboard-copy-selected	copy selected rows to clipboard
-Sheet	delete-row		d	d	n	n	y	y	modify-delete-row	delete current row and move it to clipboard
-Sheet	delete-selected	g	d	gd	n	use	y	y	modify-delete-selected	delete selected rows and move them to clipboard
-Sheet	describe		I	I	derived	n	n	y	data-describe	open descriptive statistics for all visible columns
-Sheet	describe-all	g	I	gI	derived	n	n	y	data-describe-all	open descriptive statistics for all visible columns on all sheets
-Sheet	dive-cell	z	^J	z^J	derived	n	n	y		
-Sheet	dive-row		^J	^J	derived	n	n	y		
-Sheet	dup-rows	g	"	g"	derived	use	n	y	sheet-duplicate-all	open duplicate sheet with all rows
-Sheet	dup-rows-deep	gz	"	gz"	copy	use	n	y	sheet-duplicate-deepcopy	open duplicate sheet with deepcopy of all rows
-Sheet	dup-selected		"	"	derived	use	n	y	sheet-duplicate-selected	open duplicate sheet with only selected rows
-Sheet	dup-selected-deep	z	"	z"	copy	use	n	y	sheet-duplicate-deepcopy-selected	open duplicate sheet with deepcopy of selected rows
-Sheet	edit-cell		e	e	n	n	y	y	modify-edit-cell	edit contents of current cell
-Sheet	edit-cells	g	e	ge	n	use	y	y	modify-edit-column-selected	set contents of current column for selected rows to same input
-Sheet	error-cell	z	^E	z^E	meta	n	n	n		view traceback for error in current cell
-Sheet	expand-col		(	(	n	n	n	y	expand_col	expand current column of containers one level
-Sheet	expand-col-depth	z	(	z(	n	n	n	y	expand_col_deep	expand current column of containers to given depth (0=fully)
-Sheet	expand-cols	g	(	g(	n	n	n	y	expand_vcols	expand all visible columns of containers one level
-Sheet	expand-cols-depth	gz	(	gz(	n	n	n	y	expand_vcols_deep	expand all visible columns of containers to given depth (0=fully)
-Sheet	fill-nulls		f	f	n	n	y	y	modify-fill-column	fills null cells in current column with contents of non-null cells up the current column
-Sheet	freeze-col		'	'	n	n	n	y	column-freeze	add a frozen copy of current column with all cells evaluated
-Sheet	freeze-sheet	g	'	g'	copy	n	n	y	sheet-freeze	open a frozen copy of current sheet with all visible columns evaluated
-Sheet	freq-col		F	F	derived	n	n	y	data-aggregate-column	open Frequency Table grouped on current column
-Sheet	freq-keys	g	F	gF	derived	n	n	y	data-aggregate-keys	open Frequency Table grouped by all key columns on the source sheet
-Sheet	go-bottom	g	j	gj	n	n	n	n		
-Sheet	go-col-number	z	c	zc	n	n	n	n	view-go-column-number	move to the given column number
-Sheet	go-col-regex		c	c	n	n	n	n	view-go-column-regex	move to the next column with name matching regex
-Sheet	go-down		j	j	n	n	n	n		
-Sheet	go-left		h	h	n	n	n	n		
-Sheet	go-leftmost	g	h	gh	n	n	n	n	view-go-far-left	move all the way to the left
-Sheet	go-right		l	l	n	n	n	n		
-Sheet	go-rightmost	g	l	gl	n	n	n	n	view-go-far-right	move all the way to the right
-Sheet	go-row-number	z	r	zr	n	n	n	n	view-go-row-number	move to the given row number
-Sheet	go-top	g	k	gk	n	n	n	n		
-Sheet	go-up		k	k	n	n	n	n		
-Sheet	hide-col		-	-	n	n	n	y	column-hide	hide current column
-Sheet	key-col		!	!	n	n	n	y	column-key-toggle	toggle current column as a key column
-Sheet	key-col-off	z	!	z!	n	n	n	y	column-key-unset	unset current column as a key column
-Sheet	key-col-on	g	!	g!	n	n	n	y		
-Sheet	melt		M	M	derived	n	n	y	data-melt	open melted sheet (unpivot)
-Sheet	melt-regex	g	M	gM	derived	n	n	y	data-melt-regex	open melted sheet (unpivot), factoring columns
-Sheet	next-null	z	>	z>	n	n	n	n	view-go-next-null	move down the current column to the next null value
-Sheet	next-page		^F	^F	n	n	n	n		
-Sheet	next-search		n	n	n	n	n	n	view-find-forward-repeat	move to next match from last search
-Sheet	next-selected		}	}	n	use	n	n	view-go-next-selected	move down the current column to the next selected row
-Sheet	next-value		>	>	n	n	n	n	view-go-next-value	move down the current column to the next value
-Sheet	paste-after		p	p	n	n	y	y	data-clipboard-paste-after	paste clipboard rows after current row
-Sheet	paste-before		P	P	n	n	y	y	data-clipboard-paste-before	paste clipboard rows before current row
-Sheet	paste-cell	z	p	zp	n	n	y	y	data-clipboard-paste-cell	set contents of current column for current row to last clipboard value
-Sheet	paste-cell-before	z	P	zP	n	n	y	y		
-Sheet	pivot		W	W	derived	n	n	y	data-pivot	Pivot the current column into a new sheet
-Sheet	plot-column		.	.	canvas	n	n	y	data-plot-column	graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determine color
-Sheet	plot-numerics	g	.	g.	canvas	n	n	y	data-plot-allnumeric	open a graph of all visible numeric columns vs key column
-Sheet	prev-null	z	<	z<	n	n	n	n	view-go-prev-null	move up the current column to the next null value
-Sheet	prev-page		^B	^B	n	n	n	n		
-Sheet	prev-search		N	N	n	n	n	n	view-find-backward-repeat	move to previous match from last search
-Sheet	prev-selected		{	{	n	use	n	n	view-go-prev-selected	move up the current column to the previous selected row
-Sheet	prev-value		<	<	n	n	n	n	view-go-prev-value	move up the current column to the next value
-Sheet	pyobj-cell	z	^Y	z^Y	meta	n	n	y	python-push-cell-object	open current cell as Python object
-Sheet	pyobj-row		^Y	^Y	meta	n	n	y	python-push-row-object	open current row as Python object
-Sheet	random-rows		R	R	derived	n	n	y	rows-select-random	open duplicate sheet with a random population subset of # rows
-Sheet	reload-sheet		^R	^R	n	n	should confirm if modified; marks as unmodified	y	sheet-reload	reload current sheet
-Sheet	remove-col	g	-	g-	n	n	n	y	delete-column-really	remove column permanently from the list of columns
-Sheet	rename-col		^	^	n	n	y	y	column-name-input	edit name of current column
-Sheet	rename-col-cell	z	^	z^	n	n	y	y	column-name-cell	set name of current column to current cell
-Sheet	rename-cols-row	g	^	g^	n	n	y	y	column-name-all-selected	set names of all visible columns to contents of selected rows (or current row)
-Sheet	rename-cols-selected	gz	^	gz^	n	use	y	y	column-name-selected	set current column name to combined contents of current cell in selected rows (or current row)
-Sheet	resize-col	z	_	z_	n	n	n	n	column-width-input	adjust current column width to given number
-Sheet	resize-col-half	z	-	z-	n	n	n	n	column-width-half	reduce width of current column by half
-Sheet	resize-col-max		_	_	n	n	n	n	column-width-full	adjust width of current column to full
-Sheet	resize-cols-max	g	_	g_	n	n	n	n	column-width-all-full	adjust width of all visible columns to full
-Sheet	save-col	z	^S	z^S	n	n	n	y	sheet-save-column	save current column to filename in format determined by extension
-Sheet	save-sheet		^S	^S	n	n	n	y	sheet-save	save current sheet to filename in format determined by extension (default .tsv)
-Sheet	scroll-down	z	j	zj	n	n	n	n		scroll one row down
-Sheet	scroll-left	z	h	zh	n	n	n	n		scroll one column left
-Sheet	scroll-middle	z	z	zz	n	n	n	n		scroll current row to center of screen
-Sheet	scroll-right	z	l	zl	n	n	n	n		scroll one column right
-Sheet	scroll-up	z	k	zk	n	n	n	n		scroll one row up
-Sheet	search-col		/	/	n	n	n	n	view-find-row-curcol-forward	search for regex forwards in current column
-Sheet	search-cols	g	/	g/	n	n	n	n	view-find-row-viscol-forward	search for regex forwards over all visible columns
-Sheet	search-expr	z	/	z/	n	n	n	n		
-Sheet	search-keys		r	r	n	n	n	n	view-go-row-regex	move to the next row with key matching regex
-Sheet	searchr-col		?	?	n	n	n	n	view-find-row-curcol-backward	search for regex backwards in current column
-Sheet	searchr-cols	g	?	g?	n	n	n	n	view-find-row-viscol-backward	search for regex backwards over all visible columns
-Sheet	searchr-expr	z	?	z?	n	n	n	n	info-manpage	launch VisiData manpage
-Sheet	select-after	gz	s	gzs	n	change	n	y	rows-select-from-cursor	select all rows from cursor to bottom
-Sheet	select-before	z	s	zs	n	change	n	y	rows-select-to-cursor	select all rows from top to cursor
-Sheet	select-col-regex		|	|	n	change	n	y	rows-select-regex	select rows matching regex in current column
-Sheet	select-cols-regex	g	|	g|	n	change	n	y	rows-select-regex-all	select rows matching regex in any visible column
-Sheet	select-equal-cell		,	,	n	change	n	y	rows-select-like-cell	select rows matching current cell in current column
-Sheet	select-equal-row	g	,	g,	n	change	n	y	rows-select-like-row	select rows matching current row in all visible columns
-Sheet	select-expr	z	|	z|	n	change	n	y	rows-select-expr	select rows with a Python expression
-Sheet	select-row		s	s	n	change	n	y	rows-select-current	select current row
-Sheet	select-rows	g	s	gs	n	change	n	y	rows-select-all	select all rows
-Sheet	setcell-none	z	d	zd	n	n	y	y	modify-clear-cell	set contents of current cell to None
-Sheet	setcol-expr	g	=	g=	n	use	y	y	modify-set-column-selected-expr	set current column for selected rows to result of Python expression
-Sheet	setcol-none	gz	d	gzd	n	use	y	y	modify-clear-column-selected	set contents of cells in current column to None for selected rows
-Sheet	setcol-range	gz	=	gz=	n	use	y	y	modify-set-column-sequence	set current column for selected rows to the items in result of Python sequence expression
-Sheet	setcol-subst	g	*	g*	n	use	y	y	modify-add-column-regex-transform-foo	regex/subst - replace regex with subst, which may include backreferences (\1 etc)
-Sheet	show-aggregate	z	+	z+	n	n	n	y	column-aggregator-show	display result of aggregator over all values in current column
-Sheet	show-cursor		^G	^G	n	n	n	n	info-sheet	show cursor position and bounds of current sheet on status line
-Sheet	show-expr	z	=	z=	n	n	n	y	python-eval-row	set current cell to result of evaluated Python expression on current row
-Sheet	slide-bottom	g	J	gJ	n	n	n	y	slide-row-bottom	slide current row to the bottom of sheet
-Sheet	slide-down		J	J	n	n	n	y	slide-row-down	slide current row down
-Sheet	slide-left		H	H	n	n	n	y	slide-col-left	slide current column left
-Sheet	slide-leftmost	g	H	gH	n	n	n	y	slide-col-leftmost	slide current column all the way to the left of sheet
-Sheet	slide-right		L	L	n	n	n	y	slide-col-right	slide current column right
-Sheet	slide-rightmost	g	L	gL	n	n	n	y	slide-col-rightmost	slide current column all the way to the right of sheet
-Sheet	slide-top	g	K	gK	n	n	n	y	slide-row-top	slide current row the top of sheet
-Sheet	slide-up		K	K	n	n	n	y	slide-row-up	slide current row up
-Sheet	sort-asc		[	[	n	n	n	y	rows-sort-asc	sort ascending by current column
-Sheet	sort-desc		]	]	n	n	n	y	rows-sort-desc	sort descending by current column
-Sheet	sort-keys-asc	g	[	g[	n	n	n	y	rows-sort-keys-asc	sort ascending by all key columns
-Sheet	sort-keys-desc	g	]	g]	n	n	n	y	rows-sort-keys-desc	sort descending by all key columns
-Sheet	split-col		:	:	n	n	n	y	modify-add-column-regex-split	add new columns from regex split; # columns determined by example row at cursor
-Sheet	stoggle-after	gz	t	gzt	n	change	n	y	rows-toggle-from-cursor	toggle select rows from cursor to bottom
-Sheet	stoggle-before	z	t	zt	n	change	n	y	rows-toggle-to-cursor	toggle select rows from top to cursor
-Sheet	stoggle-row		t	t	n	change	n	y	rows-toggle-current	toggle selection of current row
-Sheet	stoggle-rows	g	t	gt	n	change	n	y	rows-toggle-all	toggle selection of all rows
-Sheet	syscopy-cell	z	Y	zY	n	n	n	n	data-clipboard-copy-system-cell	yank (copy) current cell to system clipboard
-Sheet	syscopy-row		Y	Y	n	n	n	n	data-clipboard-copy-system-row	yank (copy) current row to system clipboard
-Sheet	syscopy-selected	g	Y	gY	n	use	n	n	data-clipboard-copy-system-selected	yank (copy) selected rows to system clipboard
-Sheet	sysopen-cell	z	^O	z^O	external	n	y	y		
-Sheet	sysopen-row		^O	^O	external	n	y	y		
-Sheet	transpose		T	T	derived	n	n	y	data-transpose	open new sheet with rows and columns transposed
-Sheet	type-any	z	~	z~	n	n	n	y	column-type-any	set type of current column to anytype
-Sheet	type-currency		$	$	n	n	n	y	column-type-currency	set type of current column to currency
-Sheet	type-date		@	@	n	n	n	y	column-type-date	set type of current column to date
-Sheet	type-float		%	%	n	n	n	y	column-type-float	set type of current column to float
-Sheet	type-int		#	#	n	n	n	y	column-type-int	set type of current column to int
-Sheet	type-string		~	~	n	n	n	y	column-type-str	set type of current column to str
-Sheet	unhide-cols	g	v	gv	n	n	n	y	column-unhide-all	unhide all columns
-Sheet	unselect-after	gz	u	gzu	n	change	n	y	rows-unselect-from-cursor	unselect all rows from cursor to bottom
-Sheet	unselect-before	z	u	zu	n	change	n	y	rows-unselect-to-cursor	unselect all rows from top to cursor
-Sheet	unselect-col-regex		\	\	n	change	n	y	rows-unselect-regex	unselect rows matching regex in current column
-Sheet	unselect-cols-regex	g	\	g\	n	change	n	y	rows-unselect-regex-all	unselect rows matching regex in any visible column
-Sheet	unselect-expr	z	\	z\	n	change	n	y	rows-unselect-expr	unselect rows with a Python expression
-Sheet	unselect-row		u	u	n	change	n	y	rows-unselect-current	unselect current row
-Sheet	unselect-rows	g	u	gu	n	change	n	y	rows-unselect-all	unselect all rows
-Sheet	view-cell		V	V	derived	n	?	y	sheet-open-cell	view contents of current cell in a new sheet
-Sheet	visibility		v	v	n	n	n	y		
-Canvas				BUTTON4_PRESSED						zoom in with scroll wheel
-Canvas				gu						unselect rows on source sheet visible on screen
-Canvas				zz						set visible bounds to cursor
-Canvas				^J						open sheet of source rows contained within canvas cursor
-Canvas				BUTTON1_RELEASED						end cursor box with left mouse button release
-Canvas				d						delete rows on source sheet contained within canvas cursor
-Canvas				gd						delete rows on source sheet visible on screen
-Canvas				REPORT_MOUSE_POSITION						zoom out with scroll wheel
-Canvas				BUTTON1_PRESSED						start cursor box with left mouse button press
-Canvas				BUTTON3_PRESSED						mark grid point to move
-Canvas				s						select rows on source sheet contained within canvas cursor
-Canvas				g^J						open sheet of source rows visible on screen
-Canvas				gt						toggle selection of rows on source sheet visible on screen
-Canvas				v						toggle show_graph_labels
-Canvas				-						zoom out from cursor center
-Canvas				BUTTON3_RELEASED						mark canvas anchor point
-Canvas				+						zoom into cursor center
-Canvas				u						unselect rows on source sheet contained within canvas cursor
-Canvas				t						toggle selection of rows on source sheet contained within canvas cursor
-Canvas				z_						set aspect ratio
-Canvas				gs						select rows on source sheet visible on screen
-Canvas				^L						redraw all pixels on canvas
-Canvas				_						zoom to fit full extent
-				BUTTON1_PRESSED					view-go-mouse-row	
-				zL					slide-col-right-n	slide current column right n
-				BUTTON4_PRESSED					view-scroll-up	move scroll_incr forward
-				zH					slide-col-left-n	slide current column left n
-				gzp					data-clipboard-paste-selected	set contents of current column for selected rows to last clipboard value
-				z^R						clear cache for current column
-				 						start menu command
-				zKEY_F(1)					meta-commands	view sheet of commands and keybindings
-				BUTTON1_RELEASED					view-scroll-mouse-row	
-				REPORT_MOUSE_POSITION					view-scroll-down	move scroll_incr backward
-				zF					data-aggregate-summary	open one-line summary for all selected rows
-				zJ					slide-row-down-n	slide current row down n
-				zK					slide-row-up-n	slide current row up n
+sheet	longname	prefix	key	keystrokes	jump	selection	modifies	logged	video	menupath	helpstr
+Sheet	rename-col		^	^	n	n	y	y	3	column-name-input	edit name of current column
+Sheet	go-rightmost	g	l	gl	n	n	n	n		view-go-far-right	move all the way to the right
+Sheet	error-cell	z	^E	z^E	meta	n	n	n			view traceback for error in current cell
+Sheet	unselect-cols-regex	g	\	g\	n	change	n	y		rows-unselect-regex-all	unselect rows matching regex in any visible column
+Sheet	addcol-bulk	gz	a	gza	n	n	y	y		modify-add-column-manyblank	add N empty columns
+Sheet	go-left		h	h	n	n	n	n	*		
+Sheet	expand-col-depth	z	(	z(	n	n	n	y		expand_col_deep	expand current column of containers to given depth (0=fully)
+global	show-version		^V	^V	n	n	n	n		info-version	show version information on status line
+global	visidata-dir	g	D	gD	static	n	n	y		meta-visidata-dir	open .visidata directory
+Sheet	go-up		k	k	n	n	n	n	*		
+Sheet	addcol-new	z	a	za	n	n	y	y	3	modify-add-column-blank	add an empty column
+Sheet	go-bottom	g	j	gj	n	n	n	n			
+Sheet	type-date		@	@	n	n	n	y		column-type-date	set type of current column to date
+Sheet	cache-cols	gz	'	gz'	n	n	n	y		column-cache-clear-all	add/reset cache for all visible columns
+Sheet	searchr-expr	z	?	z?	n	n	n	n		info-manpage	launch VisiData manpage
+global	threads-all		^T	^T	meta	n	n	n		meta-threads	open Threads Sheet
+Sheet	describe		I	I	derived	n	n	y		data-describe	open descriptive statistics for all visible columns
+global	pyobj-sheet	g	^Y	g^Y	meta	n	n	y		python-push-sheet-object	open current sheet as Python object
+Sheet	sort-keys-asc	g	[	g[	n	n	n	y		rows-sort-keys-asc	sort ascending by all key columns
+global	save-all	g	^S	g^S	n	n	n	y		sheet-save-all	save all sheets to given file or directory)
+Sheet	add-row		a	a	n	n	y	y	3	modify-add-row-blank	insert a blank row
+Sheet	delete-selected	g	d	gd	n	use	y	y	5	modify-delete-selected	delete selected rows and move them to clipboard
+Sheet	setcol-subst	g	*	g*	n	use	y	y	4	modify-add-column-regex-transform-foo	regex/subst - replace regex with subst, which may include backreferences (\1 etc)
+Sheet	prev-search		N	N	n	n	n	n		view-find-backward-repeat	move to previous match from last search
+Sheet	searchr-col		?	?	n	n	n	n		view-find-row-curcol-backward	search for regex backwards in current column
+Sheet	save-sheet		^S	^S	n	n	n	y	2,4	sheet-save	save current sheet to filename in format determined by extension (default .tsv)
+Sheet	select-row		s	s	n	change	n	y	2,5	rows-select-current	select current row
+Sheet	cancel-sheet		^C	^C	n	n	n	n		meta-threads-cancel-sheet	abort all threads on current sheet
+Sheet	save-col	z	^S	z^S	n	n	n	y		sheet-save-column	save current column to filename in format determined by extension
+Sheet	unselect-after	gz	u	gzu	n	change	n	y		rows-unselect-from-cursor	unselect all rows from cursor to bottom
+Sheet	stoggle-row		t	t	n	change	n	y		rows-toggle-current	toggle selection of current row
+Sheet	type-int		#	#	n	n	n	y	2	column-type-int	set type of current column to int
+Sheet	go-col-regex		c	c	n	n	n	n		view-go-column-regex	move to the next column with name matching regex
+Sheet	slide-leftmost	g	H	gH	n	n	n	y	5	slide-col-leftmost	slide current column all the way to the left of sheet
+Sheet	reload-row	z	^R	z^R	n	n	unmodifies	y			
+global	toggle-profile		^_	^_	n	n	n	n		meta-threads-profile	turn profiling on for main process
+Sheet	edit-cell		e	e	n	n	y	y	3,4,5	modify-edit-cell	edit contents of current cell
+Sheet	stoggle-after	gz	t	gzt	n	change	n	y		rows-toggle-from-cursor	toggle select rows from cursor to bottom
+Sheet	search-keys		r	r	n	n	n	n		view-go-row-regex	move to the next row with key matching regex
+Sheet	unselect-expr	z	\	z\	n	change	n	y		rows-unselect-expr	unselect rows with a Python expression
+Sheet	slide-left		H	H	n	n	n	y		slide-col-left	slide current column left
+Sheet	go-right		l	l	n	n	n	n	*		
+Sheet	hide-col		-	-	n	n	n	y	2	column-hide	hide current column
+Sheet	slide-top	g	K	gK	n	n	n	y		slide-row-top	slide current row the top of sheet
+Sheet	columns-sheet		C	C	meta	n	n	y	4,5	meta-columns-sheet	open Columns Sheet
+Sheet	resize-col-max		_	_	n	n	n	n	2	column-width-full	adjust width of current column to full
+Sheet	setcol-none	gz	d	gzd	n	use	y	y		modify-clear-column-selected	set contents of cells in current column to None for selected rows
+Sheet	type-any	z	~	z~	n	n	n	y		column-type-any	set type of current column to anytype
+Sheet	slide-right		L	L	n	n	n	y	5	slide-col-right	slide current column right
+Sheet	dup-rows	g	"	g"	derived	use	n	y		sheet-duplicate-all	open duplicate sheet with all rows
+global	exec-longname		^A	^A	n	n	n	n		meta-exec-cmd	execute command by name
+global	columns-all	g	C	gC	meta	n	n	y		meta-columns-all	open Columns Sheet with all columns from all sheets
+Sheet	next-page		^F	^F	n	n	n	n			
+Sheet	go-col-number	z	c	zc	n	n	n	n		view-go-column-number	move to the given column number
+Sheet	capture-col		;	;	n	n	n	y	1,5	modify-add-column-regex-capture	add new column from capture groups of regex; requires example row
+global	show-eval	z	^X	z^X	n	n	n	y		python-eval-status	evaluate Python expression on current row and show result on status line
+global	statuses		^P	^P	static meta	n	n	n		meta-status-history	open Status History
+Sheet	sort-keys-desc	g	]	g]	n	n	n	y		rows-sort-keys-desc	sort descending by all key columns
+Sheet	unselect-rows	g	u	gu	n	change	n	y	2,5	rows-unselect-all	unselect all rows
+global	cancel-all	g	^C	g^C	n	n	n	n		meta-threads-cancel-all	abort all secondary threads
+Sheet	scroll-down	z	j	zj	n	n	n	n			scroll one row down
+Sheet	resize-col-half	z	-	z-	n	n	n	n		column-width-half	reduce width of current column by half
+Sheet	unselect-row		u	u	n	change	n	y		rows-unselect-current	unselect current row
+Sheet	prev-null	z	<	z<	n	n	n	n		view-go-prev-null	move up the current column to the next null value
+Sheet	next-value		>	>	n	n	n	n		view-go-next-value	move down the current column to the next value
+Sheet	slide-bottom	g	J	gJ	n	n	n	y		slide-row-bottom	slide current row to the bottom of sheet
+Sheet	dup-selected		"	"	derived	use	n	y	2	sheet-duplicate-selected	open duplicate sheet with only selected rows
+Sheet	unselect-before	z	u	zu	n	change	n	y		rows-unselect-to-cursor	unselect all rows from top to cursor
+Sheet	rename-cols-row	g	^	g^	n	n	y	y		column-name-all-selected	set names of all visible columns to contents of selected rows (or current row)
+Sheet	expand-col		(	(	n	n	n	y	5	expand_col	expand current column of containers one level
+Sheet	copy-row		y	y	n	n	n	y		data-clipboard-copy-row	copy current row to clipboard
+Sheet	scroll-left	z	h	zh	n	n	n	n			scroll one column left
+Sheet	dive-row		^J	^J	derived	n	n	y			
+global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd file
+Sheet	resize-col	z	_	z_	n	n	n	n		column-width-input	adjust current column width to given number
+Sheet	next-selected		}	}	n	use	n	n	2	view-go-next-selected	move down the current column to the next selected row
+Sheet	key-col-on	g	!	g!	n	n	n	y			
+Sheet	random-rows		R	R	derived	n	n	y		rows-select-random	open duplicate sheet with a random population subset of # rows
+Sheet	copy-selected	g	y	gy	n	use	n	y	4	data-clipboard-copy-selected	copy selected rows to clipboard
+Sheet	freeze-col		'	'	n	n	n	y		column-freeze	add a frozen copy of current column with all cells evaluated
+Sheet	slide-up		K	K	n	n	n	y		slide-row-up	slide current row up
+Sheet	paste-cell	z	p	zp	n	n	y	y		data-clipboard-paste-cell	set contents of current column for current row to last clipboard value
+Sheet	prev-selected		{	{	n	use	n	n	2	view-go-prev-selected	move up the current column to the previous selected row
+Sheet	search-expr	z	/	z/	n	n	n	n			
+Sheet	reload-sheet		^R	^R	n	n	should confirm if modified; marks as unmodified	y	4,5	sheet-reload	reload current sheet
+Sheet	go-top	g	k	gk	n	n	n	n			
+global	quit-all	g	q	gq	quit	n	n	n		sheet-quit-all	quit all sheets (clean exit)
+global	prev-sheet		^^	^^	swap	n	n	n		view-go-sheet-swap	jump to previous sheet (swap with current sheet)
+Sheet	plot-column		.	.	canvas	n	n	y	2,3	data-plot-column	graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determine color
+Sheet	search-cols	g	/	g/	n	n	n	n		view-find-row-viscol-forward	search for regex forwards over all visible columns
+global	suspend		^Z	^Z	suspend	n	n	n			suspend VisiData process
+Sheet	melt-regex	g	M	gM	derived	n	n	y		data-melt-regex	open melted sheet (unpivot), factoring columns
+Sheet	type-float		%	%	n	n	n	y	2,3	column-type-float	set type of current column to float
+Sheet	syscopy-row		Y	Y	n	n	n	n		data-clipboard-copy-system-row	yank (copy) current row to system clipboard
+Sheet	delete-row		d	d	n	n	y	y	1,2,5	modify-delete-row	delete current row and move it to clipboard
+global	pause-replay		^U	^U	n	n	n	n		meta-replay-toggle	pause/resume replay
+global	exec-python	g	^X	g^X	n	n	n	y		python-exec	execute Python statement in the global scope
+Sheet	slide-down		J	J	n	n	n	y		slide-row-down	slide current row down
+Sheet	scroll-middle	z	z	zz	n	n	n	n			scroll current row to center of screen
+Sheet	visibility		v	v	n	n	n	y			
+global	redraw		^L	^L	n	n	n	n			refresh screen
+Sheet	sort-desc		]	]	n	n	n	y		rows-sort-desc	sort descending by current column
+Sheet	prev-page		^B	^B	n	n	n	n			
+Sheet	expand-cols-depth	gz	(	gz(	n	n	n	y		expand_vcols_deep	expand all visible columns of containers to given depth (0=fully)
+Sheet	type-currency		$	$	n	n	n	y	1	column-type-currency	set type of current column to currency
+Sheet	copy-cells	gz	y	gzy	n	use	n	y			
+Sheet	sysopen-row		^O	^O	external	n	y	y	1		
+Sheet	searchr-cols	g	?	g?	n	n	n	n		view-find-row-viscol-backward	search for regex backwards over all visible columns
+global	add-sheet		A	A	new	n	n	y	3	sheet-new	open new blank sheet with N columns
+Sheet	aggregate-numerics	g	+	g+	n	n	n	y			
+global	forget-sheet		Q	Q	quit	n	n	n		sheet-quit-remove	quit current sheet and remove it from the cmdlog
+Sheet	paste-cell-before	z	P	zP	n	n	y	y			
+Sheet	reload-selected	gz	^R	gz^R	n	n	unmodifies	y			
+Sheet	expand-cols	g	(	g(	n	n	n	y		expand_vcols	expand all visible columns of containers one level
+Sheet	stoggle-rows	g	t	gt	n	change	n	y		rows-toggle-all	toggle selection of all rows
+Sheet	contract-col		)	)	n	n	n	y			unexpand current column; restore original column and remove other columns at this level
+Sheet	aggregate-col		+	+	n	n	n	y	5	column-aggregator-add	add aggregator to current column
+Sheet	paste-after		p	p	n	n	y	y	5	data-clipboard-paste-after	paste clipboard rows after current row
+global	stop-replay		^K	^K	n	n	n	n		meta-replay-cancel	cancel current replay
+Sheet	plot-numerics	g	.	g.	canvas	n	n	y		data-plot-allnumeric	open a graph of all visible numeric columns vs key column
+Sheet	dup-rows-deep	gz	"	gz"	copy	use	n	y		sheet-duplicate-deepcopy	open duplicate sheet with deepcopy of all rows
+Sheet	addcol-expr		=	=	n	n	y	y	1,3,5	modify-add-column-expr	create new column from Python expression, with column names as variables
+Sheet	edit-cells	g	e	ge	n	use	y	y	4,5	modify-edit-column-selected	set contents of current column for selected rows to same input
+Sheet	melt		M	M	derived	n	n	y	1,5	data-melt	open melted sheet (unpivot)
+global	quit-sheet		q	q	quit	n	n	y	*	sheet-quit-current	quit current sheet
+Sheet	syscopy-selected	g	Y	gY	n	use	n	n		data-clipboard-copy-system-selected	yank (copy) selected rows to system clipboard
+Sheet	copy-cell	z	y	zy	n	n	n	y		data-clipboard-copy-cell	copy current cell to clipboard
+Sheet	setcol-range	gz	=	gz=	n	use	y	y	3	modify-set-column-sequence	set current column for selected rows to the items in result of Python sequence expression
+Sheet	select-before	z	s	zs	n	change	n	y		rows-select-to-cursor	select all rows from top to cursor
+Sheet	paste-before		P	P	n	n	y	y		data-clipboard-paste-before	paste clipboard rows before current row
+global	cmdlog		D	D	meta	n	n	n	3	meta-cmdlog	open CommandLog
+Sheet	pyobj-row		^Y	^Y	meta	n	n	y		python-push-row-object	open current row as Python object
+Sheet	resize-cols-max	g	_	g_	n	n	n	n		column-width-all-full	adjust width of all visible columns to full
+Sheet	scroll-up	z	k	zk	n	n	n	n			scroll one row up
+Sheet	remove-col	g	-	g-	n	n	n	y		delete-column-really	remove column permanently from the list of columns
+Sheet	rename-col-cell	z	^	z^	n	n	y	y		column-name-cell	set name of current column to current cell
+Sheet	describe-all	g	I	gI	derived	n	n	y		data-describe-all	open descriptive statistics for all visible columns on all sheets
+Sheet	sysopen-cell	z	^O	z^O	external	n	y	y			
+Sheet	rename-cols-selected	gz	^	gz^	n	use	y	y		column-name-selected	set current column name to combined contents of current cell in selected rows (or current row)
+Sheet	commands-sheet	g	^H	g^H	static	n	n	n			
+Sheet	type-string		~	~	n	n	n	y	1	column-type-str	set type of current column to str
+Sheet	fill-nulls		f	f	n	n	y	y		modify-fill-column	fills null cells in current column with contents of non-null cells up the current column
+Sheet	add-rows	g	a	ga	n	n	y	y	3	modify-add-row-many	add N blank rows
+Sheet	next-search		n	n	n	n	n	n	2	view-find-forward-repeat	move to next match from last search
+global	reload-all	g	^R	g^R	n	n		y			
+Sheet	addcol-subst		*	*	n	n	y	y	5	modify-add-column-regex-transform	regex/subst - replace regex with subst, which may include backreferences (\1 etc)
+Sheet	split-col		:	:	n	n	n	y	1	modify-add-column-regex-split	add new columns from regex split; # columns determined by example row at cursor
+global	menu		SPACE	SPACE	modal	n	n	n	3		
+global	advance-replay		^I	^I	n	n	n	n		meta-replay-step	execute next row in replaying sheet
+global	sheets-graveyard	g	S	gS	static meta	n	n	y		sheets-graveyard	open Sheets Graveyard
+global	options		O	O	meta static	n	n	n		meta-options	open Options
+global	open-file		o	o	y	n	n	y		sheet-open-path	open input in VisiData
+global	errors-all	g	^E	g^E	meta	n	n	n		info-errors-all	view traceback for most recent errors
+Sheet	dup-selected-deep	z	"	z"	copy	use	n	y		sheet-duplicate-deepcopy-selected	open duplicate sheet with deepcopy of selected rows
+Sheet	syscopy-cell	z	Y	zY	n	n	n	n		data-clipboard-copy-system-cell	yank (copy) current cell to system clipboard
+Sheet	scroll-right	z	l	zl	n	n	n	n			scroll one column right
+Sheet	freeze-sheet	g	'	g'	copy	n	n	y		sheet-freeze	open a frozen copy of current sheet with all visible columns evaluated
+Sheet	show-cursor		^G	^G	n	n	n	n		info-sheet	show cursor position and bounds of current sheet on status line
+Sheet	go-row-number	z	r	zr	n	n	n	n		view-go-row-number	move to the given row number
+Sheet	freq-keys	g	F	gF	derived	n	n	y	2	data-aggregate-keys	open Frequency Table grouped by all key columns on the source sheet
+Sheet	select-equal-cell		,	,	n	change	n	y	4,5	rows-select-like-cell	select rows matching current cell in current column
+Sheet	setcol-expr	g	=	g=	n	use	y	y	3,5	modify-set-column-selected-expr	set current column for selected rows to result of Python expression
+Sheet	freq-col		F	F	derived	n	n	y		data-aggregate-column	open Frequency Table grouped on current column
+Sheet	stoggle-before	z	t	zt	n	change	n	y		rows-toggle-to-cursor	toggle select rows from top to cursor
+Sheet	show-aggregate	z	+	z+	n	n	n	y	1	column-aggregator-show	display result of aggregator over all values in current column
+Sheet	unhide-cols	g	v	gv	n	n	n	y		column-unhide-all	unhide all columns
+Sheet	go-down		j	j	n	n	n	n	*		
+Sheet	dive-cell	z	^J	z^J	derived	n	n	y			
+Sheet	slide-rightmost	g	L	gL	n	n	n	y		slide-col-rightmost	slide current column all the way to the right of sheet
+Sheet	pivot		W	W	derived	n	n	y	5	data-pivot	Pivot the current column into a new sheet
+Sheet	next-null	z	>	z>	n	n	n	n		view-go-next-null	move down the current column to the next null value
+Sheet	show-expr	z	=	z=	n	n	n	y		python-eval-row	set current cell to result of evaluated Python expression on current row
+Sheet	sort-asc		[	[	n	n	n	y		rows-sort-asc	sort ascending by current column
+Sheet	select-col-regex		|	|	n	change	n	y	4	rows-select-regex	select rows matching regex in current column
+global	pyobj-eval		^X	^X	y	n	n	y		python-eval-push	evaluate Python expression and open result as Python object
+Canvas				BUTTON4_PRESSED							zoom in with scroll wheel
+Canvas				gu							unselect rows on source sheet visible on screen
+Canvas				zz							set visible bounds to cursor
+Canvas				^J							open sheet of source rows contained within canvas cursor
+Canvas				BUTTON1_RELEASED							end cursor box with left mouse button release
+Canvas				d							delete rows on source sheet contained within canvas cursor
+Canvas				gd							delete rows on source sheet visible on screen
+Canvas				REPORT_MOUSE_POSITION							zoom out with scroll wheel
+Canvas				BUTTON1_PRESSED							start cursor box with left mouse button press
+Canvas				BUTTON3_PRESSED							mark grid point to move
+Canvas				s							select rows on source sheet contained within canvas cursor
+Canvas				g^J							open sheet of source rows visible on screen
+Canvas				gt							toggle selection of rows on source sheet visible on screen
+Canvas				v							toggle show_graph_labels
+Canvas				-							zoom out from cursor center
+Canvas				BUTTON3_RELEASED							mark canvas anchor point
+Canvas				+							zoom into cursor center
+Canvas				u							unselect rows on source sheet contained within canvas cursor
+Canvas				t							toggle selection of rows on source sheet contained within canvas cursor
+Canvas				z_							set aspect ratio
+Canvas				gs							select rows on source sheet visible on screen
+Canvas				^L							redraw all pixels on canvas
+Canvas				_							zoom to fit full extent
+				BUTTON1_PRESSED						view-go-mouse-row	
+				zL						slide-col-right-n	slide current column right n
+				BUTTON4_PRESSED						view-scroll-up	move scroll_incr forward
+				zH						slide-col-left-n	slide current column left n
+				gzp						data-clipboard-paste-selected	set contents of current column for selected rows to last clipboard value
+				z^R							clear cache for current column
+				 							start menu command
+				zKEY_F(1)						meta-commands	view sheet of commands and keybindings
+				BUTTON1_RELEASED						view-scroll-mouse-row	
+				REPORT_MOUSE_POSITION						view-scroll-down	move scroll_incr backward
+				zF						data-aggregate-summary	open one-line summary for all selected rows
+				zJ						slide-row-down-n	slide current row down n
+				zK						slide-row-up-n	slide current row up n
+Sheet	setcell-none	z	d	zd	n	n	y	y		modify-clear-cell	set contents of current cell to None
+global	sysopen-help		^H	^H	external	n	n	n			
+Sheet	prev-value		<	<	n	n	n	n		view-go-prev-value	move up the current column to the next value
+Sheet	select-cols-regex	g	|	g|	n	change	n	y		rows-select-regex-all	select rows matching regex in any visible column
+Sheet	transpose		T	T	derived	n	n	y		data-transpose	open new sheet with rows and columns transposed
+Sheet	select-expr	z	|	z|	n	change	n	y		rows-select-expr	select rows with a Python expression
+global	sheets		S	S	static meta	n	n	y		meta-sheets	open Sheets Sheet
+Sheet	select-rows	g	s	gs	n	change	n	y	5	rows-select-all	select all rows
+global	errors-recent		^E	^E	meta	n	n	n		errors-recent	view traceback for most recent error
+Sheet	view-cell		V	V	derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
+Sheet	cache-col	z	'	z'	n	n	n	y		column-cache-clear	add/reset cache for current column
+Sheet	key-col		!	!	n	n	n	y	2,3,5	column-key-toggle	toggle current column as a key column
+Sheet	select-after	gz	s	gzs	n	change	n	y		rows-select-from-cursor	select all rows from cursor to bottom
+Sheet	search-col		/	/	n	n	n	n	2	view-find-row-curcol-forward	search for regex forwards in current column
+Sheet	pyobj-cell	z	^Y	z^Y	meta	n	n	y		python-push-cell-object	open current cell as Python object
+Sheet	unselect-col-regex		\	\	n	change	n	y	5	rows-unselect-regex	unselect rows matching regex in current column
+Sheet	key-col-off	z	!	z!	n	n	n	y		column-key-unset	unset current column as a key column
+Sheet	go-leftmost	g	h	gh	n	n	n	n		view-go-far-left	move all the way to the left
+Sheet	select-equal-row	g	,	g,	n	change	n	y		rows-select-like-row	select rows matching current row in all visible columns
