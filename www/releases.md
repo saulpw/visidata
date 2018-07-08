@@ -1,3 +1,10 @@
+# [v1.2.1](https://github.com/saulpw/visidata/releases/tag/v1.2.1) (2018-07-06)
+
+@deinspanjer (issue [#164](https://github.com/saulpw/visidata/issues/164)) discovered that VisiData doesn't work with Python3.7 due to our use of the 'async' identifier, which is now off-limits as it is a formal keyword as of 3.7. The only change in 1.2.1 is changing 'async' to 'asyncthread' in order to work with Python 3.7.
+
+Thanks to the illustrious @anjakefala for getting this release out quickly and without incident (knock on wood).
+
+
 # [v1.2](https://github.com/saulpw/visidata/releases/tag/v1.2) (2018-05-02)
 
 Here are the major feature enhancements for v1.2.  Please see the [CHANGELOG](https://github.com/saulpw/visidata/blob/stable/CHANGELOG.md) for the complete list.
