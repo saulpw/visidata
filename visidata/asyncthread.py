@@ -10,10 +10,10 @@ min_thread_time_s = 0.10 # only keep threads that take longer than this number o
 option('profile', '', 'filename to save binary profiling data')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
-globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet', 'meta-threads-cancel-sheet')
-globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary threads', 'meta-threads-cancel-all')
-globalCommand('^T', 'vd.push(vd.threadsSheet)', 'open Threads Sheet', 'meta-threads')
-globalCommand('^_', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process', 'meta-threads-profile')
+globalCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))')
+globalCommand('g^C', 'cancel-all' 'cancelThread(*vd.threads or error("no threads"))')
+globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)')
+globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())')
 
 class ProfileSheet(TextSheet):
     commands = TextSheet.commands + [
