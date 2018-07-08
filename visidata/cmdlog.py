@@ -10,14 +10,14 @@ option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
-globalCommand('gD', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))', 'open .visidata directory', 'meta-visidata-dir')
-globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'meta-cmdlog')
-globalCommand('^D', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)', 'save CommandLog to new .vd file', 'meta-cmdlog-save')
-globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'meta-replay-toggle')
-globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'meta-replay-step')
-globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'meta-replay-cancel')
+globalCommand('gD', 'visidata-dir', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))')
+globalCommand('D', 'cmdlog', 'vd.push(vd.cmdlog)')
+globalCommand('^D', 'save-cmdlog', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)')
+globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
+globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or error("no replay to advance")).advance()')
+globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()')
 
-globalCommand('Q', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))', 'quit current sheet and remove it from the cmdlog', 'sheet-quit-remove')
+globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
 
 globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
 
