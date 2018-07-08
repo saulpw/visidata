@@ -11,10 +11,10 @@ globalCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); push_pyobj("%s[%s]" %
 globalCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)')
 globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)')
 
-Sheet.Command('(', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)', 'expand current column of containers one level', 'expand_col')
-Sheet.Command('g(', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)', 'expand all visible columns of containers one level', 'expand_vcols')
-Sheet.Command('z(', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))', 'expand current column of containers to given depth (0=fully)', 'expand_col_deep')
-Sheet.Command('gz(', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)', 'expand_vcols_deep')
+Sheet.Command('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)')
+Sheet.Command('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)')
+Sheet.Command('z(', 'expand-cols', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))')
+Sheet.Command('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))')
 
 globalCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)')
 
