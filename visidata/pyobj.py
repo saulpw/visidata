@@ -3,20 +3,20 @@ from visidata import *
 option('pyobj_show_hidden', False, 'show _private properties on pyobjs')
 option('pyobj_show_methods', False, 'show methods on pyobjs')
 
-globalCommand('^X', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, cursorRow))', 'evaluate Python expression and open result as Python object', 'python-eval-push')
-globalCommand('g^X', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope', 'python-exec')
-globalCommand('z^X', 'status(evalexpr(inputExpr("status="), cursorRow))', 'evaluate Python expression on current row and show result on status line', 'python-eval-status')
+globalCommand('^X', 'pyobj-eval', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, cursorRow))')
+globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())')
+globalCommand('z^X', 'show-eval', 'status(evalexpr(inputExpr("status="), cursorRow))')
 
-globalCommand('^Y', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name, cursorRowIndex), cursorRow)', 'open current row as Python object', 'python-push-row-object')
-globalCommand('z^Y', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object', 'python-push-cell-object')
-globalCommand('g^Y', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object', 'python-push-sheet-object')
+globalCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name, cursorRowIndex), cursorRow)')
+globalCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)')
+globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)')
 
 Sheet.Command('(', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)', 'expand current column of containers one level', 'expand_col')
 Sheet.Command('g(', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)', 'expand all visible columns of containers one level', 'expand_vcols')
 Sheet.Command('z(', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))', 'expand current column of containers to given depth (0=fully)', 'expand_col_deep')
 Sheet.Command('gz(', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)', 'expand_vcols_deep')
 
-globalCommand(')', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
+globalCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)')
 
 # used as ENTER in several pyobj sheets
 globalCommand('', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex', 'dive further into Python object', 'python-dive-row')
