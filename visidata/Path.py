@@ -154,7 +154,7 @@ class PathFd(Path):
 class RepeatFile:
     def __init__(self, pathfd):
         self.pathfd = pathfd
-        self.iter = None
+        self.iter = RepeatFileIter(self)
 
     def __enter__(self):
         self.iter = RepeatFileIter(self)

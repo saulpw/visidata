@@ -1,11 +1,8 @@
 from visidata import *
 
-import re
-
-
 def open_xml(p):
     from lxml import etree, objectify
-    root = etree.parse(p.resolve())
+    root = etree.parse(p.open_text())
     objectify.deannotate(root, cleanup_namespaces=True)
     return XmlSheet(p.name, source=root)
 open_svg = open_xml
@@ -13,7 +10,6 @@ open_svg = open_xml
 
 @asyncthread
 def save_xml(p, vs):
-    from lxml import etree, objectify
     vs.source.write(p.resolve(), encoding=options.encoding, standalone=False, pretty_print=True)
 save_svg = save_xml
 
