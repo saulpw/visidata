@@ -3,6 +3,7 @@
 
 from .vdtui import __version__, __version_info__
 from .vdtui import *
+from .errors import *
 from .Path import *
 from .urlcache import *
 from .zscroll import *
