@@ -229,3 +229,4 @@ Canvas				_							zoom to fit full extent
 				zF						data-aggregate-summary	open one-line summary for all selected rows
 				zJ						slide-row-down-n	slide current row down n
 				zK						slide-row-up-n	slide current row up n
+	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
