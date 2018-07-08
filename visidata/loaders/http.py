@@ -13,8 +13,7 @@ def openurl_http(p, filetype=None):
     r = requests.get(p.url, stream=True)
     if not filetype:
         contenttype = r.headers['content-type']
-        if 'html' in contenttype:
-            filetype = 'html'
+        filetype = contenttype.split(';')[0].split('/')[-1]
     return openSource(HttpPath(p.url, r.iter_lines(decode_unicode=True)), filetype=filetype)
 
 openurl_https = openurl_http
