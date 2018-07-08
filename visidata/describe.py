@@ -5,10 +5,10 @@ from visidata import *
 max_threads = 2
 
 Sheet.commands += [
-    Command('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet], sourceRows=selectedRows or rows))', 'open descriptive statistics for all visible columns', 'data-describe')
+    Command('I', 'describe', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet], sourceRows=selectedRows or rows))')
 ]
 
-globalCommand('gI', 'vd.push(DescribeSheet("describe_all", source=vd.sheets, sourceRows=selectedRows or rows))', 'open descriptive statistics for all visible columns on all sheets', 'data-describe-all')
+globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets, sourceRows=selectedRows or rows))')
 
 def isNumeric(col):
     return col.type in (int,float,currency,date)
