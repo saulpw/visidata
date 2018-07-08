@@ -218,15 +218,15 @@ Canvas				gs							select rows on source sheet visible on screen
 Canvas				^L							redraw all pixels on canvas
 Canvas				_							zoom to fit full extent
 				BUTTON1_PRESSED						view-go-mouse-row	
-				zL						slide-col-right-n	slide current column right n
 				BUTTON4_PRESSED						view-scroll-up	move scroll_incr forward
-				zH						slide-col-left-n	slide current column left n
 				z^R							clear cache for current column
 				 							start menu command
 				zKEY_F(1)						meta-commands	view sheet of commands and keybindings
 				BUTTON1_RELEASED						view-scroll-mouse-row	
 				REPORT_MOUSE_POSITION						view-scroll-down	move scroll_incr backward
 				zF						data-aggregate-summary	open one-line summary for all selected rows
-				zJ						slide-row-down-n	slide current row down n
-				zK						slide-row-up-n	slide current row up n
 	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
+	slide-down-n	z	J	zJ						slide-row-down-n	slide current row down n
+	slide-left-n	z	H	zH						slide-col-left-n	slide current column left n
+	slide-right-n	z	L	zL						slide-col-right-n	slide current column right n
+	slide-up-n	z	K	zK						slide-row-up-n	slide current row up n
