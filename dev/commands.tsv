@@ -5,7 +5,7 @@ global	cancel-all	g	^C	g^C	n	n	n	n		meta-threads-cancel-all	abort all secondary 
 global	cmdlog		D	D	meta	n	n	n	3	meta-cmdlog	open CommandLog
 global	columns-all	g	C	gC	meta	n	n	y		meta-columns-all	open Columns Sheet with all columns from all sheets
 global	errors-all	g	^E	g^E	meta	n	n	n		info-errors-all	view traceback for most recent errors
-global	errors-recent		^E	^E	meta	n	n	n		errors-recent	view traceback for most recent error
+global	error-recent		^E	^E	meta	n	n	n		errors-recent	view traceback for most recent error
 global	exec-longname		^A	^A	n	n	n	n		meta-exec-cmd	execute command by name
 global	exec-python	g	^X	g^X	n	n	n	y		python-exec	execute Python statement in the global scope
 global	forget-sheet		Q	Q	quit	n	n	n		sheet-quit-remove	quit current sheet and remove it from the cmdlog
