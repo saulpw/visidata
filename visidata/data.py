@@ -18,20 +18,20 @@ replayableOption('tsv_safe_tab', '\u001f', 'replacement for newline character wh
 option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
 option('color_delete_pending', 'red', 'color for files pending delete')
 
-globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)', 'move to the next column with name matching regex', 'view-go-column-regex')
-globalCommand('r', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'move to the next row with key matching regex', 'view-go-row-regex')
-globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'move to the given column number', 'view-go-column-number')
-globalCommand('zr', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'move to the given row number', 'view-go-row-number')
+globalCommand('c', 'go-column-regex', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)')
+globalCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp')
+globalCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))')
+globalCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))')
 
-globalCommand('R', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows', 'rows-select-random')
+globalCommand('R', 'random-rows', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)')
 
-globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'insert a blank row', 'modify-add-row-blank')
-globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows', 'modify-add-row-many')
-globalCommand('za', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)', 'add an empty column', 'modify-add-column-blank')
+globalCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)')
+globalCommand('ga', 'add-rows', 'for r in range(int(input("add rows: "))): addRow(newRow())')
+globalCommand('za', 'addcol-new', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)')
 
-globalCommand('gza', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)', 'add N empty columns', 'modify-add-column-manyblank')
+globalCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)')
 
-globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with contents of non-null cells up the current column', 'modify-fill-column')
+globalCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows or rows)')
 
 alias('KEY_SLEFT', 'modify-move-column-left')
 alias('KEY_SR', 'modify-move-column-left')
@@ -84,28 +84,28 @@ def updateColNames(sheet, rows):
         if not c._name:
             c.name = "_".join(c.getDisplayValue(r) for r in rows)
 
-globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set name of current column to current cell', 'column-name-cell')
-globalCommand('g^', 'updateColNames(sheet, selectedRows or [cursorRow])', 'set names of all visible columns to contents of selected rows (or current row)', 'column-name-all-selected')
-globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined contents of current cell in selected rows (or current row)', 'column-name-selected')
+globalCommand('z^', 'rename-col-cell', 'sheet.cursorCol.name = cursorDisplay')
+globalCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow])')
+globalCommand('gz^', 'rename-cols-selected', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ')
 # gz^ with no selectedRows is same as z^
 
-globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData', 'sheet-open-path')
-globalCommand('^S', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
-globalCommand('g^S', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)', 'sheet-save-all')
-globalCommand('z^S', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputFilename("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)', 'save current column to filename in format determined by extension', 'sheet-save-column')
+globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))')
+globalCommand('^S', 'save-sheet', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
+globalCommand('g^S', 'save-all', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
+globalCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputFilename("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)')
 
-globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))', 'set current cell to result of evaluated Python expression on current row', 'python-eval-row')
+globalCommand('z=', 'show-expr', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))')
 
-globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)', 'set current column for selected rows to the items in result of Python sequence expression', 'modify-set-column-sequence')
+globalCommand('gz=', 'setcol-range', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)')
 
-globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with N columns', 'sheet-new')
+globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: "))))')
 
 
-globalCommand('gKEY_F(1)', 'info-commands')  # vdtui generic commands sheet
-globalCommand('gz?', 'info-commands')  # vdtui generic commands sheet
+globalCommand('gKEY_F(1)', 'commands-sheet')  # vdtui generic commands sheet
+globalCommand('gz?', 'commands-sheet')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
-globalCommand('z?', 'openManPage()', 'launch VisiData manpage', 'info-manpage')
+globalCommand('z?', 'sysopen-help', 'openManPage()')
 globalCommand('KEY_F(1)', 'z?')
 
 def openManPage():
