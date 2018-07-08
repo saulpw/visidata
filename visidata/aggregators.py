@@ -4,8 +4,8 @@ import collections
 
 from visidata import *
 
-globalCommand('+', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))', 'add aggregator to current column', 'column-aggregator-add')
-globalCommand('z+', 'status(cursorCol.format(chooseOne(aggregators)(cursorCol, rows)))', 'display result of aggregator over all values in current column', 'column-aggregator-show')
+globalCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
+globalCommand('z+', 'show-aggregate', 'status(cursorCol.format(chooseOne(aggregators)(cursorCol, rows)))')
 
 aggregators = collections.OrderedDict()
 
