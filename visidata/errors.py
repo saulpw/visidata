@@ -1,10 +1,10 @@
 from visidata import globalCommand, Sheet, TextSheet, vd, error, stacktrace, Command
 
 
-globalCommand('^E', 'error-recent', 'vd.lastErrors and vd.push(ErrorSheet("last_error", vd.lastErrors[-1])) or error("no error")')
-globalCommand('g^E', 'errors-all', 'vd.push(ErrorSheet("last_errors", sum(vd.lastErrors[-10:], [])))')
+globalCommand('error-recent', '^E', 'vd.lastErrors and vd.push(ErrorSheet("last_error", vd.lastErrors[-1])) or error("no error")')
+globalCommand('errors-all', 'g^E', 'vd.push(ErrorSheet("last_errors", sum(vd.lastErrors[-10:], [])))')
 
-Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet("cell_error", getattr(cursorCell, "error", None) or error("no error this cell")))')
+Sheet.addCommand('error-cell', 'z^E', 'vd.push(ErrorSheet("cell_error", getattr(cursorCell, "error", None) or error("no error this cell")))')
 
 
 class ErrorSheet(TextSheet):

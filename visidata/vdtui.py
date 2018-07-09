@@ -220,21 +220,21 @@ theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
 ENTER='^J'
 ESC='^['
-globalCommand('no-op', 'KEY_RESIZE', '')
-globalCommand('quit-sheet', 'q',  'vd.sheets[1:] or confirm("quit last sheet? "); vd.sheets.pop(0)')
-globalCommand('quit-all', 'gq', 'vd.sheets.clear()')
+globalCommand('KEY_RESIZE', 'no-op', '')
+globalCommand('q', 'quit-sheet',  'vd.sheets[1:] or confirm("quit last sheet? "); vd.sheets.pop(0)')
+globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
-globalCommand('redraw', '^L', 'vd.scr.clear()')
-globalCommand('show-version', '^V', 'status(__version_info__); status(__copyright__)')
-globalCommand('statuses', '^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))')
+globalCommand('^L', 'redraw', 'vd.scr.clear()')
+globalCommand('^V', 'show-version', 'status(__version_info__); status(__copyright__)')
+globalCommand('^P', 'statuses', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))')
 
-globalCommand('reload-sheet', '^R', 'reload(); status("reloaded")')
+globalCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
 
-globalCommand('swap-sheet', '^^', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
+globalCommand('^^', 'swap-sheet', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
-globalCommand('suspend', '^Z', 'suspend()')
+globalCommand('^Z', 'suspend', 'suspend()')
 
-globalCommand('exec-longname', '^A', 'exec_keystrokes(input_longname(sheet))')
+globalCommand('^A', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
 def input_longname(sheet):
     longnames = [
@@ -1655,82 +1655,82 @@ class Sheet(BaseSheet):
 
         return r
 
-Sheet.addCommand('go-left', 'KEY_LEFT',  'cursorRight(-1)'),
-Sheet.addCommand('go-down', 'KEY_DOWN',  'cursorDown(+1)'),
-Sheet.addCommand('go-up', 'KEY_UP',    'cursorDown(-1)'),
-Sheet.addCommand('go-right', 'KEY_RIGHT', 'cursorRight(+1)'),
-Sheet.addCommand('next-page', 'KEY_NPAGE', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
-Sheet.addCommand('prev-page', 'KEY_PPAGE', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
+Sheet.addCommand('KEY_LEFT', 'go-left',  'cursorRight(-1)'),
+Sheet.addCommand('KEY_DOWN', 'go-down',  'cursorDown(+1)'),
+Sheet.addCommand('KEY_UP', 'go-up',    'cursorDown(-1)'),
+Sheet.addCommand('KEY_RIGHT', 'go-right', 'cursorRight(+1)'),
+Sheet.addCommand('KEY_NPAGE', 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
+Sheet.addCommand('KEY_PPAGE', 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
 
-Sheet.addCommand('go-leftmost', 'gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
-Sheet.addCommand('go-top', 'KEY_HOME', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
-Sheet.addCommand('go-bottom', 'KEY_END', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
-Sheet.addCommand('go-rightmost', 'gl', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
+Sheet.addCommand('gh', 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
+Sheet.addCommand('KEY_HOME', 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
+Sheet.addCommand('KEY_END', 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
+Sheet.addCommand('gl', 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
 
-Sheet.addCommand('go-mouse', 'BUTTON1_PRESSED', 'sheet.cursorRowIndex=topRowIndex+mouseY-1'),
-Sheet.addCommand('scroll-mouse', 'BUTTON1_RELEASED', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
-Sheet.addCommand('scroll-up', 'BUTTON4_PRESSED', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
-Sheet.addCommand('scroll-down', 'REPORT_MOUSE_POSITION', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
+Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=topRowIndex+mouseY-1'),
+Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
+Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
+Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
 
-Sheet.addCommand('show-cursor', '^G', 'status(statusLine)'),
+Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 
-Sheet.addCommand('prev-value', '<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")'),
-Sheet.addCommand('next-value', '>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")'),
-Sheet.addCommand('prev-selected', '{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
-Sheet.addCommand('next-selected', '}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
+Sheet.addCommand('<', 'prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")'),
+Sheet.addCommand('>', 'next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")'),
+Sheet.addCommand('{', 'prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
+Sheet.addCommand('}', 'next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
 
-Sheet.addCommand('prev-null', 'z<', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
-Sheet.addCommand('next-null', 'z>', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
+Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
+Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
 
-Sheet.addCommand('resize-col-max', '_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
-Sheet.addCommand('resize-col', 'z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))'),
+Sheet.addCommand('_', 'resize-col-max', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
+Sheet.addCommand('z_', 'resize-col', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))'),
 
-Sheet.addCommand('hide-col', '-', 'cursorCol.hide()'),
-Sheet.addCommand('resize-col-half', 'z-', 'cursorCol.width = cursorCol.width//2'),
-Sheet.addCommand('unhide-cols', 'gv', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)'),
+Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()'),
+Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.width = cursorCol.width//2'),
+Sheet.addCommand('gv', 'unhide-cols', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)'),
 
-Sheet.addCommand('key-col', '!', 'toggleKeyColumn(cursorCol)'),
-Sheet.addCommand('key-col-off', 'z!', 'keyCols.remove(cursorCol)'),
-Sheet.addCommand('type-any', 'z~', 'cursorCol.type = anytype'),
-Sheet.addCommand('type-string', '~', 'cursorCol.type = str'),
-Sheet.addCommand('type-date', '@', 'cursorCol.type = date'),
-Sheet.addCommand('type-int', '#', 'cursorCol.type = int'),
-Sheet.addCommand('type-currency', '$', 'cursorCol.type = currency'),
-Sheet.addCommand('type-float', '%', 'cursorCol.type = float'),
-Sheet.addCommand('renmae-col', '^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
+Sheet.addCommand('!', 'key-col', 'toggleKeyColumn(cursorCol)'),
+Sheet.addCommand('z!', 'key-col-off', 'keyCols.remove(cursorCol)'),
+Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype'),
+Sheet.addCommand('~', 'type-string', 'cursorCol.type = str'),
+Sheet.addCommand('@', 'type-date', 'cursorCol.type = date'),
+Sheet.addCommand('#', 'type-int', 'cursorCol.type = int'),
+Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency'),
+Sheet.addCommand('%', 'type-float', 'cursorCol.type = float'),
+Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
 
-Sheet.addCommand('resize-cols-max', 'g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
+Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
 
-Sheet.addCommand('sort-asc', '[', 'orderBy(cursorCol)'),
-Sheet.addCommand('sort-desc', ']', 'orderBy(cursorCol, reverse=True)'),
-Sheet.addCommand('sort-keys-asc', 'g[', 'orderBy(*keyCols)'),
-Sheet.addCommand('sort-keys-desc', 'g]', 'orderBy(*keyCols, reverse=True)'),
+Sheet.addCommand('[', 'sort-asc', 'orderBy(cursorCol)'),
+Sheet.addCommand(']', 'sort-desc', 'orderBy(cursorCol, reverse=True)'),
+Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(*keyCols)'),
+Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(*keyCols, reverse=True)'),
 
-Sheet.addCommand('reload-sheet', '^R', 'reload(); recalc(); status("reloaded")'),
-Sheet.addCommand('cache-col', "z'", 'cursorCol._cachedValues.clear()'),
+Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
+Sheet.addCommand("z'", 'cache-col', 'cursorCol._cachedValues.clear()'),
 
-Sheet.addCommand('search-col', '/', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)'),
-Sheet.addCommand('searchr-col', '?', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)'),
-Sheet.addCommand('next-search', 'n', 'moveRegex(sheet, reverse=False)'),
-Sheet.addCommand('prev-search', 'N', 'moveRegex(sheet, reverse=True)'),
+Sheet.addCommand('/', 'search-col', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)'),
+Sheet.addCommand('?', 'searchr-col', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)'),
+Sheet.addCommand('n', 'next-search', 'moveRegex(sheet, reverse=False)'),
+Sheet.addCommand('N', 'prev-search', 'moveRegex(sheet, reverse=True)'),
 
-Sheet.addCommand('search-cols', 'g/', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")'),
-Sheet.addCommand('searchr-cols', 'g?', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")'),
+Sheet.addCommand('g/', 'search-cols', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")'),
+Sheet.addCommand('g?', 'searchr-cols', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")'),
 
-Sheet.addCommand('edit-cell', 'e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)'),
-Sheet.addCommand('edit-cells', 'ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
-Sheet.addCommand('setcell-none', 'zd', 'cursorCol.setValues([cursorRow], None)'),
-Sheet.addCommand('setcol-none', 'gzd', 'cursorCol.setValues(selectedRows, None)'),
+Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)'),
+Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
+Sheet.addCommand('zd', 'setcell-none', 'cursorCol.setValues([cursorRow], None)'),
+Sheet.addCommand('gzd', 'setcol-none', 'cursorCol.setValues(selectedRows, None)'),
 
-Sheet.addCommand('dup-selected', '"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)'),
-Sheet.addCommand('dup-rows', 'g"', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),
-Sheet.addCommand('dup-selected-deep', 'z"', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
-Sheet.addCommand('dup-rows-deep', 'gz"', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
+Sheet.addCommand('"', 'dup-selected', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)'),
+Sheet.addCommand('g"', 'dup-rows', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),
+Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
+Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
 
-Sheet.addCommand('addcol-expr', '=', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)'),
-Sheet.addCommand('setcol-expr', 'g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))'),
+Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)'),
+Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))'),
 
-Sheet.addCommand('view-cell', 'V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))'),
+Sheet.addCommand('V', 'view-cell', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))'),
 
 
 def isNullFunc():
@@ -2155,7 +2155,7 @@ class TextSheet(Sheet):
             else:
                 self.addRow((len(self.rows), text))
 
-TextSheet.addCommand('visibility', 'v', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()')
+TextSheet.addCommand('v', 'visibility', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()')
 
 ### Curses helpers
 
