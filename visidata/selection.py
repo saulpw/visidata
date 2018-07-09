@@ -1,30 +1,27 @@
-from visidata import Sheet, Command
+from visidata import Sheet
 
-Sheet.commands.extend([
-Command('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)'),
-Command('s', 'select-row', 'select([cursorRow]); cursorDown(1)'),
-Command('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)'),
+Sheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)'),
+Sheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)'),
+Sheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)'),
 
-Command('gt', 'toggle-rows', 'toggle(rows)'),
-Command('gs', 'select-rows', 'select(rows)'),
-Command('gu', 'unselect-rows', '_selectedRows.clear()'),
+Sheet.addCommand('gt', 'toggle-rows', 'toggle(rows)'),
+Sheet.addCommand('gs', 'select-rows', 'select(rows)'),
+Sheet.addCommand('gu', 'unselect-rows', '_selectedRows.clear()'),
 
-Command('zt', 'stoggle-before', 'toggle(rows[:cursorRowIndex])'),
-Command('zs', 'select-before', 'select(rows[:cursorRowIndex])'),
-Command('zu', 'unselect-before', 'unselect(rows[:cursorRowIndex])'),
-Command('gzt', 'stoggle-after', 'toggle(rows[cursorRowIndex:])'),
-Command('gzs', 'select-after', 'select(rows[cursorRowIndex:])'),
-Command('gzu', 'unselect-after', 'unselect(rows[cursorRowIndex:])'),
+Sheet.addCommand('zt', 'stoggle-before', 'toggle(rows[:cursorRowIndex])'),
+Sheet.addCommand('zs', 'select-before', 'select(rows[:cursorRowIndex])'),
+Sheet.addCommand('zu', 'unselect-before', 'unselect(rows[:cursorRowIndex])'),
+Sheet.addCommand('gzt', 'stoggle-after', 'toggle(rows[cursorRowIndex:])'),
+Sheet.addCommand('gzs', 'select-after', 'select(rows[cursorRowIndex:])'),
+Sheet.addCommand('gzu', 'unselect-after', 'unselect(rows[cursorRowIndex:])'),
 
-Command('|', 'select-col-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex", defaultLast=True), columns="cursorCol"))'),
-Command('\\', 'unselect-col-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex", defaultLast=True), columns="cursorCol"))'),
-Command('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex", defaultLast=True), columns="visibleCols"))'),
-Command('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex", defaultLast=True), columns="visibleCols"))'),
+Sheet.addCommand('|', 'select-col-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex", defaultLast=True), columns="cursorCol"))'),
+Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex", defaultLast=True), columns="cursorCol"))'),
+Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex", defaultLast=True), columns="visibleCols"))'),
+Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex", defaultLast=True), columns="visibleCols"))'),
 
-Command(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)'),
-Command('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getValue(r) == c.getValue(currow) for c in vcols])), progress=False)'),
+Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)'),
+Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getValue(r) == c.getValue(currow) for c in vcols])), progress=False)'),
 
-
-Command('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)'),
-Command('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)')
-])
+Sheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)'),
+Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)')

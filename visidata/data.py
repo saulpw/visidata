@@ -33,17 +33,17 @@ globalCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: ")))
 
 globalCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows or rows)')
 
-alias('KEY_SLEFT', 'modify-move-column-left')
-alias('KEY_SR', 'modify-move-column-left')
-alias('kDN', 'modify-move-row-down')
-alias('kUP', 'modify-move-row-up')
-alias('KEY_SRIGHT', 'modify-move-column-right')
-alias('KEY_SF', 'modify-move-column-right')
+bindkey('KEY_SLEFT', 'slide-left')
+bindkey('KEY_SR', 'slide-left')
+bindkey('kDN', 'slide-down')
+bindkey('kUP', 'slide-up')
+bindkey('KEY_SRIGHT', 'slide-right')
+bindkey('KEY_SF', 'slide-right')
 
-alias('gKEY_SLEFT', 'modify-move-column-leftmost')
-alias('gkDN', 'modify-move-row-bottom')
-alias('gkUP', 'modify-move-row-top')
-alias('gKEY_SRIGHT', 'modify-move-column-rightmost')
+bindkey('gKEY_SLEFT', 'slide-leftmost')
+bindkey('gkDN', 'slide-bottom')
+bindkey('gkUP', 'slide-top')
+bindkey('gKEY_SRIGHT', 'slide-rightmost')
 
 
 class SettableColumn(Column):
@@ -101,8 +101,8 @@ globalCommand('gz=', 'setcol-range', 'for r, v in zip(selectedRows or rows, eval
 globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: "))))')
 
 
-globalCommand('gKEY_F(1)', 'commands-sheet')  # vdtui generic commands sheet
-globalCommand('gz?', 'commands-sheet')  # vdtui generic commands sheet
+bindkey('gKEY_F(1)', 'commands-sheet')  # vdtui generic commands sheet
+bindkey('gz?', 'commands-sheet')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
 globalCommand('z?', 'sysopen-help', 'openManPage()')
@@ -384,8 +384,8 @@ DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in 
 DirSheet.addCommand('^S', 'save-sheet', 'save()')
 DirSheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
 DirSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow); restat(cursorRow)')
-DirSheet.addCommand(None, 'delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1', '', 'modify-delete-row'),
-DirSheet.addCommand(None, 'delete-selected', 'deleteFiles(selectedRows)', '', 'modify-delete-selected')
+DirSheet.addCommand(None, 'delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1')
+DirSheet.addCommand(None, 'delete-selected', 'deleteFiles(selectedRows)')
 
 def openSource(p, filetype=None):
     'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
