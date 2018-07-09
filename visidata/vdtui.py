@@ -238,9 +238,9 @@ globalCommand('^A', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
 def input_longname(sheet):
     longnames = [
-        longname
+        cmd.longname
             for cmdmap in sheet._commands.maps
-                for longname, cmd in cmdmap.items()
+                for cmd in cmdmap.values()
                     if getattr(cmd, 'longname', None)
     ]
     return input("command name: ", completer=CompleteKey(sorted(set(longnames))))
