@@ -34,7 +34,7 @@ global	threads-all		^T	^T	meta	n	n	n		meta-threads	open Threads Sheet
 global	toggle-profile		^_	^_	n	n	n	n		meta-threads-profile	turn profiling on for main process
 global	visidata-dir	g	D	gD	static	n	n	y		meta-visidata-dir	open .visidata directory
 ThreadsSheet	cancel-thread		^C	^C				n		cancel-thread	abort thread at current row
-ThreadsSheet	profile-row		Enter	Enter						sheet-profile	push profile sheet for this action
+ThreadsSheet	profile-row		^J	^J						sheet-profile	push profile sheet for this action
 SheetsSheet	cancel-sheet		^C	^C				n		cancel-thread	abort all threads on sheet at cursor
 Sheet	add-row		a	a	n	n	y	y	3	modify-add-row-blank	insert a blank row
 Sheet	add-rows	g	a	ga	n	n	y	y	3	modify-add-row-many	add N blank rows
@@ -198,30 +198,50 @@ Sheet	unselect-rows	g	u	gu	n	change	n	y	2,5	rows-unselect-all	unselect all rows
 Sheet	view-cell		V	V	derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
 Sheet	visibility		v	v	n	n	n	y			
 ProfileSheet	save-profile	z	^S	^S	n	n	n	n		sheet-save-profile	save profile
+Plotter	redraw		^L	^L							redraw all pixels on canvas
+Plotter	visibility		v	v							toggle show_graph_labels
 ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
-Canvas				BUTTON4_PRESSED							zoom in with scroll wheel
-Canvas				gu							unselect rows on source sheet visible on screen
-Canvas				zz							set visible bounds to cursor
-Canvas				^J							open sheet of source rows contained within canvas cursor
-Canvas				BUTTON1_RELEASED							end cursor box with left mouse button release
-Canvas				d							delete rows on source sheet contained within canvas cursor
-Canvas				gd							delete rows on source sheet visible on screen
-Canvas				REPORT_MOUSE_POSITION							zoom out with scroll wheel
-Canvas				BUTTON1_PRESSED							start cursor box with left mouse button press
-Canvas				BUTTON3_PRESSED							mark grid point to move
-Canvas				s							select rows on source sheet contained within canvas cursor
-Canvas				g^J							open sheet of source rows visible on screen
-Canvas				gt							toggle selection of rows on source sheet visible on screen
-Canvas				v							toggle show_graph_labels
-Canvas				-							zoom out from cursor center
-Canvas				BUTTON3_RELEASED							mark canvas anchor point
-Canvas				+							zoom into cursor center
-Canvas				u							unselect rows on source sheet contained within canvas cursor
-Canvas				t							toggle selection of rows on source sheet contained within canvas cursor
-Canvas				z_							set aspect ratio
-Canvas				gs							select rows on source sheet visible on screen
-Canvas				^L							redraw all pixels on canvas
-Canvas				_							zoom to fit full extent
+Canvas	delete-cursor		d	d							delete rows on source sheet contained within canvas cursor
+Canvas	delete-visible	g	d	gd							delete rows on source sheet visible on screen
+Canvas	dive-cursor		^J	^J							open sheet of source rows contained within canvas cursor
+Canvas	dive-visible	g	^J	g^J							open sheet of source rows visible on screen
+Canvas	end-cursor			BUTTON1_RELEASED							end cursor box with left mouse button release
+Canvas	end-move			BUTTON3_RELEASED							mark canvas anchor point
+Canvas	go-bottom										
+Canvas	go-down										
+Canvas	go-down-small										
+Canvas	go-left										
+Canvas	go-left-small										
+Canvas	go-leftmost										
+Canvas	go-right										
+Canvas	go-right-small										
+Canvas	go-rightmost										
+Canvas	go-top										
+Canvas	go-up										
+Canvas	go-up-small										
+Canvas	resize-cursor-doubleheight	g	K	gK							
+Canvas	resize-cursor-doublewide	g	L	gL							
+Canvas	resize-cursor-halfheight	g	J	gJ							
+Canvas	resize-cursor-halfwide	g	H	gH							
+Canvas	resize-cursor-shorter		K	K							
+Canvas	resize-cursor-taller		J	J							
+Canvas	resize-cursor-thinner		H	H							
+Canvas	resize-cursor-wider		L	L							
+Canvas	select-cursor		s	s							select rows on source sheet contained within canvas cursor
+Canvas	select-visible	g	s	gs							select rows on source sheet visible on screen
+Canvas	set-aspect	z	_	z_							set aspect ratio
+Canvas	start-cursor			BUTTON1_PRESSED							start cursor box with left mouse button press
+Canvas	start-move			BUTTON3_PRESSED							mark grid point to move
+Canvas	stoggle-cursor		t	t							toggle selection of rows on source sheet contained within canvas cursor
+Canvas	stoggle-visible	g	t	gt							toggle selection of rows on source sheet visible on screen
+Canvas	unselect-cursor		u	u							unselect rows on source sheet contained within canvas cursor
+Canvas	unselect-visible	g	u	gu							unselect rows on source sheet visible on screen
+Canvas	zoom-all			_							zoom to fit full extent
+Canvas	zoom-cursor			zz							set visible bounds to cursor
+Canvas	zoomin-cursor		+	+							zoom into cursor center
+Canvas	zoomin-mouse			BUTTON4_PRESSED							zoom in with scroll wheel
+Canvas	zoomout-cursor			-							zoom out from cursor center
+Canvas	zoomout-mouse			REPORT_MOUSE_POSITION							zoom out with scroll wheel
 				BUTTON1_PRESSED						view-go-mouse-row	
 				BUTTON4_PRESSED						view-scroll-up	move scroll_incr forward
 				z^R							clear cache for current column

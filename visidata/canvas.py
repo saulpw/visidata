@@ -132,9 +132,6 @@ class Plotter(BaseSheet):
     columns=[Column('')]  # to eliminate errors outside of draw()
     rowtype='pixels'
     commands=[
-        Command('^L', 'refresh()', 'redraw all pixels on canvas'),
-        Command('v', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels'),
-        Command('KEY_RESIZE', 'refresh()', ''),
     ]
     def __init__(self, name='plotter', **kwargs):
         super().__init__(name, **kwargs)
@@ -296,6 +293,9 @@ class Plotter(BaseSheet):
                         char_x, char_y, txt, attr, row = o
                         clipdraw(scr, char_y, char_x, txt, attr, len(txt))
 
+Plotter.addCommand('^L', 'redraw', 'refresh()')
+Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels')
+#bindkey('KEY_RESIZE', 'redraw')
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
 class Canvas(Plotter):
@@ -307,61 +307,7 @@ class Canvas(Plotter):
     topMarginPixels = 0
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
-    commands = Plotter.commands + [
-        Command('', 'sheet.cursorBox.xmin -= cursorBox.w', '', 'view-go-left'),
-        Command('', 'sheet.cursorBox.xmin += cursorBox.w', '', 'view-go-right'),
-        Command('', 'sheet.cursorBox.ymin += cursorBox.h', '', 'view-go-up'),
-        Command('', 'sheet.cursorBox.ymin -= cursorBox.h', '', 'view-go-down'),
-        Command('', 'sheet.cursorBox.xmin = visibleBox.xmin', '', 'view-go-far-left'),
-        Command('', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w', '', 'view-go-far-right'),
-        Command('', 'sheet.cursorBox.ymin = cursorBox.ymin', '', 'view-go-far-up'),
-        Command('', 'sheet.cursorBox.ymin = cursorBox.ymax-cursorBox.h', '', 'view-go-far-down'),
-
-        Command('zh', 'sheet.cursorBox.xmin -= canvasCharWidth', ''),
-        Command('zl', 'sheet.cursorBox.xmin += canvasCharWidth', ''),
-        Command('zj', 'sheet.cursorBox.ymin += canvasCharHeight', ''),
-        Command('zk', 'sheet.cursorBox.ymin -= canvasCharHeight', ''),
-
-        Command('gH', 'sheet.cursorBox.w /= 2', ''),
-        Command('gL', 'sheet.cursorBox.w *= 2', ''),
-        Command('gJ', 'sheet.cursorBox.h /= 2', ''),
-        Command('gK', 'sheet.cursorBox.h *= 2', ''),
-
-        Command('H', 'sheet.cursorBox.w -= canvasCharWidth', ''),
-        Command('L', 'sheet.cursorBox.w += canvasCharWidth', ''),
-        Command('J', 'sheet.cursorBox.h += canvasCharHeight', ''),
-        Command('K', 'sheet.cursorBox.h -= canvasCharHeight', ''),
-
-        Command('zz', 'zoomTo(cursorBox)', 'set visible bounds to cursor'),
-
-        Command('-', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center'),
-        Command('+', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center'),
-        Command('_', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()', 'zoom to fit full extent'),
-        Command('z_', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio'),
-
-        # set cursor box with left click
-        Command('BUTTON1_PRESSED', 'sheet.cursorBox = Box(*canvasMouse.xy)', 'start cursor box with left mouse button press'),
-        Command('BUTTON1_RELEASED', 'setCursorSize(canvasMouse)', 'end cursor box with left mouse button release'),
-
-        Command('BUTTON3_PRESSED', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move'),
-        Command('BUTTON3_RELEASED', 'fixPoint(plotterMouse, anchorPoint)', 'mark canvas anchor point'),
-
-        Command('BUTTON4_PRESSED', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel'),
-        Command('REPORT_MOUSE_POSITION', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel'),
-
-        Command('s', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor'),
-        Command('t', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor'),
-        Command('u', 'source.unselect(list(rowsWithin(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor'),
-        Command(ENTER, 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)', 'open sheet of source rows contained within canvas cursor'),
-        Command('d', 'source.delete(list(rowsWithin(plotterCursorBox))); reload()', 'delete rows on source sheet contained within canvas cursor'),
-
-
-        Command('gs', 'source.select(list(rowsWithin(plotterVisibleBox)))', 'select rows on source sheet visible on screen'),
-        Command('gt', 'source.toggle(list(rowsWithin(plotterVisibleBox)))', 'toggle selection of rows on source sheet visible on screen'),
-        Command('gu', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect rows on source sheet visible on screen'),
-        Command('g'+ENTER, 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen'),
-        Command('gd', 'source.delete(list(rowsWithin(plotterVisibleBox))); reload()', 'delete rows on source sheet visible on screen'),
-    ]
+    commands = Plotter.commands
 
     def __init__(self, name='canvas', source=None, **kwargs):
         super().__init__(name, source=source, **kwargs)
@@ -671,3 +617,55 @@ class Canvas(Plotter):
         for x, y, text, attr, row in Progress(self.gridlabels):
             self.plotlabel(self.scaleX(x), self.scaleY(y), text, attr, row)
 
+Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w')
+Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w')
+Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h')
+Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h')
+Canvas.addCommand(None, 'go-leftmost', 'sheet.cursorBox.xmin = visibleBox.xmin')
+Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w')
+Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = cursorBox.ymin')
+Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = cursorBox.ymax-cursorBox.h')
+
+Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth', '')
+Canvas.addCommand('zl', 'go-right-small' 'sheet.cursorBox.xmin += canvasCharWidth', '')
+Canvas.addCommand('zj', 'go-down-small' 'sheet.cursorBox.ymin += canvasCharHeight', '')
+Canvas.addCommand('zk', 'go-up-small' 'sheet.cursorBox.ymin -= canvasCharHeight', '')
+
+Canvas.addCommand('gH', 'resize-cursor-halfwide', 'sheet.cursorBox.w /= 2', ''),
+Canvas.addCommand('gL', 'resize-cursor-doublewide', 'sheet.cursorBox.w *= 2', '')
+Canvas.addCommand('gJ','resize-cursor-halfheight', 'sheet.cursorBox.h /= 2', ''),
+Canvas.addCommand('gK', 'resize-cursor-doubleheight', 'sheet.cursorBox.h *= 2', '')
+
+Canvas.addCommand('H', 'resize-cursor-thinner', 'sheet.cursorBox.w -= canvasCharWidth', '')
+Canvas.addCommand('L', 'resize-cursor-wider', 'sheet.cursorBox.w += canvasCharWidth', '')
+Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight', '')
+Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', '')
+Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)')
+
+Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)')
+Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.center, tmp)')
+Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()')
+Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()')
+
+# set cursor box with left click
+Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'sheet.cursorBox = Box(*canvasMouse.xy)')
+Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)')
+
+Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse')
+Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint)')
+
+Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)')
+Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)')
+
+Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))')
+Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))')
+Canvas.addCommand('u', 'unselect-cursor', 'source.unselect(list(rowsWithin(plotterCursorBox)))')
+Canvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)')
+Canvas.addCommand('d', 'delete-cursor', 'source.delete(list(rowsWithin(plotterCursorBox))); reload()')
+
+
+Canvas.addCommand('gs', 'select-visible', 'source.select(list(rowsWithin(plotterVisibleBox)))')
+Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotterVisibleBox)))')
+Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))')
+Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)')
+Canvas.addCommand('gd', 'delete-visible', 'source.delete(list(rowsWithin(plotterVisibleBox))); reload()')
