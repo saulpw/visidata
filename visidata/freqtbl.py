@@ -11,9 +11,7 @@ option('disp_histolen', 50, 'width of histogram column')
 #option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
-ColumnsSheet.commands += [
-    Command(ENTER, 'vd.push(SheetFreqTable(source[0], cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
-]
+ColumnsSheet.addCommand(ENTER, 'freq-col', 'vd.push(SheetFreqTable(source[0], cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
 
 def valueNames(vals):
     return '-'.join(str(v) for v in vals)
@@ -30,12 +28,6 @@ class SheetFreqTable(Sheet):
     rowtype = 'bins'
     commands = [
         # redefine these commands only to change the helpstr
-        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet', 'filter-source-toggle-bin'),
-        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet', 'filter-source-select-bin'),
-        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet', 'filter-source-unselect-bin'),
-
-        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell', 'open-source-bin'),
-#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
     ]
 
     def __init__(self, sheet, *columns):
@@ -177,4 +169,9 @@ class SheetFreqTable(Sheet):
         for c in self.visibleCols:
             c._cachedValues = collections.OrderedDict()
 
+SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
+SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
+SheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
 
+SheetFreqTable.addCommand(ENTER, 'dup-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)')
+#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')

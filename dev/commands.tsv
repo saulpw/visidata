@@ -37,6 +37,10 @@ global	visidata-dir	g	D	gD	static	n	n	y		meta-visidata-dir	open .visidata direct
 ThreadsSheet	cancel-thread		^C	^C				n		cancel-thread	abort thread at current row
 ThreadsSheet	profile-row		^J	^J						sheet-profile	push profile sheet for this action
 SheetsSheet	cancel-sheet		^C	^C				n		cancel-thread	abort all threads on sheet at cursor
+SheetFreqTable	dup-row		^J	^J						open-cell-source	open copy of source sheet with rows described in current cell
+SheetFreqTable	select-row		s	s						filter-source-select-bin	select these entries in source sheet
+SheetFreqTable	stoggle-row		t	t						filter-source-toggle-bin	toggle these entries in source sheet
+SheetFreqTable	unselect-row		u	u						filter-source-unselect-bin	unselect these entries in source sheet
 Sheet	add-row		a	a	n	n	y	y	3	modify-add-row-blank	insert a blank row
 Sheet	add-rows	g	a	ga	n	n	y	y	3	modify-add-row-many	add N blank rows
 Sheet	addcol-bulk	gz	a	gza	n	n	y	y		modify-add-column-manyblank	add N empty columns
@@ -219,6 +223,8 @@ CommandLog	replay-row			x							replay command in current row
 CommandLog	save-macro	z	^S	z^S							save macro
 CommandLog	stop-replay			^C							abort replay
 ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
+ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
+ColumnsSheet	freq-col		^J	^J						data-aggregate-source-column	open a Frequency Table grouped on column referenced in current row
 Canvas	delete-cursor		d	d							delete rows on source sheet contained within canvas cursor
 Canvas	delete-visible	g	d	gd							delete rows on source sheet visible on screen
 Canvas	dive-cursor		^J	^J							open sheet of source rows contained within canvas cursor
