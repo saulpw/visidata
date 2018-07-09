@@ -22,6 +22,7 @@ global	redraw		^L	^L	n	n	n	n			refresh screen
 global	reload-all	g	^R	g^R	n	n		y			
 global	save-all	g	^S	g^S	n	n	n	y		sheet-save-all	save all sheets to given file or directory)
 global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd file
+global	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
 global	sheets		S	S	static meta	n	n	y		meta-sheets	open Sheets Sheet
 global	sheets-graveyard	g	S	gS	static meta	n	n	y		sheets-graveyard	open Sheets Graveyard
 global	show-eval	z	^X	z^X	n	n	n	y		python-eval-status	evaluate Python expression on current row and show result on status line
@@ -200,6 +201,15 @@ Sheet	visibility		v	v	n	n	n	y
 ProfileSheet	save-profile	z	^S	^S	n	n	n	n		sheet-save-profile	save profile
 Plotter	redraw		^L	^L							redraw all pixels on canvas
 Plotter	visibility		v	v							toggle show_graph_labels
+DirSheet	delete-row									modify-delete-row	
+DirSheet	delete-selected									modify-delete-selected	
+DirSheet	open-row		^J	^J	y	n	n	y		sheet-open-row	open current file as a new sheet
+DirSheet	open-rows	g	^J	g^J		use	n	y		sheet-open-rows	open selected files as new sheets
+DirSheet	reload-row	z	^R	z^R						sheet-specific-apply-edits	undo pending changes to current row
+DirSheet	save-sheet		^S	^S						sheet-specific-apply-edits	apply all changes on all rows
+DirSheet	save-sheet	z	^S	z^S						sheet-specific-apply-edits	apply changes to current row
+DirSheet	sysopen-row		^O	^O	external				1	edit-row-external	open current file in external $EDITOR
+DirSheet	sysopen-rows	g	^O	g^O	external				1	edit-rows-external	open selected files in external $EDITOR
 DescribeSheet	dup-cell	z	^J	z^J						open-cell-source	open copy of source sheet with rows described in current cell
 DescribeSheet	freq-row			^J						data-aggregate-source-column	open a Frequency Table sheet grouped on column referenced in current row
 DescribeSheet	select-cell	z	s	zs						rows-select-source-cell	select rows on source sheet which are being described in current cell
@@ -258,7 +268,6 @@ Canvas	zoomout-mouse			REPORT_MOUSE_POSITION							zoom out with scroll wheel
 				BUTTON1_RELEASED						view-scroll-mouse-row	
 				REPORT_MOUSE_POSITION						view-scroll-down	move scroll_incr backward
 				zF						data-aggregate-summary	open one-line summary for all selected rows
-	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
 	slide-down-n	z	J	zJ						slide-row-down-n	slide current row down n
 	slide-left-n	z	H	zH						slide-col-left-n	slide current column left n
 	slide-right-n	z	L	zL						slide-col-right-n	slide current column right n

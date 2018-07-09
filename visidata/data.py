@@ -106,7 +106,7 @@ globalCommand('gz?', 'commands-sheet')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
 globalCommand('z?', 'sysopen-help', 'openManPage()')
-globalCommand('KEY_F(1)', 'z?')
+bindkey('KEY_F(1)', 'sysopen-help')
 
 def openManPage():
     from pkg_resources import resource_filename
@@ -217,15 +217,6 @@ class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
     commands = [
-        Command(ENTER, 'vd.push(openSource(cursorRow))', 'open current file as a new sheet', 'sheet-open-row'),
-        Command('g'+ENTER, 'for r in selectedRows: vd.push(openSource(r.resolve()))', 'open selected files as new sheets', 'sheet-open-rows'),
-        Command('^O', 'launchEditor(cursorRow.resolve())', 'open current file in external $EDITOR', 'edit-row-external'),
-        Command('g^O', 'launchEditor(*(r.resolve() for r in selectedRows))', 'open selected files in external $EDITOR', 'edit-rows-external'),
-        Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
-        Command('z^S', 'save(cursorRow)', 'apply changes to current row', 'sheet-specific-apply-edits'),
-        Command('z^R', 'undoMod(cursorRow); restat(cursorRow)', 'undo pending changes to current row', 'sheet-specific-apply-edits'),
-        Command('', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1', '', 'modify-delete-row'),
-        Command('', 'deleteFiles(selectedRows)', '', 'modify-delete-selected')
     ]
     columns = [
         # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
@@ -386,6 +377,15 @@ class DirSheet(Sheet):
     def restat(self, row):
         row.stat(force=True)
 
+DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
+DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r.resolve()))')
+DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.resolve())')
+DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in selectedRows))')
+DirSheet.addCommand('^S', 'save-sheet', 'save()')
+DirSheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
+DirSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow); restat(cursorRow)')
+DirSheet.addCommand(None, 'delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1', '', 'modify-delete-row'),
+DirSheet.addCommand(None, 'delete-selected', 'deleteFiles(selectedRows)', '', 'modify-delete-selected')
 
 def openSource(p, filetype=None):
     'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
