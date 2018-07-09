@@ -225,21 +225,21 @@ theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
 ENTER='^J'
 ESC='^['
-globalCommand('KEY_RESIZE', '', 'no-op by default')
-globalCommand('q',  'vd.sheets[1:] or confirm("quit last sheet? "); vd.sheets.pop(0)', 'quit current sheet', 'sheet-quit-current')
-globalCommand('gq', 'vd.sheets.clear()', 'quit all sheets (clean exit)', 'sheet-quit-all')
+globalCommand('no-op', 'KEY_RESIZE', '')
+globalCommand('quit-sheet', 'q',  'vd.sheets[1:] or confirm("quit last sheet? "); vd.sheets.pop(0)')
+globalCommand('quit-all', 'gq', 'vd.sheets.clear()')
 
-globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
-globalCommand('^V', 'status(__version_info__); status(__copyright__)', 'show version information on status line', 'info-version')
-globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))', 'open Status History', 'meta-status-history')
+globalCommand('redraw', '^L', 'vd.scr.clear()')
+globalCommand('show-version', '^V', 'status(__version_info__); status(__copyright__)')
+globalCommand('statuses', '^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))')
 
-globalCommand('^R', 'reload(); status("reloaded")', 'reload current sheet', 'sheet-reload')
+globalCommand('reload-sheet', '^R', 'reload(); status("reloaded")')
 
-globalCommand('^^', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet (swap with current sheet)', 'view-go-sheet-swap')
+globalCommand('swap-sheet', '^^', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
-globalCommand('^Z', 'suspend()', 'suspend VisiData process')
+globalCommand('suspend', '^Z', 'suspend()')
 
-globalCommand('^A', 'exec_keystrokes(input_longname(sheet))', 'execute command by name', 'meta-exec-cmd')
+globalCommand('exec-longname', '^A', 'exec_keystrokes(input_longname(sheet))')
 
 def input_longname(sheet):
     longnames = [
@@ -250,15 +250,16 @@ def input_longname(sheet):
     ]
     return input("command name: ", completer=CompleteKey(sorted(set(longnames))))
 
-def StubCommand(longname):
-    return Command('', 'error("command %s not defined for this sheet")' % longname, 'stub', longname)
 
-alias(ENTER, 'modify-edit-cell')  # ENTER is this by default
-alias('delete-column-hide', 'schema-column-hide')
-alias('gKEY_LEFT', 'view-go-far-left'),
-alias('gKEY_RIGHT', 'view-go-far-right'),
-alias('gKEY_UP', 'view-go-far-top'),
-alias('gKEY_DOWN', 'view-go-far-bottom'),
+bindkey(ENTER, 'edit-cell')  # ENTER is this by default
+bindkey('gKEY_LEFT', 'go-leftmost'),
+bindkey('gKEY_RIGHT', 'go-rightmost'),
+bindkey('gKEY_UP', 'go-top'),
+bindkey('gKEY_DOWN', 'go-bottom'),
+
+bindkey('KEY_DC', 'setcell-none'),
+bindkey('gKEY_DC', 'setcol-none'),
+
 
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
 #
@@ -899,24 +900,7 @@ class Colorizer:
 
 class BaseSheet:
     precious = True
-    commands = [
-StubCommand('modify-edit-cell'),
-StubCommand('schema-column-hide'),
-StubCommand('view-go-left'),
-StubCommand('view-go-down'),
-StubCommand('view-go-up'),
-StubCommand('view-go-right'),
-StubCommand('view-go-far-left'),
-StubCommand('view-go-far-right'),
-StubCommand('view-go-far-top'),
-StubCommand('view-go-far-bottom'),
-StubCommand('view-go-page-down'),
-StubCommand('view-go-page-up'),
-StubCommand('view-go-far-top'),
-StubCommand('view-go-far-bottom'),
-StubCommand('view-go-far-left'),
-StubCommand('view-go-far-right'),
-]
+    commands = []
     rowtype=''
     def __init__(self, name, **kwargs):
         self.name = name
@@ -1056,86 +1040,6 @@ StubCommand('view-go-far-right'),
 
 class Sheet(BaseSheet):
     commands = [
-Command('KEY_LEFT',  'cursorRight(-1)', 'move one column left',  'view-go-left'),
-Command('KEY_DOWN',  'cursorDown(+1)',  'move one row down',     'view-go-down'),
-Command('KEY_UP',    'cursorDown(-1)',  'move one row up',       'view-go-up'),
-Command('KEY_RIGHT', 'cursorRight(+1)', 'move one column right', 'view-go-right'),
-Command('KEY_NPAGE', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows',  'move one page forward',  'view-go-page-down'),
-Command('KEY_PPAGE', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'move one page backward', 'view-go-page-up'),
-
-Command('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'move all the way to the left', 'view-go-far-left'),
-Command('KEY_HOME', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'move all the way to the top', 'view-go-far-top'),
-Command('KEY_END', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'move all the way to the bottom', 'view-go-far-bottom'),
-Command('gl', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'move all the way to the right', 'view-go-far-right'),
-
-Command('BUTTON1_PRESSED', 'sheet.cursorRowIndex=topRowIndex+mouseY-1', '', 'view-go-mouse-row'),
-Command('BUTTON1_RELEASED', 'sheet.topRowIndex=cursorRowIndex-mouseY+1', '', 'view-scroll-mouse-row'),
-Command('BUTTON4_PRESSED', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'move scroll_incr forward', 'view-scroll-up'),
-Command('REPORT_MOUSE_POSITION', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'move scroll_incr backward', 'view-scroll-down'),
-
-Command('^G', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line', 'info-sheet'),
-
-Command('<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")', 'move up the current column to the next value', 'view-go-prev-value'),
-Command('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")', 'move down the current column to the next value', 'view-go-next-value'),
-Command('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'move up the current column to the previous selected row', 'view-go-prev-selected'),
-Command('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move down the current column to the next selected row', 'view-go-next-selected'),
-
-Command('z<', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")', 'move up the current column to the next null value', 'view-go-prev-null'),
-Command('z>', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")', 'move down the current column to the next null value', 'view-go-next-null'),
-
-Command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjust width of current column to full', 'column-width-full'),
-Command('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))', 'adjust current column width to given number', 'column-width-input'),
-
-Command('-', 'cursorCol.hide()', 'hide current column', 'column-hide'),
-Command('z-', 'cursorCol.width = cursorCol.width//2', 'reduce width of current column by half', 'column-width-half'),
-Command('gv', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)', 'unhide all columns', 'column-unhide-all'),
-
-Command('!', 'toggleKeyColumn(cursorCol)', 'toggle current column as a key column', 'column-key-toggle'),
-Command('z!', 'keyCols.remove(cursorCol)', 'unset current column as a key column', 'column-key-unset'),
-Command('z~', 'cursorCol.type = anytype', 'set type of current column to anytype', 'column-type-any'),
-Command('~', 'cursorCol.type = str', 'set type of current column to str', 'column-type-str'),
-Command('@', 'cursorCol.type = date', 'set type of current column to date', 'column-type-date'),
-Command('#', 'cursorCol.type = int', 'set type of current column to int', 'column-type-int'),
-Command('$', 'cursorCol.type = currency', 'set type of current column to currency', 'column-type-currency'),
-Command('%', 'cursorCol.type = float', 'set type of current column to float', 'column-type-float'),
-Command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column', 'column-name-input'),
-
-Command('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'adjust width of all visible columns to full', 'column-width-all-full'),
-
-Command('[', 'orderBy(cursorCol)', 'sort ascending by current column', 'rows-sort-asc'),
-Command(']', 'orderBy(cursorCol, reverse=True)', 'sort descending by current column', 'rows-sort-desc'),
-Command('g[', 'orderBy(*keyCols)', 'sort ascending by all key columns', 'rows-sort-keys-asc'),
-Command('g]', 'orderBy(*keyCols, reverse=True)', 'sort descending by all key columns', 'rows-sort-keys-desc'),
-
-Command('^R', 'reload(); recalc(); status("reloaded")', 'reload current sheet'),
-Command('z^R', 'cursorCol._cachedValues.clear()', 'clear cache for current column'),
-
-Command('/', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)', 'search for regex forwards in current column', 'view-find-row-curcol-forward'),
-Command('?', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)', 'search for regex backwards in current column', 'view-find-row-curcol-backward'),
-Command('n', 'moveRegex(sheet, reverse=False)', 'move to next match from last search', 'view-find-forward-repeat'),
-Command('N', 'moveRegex(sheet, reverse=True)', 'move to previous match from last search', 'view-find-backward-repeat'),
-
-Command('g/', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns', 'view-find-row-viscol-forward'),
-Command('g?', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns', 'view-find-row-viscol-backward'),
-
-Command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit contents of current cell', 'modify-edit-cell'),
-Command('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))', 'set contents of current column for selected rows to same input', 'modify-edit-column-selected'),
-Command('zd', 'cursorCol.setValues([cursorRow], None)', 'set contents of current cell to None', 'modify-clear-cell'),
-Command('gzd', 'cursorCol.setValues(selectedRows, None)', 'set contents of cells in current column to None for selected rows', 'modify-clear-column-selected'),
-Command('KEY_DC', 'zd'),
-Command('gKEY_DC', 'gzd'),
-
-Command('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)', 'open duplicate sheet with only selected rows', 'sheet-duplicate-selected'),
-Command('g"', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with all rows', 'sheet-duplicate-all'),
-Command('z"', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows', 'sheet-duplicate-deepcopy-selected'),
-Command('gz"', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows', 'sheet-duplicate-deepcopy'),
-
-Command('=', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables', 'modify-add-column-expr'),
-Command('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))', 'set current column for selected rows to result of Python expression', 'modify-set-column-selected-expr'),
-
-Command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet', 'sheet-open-cell'),
-
-Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the list of columns', 'delete-column-really'),
     ]
     columns = []  # list of Column
     colorizers = [ # list of Colorizer
@@ -1764,6 +1668,83 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
 
         return r
 
+Sheet.addCommand('go-left', 'KEY_LEFT',  'cursorRight(-1)'),
+Sheet.addCommand('go-down', 'KEY_DOWN',  'cursorDown(+1)'),
+Sheet.addCommand('go-up', 'KEY_UP',    'cursorDown(-1)'),
+Sheet.addCommand('go-right', 'KEY_RIGHT', 'cursorRight(+1)'),
+Sheet.addCommand('next-page', 'KEY_NPAGE', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
+Sheet.addCommand('prev-page', 'KEY_PPAGE', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
+
+Sheet.addCommand('go-leftmost', 'gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
+Sheet.addCommand('go-top', 'KEY_HOME', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
+Sheet.addCommand('go-bottom', 'KEY_END', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
+Sheet.addCommand('go-rightmost', 'gl', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
+
+Sheet.addCommand('go-mouse', 'BUTTON1_PRESSED', 'sheet.cursorRowIndex=topRowIndex+mouseY-1'),
+Sheet.addCommand('scroll-mouse', 'BUTTON1_RELEASED', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
+Sheet.addCommand('scroll-up', 'BUTTON4_PRESSED', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
+Sheet.addCommand('scroll-down', 'REPORT_MOUSE_POSITION', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
+
+Sheet.addCommand('show-cursor', '^G', 'status(statusLine)'),
+
+Sheet.addCommand('prev-value', '<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")'),
+Sheet.addCommand('next-value', '>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")'),
+Sheet.addCommand('prev-selected', '{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
+Sheet.addCommand('next-selected', '}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
+
+Sheet.addCommand('prev-null', 'z<', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
+Sheet.addCommand('next-null', 'z>', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
+
+Sheet.addCommand('resize-col-max', '_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
+Sheet.addCommand('resize-col', 'z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))'),
+
+Sheet.addCommand('hide-col', '-', 'cursorCol.hide()'),
+Sheet.addCommand('resize-col-half', 'z-', 'cursorCol.width = cursorCol.width//2'),
+Sheet.addCommand('unhide-cols', 'gv', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)'),
+
+Sheet.addCommand('key-col', '!', 'toggleKeyColumn(cursorCol)'),
+Sheet.addCommand('key-col-off', 'z!', 'keyCols.remove(cursorCol)'),
+Sheet.addCommand('type-any', 'z~', 'cursorCol.type = anytype'),
+Sheet.addCommand('type-string', '~', 'cursorCol.type = str'),
+Sheet.addCommand('type-date', '@', 'cursorCol.type = date'),
+Sheet.addCommand('type-int', '#', 'cursorCol.type = int'),
+Sheet.addCommand('type-currency', '$', 'cursorCol.type = currency'),
+Sheet.addCommand('type-float', '%', 'cursorCol.type = float'),
+Sheet.addCommand('renmae-col', '^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
+
+Sheet.addCommand('resize-cols-max', 'g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
+
+Sheet.addCommand('sort-asc', '[', 'orderBy(cursorCol)'),
+Sheet.addCommand('sort-desc', ']', 'orderBy(cursorCol, reverse=True)'),
+Sheet.addCommand('sort-keys-asc', 'g[', 'orderBy(*keyCols)'),
+Sheet.addCommand('sort-keys-desc', 'g]', 'orderBy(*keyCols, reverse=True)'),
+
+Sheet.addCommand('reload-sheet', '^R', 'reload(); recalc(); status("reloaded")'),
+Sheet.addCommand('cache-col', "z'", 'cursorCol._cachedValues.clear()'),
+
+Sheet.addCommand('search-col', '/', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)'),
+Sheet.addCommand('searchr-col', '?', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)'),
+Sheet.addCommand('next-search', 'n', 'moveRegex(sheet, reverse=False)'),
+Sheet.addCommand('prev-search', 'N', 'moveRegex(sheet, reverse=True)'),
+
+Sheet.addCommand('search-cols', 'g/', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")'),
+Sheet.addCommand('searchr-cols', 'g?', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")'),
+
+Sheet.addCommand('edit-cell', 'e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)'),
+Sheet.addCommand('edit-cells', 'ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
+Sheet.addCommand('setcell-none', 'zd', 'cursorCol.setValues([cursorRow], None)'),
+Sheet.addCommand('setcol-none', 'gzd', 'cursorCol.setValues(selectedRows, None)'),
+
+Sheet.addCommand('dup-selected', '"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)'),
+Sheet.addCommand('dup-rows', 'g"', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),
+Sheet.addCommand('dup-selected-deep', 'z"', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
+Sheet.addCommand('dup-rows-deep', 'gz"', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
+
+Sheet.addCommand('addcol-expr', '=', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)'),
+Sheet.addCommand('setcol-expr', 'g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))'),
+
+Sheet.addCommand('view-cell', 'V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))'),
+
 
 def isNullFunc():
     'Returns isNull function according to current options.'
@@ -2167,7 +2148,6 @@ class TextSheet(Sheet):
     'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
     rowtype = 'lines'
     commands = [
-        Command('v', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()', 'toggle text wrap for this sheet')
     ]
     filetype = 'txt'
 
@@ -2187,6 +2167,8 @@ class TextSheet(Sheet):
                     self.addRow((startingLine+i, L))
             else:
                 self.addRow((len(self.rows), text))
+
+TextSheet.addCommand('visibility', 'v', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()')
 
 ### Curses helpers
 
