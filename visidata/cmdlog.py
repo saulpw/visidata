@@ -93,10 +93,6 @@ class CommandLog(Sheet):
     rowtype = 'logged commands'
     precious = False
     commands = [
-        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row', 'replay-row'),
-        Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog', 'replay-sheet'),
-        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay', 'replay-abort'),
-        Command('z^S', 'sheet.saveMacro(selectedRows or error("no rows selected"), input("save macro for keystroke: "))', 'save macro', 'meta-macro-save'),
     ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 
@@ -318,6 +314,10 @@ class CommandLog(Sheet):
     def setOption(self, optname, optval):
         self.addRow(CommandLogRow(['options', '', options.rowkey_prefix + optname, 'set-row-input', str(optval), 'set option']))
 
+CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
+CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
+CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
+CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or error("no rows selected"), input("save macro for keystroke: "))')
 
 vd().cmdlog = CommandLog('cmdlog')
 vd().cmdlog.rows = []  # so it can be added to immediately

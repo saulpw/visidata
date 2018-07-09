@@ -200,6 +200,10 @@ Sheet	visibility		v	v	n	n	n	y
 ProfileSheet	save-profile	z	^S	^S	n	n	n	n		sheet-save-profile	save profile
 Plotter	redraw		^L	^L							redraw all pixels on canvas
 Plotter	visibility		v	v							toggle show_graph_labels
+CommandLog	replay-all	g	x	gx							replay contents of entire CommandLog
+CommandLog	replay-row			x							replay command in current row
+CommandLog	save-macro	z	^S	z^S							save macro
+CommandLog	stop-replay			^C							abort replay
 ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
 Canvas	delete-cursor		d	d							delete rows on source sheet contained within canvas cursor
 Canvas	delete-visible	g	d	gd							delete rows on source sheet visible on screen
