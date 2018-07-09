@@ -194,6 +194,7 @@ Sheet	unselect-row		u	u	n	change	n	y		rows-unselect-current	unselect current row
 Sheet	unselect-rows	g	u	gu	n	change	n	y	2,5	rows-unselect-all	unselect all rows
 Sheet	view-cell		V	V	derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
 Sheet	visibility		v	v	n	n	n	y			
+ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
 Canvas				BUTTON4_PRESSED							zoom in with scroll wheel
 Canvas				gu							unselect rows on source sheet visible on screen
 Canvas				zz							set visible bounds to cursor

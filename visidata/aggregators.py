@@ -78,9 +78,8 @@ aggregators['q10'] = quantiles(10)
 # returns keys of the row with the max value
 aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
 
-ColumnsSheet.commands += [
-    Command('g+', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))', 'add aggregators to selected source columns', 'column-aggregate-add-all'),
-]
+ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))')
+
 ColumnsSheet.columns += [
         Column('aggregators',
                getter=lambda col,row: ' '.join(x.__name__ for x in getattr(row, 'aggregators', [])),
