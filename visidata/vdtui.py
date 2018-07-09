@@ -67,29 +67,25 @@ def returnException(f, *args, **kwargs):
     except Exception as e:
         return e
 
-baseCommands = collections.OrderedDict()  # [cmd.name] -> Command
+baseCommands = collections.OrderedDict()  # [cmd.longname] -> Command
 baseOptions = collections.OrderedDict()   # [opt.name] -> opt
 
+keybindings = {}
+
 class Command:
-    def __init__(self, name, execstr, helpstr='', longname=None):
-        self.name = name
-        self.execstr = execstr
-        self.helpstr = helpstr
+    def __init__(self, longname, execstr):
         self.longname = longname
+        self.execstr = execstr
 
-def globalCommand(keystrokes, execstr, helpstr='', longname=None):
-    if isinstance(keystrokes, str):
-        keystrokes = [keystrokes]
+def globalCommand(longname, keystrokes, execstr):
+    cmd = Command(longname, execstr)
+    baseCommands[longname] = cmd
 
-    if longname:
-        cmd = Command(longname, execstr, helpstr, longname)
-        baseCommands[longname] = cmd
-        assert helpstr or (execstr in baseCommands), 'unknown longname ' + execstr
-        helpstr = ''
+    if keystrokes:
+        bindkey(keystrokes, longname)
 
-    for ks in keystrokes:
-        if ks:
-            baseCommands[ks] = Command(ks, longname or execstr, helpstr, longname)
+def bindkey(keystrokes, longname):
+    keybindings[keystrokes] = longname
 
 
 class Option:
@@ -153,7 +149,6 @@ def option(name, default, helpstr=''):
     return baseOptions[name]
 
 
-alias = globalCommand
 theme = option
 def replayableOption(*args):
     option(*args).replayable = True
@@ -924,9 +919,12 @@ class BaseSheet:
         self.__dict__.update(kwargs)
 
     @classmethod
-    def Command(cls, keystrokes, execstr, helpstr='', longname=''):
-        cmd = Command(keystrokes, execstr, helpstr, longname)
+    def addCommand(cls, longname, keystrokes, execstr):
+        cmd = Command(longname, execstr)
         cls.commands += [cmd]
+        if keystrokes in keybindings:
+            assert keybindings[keystrokes] == longname, '%s already bound to %s' % (keystrokes, keybindings[keystrokes])
+        keybindings[keystrokes] = longname
         return cmd
 
     def __bool__(self):
@@ -944,20 +942,9 @@ class BaseSheet:
         'Compose left side of status bar for this sheet (overridable).'
         return options.disp_status_fmt.format(sheet=self)
 
-    def addCommand(self, keystrokes, execstr, helpstr='', longname=None):
-        'Add a command specific to this Sheet instance'
-        cmd = Command(keystrokes, longname or execstr, helpstr, longname)
-        self._commands = self._commands.new_child({ keystrokes: cmd })
-
-    def getCommand(self, keystrokes, default=None):
-        k = keystrokes
-        cmd = None
-        while k in self._commands:
-            cmd = self._commands.get(k, default)
-            if isinstance(cmd, CommandLog):
-                return cmd
-            k = cmd.execstr  # see if execstr is actually just an alias for another keystroke
-        return cmd
+    def getCommand(self, keystrokes):
+        longname = keybindings[keystrokes]
+        return self._commands.get(longname)
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
         return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
