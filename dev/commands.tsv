@@ -200,6 +200,10 @@ Sheet	visibility		v	v	n	n	n	y
 ProfileSheet	save-profile	z	^S	^S	n	n	n	n		sheet-save-profile	save profile
 Plotter	redraw		^L	^L							redraw all pixels on canvas
 Plotter	visibility		v	v							toggle show_graph_labels
+DescribeSheet	dup-cell	z	^J	z^J						open-cell-source	open copy of source sheet with rows described in current cell
+DescribeSheet	freq-row			^J						data-aggregate-source-column	open a Frequency Table sheet grouped on column referenced in current row
+DescribeSheet	select-cell	z	s	zs						rows-select-source-cell	select rows on source sheet which are being described in current cell
+DescribeSheet	unselect-cell	z	u	zu						rows-unselect-source-cell	unselect rows on source sheet which are being described in current cell
 CommandLog	replay-all	g	x	gx							replay contents of entire CommandLog
 CommandLog	replay-row			x							replay command in current row
 CommandLog	save-macro	z	^S	z^S							save macro
