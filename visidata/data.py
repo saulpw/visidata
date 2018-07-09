@@ -216,8 +216,6 @@ class DeferredSetColumn(Column):
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
-    commands = [
-    ]
     columns = [
         # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
         DeferredSetColumn('directory',

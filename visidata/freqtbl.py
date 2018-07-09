@@ -4,14 +4,14 @@ from visidata import *
 
 globalCommand('F', 'freq-col', 'vd.push(SheetFreqTable(sheet, cursorCol))')
 globalCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
-globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows', 'data-aggregate-summary')
+globalCommand('zF', 'freq-rows', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
 #option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
-ColumnsSheet.addCommand(ENTER, 'freq-col', 'vd.push(SheetFreqTable(source[0], cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
+ColumnsSheet.addCommand(ENTER, 'freq-col', 'vd.push(SheetFreqTable(source[0], cursorRow))')
 
 def valueNames(vals):
     return '-'.join(str(v) for v in vals)
@@ -26,10 +26,6 @@ def copy_update(obj, **kwargs):
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     rowtype = 'bins'
-    commands = [
-        # redefine these commands only to change the helpstr
-    ]
-
     def __init__(self, sheet, *columns):
         fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in columns))
         super().__init__(fqcolname, source=sheet)

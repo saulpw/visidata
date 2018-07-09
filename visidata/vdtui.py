@@ -67,25 +67,24 @@ def returnException(f, *args, **kwargs):
     except Exception as e:
         return e
 
-baseCommands = collections.OrderedDict()  # [cmd.longname] -> Command
+globalCommands = collections.OrderedDict()  # [cmd.longname] -> Command
+globalBindings = collections.OrderedDict()  # [keystrokes] -> cmd.longname
 baseOptions = collections.OrderedDict()   # [opt.name] -> opt
-
-keybindings = {}
 
 class Command:
     def __init__(self, longname, execstr):
         self.longname = longname
         self.execstr = execstr
 
-def globalCommand(longname, keystrokes, execstr):
+def globalCommand(keystrokes, longname, execstr):
     cmd = Command(longname, execstr)
-    baseCommands[longname] = cmd
+    globalCommands[longname] = cmd
 
     if keystrokes:
         bindkey(keystrokes, longname)
 
 def bindkey(keystrokes, longname):
-    keybindings[keystrokes] = longname
+    globalBindings[keystrokes] = longname
 
 
 class Option:
@@ -244,16 +243,6 @@ def input_longname(sheet):
                     if getattr(cmd, 'longname', None)
     ]
     return input("command name: ", completer=CompleteKey(sorted(set(longnames))))
-
-
-bindkey(ENTER, 'edit-cell')  # ENTER is this by default
-bindkey('gKEY_LEFT', 'go-leftmost'),
-bindkey('gKEY_RIGHT', 'go-rightmost'),
-bindkey('gKEY_UP', 'go-top'),
-bindkey('gKEY_DOWN', 'go-bottom'),
-
-bindkey('KEY_DC', 'setcell-none'),
-bindkey('gKEY_DC', 'setcol-none'),
 
 
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
@@ -895,21 +884,19 @@ class Colorizer:
 
 class BaseSheet:
     precious = True
-    commands = []
+    treedict = collections.defaultdict(collections.OrderedDict)  # [maptype] -> {[longname] -> obj}
+#    commands = collections.OrderedDict()
+#    keybindings = collections.OrderedDict()
+#    options = collections.OrderedDict()
     rowtype=''
+
     def __init__(self, name, **kwargs):
         self.name = name
         self.vd = vd()
 
-        # commands specific to this sheet
-        sheetcmds = collections.OrderedDict()
-        for cls in inspect.getmro(self.__class__)[::-1]:  # reverse of method-resolution-order
-            for cmd in getattr(cls, 'commands', []):
-                if cmd.name:
-                    sheetcmds[cmd.name] = cmd
-                if cmd.longname:
-                    sheetcmds[cmd.longname] = cmd
-        self._commands = collections.ChainMap(vd().macros, sheetcmds, baseCommands)
+        self._commands = self.makeChainMap('commands', globalCommands, vd().macros)
+        self._bindings = self.makeChainMap('bindings', globalBindings)
+        self._options = self.makeChainMap('options', baseOptions)
 
         # for progress bar
         self.progresses = []  # list of Progress objects
@@ -918,14 +905,25 @@ class BaseSheet:
         self.currentThreads = []
         self.__dict__.update(kwargs)
 
+
     @classmethod
-    def addCommand(cls, longname, keystrokes, execstr):
-        cmd = Command(longname, execstr)
-        cls.commands += [cmd]
-        if keystrokes in keybindings:
-            assert keybindings[keystrokes] == longname, '%s already bound to %s' % (keystrokes, keybindings[keystrokes])
-        keybindings[keystrokes] = longname
-        return cmd
+    def getMap(cls, mapname):
+        return BaseSheet.treedict[(mapname, cls)]
+
+    @classmethod
+    def addCommand(cls, keystrokes, longname, execstr):
+        commands = cls.getMap('command')
+        assert longname not in commands
+        commands[longname] = Command(longname, execstr)
+        if keystrokes:
+            cls.bindkey(keystrokes, longname)
+
+    @classmethod
+    def bindkey(cls, keystrokes, longname):
+        bindings = cls.getMap('bindings')
+        if bindings.get(keystrokes, longname) != longname:
+            warning( '%s already bound to %s' % (keystrokes, bindings[keystrokes]))
+        bindings[keystrokes] = longname
 
     def __bool__(self):
         'an instantiated Sheet always tests true'
@@ -942,9 +940,28 @@ class BaseSheet:
         'Compose left side of status bar for this sheet (overridable).'
         return options.disp_status_fmt.format(sheet=self)
 
+    def makeChainMap(self, attrname, *args):
+        'Return ChainMap for the container of "attrname", up our class hierarchy'
+        maps = [
+            cmds
+                for cls in inspect.getmro(self.__class__)[::-1]
+                    for cmds in self.getMap(attrname).values()
+               ] + list(args)
+        return collections.ChainMap(*maps)
+
+    def _getDeep(self, container, key):
+        bucket = getattr(BaseSheet, attrname)
+        for cls in inspect.getmro(self.__class__)[::-1]:  # reverse of method-resolution-order
+            cmd = bucket.get((cls, key), None)
+            if cmd:
+                return cmd
+
     def getCommand(self, keystrokes):
-        longname = keybindings[keystrokes]
-        return self._commands.get(longname)
+        longname = self._bindings[keystrokes]
+        return longname and self._commands[longname]
+
+    def getOption(self, optname):
+        return self._getDeep('option', optname)
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
         return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
@@ -1026,8 +1043,6 @@ class BaseSheet:
         pass
 
 class Sheet(BaseSheet):
-    commands = [
-    ]
     columns = []  # list of Column
     colorizers = [ # list of Colorizer
         Colorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr),
@@ -1732,6 +1747,15 @@ Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows 
 
 Sheet.addCommand('V', 'view-cell', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))'),
 
+Sheet.bindkey('gKEY_LEFT', 'go-leftmost'),
+Sheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
+Sheet.bindkey('gKEY_UP', 'go-top'),
+Sheet.bindkey('gKEY_DOWN', 'go-bottom'),
+
+Sheet.bindkey('KEY_DC', 'setcell-none'),
+Sheet.bindkey('gKEY_DC', 'setcol-none'),
+
+
 
 def isNullFunc():
     'Returns isNull function according to current options.'
@@ -2134,8 +2158,6 @@ def clipstr(s, dispw):
 class TextSheet(Sheet):
     'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
     rowtype = 'lines'
-    commands = [
-    ]
     filetype = 'txt'
 
     def __init__(self, name, source, **kwargs):

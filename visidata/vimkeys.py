@@ -1,14 +1,14 @@
-from visidata import alias
+from visidata import bindkey
 
-alias('h', 'view-go-left'),
-alias('j', 'view-go-down'),
-alias('k', 'view-go-up'),
-alias('l', 'view-go-right'),
-alias('^F', 'view-go-page-down'),
-alias('^B', 'view-go-page-up'),
-alias('gg', 'view-go-far-top'),
-alias('gk', 'view-go-far-top'),
-alias('G',  'view-go-far-bottom'),
-alias('gj', 'view-go-far-bottom'),
-alias('gh', 'view-go-far-left'),
-alias('gl', 'view-go-far-right')
+bindkey('h', 'go-left'),
+bindkey('j', 'go-down'),
+bindkey('k', 'go-up'),
+bindkey('l', 'go-right'),
+bindkey('^F', 'next-page'),
+bindkey('^B', 'prev-page'),
+bindkey('gg', 'go-top'),
+bindkey('G',  'go-bottom'),
+bindkey('gj', 'go-bottom'),
+bindkey('gk', 'go-top'),
+bindkey('gh', 'go-leftmost'),
+bindkey('gl', 'go-rightmost')

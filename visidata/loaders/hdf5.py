@@ -2,11 +2,6 @@ from visidata import *
 
 class SheetH5Obj(Sheet):
     'Support sheets in HDF5 format.'
-    commands = [
-        Command(ENTER, 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), source=cursorRow))', 'open this group or dataset'),
-        Command('A', 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))', 'open metadata sheet for this object')
-    ]
-
     def reload(self):
         import h5py
         if isinstance(self.source, h5py.Group):
@@ -29,6 +24,9 @@ class SheetH5Obj(Sheet):
         else:
             status('unknown h5 object type %s' % type(self.source))
         self.recalc()
+
+SheetH5Obj.addCommand(ENTER, 'dive-row', 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), source=cursorRow))')
+SheetH5Obj.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))')
 
 class open_hdf5(SheetH5Obj):
     def __init__(self, p):

@@ -9,11 +9,9 @@ globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=v
 globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
 globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
 globalCommand('O', 'options', 'vd.push(vd.optionsSheet)')
-globalCommand('zKEY_F(1)', 'vd.push(HelpSheet(name + "_commands", source=sheet))', 'view sheet of commands and keybindings', 'meta-commands')
+globalCommand('zKEY_F(1)', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet))')
 
-Sheet.commands += [
-    Command('C', 'columns-sheet', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=[sheet]))'),
-]
+Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=[sheet]))')
 
 
 class ColumnsSheet(Sheet):
@@ -40,10 +38,6 @@ class ColumnsSheet(Sheet):
             Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
             Colorizer('row', 6, lambda self,c,r,v: options.color_hidden_col if r.hidden else None),
     ]
-    commands = [
-        Command('column-source-width-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
-        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or error("no columns selected to concatenate")))', 'add column from concatenating selected source columns'),
-    ]
     def reload(self):
         if len(self.source) == 1:
             self.rows = self.source[0].columns
@@ -52,17 +46,13 @@ class ColumnsSheet(Sheet):
         else:
             self.rows = [col for vs in self.source for col in vs.visibleCols if vs is not self]
 
+ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)')
+ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or error("no columns selected to concatenate")))')
+
+
 class SheetsSheet(Sheet):
     rowtype = 'sheets'
     precious = False
-    commands = [
-        Command(ENTER, 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)', 'replace this sheet with sheet referenced in current row'),
-        Command('g'+ENTER, 'for vs in selectedRows: vd.push(vs)', 'push selected sheets to top of sheets stack'),
-        Command('g^R', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets', 'reload-all'),
-        Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
-        Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
-        Command('gI', 'vd.push(DescribeSheet("describe_all", source=selectedRows or rows[1:]))', 'open Describe Sheet with all columns from selected sheets', 'sheet-describe-selected'),
-    ]
     columns = [
         ColumnAttr('name', width=30),
         ColumnAttr('nRows', type=int),
@@ -81,6 +71,12 @@ class SheetsSheet(Sheet):
     def reload(self):
         self.rows = self.source
 
+SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
+SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
+SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
+SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))')
+SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))')
+SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows or rows[1:]))')
 
 # source: vd.allSheets (with BaseSheet as weakref keys)
 class GraveyardSheet(SheetsSheet):
@@ -112,14 +108,9 @@ class HelpSheet(Sheet):
         for src in self.source._commands.maps:
             self.rows.extend(src.values())
 
-
 class OptionsSheet(Sheet):
     rowtype = 'options'
     precious = False
-    commands = [
-        Command(ENTER, 'editOption(cursorRow)', 'edit option', 'set-row-input'),
-        Command('e', 'set-row-input')
-    ]
     columns = (ColumnAttr('option', 'name'),
                ColumnAttr('value'),
                ColumnAttr('default'),
@@ -138,6 +129,9 @@ class OptionsSheet(Sheet):
 
     def reload(self):
         self.rows = list(self.source._opts.values())
+
+OptionsSheet.addCommand(ENTER, 'edit-row', 'editOption(cursorRow)')
+OptionsSheet.bindkey('e', 'edit-row')
 
 vd().optionsSheet = OptionsSheet('options', source=options)
 vd().sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
@@ -158,19 +152,15 @@ def createJoinedSheet(sheets, jointype=''):
 jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
 
 # used ColumnsSheet, affecting the 'row' (source column)
-columnCommands = [
-        Command('g!', 'for c in selectedRows or [cursorRow]: c.sheet.toggleKeyColumn(c)', 'toggle selected rows as key columns on source sheet'),
-        Command('gz!', 'for c in selectedRows or [cursorRow]: c.sheet.keyCols.remove(c)', 'unset selected rows as key columns on source sheet'),
-        Command('g-', 'for c in selectedRows or [cursorRow]: c.hide()', 'hide selected source columns on source sheet'),
-        Command('g%', 'for c in selectedRows or [cursorRow]: c.type = float', 'set type of selected source columns to float'),
-        Command('g#', 'for c in selectedRows or [cursorRow]: c.type = int', 'set type of selected source columns to int'),
-        Command('g@', 'for c in selectedRows or [cursorRow]: c.type = date', 'set type of selected source columns to date'),
-        Command('g$', 'for c in selectedRows or [cursorRow]: c.type = currency', 'set type of selected columns to currency'),
-        Command('g~', 'for c in selectedRows or [cursorRow]: c.type = str', 'set type of selected columns to str'),
-        Command('gz~', 'for c in selectedRows or [cursorRow]: c.type = anytype', 'set type of selected columns to anytype'),
-    ]
-
-ColumnsSheet.commands += columnCommands
+ColumnsSheet.addCommand('g!', 'key-selected', 'for c in selectedRows or [cursorRow]: c.sheet.toggleKeyColumn(c)')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in selectedRows or [cursorRow]: c.sheet.keyCols.remove(c)')
+ColumnsSheet.addCommand('g-', 'hide-selected', 'for c in selectedRows or [cursorRow]: c.hide()')
+ColumnsSheet.addCommand('g%', 'type-float-selected', 'for c in selectedRows or [cursorRow]: c.type = float')
+ColumnsSheet.addCommand('g#', 'type-int-selected', 'for c in selectedRows or [cursorRow]: c.type = int')
+ColumnsSheet.addCommand('g@', 'type-date-selected', 'for c in selectedRows or [cursorRow]: c.type = date')
+ColumnsSheet.addCommand('g$', 'type-currency-selected', 'for c in selectedRows or [cursorRow]: c.type = currency')
+ColumnsSheet.addCommand('g~', 'type-string-selected', 'for c in selectedRows or [cursorRow]: c.type = str')
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'for c in selectedRows or [cursorRow]: c.type = anytype')
 
 
 #### slicing and dicing

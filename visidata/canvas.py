@@ -307,8 +307,6 @@ class Canvas(Plotter):
     topMarginPixels = 0
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
-    commands = Plotter.commands
-
     def __init__(self, name='canvas', source=None, **kwargs):
         super().__init__(name, source=source, **kwargs)
 
@@ -626,20 +624,20 @@ Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-
 Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = cursorBox.ymin')
 Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = cursorBox.ymax-cursorBox.h')
 
-Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth', '')
-Canvas.addCommand('zl', 'go-right-small' 'sheet.cursorBox.xmin += canvasCharWidth', '')
-Canvas.addCommand('zj', 'go-down-small' 'sheet.cursorBox.ymin += canvasCharHeight', '')
-Canvas.addCommand('zk', 'go-up-small' 'sheet.cursorBox.ymin -= canvasCharHeight', '')
+Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth')
+Canvas.addCommand('zl', 'go-right-small', 'sheet.cursorBox.xmin += canvasCharWidth')
+Canvas.addCommand('zj', 'go-down-small', 'sheet.cursorBox.ymin += canvasCharHeight')
+Canvas.addCommand('zk', 'go-up-small', 'sheet.cursorBox.ymin -= canvasCharHeight')
 
-Canvas.addCommand('gH', 'resize-cursor-halfwide', 'sheet.cursorBox.w /= 2', ''),
-Canvas.addCommand('gL', 'resize-cursor-doublewide', 'sheet.cursorBox.w *= 2', '')
-Canvas.addCommand('gJ','resize-cursor-halfheight', 'sheet.cursorBox.h /= 2', ''),
-Canvas.addCommand('gK', 'resize-cursor-doubleheight', 'sheet.cursorBox.h *= 2', '')
+Canvas.addCommand('gH', 'resize-cursor-halfwide', 'sheet.cursorBox.w /= 2')
+Canvas.addCommand('gL', 'resize-cursor-doublewide', 'sheet.cursorBox.w *= 2')
+Canvas.addCommand('gJ','resize-cursor-halfheight', 'sheet.cursorBox.h /= 2')
+Canvas.addCommand('gK', 'resize-cursor-doubleheight', 'sheet.cursorBox.h *= 2')
 
-Canvas.addCommand('H', 'resize-cursor-thinner', 'sheet.cursorBox.w -= canvasCharWidth', '')
-Canvas.addCommand('L', 'resize-cursor-wider', 'sheet.cursorBox.w += canvasCharWidth', '')
-Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight', '')
-Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', '')
+Canvas.addCommand('H', 'resize-cursor-thinner', 'sheet.cursorBox.w -= canvasCharWidth')
+Canvas.addCommand('L', 'resize-cursor-wider', 'sheet.cursorBox.w += canvasCharWidth')
+Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight')
+Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight')
 Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)')
 
 Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)')

@@ -16,9 +16,7 @@ class xlsxContents(Sheet):
         ColumnAttr('nCols', type=int),
     ]
     nKeys = 1
-    commands = [
-        Command(ENTER, 'vd.push(cursorRow)', 'load the entire table into memory')
-    ]
+
     def __init__(self, path):
         super().__init__(path.name, source=path)
         self.workbook = None
@@ -33,6 +31,7 @@ class xlsxContents(Sheet):
             vs.reload()
             self.rows.append(vs)
 
+xlsxContents.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
 class xlsxSheet(Sheet):
     @asyncthread
@@ -54,9 +53,6 @@ class xlsxSheet(Sheet):
 class open_xls(Sheet):
     'Load XLS file (in Excel format).'
     rowtype = 'sheets'  # rowdef: xlsSheet
-    commands = [
-        Command(ENTER, 'vd.push(cursorRow)', 'load the entire table into memory')
-    ]
     columns = [
         Column('sheet', getter=lambda col,row: row.source.name),  # xls sheet name
         ColumnAttr('name', width=0),  # visidata sheet name
@@ -78,6 +74,7 @@ class open_xls(Sheet):
             vs.reload()
             self.rows.append(vs)
 
+open_xls.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
 class xlsSheet(Sheet):
     @asyncthread

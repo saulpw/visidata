@@ -38,13 +38,6 @@ class XmlSheet(Sheet):
         ColumnAttr('text'),
         ColumnAttr('tail', width=0),
     ]
-
-    commands = [
-        Command('za', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)', 'add column for xml attribute'),
-        Command('v', 'showColumnsBasedOnRow(cursorRow)', 'show only columns in current row attributes', ),
-        Command(ENTER, 'r=cursorRow; vd.push(XmlSheet("%s_%s" % (unns(r.tag), r.attrib.get("id")), source=r))', 'dive into this element')
-    ]
-
     colorizers = [
             Colorizer('row', 8, lambda self,c,r,v: 'green' if r is self.source else None)
     ]
@@ -75,3 +68,8 @@ class XmlSheet(Sheet):
                 self.addColumn(c)
                 self.attribcols[k] = c
                 c.nstag = k
+
+XmlSheet.addCommand('za', 'add-column', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)')
+XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)')
+XmlSheet.addCommand(ENTER, 'dive-row', 'r=cursorRow; vd.push(XmlSheet("%s_%s" % (unns(r.tag), r.attrib.get("id")), source=r))')
+

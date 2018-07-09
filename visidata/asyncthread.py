@@ -11,13 +11,11 @@ option('profile', '', 'filename to save binary profiling data')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
 globalCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))')
-globalCommand('g^C', 'cancel-all' 'cancelThread(*vd.threads or error("no threads"))')
+globalCommand('g^C', 'cancel-all', 'cancelThread(*vd.threads or error("no threads"))')
 globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)')
 globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())')
 
 class ProfileSheet(TextSheet):
-    commands = TextSheet.commands
-    ]
     def __init__(self, name, pr):
         super().__init__(name, getProfileResults(pr).splitlines())
         self.profile = pr
@@ -95,8 +93,6 @@ SheetsSheet.columns += [
 # each row is an augmented threading.Thread object
 class ThreadsSheet(Sheet):
     rowtype = 'threads'
-    commands = [
-    ]
     columns = [
         ColumnAttr('name'),
         Column('process_time', type=float, getter=lambda col,row: elapsed_s(row)),

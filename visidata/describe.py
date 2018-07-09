@@ -41,8 +41,6 @@ class DescribeSheet(ColumnsSheet):
             DescribeColumn('mean',   type=float),
             DescribeColumn('stdev',  type=float),
     ]
-    commands = [
-    ]
     colorizers = [
         Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
     ]

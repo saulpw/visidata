@@ -92,8 +92,6 @@ class CommandLog(Sheet):
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
-    commands = [
-    ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 
     paused = False
