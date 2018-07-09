@@ -33,6 +33,9 @@ global	sysopen-help		^H	^H	external	n	n	n
 global	threads-all		^T	^T	meta	n	n	n		meta-threads	open Threads Sheet
 global	toggle-profile		^_	^_	n	n	n	n		meta-threads-profile	turn profiling on for main process
 global	visidata-dir	g	D	gD	static	n	n	y		meta-visidata-dir	open .visidata directory
+ThreadsSheet	cancel-thread		^C	^C				n		cancel-thread	abort thread at current row
+ThreadsSheet	profile-row		Enter	Enter						sheet-profile	push profile sheet for this action
+SheetsSheet	cancel-sheet		^C	^C				n		cancel-thread	abort all threads on sheet at cursor
 Sheet	add-row		a	a	n	n	y	y	3	modify-add-row-blank	insert a blank row
 Sheet	add-rows	g	a	ga	n	n	y	y	3	modify-add-row-many	add N blank rows
 Sheet	addcol-bulk	gz	a	gza	n	n	y	y		modify-add-column-manyblank	add N empty columns
@@ -194,6 +197,7 @@ Sheet	unselect-row		u	u	n	change	n	y		rows-unselect-current	unselect current row
 Sheet	unselect-rows	g	u	gu	n	change	n	y	2,5	rows-unselect-all	unselect all rows
 Sheet	view-cell		V	V	derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
 Sheet	visibility		v	v	n	n	n	y			
+ProfileSheet	save-profile	z	^S	^S	n	n	n	n		sheet-save-profile	save profile
 ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
 Canvas				BUTTON4_PRESSED							zoom in with scroll wheel
 Canvas				gu							unselect rows on source sheet visible on screen

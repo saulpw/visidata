@@ -16,12 +16,13 @@ globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)')
 globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())')
 
 class ProfileSheet(TextSheet):
-    commands = TextSheet.commands + [
-        Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile', 'sheet-save-profile'),
+    commands = TextSheet.commands
     ]
     def __init__(self, name, pr):
         super().__init__(name, getProfileResults(pr).splitlines())
         self.profile = pr
+
+ProfileSheet.addCommand('z^S', 'save-profile', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))')
 
 def toggleProfiling(t):
     if not t.profile:
@@ -85,9 +86,7 @@ def cancelThread(*threads, exception=EscapeException):
         ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(t.ident), ctypes.py_object(exception))
 
 
-SheetsSheet.commands += [
-    Command('^C', 'cancelThread(*cursorRow.currentThreads)', 'abort all threads on sheet at cursor', 'cancel-thread'),
-]
+SheetsSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*cursorRow.currentThreads)')
 
 SheetsSheet.columns += [
     ColumnAttr('threads', 'currentThreads', type=len),
@@ -97,9 +96,6 @@ SheetsSheet.columns += [
 class ThreadsSheet(Sheet):
     rowtype = 'threads'
     commands = [
-        Command('d', 'cancelThread(cursorRow)', 'abort thread at current row', 'cancel-thread'),
-        Command('^C', 'd'),
-        Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action', 'sheet-profile'),
     ]
     columns = [
         ColumnAttr('name'),
@@ -109,6 +105,9 @@ class ThreadsSheet(Sheet):
     ]
     def reload(self):
         self.rows = vd().threads
+
+ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)')
+ThreadsSheet.addCommand(ENTER, 'profile-row', 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))')
 
 def elapsed_s(t):
     return (t.endTime or time.process_time())-t.startTime
