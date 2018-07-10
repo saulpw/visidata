@@ -20,7 +20,7 @@ global	pyobj-sheet	g	^Y	g^Y	meta	n	n	y		python-push-sheet-object	open current sh
 global	quit-all	g	q	gq	quit	n	n	n		sheet-quit-all	quit all sheets (clean exit)
 global	quit-sheet		q	q	quit	n	n	y	*	sheet-quit-current	quit current sheet
 global	redraw		^L	^L	n	n	n	n			refresh screen
-global	reload-all	g	^R	g^R	n	n		y		reload-all	reload all selected sheets
+global	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
 global	save-all	g	^S	g^S	n	n	n	y		sheet-save-all	save all sheets to given file or directory)
 global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd file
 global	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
@@ -35,33 +35,33 @@ global	sysopen-help		^H	^H	external	n	n	n
 global	threads-all		^T	^T	meta	n	n	n		meta-threads	open Threads Sheet
 global	toggle-profile		^_	^_	n	n	n	n		meta-threads-profile	turn profiling on for main process
 global	visidata-dir	g	D	gD	static	n	n	y		meta-visidata-dir	open .visidata directory
-XmlSheet	addcol-xmlattr	z	a		n	n	n	y			add column for xml attribute
-XmlSheet	dive-row		v		y	n	n	y			
-XmlSheet	visibility		v		n	n	n	y			show only columns in current row attributes
-ThreadsSheet	cancel-thread		^C	^C				n		cancel-thread	abort thread at current row
-ThreadsSheet	profile-row		^J	^J						sheet-profile	push profile sheet for this action
-SheetsSheet	cancel-sheet		^C	^C				n		cancel-thread	abort all threads on sheet at cursor
-SheetsSheet	columns-selected	g	C		y	y	n	y		sheet-columns-selected	merge the selected sheets with visible columns from all, keeping rows according to jointype
-SheetsSheet	describe-selected	g	I		y	y	n	y		sheet-describe-selected	open Describe Sheet with all columns from selected sheets
-SheetsSheet	join-sheets		&		y	y	n	y		sheet-join	merge the selected sheets with visible columns from all, keeping rows according to jointype
-SheetsSheet	open-row		^J	^J	y	n	n	y		sheet-open-row	open sheet referenced in current row
-SheetsSheet	open-rows	g	^J	g^J		use	n	y		sheet-open-rows	push selected sheets to top of sheets stack
-SheetsSheet	reload-all	g	^R	g^R	n	n		y		reload-all	reload all selected sheets
+XmlSheet	addcol-xmlattr	z	a	za	n	n	y	y			add column for xml attribute
+XmlSheet	dive-row		ENTER	ENTER	y	n	n	y			
+XmlSheet	visibility		v	v	n	n	n	y			show only columns in current row attributes
+ThreadsSheet	cancel-thread		^C	^C	n	n	n	n		cancel-thread	abort thread at current row
+ThreadsSheet	profile-row		ENTER	ENTER	y	n	n	n		sheet-profile	push profile sheet for this action
+SheetsSheet	cancel-sheet		^C	^C	n	n	n	n		cancel-thread	abort all threads on sheet at cursor
+SheetsSheet	columns-selected	g	C	gC	y	y	n	y		sheet-columns-selected	merge the selected sheets with visible columns from all, keeping rows according to jointype
+SheetsSheet	describe-selected	g	I	gI	y	y	n	y		sheet-describe-selected	open Describe Sheet with all columns from selected sheets
+SheetsSheet	join-sheets		&	&	y	y	n	y		sheet-join	merge the selected sheets with visible columns from all, keeping rows according to jointype
+SheetsSheet	open-row		ENTER	ENTER	y	n	n	y		sheet-open-row	open sheet referenced in current row
+SheetsSheet	open-rows	g	ENTER	gENTER	y	use	n	y		sheet-open-rows	push selected sheets to top of sheets stack
+SheetsSheet	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
 SheetPivot	dive-cell	z	ENTER	zENTER	y	n	n	y		open-source-cell	open sheet of source rows aggregated in current cell
 SheetPivot	dive-row		ENTER	ENTER	y	n	n	y		open-source-row	open sheet of source rows aggregated in current row
-SheetObject	dive-row		ENTER		y	n	n	y		python-dive-row	dive further into Python object
-SheetObject	edit-cell		e		n	n	y	y			
-SheetObject	hide-hidden	z	v		n	n	n	y			
-SheetObject	show-hidden	g	v		n	n	n	y			
-SheetObject	visibility		v		n	n	n	y			
-SheetNamedTuple	dive-row		ENTER		y						
+SheetObject	dive-row		ENTER	ENTER	y	n	n	y		python-dive-row	dive further into Python object
+SheetObject	edit-cell		e	e	n	n	y	y			edit contents of current cell
+SheetObject	hide-hidden	z	v	zv	n	n	n	y			hide methods and hidden properties
+SheetObject	show-hidden	g	v	gv	n	n	n	y			show methods and hidden properties
+SheetObject	visibility		v	v	n	n	n	y			toggle show/hide for methods and hidden properties
+SheetNamedTuple	dive-row		ENTER	ENTER	y	n	n	y			
 SheetH5Obj	dive-metadata		A	A	y	n	n	y			open metadata sheet for this object
-SheetH5Obj	dive-row		ENTER	ENTER	y	n	n	y			
-SheetFreqTable	dup-row		^J	^J						open-cell-source	open copy of source sheet with rows described in current cell
-SheetFreqTable	select-row		s	s						filter-source-select-bin	select these entries in source sheet
-SheetFreqTable	stoggle-row		t	t						filter-source-toggle-bin	toggle these entries in source sheet
-SheetFreqTable	unselect-row		u	u						filter-source-unselect-bin	unselect these entries in source sheet
-SheetDict	dive-row		ENTER		y	n	n	y		python-dive-row	dive further into Python object
+SheetH5Obj	dive-row		ENTER	ENTER	y	n	n	y			load table referenced in current row into memory
+SheetFreqTable	dup-row		ENTER	ENTER	y	n	n	y		open-cell-source	open copy of source sheet with rows described in current cell
+SheetFreqTable	select-row		s	s	n	change	n	y		filter-source-select-bin	select these entries in source sheet
+SheetFreqTable	stoggle-row		t	t	n	change	n	y		filter-source-toggle-bin	toggle these entries in source sheet
+SheetFreqTable	unselect-row		u	u	n	change	n	y		filter-source-unselect-bin	unselect these entries in source sheet
+SheetDict	dive-row		ENTER	ENTER	y	n	n	y		python-dive-row	dive further into Python object
 SheetDict	edit-cell		e		n	n	y	y		modify-edit-cell	edit contents of current cell
 Sheet	add-row		a	a	n	n	y	y	3	modify-add-row-blank	insert a blank row
 Sheet	add-rows	g	a	ga	n	n	y	y	3	modify-add-row-many	add N blank rows
@@ -86,8 +86,8 @@ Sheet	delete-row		d	d	n	n	y	y	1,2,5	modify-delete-row	delete current row and mov
 Sheet	delete-selected	g	d	gd	n	use	y	y	5	modify-delete-selected	delete selected rows and move them to clipboard
 Sheet	describe		I	I	derived	n	n	y		data-describe	open descriptive statistics for all visible columns
 Sheet	describe-all	g	I	gI	derived	n	n	y		data-describe-all	open descriptive statistics for all visible columns on all sheets
-Sheet	dive-cell	z	^J	z^J	derived	n	n	y			
-Sheet	dive-row		^J	^J	derived	n	n	y			
+Sheet	dive-cell	z	ENTER	zENTER	derived	n	n	y			
+Sheet	dive-row		ENTER	ENTER	derived	n	n	y			
 Sheet	dup-rows	g	"	g"	derived	use	n	y		sheet-duplicate-all	open duplicate sheet with all rows
 Sheet	dup-rows-deep	gz	"	gz"	copy	use	n	y		sheet-duplicate-deepcopy	open duplicate sheet with deepcopy of all rows
 Sheet	dup-selected		"	"	derived	use	n	y	2	sheet-duplicate-selected	open duplicate sheet with only selected rows
@@ -235,23 +235,23 @@ Sheet	unselect-row		u	u	n	change	n	y		rows-unselect-current	unselect current row
 Sheet	unselect-rows	g	u	gu	n	change	n	y	2,5	rows-unselect-all	unselect all rows
 Sheet	view-cell		V	V	derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
 Sheet	visibility		v	v	n	n	n	y			
-ProfileSheet	save-profile	z	^S	^S	n	n	n	n		sheet-save-profile	save profile
-Plotter	redraw		^L	^L							redraw all pixels on canvas
-Plotter	visibility		v	v							toggle show_graph_labels
-PNGSheet	plot-sheet		.		y	n	n	y		data-plot-png	plot this png
-MbtilesSheet	dive-row		ENTER		y	n	n	y			
-MbtilesSheet	plot-row	g	.		y	n	n	y			
-DirSheet	delete-row									modify-delete-row	
-DirSheet	delete-selected									modify-delete-selected	
-DirSheet	open-row		^J	^J	y	n	n	y		sheet-open-row	open current file as a new sheet
-DirSheet	open-rows	g	^J	g^J		use	n	y		sheet-open-rows	open selected files as new sheets
-DirSheet	reload-row	z	^R	z^R						sheet-specific-apply-edits	undo pending changes to current row
-DirSheet	save-sheet		^S	^S						sheet-specific-apply-edits	apply all changes on all rows
-DirSheet	save-sheet	z	^S	z^S						sheet-specific-apply-edits	apply changes to current row
-DirSheet	sysopen-row		^O	^O	external				1	edit-row-external	open current file in external $EDITOR
-DirSheet	sysopen-rows	g	^O	g^O	external				1	edit-rows-external	open selected files in external $EDITOR
-DescribeSheet	dup-cell	z	^J	z^J						open-cell-source	open copy of source sheet with rows described in current cell
-DescribeSheet	freq-row			^J						data-aggregate-source-column	open a Frequency Table sheet grouped on column referenced in current row
+ProfileSheet	save-profile	z	^S	z^S	n	n	n	y		sheet-save-profile	save profile
+Plotter	redraw		^L	^L	n	n	n	n			redraw all pixels on canvas
+Plotter	visibility		v	v	n	n	n	y			toggle show_graph_labels
+PNGSheet	plot-sheet		.	.	y	n	n	y		data-plot-png	plot this png
+MbtilesSheet	dive-row		ENTER	ENTER	y	n	n	y			load table referenced in current row into memory
+MbtilesSheet	plot-row	g	.	g.	y	n	n	y			
+DirSheet	delete-row				n	n	y			modify-delete-row	
+DirSheet	delete-selected				n	use	y			modify-delete-selected	
+DirSheet	open-row		ENTER	ENTER	y	n	n			sheet-open-row	open current file as a new sheet
+DirSheet	open-rows	g	ENTER	gENTER		use	n			sheet-open-rows	open selected files as new sheets
+DirSheet	reload-row	z	^R	z^R	n	n	unmodifies			sheet-specific-apply-edits	undo pending changes to current row
+DirSheet	save-sheet		^S	^S	n	n	n			sheet-specific-apply-edits	apply all changes on all rows
+DirSheet	save-row	z	^S	z^S	n	n	n			sheet-specific-apply-edits	apply changes to current row
+DirSheet	sysopen-row		^O	^O	external	n			1	edit-row-external	open current file in external $EDITOR
+DirSheet	sysopen-rows	g	^O	g^O	external	use			1	edit-rows-external	open selected files in external $EDITOR
+DescribeSheet	dup-cell	z	ENTER	zENTER						open-cell-source	open copy of source sheet with rows described in current cell
+DescribeSheet	freq-row			ENTER						data-aggregate-source-column	open a Frequency Table sheet grouped on column referenced in current row
 DescribeSheet	select-cell	z	s	zs						rows-select-source-cell	select rows on source sheet which are being described in current cell
 DescribeSheet	unselect-cell	z	u	zu						rows-unselect-source-cell	unselect rows on source sheet which are being described in current cell
 CommandLog	replay-all	g	x	gx							replay contents of entire CommandLog
@@ -261,7 +261,7 @@ CommandLog	stop-replay			^C							abort replay
 ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
 ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
 ColumnsSheet	freq-col		ENTER	ENTER	derived	n	n	y		data-aggregate-source-column	open Frequency Table grouped on column referenced in current row
-ColumnsSheet	freq-col		^J	^J						data-aggregate-source-column	open a Frequency Table grouped on column referenced in current row
+ColumnsSheet	freq-col		ENTER	ENTER						data-aggregate-source-column	open a Frequency Table grouped on column referenced in current row
 ColumnsSheet	hide-selected	g	-	g-	n	use	n	y		column-hide-selected	hide selected columns on source sheet
 ColumnsSheet	join-cols		&	&	n	use	n	y			add column from concatenating selected source columns
 ColumnsSheet	key-off-selected	gz	!	gz!	n	use	n	y			unset selected rows as key columns on source sheet
@@ -275,8 +275,8 @@ ColumnsSheet	type-int-selected	g	#	#	n	n	n	y	2	column-type-int-selected	set type
 ColumnsSheet	type-string-selected	g	~	~	n	n	n	y	1	column-type-str-selected	set type of selected columns to str
 Canvas	delete-cursor		d	d							delete rows on source sheet contained within canvas cursor
 Canvas	delete-visible	g	d	gd							delete rows on source sheet visible on screen
-Canvas	dive-cursor		^J	^J							open sheet of source rows contained within canvas cursor
-Canvas	dive-visible	g	^J	g^J							open sheet of source rows visible on screen
+Canvas	dive-cursor		ENTER	ENTER							open sheet of source rows contained within canvas cursor
+Canvas	dive-visible	g	ENTER	gENTER							open sheet of source rows visible on screen
 Canvas	end-cursor			BUTTON1_RELEASED							end cursor box with left mouse button release
 Canvas	end-move			BUTTON3_RELEASED							mark canvas anchor point
 Canvas	go-bottom										
