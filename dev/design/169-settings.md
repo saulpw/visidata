@@ -2,10 +2,10 @@
 
 ## I. Layers of settings
 
-a. User input and the command-line options always override stored defaults.
-b. `.visidatarc` can set options explicitly for any layer.
-c. Settings are named globally uniquely.
-d. These layers may apply to any of these settings.  The first applicable layer is used:
+- a. User input and the command-line options always override stored defaults.
+- b. `.visidatarc` can set options explicitly for any layer.
+- c. Settings are named globally uniquely.
+- d. These layers may apply to any of these settings.  The first applicable layer is used:
 
    1. in session via meta-sheet
    2. command line (options only)
