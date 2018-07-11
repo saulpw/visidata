@@ -276,10 +276,10 @@ ColumnsSheet	type-date-selected	g	@	g@	n	n	n	y		column-type-date-selected	set ty
 ColumnsSheet	type-float-selected	g	%	g%	n	n	n	y	2,3	column-type-float-selected	set type of selected columns to float
 ColumnsSheet	type-int-selected	g	#	g#	n	n	n	y	2	column-type-int-selected	set type of selected columns to int
 ColumnsSheet	type-string-selected	g	~	g~	n	n	n	y	1	column-type-str-selected	set type of selected columns to str
-Canvas	delete-cursor		d	d	n	n		n			delete rows on source sheet contained within canvas cursor
-Canvas	delete-visible	g	d	gd	n	n		n			delete rows on source sheet visible on screen
-Canvas	dive-cursor		ENTER	ENTER	y	n	n	n			open sheet of source rows contained within canvas cursor
-Canvas	dive-visible	g	ENTER	gENTER	y	n	n	n			open sheet of source rows visible on screen
+Canvas	delete-cursor		d	d	n	n	source	y			delete rows on source sheet contained within canvas cursor
+Canvas	delete-visible	g	d	gd	n	n	source	y			delete rows on source sheet visible on screen
+Canvas	dive-cursor		ENTER	ENTER	y	n	n	y			open sheet of source rows contained within canvas cursor
+Canvas	dive-visible	g	ENTER	gENTER	y	n	n	y			open sheet of source rows visible on screen
 Canvas	end-cursor			BUTTON1_RELEASED	n	n	n	n			end cursor box with left mouse button release
 Canvas	end-move			BUTTON3_RELEASED	n	n	n	n			mark canvas anchor point
 Canvas	go-bottom				n	n	n	n			
@@ -302,19 +302,18 @@ Canvas	resize-cursor-shorter		K	K	n	n	n	n
 Canvas	resize-cursor-taller		J	J	n	n	n	n			
 Canvas	resize-cursor-thinner		H	H	n	n	n	n			
 Canvas	resize-cursor-wider		L	L	n	n	n	n			
-Canvas	select-cursor		s	s	n	change	n	n			select rows on source sheet contained within canvas cursor
-Canvas	select-visible	g	s	gs	n	change	n	n			select rows on source sheet visible on screen
+Canvas	select-cursor		s	s	n	change	n	y			select rows on source sheet contained within canvas cursor
+Canvas	select-visible	g	s	gs	n	change	n	y			select rows on source sheet visible on screen
 Canvas	set-aspect	z	_	z_	n	n	n	n			set aspect ratio
 Canvas	start-cursor			BUTTON1_PRESSED	n	n	n	n			start cursor box with left mouse button press
 Canvas	start-move			BUTTON3_PRESSED	n	n	n	n			mark grid point to move
-Canvas	stoggle-cursor		t	t	n	change	n	n			toggle selection of rows on source sheet contained within canvas cursor
-Canvas	stoggle-visible	g	t	gt	n	change	n	n			toggle selection of rows on source sheet visible on screen
-Canvas	unselect-cursor		u	u	n	change	n	n			unselect rows on source sheet contained within canvas cursor
-Canvas	unselect-visible	g	u	gu	n	change	n	n			unselect rows on source sheet visible on screen
+Canvas	stoggle-cursor		t	t	n	change	n	y			toggle selection of rows on source sheet contained within canvas cursor
+Canvas	stoggle-visible	g	t	gt	n	change	n	y			toggle selection of rows on source sheet visible on screen
+Canvas	unselect-cursor		u	u	n	change	n	y			unselect rows on source sheet contained within canvas cursor
+Canvas	unselect-visible	g	u	gu	n	change	n	y			unselect rows on source sheet visible on screen
 Canvas	zoom-all		_	_	n	n	n	n			zoom to fit full extent
 Canvas	zoom-cursor			zz	n	n	n	n			set visible bounds to cursor
 Canvas	zoomin-cursor		+	+	n	n	n	n			zoom into cursor center
 Canvas	zoomin-mouse			BUTTON4_PRESSED	n	n	n	n			zoom in with scroll wheel
 Canvas	zoomout-cursor			-	n	n	n	n			zoom out from cursor center
 Canvas	zoomout-mouse			REPORT_MOUSE_POSITION	n	n	n	n			zoom out with scroll wheel
-				z^R				n			clear cache for current column
