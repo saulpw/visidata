@@ -694,8 +694,10 @@ delimiter to use for tsv filetype
 specify file type
 .It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
 specify default file type to save as
-.It Sy --tsv-safe-char Ns = Ns Ar "str         " No "\[u00B7]"
-replacement for all tabs and newlines when saving to tsv
+.It Sy --tsv-safe-newline Ns = Ns Ar "str      " No ""
+replacement for tab character when saving to tsv
+.It Sy --tsv-safe-tab Ns = Ns Ar "str          " No ""
+replacement for newline character when saving to tsv
 .It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No ""
 command to copy stdin to system clipboard
 .It Sy --pyobj-show-hidden Ns = Ns Ar "bool    " No "False"
@@ -724,7 +726,7 @@ show axes and legend on graph
 list of distinct colors to use for plotting distinct objects
 .It Sy --zoom-incr Ns = Ns Ar "float           " No "2.0"
 amount to multiply current zoomlevel when zooming
-.It Sy --motd-url Ns = Ns Ar "str              " No "http://visidata.org/motd-1.2.1"
+.It Sy --motd-url Ns = Ns Ar "str              " No "https://visidata.org/motd-1.2.1"
 source of randomized startup messages
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
@@ -786,6 +788,8 @@ color of the header for the cursor column
 .It Sy "color_column_sep   " No "246 blue"
 color of column separators
 .It Sy "color_key_col      " No "81 cyan"
+color of key columns
+.It Sy "color_hidden_col   " No "8"
 color of key columns
 .It Sy "color_selected_row " No "215 yellow"
 color of selected rows
@@ -942,6 +946,7 @@ The following URL schemes are supported:
 .It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
 .It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
 .It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
+.It Sy xml Ns / Ns Sy html No (requires Sy xml Ns )
 .It Sy xpt No (SAS; requires Sy xport Ns )
 .It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
 .It Sy sav No (SPSS; requires Sy savReaderWriter Ns )
