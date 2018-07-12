@@ -27,7 +27,7 @@ When we mention the base VisiData package, we are referring to the VisiData load
 
 ## Comprehensive installation guide
 
-### pip3
+### [pip3](#pip3)
 
 Requires:
 
@@ -65,7 +65,7 @@ $ wget https://raw.githubusercontent.com/saulpw/visidata/stable/requirements.txt
 $ pip3 install -r requirements.txt
 ~~~
 
-### conda
+### [conda](#conda)
 
 Requires:
 
@@ -102,7 +102,7 @@ If these packages are included in the conda environment, they can be installed w
 $ conda install <package>
 ~~~
 
-### brew
+### [brew](#brew)
 
 Requires:
 
@@ -134,7 +134,7 @@ Out-of-box, you can load csv, tsv, fixed-width text, json, sqlite, http, html, .
 
 NOTE: There is no method, which is known to the package maintainer, to install additional dependencies for a brewed Python package. If anyone does know of one please, please [let us know](https://github.com/saulpw/homebrew-vd/issues/new).
 
-### apt
+### [apt](#apt)
 
 Requires:
 
@@ -181,9 +181,10 @@ Note, that the VisiData `.deb` comes preloaded with additional dependencies.
 
 Out-of-box, you can load csv, tsv, fixed-width text, json, sqlite, http, html, .xls, and .xlsx (Microsoft Excel).
 
-### dpkg
+### [dpkg](#dpkg)
 
 Requires:
+
 * Linux distribution
 * [dpkg](https://help.ubuntu.com/lts/serverguide/dpkg.html.en)
 
@@ -207,12 +208,12 @@ Note, that the VisiData `.deb` comes preloaded with additional dependencies.
 
 Out-of-box, you can load csv, tsv, fixed-width text, json, sqlite, http, html, .xls, and .xlsx (Microsoft Excel).
 
-### wsl
+### [wsl](#wsl)
 
-Windows is not directly supported. We recommend trying to use [ConEmu](https://conemu.github.io/) as your terminal on [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (Windows Subsystem for Linux).
+Windows is not yet directly supported. We recommend trying to use [ConEmu](https://conemu.github.io/) as your terminal on [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (Windows Subsystem for Linux).
 You can find discussion on this topic [here](https://github.com/saulpw/visidata/issues/117).
 
-### Build from source
+### [Build from source](#git)
 
 If you want to use bleeding edge unreleased features (which may not always work), you can do so by installing from the development branch on git.
 
@@ -222,4 +223,4 @@ To install VisiData:
 $ pip3 install git+https://github.com/saulpw/visidata.git@develop
 ~~~
 
-See [pip](#pip) above for further information on loaders and dependency management.
+See [pip3](#pip3) above for further information on loaders and dependency management.
