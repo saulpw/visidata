@@ -1,10 +1,3 @@
-# The base VisiData package
-
-A [loader](/docs/loaders/) is a module which directs how VisiData loads and engages with a particular data source. 
-
-Each package contains the full loader suite but differs in which loader dependencies will get installed by default. This is to avoid bloating the system for most users, who are not interested in using those features.
-
-When we mention the base VisiData package, we are referring to the VisiData loaders whose dependencies are covered by the Python3 standard library. Currently these include the loaders for tsv, csv, fixed width text, json, and sqlite. Additionally, .zip, .gz, .bz2, and .xz files can be decompressed on the fly.
 
 # Overview of installation decision tree
 

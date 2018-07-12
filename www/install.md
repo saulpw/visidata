@@ -2,19 +2,28 @@
 
 This guide will cover the steps for installing VisiData and provide troubleshooting assistance. To read about the differences between the various packages, and for help selecting which one best suits your needs, see our [installation decision tree guide](/topics/install).
 
+
 ## Quick Reference
 
-|Platform   |Package Manager|Command                                       |
-|-----------+---------------+:---------------------------------------------|
-|Python3.4+ |[pip3](#pip)   |`pip3 install visidata`                       |
-|Python3.4+ |[conda](#conda)|`conda install --channel conda-forge visidata`|
-|MacOS      |[Homebrew](#brew)|`brew install saulpw/vd/visidata`           |
-|Linux (Debian/Ubuntu)|[apt](#apt)      |`apt install visidata`            |
-|Linux (Debian/Ubuntu)|[dpkg](#dpkg)      |`dpkg -i visidata_ver_all.deb`            |
-|Windows    |[WSL](#wsl)    |Windows is not yet directly supported (use WSL)   |
-|Python3.4+ |[github](#git) |`pip3 install git+https://github.com/saulpw/visidata.git@develop`|
+|Platform   |Package Manager|Command                                       | Out-of-box Loaders       |
+|-----------+---------------+:---------------------------------------------+--------------------------|
+|Python3.4+ |[pip3](#pip3)   |`pip3 install visidata`                       | Base                     |
+|Python3.4+ |[conda](#conda)|`conda install --channel conda-forge visidata`| Base, http, html, .xls(x) |
+|MacOS      |[Homebrew](#brew)|`brew install saulpw/vd/visidata`           | Base, http, html, xls(x)  |
+|Linux (Debian/Ubuntu)|[apt](#apt)      |`apt install visidata`            | Base, http, html, xls(x)  |
+|Linux (Debian/Ubuntu)|[dpkg](#dpkg)      |`dpkg -i visidata_ver_all.deb` | Base, http, html, xls(x)   |
+|Windows    |[WSL](#wsl)    |Windows is not yet directly supported (use WSL)   | N/A |
+|Python3.4+ |[github](#git) |`pip3 install git+https://github.com/saulpw/visidata.git@develop`| Base |
 
 If the one-line install commands above do not work, see below for detailed instructions and troubleshooting.
+
+## The base VisiData package
+
+A [loader](/docs/loaders/) is a module which directs how VisiData loads and engages with a particular data source. 
+
+Each package contains the full loader suite but differs in which loader dependencies will get installed by default. This is to avoid bloating the system for most users, who are not interested in using those features.
+
+When we mention the base VisiData package, we are referring to the VisiData loaders whose dependencies are covered by the Python3 standard library. Currently these include the loaders for tsv, csv, fixed width text, json, and sqlite. Additionally, .zip, .gz, .bz2, and .xz files can be decompressed on the fly.
 
 ## Comprehensive installation guide
 
