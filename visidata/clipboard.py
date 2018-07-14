@@ -26,7 +26,7 @@ globalCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
 
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
 
-commands = {
+__clipboard_commands = {
     ('clip', 'win32'):    '',                                      # Windows Vista+
     ('pbcopy', 'darwin'): 'w',                                     # macOS
     ('xclip', None):      '-selection clipboard -filter',          # Linux etc.
@@ -35,7 +35,7 @@ commands = {
 
 def detect_clipboard_command():
     'Detect available clipboard util and return cmdline to copy data to the system clipboard.'
-    for (command, platform), options in commands.items():
+    for (command, platform), options in __clipboard_commands.items():
         if platform is None or sys.platform == platform:
             path = shutil.which(command)
             if path:

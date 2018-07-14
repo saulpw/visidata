@@ -63,6 +63,7 @@ class DescribeSheet(ColumnsSheet):
             d['errors'] = list()
             d['nulls'] = list()
             d['distinct'] = set()
+            options_error_is_null = options.error_is_null
             for sr in Progress(self.sourceRows):
                 try:
                     v = srccol.getValue(sr)

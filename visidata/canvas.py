@@ -131,8 +131,6 @@ class Plotter(BaseSheet):
     'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
     columns=[Column('')]  # to eliminate errors outside of draw()
     rowtype='pixels'
-    commands=[
-    ]
     def __init__(self, name='plotter', **kwargs):
         super().__init__(name, **kwargs)
         self.labels = []  # (x, y, text, attr, row)

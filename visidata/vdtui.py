@@ -67,25 +67,58 @@ def returnException(f, *args, **kwargs):
     except Exception as e:
         return e
 
-globalCommands = collections.OrderedDict()  # [cmd.longname] -> Command
-globalBindings = collections.OrderedDict()  # [keystrokes] -> cmd.longname
-baseOptions = collections.OrderedDict()   # [opt.name] -> opt
+
+vd = None  # will be filled in later
+
+# key: ('override'/Sheet-instance/Sheet-type/'default', settingname) -> # [key] -> Option/Command/str
+class SettingsMgr(collections.OrderedDict):
+    def set(self, k, v, obj=None):
+        'obj is a Sheet instance, or a Sheet [sub]class.  obj of None means override all; obj="default" means last resort'
+        self[(k, obj)] = v
+
+    def setdefault(self, k, v):
+        return self.set(k, v, 'default')
+
+    def override(self, k, v):
+        return self.set(k, v, 'override')
+
+    def get(self, k, obj=None):
+        if obj is None:
+            mappings = ['override']
+            if vd:
+                sheet = vd.sheet
+                if sheet:
+                    mappings.append(sheet)
+                    mappings.extend(inspect.getmro(type(sheet)))
+            mappings += ['default']
+        else:
+            mappings = [obj]
+
+        for obj in mappings:
+            if (k, obj) in self:
+                return self[(k, obj)]
+
 
 class Command:
     def __init__(self, longname, execstr):
         self.longname = longname
         self.execstr = execstr
+        self.helpstr = ''
 
-def globalCommand(keystrokes, longname, execstr):
-    cmd = Command(longname, execstr)
-    globalCommands[longname] = cmd
+def command(keystrokes, longname, execstr):
+    commands.setdefault(longname, Command(longname, execstr))
 
     if keystrokes:
-        bindkey(keystrokes, longname)
+        assert not bindkeys.get(keystrokes), keystrokes
+        bindkeys.setdefault(keystrokes, longname)
+
+globalCommand = command
 
 def bindkey(keystrokes, longname):
-    globalBindings[keystrokes] = longname
+    bindkeys.setdefault(keystrokes, longname)
 
+def bindkey_override(keystrokes, longname):
+    bindkeys.override(keystrokes, longname)
 
 class Option:
     def __init__(self, name, default, helpstr=''):
@@ -94,20 +127,19 @@ class Option:
         self.helpstr = helpstr
         self.replayable = False
 
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, val):
-        self._value = val
-        globals()['options_'+self.name] = val
-
-
 class OptionsObject:
     'minimalist options framework'
-    def __init__(self, d):
-        object.__setattr__(self, '_opts', d)
+    def __init__(self, mgr):
+        object.__setattr__(self, '_opts', mgr)
+
+    def keys(self, obj):
+        return [optname for optname, o in self._opts.keys() if o == obj]
+
+    def setdefault(self, k, v):
+        return self._opts.set(k, v, 'default')
+
+    def override(self, k, v):
+        return self._opts.set(k, v, 'override')
 
     def __getattr__(self, k):      # options.foo
         return self.__getitem__(k)
@@ -116,41 +148,45 @@ class OptionsObject:
         self.__setitem__(k, v)
 
     def __getitem__(self, k):      # options[k]
-         return self._opts[k].value
+        return self._opts.get(k).value
 
     def __setitem__(self, k, v):   # options[k] = v
-        prevval = self.set(k, v)
-
-        if prevval != v and self._opts[k].replayable:
-            vd().callHook('set_option', k, v)
-
-    def set(self, k, v):
-        'sets option k to value v'
         if k in self._opts:
-            curval = self._opts[k].value
+            curval = self._opts.get(k, 'default')
             t = type(curval)
             if isinstance(v, str) and t is bool: # special case for bool options
                 v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
-            elif curval is not None:             # if None, do not apply type conversion
+            elif type(v) is t:    # if right type, no conversion
+                pass
+            elif curval is None:  # if None, do not apply type conversion
+                pass
+            else:
                 v = t(v)
         else:
             curval = None
             warning('setting unknown option %s' % k)
-            option(k, v)
+            self._opts.set(k, 'default', v)
 
-        self._opts[k].value = v
-        return curval
+        prevval = curval
 
-options = OptionsObject(baseOptions)
+        if prevval != v:
+            vd().callHook('set_option', k, v)
+
+
+commands = SettingsMgr()
+bindkeys = SettingsMgr()
+_options = SettingsMgr()
+options = OptionsObject(_options)
 
 def option(name, default, helpstr=''):
-    baseOptions[name] = Option(name, default, helpstr)
-    return baseOptions[name]
+    o = Option(name, default, helpstr)
+    options.setdefault(name, o)
+    return o
 
 
 theme = option
-def replayableOption(*args):
-    option(*args).replayable = True
+def replayableOption(optname, *args):
+    option(optname, *args).replayable = True
 
 
 replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
@@ -236,12 +272,7 @@ globalCommand('^Z', 'suspend', 'suspend()')
 globalCommand('^A', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
 def input_longname(sheet):
-    longnames = [
-        cmd.longname
-            for cmdmap in sheet._commands.maps
-                for cmd in cmdmap.values()
-                    if getattr(cmd, 'longname', None)
-    ]
+    longnames = commands.keys()
     return input("command name: ", completer=CompleteKey(sorted(set(longnames))))
 
 
@@ -325,11 +356,6 @@ def middleTruncate(s, w):
         return s
     return s[:w] + options.disp_truncator + s[-w:]
 
-@functools.lru_cache()
-def vd():
-    'Return VisiData singleton, which contains all global context'
-    return VisiData()
-
 def exceptionCaught(e, **kwargs):
     return vd().exceptionCaught(e, **kwargs)
 
@@ -409,6 +435,9 @@ def async_deepcopy(vs, rowlist):
 class VisiData:
     allPrefixes = 'gz'  # embig'g'en, 'z'mallify
 
+    def __call__(self):
+        return self
+
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
         self.allSheets = weakref.WeakKeyDictionary()  # [BaseSheet] -> sheetname (all non-precious sheets ever pushed)
@@ -427,6 +456,10 @@ class VisiData:
         self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
         self.addHook('rstatus', self.rightStatus)
+
+    @property
+    def sheet(self):
+        return self.sheets[0] if self.sheets else None
 
     def getSheet(self, sheetname):
         matchingSheets = [x for x in vd().sheets if x.name == sheetname]
@@ -781,7 +814,7 @@ class VisiData:
                 pass
             elif keystroke == '^Q':
                 return self.lastErrors and '\n'.join(self.lastErrors[-1])
-            elif self.keystrokes in sheet._commands:
+            elif bindkeys.get(self.keystrokes):
                 sheet.exec_keystrokes(self.keystrokes)
                 self.prefixWaiting = False
             elif keystroke in self.allPrefixes:
@@ -827,6 +860,8 @@ class VisiData:
                 vs.vd.allSheets[vs] = vs.name
             return vs
 # end VisiData class
+
+vd = VisiData()
 
 class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
@@ -884,19 +919,11 @@ class Colorizer:
 
 class BaseSheet:
     precious = True
-    treedict = collections.defaultdict(collections.OrderedDict)  # [maptype] -> {[longname] -> obj}
-#    commands = collections.OrderedDict()
-#    keybindings = collections.OrderedDict()
-#    options = collections.OrderedDict()
     rowtype=''
 
     def __init__(self, name, **kwargs):
         self.name = name
         self.vd = vd()
-
-        self._commands = self.makeChainMap('commands', globalCommands, vd().macros)
-        self._bindings = self.makeChainMap('bindings', globalBindings)
-        self._options = self.makeChainMap('options', baseOptions)
 
         # for progress bar
         self.progresses = []  # list of Progress objects
@@ -907,23 +934,21 @@ class BaseSheet:
 
 
     @classmethod
-    def getMap(cls, mapname):
-        return BaseSheet.treedict[(mapname, cls)]
-
-    @classmethod
     def addCommand(cls, keystrokes, longname, execstr):
-        commands = cls.getMap('command')
-        assert longname not in commands
-        commands[longname] = Command(longname, execstr)
+        commands.set(longname, Command(longname, execstr), cls)
         if keystrokes:
-            cls.bindkey(keystrokes, longname)
+            bindkeys.set(keystrokes, longname, cls)
 
     @classmethod
     def bindkey(cls, keystrokes, longname):
-        bindings = cls.getMap('bindings')
-        if bindings.get(keystrokes, longname) != longname:
-            warning( '%s already bound to %s' % (keystrokes, bindings[keystrokes]))
-        bindings[keystrokes] = longname
+        oldlongname = bindkeys.get(keystrokes, cls)
+        if oldlongname:
+            warning('%s was already bound to %s' % (keystrokes, oldlongname))
+        bindkeys.set(keystrokes, longname, cls)
+
+    def getCommand(self, keystrokes):
+        longname = bindkeys.get(keystrokes)
+        return longname and commands.get(longname)
 
     def __bool__(self):
         'an instantiated Sheet always tests true'
@@ -939,29 +964,6 @@ class BaseSheet:
     def leftStatus(self):
         'Compose left side of status bar for this sheet (overridable).'
         return options.disp_status_fmt.format(sheet=self)
-
-    def makeChainMap(self, attrname, *args):
-        'Return ChainMap for the container of "attrname", up our class hierarchy'
-        maps = [
-            cmds
-                for cls in inspect.getmro(self.__class__)[::-1]
-                    for cmds in self.getMap(attrname).values()
-               ] + list(args)
-        return collections.ChainMap(*maps)
-
-    def _getDeep(self, container, key):
-        bucket = getattr(BaseSheet, attrname)
-        for cls in inspect.getmro(self.__class__)[::-1]:  # reverse of method-resolution-order
-            cmd = bucket.get((cls, key), None)
-            if cmd:
-                return cmd
-
-    def getCommand(self, keystrokes):
-        longname = self._bindings[keystrokes]
-        return longname and self._commands[longname]
-
-    def getOption(self, optname):
-        return self._getDeep('option', optname)
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
         return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
@@ -988,7 +990,7 @@ class BaseSheet:
         self.sheet = self
 
         try:
-            self.vd.callHook('preexec', self, cmd.name if options.cmdlog_longname else keystrokes)
+            self.vd.callHook('preexec', self, cmd.longname if options.cmdlog_longname else keystrokes)
             exec(cmd.execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
             status('aborted')

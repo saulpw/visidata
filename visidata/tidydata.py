@@ -63,6 +63,8 @@ class MeltedSheet(Sheet):
                 setter=lambda col,row,val,cname=cname: row[cname].setValue(row[0], val),
                 aggregators=[aggregators['max']]))
 
+        options_error_is_null = options.error_is_null
+
         self.rows = []
         for r in Progress(self.source.rows):
             for colnames, cols in valcols.items():

@@ -7,6 +7,7 @@
 - the great command longnaming
    - solidify command names separate from menu hierarchy
 - need way to turn convert date with fmtstr to just str type column
+   - freeze column should freeze typed value
 
 ### bugs
 
@@ -14,6 +15,7 @@
 - min width of key columns should be 1 or 2 (avoid hidden keycols, they act weird)
 - single status longer than window causes error (long fn)
 - 'za' created columns don't work with Freq
+- join sheet doesn't work with freq?
 
 ## Future
 

@@ -5,7 +5,7 @@
 - a. User input and the command-line options always override stored defaults.
 - b. `.visidatarc` can set options explicitly for any layer.
 - c. Settings are named globally uniquely.
-- d. These layers may apply to any of these settings.  The first applicable layer is used:
+- d. These layers may apply to any of these settings.  This is the resolution order (the first applicable layer is used):
 
    1. in session via meta-sheet
    2. command line (options only)
@@ -26,6 +26,11 @@
 - f. `g^H` can add/edit keybindings for all commands on all sheets (Id1)
 - g. `z^H` for list of sheet-specific commands (not global or on Sheet)
 - h. Commands are identified by longname, and have a default keybinding.  Use None for no default.
+- i. Command lists can be gotten by:
+    - `commands`: dict of [Sheet] -> dict of [longname] -> Command for all commands for all sheets
+    - `SheetType.commands` or `vs.commands`: dict of [longname] -> Command for all accessible commands on this sheet
+    - `bindings` or `SheetType.bindings`, similarly
+- j. `commands.show_version` or `commands[`show_version`] returns the Command in resolution order.  `bindings['^V']` returns the bound longname.
 
 ## III. Options
 
@@ -45,3 +50,5 @@
    - `<Sheet>.options.my_option = "value"` (same rules as IIc)
    - `options.my_option = "global default"`
    - `Canvas.options.my_option = 42`
+- h. Options can be fetched in resolution order via either `options.my_option` or `options['my_option']`.
+- i. Lists of options can be gotten from `Sheet.options.values()` or `options.values()`

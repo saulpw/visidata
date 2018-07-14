@@ -1,7 +1,7 @@
 import collections
 import itertools
 
-from visidata import globalCommand, Sheet, Column, options, Colorizer, Command, vd, error, anytype, ENTER, asyncthread, status, Progress
+from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, error, anytype, ENTER, asyncthread, status, Progress
 from visidata import ColumnAttr, ColumnEnum, ColumnItem, ColumnExpr, SubrowColumn
 from visidata import getGlobals
 
