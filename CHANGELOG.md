@@ -1,5 +1,42 @@
 # VisiData version history
 
+# 1.3
+
+- add quantile aggregators (q3/q4/q5/q10)
+- commands overhaul
+- sheet-specific options (see design/169.md)
+- keyboard layout (thanks to @deinspier for the inspiration)
+- quitguard
+- sort status messages by "priority" (thanks to @jsvine for idea)
+
+
+- Command changes
+    - `R` (`random-sheet`) pushes sheet instead of selecting (reverting to former behavior)
+    - `za` (`addcol-empty`) asks for column name
+    - add `gI` (`describe-all`) like `gC` (`columns-all`)
+    - add `gS` (`sheet-graveyard`)
+    - add g(, z(, gz( variants of ( 'expand-column'
+    - add `z|` and `z\` for un/selecting by python expr (thanks to @jsvine for suggestion)
+
+- Loaders:
+    - add pandas adapter
+    - add xml loader
+    - yaml loader (thanks to @robcarrington, @john, @anja at Pycon Sprints for making this happen
+    - split `tsv_safe_char` into `tsv_safe_newline` and `tsv_safe_tab`; remove `tsv_safe_char`
+
+- initial commit of a task warrior app (vtask)
+
+## minor changes
+- more portable system clipboard handling (thanks @chocolateboy for PR)
+- [json] no more incremental display during loading (need better json parser than stdlib)
+- `date` supports adding a number of days (or `6*hours`, `9*months`, etc)
+- column width can now be negative, allowing columns to preserve their pre-hidden width if unhidden
+- hidden columns are darkened on columns sheet
+- exception rollup
+- dedup status messages
+- dev/commands.tsv table of commands
+- motd default url uses https
+
 # v1.2.1 (2018-07-05)
 
 - python 3.7
