@@ -72,17 +72,18 @@ vd = None  # will be filled in later
 
 # key: ('override'/Sheet-instance/Sheet-type/'default', settingname) -> # [key] -> Option/Command/str
 class SettingsMgr(collections.OrderedDict):
-    def set(self, k, v, obj=None):
+    def set(self, k, v, obj):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj of None means override all; obj="default" means last resort'
         self[(k, obj)] = v
 
     def setdefault(self, k, v):
-        return self.set(k, v, 'default')
+        self.set(k, v, 'default')
 
     def override(self, k, v):
-        return self.set(k, v, 'override')
+        self.set(k, v, 'override')
 
     def get(self, k, obj=None):
+        'Return self[k] considering context of obj.  If obj is None, traverses the entire stack.'
         if obj is None:
             mappings = ['override']
             if vd:
@@ -112,7 +113,7 @@ def command(keystrokes, longname, execstr):
         assert not bindkeys.get(keystrokes), keystrokes
         bindkeys.setdefault(keystrokes, longname)
 
-globalCommand = command
+globalCommand = command  # deprecate?
 
 def bindkey(keystrokes, longname):
     bindkeys.setdefault(keystrokes, longname)
@@ -132,14 +133,17 @@ class OptionsObject:
     def __init__(self, mgr):
         object.__setattr__(self, '_opts', mgr)
 
-    def keys(self, obj):
-        return [optname for optname, o in self._opts.keys() if o == obj]
+    def keys(self, obj=None):
+        return [optname for optname, o in self._opts.keys() if obj is None or o == obj]
 
-    def setdefault(self, k, v):
-        return self._opts.set(k, v, 'default')
+    def setdefault(self, k, v, helpstr):
+        o = Option(k, v, helpstr)
+        self._opts.set(k, o, 'default')
+        return o
 
     def override(self, k, v):
-        return self._opts.set(k, v, 'override')
+        o = Option(k, v, helpstr)
+        return self._opts.set(k, o, 'override')
 
     def __getattr__(self, k):      # options.foo
         return self.__getitem__(k)
@@ -165,7 +169,7 @@ class OptionsObject:
         else:
             curval = None
             warning('setting unknown option %s' % k)
-            self._opts.set(k, 'default', v)
+            self._opts.set(k, Option(k, v, ''), 'default')
 
         prevval = curval
 
@@ -178,15 +182,13 @@ bindkeys = SettingsMgr()
 _options = SettingsMgr()
 options = OptionsObject(_options)
 
-def option(name, default, helpstr=''):
-    o = Option(name, default, helpstr)
-    options.setdefault(name, o)
-    return o
+def option(name, default, helpstr):
+    return options.setdefault(name, default, helpstr)
 
 
 theme = option
-def replayableOption(optname, *args):
-    option(optname, *args).replayable = True
+def replayableOption(optname, default, helpstr):
+    option(optname, default, helpstr).replayable = True
 
 
 replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
