@@ -19,7 +19,7 @@ def StaticColumn(rows, col):
     def _calcRows(sheet):
         for r in Progress(rows):
             try:
-                frozenData[id(r)] = col.getValue(r)
+                frozenData[id(r)] = col.getTypedValueOrException(r)
             except Exception as e:
                 frozenData[id(r)] = e
 
@@ -50,6 +50,6 @@ class StaticSheet(Sheet):
             self.rows.append(row)
             for col in self.source.columns:
                 try:
-                    row.append(col.getValue(r))
+                    row.append(col.getTypedValueOrException(r))
                 except Exception as e:
                     row.append(None)
