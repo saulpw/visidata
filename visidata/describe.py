@@ -4,9 +4,8 @@ from visidata import *
 
 max_threads = 2
 
-Sheet.addCommand('I', 'describe', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet], sourceRows=selectedRows or rows))')
-
-globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets, sourceRows=selectedRows or rows))')
+Sheet.addCommand('I', 'describe', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))')
+globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))')
 
 def isNumeric(col):
     return col.type in (int,float,currency,date)
@@ -63,8 +62,9 @@ class DescribeSheet(ColumnsSheet):
             d['errors'] = list()
             d['nulls'] = list()
             d['distinct'] = set()
+
             options_error_is_null = options.error_is_null
-            for sr in Progress(self.sourceRows):
+            for sr in Progress(srccol.sheet.rows):
                 try:
                     v = srccol.getValue(sr)
                     if isNull(v):
@@ -87,6 +87,7 @@ class DescribeSheet(ColumnsSheet):
         r = returnException(func, *args, **kwargs)
         d[func.__name__] = r
         return r
+
 
 DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)')
 DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)')
