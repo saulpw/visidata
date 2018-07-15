@@ -21,9 +21,6 @@ class PNGSheet(Sheet):
         Column('attr', type=int, getter=lambda col,row: rgb_to_attr(*row[2:]))
     ]
     nKeys = 2
-    commands = [
-        Command('.', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png', 'data-plot-png')
-    ]
     def newRow(self):
         return list((None, None, 0, 0, 0, 0))
 
@@ -38,13 +35,9 @@ class PNGSheet(Sheet):
                 r,g,b,a = row[i:i+4]
                 self.addRow([i//4, y, r, g, b, a])
 
-
 class PNGDrawing(Canvas):
     aspectRatio = 1.0
     rowtype = 'pixels'
-    commands = [
-        Command('.', 'vd.push(source)', 'push table of pixels for this png'),
-    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -70,6 +63,9 @@ class PNGDrawing(Canvas):
             x, y, r, g, b, a = row
             self.point(x, y, rgb_to_attr(r,g,b,a), row)
         self.refresh()
+
+PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))')
+PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)')
 
 @asyncthread
 def save_png(p, vs):

@@ -4,11 +4,9 @@ from visidata import *
 
 max_threads = 2
 
-Sheet.commands += [
-    Command('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet], sourceRows=selectedRows or rows))', 'open descriptive statistics for all visible columns', 'data-describe')
-]
+Sheet.addCommand('I', 'describe', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet], sourceRows=selectedRows or rows))')
 
-globalCommand('gI', 'vd.push(DescribeSheet("describe_all", source=vd.sheets, sourceRows=selectedRows or rows))', 'open descriptive statistics for all visible columns on all sheets', 'data-describe-all')
+globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets, sourceRows=selectedRows or rows))')
 
 def isNumeric(col):
     return col.type in (int,float,currency,date)
@@ -43,12 +41,6 @@ class DescribeSheet(ColumnsSheet):
             DescribeColumn('mean',   type=float),
             DescribeColumn('stdev',  type=float),
     ]
-    commands = [
-        Command('zs', 'cursorRow.sheet.select(cursorValue)', 'select rows on source sheet which are being described in current cell', 'rows-select-source-cell'),
-        Command('zu', 'cursorRow.sheet.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell', 'rows-unselect-source-cell'),
-        Command('z'+ENTER, 'isinstance(cursorValue, list) or error(cursorValue); vs=copy(cursorRow.sheet); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell', 'open-cell-source'),
-        Command(ENTER, 'vd.push(SheetFreqTable(cursorRow.sheet, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row', 'data-aggregate-source-column'),
-    ]
     colorizers = [
         Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
     ]
@@ -71,6 +63,7 @@ class DescribeSheet(ColumnsSheet):
             d['errors'] = list()
             d['nulls'] = list()
             d['distinct'] = set()
+            options_error_is_null = options.error_is_null
             for sr in Progress(self.sourceRows):
                 try:
                     v = srccol.getValue(sr)
@@ -94,3 +87,8 @@ class DescribeSheet(ColumnsSheet):
         r = returnException(func, *args, **kwargs)
         d[func.__name__] = r
         return r
+
+DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)')
+DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)')
+DescribeSheet.addCommand('z'+ENTER, 'dup-cell', 'isinstance(cursorValue, list) or error(cursorValue); vs=copy(cursorRow.sheet); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)')
+DescribeSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(cursorRow.sheet, cursorRow))')

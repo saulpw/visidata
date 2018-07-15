@@ -18,32 +18,32 @@ replayableOption('tsv_safe_tab', '\u001f', 'replacement for newline character wh
 option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
 option('color_delete_pending', 'red', 'color for files pending delete')
 
-globalCommand('c', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)', 'move to the next column with name matching regex', 'view-go-column-regex')
-globalCommand('r', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'move to the next row with key matching regex', 'view-go-row-regex')
-globalCommand('zc', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'move to the given column number', 'view-go-column-number')
-globalCommand('zr', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'move to the given row number', 'view-go-row-number')
+globalCommand('c', 'go-column-regex', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)')
+globalCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp')
+globalCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))')
+globalCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))')
 
-globalCommand('R', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)', 'open duplicate sheet with a random population subset of # rows', 'rows-select-random')
+globalCommand('R', 'random-rows', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)')
 
-globalCommand('a', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', 'insert a blank row', 'modify-add-row-blank')
-globalCommand('ga', 'for r in range(int(input("add rows: "))): addRow(newRow())', 'add N blank rows', 'modify-add-row-many')
-globalCommand('za', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)', 'add an empty column', 'modify-add-column-blank')
+globalCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)')
+globalCommand('ga', 'add-rows', 'for r in range(int(input("add rows: "))): addRow(newRow())')
+globalCommand('za', 'addcol-new', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)')
 
-globalCommand('gza', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)', 'add N empty columns', 'modify-add-column-manyblank')
+globalCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)')
 
-globalCommand('f', 'fillNullValues(cursorCol, selectedRows or rows)', 'fills null cells in current column with contents of non-null cells up the current column', 'modify-fill-column')
+globalCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows or rows)')
 
-alias('KEY_SLEFT', 'modify-move-column-left')
-alias('KEY_SR', 'modify-move-column-left')
-alias('kDN', 'modify-move-row-down')
-alias('kUP', 'modify-move-row-up')
-alias('KEY_SRIGHT', 'modify-move-column-right')
-alias('KEY_SF', 'modify-move-column-right')
+bindkey('KEY_SLEFT', 'slide-left')
+bindkey('KEY_SR', 'slide-left')
+bindkey('kDN', 'slide-down')
+bindkey('kUP', 'slide-up')
+bindkey('KEY_SRIGHT', 'slide-right')
+bindkey('KEY_SF', 'slide-right')
 
-alias('gKEY_SLEFT', 'modify-move-column-leftmost')
-alias('gkDN', 'modify-move-row-bottom')
-alias('gkUP', 'modify-move-row-top')
-alias('gKEY_SRIGHT', 'modify-move-column-rightmost')
+bindkey('gKEY_SLEFT', 'slide-leftmost')
+bindkey('gkDN', 'slide-bottom')
+bindkey('gkUP', 'slide-top')
+bindkey('gKEY_SRIGHT', 'slide-rightmost')
 
 
 class SettableColumn(Column):
@@ -84,29 +84,29 @@ def updateColNames(sheet, rows):
         if not c._name:
             c.name = "_".join(c.getDisplayValue(r) for r in rows)
 
-globalCommand('z^', 'sheet.cursorCol.name = cursorDisplay', 'set name of current column to current cell', 'column-name-cell')
-globalCommand('g^', 'updateColNames(sheet, selectedRows or [cursorRow])', 'set names of all visible columns to contents of selected rows (or current row)', 'column-name-all-selected')
-globalCommand('gz^', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ', 'set current column name to combined contents of current cell in selected rows (or current row)', 'column-name-selected')
+globalCommand('z^', 'rename-col-cell', 'sheet.cursorCol.name = cursorDisplay')
+globalCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow])')
+globalCommand('gz^', 'rename-cols-selected', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ')
 # gz^ with no selectedRows is same as z^
 
-globalCommand('o', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData', 'sheet-open-path')
-globalCommand('^S', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)', 'sheet-save')
-globalCommand('g^S', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)', 'sheet-save-all')
-globalCommand('z^S', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputFilename("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)', 'save current column to filename in format determined by extension', 'sheet-save-column')
+globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))')
+globalCommand('^S', 'save-sheet', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
+globalCommand('g^S', 'save-all', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
+globalCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputFilename("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)')
 
-globalCommand('z=', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))', 'set current cell to result of evaluated Python expression on current row', 'python-eval-row')
+globalCommand('z=', 'show-expr', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))')
 
-globalCommand('gz=', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)', 'set current column for selected rows to the items in result of Python sequence expression', 'modify-set-column-sequence')
+globalCommand('gz=', 'setcol-range', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)')
 
-globalCommand('A', 'vd.push(newSheet(int(input("num columns for new sheet: "))))', 'open new blank sheet with N columns', 'sheet-new')
+globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: "))))')
 
 
-globalCommand('gKEY_F(1)', 'info-commands')  # vdtui generic commands sheet
-globalCommand('gz?', 'info-commands')  # vdtui generic commands sheet
+bindkey('gKEY_F(1)', 'commands-sheet')  # vdtui generic commands sheet
+bindkey('gz?', 'commands-sheet')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
-globalCommand('z?', 'openManPage()', 'launch VisiData manpage', 'info-manpage')
-globalCommand('KEY_F(1)', 'z?')
+globalCommand('z?', 'sysopen-help', 'openManPage()')
+bindkey('KEY_F(1)', 'sysopen-help')
 
 def openManPage():
     from pkg_resources import resource_filename
@@ -216,17 +216,6 @@ class DeferredSetColumn(Column):
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
-    commands = [
-        Command(ENTER, 'vd.push(openSource(cursorRow))', 'open current file as a new sheet', 'sheet-open-row'),
-        Command('g'+ENTER, 'for r in selectedRows: vd.push(openSource(r.resolve()))', 'open selected files as new sheets', 'sheet-open-rows'),
-        Command('^O', 'launchEditor(cursorRow.resolve())', 'open current file in external $EDITOR', 'edit-row-external'),
-        Command('g^O', 'launchEditor(*(r.resolve() for r in selectedRows))', 'open selected files in external $EDITOR', 'edit-rows-external'),
-        Command('^S', 'save()', 'apply all changes on all rows', 'sheet-specific-apply-edits'),
-        Command('z^S', 'save(cursorRow)', 'apply changes to current row', 'sheet-specific-apply-edits'),
-        Command('z^R', 'undoMod(cursorRow); restat(cursorRow)', 'undo pending changes to current row', 'sheet-specific-apply-edits'),
-        Command('', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1', '', 'modify-delete-row'),
-        Command('', 'deleteFiles(selectedRows)', '', 'modify-delete-selected')
-    ]
     columns = [
         # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
         DeferredSetColumn('directory',
@@ -386,6 +375,15 @@ class DirSheet(Sheet):
     def restat(self, row):
         row.stat(force=True)
 
+DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
+DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r.resolve()))')
+DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.resolve())')
+DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in selectedRows))')
+DirSheet.addCommand('^S', 'save-sheet', 'save()')
+DirSheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
+DirSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow); restat(cursorRow)')
+DirSheet.addCommand(None, 'delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1')
+DirSheet.addCommand(None, 'delete-selected', 'deleteFiles(selectedRows)')
 
 def openSource(p, filetype=None):
     'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'

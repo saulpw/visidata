@@ -1,33 +1,27 @@
-from visidata import Sheet, Command
+from visidata import Sheet
 
-Sheet.commands.extend([
-Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle selection of current row', 'rows-toggle-current'),
-Command('s', 'select([cursorRow]); cursorDown(1)', 'select current row', 'rows-select-current'),
-Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect current row', 'rows-unselect-current'),
+Sheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)'),
+Sheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)'),
+Sheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)'),
 
-Command('|', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex", defaultLast=True), columns="cursorCol"))', 'select rows matching regex in current column', 'rows-select-regex'),
-Command('\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex", defaultLast=True), columns="cursorCol"))', 'unselect rows matching regex in current column', 'rows-unselect-regex'),
+Sheet.addCommand('gt', 'toggle-rows', 'toggle(rows)'),
+Sheet.addCommand('gs', 'select-rows', 'select(rows)'),
+Sheet.addCommand('gu', 'unselect-rows', '_selectedRows.clear()'),
 
-Command('gt', 'toggle(rows)', 'toggle selection of all rows', 'rows-toggle-all'),
-Command('gs', 'select(rows)', 'select all rows', 'rows-select-all'),
-Command('gu', '_selectedRows.clear()', 'unselect all rows', 'rows-unselect-all'),
+Sheet.addCommand('zt', 'stoggle-before', 'toggle(rows[:cursorRowIndex])'),
+Sheet.addCommand('zs', 'select-before', 'select(rows[:cursorRowIndex])'),
+Sheet.addCommand('zu', 'unselect-before', 'unselect(rows[:cursorRowIndex])'),
+Sheet.addCommand('gzt', 'stoggle-after', 'toggle(rows[cursorRowIndex:])'),
+Sheet.addCommand('gzs', 'select-after', 'select(rows[cursorRowIndex:])'),
+Sheet.addCommand('gzu', 'unselect-after', 'unselect(rows[cursorRowIndex:])'),
 
-Command('zt', 'toggle(rows[:cursorRowIndex])', 'toggle select rows from top to cursor', 'rows-toggle-to-cursor'),
-Command('zs', 'select(rows[:cursorRowIndex])', 'select all rows from top to cursor', 'rows-select-to-cursor'),
-Command('zu', 'unselect(rows[:cursorRowIndex])', 'unselect all rows from top to cursor', 'rows-unselect-to-cursor'),
-Command('gzt', 'toggle(rows[cursorRowIndex:])', 'toggle select rows from cursor to bottom', 'rows-toggle-from-cursor'),
-Command('gzs', 'select(rows[cursorRowIndex:])', 'select all rows from cursor to bottom', 'rows-select-from-cursor'),
-Command('gzu', 'unselect(rows[cursorRowIndex:])', 'unselect all rows from cursor to bottom', 'rows-unselect-from-cursor'),
+Sheet.addCommand('|', 'select-col-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex", defaultLast=True), columns="cursorCol"))'),
+Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex", defaultLast=True), columns="cursorCol"))'),
+Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex", defaultLast=True), columns="visibleCols"))'),
+Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex", defaultLast=True), columns="visibleCols"))'),
 
-Command('|', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex", defaultLast=True), columns="cursorCol"))', 'select rows matching regex in current column', 'rows-select-regex'),
-Command('\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex", defaultLast=True), columns="cursorCol"))', 'unselect rows matching regex in current column', 'rows-unselect-regex'),
-Command('g|', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex", defaultLast=True), columns="visibleCols"))', 'select rows matching regex in any visible column', 'rows-select-regex-all'),
-Command('g\\', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex", defaultLast=True), columns="visibleCols"))', 'unselect rows matching regex in any visible column', 'rows-unselect-regex-all'),
+Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)'),
+Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getValue(r) == c.getValue(currow) for c in vcols])), progress=False)'),
 
-Command(',', 'select(gatherBy(lambda r,c=cursorCol,v=cursorValue: c.getValue(r) == v), progress=False)', 'select rows matching current cell in current column', 'rows-select-like-cell'),
-Command('g,', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getValue(r) == c.getValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns', 'rows-select-like-row'),
-
-
-Command('z|', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'select rows with a Python expression', 'rows-select-expr'),
-Command('z\\', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'unselect rows with a Python expression', 'rows-unselect-expr')
-])
+Sheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)'),
+Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)')

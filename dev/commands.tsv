@@ -4,12 +4,14 @@ global	advance-replay		^I	^I	n	n	n	n		meta-replay-step	execute next row in repla
 global	cancel-all	g	^C	g^C	n	n	n	n		meta-threads-cancel-all	abort all secondary threads
 global	cmdlog		D	D	meta	n	n	n	3	meta-cmdlog	open CommandLog
 global	columns-all	g	C	gC	meta	n	n	y		meta-columns-all	open Columns Sheet with all columns from all sheets
+global	error-recent		^E	^E	meta	n	n	n		errors-recent	view traceback for most recent error
 global	errors-all	g	^E	g^E	meta	n	n	n		info-errors-all	view traceback for most recent errors
-global	errors-recent		^E	^E	meta	n	n	n		errors-recent	view traceback for most recent error
 global	exec-longname		^A	^A	n	n	n	n		meta-exec-cmd	execute command by name
 global	exec-python	g	^X	g^X	n	n	n	y		python-exec	execute Python statement in the global scope
 global	forget-sheet		Q	Q	quit	n	n	n		sheet-quit-remove	quit current sheet and remove it from the cmdlog
-global	menu		SPACE	SPACE	modal	n	n	n	3		
+global	freq-rows	z	F	zF	y	use	n	y		data-aggregate-summary	open one-line summary for all selected rows
+global	help-commands	z	F1	zF1	meta	n	n	n		meta-commands	view sheet of commands and keybindings
+global	menu		SPACE	SPACE	modal	n	n	n	3		start menu command
 global	open-file		o	o	y	n	n	y		sheet-open-path	open input in VisiData
 global	options		O	O	meta static	n	n	n		meta-options	open Options
 global	pause-replay		^U	^U	n	n	n	n		meta-replay-toggle	pause/resume replay
@@ -19,9 +21,10 @@ global	pyobj-sheet	g	^Y	g^Y	meta	n	n	y		python-push-sheet-object	open current sh
 global	quit-all	g	q	gq	quit	n	n	n		sheet-quit-all	quit all sheets (clean exit)
 global	quit-sheet		q	q	quit	n	n	y	*	sheet-quit-current	quit current sheet
 global	redraw		^L	^L	n	n	n	n			refresh screen
-global	reload-all	g	^R	g^R	n	n		y			
+global	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
 global	save-all	g	^S	g^S	n	n	n	y		sheet-save-all	save all sheets to given file or directory)
 global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd file
+global	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
 global	sheets		S	S	static meta	n	n	y		meta-sheets	open Sheets Sheet
 global	sheets-graveyard	g	S	gS	static meta	n	n	y		sheets-graveyard	open Sheets Graveyard
 global	show-eval	z	^X	z^X	n	n	n	y		python-eval-status	evaluate Python expression on current row and show result on status line
@@ -33,6 +36,34 @@ global	sysopen-help		^H	^H	external	n	n	n
 global	threads-all		^T	^T	meta	n	n	n		meta-threads	open Threads Sheet
 global	toggle-profile		^_	^_	n	n	n	n		meta-threads-profile	turn profiling on for main process
 global	visidata-dir	g	D	gD	static	n	n	y		meta-visidata-dir	open .visidata directory
+XmlSheet	addcol-xmlattr	z	a	za	n	n	y	y			add column for xml attribute
+XmlSheet	dive-row		ENTER	ENTER	y	n	n	y			
+XmlSheet	visibility		v	v	n	n	n	y			show only columns in current row attributes
+ThreadsSheet	cancel-thread		^C	^C	n	n	n	n		cancel-thread	abort thread at current row
+ThreadsSheet	profile-row		ENTER	ENTER	y	n	n	n		sheet-profile	push profile sheet for this action
+SheetsSheet	cancel-sheet		^C	^C	n	n	n	n		cancel-thread	abort all threads on sheet at cursor
+SheetsSheet	columns-selected	g	C	gC	y	y	n	y		sheet-columns-selected	merge the selected sheets with visible columns from all, keeping rows according to jointype
+SheetsSheet	describe-selected	g	I	gI	y	y	n	y		sheet-describe-selected	open Describe Sheet with all columns from selected sheets
+SheetsSheet	join-sheets		&	&	y	y	n	y		sheet-join	merge the selected sheets with visible columns from all, keeping rows according to jointype
+SheetsSheet	open-row		ENTER	ENTER	y	n	n	y		sheet-open-row	open sheet referenced in current row
+SheetsSheet	open-rows	g	ENTER	gENTER	y	use	n	y		sheet-open-rows	push selected sheets to top of sheets stack
+SheetsSheet	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
+SheetPivot	dive-cell	z	ENTER	zENTER	y	n	n	y		open-source-cell	open sheet of source rows aggregated in current cell
+SheetPivot	dive-row		ENTER	ENTER	y	n	n	y		open-source-row	open sheet of source rows aggregated in current row
+SheetObject	dive-row		ENTER	ENTER	y	n	n	y		python-dive-row	dive further into Python object
+SheetObject	edit-cell		e	e	n	n	y	y			edit contents of current cell
+SheetObject	hide-hidden	z	v	zv	n	n	n	y			hide methods and hidden properties
+SheetObject	show-hidden	g	v	gv	n	n	n	y			show methods and hidden properties
+SheetObject	visibility		v	v	n	n	n	y			toggle show/hide for methods and hidden properties
+SheetNamedTuple	dive-row		ENTER	ENTER	y	n	n	y			dive further into Python object
+SheetH5Obj	dive-metadata		A	A	y	n	n	y			open metadata sheet for this object
+SheetH5Obj	dive-row		ENTER	ENTER	y	n	n	y			load table referenced in current row into memory
+SheetFreqTable	dup-row		ENTER	ENTER	y	n	n	y		open-cell-source	open copy of source sheet with rows described in current cell
+SheetFreqTable	select-row		s	s	n	change	n	y		filter-source-select-bin	select these entries in source sheet
+SheetFreqTable	stoggle-row		t	t	n	change	n	y		filter-source-toggle-bin	toggle these entries in source sheet
+SheetFreqTable	unselect-row		u	u	n	change	n	y		filter-source-unselect-bin	unselect these entries in source sheet
+SheetDict	dive-row		ENTER	ENTER	y	n	n	y		python-dive-row	dive further into Python object
+SheetDict	edit-cell		e		n	n	y	y		modify-edit-cell	edit contents of current cell
 Sheet	add-row		a	a	n	n	y	y	3	modify-add-row-blank	insert a blank row
 Sheet	add-rows	g	a	ga	n	n	y	y	3	modify-add-row-many	add N blank rows
 Sheet	addcol-bulk	gz	a	gza	n	n	y	y		modify-add-column-manyblank	add N empty columns
@@ -56,8 +87,8 @@ Sheet	delete-row		d	d	n	n	y	y	1,2,5	modify-delete-row	delete current row and mov
 Sheet	delete-selected	g	d	gd	n	use	y	y	5	modify-delete-selected	delete selected rows and move them to clipboard
 Sheet	describe		I	I	derived	n	n	y		data-describe	open descriptive statistics for all visible columns
 Sheet	describe-all	g	I	gI	derived	n	n	y		data-describe-all	open descriptive statistics for all visible columns on all sheets
-Sheet	dive-cell	z	^J	z^J	derived	n	n	y			
-Sheet	dive-row		^J	^J	derived	n	n	y			
+Sheet	dive-cell	z	ENTER	zENTER	derived	n	n	y			
+Sheet	dive-row		ENTER	ENTER	derived	n	n	y			
 Sheet	dup-rows	g	"	g"	derived	use	n	y		sheet-duplicate-all	open duplicate sheet with all rows
 Sheet	dup-rows-deep	gz	"	gz"	copy	use	n	y		sheet-duplicate-deepcopy	open duplicate sheet with deepcopy of all rows
 Sheet	dup-selected		"	"	derived	use	n	y	2	sheet-duplicate-selected	open duplicate sheet with only selected rows
@@ -74,12 +105,16 @@ Sheet	freeze-col		'	'	n	n	n	y		column-freeze	add a frozen copy of current column
 Sheet	freeze-sheet	g	'	g'	copy	n	n	y		sheet-freeze	open a frozen copy of current sheet with all visible columns evaluated
 Sheet	freq-col		F	F	derived	n	n	y		data-aggregate-column	open Frequency Table grouped on current column
 Sheet	freq-keys	g	F	gF	derived	n	n	y	2	data-aggregate-keys	open Frequency Table grouped by all key columns on the source sheet
+Sheet	freq-rows		F	F	derived	n	n	y		data-aggregate-summary	open one-line summary for all selected rows
 Sheet	go-bottom	g	j	gj	n	n	n	n			
 Sheet	go-col-number	z	c	zc	n	n	n	n		view-go-column-number	move to the given column number
 Sheet	go-col-regex		c	c	n	n	n	n		view-go-column-regex	move to the next column with name matching regex
 Sheet	go-down		j	j	n	n	n	n	*		
+Sheet	go-end				n	n	n	n			go to last row and last column
+Sheet	go-home				n	n	n	n			go to first row and first column
 Sheet	go-left		h	h	n	n	n	n	*		
 Sheet	go-leftmost	g	h	gh	n	n	n	n		view-go-far-left	move all the way to the left
+Sheet	go-mouse			BUTTON1_PRESSED	n	n	n	n		view-go-mouse-row	
 Sheet	go-right		l	l	n	n	n	n	*		
 Sheet	go-rightmost	g	l	gl	n	n	n	n		view-go-far-right	move all the way to the right
 Sheet	go-row-number	z	r	zr	n	n	n	n		view-go-row-number	move to the given row number
@@ -96,10 +131,13 @@ Sheet	next-page		^F	^F	n	n	n	n
 Sheet	next-search		n	n	n	n	n	n	2	view-find-forward-repeat	move to next match from last search
 Sheet	next-selected		}	}	n	use	n	n	2	view-go-next-selected	move down the current column to the next selected row
 Sheet	next-value		>	>	n	n	n	n		view-go-next-value	move down the current column to the next value
+Sheet	page-left				n	n	n	n			move cursor one page left
+Sheet	page-right				n	n	n	n			move cursor one page right
 Sheet	paste-after		p	p	n	n	y	y	5	data-clipboard-paste-after	paste clipboard rows after current row
 Sheet	paste-before		P	P	n	n	y	y		data-clipboard-paste-before	paste clipboard rows before current row
 Sheet	paste-cell	z	p	zp	n	n	y	y		data-clipboard-paste-cell	set contents of current column for current row to last clipboard value
 Sheet	paste-cell-before	z	P	zP	n	n	y	y			
+Sheet	paste-selected	gz	p	gzp	n	change	y	y		data-clipboard-paste-selected	set contents of current column for selected rows to last clipboard value
 Sheet	pivot		W	W	derived	n	n	y	5	data-pivot	Pivot the current column into a new sheet
 Sheet	plot-column		.	.	canvas	n	n	y	2,3	data-plot-column	graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determine color
 Sheet	plot-numerics	g	.	g.	canvas	n	n	y		data-plot-allnumeric	open a graph of all visible numeric columns vs key column
@@ -126,10 +164,15 @@ Sheet	resize-cols-max	g	_	g_	n	n	n	n		column-width-all-full	adjust width of all 
 Sheet	save-col	z	^S	z^S	n	n	n	y		sheet-save-column	save current column to filename in format determined by extension
 Sheet	save-sheet		^S	^S	n	n	n	y	2,4	sheet-save	save current sheet to filename in format determined by extension (default .tsv)
 Sheet	scroll-down	z	j	zj	n	n	n	n			scroll one row down
+Sheet	scroll-down			REPORT_MOUSE_POSITION	n	n	n	n		view-scroll-down	move scroll_incr backward
 Sheet	scroll-left	z	h	zh	n	n	n	n			scroll one column left
+Sheet	scroll-leftmost				n	n	n	n			scroll sheet to leftmost column
 Sheet	scroll-middle	z	z	zz	n	n	n	n			scroll current row to center of screen
+Sheet	scroll-mouse			BUTTON1_RELEASED	n	n	n	n		view-scroll-mouse-row	
 Sheet	scroll-right	z	l	zl	n	n	n	n			scroll one column right
+Sheet	scroll-rightmost				n	n	n	n			scroll sheet to rightmost column
 Sheet	scroll-up	z	k	zk	n	n	n	n			scroll one row up
+Sheet	scroll-up			BUTTON4_PRESSED	n	n	n	n		view-scroll-up	move scroll_incr forward
 Sheet	search-col		/	/	n	n	n	n	2	view-find-row-curcol-forward	search for regex forwards in current column
 Sheet	search-cols	g	/	g/	n	n	n	n		view-find-row-viscol-forward	search for regex forwards over all visible columns
 Sheet	search-expr	z	/	z/	n	n	n	n			
@@ -156,12 +199,16 @@ Sheet	show-cursor		^G	^G	n	n	n	n		info-sheet	show cursor position and bounds of 
 Sheet	show-expr	z	=	z=	n	n	n	y		python-eval-row	set current cell to result of evaluated Python expression on current row
 Sheet	slide-bottom	g	J	gJ	n	n	n	y		slide-row-bottom	slide current row to the bottom of sheet
 Sheet	slide-down		J	J	n	n	n	y		slide-row-down	slide current row down
+Sheet	slide-down-n	z	J	zJ	n	n	y	y		slide-row-down-n	slide current row down n
 Sheet	slide-left		H	H	n	n	n	y		slide-col-left	slide current column left
+Sheet	slide-left-n	z	H	zH	n	n	y	y		slide-col-left-n	slide current column left n
 Sheet	slide-leftmost	g	H	gH	n	n	n	y	5	slide-col-leftmost	slide current column all the way to the left of sheet
 Sheet	slide-right		L	L	n	n	n	y	5	slide-col-right	slide current column right
+Sheet	slide-right-n	z	L	zL	n	n	y	y		slide-col-right-n	slide current column right n
 Sheet	slide-rightmost	g	L	gL	n	n	n	y		slide-col-rightmost	slide current column all the way to the right of sheet
 Sheet	slide-top	g	K	gK	n	n	n	y		slide-row-top	slide current row the top of sheet
 Sheet	slide-up		K	K	n	n	n	y		slide-row-up	slide current row up
+Sheet	slide-up-n	z	K	zK	n	n	y	y		slide-row-up-n	slide current row up n
 Sheet	sort-asc		[	[	n	n	n	y		rows-sort-asc	sort ascending by current column
 Sheet	sort-desc		]	]	n	n	n	y		rows-sort-desc	sort descending by current column
 Sheet	sort-keys-asc	g	[	g[	n	n	n	y		rows-sort-keys-asc	sort ascending by all key columns
@@ -193,39 +240,80 @@ Sheet	unselect-row		u	u	n	change	n	y		rows-unselect-current	unselect current row
 Sheet	unselect-rows	g	u	gu	n	change	n	y	2,5	rows-unselect-all	unselect all rows
 Sheet	view-cell		V	V	derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
 Sheet	visibility		v	v	n	n	n	y			
-Canvas				BUTTON4_PRESSED							zoom in with scroll wheel
-Canvas				gu							unselect rows on source sheet visible on screen
-Canvas				zz							set visible bounds to cursor
-Canvas				^J							open sheet of source rows contained within canvas cursor
-Canvas				BUTTON1_RELEASED							end cursor box with left mouse button release
-Canvas				d							delete rows on source sheet contained within canvas cursor
-Canvas				gd							delete rows on source sheet visible on screen
-Canvas				REPORT_MOUSE_POSITION							zoom out with scroll wheel
-Canvas				BUTTON1_PRESSED							start cursor box with left mouse button press
-Canvas				BUTTON3_PRESSED							mark grid point to move
-Canvas				s							select rows on source sheet contained within canvas cursor
-Canvas				g^J							open sheet of source rows visible on screen
-Canvas				gt							toggle selection of rows on source sheet visible on screen
-Canvas				v							toggle show_graph_labels
-Canvas				-							zoom out from cursor center
-Canvas				BUTTON3_RELEASED							mark canvas anchor point
-Canvas				+							zoom into cursor center
-Canvas				u							unselect rows on source sheet contained within canvas cursor
-Canvas				t							toggle selection of rows on source sheet contained within canvas cursor
-Canvas				z_							set aspect ratio
-Canvas				gs							select rows on source sheet visible on screen
-Canvas				^L							redraw all pixels on canvas
-Canvas				_							zoom to fit full extent
-				BUTTON1_PRESSED						view-go-mouse-row	
-				zL						slide-col-right-n	slide current column right n
-				BUTTON4_PRESSED						view-scroll-up	move scroll_incr forward
-				zH						slide-col-left-n	slide current column left n
-				gzp						data-clipboard-paste-selected	set contents of current column for selected rows to last clipboard value
-				z^R							clear cache for current column
-				 							start menu command
-				zKEY_F(1)						meta-commands	view sheet of commands and keybindings
-				BUTTON1_RELEASED						view-scroll-mouse-row	
-				REPORT_MOUSE_POSITION						view-scroll-down	move scroll_incr backward
-				zF						data-aggregate-summary	open one-line summary for all selected rows
-				zJ						slide-row-down-n	slide current row down n
-				zK						slide-row-up-n	slide current row up n
+ProfileSheet	save-profile	z	^S	z^S	n	n	n	y		sheet-save-profile	save profile
+Plotter	redraw		^L	^L	n	n	n	n			redraw all pixels on canvas
+Plotter	visibility		v	v	n	n	n	y			toggle show_graph_labels
+PNGSheet	plot-sheet		.	.	y	n	n	y		data-plot-png	plot this png
+MbtilesSheet	dive-row		ENTER	ENTER	y	n	n	y			load table referenced in current row into memory
+MbtilesSheet	plot-row		.	.	y	n	n	y			plot tiles in current row
+DirSheet	delete-row				n	n	y			modify-delete-row	
+DirSheet	delete-selected				n	use	y			modify-delete-selected	
+DirSheet	open-row		ENTER	ENTER	y	n	n	y		sheet-open-row	open current file as a new sheet
+DirSheet	open-rows	g	ENTER	gENTER		use	n	y		sheet-open-rows	open selected files as new sheets
+DirSheet	reload-row	z	^R	z^R	n	n	unmodifies			sheet-specific-apply-edits	undo pending changes to current row
+DirSheet	save-row	z	^S	z^S	n	n	n			sheet-specific-apply-edits	apply changes to current row
+DirSheet	save-sheet		^S	^S	n	n	n			sheet-specific-apply-edits	apply all changes on all rows
+DirSheet	sysopen-row		^O	^O	external	n			1	edit-row-external	open current file in external $EDITOR
+DirSheet	sysopen-rows	g	^O	g^O	external	use			1	edit-rows-external	open selected files in external $EDITOR
+DescribeSheet	dup-cell	z	ENTER	zENTER	y	n	n	y		open-cell-source	open copy of source sheet with rows described in current cell
+DescribeSheet	freq-row			ENTER	y	n	n	y		data-aggregate-source-column	open a Frequency Table sheet grouped on column referenced in current row
+DescribeSheet	select-cell	z	s	zs	n	change		y		rows-select-source-cell	select rows on source sheet which are being described in current cell
+DescribeSheet	unselect-cell	z	u	zu	n	change	n	y		rows-unselect-source-cell	unselect rows on source sheet which are being described in current cell
+CommandLog	replay-all	g	x	gx	n	n	n	n			replay contents of entire CommandLog
+CommandLog	replay-row			x	n	n	n	n			replay command in current row
+CommandLog	save-macro	z	^S	z^S	n	y	n	n			save macro
+CommandLog	stop-replay			^C	n	n	n	n			abort replay
+ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
+ColumnsSheet	freq-col		ENTER	ENTER	y	n	n	y		data-aggregate-source-column	open a Frequency Table grouped on column referenced in current row
+ColumnsSheet	hide-selected	g	-	g-	n	use	n	y		column-hide-selected	hide selected columns on source sheet
+ColumnsSheet	join-cols		&	&	n	use	n	y			add column from concatenating selected source columns
+ColumnsSheet	key-off-selected	gz	!	gz!	n	use	n	y			unset selected rows as key columns on source sheet
+ColumnsSheet	key-selected	g	!	g!	n	use	n	y			toggle selected rows as key columns on source sheet
+ColumnsSheet	resize-source-rows				n	use	n	y		column-source-width-max	adjust widths of selected source columns
+ColumnsSheet	type-any-selected	gz	~	gz~	n	n	n	y		column-type-any-selected	set type of selected columns to anytype
+ColumnsSheet	type-currency-selected	g	$	g$	n	n	n	y	1	column-type-currency-selected	set type of selected columns to currency
+ColumnsSheet	type-date-selected	g	@	g@	n	n	n	y		column-type-date-selected	set type of selected columns to date
+ColumnsSheet	type-float-selected	g	%	g%	n	n	n	y	2,3	column-type-float-selected	set type of selected columns to float
+ColumnsSheet	type-int-selected	g	#	g#	n	n	n	y	2	column-type-int-selected	set type of selected columns to int
+ColumnsSheet	type-string-selected	g	~	g~	n	n	n	y	1	column-type-str-selected	set type of selected columns to str
+Canvas	delete-cursor		d	d	n	n	source	y			delete rows on source sheet contained within canvas cursor
+Canvas	delete-visible	g	d	gd	n	n	source	y			delete rows on source sheet visible on screen
+Canvas	dive-cursor		ENTER	ENTER	y	n	n	y			open sheet of source rows contained within canvas cursor
+Canvas	dive-visible	g	ENTER	gENTER	y	n	n	y			open sheet of source rows visible on screen
+Canvas	end-cursor			BUTTON1_RELEASED	n	n	n	n			end cursor box with left mouse button release
+Canvas	end-move			BUTTON3_RELEASED	n	n	n	n			mark canvas anchor point
+Canvas	go-bottom				n	n	n	n			
+Canvas	go-down				n	n	n	n			
+Canvas	go-down-small				n	n	n	n			
+Canvas	go-left				n	n	n	n			
+Canvas	go-left-small				n	n	n	n			
+Canvas	go-leftmost				n	n	n	n			
+Canvas	go-right				n	n	n	n			
+Canvas	go-right-small				n	n	n	n			
+Canvas	go-rightmost				n	n	n	n			
+Canvas	go-top				n	n	n	n			
+Canvas	go-up				n	n	n	n			
+Canvas	go-up-small				n	n	n	n			
+Canvas	resize-cursor-doubleheight	g	K	gK	n	n	n	n			
+Canvas	resize-cursor-doublewide	g	L	gL	n	n	n	n			
+Canvas	resize-cursor-halfheight	g	J	gJ	n	n	n	n			
+Canvas	resize-cursor-halfwide	g	H	gH	n	n	n	n			
+Canvas	resize-cursor-shorter		K	K	n	n	n	n			
+Canvas	resize-cursor-taller		J	J	n	n	n	n			
+Canvas	resize-cursor-thinner		H	H	n	n	n	n			
+Canvas	resize-cursor-wider		L	L	n	n	n	n			
+Canvas	select-cursor		s	s	n	change	n	y			select rows on source sheet contained within canvas cursor
+Canvas	select-visible	g	s	gs	n	change	n	y			select rows on source sheet visible on screen
+Canvas	set-aspect	z	_	z_	n	n	n	n			set aspect ratio
+Canvas	start-cursor			BUTTON1_PRESSED	n	n	n	n			start cursor box with left mouse button press
+Canvas	start-move			BUTTON3_PRESSED	n	n	n	n			mark grid point to move
+Canvas	stoggle-cursor		t	t	n	change	n	y			toggle selection of rows on source sheet contained within canvas cursor
+Canvas	stoggle-visible	g	t	gt	n	change	n	y			toggle selection of rows on source sheet visible on screen
+Canvas	unselect-cursor		u	u	n	change	n	y			unselect rows on source sheet contained within canvas cursor
+Canvas	unselect-visible	g	u	gu	n	change	n	y			unselect rows on source sheet visible on screen
+Canvas	zoom-all		_	_	n	n	n	n			zoom to fit full extent
+Canvas	zoom-cursor			zz	n	n	n	n			set visible bounds to cursor
+Canvas	zoomin-cursor		+	+	n	n	n	n			zoom into cursor center
+Canvas	zoomin-mouse			BUTTON4_PRESSED	n	n	n	n			zoom in with scroll wheel
+Canvas	zoomout-cursor			-	n	n	n	n			zoom out from cursor center
+Canvas	zoomout-mouse			REPORT_MOUSE_POSITION	n	n	n	n			zoom out with scroll wheel

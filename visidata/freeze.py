@@ -1,10 +1,10 @@
 from visidata import *
 from copy import deepcopy
 
-globalCommand("'", 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated', 'column-freeze')
-globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated', 'sheet-freeze')
-globalCommand("z'", 'resetCache(cursorCol)', 'add/reset cache for current column', 'column-cache-clear')
-globalCommand("gz'", 'resetCache(*visibleCols)', 'add/reset cache for all visible columns', 'column-cache-clear-all')
+globalCommand("'", 'freeze-col', 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)')
+globalCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)')
+globalCommand("z'", 'cache-col', 'resetCache(cursorCol)')
+globalCommand("gz'", 'cache-cols', 'resetCache(*visibleCols)')
 
 def resetCache(self, *cols):
     for col in cols:

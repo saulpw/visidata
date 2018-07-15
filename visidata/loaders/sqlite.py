@@ -10,9 +10,6 @@ open_db = open_sqlite
 
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
-    commands = [
-        Command(ENTER, 'error("sqlite dbs are readonly")', 'no deeper engagement')
-    ]
     def __init__(self, name, pathOrSheet, tableName):
         super().__init__(name, source=pathOrSheet, tableName=tableName)
         if isinstance(pathOrSheet, Sheet):
@@ -51,3 +48,6 @@ class SqliteSheet(Sheet):
                 status('unknown sqlite type "%s"' % t)
             cols.append(c)
         return cols
+
+SqliteSheet.addCommand(ENTER, 'dive-row', 'error("sqlite dbs are readonly")')
+

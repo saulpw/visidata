@@ -1,7 +1,7 @@
 from visidata import *
 
-globalCommand('M', 'vd.push(MeltedSheet(sheet))', 'open melted sheet (unpivot)', 'data-melt')
-globalCommand('gM', 'vd.push(MeltedSheet(sheet, regex=input("regex to split colname: ", value="(.*)_(.*)", type="regex-capture")))', 'open melted sheet (unpivot), factoring columns', 'data-melt-regex')
+globalCommand('M', 'melt', 'vd.push(MeltedSheet(sheet))')
+globalCommand('gM', 'melt-regex', 'vd.push(MeltedSheet(sheet, regex=input("regex to split colname: ", value="(.*)_(.*)", type="regex-capture")))')
 
 melt_var_colname = 'Variable' # column name to use for the melted variable name
 melt_value_colname = 'Value'  # column name to use for the melted value
@@ -62,6 +62,8 @@ class MeltedSheet(Sheet):
                 getter=lambda col,row,cname=cname: row[cname].getValue(row[0]),
                 setter=lambda col,row,val,cname=cname: row[cname].setValue(row[0], val),
                 aggregators=[aggregators['max']]))
+
+        options_error_is_null = options.error_is_null
 
         self.rows = []
         for r in Progress(self.source.rows):

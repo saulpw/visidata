@@ -4,8 +4,8 @@ import collections
 
 from visidata import *
 
-globalCommand('+', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))', 'add aggregator to current column', 'column-aggregator-add')
-globalCommand('z+', 'status(cursorCol.format(chooseOne(aggregators)(cursorCol, rows)))', 'display result of aggregator over all values in current column', 'column-aggregator-show')
+globalCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
+globalCommand('z+', 'show-aggregate', 'status(cursorCol.format(chooseOne(aggregators)(cursorCol, rows)))')
 
 aggregators = collections.OrderedDict()
 
@@ -78,9 +78,8 @@ aggregators['q10'] = quantiles(10)
 # returns keys of the row with the max value
 aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
 
-ColumnsSheet.commands += [
-    Command('g+', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))', 'add aggregators to selected source columns', 'column-aggregate-add-all'),
-]
+ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))')
+
 ColumnsSheet.columns += [
         Column('aggregators',
                getter=lambda col,row: ' '.join(x.__name__ for x in getattr(row, 'aggregators', [])),

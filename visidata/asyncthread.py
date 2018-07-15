@@ -10,18 +10,17 @@ min_thread_time_s = 0.10 # only keep threads that take longer than this number o
 option('profile', '', 'filename to save binary profiling data')
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
-globalCommand('^C', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))', 'abort all threads on current sheet', 'meta-threads-cancel-sheet')
-globalCommand('g^C', 'cancelThread(*vd.threads or error("no threads"))', 'abort all secondary threads', 'meta-threads-cancel-all')
-globalCommand('^T', 'vd.push(vd.threadsSheet)', 'open Threads Sheet', 'meta-threads')
-globalCommand('^_', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process', 'meta-threads-profile')
+globalCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))')
+globalCommand('g^C', 'cancel-all', 'cancelThread(*vd.threads or error("no threads"))')
+globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)')
+globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())')
 
 class ProfileSheet(TextSheet):
-    commands = TextSheet.commands + [
-        Command('z^S', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile', 'sheet-save-profile'),
-    ]
     def __init__(self, name, pr):
         super().__init__(name, getProfileResults(pr).splitlines())
         self.profile = pr
+
+ProfileSheet.addCommand('z^S', 'save-profile', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))')
 
 def toggleProfiling(t):
     if not t.profile:
@@ -85,9 +84,7 @@ def cancelThread(*threads, exception=EscapeException):
         ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(t.ident), ctypes.py_object(exception))
 
 
-SheetsSheet.commands += [
-    Command('^C', 'cancelThread(*cursorRow.currentThreads)', 'abort all threads on sheet at cursor', 'cancel-thread'),
-]
+SheetsSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*cursorRow.currentThreads)')
 
 SheetsSheet.columns += [
     ColumnAttr('threads', 'currentThreads', type=len),
@@ -96,11 +93,6 @@ SheetsSheet.columns += [
 # each row is an augmented threading.Thread object
 class ThreadsSheet(Sheet):
     rowtype = 'threads'
-    commands = [
-        Command('d', 'cancelThread(cursorRow)', 'abort thread at current row', 'cancel-thread'),
-        Command('^C', 'd'),
-        Command(ENTER, 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))', 'push profile sheet for this action', 'sheet-profile'),
-    ]
     columns = [
         ColumnAttr('name'),
         Column('process_time', type=float, getter=lambda col,row: elapsed_s(row)),
@@ -109,6 +101,9 @@ class ThreadsSheet(Sheet):
     ]
     def reload(self):
         self.rows = vd().threads
+
+ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)')
+ThreadsSheet.addCommand(ENTER, 'profile-row', 'vd.push(ProfileSheet(cursorRow.name+"_profile", cursorRow.profile))')
 
 def elapsed_s(t):
     return (t.endTime or time.process_time())-t.startTime

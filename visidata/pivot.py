@@ -1,17 +1,11 @@
 from visidata import *
 
-globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'Pivot the current column into a new sheet', 'data-pivot')
+globalCommand('W', 'pivot', 'vd.push(SheetPivot(sheet, [cursorCol]))')
 
 # rowdef: (tuple(keyvalues), dict(variable_value -> list(rows)))
 class SheetPivot(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     rowtype = 'aggregated rows'
-    commands = [
-        Command('z'+ENTER, 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, []); vd.push(vs)',
-                      'open sheet of source rows aggregated in current cell', 'open-source-cell'),
-        Command(ENTER, 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow[0]); vs.rows=sum(cursorRow[1].values(), []); vd.push(vs)',
-                      'open sheet of source rows aggregated in current cell', 'open-source-row')
-               ]
     def __init__(self, srcsheet, variableCols):
         super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols), source=srcsheet)
 
@@ -87,3 +81,6 @@ class SheetPivot(Sheet):
                     pivotrow[1][varval] = [r]
                 else:
                     matchingRows.append(r)
+
+SheetPivot.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, []); vd.push(vs)')
+SheetPivot.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow[0]); vs.rows=sum(cursorRow[1].values(), []); vd.push(vs)')

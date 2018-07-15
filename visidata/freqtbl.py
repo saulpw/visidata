@@ -2,18 +2,16 @@ import math
 
 from visidata import *
 
-globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column', 'data-aggregate-column')
-globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet', 'data-aggregate-keys')
-globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows', 'data-aggregate-summary')
+globalCommand('F', 'freq-col', 'vd.push(SheetFreqTable(sheet, cursorCol))')
+globalCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
+globalCommand('zF', 'freq-rows', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
 #option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
-ColumnsSheet.commands += [
-    Command(ENTER, 'vd.push(SheetFreqTable(source[0], cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
-]
+ColumnsSheet.addCommand(ENTER, 'freq-col', 'vd.push(SheetFreqTable(source[0], cursorRow))')
 
 def valueNames(vals):
     return '-'.join(str(v) for v in vals)
@@ -28,16 +26,6 @@ def copy_update(obj, **kwargs):
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     rowtype = 'bins'
-    commands = [
-        # redefine these commands only to change the helpstr
-        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet', 'filter-source-toggle-bin'),
-        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet', 'filter-source-select-bin'),
-        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet', 'filter-source-unselect-bin'),
-
-        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell', 'open-source-bin'),
-#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
-    ]
-
     def __init__(self, sheet, *columns):
         fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in columns))
         super().__init__(fqcolname, source=sheet)
@@ -177,4 +165,9 @@ class SheetFreqTable(Sheet):
         for c in self.visibleCols:
             c._cachedValues = collections.OrderedDict()
 
+SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
+SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
+SheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
 
+SheetFreqTable.addCommand(ENTER, 'dup-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)')
+#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')

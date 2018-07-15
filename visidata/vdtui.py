@@ -67,30 +67,59 @@ def returnException(f, *args, **kwargs):
     except Exception as e:
         return e
 
-baseCommands = collections.OrderedDict()  # [cmd.name] -> Command
-baseOptions = collections.OrderedDict()   # [opt.name] -> opt
+
+vd = None  # will be filled in later
+
+# key: ('override'/Sheet-instance/Sheet-type/'default', settingname) -> # [key] -> Option/Command/str
+class SettingsMgr(collections.OrderedDict):
+    def set(self, k, v, obj):
+        'obj is a Sheet instance, or a Sheet [sub]class.  obj of None means override all; obj="default" means last resort'
+        self[(k, obj)] = v
+
+    def setdefault(self, k, v):
+        self.set(k, v, 'default')
+
+    def override(self, k, v):
+        self.set(k, v, 'override')
+
+    def get(self, k, obj=None):
+        'Return self[k] considering context of obj.  If obj is None, traverses the entire stack.'
+        if obj is None:
+            mappings = ['override']
+            if vd:
+                sheet = vd.sheet
+                if sheet:
+                    mappings.append(sheet)
+                    mappings.extend(inspect.getmro(type(sheet)))
+            mappings += ['default']
+        else:
+            mappings = [obj]
+
+        for obj in mappings:
+            if (k, obj) in self:
+                return self[(k, obj)]
+
 
 class Command:
-    def __init__(self, name, execstr, helpstr='', longname=None):
-        self.name = name
-        self.execstr = execstr
-        self.helpstr = helpstr
+    def __init__(self, longname, execstr):
         self.longname = longname
+        self.execstr = execstr
+        self.helpstr = ''
 
-def globalCommand(keystrokes, execstr, helpstr='', longname=None):
-    if isinstance(keystrokes, str):
-        keystrokes = [keystrokes]
+def command(keystrokes, longname, execstr):
+    commands.setdefault(longname, Command(longname, execstr))
 
-    if longname:
-        cmd = Command(longname, execstr, helpstr, longname)
-        baseCommands[longname] = cmd
-        assert helpstr or (execstr in baseCommands), 'unknown longname ' + execstr
-        helpstr = ''
+    if keystrokes:
+        assert not bindkeys.get(keystrokes), keystrokes
+        bindkeys.setdefault(keystrokes, longname)
 
-    for ks in keystrokes:
-        if ks:
-            baseCommands[ks] = Command(ks, longname or execstr, helpstr, longname)
+globalCommand = command  # deprecate?
 
+def bindkey(keystrokes, longname):
+    bindkeys.setdefault(keystrokes, longname)
+
+def bindkey_override(keystrokes, longname):
+    bindkeys.override(keystrokes, longname)
 
 class Option:
     def __init__(self, name, default, helpstr=''):
@@ -99,20 +128,22 @@ class Option:
         self.helpstr = helpstr
         self.replayable = False
 
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, val):
-        self._value = val
-        globals()['options_'+self.name] = val
-
-
 class OptionsObject:
     'minimalist options framework'
-    def __init__(self, d):
-        object.__setattr__(self, '_opts', d)
+    def __init__(self, mgr):
+        object.__setattr__(self, '_opts', mgr)
+
+    def keys(self, obj=None):
+        return [optname for optname, o in self._opts.keys() if obj is None or o == obj]
+
+    def setdefault(self, k, v, helpstr):
+        o = Option(k, v, helpstr)
+        self._opts.set(k, o, 'default')
+        return o
+
+    def override(self, k, v):
+        o = Option(k, v, helpstr)
+        return self._opts.set(k, o, 'override')
 
     def __getattr__(self, k):      # options.foo
         return self.__getitem__(k)
@@ -121,42 +152,43 @@ class OptionsObject:
         self.__setitem__(k, v)
 
     def __getitem__(self, k):      # options[k]
-         return self._opts[k].value
+        return self._opts.get(k).value
 
     def __setitem__(self, k, v):   # options[k] = v
-        prevval = self.set(k, v)
-
-        if prevval != v and self._opts[k].replayable:
-            vd().callHook('set_option', k, v)
-
-    def set(self, k, v):
-        'sets option k to value v'
         if k in self._opts:
-            curval = self._opts[k].value
+            curval = self._opts.get(k, 'default')
             t = type(curval)
             if isinstance(v, str) and t is bool: # special case for bool options
                 v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
-            elif curval is not None:             # if None, do not apply type conversion
+            elif type(v) is t:    # if right type, no conversion
+                pass
+            elif curval is None:  # if None, do not apply type conversion
+                pass
+            else:
                 v = t(v)
         else:
             curval = None
             warning('setting unknown option %s' % k)
-            option(k, v)
+            self._opts.set(k, Option(k, v, ''), 'default')
 
-        self._opts[k].value = v
-        return curval
+        prevval = curval
 
-options = OptionsObject(baseOptions)
-
-def option(name, default, helpstr=''):
-    baseOptions[name] = Option(name, default, helpstr)
-    return baseOptions[name]
+        if prevval != v:
+            vd().callHook('set_option', k, v)
 
 
-alias = globalCommand
+commands = SettingsMgr()
+bindkeys = SettingsMgr()
+_options = SettingsMgr()
+options = OptionsObject(_options)
+
+def option(name, default, helpstr):
+    return options.setdefault(name, default, helpstr)
+
+
 theme = option
-def replayableOption(*args):
-    option(*args).replayable = True
+def replayableOption(optname, default, helpstr):
+    option(optname, default, helpstr).replayable = True
 
 
 replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
@@ -225,40 +257,26 @@ theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
 ENTER='^J'
 ESC='^['
-globalCommand('KEY_RESIZE', '', 'no-op by default')
-globalCommand('q',  'vd.sheets[1:] or confirm("quit last sheet? "); vd.sheets.pop(0)', 'quit current sheet', 'sheet-quit-current')
-globalCommand('gq', 'vd.sheets.clear()', 'quit all sheets (clean exit)', 'sheet-quit-all')
+globalCommand('KEY_RESIZE', 'no-op', '')
+globalCommand('q', 'quit-sheet',  'vd.sheets[1:] or confirm("quit last sheet? "); vd.sheets.pop(0)')
+globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
-globalCommand('^L', 'vd.scr.clear()', 'refresh screen')
-globalCommand('^V', 'status(__version_info__); status(__copyright__)', 'show version information on status line', 'info-version')
-globalCommand('^P', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))', 'open Status History', 'meta-status-history')
+globalCommand('^L', 'redraw', 'vd.scr.clear()')
+globalCommand('^V', 'show-version', 'status(__version_info__); status(__copyright__)')
+globalCommand('^P', 'statuses', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))')
 
-globalCommand('^R', 'reload(); status("reloaded")', 'reload current sheet', 'sheet-reload')
+globalCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
 
-globalCommand('^^', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]', 'jump to previous sheet (swap with current sheet)', 'view-go-sheet-swap')
+globalCommand('^^', 'swap-sheet', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
-globalCommand('^Z', 'suspend()', 'suspend VisiData process')
+globalCommand('^Z', 'suspend', 'suspend()')
 
-globalCommand('^A', 'exec_keystrokes(input_longname(sheet))', 'execute command by name', 'meta-exec-cmd')
+globalCommand('^A', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
 def input_longname(sheet):
-    longnames = [
-        longname
-            for cmdmap in sheet._commands.maps
-                for longname, cmd in cmdmap.items()
-                    if getattr(cmd, 'longname', None)
-    ]
+    longnames = commands.keys()
     return input("command name: ", completer=CompleteKey(sorted(set(longnames))))
 
-def StubCommand(longname):
-    return Command('', 'error("command %s not defined for this sheet")' % longname, 'stub', longname)
-
-alias(ENTER, 'modify-edit-cell')  # ENTER is this by default
-alias('delete-column-hide', 'schema-column-hide')
-alias('gKEY_LEFT', 'view-go-far-left'),
-alias('gKEY_RIGHT', 'view-go-far-right'),
-alias('gKEY_UP', 'view-go-far-top'),
-alias('gKEY_DOWN', 'view-go-far-bottom'),
 
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
 #
@@ -340,11 +358,6 @@ def middleTruncate(s, w):
         return s
     return s[:w] + options.disp_truncator + s[-w:]
 
-@functools.lru_cache()
-def vd():
-    'Return VisiData singleton, which contains all global context'
-    return VisiData()
-
 def exceptionCaught(e, **kwargs):
     return vd().exceptionCaught(e, **kwargs)
 
@@ -424,6 +437,9 @@ def async_deepcopy(vs, rowlist):
 class VisiData:
     allPrefixes = 'gz'  # embig'g'en, 'z'mallify
 
+    def __call__(self):
+        return self
+
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
         self.allSheets = weakref.WeakKeyDictionary()  # [BaseSheet] -> sheetname (all non-precious sheets ever pushed)
@@ -442,6 +458,10 @@ class VisiData:
         self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
         self.addHook('rstatus', self.rightStatus)
+
+    @property
+    def sheet(self):
+        return self.sheets[0] if self.sheets else None
 
     def getSheet(self, sheetname):
         matchingSheets = [x for x in vd().sheets if x.name == sheetname]
@@ -796,7 +816,7 @@ class VisiData:
                 pass
             elif keystroke == '^Q':
                 return self.lastErrors and '\n'.join(self.lastErrors[-1])
-            elif self.keystrokes in sheet._commands:
+            elif bindkeys.get(self.keystrokes):
                 sheet.exec_keystrokes(self.keystrokes)
                 self.prefixWaiting = False
             elif keystroke in self.allPrefixes:
@@ -842,6 +862,8 @@ class VisiData:
                 vs.vd.allSheets[vs] = vs.name
             return vs
 # end VisiData class
+
+vd = VisiData()
 
 class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
@@ -899,38 +921,11 @@ class Colorizer:
 
 class BaseSheet:
     precious = True
-    commands = [
-StubCommand('modify-edit-cell'),
-StubCommand('schema-column-hide'),
-StubCommand('view-go-left'),
-StubCommand('view-go-down'),
-StubCommand('view-go-up'),
-StubCommand('view-go-right'),
-StubCommand('view-go-far-left'),
-StubCommand('view-go-far-right'),
-StubCommand('view-go-far-top'),
-StubCommand('view-go-far-bottom'),
-StubCommand('view-go-page-down'),
-StubCommand('view-go-page-up'),
-StubCommand('view-go-far-top'),
-StubCommand('view-go-far-bottom'),
-StubCommand('view-go-far-left'),
-StubCommand('view-go-far-right'),
-]
     rowtype=''
+
     def __init__(self, name, **kwargs):
         self.name = name
         self.vd = vd()
-
-        # commands specific to this sheet
-        sheetcmds = collections.OrderedDict()
-        for cls in inspect.getmro(self.__class__)[::-1]:  # reverse of method-resolution-order
-            for cmd in getattr(cls, 'commands', []):
-                if cmd.name:
-                    sheetcmds[cmd.name] = cmd
-                if cmd.longname:
-                    sheetcmds[cmd.longname] = cmd
-        self._commands = collections.ChainMap(vd().macros, sheetcmds, baseCommands)
 
         # for progress bar
         self.progresses = []  # list of Progress objects
@@ -939,11 +934,23 @@ StubCommand('view-go-far-right'),
         self.currentThreads = []
         self.__dict__.update(kwargs)
 
+
     @classmethod
-    def Command(cls, keystrokes, execstr, helpstr='', longname=''):
-        cmd = Command(keystrokes, execstr, helpstr, longname)
-        cls.commands += [cmd]
-        return cmd
+    def addCommand(cls, keystrokes, longname, execstr):
+        commands.set(longname, Command(longname, execstr), cls)
+        if keystrokes:
+            bindkeys.set(keystrokes, longname, cls)
+
+    @classmethod
+    def bindkey(cls, keystrokes, longname):
+        oldlongname = bindkeys.get(keystrokes, cls)
+        if oldlongname:
+            warning('%s was already bound to %s' % (keystrokes, oldlongname))
+        bindkeys.set(keystrokes, longname, cls)
+
+    def getCommand(self, keystrokes):
+        longname = bindkeys.get(keystrokes)
+        return longname and commands.get(longname)
 
     def __bool__(self):
         'an instantiated Sheet always tests true'
@@ -959,21 +966,6 @@ StubCommand('view-go-far-right'),
     def leftStatus(self):
         'Compose left side of status bar for this sheet (overridable).'
         return options.disp_status_fmt.format(sheet=self)
-
-    def addCommand(self, keystrokes, execstr, helpstr='', longname=None):
-        'Add a command specific to this Sheet instance'
-        cmd = Command(keystrokes, longname or execstr, helpstr, longname)
-        self._commands = self._commands.new_child({ keystrokes: cmd })
-
-    def getCommand(self, keystrokes, default=None):
-        k = keystrokes
-        cmd = None
-        while k in self._commands:
-            cmd = self._commands.get(k, default)
-            if isinstance(cmd, CommandLog):
-                return cmd
-            k = cmd.execstr  # see if execstr is actually just an alias for another keystroke
-        return cmd
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
         return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
@@ -1000,7 +992,7 @@ StubCommand('view-go-far-right'),
         self.sheet = self
 
         try:
-            self.vd.callHook('preexec', self, cmd.name if options.cmdlog_longname else keystrokes)
+            self.vd.callHook('preexec', self, cmd.longname if options.cmdlog_longname else keystrokes)
             exec(cmd.execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
             status('aborted')
@@ -1055,88 +1047,6 @@ StubCommand('view-go-far-right'),
         pass
 
 class Sheet(BaseSheet):
-    commands = [
-Command('KEY_LEFT',  'cursorRight(-1)', 'move one column left',  'view-go-left'),
-Command('KEY_DOWN',  'cursorDown(+1)',  'move one row down',     'view-go-down'),
-Command('KEY_UP',    'cursorDown(-1)',  'move one row up',       'view-go-up'),
-Command('KEY_RIGHT', 'cursorRight(+1)', 'move one column right', 'view-go-right'),
-Command('KEY_NPAGE', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows',  'move one page forward',  'view-go-page-down'),
-Command('KEY_PPAGE', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows', 'move one page backward', 'view-go-page-up'),
-
-Command('gh', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'move all the way to the left', 'view-go-far-left'),
-Command('KEY_HOME', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'move all the way to the top', 'view-go-far-top'),
-Command('KEY_END', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows', 'move all the way to the bottom', 'view-go-far-bottom'),
-Command('gl', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'move all the way to the right', 'view-go-far-right'),
-
-Command('BUTTON1_PRESSED', 'sheet.cursorRowIndex=topRowIndex+mouseY-1', '', 'view-go-mouse-row'),
-Command('BUTTON1_RELEASED', 'sheet.topRowIndex=cursorRowIndex-mouseY+1', '', 'view-scroll-mouse-row'),
-Command('BUTTON4_PRESSED', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'move scroll_incr forward', 'view-scroll-up'),
-Command('REPORT_MOUSE_POSITION', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'move scroll_incr backward', 'view-scroll-down'),
-
-Command('^G', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line', 'info-sheet'),
-
-Command('<', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")', 'move up the current column to the next value', 'view-go-prev-value'),
-Command('>', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")', 'move down the current column to the next value', 'view-go-next-value'),
-Command('{', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'move up the current column to the previous selected row', 'view-go-prev-selected'),
-Command('}', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'move down the current column to the next selected row', 'view-go-next-selected'),
-
-Command('z<', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")', 'move up the current column to the next null value', 'view-go-prev-null'),
-Command('z>', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")', 'move down the current column to the next null value', 'view-go-next-null'),
-
-Command('_', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'adjust width of current column to full', 'column-width-full'),
-Command('z_', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))', 'adjust current column width to given number', 'column-width-input'),
-
-Command('-', 'cursorCol.hide()', 'hide current column', 'column-hide'),
-Command('z-', 'cursorCol.width = cursorCol.width//2', 'reduce width of current column by half', 'column-width-half'),
-Command('gv', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)', 'unhide all columns', 'column-unhide-all'),
-
-Command('!', 'toggleKeyColumn(cursorCol)', 'toggle current column as a key column', 'column-key-toggle'),
-Command('z!', 'keyCols.remove(cursorCol)', 'unset current column as a key column', 'column-key-unset'),
-Command('z~', 'cursorCol.type = anytype', 'set type of current column to anytype', 'column-type-any'),
-Command('~', 'cursorCol.type = str', 'set type of current column to str', 'column-type-str'),
-Command('@', 'cursorCol.type = date', 'set type of current column to date', 'column-type-date'),
-Command('#', 'cursorCol.type = int', 'set type of current column to int', 'column-type-int'),
-Command('$', 'cursorCol.type = currency', 'set type of current column to currency', 'column-type-currency'),
-Command('%', 'cursorCol.type = float', 'set type of current column to float', 'column-type-float'),
-Command('^', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column', 'column-name-input'),
-
-Command('g_', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)', 'adjust width of all visible columns to full', 'column-width-all-full'),
-
-Command('[', 'orderBy(cursorCol)', 'sort ascending by current column', 'rows-sort-asc'),
-Command(']', 'orderBy(cursorCol, reverse=True)', 'sort descending by current column', 'rows-sort-desc'),
-Command('g[', 'orderBy(*keyCols)', 'sort ascending by all key columns', 'rows-sort-keys-asc'),
-Command('g]', 'orderBy(*keyCols, reverse=True)', 'sort descending by all key columns', 'rows-sort-keys-desc'),
-
-Command('^R', 'reload(); recalc(); status("reloaded")', 'reload current sheet'),
-Command('z^R', 'cursorCol._cachedValues.clear()', 'clear cache for current column'),
-
-Command('/', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)', 'search for regex forwards in current column', 'view-find-row-curcol-forward'),
-Command('?', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)', 'search for regex backwards in current column', 'view-find-row-curcol-backward'),
-Command('n', 'moveRegex(sheet, reverse=False)', 'move to next match from last search', 'view-find-forward-repeat'),
-Command('N', 'moveRegex(sheet, reverse=True)', 'move to previous match from last search', 'view-find-backward-repeat'),
-
-Command('g/', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns', 'view-find-row-viscol-forward'),
-Command('g?', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns', 'view-find-row-viscol-backward'),
-
-Command('e', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)', 'edit contents of current cell', 'modify-edit-cell'),
-Command('ge', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))', 'set contents of current column for selected rows to same input', 'modify-edit-column-selected'),
-Command('zd', 'cursorCol.setValues([cursorRow], None)', 'set contents of current cell to None', 'modify-clear-cell'),
-Command('gzd', 'cursorCol.setValues(selectedRows, None)', 'set contents of cells in current column to None for selected rows', 'modify-clear-column-selected'),
-Command('KEY_DC', 'zd'),
-Command('gKEY_DC', 'gzd'),
-
-Command('"', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)', 'open duplicate sheet with only selected rows', 'sheet-duplicate-selected'),
-Command('g"', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with all rows', 'sheet-duplicate-all'),
-Command('z"', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows', 'sheet-duplicate-deepcopy-selected'),
-Command('gz"', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows', 'sheet-duplicate-deepcopy'),
-
-Command('=', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables', 'modify-add-column-expr'),
-Command('g=', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))', 'set current column for selected rows to result of Python expression', 'modify-set-column-selected-expr'),
-
-Command('V', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet', 'sheet-open-cell'),
-
-Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the list of columns', 'delete-column-really'),
-    ]
     columns = []  # list of Column
     colorizers = [ # list of Colorizer
         Colorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr),
@@ -1764,6 +1674,92 @@ Command('g-', 'columns.pop(cursorColIndex)', 'remove column permanently from the
 
         return r
 
+Sheet.addCommand('KEY_LEFT', 'go-left',  'cursorRight(-1)'),
+Sheet.addCommand('KEY_DOWN', 'go-down',  'cursorDown(+1)'),
+Sheet.addCommand('KEY_UP', 'go-up',    'cursorDown(-1)'),
+Sheet.addCommand('KEY_RIGHT', 'go-right', 'cursorRight(+1)'),
+Sheet.addCommand('KEY_NPAGE', 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
+Sheet.addCommand('KEY_PPAGE', 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
+
+Sheet.addCommand('gh', 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
+Sheet.addCommand('KEY_HOME', 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
+Sheet.addCommand('KEY_END', 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
+Sheet.addCommand('gl', 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
+
+Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=topRowIndex+mouseY-1'),
+Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
+Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
+Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
+
+Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
+
+Sheet.addCommand('<', 'prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")'),
+Sheet.addCommand('>', 'next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")'),
+Sheet.addCommand('{', 'prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
+Sheet.addCommand('}', 'next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
+
+Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
+Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
+
+Sheet.addCommand('_', 'resize-col-max', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
+Sheet.addCommand('z_', 'resize-col', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))'),
+
+Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()'),
+Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.width = cursorCol.width//2'),
+Sheet.addCommand('gv', 'unhide-cols', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)'),
+
+Sheet.addCommand('!', 'key-col', 'toggleKeyColumn(cursorCol)'),
+Sheet.addCommand('z!', 'key-col-off', 'keyCols.remove(cursorCol)'),
+Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype'),
+Sheet.addCommand('~', 'type-string', 'cursorCol.type = str'),
+Sheet.addCommand('@', 'type-date', 'cursorCol.type = date'),
+Sheet.addCommand('#', 'type-int', 'cursorCol.type = int'),
+Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency'),
+Sheet.addCommand('%', 'type-float', 'cursorCol.type = float'),
+Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
+
+Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
+
+Sheet.addCommand('[', 'sort-asc', 'orderBy(cursorCol)'),
+Sheet.addCommand(']', 'sort-desc', 'orderBy(cursorCol, reverse=True)'),
+Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(*keyCols)'),
+Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(*keyCols, reverse=True)'),
+
+Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
+Sheet.addCommand("z'", 'cache-col', 'cursorCol._cachedValues.clear()'),
+
+Sheet.addCommand('/', 'search-col', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)'),
+Sheet.addCommand('?', 'searchr-col', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)'),
+Sheet.addCommand('n', 'next-search', 'moveRegex(sheet, reverse=False)'),
+Sheet.addCommand('N', 'prev-search', 'moveRegex(sheet, reverse=True)'),
+
+Sheet.addCommand('g/', 'search-cols', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")'),
+Sheet.addCommand('g?', 'searchr-cols', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")'),
+
+Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)'),
+Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
+Sheet.addCommand('zd', 'setcell-none', 'cursorCol.setValues([cursorRow], None)'),
+Sheet.addCommand('gzd', 'setcol-none', 'cursorCol.setValues(selectedRows, None)'),
+
+Sheet.addCommand('"', 'dup-selected', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)'),
+Sheet.addCommand('g"', 'dup-rows', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),
+Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
+Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
+
+Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)'),
+Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))'),
+
+Sheet.addCommand('V', 'view-cell', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))'),
+
+Sheet.bindkey('gKEY_LEFT', 'go-leftmost'),
+Sheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
+Sheet.bindkey('gKEY_UP', 'go-top'),
+Sheet.bindkey('gKEY_DOWN', 'go-bottom'),
+
+Sheet.bindkey('KEY_DC', 'setcell-none'),
+Sheet.bindkey('gKEY_DC', 'setcol-none'),
+
+
 
 def isNullFunc():
     'Returns isNull function according to current options.'
@@ -2166,9 +2162,6 @@ def clipstr(s, dispw):
 class TextSheet(Sheet):
     'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
     rowtype = 'lines'
-    commands = [
-        Command('v', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()', 'toggle text wrap for this sheet')
-    ]
     filetype = 'txt'
 
     def __init__(self, name, source, **kwargs):
@@ -2187,6 +2180,8 @@ class TextSheet(Sheet):
                     self.addRow((startingLine+i, L))
             else:
                 self.addRow((len(self.rows), text))
+
+TextSheet.addCommand('v', 'visibility', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()')
 
 ### Curses helpers
 

@@ -10,14 +10,14 @@ option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
-globalCommand('gD', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))', 'open .visidata directory', 'meta-visidata-dir')
-globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'meta-cmdlog')
-globalCommand('^D', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)', 'save CommandLog to new .vd file', 'meta-cmdlog-save')
-globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'meta-replay-toggle')
-globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'meta-replay-step')
-globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'meta-replay-cancel')
+globalCommand('gD', 'visidata-dir', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))')
+globalCommand('D', 'cmdlog', 'vd.push(vd.cmdlog)')
+globalCommand('^D', 'save-cmdlog', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)')
+globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
+globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or error("no replay to advance")).advance()')
+globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()')
 
-globalCommand('Q', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))', 'quit current sheet and remove it from the cmdlog', 'sheet-quit-remove')
+globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
 
 globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
 
@@ -92,12 +92,6 @@ class CommandLog(Sheet):
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
-    commands = [
-        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row', 'replay-row'),
-        Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog', 'replay-sheet'),
-        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay', 'replay-abort'),
-        Command('z^S', 'sheet.saveMacro(selectedRows or error("no rows selected"), input("save macro for keystroke: "))', 'save macro', 'meta-macro-save'),
-    ]
     columns = [ColumnAttr(x) for x in CommandLogRow._fields]
 
     paused = False
@@ -318,6 +312,10 @@ class CommandLog(Sheet):
     def setOption(self, optname, optval):
         self.addRow(CommandLogRow(['options', '', options.rowkey_prefix + optname, 'set-row-input', str(optval), 'set option']))
 
+CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
+CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
+CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
+CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or error("no rows selected"), input("save macro for keystroke: "))')
 
 vd().cmdlog = CommandLog('cmdlog')
 vd().cmdlog.rows = []  # so it can be added to immediately

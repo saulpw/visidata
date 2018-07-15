@@ -25,7 +25,7 @@ class CsvSheet(Sheet):
         load_csv(self)
 
 def csvoptions():
-    return {opt.name[4:]: opt.value for opt in baseOptions.values() if opt.name.startswith('csv_')}
+    return {optname[4:]: options[optname] for optname in options.keys() if optname.startswith('csv_')}
 
 def load_csv(vs):
     'Convert from CSV, first handling header row specially.'

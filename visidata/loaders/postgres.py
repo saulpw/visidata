@@ -52,12 +52,10 @@ def cursorToColumns(cur):
     return cols
 
 
+
 # rowdef: (table_name, ncols)
 class PgTablesSheet(Sheet):
     rowtype = 'tables'
-    commands = [
-        Command(ENTER, 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))', 'open this table'),
-    ]
 
     def reload(self):
         qstr = "SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.columns WHERE table_schema = 'public' GROUP BY table_name"
@@ -89,6 +87,7 @@ class PgTablesSheet(Sheet):
 
         return self.nrowsPerTable[tablename]
 
+PgTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))')
 
 # rowdef: tuple of values as returned by fetchone()
 class PgTable(Sheet):

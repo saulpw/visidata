@@ -1,7 +1,7 @@
 from visidata import *
 
 
-globalCommand('T', 'vd.push(TransposeSheet(name+"_T", source=sheet))', 'open new sheet with rows and columns transposed', 'data-transpose')
+globalCommand('T', 'transpose', 'vd.push(TransposeSheet(name+"_T", source=sheet))')
 
 
 # rowdef: Column
