@@ -18,9 +18,9 @@
 
 ## II. Commands/Keybindings
 
-- a. `command(default_keybinding, longname, execstr)` adds a 'global' command that would be available if there were no sheets at all (Id7)
+- a. `globalCommand(default_keybinding, longname, execstr)` adds a 'global' command that would be available if there were no sheets at all (Id7)
 - b. `bindkey(keystrokes, longname)` creates global default keybinding (used when nothing else overrides it)
-- c. `<Sheet>.command()` (which has identical interface to a) sets the command on the sheet type (Id5) if <Sheet> is a SheetType, or on the sheet instance (Id4) if <Sheet> is an instance.
+- c. `<Sheet>.addCommand()` (which has identical interface to a) sets the command on the sheet type (Id5) if <Sheet> is a SheetType, or on the sheet instance (Id4) if <Sheet> is an instance.
 - d. `<Sheet>.bindkey()` does the same as (c) but for keybindings.
 - e. `gD` to get to macros sheet to edit macro keybindings.
 - f. `g^H` can add/edit keybindings for all commands on all sheets (Id1)
