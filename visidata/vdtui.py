@@ -70,7 +70,7 @@ def returnException(f, *args, **kwargs):
 
 vd = None  # will be filled in later
 
-# key: ('override'/Sheet-instance/Sheet-type/'default', settingname) -> # [key] -> Option/Command/str
+# key: ('override'/Sheet-instance/Sheet-type/'default', settingname) -> # [key] -> Option/Command/longname
 class SettingsMgr(collections.OrderedDict):
     def set(self, k, v, obj):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj of None means override all; obj="default" means last resort'
@@ -155,8 +155,9 @@ class OptionsObject:
         return self._opts.get(k).value
 
     def __setitem__(self, k, v):   # options[k] = v
-        if k in self._opts:
-            curval = self._opts.get(k, 'default')
+        opt = self._opts.get(k, 'default')
+        if opt:
+            curval = opt.value
             t = type(curval)
             if isinstance(v, str) and t is bool: # special case for bool options
                 v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
@@ -171,9 +172,7 @@ class OptionsObject:
             warning('setting unknown option %s' % k)
             self._opts.set(k, Option(k, v, ''), 'default')
 
-        prevval = curval
-
-        if prevval != v:
+        if curval != v:
             vd().callHook('set_option', k, v)
 
 
