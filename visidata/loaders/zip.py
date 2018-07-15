@@ -7,7 +7,7 @@ class open_zip(Sheet):
     columns = [
         ColumnAttr('filename'),
         ColumnAttr('file_size', type=int),
-        ColumnAttr('date_time'),
+        Column('date_time', type=date, getter=lambda col,row: datetime.datetime(*row.date_time)),
         ColumnAttr('compress_size', type=int)
     ]
 
