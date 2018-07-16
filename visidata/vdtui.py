@@ -197,8 +197,8 @@ replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('default_width', 20, 'default column width')
 option('wrap', True, 'wrap text to fit window width on TextSheet')
 
-option('cmd_after_edit', 'j', 'command keystroke to execute after successful edit')
-option('cmdlog_longname', False, 'Use command longname in cmdlog if available')
+option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
+option('cmdlog_longname', True, 'Use command longname in cmdlog if available')
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
 
 replayableOption('none_is_null', True, 'if Python None counts as null')
@@ -947,9 +947,9 @@ class BaseSheet:
             warning('%s was already bound to %s' % (keystrokes, oldlongname))
         bindkeys.set(keystrokes, longname, cls)
 
-    def getCommand(self, keystrokes):
-        longname = bindkeys.get(keystrokes)
-        return longname and commands.get(longname)
+    def getCommand(self, keystrokes_or_longname):
+        longname = bindkeys.get(keystrokes_or_longname)
+        return commands.get(longname if longname else keystrokes_or_longname)
 
     def __bool__(self):
         'an instantiated Sheet always tests true'
@@ -966,7 +966,7 @@ class BaseSheet:
         'Compose left side of status bar for this sheet (overridable).'
         return options.disp_status_fmt.format(sheet=self)
 
-    def exec_keystrokes(self, keystrokes, vdglobals=None):  # handle multiple commands concatenated?
+    def exec_keystrokes(self, keystrokes, vdglobals=None):
         return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
 
     def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
@@ -991,7 +991,7 @@ class BaseSheet:
         self.sheet = self
 
         try:
-            self.vd.callHook('preexec', self, cmd.longname if options.cmdlog_longname else keystrokes)
+            self.vd.callHook('preexec', self, cmd, '', keystrokes)
             exec(cmd.execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
             status('aborted')

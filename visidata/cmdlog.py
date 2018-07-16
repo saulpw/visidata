@@ -51,7 +51,7 @@ def namedlist(objname, fieldnames):
 
     return NamedListTemplate
 
-CommandLogRow = namedlist('CommandLogRow', 'sheet col row keystrokes input comment'.split())
+CommandLogRow = namedlist('CommandLogRow', 'sheet col row command input comment'.split())
 
 def fnSuffix(template):
     for i in range(1, 1000):
@@ -125,15 +125,14 @@ class CommandLog(Sheet):
         vd().macros[ks] = vs
         append_tsv_row(vd().macrosheet, (ks, macropath.resolve()))
 
-    def beforeExecHook(self, sheet, keystrokes, args=''):
+    def beforeExecHook(self, sheet, cmd, args, keystrokes):
         if not isLoggableSheet(sheet):
             return  # don't record editlog commands
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
 
-        cmd = sheet.getCommand(keystrokes)
         sheetname, colname, rowname = '', '', ''
-        if sheet and keystrokes != 'o':
+        if sheet and cmd.longname != 'open-file':
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             sheetname = sheet.name
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorRow') and sheet.rows:
@@ -143,7 +142,7 @@ class CommandLog(Sheet):
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
-        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, cmd.helpstr])
+        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, cmd.longname if options.cmdlog_longname else keystrokes, args, cmd.helpstr])
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
@@ -155,7 +154,7 @@ class CommandLog(Sheet):
 
         if isLoggableSheet(sheet):  # don't record jumps to cmdlog or other internal sheets
             # remove user-aborted commands and simple movements
-            if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes):
+            if not escaped and isLoggableCommand(self.currentActiveRow.command):
                 self.addRow(self.currentActiveRow)
                 if options.cmdlog_histfile:
                     if not getattr(vd(), 'sessionlog', None):
@@ -246,8 +245,8 @@ class CommandLog(Sheet):
 
         vs = self.moveToReplayContext(r)
 
-        vd().keystrokes = r.keystrokes
-        escaped = vs.exec_keystrokes(r.keystrokes)
+        vd().keystrokes = r.command
+        escaped = vs.exec_keystrokes(r.command)
 
         CommandLog.currentReplayRow = None
 
@@ -330,7 +329,7 @@ vd().addHook('set_option', vd().cmdlog.setOption)
 
 def loadMacros():
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
-    macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('keystrokes', 0), ColumnItem('filename', 1))) or error('error loading macros')
+    macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or error('error loading macros')
 
     for ks, fn in macrosheet.rows:
         vd().macros[ks] = loadInternalSheet(CommandLog, Path(fn))
