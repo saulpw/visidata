@@ -10,6 +10,11 @@
     text-decoration: none;
 }
 
+#keyboard-outer div#keyboard div.depressed {
+    background-color: purple;
+    color: white;
+}
+
 #keyboard-outer {
     width: 880px;
     margin: auto;

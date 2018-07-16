@@ -108,6 +108,12 @@ def print_keyboard(sheetnames, shift, prefix='', shownkeys=''):
             keyname = key[:-1] if len(key) > 2 and key[-1] == '2' else key
             style = ('style="width: %s"' % widths[key]) if key in widths else ''
 
+            if keyname == shift:
+                class_ += ' depressed'
+
+            if shift == 'Ctrl' and 'na' not in class_:
+                keyname = '^' + keyname
+
             ret += '''
             <div class="key {keyname} {fullkeyname} {class_}" {style}>
                 <div class="keylabel">{keylabel}</div>
