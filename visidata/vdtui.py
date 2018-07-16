@@ -273,8 +273,8 @@ globalCommand('^Z', 'suspend', 'suspend()')
 globalCommand('^A', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
 def input_longname(sheet):
-    longnames = commands.keys()
-    return input("command name: ", completer=CompleteKey(sorted(set(longnames))))
+    longnames = set(k for k, obj in commands.keys())
+    return input("command name: ", completer=CompleteKey(sorted(longnames)))
 
 
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
