@@ -1458,7 +1458,7 @@ class Sheet(BaseSheet):
 
     def rowkey(self, row):
         'returns a tuple of the key for the given row'
-        return tuple(c.getValue(row) for c in self.keyCols)
+        return tuple(c.getTypedValueOrException(row) for c in self.keyCols)
 
     def moveToNextRow(self, func, reverse=False):
         'Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria.'
@@ -2037,8 +2037,8 @@ def ArrayColumns(ncols):
 
 
 class SubrowColumn(Column):
-    def __init__(self, origcol, subrowidx, **kwargs):
-        super().__init__(origcol.name, type=origcol.type, width=origcol.width, **kwargs)
+    def __init__(self, name, origcol, subrowidx, **kwargs):
+        super().__init__(name, type=origcol.type, width=origcol.width, **kwargs)
         self.origcol = origcol
         self.subrowidx = subrowidx
 

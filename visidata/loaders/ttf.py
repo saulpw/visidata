@@ -35,10 +35,10 @@ class TTFGlyphsSheet(Sheet):
     columns = [
         ColumnItem('codepoint', 0, type=int, fmtstr='{:0X}'),
         ColumnItem('glyphid', 1),
-        SubrowColumn(ColumnAttr('height', type=int), 2),
-        SubrowColumn(ColumnAttr('width', type=int), 2),
-        SubrowColumn(ColumnAttr('lsb'), 2),
-        SubrowColumn(ColumnAttr('tsb'), 2),
+        SubrowColumn('height', ColumnAttr('height', type=int), 2),
+        SubrowColumn('width', ColumnAttr('width', type=int), 2),
+        SubrowColumn('lsb', ColumnAttr('lsb'), 2),
+        SubrowColumn('tsb', ColumnAttr('tsb'), 2),
     ]
 
     @asyncthread

@@ -40,10 +40,12 @@ def namedlist(objname, fieldnames):
     class NamedListTemplate(list):
         __name__ = objname
         _fields = fieldnames
-        def __init__(self, L=None):
+        def __init__(self, L=None, **kwargs):
             if L is None:
-                L = [None for f in fieldnames]
+                L = [None]*len(fieldnames)
             super().__init__(L)
+            for k, v in kwargs.items():
+                setattr(self, k, v)
 
     for i, attrname in enumerate(fieldnames):
         # create property getter/setter for each field
@@ -51,7 +53,7 @@ def namedlist(objname, fieldnames):
 
     return NamedListTemplate
 
-CommandLogRow = namedlist('CommandLogRow', 'sheet col row command input comment'.split())
+CommandLogRow = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment'.split())
 
 def fnSuffix(template):
     for i in range(1, 1000):
@@ -71,10 +73,10 @@ def keystr(k):
 def isLoggableSheet(sheet):
     return sheet is not vd().cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
 
-def isLoggableCommand(keystrokes):
+def isLoggableCommand(keystrokes, longname):
     if keystrokes in nonLogKeys:
         return False
-    if keystrokes.startswith('move-'):
+    if longname.startswith('go-'):
         return False
     if keystrokes.startswith('BUTTON'):  # mouse click
         return False
@@ -142,7 +144,9 @@ class CommandLog(Sheet):
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
-        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, cmd.longname if options.cmdlog_longname else keystrokes, args, cmd.helpstr])
+        self.currentActiveRow = CommandLogRow(sheet=sheetname, col=colname, row=rowname,
+                                              keystrokes=keystrokes, input=args,
+                                              longname=cmd.longname, comment=cmd.helpstr)
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
@@ -154,7 +158,7 @@ class CommandLog(Sheet):
 
         if isLoggableSheet(sheet):  # don't record jumps to cmdlog or other internal sheets
             # remove user-aborted commands and simple movements
-            if not escaped and isLoggableCommand(self.currentActiveRow.command):
+            if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes, self.currentActiveRow.longname):
                 self.addRow(self.currentActiveRow)
                 if options.cmdlog_histfile:
                     if not getattr(vd(), 'sessionlog', None):
@@ -164,7 +168,7 @@ class CommandLog(Sheet):
         self.currentActiveRow = None
 
     def openHook(self, vs, src):
-        self.addRow(CommandLogRow(['', '', '', 'o', src, 'open file']))
+        self.addRow(CommandLogRow(keystrokes='o', input=src, longname='open-file'))
 
     @classmethod
     def togglePause(self):
@@ -245,8 +249,8 @@ class CommandLog(Sheet):
 
         vs = self.moveToReplayContext(r)
 
-        vd().keystrokes = r.command
-        escaped = vs.exec_keystrokes(r.command)
+        vd().keystrokes = r.keystrokes
+        escaped = vs.exec_keystrokes(r.longname)  # <=v1.2 used keystrokes in longname column; exec_keystrokes works with either
 
         CommandLog.currentReplayRow = None
 
@@ -308,8 +312,11 @@ class CommandLog(Sheet):
         x = options.disp_replay_pause if self.paused else options.disp_replay_play
         return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
-    def setOption(self, optname, optval):
-        self.addRow(CommandLogRow(['options', '', options.rowkey_prefix + optname, 'set-row-input', str(optval), 'set option']))
+    def setOption(self, optname, optval, obj=None):
+        sheet = options.sheetname(obj)
+        self.addRow(CommandLogRow(sheet=sheet, col='', row=options.rowkey_prefix+optname,
+                    keystrokes='', input=str(optval),
+                    longname='set-option'))
 
 CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
 CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')

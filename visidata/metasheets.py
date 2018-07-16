@@ -177,7 +177,7 @@ class SheetJoin(Sheet):
         # first columns are the key columns from the first sheet, using its row (0)
         self.columns = []
         for i, c in enumerate(sheets[0].keyCols):
-            self.addColumn(SubrowColumn(ColumnItem(c.name, i), 0))
+            self.addColumn(SubrowColumn(c.name, ColumnItem(c.name, i), 0))
         self.keyCols = self.columns[:]
 
         rowsBySheetKey = {}
@@ -194,8 +194,11 @@ class SheetJoin(Sheet):
 
             for sheetnum, vs in enumerate(sheets):
                 # subsequent elements are the rows from each source, in order of the source sheets
+                ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
                 for c in vs.nonKeyVisibleCols:
-                    self.addColumn(SubrowColumn(c, sheetnum+1))
+                    newname = c.name if ctr[c.name] == 1 else '%s_%s' % (vs.name, c.name)
+                    self.addColumn(SubrowColumn(newname, c, sheetnum+1))
+
                 for r in vs.rows:
                     prog.addProgress(1)
                     key = tuple(c.getDisplayValue(r) for c in vs.keyCols)

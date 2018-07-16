@@ -22,7 +22,7 @@ class MeltedSheet(Sheet):
         isNull = isNullFunc()
 
         sheet = self.source
-        self.columns = [SubrowColumn(c, 0) for c in sheet.keyCols]
+        self.columns = [SubrowColumn(c.name, c, 0) for c in sheet.keyCols]
         self.keyCols = self.columns[:]
 
         colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]

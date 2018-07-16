@@ -139,8 +139,8 @@ There are several helpers for constructing `Column` objects:
 * `ColumnItem(colname, itemkey, **kwargs)` uses the builtin `getitem` and `setitem` on the row (as in `row[itemkey]`).  The `itemkey` also defaults to the `colname` itself.
   This is useful when the rows are Python mappings or sequences, like dicts or lists.
 
-* `SubrowColumn(origcol, subrowidx, **kwargs)` proxies for another Column, in which its row is nested in another sequence or mapping.
-This is useful on a sheet with augmented rows, like `tuple(orig_index, orig_row)`; each column on the original sheet would be wrapped in a `SubrowColumn(col, 1)`, since `orig_row` is now `row[1]`.  Used in joined sheets.
+* `SubrowColumn(newname, origcol, subrowidx, **kwargs)` proxies for another Column, in which its row is nested in another sequence or mapping.
+This is useful on a sheet with augmented rows, like `tuple(orig_index, orig_row)`; each column on the original sheet would be wrapped in a `SubrowColumn(col.name, col, 1)`, since `orig_row` is now `row[1]`.  Used in joined sheets.
 
 Recipes for a couple of recurring patterns:
 
