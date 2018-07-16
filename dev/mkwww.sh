@@ -109,6 +109,12 @@ sed -i -e "s#<h2>How to create a frequency chart</h2>#<h2><a name=\"frequency\">
 # Create /howto/columns#derived
 sed -i -e "s#<h2>How to create derivative columns</h2>#<h2><a name=\"derived\">How to create derivative columns</a></h2>#g" $BUILDWWW/docs/columns/index.html
 
+# Build /kblayout
+
+mkdir -p $BUILDWWW/docs/kblayout
+$DEV/mklayout.py $DEV/commands.tsv > $BUILDWWW/docs/kblayout/index.html
+cp $WWW/kblayout.css $BUILDWWW/docs/kblayout/
+
 # Build /releases
 make_page "releases" "Releases"
 rm -f $BUILDWWW/releases/index.body

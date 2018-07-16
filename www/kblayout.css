@@ -1,7 +1,19 @@
-/*
-CSS for keyboard layout only.
-Fancy coloring and special style goes into another stylesheet
-*/
+/* CSS for keyboard layout only.  */
+
+.layout {
+    display: none;
+}
+.layout.shown {
+    display: block;
+}
+.layout a {
+    text-decoration: none;
+}
+
+#keyboard-outer {
+    width: 880px;
+    margin: auto;
+}
 
 div#keyboard div.na
 {
