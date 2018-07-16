@@ -1831,13 +1831,14 @@ class Column:
 
         # complex objects can be arbitrarily large (like sheet.rows)
         #  this shortcut must be before self.type(cellval) (anytype will completely stringify)
-        if isinstance(cellval, list):
-            return '[%s]' % len(cellval)
-        if isinstance(cellval, dict):
-            return '{%s}' % len(cellval)
-
         t = self.type
         typedval = t(cellval)
+
+        if isinstance(typedval, list):
+            return '[%s]' % len(cellval)
+        if isinstance(typedval, dict):
+            return '{%s}' % len(cellval)
+
         return typemap[t].formatter(self.fmtstr, typedval)
 
     def hide(self, hide=True):
