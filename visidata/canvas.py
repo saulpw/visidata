@@ -524,7 +524,7 @@ class Canvas(Plotter):
     def plotlegends(self):
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
-            self._commands[str(i+1)] = Command(str(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr), 'toggle display of "%s"' % legend)
+            self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr)) #, 'toggle display of "%s"' % legend)
             if attr in self.hiddenAttrs:
                 attr = colors[options.color_graph_hidden]
             self.plotlegend(i, '%s:%s'%(i+1,legend), attr)
