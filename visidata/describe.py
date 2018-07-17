@@ -8,7 +8,7 @@ Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_desc
 globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))')
 
 def isNumeric(col):
-    return col.type in (int,float,currency,date)
+    return col.type in (int,len,float,currency,date)
 
 def isError(col, row):
     try:

@@ -1713,6 +1713,7 @@ Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype'),
 Sheet.addCommand('~', 'type-string', 'cursorCol.type = str'),
 Sheet.addCommand('@', 'type-date', 'cursorCol.type = date'),
 Sheet.addCommand('#', 'type-int', 'cursorCol.type = int'),
+Sheet.addCommand('z#', 'type-len', 'cursorCol.type = len'),
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency'),
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float'),
 Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
@@ -1829,12 +1830,14 @@ class Column:
         if cellval is None:
             return None
 
-        # complex objects can be arbitrarily large (like sheet.rows)
-        #  this shortcut must be before self.type(cellval) (anytype will completely stringify)
         t = self.type
         typedval = t(cellval)
 
-        if isinstance(typedval, list):
+        # These were before the t() type conversion above, to avoid total
+        # stringification on arbitrarily large compound objects.  But it should
+        # be possible to stringify them with a forcibly str-typed column.  Hopefully
+        # this is a good compromise.
+        if isinstance(typedval, (list, tuple)):
             return '[%s]' % len(cellval)
         if isinstance(typedval, dict):
             return '{%s}' % len(cellval)
