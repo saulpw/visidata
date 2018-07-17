@@ -16,11 +16,6 @@ ColumnsSheet.addCommand(ENTER, 'freq-col', 'vd.push(SheetFreqTable(source[0], cu
 def valueNames(vals):
     return '-'.join(str(v) for v in vals)
 
-def copy_update(obj, **kwargs):
-    'Returns copy of obj, with any kwargs set in the __dict__'
-    newobj = copy(obj)
-    newobj.__dict__.update(kwargs)
-    return newobj
 
 # rowdef: (keys, source_rows)
 class SheetFreqTable(Sheet):
@@ -33,8 +28,7 @@ class SheetFreqTable(Sheet):
         self.largest = 100
 
         self.columns = [
-            copy_update(c, getter=lambda col,row,i=i: row[0][i],
-                           setter=lambda col,row,v,c=c,i=i: setitem(row[0], i, v) and c.setValues(row[1], v) and col.recalc())
+            Column(c.name, type=c.type, width=c.width, getter=lambda col,row,i=i: row[0][i])
                 for i, c in enumerate(self.origCols)
         ]
         self.keyCols = self.columns[:]  # origCols are now key columns
