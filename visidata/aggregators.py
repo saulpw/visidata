@@ -63,12 +63,12 @@ def quantiles(q):
 
 aggregator('min', min)
 aggregator('max', max)
-aggregator('avg', mean, float)
-aggregator('mean', mean, float)
+aggregator('avg', mean, type=float)
+aggregator('mean', mean, type=float)
 aggregator('median', median)
 aggregator('sum', sum)
-aggregator('distinct', lambda values: len(set(values)), int)
-aggregator('count', lambda values: sum(1 for v in values), int)
+aggregator('distinct', lambda values: len(set(values)), type=int)
+aggregator('count', lambda values: sum(1 for v in values), type=int)
 
 aggregators['q3'] = quantiles(3)
 aggregators['q4'] = quantiles(4)
