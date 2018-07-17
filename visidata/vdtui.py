@@ -1831,6 +1831,10 @@ class Column:
             return None
 
         t = self.type
+
+        if isinstance(cellval, BaseException):
+            return ''
+
         typedval = t(cellval)
 
         # These were before the t() type conversion above, to avoid total
