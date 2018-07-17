@@ -85,8 +85,8 @@ Sheet	copy-row		y	y	n	n	n	y		data-clipboard-copy-row	copy current row to clipboa
 Sheet	copy-selected	g	y	gy	n	use	n	y	4	data-clipboard-copy-selected	copy selected rows to clipboard
 Sheet	delete-row		d	d	n	n	y	y	1,2,5	modify-delete-row	delete current row and move it to clipboard
 Sheet	delete-selected	g	d	gd	n	use	y	y	5	modify-delete-selected	delete selected rows and move them to clipboard
-Sheet	describe		I	I	derived	n	n	y		data-describe	open descriptive statistics for all visible columns
 Sheet	describe-all	g	I	gI	derived	n	n	y		data-describe-all	open descriptive statistics for all visible columns on all sheets
+Sheet	describe-sheet		I	I	derived	n	n	y		data-describe	open descriptive statistics for all visible columns
 Sheet	dive-cell	z	Enter	zEnter	derived	n	n	y			
 Sheet	dive-row		Enter	Enter	derived	n	n	y			
 Sheet	dup-rows	g	"	g"	derived	use	n	y		sheet-duplicate-all	open duplicate sheet with all rows
