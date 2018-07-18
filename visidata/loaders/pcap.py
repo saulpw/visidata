@@ -1,4 +1,3 @@
-import dpkt
 import struct
 
 from visidata import *
@@ -47,6 +46,8 @@ class PCAPSheet(Sheet):
     ]
 
     def reload(self):
+        import dpkt
+
         f = self.source.open_bytes()
         pcap = dpkt.pcap.Reader(f)
         self.rows = []
