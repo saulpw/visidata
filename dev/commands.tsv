@@ -189,12 +189,12 @@ Sheet	select-equal-row	g	,	g,	n	change	n	y		rows-select-like-row	select rows mat
 Sheet	select-expr	z	|	z|	n	change	n	y		rows-select-expr	select rows with a Python expression
 Sheet	select-row		s	s	n	change	n	y	2,5	rows-select-current	select current row
 Sheet	select-rows	g	s	gs	n	change	n	y	5	rows-select-all	select all rows
+Sheet	set-option				n	n		y			set option on current sheet
 Sheet	setcell-none	z	d	zd	n	n	y	y		modify-clear-cell	set contents of current cell to None
 Sheet	setcol-expr	g	=	g=	n	use	y	y	3,5	modify-set-column-selected-expr	set current column for selected rows to result of Python expression
 Sheet	setcol-none	gz	d	gzd	n	use	y	y		modify-clear-column-selected	set contents of cells in current column to None for selected rows
 Sheet	setcol-range	gz	=	gz=	n	use	y	y	3	modify-set-column-sequence	set current column for selected rows to the items in result of Python sequence expression
 Sheet	setcol-subst	g	*	g*	n	use	y	y	4	modify-add-column-regex-transform-foo	regex/subst - replace regex with subst, which may include backreferences (\1 etc)
-Sheet	set-option				n	n		y			set option on current sheet
 Sheet	show-aggregate	z	+	z+	n	n	n	y	1	column-aggregator-show	display result of aggregator over all values in current column
 Sheet	show-cursor		^G	^G	n	n	n	n		info-sheet	show cursor position and bounds of current sheet on status line
 Sheet	show-expr	z	=	z=	n	n	n	y		python-eval-row	set current cell to result of evaluated Python expression on current row
