@@ -153,8 +153,8 @@ unhide all columns
 .Pp
 .It Ic "! z!" Ns
 toggle/unset current column as a key column
-.It Ic "~  #  %  $  @"
-set type of current column to str/int/float/currency/date
+.It Ic "~  #  %  $  @  z#"
+set type of current column to str/int/float/currency/date/len
 .It Ic "  ^"
 edit name of current column
 .It Ic " g^"

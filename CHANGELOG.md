@@ -17,6 +17,7 @@
     - add `gS` (`sheet-graveyard`)
     - add g(, z(, gz( variants of ( 'expand-column'
     - add `z|` and `z\` for un/selecting by python expr (thanks to @jsvine for suggestion)
+    - add `z#` for setting type of current column to `len`
 
 - Loaders:
     - add pandas adapter

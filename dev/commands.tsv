@@ -230,6 +230,7 @@ Sheet	type-currency		$	$	n	n	n	y	1	column-type-currency	set type of current colu
 Sheet	type-date		@	@	n	n	n	y		column-type-date	set type of current column to date
 Sheet	type-float		%	%	n	n	n	y	2,3	column-type-float	set type of current column to float
 Sheet	type-int		#	#	n	n	n	y	2	column-type-int	set type of current column to int
+Sheet	type-len	z	#	z#	n	n	n	y			set type of current column to len
 Sheet	type-string		~	~	n	n	n	y	1	column-type-str	set type of current column to str
 Sheet	unhide-cols	g	v	gv	n	n	n	y		column-unhide-all	unhide all columns
 Sheet	unselect-after	gz	u	gzu	n	change	n	y		rows-unselect-from-cursor	unselect all rows from cursor to bottom
