@@ -1845,6 +1845,8 @@ class Column:
             return '[%s]' % len(cellval)
         if isinstance(typedval, dict):
             return '{%s}' % len(cellval)
+        if isinstance(typedval, bytes):
+            typedval = typedval.decode(options.encoding, options.encoding_errors)
 
         return typemap[t].formatter(self.fmtstr, typedval)
 
@@ -1943,9 +1945,6 @@ class Column:
                                 display=options.disp_pending,
                                 note=options.note_pending,
                                 notecolor=options.color_note_pending)
-
-        if isinstance(cellval, bytes):
-            cellval = cellval.decode(options.encoding, options.encoding_errors)
 
         dw = DisplayWrapper(cellval)
 

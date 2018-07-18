@@ -47,6 +47,7 @@ from .loaders.mbtiles import *
 from .loaders.http import *
 from .loaders.html import *
 from .loaders.markdown import *
+from .loaders.pcap import *
 from .loaders.png import *
 from .loaders.ttf import *
 from .loaders.sas import *
