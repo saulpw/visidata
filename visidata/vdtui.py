@@ -1773,7 +1773,7 @@ def isNullFunc():
 
 
 class Column:
-    def __init__(self, name, type=anytype, cache=False, **kwargs):
+    def __init__(self, name, *, type=anytype, cache=False, **kwargs):
         self.sheet = None     # owning Sheet, set in Sheet.addColumn
         self.name = name      # display visible name
         self.fmtstr = ''      # by default, use str()
@@ -2016,14 +2016,25 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
-def ColumnAttr(name, attr=None, **kwargs):
+def getattrdeep(obj, attrs, default):
+    for a in attrs:
+        obj = getattr(obj, a)
+    return obj
+
+def setattrdeep(obj, attrs, val):
+    for a in attrs[:-1]:
+        obj = getattr(obj, a)
+    obj[attrs[-1]] = val
+
+def ColumnAttr(name, *attrs, **kwargs):
     'Column using getattr/setattr of given attr.'
-    if attr is None:
-        attr = name
+    if not attrs:
+        attrs = name.split('.')
+
     return Column(name,
-            getter=lambda col,row,attr=attr: getattr(row, attr, None),
-            setter=lambda col,row,val,attr=attr: setattr(row, attr, val),
-            **kwargs)
+                  getter=lambda col,row,attrs=attrs: getattrdeep(row, attrs, None),
+                  setter=lambda col,row,val,attrs=attrs: setattrdeep(row, attrs, val),
+                  **kwargs)
 
 def ColumnItem(name, key=None, **kwargs):
     'Column using getitem/setitem of given key.'
