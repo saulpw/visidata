@@ -1,5 +1,5 @@
-- Date: 2017-12-27
-- Version: 1.0
+- Date: 2018-07-18
+- Version: 1.3
 
 # How to create a loader for VisiData
 
