@@ -149,18 +149,19 @@ Recipes for a couple of recurring patterns:
 
 ## 4. Define Sheet-specific Commands
 
-`Command()` and `globalCommand()` have the same signature:
+`<Sheet>.addCommand()` and `globalCommand()` have the same signature:
 
-`Command(keystrokes, execstr, helpstr, longname)`
+`[...]Command(default_keybinding, longname, execstr)`
 
     class FooSheet(Sheet):
         ...
-        commands = [
-            Command('b', 'cursorRow.set_bar(0)', 'reset bar to 0', 'reset-bar')
-        ]
 
-- Reasonably intuitive and mnemonic default keybindings should be chosen.
-- The longname allows the command to be rebound by a more descriptive name, and for the command to be redefined for other contexts (so all keystrokes bound to that command will take on the new action).
+    FooSheet.addCommand('b', 'reset-bar', 'cursorRow.set_bar(0)')
+
+- Optionally, a reasonably intuitive and mnemonic default keybindings could be chosen.
+- The longname is a mandatory argument and allows the command to be rebound by a more descriptive name, and for the command to be redefined for other contexts (so all keystrokes bound to that command will take on the new action).
+
+See the [commands design document]() and [commands checklist]() for more details.
 
 ## Full Example
 
@@ -179,9 +180,6 @@ This would be a completely functional read-only viewer for the fictional foolib.
                           setter=lambda col,row,val: row.set_bar(val)),
             Column('baz', type=int, getter=lambda col,row: row.inside[1]*100)
         ]
-        commands = [
-            Command('b', 'cursorRow.set_bar(0)', 'reset bar to 0', 'reset-bar')
-        ]
 
         @asyncthread
         def reload(self):
@@ -194,6 +192,8 @@ This would be a completely functional read-only viewer for the fictional foolib.
                 except Exception as e:
                     r = e
                 self.rows.append(r)
+
+    FooSheet.addCommand('b', 'reset-bar', 'cursorRow.set_bar(0)')
 
 ## Extra Credit: create a saver
 
