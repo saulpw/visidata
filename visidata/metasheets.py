@@ -112,8 +112,8 @@ class OptionsSheet(Sheet):
     rowtype = 'options'
     precious = False
     columns = (ColumnAttr('option', 'name'),
-               ColumnAttr('value'),
-               ColumnAttr('default'),
+               Column('value', getter=lambda col, row: options[row.name]),
+               Column('default', getter=lambda col, row: options.getdefault(row.name)),
                ColumnAttr('helpstr'))
     colorizers = Sheet.colorizers + [
         Colorizer('cell', 9, lambda s,c,r,v: v.value if c.name in ['value', 'default'] and r.name.startswith('color_') else None)

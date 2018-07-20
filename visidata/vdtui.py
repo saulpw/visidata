@@ -122,11 +122,14 @@ def bindkey_override(keystrokes, longname):
     bindkeys.override(keystrokes, longname)
 
 class Option:
-    def __init__(self, name, default, helpstr=''):
+    def __init__(self, name, value, helpstr=''):
         self.name = name
-        self.default = self.value = default
+        self.value = value
         self.helpstr = helpstr
         self.replayable = False
+
+    def __str__(self):
+        return self.value
 
 class OptionsObject:
     'minimalist options framework'
@@ -136,13 +139,22 @@ class OptionsObject:
     def keys(self, obj=None):
         return [optname for optname, o in self._opts.keys() if obj is None or o == obj]
 
+    def getdefault(self, k):
+        return self._opts.get(k, 'default').value
+
     def setdefault(self, k, v, helpstr):
         o = Option(k, v, helpstr)
         self._opts.set(k, o, 'default')
         return o
 
+    def sheetname(self, obj):
+        if isinstance(obj, BaseSheet):
+            return obj.name
+        elif obj is None:
+            return 'override'
+
     def override(self, k, v):
-        o = Option(k, v, helpstr)
+        o = Option(k, v)
         return self._opts.set(k, o, 'override')
 
     def __getattr__(self, k):      # options.foo
@@ -155,7 +167,7 @@ class OptionsObject:
         return self._opts.get(k).value
 
     def __setitem__(self, k, v):   # options[k] = v
-        opt = self._opts.get(k, 'default')
+        opt = self._opts.get(k)
         if opt:
             curval = opt.value
             t = type(curval)
@@ -170,11 +182,11 @@ class OptionsObject:
         else:
             curval = None
             warning('setting unknown option %s' % k)
-            self._opts.set(k, Option(k, v, ''), 'default')
 
         if curval != v:
             vd().callHook('set_option', k, v)
 
+        self.override(k, v)
 
 commands = SettingsMgr()
 bindkeys = SettingsMgr()
