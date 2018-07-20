@@ -73,7 +73,9 @@ vd = None  # will be filled in later
 # key: ('override'/Sheet-instance/Sheet-type/'default', settingname) -> # [key] -> Option/Command/longname
 class SettingsMgr(collections.OrderedDict):
     def set(self, k, v, obj):
-        'obj is a Sheet instance, or a Sheet [sub]class.  obj of None means override all; obj="default" means last resort'
+        'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
+        if vd:
+            vd.status('setting %s.%s = %s' % (obj, k, v))
         self[(k, obj)] = v
 
     def setdefault(self, k, v):
@@ -129,7 +131,7 @@ class Option:
         self.replayable = False
 
     def __str__(self):
-        return self.value
+        return str(self.value)
 
 class OptionsObject:
     'minimalist options framework'

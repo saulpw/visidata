@@ -175,9 +175,9 @@ class SheetNamedTuple(PythonSheet):
 SheetNamedTuple.addCommand(ENTER, 'dive-row', 'dive()')
 
 class SheetDict(PythonSheet):
-    rowtype = 'items'
-    def __init__(self, name, src, **kwargs):
-        super().__init__(name, source=src, **kwargs)
+    rowtype = 'items'  # rowdef: [key, value]  (editable)
+    def __init__(self, name, source, **kwargs): # source is dict()
+        super().__init__(name, source=source, **kwargs)
 
     def reload(self):
         self.columns = [ColumnItem('key', 0)]
