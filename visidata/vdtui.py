@@ -2040,7 +2040,7 @@ def getattrdeep(obj, attrs, default):
 def setattrdeep(obj, attrs, val):
     for a in attrs[:-1]:
         obj = getattr(obj, a)
-    obj[attrs[-1]] = val
+    setattr(obj, attrs[-1], val)
 
 def ColumnAttr(name, *attrs, **kwargs):
     'Column using getattr/setattr of given attr.'
