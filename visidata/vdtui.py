@@ -212,6 +212,7 @@ option('wrap', True, 'wrap text to fit window width on TextSheet')
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
 option('cmdlog_longname', True, 'Use command longname in cmdlog if available')
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
+option('quitguard', False, 'confirm before quitting last sheet')
 
 replayableOption('none_is_null', True, 'if Python None counts as null')
 replayableOption('empty_is_null', False, 'if empty string counts as null')
@@ -269,7 +270,7 @@ theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 ENTER='^J'
 ESC='^['
 globalCommand('KEY_RESIZE', 'no-op', '')
-globalCommand('q', 'quit-sheet',  'vd.sheets[1:] or confirm("quit last sheet? "); vd.sheets.pop(0)')
+globalCommand('q', 'quit-sheet',  'vd.sheets[1:] or options.quitguard and confirm("quit last sheet? "); vd.sheets.pop(0)')
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
 globalCommand('^L', 'redraw', 'vd.scr.clear()')
