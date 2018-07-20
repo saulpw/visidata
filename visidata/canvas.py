@@ -361,7 +361,7 @@ class Canvas(Plotter):
         return self.canvasFromPlotterCoord(self.plotterMouse.x, self.plotterMouse.y)
 
     def canvasFromPlotterCoord(self, plotter_x, plotter_y):
-        return self.visibleBox.xmin + (plotter_x-self.plotviewBox.xmin)/self.xScaler, self.visibleBox.ymin + (plotter_y-self.plotviewBox.ymin)/self.yScaler
+        return Point(self.visibleBox.xmin + (plotter_x-self.plotviewBox.xmin)/self.xScaler, self.visibleBox.ymin + (plotter_y-self.plotviewBox.ymin)/self.yScaler)
 
     def canvasFromTerminalCoord(self, x, y):
         return self.canvasFromPlotterCoord(*self.plotterFromTerminalCoord(x, y))
