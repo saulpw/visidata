@@ -351,14 +351,9 @@ def status(*args, **kwargs):
 def input(*args, **kwargs):
     return vd().input(*args, **kwargs)
 
-def enumPivot(L, pivotIdx):
-    '''Model Python `enumerate()` but starting midway through sequence `L`.
-
-    Begin at index following `pivotIdx`, traverse through end.
-    At sequence-end, begin at sequence-head, continuing through `pivotIdx`.'''
-    rng = range(pivotIdx+1, len(L))
-    rng2 = range(0, pivotIdx+1)
-    for i in itertools.chain(rng, rng2):
+def enum_pivot(L, pivot):
+    'Like `enumerate()` but starting midway through sequence `L` and wrapping around to (i, L[i]) as the last item.'
+    for i in itertools.chain(range(pivot+1, len(L)), range(0, pivot+1)):
         yield i, L[i]
 
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
@@ -1162,7 +1157,7 @@ class Sheet(BaseSheet):
 
     def searchColumnNameRegex(self, colregex, moveCursor=False):
         'Select visible column matching `colregex`, if found.'
-        for i, c in enumPivot(self.visibleCols, self.cursorVisibleColIndex):
+        for i, c in enum_pivot(self.visibleCols, self.cursorVisibleColIndex):
             if re.search(colregex, c.name, regex_flags()):
                 if moveCursor:
                     self.cursorVisibleColIndex = i
