@@ -74,8 +74,6 @@ vd = None  # will be filled in later
 class SettingsMgr(collections.OrderedDict):
     def set(self, k, v, obj):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
-        if vd:
-            vd.status('setting %s.%s = %s' % (obj, k, v))
         self[(k, obj)] = v
 
     def setdefault(self, k, v):
