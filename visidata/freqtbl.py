@@ -28,7 +28,7 @@ class SheetFreqTable(Sheet):
         self.largest = 100
 
         self.columns = [
-            Column(c.name, type=c.type, width=c.width, getter=lambda col,row,i=i: row[0][i])
+            Column(c.name, type=c.type, width=c.width, fmtstr=c.fmtstr, getter=lambda col,row,i=i: row[0][i])
                 for i, c in enumerate(self.origCols)
         ]
         self.keyCols = self.columns[:]  # origCols are now key columns
