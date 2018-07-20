@@ -406,10 +406,19 @@ def sync(expectedThreads=0):
 
 def asyncthread(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
+    d = {}  # per decoration cache
+    def _func(*args, **kwargs):
+        k = str(args) + str(kwargs)
+        d[k] = func(*args, **kwargs)
+
     @functools.wraps(func)
     def _execAsync(*args, **kwargs):
-        return vd().execAsync(func, *args, **kwargs)
+        k = str(args) + str(kwargs)
+        if k not in d:
+            d[k] = vd().execAsync(_func, *args, **kwargs)
+        return d.get(k)
     return _execAsync
+
 
 class Progress:
     def __init__(self, iterable=None, total=None, sheet=None):

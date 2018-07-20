@@ -125,4 +125,3 @@ def checkMemoryUsage(vs):
 vd().threadsSheet = ThreadsSheet('thread_history')
 vd().toplevelTryFunc = threadProfileCode
 vd().addHook('rstatus', checkMemoryUsage)
-
