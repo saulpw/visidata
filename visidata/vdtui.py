@@ -212,7 +212,6 @@ replayableOption('default_width', 20, 'default column width')
 option('wrap', True, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
-option('cmdlog_longname', True, 'Use command longname in cmdlog if available')
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
 option('quitguard', False, 'confirm before quitting last sheet')
 
