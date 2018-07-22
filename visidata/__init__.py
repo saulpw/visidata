@@ -14,6 +14,8 @@ from .clipboard import *
 from .utils import *
 from .slide import *
 
+from .loaders.tsv import *
+
 from .pyobj import *
 from .metasheets import *
 from .describe import *
