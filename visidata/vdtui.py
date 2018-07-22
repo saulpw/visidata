@@ -179,12 +179,12 @@ class OptionsObject:
                 pass
             else:
                 v = t(v)
+
+            if curval != v and opt.replayable:
+                vd().callHook('set_option', k, v)
         else:
             curval = None
             warning('setting unknown option %s' % k)
-
-        if curval != v:
-            vd().callHook('set_option', k, v)
 
         self.override(k, v)
 
