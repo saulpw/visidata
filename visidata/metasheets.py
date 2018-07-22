@@ -122,7 +122,7 @@ class OptionsSheet(Sheet):
     nKeys = 1
 
     def editOption(self, row):
-        if isinstance(row.default, bool):
+        if isinstance(row.value, bool):
             options[row.name] = not row.value
         else:
             options[row.name] = self.editCell(1)
