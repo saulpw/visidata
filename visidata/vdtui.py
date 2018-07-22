@@ -284,6 +284,8 @@ globalCommand('^Z', 'suspend', 'suspend()')
 
 globalCommand('^A', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
+bindkey('KEY_RESIZE', 'redraw')
+
 def input_longname(sheet):
     longnames = set(k for k, obj in commands.keys())
     return input("command name: ", completer=CompleteKey(sorted(longnames)))

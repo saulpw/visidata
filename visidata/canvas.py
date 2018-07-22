@@ -293,7 +293,6 @@ class Plotter(BaseSheet):
 
 Plotter.addCommand('^L', 'redraw', 'refresh()')
 Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels')
-#bindkey('KEY_RESIZE', 'redraw')
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
 class Canvas(Plotter):
