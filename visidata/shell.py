@@ -1,9 +1,16 @@
-from visidata import Column, Sheet, LazyMapRow, asyncthread
+from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught
 
 import subprocess
 
 
-Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addColumn(ColumnShell(cmd, source=sheet))')
+Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)')
+
+
+def addShellColumns(cmd, sheet):
+    c = ColumnShell(cmd, source=sheet, width=0)
+    sheet.addColumn(c)
+    sheet.addColumn(Column(cmd+'_stdout', srccol=c, getter=lambda col,row: col.srccol.getValue(row)[0]))
+    sheet.addColumn(Column(cmd+'_stderr', srccol=c, getter=lambda col,row: col.srccol.getValue(row)[1]))
 
 
 class ColumnShell(Column):
@@ -11,8 +18,19 @@ class ColumnShell(Column):
         super().__init__(name, **kwargs)
         self.expr = cmd or name
 
-    @asyncthread
+    @asynccache
     def calcValue(self, row):
-        args = self.expr.format_map(LazyMapRow(self.source, row)).split()
-        p = subprocess.Popen(args, stdout=subprocess.PIPE)
-        return p.communicate()[0]
+        try:
+            import shlex
+            args = []
+            lmr = LazyMapRow(self.source, row)
+            for arg in shlex.split(self.expr):
+                if arg.startswith('$'):
+                    args.append(shlex.quote(lmr[arg[1:]]))
+                else:
+                    args.append(arg)
+
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            return p.communicate()
+        except Exception as e:
+            exceptionCaught(e)

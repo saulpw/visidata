@@ -397,8 +397,17 @@ def moveRegex(sheet, *args, **kwargs):
 def sync(expectedThreads=0):
     vd().sync(expectedThreads)
 
+
 def asyncthread(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
+    @functools.wraps(func)
+    def _execAsync(*args, **kwargs):
+        return vd().execAsync(func, *args, **kwargs)
+    return _execAsync
+
+
+def asynccache(func):
+    'Function decorator, so first call to `func()` spawns a separate thread. Calls return the Thread until the wrapped function returns; subsequent calls return the cached return value.'
     d = {}  # per decoration cache
     def _func(*args, **kwargs):
         k = str(args) + str(kwargs)
