@@ -75,7 +75,7 @@ class SheetPivot(Sheet):
                 self.addRow(pivotrow)
 
             for col in self.variableCols:
-                varval = col.getTypedValueNoExceptions(r)
+                varval = col.getTypedValueOrException(r)
                 matchingRows = pivotrow[1].get(varval)
                 if matchingRows is None:
                     pivotrow[1][varval] = [r]
