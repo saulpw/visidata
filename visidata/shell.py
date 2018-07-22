@@ -26,7 +26,7 @@ class ColumnShell(Column):
             lmr = LazyMapRow(self.source, row)
             for arg in shlex.split(self.expr):
                 if arg.startswith('$'):
-                    args.append(shlex.quote(lmr[arg[1:]]))
+                    args.append(lmr[arg[1:]])
                 else:
                     args.append(arg)
 
