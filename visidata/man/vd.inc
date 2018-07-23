@@ -312,7 +312,8 @@ open
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "R" Ar number
-select a random population subset of
+pushes sheet with random population subset of
+.Ar number No rows
 .It Ic "zR" Ar number
 select a random population subset of
 .Ar number No rows
@@ -671,7 +672,7 @@ For example:
 .Bd -literal
    options.min_memory_mb=100  # stop processing without 100MB free
 
-   globalCommand('0', 'gh')   # alias '0' to move to first column, like vim
+   bindkey('0', 'go-leftmost')   # alias '0' to move to first column, like vim
 
    def median(values):
        L = sorted(values)
