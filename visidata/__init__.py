@@ -13,6 +13,7 @@ from .data import *
 from .clipboard import *
 from .utils import *
 from .slide import *
+from .namedlist import *
 
 from .loaders.tsv import *
 
