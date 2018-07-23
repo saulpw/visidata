@@ -44,7 +44,7 @@ def indexMatch(L, func):
             return i
 
 def keystr(k):
-    return  ','.join(map(str, k))
+    return options.rowkey_prefix + ','.join(map(str, k))
 
 def isLoggableSheet(sheet):
     return sheet is not vd().cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
@@ -115,7 +115,7 @@ class CommandLog(TsvSheet):
             sheetname = sheet.name
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorRow') and sheet.rows:
                 k = sheet.rowkey(sheet.cursorRow)
-                rowname = (options.rowkey_prefix + keystr(k)) if k else sheet.cursorRowIndex
+                rowname = keystr(k) if k else sheet.cursorRowIndex
 
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
@@ -180,7 +180,6 @@ class CommandLog(TsvSheet):
             try:
                 rowidx = int(r.row)
             except ValueError:
-                k = r.row[1:]  # trim rowkey_prefix
                 rowidx = indexMatch(vs.rows, lambda r,vs=vs,k=k: keystr(vs.rowkey(r)) == k)
 
             if rowidx is None:
@@ -223,10 +222,18 @@ class CommandLog(TsvSheet):
         'Replay the command in one given row.'
         CommandLog.currentReplayRow = r
 
-        vs = self.moveToReplayContext(r)
+        if r.longname == 'set-option':
+            try:
+                options.set(r.row, r.input, options.getobj(r.col))
+                escaped = False
+            except Exception as e:
+                exceptionCaught(e)
+                escaped = True
+        else:
+            vs = self.moveToReplayContext(r)
 
-        vd().keystrokes = r.keystrokes
-        escaped = vs.exec_keystrokes(r.longname)  # <=v1.2 used keystrokes in longname column; exec_keystrokes works with either
+            vd().keystrokes = r.keystrokes
+            escaped = vs.exec_keystrokes(r.longname)  # <=v1.2 used keystrokes in longname column; exec_keystrokes works with either
 
         CommandLog.currentReplayRow = None
 
@@ -289,8 +296,8 @@ class CommandLog(TsvSheet):
         return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
     def setOption(self, optname, optval, obj=None):
-        objname = options.sheetname(obj)
-        self.addRow(CommandLogRow(col=objname, row=options.rowkey_prefix+optname,
+        objname = options.objname(obj)
+        self.addRow(CommandLogRow(col=objname, row=optname,
                     keystrokes='', input=str(optval),
                     longname='set-option'))
 

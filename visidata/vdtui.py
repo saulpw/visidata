@@ -145,11 +145,19 @@ class OptionsObject:
         self._opts.set(k, o, 'default')
         return o
 
-    def sheetname(self, obj):
+    def objname(self, obj):
         if isinstance(obj, BaseSheet):
             return obj.name
-        elif obj is None:
+        elif obj is None or obj == 'override':
             return 'override'
+        elif obj == 'default':
+            return 'default'
+
+    def getobj(self, objname):
+        'Inverse of objname(obj); returns obj if available'
+        for optname, o in self._opts.keys():
+            if self.objname(o) == objname:
+                return o
 
     def get(self, k, obj=None):
         opt = self._opts.get(k, obj)
