@@ -2,18 +2,21 @@
 
 ## I. Layers of settings
 
-- a. User input and the command-line options always override stored defaults.
-- b. `.visidatarc` can set options explicitly for any layer.
-- c. Settings are named globally uniquely.
-- d. These layers may apply to any of these settings.  This is the resolution order (the first applicable layer is used):
+- a. Settings are named globally uniquely.
+- b. .visidatarc `options.foo = 42` overrides global default
+- c. `.visidatarc` can override options explicitly for any layer by naming the associated 'object'.
+- d. command-line option `--foo 42` overrides .visidatarc global at 'override' layer.
+- e. User input (OptionsSheet) overrides currently at the 'override' layer.
+- f. These layers may apply to any of these settings.  This is the resolution order (the first applicable layer is used):
 
-   1. in session via meta-sheet
-   2. command line (options only)
-   3. .visidatarc
-   4. current sheet instance
-   5. current sheet type
-   6. current sheet parent types
-   7. global defaults
+   0. user sheet-specific override (not possible yet in interface)
+   1. current sheet instance
+   2. current sheet type
+   3. current sheet parent types
+   4. in session via meta-sheet
+   5. command line (options only, applied on top of the overrides in .visidatarc)
+   6. .visidatarc  (associated object is string 'override')
+   7. global defaults  (associated object is string 'default')
 
 
 ## II. Commands/Keybindings
