@@ -70,7 +70,7 @@ def returnException(f, *args, **kwargs):
 
 vd = None  # will be filled in later
 
-# key: ('override'/Sheet-instance/Sheet-type/'default', settingname) -> # [key] -> Option/Command/longname
+# (settingname, Sheet-instance/Sheet-type/'override'/'default') -> Option/Command/longname
 class SettingsMgr(collections.OrderedDict):
     def set(self, k, v, obj='override'):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
@@ -80,7 +80,7 @@ class SettingsMgr(collections.OrderedDict):
         self.set(k, v, 'default')
 
     def get(self, k, obj=None):
-        'Return self[k] considering context of obj.  If obj is None, traverses the entire stack.'
+        'Return self[k] considering context of obj.  If obj is None, uses the context of the top sheet.'
         if obj is None and vd:
             obj = vd.sheet
 
