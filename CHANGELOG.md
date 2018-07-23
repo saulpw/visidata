@@ -3,6 +3,7 @@
 # 1.3
 
 - add quantile aggregators (q3/q4/q5/q10)
+- add z; to add new column from bash *expr*, with `$`columnNames as variables
 - commands overhaul
 - sheet-specific options (see design/169.md)
 - keyboard layout (thanks to @deinspier for the inspiration)

@@ -181,11 +181,13 @@ open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
 reset cache for current/all visible column(s)
 .Pp
-.It Ic "\&:" Ar regex
+.It Ic " \&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
-.It Ic "\&;" Ar regex
+.It Ic " \&;" Ar regex
 .No add new columns from capture groups of Ar regex No (also requires example row)
-.It Ic "*" Ar regex Ns Sy / Ns Ar subst
+.It Ic "z" Ns Ic "\&;" Ar expr
+.No add new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
+.It Ic " *" Ar regex Ns Sy / Ns Ar subst
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .It Ic "g*" Ar regex Ns Sy / Ns Ar subst
 .No modify selected rows in current column, replacing Ar regex No with Ar subst

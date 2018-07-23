@@ -69,6 +69,7 @@ Sheet	add-rows	g	a	ga	n	n	y	y	3	modify-add-row-many	add N blank rows
 Sheet	addcol-bulk	gz	a	gza	n	n	y	y		modify-add-column-manyblank	add N empty columns
 Sheet	addcol-expr		=	=	n	n	y	y	1,3,5	modify-add-column-expr	create new column from Python expression, with column names as variables
 Sheet	addcol-new	z	a	za	n	n	y	y	3	modify-add-column-blank	add an empty column
+Sheet	addcol-sh	z	;	z;	n	n	y	y			create new column from bash expression, with $columnNames as variables
 Sheet	addcol-subst		*	*	n	n	y	y	5	modify-add-column-regex-transform	regex/subst - replace regex with subst, which may include backreferences (\1 etc)
 Sheet	aggregate-col		+	+	n	n	n	y	5	column-aggregator-add	add aggregator to current column
 Sheet	aggregate-numerics	g	+	g+	n	n	n	y			add aggregator to all numeric columns
