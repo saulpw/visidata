@@ -2,75 +2,66 @@ import os
 import contextlib
 
 from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet
+from visidata import namedlist
 
 
 def _getTsvHeaders(fp, nlines):
-    headers = []
+    return [L.split(options.delimiter) for L in getlines(fp, nlines or -1)]
+
+def getlines(fp, maxlines=None):
     i = 0
-    while i < nlines:
+    while True:
+        if maxlines is not None and i >= maxlines:
+            break
+
         try:
             L = next(fp)
-        except StopIteration:  # not enough lines for headers
-            return headers
+        except StopIteration:
+            break
+
         L = L.rstrip('\n')
         if L:
-            headers.append(L.split(options.delimiter))
-            i += 1
-
-    return headers
+            yield L
+        i += 1
 
 
-def open_tsv(p, vs=None):
-    'Parse contents of Path `p` and populate columns.'
-
-    if vs is None:
-        vs = TsvSheet(p.name, source=p)
-
-    return vs
+def open_tsv(p):
+    return TsvSheet(p.name, source=p)
 
 
+# rowdef: namedlist
 class TsvSheet(Sheet):
+    _rowtype = None
     @asyncthread
     def reload(self):
-        header_lines = int(options.header)
+        self.reload_sync()
+
+    def reload_sync(self):
+        'Perform synchronous loading of TSV file, discarding header lines.'
+        header_lines = options.get('header', self)
 
         with self.source.open_text() as fp:
-            headers = _getTsvHeaders(fp, header_lines or 1)  # get one data line if no headers
+            headers = _getTsvHeaders(fp, header_lines) # or 1)  # get one data line if no headers
 
-            if header_lines == 0:
-                self.columns = [ColumnItem('', i, width=8) for i in range(len(headers[0]))]
-                # columns ideally reflect the max number of fields over all rows
-                # but that's a lot of work for a large dataset
-            else:
-                self.columns = [
+            self.columns = [
                     ColumnItem('\\n'.join(x), i)
                         for i, x in enumerate(zip(*headers[:header_lines]))
                     ]
+            self._rowtype = namedlist('tsvobj', [c.name for c in self.columns])
 
-        self.recalc()
+            self.recalc()
+            delim = options.delimiter
+            self.rows = []
 
-        reload_tsv_sync(self)
-
-
-def reload_tsv_sync(vs, **kwargs):
-    'Perform synchronous loading of TSV file, discarding header lines.'
-    header_lines = kwargs.get('header', options.header)
-
-    delim = options.delimiter
-    vs.rows = []
-    with vs.source.open_text() as fp:
-        _getTsvHeaders(fp, header_lines)  # discard header lines
-
-        with Progress(total=vs.source.filesize) as prog:
-            while True:
-                try:
-                    L = next(fp)
-                except StopIteration:
-                    break
-                L = L.rstrip('\n')
-                if L:
-                    vs.addRow(L.split(delim))
-                prog.addProgress(len(L))
+            with Progress(total=self.source.filesize) as prog:
+                for L in getlines(fp):
+                    row = L.split(delim)
+                    ncols = self._rowtype.length()  # current number of cols
+                    if len(row) > ncols:
+                        newcols = [ColumnItem('', len(row)+i, width=8) for i in range(len(row)-ncols)]
+                        self._rowtype = namedlist(self._rowtype.__name__, list(self._rowtype._fields) + ['_' for c in newcols])
+                    self.addRow(self._rowtype(row))
+                    prog.addProgress(len(L))
 
 
 def tsv_trdict(delim=None):

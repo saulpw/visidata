@@ -66,7 +66,7 @@ def open_vd(p):
 save_vd = save_tsv
 
 # rowdef: CommandLogRow
-class CommandLog(Sheet):
+class CommandLog(TsvSheet):
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
@@ -87,7 +87,7 @@ class CommandLog(Sheet):
 
     @asyncthread
     def reload(self):
-        reload_tsv_sync(self, header=1)  # .vd files always have a header row, regardless of options
+        self.reload_sync()
         self.rows = [CommandLogRow(r) for r in self.rows]
 
     def removeSheet(self, vs):
@@ -298,6 +298,7 @@ CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("re
 CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
 CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
 CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or error("no rows selected"), input("save macro for keystroke: "))')
+options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
 vd().cmdlog = CommandLog('cmdlog')
 vd().cmdlog.rows = []  # so it can be added to immediately
