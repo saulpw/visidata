@@ -273,12 +273,13 @@ ColumnsSheet	join-cols		&	&	n	use	n	y			add column from concatenating selected s
 ColumnsSheet	key-off-selected	gz	!	gz!	n	use	n	y			unset selected rows as key columns on source sheet
 ColumnsSheet	key-selected	g	!	g!	n	use	n	y			toggle selected rows as key columns on source sheet
 ColumnsSheet	resize-source-rows				n	use	n	y		column-source-width-max	adjust widths of selected source columns
-ColumnsSheet	type-any-selected	gz	~	gz~	n	n	n	y		column-type-any-selected	set type of selected columns to anytype
-ColumnsSheet	type-currency-selected	g	$	g$	n	n	n	y	1	column-type-currency-selected	set type of selected columns to currency
-ColumnsSheet	type-date-selected	g	@	g@	n	n	n	y		column-type-date-selected	set type of selected columns to date
-ColumnsSheet	type-float-selected	g	%	g%	n	n	n	y	2,3	column-type-float-selected	set type of selected columns to float
-ColumnsSheet	type-int-selected	g	#	g#	n	n	n	y	2	column-type-int-selected	set type of selected columns to int
-ColumnsSheet	type-string-selected	g	~	g~	n	n	n	y	1	column-type-str-selected	set type of selected columns to str
+ColumnsSheet	type-any-selected	gz	~	gz~	n	use	n	y		column-type-any-selected	set type of selected columns to anytype
+ColumnsSheet	type-currency-selected	g	$	g$	n	use	n	y	1	column-type-currency-selected	set type of selected columns to currency
+ColumnsSheet	type-date-selected	g	@	g@	n	use	n	y		column-type-date-selected	set type of selected columns to date
+ColumnsSheet	type-float-selected	g	%	g%	n	use	n	y	2,3	column-type-float-selected	set type of selected columns to float
+ColumnsSheet	type-int-selected	g	#	g#	n	use	n	y	2	column-type-int-selected	set type of selected columns to int
+ColumnsSheet	type-len-selected	gz	#	gz#	n	use	n	y		column-type-int-selected	set type of selected columns to len
+ColumnsSheet	type-string-selected	g	~	g~	n	use	n	y	1	column-type-str-selected	set type of selected columns to str
 Canvas	delete-cursor		d	d	n	n	source	y			delete rows on source sheet contained within canvas cursor
 Canvas	delete-visible	g	d	gd	n	n	source	y			delete rows on source sheet visible on screen
 Canvas	dive-cursor		Enter	Enter	y	n	n	y			open sheet of source rows contained within canvas cursor
