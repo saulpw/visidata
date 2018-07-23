@@ -289,8 +289,8 @@ class CommandLog(TsvSheet):
         return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
     def setOption(self, optname, optval, obj=None):
-        sheet = options.sheetname(obj)
-        self.addRow(CommandLogRow(sheet=sheet, col='', row=options.rowkey_prefix+optname,
+        objname = options.sheetname(obj)
+        self.addRow(CommandLogRow(col=objname, row=options.rowkey_prefix+optname,
                     keystrokes='', input=str(optval),
                     longname='set-option'))
 

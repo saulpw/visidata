@@ -168,7 +168,10 @@ class OptionsObject:
         self.__setitem__(k, v)
 
     def __getitem__(self, k):      # options[k]
-        return self._opts.get(k).value
+        opt = self._opts.get(k)
+        if not opt:
+            error('no option "%s"' % k)
+        return opt.value
 
     def __setitem__(self, k, v):   # options[k] = v
         opt = self._opts.get(k)
@@ -353,6 +356,10 @@ def warning(s):
 
 def status(*args, **kwargs):
     return vd().status(*args, **kwargs)
+
+def debug(*args, **kwargs):
+    if options.debug:
+        return vd().status(*args, **kwargs)
 
 def input(*args, **kwargs):
     return vd().input(*args, **kwargs)
@@ -1028,6 +1035,7 @@ class BaseSheet:
             status('aborted')
             escaped = True
         except Exception as e:
+            debug(cmd.execstr)
             err = self.vd.exceptionCaught(e)
             escaped = True
 
