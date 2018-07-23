@@ -72,32 +72,29 @@ vd = None  # will be filled in later
 
 # key: ('override'/Sheet-instance/Sheet-type/'default', settingname) -> # [key] -> Option/Command/longname
 class SettingsMgr(collections.OrderedDict):
-    def set(self, k, v, obj):
+    def set(self, k, v, obj='override'):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
         self[(k, obj)] = v
 
     def setdefault(self, k, v):
         self.set(k, v, 'default')
 
-    def override(self, k, v):
-        self.set(k, v, 'override')
-
     def get(self, k, obj=None):
         'Return self[k] considering context of obj.  If obj is None, traverses the entire stack.'
-        if obj is None:
-            mappings = ['override']
-            if vd:
-                sheet = vd.sheet
-                if sheet:
-                    mappings.append(sheet)
-                    mappings.extend(inspect.getmro(type(sheet)))
-            mappings += ['default']
-        else:
-            mappings = [obj]
+        mappings = ['override']
+        if obj is None and vd:
+            obj = vd.sheet
 
-        for obj in mappings:
-            if (k, obj) in self:
-                return self[(k, obj)]
+        if obj:
+            mappings.append(obj)
+            mro = inspect.getmro(type(obj))
+            mappings.extend(mro)
+
+        mappings += ['default']
+
+        for o in mappings:
+            if (k, o) in self:
+                return self[(k, o)]
 
 
 class Command:
@@ -119,7 +116,7 @@ def bindkey(keystrokes, longname):
     bindkeys.setdefault(keystrokes, longname)
 
 def bindkey_override(keystrokes, longname):
-    bindkeys.override(keystrokes, longname)
+    bindkeys.set(keystrokes, longname)
 
 class Option:
     def __init__(self, name, value, helpstr=''):
@@ -153,9 +150,15 @@ class OptionsObject:
         elif obj is None:
             return 'override'
 
-    def override(self, k, v):
-        o = Option(k, v)
-        return self._opts.set(k, o, 'override')
+    def get(self, k, obj=None):
+        opt = self._opts.get(k, obj)
+        return opt.value
+
+    def set(self, k, v, obj='override'):
+        return self._opts.set(k, Option(k, v), obj)
+
+    def getall(self, kmatch):
+        return {obj:opt for (k, obj), opt in self._opts.items() if k == kmatch}
 
     def __getattr__(self, k):      # options.foo
         return self.__getitem__(k)
@@ -186,7 +189,7 @@ class OptionsObject:
             curval = None
             warning('setting unknown option %s' % k)
 
-        self.override(k, v)
+        self.set(k, v)
 
 commands = SettingsMgr()
 bindkeys = SettingsMgr()
