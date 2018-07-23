@@ -81,16 +81,17 @@ class SettingsMgr(collections.OrderedDict):
 
     def get(self, k, obj=None):
         'Return self[k] considering context of obj.  If obj is None, traverses the entire stack.'
-        mappings = ['override']
         if obj is None and vd:
             obj = vd.sheet
 
         if obj:
-            mappings.append(obj)
+            mappings = [obj]
             mro = inspect.getmro(type(obj))
             mappings.extend(mro)
+        else:
+            mappings = []
 
-        mappings += ['default']
+        mappings += ['override', 'default']
 
         for o in mappings:
             if (k, o) in self:
