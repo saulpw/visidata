@@ -181,7 +181,7 @@ class CommandLog(TsvSheet):
             try:
                 rowidx = int(r.row)
             except ValueError:
-                rowidx = indexMatch(vs.rows, lambda r,vs=vs,k=k: keystr(vs.rowkey(r)) == k)
+                rowidx = indexMatch(vs.rows, lambda r,vs=vs,k=r.row: keystr(vs.rowkey(r)) == k)
 
             if rowidx is None:
                 error('no "%s" row' % r.row)
