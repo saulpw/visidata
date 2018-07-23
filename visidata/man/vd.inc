@@ -208,6 +208,8 @@ select/toggle/unselect rows from cursor to bottom
 .No select/unselect rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
 .No select/unselect rows matching Ar regex No in any visible column
+.It Ic "z|  z\e\ " Ns Ar expr
+.No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
 select rows matching current cell in current column
 .It Ic "g\&,"
@@ -308,7 +310,7 @@ open
 .It Ic "z^S" Ar filename
 .No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
-.No save CommandLog to Ar filename.vd No file
+.No save Sy CommandLog No to Ar filename.vd No file
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "R" Ar number
@@ -425,7 +427,6 @@ open current row/cell/sheet as Python object
 .It Sy Metasheets
 .It Sy " \&."
 .Sy Columns Sheet No (Shift+C) "    edit column properties"
-.No ( Ns Ic gC No for all columns from all sheets)
 .It Sy " \&."
 .Sy Sheets Sheet No (Shift+S) "     jump between sheets or join them together"
 .It Sy " \&."
@@ -475,8 +476,14 @@ apply all deferred changes to current/all file(s)
 .It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are the literal columns on the source sheet.
 .El
 .Bl -inset -compact
-.It (sheet-specific commands)
+.It (global commands)
 .El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gC
+.No open Sy Columns Sheet No for all visible columns on all sheets
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
 add column from concatenating selected source columns
@@ -486,13 +493,20 @@ toggle/unset selected columns as key columns on source sheet
 add Ar aggregator No to selected source columns
 .It Ic "g-" No (hyphen)
 hide selected columns on source sheet
-.It Ic "g~ g# g% g$ g@"
-set type of selected columns on source sheet to str/int/float/currency/date
+.It Ic "g~ g# g% g$ g@  gz#"
+set type of selected columns on source sheet to str/int/float/currency/date/len
 .It Ic " Enter"
 .No open a Sy Frequency Table No sheet grouped by column referenced in current row
 .El
 .
 .Ss Sheets Sheet (Shift+S)
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gS
+.No open Sy Sheets Graveyard No which includes references to closed sheets
+.El
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
@@ -503,6 +517,8 @@ jump to sheet referenced in current row
 add row to reference a new blank sheet
 .It Ic "gC"
 .No open Sy Columns Sheet No with all columns from selected sheets
+.It Ic "gI"
+.No open Sy Describe Sheet No with all columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
 .It Ic " &" Ar jointype
@@ -537,7 +553,11 @@ edit option
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gD
 .No open Sy Directory Sheet No for Sy options.visidata_dir No (default: Sy ~/.visidata/ Ns ), which contains saved commandlogs and macros
+.El
+.Bl -inset -compact
 .It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "  x"
 replay command in current row
 .It Ic " gx"
@@ -561,7 +581,11 @@ abort replay
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
 open one-line summary for selected rows
+.El
+.Bl -inset -compact
 .It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " s   t   u"
 select/toggle/unselect these entries in source sheet
 .It Ic " Enter"
@@ -569,6 +593,13 @@ open sheet of source rows that are grouped in current cell
 .El
 .
 .Ss Describe Sheet (Shift+I)
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gI
+.No open Sy Describe Sheet No for all visible columns on all sheets
+.El
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El

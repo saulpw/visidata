@@ -15,7 +15,7 @@
     - `R` (`random-sheet`) pushes sheet instead of selecting (reverting to former behavior)
     - `za` (`addcol-empty`) asks for column name
     - add `gI` (`describe-all`) like `gC` (`columns-all`)
-    - add `gS` (`sheet-graveyard`)
+    - add `gS` (`sheets-graveyard`)
     - add g(, z(, gz( variants of ( 'expand-column'
     - add `z|` and `z\` for un/selecting by python expr (thanks to @jsvine for suggestion)
     - add `z#` for setting type of current column to `len`
