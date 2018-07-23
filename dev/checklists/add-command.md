@@ -1,6 +1,6 @@
-Adding a Command
+# Command checklist
 
-## Write the command
+## Writing the command
 1) choose where the command will go (module? visidatarc?);
 2) choose the appropriate scope for the command;
     - is the command a `globalCommand` (does not require a specific sheet)
@@ -12,7 +12,7 @@ Adding a Command
 4) optional: choose a default keybinding (see the [available keystrokes](https://visidata.org/kblayout)).
     - [design schema of keystrokes]() (e.g. why we decide to map a command to Ctrl, Shift, g, z, etc)
 
-## Document the command (to be done if the command remains in the release)
+## Documenting the command (to be done once the command is shippable)
 5) add command to [dev/commands.tsv]();
     - `sheet`: the SheetType the command is bound to
     - `longname`: the [longname]() for the command
