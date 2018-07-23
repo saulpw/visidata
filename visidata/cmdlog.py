@@ -29,8 +29,6 @@ nonLogKeys += [' ']
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 
-CommandLogRow = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment'.split())
-
 def fnSuffix(template):
     for i in range(1, 1000):
         fn = template.format(i)
@@ -65,12 +63,13 @@ def open_vd(p):
 
 save_vd = save_tsv
 
-# rowdef: CommandLogRow
+# rowdef: namedlist (like TsvSheet)
 class CommandLog(TsvSheet):
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
-    columns = [ColumnAttr(x) for x in CommandLogRow._fields]
+    _rowtype = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment'.split())
+    columns = [ColumnAttr(x) for x in _rowtype._fields]
 
     paused = False
     currentReplay = None     # CommandLog replaying currently
@@ -82,13 +81,8 @@ class CommandLog(TsvSheet):
         super().__init__(name, source=source, **kwargs)
         self.currentActiveRow = None
 
-    def newRow(self):
-        return CommandLogRow()
-
-    @asyncthread
-    def reload(self):
-        self.reload_sync()
-        self.rows = [CommandLogRow(r) for r in self.rows]
+    def newRow(self, **fields):
+        return self._rowtype(**fields)
 
     def removeSheet(self, vs):
         'Remove all traces of sheets named vs.name from the cmdlog.'
@@ -120,7 +114,7 @@ class CommandLog(TsvSheet):
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
-        self.currentActiveRow = CommandLogRow(sheet=sheetname, col=colname, row=rowname,
+        self.currentActiveRow = self.newRow(sheet=sheetname, col=colname, row=rowname,
                                               keystrokes=keystrokes, input=args,
                                               longname=cmd.longname, comment=cmd.helpstr)
 
@@ -144,7 +138,7 @@ class CommandLog(TsvSheet):
         self.currentActiveRow = None
 
     def openHook(self, vs, src):
-        self.addRow(CommandLogRow(keystrokes='o', input=src, longname='open-file'))
+        self.addRow(self.newRow(keystrokes='o', input=src, longname='open-file'))
 
     @classmethod
     def togglePause(self):
@@ -222,7 +216,8 @@ class CommandLog(TsvSheet):
         'Replay the command in one given row.'
         CommandLog.currentReplayRow = r
 
-        if r.longname == 'set-option':
+        longname = getattr(r, 'longname', None)
+        if longname == 'set-option':
             try:
                 options.set(r.row, r.input, options.getobj(r.col))
                 escaped = False
@@ -233,7 +228,8 @@ class CommandLog(TsvSheet):
             vs = self.moveToReplayContext(r)
 
             vd().keystrokes = r.keystrokes
-            escaped = vs.exec_keystrokes(r.longname)  # <=v1.2 used keystrokes in longname column; exec_keystrokes works with either
+            # <=v1.2 used keystrokes in longname column; getCommand fetches both
+            escaped = vs.exec_command(vs.getCommand(longname if longname else r.keystrokes), keystrokes=r.keystrokes)
 
         CommandLog.currentReplayRow = None
 
@@ -297,7 +293,7 @@ class CommandLog(TsvSheet):
 
     def setOption(self, optname, optval, obj=None):
         objname = options.objname(obj)
-        self.addRow(CommandLogRow(col=objname, row=optname,
+        self.addRow(self.newRow(col=objname, row=optname,
                     keystrokes='', input=str(optval),
                     longname='set-option'))
 
