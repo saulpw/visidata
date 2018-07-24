@@ -1,17 +1,18 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/surveys.csv	open input in VisiData
-surveys	record_id		=	year+'-'+month+'-'+day	create new column from Python expression, with column names as variables
-surveys	year+'-'+month+'-'+day		@		set type of current column to date
-surveys	year+'-'+month+'-'+day		^	date	edit name of current column
-surveys	month		-		hide current column
-surveys	day		-		hide current column
-surveys	year		-		hide current column
-surveys	hindfoot_length		#		set type of current column to int
-surveys	weight		#		set type of current column to int
-surveys			I		open Describe Sheet
-surveys_describe	errors	5	zs		select rows on source sheet which are being described in current cell
-surveys_describe			^^		jump to previous sheet (swaps with current sheet)
-surveys			gd		delete all selected rows and move them to clipboard
-surveys	species_id		!		pin current column on the left as a key column
-surveys	hindfoot_length		+	mean	add aggregator to current column
-surveys	sex		W		Pivot the current column into a new sheet
+sheet	col	row	longname	input	keystrokes	comment
+			version	1.2.1		saul.pw/vdtui v1.2.1
+			open-file	sample_data/surveys.csv	o	
+surveys	record_id		addcol-expr	year+'-'+month+'-'+day	=	
+surveys	year+'-'+month+'-'+day		type-date		@	
+surveys	year+'-'+month+'-'+day		rename-col	date	^	
+surveys	month		hide-col		-	
+surveys	day		hide-col		-	
+surveys	year		hide-col		-	
+surveys	hindfoot_length		type-int		#	
+surveys	weight		type-int		#	
+surveys			describe-sheet		I	
+surveys_describe	errors	キsurveys,hindfoot_length	select-cell		zs	
+surveys_describe			swap-sheet		^^	
+surveys			delete-selected		gd	
+surveys	species_id		key-col		!	
+surveys	hindfoot_length		aggregate-col	mean	+	
+surveys	sex		pivot		W	
