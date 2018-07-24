@@ -5,8 +5,8 @@ import tempfile
 
 from visidata import *
 
-# adds vd.clipvalue and vd.cliprows
-# vd.cliprows = [(source_sheet, source_row_idx, source_row)]
+vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
+vd.clipcells = []  # list of strings
 
 globalCommand('y', 'copy-row', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]')
 globalCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]')
@@ -16,11 +16,13 @@ globalCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(d
 globalCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()')
 globalCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))')
 
-globalCommand('zy', 'copy-cell', 'vd.clipvalue = cursorDisplay')
-globalCommand('zp', 'paste-cell', 'cursorCol.setValue(cursorRow, vd.clipvalue)')
+globalCommand('zy', 'copy-cell', 'vd.clipcells = [cursorDisplay]')
+globalCommand('zp', 'paste-cell', 'cursorCol.setValue(cursorRow, vd.clipcells[0])')
+Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)')
+Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)')
 
-globalCommand('gzy', 'copy-cells', 'vd.clipcells = list(cursorCol.getTypedValueNoExceptions(r) for r in selectedRows); status("%d values in %s to clipboard" % (len(vd.cliprows), cursorCol.name))')
-globalCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, vd.clipcells): cursorCol.setValue(r, v)')
+globalCommand('gzy', 'copy-cells', 'vd.clipcells = [sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
+globalCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValue(r, v)')
 
 globalCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))')
 globalCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))')

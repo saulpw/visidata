@@ -1785,8 +1785,6 @@ Sheet.addCommand('g?', 'searchr-cols', 'moveRegex(sheet, regex=input("g?", type=
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)'),
 Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
-Sheet.addCommand('zd', 'setcell-none', 'cursorCol.setValues([cursorRow], None)'),
-Sheet.addCommand('gzd', 'setcol-none', 'cursorCol.setValues(selectedRows, None)'),
 
 Sheet.addCommand('"', 'dup-selected', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)'),
 Sheet.addCommand('g"', 'dup-rows', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),
