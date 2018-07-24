@@ -14,6 +14,10 @@ A terminal interface for exploring and arranging tabular data.
 
 ### Installation
 
+Each package contains the full loader suite but differs in which loader dependencies will get installed by default.
+
+The base VisiData package concerns loaders whose dependencies are covered by the Python3 standard library. Currently these include the loaders for tsv, csv, fixed width text, json, and sqlite. Additionally, .zip, .gz, .bz2, and .xz files can be decompressed on the fly.
+
 |Platform           |Package Manager                        | Command                                       | Out-of-box Loaders   |
 |-------------------|----------------------------------------|----------------------------------------------|----------------------|
 |Python3.4+         |[pip3](https://visidata.org/install#pip3) | `pip3 install visidata`                    | Base                 |
