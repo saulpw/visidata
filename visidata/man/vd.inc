@@ -101,6 +101,8 @@ jump to previous sheet (swaps with current sheet)
 .No search for Ar regex No forward/backward in current column
 .It Ic  "g/  g?" Ar regex
 .No search for Ar regex No forward/backward over all visible columns
+.It Ic  "z/  z?" Ar expr
+.No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
 move to next/previous match from last search
 .Pp
