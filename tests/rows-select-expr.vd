@@ -1,5 +1,6 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/StatusPR.csv	open file
-StatusPR			rows-select-expr	'Puerto Rico' in Location	select rows with a Python expression
-StatusPR			rows-unselect-expr	'number' in Unit	unselect rows with a Python expression
-StatusPR			"		open duplicate sheet with only selected rows
+sheet	col	row	longname	input	keystrokes	comment
+			version	1.2.1		saul.pw/vdtui v1.2.1
+			open-file	sample_data/StatusPR.csv	o	
+StatusPR			select-expr	'Puerto Rico' in Location	z|	
+StatusPR			unselect-expr	'number' in Unit	z\	
+StatusPR			dup-selected		"	
