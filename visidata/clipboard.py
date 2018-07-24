@@ -17,12 +17,15 @@ globalCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i, r
 globalCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))')
 
 globalCommand('zy', 'copy-cell', 'vd.clipvalue = cursorDisplay')
-globalCommand('gzp', 'paste-selected', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)')
 globalCommand('zp', 'paste-cell', 'cursorCol.setValue(cursorRow, vd.clipvalue)')
+
+globalCommand('gzy', 'copy-cells', 'vd.clipcells = list(cursorCol.getTypedValueNoExceptions(r) for r in selectedRows); status("%d values in %s to clipboard" % (len(vd.cliprows), cursorCol.name))')
+globalCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, vd.clipcells): cursorCol.setValue(r, v)')
 
 globalCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))')
 globalCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))')
 globalCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
+globalCommand('gzY', 'syscopy-cells', 'copyToClipboard(" ".join(vd.clipcells))')
 
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
 
