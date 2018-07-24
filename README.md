@@ -35,9 +35,10 @@ Please see [/install](https://visidata.org/install) for detailed instructions, a
     $ vd [<options>] <input> ...
     $ <command> | vd [<options>]
 
-VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more.
+VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more (see the [list of supported sources](http://visidata.org/man#sources)).
+
 Use `-f <filetype>` to force a particular filetype.
-(See the [list of supported sources](http://visidata.org/man#sources)).
+
 
 ### Documentation
 
