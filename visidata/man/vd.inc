@@ -244,16 +244,16 @@ append a blank row/column
 delete current/selected row(s) and move to clipboard
 .It Ic "  y   gy"
 yank (copy) current/all selected row(s) to clipboard
-.It Ic " zy"
-yank (copy) current cell to clipboard
+.It Ic " zy  gzy"
+yank (copy) contents of current column for current/selected row(s) to clipboard
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
 set contents of current column for current/selected row(s) to last clipboard value
 .It Ic "  Y   gY"
 .No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
-.It Ic " zY"
-.No yank (copy) current cell to system clipboard (using Sy options.clipboard_copy_cmd Ns )
+.It Ic " zY  gzY"
+.No yank (copy) contents of current column for current/selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic "  f"
 fill null cells in current column with contents of non-null cells up the current column
 .
