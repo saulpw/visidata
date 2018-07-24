@@ -9,13 +9,13 @@ from .urlcache import *
 from .zscroll import *
 from ._types import *
 from .selection import *
+from .loaders.tsv import *
 from .data import *
 from .clipboard import *
 from .utils import *
 from .slide import *
-from .namedlist import *
 
-from .loaders.tsv import *
+from .namedlist import *
 
 from .pyobj import *
 from .metasheets import *

@@ -2,7 +2,7 @@ import os
 import contextlib
 
 from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet
-from visidata import namedlist
+from visidata.namedlist import namedlist
 
 
 def _getTsvHeaders(fp, nlines):

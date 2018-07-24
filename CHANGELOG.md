@@ -17,14 +17,15 @@
     - add `gI` (`describe-all`) like `gC` (`columns-all`)
     - add `gS` (`sheets-graveyard`)
     - add g(, z(, gz( variants of ( 'expand-column'
-    - add `z|` and `z\` for un/selecting by python expr (thanks to @jsvine for suggestion)
-    - add `z#` for setting type of current column to `len`
+    - add `z|` and `z\` to un/select by python expr (thanks to @jsvine for suggestion)
+    - add `z#` to set type of current column to `len`
+    - add `z;` to get the stdout/stderr from running a cmdline program with $colname args
 
 - Loaders:
     - add pandas adapter
     - add xml loader
     - yaml loader (thanks to @robcarrington, @john, @anja at Pycon Sprints for making this happen
-    - split `tsv_safe_char` into `tsv_safe_newline` and `tsv_safe_tab`; remove `tsv_safe_char`
+    - remove `tsv_safe_char` and split into `tsv_safe_newline` and `tsv_safe_tab`
 
 - initial commit of a task warrior app (vtask)
 

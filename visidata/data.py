@@ -399,7 +399,7 @@ def openSource(p, filetype=None):
         return getGlobals()[openfunc](p, filetype=filetype)
     elif isinstance(p, Path):
         if not filetype:
-            filetype = options.filetype or p.suffix
+            filetype = options.filetype or p.suffix or 'txt'
 
         if os.path.isdir(p.resolve()):
             vs = DirSheet(p.name, source=p)
