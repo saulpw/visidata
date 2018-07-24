@@ -3,7 +3,7 @@ from visidata import *
 def open_sqlite(path):
     vs = SqliteSheet(path.name + '_tables', path, 'sqlite_master')
     vs.columns = vs.getColumns('sqlite_master')
-    vs.addCommand(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'load the entire table into memory')
+    vs.addCommand(ENTER, 'dive-row', 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))')
     return vs
 open_db = open_sqlite
 
