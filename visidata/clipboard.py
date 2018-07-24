@@ -1,33 +1,36 @@
+from copy import copy
 import shutil
 import subprocess
 import sys
 import tempfile
+import functools
 
-from visidata import *
+from visidata import vd, asyncthread, sync, status, error, option, options
+from visidata import Sheet, saveSheets
 
 vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
 vd.clipcells = []  # list of strings
 
-globalCommand('y', 'copy-row', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]')
-globalCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]')
-globalCommand('p', 'paste-after', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)')
-globalCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)')
+Sheet.addCommand('y', 'copy-row', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]')
+Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]')
+Sheet.addCommand('p', 'paste-after', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)')
+Sheet.addCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)')
 
-globalCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()')
-globalCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))')
+Sheet.addCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()')
+Sheet.addCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))')
 
-globalCommand('zy', 'copy-cell', 'vd.clipcells = [cursorDisplay]')
-globalCommand('zp', 'paste-cell', 'cursorCol.setValue(cursorRow, vd.clipcells[0])')
+Sheet.addCommand('zy', 'copy-cell', 'vd.clipcells = [cursorDisplay]')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValue(cursorRow, vd.clipcells[0])')
 Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)')
 Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)')
 
-globalCommand('gzy', 'copy-cells', 'vd.clipcells = [sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
-globalCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValue(r, v)')
+Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
+Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValue(r, v)')
 
-globalCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))')
-globalCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))')
-globalCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
-globalCommand('gzY', 'syscopy-cells', 'copyToClipboard(" ".join(vd.clipcells))')
+Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))')
+Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))')
+Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
+Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard(" ".join(vd.clipcells))')
 
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
 
@@ -40,11 +43,11 @@ __clipboard_commands = {
 
 def detect_clipboard_command():
     'Detect available clipboard util and return cmdline to copy data to the system clipboard.'
-    for (command, platform), options in __clipboard_commands.items():
+    for (command, platform), opts in __clipboard_commands.items():
         if platform is None or sys.platform == platform:
             path = shutil.which(command)
             if path:
-                return ' '.join([path, options])
+                return ' '.join([path, opts])
 
     return ''
 
