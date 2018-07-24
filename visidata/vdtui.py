@@ -377,6 +377,23 @@ def enum_pivot(L, pivot):
     for i in itertools.chain(range(pivot+1, len(L)), range(0, pivot+1)):
         yield i, L[i]
 
+def rotate_range(n, idx, reverse=False):
+    if reverse:
+        rng = range(idx-1, -1, -1)
+        rng2 = range(n-1, idx-1, -1)
+    else:
+        rng = range(idx+1, n)
+        rng2 = range(0, idx+1)
+
+    wrapped = False
+    with Progress(total=n) as prog:
+        for r in itertools.chain(rng, rng2):
+            prog.addProgress(1)
+            if not wrapped and r in rng2:
+                status('search wrapped')
+                wrapped = True
+            yield r
+
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s))
 
@@ -698,29 +715,17 @@ class VisiData:
         if reverse:
             searchBackward = not searchBackward
 
-        if searchBackward:
-            rng = range(sheet.cursorRowIndex-1, -1, -1)
-            rng2 = range(sheet.nRows-1, sheet.cursorRowIndex-1, -1)
-        else:
-            rng = range(sheet.cursorRowIndex+1, sheet.nRows)
-            rng2 = range(0, sheet.cursorRowIndex+1)
-
         matchingRowIndexes = 0
-
-        with Progress(total=sheet.nRows) as prog:
-            for r in itertools.chain(rng, rng2):
-                prog.addProgress(1)
-                c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
-                if c:
-                    if moveCursor:
-                        sheet.cursorRowIndex = r
-                        sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
-                        if r in rng2:
-                            status('search wrapped')
-                        return
-                    else:
-                        matchingRowIndexes += 1
-                        yield r
+        for r in rotate_range(len(sheet.rows), sheet.cursorRowIndex, reverse=searchBackward):
+            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
+            if c:
+                if moveCursor:
+                    sheet.cursorRowIndex = r
+                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
+                    return
+                else:
+                    matchingRowIndexes += 1
+                    yield r
 
         status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
@@ -1418,8 +1423,9 @@ class Sheet(BaseSheet):
 
     def gatherBy(self, func):
         'Generate only rows for which the given func returns True.'
-        for r in Progress(self.rows):
+        for i in rotate_range(len(self.rows), self.cursorRowIndex):
             try:
+                r = self.rows[i]
                 if func(r):
                     yield r
             except Exception:
