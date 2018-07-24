@@ -102,10 +102,10 @@ globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new
 
 
 bindkey('gKEY_F(1)', 'commands-sheet')  # vdtui generic commands sheet
-bindkey('gz?', 'commands-sheet')  # vdtui generic commands sheet
+bindkey('g^H', 'commands-sheet')  # vdtui generic commands sheet
 
 # in VisiData, F1/z? refer to the man page
-globalCommand('z?', 'sysopen-help', 'openManPage()')
+globalCommand('^H', 'sysopen-help', 'openManPage()')
 bindkey('KEY_F(1)', 'sysopen-help')
 
 def openManPage():

@@ -68,7 +68,7 @@ In most cases, commands that affect selected rows will affect all rows if no row
 .Pp
 .Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " F1   z?"
+.It Ic " F1   ^H"
 view this man page
 .It Ic ^Q
 abort program immediately
