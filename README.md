@@ -42,7 +42,7 @@ Use `-f <filetype>` to force a particular filetype.
 ### Documentation
 
 * [VisiData v1.2 Getting Started Tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
-* Quick reference: `F1` (or `^H`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
+* Quick reference `Ctrl+H` within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
 * [/docs](http://visidata.org/docs) contains a collection of howto recipes.
 
 ### Help and Support
