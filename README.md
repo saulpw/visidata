@@ -10,66 +10,23 @@ A terminal interface for exploring and arranging tabular data.
 - other modules may be required for opening particular data sources
     - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](http://visidata.org/man/#loaders) in the vd manpage
 
-### Install via pip3
+## Getting started
 
-Best installation method for users who wish to take advantage of VisiData in their own code, or integrate it into a Python3 virtual environment.
+### Installation
 
-To install VisiData, with loaders for the most common data file formats (including csv, tsv, fixed-width text, json, sqlite, http, html and xls):
+|Platform           |Package Manager                        | Command                                       | Out-of-box Loaders   |
+|-------------------|----------------------------------------|----------------------------------------------|----------------------|
+|Python3.4+         |[pip3](https://visidata.org/install#pip3) | `pip3 install visidata`                    | Base                 |
+|Python3.4+         |[conda](https://visidata.org/install#conda) | `conda install --channel conda-forge visidata` | Base, http, html, xls(x) |
+|MacOS              |[Homebrew](https://visidata.org/install#brew) | `brew install saulpw/vd/visidata`            | Base, http, html, xls(x) |
+|Linux (Debian/Ubuntu) |[apt](https://visidata.org/install#apt) | [click me](https://visidata.org/install#apt)                      | Base, http, html, xls(x) |
+|Linux (Debian/Ubuntu) |[dpkg](https://visidata.org/install#dpkg) | [click me](https://visidata.org/install#dpkg)                | Base, http, html, xls(x) |
+|Windows               |[WSL](https://visidata.org/install#wsl) | Windows is not yet directly supported (use WSL) | N/A |
+|Python3.4+            |[github](https://visidata.org/install#git) | `pip3 install git+https://github.com/saulpw/visidata.git@develop` | Base |
 
-    $ pip3 install visidata
+Please see [/install](https://visidata.org/install) for detailed instructions, additional information, and troubleshooting.
 
-### Install via conda
-
-To install from [conda-forge](https://github.com/conda-forge/visidata-feedstock):
-
-Add the `conda-forge` channel.
-
-    $ conda config --add channels conda-forge
-
-You can then install VisiData by typing:
-
-    $ conda install visidata
-
-And update VisiData with:
-
-    $ conda update visidata
-
-### Install via brew
-
-Ideal for MacOS users who primarily want to engage with VisiData as an application. This is currently the most reliable way to install VisiData's manpage on MacOS.
-
-    $ brew install saulpw/vd/visidata
-
-Further instructions available [here](https://github.com/saulpw/homebrew-vd).
-
-### Install via apt
-
-Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
-
-Currently, VisiData v1.0 is in Debian unstable's [main repository](https://launchpad.net/ubuntu/+source/visidata). If you want more up-to-date versions of VisiData, it will be available in our own [Debian repo](https://github.com/saulpw/deb-vd).
-
-To install from Debian:
-
-Obtain the public key
-
-    $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B48AD6246925553
-
-Ensure the repository is in apt's search list
-
-    $ sudo apt install apt-transport-https
-    $ sudo vim /etc/apt/sources.list
-
-      deb http://ftp.debian.org/debian/ unstable main
-
-    $ sudo apt update
-
-You can then install VisiData by typing:
-
-    sudo apt install visidata
-
-Instructions for installing from our own personal repository are available [here](https://github.com/saulpw/deb-vd).
-
-## Usage
+### Usage
 
     $ vd [<options>] <input> ...
     $ <command> | vd [<options>]
@@ -78,14 +35,14 @@ VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more.
 Use `-f <filetype>` to force a particular filetype.
 (See the [list of supported sources](http://visidata.org/man#sources)).
 
-## Documentation
+### Documentation
 
-* Quick reference: `F1` (or `z?`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
+* Quick reference: `F1` (or `^H`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
 * [visidata.org/docs](http://visidata.org/docs) has a complete list of links to all official documentation.
 
-## Help and Support
+### Help and Support
 
-For additional information, see the [support page](http://visidata.org/support).
+If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues).
 
 ## vdtui
 

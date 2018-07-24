@@ -1,6 +1,6 @@
 # Install VisiData
 
-This guide will cover the steps for installing VisiData and provide troubleshooting assistance. To read about the differences between the various packages, and for help selecting which one best suits your needs, see our [installation decision tree guide](/topics/install).
+This guide will cover the steps for installing VisiData and provide troubleshooting assistance.
 
 
 ## Quick Reference
@@ -8,7 +8,7 @@ This guide will cover the steps for installing VisiData and provide troubleshoot
 |Platform   |Package Manager|Command                                       | Out-of-box Loaders       |
 |-----------+---------------+:---------------------------------------------+--------------------------|
 |Python3.4+ |[pip3](#pip3)   |`pip3 install visidata`                       | Base                     |
-|Python3.4+ |[conda](#conda)|`conda install --channel conda-forge visidata`| Base, http, html, .xls(x) |
+|Python3.4+ |[conda](#conda)|`conda install --channel conda-forge visidata`| Base, http, html, xls(x) |
 |MacOS      |[Homebrew](#brew)|`brew install saulpw/vd/visidata`           | Base, http, html, xls(x)  |
 |Linux (Debian/Ubuntu)|[apt](#apt)      |`apt install visidata`            | Base, http, html, xls(x)  |
 |Linux (Debian/Ubuntu)|[dpkg](#dpkg)      |`dpkg -i visidata_ver_all.deb` | Base, http, html, xls(x)   |
