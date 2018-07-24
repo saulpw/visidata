@@ -486,6 +486,7 @@ apply all deferred changes to current/all file(s)
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
+.El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
 add column from concatenating selected source columns

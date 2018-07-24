@@ -68,7 +68,7 @@ In most cases, commands that affect selected rows will affect all rows if no row
 .Pp
 .Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " F1   z?"
+.It Ic " F1   ^H"
 view this man page
 .It Ic ^Q
 abort program immediately
@@ -101,6 +101,8 @@ jump to previous sheet (swaps with current sheet)
 .No search for Ar regex No forward/backward in current column
 .It Ic  "g/  g?" Ar regex
 .No search for Ar regex No forward/backward over all visible columns
+.It Ic  "z/  z?" Ar expr
+.No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
 move to next/previous match from last search
 .Pp
@@ -181,11 +183,13 @@ open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
 reset cache for current/all visible column(s)
 .Pp
-.It Ic "\&:" Ar regex
+.It Ic " \&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
-.It Ic "\&;" Ar regex
+.It Ic " \&;" Ar regex
 .No add new columns from capture groups of Ar regex No (also requires example row)
-.It Ic "*" Ar regex Ns Sy / Ns Ar subst
+.It Ic "z" Ns Ic "\&;" Ar expr
+.No add new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
+.It Ic " *" Ar regex Ns Sy / Ns Ar subst
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .It Ic "g*" Ar regex Ns Sy / Ns Ar subst
 .No modify selected rows in current column, replacing Ar regex No with Ar subst
@@ -206,6 +210,8 @@ select/toggle/unselect rows from cursor to bottom
 .No select/unselect rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
 .No select/unselect rows matching Ar regex No in any visible column
+.It Ic "z|  z\e\ " Ns Ar expr
+.No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
 select rows matching current cell in current column
 .It Ic "g\&,"
@@ -240,16 +246,16 @@ append a blank row/column
 delete current/selected row(s) and move to clipboard
 .It Ic "  y   gy"
 yank (copy) current/all selected row(s) to clipboard
-.It Ic " zy"
-yank (copy) current cell to clipboard
+.It Ic " zy  gzy"
+yank (copy) contents of current column for current/selected row(s) to clipboard
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
 set contents of current column for current/selected row(s) to last clipboard value
 .It Ic "  Y   gY"
 .No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
-.It Ic " zY"
-.No yank (copy) current cell to system clipboard (using Sy options.clipboard_copy_cmd Ns )
+.It Ic " zY  gzY"
+.No yank (copy) contents of current column for current/selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic "  f"
 fill null cells in current column with contents of non-null cells up the current column
 .
@@ -306,11 +312,12 @@ open
 .It Ic "z^S" Ar filename
 .No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
-.No save CommandLog to Ar filename.vd No file
+.No save Sy CommandLog No to Ar filename.vd No file
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "R" Ar number
-select a random population subset of
+pushes sheet with random population subset of
+.Ar number No rows
 .It Ic "zR" Ar number
 select a random population subset of
 .Ar number No rows
@@ -422,7 +429,6 @@ open current row/cell/sheet as Python object
 .It Sy Metasheets
 .It Sy " \&."
 .Sy Columns Sheet No (Shift+C) "    edit column properties"
-.No ( Ns Ic gC No for all columns from all sheets)
 .It Sy " \&."
 .Sy Sheets Sheet No (Shift+S) "     jump between sheets or join them together"
 .It Sy " \&."
@@ -472,6 +478,13 @@ apply all deferred changes to current/all file(s)
 .It Properties of columns on the source sheet can be changed with standard editing commands ( Ns Sy e  ge g= Del Ns ) on the Sy Columns Sheet Ns . Multiple aggregators can be set by listing them (separated by spaces) in the aggregators column.  The 'g' commands affect the selected rows, which are the literal columns on the source sheet.
 .El
 .Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gC
+.No open Sy Columns Sheet No for all visible columns on all sheets
+.El
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -483,13 +496,20 @@ toggle/unset selected columns as key columns on source sheet
 add Ar aggregator No to selected source columns
 .It Ic "g-" No (hyphen)
 hide selected columns on source sheet
-.It Ic "g~ g# g% g$ g@"
-set type of selected columns on source sheet to str/int/float/currency/date
+.It Ic "g~ g# g% g$ g@  gz#"
+set type of selected columns on source sheet to str/int/float/currency/date/len
 .It Ic " Enter"
 .No open a Sy Frequency Table No sheet grouped by column referenced in current row
 .El
 .
 .Ss Sheets Sheet (Shift+S)
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gS
+.No open Sy Sheets Graveyard No which includes references to closed sheets
+.El
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
@@ -500,6 +520,8 @@ jump to sheet referenced in current row
 add row to reference a new blank sheet
 .It Ic "gC"
 .No open Sy Columns Sheet No with all columns from selected sheets
+.It Ic "gI"
+.No open Sy Describe Sheet No with all columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
 .It Ic " &" Ar jointype
@@ -534,7 +556,11 @@ edit option
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gD
 .No open Sy Directory Sheet No for Sy options.visidata_dir No (default: Sy ~/.visidata/ Ns ), which contains saved commandlogs and macros
+.El
+.Bl -inset -compact
 .It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "  x"
 replay command in current row
 .It Ic " gx"
@@ -558,7 +584,11 @@ abort replay
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
 open one-line summary for selected rows
+.El
+.Bl -inset -compact
 .It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " s   t   u"
 select/toggle/unselect these entries in source sheet
 .It Ic " Enter"
@@ -566,6 +596,13 @@ open sheet of source rows that are grouped in current cell
 .El
 .
 .Ss Describe Sheet (Shift+I)
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic gI
+.No open Sy Describe Sheet No for all visible columns on all sheets
+.El
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
@@ -650,10 +687,10 @@ default column width
 wrap text to fit window width on TextSheet
 .It Sy --cmd-after-edit Ns = Ns Ar "str        " No "go-down"
 command longname to execute after successful edit
-.It Sy --cmdlog-longname Ns = Ns Ar "bool      " No "True"
-Use command longname in cmdlog if available
 .It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
 max number of cache entries in each cached column
+.It Sy --quitguard Ns = Ns Ar "bool            " No "False"
+confirm before quitting last sheet
 .It Sy --none-is-null Ns = Ns Ar "bool         " No "True"
 if Python None counts as null
 .It Sy --empty-is-null Ns = Ns Ar "bool        " No "False"
@@ -718,16 +755,18 @@ directory to load and store macros
 string prefix for rowkey in the cmdlog
 .It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
 file to autorecord each cmdlog action to
+.It Sy --header Ns = Ns Ar "int                " No "1"
+parse first N rows of .csv/.tsv as column names
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
 maxsplit to pass to regex.split
 .It Sy --show-graph-labels Ns = Ns Ar "bool    " No "True"
 show axes and legend on graph
-.It Sy --plot-colors Ns = Ns Ar "str           " No "green red yellow cyan magenta white 38 136 168"
-list of distinct colors to use for plotting distinct objects
+.It Sy --plot-colors Ns = Ns Ar "str           " No ""
+
 .It Sy --zoom-incr Ns = Ns Ar "float           " No "2.0"
 amount to multiply current zoomlevel when zooming
-.It Sy --motd-url Ns = Ns Ar "str              " No "https://visidata.org/motd-1.2.1"
-source of randomized startup messages
+.It Sy --motd-url Ns = Ns Ar "str              " No ""
+
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
@@ -740,6 +779,10 @@ skipinitialspace passed to csv.reader
 escapechar passed to csv.reader
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
+.It Sy --plot-colors Ns = Ns Ar "str           " No ""
+
+.It Sy --motd-url Ns = Ns Ar "str              " No ""
+
 .El
 .
 .Ss DISPLAY OPTIONS
@@ -869,7 +912,7 @@ For example:
 .Bd -literal
    options.min_memory_mb=100  # stop processing without 100MB free
 
-   globalCommand('0', 'gh')   # alias '0' to move to first column, like vim
+   bindkey('0', 'go-leftmost')   # alias '0' to move to first column, like vim
 
    def median(values):
        L = sorted(values)
