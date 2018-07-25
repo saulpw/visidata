@@ -311,7 +311,7 @@ CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or erro
 options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
 vd().cmdlog = CommandLog('cmdlog')
-vd().cmdlog.rows = [vd.cmdlog.newRow(longname='version', input=visidata.__version__, comment=visidata.__version_info__)]
+vd().cmdlog.rows = [vd.cmdlog.newRow(longname='check-version', input=visidata.__version__, comment=visidata.__version_info__)]
 
 vd().addHook('preexec', vd().cmdlog.beforeExecHook)
 vd().addHook('postexec', vd().cmdlog.afterExecSheet)
