@@ -183,11 +183,11 @@ Sheet	scroll-up	z	k	zk	n	n	n	n			scroll one row up
 Sheet	scroll-up			BUTTON4_PRESSED	n	n	n	n		view-scroll-up	move scroll_incr forward
 Sheet	search-col		/	/	n	n	n	n	2	view-find-row-curcol-forward	search for regex forwards in current column
 Sheet	search-cols	g	/	g/	n	n	n	n		view-find-row-viscol-forward	search for regex forwards over all visible columns
-Sheet	search-expr	z	/	z/	n	n	n	n			search by Python expression forwards in current column
+Sheet	search-expr	z	/	z/	n	n	n	n			search by Python expression forwards
 Sheet	search-keys		r	r	n	n	n	n		view-go-row-regex	move to the next row with key matching regex
 Sheet	searchr-col		?	?	n	n	n	n		view-find-row-curcol-backward	search for regex backwards in current column
 Sheet	searchr-cols	g	?	g?	n	n	n	n		view-find-row-viscol-backward	search for regex backwards over all visible columns
-Sheet	searchr-expr	z	?	z?	n	n	n	n		info-manpage	search by Python expression backwards over all visible columns
+Sheet	searchr-expr	z	?	z?	n	n	n	n		info-manpage	search by Python expression backwards
 Sheet	select-after	gz	s	gzs	n	change	n	y		rows-select-from-cursor	select all rows from cursor to bottom
 Sheet	select-before	z	s	zs	n	change	n	y		rows-select-to-cursor	select all rows from top to cursor
 Sheet	select-col-regex		|	|	n	change	n	y	4	rows-select-regex	select rows matching regex in current column
