@@ -11,7 +11,7 @@ surveys	hindfoot_length		type-int		#
 surveys	weight		type-int		#	
 surveys			describe-sheet		I	
 surveys_describe	errors	キsurveys,hindfoot_length	select-cell		zs	
-surveys_describe			swap-sheet		^^	
+surveys_describe			prev-sheet		^^	
 surveys			delete-selected		gd	
 surveys	species_id		key-col		!	
 surveys	hindfoot_length		aggregate-col	mean	+	
