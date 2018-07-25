@@ -38,7 +38,7 @@ def main():
     parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
     parser.add_argument('-v', '--version', action='version', version=__version_info__)
 
-    for optname in vdtui.options.keys('default'):
+    for optname in vdtui.options.keys('global'):
         if optname.startswith('color_') or optname.startswith('disp_'):
             continue
         action = 'store_true' if vdtui.options[optname] is False else 'store'

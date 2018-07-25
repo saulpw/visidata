@@ -70,32 +70,54 @@ def returnException(f, *args, **kwargs):
 
 vd = None  # will be filled in later
 
-# (settingname, Sheet-instance/Sheet-type/'override'/'default') -> Option/Command/longname
+# (settingname, Sheet-instance/Sheet-type/'override'/'global') -> Option/Command/longname
 class SettingsMgr(collections.OrderedDict):
+    def objname(self, obj):
+        if isinstance(obj, str):
+            return obj
+        if isinstance(obj, BaseSheet):
+            return obj.name
+        elif issubclass(obj, BaseSheet):
+            return obj.__name__
+        elif obj is None:
+            return 'override'
+
+    def getobj(self, objname):
+        'Inverse of objname(obj); returns obj if available'
+        for optname, o in self._opts.keys():
+            if self.objname(o) == objname:
+                return o
+
     def set(self, k, v, obj='override'):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
-        self[(k, obj)] = v
+        self[(k, self.objname(obj))] = v
 
     def setdefault(self, k, v):
-        self.set(k, v, 'default')
+        self.set(k, v, 'global')
 
-    def get(self, k, obj=None):
+    def get(self, key, obj=None):
+        for (k, o), v in self.iter(obj):
+            if k == key:
+                return v
+
+    def iter(self, obj=None):
         'Return self[k] considering context of obj.  If obj is None, uses the context of the top sheet.'
         if obj is None and vd:
             obj = vd.sheet
 
         if obj:
-            mappings = [obj]
-            mro = inspect.getmro(type(obj))
+            mappings = [self.objname(obj)]
+            mro = [self.objname(cls) for cls in inspect.getmro(type(obj))]
             mappings.extend(mro)
         else:
             mappings = []
 
-        mappings += ['override', 'default']
+        mappings += ['override', 'global']
 
         for o in mappings:
-            if (k, o) in self:
-                return self[(k, o)]
+            for k, o2 in self.keys():
+                if o == o2:
+                    yield (k, o), self[(k, o)]
 
 
 class Command:
@@ -104,14 +126,12 @@ class Command:
         self.execstr = execstr
         self.helpstr = ''
 
-def command(keystrokes, longname, execstr):
+def globalCommand(keystrokes, longname, execstr):
     commands.setdefault(longname, Command(longname, execstr))
 
     if keystrokes:
         assert not bindkeys.get(keystrokes), keystrokes
         bindkeys.setdefault(keystrokes, longname)
-
-globalCommand = command  # deprecate?
 
 def bindkey(keystrokes, longname):
     bindkeys.setdefault(keystrokes, longname)
@@ -138,26 +158,12 @@ class OptionsObject:
         return [optname for optname, o in self._opts.keys() if obj is None or o == obj]
 
     def getdefault(self, k):
-        return self._opts.get(k, 'default').value
+        return self._opts.get(k, 'global').value
 
     def setdefault(self, k, v, helpstr):
         o = Option(k, v, helpstr)
-        self._opts.set(k, o, 'default')
+        self._opts.set(k, o, 'global')
         return o
-
-    def objname(self, obj):
-        if isinstance(obj, BaseSheet):
-            return obj.name
-        elif obj is None or obj == 'override':
-            return 'override'
-        elif obj == 'default':
-            return 'default'
-
-    def getobj(self, objname):
-        'Inverse of objname(obj); returns obj if available'
-        for optname, o in self._opts.keys():
-            if self.objname(o) == objname:
-                return o
 
     def get(self, k, obj=None):
         opt = self._opts.get(k, obj)

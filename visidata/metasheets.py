@@ -90,23 +90,32 @@ class HelpSheet(Sheet):
     rowtype = 'commands'
     precious = False
 
-    class HelpColumn(Column):
-        def calcValue(self, r):
-            cmd = self.sheet.source.getCommand(self.prefix+r.name, None)
-            return cmd.helpstr if cmd else '-'
-
     columns = [
-        ColumnAttr('keystrokes', 'name'),
-        ColumnAttr('helpstr'),
-        HelpColumn('with_g_prefix', prefix='g'),
-        HelpColumn('with_z_prefix', prefix='z'),
+        ColumnAttr('sheet'),
+        ColumnAttr('longname'),
+        Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname)),
+        Column('helpstr', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
+        ColumnAttr('logged', 'replayable', width=0),
     ]
-    nKeys = 1
+    nKeys = 2
     def reload(self):
+        from pkg_resources import resource_filename
+        cmdlist = TsvSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
+        cmdlist.reload_sync()
+        self.cmddict = {}
+        for cmdrow in cmdlist.rows:
+            self.cmddict[(cmdrow.sheet, cmdrow.longname)] = cmdrow
+
+        self.revbinds = {
+            longname:keystrokes
+                for (keystrokes, _), longname in bindkeys.iter(self.source)
+                    if keystrokes not in self.revbinds
+        }
         self.rows = []
-        for src in self.source._commands.maps:
-            self.rows.extend(src.values())
+        for (k, o), v in commands.iter(self.source):
+            self.rows.append(v)
+            v.sheet = o
 
 class OptionsSheet(Sheet):
     rowtype = 'options'
