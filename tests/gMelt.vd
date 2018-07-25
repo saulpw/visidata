@@ -1,5 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
-			version	1.2.1		saul.pw/vdtui v1.2.1
+			check-version	1.2.1		saul.pw/vdtui v1.2.1
 			open-file	sample_data/sample.tsv	o	
 sample	Unit_Cost		addcol-expr	'$'	=	
 sample	'$'		rename-col	Unit_Currency	^	
