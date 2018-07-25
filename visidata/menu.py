@@ -1,6 +1,6 @@
 from visidata import *
 
-globalCommand(' ', 'cmd=choose(mkmenu(*_commands.maps), cmdhelp, sheet); cmd and exec_command(cmd, keystrokes=cmd.longname)', 'start menu command')
+#globalCommand(' ', 'cmd=choose(mkmenu(*_commands.maps), cmdhelp, sheet); cmd and exec_command(cmd, keystrokes=cmd.longname)', 'start menu command')
 
 option('color_menu_prefix', 'green', 'color of accepted menu part')
 option('color_menu_option', 'white', 'default menu color')

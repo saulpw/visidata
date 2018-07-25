@@ -18,20 +18,20 @@ replayableOption('tsv_safe_tab', '\u001f', 'replacement for newline character wh
 option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
 option('color_delete_pending', 'red', 'color for files pending delete')
 
-globalCommand('c', 'go-column-regex', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)')
-globalCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp')
-globalCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))')
-globalCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))')
+Sheet.addCommand('c', 'go-col-regex', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)')
+Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp')
+Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))')
+Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))')
 
-globalCommand('R', 'random-rows', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)')
+Sheet.addCommand('R', 'random-rows', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)')
 
-globalCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)')
-globalCommand('ga', 'add-rows', 'for r in range(int(input("add rows: "))): addRow(newRow())')
-globalCommand('za', 'addcol-new', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)')
+Sheet.addCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)')
+Sheet.addCommand('ga', 'add-rows', 'for r in range(int(input("add rows: "))): addRow(newRow())')
+Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)')
 
-globalCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)')
+Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)')
 
-globalCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows or rows)')
+Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows or rows)')
 
 bindkey('KEY_SLEFT', 'slide-left')
 bindkey('KEY_SR', 'slide-left')
@@ -84,19 +84,19 @@ def updateColNames(sheet, rows):
         if not c._name:
             c.name = "_".join(c.getDisplayValue(r) for r in rows)
 
-globalCommand('z^', 'rename-col-cell', 'sheet.cursorCol.name = cursorDisplay')
-globalCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow])')
-globalCommand('gz^', 'rename-cols-selected', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ')
+Sheet.addCommand('z^', 'rename-col-cell', 'sheet.cursorCol.name = cursorDisplay')
+Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow])')
+Sheet.addCommand('gz^', 'rename-cols-selected', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ')
 # gz^ with no selectedRows is same as z^
 
 globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))')
-globalCommand('^S', 'save-sheet', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
+Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
 globalCommand('g^S', 'save-all', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
-globalCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputFilename("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)')
+Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputFilename("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)')
 
-globalCommand('z=', 'show-expr', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))')
+Sheet.addCommand('z=', 'show-expr', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))')
 
-globalCommand('gz=', 'setcol-range', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)')
+Sheet.addCommand('gz=', 'setcol-range', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)')
 
 globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: "))))')
 

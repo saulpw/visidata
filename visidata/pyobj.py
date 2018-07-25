@@ -16,7 +16,7 @@ Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, curs
 Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))')
 Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))')
 
-globalCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)')
+Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)')
 
 class PythonSheet(Sheet):
     pass

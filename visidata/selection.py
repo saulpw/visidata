@@ -4,7 +4,7 @@ Sheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)'),
 Sheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)'),
 Sheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)'),
 
-Sheet.addCommand('gt', 'toggle-rows', 'toggle(rows)'),
+Sheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)'),
 Sheet.addCommand('gs', 'select-rows', 'select(rows)'),
 Sheet.addCommand('gu', 'unselect-rows', '_selectedRows.clear()'),
 

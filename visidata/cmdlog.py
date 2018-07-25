@@ -19,7 +19,7 @@ globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or error("no repla
 globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
 
 globalCommand(None, 'status', 'status(input("status: ", display=False))')
-globalCommand(None, 'version', 'checkVersion(input("required version: "))')
+globalCommand(None, 'check-version', 'checkVersion(input("required version: "))')
 
 # not necessary to log movements and scrollers
 nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g? g_ _ z_'.split()

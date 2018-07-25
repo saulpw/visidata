@@ -2,8 +2,8 @@ import math
 
 from visidata import *
 
-globalCommand('F', 'freq-col', 'vd.push(SheetFreqTable(sheet, cursorCol))')
-globalCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
+Sheet.addCommand('F', 'freq-col', 'vd.push(SheetFreqTable(sheet, cursorCol))')
+Sheet.addCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
 globalCommand('zF', 'freq-rows', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))')
 
 theme('disp_histogram', '*', 'histogram element character')

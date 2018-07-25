@@ -3,13 +3,13 @@ import itertools
 
 from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, error, anytype, ENTER, asyncthread, status, Progress
 from visidata import ColumnAttr, ColumnEnum, ColumnItem, ColumnExpr, SubrowColumn
-from visidata import getGlobals
+from visidata import getGlobals, TsvSheet, Path, bindkeys, commands
 
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
 globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
 globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
 globalCommand('O', 'options', 'vd.push(vd.optionsSheet)')
-globalCommand('zKEY_F(1)', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet))')
+globalCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=[sheet]))')
 

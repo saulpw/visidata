@@ -1,9 +1,9 @@
 from visidata import *
 
-globalCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex-split"))')
-globalCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex-capture"))')
-globalCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)')
-globalCommand('g*', 'setcol-subst', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex(cursorCol, selectedRows or rows, rex)')
+Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex-split"))')
+Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex-capture"))')
+Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)')
+Sheet.addCommand('g*', 'setcol-subst', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex(cursorCol, selectedRows or rows, rex)')
 
 replayableOption('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 

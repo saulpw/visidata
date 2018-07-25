@@ -297,9 +297,7 @@ globalCommand('^L', 'redraw', 'vd.scr.clear()')
 globalCommand('^V', 'show-version', 'status(__version_info__); status(__copyright__)')
 globalCommand('^P', 'statuses', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))')
 
-globalCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
-
-globalCommand('^^', 'swap-sheet', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
+globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
 globalCommand('^Z', 'suspend', 'suspend()')
 
@@ -1102,6 +1100,10 @@ class BaseSheet:
 
     def checkCursor(self):
         pass
+
+
+BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
+
 
 class Sheet(BaseSheet):
     columns = []  # list of Column

@@ -2,14 +2,10 @@ sheet	longname	prefix	key	keystrokes	jump	selection	modifies	logged	video	menupa
 global	add-sheet		A	A	new	n	n	y	3	sheet-new	open new blank sheet with N columns
 global	advance-replay		^I	^I	n	n	n	n		meta-replay-step	execute next row in replaying sheet
 global	cancel-all	g	^C	g^C	n	n	n	n		meta-threads-cancel-all	abort all secondary threads
+global	check-version				n	n	n	n			check VisiData version against given version
 global	cmdlog		D	D	meta	n	n	n	3	meta-cmdlog	open CommandLog
 global	columns-all	g	C	gC	meta	n	n	y		meta-columns-all	open Columns Sheet with all columns from all sheets
-global	copy-cell	z	y	zy	n	n	n	y		data-clipboard-copy-cell	yank (copy) current cell to clipboard
-global	copy-cells	gz	y	gzy	n	use	n	y			yank (copy) contents of current column for selected rows to clipboard
-global	copy-row		y	y	n	n	n	y		data-clipboard-copy-row	yank (copy) current row to clipboard
-global	copy-selected	g	y	gy	n	use	n	y	4	data-clipboard-copy-selected	yank (copy) selected rows to clipboard
-global	delete-row		d	d	n	n	y	y	1,2,5	modify-delete-row	delete current row and move it to clipboard
-global	delete-selected	g	d	gd	n	use	y	y	5	modify-delete-selected	delete selected rows and move them to clipboard
+global	describe-all	g	I	gI	derived	n	n	y		data-describe-all	open descriptive statistics for all visible columns on all sheets
 global	error-recent		^E	^E	meta	n	n	n		errors-recent	view traceback for most recent error
 global	errors-all	g	^E	g^E	meta	n	n	n		info-errors-all	view traceback for most recent errors
 global	exec-longname		^A	^A	n	n	n	n		meta-exec-cmd	execute command by name
@@ -18,12 +14,9 @@ global	forget-sheet		Q	Q	quit	n	n	n		sheet-quit-remove	quit current sheet and re
 global	freq-rows	z	F	zF	y	use	n	y		data-aggregate-summary	open one-line summary for all selected rows
 global	help-commands	z	F1	zF1	meta	n	n	n		meta-commands	view sheet of commands and keybindings
 global	menu		SPACE	SPACE	modal	n	n	n	3		start menu command
+global	no-op		KEY_RESIZE	KEY_RESIZE	n	n	n	n			no operation
 global	open-file		o	o	y	n	n	y		sheet-open-path	open input in VisiData
 global	options		O	O	meta static	n	n	n		meta-options	open Options
-global	paste-after		p	p	n	n	y	y	5	data-clipboard-paste-after	paste clipboard rows after current row
-global	paste-before		P	P	n	n	y	y		data-clipboard-paste-before	paste clipboard rows before current row
-global	paste-cell	z	p	zp	n	n	y	y		data-clipboard-paste-cell	set contents of current cell to last clipboard value
-global	paste-cells	gz	y	gzp	n	use	y	y			set current column for selected rows to the items from last clipboard
 global	pause-replay		^U	^U	n	n	n	n		meta-replay-toggle	pause/resume replay
 global	prev-sheet		^^	^^	swap	n	n	n		view-go-sheet-swap	jump to previous sheet (swap with current sheet)
 global	pyobj-eval		^X	^X	y	n	n	y		python-eval-push	evaluate Python expression and open result as Python object
@@ -39,13 +32,10 @@ global	sheets		S	S	static meta	n	n	y		meta-sheets	open Sheets Sheet
 global	sheets-graveyard	g	S	gS	static meta	n	n	y		sheets-graveyard	open Sheets Graveyard
 global	show-eval	z	^X	z^X	n	n	n	y		python-eval-status	evaluate Python expression on current row and show result on status line
 global	show-version		^V	^V	n	n	n	n		info-version	show version information on status line
+global	status				n	n	n	n			show given message on status line
 global	statuses		^P	^P	static meta	n	n	n		meta-status-history	open Status History
 global	stop-replay		^K	^K	n	n	n	n		meta-replay-cancel	cancel current replay
 global	suspend		^Z	^Z	suspend	n	n	n			suspend VisiData process
-global	syscopy-cell	z	Y	zY	n	n	n	n		data-clipboard-copy-system-cell	yank (copy) current cell to system clipboard
-global	syscopy-cells	gz	Y	gzY	n	use	n	n		data-clipboard-copy-system-cell	yank (copy) cells in current column from selected rows to system clipboard
-global	syscopy-row		Y	Y	n	n	n	n		data-clipboard-copy-system-row	yank (copy) current row to system clipboard
-global	syscopy-selected	g	Y	gY	n	use	n	n		data-clipboard-copy-system-selected	yank (copy) selected rows to system clipboard
 global	sysopen-help		^H	^H	external	n	n	n			view vd man page
 global	threads-all		^T	^T	meta	n	n	n		meta-threads	open Threads Sheet
 global	toggle-profile		^_	^_	n	n	n	n		meta-threads-profile	turn profiling on for main process
@@ -94,9 +84,14 @@ Sheet	capture-col		;	;	n	n	n	y	1,5	modify-add-column-regex-capture	add new colum
 Sheet	columns-sheet		C	C	meta	n	n	y	4,5	meta-columns-sheet	open Columns Sheet
 Sheet	commands-sheet	g	^H	g^H	static	n	n	n			view list of commands available on current sheet
 Sheet	contract-col		)	)	n	n	n	y			unexpand current column; restore original column and remove other columns at this level
+Sheet	copy-cell	z	y	zy	n	n	n	y		data-clipboard-copy-cell	yank (copy) current cell to clipboard
+Sheet	copy-cells	gz	y	gzy	n	use	n	y			yank (copy) contents of current column for selected rows to clipboard
+Sheet	copy-row		y	y	n	n	n	y		data-clipboard-copy-row	yank (copy) current row to clipboard
+Sheet	copy-selected	g	y	gy	n	use	n	y	4	data-clipboard-copy-selected	yank (copy) selected rows to clipboard
 Sheet	delete-cell	z	d	zd	n	n	y	y		modify-clear-cell	delete current cell and move it to clipboard
 Sheet	delete-cells	gz	d	gzd	n	use	y	y		modify-clear-column-selected	delete contents of current column for selected rows and move them to clipboard
-Sheet	describe-all	g	I	gI	derived	n	n	y		data-describe-all	open descriptive statistics for all visible columns on all sheets
+Sheet	delete-row		d	d	n	n	y	y	1,2,5	modify-delete-row	delete current row and move it to clipboard
+Sheet	delete-selected	g	d	gd	n	use	y	y	5	modify-delete-selected	delete selected rows and move them to clipboard
 Sheet	describe-sheet		I	I	derived	n	n	y		data-describe	open descriptive statistics for all visible columns
 Sheet	dive-cell	z	Enter	zEnter	derived	n	n	y			
 Sheet	dive-row		Enter	Enter	derived	n	n	y			
@@ -144,7 +139,11 @@ Sheet	next-selected		}	}	n	use	n	n	2	view-go-next-selected	move down the current
 Sheet	next-value		>	>	n	n	n	n		view-go-next-value	move down the current column to the next value
 Sheet	page-left				n	n	n	n			move cursor one page left
 Sheet	page-right				n	n	n	n			move cursor one page right
+Sheet	paste-after		p	p	n	n	y	y	5	data-clipboard-paste-after	paste clipboard rows after current row
+Sheet	paste-before		P	P	n	n	y	y		data-clipboard-paste-before	paste clipboard rows before current row
+Sheet	paste-cell	z	p	zp	n	n	y	y		data-clipboard-paste-cell	set contents of current cell to last clipboard value
 Sheet	paste-cell-before	z	P	zP	n	n	y	y			prepend to contents of current column for current row to last clipboard value
+Sheet	paste-cells	gz	y	gzp	n	use	y	y			set current column for selected rows to the items from last clipboard
 Sheet	paste-selected	gz	p	gzp	n	change	y	y		data-clipboard-paste-selected	set cells of current column for selected rows to last clipboard value
 Sheet	pivot		W	W	derived	n	n	y	5	data-pivot	Pivot the current column into a new sheet
 Sheet	plot-column		.	.	canvas	n	n	y	2,3	data-plot-column	graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determine color
@@ -225,6 +224,10 @@ Sheet	stoggle-after	gz	t	gzt	n	change	n	y		rows-toggle-from-cursor	toggle select
 Sheet	stoggle-before	z	t	zt	n	change	n	y		rows-toggle-to-cursor	toggle select rows from top to cursor
 Sheet	stoggle-row		t	t	n	change	n	y		rows-toggle-current	toggle selection of current row
 Sheet	stoggle-rows	g	t	gt	n	change	n	y		rows-toggle-all	toggle selection of all rows
+Sheet	syscopy-cell	z	Y	zY	n	n	n	n		data-clipboard-copy-system-cell	yank (copy) current cell to system clipboard
+Sheet	syscopy-cells	gz	Y	gzY	n	use	n	n		data-clipboard-copy-system-cell	yank (copy) cells in current column from selected rows to system clipboard
+Sheet	syscopy-row		Y	Y	n	n	n	n		data-clipboard-copy-system-row	yank (copy) current row to system clipboard
+Sheet	syscopy-selected	g	Y	gY	n	use	n	n		data-clipboard-copy-system-selected	yank (copy) selected rows to system clipboard
 Sheet	sysopen-cell	z	^O	z^O	external	n	y	y			
 Sheet	sysopen-row		^O	^O	external	n	y	y	1		
 Sheet	transpose		T	T	derived	n	n	y		data-transpose	open new sheet with rows and columns transposed
@@ -323,3 +326,4 @@ Canvas	zoomin-cursor		+	+	n	n	n	n			zoom into cursor center
 Canvas	zoomin-mouse			BUTTON4_PRESSED	n	n	n	n			zoom in with scroll wheel
 Canvas	zoomout-cursor			-	n	n	n	n			zoom out from cursor center
 Canvas	zoomout-mouse			REPORT_MOUSE_POSITION	n	n	n	n			zoom out with scroll wheel
+BaseSheet	reload-sheet		^R	^R	n	n	should confirm if modified; marks as unmodified	y		sheet-reload	reload current sheet

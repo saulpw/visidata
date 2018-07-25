@@ -32,5 +32,5 @@
     - render the manpage to ensure that its beauty is intact
 7) include command longname and keybinding in commit headline.
     - add to CHANGELOG before release
-
+8) quality check that there are no errors in commands sheet (z^H)
 

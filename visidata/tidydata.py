@@ -1,7 +1,7 @@
 from visidata import *
 
-globalCommand('M', 'melt', 'vd.push(MeltedSheet(sheet))')
-globalCommand('gM', 'melt-regex', 'vd.push(MeltedSheet(sheet, regex=input("regex to split colname: ", value="(.*)_(.*)", type="regex-capture")))')
+Sheet.addCommand('M', 'melt', 'vd.push(MeltedSheet(sheet))')
+Sheet.addCommand('gM', 'melt-regex', 'vd.push(MeltedSheet(sheet, regex=input("regex to split colname: ", value="(.*)_(.*)", type="regex-capture")))')
 
 melt_var_colname = 'Variable' # column name to use for the melted variable name
 melt_value_colname = 'Value'  # column name to use for the melted value
