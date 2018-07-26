@@ -1789,17 +1789,13 @@ class Column:
     def fmtstr(self, v):
         self._fmtstr = v
 
-    def format(self, cellval):
-        'Return displayable string of `cellval` according to our `Column.type` and `Column.fmtstr`'
-        if cellval is None:
+    def format(self, typedval):
+        'Return displayable string of `typedval` according to `Column.fmtstr`'
+        if typedval is None:
             return None
 
-        t = self.type
-
-        if isinstance(cellval, BaseException):
+        if isinstance(typedval, BaseException):
             return ''
-
-        typedval = t(cellval)
 
         # These were before the t() type conversion above, to avoid total
         # stringification on arbitrarily large compound objects.  But it should
@@ -1812,7 +1808,7 @@ class Column:
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
-        return typemap[t].formatter(self.fmtstr, typedval)
+        return typemap[self.type].formatter(self.fmtstr, typedval)
 
     def hide(self, hide=True):
         if hide:
@@ -1913,7 +1909,8 @@ class Column:
         dw = DisplayWrapper(cellval)
 
         try:
-            dispval = self.format(cellval)
+            typedval = self.type(cellval)
+            dispval = self.format(typedval)
             if dispval is None:
                 dw.display = ''
                 dw.note = options.disp_note_none

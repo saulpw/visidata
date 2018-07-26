@@ -133,7 +133,7 @@ class SheetFreqTable(Sheet):
         rowidx = {}
         for r in Progress(self.source.rows):
             keys = list(c.getTypedValueOrException(r) for c in self.origCols)
-            formatted_keys = tuple(str(c.format(v)) for v, c in zip(keys, self.origCols))
+            formatted_keys = tuple(c.getDisplayValue(r) for c in self.origCols)
             histrow = rowidx.get(formatted_keys)
             if histrow is None:
                 histrow = (keys, [])
