@@ -1990,7 +1990,9 @@ def setattrdeep(obj, attrs, val):
 def ColumnAttr(name, *attrs, **kwargs):
     'Column using getattr/setattr of given attr.'
     if not attrs:
-        attrs = name.split('.')
+        attrs = [name]
+    if len(attrs) == 1:
+        attrs = attrs[0].split('.')
 
     return Column(name,
                   getter=lambda col,row,attrs=attrs: getattrdeep(row, attrs, None),
