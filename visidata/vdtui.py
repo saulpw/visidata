@@ -1469,20 +1469,6 @@ class Sheet(BaseSheet):
         'returns a tuple of the key for the given row'
         return tuple(c.getTypedValueOrException(row) for c in self.keyCols)
 
-    def moveToNextRow(self, func, reverse=False):
-        'Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria.'
-        rng = range(self.cursorRowIndex-1, -1, -1) if reverse else range(self.cursorRowIndex+1, self.nRows)
-
-        for i in rng:
-            try:
-                if func(self.rows[i]):
-                    self.cursorRowIndex = i
-                    return True
-            except Exception:
-                pass
-
-        return False
-
     def checkCursor(self):
         'Keep cursor in bounds of data and screen.'
         # keep cursor within actual available rowset
@@ -1700,14 +1686,6 @@ Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr
 Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
 
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
-
-Sheet.addCommand('<', 'prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")'),
-Sheet.addCommand('>', 'next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")'),
-Sheet.addCommand('{', 'prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
-Sheet.addCommand('}', 'next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
-
-Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
-Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
 
 Sheet.addCommand('_', 'resize-col-max', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
 Sheet.addCommand('z_', 'resize-col', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))'),
