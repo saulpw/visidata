@@ -18,10 +18,6 @@ replayableOption('tsv_safe_tab', '\u001f', 'replacement for newline character wh
 option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
 option('color_delete_pending', 'red', 'color for files pending delete')
 
-Sheet.addCommand('c', 'go-col-regex', 'searchColumnNameRegex(input("column name regex: ", type="regex-col", defaultLast=True), moveCursor=True)')
-Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp')
-Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))')
-Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))')
 
 Sheet.addCommand('R', 'random-rows', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)')
 

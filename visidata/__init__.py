@@ -34,6 +34,7 @@ from .motd import *
 from .transpose import *
 from .diff import *
 from .shell import *
+from .movement import *
 
 from .vimkeys import *
 

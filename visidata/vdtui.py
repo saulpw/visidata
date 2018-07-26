@@ -376,11 +376,6 @@ def debug(*args, **kwargs):
 def input(*args, **kwargs):
     return vd().input(*args, **kwargs)
 
-def enum_pivot(L, pivot):
-    'Like `enumerate()` but starting midway through sequence `L` and wrapping around to (i, L[i]) as the last item.'
-    for i in itertools.chain(range(pivot+1, len(L)), range(0, pivot+1)):
-        yield i, L[i]
-
 def rotate_range(n, idx, reverse=False):
     if reverse:
         rng = range(idx-1, -1, -1)
@@ -432,9 +427,6 @@ def chooseMany(choices):
 def regex_flags():
     'Return flags to pass to regex functions from options'
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
-
-def moveRegex(sheet, *args, **kwargs):
-    list(vd().searchRegex(sheet, *args, moveCursor=True, **kwargs))
 
 def sync(expectedThreads=0):
     vd().sync(expectedThreads)
@@ -511,7 +503,6 @@ class VisiData:
         self.allSheets = weakref.WeakKeyDictionary()  # [BaseSheet] -> sheetname (all non-precious sheets ever pushed)
         self.statuses = []  # (priority, num_repeats, statuses) shown until next action
         self.lastErrors = []
-        self.searchContext = {}
         self.statusHistory = []
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
@@ -685,53 +676,6 @@ class VisiData:
                 return k
             k = ord(k)
         return curses.keyname(k).decode('utf-8')
-
-
-    # kwargs: regex=None, columns=None, backward=False
-    def searchRegex(self, sheet, moveCursor=False, reverse=False, **kwargs):
-        'Set row index if moveCursor, otherwise return list of row indexes.'
-        def findMatchingColumn(sheet, row, columns, func):
-            'Find column for which func matches the displayed value in this row'
-            for c in columns:
-                if func(c.getDisplayValue(row)):
-                    return c
-
-        self.searchContext.update(kwargs)
-
-        regex = kwargs.get("regex")
-        if regex:
-            self.searchContext["regex"] = re.compile(regex, regex_flags()) or error('invalid regex: %s' % regex)
-
-        regex = self.searchContext.get("regex") or error("no regex")
-
-        columns = self.searchContext.get("columns")
-        if columns == "cursorCol":
-            columns = [sheet.cursorCol]
-        elif columns == "visibleCols":
-            columns = tuple(sheet.visibleCols)
-        elif isinstance(columns, Column):
-            columns = [columns]
-
-        if not columns:
-            error('bad columns')
-
-        searchBackward = self.searchContext.get("backward")
-        if reverse:
-            searchBackward = not searchBackward
-
-        matchingRowIndexes = 0
-        for r in rotate_range(len(sheet.rows), sheet.cursorRowIndex, reverse=searchBackward):
-            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
-            if c:
-                if moveCursor:
-                    sheet.cursorRowIndex = r
-                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
-                    return
-                else:
-                    matchingRowIndexes += 1
-                    yield r
-
-        status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
     def exceptionCaught(self, exc=None, **kwargs):
         'Maintain list of most recent errors and return most recent one.'
@@ -1205,12 +1149,10 @@ class Sheet(BaseSheet):
             self.rows.insert(index, row)
         return row
 
-    def searchColumnNameRegex(self, colregex, moveCursor=False):
-        'Select visible column matching `colregex`, if found.'
-        for i, c in enum_pivot(self.visibleCols, self.cursorVisibleColIndex):
+    def column(self, colregex):
+        'Return first column whose Column.name matches colregex.'
+        for c in self.columns:
             if re.search(colregex, c.name, regex_flags()):
-                if moveCursor:
-                    self.cursorVisibleColIndex = i
                 return c
 
     def recalc(self):
@@ -1794,14 +1736,6 @@ Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(*keyCols, reverse=True)'),
 
 Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 Sheet.addCommand("z'", 'cache-col', 'cursorCol._cachedValues.clear()'),
-
-Sheet.addCommand('/', 'search-col', 'moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)'),
-Sheet.addCommand('?', 'searchr-col', 'moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)'),
-Sheet.addCommand('n', 'next-search', 'moveRegex(sheet, reverse=False)'),
-Sheet.addCommand('N', 'prev-search', 'moveRegex(sheet, reverse=True)'),
-
-Sheet.addCommand('g/', 'search-cols', 'moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")'),
-Sheet.addCommand('g?', 'searchr-cols', 'moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")'),
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)'),
 Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),

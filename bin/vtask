@@ -82,7 +82,7 @@ class TodoSheet(Sheet):
     def reload(self):
         self.tw = tasklib.TaskWarrior(data_location=self.source.resolve(), create=True)
         self.rows = list(self.tw.tasks.pending())
-        self.orderBy(self.searchColumnNameRegex('urgency'), reverse=True)
+        self.orderBy(self.column('urgency'), reverse=True)
 
 def isChanged(r, key):
     return r._data.get(key, None) != r._original_data.get(key, None)
