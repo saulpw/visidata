@@ -1004,7 +1004,13 @@ class BaseSheet:
 
     def getCommand(self, keystrokes_or_longname):
         longname = bindkeys.get(keystrokes_or_longname)
-        return commands.get(longname if longname else keystrokes_or_longname)
+        try:
+            if longname:
+                return commands.get(longname) or error('no command "%s"' % longname)
+            else:
+                return commands.get(keystrokes_or_longname) or error('no binding for %s' % keystrokes_or_longname)
+        except Exception:
+            return None
 
     def __bool__(self):
         'an instantiated Sheet always tests true'
@@ -1027,7 +1033,7 @@ class BaseSheet:
     def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
         if not cmd:
-            status('no command "%s"' % keystrokes)
+            debug('no command "%s"' % keystrokes)
             return True
 
         if isinstance(cmd, CommandLog):
