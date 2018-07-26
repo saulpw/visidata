@@ -32,6 +32,10 @@ Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows 
 Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
 Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard(" ".join(vd.clipcells))')
 
+Sheet.bindkey('KEY_DC', 'delete-cell'),
+Sheet.bindkey('gKEY_DC', 'delete-cells'),
+
+
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
 
 __clipboard_commands = {

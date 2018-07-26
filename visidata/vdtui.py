@@ -1815,10 +1815,6 @@ Sheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
 Sheet.bindkey('gKEY_UP', 'go-top'),
 Sheet.bindkey('gKEY_DOWN', 'go-bottom'),
 
-Sheet.bindkey('KEY_DC', 'setcell-none'),
-Sheet.bindkey('gKEY_DC', 'setcol-none'),
-
-
 
 def isNullFunc():
     'Returns isNull function according to current options.'
