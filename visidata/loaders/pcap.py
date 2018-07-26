@@ -21,8 +21,8 @@ def eth_type(v):
 class PCAPSheet(Sheet):
     # @todo get columns from __hdr_fields__ and set getter for special cases
     columns = [
-        ColumnAttr('ether_dst', 'dst', type=mac_addr),
         ColumnAttr('ether_src', 'src', type=mac_addr),
+        ColumnAttr('ether_dst', 'dst', type=mac_addr),
         ColumnAttr('ether_type', 'type', type=eth_type),
         ColumnAttr('ether_data', 'data', type=len),
         ColumnAttr('ip', width=0),
@@ -38,6 +38,7 @@ class PCAPSheet(Sheet):
         ColumnAttr('ip.tcp', width=0),
         ColumnAttr('ip.udp', width=0),
         ColumnAttr('ip.icmp', width=0),
+        ColumnAttr('ip.src', type=ip_addr),
         ColumnAttr('ip.dst', type=ip_addr),
         ColumnAttr('tcp_srcport', 'ip.tcp.sport', type=int, helpstr="TCP Source Port"),
         ColumnAttr('tcp_dstport', 'ip.tcp.dport', type=int, helpstr="TCP Dest Port"),
