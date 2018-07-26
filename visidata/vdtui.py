@@ -1718,15 +1718,6 @@ Sheet.addCommand('gv', 'unhide-cols', 'for c in columns: c.width = abs(c.width o
 
 Sheet.addCommand('!', 'key-col', 'toggleKeyColumn(cursorCol)'),
 Sheet.addCommand('z!', 'key-col-off', 'keyCols.remove(cursorCol)'),
-Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype'),
-Sheet.addCommand('~', 'type-string', 'cursorCol.type = str'),
-Sheet.addCommand('@', 'type-date', 'cursorCol.type = date'),
-Sheet.addCommand('#', 'type-int', 'cursorCol.type = int'),
-Sheet.addCommand('z#', 'type-len', 'cursorCol.type = len'),
-Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency'),
-Sheet.addCommand('%', 'type-float', 'cursorCol.type = float'),
-Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
-
 Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
 
 Sheet.addCommand('[', 'sort-asc', 'orderBy(cursorCol)'),
