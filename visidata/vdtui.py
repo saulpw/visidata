@@ -75,16 +75,16 @@ class SettingsMgr(collections.OrderedDict):
     def objname(self, obj):
         if isinstance(obj, str):
             return obj
-        if isinstance(obj, BaseSheet):
+        elif obj is None:
+            return 'override'
+        elif isinstance(obj, BaseSheet):
             return obj.name
         elif issubclass(obj, BaseSheet):
             return obj.__name__
-        elif obj is None:
-            return 'override'
 
     def getobj(self, objname):
         'Inverse of objname(obj); returns obj if available'
-        for optname, o in self._opts.keys():
+        for optname, o in self.keys():
             if self.objname(o) == objname:
                 return o
 

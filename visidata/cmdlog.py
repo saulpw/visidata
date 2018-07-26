@@ -226,7 +226,7 @@ class CommandLog(TsvSheet):
         longname = getattr(r, 'longname', None)
         if longname == 'set-option':
             try:
-                options.set(r.row, r.input, options.getobj(r.col))
+                options.set(r.row, r.input, options._opts.getobj(r.col))
                 escaped = False
             except Exception as e:
                 exceptionCaught(e)
@@ -299,7 +299,7 @@ class CommandLog(TsvSheet):
         return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
     def setOption(self, optname, optval, obj=None):
-        objname = options.objname(obj)
+        objname = options._opts.objname(obj)
         self.addRow(self.newRow(col=objname, row=optname,
                     keystrokes='', input=str(optval),
                     longname='set-option'))
