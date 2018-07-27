@@ -1804,9 +1804,9 @@ class Column:
         # be possible to stringify them with a forcibly str-typed column.  Hopefully
         # this is a good compromise.
         if isinstance(typedval, (list, tuple)):
-            return '[%s]' % len(cellval)
+            return '[%s]' % len(typedval)
         if isinstance(typedval, dict):
-            return '{%s}' % len(cellval)
+            return '{%s}' % len(typedval)
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
