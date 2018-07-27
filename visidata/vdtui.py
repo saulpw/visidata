@@ -432,6 +432,8 @@ def sync(expectedThreads=0):
     vd().sync(expectedThreads)
 
 
+# define @asyncthread for potentially long-running functions
+#   when function is called, instead launches a thread
 def asyncthread(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
     @functools.wraps(func)
