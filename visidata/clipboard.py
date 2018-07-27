@@ -38,22 +38,26 @@ Sheet.bindkey('gKEY_DC', 'delete-cells'),
 
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
 
-__clipboard_commands = {
-    ('clip', 'win32'):    '',                                      # Windows Vista+
-    ('pbcopy', 'darwin'): 'w',                                     # macOS
-    ('xclip', None):      '-selection clipboard -filter',          # Linux etc.
-    ('xsel', None):       '--clipboard --input',                   # Linux etc.
-}
+__clipboard_commands = [
+    ('win32',  'clip', ''),                                      # Windows Vista+
+    ('darwin', 'pbcopy', 'w'),                                   # macOS
+    (None,     'xclip', '-selection clipboard -filter'),         # Linux etc.
+    (None,     'xsel', '--clipboard --input'),                   # Linux etc.
+]
 
-def detect_clipboard_command():
-    'Detect available clipboard util and return cmdline to copy data to the system clipboard.'
-    for (command, platform), opts in __clipboard_commands.items():
+def detect_command(cmdlist):
+    '''Detect available clipboard util and return cmdline to copy data to the system clipboard.
+    cmddict is list of (platform, progname, argstr).'''
+
+    for platform, command, args in cmdlist:
         if platform is None or sys.platform == platform:
             path = shutil.which(command)
             if path:
-                return ' '.join([path, opts])
+                return ' '.join([path, args])
 
     return ''
+
+detect_clipboard_command = lambda: detect_commands(__clipboard_commands)
 
 @functools.lru_cache()
 def clipboard():

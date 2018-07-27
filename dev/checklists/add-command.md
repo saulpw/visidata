@@ -2,6 +2,8 @@
 
 ## Writing the command
 1) choose where the command will go (module? visidatarc?);
+    - most commands should be in thematically-related files
+    - imports, then global/Sheet bindings, then helpers, then Sheets, then Sheet-specific bindings
 2) choose the appropriate scope for the command;
     - is the command a `globalCommand` (does not require a specific sheet)
     - is the command a  BaseSheet command (for commands that require a sheet but not a tabular sheet)
