@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'Usage: $0 dev/commands.tsv > www/layout.html'
+'Usage: $0 visidata/commands.tsv > www/layout.html'
 
 import sys
 import unicodedata

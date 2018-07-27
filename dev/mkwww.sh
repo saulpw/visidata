@@ -112,7 +112,7 @@ sed -i -e "s#<h2>How to create derivative columns</h2>#<h2><a name=\"derived\">H
 # Build /kblayout
 
 mkdir -p $BUILDWWW/docs/kblayout
-$DEV/mklayout.py $DEV/commands.tsv > $BUILDWWW/docs/kblayout/index.html
+$DEV/mklayout.py $VD/visidata/commands.tsv > $BUILDWWW/docs/kblayout/index.html
 cp $WWW/kblayout.css $BUILDWWW/docs/kblayout/
 
 # Build /releases
