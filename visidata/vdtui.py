@@ -91,9 +91,10 @@ class SettingsMgr(collections.OrderedDict):
     def set(self, k, v, obj='override'):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
         self[(k, self.objname(obj))] = v
+        return v
 
     def setdefault(self, k, v):
-        self.set(k, v, 'global')
+        return self.set(k, v, 'global')
 
     def get(self, key, obj=None):
         for (k, o), v in self.iter(obj):
@@ -153,24 +154,34 @@ class OptionsObject:
     'minimalist options framework'
     def __init__(self, mgr):
         object.__setattr__(self, '_opts', mgr)
+        object.__setattr__(self, '_cache', {})
 
     def keys(self, obj=None):
         return [optname for optname, o in self._opts.keys() if obj is None or o == obj]
 
-    def getdefault(self, k):
-        return self._opts.get(k, 'global').value
+    def _get(self, k, obj=None):
+        'Return Option object for k in context of obj. Cache result until any set().'
+        opt = self._cache.get((k, obj), None)
+        if opt is None:
+            opt = self._opts.get(k, obj)
+            self._cache[(k, obj)] = opt
+        return opt
 
-    def setdefault(self, k, v, helpstr):
-        o = Option(k, v, helpstr)
-        self._opts.set(k, o, 'global')
-        return o
+    def _set(self, k, v, obj=None, helpstr=''):
+        self._cache.clear()  # invalidate entire cache on any set()
+        return self._opts.set(k, Option(k, v, helpstr), obj)
 
     def get(self, k, obj=None):
-        opt = self._opts.get(k, obj)
-        return opt.value
+        return self._get(k, obj).value
+
+    def getdefault(self, k):
+        return self._get(k, 'global').value
 
     def set(self, k, v, obj='override'):
-        return self._opts.set(k, Option(k, v), obj)
+        return self._set(k, v, obj)
+
+    def setdefault(self, k, v, helpstr):
+        return self._set(k, v, 'global', helpstr=helpstr)
 
     def getall(self, kmatch):
         return {obj:opt for (k, obj), opt in self._opts.items() if k == kmatch}
@@ -182,13 +193,13 @@ class OptionsObject:
         self.__setitem__(k, v)
 
     def __getitem__(self, k):      # options[k]
-        opt = self._opts.get(k)
+        opt = self._get(k)
         if not opt:
             error('no option "%s"' % k)
         return opt.value
 
     def __setitem__(self, k, v):   # options[k] = v
-        opt = self._opts.get(k)
+        opt = self._get(k)
         if opt:
             curval = opt.value
             t = type(curval)
