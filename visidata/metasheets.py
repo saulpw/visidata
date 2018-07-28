@@ -8,10 +8,19 @@ from visidata import getGlobals, TsvSheet, Path, bindkeys, commands
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
 globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
 globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
-globalCommand('O', 'options', 'vd.push(vd.optionsSheet)')
-globalCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
 
-Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(sheet.name+"_columns", source=[sheet]))')
+Sheet.addCommand('O', 'options-sheet', 'vd.push(getOptionsSheet(sheet)).reload()')
+Sheet.addCommand('gO', 'options-global', 'vd.push(vd.optionsSheet)')
+Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
+Sheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+
+
+def getOptionsSheet(sheet):
+    optsheet = getattr(sheet, 'optionsSheet', None)
+    if not optsheet:
+        sheet.optionsSheet = OptionsSheet(sheet.name+"_options", source=sheet)
+
+    return sheet.optionsSheet
 
 
 class ColumnsSheet(Sheet):
@@ -114,35 +123,35 @@ class HelpSheet(Sheet):
         }
         self.rows = []
         for (k, o), v in commands.iter(self.source):
-            self.rows.append(v)
+            self.addRow(v)
             v.sheet = o
 
 class OptionsSheet(Sheet):
     rowtype = 'options'
     precious = False
-    columns = (ColumnAttr('option', 'name'),
-               Column('value', getter=lambda col, row: options[row.name]),
-               Column('default', getter=lambda col, row: options.getdefault(row.name)),
-               ColumnAttr('helpstr'))
+    columns = (
+       ColumnAttr('name'),
+       Column('sheet_value', getter=lambda col,row: options.get(row.name, col.sheet.source),
+                             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source)),
+       Column('override', getter=lambda col,row: options._opts.get((row.name, 'override'), ''),
+                          setter=lambda col,row,val: options.set(row.name, val, 'override')),
+       Column('default', getter=lambda col,row: options.get(row.name, 'global')),
+       ColumnAttr('helpstr')
+    )
+
     colorizers = Sheet.colorizers + [
-        Colorizer('cell', 9, lambda s,c,r,v: v.value if c.name in ['value', 'default'] and r.name.startswith('color_') else None)
+        Colorizer('cell', 9, lambda s,c,r,v: v.value if c.name in ['sheet_value', 'override', 'default'] and r.name.startswith('color_') else None)
     ]
 
-    nKeys = 1
-
-    def editOption(self, row):
-        if isinstance(row.value, bool):
-            options[row.name] = not row.value
-        else:
-            options[row.name] = self.editCell(1)
+    nKeys=1
 
     def reload(self):
-        self.rows = list(self.source._opts.values())
+        self.rows = []
+        for k in options.keys():
+            opt = options._get(k)
+            self.addRow(opt)
 
-OptionsSheet.addCommand(ENTER, 'edit-row', 'editOption(cursorRow)')
-OptionsSheet.bindkey('e', 'edit-row')
-
-vd().optionsSheet = OptionsSheet('options', source=options)
+vd().optionsSheet = OptionsSheet('global_options', source=None)
 vd().sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
 vd().graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd().allSheets)
 

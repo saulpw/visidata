@@ -26,7 +26,7 @@ visidata.options.motd_url = ''
 with open(fncli, 'w') as cliOut:
     with open(fnopts, 'w') as menuOut:
         optkeys = visidata.options.keys()
-        optvalues = [visidata.options._opts.get(optname) for optname in optkeys]
+        optvalues = [visidata.options._opts._get(optname) for optname in optkeys]
 
         widestoptwidth, widestopt = sorted((len(opt.name)+len(str(opt.value)), opt.name) for opt in optvalues)[-1]
         print('widest option+default is "%s", width %d' % (widestopt, widestoptwidth))

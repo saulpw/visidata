@@ -96,7 +96,7 @@ class SettingsMgr(collections.OrderedDict):
     def setdefault(self, k, v):
         return self.set(k, v, 'global')
 
-    def get(self, key, obj=None):
+    def _get(self, key, obj=None):
         for (k, o), v in self.iter(obj):
             if k == key:
                 return v
@@ -131,7 +131,7 @@ def globalCommand(keystrokes, longname, execstr):
     commands.setdefault(longname, Command(longname, execstr))
 
     if keystrokes:
-        assert not bindkeys.get(keystrokes), keystrokes
+        assert not bindkeys._get(keystrokes), keystrokes
         bindkeys.setdefault(keystrokes, longname)
 
 def bindkey(keystrokes, longname):
@@ -163,7 +163,7 @@ class OptionsObject:
         'Return Option object for k in context of obj. Cache result until any set().'
         opt = self._cache.get((k, obj), None)
         if opt is None:
-            opt = self._opts.get(k, obj)
+            opt = self._opts._get(k, obj)
             self._cache[(k, obj)] = opt
         return opt
 
@@ -827,7 +827,7 @@ class VisiData:
                 pass
             elif keystroke == '^Q':
                 return self.lastErrors and '\n'.join(self.lastErrors[-1])
-            elif bindkeys.get(self.keystrokes):
+            elif bindkeys._get(self.keystrokes):
                 sheet.exec_keystrokes(self.keystrokes)
                 self.prefixWaiting = False
             elif keystroke in self.allPrefixes:
@@ -954,18 +954,18 @@ class BaseSheet:
 
     @classmethod
     def bindkey(cls, keystrokes, longname):
-        oldlongname = bindkeys.get(keystrokes, cls)
+        oldlongname = bindkeys._get(keystrokes, cls)
         if oldlongname:
             warning('%s was already bound to %s' % (keystrokes, oldlongname))
         bindkeys.set(keystrokes, longname, cls)
 
     def getCommand(self, keystrokes_or_longname):
-        longname = bindkeys.get(keystrokes_or_longname)
+        longname = bindkeys._get(keystrokes_or_longname)
         try:
             if longname:
-                return commands.get(longname) or error('no command "%s"' % longname)
+                return commands._get(longname) or error('no command "%s"' % longname)
             else:
-                return commands.get(keystrokes_or_longname) or error('no binding for %s' % keystrokes_or_longname)
+                return commands._get(keystrokes_or_longname) or error('no binding for %s' % keystrokes_or_longname)
         except Exception:
             return None
 
