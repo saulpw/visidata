@@ -145,9 +145,6 @@ def getDefaultSaveName(sheet):
 def saveSheets(fn, *vsheets, confirm_overwrite=False):
     'Save sheet `vs` with given filename `fn`.'
     givenpath = Path(fn)
-    if givenpath.exists():
-        if confirm_overwrite:
-            confirm('%s already exists. overwrite? ' % fn)
 
     # determine filetype to save as
     filetype = ''
@@ -176,9 +173,11 @@ def saveSheets(fn, *vsheets, confirm_overwrite=False):
         assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
 
         # get save function to call
-        if ('save_' + filetype) not in getGlobals():
-            filetype = options.save_filetype
-        savefunc = getGlobals().get('save_' + filetype)
+        savefunc = getGlobals().get('save_' + filetype) or error('no function save_'+filetype)
+
+        if givenpath.exists():
+            if confirm_overwrite:
+                confirm('%s already exists. overwrite? ' % fn)
 
         status('saving %s sheets to %s' % (len(vsheets), givenpath.fqpn))
         for vs in vsheets:
@@ -186,9 +185,11 @@ def saveSheets(fn, *vsheets, confirm_overwrite=False):
             savefunc(p, vs)
     else:
         # get save function to call
-        if ('save_' + filetype) not in getGlobals():
-            filetype = options.save_filetype
-        savefunc = getGlobals().get('save_' + filetype)
+        savefunc = getGlobals().get('save_' + filetype) or error('no function save_'+filetype)
+
+        if givenpath.exists():
+            if confirm_overwrite:
+                confirm('%s already exists. overwrite? ' % fn)
 
         status('saving to ' + givenpath.fqpn)
         savefunc(givenpath, vsheets[0])
