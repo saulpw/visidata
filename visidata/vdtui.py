@@ -172,6 +172,25 @@ class OptionsObject:
         return self._get(k, 'global').value
 
     def set(self, k, v, obj='override'):
+        opt = self._get(k)
+        if opt:
+            curval = opt.value
+            t = type(curval)
+            if isinstance(v, str) and t is bool: # special case for bool options
+                v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
+            elif type(v) is t:    # if right type, no conversion
+                pass
+            elif curval is None:  # if None, do not apply type conversion
+                pass
+            else:
+                v = t(v)
+
+            if curval != v and opt.replayable:
+                vd().callHook('set_option', k, v, obj)
+        else:
+            curval = None
+            warning('setting unknown option %s' % k)
+
         return self._set(k, v, obj)
 
     def setdefault(self, k, v, helpstr):
@@ -193,25 +212,6 @@ class OptionsObject:
         return opt.value
 
     def __setitem__(self, k, v):   # options[k] = v
-        opt = self._get(k)
-        if opt:
-            curval = opt.value
-            t = type(curval)
-            if isinstance(v, str) and t is bool: # special case for bool options
-                v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
-            elif type(v) is t:    # if right type, no conversion
-                pass
-            elif curval is None:  # if None, do not apply type conversion
-                pass
-            else:
-                v = t(v)
-
-            if curval != v and opt.replayable:
-                vd().callHook('set_option', k, v)
-        else:
-            curval = None
-            warning('setting unknown option %s' % k)
-
         self.set(k, v)
 
 commands = SettingsMgr()
