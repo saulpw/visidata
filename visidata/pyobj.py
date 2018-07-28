@@ -3,9 +3,9 @@ from visidata import *
 option('pyobj_show_hidden', False, 'show _private properties on pyobjs')
 option('pyobj_show_methods', False, 'show methods on pyobjs')
 
-globalCommand('^X', 'pyobj-eval', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, cursorRow))')
+globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, None))')
 globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())')
-globalCommand('z^X', 'show-eval', 'status(evalexpr(inputExpr("status="), cursorRow))')
+globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, cursorRow))')
 
 Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); push_pyobj("%s[%s]" % (sheet.name, cursorRowIndex), cursorRow)')
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)')

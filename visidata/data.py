@@ -90,7 +90,7 @@ Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputFilename("save to: ", valu
 globalCommand('g^S', 'save-all', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
 Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputFilename("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)')
 
-Sheet.addCommand('z=', 'show-expr', 'cursorCol.setValue(cursorRow, evalexpr(inputExpr("set cell="), cursorRow))')
+Sheet.addCommand('z=', 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 
 Sheet.addCommand('gz=', 'setcol-range', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)')
 

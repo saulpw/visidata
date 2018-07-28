@@ -17,7 +17,8 @@ global	no-op		KEY_RESIZE	KEY_RESIZE	n	n	n	n			no operation
 global	open-file		o	o	y	n	n	y		sheet-open-path	open input in VisiData
 global	pause-replay		^U	^U	n	n	n	n		meta-replay-toggle	pause/resume replay
 global	prev-sheet		^^	^^	swap	n	n	n		view-go-sheet-swap	jump to previous sheet (swap with current sheet)
-global	pyobj-eval		^X	^X	y	n	n	y		python-eval-push	evaluate Python expression and open result as Python object
+global	pyobj-expr		^X	^X	y	n	n	y		python-eval-push	evaluate Python expression and open result as Python object
+global	pyobj-expr-row	z	^X	z^X	n	n	n	y		python-eval-status	evaluate Python expression, in context of current row, and open result as Python object
 global	pyobj-sheet	g	^Y	g^Y	meta	n	n	y		python-push-sheet-object	open current sheet as Python object
 global	quit-all	g	q	gq	quit	n	n	n		sheet-quit-all	quit all sheets (clean exit)
 global	quit-sheet		q	q	quit	n	n	y	*	sheet-quit-current	quit current sheet
@@ -28,7 +29,6 @@ global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd f
 global	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
 global	sheets		S	S	static meta	n	n	y		meta-sheets	open Sheets Sheet
 global	sheets-graveyard	g	S	gS	static meta	n	n	y		sheets-graveyard	open Sheets Graveyard
-global	show-eval	z	^X	z^X	n	n	n	y		python-eval-status	evaluate Python expression on current row and show result on status line
 global	show-version		^V	^V	n	n	n	n		info-version	show version information on status line
 global	status				n	n	n	n			show given message on status line
 global	statuses		^P	^P	static meta	n	n	n		meta-status-history	open Status History
@@ -203,7 +203,7 @@ Sheet	setcol-range	gz	=	gz=	n	use	y	y	3	modify-set-column-sequence	set current c
 Sheet	setcol-subst	g	*	g*	n	use	y	y	4	modify-add-column-regex-transform-foo	regex/subst - replace regex with subst, which may include backreferences (\1 etc)
 Sheet	show-aggregate	z	+	z+	n	n	n	y	1	column-aggregator-show	display result of aggregator over all values in current column
 Sheet	show-cursor		^G	^G	n	n	n	n		info-sheet	show cursor position and bounds of current sheet on status line
-Sheet	show-expr	z	=	z=	n	n	n	y		python-eval-row	set current cell to result of evaluated Python expression on current row
+Sheet	show-expr	z	=	z=	n	n	n	y		python-eval-row	evaluate Python expression on current row and show result on status line
 Sheet	slide-bottom	g	J	gJ	n	n	n	y		slide-row-bottom	slide current row to the bottom of sheet
 Sheet	slide-down		J	J	n	n	n	y		slide-row-down	slide current row down
 Sheet	slide-down-n	z	J	zJ	n	n	y	y		slide-row-down-n	slide current row down n

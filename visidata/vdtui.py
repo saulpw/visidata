@@ -1255,8 +1255,8 @@ class Sheet(BaseSheet):
     def __repr__(self):
         return self.name
 
-    def evalexpr(self, expr, row):
-        return eval(expr, getGlobals(), LazyMapRow(self, row))
+    def evalexpr(self, expr, row=None):
+        return eval(expr, getGlobals(), LazyMapRow(self, row) if row else None)
 
     def inputExpr(self, prompt, *args, **kwargs):
         return input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
