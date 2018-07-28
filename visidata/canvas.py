@@ -16,7 +16,7 @@ class Point:
         self.x = x
         self.y = y
 
-    def __str__(self):
+    def __repr__(self):
         if isinstance(self.x, int):
             return '(%d,%d)' % (self.x, self.y)
         else:
@@ -32,6 +32,9 @@ class Box:
         self.ymin = y
         self.w = w
         self.h = h
+
+    def __repr__(self):
+        return '[%s+%s,%s+%s]' % (self.xmin, self.w, self.ymin, self.h)
 
     @property
     def xymin(self):
@@ -580,6 +583,9 @@ class Canvas(Plotter):
 
     @asyncthread
     def render_async(self):
+        self.render_sync()
+
+    def render_sync(self):
         'plots points and lines and text onto the Plotter'
 
         self.setZoom()
