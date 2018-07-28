@@ -81,7 +81,7 @@ class DescribeSheet(ColumnsSheet):
                     d[func.__name__] = self.calcStatistic(d, func, vals)
 
     def calcStatistic(self, d, func, *args, **kwargs):
-        r = returnException(func, *args, **kwargs)
+        r = wrapply(func, *args, **kwargs)
         d[func.__name__] = r
         return r
 

@@ -61,12 +61,6 @@ class ExpectedException(Exception):
     'an expected exception'
     pass
 
-def returnException(f, *args, **kwargs):
-    try:
-        return f(*args, **kwargs)
-    except Exception as e:
-        return e
-
 
 vd = None  # will be filled in later
 
@@ -1755,32 +1749,33 @@ def isNullFunc():
 
 @functools.total_ordering
 class TypedWrapper:
-    def __init__(self, _type, val):
-        self.type = _type
-        self.val = val
+    def __init__(self, func, *args):
+        self.type = func
+        self.val = args[0]
 
     def __lt__(self, x):
         return True
 
 class TypedExceptionWrapper(TypedWrapper):
-    def __init__(self, _type, val, exception=None):
-        TypedWrapper.__init__(self, _type, val)
+    def __init__(self, func, *args, exception=None):
+        TypedWrapper.__init__(self, func, *args)
         self.exception = None
         self.stacktrace = stacktrace()
 
-def wrapply(func, val):
-    'Like apply(), but which wraps Exceptions and passes through Wrappers'
+def wrapply(func, *args, **kwargs):
+    'Like apply(), but which wraps Exceptions and passes through Wrappers (if first arg)'
+    val = args[0]
     if val is None:
         return TypedWrapper(func, None)
     elif isinstance(val, TypedWrapper):
         return val
     elif isinstance(val, Exception):
-        return TypedWrapper(func, val)
+        return TypedWrapper(func, *args)
 
     try:
-        return func(val)
+        return func(*args, **kwargs)
     except Exception as e:
-        return TypedExceptionWrapper(func, val, exception=e)
+        return TypedExceptionWrapper(func, *args, exception=e)
 
 
 class Column:
