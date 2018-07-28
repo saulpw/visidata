@@ -1753,10 +1753,14 @@ def isNullFunc():
     return lambda v,nullset=nullset: v in nullset
 
 
+@functools.total_ordering
 class TypedWrapper:
     def __init__(self, _type, val):
         self.type = _type
         self.val = val
+
+    def __lt__(self, x):
+        return False
 
 class TypedExceptionWrapper(TypedWrapper):
     def __init__(self, _type, val, exception=None):
