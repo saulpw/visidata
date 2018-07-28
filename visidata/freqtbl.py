@@ -132,8 +132,8 @@ class SheetFreqTable(Sheet):
     def discreteBinning(self):
         rowidx = {}
         for r in Progress(self.source.rows):
-            keys = list(c.getTypedValueOrException(r) for c in self.origCols)
-            formatted_keys = tuple(c.getDisplayValue(r) for c in self.origCols)
+            keys = list(c.getTypedValue(r) for c in self.origCols)
+            formatted_keys = tuple(wrapply(c.format, c.getTypedValue(r)) for c in self.origCols)
             histrow = rowidx.get(formatted_keys)
             if histrow is None:
                 histrow = (keys, [])
