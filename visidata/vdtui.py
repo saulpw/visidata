@@ -291,6 +291,7 @@ theme('disp_pending', '', 'string to display in pending cells')
 theme('note_pending', '⌛', 'note to display for pending cells')
 theme('note_format_exc', '?', 'cell note for an exception during type conversion or formatting')
 theme('note_getter_exc', '!', 'cell note for an exception during computation')
+theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
 theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
@@ -1752,6 +1753,32 @@ def isNullFunc():
     return lambda v,nullset=nullset: v in nullset
 
 
+class TypedWrapper:
+    def __init__(self, _type, val):
+        self.type = _type
+        self.val = val
+
+class TypedExceptionWrapper(TypedWrapper):
+    def __init__(self, _type, val, exception=None):
+        TypedWrapper.__init__(self, _type, val)
+        self.exception = None
+        self.stacktrace = stacktrace()
+
+def wrapply(func, val):
+    'Like apply(), but which wraps Exceptions and passes through Wrappers'
+    if val is None:
+        return TypedWrapper(func, None)
+    elif isinstance(val, TypedWrapper):
+        return val
+    elif isinstance(val, Exception):
+        return TypedWrapper(func, val)
+
+    try:
+        return func(val)
+    except Exception as e:
+        return TypedExceptionWrapper(func, val, exception=e)
+
+
 class Column:
     def __init__(self, name, *, type=anytype, cache=False, **kwargs):
         self.sheet = None     # owning Sheet, set in Sheet.addColumn
@@ -1860,26 +1887,16 @@ class Column:
 
     def getTypedValue(self, row):
         'Returns the properly-typed value for the given row at this column.'
-        return self.type(self.getValue(row))
+        return wrapply(self.type, wrapply(self.getValue, row))
 
     def getTypedValueOrException(self, row):
         'Returns the properly-typed value for the given row at this column, or an Exception object.'
-        try:
-            return self.type(self.getValue(row))
-        except Exception as e:
-            return e
+        return wrapply(self.type, wrapply(self.getValue, row))
 
     def getTypedValueNoExceptions(self, row):
         '''Returns the properly-typed value for the given row at this column.
            Returns the type's default value if either the getter or the type conversion fails.'''
-        try:
-            v = self.getValue(row)
-            if not isinstance(v, Exception):
-                return self.type(v)
-        except Exception as e:
-            pass
-
-        return self.type()
+        return wrapply(self.type, wrapply(self.getValue, row))
 
     def getValue(self, row):
         'Memoize calcValue with key id(row)'
@@ -1901,22 +1918,32 @@ class Column:
 
     def getCell(self, row, width=None):
         'Return DisplayWrapper for displayable cell value.'
-        try:
-            cellval = self.getValue(row)
-        except Exception as e:
-            return DisplayWrapper(None, error=stacktrace(),
-                                display=options.disp_error_val,
+        cellval = wrapply(self.getValue, row)
+        typedval = wrapply(self.type, cellval)
+
+        if isinstance(typedval, TypedWrapper):
+            if isinstance(cellval, TypedExceptionWrapper):
+                return DisplayWrapper(cellval.val, error=cellval.stacktrace,
+                                        display=options.disp_error_val,
+                                        note=options.note_getter_exc,
+                                        notecolor=options.color_getter_exc)
+            elif typedval.val is None:
+                return DisplayWrapper(None, display='',  # force empty display for None
+                                            note=options.disp_note_none,
+                                            notecolor=options.color_note_type)
+            elif isinstance(typedval.val, BaseException):
+                exc = typedval.val
+                return DisplayWrapper(typedval,
+                                display=traceback.format_exception_only(type(exc), exc)[-1].strip(),
+                                error=stacktrace(exc),
                                 note=options.note_getter_exc,
                                 notecolor=options.color_getter_exc)
+            else:
+                return DisplayWrapper(typedval.val, display=str(typedval.val),
+                                            note=options.note_format_exc,
+                                            notecolor=options.color_format_exc)
 
-        if isinstance(cellval, BaseException):
-            return DisplayWrapper(cellval,
-                                error=stacktrace(cellval),
-                                display=traceback.format_exception_only(type(cellval), cellval)[-1].strip(),
-                                note=options.note_getter_exc,
-                                notecolor=options.color_getter_exc)
-
-        if isinstance(cellval, threading.Thread):
+        if isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
                                 display=options.disp_pending,
                                 note=options.note_pending,
@@ -1925,22 +1952,15 @@ class Column:
         dw = DisplayWrapper(cellval)
 
         try:
-            typedval = self.type(cellval)
-            dispval = self.format(typedval)
-            if dispval is None:
-                dw.display = ''
-                dw.note = options.disp_note_none
-                dw.notecolor = options.color_note_type
-                return dw
+            dw.display = self.format(typedval)
 
-            if width and self.type in (int, float, currency, len):
-                dispval = dispval.rjust(width-1)
-
-            dw.display = dispval
+            if width and isNumeric(self.type): #  in (int, float, currency, len):
+                dw.display = dw.display.rjust(width-1)
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str and options.color_note_type:
-                dw.note = typemap[type(cellval)].icon
+                typedesc = typemap.get(type(cellval), None)
+                dw.note = typedesc.icon if typedesc else options.note_unknown_type
                 dw.notecolor = options.color_note_type
 
         except Exception as e:  # type conversion or formatting failed
