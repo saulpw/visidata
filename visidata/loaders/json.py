@@ -59,18 +59,27 @@ class JSONSheet(Sheet):
 JSONSheet.bindkey(ENTER, 'pyobj-dive')
 
 
+def _rowdict(cols, row):
+    d = {}
+    for col in cols:
+        try:
+            d[col.name] = col.getTypedValue(row)
+        except Exception:
+            pass
+    return d
+
+
 @asyncthread
 def save_json(p, vs):
-    def rowdict(cols, row):
-        d = {}
-        for col in cols:
-            try:
-                d[col.name] = col.getTypedValue(row)
-            except Exception:
-                pass
-        return d
-
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
-        for chunk in json.JSONEncoder().iterencode([rowdict(vcols, r) for r in Progress(vs.rows)]):
+        for chunk in json.JSONEncoder().iterencode([_rowdict(vcols, r) for r in Progress(vs.rows)]):
             fp.write(chunk)
+
+
+@asyncthread
+def save_jsonl(p, vs):
+    with p.open_text(mode='w') as fp:
+        vcols = vs.visibleCols
+        for r in Progress(vs.rows):
+            fp.write(json.dumps(_rowdict(vcols, r)) + '\n')
