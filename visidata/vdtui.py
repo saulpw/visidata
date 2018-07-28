@@ -164,7 +164,7 @@ class OptionsObject:
         opt = self._cache.get((k, obj), None)
         if opt is None:
             opt = self._opts._get(k, obj)
-            self._cache[(k, obj)] = opt
+            self._cache[(k, obj or vd.sheet)] = opt
         return opt
 
     def _set(self, k, v, obj=None, helpstr=''):
