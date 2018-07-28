@@ -1760,7 +1760,7 @@ class TypedWrapper:
         self.val = val
 
     def __lt__(self, x):
-        return False
+        return True
 
 class TypedExceptionWrapper(TypedWrapper):
     def __init__(self, _type, val, exception=None):
