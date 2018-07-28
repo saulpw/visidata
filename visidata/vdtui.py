@@ -367,6 +367,9 @@ vdtype(len, '#')
 vdtype(dict, '')
 vdtype(list, '')
 
+def isNumeric(type):
+    return type in (int,len,float,currency,date)
+
 ###
 
 def error(s):

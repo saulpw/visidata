@@ -7,9 +7,6 @@ max_threads = 2
 Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))')
 globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))')
 
-def isNumeric(col):
-    return col.type in (int,len,float,currency,date)
-
 def isError(col, row):
     try:
         v = col.getValue(row)
