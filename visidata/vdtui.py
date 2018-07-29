@@ -1298,7 +1298,7 @@ class Sheet(BaseSheet):
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in .refresh()
     def visibleCols(self):  # non-hidden cols
         'List of `Column` which are not hidden.'
-        return [c for c in self.keyCols if not c.hidden] + [c for c in self.columns if not c.hidden and c not in self.keyCols]
+        return self.keyCols + [c for c in self.columns if not c.hidden and c not in self.keyCols]
 
     @property
     def cursorColIndex(self):
@@ -1563,6 +1563,8 @@ class Sheet(BaseSheet):
                 if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, options.default_width)
             width = col.width if col.width is not None else options.default_width
+            if col in self.keyCols:
+                width = max(width, 1)  # keycols must all be visible
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self.visibleColLayout[vcolidx] = [x, min(width, winWidth-x)]
                 x += width+sepColWidth
