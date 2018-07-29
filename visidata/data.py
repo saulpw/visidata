@@ -48,10 +48,10 @@ class SettableColumn(Column):
         self.cache = {}
 
     def setValue(self, row, value):
-        self.cache[id(row)] = self.type(value)
+        self.cache[id(row)] = value
 
     def calcValue(self, row):
-        return self.cache.get(id(row), '')
+        return self.cache.get(id(row), None)
 
 
 def fillNullValues(col, rows):
@@ -92,7 +92,7 @@ Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol];
 
 Sheet.addCommand('z=', 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 
-Sheet.addCommand('gz=', 'setcol-range', 'for r, v in zip(selectedRows or rows, eval(input("set column= ", "expr", completer=CompleteExpr()))): cursorCol.setValue(r, v)')
+Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows or rows, *list(eval(input("set column= ", "expr", completer=CompleteExpr()))))')
 
 globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: "))))')
 

@@ -20,12 +20,12 @@ Sheet.addCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i
 Sheet.addCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))')
 
 Sheet.addCommand('zy', 'copy-cell', 'vd.clipcells = [cursorDisplay]')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValue(cursorRow, vd.clipcells[0])')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])')
 Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)')
 Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)')
 
 Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
-Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValue(r, v)')
+Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)')
 
 Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))')
 Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))')

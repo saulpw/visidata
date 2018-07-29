@@ -1738,7 +1738,7 @@ Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")')
 Sheet.addCommand("z'", 'cache-col', 'cursorCol._cachedValues.clear()'),
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); sheet.exec_keystrokes(options.cmd_after_edit)'),
-Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValues(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
+Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValuesTyped(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
 
 Sheet.addCommand('"', 'dup-selected', 'vs = copy(sheet); vs.name += "_selectedref"; vs.rows = list(selectedRows or rows); vd.push(vs)'),
 Sheet.addCommand('g"', 'dup-rows', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),
@@ -2006,15 +2006,21 @@ class Column:
         return self.getCell(row).display
 
     def setValue(self, row, value):
-        'Set our column value for given row to `value`.'
+        'Set our column value on row.  defaults to .setter; override in Column subclass. no type checking'
         self.setter or error(self.name+' column cannot be changed')
         return self.setter(self, row, value)
 
-    def setValues(self, rows, value):
+    def setValues(self, rows, *values):
         'Set our column value for given list of rows to `value`.'
-        for r in rows:
-            self.setValue(r, value)
-        return status('set %d values = %s' % (len(rows), value))
+        for r, v in zip(rows, itertools.cycle(values)):
+            self.setValue(r, v)
+        return status('set %d cells to %d values' % (len(rows), len(values)))
+
+    def setValuesTyped(self, rows, *values):
+        'Set values on this column for rows, coerced to the column type.  will stop on first exception in type().'
+        for r, v in zip(rows, itertools.cycle(self.type(val) for val in values)):
+            self.setValue(r, v)
+        return status('set %d cells to %d values' % (len(rows), len(values)))
 
     @asyncthread
     def setValuesFromExpr(self, rows, expr):
