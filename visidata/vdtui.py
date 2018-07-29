@@ -362,8 +362,8 @@ vdtype(len, '#')
 vdtype(dict, '')
 vdtype(list, '')
 
-def isNumeric(type):
-    return type in (int,len,float,currency,date)
+def isNumeric(col):
+    return col.type in (int,len,float,currency,date)
 
 ###
 
@@ -1953,7 +1953,7 @@ class Column:
         try:
             dw.display = self.format(typedval)
 
-            if width and isNumeric(self.type): #  in (int, float, currency, len):
+            if width and isNumeric(self):
                 dw.display = dw.display.rjust(width-1)
 
             # annotate cells with raw value type in anytype columns, except for strings
