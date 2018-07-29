@@ -160,7 +160,7 @@ class SheetFreqTable(Sheet):
         self.discreteBinning()
 
         # automatically add cache to all columns now that everything is binned
-        for c in self.visibleCols:
+        for c in self.nonKeyVisibleCols:
             c._cachedValues = collections.OrderedDict()
 
 SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
