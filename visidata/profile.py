@@ -5,7 +5,7 @@ import threading
 import collections
 
 from visidata import vd, option, options, status, globalCommand, Sheet, EscapeException
-from visidata import elapsed_s, min_thread_time_s, ColumnAttr, Column, ThreadsSheet, ENTER
+from visidata import elapsed_s, ColumnAttr, Column, ThreadsSheet, ENTER
 
 option('profile', '', 'filename to save binary profiling data')
 
@@ -13,6 +13,7 @@ globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread(
 
 ThreadsSheet.addCommand(ENTER, 'profile-row', 'vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile.getstats()))')
 
+min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
 def open_pyprof(p):
     return ProfileSheet(p.name, p.open_bytes())

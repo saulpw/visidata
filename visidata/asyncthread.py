@@ -3,8 +3,6 @@ import threading
 
 from .vdtui import *
 
-min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
-
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
 Sheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))')
