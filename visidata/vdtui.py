@@ -1758,11 +1758,26 @@ class TypedWrapper:
     def __lt__(self, x):
         return True
 
+    def __hash__(self):
+        return hash((self.type, self.val))
+
+    def __eq__(self, x):
+        if isinstance(x, TypedWrapper):
+            return self.type == x.type and self.val == x.val
+
 class TypedExceptionWrapper(TypedWrapper):
     def __init__(self, func, *args, exception=None):
         TypedWrapper.__init__(self, func, *args)
-        self.exception = None
+        self.exception = exception
         self.stacktrace = stacktrace()
+
+    def __hash__(self):
+        return hash((self.exception, ''.join(self.stacktrace)))
+
+    def __eq__(self, x):
+        if isinstance(x, TypedExceptionWrapper):
+            return self.exception == x.exception and self.stacktrace == x.stacktrace
+
 
 def wrapply(func, *args, **kwargs):
     'Like apply(), but which wraps Exceptions and passes through Wrappers (if first arg)'
@@ -1964,7 +1979,7 @@ class Column:
                 dw.note = typedesc.icon if typedesc else options.note_unknown_type
                 dw.notecolor = options.color_note_type
 
-        except Exception as e:  # type conversion or formatting failed
+        except Exception as e:  # formatting failure
             dw.error = stacktrace()
             dw.display = str(cellval)
             dw.note = options.note_format_exc
