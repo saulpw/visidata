@@ -1756,10 +1756,11 @@ class TypedWrapper:
         self.val = args[0]
 
     def __lt__(self, x):
+        'maintain sortability; wrapped objects are always least'
         return True
 
     def __hash__(self):
-        return hash((self.type, self.val))
+        return hash((self.type, str(self.val)))
 
     def __eq__(self, x):
         if isinstance(x, TypedWrapper):
@@ -1770,13 +1771,14 @@ class TypedExceptionWrapper(TypedWrapper):
         TypedWrapper.__init__(self, func, *args)
         self.exception = exception
         self.stacktrace = stacktrace()
+        self.forwarded = False
 
     def __hash__(self):
-        return hash((self.exception, ''.join(self.stacktrace)))
+        return hash((str(self.exception), ''.join(self.stacktrace)))
 
     def __eq__(self, x):
         if isinstance(x, TypedExceptionWrapper):
-            return self.exception == x.exception and self.stacktrace == x.stacktrace
+            return str(self.exception) == str(x.exception) and self.stacktrace == x.stacktrace
 
 
 def wrapply(func, *args, **kwargs):
@@ -1784,6 +1786,10 @@ def wrapply(func, *args, **kwargs):
     val = args[0]
     if val is None:
         return TypedWrapper(func, None)
+    elif isinstance(val, TypedExceptionWrapper):
+        tew = copy(val)
+        tew.forwarded = True
+        return tew
     elif isinstance(val, TypedWrapper):
         return val
     elif isinstance(val, Exception):
@@ -1792,6 +1798,7 @@ def wrapply(func, *args, **kwargs):
     try:
         return func(*args, **kwargs)
     except Exception as e:
+        e.stacktrace = stacktrace()
         return TypedExceptionWrapper(func, *args, exception=e)
 
 
@@ -1853,13 +1860,6 @@ class Column:
         if typedval is None:
             return None
 
-        if isinstance(typedval, BaseException):
-            return ''
-
-        # These were before the t() type conversion above, to avoid total
-        # stringification on arbitrarily large compound objects.  But it should
-        # be possible to stringify them with a forcibly str-typed column.  Hopefully
-        # this is a good compromise.
         if isinstance(typedval, (list, tuple)):
             return '[%s]' % len(typedval)
         if isinstance(typedval, dict):
@@ -1939,27 +1939,24 @@ class Column:
 
         if isinstance(typedval, TypedWrapper):
             if isinstance(cellval, TypedExceptionWrapper):
-                return DisplayWrapper(cellval.val, error=cellval.stacktrace,
-                                        display=options.disp_error_val,
+                exc = cellval.exception
+                if cellval.forwarded:
+                    dispval = traceback.format_exception_only(type(exc), exc)[-1].strip()
+                else:
+                    dispval = options.disp_error_val
+                return DisplayWrapper(cellval.val, error=exc.stacktrace,
+                                        display=dispval,
                                         note=options.note_getter_exc,
                                         notecolor=options.color_getter_exc)
             elif typedval.val is None:
                 return DisplayWrapper(None, display='',  # force empty display for None
                                             note=options.disp_note_none,
                                             notecolor=options.color_note_type)
-            elif isinstance(typedval.val, BaseException):
-                exc = typedval.val
-                return DisplayWrapper(typedval,
-                                display=traceback.format_exception_only(type(exc), exc)[-1].strip(),
-                                error=stacktrace(exc),
-                                note=options.note_getter_exc,
-                                notecolor=options.color_getter_exc)
             else:
                 return DisplayWrapper(typedval.val, display=str(typedval.val),
                                             note=options.note_format_exc,
                                             notecolor=options.color_format_exc)
-
-        if isinstance(typedval, threading.Thread):
+        elif isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
                                 display=options.disp_pending,
                                 note=options.note_pending,
