@@ -358,7 +358,7 @@ vdtype(anytype, '')
 vdtype(str, '~')
 vdtype(int, '#', '{:d}')
 vdtype(float, '%', '{:.02f}')
-vdtype(len, '#')
+vdtype(len, '♯')
 vdtype(dict, '')
 vdtype(list, '')
 
