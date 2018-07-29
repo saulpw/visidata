@@ -318,7 +318,6 @@ globalCommand('q', 'quit-sheet',  'vd.sheets[1:] or options.quitguard and confir
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
 globalCommand('^L', 'redraw', 'vd.scr.clear()')
-globalCommand('^V', 'show-version', 'status(__version_info__); status(__copyright__)')
 globalCommand('^P', 'statuses', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))')
 
 globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')

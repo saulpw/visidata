@@ -19,7 +19,7 @@ globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or error("no repla
 globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
 
 globalCommand(None, 'status', 'status(input("status: ", display=False))')
-globalCommand(None, 'check-version', 'checkVersion(input("required version: "))')
+globalCommand('^V', 'check-version', 'status(__version_info__); checkVersion(input("require version: ", value=__version_info__))')
 
 # not necessary to log movements and scrollers
 nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g? g_ _ z_'.split()
@@ -34,7 +34,7 @@ option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 
 def checkVersion(desired_version):
     if desired_version != visidata.__version__:
-        error("needs version "+desired_version)
+        error("version %s required" % desired_version)
 
 def fnSuffix(template):
     for i in range(1, 1000):
@@ -311,7 +311,7 @@ CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or erro
 options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
 vd().cmdlog = CommandLog('cmdlog')
-vd().cmdlog.rows = [vd.cmdlog.newRow(longname='check-version', input=visidata.__version__, comment=visidata.__version_info__)]
+vd().cmdlog.rows = []
 
 vd().addHook('preexec', vd().cmdlog.beforeExecHook)
 vd().addHook('postexec', vd().cmdlog.afterExecSheet)
