@@ -29,6 +29,7 @@ class ThreadsSheet(Sheet):
         Column('process_time', type=float, getter=lambda col,row: elapsed_s(row)),
         ColumnAttr('profile'),
         ColumnAttr('status'),
+        ColumnAttr('exception'),
     ]
     def reload(self):
         self.rows = vd().threads

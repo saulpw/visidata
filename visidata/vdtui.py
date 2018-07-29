@@ -574,6 +574,7 @@ class VisiData:
         t.endTime = endTime
         t.status = ''
         t.profile = None
+        t.exception = None
         self.threads.append(t)
 
     def execAsync(self, func, *args, **kwargs):
@@ -605,6 +606,7 @@ class VisiData:
             t.status += 'aborted by user'
             status('%s aborted' % t.name, priority=2)
         except Exception as e:
+            t.exception = e
             exceptionCaught(e)
 
         if t.sheet:
@@ -621,7 +623,7 @@ class VisiData:
         for t in self.unfinishedThreads:
             if not t.is_alive():
                 t.endTime = time.process_time()
-                if not getattr(t, 'status', None):
+                if getattr(t, 'status', None) is None:
                     t.status = 'ended'
 
     def sync(self, expectedThreads=0):

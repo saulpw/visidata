@@ -61,9 +61,12 @@ class ThreadProfiler:
             self.thread.profile.disable()
             self.thread.profile.dump_stats(options.profile + str(self.profileNumber))
 
-        # remove very-short-lived async actions
-        if elapsed_s(self.thread) < min_thread_time_s:
-            vd().threads.remove(self.thread)
+        if exc_val:
+            self.thread.exception = exc_val
+        else:
+            # remove very-short-lived async actions
+            if elapsed_s(self.thread) < min_thread_time_s:
+                vd().threads.remove(self.thread)
 
 class ProfileSheet(Sheet):
     columns = [
