@@ -1676,8 +1676,8 @@ class Sheet(BaseSheet):
                         truncchar=options.disp_truncator)
         editargs.update(kwargs)  # update with user-specified args
         r = self.vd.editText(y, x, w, **editargs)
-        if rowidx >= 0:
-            r = col.type(r)  # convert input to column type
+        if rowidx >= 0:  # if not header
+            r = col.type(r)  # convert input to column type, let exceptions be raised
 
         return r
 
