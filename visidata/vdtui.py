@@ -64,42 +64,43 @@ class ExpectedException(Exception):
 
 vd = None  # will be filled in later
 
-# (settingname, Sheet-instance/Sheet-type/'override'/'global') -> Option/Command/longname
+
+# [settingname] -> { objname(Sheet-instance/Sheet-type/'override'/'global'): Option/Command/longname }
 class SettingsMgr(collections.OrderedDict):
+    def __init__(self):
+        super().__init__()
+        self.allobjs = {}
+
     def objname(self, obj):
         if isinstance(obj, str):
-            return obj
+            v = obj
         elif obj is None:
-            return 'override'
+            v = 'override'
         elif isinstance(obj, BaseSheet):
-            return obj.name
+            v = obj.name
         elif issubclass(obj, BaseSheet):
-            return obj.__name__
+            v = obj.__name__
+        else:
+            return None
+
+        self.allobjs[v] = obj
+        return v
 
     def getobj(self, objname):
         'Inverse of objname(obj); returns obj if available'
-        for optname, o in self.keys():
-            if self.objname(o) == objname:
-                return o
+        return self.allobjs.get(objname)
 
     def set(self, k, v, obj='override'):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
-        self[(k, self.objname(obj))] = v
+        if k not in self:
+            self[k] = dict()
+        self[k][self.objname(obj)] = v
         return v
 
     def setdefault(self, k, v):
         return self.set(k, v, 'global')
 
-    def _get(self, key, obj=None):
-        for (k, o), v in self.iter(obj):
-            if k == key:
-                return v
-
-    def iter(self, obj=None):
-        'Return self[k] considering context of obj.  If obj is None, uses the context of the top sheet.'
-        if obj is None and vd:
-            obj = vd.sheet
-
+    def _mappings(self, obj):
         if obj:
             mappings = [self.objname(obj)]
             mro = [self.objname(cls) for cls in inspect.getmro(type(obj))]
@@ -108,11 +109,26 @@ class SettingsMgr(collections.OrderedDict):
             mappings = []
 
         mappings += ['override', 'global']
+        return mappings
 
-        for o in mappings:
-            for k, o2 in self.keys():
-                if o == o2:
-                    yield (k, o), self[(k, o)]
+    def _get(self, key, obj=None):
+        d = self.get(key, None)
+        if d:
+            for m in self._mappings(obj or vd.sheet):
+                v = d.get(m)
+                if v:
+                    return v
+
+    def iter(self, obj=None):
+        'Return self[k] considering context of obj.  If obj is None, uses the context of the top sheet.'
+        if obj is None and vd:
+            obj = vd.sheet
+
+        for o in self._mappings():
+            for k in self.keys():
+                for o2 in self[k]:
+                    if o == o2:
+                        yield (k, o), self[k][o2]
 
 
 class Command:
@@ -151,7 +167,9 @@ class OptionsObject:
         object.__setattr__(self, '_cache', {})
 
     def keys(self, obj=None):
-        return [optname for optname, o in self._opts.keys() if obj is None or o == obj]
+        for k, d in self._opts.items():
+            if obj is None or self._opts.objname(obj) in d:
+                yield k
 
     def _get(self, k, obj=None):
         'Return Option object for k in context of obj. Cache result until any set().'
