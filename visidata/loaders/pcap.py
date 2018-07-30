@@ -21,6 +21,7 @@ def eth_type(v):
 class PCAPSheet(Sheet):
     # @todo get columns from __hdr_fields__ and set getter for special cases
     columns = [
+        ColumnAttr('timestamp', type=date, fmtstr="%Y-%m-%d %H:%M:%S"),
         ColumnAttr('ether_src', 'src', type=mac_addr),
         ColumnAttr('ether_dst', 'dst', type=mac_addr),
         ColumnAttr('ether_type', 'type', type=eth_type),
@@ -60,6 +61,7 @@ class PCAPSheet(Sheet):
         self.rows = []
         for ts, buf in pcap:
             eth = dpkt.ethernet.Ethernet(buf)
+            eth.timestamp = ts
             self.rows.append(eth)
 
 def open_pcap(p):
