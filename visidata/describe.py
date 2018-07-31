@@ -19,7 +19,7 @@ def isError(col, row):
 
 class DescribeColumn(Column):
     def __init__(self, name, **kwargs):
-        super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.name), **kwargs)
+        super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.name, ''), **kwargs)
 
 # rowdef: Column from source sheet
 class DescribeSheet(ColumnsSheet):
@@ -47,7 +47,8 @@ class DescribeSheet(ColumnsSheet):
         self.describeData = { col: {} for col in self.rows }
 
         for srccol in Progress(self.rows):
-            self.reloadColumn(srccol)
+            if not srccol.hidden:
+                self.reloadColumn(srccol)
             sync(max_threads)
 
     @asyncthread
