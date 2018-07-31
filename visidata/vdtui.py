@@ -2563,7 +2563,7 @@ def cursesMain(_scr, sheetlist):
     for vs in sheetlist:
         vd().push(vs)  # first push does a reload
 
-    status('<F1> or z? opens help')
+    status('^H or <F1> opens help')
     return vd().run(_scr)
 
 def addGlobals(g):
