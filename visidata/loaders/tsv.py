@@ -1,12 +1,10 @@
 import os
 import contextlib
+import itertools
 
 from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet
 from visidata.namedlist import namedlist
 
-
-def _getTsvHeaders(fp, nlines):
-    return [L.split(options.delimiter) for L in getlines(fp, nlines or -1)]
 
 def getlines(fp, maxlines=None):
     i = 0
@@ -41,12 +39,19 @@ class TsvSheet(Sheet):
         header_lines = options.get('header', self)
 
         with self.source.open_text() as fp:
-            headers = _getTsvHeaders(fp, header_lines) # or 1)  # get one data line if no headers
+            # get one line anyway to determine number of columns
+            lines = list(getlines(fp, int(header_lines) or 1))
+            headers = [L.split(options.delimiter) for L in lines]
 
-            self.columns = [
+            if header_lines <= 0:
+                self.columns = [ColumnItem('', i) for i in range(len(headers[0]))]
+            else:
+                self.columns = [
                     ColumnItem('\\n'.join(x), i)
                         for i, x in enumerate(zip(*headers[:header_lines]))
                     ]
+
+            lines = lines[header_lines:]  # in case of header_lines == 0
             self._rowtype = namedlist('tsvobj', [c.name for c in self.columns])
 
             self.recalc()
@@ -54,7 +59,7 @@ class TsvSheet(Sheet):
             self.rows = []
 
             with Progress(total=self.source.filesize) as prog:
-                for L in getlines(fp):
+                for L in itertools.chain(lines, getlines(fp)):
                     row = L.split(delim)
                     ncols = self._rowtype.length()  # current number of cols
                     if len(row) > ncols:
