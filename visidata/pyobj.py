@@ -227,7 +227,7 @@ class SheetObject(PythonSheet):
         ]
         self.recalc()
 
-        self.keyCols = self.columns[0:1]
+        self.setKeys(self.columns[0:1])
 
 SheetObject.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)')
 SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()')

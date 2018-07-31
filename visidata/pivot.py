@@ -7,19 +7,20 @@ class SheetPivot(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     rowtype = 'aggregated rows'
     def __init__(self, srcsheet, variableCols):
-        super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols), source=srcsheet)
+        super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols),
+                         source=srcsheet)
 
+    def reload(self):
         self.nonpivotKeyCols = []
         self.variableCols = variableCols
-        for colnum, col in enumerate(srcsheet.keyCols):
+
+        for colnum, col in enumerate(self.source.keyCols):
             if col not in variableCols:
                 newcol = copy(col)
                 newcol.getter = lambda col,row,colnum=colnum: row[0][colnum]
                 newcol.srccol = col
                 self.nonpivotKeyCols.append(newcol)
 
-
-    def reload(self):
         # two different threads for better interactive display
         self.reloadCols()
         self.reloadRows()
@@ -27,7 +28,7 @@ class SheetPivot(Sheet):
     @asyncthread
     def reloadCols(self):
         self.columns = copy(self.nonpivotKeyCols)
-        self.keyCols = copy(self.columns)
+        self.setKeys(self.columns)
 
         aggcols = [(c, aggregator) for c in self.source.visibleCols for aggregator in getattr(c, 'aggregators', [])]
 

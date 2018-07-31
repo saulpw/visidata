@@ -13,7 +13,7 @@ class TransposeSheet(Sheet):
             Column('_'.join(c.name for c in self.source.keyCols),
                    getter=lambda c,origcol: origcol.name)
         ]
-        self.keyCols = self.columns[:]
+        self.setKeys(self.columns)
 
         # rows become columns
         for row in Progress(self.source.rows):

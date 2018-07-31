@@ -69,7 +69,7 @@ class PgTablesSheet(Sheet):
             if r:
                 self.addRow(r)
             self.columns = cursorToColumns(cur)
-            self.keyCols = self.columns[0:1]  # table_name is the key
+            self.setKeys(self.columns[0:1])  # table_name is the key
             self.addColumn(Column('nrows', type=int, getter=lambda col,row: col.sheet.getRowCount(row[0])))
 
             for r in cur:

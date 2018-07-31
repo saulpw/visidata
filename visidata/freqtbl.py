@@ -33,7 +33,7 @@ class SheetFreqTable(Sheet):
                         setter=lambda col,row,v,i=i,origCol=c: setitem(row[0], i, v) and origCol.setValues(row[1], v))
                 for i, c in enumerate(self.origCols)
         ]
-        self.keyCols = self.columns[:]  # origCols are now key columns
+        self.setKeys(self.columns)  # origCols are now key columns
         nkeys = len(self.keyCols)
 
         self.columns.extend([

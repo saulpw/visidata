@@ -41,6 +41,7 @@ class ColumnsSheet(Sheet):
             ColumnAttr('fmtstr'),
             ValueColumn('value', width=options.default_width),
             ColumnAttr('expr'),
+            Column('keycol', getter=lambda col,row: row in row.sheet.keyCols),
     ]
     nKeys = 2
     colorizers = Sheet.colorizers + [
@@ -170,8 +171,8 @@ def createJoinedSheet(sheets, jointype=''):
 jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
 
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'for c in selectedRows or [cursorRow]: c.sheet.toggleKeyColumn(c)')
-ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in selectedRows or [cursorRow]: c.sheet.keyCols.remove(c)')
+ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(selectedRows or [cursorRow])')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(selectedRows or [cursorRow])')
 ColumnsSheet.addCommand('g-', 'hide-selected', 'for c in selectedRows or [cursorRow]: c.hide()')
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'for c in selectedRows or [cursorRow]: c.type = float')
 ColumnsSheet.addCommand('g#', 'type-int-selected', 'for c in selectedRows or [cursorRow]: c.type = int')
@@ -197,7 +198,7 @@ class SheetJoin(Sheet):
         self.columns = []
         for i, c in enumerate(sheets[0].keyCols):
             self.addColumn(SubrowColumn(c.name, ColumnItem(c.name, i), 0))
-        self.keyCols = self.columns[:]
+        self.setKeys(self.columns)
 
         rowsBySheetKey = {}
         rowsByKey = {}

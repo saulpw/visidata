@@ -651,6 +651,7 @@ class VisiData:
 
     def refresh(self):
         Sheet.visibleCols.fget.cache_clear()
+        Sheet.keyCols.fget.cache_clear()
 
     def editText(self, y, x, w, record=True, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
@@ -1096,7 +1097,7 @@ class Sheet(BaseSheet):
         Colorizer('cell', 2, lambda s,c,r,v: options.color_default),
         Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
     ]
-    nKeys = 0  # initial keyCols = columns[:nKeys]
+    nKeys = 0  # columns[:nKeys] are key columns
     rowtype = 'rows'
 
     def __init__(self, name, **kwargs):
@@ -1115,10 +1116,9 @@ class Sheet(BaseSheet):
 
         # list of all columns in display order
         self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('')]
-        self.recalc()
+        self.recalc()  # set .sheet on columns and start caches
 
-        self.keyCols = self.columns[:self.nKeys]  # initial list of key columns
-
+        self.setKeys(self.columns[:self.nKeys])  # initial list of key columns
         self._selectedRows = {}  # id(row) -> row
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
@@ -1208,7 +1208,6 @@ class Sheet(BaseSheet):
         ret.__dict__.update(self.__dict__)
         ret.rows = []                     # a fresh list without incurring any overhead
         ret.columns = deepcopy(self.columns) # deepcopy columns even for shallow copy of sheet
-        ret.keyCols = [ret.columns[i] for i, c in enumerate(self.columns) if c in self.keyCols]
         ret.recalc()  # set .sheet on columns
         ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
@@ -1298,7 +1297,13 @@ class Sheet(BaseSheet):
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in .refresh()
     def visibleCols(self):  # non-hidden cols
         'List of `Column` which are not hidden.'
-        return self.keyCols + [c for c in self.columns if not c.hidden and c not in self.keyCols]
+        return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
+
+    @property
+    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in .refresh()
+    def keyCols(self):
+        'Cached list of visible key columns (Columns with .key=True)'
+        return [c for c in self.columns if c.keycol and not c.hidden]
 
     @property
     def cursorColIndex(self):
@@ -1486,14 +1491,17 @@ class Sheet(BaseSheet):
             self.columns.insert(index, col)
             return col
 
-    def toggleKeyColumn(self, col):
-        'Toggle col as key column.'
-        if col not in self.keyCols: # if not a key, add it
-            self.keyCols.append(col)
-            return 1
-        else:
-            self.keyCols.remove(col)
-            return 0
+    def setKeys(self, cols):
+        for col in cols:
+            col.keycol = True
+
+    def unsetKeys(self, cols):
+        for col in cols:
+            col.keycol = False
+
+    def toggleKeys(self, cols):
+        for col in cols:
+            col.keycol = not col.keycol
 
     def rowkey(self, row):
         'returns a tuple of the key for the given row'
@@ -1726,8 +1734,8 @@ Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()'),
 Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.width = cursorCol.width//2'),
 Sheet.addCommand('gv', 'unhide-cols', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)'),
 
-Sheet.addCommand('!', 'key-col', 'toggleKeyColumn(cursorCol)'),
-Sheet.addCommand('z!', 'key-col-off', 'keyCols.remove(cursorCol)'),
+Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])'),
+Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])'),
 Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
 
 Sheet.addCommand('[', 'sort-asc', 'orderBy(cursorCol)'),
@@ -1830,6 +1838,7 @@ class Column:
         self.getter = lambda col, row: row
         self.setter = None    # setter(col,row,value)
         self.width = None     # == 0 if hidden, None if auto-compute next time
+        self.keycol = False      # is a key column
 
         self._cachedValues = collections.OrderedDict() if cache else None
         for k, v in kwargs.items():
