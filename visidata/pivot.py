@@ -7,15 +7,15 @@ class SheetPivot(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     rowtype = 'aggregated rows'
     def __init__(self, srcsheet, variableCols):
+        self.variableCols = variableCols
         super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols),
                          source=srcsheet)
 
     def reload(self):
         self.nonpivotKeyCols = []
-        self.variableCols = variableCols
 
         for colnum, col in enumerate(self.source.keyCols):
-            if col not in variableCols:
+            if col not in self.variableCols:
                 newcol = copy(col)
                 newcol.getter = lambda col,row,colnum=colnum: row[0][colnum]
                 newcol.srccol = col
