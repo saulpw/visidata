@@ -2066,12 +2066,18 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
-def getattrdeep(obj, attrs, default):
+def getattrdeep(obj, *attrs, default=None):
+    if len(attrs) == 1:
+        attrs = attrs[0].split('.')
+
     for a in attrs:
-        obj = getattr(obj, a)
+        obj = getattr(obj, a, default)
     return obj
 
-def setattrdeep(obj, attrs, val):
+def setattrdeep(obj, *attrs, val):
+    if len(attrs) == 1:
+        attrs = attrs[0].split('.')
+
     for a in attrs[:-1]:
         obj = getattr(obj, a)
     setattr(obj, attrs[-1], val)
@@ -2080,12 +2086,10 @@ def ColumnAttr(name, *attrs, **kwargs):
     'Column using getattr/setattr of given attr.'
     if not attrs:
         attrs = [name]
-    if len(attrs) == 1:
-        attrs = attrs[0].split('.')
 
     return Column(name,
-                  getter=lambda col,row,attrs=attrs: getattrdeep(row, attrs, None),
-                  setter=lambda col,row,val,attrs=attrs: setattrdeep(row, attrs, val),
+                  getter=lambda col,row,attrs=attrs: getattrdeep(row, *attrs, default=None),
+                  setter=lambda col,row,val,attrs=attrs: setattrdeep(row, *attrs, val),
                   **kwargs)
 
 def ColumnItem(name, key=None, **kwargs):
