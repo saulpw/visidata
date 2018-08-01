@@ -1,8 +1,8 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample.tsv	open file
-sample	OrderDate		@		set type of current column to date
-sample			C		open Columns Sheet
-sample_columns	fmtstr	キsample,OrderDate	e	%Y	edit contents of current cell
-sample_columns			q		quit current sheet
-sample	OrderDate		F		open Frequency Table grouped on current column
-sample_OrderDate_freq	histogram		-		hide current column
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	OrderDate		type-date		@	
+sample			columns-sheet		C	
+sample_columns	fmtstr	キOrderDate	edit-cell	%Y	e	
+sample_columns			quit-sheet		q	
+sample	OrderDate		freq-col		F	
+sample_OrderDate_freq	histogram		hide-col		-	

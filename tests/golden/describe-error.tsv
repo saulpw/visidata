@@ -1,5 +1,5 @@
 column	errors	nulls	distinct	mode	min	max	median	mean	stdev
+amt	1	1	8	0.01	0.01	43.2	1.65	7.37	14.81
+key1	1	1	9		2016-01-01	2018-10-20			
 key2	1	1	4						
 qty	2	1	8		1	256	16	53.57	92.05
-key1	1	1	9		2016-01-01	2018-10-20			
-amt	1	1	8	0.01	0.01	43.2	1.65	7.37	14.81

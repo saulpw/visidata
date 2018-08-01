@@ -1,7 +1,7 @@
 sheet	col	row	longname	input	keystrokes	comment
-			check-version	1.2.1		saul.pw/vdtui v1.2.1
 			open-file	sample_data/test.jsonl	o	
 test	key1		type-date		@	
 test	qty		type-int		#	
 test	amt		type-float		%	
 test			describe-sheet		I	
+test_describe	column		sort-asc		[	
