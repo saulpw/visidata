@@ -1996,7 +1996,7 @@ class Column:
         dw = DisplayWrapper(cellval)
 
         try:
-            dw.display = self.format(typedval)
+            dw.display = self.format(typedval) or ''
 
             if width and isNumeric(self):
                 dw.display = dw.display.rjust(width-1)
@@ -2124,6 +2124,9 @@ class DisplayWrapper:
     def __init__(self, value, **kwargs):
         self.value = value
         self.__dict__.update(kwargs)
+
+    def __bool__(self):
+        return self.value
 
 
 class ColumnEnum(Column):
