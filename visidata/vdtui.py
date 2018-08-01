@@ -2009,7 +2009,10 @@ class Column:
 
         except Exception as e:  # formatting failure
             dw.error = stacktrace()
-            dw.display = str(cellval)
+            try:
+                dw.display = str(cellval)
+            except Exception as e:
+                dw.display = str(e)
             dw.note = options.note_format_exc
             dw.notecolor = options.color_format_exc
 
