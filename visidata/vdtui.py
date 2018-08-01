@@ -363,7 +363,10 @@ def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
     return t
 
 # typemap [typetype] -> _vdtype
-typemap = collections.defaultdict(lambda: _vdtype(anytype, '', '', _defaultFormatter))
+typemap = {}
+
+def getType(typetype):
+    return typemap.get(typetype) or _vdtype(anytype, '', '', _defaultFormatter)
 
 def typeIcon(typetype):
     t = typemap.get(typetype, None)
@@ -1597,7 +1600,7 @@ class Sheet(BaseSheet):
         x, colwidth = self.visibleColLayout[vcolidx]
 
         # ANameTC
-        T = typemap[col.type].icon
+        T = getType(col.type).icon
         if T is None:  # still allow icon to be explicitly non-displayed ''
             T = '?'
         N = ' ' + col.name  # save room at front for LeftMore
@@ -1877,7 +1880,7 @@ class Column:
 
     @property
     def fmtstr(self):
-        return self._fmtstr or typemap[self.type].fmtstr
+        return self._fmtstr or getType(self.type).fmtstr
 
     @fmtstr.setter
     def fmtstr(self, v):
@@ -1895,7 +1898,7 @@ class Column:
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
-        return typemap[self.type].formatter(self.fmtstr, typedval)
+        return getType(self.type).formatter(self.fmtstr, typedval)
 
     def hide(self, hide=True):
         if hide:
