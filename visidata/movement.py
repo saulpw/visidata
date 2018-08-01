@@ -18,30 +18,30 @@ Sheet.addCommand('N', 'prev-search', 'vd.moveRegex(sheet, reverse=True)'),
 Sheet.addCommand('g/', 'search-cols', 'vd.moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")'),
 Sheet.addCommand('g?', 'searchr-cols', 'vd.moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")'),
 
-Sheet.addCommand('<', 'prev-value', 'vd.moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")'),
-Sheet.addCommand('>', 'next-value', 'vd.moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")'),
-Sheet.addCommand('{', 'prev-selected', 'vd.moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
-Sheet.addCommand('}', 'next-selected', 'vd.moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
+Sheet.addCommand('<', 'prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val, reverse=True) or status("no different value up this column")'),
+Sheet.addCommand('>', 'next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorValue: col.getValue(row) != val) or status("no different value down this column")'),
+Sheet.addCommand('{', 'prev-selected', 'moveToNextRow(sheet, lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
+Sheet.addCommand('}', 'next-selected', 'moveToNextRow(sheet, lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
 
-Sheet.addCommand('z<', 'prev-null', 'vd.moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
-Sheet.addCommand('z>', 'next-null', 'vd.moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
+Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
+Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
 
 
-def moveToNextRow(vd, func, reverse=False):
+def moveToNextRow(vs, func, reverse=False):
     'Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria.'
-    rng = range(vd.cursorRowIndex-1, -1, -1) if reverse else range(vd.cursorRowIndex+1, vd.nRows)
+    rng = range(vs.cursorRowIndex-1, -1, -1) if reverse else range(vs.cursorRowIndex+1, vs.nRows)
 
     for i in rng:
         try:
-            if func(vd.rows[i]):
-                vd.cursorRowIndex = i
+            if func(vs.rows[i]):
+                vs.cursorRowIndex = i
                 return True
         except Exception:
             pass
 
     return False
 
-VisiData.moveToNextRow = moveToNextRow
+Sheet.moveToNextRow = moveToNextRow
 
 
 def nextColRegex(sheet, colregex):
