@@ -124,7 +124,7 @@ class SettingsMgr(collections.OrderedDict):
         if obj is None and vd:
             obj = vd.sheet
 
-        for o in self._mappings():
+        for o in self._mappings(obj):
             for k in self.keys():
                 for o2 in self[k]:
                     if o == o2:
@@ -329,7 +329,7 @@ globalCommand(' ', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 bindkey('KEY_RESIZE', 'redraw')
 
 def input_longname(sheet):
-    longnames = set(k for k, obj in commands.keys())
+    longnames = set(k for (k, obj), v in commands.iter(sheet))
     return input("command name: ", completer=CompleteKey(sorted(longnames)))
 
 
