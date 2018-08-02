@@ -1899,7 +1899,7 @@ class Column:
 
     def hide(self, hide=True):
         if hide:
-            self.width = -abs(self.width or 0)
+            self.width = 0
         else:
             self.width = abs(self.width or self.getMaxWidth(self.sheet.visibleRows))
 
