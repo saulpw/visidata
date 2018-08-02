@@ -4,4 +4,4 @@ key1	qty_sum_foo	qty_sum_baz	qty_sum_bar	Total_qty_sum	Total_count
 2017-12-25	0	0	16	16	2
 2016-01-01	1	0	0	3	2
 	0	4	0	4	1
-	0	32	0	32	1
+KeyError: 'key1'	0	32	0	32	1
