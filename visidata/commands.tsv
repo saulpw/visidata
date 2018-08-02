@@ -8,11 +8,10 @@ global	columns-all	g	C	gC	meta	n	n	y		meta-columns-all	open Columns Sheet with a
 global	describe-all	g	I	gI	derived	n	n	y		data-describe-all	open descriptive statistics for all visible columns on all sheets
 global	error-recent		^E	^E	meta	n	n	n		errors-recent	view traceback for most recent error
 global	errors-all	g	^E	g^E	meta	n	n	n		info-errors-all	view traceback for most recent errors
-global	exec-longname		^A	^A	n	n	n	n		meta-exec-cmd	execute command by name
+global	exec-longname		Space	Space				n		meta-exec-cmd	execute command by name
 global	exec-python	g	^X	g^X	n	n	n	y		python-exec	execute Python statement in the global scope
 global	forget-sheet		Q	Q	quit	n	n	n		sheet-quit-remove	quit current sheet and remove it from the cmdlog
 global	freq-rows	z	F	zF	y	use	n	y		data-aggregate-summary	open one-line summary for all selected rows
-global	menu		SPACE	SPACE	modal	n	n	n	3		start menu command
 global	no-op		KEY_RESIZE	KEY_RESIZE	n	n	n	n			no operation
 global	open-file		o	o	y	n	n	y		sheet-open-path	open input in VisiData
 global	pause-replay		^U	^U	n	n	n	n		meta-replay-toggle	pause/resume replay

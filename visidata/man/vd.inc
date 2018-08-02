@@ -381,9 +381,7 @@ view contents of current cell in a new TextSheet
 .It Ic "  v"
 toggle sheet-specific visibility (text wrap on TextSheet, legends/axes on Graph)
 .Pp
-.It Ic "Space"
-open command selection menu
-.It Ic " ^A" Ar longname
+.It Ic "Space" Ar longname
 .No execute command by its Ar longname
 .Pp
 .It Ic " ^E"

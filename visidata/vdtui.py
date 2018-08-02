@@ -324,7 +324,7 @@ globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or error("no previous sheet"); 
 
 globalCommand('^Z', 'suspend', 'suspend()')
 
-globalCommand('^A', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
+globalCommand(' ', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
 bindkey('KEY_RESIZE', 'redraw')
 

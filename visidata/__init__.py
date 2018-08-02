@@ -29,7 +29,6 @@ from .freeze import *
 from .regex import *
 from .canvas import *
 from .graph import *
-from .menu import *
 from .motd import *
 from .transpose import *
 from .diff import *
