@@ -35,7 +35,7 @@ from .transpose import *
 from .diff import *
 from .shell import *
 from .movement import *
-from .profile import *
+from ._profile import *
 
 from .vimkeys import *
 
