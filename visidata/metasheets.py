@@ -41,7 +41,6 @@ class ColumnsSheet(Sheet):
             ColumnAttr('fmtstr'),
             ValueColumn('value', width=options.default_width),
             ColumnAttr('expr'),
-            Column('keycol', getter=lambda col,row: row in row.sheet.keyCols),
     ]
     nKeys = 2
     colorizers = Sheet.colorizers + [

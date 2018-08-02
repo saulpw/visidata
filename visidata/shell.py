@@ -7,10 +7,13 @@ Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColum
 
 
 def addShellColumns(cmd, sheet):
-    c = ColumnShell(cmd, source=sheet, width=0)
-    sheet.addColumn(c)
-    sheet.addColumn(Column(cmd+'_stdout', srccol=c, getter=lambda col,row: col.srccol.getValue(row)[0]))
-    sheet.addColumn(Column(cmd+'_stderr', srccol=c, getter=lambda col,row: col.srccol.getValue(row)[1]))
+    shellcol = ColumnShell(cmd, source=sheet, width=0)
+    for i, c in enumerate([
+            shellcol,
+            Column(cmd+'_stdout', srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[0]),
+            Column(cmd+'_stderr', srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]),
+            ]):
+        sheet.addColumn(c, index=sheet.cursorColIndex+i+1)
 
 
 class ColumnShell(Column):

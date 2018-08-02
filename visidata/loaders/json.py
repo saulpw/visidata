@@ -47,14 +47,17 @@ class JSONSheet(Sheet):
             for L in fp:
                 self.addRow(json.loads(L))
 
-    def addRow(self, row):
-        self.rows.append(row)  # just during loading until final assignment
+    def addRow(self, row, index=None):
+        super().addRow(row, index=index)
         for k in row:
             if k not in self.colnames:
                 c = ColumnItem(k, type=deduceType(row[k]))
                 self.colnames[k] = c
                 self.addColumn(c)
         return row
+
+    def newRow(self):
+        return {}
 
 JSONSheet.bindkey(ENTER, 'pyobj-dive')
 

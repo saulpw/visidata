@@ -22,10 +22,10 @@ option('color_delete_pending', 'red', 'color for files pending delete')
 Sheet.addCommand('R', 'random-rows', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)')
 
 Sheet.addCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)')
-Sheet.addCommand('ga', 'add-rows', 'for r in range(int(input("add rows: "))): addRow(newRow())')
+Sheet.addCommand('ga', 'add-rows', 'for r in range(int(input("add rows: "))): addRow(newRow(), cursorRowIndex+1)')
 Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)')
 
-Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorVisibleColIndex+1)')
+Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)')
 
 Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows or rows)')
 
