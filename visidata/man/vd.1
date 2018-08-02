@@ -715,6 +715,8 @@ note to display for pending cells
 cell note for an exception during type conversion or formatting
 .It Sy --note-getter-exc Ns = Ns Ar "str       " No "!"
 cell note for an exception during computation
+.It Sy --note-unknown-type Ns = Ns Ar "str     " No ""
+cell note for unknown types in anytype column
 .It Sy --scroll-incr Ns = Ns Ar "int           " No "3"
 amount to scroll with scrollwheel
 .It Sy --skip Ns = Ns Ar "int                  " No "0"
@@ -739,8 +741,6 @@ command to copy stdin to system clipboard
 show _private properties on pyobjs
 .It Sy --pyobj-show-methods Ns = Ns Ar "bool   " No "False"
 show methods on pyobjs
-.It Sy --profile Ns = Ns Ar "str               " No ""
-filename to save binary profiling data
 .It Sy --min-memory-mb Ns = Ns Ar "int         " No "0"
 minimum memory to continue loading and async processing
 .It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
@@ -753,18 +753,18 @@ directory to load and store macros
 string prefix for rowkey in the cmdlog
 .It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
 file to autorecord each cmdlog action to
-.It Sy --header Ns = Ns Ar "int                " No "1"
-parse first N rows of .csv/.tsv as column names
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
 maxsplit to pass to regex.split
 .It Sy --show-graph-labels Ns = Ns Ar "bool    " No "True"
 show axes and legend on graph
 .It Sy --plot-colors Ns = Ns Ar "str           " No ""
-
+list of distinct colors to use for plotting distinct objects
 .It Sy --zoom-incr Ns = Ns Ar "float           " No "2.0"
 amount to multiply current zoomlevel when zooming
 .It Sy --motd-url Ns = Ns Ar "str              " No ""
-
+source of randomized startup messages
+.It Sy --profile Ns = Ns Ar "str               " No ""
+filename to save binary profiling data
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
@@ -777,10 +777,6 @@ skipinitialspace passed to csv.reader
 escapechar passed to csv.reader
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
-.It Sy --plot-colors Ns = Ns Ar "str           " No ""
-
-.It Sy --motd-url Ns = Ns Ar "str              " No ""
-
 .El
 .
 .Ss DISPLAY OPTIONS
