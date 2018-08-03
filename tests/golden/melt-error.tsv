@@ -9,8 +9,6 @@ key1	Variable	Value
 2016-01-01	amt	3
 2016-01-01	qty	1
 2016-01-01	key2	foo
-2017-12-25	key2	foo
-2017-12-25	amt	.03
 2017-12-25	qty	16
 2017-12-25	key2	bar
 2017-12-25	amt	.3

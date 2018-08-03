@@ -1,87 +1,87 @@
-OrderDate	Region	Rep	Item	Variable	Currency	Cost
-2016-01-06	East	Jones	Pencil	Unit	$	1.99
-2016-01-06	East	Jones	Pencil	Total	$	189.05
-2016-01-23	Central	Kivell	Binder	Unit	$	19.99
-2016-01-23	Central	Kivell	Binder	Total	$	999.50
-2016-02-09	Central	Jardine	Pencil	Unit	$	4.99
-2016-02-09	Central	Jardine	Pencil	Total	$	179.64
-2016-02-26	Central	Gill	Pen	Unit	$	19.99
-2016-02-26	Central	Gill	Pen	Total	$	539.73
-2016-03-15	West	Sorvino	Pencil	Unit	$	2.99
-2016-03-15	West	Sorvino	Pencil	Total	$	167.44
-2016-04-01	East	Jones	Binder	Unit	$	4.99
-2016-04-01	East	Jones	Binder	Total	$	299.40
-2016-04-18	Central	Andrews	Pencil	Unit	$	1.99
-2016-04-18	Central	Andrews	Pencil	Total	$	149.25
-2016-05-05	Central	Jardine	Pencil	Unit	AUD$	4.99
-2016-05-05	Central	Jardine	Pencil	Total	$	449.10
-2016-05-22	West	Thompson	Pencil	Unit	$	1.99
-2016-05-22	West	Thompson	Pencil	Total	$	63.68
-2016-06-08	East	Jones	Binder	Unit	$	8.99
-2016-06-08	East	Jones	Binder	Total	$	539.40
-2016-06-25	Central	Morgan	Pencil	Unit	$	4.99
-2016-06-25	Central	Morgan	Pencil	Total	$	449.10
-2016-07-12	East	Howard	Binder	Unit	$	1.99
-2016-07-12	East	Howard	Binder	Total	$	57.71
-2016-07-29	East	Parent	Binder	Unit	EUR	19.99
-2016-07-29	East	Parent	Binder	Total	$	1619.19
-2016-08-15	East	Jones	Pencil	Unit	$	4.99
-2016-08-15	East	Jones	Pencil	Total	$	174.65
-2016-09-01	Central	Smith	Desk	Unit	$	125.00
-2016-09-01	Central	Smith	Desk	Total	$	250.00
-2016-09-18	East	Jones	Pen Set	Unit	$	15.99
-2016-09-18	East	Jones	Pen Set	Total	$	255.84
-2016-10-05	Central	Morgan	Binder	Unit	$	8.99
-2016-10-05	Central	Morgan	Binder	Total	$	251.72
-2016-10-22	East	Jones	Pen	Unit	PES	8.99
-2016-10-22	East	Jones	Pen	Total	$	575.36
-2016-11-08	East	Parent	Pen	Unit	$	19.99
-2016-11-08	East	Parent	Pen	Total	$	299.85
-2016-11-25	Central	Kivell	Pen Set	Unit	$	4.99
-2016-11-25	Central	Kivell	Pen Set	Total	$	479.04
-2016-12-12	Central	Smith	Pencil	Unit	$	1.29
-2016-12-12	Central	Smith	Pencil	Total	$	86.43
-2016-12-29	East	Parent	Pen Set	Unit	$	15.99
-2016-12-29	East	Parent	Pen Set	Total	$	1183.26
-2017-01-15	Central	Gill	Binder	Unit	$	8.99
-2017-01-15	Central	Gill	Binder	Total	$	413.54
-2017-02-01	Central	Smith	Binder	Unit	$	15.00
-2017-02-01	Central	Smith	Binder	Total	$	1305.00
-2017-02-18	East	Jones	Binder	Unit	$	4.99
-2017-02-18	East	Jones	Binder	Total	$	19.96
-2017-03-07	West	Sorvino	Binder	Unit	$	19.99
-2017-03-07	West	Sorvino	Binder	Total	$	139.93
-2017-03-24	Central	Jardine	Pen Set	Unit	$	4.99
-2017-03-24	Central	Jardine	Pen Set	Total	$	249.50
-2017-04-10	Central	Andrews	Pencil	Unit	$	1.99
-2017-04-10	Central	Andrews	Pencil	Total	$	131.34
-2017-04-27	East	Howard	Pen	Unit	$	4.99
-2017-04-27	East	Howard	Pen	Total	$	479.04
-2017-05-14	Central	Gill	Pencil	Unit	$	1.29
-2017-05-14	Central	Gill	Pencil	Total	$	68.37
-2017-05-31	Central	Gill	Binder	Unit	$	8.99
-2017-05-31	Central	Gill	Binder	Total	$	719.20
-2017-06-17	Central	Kivell	Desk	Unit	$	125.00
-2017-06-17	Central	Kivell	Desk	Total	$	625.00
-2017-07-04	East	Jones	Pen Set	Unit	$	4.99
-2017-07-04	East	Jones	Pen Set	Total	$	309.38
-2017-07-21	Central	Morgan	Pen Set	Unit	$	12.49
-2017-07-21	Central	Morgan	Pen Set	Total	$	686.95
-2017-08-07	Central	Kivell	Pen Set	Unit	$	23.95
-2017-08-07	Central	Kivell	Pen Set	Total	$	1005.90
-2017-08-24	West	Sorvino	Desk	Unit	$	275.00
-2017-08-24	West	Sorvino	Desk	Total	$	825.00
-2017-09-10	Central	Gill	Pencil	Unit	$	1.29
-2017-09-10	Central	Gill	Pencil	Total	$	9.03
-2017-09-27	West	Sorvino	Pen	Unit	$	1.99
-2017-09-27	West	Sorvino	Pen	Total	$	151.24
-2017-10-14	West	Thompson	Binder	Unit	$	19.99
-2017-10-14	West	Thompson	Binder	Total	$	1139.43
-2017-10-31	Central	Andrews	Pencil	Unit	$	1.29
-2017-10-31	Central	Andrews	Pencil	Total	$	18.06
-2017-11-17	Central	Jardine	Binder	Unit	$	4.99
-2017-11-17	Central	Jardine	Binder	Total	$	54.89
-2017-12-04	Central	Jardine	Binder	Unit	$	19.99
-2017-12-04	Central	Jardine	Binder	Total	$	1879.06
-2017-12-21	Central	Andrews	Binder	Unit	$	4.99
-2017-12-21	Central	Andrews	Binder	Total	$	139.72
+Rep	Region	OrderDate	Item	Variable	Currency	Cost
+Jones	East	2016-01-06	Pencil	Unit	$	1.99
+Jones	East	2016-01-06	Pencil	Total	$	189.05
+Kivell	Central	2016-01-23	Binder	Unit	$	19.99
+Kivell	Central	2016-01-23	Binder	Total	$	999.50
+Jardine	Central	2016-02-09	Pencil	Unit	$	4.99
+Jardine	Central	2016-02-09	Pencil	Total	$	179.64
+Gill	Central	2016-02-26	Pen	Unit	$	19.99
+Gill	Central	2016-02-26	Pen	Total	$	539.73
+Sorvino	West	2016-03-15	Pencil	Unit	$	2.99
+Sorvino	West	2016-03-15	Pencil	Total	$	167.44
+Jones	East	2016-04-01	Binder	Unit	$	4.99
+Jones	East	2016-04-01	Binder	Total	$	299.40
+Andrews	Central	2016-04-18	Pencil	Unit	$	1.99
+Andrews	Central	2016-04-18	Pencil	Total	$	149.25
+Jardine	Central	2016-05-05	Pencil	Unit	AUD$	4.99
+Jardine	Central	2016-05-05	Pencil	Total	$	449.10
+Thompson	West	2016-05-22	Pencil	Unit	$	1.99
+Thompson	West	2016-05-22	Pencil	Total	$	63.68
+Jones	East	2016-06-08	Binder	Unit	$	8.99
+Jones	East	2016-06-08	Binder	Total	$	539.40
+Morgan	Central	2016-06-25	Pencil	Unit	$	4.99
+Morgan	Central	2016-06-25	Pencil	Total	$	449.10
+Howard	East	2016-07-12	Binder	Unit	$	1.99
+Howard	East	2016-07-12	Binder	Total	$	57.71
+Parent	East	2016-07-29	Binder	Unit	EUR	19.99
+Parent	East	2016-07-29	Binder	Total	$	1619.19
+Jones	East	2016-08-15	Pencil	Unit	$	4.99
+Jones	East	2016-08-15	Pencil	Total	$	174.65
+Smith	Central	2016-09-01	Desk	Unit	$	125.00
+Smith	Central	2016-09-01	Desk	Total	$	250.00
+Jones	East	2016-09-18	Pen Set	Unit	$	15.99
+Jones	East	2016-09-18	Pen Set	Total	$	255.84
+Morgan	Central	2016-10-05	Binder	Unit	$	8.99
+Morgan	Central	2016-10-05	Binder	Total	$	251.72
+Jones	East	2016-10-22	Pen	Unit	PES	8.99
+Jones	East	2016-10-22	Pen	Total	$	575.36
+Parent	East	2016-11-08	Pen	Unit	$	19.99
+Parent	East	2016-11-08	Pen	Total	$	299.85
+Kivell	Central	2016-11-25	Pen Set	Unit	$	4.99
+Kivell	Central	2016-11-25	Pen Set	Total	$	479.04
+Smith	Central	2016-12-12	Pencil	Unit	$	1.29
+Smith	Central	2016-12-12	Pencil	Total	$	86.43
+Parent	East	2016-12-29	Pen Set	Unit	$	15.99
+Parent	East	2016-12-29	Pen Set	Total	$	1183.26
+Gill	Central	2017-01-15	Binder	Unit	$	8.99
+Gill	Central	2017-01-15	Binder	Total	$	413.54
+Smith	Central	2017-02-01	Binder	Unit	$	15.00
+Smith	Central	2017-02-01	Binder	Total	$	1305.00
+Jones	East	2017-02-18	Binder	Unit	$	4.99
+Jones	East	2017-02-18	Binder	Total	$	19.96
+Sorvino	West	2017-03-07	Binder	Unit	$	19.99
+Sorvino	West	2017-03-07	Binder	Total	$	139.93
+Jardine	Central	2017-03-24	Pen Set	Unit	$	4.99
+Jardine	Central	2017-03-24	Pen Set	Total	$	249.50
+Andrews	Central	2017-04-10	Pencil	Unit	$	1.99
+Andrews	Central	2017-04-10	Pencil	Total	$	131.34
+Howard	East	2017-04-27	Pen	Unit	$	4.99
+Howard	East	2017-04-27	Pen	Total	$	479.04
+Gill	Central	2017-05-14	Pencil	Unit	$	1.29
+Gill	Central	2017-05-14	Pencil	Total	$	68.37
+Gill	Central	2017-05-31	Binder	Unit	$	8.99
+Gill	Central	2017-05-31	Binder	Total	$	719.20
+Kivell	Central	2017-06-17	Desk	Unit	$	125.00
+Kivell	Central	2017-06-17	Desk	Total	$	625.00
+Jones	East	2017-07-04	Pen Set	Unit	$	4.99
+Jones	East	2017-07-04	Pen Set	Total	$	309.38
+Morgan	Central	2017-07-21	Pen Set	Unit	$	12.49
+Morgan	Central	2017-07-21	Pen Set	Total	$	686.95
+Kivell	Central	2017-08-07	Pen Set	Unit	$	23.95
+Kivell	Central	2017-08-07	Pen Set	Total	$	1005.90
+Sorvino	West	2017-08-24	Desk	Unit	$	275.00
+Sorvino	West	2017-08-24	Desk	Total	$	825.00
+Gill	Central	2017-09-10	Pencil	Unit	$	1.29
+Gill	Central	2017-09-10	Pencil	Total	$	9.03
+Sorvino	West	2017-09-27	Pen	Unit	$	1.99
+Sorvino	West	2017-09-27	Pen	Total	$	151.24
+Thompson	West	2017-10-14	Binder	Unit	$	19.99
+Thompson	West	2017-10-14	Binder	Total	$	1139.43
+Andrews	Central	2017-10-31	Pencil	Unit	$	1.29
+Andrews	Central	2017-10-31	Pencil	Total	$	18.06
+Jardine	Central	2017-11-17	Binder	Unit	$	4.99
+Jardine	Central	2017-11-17	Binder	Total	$	54.89
+Jardine	Central	2017-12-04	Binder	Unit	$	19.99
+Jardine	Central	2017-12-04	Binder	Total	$	1879.06
+Andrews	Central	2017-12-21	Binder	Unit	$	4.99
+Andrews	Central	2017-12-21	Binder	Total	$	139.72
