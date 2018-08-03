@@ -44,6 +44,7 @@ class DescribeSheet(ColumnsSheet):
     @asyncthread
     def reload(self):
         super().reload()
+        self.rows = [c for c in self.rows if not c.hidden]
         self.describeData = { col: {} for col in self.rows }
 
         for srccol in Progress(self.rows):
