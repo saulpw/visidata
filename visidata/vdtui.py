@@ -949,8 +949,9 @@ class Colorizer:
 
 
 class BaseSheet:
-    precious = True
-    rowtype=''
+    _rowtype = object    # callable that returns new empty item
+    rowtype = 'objects'  # one word, plural, describing the items
+    precious = True      # False for a few discardable metasheets
 
     def __init__(self, name, **kwargs):
         self.name = name
@@ -1082,11 +1083,18 @@ class BaseSheet:
     def checkCursor(self):
         pass
 
+    def newRow(self):
+        return self._rowtype()
+
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
 
 
 class Sheet(BaseSheet):
+    'Base class for all tabular sheets.'
+    _rowtype = lambda: defaultdict(lambda: None)
+    rowtype = 'rows'
+
     columns = []  # list of Column
     colorizers = [ # list of Colorizer
         Colorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr),
@@ -1098,7 +1106,6 @@ class Sheet(BaseSheet):
         Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
     ]
     nKeys = 0  # columns[:nKeys] are key columns
-    rowtype = 'rows'
 
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
@@ -1168,9 +1175,6 @@ class Sheet(BaseSheet):
                 exceptionCaught(e)
 
         return attr
-
-    def newRow(self):
-        return list((None for c in self.columns))
 
     def addRow(self, row, index=None):
         if index is None:
