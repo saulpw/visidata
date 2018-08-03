@@ -18,6 +18,7 @@ from .search import *
 
 from .pyobj import *
 from .metasheets import *
+from .join import *
 from .describe import *
 from .freqtbl import *
 from .aggregators import *
