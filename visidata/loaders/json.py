@@ -48,7 +48,8 @@ class JSONSheet(Sheet):
                 try:
                     self.addRow(json.loads(L))
                 except Exception as e:
-                    pass  # self.addRow(e)
+                    e.stacktrace = stacktrace()
+                    self.addRow(TypedExceptionWrapper(json.loads, L, exception=e))
 
     def addRow(self, row, index=None):
         super().addRow(row, index=index)

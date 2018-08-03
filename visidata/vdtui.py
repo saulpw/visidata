@@ -1104,6 +1104,7 @@ class Sheet(BaseSheet):
         Colorizer('col', 7, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
         Colorizer('cell', 2, lambda s,c,r,v: options.color_default),
         Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
+        Colorizer('row', 4, lambda s,c,r,v: 'bold red' if isinstance(r, TypedExceptionWrapper) else None),
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
