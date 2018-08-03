@@ -30,7 +30,7 @@ class SheetJoin(Sheet):
         # first columns are the key columns from the first sheet, using its row (0)
         self.columns = []
         for i, c in enumerate(sheets[0].keyCols):
-            self.addColumn(SubrowColumn(c.name, ColumnItem(c.name, i), 0))
+            self.addColumn(SubrowColumn(c.name, ColumnItem(c.name, i, type=c.type, width=c.width), 0))
         self.setKeys(self.columns)
 
         rowsBySheetKey = {}
