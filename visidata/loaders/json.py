@@ -45,16 +45,20 @@ class JSONSheet(Sheet):
         with self.source.open_text() as fp:
             self.rows = []
             for L in fp:
-                self.addRow(json.loads(L))
+                try:
+                    self.addRow(json.loads(L))
+                except Exception as e:
+                    pass  # self.addRow(e)
 
     def addRow(self, row, index=None):
         super().addRow(row, index=index)
-        for k in row:
-            if k not in self.colnames:
-                c = ColumnItem(k, type=deduceType(row[k]))
-                self.colnames[k] = c
-                self.addColumn(c)
-        return row
+        if isinstance(row, dict):
+            for k in row:
+                if k not in self.colnames:
+                    c = ColumnItem(k, type=deduceType(row[k]))
+                    self.colnames[k] = c
+                    self.addColumn(c)
+            return row
 
     def newRow(self):
         return {}
