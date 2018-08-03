@@ -1087,7 +1087,7 @@ class BaseSheet:
         pass
 
     def newRow(self):
-        return self._rowtype()
+        return type(self)._rowtype()
 
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
