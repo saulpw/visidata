@@ -297,8 +297,8 @@ theme('color_hidden_col', '8', 'color of key columns')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
 
 theme('color_status', 'bold', 'status line color')
-theme('color_error', 'bold red', 'error message color')
-theme('color_warn', 'bold yellow', 'warning message color')
+theme('color_error', 'red', 'error message color')
+theme('color_warn', 'yellow', 'warning message color')
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 
 theme('disp_pending', '', 'string to display in pending cells')
@@ -309,8 +309,6 @@ theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
 theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
-theme('color_format_exc', '48 green', 'color of formatting exception note')
-theme('color_getter_exc', 'red ', 'color of computation exception note')
 theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
 ENTER='^J'
@@ -723,8 +721,8 @@ class VisiData:
     def drawLeftStatus(self, scr, vs):
         'Draw left side of status bar.'
         attr = colors[options.color_status]
-        error_attr = colors[options.color_error]
-        warn_attr = colors[options.color_warn]
+        error_attr, _ = colors.update(attr, 0, options.color_error, 1)
+        warn_attr, _ = colors.update(attr, 0, options.color_warn, 1)
         sep = options.disp_status_sep
 
         try:
@@ -736,10 +734,10 @@ class VisiData:
             y = self.windowHeight-1
             clipdraw(scr, y, 0, lstatus, attr)
             x = len(lstatus)
-            for pri, n, msg in sorted(self.statuses, key=lambda y: -y[0]):
+            for i, (pri, n, msg) in enumerate(sorted(self.statuses, key=lambda y: -y[0])):
                 if x > self.windowWidth:
                     break
-                if True:  # any messages already:
+                if i > 0:  # any messages already:
                     clipdraw(scr, y, x, sep, attr, self.windowWidth)
                     x += len(sep)
 
@@ -1109,7 +1107,7 @@ class Sheet(BaseSheet):
         Colorizer('col', 7, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
         Colorizer('cell', 2, lambda s,c,r,v: options.color_default),
         Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
-        Colorizer('row', 4, lambda s,c,r,v: 'bold red' if isinstance(r, TypedExceptionWrapper) else None),
+        Colorizer('row', 4, lambda s,c,r,v: options.color_error if isinstance(r, (Exception, TypedExceptionWrapper)) else None),
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
@@ -1992,7 +1990,7 @@ class Column:
                 return DisplayWrapper(cellval.val, error=exc.stacktrace,
                                         display=dispval,
                                         note=options.note_getter_exc,
-                                        notecolor=options.color_getter_exc)
+                                        notecolor=options.color_error)
             elif typedval.val is None:
                 return DisplayWrapper(None, display='',  # force empty display for None
                                             note=options.disp_note_none,
@@ -2000,7 +1998,7 @@ class Column:
             else:
                 return DisplayWrapper(typedval.val, display=str(typedval.val),
                                             note=options.note_format_exc,
-                                            notecolor=options.color_format_exc)
+                                            notecolor=options.color_warn)
         elif isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
                                 display=options.disp_pending,
@@ -2025,7 +2023,7 @@ class Column:
             dw.error = stacktrace()
             dw.display = str(cellval)
             dw.note = options.note_format_exc
-            dw.notecolor = options.color_format_exc
+            dw.notecolor = options.color_warn
 
         return dw
 
