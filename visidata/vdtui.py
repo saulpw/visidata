@@ -297,6 +297,8 @@ theme('color_hidden_col', '8', 'color of key columns')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
 
 theme('color_status', 'bold', 'status line color')
+theme('color_error', 'bold red', 'error message color')
+theme('color_warn', 'bold yellow', 'warning message color')
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 
 theme('disp_pending', '', 'string to display in pending cells')
@@ -720,11 +722,35 @@ class VisiData:
 
     def drawLeftStatus(self, scr, vs):
         'Draw left side of status bar.'
+        attr = colors[options.color_status]
+        error_attr = colors[options.color_error]
+        warn_attr = colors[options.color_warn]
+        sep = options.disp_status_sep
+
         try:
-            lstatus = self.leftStatus(vs)
-            attr = colors[options.color_status]
-            clipdraw(scr, self.windowHeight-1, 0, lstatus, attr, self.windowWidth)
-            return lstatus
+            lstatus = vs.leftStatus()
+            maxwidth = options.disp_lstatus_max
+            if maxwidth > 0:
+                lstatus = middleTruncate(lstatus, maxwidth//2)
+
+            y = self.windowHeight-1
+            clipdraw(scr, y, 0, lstatus, attr)
+            x = len(lstatus)
+            for pri, n, msg in sorted(self.statuses, key=lambda y: -y[0]):
+                if x > self.windowWidth:
+                    break
+                if True:  # any messages already:
+                    clipdraw(scr, y, x, sep, attr, self.windowWidth)
+                    x += len(sep)
+
+                if n != 1:
+                    msg = '[%sx] %s' % (n, msg)
+
+                if pri == 2: msgattr = error_attr
+                elif pri == 1: msgattr = warn_attr
+                else: msgattr = attr
+                clipdraw(scr, y, x, msg, msgattr, self.windowWidth)
+                x += len(msg)
         except Exception as e:
             self.exceptionCaught(e)
 
@@ -746,27 +772,6 @@ class VisiData:
                     self.exceptionCaught(e)
 
         curses.doupdate()
-        return ret
-
-    def leftStatus(self, vs):
-        'Compose left side of status bar and add status messages.'
-        ret = vs.leftStatus()
-        maxwidth = options.disp_lstatus_max
-        if maxwidth > 0:
-            ret = middleTruncate(ret, maxwidth//2)
-
-        sep = options.disp_status_sep
-        msgs = ''
-        for _, n, x in sorted(self.statuses, key=lambda y: -y[0]):
-            if msgs:
-                msgs += sep
-
-            if n == 1:
-                msgs += '%s' % x
-            else:
-                msgs += '[%sx] %s' % (n, x)
-
-        ret += msgs
         return ret
 
     def rightStatus(self, sheet):
