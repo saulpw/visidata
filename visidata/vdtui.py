@@ -1790,7 +1790,11 @@ def isNullFunc():
 class TypedWrapper:
     def __init__(self, func, *args):
         self.type = func
+        self.args = args
         self.val = args[0]
+
+    def __str__(self):
+        return '%s(%s)' % (self.type.__name__, ','.join(str(x) for x in self.args))
 
     def __lt__(self, x):
         'maintain sortability; wrapped objects are always least'
@@ -1809,6 +1813,9 @@ class TypedExceptionWrapper(TypedWrapper):
         self.exception = exception
         self.stacktrace = stacktrace()
         self.forwarded = False
+
+    def __str__(self):
+        return '%s(%s)' % (type(self.exception).__name__, str(self.exception))
 
     def __hash__(self):
         return hash((str(self.exception), ''.join(self.stacktrace)))
@@ -2034,7 +2041,17 @@ class Column:
         'Set our column value for given list of rows to `value`.'
         for r, v in zip(rows, itertools.cycle(values)):
             self.setValue(r, v)
-        return status('set %d cells to %d values' % (len(rows), len(values)))
+        if len(rows) == 1:
+            k = ','.join(map(str, self.sheet.rowkey(rows[0])))
+            msg = 'set %s:%s' % (k, self.name)
+        else:
+            msg = 'set %d cells' % len(rows)
+
+        if len(values) == 1:
+            msg += ' to %s' % values[0]
+        else:
+            msg += ' to %d values' % len(values)
+        return status(msg)
 
     def setValuesTyped(self, rows, *values):
         'Set values on this column for rows, coerced to the column type.  will stop on first exception in type().'
