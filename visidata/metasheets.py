@@ -40,7 +40,8 @@ class ColumnsSheet(Sheet):
             ColumnEnum('type', getGlobals(), default=anytype),
             ColumnAttr('fmtstr'),
             ValueColumn('value', width=options.default_width),
-            ColumnAttr('expr'),
+            Column('expr', getter=lambda col,row: getattr(row, 'expr', None),
+                           setter=lambda col,row,val: setattr(row, 'expr', val)),
     ]
     nKeys = 2
     colorizers = Sheet.colorizers + [
