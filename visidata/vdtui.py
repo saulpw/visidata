@@ -1818,14 +1818,14 @@ class TypedExceptionWrapper(TypedWrapper):
         self.forwarded = False
 
     def __str__(self):
-        return '%s(%s)' % (type(self.exception).__name__, str(self.exception))
+        return '%s' % type(self.exception).__name__
 
     def __hash__(self):
-        return hash((str(self.exception), ''.join(self.stacktrace)))
+        return hash((type(self.exception), ''.join(self.stacktrace[:-1])))
 
     def __eq__(self, x):
         if isinstance(x, TypedExceptionWrapper):
-            return str(self.exception) == str(x.exception) and self.stacktrace == x.stacktrace
+            return type(self.exception) is type(x.exception) and self.stacktrace[:-1] == x.stacktrace[:-1]
 
 def wrmap(func, iterable, *args):
     'Same as map(func, iterable, *args), but ignoring exceptions.'
@@ -1996,7 +1996,7 @@ class Column:
             if isinstance(cellval, TypedExceptionWrapper):
                 exc = cellval.exception
                 if cellval.forwarded:
-                    dispval = traceback.format_exception_only(type(exc), exc)[-1].strip()
+                    dispval = str(cellval)  # traceback.format_exception_only(type(exc), exc)[-1].strip()
                 else:
                     dispval = options.disp_error_val
                 return DisplayWrapper(cellval.val, error=exc.stacktrace,
