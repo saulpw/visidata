@@ -265,10 +265,12 @@ PcapSheet.addCommand('2', 'l2-packet', 'vd.push(IPSheet("L2packets", source=shee
 PcapSheet.addCommand('3', 'l3-packet', 'vd.push(TCPSheet("L3packets", source=sheet))')
 
 
-flowtype = collections.namedtuple('flow', 'transport src sport dst dport packets'.split())
+flowtype = collections.namedtuple('flow', 'packets transport src sport dst dport'.split())
 
 class PcapFlowsSheet(Sheet):
     rowtype = 'netflows'  # rowdef: flowtype
+    _rowtype = flowtype
+
     columns = [
         ColumnAttr('transport'),
         Column('src', getter=lambda col,row: row.src),
@@ -293,7 +295,7 @@ class PcapFlowsSheet(Sheet):
                 flowpkts = self.flows.get(tup)
                 if flowpkts is None:
                     flowpkts = self.flows[tup] = []
-                    self.addRow(flowtype(*tup, flowpkts))
+                    self.addRow(flowtype(flowpkts, *tup))
                 flowpkts.append(pkt)
 
                 if not getattr(pkt.ip, 'tcp', None):

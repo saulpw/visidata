@@ -48,7 +48,7 @@ class date(datetime.datetime):
             raise Exception('invalid type for date')
 
         t = r.timetuple()
-        return super().__new__(cls, *t[:6], r.microsecond, tzinfo=r.tzinfo)
+        return super().__new__(cls, *t[:6], microsecond=r.microsecond, tzinfo=r.tzinfo)
 
     def __str__(self):
         return self.strftime(options.disp_date_fmt)
