@@ -1047,7 +1047,7 @@ class BaseSheet:
             self.vd.exceptionCaught(e)
 
         try:
-            sheet.checkCursor()
+            self.checkCursor()
         except Exception as e:
             exceptionCaught(e)
 
