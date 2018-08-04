@@ -326,7 +326,9 @@ def loadMacros():
     macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or error('error loading macros')
 
     for ks, fn in macrosheet.rows:
-        vd().macros[ks] = loadInternalSheet(CommandLog, Path(fn))
+        vs = loadInternalSheet(CommandLog, Path(fn))
+        bindkeys.set(ks, vs.name, 'override')
+        commands.set(vs.name, vs, 'override')
 
     return macrosheet
 

@@ -542,7 +542,6 @@ class VisiData:
         self.scr = None  # curses scr
         self.hooks = collections.defaultdict(list)  # [hookname] -> list(hooks)
         self.threads = [] # all long-running threads, including main and finished
-        self.macros = {}  # [keystrokes] -> CommandLog
         self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
         self.addHook('rstatus', self.rightStatus)
