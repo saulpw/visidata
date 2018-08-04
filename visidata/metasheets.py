@@ -1,7 +1,8 @@
 from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, error, anytype, ENTER, asyncthread, status, Progress
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
-from visidata import getGlobals, TsvSheet, Path, bindkeys, commands
+from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus
 
+globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
 globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
 globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
@@ -18,6 +19,24 @@ def getOptionsSheet(sheet):
         sheet.optionsSheet = OptionsSheet(sheet.name+"_options", source=sheet)
 
     return sheet.optionsSheet
+
+
+class StatusSheet(Sheet):
+    precious = False
+    rowtype = 'statuses'
+    columns = [
+        ColumnItem('frequency', 1, type=int, width=0),
+        Column('priority', type=int, width=0, getter=lambda col,row: row[0][0]),
+        Column('args', width=0, getter=lambda col,row: row[0][1]),
+        Column('message', getter=lambda col,row: composeStatus(row[0][1], row[1]))
+    ]
+    colorizers = [
+        Colorizer('row', 1, lambda s,c,r,v: options.color_error if r[0][0] == 2 else None),
+        Colorizer('row', 1, lambda s,c,r,v: options.color_warning if r[0][0] == 1 else None),
+    ]
+
+    def reload(self):
+        self.rows = list(reversed(vd.statusHistory.items()))
 
 
 class ColumnsSheet(Sheet):

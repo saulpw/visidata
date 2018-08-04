@@ -318,8 +318,6 @@ globalCommand('q', 'quit-sheet',  'vd.sheets[1:] or options.quitguard and confir
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
 globalCommand('^L', 'redraw', 'vd.scr.clear()')
-globalCommand('^P', 'statuses', 'vd.push(TextSheet("statusHistory", vd.statusHistory, rowtype="statuses", precious=False))')
-
 globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
 globalCommand('^Z', 'suspend', 'suspend()')
@@ -430,6 +428,12 @@ def middleTruncate(s, w):
         return s
     return s[:w] + options.disp_truncator + s[-w:]
 
+def composeStatus(msgparts, n):
+    msg = '; '.join(msgparts)
+    if n > 1:
+        msg = '[%sx] %s' % (n, msg)
+    return msg
+
 def exceptionCaught(e, **kwargs):
     return vd().exceptionCaught(e, **kwargs)
 
@@ -532,9 +536,9 @@ class VisiData:
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
         self.allSheets = weakref.WeakKeyDictionary()  # [BaseSheet] -> sheetname (all non-precious sheets ever pushed)
-        self.statuses = []  # (priority, num_repeats, statuses) shown until next action
+        self.statuses = collections.OrderedDict()  # (priority, statusmsg) -> num_repeats; shown until next action
+        self.statusHistory = collections.OrderedDict()  # same as statuses but for all status messages ever
         self.lastErrors = []
-        self.statusHistory = []
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
         self.inInput = False
@@ -564,15 +568,11 @@ class VisiData:
 
     def status(self, *args, priority=0):
         'Add status message to be shown until next action.'
-        s = '; '.join(str(x) for x in args)
-        for i, (pri, n, msg) in enumerate(self.statuses):
-            if s == msg:
-                self.statuses[i][1] += 1
-                break
-        else:
-            self.statuses.append([priority, 1, s])
-        self.statusHistory.insert(0, args[0] if len(args) == 1 else args)
-        return s
+        k = (priority, args)
+        self.statuses[k] = self.statuses.get(k, 0) + 1
+        self.statusHistory[k] = self.statusHistory.get(k, 0) + 1
+        self.statusHistory.move_to_end(k)
+        return True
 
     def addHook(self, hookname, hookfunc):
         'Add hookfunc by hookname, to be called by corresponding `callHook`.'
@@ -736,15 +736,15 @@ class VisiData:
             y = self.windowHeight-1
             clipdraw(scr, y, 0, lstatus, attr)
             x = len(lstatus)
-            for i, (pri, n, msg) in enumerate(sorted(self.statuses, key=lambda y: -y[0])):
+            one = False
+            for (pri, msgparts), n in sorted(self.statuses.items(), key=lambda k: -k[0][0]):
                 if x > self.windowWidth:
                     break
-                if i > 0:  # any messages already:
+                if one:  # any messages already:
                     clipdraw(scr, y, x, sep, attr, self.windowWidth)
                     x += len(sep)
-
-                if n != 1:
-                    msg = '[%sx] %s' % (n, msg)
+                one = True
+                msg = composeStatus(msgparts, n)
 
                 if pri == 2: msgattr = error_attr
                 elif pri == 1: msgattr = warn_attr
@@ -822,7 +822,7 @@ class VisiData:
                 if not self.prefixWaiting:
                     self.keystrokes = ''
 
-                self.statuses = []
+                self.statuses.clear()
 
                 if keystroke == 'KEY_MOUSE':
                     try:

@@ -254,7 +254,7 @@ class CommandLog(TsvSheet):
                     status('replay canceled')
                     return
 
-                vd().statuses = []
+                vd().statuses.clear()
                 try:
                     if self.replayOne(self.cursorRow):
                         self.cancel()
