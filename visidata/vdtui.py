@@ -864,10 +864,6 @@ class VisiData:
 
             self.checkForFinishedThreads()
             self.callHook('predraw')
-            try:
-                sheet.checkCursor()
-            except Exception as e:
-                exceptionCaught(e)
 
     def replace(self, vs):
         'Replace top sheet with the given sheet `vs`.'
@@ -1049,6 +1045,11 @@ class BaseSheet:
             self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
         except Exception:
             self.vd.exceptionCaught(e)
+
+        try:
+            sheet.checkCursor()
+        except Exception as e:
+            exceptionCaught(e)
 
         self.vd.refresh()
         return escaped
