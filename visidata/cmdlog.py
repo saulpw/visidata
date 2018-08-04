@@ -25,7 +25,7 @@ globalCommand('^V', 'check-version', 'status(__version_info__); checkVersion(inp
 nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g? g_ _ z_'.split()
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c Q'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
-nonLogKeys += '^Z ^A ^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) ^H KEY_BACKSPACE'.split()
+nonLogKeys += '^^ ^Z ^A ^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) ^H KEY_BACKSPACE'.split()
 nonLogKeys += [' ']
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
