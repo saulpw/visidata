@@ -66,7 +66,7 @@ class Host:
         if not machosts:
             machosts = cls.hosts[mac] = {}
 
-        ipraw = getattrdeep(pkt, 'ip', field)
+        ipraw = getattrdeep(pkt, 'ip.'+field)
         if ipraw is not None:
             ip = ipaddress.ip_address(ipraw)
             if ip not in machosts:
@@ -147,7 +147,8 @@ def get_transport(pkt):
     return ret
 
 def get_port(pkt, field='sport'):
-    return getattrdeep(pkt, 'ip', 'tcp', field) or getattrdeep(pkt, 'ip', 'udp', field)
+    return getattrdeep(pkt, 'ip.tcp.'+field) or getattrdeep(pkt, 'ip.udp.'+field)
+
 
 class EtherSheet(Sheet):
     'Layer 2 (ethernet) packets'

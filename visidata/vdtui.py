@@ -2091,30 +2091,33 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
-def getattrdeep(obj, *attrs, default=None):
-    if len(attrs) == 1:
-        attrs = attrs[0].split('.')
+def getattrdeep(obj, attr, default=None):
+    'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
+    attrs = attr.split('.')
 
-    for a in attrs:
-        obj = getattr(obj, a, default)
-    return obj
+    for a in attrs[:-1]:
+        obj = getattr(obj, a, None)
+        if obj is None:
+            return default
+    return getattr(obj, attrs[-1], default)
 
-def setattrdeep(obj, *attrs, val):
-    if len(attrs) == 1:
-        attrs = attrs[0].split('.')
+def setattrdeep(obj, attr, val):
+    'Set dotted attr (like "a.b.c") on obj to val.'
+    attrs = attr.split('.')
 
     for a in attrs[:-1]:
         obj = getattr(obj, a)
     setattr(obj, attrs[-1], val)
 
-def ColumnAttr(name, *attrs, **kwargs):
+
+def ColumnAttr(name, attr=None, **kwargs):
     'Column using getattr/setattr of given attr.'
-    if not attrs:
-        attrs = [name]
+    if not attr:
+        attr = name
 
     return Column(name,
-                  getter=lambda col,row,attrs=attrs: getattrdeep(row, *attrs, default=None),
-                  setter=lambda col,row,val,attrs=attrs: setattrdeep(row, *attrs, val),
+                  getter=lambda col,row,attr=attr: getattrdeep(row, attr, None),
+                  setter=lambda col,row,val,attr=attr: setattrdeep(row, attr, val),
                   **kwargs)
 
 def ColumnItem(name, key=None, **kwargs):
