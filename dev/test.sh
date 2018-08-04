@@ -23,4 +23,5 @@ for i in $TESTS ; do
     fi
 done
 echo '=== git diffs ==='
-git --no-pager diff --exit-code --numstat tests/
+git --no-pager diff --numstat tests/
+git --no-pager diff --exit-code tests/
