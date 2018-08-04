@@ -62,6 +62,9 @@ from .loaders.xml import *
 from .loaders.yaml import *
 from .loaders.pandas import *
 
+from .colors import *   # ColorsSheet
+
 from math import *
+
 
 addGlobals(globals())

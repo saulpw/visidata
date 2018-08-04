@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
-from visidata import *
+import curses
+from visidata import globalCommand, colors, Sheet, Column, Colorizer
+
+
+globalCommand(None, 'colors', 'vd.push(ColorSheet("vdcolors"))')
+
 
 class ColorSheet(Sheet):
-    rowtype = 'colors'
+    rowtype = 'colors'  # rowdef: color number as assigned in the colors object
     columns = [
         Column('color', type=int),
         Column('R', getter=lambda col,row: curses.color_content(curses.pair_number(colors[row])-1)[0]),
@@ -15,7 +20,4 @@ class ColorSheet(Sheet):
     ]
 
     def reload(self):
-        self.rows = colors.keys()
-        self.exec_keystrokes('sort-curcol-asc')  # sort by the color column
-
-run(ColorSheet('vdcolors'))
+        self.rows = sorted(colors.keys())
