@@ -1,22 +1,5 @@
 # Roadmap
 
-## v1.3 (2018-Q3)
-
-- z/ search by python expr
-- version checking in cmdlog
-- the great command longnaming
-   - solidify command names separate from menu hierarchy
-- need way to turn convert date with fmtstr to just str type column
-   - freeze column should freeze typed value
-
-### bugs
-
-- hidden columns should stay hidden on join
-- min width of key columns should be 1 or 2 (avoid hidden keycols, they act weird)
-- single status longer than window causes error (long fn)
-- 'za' created columns don't work with Freq
-- join sheet doesn't work with freq?
-
 ## Future
 
 ### plugin api/package manager
@@ -27,7 +10,6 @@
 ### stable apis
 
 - refactor Canvas into reusable component
-- longterm longnames
 
 ### productization
 
@@ -44,12 +26,8 @@
 - 'v' hide cols which have errors on cursor row
 - modified indicator on status bar, also enables quitguard
 - ColumnsSheet should show subcolumns and their parent column (for expand/contract)
-   - also need better way to unhide columns?
-   - set width w 'ge' should work
-- sheet join with only *visible* keycols
 - fill on join nulls should cause error
-- 'zd' move contents to clipboard
-- tab completion of macros in ^A, requires command overhaul
+- tab completion of macros in exec-longname, requires command overhaul
 - csv with NUL bytes should parse.  safe_mode? (slow but handles these kinds of things)
 
 
@@ -67,7 +45,7 @@
     - replay all but last command
 
 - skip to next error
-+ weakref for all Sheets, viewable with gS (partial guard against losing intermediate steps)
++ graveyard sheet
    - start/drop datetimes
    - number of derivative sheets (two columns, for immediate children and to any depth)
    - number of commands executed on that sheet (as a list so they can be viewed separately)
@@ -82,7 +60,6 @@
 #### III. Loaders and Savers
 
 - parquet
-+ .xml
 - .mdb, .accdb
 - google sheets
 - save to .py: emit code to get current cell/row/sheet from source data
@@ -95,7 +72,6 @@
 #### IV. other commands and features
 
 - numeric binning for freq column and pivot table
-- quintile/decile/percentile aggregators
 - rowmax aggregator ( rowmax(field) gets whole row)
 - add row number in hidden column on data sheets so that original (load) order can be restored
 - handle timezone for datetime

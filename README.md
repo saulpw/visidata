@@ -16,17 +16,19 @@ A terminal interface for exploring and arranging tabular data.
 
 Each package contains the full loader suite but differs in which loader dependencies will get installed by default.
 
-The base VisiData package concerns loaders whose dependencies are covered by the Python3 standard library. Currently these include the loaders for tsv, csv, fixed width text, json, and sqlite. Additionally, .zip, .gz, .bz2, and .xz files can be decompressed on the fly.
+The base VisiData package concerns loaders whose dependencies are covered by the Python3 standard library.
+
+Base loaders: tsv, csv, json, sqlite, and fixed width text.
 
 |Platform           |Package Manager                        | Command                                       | Out-of-box Loaders   |
 |-------------------|----------------------------------------|----------------------------------------------|----------------------|
 |Python3.4+         |[pip3](https://visidata.org/install#pip3) | `pip3 install visidata`                    | Base                 |
 |Python3.4+         |[conda](https://visidata.org/install#conda) | `conda install --channel conda-forge visidata` | Base, http, html, xls(x) |
 |MacOS              |[Homebrew](https://visidata.org/install#brew) | `brew install saulpw/vd/visidata`            | Base, http, html, xls(x) |
-|Linux (Debian/Ubuntu) |[apt](https://visidata.org/install#apt) | [click me](https://visidata.org/install#apt)                      | Base, http, html, xls(x) |
-|Linux (Debian/Ubuntu) |[dpkg](https://visidata.org/install#dpkg) | [click me](https://visidata.org/install#dpkg)                | Base, http, html, xls(x) |
-|Windows               |[WSL](https://visidata.org/install#wsl) | Windows is not yet directly supported (use WSL) | N/A |
-|Python3.4+            |[github](https://visidata.org/install#git) | `pip3 install git+https://github.com/saulpw/visidata.git@develop` | Base |
+|Linux (Debian/Ubuntu) |[apt](https://visidata.org/install#apt) | [full instructions](https://visidata.org/install#apt)                      | Base, http, html, xls(x) |
+|Linux (Debian/Ubuntu) |[dpkg](https://visidata.org/install#dpkg) | [full instructions](https://visidata.org/install#dpkg)                | Base, http, html, xls(x) |
+|Windows               |[WSL](https://visidata.org/install#wsl) | Windows is not directly supported (use WSL) | N/A |
+|Python3.4+            |[github](https://visidata.org/install#git) | `pip3 install git+https://github.com/saulpw/visidata.git@stable` | Base |
 
 Please see [/install](https://visidata.org/install) for detailed instructions, additional information, and troubleshooting.
 
@@ -43,7 +45,7 @@ Use `-f <filetype>` to force a particular filetype.
 ### Documentation
 
 * [VisiData v1.2 Getting Started Tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
-* Quick reference `Ctrl+H` within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
+* Quick reference: `Ctrl+H` within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
 * [/docs](http://visidata.org/docs) contains a collection of howto recipes.
 
 ### Help and Support
@@ -69,6 +71,8 @@ Other VisiData components, including the main `vd` application, addons, loaders,
 
 ## Credits
 
-VisiData was created and developed by Saul Pwanson `<vd@saul.pw>`.
+VisiData is conceived and developed by Saul Pwanson `<vd@saul.pw>`.
 
-Thanks to all the contributors, and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.
+Anja Kefala `<anja.kefala@gmail.com>` maintains the documentation and packages for all platforms.
+
+Many thanks to numerous other contributors, and to those wonderful users who provide feedback, for helping to make VisiData the awesome tool that it is.
