@@ -105,6 +105,7 @@ class HelpSheet(Sheet):
         ColumnAttr('logged', 'replayable', width=0),
     ]
     nKeys = 2
+    @asyncthread
     def reload(self):
         from pkg_resources import resource_filename
         cmdlist = TsvSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
