@@ -363,7 +363,10 @@ def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
     return t
 
 # typemap [typetype] -> _vdtype
-typemap = collections.defaultdict(lambda: _vdtype(anytype, '', '', _defaultFormatter))
+typemap = {}
+
+def getType(typetype):
+    return typemap.get(typetype) or _vdtype(anytype, '', '', _defaultFormatter)
 
 def typeIcon(typetype):
     t = typemap.get(typetype, None)
@@ -1605,7 +1608,7 @@ class Sheet(BaseSheet):
         x, colwidth = self.visibleColLayout[vcolidx]
 
         # ANameTC
-        T = typemap[col.type].icon
+        T = getType(col.type).icon
         if T is None:  # still allow icon to be explicitly non-displayed ''
             T = '?'
         N = ' ' + col.name  # save room at front for LeftMore
@@ -1892,7 +1895,7 @@ class Column:
 
     @property
     def fmtstr(self):
-        return self._fmtstr or typemap[self.type].fmtstr
+        return self._fmtstr or getType(self.type).fmtstr
 
     @fmtstr.setter
     def fmtstr(self, v):
@@ -1910,7 +1913,7 @@ class Column:
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
-        return typemap[self.type].formatter(self.fmtstr, typedval)
+        return getType(self.type).formatter(self.fmtstr, typedval)
 
     def hide(self, hide=True):
         if hide:
@@ -2008,7 +2011,7 @@ class Column:
         dw = DisplayWrapper(cellval)
 
         try:
-            dw.display = self.format(typedval)
+            dw.display = self.format(typedval) or ''
 
             if width and isNumeric(self):
                 dw.display = dw.display.rjust(width-1)
@@ -2021,7 +2024,10 @@ class Column:
 
         except Exception as e:  # formatting failure
             dw.error = stacktrace()
-            dw.display = str(cellval)
+            try:
+                dw.display = str(cellval)
+            except Exception as e:
+                dw.display = str(e)
             dw.note = options.note_format_exc
             dw.notecolor = options.color_warn
 
@@ -2085,12 +2091,18 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
-def getattrdeep(obj, attrs, default):
+def getattrdeep(obj, *attrs, default=None):
+    if len(attrs) == 1:
+        attrs = attrs[0].split('.')
+
     for a in attrs:
-        obj = getattr(obj, a)
+        obj = getattr(obj, a, default)
     return obj
 
-def setattrdeep(obj, attrs, val):
+def setattrdeep(obj, *attrs, val):
+    if len(attrs) == 1:
+        attrs = attrs[0].split('.')
+
     for a in attrs[:-1]:
         obj = getattr(obj, a)
     setattr(obj, attrs[-1], val)
@@ -2099,12 +2111,10 @@ def ColumnAttr(name, *attrs, **kwargs):
     'Column using getattr/setattr of given attr.'
     if not attrs:
         attrs = [name]
-    if len(attrs) == 1:
-        attrs = attrs[0].split('.')
 
     return Column(name,
-                  getter=lambda col,row,attrs=attrs: getattrdeep(row, attrs, None),
-                  setter=lambda col,row,val,attrs=attrs: setattrdeep(row, attrs, val),
+                  getter=lambda col,row,attrs=attrs: getattrdeep(row, *attrs, default=None),
+                  setter=lambda col,row,val,attrs=attrs: setattrdeep(row, *attrs, val),
                   **kwargs)
 
 def ColumnItem(name, key=None, **kwargs):
@@ -2146,6 +2156,9 @@ class DisplayWrapper:
     def __init__(self, value, **kwargs):
         self.value = value
         self.__dict__.update(kwargs)
+
+    def __bool__(self):
+        return self.value
 
 
 class ColumnEnum(Column):
