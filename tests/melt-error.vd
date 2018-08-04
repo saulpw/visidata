@@ -7,4 +7,5 @@ test	key1		key-col		!
 test			melt		M	
 	override	error_is_null	set-option	True		
 test_melted			reload-sheet		^R	
-test_melted	key1		sort-asc		[	
+test_melted	Variable		key-col		!	
+test_melted	key1		sort-keys-asc		g[	
