@@ -18,7 +18,7 @@ globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or error("no repla
 
 globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
 
-globalCommand(None, 'status', 'status(input("status: ", display=False))')
+globalCommand(None, 'status', 'status(input("status: "))')
 globalCommand('^V', 'check-version', 'status(__version_info__); checkVersion(input("require version: ", value=__version_info__))')
 
 # not necessary to log movements and scrollers
