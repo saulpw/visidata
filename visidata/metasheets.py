@@ -37,13 +37,13 @@ class ColumnsSheet(Sheet):
             ColumnEnum('type', getGlobals(), default=anytype),
             ColumnAttr('fmtstr'),
             ValueColumn('value', width=options.default_width),
-            Column('expr', getter=lambda col,row: getattr(row, 'expr', None),
+            Column('expr', getter=lambda col,row: getattr(row, 'expr', ''),
                            setter=lambda col,row,val: setattr(row, 'expr', val)),
     ]
     nKeys = 2
     colorizers = Sheet.colorizers + [
             Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r.keycol else None),
-            Colorizer('row', 6, lambda self,c,r,v: options.color_hidden_col if r.hidden else None),
+            Colorizer('row', 8, lambda self,c,r,v: options.color_hidden_col if r.hidden else None),
     ]
     def reload(self):
         if len(self.source) == 1:
