@@ -429,7 +429,7 @@ def middleTruncate(s, w):
     return s[:w] + options.disp_truncator + s[-w:]
 
 def composeStatus(msgparts, n):
-    msg = '; '.join(msgparts)
+    msg = '; '.join(wrmap(str, msgparts))
     if n > 1:
         msg = '[%sx] %s' % (n, msg)
     return msg
@@ -1824,6 +1824,13 @@ class TypedExceptionWrapper(TypedWrapper):
         if isinstance(x, TypedExceptionWrapper):
             return str(self.exception) == str(x.exception) and self.stacktrace == x.stacktrace
 
+def wrmap(func, iterable, *args):
+    'Same as map(func, iterable, *args), but ignoring exceptions.'
+    for it in iterable:
+        try:
+            yield func(it, *args)
+        except Exception as e:
+            pass
 
 def wrapply(func, *args, **kwargs):
     'Like apply(), but which wraps Exceptions and passes through Wrappers (if first arg)'
