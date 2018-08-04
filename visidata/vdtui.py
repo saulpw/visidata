@@ -293,12 +293,12 @@ theme('color_current_col', 'bold', 'color of the cursor column')
 theme('color_current_hdr', 'reverse underline', 'color of the header for the cursor column')
 theme('color_column_sep', '246 blue', 'color of column separators')
 theme('color_key_col', '81 cyan', 'color of key columns')
-theme('color_hidden_col', '8', 'color of key columns')
+theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
 
 theme('color_status', 'bold', 'status line color')
 theme('color_error', 'red', 'error message color')
-theme('color_warn', 'yellow', 'warning message color')
+theme('color_warning', 'yellow', 'warning message color')
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 
 theme('disp_pending', '', 'string to display in pending cells')
@@ -725,7 +725,7 @@ class VisiData:
         'Draw left side of status bar.'
         attr = colors[options.color_status]
         error_attr, _ = colors.update(attr, 0, options.color_error, 1)
-        warn_attr, _ = colors.update(attr, 0, options.color_warn, 1)
+        warn_attr, _ = colors.update(attr, 0, options.color_warning, 1)
         sep = options.disp_status_sep
 
         try:
@@ -2001,7 +2001,7 @@ class Column:
             else:
                 return DisplayWrapper(typedval.val, display=str(typedval.val),
                                             note=options.note_format_exc,
-                                            notecolor=options.color_warn)
+                                            notecolor=options.color_warning)
         elif isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
                                 display=options.disp_pending,
@@ -2029,7 +2029,7 @@ class Column:
             except Exception as e:
                 dw.display = str(e)
             dw.note = options.note_format_exc
-            dw.notecolor = options.color_warn
+            dw.notecolor = options.color_warning
 
         return dw
 

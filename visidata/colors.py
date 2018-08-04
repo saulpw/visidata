@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import curses
-from visidata import globalCommand, colors, Sheet, Column, Colorizer
+from visidata import globalCommand, colors, Sheet, Column, Colorizer, wrapply
 
 
 globalCommand(None, 'colors', 'vd.push(ColorSheet("vdcolors"))')
@@ -20,4 +20,4 @@ class ColorSheet(Sheet):
     ]
 
     def reload(self):
-        self.rows = sorted(colors.keys())
+        self.rows = sorted(colors.keys(), key=lambda n: wrapply(int, n))
