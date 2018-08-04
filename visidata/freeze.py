@@ -14,7 +14,6 @@ Sheet.resetCache = resetCache
 
 def StaticColumn(rows, col):
     c = deepcopy(col)
-    c.type = anytype
     frozenData = {}
     @asyncthread
     def _calcRows(sheet):
