@@ -1,17 +1,19 @@
 import struct
 import collections
 import functools
+import ipaddress
 
 from visidata import *
 
-def _ord(c):
-    return struct.unpack('B', c)[0]
 
 protocols = collections.defaultdict(dict)  # ['ethernet'] = {[6] -> 'IP'}
 _flags = collections.defaultdict(dict)  # ['tcp'] = {[4] -> 'FIN'}
 oui = {}  # [macprefix (like '01:02:dd:0')] -> 'manufacturer'
 services = {}  # [('tcp', 25)] -> 'smtp'
 
+def macaddr(addrbytes):
+    return ':'.join('%02x' % b for b in addrbytes)
+#    return oui.get(mac[:13]) or oui.get(mac[:10]) or oui.get(mac[:8])
 
 def FlagGetter(flagfield):
     def flags_func(fl):
@@ -55,72 +57,51 @@ def init_pcap():
 
 class Host:
     dns = {}  # [ipstr] -> dnsname
-    hosts = {}  # [hostid] -> Host
+    hosts = {}  # [macaddr] -> { [ipaddr] -> Host }
 
     @classmethod
-    def get(cls, hostid):
-        'hostid could be ethermac, ipaddr, dnsname, or other id.  this returns a Host object'
-        ret = cls.hosts.get(hostid)
+    def get_host(cls, pkt, field='src'):
+        mac = macaddr(getattr(pkt, field))
+        machosts = cls.hosts.get(mac, None)
+        if not machosts:
+            machosts = cls.hosts[mac] = {}
+
+        ipraw = getattrdeep(pkt, 'ip', field)
+        if ipraw is not None:
+            ip = ipaddress.ip_address(ipraw)
+            if ip not in machosts:
+                machosts[ip] = Host(mac, ip)
+            return machosts[ip]
+        else:
+            if machosts:
+                return list(machosts.values())[0]
+
+        return Host(mac, None)
+
+    @classmethod
+    def get_by_ip(cls, ip):
+        'Returns Host instance for the given ip address.'
+        ret = cls.hosts_by_ip.get(ip)
         if ret is None:
-            ret = cls.hosts[hostid] = Host(hostid)
+            ret = cls.hosts_by_ip[ip] = [Host(ip)]
         return ret
 
-    def __init__(self, addr=None):
-        self.macaddr = None
+    def __init__(self, mac, ip):
+        self.ipaddr = ip
+        self.macaddr = mac
         self.mac_manuf = None
-        self.ipaddrs = set()
-
-        if addr:
-            if isinstance(addr, bytes):
-                if len(addr) == 6:     # mac
-                    self.setmac(addr)
-                elif len(addr) == 4:   # ipv4
-                    self.setip(addr)
-                elif len(addr) == 16:  # ipv6
-                    self.setip6(addr)
-                else:
-                    assert False, addr
-            elif isinstance(addr, str):
-                assert '.' in addr, addr
-                self.sethostname(addr)
-            else:
-                assert False, addr
 
     def __str__(self):
-        return self.hostname or self.ipaddr or self.macaddr
+        return str(self.hostname or self.ipaddr or self.macaddr)
 
     def __lt__(self, x):
-        return self.ipaddr < x.ipaddr
-
-    def setmac(self, mac):
-        if isinstance(mac, bytes):
-            # Convert a MAC address to a readable/printable string
-            mac = ':'.join('%02x' % b for b in mac)
-
-        assert ':' in mac
-
-        self.macaddr = mac
-        self.mac_manuf = oui.get(mac[:13]) or oui.get(mac[:10]) or oui.get(mac[:8])
-
-    def setip(self, ip):
-        straddr = None
-        if isinstance(ip, bytes):
-            straddr = '.'.join('%d' % b for b in ip)
-        elif isinstance(ip, str):
-            straddr = addrbytes
-        else:
-            assert False, ip
-
-        self.ipaddrs.add(straddr)
-
-    @property
-    def ipaddr(self):
-        if len(self.ipaddrs) == 1:
-            return list(self.ipaddrs)[0]
+        if isinstance(x, Host):
+            return str(self.ipaddr) < str(x.ipaddr)
+        return True
 
     @property
     def hostname(self):
-        return self.dns.get(self.ipaddr)
+        return Host.dns.get(str(self.ipaddr))
 
 def load_consts(outdict, module, attrprefix):
     for k in dir(module):
@@ -130,9 +111,9 @@ def load_consts(outdict, module, attrprefix):
 
 def getTuple(pkt):
     if getattrdeep(pkt, 'ip.tcp'):
-        tup = ('tcp', Host.get(pkt.ip.src), pkt.ip.tcp.sport, Host.get(pkt.ip.dst), pkt.ip.tcp.dport)
+        tup = ('tcp', Host.get_host(pkt, 'src'), pkt.ip.tcp.sport, Host.get_host(pkt, 'dst'), pkt.ip.tcp.dport)
     elif getattrdeep(pkt, 'ip.udp'):
-        tup = ('udp', Host.get(pkt.ip.src), pkt.ip.udp.sport, Host.get(pkt.ip.dst), pkt.ip.udp.dport)
+        tup = ('udp', Host.get_host(pkt, 'src'), pkt.ip.udp.sport, Host.get_host(pkt, 'dst'), pkt.ip.udp.dport)
     else:
         return None
     a,b,c,d,e = tup
@@ -149,14 +130,6 @@ def getService(tup):
     if (transport, sport) in services:
         return services.get((transport, sport))
 
-
-def show_dns(dns):
-    for rr in dns.rr:
-        if rr.rtype == 1:
-            return '%s -> %s' % (rr.rname, rr.rdata)
-    for q in dns.questions:
-        return str(q.qname)
-
 def get_transport(pkt):
     ret = 'ether'
     if getattr(pkt, 'ip', None):
@@ -165,77 +138,101 @@ def get_transport(pkt):
             ret = 'tcp'
         elif getattr(pkt.ip, 'udp', None):
             ret = 'udp'
-            if getattr(pkt, 'dns', None):
-                ret = 'dns'
-        elif getattr(pkt.ip, 'icmp', None):
-            ret = 'icmp'
-    elif getattr(pkt, 'arp', None):
-        ret = 'arp'
+#            if getattr(pkt, 'dns', None):
+#                ret = 'dns'
+#        elif getattr(pkt.ip, 'icmp', None):
+#            ret = 'icmp'
+#    elif getattr(pkt, 'arp', None):
+#        ret = 'arp'
     return ret
 
-def get_srcport(pkt):
-    ret = None
-    if getattr(pkt, 'ip', None):
-        if getattr(pkt.ip, 'tcp', None):
-            ret = pkt.ip.tcp.sport
-        elif getattr(pkt.ip, 'udp', None):
-            ret = pkt.ip.udp.sport
-    return ret
+def get_port(pkt, field='sport'):
+    return getattrdeep(pkt, 'ip', 'tcp', field) or getattrdeep(pkt, 'ip', 'udp', field)
 
-def get_dstport(pkt):
-    ret = None
-    if getattr(pkt, 'ip', None):
-        if getattr(pkt.ip, 'tcp', None):
-            ret = pkt.ip.tcp.dport
-        elif getattr(pkt.ip, 'udp', None):
-            ret = pkt.ip.udp.dport
-    return ret
+class EtherSheet(Sheet):
+    'Layer 2 (ethernet) packets'
+    rowtype = 'packets'
+    columns = [
+        ColumnAttr('timestamp', type=date, fmtstr="%H:%M:%S.%f"),
+        Column('ether_manuf', getter=lambda col,row: mac_manuf(macaddr(row.src))),
+        Column('ether_src', getter=lambda col,row: macaddr(row.src), width=6),
+        Column('ether_dst', getter=lambda col,row: macaddr(row.dst), width=6),
+        ColumnAttr('ether_data', 'data', type=len, width=0),
+    ]
 
-class DpktSheet(Sheet):
+
+class IPSheet(Sheet):
+    rowtype = 'packets'
+    columns = [
+        ColumnAttr('timestamp', type=date, fmtstr="%H:%M:%S.%f"),
+        ColumnAttr('ip', width=0),
+        Column('ip_src', width=14, getter=lambda col,row: ipaddress.ip_address(row.ip.src)),
+        Column('ip_dst', width=14, getter=lambda col,row: ipaddress.ip_address(row.ip.dst)),
+        ColumnAttr('ip_hdrlen', 'ip.hl', width=0, helpstr="IPv4 Header Length"),
+        ColumnAttr('ip_proto', 'ip.p', type=lambda v: protocols['ip'].get(v), width=8, helpstr="IPv4 Protocol"),
+        ColumnAttr('ip_id', 'ip.id', width=0, helpstr="IPv4 Identification"),
+        ColumnAttr('ip_rf', 'ip.rf', width=0, helpstr="IPv4 Reserved Flag (Evil Bit)"),
+        ColumnAttr('ip_df', 'ip.df', width=0, helpstr="IPv4 Don't Fragment flag"),
+        ColumnAttr('ip_mf', 'ip.mf', width=0, helpstr="IPv4 More Fragments flag"),
+        ColumnAttr('ip_tos', 'ip.tos', width=0, type=FlagGetter('ip_tos'), helpstr="IPv4 Type of Service"),
+        ColumnAttr('ip_ttl', 'ip.ttl', width=0, helpstr="IPv4 Time To Live"),
+        ColumnAttr('ip_ver', 'ip.v', width=0, helpstr="IPv4 Version"),
+    ]
+
+    def reload(self):
+        self.rows = []
+        for pkt in Progress(self.source.rows):
+            if getattr(pkt, 'ip', None):
+                self.addRow(pkt)
+
+
+class TCPSheet(IPSheet):
+    columns = IPSheet.columns + [
+        ColumnAttr('tcp_srcport', 'ip.tcp.sport', type=int, width=8, helpstr="TCP Source Port"),
+        ColumnAttr('tcp_dstport', 'ip.tcp.dport', type=int, width=8, helpstr="TCP Dest Port"),
+        ColumnAttr('tcp_opts', 'ip.tcp.opts', width=0),
+        ColumnAttr('tcp_flags', 'ip.tcp.flags', type=FlagGetter('tcp'), helpstr="TCP Flags"),
+    ]
+
+    def reload(self):
+        self.rows = []
+        for pkt in Progress(self.source.rows):
+            if getattrdeep(pkt, 'ip.tcp'):
+                self.addRow(pkt)
+
+class UDPSheet(IPSheet):
+    columns = IPSheet.columns + [
+        ColumnAttr('udp_srcport', 'ip.udp.sport', type=int, width=8, helpstr="UDP Source Port"),
+        ColumnAttr('udp_dstport', 'ip.udp.dport', type=int, width=8, helpstr="UDP Dest Port"),
+        ColumnAttr('ip.udp.data', type=len, width=0),
+        ColumnAttr('ip.udp.ulen', type=int, width=0),
+    ]
+
+    def reload(self):
+        self.rows = []
+        for pkt in Progress(self.source.rows):
+            if getattrdeep(pkt, 'ip.udp'):
+                self.addRow(pkt)
+
+class PcapSheet(Sheet):
     rowtype = 'packets'
     columns = [
         ColumnAttr('timestamp', type=date, fmtstr="%H:%M:%S.%f"),
         Column('transport', type=get_transport, width=5),
-        ColumnAttr('src', type=Host.get),
-        Column('srcport', type=get_srcport),
-        ColumnAttr('dst', type=Host.get),
-        Column('dstport', type=get_dstport),
-#        Column('ether_manuf', getter=lambda col,row: mac_manuf(mac_addr(row.src))),
-#        ColumnAttr('ether_src', 'src', type=mac_addr, width=6),
-#        ColumnAttr('ether_dst', 'dst', type=mac_addr, width=6),
+        Column('srchost', getter=lambda col,row: row.srchost),
+        Column('srcport', type=int, getter=lambda col,row: get_port(row, 'sport')),
+        Column('dsthost', getter=lambda col,row: row.dsthost),
+        Column('dstport', type=int, getter=lambda col,row: get_port(row, 'dport')),
         ColumnAttr('ether_proto', 'type', type=lambda v: protocols['ethernet'].get(v), width=0),
-#        ColumnAttr('ether_data', 'data', type=len, width=0),
-#        ColumnAttr('ip', width=0),
-#        ColumnAttr('ip_hdrlen', 'ip.hl', width=0, helpstr="IPv4 Header Length"),
-#        ColumnAttr('ip_proto', 'ip.p', type=lambda v: protocols['ip'].get(v), width=8, helpstr="IPv4 Protocol"),
-#        ColumnAttr('ip_id', 'ip.id', width=0, helpstr="IPv4 Identification"),
-#        ColumnAttr('ip_rf', 'ip.rf', width=0, helpstr="IPv4 Reserved Flag (Evil Bit)"),
-#        ColumnAttr('ip_df', 'ip.df', width=0, helpstr="IPv4 Don't Fragment flag"),
-#        ColumnAttr('ip_mf', 'ip.mf', width=0, helpstr="IPv4 More Fragments flag"),
-#        ColumnAttr('ip_tos', 'ip.tos', width=0, type=FlagGetter('ip_tos'), helpstr="IPv4 Type of Service"),
-#        ColumnAttr('ip_ttl', 'ip.ttl', width=0, helpstr="IPv4 Time To Live"),
-#        ColumnAttr('ip_ver', 'ip.v', width=0, helpstr="IPv4 Version"),
+        ColumnAttr('tcp_flags', 'ip.tcp.flags', type=FlagGetter('tcp'), helpstr="TCP Flags"),
+#        Column('service', width=8, getter=lambda col,row: getService(getTuple(row)), helpstr="Service Abbr"),
 #        ColumnAttr('tcp', 'ip.tcp', width=4),
 #        ColumnAttr('udp', 'ip.udp', width=4),
 #        ColumnAttr('icmp', 'ip.icmp', width=4),
 #        ColumnAttr('dns', width=4),
-#        Column('dnsQ', getter=lambda col,row: show_dns(row.dns)),
 #        ColumnAttr('netbios', width=4),
-#        Column('ip_src', width=14, getter=lambda col,row: col.sheet.ip_addr(row.ip.src)),
-#        Column('ip_dst', width=14, getter=lambda col,row: col.sheet.ip_addr(row.ip.dst)),
-#        ColumnAttr('tcp_opts', 'ip.tcp.opts', width=0),
-        ColumnAttr('tcp_flags', 'ip.tcp.flags', type=FlagGetter('tcp'), helpstr="TCP Flags"),
-#        ColumnAttr('tcp_srcport', 'ip.tcp.sport', type=int, width=8, helpstr="TCP Source Port"),
-#        ColumnAttr('tcp_dstport', 'ip.tcp.dport', type=int, width=8, helpstr="TCP Dest Port"),
-#        Column('service', width=8, getter=lambda col,row: getService(getTuple(row)), helpstr="Service Abbr"),
-#        ColumnAttr('udp_srcport', 'ip.udp.sport', type=int, width=8, helpstr="UDP Source Port"),
-#        ColumnAttr('udp_dstport', 'ip.udp.dport', type=int, width=8, helpstr="UDP Dest Port"),
-#        ColumnAttr('ip.udp.data', type=len, width=0),
-#        ColumnAttr('ip.udp.ulen', type=int, width=0),
     ]
 
-
-class PcapSheet(DpktSheet):
     @asyncthread
     def reload(self):
         init_pcap()
@@ -246,7 +243,7 @@ class PcapSheet(DpktSheet):
         with Progress(total=self.source.filesize) as prog:
             for ts, buf in self.pcap:
                 eth = dpkt.ethernet.Ethernet(buf)
-                self.rows.append(eth)
+                self.addRow(eth)
                 prog.addProgress(len(buf))
 
                 eth.timestamp = ts
@@ -257,19 +254,14 @@ class PcapSheet(DpktSheet):
                     for rr in eth.dns.rr:
                         Host.dns[str(rr.rdata)] = str(rr.rname)
 
-                srchost = Host.get(eth.src)
-                srcip = getattr(eth, 'ip', None)
-                if srcip:
-                    srchost.setip(srcip.src)
-
-                dsthost = Host.get(eth.dst)
-                dstip = getattr(eth, 'ip', None)
-                if dstip:
-                    dsthost.setip(dstip.src)
+                eth.srchost = Host.get_host(eth, 'src')
+                eth.dsthost = Host.get_host(eth, 'dst')
 
 #                eth.netbios = try_apply(lambda eth: dpkt.netbios.NS(eth.ip.udp.data), eth)
 
-PcapSheet.addCommand('1', 'flows', 'vd.push(PcapFlowsSheet("flows", source=sheet))')
+PcapSheet.addCommand('W', 'flows', 'vd.push(PcapFlowsSheet(sheet.name+"_flows", source=sheet))')
+PcapSheet.addCommand('2', 'l2-packet', 'vd.push(IPSheet("L2packets", source=sheet))')
+PcapSheet.addCommand('3', 'l3-packet', 'vd.push(TCPSheet("L3packets", source=sheet))')
 
 
 flowtype = collections.namedtuple('flow', 'transport src sport dst dport packets'.split())
@@ -278,9 +270,9 @@ class PcapFlowsSheet(Sheet):
     rowtype = 'netflows'  # rowdef: flowtype
     columns = [
         ColumnAttr('transport'),
-        ColumnAttr('src', type=Host.get),
+        Column('src', getter=lambda col,row: row.src),
         ColumnAttr('sport', type=int),
-        ColumnAttr('dst', type=Host.get),
+        Column('dst', getter=lambda col,row: row.dst),
         ColumnAttr('dport', type=int),
         Column('service', width=8, getter=lambda col,row: getService(getTuple(row.packets[0]))),
         ColumnAttr('packets', type=len),
@@ -294,7 +286,7 @@ class PcapFlowsSheet(Sheet):
         self.latency = {}  # [flowtuple] -> float ms of latency
         self.syntimes = {}  # [flowtuple] -> timestamp of SYN
         flags = FlagGetter('tcp')
-        for pkt in self.source.rows:
+        for pkt in Progress(self.source.rows):
             tup = getTuple(pkt)
             if tup:
                 flowpkts = self.flows.get(tup)
@@ -317,7 +309,7 @@ class PcapFlowsSheet(Sheet):
 PcapFlowsSheet.addCommand(ENTER, 'dive-row', 'vd.push(PcapSheet("%s_packets"%flowname(cursorRow), rows=cursorRow.packets))')
 
 def flowname(flow):
-    return '%s_%s:%s-%s:%s' % (flow.transport, Host.get(flow.src), flow.sport, Host.get(flow.dst), flow.dport)
+    return '%s_%s:%s-%s:%s' % (flow.transport, flow.src, flow.sport, flow.dst, flow.dport)
 
 def try_apply(func, *args, **kwargs):
     try:
