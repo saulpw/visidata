@@ -251,7 +251,7 @@ replayableOption('encoding_errors', 'surrogateescape', 'encoding errors passed t
 
 replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('default_width', 20, 'default column width')
-option('wrap', True, 'wrap text to fit window width on TextSheet')
+option('wrap', False, 'wrap text to fit window width on TextSheet')
 
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
@@ -2619,7 +2619,7 @@ def cursesMain(_scr, sheetlist):
     for vs in sheetlist:
         vd().push(vs)  # first push does a reload
 
-    status('^H opens help')
+    status('Ctrl+H opens help')
     return vd().run(_scr)
 
 def addGlobals(g):
