@@ -1,30 +1,39 @@
 # VisiData version history
 
-# 1.3
+# v1.3
 
+- commands overhaul; see `commands.tsv` (command longnames should now be largely stable)
 - add quantile aggregators (q3/q4/q5/q10)
-- add z; to add new column from bash *expr*, with `$`columnNames as variables
-- commands overhaul
-- sheet-specific options (see design/169.md)
+- add `z;` to add new column from bash *expr*, with `$`columnNames as variables
+- sheet-specific options (see design/169.md); use `v` on OptionsSheet to toggle between global and sheet-specific values
 - keyboard layout (thanks to @deinspier for the inspiration)
-- quitguard
-- sort status messages by "priority" (thanks to @jsvine for idea)
-
+- options.wrap now defaults to False
+- options.quitguard enables confirmation before quitting last sheet
+- options.safety_first makes loading/saving more robust, at the cost of performance
+   - currently only removing NULs from csv input
+- dedup, sort, color status messages by "priority" (thanks to @jsvine for suggestion)
+- remove menu system
+- can now edit source values from FreqSheet
 
 - Command changes
+    - `^H` is now main command to open the manpage!  `z^H` opens a list of all commands for this sheet.
     - `R` (`random-sheet`) pushes sheet instead of selecting (reverting to former behavior)
     - `za` (`addcol-empty`) asks for column name
+    - `zd` (`delete-cell`) moves value to clipboard ("cut", like other delete commands)
     - add `gI` (`describe-all`) like `gC` (`columns-all`)
     - add `gS` (`sheets-graveyard`)
     - add g(, z(, gz( variants of ( 'expand-column'
     - add `z|` and `z\` to un/select by python expr (thanks to @jsvine for suggestion)
     - add `z#` to set type of current column to `len`
     - add `z;` to get the stdout/stderr from running a cmdline program with $colname args
+    - `Space` is now bound to exec-longname (was `menu`; `^A` was `exec-longname`)
 
 - Loaders:
     - add pandas adapter
     - add xml loader
-    - yaml loader (thanks to @robcarrington, @john, @anja at Pycon Sprints for making this happen
+    - add pcap loader (thanks to @vbrown608)
+    - add yaml loader (thanks to @robcarrington, @john, @anja at Pycon Sprints for making this happen
+    - add jsonl saver
     - remove `tsv_safe_char` and split into `tsv_safe_newline` and `tsv_safe_tab`
 
 - initial commit of a task warrior app (vtask)
@@ -33,12 +42,11 @@
 - more portable system clipboard handling (thanks @chocolateboy for PR)
 - [json] no more incremental display during loading (need better json parser than stdlib)
 - `date` supports adding a number of days (or `6*hours`, `9*months`, etc)
-- column width can now be negative, allowing columns to preserve their pre-hidden width if unhidden
 - hidden columns are darkened on columns sheet
 - exception rollup
-- dedup status messages
 - dev/commands.tsv table of commands
 - motd default url uses https
+- improve ProfileSheet
 
 # v1.2.1 (2018-07-05)
 

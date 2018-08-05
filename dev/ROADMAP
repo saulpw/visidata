@@ -1,35 +1,21 @@
 # Roadmap
 
-## Future
+### 1. plugin api/package manager
 
-### plugin api/package manager
-
-- use snippets without git clone
 - in-app downloadable/installable snippets
 
-### stable apis
+### 2. save path to get to current sheet/row/cell
 
-- refactor Canvas into reusable component
+- remove superfluous sheets
+- output .sql or .py code
 
-### productization
+### 3. website content
 
-- windows installer/version
-
-### content
-
-- design blog posts
-- putting together a talk on visidata design/internals
+- front page redesign
+- /features grid
+- /blog of topic/design discussions
+- visidata design/internals
 - make separate webpages for: devops, sysadmins, hackers, git users, bioinfers, etc
-
-### misc
-
-- 'v' hide cols which have errors on cursor row
-- modified indicator on status bar, also enables quitguard
-- ColumnsSheet should show subcolumns and their parent column (for expand/contract)
-- fill on join nulls should cause error
-- tab completion of macros in exec-longname, requires command overhaul
-- csv with NUL bytes should parse.  safe_mode? (slow but handles these kinds of things)
-
 
 ### features
 
@@ -40,29 +26,27 @@
     - clickable column headers to set type/name, click-drag to move columns/rows
     - clickable status items (including motd)
     - info mode: mouse hover describes interface components and/or shows relevant commands
-- undo
+- undo #141
     - start from previous sheet in commandlog
     - replay all but last command
 
-- skip to next error
-+ graveyard sheet
+##### minor points
+#
+- 'v' hide cols which have errors on cursor row
+   - or should 'v' be 'toggle-visibility' on all sheets?
+- 'modified' indicator on status bar, also enables quitguard
+- ColumnsSheet should show subcolumns and their parent column (for expand/contract)
+
+- graveyard sheet improvements
    - start/drop datetimes
    - number of derivative sheets (two columns, for immediate children and to any depth)
    - number of commands executed on that sheet (as a list so they can be viewed separately)
 
-#### II. Internals
-
-- break out into library, usable standalone by other apps
-   - Progress/async
-   - Canvas
-- SourceSheet inherits from Sheet
-
 #### III. Loaders and Savers
 
-- parquet
+- parquet #112
 - .mdb, .accdb
 - google sheets
-- save to .py: emit code to get current cell/row/sheet from source data
 - sqlite: allow in-memory edits, ^S to commit
   - index sheet: include rows/cols; allow to be cutnpasted
   - solve "load in other thread" problem
@@ -80,20 +64,14 @@
 - macro parameterization
 - g^D bug report
 - zip/unzip from dirsheet
-- status rework: use logging module; color status items; use multiple lines on overflow
+- status rework: use logging module?  use multiple lines on overflow?
 - proper dive on json
 
 ##### technical debt
 
-- either remove all asserts; possibly replace with error()
+- remove all asserts; possibly replace with error()
 
-#### V. website
-
-- /features grid
-- front page redesign
-- /blog of topic/design discussions
-
-# VI. other applications with a vd-like interface
+# V. other applications with a vd-like interface
 
 - [vgit](http://github.com/saulpw/vgit) (currently v0.2)
 - [vsh](http://github.com/saulpw/vsh) (unreleased)
