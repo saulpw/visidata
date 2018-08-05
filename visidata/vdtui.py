@@ -2160,8 +2160,9 @@ class SubrowColumn(Column):
 
     def setValue(self, row, value):
         subrow = row[self.subrowidx]
-        if subrow is not None:
-           self.origcol.setValue(subrow, value)
+        if subrow is None:
+            error('no source row')
+        self.origcol.setValue(subrow, value)
 
 
 class DisplayWrapper:
