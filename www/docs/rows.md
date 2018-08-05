@@ -3,7 +3,7 @@
 
 # Rows
 
-## How to perform operations on a subset of rows
+## [How to perform operations on a subset of rows](#subset)
 
 Many commands can be finetuned to operate on rows which are 'selected'.
 

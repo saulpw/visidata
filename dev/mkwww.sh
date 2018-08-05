@@ -102,12 +102,6 @@ done
 mkdir -p $BUILDWWW/docs/casts
 cp $DOCS/casts/* $BUILDWWW/docs/casts
 cp $WWW/asciinema-player.* $BUILDWWW
-# Create docs/rows#subset
-sed -i -e "s#<h2>How to perform operations on a subset of rows</h2>#<h2><a name=\"subset\">How to perform operations on a subset of rows</a></h2>#g" $BUILDWWW/docs/rows/index.html
-# Create /docs/group#aggregatrs
-sed -i -e "s#<h2>How to create a frequency chart</h2>#<h2><a name=\"frequency\">How to create a frequency chart</a></h2>#g" $BUILDWWW/docs/group/index.html
-# Create /howto/columns#derived
-sed -i -e "s#<h2>How to create derivative columns</h2>#<h2><a name=\"derived\">How to create derivative columns</a></h2>#g" $BUILDWWW/docs/columns/index.html
 
 # Build /kblayout
 
