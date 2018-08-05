@@ -13,4 +13,4 @@ If you have a question, issue, or suggestion regarding the free VisiData tool, p
 If you have other questions, or would like more in-depth help or support, please contact:
 
 - [saul@visidata.org](mailto:saul@visidata.org) (author)
-- [anja@visidata.org](mailto:anja@visidata.org) (package maintainer)
+- [anja.kefala@gmail.com](mailto:anja.kefala@gmail.com) (package maintainer)

@@ -1,5 +1,5 @@
-- Update: 2018-01-22
-- Version: VisiData 1.0
+- Update: 2018-08-04
+- Version: VisiData 1.3
 
 # Rows
 
@@ -11,12 +11,13 @@ Many commands can be finetuned to operate on rows which are 'selected'.
 
 Command(s)         Operation
 -----------------  -------------
- `s`  `t`  `u`     selects/toggles/unselects current row
-`gs` `gt` `gu`     selects/toggles/unselects all rows
- `|`  `\` *regex*  selects/unselects rows matching *regex* in current column
-`g|` `g\` *regex*  selects/unselects rows matching *regex* in any visible column
- `,`               selects rows matching current cell in current column
-`g,`               selects rows matching this row in all visible column
+ `s`  `t`  `u`     select/toggle/unselect current row
+`gs` `gt` `gu`     select/toggle/unselect all rows
+ `|`  `\` *regex*  select/unselect rows matching *regex* in current column
+`g|` `g\` *regex*  select/unselect rows matching *regex* in any visible column
+`z|` `z\` *expr*   select/unselect rows matching Python *expr* in any visible column
+ `,`               select rows matching current cell in current column
+`g,`               select rows matching this row in all visible column
 
 An example usage follows.
 

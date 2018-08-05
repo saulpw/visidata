@@ -19,7 +19,7 @@ If the one-line install commands above do not work, see below for detailed instr
 
 ## The base VisiData package
 
-A [loader](/docs/loaders/) is a module which directs how VisiData loads and engages with a particular data source. 
+A [loader](/docs/loaders/) is a module which directs how VisiData structures and engages with a particular data source. 
 
 Each package contains the full loader suite but differs in which loader dependencies will get installed by default. This is to avoid bloating the system for most users, who are not interested in using those features.
 

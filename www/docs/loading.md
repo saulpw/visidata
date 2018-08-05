@@ -1,11 +1,11 @@
-- Update: 2018-01-28
-- Version: VisiData 1.0
+- Update: 2018-08-04
+- Version: VisiData 1.3
 
 # Loading data
 
 ## How to specify a source
 
-In VisiData, [loaders](/docs/loaders) load files of a particular type. [These sources are currently supported](/man#loaders).
+In VisiData, a [loader](/docs/loaders) is a module which directs how VisiData structures and engages with a particular data source. [These sources](/man#loaders) are currently supported.
 
 On default, the file extension determines which loader is used. Unknown filetypes are loaded as **Text sheets**.
 
@@ -31,9 +31,9 @@ Multiple files can be passed as inputs through the commandline.
 vd birdsdiet.tsv surveys.csv sunshinelist.html
 ~~~
 
-Upon launching, the last dataset to load (in this case, sunshinelist.html) will be displayed on top.
+Upon launching, the final dataset to load (in this case, sunshinelist.html) will be displayed on top.
 
-To load another file, press `o` and enter a filepath.
+To load files from within a VisiData session, press `o` and enter a filepath.
 
 ---
 
