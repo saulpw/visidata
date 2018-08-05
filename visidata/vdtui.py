@@ -120,7 +120,7 @@ class SettingsMgr(collections.OrderedDict):
                     return v
 
     def iter(self, obj=None):
-        'Return self[k] considering context of obj.  If obj is None, uses the context of the top sheet.'
+        'Iterate through all keys considering context of obj. If obj is None, uses the context of the top sheet.'
         if obj is None and vd:
             obj = vd.sheet
 

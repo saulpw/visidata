@@ -1,4 +1,4 @@
-from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, error, anytype, ENTER, asyncthread, status, Progress
+from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, error, anytype, ENTER, asyncthread, status, Progress, option
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus
 
@@ -12,6 +12,7 @@ Sheet.addCommand('gO', 'options-global', 'vd.push(vd.optionsSheet)')
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
 Sheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
 
+option('visibility', 0, 'visibility level (0=low, 1=high)')
 
 def getOptionsSheet(sheet):
     optsheet = getattr(sheet, 'optionsSheet', None)
@@ -119,7 +120,7 @@ class HelpSheet(Sheet):
         ColumnAttr('sheet'),
         ColumnAttr('longname'),
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname)),
-        Column('helpstr', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
+        Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
         ColumnAttr('logged', 'replayable', width=0),
     ]
@@ -143,30 +144,36 @@ class HelpSheet(Sheet):
             self.addRow(v)
             v.sheet = o
 
+
 class OptionsSheet(Sheet):
     rowtype = 'options'
     precious = False
     columns = (
-       ColumnAttr('name'),
-       Column('sheet_value', getter=lambda col,row: options.get(row.name, col.sheet.source),
-                             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source)),
-       Column('override', getter=lambda col,row: options._opts.get((row.name, 'override'), ''),
-                          setter=lambda col,row,val: options.set(row.name, val, 'override')),
-       Column('default', getter=lambda col,row: options.get(row.name, 'global')),
-       ColumnAttr('helpstr')
+        ColumnAttr('option', 'name'),
+        Column('value',
+            getter=lambda col,row: options.get(row.name, col.sheet.source if options.get('visibility', col.sheet) else 'override'),
+            setter=lambda col,row,val: options.set(row.name, val, col.sheet.source if options.get('visibility', col.sheet) else 'override')),
+        ColumnAttr('description', 'helpstr')
     )
-
     colorizers = Sheet.colorizers + [
-        Colorizer('cell', 9, lambda s,c,r,v: v.value if c.name in ['sheet_value', 'override', 'default'] and r.name.startswith('color_') else None)
+        Colorizer('cell', 9, lambda s,c,r,v: v.value if c is s.columns[1] and r.name.startswith('color_') else None),
     ]
+    nKeys = 1
 
-    nKeys=1
+    def setVis(self, level):
+        options.set("visibility", level, self)
+        self.columns[1].name = 'global_value' if level else 'sheet_value'
+        self.rowtype = 'global options' if level else 'sheet options'
 
     def reload(self):
         self.rows = []
         for k in options.keys():
             opt = options._get(k)
             self.addRow(opt)
+        self.cursorVisibleColIndex = 1
+        self.setVis(options.get('visibility', self))
+
+OptionsSheet.addCommand('v', 'visibility', 'setVis(0 if options.get("visibility", sheet) else 1)')
 
 vd().optionsSheet = OptionsSheet('global_options', source=None)
 vd().sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
