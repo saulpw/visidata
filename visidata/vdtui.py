@@ -307,6 +307,7 @@ theme('disp_pending', '', 'string to display in pending cells')
 theme('note_pending', '⌛', 'note to display for pending cells')
 theme('note_format_exc', '?', 'cell note for an exception during type conversion or formatting')
 theme('note_getter_exc', '!', 'cell note for an exception during computation')
+theme('note_type_exc', '!', 'cell note for an exception during computation')
 theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
@@ -1993,7 +1994,7 @@ class Column:
         typedval = wrapply(self.type, cellval)
 
         if isinstance(typedval, TypedWrapper):
-            if isinstance(cellval, TypedExceptionWrapper):
+            if isinstance(cellval, TypedExceptionWrapper):  # calc failed
                 exc = cellval.exception
                 if cellval.forwarded:
                     dispval = str(cellval)  # traceback.format_exception_only(type(exc), exc)[-1].strip()
@@ -2003,14 +2004,20 @@ class Column:
                                         display=dispval,
                                         note=options.note_getter_exc,
                                         notecolor=options.color_error)
-            elif typedval.val is None:
+            elif typedval.val is None:  # early out for strict None
                 return DisplayWrapper(None, display='',  # force empty display for None
                                             note=options.disp_note_none,
                                             notecolor=options.color_note_type)
+            elif isinstance(typedval, TypedExceptionWrapper):  # calc succeeded, type failed
+                return DisplayWrapper(typedval.val, display=str(cellval),
+                                            error=typedval.exception.stacktrace,
+                                            note=options.note_type_exc,
+                                            notecolor=options.color_warning)
             else:
                 return DisplayWrapper(typedval.val, display=str(typedval.val),
-                                            note=options.note_format_exc,
+                                            note=options.note_type_exc,
                                             notecolor=options.color_warning)
+
         elif isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
                                 display=options.disp_pending,
@@ -2032,7 +2039,8 @@ class Column:
                 dw.notecolor = options.color_note_type
 
         except Exception as e:  # formatting failure
-            dw.error = stacktrace()
+            e.stacktrace = stacktrace()
+            dw.error = e
             try:
                 dw.display = str(cellval)
             except Exception as e:
