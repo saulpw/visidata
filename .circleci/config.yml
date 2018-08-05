@@ -3,12 +3,12 @@ jobs:
   build:
     working_directory: ~/visidata
     docker:
-      - image: circleci/python:3.4
+      - image: circleci/python:3.5
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/share
-      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.4/site-packages
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.5/site-packages
       - run:
           name: dependencies
           command: |
