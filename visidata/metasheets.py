@@ -106,7 +106,7 @@ SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("descri
 
 # source: vd.allSheets (with BaseSheet as weakref keys)
 class GraveyardSheet(SheetsSheet):
-    rowtype = 'dead sheets'  # rowdef: BaseSheet
+    rowtype = 'undead sheets'  # rowdef: BaseSheet
     def reload(self):
         self.rows = list(vs for vs in self.source.keys() if vs not in vd().sheets)
 
