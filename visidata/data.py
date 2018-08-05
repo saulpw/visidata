@@ -96,13 +96,10 @@ Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows or row
 
 globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: "))))')
 
-
-bindkey('gKEY_F(1)', 'commands-sheet')  # vdtui generic commands sheet
-bindkey('g^H', 'commands-sheet')  # vdtui generic commands sheet
-
-# in VisiData, ^H refer to the man page
+# in VisiData, ^H refers to the man page
 globalCommand('^H', 'sysopen-help', 'openManPage()')
 bindkey('KEY_F(1)', 'sysopen-help')
+bindkey('zKEY_F(1)', 'help-commands')
 
 def openManPage():
     from pkg_resources import resource_filename

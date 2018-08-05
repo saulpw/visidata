@@ -26,7 +26,7 @@
 - c. `<Sheet>.addCommand()` (which has identical interface to a) sets the command on the sheet type (Id5) if <Sheet> is a SheetType, or on the sheet instance (Id4) if <Sheet> is an instance.
 - d. `<Sheet>.bindkey()` does the same as (c) but for keybindings.
 - e. `gD` to get to macros sheet to edit macro keybindings.
-- f. `g^H` can add/edit keybindings for all commands on all sheets (Id1)
+- f. `g^H` can add/edit keybindings for all commands on all sheets (Id1, not impl yet)
 - g. `z^H` for list of sheet-specific commands (not global or on Sheet)
 - h. Commands are identified by longname, and have a default keybinding.  Use None for no default.
 - i. Command lists can be gotten by:

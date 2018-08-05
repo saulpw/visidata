@@ -79,7 +79,6 @@ Sheet	cache-cols	gz	'	gz'	n	n	n	y		column-cache-clear-all	add/reset cache for al
 Sheet	cancel-sheet		^C	^C	n	n	n	n		meta-threads-cancel-sheet	abort all threads on current sheet
 Sheet	capture-col		;	;	n	n	n	y	1,5	modify-add-column-regex-capture	add new column from capture groups of regex; requires example row
 Sheet	columns-sheet		C	C	meta	n	n	y	4,5	meta-columns-sheet	open Columns Sheet
-Sheet	commands-sheet	g	^H	g^H	static	n	n	n			view list of commands available on current sheet
 Sheet	contract-col		)	)	n	n	n	y			unexpand current column; restore original column and remove other columns at this level
 Sheet	copy-cell	z	y	zy	n	n	n	y		data-clipboard-copy-cell	yank (copy) current cell to clipboard
 Sheet	copy-cells	gz	y	gzy	n	use	n	y			yank (copy) contents of current column for selected rows to clipboard

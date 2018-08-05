@@ -32,7 +32,7 @@
     - add pandas adapter
     - add xml loader
     - add pcap loader (thanks to @vbrown608)
-    - add yaml loader (thanks to @robcarrington, @john, @anja at Pycon Sprints for making this happen
+    - add yaml loader (thanks to @robcarrington, @JKiely, @anjakefala at Pycon Sprints for making this happen)
     - add jsonl saver
     - remove `tsv_safe_char` and split into `tsv_safe_newline` and `tsv_safe_tab`
 
