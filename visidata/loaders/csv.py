@@ -7,6 +7,7 @@ replayableOption('csv_delimiter', ',', 'delimiter passed to csv.reader')
 replayableOption('csv_quotechar', '"', 'quotechar passed to csv.reader')
 replayableOption('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
 replayableOption('csv_escapechar', None, 'escapechar passed to csv.reader')
+replayableOption('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost')
 
 csv.field_size_limit(sys.maxsize)
 
@@ -18,6 +19,10 @@ def wrappedNext(rdr):
         return next(rdr)
     except csv.Error as e:
         return ['[csv.Error: %s]' % e]
+
+def removeNulls(fp):
+    for line in fp:
+        yield line.replace('\0', '')
 
 class CsvSheet(Sheet):
     @asyncthread
@@ -36,7 +41,10 @@ def load_csv(vs):
         for i in range(options.skip):
             wrappedNext(fp)  # discard initial lines
 
-        rdr = csv.reader(fp, **csvoptions())
+        if options.safety_first:
+            rdr = csv.reader(removeNulls(fp), **csvoptions())
+        else:
+            rdr = csv.reader(fp, **csvoptions())
 
         vs.rows = []
 
