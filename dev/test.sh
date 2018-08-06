@@ -21,13 +21,14 @@ for i in $TESTS ; do
     elif [ "${i%-nofail.vd}-nofail" == "${i%.vd}" ];
     then
         PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i --batch --output tests/golden/${outbase%.vd}.tsv
-        echo '=== git diffs; will not trigger build failure ==='
+        echo '==================================================='
         git --no-pager diff tests/
         git --no-pager diff --numstat tests/
         git checkout tests/golden/
         echo '==================================================='
     else
-        echo '=== git diffs; will trigger build failure ==='
+        echo '==================================================='
+        PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i --batch --output tests/golden/${outbase%.vd}.tsv
         git --no-pager diff --numstat tests/
         git --no-pager diff --exit-code tests/
         echo '=============================================='
