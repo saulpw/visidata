@@ -1838,7 +1838,7 @@ class TypedExceptionWrapper(TypedWrapper):
         self.forwarded = False
 
     def __str__(self):
-        return '%s' % type(self.exception).__name__
+        return str(self.val)
 
     def __hash__(self):
         return hash((type(self.exception), ''.join(self.stacktrace[:-1])))
@@ -1846,6 +1846,11 @@ class TypedExceptionWrapper(TypedWrapper):
     def __eq__(self, x):
         if isinstance(x, TypedExceptionWrapper):
             return type(self.exception) is type(x.exception) and self.stacktrace[:-1] == x.stacktrace[:-1]
+
+def forward(wr):
+    if isinstance(wr, TypedExceptionWrapper):
+        wr.forwarded = True
+    return wr
 
 def wrmap(func, iterable, *args):
     'Same as map(func, iterable, *args), but ignoring exceptions.'

@@ -66,7 +66,7 @@ class SheetPivot(Sheet):
         rowidx = {}
         self.rows = []
         for r in Progress(self.source.rows):
-            keys = tuple(keycol.srccol.getTypedValueOrException(r) for keycol in self.nonpivotKeyCols)
+            keys = tuple(forward(keycol.srccol.getTypedValue(r)) for keycol in self.nonpivotKeyCols)
             formatted_keys = tuple(wrapply(c.format, v) for v, c in zip(keys, self.nonpivotKeyCols))
 
             pivotrow = rowidx.get(formatted_keys)

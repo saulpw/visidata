@@ -134,7 +134,7 @@ class SheetFreqTable(Sheet):
     def discreteBinning(self):
         rowidx = {}
         for r in Progress(self.source.rows):
-            keys = list(c.getTypedValue(r) for c in self.origCols)
+            keys = list(forward(c.getTypedValue(r)) for c in self.origCols)
 
             # wrapply will pass-through a key-able TypedWrapper
             formatted_keys = tuple(wrapply(c.format, c.getTypedValue(r)) for c in self.origCols)
