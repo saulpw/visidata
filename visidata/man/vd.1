@@ -68,8 +68,10 @@ In most cases, commands that affect selected rows will affect all rows if no row
 .Pp
 .Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " F1   ^H"
+.It Ic " ^H"
 view this man page
+.It Ic "z^H"
+view sheet of commands and keybindings
 .It Ic ^Q
 abort program immediately
 .It Ic ^C
@@ -193,6 +195,13 @@ reset cache for current/all visible column(s)
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .It Ic "g*" Ar regex Ns Sy / Ns Ar subst
 .No modify selected rows in current column, replacing Ar regex No with Ar subst
+.Pp
+.It Ic " (   g("
+.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
+.It Ic "z(  gz(" Ar depth
+.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
+.It Ic " )"
+unexpand current column; restore original column and remove other columns at this level
 .El
 .Ss Row Selection
 .
@@ -243,11 +252,13 @@ append a blank row/column
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
-delete current/selected row(s) and move to clipboard
+delete (cut) current/selected row(s) and move to clipboard
 .It Ic "  y   gy"
 yank (copy) current/all selected row(s) to clipboard
 .It Ic " zy  gzy"
 yank (copy) contents of current column for current/selected row(s) to clipboard
+.It Ic " zd  gzd"
+delete (cut) contents of current column for current/selected row(s) and move to clipboard
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
@@ -264,10 +275,6 @@ fill null cells in current column with contents of non-null cells up the current
 edit contents of current cell
 .It Ic " ge" Ar text
 .No set contents of current column for selected rows to Ar text
-.It Ic " zd   Del"
-.No set contents of current cell to Sy None
-.It Ic "gzd  gDel"
-.No set contents of cells in current column to Sy None No for selected rows
 .
 .El
 .
@@ -648,10 +655,6 @@ edit contents of current cell
 toggle show/hide for methods and hidden properties
 .It Ic "gv  zv"
 show/hide methods and hidden properties
-.It Ic " ("
-expand current column of lists or dicts into multiple columns and hide original column
-.It Ic " )"
-unexpand current column; restore original column and remove other columns at this level
 .El
 .
 .Sh COMMANDLINE OPTIONS
@@ -681,7 +684,7 @@ encoding errors passed to codecs.open
 flags to pass to re.compile() [AILMSUX]
 .It Sy --default-width Ns = Ns Ar "int         " No "20"
 default column width
-.It Sy --wrap Ns = Ns Ar "bool                 " No "True"
+.It Sy --wrap Ns = Ns Ar "bool                 " No "False"
 wrap text to fit window width on TextSheet
 .It Sy --cmd-after-edit Ns = Ns Ar "str        " No "go-down"
 command longname to execute after successful edit
@@ -715,6 +718,8 @@ note to display for pending cells
 cell note for an exception during type conversion or formatting
 .It Sy --note-getter-exc Ns = Ns Ar "str       " No "!"
 cell note for an exception during computation
+.It Sy --note-type-exc Ns = Ns Ar "str         " No "!"
+cell note for an exception during computation
 .It Sy --note-unknown-type Ns = Ns Ar "str     " No ""
 cell note for unknown types in anytype column
 .It Sy --scroll-incr Ns = Ns Ar "int           " No "3"
@@ -737,10 +742,8 @@ replacement for tab character when saving to tsv
 replacement for newline character when saving to tsv
 .It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No ""
 command to copy stdin to system clipboard
-.It Sy --pyobj-show-hidden Ns = Ns Ar "bool    " No "False"
-show _private properties on pyobjs
-.It Sy --pyobj-show-methods Ns = Ns Ar "bool   " No "False"
-show methods on pyobjs
+.It Sy --visibility Ns = Ns Ar "int            " No "0"
+visibility level (0=low, 1=high)
 .It Sy --min-memory-mb Ns = Ns Ar "int         " No "0"
 minimum memory to continue loading and async processing
 .It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
@@ -775,6 +778,8 @@ quotechar passed to csv.reader
 skipinitialspace passed to csv.reader
 .It Sy --csv-escapechar Ns = Ns Ar "NoneType   " No "None"
 escapechar passed to csv.reader
+.It Sy --safety-first Ns = Ns Ar "bool         " No "False"
+sanitize input/output to handle edge cases, with a performance cost
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .El
@@ -827,11 +832,15 @@ color of column separators
 .It Sy "color_key_col      " No "81 cyan"
 color of key columns
 .It Sy "color_hidden_col   " No "8"
-color of key columns
+color of hidden columns on metasheets
 .It Sy "color_selected_row " No "215 yellow"
 color of selected rows
 .It Sy "color_status       " No "bold"
 status line color
+.It Sy "color_error        " No "red"
+error message color
+.It Sy "color_warning      " No "yellow"
+warning message color
 .It Sy "color_edit_cell    " No "normal"
 cell color to use when editing cell
 .It Sy "disp_pending       " No ""
@@ -840,10 +849,6 @@ string to display in pending cells
 color of note in pending cells
 .It Sy "color_note_type    " No "226 yellow"
 cell note for numeric types in anytype columns
-.It Sy "color_format_exc   " No "48 green"
-color of formatting exception note
-.It Sy "color_getter_exc   " No "red "
-color of computation exception note
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
 default fmtstr to strftime for date values
 .It Sy "color_change_pending" No "reverse yellow"
@@ -934,12 +939,19 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy json No (single object) and Sy jsonl No (one object per line).
 .Bl -inset -compact -offset xxx
-.It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be expanded into new columns with Sy "\&(" Ns and unexpanded with Sy "\&)" Ns .
+.It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be expanded into new columns with Sy "\&(" No and unexpanded with Sy "\&)" Ns .
 .El
 .El
 .Pp
 .Bl -inset -compact -offset xxx
 .It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
+.El
+.Pp
+.Bl -inset -compact -offset xxx
+.It Sy pcap No ( requires Sy xpkt Ns , Sy dnslib Ns )
+.Bl -inset -compact -offset xxx
+.It View and investigate captured network traffic in a tabular format.
+.El
 .El
 .Pp
 .Bl -inset -compact -offset xxx
@@ -971,7 +983,13 @@ The following URL schemes are supported:
 .It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
 .It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
 .It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
-.It Sy xml Ns / Ns Sy html No (requires Sy xml Ns )
+.It Sy xml No (requires Sy lxml Ns )
+.Bl -tag -width XXXX -compact -offset XXX
+.It Sy " v"
+show only columns in current row attributes
+.It Sy za
+add column for xml attributes
+.El
 .It Sy xpt No (SAS; requires Sy xport Ns )
 .It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
 .It Sy sav No (SPSS; requires Sy savReaderWriter Ns )
