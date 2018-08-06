@@ -10,7 +10,7 @@ def open_jsonl(p):
     return JSONSheet(p.name, source=p, jsonlines=True)
 
 
-class JSONSheet(Sheet):
+class JSONSheet(PythonSheet):
     @asyncthread
     def reload(self):
         self.colnames = {}  # [colname] -> Column
@@ -63,8 +63,6 @@ class JSONSheet(Sheet):
 
     def newRow(self):
         return {}
-
-JSONSheet.bindkey(ENTER, 'pyobj-dive')
 
 
 def _rowdict(cols, row):

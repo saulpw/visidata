@@ -1,7 +1,6 @@
 from visidata import *
 
-option('pyobj_show_hidden', False, 'show _private properties on pyobjs')
-option('pyobj_show_methods', False, 'show methods on pyobjs')
+option('visibility', 0, 'visibility level')
 
 globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, None))')
 globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())')
@@ -22,7 +21,8 @@ class PythonSheet(Sheet):
     pass
 
 # used as ENTER in several pyobj sheets
-PythonSheet.addCommand(None, 'dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow).cursorRowIndex = cursorColIndex')
+PythonSheet.addCommand(None, 'dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow)')
+bindkey(ENTER, 'dive-row')
 
 def expand_cols_deep(sheet, cols, row, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'
@@ -211,19 +211,19 @@ class SheetObject(PythonSheet):
 
     def reload(self):
         self.rows = []
+        vislevel = options.visibility
         for r in dir(self.source):
             try:
-                if options.pyobj_show_hidden or not r.startswith('_'):
-                    self.addRow(r)
-                elif options.pyobj_show_methods or not callable(getattr(self.source, r)):
-                    self.addRow(r)
+                if vislevel <= 1 and r.startswith('_'): continue
+                if vislevel <= 0 and callable(getattr(self.source, r)): continue
+                self.addRow(r)
             except Exception:
                 pass
 
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
             ColumnSourceAttr('value'),
-            ColumnExpr('docstring', 'value.__doc__')
+            ColumnExpr('docstring', 'value.__doc__ if callable(value) else type(value).__name__')
         ]
         self.recalc()
 
@@ -231,6 +231,6 @@ class SheetObject(PythonSheet):
 
 SheetObject.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)')
 SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()')
-SheetObject.addCommand('v', 'visibility', 'options.pyobj_show_hidden = not options.pyobj_show_hidden; reload()')
-SheetObject.addCommand('gv', 'show-hidden', 'options.pyobj_show_hidden = options.pyobj_show_methods = True; reload()')
-SheetObject.addCommand('zv', 'hide-hidden', 'options.pyobj_show_hidden = options.pyobj_show_methods = False; reload()')
+SheetObject.addCommand('v', 'visibility', 'options.set("visibility", 0 if options.visibility else 1, sheet); reload()')
+SheetObject.addCommand('gv', 'show-hidden', 'options.visibility = 2; reload()')
+SheetObject.addCommand('zv', 'hide-hidden', 'options.visibility -= 1; reload()')
