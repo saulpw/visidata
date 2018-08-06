@@ -5,15 +5,39 @@ import ipaddress
 
 from visidata import *
 
-
 protocols = collections.defaultdict(dict)  # ['ethernet'] = {[6] -> 'IP'}
 _flags = collections.defaultdict(dict)  # ['tcp'] = {[4] -> 'FIN'}
+
+
+url_oui = 'https://visidata.org/data/wireshark-oui.tsv'
+url_iana = 'https://visidata.org/data/iana-ports.tsv'
+
 oui = {}  # [macprefix (like '01:02:dd:0')] -> 'manufacturer'
 services = {}  # [('tcp', 25)] -> 'smtp'
 
+
+def manuf(mac):
+    return oui.get(mac[:13]) or oui.get(mac[:10]) or oui.get(mac[:8])
+
 def macaddr(addrbytes):
-    return ':'.join('%02x' % b for b in addrbytes)
-#    return oui.get(mac[:13]) or oui.get(mac[:10]) or oui.get(mac[:8])
+    mac = ':'.join('%02x' % b for b in addrbytes)
+    return mac
+
+def macmanuf(mac):
+    manuf = oui.get(mac[:13])
+    if manuf:
+        return manuf + mac[13:]
+
+    manuf = oui.get(mac[:10])
+    if manuf:
+        return manuf + mac[10:]
+
+    manuf = oui.get(mac[:8])
+    if manuf:
+        return manuf + mac[8:]
+
+    return mac
+
 
 def FlagGetter(flagfield):
     def flags_func(fl):
@@ -35,24 +59,27 @@ def init_pcap():
     load_consts(protocols['icmp'], dpkt.icmp, 'ICMP_')
     load_consts(_flags['tcp'], dpkt.tcp, 'TH_')
 
-    try:
-        vsoui = open_tsv(Path('wireshark-oui.tsv'))
-        vsoui.reload_sync()
-        for macslash, shortname, _ in vsoui.rows:
-            if macslash.endswith('/36'): prefix = macslash[:13]
-            elif macslash.endswith('/28'): prefix = macslash[:13]
-            else: prefix = macslash[:13]
-            oui[prefix.lower()] = shortname
-    except Exception as e:
-        pass # exceptionCaught(e)
+    load_oui(url_oui)
+    load_iana(url_iana)
 
-    try:
-        ports_tsv = open_tsv(Path('iana-ports.tsv'))
-        ports_tsv.reload_sync()
-        for r in ports_tsv.rows:
-            services[(r.transport, int(r.port))] = r.service
-    except Exception as e:
-        pass # exceptionCaught(e)
+
+@asyncthread
+def load_oui(url):
+    vsoui = open_tsv(urlcache(url, 30*days))
+    vsoui.reload_sync()
+    for r in vsoui.rows:
+        if r.prefix.endswith('/36'): prefix = r.prefix[:13]
+        elif r.prefix.endswith('/28'): prefix = r.prefix[:10]
+        else: prefix = r.prefix[:8]
+        oui[prefix.lower()] = r.shortname
+
+
+@asyncthread
+def load_iana(url):
+    ports_tsv = open_tsv(urlcache(url, 30*days))
+    ports_tsv.reload_sync()
+    for r in ports_tsv.rows:
+        services[(r.transport, int(r.port))] = r.service
 
 
 class Host:
@@ -220,8 +247,10 @@ class PcapSheet(Sheet):
     columns = [
         ColumnAttr('timestamp', type=date, fmtstr="%H:%M:%S.%f"),
         Column('transport', type=get_transport, width=5),
+        Column('srcmanuf', getter=lambda col,row: manuf(macaddr(row.src))),
         Column('srchost', getter=lambda col,row: row.srchost),
         Column('srcport', type=int, getter=lambda col,row: get_port(row, 'sport')),
+        Column('dstmanuf', getter=lambda col,row: manuf(macaddr(row.dst))),
         Column('dsthost', getter=lambda col,row: row.dsthost),
         Column('dstport', type=int, getter=lambda col,row: get_port(row, 'dport')),
         ColumnAttr('ether_proto', 'type', type=lambda v: protocols['ethernet'].get(v), width=0),

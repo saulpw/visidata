@@ -11,7 +11,8 @@ earthdays = lambda n: n*24*60*60
 def domotd():
     try:
         if options.motd_url:
-            line = random.choice(urlcache(options.motd_url, earthdays(1)).splitlines())  # 1 earth day
+            p = urlcache(options.motd_url, earthdays(1))
+            line = random.choice(list(p))
             status(line.split('\t')[0], priority=-1)
     except Exception:
         pass

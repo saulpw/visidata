@@ -1,17 +1,19 @@
-from visidata import *
-
+import os
+import os.path
+import time
 import urllib.request
 import urllib.parse
-import os.path
+
+from visidata import __version_info__, Path, options
 
 
-@functools.lru_cache()
 def urlcache(url, cachesecs=24*60*60):
+    'Returns Path object to local cache of url contents.'
     p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
     if p.exists():
         secs = time.time() - p.stat().st_mtime
         if secs < cachesecs:
-            return p.read_text()
+            return p
 
     if not p.parent.exists():
         os.mkdir(p.parent.resolve())
@@ -24,4 +26,4 @@ def urlcache(url, cachesecs=24*60*60):
         with p.open_text(mode='w') as fpout:
             fpout.write(ret)
 
-    return ret
+    return p

@@ -17,7 +17,7 @@ currency_symbols = {
 
 def currency_rates_json(base='USD', date='latest'):
     url = 'https://api.fixer.io/%s?base=USD' % date
-    return urlcache(url)
+    return urlcache(url).read_text()
 
 @functools.lru_cache()
 def currency_rates(base='USD'):
