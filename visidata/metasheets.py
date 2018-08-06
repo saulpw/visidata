@@ -155,7 +155,7 @@ class OptionsSheet(Sheet):
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source)),
         Column('default', getter=lambda col,row: options.get(row.name, 'global')),
-        ColumnAttr('description', 'helpstr')
+        Column('description', getter=lambda col,row: options._get(row.name, 'global').helpstr),
     )
     colorizers = Sheet.colorizers + [
         Colorizer('cell', 9, lambda s,c,r,v: v.value if c is s.columns[1] and r.name.startswith('color_') else None),
