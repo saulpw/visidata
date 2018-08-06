@@ -4,5 +4,5 @@ key1	count	sum_qty	avg_qty*amt
 2017-12-25	1	16	4.80
 2016-01-01	2	3	6.00
 	1	4	172.80
-KeyError	1	32	105.60
-JSONDecodeError	1	0	
+{'amt': '3.3', 'key2': 'baz', 'qty': '32'}	1	32	105.60
+{"key1": "2017-12-25 8:43", "foo", "amt": ".03", "qty": null}	1	0	
