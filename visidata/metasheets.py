@@ -1,6 +1,6 @@
-from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, error, anytype, ENTER, asyncthread, status, Progress, option
+from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, anytype, ENTER, asyncthread, option
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
-from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus
+from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
 
 globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
@@ -146,13 +146,15 @@ class HelpSheet(Sheet):
 
 
 class OptionsSheet(Sheet):
+    _rowtype = Option  # rowdef: Option
     rowtype = 'options'
     precious = False
     columns = (
         ColumnAttr('option', 'name'),
         Column('value',
-            getter=lambda col,row: options.get(row.name, col.sheet.source if options.get('visibility', col.sheet) else 'override'),
-            setter=lambda col,row,val: options.set(row.name, val, col.sheet.source if options.get('visibility', col.sheet) else 'override')),
+            getter=lambda col,row: col.sheet.diffOption(row.name),
+            setter=lambda col,row,val: options.set(row.name, val, col.sheet.source)),
+        Column('default', getter=lambda col,row: options.get(row.name, 'global')),
         ColumnAttr('description', 'helpstr')
     )
     colorizers = Sheet.colorizers + [
@@ -160,24 +162,32 @@ class OptionsSheet(Sheet):
     ]
     nKeys = 1
 
-    def setVis(self, level):
-        options.set("visibility", level, self)
-        self.columns[1].name = 'global_value' if level else 'sheet_value'
-        self.rowtype = 'global options' if level else 'sheet options'
+    def diffOption(self, optname):
+        val = options.get(optname, self.source)
+        default = options.get(optname, 'global')
+        return val if val != default else ''
+
+    def editOption(self, row):
+        if isinstance(row.value, bool):
+            options.set(row.name, not options.get(row.name, self.source), self.source)
+        else:
+            options.set(row.name, self.editCell(1), self.source)
 
     def reload(self):
         self.rows = []
         for k in options.keys():
             opt = options._get(k)
             self.addRow(opt)
-        self.cursorVisibleColIndex = 1
-        self.setVis(options.get('visibility', self))
 
-OptionsSheet.addCommand('v', 'visibility', 'setVis(0 if options.get("visibility", sheet) else 1)')
+OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
 
-vd().optionsSheet = OptionsSheet('global_options', source=None)
-vd().sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
-vd().graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd().allSheets)
+bindkeys.set('e', 'edit-option', OptionsSheet)
+bindkeys.set(ENTER, 'edit-option', OptionsSheet)
+
+vd.optionsSheet = OptionsSheet('global_options', source='override')
+
+vd.sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
+vd.graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd().allSheets)
 
 
 def combineColumns(cols):
