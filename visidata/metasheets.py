@@ -178,6 +178,7 @@ class OptionsSheet(Sheet):
         for k in options.keys():
             opt = options._get(k)
             self.addRow(opt)
+        self.columns[1].name = 'global_value' if self.source == 'override' else 'sheet_value'
 
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
 
