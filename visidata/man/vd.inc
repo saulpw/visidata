@@ -195,6 +195,13 @@ reset cache for current/all visible column(s)
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .It Ic "g*" Ar regex Ns Sy / Ns Ar subst
 .No modify selected rows in current column, replacing Ar regex No with Ar subst
+.Pp
+.It Ic " (   g("
+.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
+.It Ic "z(  gz(" Ar depth
+.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
+.It Ic " )"
+unexpand current column; restore original column and remove other columns at this level
 .El
 .Ss Row Selection
 .
@@ -648,10 +655,6 @@ edit contents of current cell
 toggle show/hide for methods and hidden properties
 .It Ic "gv  zv"
 show/hide methods and hidden properties
-.It Ic " ("
-expand current column of lists or dicts into multiple columns and hide original column
-.It Ic " )"
-unexpand current column; restore original column and remove other columns at this level
 .El
 .
 .Sh COMMANDLINE OPTIONS
@@ -744,12 +747,19 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy json No (single object) and Sy jsonl No (one object per line).
 .Bl -inset -compact -offset xxx
-.It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be expanded into new columns with Sy "\&(" Ns and unexpanded with Sy "\&)" Ns .
+.It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be expanded into new columns with Sy "\&(" No and unexpanded with Sy "\&)" Ns .
 .El
 .El
 .Pp
 .Bl -inset -compact -offset xxx
 .It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
+.El
+.Pp
+.Bl -inset -compact -offset xxx
+.It Sy pcap No ( requires Sy xpkt Ns , Sy dnslib Ns )
+.Bl -inset -compact -offset xxx
+.It View and investigate captured network traffic in a tabular format.
+.El
 .El
 .Pp
 .Bl -inset -compact -offset xxx
@@ -781,7 +791,13 @@ The following URL schemes are supported:
 .It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
 .It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
 .It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
-.It Sy xml Ns / Ns Sy html No (requires Sy xml Ns )
+.It Sy xml No (requires Sy lxml Ns )
+.Bl -tag -width XXXX -compact -offset XXX
+.It Sy " v"
+show only columns in current row attributes
+.It Sy za
+add column for xml attributes
+.El
 .It Sy xpt No (SAS; requires Sy xport Ns )
 .It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
 .It Sy sav No (SPSS; requires Sy savReaderWriter Ns )

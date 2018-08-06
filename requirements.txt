@@ -3,7 +3,7 @@ python-dateutil     # date type
 # optional requirements
 pandas==0.19.2      # dta (Stata)
 requests            # http
-lxml                # html
+lxml                # html/xml
 openpyxl            # xlsx
 xlrd                # xls
 h5py                # hdf5
