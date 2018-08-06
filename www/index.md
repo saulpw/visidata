@@ -3,7 +3,7 @@
 
 # VisiData
 
-## Latest Version: [1.2.1 (released 2018-07-05)](/releases)
+## Latest Version: [1.3 (released 2018-06-06) ](/releases)
 
 VisiData is an interactive multitool for tabular data.  It combines the clarity of a spreadsheet, the efficiency of the terminal, and the power of Python, into a lightweight utility which can handle millions of rows with ease.
 
