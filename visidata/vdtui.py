@@ -540,7 +540,7 @@ class VisiData:
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
         self.allSheets = weakref.WeakKeyDictionary()  # [BaseSheet] -> sheetname (all non-precious sheets ever pushed)
         self.statuses = collections.OrderedDict()  # (priority, statusmsg) -> num_repeats; shown until next action
-        self.statusHistory = collections.OrderedDict()  # same as statuses but for all status messages ever
+        self.statusHistory = []  # list of [priority, statusmsg, repeats] for all status messages ever
         self.lastErrors = []
         self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
@@ -573,8 +573,14 @@ class VisiData:
         'Add status message to be shown until next action.'
         k = (priority, args)
         self.statuses[k] = self.statuses.get(k, 0) + 1
-        self.statusHistory[k] = self.statusHistory.get(k, 0) + 1
-        self.statusHistory.move_to_end(k)
+
+        if self.statusHistory:
+            prevpri, prevargs, prevn = self.statusHistory[-1]
+            if prevpri == priority and prevargs == args:
+                self.statusHistory[-1][2] += 1
+                return True
+
+        self.statusHistory.append([priority, args, 1])
         return True
 
     def addHook(self, hookname, hookfunc):

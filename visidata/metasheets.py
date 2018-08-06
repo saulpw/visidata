@@ -24,20 +24,20 @@ def getOptionsSheet(sheet):
 
 class StatusSheet(Sheet):
     precious = False
-    rowtype = 'statuses'
+    rowtype = 'statuses'  # rowdef: (priority, args, nrepeats)
     columns = [
-        ColumnItem('frequency', 1, type=int, width=0),
-        Column('priority', type=int, width=0, getter=lambda col,row: row[0][0]),
-        Column('args', width=0, getter=lambda col,row: row[0][1]),
-        Column('message', getter=lambda col,row: composeStatus(row[0][1], row[1]))
+        ColumnItem('priority', 0, type=int, width=0),
+        ColumnItem('nrepeats', 2, type=int, width=0),
+        ColumnItem('args', 1, width=0),
+        Column('message', getter=lambda col,row: composeStatus(row[1], row[2])),
     ]
     colorizers = [
-        Colorizer('row', 1, lambda s,c,r,v: options.color_error if r[0][0] == 2 else None),
-        Colorizer('row', 1, lambda s,c,r,v: options.color_warning if r[0][0] == 1 else None),
+        Colorizer('row', 1, lambda s,c,r,v: options.color_error if r[0] == 2 else None),
+        Colorizer('row', 1, lambda s,c,r,v: options.color_warning if r[0] == 1 else None),
     ]
 
     def reload(self):
-        self.rows = list(reversed(vd.statusHistory.items()))
+        self.rows = vd.statusHistory[::-1]
 
 
 class ColumnsSheet(Sheet):
