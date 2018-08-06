@@ -13,8 +13,8 @@ globalCommand('gD', 'visidata-dir', 'p=Path(options.visidata_dir); vd.push(DirSh
 globalCommand('D', 'cmdlog', 'vd.push(vd.cmdlog)')
 globalCommand('^D', 'save-cmdlog', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)')
 globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
-globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or error("no replay to advance")).advance()')
-globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()')
+globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
+globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
 
 globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
 
@@ -308,7 +308,7 @@ class CommandLog(TsvSheet):
 CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
 CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
 CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
-CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or error("no rows selected"), input("save macro for keystroke: "))')
+CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))')
 options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
 vd().cmdlog = CommandLog('cmdlog')

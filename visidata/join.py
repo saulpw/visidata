@@ -1,11 +1,11 @@
 import collections
 import itertools
 
-from visidata import asyncthread, Progress, status
+from visidata import asyncthread, Progress, status, fail
 from visidata import ColumnItem, ColumnExpr, SubrowColumn, Sheet, Column
 from visidata import SheetsSheet
 
-SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))')
+SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
 
 def createJoinedSheet(sheets, jointype=''):
     if jointype == 'append':
@@ -104,7 +104,7 @@ class ColumnConcat(Column):
         if srcCol:
             srcCol.setValue(srcRow, v)
         else:
-            error('column not on source sheet')
+            fail('column not on source sheet')
 
 
 # rowdef: (Sheet, row)

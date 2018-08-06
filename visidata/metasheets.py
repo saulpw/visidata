@@ -32,8 +32,8 @@ class StatusSheet(Sheet):
         Column('message', getter=lambda col,row: composeStatus(row[1], row[2])),
     ]
     colorizers = [
-        Colorizer('row', 1, lambda s,c,r,v: options.color_error if r[0] == 2 else None),
-        Colorizer('row', 1, lambda s,c,r,v: options.color_warning if r[0] == 1 else None),
+        Colorizer('row', 1, lambda s,c,r,v: options.color_error if r[0] == 3 else None),
+        Colorizer('row', 1, lambda s,c,r,v: options.color_warning if r[0] in [1,2] else None),
     ]
 
     def reload(self):
@@ -74,7 +74,7 @@ class ColumnsSheet(Sheet):
             self.rows = [col for vs in self.source for col in vs.visibleCols if vs is not self]
 
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)')
-ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or error("no columns selected to concatenate")))')
+ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or fail("no columns selected to concatenate")))')
 
 
 class SheetsSheet(Sheet):

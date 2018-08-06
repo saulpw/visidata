@@ -170,7 +170,7 @@ def saveSheets(fn, *vsheets, confirm_overwrite=False):
         assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
 
         # get save function to call
-        savefunc = getGlobals().get('save_' + filetype) or error('no function save_'+filetype)
+        savefunc = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
 
         if givenpath.exists():
             if confirm_overwrite:
@@ -182,7 +182,7 @@ def saveSheets(fn, *vsheets, confirm_overwrite=False):
             savefunc(p, vs)
     else:
         # get save function to call
-        savefunc = getGlobals().get('save_' + filetype) or error('no function save_'+filetype)
+        savefunc = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
 
         if givenpath.exists():
             if confirm_overwrite:
@@ -316,7 +316,7 @@ class DirSheet(Sheet):
                         changes.append((col, r))
 
         if not changes and not deletes:
-            error('nothing to save')
+            fail('nothing to save')
 
         cstr = ''
         if changes:

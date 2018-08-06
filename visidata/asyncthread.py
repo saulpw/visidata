@@ -5,8 +5,8 @@ from .vdtui import *
 
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
-Sheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or error("no active threads on this sheet"))')
-globalCommand('g^C', 'cancel-all', 'cancelThread(*vd.threads or error("no threads"))')
+Sheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))')
+globalCommand('g^C', 'cancel-all', 'cancelThread(*vd.threads or fail("no threads"))')
 globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)')
 
 def cancelThread(*threads, exception=EscapeException):

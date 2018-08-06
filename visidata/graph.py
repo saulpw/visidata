@@ -51,7 +51,7 @@ class GraphSheet(InvertedCanvas):
         super().__init__(name, sheet, sourceRows=rows, **kwargs)
 
         self.xcols = xcols
-        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or error('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
+        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or fail('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
 
     @asyncthread
     def reload(self):

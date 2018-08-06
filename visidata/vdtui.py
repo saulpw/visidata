@@ -321,7 +321,7 @@ globalCommand('q', 'quit-sheet',  'vd.sheets[1:] or options.quitguard and confir
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
 globalCommand('^L', 'redraw', 'vd.scr.clear()')
-globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or error("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
+globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
 globalCommand('^Z', 'suspend', 'suspend()')
 
@@ -396,6 +396,10 @@ def catchapply(func, *args, **kwargs):
 
 def error(s):
     'Log an error and raise an exception.'
+    status(s, priority=3)
+    raise ExpectedException(s)
+
+def fail(s):
     status(s, priority=2)
     raise ExpectedException(s)
 
@@ -692,7 +696,7 @@ class VisiData:
             if ret:
                 self.lastInputs[type][ret] = ret
             elif defaultLast:
-                histlist or error("no previous input")
+                histlist or fail("no previous input")
                 ret = histlist[-1]
         else:
             ret = self._inputLine(prompt, **kwargs)
@@ -761,7 +765,8 @@ class VisiData:
                 one = True
                 msg = composeStatus(msgparts, n)
 
-                if pri == 2: msgattr = error_attr
+                if pri == 3: msgattr = error_attr
+                if pri == 2: msgattr = warn_attr
                 elif pri == 1: msgattr = warn_attr
                 else: msgattr = attr
                 clipdraw(scr, y, x, msg, msgattr, self.windowWidth)
@@ -888,7 +893,7 @@ class VisiData:
         if vs in self.sheets:
             self.sheets.remove(vs)
         else:
-            error('sheet not on stack')
+            fail('sheet not on stack')
 
     def push(self, vs):
         'Move given sheet `vs` to index 0 of list `sheets`.'
@@ -999,9 +1004,9 @@ class BaseSheet:
         longname = bindkeys._get(keystrokes_or_longname)
         try:
             if longname:
-                return commands._get(longname) or error('no command "%s"' % longname)
+                return commands._get(longname) or fail('no command "%s"' % longname)
             else:
-                return commands._get(keystrokes_or_longname) or error('no binding for %s' % keystrokes_or_longname)
+                return commands._get(keystrokes_or_longname) or fail('no binding for %s' % keystrokes_or_longname)
         except Exception:
             return None
 
@@ -2069,7 +2074,7 @@ class Column:
 
     def setValue(self, row, value):
         'Set our column value on row.  defaults to .setter; override in Column subclass. no type checking'
-        self.setter or error(self.name+' column cannot be changed')
+        self.setter or fail(self.name+' column cannot be changed')
         return self.setter(self, row, value)
 
     def setValues(self, rows, *values):
@@ -2183,7 +2188,7 @@ class SubrowColumn(Column):
     def setValue(self, row, value):
         subrow = row[self.subrowidx]
         if subrow is None:
-            error('no source row')
+            fail('no source row')
         self.origcol.setValue(subrow, value)
 
 
@@ -2257,7 +2262,7 @@ class ColumnExpr(Column):
 def confirm(prompt):
     yn = input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
-        error('disconfirmed')
+        fail('disconfirmed')
     return True
 
 
@@ -2365,7 +2370,7 @@ class EnableCursor:
             curses.mousemask(-1)
 
 def launchEditor(*args):
-    editor = os.environ.get('EDITOR') or error('$EDITOR not set')
+    editor = os.environ.get('EDITOR') or fail('$EDITOR not set')
     args = [editor] + list(args)
     with SuspendCurses():
         return subprocess.call(args)

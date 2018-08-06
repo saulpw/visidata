@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, error, status, Sheet, Column, regex_flags, rotate_range, warning
+from visidata import vd, VisiData, error, status, Sheet, Column, regex_flags, rotate_range, fail
 
 vd.searchContext = {}  # regex, columns, backward to kwargs from previous search
 
@@ -52,7 +52,7 @@ def nextColRegex(sheet, colregex):
         if re.search(colregex, c.name, regex_flags()):
             return i
 
-    error('no column name matches /%s/' % colregex)
+    fail('no column name matches /%s/' % colregex)
 
 
 def moveRegex(vd, sheet, *args, **kwargs):
@@ -75,7 +75,7 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
         if regex:
             vd.searchContext["regex"] = re.compile(regex, regex_flags()) or error('invalid regex: %s' % regex)
 
-        regex = vd.searchContext.get("regex") or warning("no regex")
+        regex = vd.searchContext.get("regex") or fail("no regex")
 
         columns = vd.searchContext.get("columns")
         if columns == "cursorCol":

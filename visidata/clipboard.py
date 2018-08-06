@@ -5,7 +5,7 @@ import sys
 import tempfile
 import functools
 
-from visidata import vd, asyncthread, sync, status, error, option, options
+from visidata import vd, asyncthread, sync, status, fail, option, options
 from visidata import Sheet, saveSheets
 
 vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
@@ -73,9 +73,7 @@ class _Clipboard:
     @property
     def command(self):
         'Return cmdline cmd+args (as list for Popen) to copy data to the system clipboard.'
-        cmd = options.clipboard_copy_cmd
-        if not cmd:
-            error('options.clipboard_copy_cmd not set')
+        cmd = options.clipboard_copy_cmd or fail('options.clipboard_copy_cmd not set')
         return cmd.split()
 
     def copy(self, value):
