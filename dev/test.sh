@@ -25,11 +25,11 @@ for i in $TESTS ; do
         git --no-pager diff tests/
         git --no-pager diff --numstat tests/
         git checkout tests/golden/
-        echo'==================================================='
+        echo '==================================================='
     else
         echo '=== git diffs; will trigger build failure ==='
         git --no-pager diff --numstat tests/
         git --no-pager diff --exit-code tests/
-        echo'=============================================='
+        echo '=============================================='
     fi
 done
