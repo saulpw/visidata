@@ -68,8 +68,10 @@ In most cases, commands that affect selected rows will affect all rows if no row
 .Pp
 .Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " F1   ^H"
+.It Ic " ^H"
 view this man page
+.It Ic "z^H"
+view sheet of commands and keybindings
 .It Ic ^Q
 abort program immediately
 .It Ic ^C
@@ -243,11 +245,13 @@ append a blank row/column
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
-delete current/selected row(s) and move to clipboard
+delete (cut) current/selected row(s) and move to clipboard
 .It Ic "  y   gy"
 yank (copy) current/all selected row(s) to clipboard
 .It Ic " zy  gzy"
 yank (copy) contents of current column for current/selected row(s) to clipboard
+.It Ic " zd  gzd"
+delete (cut) contents of current column for current/selected row(s) and move to clipboard
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
@@ -264,10 +268,6 @@ fill null cells in current column with contents of non-null cells up the current
 edit contents of current cell
 .It Ic " ge" Ar text
 .No set contents of current column for selected rows to Ar text
-.It Ic " zd   Del"
-.No set contents of current cell to Sy None
-.It Ic "gzd  gDel"
-.No set contents of cells in current column to Sy None No for selected rows
 .
 .El
 .

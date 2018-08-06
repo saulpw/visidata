@@ -84,8 +84,8 @@ Sheet	copy-cell	z	y	zy	n	n	n	y		data-clipboard-copy-cell	yank (copy) current cel
 Sheet	copy-cells	gz	y	gzy	n	use	n	y			yank (copy) contents of current column for selected rows to clipboard
 Sheet	copy-row		y	y	n	n	n	y		data-clipboard-copy-row	yank (copy) current row to clipboard
 Sheet	copy-selected	g	y	gy	n	use	n	y	4	data-clipboard-copy-selected	yank (copy) selected rows to clipboard
-Sheet	delete-cell	z	d	zd	n	n	y	y		modify-clear-cell	delete current cell and move it to clipboard
-Sheet	delete-cells	gz	d	gzd	n	use	y	y		modify-clear-column-selected	delete contents of current column for selected rows and move them to clipboard
+Sheet	delete-cell	z	d	zd	n	n	y	y		modify-clear-cell	delete (cut) current cell and move it to clipboard
+Sheet	delete-cells	gz	d	gzd	n	use	y	y		modify-clear-column-selected	delete (cut) contents of current column for selected rows and move them to clipboard
 Sheet	delete-row		d	d	n	n	y	y	1,2,5	modify-delete-row	delete current row and move it to clipboard
 Sheet	delete-selected	g	d	gd	n	use	y	y	5	modify-delete-selected	delete selected rows and move them to clipboard
 Sheet	describe-sheet		I	I	derived	n	n	y		data-describe	open descriptive statistics for all visible columns
