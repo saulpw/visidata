@@ -27,10 +27,10 @@ for i in $TESTS ; do
         git checkout tests/golden/
         echo '==================================================='
     else
-        echo '==================================================='
         PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i --batch --output tests/golden/${outbase%.vd}.tsv
-        git --no-pager diff --numstat tests/
-        git --no-pager diff --exit-code tests/
-        echo '=============================================='
     fi
+    echo '=== git diffs for BUILD FAILURE ==='
+    git --no-pager diff --numstat tests/
+    git --no-pager diff --exit-code tests/
+    echo '=============================================='
 done
