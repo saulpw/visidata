@@ -1123,10 +1123,10 @@ class Sheet(BaseSheet):
         Colorizer('hdr', 9, lambda s,c,r,v: options.color_current_hdr if c is s.cursorCol else None),
         Colorizer('hdr', 8, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
         Colorizer('col', 5, lambda s,c,r,v: options.color_current_col if c is s.cursorCol else None),
-        Colorizer('col', 7, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
+        Colorizer('col', 6, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
         Colorizer('cell', 2, lambda s,c,r,v: options.color_default),
         Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
-        Colorizer('row', 4, lambda s,c,r,v: options.color_error if isinstance(r, (Exception, TypedExceptionWrapper)) else None),
+        Colorizer('row', 7, lambda s,c,r,v: options.color_error if isinstance(r, (Exception, TypedExceptionWrapper)) else None),
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
