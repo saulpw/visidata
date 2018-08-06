@@ -11,7 +11,7 @@ option('disp_histolen', 50, 'width of histogram column')
 #option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
-ColumnsSheet.addCommand(ENTER, 'freq-col', 'vd.push(SheetFreqTable(source[0], cursorRow))')
+ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(source[0], cursorRow))')
 
 def valueNames(vals):
     return '-'.join(str(v) for v in vals)
