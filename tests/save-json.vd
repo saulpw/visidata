@@ -1,7 +1,0 @@
-sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/test.jsonl	o	
-test			save-sheet	tests/golden/save-json.csv	^S	
-test			save-sheet	tests/golden/save-json.json	^S	
-test			save-sheet	tests/golden/save-json.md	^S	
-test			save-sheet	tests/golden/save-json.html	^S	
-test			save-sheet	tests/golden/save-json.txt	^S	
