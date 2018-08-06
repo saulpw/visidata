@@ -388,6 +388,12 @@ def isNumeric(col):
 
 ###
 
+def catchapply(func, *args, **kwargs):
+    try:
+        return func(*args, **kwargs)
+    except Exception as e:
+        exceptionCaught(e)
+
 def error(s):
     'Log an error and raise an exception.'
     status(s, priority=2)
@@ -871,6 +877,7 @@ class VisiData:
 
             self.checkForFinishedThreads()
             self.callHook('predraw')
+            catchapply(sheet.checkCursor)
 
     def replace(self, vs):
         'Replace top sheet with the given sheet `vs`.'
@@ -1056,10 +1063,7 @@ class BaseSheet:
         except Exception:
             self.vd.exceptionCaught(e)
 
-        try:
-            self.checkCursor()
-        except Exception as e:
-            exceptionCaught(e)
+        catchapply(self.checkCursor)
 
         self.vd.refresh()
         return escaped
@@ -1703,6 +1707,7 @@ class Sheet(BaseSheet):
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.vd.windowWidth-2, options.disp_more_right, colors[options.color_column_sep])
 
+        catchapply(self.checkCursor)
 
     def editCell(self, vcolidx=None, rowidx=None, **kwargs):
         'Call `editText` at its place on the screen.  Returns the new value, properly typed'
