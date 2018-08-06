@@ -5,7 +5,7 @@ import collections
 from visidata import *
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
-Sheet.addCommand('z+', 'show-aggregate', 'status(cursorCol.format(chooseOne(aggregators)(cursorCol, rows)))')
+Sheet.addCommand('z+', 'show-aggregate', 'agg=chooseOne(aggregators); status(cursorCol.format(wrapply(agg.type or cursorCol.type, agg(cursorCol, rows))))')
 
 aggregators = collections.OrderedDict()
 

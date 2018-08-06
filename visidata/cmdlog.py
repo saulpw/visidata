@@ -121,9 +121,10 @@ class CommandLog(TsvSheet):
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
+        comment = CommandLog.currentReplayRow.comment if CommandLog.currentReplayRow else cmd.helpstr
         self.currentActiveRow = self.newRow(sheet=sheetname, col=colname, row=rowname,
                                               keystrokes=keystrokes, input=args,
-                                              longname=cmd.longname, comment=cmd.helpstr)
+                                              longname=cmd.longname, comment=comment)
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
