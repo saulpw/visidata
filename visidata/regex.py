@@ -21,6 +21,7 @@ def addRegexColumns(regexMaker, vs, colIndex, origcol, exampleRow, regexstr):
 
     for i, g in enumerate(result):
         c = Column(origcol.name+'_re'+str(i), getter=lambda col,row,i=i,func=func: func(row)[i])
+        c.origCol = origcol
         vs.addColumn(c, index=colIndex+i+1)
 
 
