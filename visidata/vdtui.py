@@ -1965,7 +1965,7 @@ class Column:
         'Generate (val, row) for the given `rows` at this Column, excluding errors and nulls.'
         f = isNullFunc()
 
-        for r in rows:
+        for r in Progress(rows):
             try:
                 v = self.getTypedValue(r)
                 if not f(v):

@@ -3,14 +3,14 @@ from copy import deepcopy
 
 Sheet.addCommand("'", 'freeze-col', 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)')
 Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)')
-Sheet.addCommand("z'", 'cache-col', 'resetCache(cursorCol)')
-Sheet.addCommand("gz'", 'cache-cols', 'resetCache(*visibleCols)')
+Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()')
+Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()')
 
-def resetCache(self, *cols):
-    for col in cols:
-        col._cachedValues = collections.OrderedDict()
-    status("reset cache for " + (cols[0].name if len(cols) == 1 else str(len(cols))+" columns"))
-Sheet.resetCache = resetCache
+def resetCache(self):
+    self._cachedValues = collections.OrderedDict()
+    status("reset cache for " + self.name)
+
+Column.resetCache = resetCache
 
 def StaticColumn(rows, col):
     c = deepcopy(col)
