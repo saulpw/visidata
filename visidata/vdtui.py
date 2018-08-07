@@ -1777,7 +1777,6 @@ Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(*keyCols)'),
 Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(*keyCols, reverse=True)'),
 
 Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
-Sheet.addCommand("z'", 'cache-col', 'cursorCol._cachedValues.clear()'),
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)'),
 Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValuesTyped(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
@@ -1968,7 +1967,7 @@ class Column:
 
         for r in rows:
             try:
-                v = self.type(self.getValue(r))
+                v = self.getTypedValue(r)
                 if not f(v):
                     yield v, r
             except Exception:
