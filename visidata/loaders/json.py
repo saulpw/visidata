@@ -65,21 +65,28 @@ class JSONSheet(PythonSheet):
         return {}
 
 
+## saving json and jsonl
+
+class vjsonEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, TypedExceptionWrapper):
+            if options.error_is_null:
+                return None
+            return {type(o.exception).__name__: str(o.exception), 'value': str(o.val)}
+        elif isinstance(o, TypedWrapper):
+            return o.val
+        return json.JSONEncoder.default(self, o)
+
+
 def _rowdict(cols, row):
-    d = {}
-    for col in cols:
-        try:
-            d[col.name] = col.getTypedValue(row)
-        except Exception:
-            pass
-    return d
+    return {c.name: wrapply(c.getTypedValue, row) for c in cols}
 
 
 @asyncthread
 def save_json(p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
-        for chunk in json.JSONEncoder().iterencode([_rowdict(vcols, r) for r in Progress(vs.rows)]):
+        for chunk in vjsonEncoder().iterencode([_rowdict(vcols, r) for r in Progress(vs.rows)]):
             fp.write(chunk)
 
 
@@ -87,5 +94,7 @@ def save_json(p, vs):
 def save_jsonl(p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
+        jsonenc = vjsonEncoder()
         for r in Progress(vs.rows):
-            fp.write(json.dumps(_rowdict(vcols, r)) + '\n')
+            rowdict = _rowdict(vcols, r)
+            fp.write(jsonenc.encode(rowdict) + '\n')
