@@ -766,7 +766,7 @@ class VisiData:
                 msg = composeStatus(msgparts, n)
 
                 if pri == 3: msgattr = error_attr
-                if pri == 2: msgattr = warn_attr
+                elif pri == 2: msgattr = warn_attr
                 elif pri == 1: msgattr = warn_attr
                 else: msgattr = attr
                 clipdraw(scr, y, x, msg, msgattr, self.windowWidth)

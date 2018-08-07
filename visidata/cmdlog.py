@@ -34,7 +34,7 @@ option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 
 def checkVersion(desired_version):
     if desired_version != visidata.__version__:
-        error("version %s required" % desired_version)
+        fail("version %s required" % desired_version)
 
 def fnSuffix(template):
     for i in range(1, 1000):
@@ -242,7 +242,7 @@ class CommandLog(TsvSheet):
         CommandLog.currentReplayRow = None
 
         if escaped:  # escape during replay aborts replay
-            status('replay aborted')
+            warning('replay aborted')
         return escaped
 
     def replay_sync(self, live=False):
