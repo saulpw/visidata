@@ -2,8 +2,8 @@ from visidata import *
 
 option('color_graph_axis', 'bold', 'color for graph axis labels')
 
-globalCommand('.', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, [cursorCol]))', 'graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determin color', 'data-plot-column')
-globalCommand('g.', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, selectedRows or rows, keyCols, numericCols(nonKeyVisibleCols)))', 'open a graph of all visible numeric columns vs key column', 'data-plot-allnumeric')
+Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, [cursorCol]))')
+Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, numericCols(nonKeyVisibleCols)))')
 
 
 def numericCols(cols):
@@ -12,18 +12,6 @@ def numericCols(cols):
 
 
 class InvertedCanvas(Canvas):
-    commands = Canvas.commands + [
-        # swap directions of up/down
-        Command('move-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up'),
-        Command('move-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down'),
-
-        Command('zj', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor down one line'),
-        Command('zk', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor up one line'),
-
-        Command('J', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height'),
-        Command('K', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height'),
-    ]
-
     def zoomTo(self, bbox):
         super().zoomTo(bbox)
         self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax), bbox.xymin)
@@ -46,6 +34,16 @@ class InvertedCanvas(Canvas):
         p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouse.y)/self.yScaler
         return p
 
+# swap directions of up/down
+InvertedCanvas.addCommand(None, 'move-up', 'sheet.cursorBox.ymin += cursorBox.h')
+InvertedCanvas.addCommand(None, 'move-down', 'sheet.cursorBox.ymin -= cursorBox.h')
+
+InvertedCanvas.addCommand(None, 'move-down-one', 'sheet.cursorBox.ymin -= canvasCharHeight')
+InvertedCanvas.addCommand(None, 'move-up-one', 'sheet.cursorBox.ymin += canvasCharHeight')
+
+InvertedCanvas.addCommand(None, 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight')
+InvertedCanvas.addCommand(None, 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight')
+
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
@@ -53,7 +51,7 @@ class GraphSheet(InvertedCanvas):
         super().__init__(name, sheet, sourceRows=rows, **kwargs)
 
         self.xcols = xcols
-        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or error('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
+        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or fail('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
 
     @asyncthread
     def reload(self):

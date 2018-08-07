@@ -1,27 +1,29 @@
-- Update: 2018-03-17
-- Version: VisiData 1.1
+- Update: 2018-08-04
+- Version: VisiData 1.3
 
 # Navigation
 
 ## How to rapidly scroll through a sheet
 
-- To move the cursor by one row/column, use the arrow keys or `h`, `j`, `k` and `l` (like in vim).
+Command(s)              Operation
+--------------          ---------------
+` ← ` `↑`   ` →`   ` ↓` move as expected
+` h`  ` j`  ` k`  ` l`  move cursor left/down/up/right (like in vim)
+`gh`  `gj`  `gk`  `gl`  move all the way to the left/bottom/top/right of sheet
+` <`  ` >`              move up/down the current column to the next value which differs from current cell
+` {`  ` }`              move up/down the current column to the next [selected](/docs/rows#subset) row.
 
-- To move the cursor all the way to the top/bottom/left/right, press `g` before the corresponding movement.
-
-- To quickly move through a categorical column, use `<` and `>`. They move the cursor up/down the current column to the subsequent value.
-
-- Use `{`/`}` to move up/down the current column to the next [selected](/docs/rows#subset) row.
 
 ---
 
 ## How to search within a sheet
 
-- Press `/`/`?` followed by a *regex search pattern* to search for matches up/down the current column.
-
-- Press `g/`/`g?` followed by a *regex search pattern* to search for matches over all visible columns.
-
-- Use `n`/`N` to move to the next/previous match from the most recent search.
+Command(s)              Operation
+--------------          ---------------
+` /`  ` ?` *regex*      search for *regex* matches up/down the current column
+`g/`  `g?` *regex*      search for *regex* matches up/down over all visible columns
+` n`  ` N`              move to next/previous *regex* match from last search
+`z/`  `z?` *expr*       search by Python *expr* up/down in current column (with column names as variables)
 
 ---
 
@@ -35,8 +37,11 @@
 
 ###### Jumping away from sheets
 
-- Press `Ctrl+^` to jump to the previous sheet, without quitting the current one.
+Command(s)              Operation
+--------------          ---------------
+`Ctrl+^`                jump to the previous sheet, without closing the current one
+`q`                     quit the current sheet (closes it)
 
-- Press `q` to quit the current sheet.
+**Note**: When sheets are 'closed', they will cease to be referenced by the **Sheets sheet**. Press `gS` to access them again through the **Sheets graveyard**.
 
 ---

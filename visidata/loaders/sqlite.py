@@ -3,14 +3,13 @@ from visidata import *
 def open_sqlite(path):
     vs = SqliteSheet(path.name + '_tables', path, 'sqlite_master')
     vs.columns = vs.getColumns('sqlite_master')
-    vs.addCommand(ENTER, 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))', 'load the entire table into memory')
+    vs.addCommand(ENTER, 'dive-row', 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), sheet, cursorRow[1]))')
     return vs
+open_db = open_sqlite
+
 
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
-    commands = [
-        Command(ENTER, 'error("sqlite dbs are readonly")', 'no deeper engagement')
-    ]
     def __init__(self, name, pathOrSheet, tableName):
         super().__init__(name, source=pathOrSheet, tableName=tableName)
         if isinstance(pathOrSheet, Sheet):
@@ -33,9 +32,6 @@ class SqliteSheet(Sheet):
         cols = []
         for i, r in enumerate(self.conn.execute('PRAGMA TABLE_INFO(%s)' % tableName)):
             c = ColumnItem(r[1], i)
-            if r[-1]:
-                self.keyCols.append(c)
-
             t = r[2].lower()
             if t == 'integer':
                 c.type = int
@@ -47,5 +43,11 @@ class SqliteSheet(Sheet):
                 c.type = float
             else:
                 status('unknown sqlite type "%s"' % t)
+
             cols.append(c)
+            if r[-1]:
+                self.setKeys([c])
+
         return cols
+
+SqliteSheet.addCommand(ENTER, 'dive-row', 'error("sqlite dbs are readonly")')

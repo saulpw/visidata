@@ -22,6 +22,7 @@ class Path:
             self.compression = None
 
         self.suffix = self.ext[1:]
+        self._stat = None
 
     def open_text(self, mode='rt'):
         if 't' not in mode:
@@ -61,6 +62,9 @@ class Path:
         with self.open_text() as fp:
             return fp.read()
 
+    def open_bytes(self):
+        return self._open(self.resolve(), 'rb')
+
     def read_bytes(self):
         with self._open(self.resolve(), 'rb') as fp:
             return fp.read()
@@ -74,11 +78,13 @@ class Path:
     def iterdir(self):
         return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
 
-    def stat(self):
-        try:
-            return os.stat(self.resolve())
-        except Exception:
-            return None
+    def stat(self, force=False):
+        if force or self._stat is None:
+            try:
+                self._stat = os.stat(self.resolve())
+            except Exception as e:
+                self._stat = e
+        return self._stat
 
     def resolve(self):
         'Resolve pathname shell variables and ~userdir'
@@ -151,7 +157,7 @@ class PathFd(Path):
 class RepeatFile:
     def __init__(self, pathfd):
         self.pathfd = pathfd
-        self.iter = None
+        self.iter = RepeatFileIter(self)
 
     def __enter__(self):
         self.iter = RepeatFileIter(self)

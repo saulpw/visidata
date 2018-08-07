@@ -1,0 +1,15 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/test.jsonl	o	
+test			columns-sheet		C	
+test_columns	name		sort-asc		[	
+test_columns			quit-sheet		q	
+test	amt		key-col		!	
+test	key1		key-col		!	
+test			sort-keys-asc		g[	
+test	amt		key-col		!	
+test	key1		key-col		!	
+test			save-sheet	tests/golden/save-json-nofail.csv	^S	
+test			save-sheet	tests/golden/save-json-nofail.json	^S	
+test			save-sheet	tests/golden/save-json-nofail.md	^S	
+test			save-sheet	tests/golden/save-json-nofail.html	^S	
+test			save-sheet	tests/golden/save-json-nofail.txt	^S	

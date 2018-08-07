@@ -20,27 +20,30 @@ options_menu_skel = '''.It Sy "{optname:<19}" No "{default}"
 {description}
 '''
 
-visidata.options.plot_colors = ''
-visidata.options.motd_url = ''
+visidata.options.setdefault('plot_colors', '', visidata.options._opts._get('plot_colors', 'global').helpstr)
+visidata.options.setdefault('motd_url', '', visidata.options._opts._get('motd_url', 'global').helpstr)
 
 with open(fncli, 'w') as cliOut:
     with open(fnopts, 'w') as menuOut:
-        opts = visidata.baseOptions.keys()
+        optkeys = visidata.options.keys()
+        optvalues = [visidata.options._opts._get(optname) for optname in optkeys]
 
-        widestoptwidth, widestopt = sorted((len(opt.name)+len(str(opt.value)), opt.name) for opt in visidata.baseOptions.values())[-1]
+        widestoptwidth, widestopt = sorted((len(opt.name)+len(str(opt.value)), opt.name) for opt in optvalues)[-1]
         print('widest option+default is "%s", width %d' % (widestopt, widestoptwidth))
         widestoptwidth = 35
         menuOut.write('.Bl -tag -width %s -compact\n' % ('X'*(widestoptwidth+3)))
 
-#        cliwidth = max(padding+len(str(opt.value)) for opt in visidata.baseOptions.values())
+#        cliwidth = max(padding+len(str(opt.value)) for opt in optvalues)
         cliwidth = 43
         print('using width for cli options of %d' % cliwidth)
         cliOut.write('.Bl -tag -width %s -compact\n' % ('X'*(cliwidth+3)))
 
-        for optname in opts:
-            opt = visidata.baseOptions[optname]
+        for opt in optvalues:
             if opt.name[:5] in ['color', 'disp_']:
-                options_menu = options_menu_skel.format(optname=opt.name,type=type(opt.value).__name__,default = str(opt.default), description = opt.helpstr)
+                options_menu = options_menu_skel.format(optname=opt.name,
+                                                        type=type(opt.value).__name__,
+                                                        default=visidata.options.get(opt.name, 'global'),
+                                                        description=opt.helpstr)
                 menuOut.write(options_menu)
             else:
                 cli_optname=opt.name.replace('_', '-')
@@ -49,7 +52,7 @@ with open(fncli, 'w') as cliOut:
                 cliOut.write(options_cli_skel.format(cli_optname=cli_optname,
                                                 optname = opt.name,
                                                 type=cli_type+" "*(padding-optlen),
-                                                 default=opt.default,
+                                                default=visidata.options.get(opt.name, 'global'),
                                                  description=opt.helpstr))
 
         menuOut.write('.El')

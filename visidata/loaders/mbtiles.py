@@ -23,17 +23,12 @@ def getFeatures(tile_data):
             yield layername, feat
 
 
+
 class MbtilesSheet(Sheet):
     columns = [
         ColumnItem('zoom_level', 0),
         ColumnItem('tile_column', 1),
         ColumnItem('tile_row', 2),
-    ]
-
-    commands = [
-        Command(ENTER, 'vd.push(PbfSheet(tilename(cursorRow), source=sheet, sourceRow=cursorRow))', 'open this tile'),
-        Command('.', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn, sourceRows=list(getFeatures(getTile(*cursorRow))))))', 'plot this tile'),
-#        Command('g.', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn), sourceRows=sum((list(getFeatures(getTile(*r))) for r in selectedRows or rows), [])))', 'plot selected tiles'),
     ]
 
     def tilename(self, row):
@@ -62,6 +57,11 @@ class MbtilesSheet(Sheet):
             self.addRow(r)
 
 
+MbtilesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PbfSheet(tilename(cursorRow), source=sheet, sourceRow=cursorRow))')
+MbtilesSheet.addCommand('.', 'plot-row', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn, sourceRows=list(getFeatures(getTile(*cursorRow))))))')
+#MbtilesSheet.addCommand('g.', '', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn), sourceRows=sum((list(getFeatures(getTile(*r))) for r in selectedRows or rows), [])))', 'plot selected tiles'),
+
+
 class PbfSheet(Sheet):
     columns = [
         ColumnItem('layer', 0),
@@ -70,10 +70,6 @@ class PbfSheet(Sheet):
         Column('geometry_coords_depth', getter=lambda col,row: getListDepth(row[1]['geometry']['coordinates']), width=0),
     ]
     nKeys = 1  # layer
-    commands = [
-        Command('.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot this row only'),
-        Command('g.', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows, textCol=cursorCol))', 'plot as map'),
-    ]
     @asyncthread
     def reload(self):
         props = set()  # property names
@@ -128,3 +124,7 @@ class PbfCanvas(InvertedCanvas):
 
 
         self.refresh()
+
+
+PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))')
+PbfSheet.addCommand('g.', 'plot-selected', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows, textCol=cursorCol))')

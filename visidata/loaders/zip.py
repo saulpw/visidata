@@ -4,14 +4,10 @@ from visidata import *
 class open_zip(Sheet):
     'Provide wrapper around `zipfile` library for opening ZIP files.'
     rowtype = 'files'
-    commands = [
-        Command(ENTER, 'vd.push(openZipFileEntry(cursorRow))', 'open this file'),
-        Command('g'+ENTER, 'for r in selectedRows or rows: vd.push(openZipFileEntry(r))', 'open all selected files')
-    ]
     columns = [
         ColumnAttr('filename'),
         ColumnAttr('file_size', type=int),
-        ColumnAttr('date_time'),
+        Column('date_time', type=date, getter=lambda col,row: datetime.datetime(*row.date_time)),
         ColumnAttr('compress_size', type=int)
     ]
 
@@ -28,3 +24,7 @@ class open_zip(Sheet):
         zfp = zipfile.ZipFile(self.source.resolve(), 'r')
         decodedfp = codecs.iterdecode(zfp.open(zi), encoding=options.encoding, errors=options.encoding_errors)
         return openSource(PathFd(zi.filename, decodedfp, filesize=zi.file_size))
+
+
+open_zip.addCommand(ENTER, 'dive-row', 'vd.push(openZipFileEntry(cursorRow))')
+open_zip.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows or rows: vd.push(openZipFileEntry(r))')

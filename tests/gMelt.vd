@@ -1,21 +1,21 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample.tsv	open file
-sample	Unit_Cost		=	'$'	create new column from Python expression, with column names as variables
-sample	'$'		^	Unit_Currency	set name of new column
-sample	Unit_Currency		'		add a frozen copy of current column with all cells evaluated
-sample	Unit_Currency_frozen		^	Unit_Currency	edit name of current column
-sample	Unit_Currency		g-		delete unfrozen column
-sample	Unit_Currency	7	e	AUD$	edit contents of current cell
-sample	Unit_Currency	12	e	EUR	edit contents of current cell
-sample	Unit_Currency	17	e	PES	edit contents of current cell
-sample	Total		=	'$'	create new column from Python expression, with column names as variables
-sample	'$'		^	Total_Currency	edit name of current column
-sample	OrderDate		!		toggle current column as a key column
-sample	Region		!		toggle current column as a key column
-sample	Rep		!		toggle current column as a key column
-sample	Item		!		toggle current column as a key column
-sample	Total		^	Total_Cost	edit name of current column
-sample			gM	(.*)_(.*)	open melted sheet (unpivot), factoring columns
-sample_melted			C		open Columns Sheet
-sample_melted_columns	name		]		sort descending by current column
-sample_melted_columns			q		quit current sheet
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Unit_Cost		addcol-expr	'$'	=	
+sample	'$'		rename-col	Unit_Currency	^	
+sample	Unit_Currency		freeze-col		'	
+sample	Unit_Currency_frozen		rename-col	Unit_Currency	^	
+sample	Unit_Currency		hide-col		-	
+sample	Unit_Currency	7	edit-cell	AUD$	e	
+sample	Unit_Currency	12	edit-cell	EUR	e	
+sample	Unit_Currency	17	edit-cell	PES	e	
+sample	Total		addcol-expr	'$'	=	
+sample	'$'		rename-col	Total_Currency	^	
+sample	OrderDate		key-col		!	
+sample	Region		key-col		!	
+sample	Rep		key-col		!	
+sample	Item		key-col		!	
+sample	Total		rename-col	Total_Cost	^	
+sample			melt-regex	(.*)_(.*)	gM	
+sample_melted			columns-sheet		C	
+sample_melted_columns	name		sort-desc		]	
+sample_melted_columns			quit-sheet		q	

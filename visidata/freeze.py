@@ -1,16 +1,16 @@
 from visidata import *
 from copy import deepcopy
 
-globalCommand("'", 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated', 'column-freeze')
-globalCommand("g'", 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated', 'sheet-freeze')
-globalCommand("z'", 'resetCache(cursorCol)', 'add/reset cache for current column', 'column-cache-clear')
-globalCommand("gz'", 'resetCache(*visibleCols)', 'add/reset cache for all visible columns', 'column-cache-clear-all')
+Sheet.addCommand("'", 'freeze-col', 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)')
+Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)')
+Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()')
+Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()')
 
-def resetCache(self, *cols):
-    for col in cols:
-        col._cachedValues = collections.OrderedDict()
-    status("reset cache for " + (cols[0].name if len(cols) == 1 else str(len(cols))+" columns"))
-Sheet.resetCache = resetCache
+def resetCache(self):
+    self._cachedValues = collections.OrderedDict()
+    status("reset cache for " + self.name)
+
+Column.resetCache = resetCache
 
 def StaticColumn(rows, col):
     c = deepcopy(col)
@@ -19,7 +19,7 @@ def StaticColumn(rows, col):
     def _calcRows(sheet):
         for r in Progress(rows):
             try:
-                frozenData[id(r)] = col.getValue(r)
+                frozenData[id(r)] = col.getTypedValueOrException(r)
             except Exception as e:
                 frozenData[id(r)] = e
 
@@ -37,10 +37,10 @@ class StaticSheet(Sheet):
 
         self.columns = []
         for i, col in enumerate(self.source.columns):
-            colcopy = ColumnItem(col.name, i, width=col.width, type=col.type)
-            self.columns.append(colcopy)
+            colcopy = ColumnItem(col.name, i, width=col.width, type=col.type, fmtstr=col.fmtstr)
+            self.addColumn(colcopy)
             if col in self.source.keyCols:
-                self.keyCols.append(colcopy)
+                self.setKeys([colcopy])
 
     @asyncthread
     def reload(self):
@@ -50,6 +50,6 @@ class StaticSheet(Sheet):
             self.rows.append(row)
             for col in self.source.columns:
                 try:
-                    row.append(col.getValue(r))
+                    row.append(col.getTypedValueOrException(r))
                 except Exception as e:
                     row.append(None)

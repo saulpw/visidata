@@ -1,5 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-quantum-sum-notest	sheet	0	A	1	open new blank sheet with number columns
+quantum-sum-nosave_vd	sheet	0	A	1	open new blank sheet with number columns
 unnamed	0	0	ga	100000	add N blank rows
 unnamed	0	0	=	random.random()	create new column from Python expression, with column names as variables
 unnamed	0	0	%		set type of current column to float

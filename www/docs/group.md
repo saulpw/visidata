@@ -20,6 +20,7 @@ Aggregator      Description
 `max`           largest value in the group
 `avg`/`mean`    average value of the group
 `median`        median value in the group
+`q3/q4/q5/q10`  add quantile aggregators to group (e.g. q4 adds p25, p50, p75)
 `sum`           total summation of all numbers in the group
 `distinct`      number of distinct values in the group
 `count`         number of values in the group
@@ -45,7 +46,7 @@ This example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw
 
 ---
 
-## How to create a frequency chart
+## [How to create a frequency chart](#frequency)
 
 The following examples use the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 

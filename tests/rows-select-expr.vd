@@ -1,0 +1,5 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/StatusPR.csv	o	
+StatusPR			select-expr	'Puerto Rico' in Location	z|	
+StatusPR			unselect-expr	'number' in Unit	z\	
+StatusPR			dup-selected		"	

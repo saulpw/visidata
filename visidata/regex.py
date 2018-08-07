@@ -1,9 +1,9 @@
 from visidata import *
 
-globalCommand(':', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex-split"))', 'add new columns from regex split; # columns determined by example row at cursor', 'modify-add-column-regex-split')
-globalCommand(';', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', 'modify-add-column-regex-capture')
-globalCommand('*', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)', 'regex/subst - replace regex with subst, which may include backreferences (\\1 etc)', 'modify-add-column-regex-transform')
-globalCommand('g*', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex(cursorCol, selectedRows or rows, rex)', 'regex/subst - replace regex with subst, which may include backreferences (\\1 etc)', 'modify-add-column-regex-transform-foo')
+Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex-split"))')
+Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex-capture"))')
+Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)')
+Sheet.addCommand('g*', 'setcol-subst', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex(cursorCol, selectedRows or rows, rex)')
 
 replayableOption('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 
@@ -21,6 +21,7 @@ def addRegexColumns(regexMaker, vs, colIndex, origcol, exampleRow, regexstr):
 
     for i, g in enumerate(result):
         c = Column(origcol.name+'_re'+str(i), getter=lambda col,row,i=i,func=func: func(row)[i])
+        c.origCol = origcol
         vs.addColumn(c, index=colIndex+i+1)
 
 

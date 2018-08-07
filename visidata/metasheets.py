@@ -1,165 +1,210 @@
-from visidata import *
+from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, anytype, ENTER, asyncthread, option
+from visidata import ColumnAttr, ColumnEnum, ColumnItem
+from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
 
-OptionsSheet.colorizers += [
-        Colorizer('cell', 9, lambda s,c,r,v: v.value if c.name in ['value', 'default'] and r.name.startswith('color_') else None)
+globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
+globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
+globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
+globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
+
+Sheet.addCommand('O', 'options-sheet', 'vd.push(getOptionsSheet(sheet)).reload()')
+Sheet.addCommand('gO', 'options-global', 'vd.push(vd.optionsSheet)')
+Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
+Sheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+
+option('visibility', 0, 'visibility level (0=low, 1=high)')
+
+def getOptionsSheet(sheet):
+    optsheet = getattr(sheet, 'optionsSheet', None)
+    if not optsheet:
+        sheet.optionsSheet = OptionsSheet(sheet.name+"_options", source=sheet)
+
+    return sheet.optionsSheet
+
+
+class StatusSheet(Sheet):
+    precious = False
+    rowtype = 'statuses'  # rowdef: (priority, args, nrepeats)
+    columns = [
+        ColumnItem('priority', 0, type=int, width=0),
+        ColumnItem('nrepeats', 2, type=int, width=0),
+        ColumnItem('args', 1, width=0),
+        Column('message', getter=lambda col,row: composeStatus(row[1], row[2])),
     ]
+    colorizers = [
+        Colorizer('row', 1, lambda s,c,r,v: options.color_error if r[0] == 3 else None),
+        Colorizer('row', 1, lambda s,c,r,v: options.color_warning if r[0] in [1,2] else None),
+    ]
+
+    def reload(self):
+        self.rows = vd.statusHistory[::-1]
+
+
+class ColumnsSheet(Sheet):
+    rowtype = 'columns'
+    precious = False
+    class ValueColumn(Column):
+        'passthrough to the value on the source cursorRow'
+        def calcValue(self, srcCol):
+            return srcCol.getDisplayValue(srcCol.sheet.cursorRow)
+        def setValue(self, srcCol, val):
+            srcCol.setValue(self.sheet.source.cursorRow, val)
+
+    columns = [
+            ColumnAttr('sheet', type=str),
+            ColumnAttr('name', width=options.default_width),
+            ColumnAttr('width', type=int),
+            ColumnEnum('type', getGlobals(), default=anytype),
+            ColumnAttr('fmtstr'),
+            ValueColumn('value', width=options.default_width),
+            Column('expr', getter=lambda col,row: getattr(row, 'expr', ''),
+                           setter=lambda col,row,val: setattr(row, 'expr', val)),
+    ]
+    nKeys = 2
+    colorizers = Sheet.colorizers + [
+            Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r.keycol else None),
+            Colorizer('row', 8, lambda self,c,r,v: options.color_hidden_col if r.hidden else None),
+    ]
+    def reload(self):
+        if len(self.source) == 1:
+            self.rows = self.source[0].columns
+            self.cursorRowIndex = self.source[0].cursorColIndex
+            self.columns[0].hide()  # hide 'sheet' column if only one sheet
+        else:
+            self.rows = [col for vs in self.source for col in vs.visibleCols if vs is not self]
+
+ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)')
+ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or fail("no columns selected to concatenate")))')
+
+
+class SheetsSheet(Sheet):
+    rowtype = 'sheets'
+    precious = False
+    columns = [
+        ColumnAttr('name', width=30),
+        ColumnAttr('nRows', type=int),
+        ColumnAttr('nCols', type=int),
+        ColumnAttr('nVisibleCols', type=int),
+        ColumnAttr('cursorDisplay'),
+        ColumnAttr('keyColNames'),
+        ColumnAttr('source'),
+        ColumnAttr('progressPct'),
+    ]
+    nKeys = 1
+
+    def newRow(self):
+        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
+
+    def reload(self):
+        self.rows = self.source
+
+SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
+SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
+SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
+SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))')
+SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows or rows[1:]))')
+
+# source: vd.allSheets (with BaseSheet as weakref keys)
+class GraveyardSheet(SheetsSheet):
+    rowtype = 'undead sheets'  # rowdef: BaseSheet
+    def reload(self):
+        self.rows = list(vs for vs in self.source.keys() if vs not in vd().sheets)
+
+
+class HelpSheet(Sheet):
+    'Show all commands available to the source sheet.'
+    rowtype = 'commands'
+    precious = False
+
+    columns = [
+        ColumnAttr('sheet'),
+        ColumnAttr('longname'),
+        Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname)),
+        Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
+        ColumnAttr('execstr', width=0),
+        ColumnAttr('logged', 'replayable', width=0),
+    ]
+    nKeys = 2
+    @asyncthread
+    def reload(self):
+        from pkg_resources import resource_filename
+        cmdlist = TsvSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
+        cmdlist.reload_sync()
+        self.cmddict = {}
+        for cmdrow in cmdlist.rows:
+            self.cmddict[(cmdrow.sheet, cmdrow.longname)] = cmdrow
+
+        self.revbinds = {
+            longname:keystrokes
+                for (keystrokes, _), longname in bindkeys.iter(self.source)
+                    if keystrokes not in self.revbinds
+        }
+        self.rows = []
+        for (k, o), v in commands.iter(self.source):
+            self.addRow(v)
+            v.sheet = o
+
+
+class OptionsSheet(Sheet):
+    _rowtype = Option  # rowdef: Option
+    rowtype = 'options'
+    precious = False
+    columns = (
+        ColumnAttr('option', 'name'),
+        Column('value',
+            getter=lambda col,row: col.sheet.diffOption(row.name),
+            setter=lambda col,row,val: options.set(row.name, val, col.sheet.source)),
+        Column('default', getter=lambda col,row: options.get(row.name, 'global')),
+        Column('description', getter=lambda col,row: options._get(row.name, 'global').helpstr),
+    )
+    colorizers = Sheet.colorizers + [
+        Colorizer('cell', 9, lambda s,c,r,v: v.value if c is s.columns[1] and r.name.startswith('color_') else None),
+    ]
+    nKeys = 1
+
+    def diffOption(self, optname):
+        val = options.get(optname, self.source)
+        default = options.get(optname, 'global')
+        return val if val != default else ''
+
+    def editOption(self, row):
+        if isinstance(row.value, bool):
+            options.set(row.name, not options.get(row.name, self.source), self.source)
+        else:
+            options.set(row.name, self.editCell(1), self.source)
+
+    def reload(self):
+        self.rows = []
+        for k in options.keys():
+            opt = options._get(k)
+            self.addRow(opt)
+        self.columns[1].name = 'global_value' if self.source == 'override' else 'sheet_value'
+
+OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
+
+bindkeys.set('e', 'edit-option', OptionsSheet)
+bindkeys.set(ENTER, 'edit-option', OptionsSheet)
+
+vd.optionsSheet = OptionsSheet('global_options', source='override')
+
+vd.sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
+vd.graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd().allSheets)
+
 
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
     return Column("+".join(c.name for c in cols),
                   getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
 
-def createJoinedSheet(sheets, jointype=''):
-    if jointype == 'append':
-        return SheetConcat('&'.join(vs.name for vs in sheets), sources=sheets)
-    else:
-        return SheetJoin('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
-
-jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
-
-SheetsSheet.commands += [
-        Command('&', 'vd.replace(createJoinedSheet(selectedRows or error("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge the selected sheets with visible columns from all, keeping rows according to jointype', 'sheet-join'),
-        Command('gC', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))', 'open Columns Sheet with all columns from selected sheets', 'sheet-columns-selected'),
-    ]
-
-SheetsSheet.columns.append(ColumnAttr('progressPct'))
-
 # used ColumnsSheet, affecting the 'row' (source column)
-columnCommands = [
-        Command('g!', 'for c in selectedRows or [cursorRow]: c.sheet.toggleKeyColumn(c)', 'toggle selected rows as key columns on source sheet'),
-        Command('gz!', 'for c in selectedRows or [cursorRow]: c.sheet.keyCols.remove(c)', 'unset selected rows as key columns on source sheet'),
-        Command('g-', 'for c in selectedRows or [cursorRow]: c.width = 0', 'hide selected source columns on source sheet'),
-        Command('g%', 'for c in selectedRows or [cursorRow]: c.type = float', 'set type of selected source columns to float'),
-        Command('g#', 'for c in selectedRows or [cursorRow]: c.type = int', 'set type of selected source columns to int'),
-        Command('g@', 'for c in selectedRows or [cursorRow]: c.type = date', 'set type of selected source columns to date'),
-        Command('g$', 'for c in selectedRows or [cursorRow]: c.type = currency', 'set type of selected columns to currency'),
-        Command('g~', 'for c in selectedRows or [cursorRow]: c.type = str', 'set type of selected columns to str'),
-        Command('gz~', 'for c in selectedRows or [cursorRow]: c.type = anytype', 'set type of selected columns to anytype'),
-    ]
+ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(selectedRows or [cursorRow])')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(selectedRows or [cursorRow])')
+ColumnsSheet.addCommand('g-', 'hide-selected', 'for c in selectedRows or [cursorRow]: c.hide()')
+ColumnsSheet.addCommand('g%', 'type-float-selected', 'for c in selectedRows or [cursorRow]: c.type = float')
+ColumnsSheet.addCommand('g#', 'type-int-selected', 'for c in selectedRows or [cursorRow]: c.type = int')
+ColumnsSheet.addCommand('gz#', 'type-len-selected', 'for c in selectedRows or [cursorRow]: c.type = len')
+ColumnsSheet.addCommand('g@', 'type-date-selected', 'for c in selectedRows or [cursorRow]: c.type = date')
+ColumnsSheet.addCommand('g$', 'type-currency-selected', 'for c in selectedRows or [cursorRow]: c.type = currency')
+ColumnsSheet.addCommand('g~', 'type-string-selected', 'for c in selectedRows or [cursorRow]: c.type = str')
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'for c in selectedRows or [cursorRow]: c.type = anytype')
 
-ColumnsSheet.commands += columnCommands + [
-        Command('column-source-width-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)', 'adjust widths of selected source columns'),
-        Command('&', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or error("no columns selected to concatenate")))', 'add column from concatenating selected source columns'),
-]
-DescribeSheet.commands += columnCommands
-
-
-ColumnsSheet.columns += [
-        ColumnAttr('expr'),
-    ]
-
-#### slicing and dicing
-# rowdef: [(key, ...), sheet1_row, sheet2_row, ...]
-#   if a sheet does not have this key, sheet#_row is None
-class SheetJoin(Sheet):
-    'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
-
-    @asyncthread
-    def reload(self):
-        sheets = self.sources
-
-        # first item in joined row is the key tuple from the first sheet.
-        # first columns are the key columns from the first sheet, using its row (0)
-        self.columns = []
-        for i, c in enumerate(sheets[0].keyCols):
-            self.addColumn(SubrowColumn(ColumnItem(c.name, i), 0))
-        self.keyCols = self.columns[:]
-
-        rowsBySheetKey = {}
-        rowsByKey = {}
-
-        with Progress(total=sum(len(vs.rows) for vs in sheets)*2) as prog:
-            for vs in sheets:
-                # tally rows by keys for each sheet
-                rowsBySheetKey[vs] = collections.defaultdict(list)
-                for r in vs.rows:
-                    prog.addProgress(1)
-                    key = tuple(c.getDisplayValue(r) for c in vs.keyCols)
-                    rowsBySheetKey[vs][key].append(r)
-
-            for sheetnum, vs in enumerate(sheets):
-                # subsequent elements are the rows from each source, in order of the source sheets
-                for c in vs.nonKeyVisibleCols:
-                    self.addColumn(SubrowColumn(c, sheetnum+1))
-                for r in vs.rows:
-                    prog.addProgress(1)
-                    key = tuple(c.getDisplayValue(r) for c in vs.keyCols)
-                    if key not in rowsByKey: # gather for this key has not been done yet
-                        # multiplicative for non-unique keys
-                        rowsByKey[key] = []
-                        for crow in itertools.product(*[rowsBySheetKey[vs2].get(key, [None]) for vs2 in sheets]):
-                            rowsByKey[key].append([key] + list(crow))
-
-        self.rows = []
-
-        with Progress(total=len(rowsByKey)) as prog:
-            for k, combinedRows in rowsByKey.items():
-                prog.addProgress(1)
-
-                if self.jointype == 'full':  # keep all rows from all sheets
-                    for combinedRow in combinedRows:
-                        self.addRow(combinedRow)
-
-                elif self.jointype == 'inner':  # only rows with matching key on all sheets
-                    for combinedRow in combinedRows:
-                        if all(combinedRow):
-                            self.addRow(combinedRow)
-
-                elif self.jointype == 'outer':  # all rows from first sheet
-                    for combinedRow in combinedRows:
-                        if combinedRow[1]:
-                            self.addRow(combinedRow)
-
-                elif self.jointype == 'diff':  # only rows without matching key on all sheets
-                    for combinedRow in combinedRows:
-                        if not all(combinedRow):
-                            self.addRow(combinedRow)
-
-class ColumnConcat(Column):
-    def __init__(self, name, colsBySheet, **kwargs):
-        super().__init__(name, **kwargs)
-        self.colsBySheet = colsBySheet
-
-    def calcValue(self, row):
-        srcSheet, srcRow = row
-        srcCol = self.colsBySheet.get(srcSheet, None)
-        if srcCol:
-            return srcCol.calcValue(srcRow)
-
-    def setValue(self, row, v):
-        srcSheet, srcRow = row
-        srcCol = self.colsBySheet.get(srcSheet, None)
-        if srcCol:
-            srcCol.setValue(srcRow, v)
-        else:
-            error('column not on source sheet')
-
-# rowdef: (Sheet, row)
-class SheetConcat(Sheet):
-    'combination of multiple sheets by row concatenation'
-    def reload(self):
-        self.rows = []
-        for sheet in self.sources:
-            for r in sheet.rows:
-                self.addRow((sheet, r))
-
-        self.columns = []
-        allColumns = {}
-        for srcsheet in self.sources:
-            for srccol in srcsheet.visibleCols:
-                colsBySheet = allColumns.get(srccol.name, None)
-                if colsBySheet is None:
-                    colsBySheet = {}  # dict of [Sheet] -> Column
-                    allColumns[srccol.name] = colsBySheet
-                    if isinstance(srccol, ColumnExpr):
-                        combinedCol = copy(srccol)
-                    else:
-                        combinedCol = ColumnConcat(srccol.name, colsBySheet, type=srccol.type)
-                    self.addColumn(combinedCol)
-
-                if srcsheet in colsBySheet:
-                    status('%s has multiple columns named "%s"' % (srcsheet.name, srccol.name))
-
-                colsBySheet[srcsheet] = srccol
-
-        self.recalc()  # to set .sheet on columns, needed if this reload becomes async

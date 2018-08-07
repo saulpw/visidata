@@ -1,0 +1,9 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/test.jsonl	o	
+test	key1		type-date		@	
+test	qty		type-int		#	
+test	amt		type-float		%	
+test	qty		aggregate-col	sum	+	
+test	key1		key-col		!	
+test	key2		pivot		W	
+test_pivot_key2	key1		sort-desc		]	

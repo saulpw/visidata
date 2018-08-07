@@ -1,46 +1,77 @@
 # Roadmap
 
-I. Interface
+### 1. plugin api/package manager
+
+- in-app downloadable/installable snippets
+
+### 2. save path to get to current sheet/row/cell
+
+- remove superfluous sheets
+- output .sql or .py code
+
+### 3. website content
+
+- front page redesign
+- /features grid
+- /blog of topic/design discussions
+- visidata design/internals
+- make separate webpages for: devops, sysadmins, hackers, git users, bioinfers, etc
+
+### features
+
+#### I. Interface
+
 - mouse-ability
     - allow user to disable mouse for system copy/paste
     - clickable column headers to set type/name, click-drag to move columns/rows
-    - clickable motd
-- undo
+    - clickable status items (including motd)
+    - info mode: mouse hover describes interface components and/or shows relevant commands
+- undo #141
     - start from previous sheet in commandlog
     - replay all but last command
 
-II. Internals
-- break out into library, usable standalone by other apps
-   - Progress/async
-   - Canvas
-- SourceSheet inherits from Sheet
-- the great command longnaming
-   - solidify command names separate from menu hierarchy
+##### minor points
+#
+- 'v' hide cols which have errors on cursor row
+   - or should 'v' be 'toggle-visibility' on all sheets?
+- 'modified' indicator on status bar, also enables quitguard
+- ColumnsSheet should show subcolumns and their parent column (for expand/contract)
 
-III. Loaders and Savers
-- parquet
-- .xml
+- graveyard sheet improvements
+   - start/drop datetimes
+   - number of derivative sheets (two columns, for immediate children and to any depth)
+   - number of commands executed on that sheet (as a list so they can be viewed separately)
+
+#### III. Loaders and Savers
+
+- parquet #112
 - .mdb, .accdb
-- sqlite: allow in-memory edits, ^S to commit
 - google sheets
-- save to .py: emit code to get current cell/row/sheet from source data
-- save canvas to .svg
-- g^S: save to hdf5
+- sqlite: allow in-memory edits, ^S to commit
+  - index sheet: include rows/cols; allow to be cutnpasted
+  - solve "load in other thread" problem
+- save canvas to .svg (canvassave_svg)
+- multisave_hdf5
 
-IV. other commands and features
+#### IV. other commands and features
 
 - numeric binning for freq column and pivot table
-- quintile/decile/percentile aggregators
-- Python expressions usable like regex for search, select, etc
+- rowmax aggregator ( rowmax(field) gets whole row)
 - add row number in hidden column on data sheets so that original (load) order can be restored
 - handle timezone for datetime
+- options should allow list or dict of enum values
+- column helpstr (esp for non-data sheets)
+- macro parameterization
+- g^D bug report
+- zip/unzip from dirsheet
+- status rework: use logging module?  use multiple lines on overflow?
+- proper dive on json
 
-V. website
+##### technical debt
 
-- /features grid
-- front page redesign
+- remove all asserts; possibly replace with error()
 
-# Applications
+# V. other applications with a vd-like interface
 
 - [vgit](http://github.com/saulpw/vgit) (currently v0.2)
 - [vsh](http://github.com/saulpw/vsh) (unreleased)
@@ -49,8 +80,10 @@ V. website
    - vnet (netstat)
    - vping
    - vproc (explore /proc filesystem with some added goodies)
+- vsql
 - vpy (python explorer/debugger)
 - vchat
 - [vdgalcon](http://github.com/saulpw/vdgalcon)
 - vscrape
-
+- vdbg
+- vaws

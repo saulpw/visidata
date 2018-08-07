@@ -3,7 +3,7 @@ python-dateutil     # date type
 # optional requirements
 pandas==0.19.2      # dta (Stata)
 requests            # http
-lxml                # html
+lxml                # html/xml
 openpyxl            # xlsx
 xlrd                # xls
 h5py                # hdf5
@@ -15,3 +15,6 @@ fonttools           # ttf/otf
 sas7bdat            # sas7bdat (SAS)
 xport               # xpt (SAS)
 savReaderWriter     # sav (SPSS)
+PyYAML              # yaml/yml
+dpkt                # pcap
+dnslib              # pcap

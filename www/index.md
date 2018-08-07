@@ -3,7 +3,7 @@
 
 # VisiData
 
-## Latest Version: [1.2.1 (released 2018-07-05)](/releases)
+## Latest Version: [1.3 (released 2018-06-06) ](/releases)
 
 VisiData is an interactive multitool for tabular data.  It combines the clarity of a spreadsheet, the efficiency of the terminal, and the power of Python, into a lightweight utility which can handle millions of rows with ease.
 
@@ -12,6 +12,8 @@ VisiData is an interactive multitool for tabular data.  It combines the clarity 
 </div>
 
 It's great for investigative journalists, data scientists, unix command-line users, and anyone else who wants to quickly look at or manipulate data.
+
+## [Install VisiData](/install)
 
 ## Testimonials
 
@@ -35,44 +37,5 @@ It's great for investigative journalists, data scientists, unix command-line use
 
 - <form action="https://tinyletter.com/visidata" method="post" target="popupwindow" onsubmit="window.open('https://tinyletter.com/visidata', 'popupwindow', 'scrollbars=yes,width=800,height=600');return true">Sign up for the email newsletter: <input type="text" style="width:140px" name="email" id="tlemail" /><input type="hidden" value="1" name="embed"/><input type="submit" value="Subscribe" /> (powered by <a href="https://tinyletter.com" target="_blank">TinyLetter</a>)</form>
 
-- Follow [\@saulfp](https://twitter.com/saulfp) on Twitter for more regular updates, tips, and tricks!
-
----
-
-## Installation
-
-<div class="install">
-<div>
-### MacOS (requires [homebrew](https://brew.sh/))
-
-    $ brew install saulpw/vd/visidata
-
-See [our homebrew repository](https://github.com/saulpw/homebrew-vd) for more information.
-</div>
-<!--div>
-### Linux (requires [debian's unstable repo](https://github.com/saulpw/visidata#install-via-apt))
-
-    $ apt install visidata
-
-See [our Debian repository](https://github.com/saulpw/deb-vd) for more information.
-</div-->
-<div>
-### Other (requires [pip3](https://stackoverflow.com/questions/6587507/how-to-install-pip-with-python-3))
-
-    $ pip3 install visidata
-
-See [our Github repository](https://github.com/saulpw/visidata) for more information.
-</div>
-<div>
-### conda (requires [conda-forge](https://conda-forge.org/))
-
-    $ conda install visidata
-
-See [the Github repository](https://github.com/conda-forge/visidata-feedstock) for more information.
-</div>
-</div>
-
-<div>
-VisiData supports [many sources](http://visidata.org/man/#loaders), but not all dependencies are installed automatically.  For additional sources and formats, see the [support page](/support) for contact information.
-</div>
+- Follow [\@VisiData_](https://twitter.com/VisiData_) on Twitter for more regular updates, tips, and tricks!
 

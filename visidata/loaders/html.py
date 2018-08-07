@@ -16,7 +16,6 @@ class HtmlTablesSheet(Sheet):
         Column('ncols', type=int, getter=lambda col,row: len(row.columns)),
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
     ]
-    commands = [ Command(ENTER, 'vd.push(cursorRow)', 'open this table') ]
     @asyncthread
     def reload(self):
         import lxml.html
@@ -31,6 +30,7 @@ class HtmlTablesSheet(Sheet):
                 vs.reload()
                 vs.html = e
                 self.addRow(vs)
+HtmlTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
 def is_header(elem):
     scope = elem.attrib.get('scope', '')

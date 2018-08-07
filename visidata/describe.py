@@ -2,10 +2,10 @@ from statistics import mode, median, mean, stdev
 
 from visidata import *
 
-globalCommand('I', 'vd.push(DescribeSheet(sheet.name+"_describe", source=sheet, sourceRows=selectedRows or rows))', 'open sheet with descriptive statistics of all visible columns', 'data-describe')
+max_threads = 2
 
-def isNumeric(col):
-    return col.type in (int,float,currency,date)
+Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))')
+globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))')
 
 def isError(col, row):
     try:
@@ -16,51 +16,41 @@ def isError(col, row):
     except Exception as e:
         return True
 
-def returnException(f, *args, **kwargs):
-    try:
-        return f(*args, **kwargs)
-    except Exception as e:
-        return e
-
 
 class DescribeColumn(Column):
     def __init__(self, name, **kwargs):
-        super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.name), **kwargs)
+        super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.name, ''), **kwargs)
 
 # rowdef: Column from source sheet
-class DescribeSheet(Sheet):
-    rowtype = 'columns'
+class DescribeSheet(ColumnsSheet):
+#    rowtype = 'columns'
     columns = [
-            Column('column', type=str, getter=lambda col,row: row.name),
+            ColumnAttr('sheet', 'sheet'),
+            ColumnAttr('column', 'name'),
             DescribeColumn('errors', type=len),
             DescribeColumn('nulls',  type=len),
             DescribeColumn('distinct',type=len),
-            DescribeColumn('mode',   type=anytype),
-            DescribeColumn('min',    type=anytype),
-            DescribeColumn('max',    type=anytype),
-            DescribeColumn('median', type=anytype),
+            DescribeColumn('mode',   type=str),
+            DescribeColumn('min',    type=str),
+            DescribeColumn('max',    type=str),
+            DescribeColumn('median', type=str),
             DescribeColumn('mean',   type=float),
             DescribeColumn('stdev',  type=float),
     ]
-    commands = [
-        Command('zs', 'source.select(cursorValue)', 'select rows on source sheet which are being described in current cell', 'rows-select-source-cell'),
-        Command('zu', 'source.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell', 'rows-unselect-source-cell'),
-        Command('z'+ENTER, 'isinstance(cursorValue, list) or error(cursorValue); vs=copy(source); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell', 'open-cell-source'),
-        Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row', 'data-aggregate-source-column'),
-        Command('!', 'source.toggleKeyColumn(cursorRow)', 'toggle current column as a key column on source sheet', 'key-row-source-toggle'),
-        Command('z!', 'source.keyCols.remove(cursorRow)', 'unset current column as a key column on source sheet', 'key-row-source-remove')
-    ]
     colorizers = [
-        Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in self.source.keyCols else None),
+        Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
     ]
 
     @asyncthread
     def reload(self):
-        self.rows = list(self.source.visibleCols)  # column deleting/reordering here does not affect actual columns
-        self.describeData = { col: {} for col in self.source.visibleCols }
+        super().reload()
+        self.rows = [c for c in self.rows if not c.hidden]
+        self.describeData = { col: {} for col in self.rows }
 
-        for srccol in Progress(self.source.visibleCols):
-            self.reloadColumn(srccol)
+        for srccol in Progress(self.rows):
+            if not srccol.hidden:
+                self.reloadColumn(srccol)
+            sync(max_threads)
 
     @asyncthread
     def reloadColumn(self, srccol):
@@ -71,7 +61,9 @@ class DescribeSheet(Sheet):
             d['errors'] = list()
             d['nulls'] = list()
             d['distinct'] = set()
-            for sr in Progress(self.sourceRows):
+
+            options_error_is_null = options.error_is_null
+            for sr in Progress(srccol.sheet.rows):
                 try:
                     v = srccol.getValue(sr)
                     if isNull(v):
@@ -91,6 +83,11 @@ class DescribeSheet(Sheet):
                     d[func.__name__] = self.calcStatistic(d, func, vals)
 
     def calcStatistic(self, d, func, *args, **kwargs):
-        r = returnException(func, *args, **kwargs)
+        r = wrapply(func, *args, **kwargs)
         d[func.__name__] = r
         return r
+
+
+DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)')
+DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)')
+DescribeSheet.addCommand('z'+ENTER, 'dup-cell', 'isinstance(cursorValue, list) or error(cursorValue); vs=copy(cursorRow.sheet); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)')

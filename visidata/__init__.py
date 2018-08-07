@@ -3,18 +3,26 @@
 
 from .vdtui import __version__, __version_info__
 from .vdtui import *
+from .errors import *
 from .Path import *
-from .asyncthread import *
-from .diskcache import *
+from .urlcache import *
 from .zscroll import *
-from .aggregators import *
+from ._types import *
+from .selection import *
+from .loaders.tsv import *
 from .data import *
 from .clipboard import *
+from .utils import *
+from .slide import *
+from .search import *
 
-from .freqtbl import *
-from .describe import *
 from .pyobj import *
 from .metasheets import *
+from .join import *
+from .describe import *
+from .freqtbl import *
+from .aggregators import *
+from .asyncthread import *
 from .pivot import *
 from .tidydata import *
 from .cmdlog import *
@@ -22,10 +30,14 @@ from .freeze import *
 from .regex import *
 from .canvas import *
 from .graph import *
-from .menu import *
 from .motd import *
 from .transpose import *
 from .diff import *
+from .shell import *
+from .movement import *
+from ._profile import *
+
+from .vimkeys import *
 
 from .loaders.csv import *
 from .loaders.json import *
@@ -40,12 +52,19 @@ from .loaders.mbtiles import *
 from .loaders.http import *
 from .loaders.html import *
 from .loaders.markdown import *
+from .loaders.pcap import *
 from .loaders.png import *
 from .loaders.ttf import *
 from .loaders.sas import *
 from .loaders.spss import *
 from .loaders.stata import *
+from .loaders.xml import *
+from .loaders.yaml import *
+from .loaders.pandas import *
+
+from .colors import *   # ColorsSheet
 
 from math import *
+
 
 addGlobals(globals())

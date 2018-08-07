@@ -1,4 +1,4 @@
-# VisiData v1.2.1 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
+# VisiData v1.3 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A terminal interface for exploring and arranging tabular data.
 
@@ -10,82 +10,47 @@ A terminal interface for exploring and arranging tabular data.
 - other modules may be required for opening particular data sources
     - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](http://visidata.org/man/#loaders) in the vd manpage
 
-### Install via pip3
+## Getting started
 
-Best installation method for users who wish to take advantage of VisiData in their own code, or integrate it into a Python3 virtual environment.
+### Installation
 
-To install VisiData, with loaders for the most common data file formats (including csv, tsv, fixed-width text, json, sqlite, http, html and xls):
+Each package contains the full loader suite but differs in which loader dependencies will get installed by default.
 
-    $ pip3 install visidata
+The base VisiData package concerns loaders whose dependencies are covered by the Python3 standard library.
 
-### Install via conda
+Base loaders: tsv, csv, json, sqlite, and fixed width text.
 
-To install from [conda-forge](https://github.com/conda-forge/visidata-feedstock):
+|Platform           |Package Manager                        | Command                                       | Out-of-box Loaders   |
+|-------------------|----------------------------------------|----------------------------------------------|----------------------|
+|Python3.4+         |[pip3](https://visidata.org/install#pip3) | `pip3 install visidata`                    | Base                 |
+|Python3.4+         |[conda](https://visidata.org/install#conda) | `conda install --channel conda-forge visidata` | Base, http, html, xls(x) |
+|MacOS              |[Homebrew](https://visidata.org/install#brew) | `brew install saulpw/vd/visidata`            | Base, http, html, xls(x) |
+|Linux (Debian/Ubuntu) |[apt](https://visidata.org/install#apt) | [full instructions](https://visidata.org/install#apt)                      | Base, http, html, xls(x) |
+|Linux (Debian/Ubuntu) |[dpkg](https://visidata.org/install#dpkg) | [full instructions](https://visidata.org/install#dpkg)                | Base, http, html, xls(x) |
+|Windows               |[WSL](https://visidata.org/install#wsl) | Windows is not directly supported (use WSL) | N/A |
+|Python3.4+            |[github](https://visidata.org/install#git) | `pip3 install git+https://github.com/saulpw/visidata.git@stable` | Base |
 
-Add the `conda-forge` channel.
+Please see [/install](https://visidata.org/install) for detailed instructions, additional information, and troubleshooting.
 
-    $ conda config --add channels conda-forge
-
-You can then install VisiData by typing:
-
-    $ conda install visidata
-
-And update VisiData with:
-
-    $ conda update visidata
-
-### Install via brew
-
-Ideal for MacOS users who primarily want to engage with VisiData as an application. This is currently the most reliable way to install VisiData's manpage on MacOS.
-
-    $ brew install saulpw/vd/visidata
-
-Further instructions available [here](https://github.com/saulpw/homebrew-vd).
-
-### Install via apt
-
-Packaged for Linux users who do not wish to wrangle with PyPi or python3-pip.
-
-Currently, VisiData v1.0 is in Debian unstable's [main repository](https://launchpad.net/ubuntu/+source/visidata). If you want more up-to-date versions of VisiData, it will be available in our own [Debian repo](https://github.com/saulpw/deb-vd).
-
-To install from Debian:
-
-Obtain the public key
-
-    $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B48AD6246925553
-
-Ensure the repository is in apt's search list
-
-    $ sudo apt install apt-transport-https
-    $ sudo vim /etc/apt/sources.list
-
-      deb http://ftp.debian.org/debian/ unstable main
-
-    $ sudo apt update
-
-You can then install VisiData by typing:
-
-    sudo apt install visidata
-
-Instructions for installing from our own personal repository are available [here](https://github.com/saulpw/deb-vd).
-
-## Usage
+### Usage
 
     $ vd [<options>] <input> ...
     $ <command> | vd [<options>]
 
-VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more.
+VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more (see the [list of supported sources](http://visidata.org/man#sources)).
+
 Use `-f <filetype>` to force a particular filetype.
-(See the [list of supported sources](http://visidata.org/man#sources)).
 
-## Documentation
 
-* Quick reference: `F1` (or `z?`) within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
-* [visidata.org/docs](http://visidata.org/docs) has a complete list of links to all official documentation.
+### Documentation
 
-## Help and Support
+* [VisiData v1.2 Getting Started Tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
+* Quick reference: `Ctrl+H` within `vd` will open the [man page](http://visidata.org/man), which has a list of all commands and options.
+* [/docs](http://visidata.org/docs) contains a collection of howto recipes.
 
-For additional information, see the [support page](http://visidata.org/support).
+### Help and Support
+
+If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues).
 
 ## vdtui
 
@@ -106,6 +71,8 @@ Other VisiData components, including the main `vd` application, addons, loaders,
 
 ## Credits
 
-VisiData was created and developed by Saul Pwanson `<vd@saul.pw>`.
+VisiData is conceived and developed by Saul Pwanson `<vd@saul.pw>`.
 
-Thanks to all the contributors, and to those wonderful users who provide feedback, for making VisiData the awesome tool that it is.
+Anja Kefala `<anja.kefala@gmail.com>` maintains the documentation and packages for all platforms.
+
+Many thanks to numerous other contributors, and to those wonderful users who provide feedback, for helping to make VisiData the awesome tool that it is.

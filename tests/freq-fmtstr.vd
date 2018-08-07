@@ -1,0 +1,8 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	OrderDate		type-date		@	
+sample			columns-sheet		C	
+sample_columns	fmtstr	キOrderDate	edit-cell	%Y	e	
+sample_columns			quit-sheet		q	
+sample	OrderDate		freq-col		F	
+sample_OrderDate_freq	histogram		hide-col		-	

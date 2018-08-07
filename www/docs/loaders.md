@@ -1,5 +1,5 @@
-- Date: 2017-12-27
-- Version: 1.0
+- Date: 2018-07-18
+- Version: 1.3
 
 # How to create a loader for VisiData
 
@@ -139,8 +139,8 @@ There are several helpers for constructing `Column` objects:
 * `ColumnItem(colname, itemkey, **kwargs)` uses the builtin `getitem` and `setitem` on the row (as in `row[itemkey]`).  The `itemkey` also defaults to the `colname` itself.
   This is useful when the rows are Python mappings or sequences, like dicts or lists.
 
-* `SubrowColumn(origcol, subrowidx, **kwargs)` proxies for another Column, in which its row is nested in another sequence or mapping.
-This is useful on a sheet with augmented rows, like `tuple(orig_index, orig_row)`; each column on the original sheet would be wrapped in a `SubrowColumn(col, 1)`, since `orig_row` is now `row[1]`.  Used in joined sheets.
+* `SubrowColumn(newname, origcol, subrowidx, **kwargs)` proxies for another Column, in which its row is nested in another sequence or mapping.
+This is useful on a sheet with augmented rows, like `tuple(orig_index, orig_row)`; each column on the original sheet would be wrapped in a `SubrowColumn(col.name, col, 1)`, since `orig_row` is now `row[1]`.  Used in joined sheets.
 
 Recipes for a couple of recurring patterns:
 
@@ -149,18 +149,19 @@ Recipes for a couple of recurring patterns:
 
 ## 4. Define Sheet-specific Commands
 
-`Command()` and `globalCommand()` have the same signature:
+`<Sheet>.addCommand()` and `globalCommand()` have the same signature:
 
-`Command(keystrokes, execstr, helpstr, longname)`
+`[...]Command(default_keybinding, longname, execstr)`
 
     class FooSheet(Sheet):
         ...
-        commands = [
-            Command('b', 'cursorRow.set_bar(0)', 'reset bar to 0', 'reset-bar')
-        ]
 
-- Reasonably intuitive and mnemonic default keybindings should be chosen.
-- The longname allows the command to be rebound by a more descriptive name, and for the command to be redefined for other contexts (so all keystrokes bound to that command will take on the new action).
+    FooSheet.addCommand('b', 'reset-bar', 'cursorRow.set_bar(0)')
+
+- Optionally, a reasonably intuitive and mnemonic default keybindings could be chosen.
+- The longname is a mandatory argument and allows the command to be rebound by a more descriptive name, and for the command to be redefined for other contexts (so all keystrokes bound to that command will take on the new action).
+
+See the [commands design document]() and [commands checklist]() for more details.
 
 ## Full Example
 
@@ -179,9 +180,6 @@ This would be a completely functional read-only viewer for the fictional foolib.
                           setter=lambda col,row,val: row.set_bar(val)),
             Column('baz', type=int, getter=lambda col,row: row.inside[1]*100)
         ]
-        commands = [
-            Command('b', 'cursorRow.set_bar(0)', 'reset bar to 0', 'reset-bar')
-        ]
 
         @asyncthread
         def reload(self):
@@ -194,6 +192,8 @@ This would be a completely functional read-only viewer for the fictional foolib.
                 except Exception as e:
                     r = e
                 self.rows.append(r)
+
+    FooSheet.addCommand('b', 'reset-bar', 'cursorRow.set_bar(0)')
 
 ## Extra Credit: create a saver
 

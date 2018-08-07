@@ -1,0 +1,9 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample			columns-sheet		C	
+sample_columns	type	キUnits	edit-cell	int	e	
+sample_columns		キUnit_Cost	select-row		s	
+sample_columns		キTotal	select-row		s	
+sample_columns	type		edit-cells	float	ge	
+sample_columns			quit-sheet		q	
+sample			describe-sheet		I	

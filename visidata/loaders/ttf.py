@@ -19,9 +19,6 @@ class TTFTablesSheet(Sheet):
         Column('isSymbol', getter=lambda col,row: row.isSymbol()),
         Column('isUnicode', getter=lambda col,row: row.isUnicode()),
     ]
-    commands = [
-        Command(ENTER, 'vd.push(TTFGlyphsSheet(name+str(cursorRowIndex), source=sheet, sourceRows=[cursorRow], ttf=ttf))', '', ''),
-    ]
 
     @asyncthread
     def reload(self):
@@ -38,14 +35,12 @@ class TTFGlyphsSheet(Sheet):
     columns = [
         ColumnItem('codepoint', 0, type=int, fmtstr='{:0X}'),
         ColumnItem('glyphid', 1),
-        SubrowColumn(ColumnAttr('height', type=int), 2),
-        SubrowColumn(ColumnAttr('width', type=int), 2),
-        SubrowColumn(ColumnAttr('lsb'), 2),
-        SubrowColumn(ColumnAttr('tsb'), 2),
+        SubrowColumn('height', ColumnAttr('height', type=int), 2),
+        SubrowColumn('width', ColumnAttr('width', type=int), 2),
+        SubrowColumn('lsb', ColumnAttr('lsb'), 2),
+        SubrowColumn('tsb', ColumnAttr('tsb'), 2),
     ]
-    commands = [
-        Command('.', 'vd.push(makePen(name+"_"+cursorRow[1], source=cursorRow[2], glyphSet=ttf.getGlyphSet()))', 'push plot of this glyph')
-    ]
+
     @asyncthread
     def reload(self):
         self.rows = []
@@ -53,6 +48,10 @@ class TTFGlyphsSheet(Sheet):
         for cmap in self.sourceRows:
             for codepoint, glyphid in Progress(cmap.cmap.items(), total=len(cmap.cmap)):
                 self.addRow((codepoint, glyphid, glyphs[glyphid]))
+
+
+TTFTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(TTFGlyphsSheet(name+str(cursorRowIndex), source=sheet, sourceRows=[cursorRow], ttf=ttf))')
+TTFGlyphsSheet.addCommand('.', 'plot-row', 'vd.push(makePen(name+"_"+cursorRow[1], source=cursorRow[2], glyphSet=ttf.getGlyphSet()))')
 
 
 def makePen(*args, **kwargs):

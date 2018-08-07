@@ -1,5 +1,5 @@
 sheet	col	row	keystrokes	input	comment
-graph-sincos-notest_vd	sheet	0	A	1	open new blank sheet with number columns
+graph-sincos-nosave_vd	sheet	0	A	1	open new blank sheet with number columns
 unnamed	0	0	ga	360	add N blank rows
 unnamed	0	0	gz=	range(360)	set selected rows in this column to the values in the given Python sequence expression
 unnamed	0	0	^	xdeg	edit name of current column

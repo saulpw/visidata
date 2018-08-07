@@ -1,30 +1,26 @@
 from visidata import *
 
-globalCommand('W', 'vd.push(SheetPivot(sheet, [cursorCol]))', 'Pivot the current column into a new sheet', 'data-pivot')
+Sheet.addCommand('W', 'pivot', 'vd.push(SheetPivot(sheet, [cursorCol]))')
 
 # rowdef: (tuple(keyvalues), dict(variable_value -> list(rows)))
 class SheetPivot(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     rowtype = 'aggregated rows'
-    commands = [
-        Command('z'+ENTER, 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, []); vd.push(vs)',
-                      'open sheet of source rows aggregated in current cell', 'open-source-cell'),
-        Command(ENTER, 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow[0]); vs.rows=sum(cursorRow[1].values(), []); vd.push(vs)',
-                      'open sheet of source rows aggregated in current cell', 'open-source-row')
-               ]
     def __init__(self, srcsheet, variableCols):
-        super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols), source=srcsheet)
-
-        self.nonpivotKeyCols = []
         self.variableCols = variableCols
-        for colnum, col in enumerate(srcsheet.keyCols):
-            if col not in variableCols:
-                newcol = Column(col.name, getter=lambda col,row,colnum=colnum: row[0][colnum])
+        super().__init__(srcsheet.name+'_pivot_'+''.join(c.name for c in variableCols),
+                         source=srcsheet)
+
+    def reload(self):
+        self.nonpivotKeyCols = []
+
+        for colnum, col in enumerate(self.source.keyCols):
+            if col not in self.variableCols:
+                newcol = copy(col)
+                newcol.getter = lambda col,row,colnum=colnum: row[0][colnum]
                 newcol.srccol = col
                 self.nonpivotKeyCols.append(newcol)
 
-
-    def reload(self):
         # two different threads for better interactive display
         self.reloadCols()
         self.reloadRows()
@@ -32,7 +28,7 @@ class SheetPivot(Sheet):
     @asyncthread
     def reloadCols(self):
         self.columns = copy(self.nonpivotKeyCols)
-        self.keyCols = copy(self.columns)
+        self.setKeys(self.columns)
 
         aggcols = [(c, aggregator) for c in self.source.visibleCols for aggregator in getattr(c, 'aggregators', [])]
 
@@ -70,18 +66,22 @@ class SheetPivot(Sheet):
         rowidx = {}
         self.rows = []
         for r in Progress(self.source.rows):
-            keys = tuple(getValueOrError(keycol.srccol, r) for keycol in self.nonpivotKeyCols)
+            keys = tuple(forward(keycol.srccol.getTypedValue(r)) for keycol in self.nonpivotKeyCols)
+            formatted_keys = tuple(wrapply(c.format, v) for v, c in zip(keys, self.nonpivotKeyCols))
 
-            pivotrow = rowidx.get(keys)
+            pivotrow = rowidx.get(formatted_keys)
             if pivotrow is None:
                 pivotrow = (keys, {})
-                rowidx[keys] = pivotrow
+                rowidx[formatted_keys] = pivotrow
                 self.addRow(pivotrow)
 
             for col in self.variableCols:
-                varval = col.getTypedValueNoExceptions(r)
+                varval = col.getTypedValueOrException(r)
                 matchingRows = pivotrow[1].get(varval)
                 if matchingRows is None:
                     pivotrow[1][varval] = [r]
                 else:
                     matchingRows.append(r)
+
+SheetPivot.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow[1].get(cursorCol.aggvalue, []); vd.push(vs)')
+SheetPivot.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow[0]); vs.rows=sum(cursorRow[1].values(), []); vd.push(vs)')

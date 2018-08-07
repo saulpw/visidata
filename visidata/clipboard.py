@@ -1,54 +1,120 @@
-
-from visidata import *
-
-# adds vd.clipvalue and vd.cliprows
-# vd.cliprows = [(source_sheet, source_row_idx, source_row)]
-
-globalCommand('y', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]', 'copy current row to clipboard', 'data-clipboard-copy-row')
-globalCommand('d', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', 'delete current row and move it to clipboard', 'modify-delete-row')
-globalCommand('p', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'data-clipboard-paste-after')
-globalCommand('P', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', 'paste clipboard rows after current row', 'data-clipboard-paste-before')
-
-globalCommand('gd', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', 'delete selected rows and move them to clipboard', 'modify-delete-selected')
-globalCommand('gy', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))', 'copy selected rows to clipboard', 'data-clipboard-copy-selected')
-
-globalCommand('zy', 'vd.clipvalue = cursorDisplay', 'copy current cell to clipboard', 'data-clipboard-copy-cell')
-globalCommand('gzp', 'cursorCol.setValues(selectedRows or rows, vd.clipvalue)', 'set contents of current column for selected rows to last clipboard value', 'data-clipboard-paste-selected')
-globalCommand('zp', 'cursorCol.setValue(cursorRow, vd.clipvalue)', 'set contents of current column for current row to last clipboard value', 'data-clipboard-paste-cell')
-
-globalCommand('Y', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank (copy) current row to system clipboard', 'data-clipboard-copy-system-row')
-globalCommand('gY', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))', 'yank (copy) selected rows to system clipboard', 'data-clipboard-copy-system-selected')
-globalCommand('zY', 'copyToClipboard(cursorDisplay)', 'yank (copy) current cell to system clipboard', 'data-clipboard-copy-system-cell')
-
-option('clipboard_copy_cmd', 'pbcopy w', 'command to copy stdin to system clipboard')
-# or 'xsel --primary' for xsel
-# or 'xclip -selection primary'
-# or 'pbcopy w' for mac
-
-import tempfile
+from copy import copy
+import shutil
 import subprocess
+import sys
+import tempfile
+import functools
 
-def copyToClipboard(val):
-    cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
-    with tempfile.NamedTemporaryFile() as temp:
-        with open(temp.name, 'w', encoding=options.encoding) as fp:
-            fp.write(str(val))
+from visidata import vd, asyncthread, sync, status, fail, option, options
+from visidata import Sheet, saveSheets
 
-        p = subprocess.Popen(cmd.split(), stdin=open(temp.name, 'r', encoding=options.encoding))
-        p.communicate()
+vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
+vd.clipcells = []  # list of strings
+
+Sheet.addCommand('y', 'copy-row', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]')
+Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]')
+Sheet.addCommand('p', 'paste-after', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)')
+Sheet.addCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)')
+
+Sheet.addCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()')
+Sheet.addCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))')
+
+Sheet.addCommand('zy', 'copy-cell', 'vd.clipcells = [cursorDisplay]')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])')
+Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)')
+Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)')
+
+Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
+Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)')
+
+Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))')
+Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))')
+Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
+Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard(" ".join(vd.clipcells))')
+
+Sheet.bindkey('KEY_DC', 'delete-cell'),
+Sheet.bindkey('gKEY_DC', 'delete-cells'),
+
+
+option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
+
+__clipboard_commands = [
+    ('win32',  'clip', ''),                                      # Windows Vista+
+    ('darwin', 'pbcopy', 'w'),                                   # macOS
+    (None,     'xclip', '-selection clipboard -filter'),         # Linux etc.
+    (None,     'xsel', '--clipboard --input'),                   # Linux etc.
+]
+
+def detect_command(cmdlist):
+    '''Detect available clipboard util and return cmdline to copy data to the system clipboard.
+    cmddict is list of (platform, progname, argstr).'''
+
+    for platform, command, args in cmdlist:
+        if platform is None or sys.platform == platform:
+            path = shutil.which(command)
+            if path:
+                return ' '.join([path, args])
+
+    return ''
+
+detect_clipboard_command = lambda: detect_commands(__clipboard_commands)
+
+@functools.lru_cache()
+def clipboard():
+    'Detect cmd and set option at first use, to allow option to be changed by user later.'
+    if not options.clipboard_copy_cmd:
+        options.clipboard_copy_cmd = detect_clipboard_command()
+    return _Clipboard()
+
+
+class _Clipboard:
+    'Cross-platform helper to copy a cell or multiple rows to the system clipboard.'
+
+    @property
+    def command(self):
+        'Return cmdline cmd+args (as list for Popen) to copy data to the system clipboard.'
+        cmd = options.clipboard_copy_cmd or fail('options.clipboard_copy_cmd not set')
+        return cmd.split()
+
+    def copy(self, value):
+        'Copy a cell to the system clipboard.'
+
+        with tempfile.NamedTemporaryFile() as temp:
+            with open(temp.name, 'w', encoding=options.encoding) as fp:
+                fp.write(str(value))
+
+            p = subprocess.Popen(
+                self.command,
+                stdin=open(temp.name, 'r', encoding=options.encoding),
+                stdout=subprocess.DEVNULL)
+            p.communicate()
+
+    def save(self, vs, filetype):
+        'Copy rows to the system clipboard.'
+
+        # use NTF to generate filename and delete file on context exit
+        with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
+            saveSheets(temp.name, vs)
+            sync(1)
+            p = subprocess.Popen(
+                self.command,
+                stdin=open(temp.name, 'r', encoding=options.encoding),
+                stdout=subprocess.DEVNULL,
+                close_fds=True)
+            p.communicate()
+
+
+def copyToClipboard(value):
+    'copy single value to system clipboard'
+    clipboard().copy(value)
     status('copied value to clipboard')
+
 
 @asyncthread
 def saveToClipboard(sheet, rows, filetype=None):
-    cmd = options.clipboard_copy_cmd or error('options.clipboard_copy_cmd not set')
+    'copy rows from sheet to system clipboard'
+    filetype = filetype or options.filetype
     vs = copy(sheet)
     vs.rows = rows
-    filetype = filetype or options.filetype
-    with tempfile.NamedTemporaryFile() as temp:
-        tempfn = temp.name + "." + filetype
-        status('copying rows to clipboard')
-        saveSheets(tempfn, vs)
-        sync(1)
-        p = subprocess.Popen(cmd.split(), stdin=open(tempfn, 'r', encoding=options.encoding), close_fds=True)
-        p.communicate()
-    status('done')
+    status('copying rows to clipboard')
+    clipboard().save(vs, filetype)

@@ -1,0 +1,7 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/test.jsonl	o	
+test	key1		type-date		@	
+test	qty		type-int		#	
+test	amt		type-float		%	
+test			describe-sheet		I	
+test_describe	column		sort-asc		[	

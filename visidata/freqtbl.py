@@ -2,43 +2,25 @@ import math
 
 from visidata import *
 
-globalCommand('F', 'vd.push(SheetFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column', 'data-aggregate-column')
-globalCommand('gF', 'vd.push(SheetFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on the source sheet', 'data-aggregate-keys')
-globalCommand('zF', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))', 'open one-line summary for all selected rows', 'data-aggregate-summary')
+Sheet.addCommand('F', 'freq-col', 'vd.push(SheetFreqTable(sheet, cursorCol))')
+Sheet.addCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
+globalCommand('zF', 'freq-rows', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
 #option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 #option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
 
-ColumnsSheet.commands += [
-    Command(ENTER, 'vd.push(SheetFreqTable(source, cursorRow))', 'open a Frequency Table grouped on column referenced in current row', 'data-aggregate-source-column')
-]
-
-def getValueOrError(c, r):
-    try:
-        return c.getDisplayValue(r)
-    except Exception as e:
-        return 'error: %s' % e
-
+ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(source[0], cursorRow))')
 
 def valueNames(vals):
     return '-'.join(str(v) for v in vals)
 
-# rowdef: ([bin_values], source_rows)
+
+# rowdef: (keys, source_rows)
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
     rowtype = 'bins'
-    commands = [
-        # redefine these commands only to change the helpstr
-        Command('t', 'toggle([cursorRow]); cursorDown(1)', 'toggle these entries in source sheet', 'filter-source-toggle-bin'),
-        Command('s', 'select([cursorRow]); cursorDown(1)', 'select these entries in source sheet', 'filter-source-select-bin'),
-        Command('u', 'unselect([cursorRow]); cursorDown(1)', 'unselect these entries in source sheet', 'filter-source-unselect-bin'),
-
-        Command(ENTER, 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)', 'open sheet of source rows which are grouped in current cell', 'open-source-bin'),
-#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
-    ]
-
     def __init__(self, sheet, *columns):
         fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in columns))
         super().__init__(fqcolname, source=sheet)
@@ -46,9 +28,12 @@ class SheetFreqTable(Sheet):
         self.largest = 100
 
         self.columns = [
-            Column(c.name, type=c.type, width=c.width, getter=lambda col,row,i=i: row[0][i]) for i, c in enumerate(self.origCols)
+            Column(c.name, type=c.type if c.type in typemap else anytype, width=c.width, fmtstr=c.fmtstr,
+                        getter=lambda col,row,i=i: row[0][i],
+                        setter=lambda col,row,v,i=i,origCol=c: setitem(row[0], i, v) and origCol.setValues(row[1], v))
+                for i, c in enumerate(self.origCols)
         ]
-        self.keyCols = self.columns[:]  # origCols are now key columns
+        self.setKeys(self.columns)  # origCols are now key columns
         nkeys = len(self.keyCols)
 
         self.columns.extend([
@@ -68,7 +53,7 @@ class SheetFreqTable(Sheet):
 
         if aggregatedCols:  # hide percent/histogram if aggregations added
             for c in self.columns[nkeys+1:nkeys+3]:
-                c.width = 0
+                c.hide()
 
         self.groupby = columns
         self.orderby = [(self.columns[nkeys], -1)]  # count desc
@@ -149,11 +134,14 @@ class SheetFreqTable(Sheet):
     def discreteBinning(self):
         rowidx = {}
         for r in Progress(self.source.rows):
-            v = tuple(getValueOrError(c, r) for c in self.origCols)
-            histrow = rowidx.get(v)
+            keys = list(forward(c.getTypedValue(r)) for c in self.origCols)
+
+            # wrapply will pass-through a key-able TypedWrapper
+            formatted_keys = tuple(wrapply(c.format, c.getTypedValue(r)) for c in self.origCols)
+            histrow = rowidx.get(formatted_keys)
             if histrow is None:
-                histrow = (v, [])
-                rowidx[v] = histrow
+                histrow = (keys, [])
+                rowidx[formatted_keys] = histrow
                 self.addRow(histrow)
             histrow[1].append(r)
             self.largest = max(self.largest, len(histrow[1]))
@@ -172,7 +160,12 @@ class SheetFreqTable(Sheet):
         self.discreteBinning()
 
         # automatically add cache to all columns now that everything is binned
-        for c in self.visibleCols:
+        for c in self.nonKeyVisibleCols:
             c._cachedValues = collections.OrderedDict()
 
+SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
+SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
+SheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
 
+SheetFreqTable.addCommand(ENTER, 'dup-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)')
+#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')

@@ -1,8 +1,7 @@
-import time
-import operator
 import threading
 
 from visidata import *
+import visidata
 
 option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds')
 option('disp_replay_play', '▶', 'status indicator for active replay')
@@ -10,48 +9,32 @@ option('disp_replay_pause', '‖', 'status indicator for paused replay')
 option('replay_movement', False, 'insert movements during replay')
 option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
-globalCommand('gD', 'p=Path(options.visidata_dir); vd.push(DirSheet(p.name, source=p))', 'open .visidata directory', 'meta-visidata-dir')
-globalCommand('D', 'vd.push(vd.cmdlog)', 'open CommandLog', 'meta-cmdlog')
-globalCommand('^D', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)', 'save CommandLog to new .vd file', 'meta-cmdlog-save')
-globalCommand('^U', 'CommandLog.togglePause()', 'pause/resume replay', 'meta-replay-toggle')
-globalCommand('^I', '(CommandLog.currentReplay or error("no replay to advance")).advance()', 'execute next row in replaying sheet', 'meta-replay-step')
-globalCommand('^K', '(CommandLog.currentReplay or error("no replay to cancel")).cancel()', 'cancel current replay', 'meta-replay-cancel')
+globalCommand('gD', 'visidata-dir', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))')
+globalCommand('D', 'cmdlog', 'vd.push(vd.cmdlog)')
+globalCommand('^D', 'save-cmdlog', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)')
+globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
+globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
+globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
 
-globalCommand('Q', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))', 'quit current sheet and remove it from the cmdlog', 'sheet-quit-remove')
+globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
 
-globalCommand('status', 'status(input("status: ", display=False))', 'show given status message')
+globalCommand(None, 'status', 'status(input("status: "))')
+globalCommand('^V', 'check-version', 'status(__version_info__); checkVersion(input("require version: ", value=__version_info__))')
 
 # not necessary to log movements and scrollers
-nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g?'.split()
-nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c'.split()
+nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g? g_ _ z_'.split()
+nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c Q'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
-nonLogKeys += '^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) z? KEY_BACKSPACE'.split()
+nonLogKeys += '^^ ^Z ^A ^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) ^H KEY_BACKSPACE'.split()
 nonLogKeys += [' ']
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 
-def itemsetter(i):
-    def g(obj, v):
-        obj[i] = v
-    return g
 
-def namedlist(objname, fieldnames):
-    class NamedListTemplate(list):
-        __name__ = objname
-        _fields = fieldnames
-        def __init__(self, L=None):
-            if L is None:
-                L = [None for f in fieldnames]
-            super().__init__(L)
-
-    for i, attrname in enumerate(fieldnames):
-        # create property getter/setter for each field
-        setattr(NamedListTemplate, attrname, property(operator.itemgetter(i), itemsetter(i)))
-
-    return NamedListTemplate
-
-CommandLogRow = namedlist('CommandLogRow', 'sheet col row keystrokes input comment'.split())
+def checkVersion(desired_version):
+    if desired_version != visidata.__version__:
+        fail("version %s required" % desired_version)
 
 def fnSuffix(template):
     for i in range(1, 1000):
@@ -59,26 +42,22 @@ def fnSuffix(template):
         if not Path(fn).exists():
             return fn
 
-def getColVisibleIdxByFullName(sheet, name):
-    for i, c in enumerate(sheet.visibleCols):
-        if name == c.name:
+def indexMatch(L, func):
+    'returns the smallest i for which func(L[i]) is true'
+    for i, x in enumerate(L):
+        if func(x):
             return i
 
 def keystr(k):
-    return  ','.join(map(str, k))
-
-def getRowIdxByKey(sheet, k):
-    for i, r in enumerate(sheet.rows):
-        if keystr(sheet.rowkey(r)) == k:
-            return i
+    return options.rowkey_prefix + ','.join(map(str, k))
 
 def isLoggableSheet(sheet):
     return sheet is not vd().cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
 
-def isLoggableCommand(keystrokes):
+def isLoggableCommand(keystrokes, longname):
     if keystrokes in nonLogKeys:
         return False
-    if keystrokes.startswith('move-'):
+    if longname.startswith('go-'):
         return False
     if keystrokes.startswith('BUTTON'):  # mouse click
         return False
@@ -91,17 +70,13 @@ def open_vd(p):
 
 save_vd = save_tsv
 
-# rowdef: CommandLogRow
-class CommandLog(Sheet):
+# rowdef: namedlist (like TsvSheet)
+class CommandLog(TsvSheet):
     'Log of commands for current session.'
     rowtype = 'logged commands'
-    commands = [
-        Command('x', 'sheet.replayOne(cursorRow); status("replayed one row")', 'replay command in current row', 'replay-row'),
-        Command('gx', 'sheet.replay()', 'replay contents of entire CommandLog', 'replay-sheet'),
-        Command('^C', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay', 'replay-abort'),
-        Command('z^S', 'sheet.saveMacro(selectedRows or error("no rows selected"), input("save macro for keystroke: "))', 'save macro', 'meta-macro-save'),
-    ]
-    columns = [ColumnAttr(x) for x in CommandLogRow._fields]
+    precious = False
+    _rowtype = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment'.split())
+    columns = [ColumnAttr(x) for x in _rowtype._fields]
 
     paused = False
     currentReplay = None     # CommandLog replaying currently
@@ -113,13 +88,8 @@ class CommandLog(Sheet):
         super().__init__(name, source=source, **kwargs)
         self.currentActiveRow = None
 
-    def newRow(self):
-        return CommandLogRow()
-
-    @asyncthread
-    def reload(self):
-        reload_tsv_sync(self, header=1)  # .vd files always have a header row, regardless of options
-        self.rows = [CommandLogRow(r) for r in self.rows]
+    def newRow(self, **fields):
+        return self._rowtype(**fields)
 
     def removeSheet(self, vs):
         'Remove all traces of sheets named vs.name from the cmdlog.'
@@ -134,25 +104,27 @@ class CommandLog(Sheet):
         vd().macros[ks] = vs
         append_tsv_row(vd().macrosheet, (ks, macropath.resolve()))
 
-    def beforeExecHook(self, sheet, keystrokes, args=''):
+    def beforeExecHook(self, sheet, cmd, args, keystrokes):
         if not isLoggableSheet(sheet):
             return  # don't record editlog commands
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
 
-        cmd = sheet.getCommand(keystrokes)
         sheetname, colname, rowname = '', '', ''
-        if sheet and keystrokes != 'o':
+        if sheet and cmd.longname != 'open-file':
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             sheetname = sheet.name
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorRow') and sheet.rows:
                 k = sheet.rowkey(sheet.cursorRow)
-                rowname = (options.rowkey_prefix + keystr(k)) if k else sheet.cursorRowIndex
+                rowname = keystr(k) if k else sheet.cursorRowIndex
 
             if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
-        self.currentActiveRow = CommandLogRow([sheetname, colname, rowname, keystrokes, args, cmd.helpstr])
+        comment = CommandLog.currentReplayRow.comment if CommandLog.currentReplayRow else cmd.helpstr
+        self.currentActiveRow = self.newRow(sheet=sheetname, col=colname, row=rowname,
+                                              keystrokes=keystrokes, input=args,
+                                              longname=cmd.longname, comment=comment)
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
@@ -164,17 +136,17 @@ class CommandLog(Sheet):
 
         if isLoggableSheet(sheet):  # don't record jumps to cmdlog or other internal sheets
             # remove user-aborted commands and simple movements
-            if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes):
+            if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes, self.currentActiveRow.longname):
                 self.addRow(self.currentActiveRow)
                 if options.cmdlog_histfile:
                     if not getattr(vd(), 'sessionlog', None):
-                        vd().sessionlog = loadInternalSheet(CommandLog, Path(date().to_string(options.cmdlog_histfile)))
+                        vd().sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
                     append_tsv_row(vd().sessionlog, self.currentActiveRow)
 
         self.currentActiveRow = None
 
     def openHook(self, vs, src):
-        self.addRow(CommandLogRow(['', '', '', 'o', src, 'open file']))
+        self.addRow(self.newRow(keystrokes='o', input=src, longname='open-file'))
 
     @classmethod
     def togglePause(self):
@@ -210,8 +182,7 @@ class CommandLog(Sheet):
             try:
                 rowidx = int(r.row)
             except ValueError:
-                k = r.row[1:]  # trim rowkey_prefix
-                rowidx = getRowIdxByKey(vs, k)
+                rowidx = indexMatch(vs.rows, lambda r,vs=vs,k=r.row: keystr(vs.rowkey(r)) == k)
 
             if rowidx is None:
                 error('no "%s" row' % r.row)
@@ -228,7 +199,7 @@ class CommandLog(Sheet):
             try:
                 vcolidx = int(r.col)
             except ValueError:
-                vcolidx = getColVisibleIdxByFullName(vs, r.col)
+                vcolidx = indexMatch(vs.visibleCols, lambda c,name=r.col: name == c.name)
 
             if vcolidx is None:
                 error('no "%s" column' % r.col)
@@ -253,15 +224,25 @@ class CommandLog(Sheet):
         'Replay the command in one given row.'
         CommandLog.currentReplayRow = r
 
-        vs = self.moveToReplayContext(r)
+        longname = getattr(r, 'longname', None)
+        if longname == 'set-option':
+            try:
+                options.set(r.row, r.input, options._opts.getobj(r.col))
+                escaped = False
+            except Exception as e:
+                exceptionCaught(e)
+                escaped = True
+        else:
+            vs = self.moveToReplayContext(r)
 
-        vd().keystrokes = r.keystrokes
-        escaped = vs.exec_keystrokes(r.keystrokes)
+            vd().keystrokes = r.keystrokes
+            # <=v1.2 used keystrokes in longname column; getCommand fetches both
+            escaped = vs.exec_command(vs.getCommand(longname if longname else r.keystrokes), keystrokes=r.keystrokes)
 
         CommandLog.currentReplayRow = None
 
         if escaped:  # escape during replay aborts replay
-            status('replay aborted')
+            warning('replay aborted')
         return escaped
 
     def replay_sync(self, live=False):
@@ -274,7 +255,7 @@ class CommandLog(Sheet):
                     status('replay canceled')
                     return
 
-                vd().statuses = []
+                vd().statuses.clear()
                 try:
                     if self.replayOne(self.cursorRow):
                         self.cancel()
@@ -318,12 +299,20 @@ class CommandLog(Sheet):
         x = options.disp_replay_pause if self.paused else options.disp_replay_play
         return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
-    def setOption(self, optname, optval):
-        self.addRow(CommandLogRow(['options', '', options.rowkey_prefix + optname, 'set-row-input', str(optval), 'set option']))
+    def setOption(self, optname, optval, obj=None):
+        objname = options._opts.objname(obj)
+        self.addRow(self.newRow(col=objname, row=optname,
+                    keystrokes='', input=str(optval),
+                    longname='set-option'))
 
+CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
+CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
+CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
+CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))')
+options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
 vd().cmdlog = CommandLog('cmdlog')
-vd().cmdlog.rows = []  # so it can be added to immediately
+vd().cmdlog.rows = []
 
 vd().addHook('preexec', vd().cmdlog.beforeExecHook)
 vd().addHook('postexec', vd().cmdlog.afterExecSheet)
@@ -335,10 +324,12 @@ vd().addHook('set_option', vd().cmdlog.setOption)
 
 def loadMacros():
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
-    macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('keystrokes', 0), ColumnItem('filename', 1))) or error('error loading macros')
+    macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or error('error loading macros')
 
     for ks, fn in macrosheet.rows:
-        vd().macros[ks] = loadInternalSheet(CommandLog, Path(fn))
+        vs = loadInternalSheet(CommandLog, Path(fn))
+        bindkeys.set(ks, vs.name, 'override')
+        commands.set(vs.name, vs, 'override')
 
     return macrosheet
 

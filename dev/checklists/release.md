@@ -2,9 +2,15 @@
 
 1. Merge `stable` to `develop` (if necessary)
 
-2. Ensure `develop` automated tests run correctly with dev/test.sh
+2. Verify that documentation/docstrings are up-to-date on features and functionality
 
-3. Verify that documentation/docstrings are up-to-date on features and functionality
+    a. manpage;
+
+    b. visidata.org;
+
+    c. CHANGELOG;
+
+3. Ensure `develop` automated tests run correctly with dev/test.sh
 
 4. Verify that setup.py is up-to-date with requirements.
 
@@ -83,6 +89,7 @@ twine upload dist/*
    b. Ask someone else to test install
 
 13. Create a tag `v#.#.#` for that commit
+
 ```
 git tag v#.#.#
 git push --tags
@@ -90,11 +97,17 @@ git push --tags
 
 14. Push code to stable
 
-15. Write up the release notes and post at visidata.org/release/#.#
+15. Write up the release notes and add it to `www/releases.md`
 
-16. Comb through issues and close the ones that have been solved, referencing the version number
+16. Upload new motd
 
-17. Post release notes on tinyletter and twitter and have some ice cream
+17. Run dev/mkwww.sh to rebuild the website and deploy with dev/deploy_www.sh
+
+18. Comb through issues and close the ones that have been solved, referencing the version number
+
+19. Post github release notes on tinyletter.
+
+20. Update the other distributions.
 
 # conda
 
@@ -103,6 +116,10 @@ git push --tags
 2. Update the VisiData version and sha256.
 
 3. Make any necessary removals, additions or modifications to the dependencies -> note that a dependency must be part of conda.
+
+4. Make a PR.
+
+5. Comment `@conda-forge-admin, please rerender` in the PR.
 
 
 # Homebrew
@@ -144,4 +161,4 @@ dput mentors visidata_ver.changes
 
 ## deb-vd
 9. Enter saulpw/deb-vd.
-10. Run the command reprepro includeb sid new-vd.deb
+10. Run the command reprepro includedeb sid new-vd.deb

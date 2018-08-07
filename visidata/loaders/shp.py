@@ -28,10 +28,6 @@ class ShapeSheet(Sheet):
     columns = [
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]
-    commands = [
-        Command('.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', ''),
-        Command('g.', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows, textCol=cursorCol))', ''),
-    ]
     @asyncthread
     def reload(self):
         import shapefile
@@ -42,12 +38,8 @@ class ShapeSheet(Sheet):
         for shaperec in Progress(sf.iterShapeRecords(), total=sf.numRecords):
             self.addRow(shaperec)
 
-
 class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
-    commands = [
-        Command('^S', 'save_geojson(Path(input("json to save: ", value=name+".geojson")), sheet)', 'save in geojson format'),
-    ]
     @asyncthread
     def reload(self):
         self.reset()
@@ -72,6 +64,10 @@ class ShapeMap(InvertedCanvas):
             self.label(textx, texty, disptext, self.plotColor(k), row)
 
         self.refresh()
+
+ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))')
+ShapeSheet.addCommand('g.', 'plot-selected', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows, textCol=cursorCol))')
+ShapeMap.addCommand('^S', 'save-geojson', 'save_geojson(Path(input("json to save: ", value=name+".geojson")), sheet)')
 
 
 def save_geojson(p, vs):

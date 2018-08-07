@@ -1,5 +1,5 @@
-sheet	col	row	keystrokes	input	comment
-options		キfiletype	set-row-input	fixed	set option
-			o	sample_data/countries	open file
-countries	country-name--------------------------------		^	country name	edit name of current column
-countries	keywords-------------------------------------------		^	keywords	edit name of current column
+sheet	col	row	longname	input	keystrokes	comment
+	override	filetype	set-option	fixed		
+			open-file	sample_data/countries	o	
+countries	country-name--------------------------------		rename-col	country name	^	
+countries	keywords-------------------------------------------		rename-col	keywords	^	

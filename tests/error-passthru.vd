@@ -1,0 +1,6 @@
+sheet	col	row	keystrokes	input	comment
+			o	sample_data/sample.tsv	open file
+sample	Item	2	,		
+sample	Item		gzd		
+sample	Item		=	Item.foo	
+sample	Item.foo		F		
