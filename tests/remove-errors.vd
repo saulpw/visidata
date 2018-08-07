@@ -1,5 +1,4 @@
 sheet	col	row	longname	input	keystrokes	comment
-			check-version	1.2.1		saul.pw/vdtui v1.2.1
 			open-file	sample_data/surveys.csv	o	
 surveys	record_id		addcol-expr	year+'-'+month+'-'+day	=	
 surveys	year+'-'+month+'-'+day		type-date		@	

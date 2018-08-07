@@ -1,5 +1,4 @@
 sheet	col	row	longname	input	keystrokes	comment
-			check-version	1.2.1		saul.pw/vdtui v1.2.1
 	override	filetype	set-option	fixed		
 			open-file	sample_data/countries	o	
 countries	country-name--------------------------------		rename-col	country name	^	
