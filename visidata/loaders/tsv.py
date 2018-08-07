@@ -30,6 +30,7 @@ def open_tsv(p):
 # rowdef: namedlist
 class TsvSheet(Sheet):
     _rowtype = None
+
     @asyncthread
     def reload(self):
         self.reload_sync()
@@ -68,6 +69,8 @@ class TsvSheet(Sheet):
                     self.addRow(self._rowtype(row))
                     prog.addProgress(len(L))
 
+    def newRow(self):
+        return self._rowtype()
 
 def tsv_trdict(delim=None):
     'returns string.translate dictionary for replacing tabs and newlines'
