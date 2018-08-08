@@ -5,7 +5,7 @@
 - commands overhaul; see `commands.tsv` (command longnames should now be largely stable)
 - add quantile aggregators (q3/q4/q5/q10)
 - add `z;` to add new column from bash *expr*, with `$`columnNames as variables
-- sheet-specific options (see design/169.md); use `v` on OptionsSheet to toggle between global and sheet-specific values
+- `O` launches sheet-specific options (see design/169.md); `gO` launches global OptionsSheet
 - keyboard layout (thanks to @deinspier for the inspiration)
 - options.wrap now defaults to False
 - options.quitguard enables confirmation before quitting last sheet
