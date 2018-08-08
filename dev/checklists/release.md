@@ -76,26 +76,26 @@
     b. otherwise, clean out the branch
 
 
-11. Push stable to pypi
+11. Push code to stable
+
+12. Push stable to pypi
 
 ```
 twine upload dist/*
 ```
 
-12. Test install/upgrade from pypi
+13. Test install/upgrade from pypi
 
   a. Build and deploy the website
 
    b. Ask someone else to test install
 
-13. Create a tag `v#.#.#` for that commit
+14. Create a tag `v#.#.#` for that commit
 
 ```
 git tag v#.#.#
 git push --tags
 ```
-
-14. Push code to stable
 
 15. Write up the release notes and add it to `www/releases.md`
 
