@@ -99,9 +99,9 @@ globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new
 # in VisiData, ^H refers to the man page
 globalCommand('^H', 'sysopen-help', 'openManPage()')
 bindkey('KEY_F(1)', 'sysopen-help')
-bindkey('BACKSPACE', 'sysopen-help')
+bindkey('KEY_BACKSPACE', 'sysopen-help')
 bindkey('zKEY_F(1)', 'help-commands')
-bindkey('zBACKSPACE', 'help-commands')
+bindkey('zKEY_BACKSPACE', 'help-commands')
 
 def openManPage():
     from pkg_resources import resource_filename
