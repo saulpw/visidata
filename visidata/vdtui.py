@@ -488,20 +488,21 @@ def asyncthread(func):
     return _execAsync
 
 
-def asynccache(func):
-    'Function decorator, so first call to `func()` spawns a separate thread. Calls return the Thread until the wrapped function returns; subsequent calls return the cached return value.'
-    d = {}  # per decoration cache
-    def _func(*args, **kwargs):
-        k = str(args) + str(kwargs)
-        d[k] = func(*args, **kwargs)
+def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
+    def _decorator(func):
+        'Function decorator, so first call to `func()` spawns a separate thread. Calls return the Thread until the wrapped function returns; subsequent calls return the cached return value.'
+        d = {}  # per decoration cache
+        def _func(k, *args, **kwargs):
+            d[k] = func(*args, **kwargs)
 
-    @functools.wraps(func)
-    def _execAsync(*args, **kwargs):
-        k = str(args) + str(kwargs)
-        if k not in d:
-            d[k] = vd().execAsync(_func, *args, **kwargs)
-        return d.get(k)
-    return _execAsync
+        @functools.wraps(func)
+        def _execAsync(*args, **kwargs):
+            k = key(*args, **kwargs)
+            if k not in d:
+                d[k] = vd().execAsync(_func, k, *args, **kwargs)
+            return d.get(k)
+        return _execAsync
+    return _decorator
 
 
 class Progress:
