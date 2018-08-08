@@ -1,3 +1,12 @@
+# [v1.3](https://github.com/saulpw/visidata/releases/tag/v1.3)
+
+## Known bugs
+
+* when `confirm_overwrite` is set to false, a cmdlog replay with a `save_sheet` gets stuck in an infinite loop
+* after using the **Dir sheet** to rename a file, a `reload-sheet` is required to refresh the `ext` column for that row
+* `next-search`/`prev-search` should work with `search-expr` and `searchr-expr
+*  `show-aggregate` *mean* should work with columns typed `int` 
+
 # [v1.2.1](https://github.com/saulpw/visidata/releases/tag/v1.2.1) (2018-07-06)
 
 @deinspanjer (issue [#164](https://github.com/saulpw/visidata/issues/164)) discovered that VisiData doesn't work with Python3.7 due to our use of the 'async' identifier, which is now off-limits as it is a formal keyword as of 3.7. The only change in 1.2.1 is changing 'async' to 'asyncthread' in order to work with Python 3.7.
