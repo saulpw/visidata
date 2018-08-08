@@ -101,7 +101,7 @@ class CommandLog(TsvSheet):
         vs.rows = self.selectedRows
         macropath = Path(fnSuffix(options.visidata_dir+"macro-{0}.vd"))
         save_vd(macropath, vs)
-        vd().macros[ks] = vs
+        setMacro(ks, vs)
         append_tsv_row(vd().macrosheet, (ks, macropath.resolve()))
 
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
@@ -328,9 +328,12 @@ def loadMacros():
 
     for ks, fn in macrosheet.rows:
         vs = loadInternalSheet(CommandLog, Path(fn))
-        bindkeys.set(ks, vs.name, 'override')
-        commands.set(vs.name, vs, 'override')
+        setMacro(ks, vs)
 
     return macrosheet
+
+def setMacro(ks, vs):
+    bindkeys.set(ks, vs.name, 'override')
+    commands.set(vs.name, vs, 'override')
 
 vd().macrosheet = loadMacros()
