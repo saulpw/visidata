@@ -205,7 +205,7 @@ class OptionsObject:
             else:
                 v = t(v)
 
-            if curval != v and opt.replayable:
+            if curval != v and self._get(k, 'global').replayable:
                 vd().callHook('set_option', k, v, obj)
         else:
             curval = None
