@@ -16,7 +16,7 @@ def urlcache(url, cachesecs=24*60*60):
             return p
 
     if not p.parent.exists():
-        os.mkdir(p.parent.resolve())
+        os.makedirs(p.parent.resolve(), exist_ok=True)
 
     assert p.parent.is_dir(), p.parent
 

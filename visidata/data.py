@@ -163,7 +163,7 @@ def saveSheets(fn, *vsheets, confirm_overwrite=False):
         # save as individual files in the givenpath directory
         if not givenpath.exists():
             try:
-                os.mkdir(givenpath.resolve())
+                os.makedirs(givenpath.resolve(), exist_ok=True)
             except FileExistsError:
                 pass
 
