@@ -7,7 +7,7 @@ In VisiData, there is a distinction between global configurations (options/comma
 
 Examples of **SheetType**s include (but are not limited to):
 
-* **FreqTblSheet** (the command is executable on every [frequency table](/docs/group#frequency));
+* **SheetFreqTable** (the command is executable on every [frequency table](/docs/group#frequency));
 * **TsvSheet** (option is applied to every loaded .tsv file);
 * **ColumnsSheet** (typing selected referenced columns with `g#` can only be done on the **Columns sheet**).
 
@@ -37,30 +37,6 @@ vd --skip=2
 ## How to have setting configurations persist
 
 The contents of **.visidatarc** in the user's home directory (and also the current directory) are `exec()`d on startup. Options set through the command-line or **Options Sheet** will override those set in **.visidatarc**.
-
-Both `option` and `replayableOption` take on the same parameters:
-
-~~~
-option(optname, default, helpstr)
-~~~
-
-For example, to declare a global option:
-
-~~~
-option('num_burgers', 42, 'number of burgers to use')
-~~~
-
-To get the value of an option:
-
-~~~
-options.num_burgers 
-~~~
-
-or
-
-~~~
-options['num_burgers']
-~~~
 
 To set the global value of an option:
 
