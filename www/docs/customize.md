@@ -3,11 +3,24 @@
 
 # Customizing VisiData
 
+In VisiData, there is a distinction between global configurations (options/commands) and sheet-specific. Global settings are on default applied to every single sheet in the session. Sheet-specific  ones override global settings for a given **SheetType**.
+
+Examples of **SheetType**s include (but are not limited to):
+
+* **FreqTblSheet** (the command is executable on every [frequency table](/docs/group#frequency));
+* **TsvSheet** (option is applied to every loaded .tsv file);
+* **ColumnsSheet** (typing selected referenced columns with `g#` can only be done on the **Columns sheet**).
+
 ## How to configure VisiData within the current session
 
-Within the application itself, press `O` to access the **Options sheet**. An option can be edited either by pressing `Enter` or by using [standard editing commands](/man#edit). 
+Within the application itself:
 
-Options can also be passed as arguments through the [commandline](/man#options).  For example
+* Press `O` to access the **Options sheet** for the current **SheetType**.
+* Press `gO` to access the global **Options sheet**.
+
+An option can be edited either by pressing `Enter` or by using [standard editing commands](/man#edit).
+
+Global options can also be passed as arguments through the [commandline](/man#options).  For example
 
 ~~~
 vd --skip 2
@@ -72,21 +85,18 @@ The maximum option name length should be 20.
 
 ## How to configure commands
 
-TODO I NEED A VISIDATARC topic that I can link to for both sections: The contents of **.visidatarc** in the user's home directory (and also the current directory) are `exec()`d on startup.
-
-TODO: explain longnames in a topic
+The contents of **.visidatarc** in the user's home directory (and also the current directory) are `exec()`d on startup. Longnames are names given to particular flavours of executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, these are bound to the keystroke `s`.
 
 ### Creating command aliases for existing commands
 
-1. Use `Ctrl+H` to open the **Commands Sheet** and discover the [longname]() for the functionality in question.
+1. Use `zCtrl+H` to open the **Commands Sheet** and discover the [longname]() for the functionality in question.
 
-2.
-    a) To create a global keybinding, add `bindkey(keystroke, longname)` to your [visidatarc]().
-    b) To set the binding for a particular sheet type, add `<Sheet>.bindkey(keystroke, longname)` to your [visidatarc](), where `<Sheet>` is a **SheetType**.
+2. a) To create a global keybinding, add `bindkey(keystroke, longname)` to your **.visidatarc**.
+b) To set the binding for a particular sheet type, add `<Sheet>.bindkey(keystroke, longname)` to your **.visidatarc**, where `<Sheet>` is a **SheetType**.
 
 ### Creating new commands
 
-Both `globalCommand` and `<Sheet>.addCommand` take the same parameters. At minimum, each command requires a [longname]() and execstr.
+Both `globalCommand` and `<Sheet>.addCommand` take the same parameters. At minimum, each command requires a longname and execstr.
 
 ~~~
 globalCommand(default_keybinding, longname, execstr)
@@ -98,7 +108,7 @@ For example, to define a new global command:
 globalCommand('^D', 'scroll-halfpage-down', ''sheet.topRowIndex += nVisibleRows//2')
 ~~~
 
-For a sheet-level command:
+For a sheet-specific command:
 
 ~~~
 <Sheet>.addCommand('^D', 'scroll-halfpage-down', ''sheet.topRowIndex += nVisibleRows//2')
