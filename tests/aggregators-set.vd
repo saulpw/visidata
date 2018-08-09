@@ -1,15 +1,15 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample.tsv	open input in VisiData
-sample	Units	0	#		set type of current column to int
-sample	Unit_Cost	0	%		set type of current column to float
-sample	Total	0	%		set type of current column to float
-sample	Total	0	C		open Columns Sheet
-sample_columns	name	4	s		select current row
-sample_columns	name	6	s		select current row
-sample_columns	name	6	g+	sum	add aggregator to selected source columns
-sample_columns	aggregators	6	e	sum avg	edit contents of current cell
-sample_columns	aggregators	6	q		quit current sheet
-sample	Item	0	F		open Frequency Table grouped on current column
-sample_Item_freq	Item	0	C		open Columns Sheet
-sample_Item_freq_columns	name	0	[		sort ascending by current column
-sample_Item_freq_columns	name	0	q		quit current sheet
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	open input in VisiData
+sample	Units		type-int		#	set type of current column to int
+sample	Unit_Cost		type-float		%	set type of current column to float
+sample	Total		type-float		%	set type of current column to float
+sample			columns-sheet		C	open Columns Sheet
+sample_columns		キUnits	select-row		s	select current row
+sample_columns		キTotal	select-row		s	select current row
+sample_columns			aggregate-cols	sum	g+	add aggregator to selected source columns
+sample_columns	aggregators	キTotal	edit-cell	sum avg	e	edit contents of current cell
+sample_columns			quit-sheet		q	quit current sheet
+sample	Item		freq-col		F	open Frequency Table grouped on current column
+sample_Item_freq			columns-sheet		C	open Columns Sheet
+sample_Item_freq_columns	name		sort-asc		[	sort ascending by current column
+sample_Item_freq_columns			quit-sheet		q	quit current sheet
