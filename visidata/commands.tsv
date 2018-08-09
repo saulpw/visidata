@@ -98,9 +98,9 @@ Sheet	dup-selected-deep	z	"	z"	copy	use	n	y		sheet-duplicate-deepcopy-selected	o
 Sheet	edit-cell		e	e	n	n	y	y	3,4,5	modify-edit-cell	edit contents of current cell
 Sheet	edit-cells	g	e	ge	n	use	y	y	4,5	modify-edit-column-selected	set contents of current column for selected rows to same input
 Sheet	error-cell	z	^E	z^E	meta	n	n	n			view traceback for error in current cell
-Sheet	expand-col		(	(	n	n	n	y	5	expand_col	expand current column of containers one level
+Sheet	expand-col		(	(	n	n	n	y	5	expand_col	expand current column of containers fully
 Sheet	expand-col-depth	z	(	z(	n	n	n	y		expand_col_deep	expand current column of containers to given depth (0=fully)
-Sheet	expand-cols	g	(	g(	n	n	n	y		expand_vcols	expand all visible columns of containers one level
+Sheet	expand-cols	g	(	g(	n	n	n	y		expand_vcols	expand all visible columns of containers fully
 Sheet	expand-cols-depth	gz	(	gz(	n	n	n	y		expand_vcols_deep	expand all visible columns of containers to given depth (0=fully)
 Sheet	fill-nulls		f	f	n	n	y	y		modify-fill-column	fills null cells in current column with contents of non-null cells up the current column
 Sheet	freeze-col		'	'	n	n	n	y		column-freeze	add a frozen copy of current column with all cells evaluated
@@ -158,7 +158,6 @@ Sheet	random-rows		R	R	derived	n	n	y		rows-select-random	open duplicate sheet wi
 Sheet	reload-row	z	^R	z^R	n	n	unmodifies	y			
 Sheet	reload-selected	gz	^R	gz^R	n	n	unmodifies	y			
 Sheet	reload-sheet		^R	^R	n	n	should confirm if modified; marks as unmodified	y	4,5	sheet-reload	reload current sheet
-Sheet	remove-col	g	-	g-	n	n	n	y		delete-column-really	remove column permanently from the list of columns
 Sheet	rename-col		^	^	n	n	y	y	3	column-name-input	edit name of current column
 Sheet	rename-col-cell	z	^	z^	n	n	y	y		column-name-cell	set name of current column to current cell
 Sheet	rename-cols-row	g	^	g^	n	n	y	y		column-name-all-selected	set names of all visible columns to contents of selected rows (or current row)

@@ -150,8 +150,6 @@ adjust width of all visible columns
 hide current column
 .It Ic "z-" Ns
 reduce width of current column by half
-.It Ic "g-" Ns
-delete this column (cannot be undeleted)
 .It Ic "gv" Ns
 unhide all columns
 .Pp
@@ -175,7 +173,7 @@ set name of current column to combined contents of current column for selected r
 .It Ic "gz=" Ar expr
 .No set current column for selected rows to the items in result of Python sequence Ar expr
 .It Ic " z=" Ar expr
-.No set current cell to result of evaluated Python Ar expr No on current row
+.No evaluate Python expression on current row and show result on status line
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " '" Ns " (tick)"
@@ -197,7 +195,7 @@ reset cache for current/all visible column(s)
 .No modify selected rows in current column, replacing Ar regex No with Ar subst
 .Pp
 .It Ic " (   g("
-.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
+.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) fully
 .It Ic "z(  gz(" Ar depth
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic " )"
@@ -324,9 +322,6 @@ open
 .No open new blank sheet with Ar number No columns
 .It Ic "R" Ar number
 pushes sheet with random population subset of
-.Ar number No rows
-.It Ic "zR" Ar number
-select a random population subset of
 .Ar number No rows
 .It Ic "T"
 open new sheet with rows and columns transposed
