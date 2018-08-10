@@ -158,7 +158,7 @@ class OptionsSheet(Sheet):
         Column('description', getter=lambda col,row: options._get(row.name, 'global').helpstr),
     )
     colorizers = Sheet.colorizers + [
-        Colorizer('cell', 9, lambda s,c,r,v: v.value if c is s.columns[1] and r.name.startswith('color_') else None),
+        Colorizer('cell', 9, lambda s,c,r,v: v.value if c in s.columns[1:3] and r.name.startswith('color_') else None),
     ]
     nKeys = 1
 
