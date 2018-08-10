@@ -754,15 +754,13 @@ class VisiData:
                 lstatus = middleTruncate(lstatus, maxwidth//2)
 
             y = self.windowHeight-1
-            clipdraw(scr, y, 0, lstatus, attr)
-            x = len(lstatus)
+            x = clipdraw(scr, y, 0, lstatus, attr)
             one = False
             for (pri, msgparts), n in sorted(self.statuses.items(), key=lambda k: -k[0][0]):
                 if x > self.windowWidth:
                     break
                 if one:  # any messages already:
-                    clipdraw(scr, y, x, sep, attr, self.windowWidth)
-                    x += len(sep)
+                    x += clipdraw(scr, y, x, sep, attr, self.windowWidth)
                 one = True
                 msg = composeStatus(msgparts, n)
 
@@ -770,8 +768,7 @@ class VisiData:
                 elif pri == 2: msgattr = warn_attr
                 elif pri == 1: msgattr = warn_attr
                 else: msgattr = attr
-                clipdraw(scr, y, x, msg, msgattr, self.windowWidth)
-                x += len(msg)
+                x += clipdraw(scr, y, x, msg, msgattr, self.windowWidth)
         except Exception as e:
             self.exceptionCaught(e)
 
@@ -2340,16 +2337,18 @@ def clipdraw(scr, y, x, s, attr, w=None):
             w = windowWidth-1
         w = min(w, windowWidth-x-1)
         if w == 0:  # no room anyway
-            return
+            return 0
 
         # convert to string just before drawing
         s, dispw = clipstr(str(s), w)
         scr.addstr(y, x, disp_column_fill*w, attr)
         scr.addstr(y, x, s, attr)
     except Exception as e:
+        pass
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
 #                ).with_traceback(sys.exc_info()[2])
-        pass
+
+    return dispw
 
 
 # https://stackoverflow.com/questions/19833315/running-system-commands-in-python-using-curses-and-panel-and-come-back-to-previ
