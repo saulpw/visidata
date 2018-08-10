@@ -5,6 +5,8 @@ from visidata import asyncthread, Progress, status, fail
 from visidata import ColumnItem, ColumnExpr, SubrowColumn, Sheet, Column
 from visidata import SheetsSheet
 
+from copy import copy
+
 SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
 
 def createJoinedSheet(sheets, jointype=''):
@@ -117,6 +119,7 @@ class SheetConcat(Sheet):
                 self.addRow((sheet, r))
 
         self.columns = []
+        self.addColumn(ColumnItem('origin_sheet', 0))
         allColumns = {}
         for srcsheet in self.sources:
             for srccol in srcsheet.visibleCols:
