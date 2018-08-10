@@ -706,12 +706,15 @@ class VisiData:
 
     def _inputLine(self, prompt, **kwargs):
         'Add prompt to bottom of screen and get line of input from user.'
-        scr = self.scr
-        if scr:
-            scr.addstr(self.windowHeight-1, 0, prompt)
         self.inInput = True
-        rstatus, _ = self.rightStatus(self.sheets[0])
-        ret = self.editText(self.windowHeight-1, len(prompt), self.windowWidth-len(prompt)-len(rstatus), attr=colors[options.color_edit_cell], unprintablechar=options.disp_unprintable, **kwargs)
+        rstatuslen = self.drawRightStatus(self.scr, self.sheets[0])
+        attr = 0
+        promptlen = clipdraw(self.scr, self.windowHeight-1, 0, prompt, attr, w=self.windowWidth-rstatuslen-1)
+        ret = self.editText(self.windowHeight-1, promptlen, self.windowWidth-promptlen-rstatuslen-2,
+                            attr=colors[options.color_edit_cell],
+                            unprintablechar=options.disp_unprintable,
+                            truncchar=options.disp_truncator,
+                            **kwargs)
         self.inInput = False
         return ret
 
@@ -773,19 +776,19 @@ class VisiData:
             self.exceptionCaught(e)
 
     def drawRightStatus(self, scr, vs):
-        'Draw right side of status bar.'
+        'Draw right side of status bar.  Return length displayed.'
         rightx = self.windowWidth-1
 
-        ret = ''
+        ret = 0
         for rstatcolor in self.callHook('rstatus', vs):
             if rstatcolor:
                 try:
                     rstatus, color = rstatcolor
                     rstatus = ' '+rstatus
-                    rightx -= len(rstatus)
                     attr = colors[color]
-                    clipdraw(scr, self.windowHeight-1, rightx, rstatus, attr, len(rstatus))
-                    ret += rstatus
+                    statuslen = clipdraw(scr, self.windowHeight-1, rightx, rstatus, attr, rtl=True)
+                    rightx -= statuslen
+                    ret += statuslen
                 except Exception as e:
                     self.exceptionCaught(e)
 
@@ -2328,24 +2331,31 @@ TextSheet.addCommand('v', 'visibility', 'sheet.wrap = not getattr(sheet, "wrap",
 
 ### Curses helpers
 
-def clipdraw(scr, y, x, s, attr, w=None):
-    'Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char.'
+def clipdraw(scr, y, x, s, attr, w=None, rtl=False):
+    'Draw string `s` at (y,x)-(y,x+w), clipping with ellipsis char.  if rtl, draw inside (x-w, x).  Returns width drawn (max of w).'
+    if not scr:
+        return 0
     _, windowWidth = scr.getmaxyx()
     dispw = 0
     try:
         if w is None:
             w = windowWidth-1
-        w = min(w, windowWidth-x-1)
-        if w == 0:  # no room anyway
+        w = min(w, (x-1) if rtl else (windowWidth-x-1))
+        if w <= 0:  # no room anyway
             return 0
 
         # convert to string just before drawing
-        s, dispw = clipstr(str(s), w)
-        scr.addstr(y, x, disp_column_fill*w, attr)
-        scr.addstr(y, x, s, attr)
+        clipped, dispw = clipstr(str(s), w)
+        if rtl:
+            # clearing whole area (w) has negative display effects; clearing just dispw area is useless
+#            scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
+            scr.addstr(y, x-dispw-1, clipped, attr)
+        else:
+            scr.addstr(y, x, disp_column_fill*w, attr)  # clear whole area before displaying
+            scr.addstr(y, x, clipped, attr)
     except Exception as e:
         pass
-#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s]' % (e, y, x, dispw, w)
+#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s clippedlen=%s]' % (e, y, x, dispw, w, len(clipped))
 #                ).with_traceback(sys.exc_info()[2])
 
     return dispw
@@ -2533,8 +2543,9 @@ def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
             k = 1 if w%2==0 else 0  # odd widths have one character more
             dispval = left_truncchar + dispval[i-w//2+1:i+w//2-k] + right_truncchar
 
-        scr.addstr(y, x, dispval, attr)
-        scr.move(y, x+dispi)
+        prew = clipdraw(scr, y, x, dispval[:dispi], attr, w)
+        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew)
+        scr.move(y, x+prew)
         ch = vd().getkeystroke(scr)
         if ch == '':                               continue
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
