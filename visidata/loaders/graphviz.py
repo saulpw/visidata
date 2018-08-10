@@ -30,12 +30,10 @@ def norm_host(host):
     if host.ipaddr:
         if host.ipaddr.is_global:
             opt = options.pcap_internet
-            if opt == 'y':
-                return str(host)
+            if opt == 'n':
+                return None
             elif opt == 's':
                 return "internet"
-            else:
-                return None
 
         if host.ipaddr.is_multicast:
             # include in multicast  (minus dns?)
