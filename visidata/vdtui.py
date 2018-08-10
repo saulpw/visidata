@@ -739,7 +739,7 @@ class VisiData:
             return
         self.lastErrors.append(stacktrace())
         if kwargs.get('status', True):
-            return status(self.lastErrors[-1][-1], priority=2)  # last line of latest error
+            status(self.lastErrors[-1][-1], priority=2)  # last line of latest error
         if options.debug:
             raise
 
@@ -792,7 +792,8 @@ class VisiData:
                 except Exception as e:
                     self.exceptionCaught(e)
 
-        curses.doupdate()
+        if scr:
+            curses.doupdate()
         return ret
 
     def rightStatus(self, sheet):
