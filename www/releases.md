@@ -6,6 +6,7 @@
 * after using the **Dir sheet** to rename a file, a `reload-sheet` is required to refresh the `ext` column for that row
 * `next-search`/`prev-search` should work with `search-expr` and `searchr-expr
 *  `show-aggregate` *mean* should work with columns typed `int` 
+* contracting an expanded column on a dup-ed (`"`) sheet results it in disappearing
 
 # [v1.2.1](https://github.com/saulpw/visidata/releases/tag/v1.2.1) (2018-07-06)
 
