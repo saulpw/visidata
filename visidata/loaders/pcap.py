@@ -261,12 +261,13 @@ class PcapSheet(Sheet):
         Column('dstport', type=int, getter=lambda col,row: get_port(row, 'dport')),
         ColumnAttr('ether_proto', 'type', type=lambda v: protocols['ethernet'].get(v), width=0),
         ColumnAttr('tcp_flags', 'ip.tcp.flags', type=FlagGetter('tcp'), helpstr="TCP Flags"),
-#        Column('service', width=8, getter=lambda col,row: getService(getTuple(row)), helpstr="Service Abbr"),
-#        ColumnAttr('tcp', 'ip.tcp', width=4),
-#        ColumnAttr('udp', 'ip.udp', width=4),
-#        ColumnAttr('icmp', 'ip.icmp', width=4),
-#        ColumnAttr('dns', width=4),
-#        ColumnAttr('netbios', width=4),
+        Column('service', getter=lambda col,row: getService(getTuple(row))),
+        ColumnAttr('data', type=len),
+        ColumnAttr('ip.len', type=int),
+        ColumnAttr('tcp', 'ip.tcp', width=4, type=len),
+        ColumnAttr('udp', 'ip.udp', width=4, type=len),
+        ColumnAttr('icmp', 'ip.icmp', width=4, type=len),
+        ColumnAttr('dns', width=4),
     ]
 
     @asyncthread
