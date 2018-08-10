@@ -1,4 +1,4 @@
 include README.md
-include dev/commands.tsv
 include LICENSE.gpl3
 include visidata/man/vd.1
+include visidata/commands.tsv
