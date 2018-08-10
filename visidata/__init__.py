@@ -61,6 +61,7 @@ from .loaders.stata import *
 from .loaders.xml import *
 from .loaders.yaml import *
 from .loaders.pandas import *
+from .loaders.graphviz import *
 
 from .colors import *   # ColorsSheet
 
