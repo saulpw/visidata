@@ -38,6 +38,15 @@ An example usage follows.
 
     c. `gz"` to open a duplicate sheet with copies of the selected rows.  Any changes will not affect the source sheet.
 
+The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
+
+
+**Question** On which days have we sold less than 10 Binders?
+
+1. Scroll to the `Units` column. Set the type of the `Units` column by pressing `#` (int).
+2. Type `z|` followed by `Item == 'Binder' and Units < 10` to select all of the rows where the `Item` is Binder and the number of `Units` is less than 10.
+3. Press `"` to open a duplicate sheet with only those selected rows.
+
 ---
 
 ## How to move, copy and remove rows

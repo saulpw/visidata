@@ -25,6 +25,20 @@ Command(s)              Operation
 ` n`  ` N`              move to next/previous *regex* match from last search
 `z/`  `z?` *expr*       search by Python *expr* up/down in current column (with column names as variables)
 
+The following example uses the file [commands.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/visidata/commands.tsv).
+
+**Question** What is the **longname** for `gk`?
+
+1. Type `z/` followed by `('g' in prefix) and (key == 'k')`.
+2. Press `c` followed by `longname` to move the cursor to the **longname** column.
+
+The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
+
+**Question** Has there been a day where we sold more than 95 **Item**s?
+
+1. Scroll to the **Units** column. Set the type of the **Units** column by pressing `#` (int).
+2. Type `z/` followed by `Units > 95`.
+
 ---
 
 ## How to move between sheets

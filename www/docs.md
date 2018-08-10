@@ -11,6 +11,7 @@
     * How to specify a source
     * How to load multiple datasets simultaneously
     * How to access other loaded or derived sheets
+    * How to convert a dataset from one supported filetype into another
 * [Navigation](/docs/navigate)
     * How to rapidly scroll through a sheet
     * How to search within a sheet

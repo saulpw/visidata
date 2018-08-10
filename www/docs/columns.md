@@ -1,5 +1,5 @@
-- Update: 2018-03-17
-- Version: VisiData 1.1
+- Update: 2018-08-09
+- Version: VisiData 1.3
 
 # Columns
 
@@ -13,7 +13,7 @@ Commands(s)     Operation
 
 ---
 
-## How to hide and unhide columns
+## How to hide (remove) and unhide columns
 
 ###### How to hide columns
 

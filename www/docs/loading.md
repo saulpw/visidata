@@ -43,6 +43,8 @@ To load files from within a VisiData session, press `o` and enter a filepath.
 2. Move the cursor to the row containing the desired sheet.
 3. Press `Enter` to jump to the sheet referenced in that current cursor row.
 
+---
+
 ## How to convert a dataset from one supported filetype into another
 
 ~~~
