@@ -11,6 +11,8 @@ replayableOption('safety_first', False, 'sanitize input/output to handle edge ca
 
 csv.field_size_limit(sys.maxsize)
 
+options_num_first_rows = 10
+
 def open_csv(p):
     return CsvSheet(p.name, source=p)
 
@@ -35,9 +37,6 @@ def csvoptions():
 def load_csv(vs):
     'Convert from CSV, first handling header row specially.'
     with vs.source.open_text() as fp:
-        samplelen = min(len(wrappedNext(fp)) for i in range(10))  # for progress only
-        fp.seek(0)
-
         for i in range(options.skip):
             wrappedNext(fp)  # discard initial lines
 
@@ -62,11 +61,19 @@ def load_csv(vs):
         vs.recalc()  # make columns usable
         with Progress(total=vs.source.filesize) as prog:
             try:
+                samplelen = 0
+                for i in range(options_num_first_rows):  # for progress below
+                    row = wrappedNext(rdr)
+                    vs.addRow(row)
+                    samplelen += sum(len(x) for x in row)
+
+                samplelen //= options_num_first_rows  # avg len of first n rows
+
                 while True:
                     vs.addRow(wrappedNext(rdr))
                     prog.addProgress(samplelen)
             except StopIteration:
-                pass
+                pass  # as expected
 
     vs.recalc()
     return vs
