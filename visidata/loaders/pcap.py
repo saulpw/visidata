@@ -71,7 +71,10 @@ def load_oui(url):
         if r.prefix.endswith('/36'): prefix = r.prefix[:13]
         elif r.prefix.endswith('/28'): prefix = r.prefix[:10]
         else: prefix = r.prefix[:8]
-        oui[prefix.lower()] = r.shortname
+        try:
+            oui[prefix.lower()] = r.shortname
+        except Exception as e:
+            exceptionCaught(e)
 
 
 @asyncthread
@@ -79,7 +82,10 @@ def load_iana(url):
     ports_tsv = open_tsv(urlcache(url, 30*days))
     ports_tsv.reload_sync()
     for r in ports_tsv.rows:
-        services[(r.transport, int(r.port))] = r.service
+        try:
+            services[(r.transport, int(r.port))] = r.service
+        except Exception as e:
+            exceptionCaught(e)
 
 
 class Host:
@@ -119,7 +125,7 @@ class Host:
         self.mac_manuf = None
 
     def __str__(self):
-        return str(self.hostname or self.ipaddr or self.macaddr)
+        return str(self.hostname or self.ipaddr or macmanuf(self.macaddr))
 
     def __lt__(self, x):
         if isinstance(x, Host):
@@ -352,3 +358,4 @@ def try_apply(func, *args, **kwargs):
 
 def open_pcap(p):
     return PcapSheet(p.name, source = p)
+open_cap = open_pcap
