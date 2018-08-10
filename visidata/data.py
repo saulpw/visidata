@@ -19,7 +19,7 @@ option('color_change_pending', 'reverse yellow', 'color for file attributes pend
 option('color_delete_pending', 'red', 'color for files pending delete')
 
 
-Sheet.addCommand('R', 'random-rows', 'nrows=int(input("random number to select: ")); vd.push(copy(sheet, "_sample")).rows=random.sample(rows, nrows)')
+Sheet.addCommand('R', 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vd.push(vs).rows=random.sample(rows, nrows or nRows)')
 
 Sheet.addCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)')
 Sheet.addCommand('ga', 'add-rows', 'for r in range(int(input("add rows: "))): addRow(newRow(), cursorRowIndex+1)')
