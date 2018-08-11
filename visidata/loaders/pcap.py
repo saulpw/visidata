@@ -1,9 +1,10 @@
-import struct
 import collections
-import functools
 import ipaddress
 
 from visidata import *
+
+
+option('pcap_internet', 'n', '(y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)')
 
 protocols = collections.defaultdict(dict)  # ['ethernet'] = {[6] -> 'IP'}
 _flags = collections.defaultdict(dict)  # ['tcp'] = {[4] -> 'FIN'}
@@ -37,6 +38,32 @@ def macmanuf(mac):
         return manuf + mac[8:]
 
     return mac
+
+
+def norm_host(host):
+    if not host:
+        return None
+    srcmac = str(host.macaddr)
+    if srcmac == 'ff:ff:ff:ff:ff:ff': return None
+
+    srcip = str(host.ipaddr)
+    if srcip == '0.0.0.0' or srcip == '::': return None
+    if srcip == '255.255.255.255': return None
+
+    if host.ipaddr:
+        if host.ipaddr.is_global:
+            opt = options.pcap_internet
+            if opt == 'n':
+                return None
+            elif opt == 's':
+                return "internet"
+
+        if host.ipaddr.is_multicast:
+            # include in multicast  (minus dns?)
+            return 'multicast'
+
+    names = [host.hostname, host.ipaddr, macmanuf(host.macaddr)]
+    return '\\n'.join(str(x) for x in names if x)
 
 
 def FlagGetter(flagfield):

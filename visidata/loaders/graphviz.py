@@ -1,8 +1,8 @@
-from visidata import *
-from namestand import downscore
+from visidata import option, exceptionCaught, TypedWrapper, asyncthread
+from visidata import wrapply, clean_to_id, isNumeric
 
-option('pcap_internet', 'n', '(y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)')
-option('pcap_edge_labels', True, 'whether to include pcap edge labels')
+option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz diagrams')
+
 
 si_levels = ['', 'k', 'M', 'G', 'T', 'P', 'Q']
 def SI(n):
@@ -16,31 +16,6 @@ def SI(n):
     except Exception as e:
         exceptionCaught(e)
         return orig_n
-
-def norm_host(host):
-    if not host:
-        return None
-    srcmac = str(host.macaddr)
-    if srcmac == 'ff:ff:ff:ff:ff:ff': return None
-
-    srcip = str(host.ipaddr)
-    if srcip == '0.0.0.0' or srcip == '::': return None
-    if srcip == '255.255.255.255': return None
-
-    if host.ipaddr:
-        if host.ipaddr.is_global:
-            opt = options.pcap_internet
-            if opt == 'n':
-                return None
-            elif opt == 's':
-                return "internet"
-
-        if host.ipaddr.is_multicast:
-            # include in multicast  (minus dns?)
-            return 'multicast'
-
-    names = [host.hostname, host.ipaddr, macmanuf(host.macaddr)]
-    return '\\n'.join(str(x) for x in names if x)
 
 
 def is_valid(v):
@@ -66,8 +41,8 @@ def save_dot(p, vs):
             if not is_valid(src) or not is_valid(dst):
                 continue
 
-            downsrc = downscore(str(src)) or src
-            downdst = downscore(str(dst)) or dst
+            downsrc = clean_to_id(str(src)) or src
+            downdst = clean_to_id(str(dst)) or dst
             edgetype = '-'.join(c.getTypedValue(row) for c in vs.nonKeyVisibleCols if not isNumeric(c))
             color = assignedColors.get(edgetype, None)
             if not color:
