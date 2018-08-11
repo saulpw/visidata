@@ -6,7 +6,7 @@
 - add quantile aggregators (q3/q4/q5/q10)
 - add `z;` to add new column from bash *expr*, with `$`columnNames as variables
 - sheet-specific options (see design/169.md); use `v` on OptionsSheet to toggle between global and sheet-specific values
-- keyboard layout (thanks to @deinspier for the inspiration)
+- keyboard layout (thanks to @deinspanjer for the inspiration)
 - options.wrap now defaults to False
 - options.quitguard enables confirmation before quitting last sheet
 - options.safety_first makes loading/saving more robust, at the cost of performance
@@ -22,11 +22,11 @@
     - `zd` (`delete-cell`) moves value to clipboard ("cut", like other delete commands)
     - add `gI` (`describe-all`) like `gC` (`columns-all`)
     - add `gS` (`sheets-graveyard`)
-    - add g(, z(, gz( variants of ( 'expand-column'
+    - add `g(`, `z(`, `gz(` variants of `(` 'expand-column'
     - add `z|` and `z\` to un/select by python expr (thanks to @jsvine for suggestion)
     - add `z#` to set type of current column to `len`
     - add `z;` to get the stdout/stderr from running a cmdline program with $colname args
-    - `Space` is now bound to exec-longname (was `menu`; `^A` was `exec-longname`)
+    - `Space` is now bound to exec-longname (was `menu`; `^A` was exec-longname previously)
 
 - Loaders:
     - add pandas adapter

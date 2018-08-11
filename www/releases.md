@@ -1,13 +1,79 @@
 # [v1.3](https://github.com/saulpw/visidata/releases/tag/v1.3)
 
-## Known bugs
+The largest effort in this release was a commands/options reworking, which will hopefully pay dividends in the future.  Many other so-called improvements were made as well.  Here's a list of most of them:
 
-* when `confirm_overwrite` is set to false, a cmdlog replay with a `save_sheet` gets stuck in an infinite loop
-* after using the **Dir sheet** to rename a file, a `reload-sheet` is required to refresh the `ext` column for that row
-* `next-search`/`prev-search` should work with `search-expr` and `searchr-expr
-*  `show-aggregate` *mean* should work with columns typed `int` 
-* contracting an expanded column on a dup-ed (`"`) sheet results it in disappearing
-* macros are resulting in error stacktraces on MacOS
+### commands
+
+- All commands were thoughtfully renamed, and the command longnames should be largely stable now.
+- `[commands.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/visidata/commands.tsv)` is an exhaustive list of commands and their attributes and side effects.
+- The manpage has moved to `Ctrl+H`, which is hopefully its final resting place.
+   - `F1` will still open the manage if the terminal doesn't intercept it.
+   - but `z?` has been repurposed (see below).
+   - Note that because iTerm reports `Ctrl+H` as `Backspace`, these help commands are also available by using `Backspace` (backspace for help, a new trend).
+- `z Ctrl+H` opens a list of commands available on this sheet.
+- Keybindings and longnames are separated out.  The cmdlog now records longnames as well.
+- See the new [keyboard layouts page](http://visidata.org/docs/kblayout/) (thanks to @deinspanjer for inspiration).
+
+### changes to existing commands and options
+
+- The experimental menu system (was `Space`) has been removed.
+- Now `Space` (`exec-longname`) executes the command for the input longname (tab completion of available commands is supported).  (This function was previously bound to `Ctrl+A`).
+- `options.wrap` (for TextSheet wrapping of lines) now defaults to `False`.
+- `R` (`random-sheet`) opens a new sheet instead of selecting random rows (reverting to former behavior).
+- `za` (`addcol-empty`) asks for column name
+- `zd` (`delete-cell`) moves value to clipboard ("cut", like other delete commands)
+
+### options
+
+- options can now be set on specific sheet types or even individual sheets.  `Shift+O` opens [options for the current sheet type](http://visidata.org/docs/customize/), and `g Shift+O` opens the global options sheet.
+- See available colors by pressing `Space` and then typing the longname `colors`.
+
+#### new safety options
+
+- Error messages are sorted before informational status messages, and colored by `color_error` and `color_warning` (thanks to @jsvine for suggestion)
+- `options.quitguard` (default `False` to keep old behavior) if True, will confirm before quitting last sheet.
+- The `sheets-graveyard` (`gS`) command opens a sheet that shows all discarded (but "precious") sheets.  These are stored as weak references so they will be garbage collected eventually, but can be resurrected from the graveyard sheet until then.
+- `options.safety_first` (default `False`) makes loading/saving more robust, likely at the cost of performance which can become significant in large files.
+   - Currently, only removes NULs from csv input.
+- `options.tsv_safe_char` is split into `tsv_safe_newline` and `tsv_safe_tab`.
+
+### new power features
+
+- `z;` (`addcol-sh`) adds new columns for stdout/stderr of a `bash` command, which uses `$colname` to substitute values from other columns (whole arguments only, so far).
+- `z|` (`select-expr`) and `z\` (`unselect-expr`) select/unselect by Python expression (thanks to @jsvine for suggestion).
+- `z/` (`search-expr`) and `z?` (`searchr-expr`) to search forward/backward by Python expression.
+- `gI` (`describe-all`) describes all columns in all sheeets (like `gC` (`columns-all`)).
+
+### nice things
+- The `g(`, `z(`, and `gz(` variants of `(` ('expand-column') are filled out.
+- `z#` sets type of current column to `len`.
+
+## new loaders
+
+- yaml loader (thanks to @robcarrington, @JKiely, @anjakefala at PyCon Sprints for making this happen)
+- pcap loader (thanks to @vbrown608 and @TemperedNetworks)
+- xml loader
+- jsonl saver
+- [json loader] no more incremental display (need a better json parser than the Python stdlib offers)
+- [pandas adapter](https://github.com/saulpw/visidata/issues/162#issuecomment-400488487) (thanks to @jjzmajic for issue #162)
+
+## minor changes
+
+- System clipboard command detection is more portable (thanks to @chocolateboy for the PR).
+- `date` supports adding a number of days (or like `foo+6*hours`, `foo+9*months`, etc).
+- Hidden columns are darkened on columns sheet.
+- Exceptions are rolled up properly.
+- `options.motd_url` now uses https by default (thanks to @jsvine for the warning).
+- [DirSheet] `mode` is editable (set to octal like `0o0644`).
+- [internal dev] ProfileSheet is improved.
+
+## known issues
+
+* cmdlog replay with a `Ctrl+S` (`save-sheet`) to an existing file gets stuck in an infinite loop when `options.confirm_overwrite` is on.
+* After renaming a file on a **DirSheet**, `Ctrl+R` (`reload-sheet`) is required to refresh the `ext` column for that row.
+* `n`/`N` (`next-search`/`prev-search`) won't continue `search-expr` and `searchr-expr`.
+* `show-aggregate` *mean* errors on `int` columns.
+* Contracting (with `)`) a previously expanded column on a dup-ed (with `"`) sheet results it in disappearing on the source sheet.
 
 # [v1.2.1](https://github.com/saulpw/visidata/releases/tag/v1.2.1) (2018-07-06)
 
