@@ -1,12 +1,12 @@
 # VisiData version history
 
-# v1.3
+# v1.3 (2018-08-11)
 
 - commands overhaul; see `commands.tsv` (command longnames should now be largely stable)
 - add quantile aggregators (q3/q4/q5/q10)
 - add `z;` to add new column from bash *expr*, with `$`columnNames as variables
 - sheet-specific options (see design/169.md); use `v` on OptionsSheet to toggle between global and sheet-specific values
-- keyboard layout (thanks to @deinspier for the inspiration)
+- keyboard layout (thanks to @deinspanjer for the inspiration)
 - options.wrap now defaults to False
 - options.quitguard enables confirmation before quitting last sheet
 - options.safety_first makes loading/saving more robust, at the cost of performance
