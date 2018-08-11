@@ -4,6 +4,7 @@
 * [quick reference guide](/man)
     * comprehensive overview of all available commands and options
     * also available as a manpage via `man vd` and from inside VisiData with `Ctrl+H`
+* [keyboard layout of commands](/docs/kblayout)
 
 ###### 'How to' recipes
 
