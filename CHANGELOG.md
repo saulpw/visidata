@@ -31,8 +31,8 @@
 - Loaders:
     - add pandas adapter
     - add xml loader
-    - add pcap loader (thanks to @vbrown608)
-    - add yaml loader (thanks to @robcarrington, @JKiely, @anjakefala at Pycon Sprints for making this happen)
+    - add pcap loader (thanks to @vbrown608 and @TemperedNetworks)
+    - add yaml loader (thanks to @robcarrington, @JKiely, @anjakefala at PyCon Sprints for making this happen)
     - add jsonl saver
     - remove `tsv_safe_char` and split into `tsv_safe_newline` and `tsv_safe_tab`
 
@@ -47,6 +47,7 @@
 - dev/commands.tsv table of commands
 - motd default url uses https
 - improve ProfileSheet
+- [DirSheet] editable `mode` (set to octal like `0o0644`)
 
 # v1.2.1 (2018-07-05)
 
