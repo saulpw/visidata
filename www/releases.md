@@ -1,13 +1,13 @@
 # [v1.3](https://github.com/saulpw/visidata/releases/tag/v1.3)
 
-The largest effort in this release was a commands/options reworking, which will hopefully pay dividends in the future.  Many other so-called improvements were made as well.  Here's a list of most of them:
+It's been a productive 3 months since v1.2.  The largest effort in this release was a commands/options reworking, which will hopefully pay dividends in the future.  Many other so-called improvements were made as well.  Here's a list of most of them:
 
 ### commands
 
 - All commands were thoughtfully renamed, and the command longnames should be largely stable now.
-- `[commands.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/visidata/commands.tsv)` is an exhaustive list of commands and their attributes and side effects.
-- The manpage has moved to `Ctrl+H`, which is hopefully its final resting place.
-   - `F1` will still open the manage if the terminal doesn't intercept it.
+- [`commands.tsv`](https://raw.githubusercontent.com/saulpw/visidata/stable/visidata/commands.tsv) is an exhaustive list of commands and their attributes and side effects.
+- The manpage has moved to `Ctrl+H` (sysopen-help), which is hopefully its final keybinding.
+   - `F1` will still open the manpage if the terminal doesn't intercept it.
    - but `z?` has been repurposed (see below).
    - Note that because iTerm reports `Ctrl+H` as `Backspace`, these help commands are also available by using `Backspace` (backspace for help, a new trend).
 - `z Ctrl+H` opens a list of commands available on this sheet.
@@ -17,11 +17,11 @@ The largest effort in this release was a commands/options reworking, which will 
 ### changes to existing commands and options
 
 - The experimental menu system (was `Space`) has been removed.
-- Now `Space` (`exec-longname`) executes the command for the input longname (tab completion of available commands is supported).  (This function was previously bound to `Ctrl+A`).
+- Now `Space` (exec-longname) executes the command for the input longname (tab completion of available commands is supported).  (This function was previously bound to `Ctrl+A`).
 - `options.wrap` (for TextSheet wrapping of lines) now defaults to `False`.
-- `R` (`random-sheet`) opens a new sheet instead of selecting random rows (reverting to former behavior).
-- `za` (`addcol-empty`) asks for column name
-- `zd` (`delete-cell`) moves value to clipboard ("cut", like other delete commands)
+- `R` (random-sheet) opens a new sheet instead of selecting random rows (reverting to former behavior).
+- `za` (addcol-empty) asks for column name
+- `zd` (delete-cell) moves value to clipboard ("cut", like other delete commands)
 
 ### options
 
@@ -32,7 +32,7 @@ The largest effort in this release was a commands/options reworking, which will 
 
 - Error messages are sorted before informational status messages, and colored by `color_error` and `color_warning` (thanks to @jsvine for suggestion)
 - `options.quitguard` (default `False` to keep old behavior) if True, will confirm before quitting last sheet.
-- The `sheets-graveyard` (`gS`) command opens a sheet that shows all discarded (but "precious") sheets.  These are stored as weak references so they will be garbage collected eventually, but can be resurrected from the graveyard sheet until then.
+- The `gS` (sheets-graveyard) command opens a sheet that shows all discarded (but "precious") sheets.  These are stored as weak references so they will be garbage collected eventually, but can be resurrected from the graveyard sheet until then.
 - `options.safety_first` (default `False`) makes loading/saving more robust, likely at the cost of performance which can become significant in large files.
    - Currently, only removes NULs from csv input.
 - `options.tsv_safe_char` is split into `tsv_safe_newline` and `tsv_safe_tab`.
@@ -71,8 +71,8 @@ The largest effort in this release was a commands/options reworking, which will 
 
 * cmdlog replay with a `Ctrl+S` (`save-sheet`) to an existing file gets stuck in an infinite loop when `options.confirm_overwrite` is on.
 * After renaming a file on a **DirSheet**, `Ctrl+R` (`reload-sheet`) is required to refresh the `ext` column for that row.
-* `n`/`N` (`next-search`/`prev-search`) won't continue `search-expr` and `searchr-expr`.
-* `show-aggregate` *mean* errors on `int` columns.
+* `n`/`N` (`next-search`/`prev-search`) won't continue a previous `search-expr` and `searchr-expr`.
+* `show-aggregate` with *mean* errors on `int` columns.
 * Contracting (with `)`) a previously expanded column on a dup-ed (with `"`) sheet results it in disappearing on the source sheet.
 
 # [v1.2.1](https://github.com/saulpw/visidata/releases/tag/v1.2.1) (2018-07-06)
