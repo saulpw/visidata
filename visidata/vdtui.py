@@ -1824,6 +1824,12 @@ class TypedWrapper:
         'maintain sortability; wrapped objects are always least'
         return True
 
+    def __add__(self, x):
+        return x
+
+    def __radd__(self, x):
+        return x
+
     def __hash__(self):
         return hash((self.type, str(self.val)))
 
