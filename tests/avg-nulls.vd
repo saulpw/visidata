@@ -1,0 +1,9 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Item		select-equal-cell		,	
+sample		0	unselect-row		u	
+sample	Units		delete-cells		gzd	
+sample	Units		type-int		#	
+	sample	error_is_null	set-option	True		
+sample	Units		aggregate-col	avg	+	
+sample	Item		freq-col		F	
