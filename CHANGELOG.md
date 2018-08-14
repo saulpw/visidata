@@ -1,5 +1,8 @@
 # VisiData version history
 
+##
+- `rename-sheet` renames current sheet to input
+
 # v1.3 (2018-08-11)
 
 - commands overhaul; see `commands.tsv` (command longnames should now be largely stable)

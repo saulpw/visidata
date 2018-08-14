@@ -328,3 +328,4 @@ Canvas	zoomin-mouse			BUTTON4_PRESSED	n	n	n	n			zoom in with scroll wheel
 Canvas	zoomout-cursor			-	n	n	n	n			zoom out from cursor center
 Canvas	zoomout-mouse			REPORT_MOUSE_POSITION	n	n	n	n			zoom out with scroll wheel
 BaseSheet	reload-sheet		^R	^R	n	n	should confirm if modified; marks as unmodified	y		sheet-reload	reload current sheet
+BaseSheet	rename-sheet				n	n		y			rename current sheet to input
