@@ -265,12 +265,7 @@ option('cmd_after_edit', 'go-down', 'command longname to execute after successfu
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
 option('quitguard', False, 'confirm before quitting last sheet')
 
-replayableOption('none_is_null', True, 'if Python None counts as null')
-replayableOption('empty_is_null', False, 'if empty string counts as null')
-replayableOption('false_is_null', False, 'if Python False counts as null')
-replayableOption('zero_is_null', False, 'if integer 0 counts as null')
-replayableOption('error_is_null', False, 'if error counts as null')
-
+replayableOption('null_value', None, 'a value to be counted as null')
 
 replayableOption('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 option('debug', False, 'exit on error and display stacktrace')
@@ -1806,14 +1801,7 @@ Sheet.bindkey('gKEY_DOWN', 'go-bottom'),
 
 
 def isNullFunc():
-    'Returns isNull function according to current options.'
-    nullset = []
-    if options.none_is_null:  nullset.append(None)
-    if options.empty_is_null: nullset.append('')
-    if options.false_is_null: nullset.append(False)
-    if options.zero_is_null:  nullset.append(0)
-    if options.error_is_null: return lambda v,nullset=nullset: isinstance(v, Exception) or v in nullset
-    return lambda v,nullset=nullset: v in nullset
+    return lambda v,nulls=set(None, options.null_value): v in nulls or isinstance(v, TypedWrapper)
 
 
 @functools.total_ordering

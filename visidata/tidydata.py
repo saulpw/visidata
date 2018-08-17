@@ -63,8 +63,6 @@ class MeltedSheet(Sheet):
                 setter=lambda col,row,val,cname=cname: row[cname].setValue(row[0], val),
                 aggregators=[aggregators['max']]))
 
-        options_error_is_null = options.error_is_null
-
         self.rows = []
         for r in Progress(self.source.rows):
             for colnames, cols in valcols.items():
@@ -74,8 +72,7 @@ class MeltedSheet(Sheet):
                         if not isNull(c.getValue(r)):
                             meltedrow[varval] = c
                     except Exception as e:
-                        if not options_error_is_null:
-                            meltedrow[varval] = e
+                        pass
 
                 if meltedrow:  # remove rows with no content (all nulls)
                     meltedrow[0] = r

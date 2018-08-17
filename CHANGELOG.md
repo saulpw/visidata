@@ -1,7 +1,13 @@
 # VisiData version history
 
 ##
+
 - `rename-sheet` renames current sheet to input
+- [json] add options.json_indent for pretty-printing
+- [tsv json txt] add options.save_errors (default True) to include errors when saving
+- remove all options.*_is_null and fix according to 178-nulls.md
+
+- [aggregators] fix summation with exceptions
 
 # v1.3 (2018-08-11)
 

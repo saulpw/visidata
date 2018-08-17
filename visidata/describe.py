@@ -62,7 +62,6 @@ class DescribeSheet(ColumnsSheet):
             d['nulls'] = list()
             d['distinct'] = set()
 
-            options_error_is_null = options.error_is_null
             for sr in Progress(srccol.sheet.rows):
                 try:
                     v = srccol.getValue(sr)
@@ -74,8 +73,6 @@ class DescribeSheet(ColumnsSheet):
                     d['distinct'].add(v)
                 except Exception as e:
                     d['errors'].append(sr)
-                    if options_error_is_null:
-                        d['nulls'].append(sr)
 
             d['mode'] = self.calcStatistic(d, mode, vals)
             if isNumeric(srccol):
