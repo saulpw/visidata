@@ -2,7 +2,7 @@ import os
 import contextlib
 import itertools
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet
+from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, TypedWrapper, FileExistsError
 from visidata.namedlist import namedlist
 
 
@@ -101,22 +101,21 @@ def save_tsv(p, vs):
     save_tsv_header(p, vs)
 
     with p.open_text(mode='a') as fp:
-        if trdict:
-            for r in Progress(vs.rows):
-                dispvals = []
-                for col in vs.visibleCols:
-                    v = col.getDisplayValue(r)
-                    if isinstance(v, TypedWrapper):
-                        if not options.save_errors:
-                            continue
-                        dispvals.append(str(v))
+        for r in Progress(vs.rows):
+            dispvals = []
+            for col in vs.visibleCols:
+                v = col.getDisplayValue(r)
+                if isinstance(v, TypedWrapper):
+                    if not options.save_errors:
+                        continue
+                    v = str(v)
 
-                    if trdict:
-                        v = v.translate(trdict)
+                if trdict:
+                    v = str(v).translate(trdict)
 
-                    dispvals.append(v)
-                fp.write(delim.join(dispvals))
-                fp.write('\n')
+                dispvals.append(v)
+            fp.write(delim.join(dispvals))
+            fp.write('\n')
 
     status('%s save finished' % p)
 
@@ -130,8 +129,6 @@ def append_tsv_row(vs, row):
                 os.makedirs(parentdir)
 
         save_tsv_header(vs.source, vs)
-
-    trdict = tsv_trdict(delim='\t')
 
     with vs.source.open_text(mode='a') as fp:
         fp.write('\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')
