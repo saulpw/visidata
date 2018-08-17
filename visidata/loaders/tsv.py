@@ -103,10 +103,20 @@ def save_tsv(p, vs):
     with p.open_text(mode='a') as fp:
         if trdict:
             for r in Progress(vs.rows):
-                fp.write(delim.join(col.getDisplayValue(r).translate(trdict) for col in vs.visibleCols) + '\n')
-        else:
-            for r in Progress(vs.rows):
-                fp.write(delim.join(col.getDisplayValue(r) for col in vs.visibleCols) + '\n')
+                dispvals = []
+                for col in vs.visibleCols:
+                    v = col.getDisplayValue(r)
+                    if isinstance(v, TypedWrapper):
+                        if not options.save_errors:
+                            continue
+                        dispvals.append(str(v))
+
+                    if trdict:
+                        v = v.translate(trdict)
+
+                    dispvals.append(v)
+                fp.write(delim.join(dispvals))
+                fp.write('\n')
 
     status('%s save finished' % p)
 

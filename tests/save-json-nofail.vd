@@ -10,6 +10,7 @@ test	amt		key-col		!
 test	key1		key-col		!	
 test			save-sheet	tests/golden/save-json-nofail.csv	^S	
 test			save-sheet	tests/golden/save-json-nofail.json	^S	
+test			save-sheet	tests/golden/save-json-nofail.jsonl	^S	
 test			save-sheet	tests/golden/save-json-nofail.md	^S	
 test			save-sheet	tests/golden/save-json-nofail.html	^S	
 test			save-sheet	tests/golden/save-json-nofail.txt	^S	

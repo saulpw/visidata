@@ -1,6 +1,11 @@
 import json
 
-from visidata import *
+from visidata import options, option, status, date, deduceType
+from visidata import PythonSheet, ColumnItem, stacktrace, asyncthread, Progress
+from visidata import wrapply, TypedExceptionWrapper, TypedWrapper
+
+
+option('json_indent', None, 'indent to use when saving json')
 
 
 def open_json(p):
@@ -67,26 +72,38 @@ class JSONSheet(PythonSheet):
 
 ## saving json and jsonl
 
-class vjsonEncoder(json.JSONEncoder):
-    def default(self, o):
+class Cell:
+    def __init__(self, col, row):
+        self.col = col
+        self.row = row
+
+class _vjsonEncoder(json.JSONEncoder):
+    def __init__(self, **kwargs):
+        super().__init__(sort_keys=True, **kwargs)
+
+    def default(self, cell):
+        o = wrapply(cell.col.getTypedValue, cell.row)
         if isinstance(o, TypedExceptionWrapper):
-            if options.error_is_null:
+            if not options.save_errors:
                 return None
-            return {type(o.exception).__name__: str(o.exception), 'value': str(o.val)}
+            return str(o.exception)
         elif isinstance(o, TypedWrapper):
             return o.val
-        return json.JSONEncoder.default(self, o)
+        elif isinstance(o, date):
+            return cell.col.getDisplayValue(cell.row)
+        return o
 
 
 def _rowdict(cols, row):
-    return {c.name: wrapply(c.getTypedValue, row) for c in cols}
+    return {c.name: Cell(c, row) for c in cols}
 
 
 @asyncthread
 def save_json(p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
-        for chunk in vjsonEncoder().iterencode([_rowdict(vcols, r) for r in Progress(vs.rows)]):
+        jsonenc = _vjsonEncoder(indent=options.json_indent)
+        for chunk in jsonenc.iterencode([_rowdict(vcols, r) for r in Progress(vs.rows)]):
             fp.write(chunk)
 
 
@@ -94,7 +111,7 @@ def save_json(p, vs):
 def save_jsonl(p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
-        jsonenc = vjsonEncoder()
+        jsonenc = _vjsonEncoder()
         for r in Progress(vs.rows):
             rowdict = _rowdict(vcols, r)
             fp.write(jsonenc.encode(rowdict) + '\n')
