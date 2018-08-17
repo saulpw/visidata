@@ -1,5 +1,7 @@
 import collections
 import itertools
+import functools
+from copy import copy
 
 from visidata import asyncthread, Progress, status, fail
 from visidata import ColumnItem, ColumnExpr, SubrowColumn, Sheet, Column
@@ -10,13 +12,23 @@ from copy import copy
 SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
 
 def createJoinedSheet(sheets, jointype=''):
+    sheets[1:] or error("join requires more than 1 sheet")
+
     if jointype == 'append':
         return SheetConcat('&'.join(vs.name for vs in sheets), sources=sheets)
+    elif jointype == 'extend':
+        vs = copy(sources[0])
+        vs.name = '+'.join(vs.name for vs in sheets)
+        vs.reload = functools.partial(ExtendedSheet_reload, vs, sources=sheets)
+        vs.rows = tuple()  # to induce reload on first push, see vdtui
+        return vs
     else:
         return SheetJoin('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
 
-jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append"]}
+jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append", "extend"]}
 
+def joinkey(sheet, row):
+    return tuple(c.getDisplayValue(row) for c in sheet.keyCols)
 
 #### slicing and dicing
 # rowdef: [(key, ...), sheet1_row, sheet2_row, ...]
@@ -44,7 +56,7 @@ class SheetJoin(Sheet):
                 rowsBySheetKey[vs] = collections.defaultdict(list)
                 for r in vs.rows:
                     prog.addProgress(1)
-                    key = tuple(c.getDisplayValue(r) for c in vs.keyCols)
+                    key = joinkey(vs, r)
                     rowsBySheetKey[vs][key].append(r)
 
             for sheetnum, vs in enumerate(sheets):
@@ -56,7 +68,7 @@ class SheetJoin(Sheet):
 
                 for r in vs.rows:
                     prog.addProgress(1)
-                    key = tuple(c.getDisplayValue(r) for c in vs.keyCols)
+                    key = joinkey(vs, r)
                     if key not in rowsByKey: # gather for this key has not been done yet
                         # multiplicative for non-unique keys
                         rowsByKey[key] = []
@@ -87,6 +99,69 @@ class SheetJoin(Sheet):
                     for combinedRow in combinedRows:
                         if not all(combinedRow):
                             self.addRow(combinedRow)
+
+
+## for ExtendedSheet
+class ExtendedColumn(Column):
+    def calcValue(self, row):
+        key = joinkey(self.sheet.joinSources[0], row)
+        srcsheet = self.sheet.joinSources[self.sheetnum]
+        srcrow = self.sheet.rowsBySheetKey[srcsheet][key]
+        if srcrow[0]:
+            return self.sourceCol.calcValue(srcrow[0])
+
+
+@asyncthread
+def ExtendedSheet_reload(self, sheets):
+    self.joinSources = sheets
+
+    # first item in joined row is the key tuple from the first sheet.
+    # first columns are the key columns from the first sheet, using its row (0)
+    self.columns = []
+    for i, c in enumerate(sheets[0].keyCols):
+        self.addColumn(copy(c))
+    self.setKeys(self.columns)
+
+    for i, c in enumerate(sheets[0].nonKeyVisibleCols):
+        self.addColumn(copy(c))
+
+    self.rowsBySheetKey = {}  # [srcSheet][key] -> list(rowobjs from sheets[0])
+    rowsByKey = {}  # [key] -> [key, rows0, rows1, ...]
+
+    with Progress(total=sum(len(vs.rows) for vs in sheets)*2) as prog:
+        for vs in sheets:
+            # tally rows by keys for each sheet
+            self.rowsBySheetKey[vs] = collections.defaultdict(list)
+            for r in vs.rows:
+                prog.addProgress(1)
+                key = joinkey(vs, r)
+                self.rowsBySheetKey[vs][key].append(r)
+
+        for sheetnum, vs in enumerate(sheets[1:]):
+            # subsequent elements are the rows from each source, in order of the source sheets
+            ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
+            for c in vs.nonKeyVisibleCols:
+                newname = '%s_%s' % (vs.name, c.name)
+                newcol = ExtendedColumn(newname, sheetnum=sheetnum+1, sourceCol=c)
+                self.addColumn(newcol)
+
+            for r in vs.rows:
+                prog.addProgress(1)
+                key = joinkey(vs, r)
+                if key not in rowsByKey: # gather for this key has not been done yet
+                    # multiplicative for non-unique keys
+                    rowsByKey[key] = []
+                    for crow in itertools.product(*[self.rowsBySheetKey[vs2].get(key, [None]) for vs2 in sheets]):
+                        rowsByKey[key].append([key] + list(crow))
+
+    self.rows = []
+
+    with Progress(total=len(rowsByKey)) as prog:
+        for k, combinedRows in rowsByKey.items():
+            prog.addProgress(1)
+            for combinedRow in combinedRows:
+                if combinedRow[1]:
+                    self.addRow(combinedRow[1])
 
 
 class ColumnConcat(Column):
