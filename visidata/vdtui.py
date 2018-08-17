@@ -1801,7 +1801,7 @@ Sheet.bindkey('gKEY_DOWN', 'go-bottom'),
 
 
 def isNullFunc():
-    return lambda v,nulls=set(None, options.null_value): v in nulls or isinstance(v, TypedWrapper)
+    return lambda v,nulls=set([None, options.null_value]): v in nulls or isinstance(v, TypedWrapper)
 
 
 @functools.total_ordering
