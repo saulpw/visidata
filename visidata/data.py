@@ -310,6 +310,7 @@ class DirSheet(Sheet):
 
         if row in self.toBeDeleted:
             self.toBeDeleted.remove(row)
+        self.restat(row)
 
     def save(self, *rows):
         changes = []
@@ -382,7 +383,8 @@ DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.resolve())')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in selectedRows))')
 DirSheet.addCommand('^S', 'save-sheet', 'save()')
 DirSheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
-DirSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow); restat(cursorRow)')
+DirSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')
+DirSheet.addCommand('gz^R', 'reload-rows', 'for r in self.selectedRows: undoMod(r)')
 DirSheet.addCommand(None, 'delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1')
 DirSheet.addCommand(None, 'delete-selected', 'deleteFiles(selectedRows)')
 
