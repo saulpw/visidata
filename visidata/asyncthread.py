@@ -5,17 +5,18 @@ from .vdtui import *
 
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
-Sheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))')
+BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))')
 globalCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))')
 globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)')
+SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
+SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
+
 
 def cancelThread(*threads, exception=EscapeException):
     'Raise exception on another thread.'
     for t in threads:
         ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(t.ident), ctypes.py_object(exception))
 
-
-SheetsSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*cursorRow.currentThreads)')
 
 SheetsSheet.columns += [
     ColumnAttr('threads', 'currentThreads', type=len),
