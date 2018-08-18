@@ -57,7 +57,7 @@ def detect_command(cmdlist):
 
     return ''
 
-detect_clipboard_command = lambda: detect_commands(__clipboard_commands)
+detect_clipboard_command = lambda: detect_command(__clipboard_commands)
 
 @functools.lru_cache()
 def clipboard():

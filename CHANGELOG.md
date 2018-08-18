@@ -31,11 +31,11 @@
     - `zd` (`delete-cell`) moves value to clipboard ("cut", like other delete commands)
     - add `gI` (`describe-all`) like `gC` (`columns-all`)
     - add `gS` (`sheets-graveyard`)
-    - add g(, z(, gz( variants of ( 'expand-column'
+    - add `g(`, `z(`, `gz(` variants of `(` 'expand-column'
     - add `z|` and `z\` to un/select by python expr (thanks to @jsvine for suggestion)
     - add `z#` to set type of current column to `len`
     - add `z;` to get the stdout/stderr from running a cmdline program with $colname args
-    - `Space` is now bound to exec-longname (was `menu`; `^A` was `exec-longname`)
+    - `Space` is now bound to exec-longname (was `menu`; `^A` was exec-longname previously)
 
 - Loaders:
     - add pandas adapter

@@ -2543,7 +2543,7 @@ def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
 
         dispi = i  # the onscreen offset within the field where v[i] is displayed
         if len(dispval) < w:  # entire value fits
-            dispval += fillchar*(w-len(dispval))
+            dispval += fillchar*(w-len(dispval)-1)
         elif i == len(dispval):  # cursor after value (will append)
             dispi = w-1
             dispval = left_truncchar + dispval[len(dispval)-w+2:] + fillchar
@@ -2558,7 +2558,7 @@ def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
             dispval = left_truncchar + dispval[i-w//2+1:i+w//2-k] + right_truncchar
 
         prew = clipdraw(scr, y, x, dispval[:dispi], attr, w)
-        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew)
+        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1)
         scr.move(y, x+prew)
         ch = vd().getkeystroke(scr)
         if ch == '':                               continue
