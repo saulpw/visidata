@@ -92,12 +92,8 @@ class GraphSheet(InvertedCanvas):
 
     def add_y_axis_label(self, frac):
         amt = self.visibleBox.ymin + frac*self.visibleBox.h
-        if isinstance(self.canvasBox.ymin, int):
-            txt = '%d' % amt
-        elif isinstance(self.canvasBox.ymin, float):
-            txt = '%.02f' % amt
-        else:
-            txt = str(frac)
+        srccol = self.ycols[0]
+        txt = srccol.format(srccol.type(amt))
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors[options.color_graph_axis]
