@@ -73,6 +73,7 @@ def fillNullValues(col, rows):
         else:
             lastval = val
 
+    col.recalc()
     status("filled %d values" % n)
 
 
@@ -198,18 +199,30 @@ def saveSheets(fn, *vsheets, confirm_overwrite=False):
 
 class DeferredSetColumn(Column):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, cache=True, **kwargs)
+        super().__init__(*args, **kwargs)
         self.realsetter = self.setter
         self.setter = self.deferredSet
+        self._modifiedValues = {}
 
     @staticmethod
     def deferredSet(col, row, val):
-        col._cachedValues[id(row)] = val
+        if col.getValue(row) != val:
+            col._modifiedValues[id(row)] = val
 
     def changed(self, row):
         curval = self.calcValue(row)
-        newval = self._cachedValues.get(id(row), curval)
+        newval = self._modifiedValues.get(id(row), curval)
         return self.type(newval) != self.type(curval)
+
+    def getValue(self, row):
+        if id(row) in self._modifiedValues:
+            return self._modifiedValues.get(id(row))  # overrides cache
+        return Column.getValue(self, row)
+
+    def __copy__(self):
+        ret = Column.__copy__(self)
+        ret._modifiedValues = collections.OrderedDict()  # force a new, unrelated modified set
+        return ret
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
@@ -305,8 +318,8 @@ class DirSheet(Sheet):
 
     def undoMod(self, row):
         for col in self.visibleCols:
-            if col._cachedValues and id(row) in col._cachedValues:
-                del col._cachedValues[id(row)]
+            if col._modifiedValues and id(row) in col._modifiedValues:
+                del col._modifiedValues[id(row)]
 
         if row in self.toBeDeleted:
             self.toBeDeleted.remove(row)
@@ -353,7 +366,7 @@ class DirSheet(Sheet):
 
         for col, row in changes:
             try:
-                col.realsetter(col, row, col._cachedValues[id(row)])
+                col.realsetter(col, row, col._modifiedValues[id(row)])
                 self.restat(r)
             except Exception as e:
                 exceptionCaught(e)

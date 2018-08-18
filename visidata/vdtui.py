@@ -1901,8 +1901,8 @@ class Column:
         cls = self.__class__
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
-        if ret._cachedValues:
-            ret._cachedValues = collections.OrderedDict()  # a fresh cache
+        if self._cachedValues is not None:
+            ret._cachedValues = collections.OrderedDict()  # an unrelated cache for copied columns
         return ret
 
     def __deepcopy__(self, memo):
@@ -2087,6 +2087,9 @@ class Column:
         'Set our column value for given list of rows to `value`.'
         for r, v in zip(rows, itertools.cycle(values)):
             self.setValue(r, v)
+
+        self.recalc()
+
         if len(rows) == 1:
             k = ','.join(map(str, self.sheet.rowkey(rows[0])))
             msg = 'set %s:%s' % (k, self.name)
@@ -2103,6 +2106,7 @@ class Column:
         'Set values on this column for rows, coerced to the column type.  will stop on first exception in type().'
         for r, v in zip(rows, itertools.cycle(self.type(val) for val in values)):
             self.setValue(r, v)
+        self.recalc()
         return status('set %d cells to %d values' % (len(rows), len(values)))
 
     @asyncthread
@@ -2110,6 +2114,7 @@ class Column:
         compiledExpr = compile(expr, '<expr>', 'eval')
         for row in Progress(rows):
             self.setValue(row, self.sheet.evalexpr(compiledExpr, row))
+        self.recalc()
         status('set %d values = %s' % (len(rows), expr))
 
     def getMaxWidth(self, rows):
@@ -2196,6 +2201,10 @@ class SubrowColumn(Column):
         if subrow is None:
             fail('no source row')
         self.origcol.setValue(subrow, value)
+
+    def recalc(self, sheet=None):
+        Column.recalc(self, sheet)
+        self.origcol.recalc(sheet)
 
 
 class DisplayWrapper:

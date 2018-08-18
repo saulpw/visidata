@@ -51,3 +51,4 @@ def setValuesFromRegex(col, rows, rex):
     transform = regexTransform(col, rex)
     for r in rows:
         col.setValue(r, transform(col, r))
+    col.recalc()
