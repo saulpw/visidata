@@ -377,7 +377,7 @@ def typeIcon(typetype):
 
 vdtype(None, '∅')
 vdtype(anytype, '')
-vdtype(str, '~')
+vdtype(str, '~', formatter=lambda _,v: v)
 vdtype(int, '#', '{:.0f}')
 vdtype(float, '%', '{:.02f}')
 vdtype(len, '♯', '{:.0f}')
