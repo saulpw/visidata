@@ -63,13 +63,19 @@ class date(datetime.datetime):
         'add n days (int or float) to the date'
         if isinstance(n, (int, float)):
             n = datetime.timedelta(days=n)
-        return super().__add__(n)
+        return date(super().__add__(n))
 
     def __sub__(self, n):
-        'subtract n days (int or float) from the date'
+        'subtract n days (int or float) from the date.  or subtract another date for a timedelta'
         if isinstance(n, (int, float)):
             n = datetime.timedelta(days=n)
+        elif isinstance(n, (date, datetime.datetime)):
+            return datedelta(super().__sub__(n).total_seconds())
         return super().__sub__(n)
+
+class datedelta(datetime.timedelta):
+    def __float__(self):
+        return self.total_seconds()
 
 vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
 vdtype(currency, '$', '{:,.02f}')
