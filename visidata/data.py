@@ -228,7 +228,6 @@ class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
     columns = [
-        # these setters all either raise or return None, so this is a non-idiomatic 'or' to squeeze in a restat
         DeferredSetColumn('directory',
             getter=lambda col,row: row.parent.relpath(col.sheet.source.resolve()),
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
