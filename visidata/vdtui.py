@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 2017 Saul Pwanson  http://saul.pw/vdtui
+# Copyright 2017-2018 Saul Pwanson  http://saul.pw/vdtui
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -2138,15 +2138,18 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
-def getattrdeep(obj, attr, default=None):
+def getattrdeep(obj, attr, *default):
     'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
     attrs = attr.split('.')
+    if default:
+        getattr_default = lambda o,a,d=default[0]: getattr(o, a, d)
+    else:
+        getattr_default = lambda o,a: getattr(o, a)
 
     for a in attrs[:-1]:
-        obj = getattr(obj, a, None)
-        if obj is None:
-            return default
-    return getattr(obj, attrs[-1], default)
+        obj = getattr_default(obj, a)
+
+    return getattr_default(obj, attrs[-1])
 
 def setattrdeep(obj, attr, val):
     'Set dotted attr (like "a.b.c") on obj to val.'
@@ -2163,7 +2166,7 @@ def ColumnAttr(name, attr=None, **kwargs):
         attr = name
 
     return Column(name,
-                  getter=lambda col,row,attr=attr: getattrdeep(row, attr, None),
+                  getter=lambda col,row,attr=attr: getattrdeep(row, attr),
                   setter=lambda col,row,val,attr=attr: setattrdeep(row, attr, val),
                   **kwargs)
 

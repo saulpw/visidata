@@ -126,7 +126,7 @@ class Host:
         if not machosts:
             machosts = cls.hosts[mac] = {}
 
-        ipraw = getattrdeep(pkt, 'ip.'+field)
+        ipraw = getattrdeep(pkt, 'ip.'+field, None)
         if ipraw is not None:
             ip = ipaddress.ip_address(ipraw)
             if ip not in machosts:
@@ -170,9 +170,9 @@ def load_consts(outdict, module, attrprefix):
             outdict[v] = k[len(attrprefix):]
 
 def getTuple(pkt):
-    if getattrdeep(pkt, 'ip.tcp'):
+    if getattrdeep(pkt, 'ip.tcp', None):
         tup = ('tcp', Host.get_host(pkt, 'src'), pkt.ip.tcp.sport, Host.get_host(pkt, 'dst'), pkt.ip.tcp.dport)
-    elif getattrdeep(pkt, 'ip.udp'):
+    elif getattrdeep(pkt, 'ip.udp', None):
         tup = ('udp', Host.get_host(pkt, 'src'), pkt.ip.udp.sport, Host.get_host(pkt, 'dst'), pkt.ip.udp.dport)
     else:
         return None
@@ -207,7 +207,7 @@ def get_transport(pkt):
     return ret
 
 def get_port(pkt, field='sport'):
-    return getattrdeep(pkt, 'ip.tcp.'+field) or getattrdeep(pkt, 'ip.udp.'+field)
+    return getattrdeep(pkt, 'ip.tcp.'+field, None) or getattrdeep(pkt, 'ip.udp.'+field, None)
 
 
 class EtherSheet(Sheet):
@@ -258,7 +258,7 @@ class TCPSheet(IPSheet):
     def reload(self):
         self.rows = []
         for pkt in Progress(self.source.rows):
-            if getattrdeep(pkt, 'ip.tcp'):
+            if getattrdeep(pkt, 'ip.tcp', None):
                 self.addRow(pkt)
 
 class UDPSheet(IPSheet):
@@ -272,7 +272,7 @@ class UDPSheet(IPSheet):
     def reload(self):
         self.rows = []
         for pkt in Progress(self.source.rows):
-            if getattrdeep(pkt, 'ip.udp'):
+            if getattrdeep(pkt, 'ip.udp', None):
                 self.addRow(pkt)
 
 class PcapSheet(Sheet):
