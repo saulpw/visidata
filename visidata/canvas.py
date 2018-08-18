@@ -508,7 +508,7 @@ class Canvas(Plotter):
                     if ymin is None or y < ymin: ymin = y
                     if xmax is None or x > xmax: xmax = x
                     if ymax is None or y > ymax: ymax = y
-            self.canvasBox = BoundingBox(xmin or 0, ymin or 0, xmax or 1, ymax or 1)
+            self.canvasBox = BoundingBox(float(xmin) or 0, float(ymin) or 0, float(xmax) or 1, float(ymax) or 1)
 
         if not self.visibleBox:
             # initialize minx/miny, but w/h must be set first to center properly
@@ -596,6 +596,7 @@ class Canvas(Plotter):
         for vertexes, attr, row in Progress(self.polylines):
             if len(vertexes) == 1:  # single point
                 x1, y1 = vertexes[0]
+                x1, y1 = float(x1), float(y1)
                 if xmin <= x1 <= xmax and ymin <= y1 <= ymax:
                     x = plotxmin+(x1-xmin)*xfactor
                     y = plotymin+(y1-ymin)*yfactor
@@ -607,10 +608,10 @@ class Canvas(Plotter):
                 r = clipline(prev_x, prev_y, x, y, xmin, ymin, xmax, ymax)
                 if r:
                     x1, y1, x2, y2 = r
-                    x1 = plotxmin+(x1-xmin)*xfactor
-                    y1 = plotymin+(y1-ymin)*yfactor
-                    x2 = plotxmin+(x2-xmin)*xfactor
-                    y2 = plotymin+(y2-ymin)*yfactor
+                    x1 = plotxmin+float(x1-xmin)*xfactor
+                    y1 = plotymin+float(y1-ymin)*yfactor
+                    x2 = plotxmin+float(x2-xmin)*xfactor
+                    y2 = plotymin+float(y2-ymin)*yfactor
                     self.plotline(x1, y1, x2, y2, attr, row)
                 prev_x, prev_y = x, y
 
