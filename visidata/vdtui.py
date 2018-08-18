@@ -1901,6 +1901,7 @@ class Column:
         cls = self.__class__
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
+        self.key = False   # column copies lose their key status
         if self._cachedValues is not None:
             ret._cachedValues = collections.OrderedDict()  # an unrelated cache for copied columns
         return ret
