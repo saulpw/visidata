@@ -15,7 +15,7 @@
     - [design schema of keystrokes]() (e.g. why we decide to map a command to Ctrl, Shift, g, z, etc)
 
 ## Documenting the command (to be done once the command is shippable)
-5) add command to [dev/commands.tsv]();
+5) add command to [visidata/commands.tsv](https://raw.githubusercontent.com/saulpw/visidata/develop/visidata/commands.tsv);
     - `sheet`: the SheetType the command is bound to
     - `longname`: the [longname]() for the command
     - if the command is bound to a keystroke
@@ -30,7 +30,7 @@
     - `menupath`: the original form of the longnames; when they were used as a pathway through the vd menu
     - `helpstr` a documentation of what the command does; should mirror what is contained in the manpage
     - sort by `longname` with `[` and then sort `sheet` with `]`
-6) add it to the [man page](https://github.com/saulpw/visidata/blob/develop/visidata/man/vd.inc);
+6) if the command has been bound to a key, add it to the [man page](https://github.com/saulpw/visidata/blob/develop/visidata/man/vd.inc);
     - render the manpage to ensure that its beauty is intact
 7) include command longname and keybinding in commit headline.
     - add to CHANGELOG before release
