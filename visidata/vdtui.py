@@ -2208,7 +2208,7 @@ class SubrowColumn(Column):
 
     def recalc(self, sheet=None):
         Column.recalc(self, sheet)
-        self.origcol.recalc(sheet)
+        self.origcol.recalc()  # reset cache but don't change sheet
 
 
 class DisplayWrapper:
