@@ -21,7 +21,7 @@ class ColumnShell(Column):
         super().__init__(name, **kwargs)
         self.expr = cmd or name
 
-    @asynccache(lambda col,row: id(row))
+    @asynccache(lambda col,row: (col, id(row)))
     def calcValue(self, row):
         try:
             import shlex
