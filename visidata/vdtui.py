@@ -1889,7 +1889,7 @@ class Column:
         self.fmtstr = ''      # by default, use str()
         self.type = type      # anytype/str/int/float/date/func
         self.getter = lambda col, row: row
-        self.setter = None    # setter(col,row,value)
+        self.setter = lambda col, row, value: fail(col.name+' column cannot be changed')
         self.width = None     # == 0 if hidden, None if auto-compute next time
         self.keycol = False      # is a key column
 
@@ -2081,7 +2081,6 @@ class Column:
 
     def setValue(self, row, value):
         'Set our column value on row.  defaults to .setter; override in Column subclass. no type checking'
-        self.setter or fail(self.name+' column cannot be changed')
         return self.setter(self, row, value)
 
     def setValues(self, rows, *values):
