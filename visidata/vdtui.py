@@ -2087,20 +2087,8 @@ class Column:
         'Set our column value for given list of rows to `value`.'
         for r, v in zip(rows, itertools.cycle(values)):
             self.setValue(r, v)
-
         self.recalc()
-
-        if len(rows) == 1:
-            k = ','.join(map(str, self.sheet.rowkey(rows[0])))
-            msg = 'set %s:%s' % (k, self.name)
-        else:
-            msg = 'set %d cells' % len(rows)
-
-        if len(values) == 1:
-            msg += ' to %s' % values[0]
-        else:
-            msg += ' to %d values' % len(values)
-        return status(msg)
+        return status('set %d cells to %d values' % (len(rows), len(values)))
 
     def setValuesTyped(self, rows, *values):
         'Set values on this column for rows, coerced to the column type.  will stop on first exception in type().'
