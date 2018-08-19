@@ -1839,7 +1839,7 @@ class TypedExceptionWrapper(TypedWrapper):
         self.forwarded = False
 
     def __str__(self):
-        return str(self.val)
+        return str(self.exception)
 
     def __hash__(self):
         return hash((type(self.exception), ''.join(self.stacktrace[:-1])))
