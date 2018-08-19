@@ -2,7 +2,7 @@
 
 import functools
 import datetime
-from visidata import options, theme, Sheet
+from visidata import options, theme, Sheet, TypedWrapper
 
 from .vdtui import vdtype
 
@@ -29,7 +29,7 @@ def currency(s=''):
     'dirty float (strip non-numeric characters)'
     if isinstance(s, str):
         s = ''.join(ch for ch in s if ch in floatchars)
-    return float(s) if s else float()
+    return float(s) if s else TypedWrapper(float, None)
 
 class date(datetime.datetime):
     'datetime wrapper, constructed from time_t or from str with dateutil.parse'
