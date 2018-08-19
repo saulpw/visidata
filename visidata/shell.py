@@ -70,10 +70,9 @@ class DirSheet(Sheet):
         DeferredSetColumn('group', width=0,
             getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name,
             setter=lambda col,row,val: os.chown(row.resolve(), -1, grp.getgrnam(val).pw_gid)),
-        DeferredSetColumn('mode', width=0, type=int, fmtstr='{:o}',
-            getter=lambda col,row: row.stat().st_mode,
-            setter=lambda col,row,val: os.chmod(row.resolve(), val),
-            ),
+        DeferredSetColumn('mode', width=0,
+            getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
+            setter=lambda col,row,val: os.chmod(row.resolve(), int(val, 8))),
         Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     colorizers = [

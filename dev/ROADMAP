@@ -35,7 +35,8 @@
 - 'v' hide cols which have errors on cursor row
    - or should 'v' be 'toggle-visibility' on all sheets?
 - 'modified' indicator on status bar, also enables quitguard
-- ColumnsSheet should show subcolumns and their parent column (for expand/contract)
+- [ColumnsSheet] show subcolumns and their parent column (for expand/contract)
+- [cmdlog] add timestamp?
 
 - graveyard sheet improvements
    - start/drop datetimes
