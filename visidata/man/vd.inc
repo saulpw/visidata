@@ -74,8 +74,10 @@ view this man page
 view sheet of commands and keybindings
 .It Ic ^Q
 abort program immediately
-.It Ic ^C
+.It Ic " ^C"
 cancel user input or abort all async threads on current sheet
+.It Ic "z^C  gz^C"
+abort async threads for current/selected row(s)
 .It Ic " q"
 quit current sheet
 .It Ic "gq"
@@ -466,8 +468,8 @@ open current/selected file(s) as new sheet(s)
 open current/selected file(s) in external $EDITOR
 .It Ic " d   gd"
 schedule current/selected file(s) for deletion
-.It Ic "z^R   ^R"
-reload information for current/all file(s), undoing any pending changes
+.It Ic " ^R  z^R  gz^R"
+reload information for all/current/selected file(s), undoing any pending changes
 .It Ic "z^S   ^S"
 apply all deferred changes to current/all file(s)
 .El
@@ -536,6 +538,8 @@ add row to reference a new blank sheet
 .Sy full No "  keep all rows from all sheets (union)"
 .It Sy "\&."
 .Sy diff No "  keep only rows NOT in all sheets"
+.It Sy "\&."
+.Sy extend No "keep all rows and retain SheetType from first selected sheet"
 .It Sy "\&."
 .Sy append No "keep all rows from all sheets (concatenation)"
 .El

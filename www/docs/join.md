@@ -27,6 +27,7 @@ jointype            description
 `outer`             keeps all rows from first selected sheet
 `full`              keeps all rows from all sheets (union)
 `diff`              keeps only rows NOT in all sheets
+`extend`            keeps all rows and retain **SheetType** from first selected sheet
 
 ## How to append two datasets
 

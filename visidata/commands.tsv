@@ -42,7 +42,8 @@ XmlSheet	dive-row		Enter	Enter	y	n	n	y			load table referenced in current row in
 XmlSheet	visibility		v	v	n	n	n	y			show only columns in current row attributes
 ThreadsSheet	cancel-thread		^C	^C	n	n	n	n		cancel-thread	abort thread at current row
 ThreadsSheet	profile-row		Enter	Enter	y	n	n	n		sheet-profile	push profile sheet for this action
-SheetsSheet	cancel-sheet		^C	^C	n	n	n	n		cancel-thread	abort all threads on sheet at cursor
+SheetsSheet	cancel-row	z	^C	z^C	n	n	n	n			abort thread on current row
+SheetsSheet	cancel-rows	gz	^C	gz^C	n	use	n	n			abort thread on selected rows
 SheetsSheet	columns-selected	g	C	gC	y	y	n	y		sheet-columns-selected	merge the selected sheets with visible columns from all, keeping rows according to jointype
 SheetsSheet	describe-selected	g	I	gI	y	y	n	y		sheet-describe-selected	open Describe Sheet with all columns from selected sheets
 SheetsSheet	join-sheets		&	&	y	y	n	y		sheet-join	merge the selected sheets with visible columns from all, keeping rows according to jointype
@@ -76,7 +77,6 @@ Sheet	aggregate-col		+	+	n	n	n	y	5	column-aggregator-add	add aggregator to curre
 Sheet	aggregate-numerics	g	+	g+	n	n	n	y			add aggregator to all numeric columns
 Sheet	cache-col	z	'	z'	n	n	n	y		column-cache-clear	add/reset cache for current column
 Sheet	cache-cols	gz	'	gz'	n	n	n	y		column-cache-clear-all	add/reset cache for all visible columns
-Sheet	cancel-sheet		^C	^C	n	n	n	n		meta-threads-cancel-sheet	abort all threads on current sheet
 Sheet	capture-col		;	;	n	n	n	y	1,5	modify-add-column-regex-capture	add new column from capture groups of regex; requires example row
 Sheet	columns-sheet		C	C	meta	n	n	y	4,5	meta-columns-sheet	open Columns Sheet
 Sheet	contract-col		)	)	n	n	n	y			unexpand current column; restore original column and remove other columns at this level
@@ -260,6 +260,7 @@ DirSheet	delete-selected				n	use	y			modify-delete-selected
 DirSheet	open-row		Enter	Enter	y	n	n	y		sheet-open-row	open current file as a new sheet
 DirSheet	open-rows	g	Enter	gEnter		use	n	y		sheet-open-rows	open selected files as new sheets
 DirSheet	reload-row	z	^R	z^R	n	n	unmodifies			sheet-specific-apply-edits	undo pending changes to current row
+DirSheet	reload-rows	gz	^R	gz^R	n	use	unmodifies				undo pending changes to selected rows
 DirSheet	save-row	z	^S	z^S	n	n	n			sheet-specific-apply-edits	apply changes to current row
 DirSheet	save-sheet		^S	^S	n	n	n			sheet-specific-apply-edits	apply all changes on all rows
 DirSheet	sysopen-row		^O	^O	external	n			1	edit-row-external	open current file in external $EDITOR
@@ -327,5 +328,6 @@ Canvas	zoomin-cursor		+	+	n	n	n	n			zoom into cursor center
 Canvas	zoomin-mouse			BUTTON4_PRESSED	n	n	n	n			zoom in with scroll wheel
 Canvas	zoomout-cursor			-	n	n	n	n			zoom out from cursor center
 Canvas	zoomout-mouse			REPORT_MOUSE_POSITION	n	n	n	n			zoom out with scroll wheel
+BaseSheet	cancel-sheet		^C	^C	n	n	n	n		meta-threads-cancel-sheet	abort all threads on current sheet
 BaseSheet	reload-sheet		^R	^R	n	n	should confirm if modified; marks as unmodified	y		sheet-reload	reload current sheet
 BaseSheet	rename-sheet				n	n		y			rename current sheet to input

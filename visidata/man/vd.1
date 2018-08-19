@@ -74,8 +74,10 @@ view this man page
 view sheet of commands and keybindings
 .It Ic ^Q
 abort program immediately
-.It Ic ^C
+.It Ic " ^C"
 cancel user input or abort all async threads on current sheet
+.It Ic "z^C  gz^C"
+abort async threads for current/selected row(s)
 .It Ic " q"
 quit current sheet
 .It Ic "gq"
@@ -466,8 +468,8 @@ open current/selected file(s) as new sheet(s)
 open current/selected file(s) in external $EDITOR
 .It Ic " d   gd"
 schedule current/selected file(s) for deletion
-.It Ic "z^R   ^R"
-reload information for current/all file(s), undoing any pending changes
+.It Ic " ^R  z^R  gz^R"
+reload information for all/current/selected file(s), undoing any pending changes
 .It Ic "z^S   ^S"
 apply all deferred changes to current/all file(s)
 .El
@@ -536,6 +538,8 @@ add row to reference a new blank sheet
 .Sy full No "  keep all rows from all sheets (union)"
 .It Sy "\&."
 .Sy diff No "  keep only rows NOT in all sheets"
+.It Sy "\&."
+.Sy extend No "keep all rows and retain SheetType from first selected sheet"
 .It Sy "\&."
 .Sy append No "keep all rows from all sheets (concatenation)"
 .El
@@ -687,16 +691,8 @@ command longname to execute after successful edit
 max number of cache entries in each cached column
 .It Sy --quitguard Ns = Ns Ar "bool            " No "False"
 confirm before quitting last sheet
-.It Sy --none-is-null Ns = Ns Ar "bool         " No "True"
-if Python None counts as null
-.It Sy --empty-is-null Ns = Ns Ar "bool        " No "False"
-if empty string counts as null
-.It Sy --false-is-null Ns = Ns Ar "bool        " No "False"
-if Python False counts as null
-.It Sy --zero-is-null Ns = Ns Ar "bool         " No "False"
-if integer 0 counts as null
-.It Sy --error-is-null Ns = Ns Ar "bool        " No "False"
-if error counts as null
+.It Sy --null-value Ns = Ns Ar "NoneType       " No "None"
+a value to be counted as null
 .It Sy --force-valid-colnames Ns = Ns Ar "bool " No "False"
 clean column names to be valid Python identifiers
 .It Sy --debug Ns = Ns Ar "bool                " No "False"
@@ -723,6 +719,8 @@ amount to scroll with scrollwheel
 skip first N lines of text input
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
 whether to prompt for overwrite confirmation on save
+.It Sy --save-errors Ns = Ns Ar "bool          " No "True"
+whether to save or discard errors while saving
 .It Sy --header Ns = Ns Ar "int                " No "1"
 parse first N rows of .csv/.tsv as column names
 .It Sy --delimiter Ns = Ns Ar "str             " No "	"
@@ -775,6 +773,8 @@ skipinitialspace passed to csv.reader
 escapechar passed to csv.reader
 .It Sy --safety-first Ns = Ns Ar "bool         " No "False"
 sanitize input/output to handle edge cases, with a performance cost
+.It Sy --json-indent Ns = Ns Ar "NoneType      " No "None"
+indent to use when saving json
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
