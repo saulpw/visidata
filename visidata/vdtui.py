@@ -1242,7 +1242,10 @@ class Sheet(BaseSheet):
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
         ret.rows = []                     # a fresh list without incurring any overhead
-        ret.columns = deepcopy(self.columns) # deepcopy columns even for shallow copy of sheet
+        # deepcopy columns even for shallow copy of sheet
+        ret.columns = deepcopy(self.keyCols)
+        ret.setKeys(ret.columns)
+        ret.columns.extend(deepcopy(c) for c in self.columns if c not in self.keyCols)
         ret.recalc()  # set .sheet on columns
         ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
