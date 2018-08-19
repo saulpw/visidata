@@ -12,22 +12,20 @@ def resetCache(self):
 
 Column.resetCache = resetCache
 
+
 def StaticColumn(rows, col):
-    c = deepcopy(col)
-    frozenData = {}
+    frozencol = SettableColumn(col.name+'_frozen', width=col.width, type=col.type, fmtstr=col.fmtstr)
+
     @asyncthread
-    def _calcRows(sheet):
+    def calcRows_async(frozencol, rows, col):
         for r in Progress(rows):
             try:
-                frozenData[id(r)] = col.getTypedValueOrException(r)
+                frozencol.setValue(r, col.getTypedValue(r))
             except Exception as e:
-                frozenData[id(r)] = e
+                frozencol.setValue(r, e)
 
-    _calcRows(col.sheet)
-    c.calcValue=lambda row,d=frozenData: d[id(row)]
-    c.setter=lambda col,row,val,d=frozenData: setitem(d, id(row), val)
-    c.name = c.name + '_frozen'
-    return c
+    calcRows_async(frozencol, rows, col)
+    return frozencol
 
 
 class StaticSheet(Sheet):
