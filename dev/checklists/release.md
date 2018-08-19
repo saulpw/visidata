@@ -20,7 +20,7 @@
 
    b. update the date in the manpage;
 
-   c. update version number on README and front page of website;
+   c. update version number on README and front page of website (update dates here too);
 
    d. bump version in `__version__` in source code (bin/vd, visidata/vdtui.py) and setup.py;
 

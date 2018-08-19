@@ -1,7 +1,6 @@
 # VisiData version history
 
-##
-
+# v1.3.1 (2018-08-19)
 
 - [http] add `tab-seperated-values` to content_filetypes mapping
 - [join] add `extend` join type to use keep all rows and retain **SheetType** from first selected sheet
@@ -12,11 +11,8 @@
 - add `z^C` and `gz^C` to cancel threads in current/selected row(s)
 - [bugfix] `^R` (reload) on a filtered sheet (`"`) now reloads only the filtered rows
     - before it would reload all rows from the source sheet
-
-
 - [aggregators] fix summation with exceptions
-
-- DirSheet
+- [DirSheet]
     - add `gz^R` (reload-rows) to undo modifications on selected rows
 
 # v1.3 (2018-08-11)
