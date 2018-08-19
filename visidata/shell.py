@@ -142,7 +142,7 @@ class DirSheet(Sheet):
 
     def undoMod(self, row):
         for col in self.visibleCols:
-            if col._modifiedValues and id(row) in col._modifiedValues:
+            if getattr(col, '_modifiedValues', None) and id(row) in col._modifiedValues:
                 del col._modifiedValues[id(row)]
 
         if row in self.toBeDeleted:
