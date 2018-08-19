@@ -10,10 +10,8 @@
 - remove all options.foo_is_null and fix according to 178-nulls.md
 - add `z^C` and `gz^C` to cancel threads in current/selected row(s)
 - [bugfix] `^R` (reload) on a filtered sheet (`"`) now reloads only the filtered rows
-    - before it would reload all rows from the source sheet
 - [aggregators] fix summation with exceptions
-- [DirSheet]
-    - add `gz^R` (reload-rows) to undo modifications on selected rows
+- [DirSheet] add `gz^R` (reload-rows) to undo modifications on selected rows
 
 # v1.3 (2018-08-11)
 

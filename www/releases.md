@@ -1,4 +1,18 @@
-# [v1.3](https://github.com/saulpw/visidata/releases/tag/v1.3)
+
+# [v1.3.1](https://github.com/saulpw/visidata/releases/tag/v1.3.1) (2018-08-19)
+
+We found some issues with 1.3 (aggregators interacting with nulls/errors, primarily) that we didn't want to let sit until 1.4.  So we fixed those issues and a couple others, and added a few 'minor' features.  This patch version should be a definitive improvement over the base 1.3 version.
+
+The complete list of changes is in the [CHANGELOG](https://github.com/saulpw/visidata/blob/stable/CHANGELOG.md).  Here are the new options and features:
+
+- new `extend` join type keeps the type of the first sheet, extending it with columns from the other sheets
+- `rename-sheet` command (thanks to @jsvine for suggestion; what default keybinding should it have?)
+- [DirSheet] add `reload-rows` (`gz^R`) to undo modifications on all selected rows
+- remove all options.foo_is_null and add options.null_value
+- options.save_errors (default True) to include errors when saving
+- add options.json_indent for json pretty-printing
+
+# [v1.3](https://github.com/saulpw/visidata/releases/tag/v1.3) (2018-08-11)
 
 It's been a productive 3 months since v1.2.  The largest effort in this release was a commands/options reworking, which will hopefully pay dividends in the future.  Many other so-called improvements were made as well.  Here's a list of most of them:
 
