@@ -1,8 +1,12 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample.tsv	open input in VisiData
-sample	OrderDate		@		set type of current column to date
-sample	OrderDate		=	OrderDate+1	create new column from Python expression, with column names as variables
-sample	OrderDate+1		@		set type of current column to date
-sample	OrderDate+1		=	1+OrderDate	create new column from Python expression, with column names as variables
-sample	1+OrderDate		@		set type of current column to date
-sample	1+OrderDate		=	OrderDate+15*minutes	create new column from Python expression, with column names as variables
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	open input in VisiData
+sample	OrderDate		type-date		@	set type of current column to date
+sample	OrderDate		addcol-expr	OrderDate+1	=	create new column from Python expression, with column names as variables
+sample	OrderDate+1		type-date		@	set type of current column to date
+sample	OrderDate+1		addcol-expr	1+OrderDate	=	create new column from Python expression, with column names as variables
+sample	1+OrderDate		type-date		@	set type of current column to date
+sample	1+OrderDate		addcol-expr	OrderDate+15*minutes	=	create new column from Python expression, with column names as variables
+sample	OrderDate+15*minutes		type-date		@	
+sample			columns-sheet		C	
+sample_columns	fmtstr	キOrderDate+15*minutes	edit-cell	%Y-%m-%d %H:%M:%S	e	
+sample_columns			quit-sheet		q	
