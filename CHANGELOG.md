@@ -10,6 +10,9 @@
 - [tsv json txt] add options.save_errors (default True) to include errors when saving
 - remove all options.foo_is_null and fix according to 178-nulls.md
 - add `z^C` and `gz^C` to cancel threads in current/selected row(s)
+- [bugfix] `^R` (reload) on a filtered sheet (`"`) now reloads only the filtered rows
+    - before it would reload all rows from the source sheet
+
 
 - [aggregators] fix summation with exceptions
 
