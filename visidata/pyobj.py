@@ -231,6 +231,6 @@ class SheetObject(PythonSheet):
 
 SheetObject.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)')
 SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()')
-SheetObject.addCommand('v', 'visibility', 'options.set("visibility", 0 if options.visibility else 1, sheet); reload()')
+SheetObject.addCommand('v', 'visibility', 'options.set("visibility", 0 if options.visibility else 2, sheet); reload()')
 SheetObject.addCommand('gv', 'show-hidden', 'options.visibility = 2; reload()')
 SheetObject.addCommand('zv', 'hide-hidden', 'options.visibility -= 1; reload()')
