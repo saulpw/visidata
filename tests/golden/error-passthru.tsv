@@ -1,2 +1,2 @@
 Item.foo	count	percent	histogram
-['2016-01-06', 'East', 'Jones', None, '95', '1.99', '189.05']	43	100.00	*********************
+'TypedWrapper' object has no attribute 'foo'	43	100.00	*********************
