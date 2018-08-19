@@ -1,0 +1,23 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/test.jsonl	o	
+test	key1		type-date		@	
+test	qty		type-int		#	
+test	amt		type-float		%	
+test	qty		aggregate-col	sum	+	
+test	key1		key-col		!	
+test			columns-sheet		C	
+test_columns		キqty	select-row		s	
+test_columns		キamt	select-row		s	
+test_columns			aggregate-cols	min	g+	
+test_columns			aggregate-cols	max	g+	
+test_columns			aggregate-cols	mean	g+	
+test_columns			aggregate-cols	median	g+	
+test_columns			aggregate-cols	sum	g+	
+test_columns			aggregate-cols	distinct	g+	
+test_columns			aggregate-cols	count	g+	
+test_columns			quit-sheet		q	
+test	key2		pivot		W	
+test_pivot_key2			columns-sheet		C	
+test_pivot_key2_columns	name		sort-asc		[	
+test_pivot_key2_columns			quit-sheet		q	
+test_pivot_key2	key1		sort-asc		[	
