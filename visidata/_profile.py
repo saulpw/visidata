@@ -23,10 +23,13 @@ def toggleProfiling(t):
     if not t.profile:
         t.profile = cProfile.Profile()
         t.profile.enable()
-        status('profiling of main thread enabled')
+        if not options.profile:
+            options.set('profile', 'vdprofile')
     else:
         t.profile.disable()
-        status('profiling of main thread disabled')
+        t.profile = None
+        options.set('profile', '')
+    status('profiling ' + ('ON' if t.profile else 'OFF'))
 
 
 @functools.wraps(vd().toplevelTryFunc)

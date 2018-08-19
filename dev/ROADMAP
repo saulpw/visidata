@@ -42,6 +42,10 @@
    - number of derivative sheets (two columns, for immediate children and to any depth)
    - number of commands executed on that sheet (as a list so they can be viewed separately)
 
+- error history with error objects
+- error sheet showing row-form traceback
+   - ^O to edit
+
 #### III. Loaders and Savers
 
 - parquet #112
