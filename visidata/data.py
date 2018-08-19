@@ -1,9 +1,4 @@
 import random
-import stat
-import pwd
-import grp
-import subprocess
-import contextlib
 
 from visidata import *
 
@@ -224,181 +219,6 @@ class DeferredSetColumn(Column):
         ret._modifiedValues = collections.OrderedDict()  # force a new, unrelated modified set
         return ret
 
-class DirSheet(Sheet):
-    'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
-    rowtype = 'files' # rowdef: Path
-    columns = [
-        DeferredSetColumn('directory',
-            getter=lambda col,row: row.parent.relpath(col.sheet.source.resolve()),
-            setter=lambda col,row,val: col.sheet.moveFile(row, val)),
-        DeferredSetColumn('filename',
-            getter=lambda col,row: row.name + row.ext,
-            setter=lambda col,row,val: col.sheet.renameFile(row, val)),
-        Column('ext', getter=lambda col,row: row.is_dir() and '/' or row.suffix),
-        DeferredSetColumn('size', type=int,
-            getter=lambda col,row: row.stat().st_size,
-            setter=lambda col,row,val: os.truncate(row.resolve(), int(val))),
-        DeferredSetColumn('modtime', type=date,
-            getter=lambda col,row: row.stat().st_mtime,
-            setter=lambda col,row,val: os.utime(row.resolve(), times=((row.stat().st_atime, float(val))))),
-        DeferredSetColumn('owner', width=0,
-            getter=lambda col,row: pwd.getpwuid(row.stat().st_uid).pw_name,
-            setter=lambda col,row,val: os.chown(row.resolve(), pwd.getpwnam(val).pw_uid, -1)),
-        DeferredSetColumn('group', width=0,
-            getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name,
-            setter=lambda col,row,val: os.chown(row.resolve(), -1, grp.getgrnam(val).pw_gid)),
-        DeferredSetColumn('mode', width=0, type=int, fmtstr='{:o}',
-            getter=lambda col,row: row.stat().st_mode,
-            setter=lambda col,row,val: os.chmod(row.resolve(), val),
-            ),
-        Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
-    ]
-    colorizers = [
-#        Colorizer('cell', 4, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
-        Colorizer('cell', 8, lambda s,c,r,v: options.color_change_pending if s.changed(c, r) else None),
-        Colorizer('row', 9, lambda s,c,r,v: options.color_delete_pending if r in s.toBeDeleted else None),
-    ]
-    nKeys = 2
-
-    @staticmethod
-    def colorOwner(sheet, col, row, val):
-        ret = ''
-        if col.name == 'group':
-            mode = row.stat().st_mode
-            if mode & stat.S_IXGRP: ret = 'bold '
-            if mode & stat.S_IWGRP: return ret + 'green'
-            if mode & stat.S_IRGRP: return ret + 'yellow'
-        elif col.name == 'owner':
-            mode = row.stat().st_mode
-            if mode & stat.S_IXUSR: ret = 'bold '
-            if mode & stat.S_IWUSR: return ret + 'green'
-            if mode & stat.S_IRUSR: return ret + 'yellow'
-
-    def changed(self, col, row):
-        try:
-            return isinstance(col, DeferredSetColumn) and col.changed(row)
-        except Exception:
-            return False
-
-    def deleteFiles(self, rows):
-        for r in rows:
-            if r not in self.toBeDeleted:
-                self.toBeDeleted.append(r)
-
-    def moveFile(self, row, val):
-        fn = row.name + row.ext
-        newpath = os.path.join(val, fn)
-        if not newpath.startswith('/'):
-            newpath = os.path.join(self.source.resolve(), newpath)
-
-        parent = Path(newpath).parent
-        if parent.exists():
-            if not parent.is_dir():
-                error('destination %s not a directory' % parent)
-        else:
-            with contextlib.suppress(FileExistsError):
-                os.makedirs(parent.resolve())
-
-        os.rename(row.resolve(), newpath)
-        row.fqpn = newpath
-        self.restat(row)
-
-    def renameFile(self, row, val):
-        newpath = row.with_name(val)
-        os.rename(row.resolve(), newpath.resolve())
-        row.fqpn = newpath
-        self.restat(row)
-
-    def removeFile(self, path):
-        if path.is_dir():
-            os.rmdir(path.resolve())
-        else:
-            os.remove(path.resolve())
-
-    def undoMod(self, row):
-        for col in self.visibleCols:
-            if col._modifiedValues and id(row) in col._modifiedValues:
-                del col._modifiedValues[id(row)]
-
-        if row in self.toBeDeleted:
-            self.toBeDeleted.remove(row)
-        self.restat(row)
-
-    def save(self, *rows):
-        changes = []
-        deletes = {}
-        for r in list(rows or self.rows):  # copy list because elements may be removed
-            if r in self.toBeDeleted:
-                deletes[id(r)] = r
-            else:
-                for col in self.visibleCols:
-                    if self.changed(col, r):
-                        changes.append((col, r))
-
-        if not changes and not deletes:
-            fail('nothing to save')
-
-        cstr = ''
-        if changes:
-            cstr += 'change %d attributes' % len(changes)
-
-        if deletes:
-            if cstr: cstr += ' and '
-            cstr += 'delete %d files' % len(deletes)
-
-        confirm('really %s? ' % cstr)
-
-        self._commit(changes, deletes)
-
-    @asyncthread
-    def _commit(self, changes, deletes):
-        oldrows = self.rows
-        self.rows = []
-        for r in oldrows:
-            try:
-                if id(r) in deletes:
-                    self.removeFile(r)
-                else:
-                    self.rows.append(r)
-            except Exception as e:
-                exceptionCaught(e)
-
-        for col, row in changes:
-            try:
-                col.realsetter(col, row, col._modifiedValues[id(row)])
-                self.restat(r)
-            except Exception as e:
-                exceptionCaught(e)
-
-    @asyncthread
-    def reload(self):
-        self.toBeDeleted = []
-        self.rows = []
-        basepath = self.source.resolve()
-        for folder, subdirs, files in os.walk(basepath):
-            subfolder = folder[len(basepath)+1:]
-            if subfolder.startswith('.'): continue
-            for fn in files:
-                if fn.startswith('.'): continue
-                p = Path(os.path.join(folder, fn))
-                self.rows.append(p)
-
-        # sort by modtime initially
-        self.rows.sort(key=lambda row: row.stat().st_mtime, reverse=True)
-
-    def restat(self, row):
-        row.stat(force=True)
-
-DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
-DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r.resolve()))')
-DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.resolve())')
-DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in selectedRows))')
-DirSheet.addCommand('^S', 'save-sheet', 'save()')
-DirSheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
-DirSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')
-DirSheet.addCommand('gz^R', 'reload-rows', 'for r in self.selectedRows: undoMod(r)')
-DirSheet.addCommand(None, 'delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1')
-DirSheet.addCommand(None, 'delete-selected', 'deleteFiles(selectedRows)')
 
 def openSource(p, filetype=None):
     'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
@@ -417,15 +237,14 @@ def openSource(p, filetype=None):
             filetype = options.filetype or p.suffix or 'txt'
 
         if os.path.isdir(p.resolve()):
-            vs = DirSheet(p.name, source=p)
             filetype = 'dir'
-        else:
-            openfunc = 'open_' + filetype.lower()
-            if openfunc not in getGlobals():
-                warning('no %s function' % openfunc)
-                filetype = 'txt'
-                openfunc = 'open_txt'
-            vs = getGlobals()[openfunc](p)
+
+        openfunc = 'open_' + filetype.lower()
+        if openfunc not in getGlobals():
+            warning('no %s function' % openfunc)
+            filetype = 'txt'
+            openfunc = 'open_txt'
+        vs = getGlobals()[openfunc](p)
     else:  # some other object
         status('unknown object type %s' % type(p))
         vs = None
