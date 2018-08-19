@@ -1,5 +1,5 @@
-- Update: 2018-08-04
-- Version: VisiData 1.3
+- Update: 2018-08-19
+- Version: VisiData 1.3.1
 
 # Navigation
 
@@ -9,9 +9,9 @@ Command(s)              Operation
 --------------          ---------------
 ` ← ` `↑`   ` →`   ` ↓` move as expected
 ` h`  ` j`  ` k`  ` l`  move cursor left/down/up/right (like in vim)
-`gh`  `gj`  `gk`  `gl`  move all the way to the left/bottom/top/right of sheet
-` <`  ` >`              move up/down the current column to the next value which differs from current cell
-` {`  ` }`              move up/down the current column to the next [selected](/docs/rows#subset) row.
+`gh`  `gj`  `gk`  `gl`  move **all the way** to the left/bottom/top/right of sheet
+` <`  ` >`              move up/down the **current** column to the next value which differs from **current** cell
+` {`  ` }`              move up/down the **current** column to the next [selected](/docs/rows#subset) row.
 
 
 ---
@@ -20,10 +20,10 @@ Command(s)              Operation
 
 Command(s)              Operation
 --------------          ---------------
-` /`  ` ?` *regex*      search for *regex* matches up/down the current column
-`g/`  `g?` *regex*      search for *regex* matches up/down over all visible columns
+` /`  ` ?` *regex*      search for *regex* matches up/down the **current** column
+`g/`  `g?` *regex*      search for *regex* matches up/down over **all visible** columns
 ` n`  ` N`              move to next/previous *regex* match from last search
-`z/`  `z?` *expr*       search by Python *expr* up/down in current column (with column names as variables)
+`z/`  `z?` *expr*       search by Python *expr* up/down in **current** column (with column names as variables)
 
 The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 

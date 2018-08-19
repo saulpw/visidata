@@ -1,5 +1,5 @@
-- Update: 2018-04-29
-- Version: VisiData 1.2
+- Update: 2018-08-19
+- Version: VisiData 1.3.1
 
 # Combining datasets
 

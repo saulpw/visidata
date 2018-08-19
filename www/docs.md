@@ -24,11 +24,11 @@
     * How to sort rows
 * [Columns](/docs/columns)
     * How to manipulate columns
-    * How to hide and unhide columns
+    * How to hide (remove) and unhide (return) columns
     * How to specify column types
     * How to split a column
     * How to create derivative columns
-    * How to modify configuration for multiple columns
+    * How to configure multiple columns
 * [Editing contents](/docs/edit)
     * How to edit cells
     * How to rename columns

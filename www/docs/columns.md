@@ -1,5 +1,5 @@
-- Update: 2018-08-09
-- Version: VisiData 1.3
+- Update: 2018-08-19
+- Version: VisiData 1.3.1
 
 # Columns
 
@@ -7,13 +7,13 @@
 
 Commands(s)     Operation
 ------------    -----------
-`!`             pins the current column on the left as a key column
- `H`  `L`       slides the current column one position to the left/right
-`gH` `gL`       slides the current column all the way to the left/right of the sheet
+`!`             pins the **current** column on the left as a key column
+ `H`  `L`       slides the **current** column one position to the left/right
+`gH` `gL`       slides the **current** column all the way to the left/right of the sheet
 
 ---
 
-## How to hide (remove) and unhide columns
+## How to hide (remove) and unhide (return) columns
 
 ###### How to hide columns
 
@@ -41,11 +41,12 @@ Commands(s)     Operation
 
 Command    Type
 --------- --------
-`~`       string
-`#`       int
-`%`       float
-`$`       currency
-`@`       date
+` ~`      string
+` #`      int
+` %`      float
+` $`      currency
+` @`      date
+`z#`      len
 
 Columns usually begin as untyped. Odd results while working with numerical or datetime data is usually due to values being considered as strings, and the problem is solved by setting the correct type.
 
@@ -56,11 +57,11 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
     <script type="text/javascript" src="/asciinema-player.js"></script>
 </div>
 
-###### How to specify batch specify column types for more than one column
+###### How to batch specify column types for more than one column
 
 1. Press `C` to open the **Columns sheet**.
 2. Press `s` or `t` to select the rows referencing the columns you wish to type.
-3. Type `g` followed by the any of the above typing keystrokes to set the type of all selected columns on the source sheet.
+3. Type `g` followed by the any of the above typing keystrokes to set the type for all selected columns on the source sheet.
 
 ---
 
@@ -84,7 +85,7 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 
 ## [How to create derivative columns](#derived)
 
-The `=` command takes a Python expression as input, evaluates the expression, and creates a new column from the result. Column names can be supplied as variables, in order to have the expression performed on the column cell-by-cell. VisiData supports `Tab` autocomplete of column names.
+The `=` command takes a Python expression as input, evaluates the expression, and creates a new column from the result. Column names can be supplied as variables, in order to have the expression performed on the column cell-by-cell. VisiData supports `Tab` autocompletion of column names.
 
 The following examples use the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
@@ -104,7 +105,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 ---
 
-## How to modify configuration for multiple columns
+## How to configure multiple columns
 
 Properties of columns on the source sheet can be changed by using [standard editing commands](/man#edit) on its **Columns sheet** (accessed with `C`). In particular, it facilitates the selection of multiple columns, followed by utilising one of the `g`-prefixed commands to modify all of them.
 
@@ -116,8 +117,8 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 **Question** What is the average daily revenue from sales of each **Item**?
 
-1. Type the **Units** column by pressing `#` (int).
-2. Type the **Total** column by pressing `%` (float).
+1. Set the type of the **Units** column by pressing `#` (int).
+2. Set the type of the **Total** column by pressing `%` (float).
 3. Press `C` to open the **Columns sheet**.
 4. Press `s` or `t` on the rows referencing the source sheet **Units** column and the **Total** column to select them.
 5. Type `g+` followed by `avg` to add a **avg** statistical aggregator to the selected rows.

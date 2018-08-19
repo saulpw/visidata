@@ -1,5 +1,5 @@
-- Update: 2018-08-04
-- Version: VisiData 1.3
+- Update: 2018-08-19
+- Version: VisiData 1.3.1
 
 # Loading data
 

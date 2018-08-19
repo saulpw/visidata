@@ -1,5 +1,5 @@
-- Update: 2018-01-22
-- Version: VisiData 1.0
+- Update: 2018-08-19
+- Version: VisiData 1.3.1
 
 # Editing Contents
 
@@ -9,8 +9,8 @@ For a summary of all editing commands, see the [man page](/man#edit).
 
 Command         Operation
 --------        ----------
- `e`            edits contents of current cell
-`ge` *text*     sets contents of current column for selected rows to *text*
+ `e`            edits contents of **current** cell
+`ge` *text*     sets contents of **current** column for **selected** rows to *text*
 
 While in editing mode, or anytime VisiData expects input (with e.g. `=`, `;`), these are some commands which become available:
 
@@ -31,14 +31,15 @@ Command             Operation
 
 Command     Operation
 --------    ----------
-  `^`       edits name of current column
- `g^`       sets names of all unnamed visible columns to contents of selected rows (or current row)
- `z^`       sets name of current column to contents of current cell
-`gz^`       sets name of current column to combined contents of current column for selected rows
+  `^`       edits name of **current** column
+ `g^`       sets names of **all unnamed visible** columns to contents of **selected** rows (or **current** row)
+ `z^`       sets name of **current** column to contents of **current** cell
+`gz^`       sets name of **current** column to combined contents of **current** column for **selected** rows
 
 In most cases, `^` is the preferred command. Examples which demo `^` can be seen in [Columns](/docs/columns#derived) and [Group](/docs/group#frequency).
 
 ###### How to set the header in an Excel sheet?
+
 For the standard filetypes (e.g. csv, tsv) the loaders assume that the dataset's first `options.header` rows contain the column names. The Excel loader does not because an Excel file can have multiple sheets with varying number of header rows.
 
 1. Press `s` or `t` to select the rows which represent the header rows.

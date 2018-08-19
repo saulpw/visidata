@@ -1,5 +1,5 @@
-- Update: 2018-08-04
-- Version: VisiData 1.3
+- Update: 2018-08-19
+- Version: VisiData 1.3.1
 
 # Rows
 
@@ -11,13 +11,13 @@ Many commands can be finetuned to operate on rows which are 'selected'.
 
 Command(s)         Operation
 -----------------  -------------
- `s`  `t`  `u`     select/toggle/unselect current row
-`gs` `gt` `gu`     select/toggle/unselect all rows
- `|`  `\` *regex*  select/unselect rows matching *regex* in current column
-`g|` `g\` *regex*  select/unselect rows matching *regex* in any visible column
-`z|` `z\` *expr*   select/unselect rows matching Python *expr* in any visible column
- `,`               select rows matching current cell in current column
-`g,`               select rows matching this row in all visible column
+ `s`  `t`  `u`     select/toggle/unselect **current** row
+`gs` `gt` `gu`     select/toggle/unselect **all** rows
+ `|`  `\` *regex*  select/unselect rows matching *regex* in **current** column
+`g|` `g\` *regex*  select/unselect rows matching *regex* in **any visible** column
+`z|` `z\` *expr*   select/unselect rows matching Python *expr* in **any visible** column
+ `,`               select rows matching current cell in **current** column
+`g,`               select rows matching **entire current** row in **all visible** columns
 
 An example usage follows.
 
@@ -76,20 +76,20 @@ Command(s)         Operation
 
 Command(s)         Operation
 -----------------  -------------
- `[`  `]`          sorts ascending/descending by current column
-`g[` `g]`          sorts ascending/descending by all key columns
+ `[`  `]`          sorts ascending/descending by **current** column
+`g[` `g]`          sorts ascending/descending by **all key** columns
 
 ###### How to sort a numerical column from highest number to lowest:
 
-1. Type the column being sorted by pressing `#` (int) or `%` (float).
+1. Set the type of the column being sorted by pressing `#` (int) or `%` (float).
 2. Press `[` to sort the column from highest to lowest.
 
 ###### How to sort a date column in chronological order:
 
-1. Type the column being sorted by pressing `@` (date).
+1. Set the type of the column being sorted by pressing `@` (date).
 2. Press `]` to sort the column chronologically.
 
-###### How to sort based on two columns
+###### How to sort based on multiple columns
 
 1. Press `!` on those columns to designate them as key columns.
 2. Press `g[` or `g]` to sort.
