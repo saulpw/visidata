@@ -7,9 +7,9 @@
 
 Commands(s)     Operation
 ------------    -----------
-`!`             pins the **current** column on the left as a key column
- `H`  `L`       slides the **current** column one position to the left/right
-`gH` `gL`       slides the **current** column all the way to the left/right of the sheet
+`!`             pins the current column on the left as a key column
+ `H`  `L`       slides the current column **one position** to the left/right
+`gH` `gL`       slides the current column **all the way** to the left/right of the sheet
 
 ---
 
@@ -47,6 +47,7 @@ Command    Type
 ` $`      currency
 ` @`      date
 `z#`      len
+`z~`      anytype
 
 Columns usually begin as untyped. Odd results while working with numerical or datetime data is usually due to values being considered as strings, and the problem is solved by setting the correct type.
 

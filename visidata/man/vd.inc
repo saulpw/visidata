@@ -76,8 +76,6 @@ view sheet of commands and keybindings
 abort program immediately
 .It Ic " ^C"
 cancel user input or abort all async threads on current sheet
-.It Ic "z^C  gz^C"
-abort async threads for current/selected row(s)
 .It Ic " q"
 quit current sheet
 .It Ic "gq"
@@ -526,6 +524,8 @@ add row to reference a new blank sheet
 .No open Sy Describe Sheet No with all columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
+.It Ic "z^C  gz^C"
+abort async threads for current/selected sheets(s)
 .It Ic " &" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
@@ -539,9 +539,9 @@ add row to reference a new blank sheet
 .It Sy "\&."
 .Sy diff No "  keep only rows NOT in all sheets"
 .It Sy "\&."
-.Sy extend No "keep all rows and retain SheetType from first selected sheet"
-.It Sy "\&."
 .Sy append No "keep all rows from all sheets (concatenation)"
+.It Sy "\&."
+.Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
 .El
 .
 .Ss Options Sheet (Shift+O)

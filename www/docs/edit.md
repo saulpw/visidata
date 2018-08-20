@@ -9,15 +9,15 @@ For a summary of all editing commands, see the [man page](/man#edit).
 
 Command         Operation
 --------        ----------
- `e`            edits contents of **current** cell
-`ge` *text*     sets contents of **current** column for **selected** rows to *text*
+ `e`            edit contents of **current cell**
+`ge` *text*     set contents of **current column for selected rows** to *text*
 
-While in editing mode, or anytime VisiData expects input (with e.g. `=`, `;`), these are some commands which become available:
+While in editing mode, or anytime VisiData expects input (with e.g. `=`, `;`), typical readline commands become available:
 
 Command             Operation
 --------            ----------
 `Enter`             accepts input
-`^C`  Esc           aborts input
+`^C`  `Esc`           aborts input
 `^O`                opens external $EDITOR to edit contents
 `^R`                reloads initial value
 `^A`  `^E`          moves to beginning/end of line

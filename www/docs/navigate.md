@@ -8,10 +8,10 @@
 Command(s)              Operation
 --------------          ---------------
 ` ← ` `↑`   ` →`   ` ↓` move as expected
-` h`  ` j`  ` k`  ` l`  move cursor left/down/up/right (like in vim)
+` h`  ` j`  ` k`  ` l`  move cursor **one cell** left/down/up/right (like in vim)
 `gh`  `gj`  `gk`  `gl`  move **all the way** to the left/bottom/top/right of sheet
-` <`  ` >`              move up/down the **current** column to the next value which differs from **current** cell
-` {`  ` }`              move up/down the **current** column to the next [selected](/docs/rows#subset) row.
+` <`  ` >`              move up/down the current column to the next **value which differs from current cell**
+` {`  ` }`              move up/down the current column to the next **[selected](/docs/rows#subset) row**
 
 
 ---
@@ -23,7 +23,7 @@ Command(s)              Operation
 ` /`  ` ?` *regex*      search for *regex* matches up/down the **current** column
 `g/`  `g?` *regex*      search for *regex* matches up/down over **all visible** columns
 ` n`  ` N`              move to next/previous *regex* match from last search
-`z/`  `z?` *expr*       search by Python *expr* up/down in **current** column (with column names as variables)
+`z/`  `z?` *expr*       search by Python *expr* up/down (with column names as variables)
 
 The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
@@ -35,7 +35,7 @@ The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw
 **Question** What is the **longname** for `gk`?
 
 1. Press `z^H` to open the **Commands sheet**.
-2. Type `z/` followed by `'gk' in keystrokes`.
+2. Type `/` followed by `'gk' in keystrokes`.
 3. Press `c` followed by `longname` to move the cursor to the **longname** column.
 
 ---
@@ -55,6 +55,6 @@ Command(s)              Operation
 `Ctrl+^`                jump to the previous sheet, without closing the current one
 `q`                     quit the current sheet (closes it)
 
-**Note**: When sheets are 'closed', they will cease to be referenced by the **Sheets sheet**. Press `gS` to access them again through the **Sheets graveyard**.
+**Note**: When sheets are 'closed', they are no longer referenced by the **Sheets sheet**. Press `gS` to find them again through the **Sheets graveyard**.
 
 ---

@@ -24,7 +24,7 @@
     * How to sort rows
 * [Columns](/docs/columns)
     * How to manipulate columns
-    * How to hide (remove) and unhide (return) columns
+    * How to hide (remove) and unhide columns
     * How to specify column types
     * How to split a column
     * How to create derivative columns
