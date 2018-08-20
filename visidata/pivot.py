@@ -16,9 +16,8 @@ class SheetPivot(Sheet):
 
         for colnum, col in enumerate(self.source.keyCols):
             if col not in self.variableCols:
-                newcol = copy(col)
-                newcol.getter = lambda col,row,colnum=colnum: row[0][colnum]
-                newcol.srccol = col
+                newcol = Column(col.name, origcol=col, width=col.width, type=col.type,
+                                getter=lambda col,row,colnum=colnum: row[0][colnum])
                 self.nonpivotKeyCols.append(newcol)
 
         # two different threads for better interactive display
@@ -66,7 +65,7 @@ class SheetPivot(Sheet):
         rowidx = {}
         self.rows = []
         for r in Progress(self.source.rows):
-            keys = tuple(forward(keycol.srccol.getTypedValue(r)) for keycol in self.nonpivotKeyCols)
+            keys = tuple(forward(keycol.origcol.getTypedValue(r)) for keycol in self.nonpivotKeyCols)
             formatted_keys = tuple(wrapply(c.format, v) for v, c in zip(keys, self.nonpivotKeyCols))
 
             pivotrow = rowidx.get(formatted_keys)
