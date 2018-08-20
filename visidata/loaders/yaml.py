@@ -15,4 +15,3 @@ class YamlSheet(Sheet):
         for k in self.rows[0]:
             c = ColumnItem(k, type=deduceType(self.rows[0][k]))
             self.addColumn(c)
-

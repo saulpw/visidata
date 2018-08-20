@@ -9,11 +9,11 @@
 - e. User input (OptionsSheet) overrides currently at the 'override' layer.
 - f. These layers may apply to any of these settings.  This is the resolution order (the first applicable layer is used):
 
-   0. user sheet-specific override (not possible yet in interface)
+   0. user sheet-specific override (with `O` in 1.3)
    1. current sheet instance
    2. current sheet type
    3. current sheet parent types
-   4. in session via meta-sheet
+   4. in session via meta-sheet (with `gO`)
    5. command line (options only, applied on top of the overrides in .visidatarc)
    6. .visidatarc  (associated object is string 'override')
    7. global defaults  (associated object is string 'default')
