@@ -2328,9 +2328,9 @@ class TextSheet(Sheet):
         for startingLine, text in enumerate(self.source):
             if wrap and text:
                 for i, L in enumerate(textwrap.wrap(str(text), width=winWidth)):
-                    self.addRow([startingLine+i, L])
+                    self.addRow([startingLine+i+1, L])
             else:
-                self.addRow([startingLine, text])
+                self.addRow([startingLine+1, text])
 
 TextSheet.addCommand('v', 'visibility', 'options.set("wrap", not options.wrap, sheet); reload(); status("text%s wrapped" % ("" if options.wrap else " NOT")); ')
 
