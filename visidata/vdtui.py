@@ -1242,10 +1242,9 @@ class Sheet(BaseSheet):
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
         ret.rows = []                     # a fresh list without incurring any overhead
-        # deepcopy columns even for shallow copy of sheet
-        ret.columns = deepcopy(self.keyCols)
+        ret.columns = [copy(c) for c in self.keyCols]
         ret.setKeys(ret.columns)
-        ret.columns.extend(deepcopy(c) for c in self.columns if c not in self.keyCols)
+        ret.columns.extend(copy(c) for c in self.columns if c not in self.keyCols)
         ret.recalc()  # set .sheet on columns
         ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
@@ -2313,25 +2312,27 @@ class TextSheet(Sheet):
     'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
     rowtype = 'lines'
     filetype = 'txt'
+    columns = [
+        ColumnItem('linenum', 0, type=int, width=0),
+        ColumnItem('text', 1),
+    ]
 
     def __init__(self, name, source, **kwargs):
         super().__init__(name, source=source, **kwargs)
 
     @asyncthread
     def reload(self):
-        self.columns = [Column(self.name, getter=lambda col,row: row[1])]
         self.rows = []
-        winWidth = vd().windowWidth
-        wrap = getattr(self, 'wrap', options.wrap)
-        for text in self.source:
-            if wrap:
-                startingLine = len(self.rows)
-                for i, L in enumerate(textwrap.wrap(str(text), width=winWidth-2)):
-                    self.addRow((startingLine+i, L))
+        winWidth = min(self.columns[1].width or 78, vd().windowWidth-2)
+        wrap = options.wrap
+        for startingLine, text in enumerate(self.source):
+            if wrap and text:
+                for i, L in enumerate(textwrap.wrap(str(text), width=winWidth)):
+                    self.addRow([startingLine+i, L])
             else:
-                self.addRow((len(self.rows), text))
+                self.addRow([startingLine, text])
 
-TextSheet.addCommand('v', 'visibility', 'sheet.wrap = not getattr(sheet, "wrap", options.wrap); status("text%s wrapped" % ("" if wrap else " NOT")); reload()')
+TextSheet.addCommand('v', 'visibility', 'options.set("wrap", not options.wrap, sheet); reload(); status("text%s wrapped" % ("" if options.wrap else " NOT")); ')
 
 ### Curses helpers
 
