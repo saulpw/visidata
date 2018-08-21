@@ -90,6 +90,14 @@ def init_pcap():
     load_iana(url_iana)
 
 
+def read_pcap(f):
+
+    try:
+        return dpkt.pcapng.Reader(f.open_bytes())
+    except ValueError:
+        return dpkt.pcap.Reader(f.open_bytes())
+
+
 @asyncthread
 def load_oui(url):
     vsoui = open_tsv(urlcache(url, 30*days))
@@ -190,21 +198,32 @@ def getService(tup):
     if (transport, sport) in services:
         return services.get((transport, sport))
 
+
 def get_transport(pkt):
     ret = 'ether'
+    if getattr(pkt, 'arp', None):
+        return 'arp'
+
     if getattr(pkt, 'ip', None):
         ret = 'ip'
         if getattr(pkt.ip, 'tcp', None):
             ret = 'tcp'
         elif getattr(pkt.ip, 'udp', None):
             ret = 'udp'
-#            if getattr(pkt, 'dns', None):
-#                ret = 'dns'
-#        elif getattr(pkt.ip, 'icmp', None):
-#            ret = 'icmp'
-#    elif getattr(pkt, 'arp', None):
-#        ret = 'arp'
+        elif getattr(pkt.ip, 'icmp', None):
+            ret = 'icmp'
+
+    if getattr(pkt, 'ip6', None):
+        ret = 'ipv6'
+        if getattr(pkt.ip6, 'tcp', None):
+            ret = 'tcp'
+        elif getattr(pkt.ip6, 'udp', None):
+            ret = 'udp'
+        elif getattr(pkt.ip6, 'icmp6', None):
+            ret = 'icmpv6'
+
     return ret
+
 
 def get_port(pkt, field='sport'):
     return getattrdeep(pkt, 'ip.tcp.'+field, None) or getattrdeep(pkt, 'ip.udp.'+field, None)
@@ -275,6 +294,7 @@ class UDPSheet(IPSheet):
             if getattrdeep(pkt, 'ip.udp', None):
                 self.addRow(pkt)
 
+
 class PcapSheet(Sheet):
     rowtype = 'packets'
     columns = [
@@ -301,8 +321,7 @@ class PcapSheet(Sheet):
     def reload(self):
         init_pcap()
 
-        f = self.source.open_bytes()
-        self.pcap = dpkt.pcap.Reader(f)
+        self.pcap = read_pcap(self.source)
         self.rows = []
         with Progress(total=self.source.filesize) as prog:
             for ts, buf in self.pcap:
@@ -321,7 +340,6 @@ class PcapSheet(Sheet):
                 eth.srchost = Host.get_host(eth, 'src')
                 eth.dsthost = Host.get_host(eth, 'dst')
 
-#                eth.netbios = try_apply(lambda eth: dpkt.netbios.NS(eth.ip.udp.data), eth)
 
 PcapSheet.addCommand('W', 'flows', 'vd.push(PcapFlowsSheet(sheet.name+"_flows", source=sheet))')
 PcapSheet.addCommand('2', 'l2-packet', 'vd.push(IPSheet("L2packets", source=sheet))')
@@ -385,5 +403,9 @@ def try_apply(func, *args, **kwargs):
 
 
 def open_pcap(p):
-    return PcapSheet(p.name, source = p)
+    return PcapSheet(p.name, source=p)
+
+
 open_cap = open_pcap
+open_pcapng = open_pcap
+open_ntar = open_pcap
