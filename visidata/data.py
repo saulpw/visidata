@@ -1,3 +1,4 @@
+import itertools
 import random
 
 from visidata import *
@@ -90,7 +91,7 @@ Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol];
 
 Sheet.addCommand('z=', 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 
-Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows or rows, *list(eval(input("set column= ", "expr", completer=CompleteExpr()))))')
+Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows or rows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows or rows))))')
 
 globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: "))))')
 
