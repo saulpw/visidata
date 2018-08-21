@@ -3,11 +3,9 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import asyncthread, Progress, status, fail
+from visidata import asyncthread, Progress, status, fail, error
 from visidata import ColumnItem, ColumnExpr, SubrowColumn, Sheet, Column
 from visidata import SheetsSheet
-
-from copy import copy
 
 SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
 
@@ -17,7 +15,7 @@ def createJoinedSheet(sheets, jointype=''):
     if jointype == 'append':
         return SheetConcat('&'.join(vs.name for vs in sheets), sources=sheets)
     elif jointype == 'extend':
-        vs = copy(sources[0])
+        vs = copy(sheets[0])
         vs.name = '+'.join(vs.name for vs in sheets)
         vs.reload = functools.partial(ExtendedSheet_reload, vs, sources=sheets)
         vs.rows = tuple()  # to induce reload on first push, see vdtui
