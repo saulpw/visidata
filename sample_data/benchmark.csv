@@ -1,0 +1,7 @@
+Transaction Date,Customer,SKU,Item,Quantity,Unit,Total
+8/16/2018 5:15p,Michael Smith,BIRD160,"Parakeet, Blue (Melopsittacus undulatus)",1,29.95,$31.85
+8/7/2018 4:12p,Juan Johnson,REPT082,"Kingsnake, California (Lampropeltis getula)",1,$89.95,
+8/13/2018 9:07a,Monica Johnson,RDNT443,"Mouse, Pinky (Mus musculus)",1,$1.49,
+8/20/2018 9:14a,Monica Johnson,NSCT201,"Crickets, Adult Live (Gryllus assimilis) 10ct",3,$.05,
+8/27/2018 9:26a,Monica Johnson,NSCT443,"Mealworms, Large (Tenebrio molitor) 100ct",1,$1.99,
+9/17/2018 5:57p,Juan Johnson,REPT217,"Lizard, Spinytail (Uromastyx ornatus)",1,$99.95,
