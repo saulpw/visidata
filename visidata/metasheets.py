@@ -156,6 +156,7 @@ class OptionsSheet(Sheet):
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source)),
         Column('default', getter=lambda col,row: options.get(row.name, 'global')),
         Column('description', getter=lambda col,row: options._get(row.name, 'global').helpstr),
+        ColumnAttr('replayable'),
     )
     colorizers = Sheet.colorizers + [
         Colorizer('cell', 9, lambda s,c,r,v: v.value if c in s.columns[1:3] and r.name.startswith('color_') else None),
