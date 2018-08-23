@@ -1,11 +1,18 @@
-Transaction Date,Customer,SKU,Item,Quantity,Unit,Total
+Date,Customer,SKU,Item,Quantity,Unit,Paid
 8/16/2018 5:15p,Michael Smith,BIRD160,"Parakeet, Blue (Melopsittacus undulatus)",1,29.95,$31.85
 8/7/2018 4:12p,Juan Johnson,REPT082,"Kingsnake, California (Lampropeltis getula)",1,$89.95,
-8/13/2018 9:07a,Monica Johnson,RDNT443,"Mouse, Pinky (Mus musculus)",1,$1.49,
-8/20/2018 9:14a,Monica Johnson,NSCT201,"Crickets, Adult Live (Gryllus assimilis) 10ct",3,$.05,
-8/27/2018 9:26a,Monica Johnson,NSCT443,"Mealworms, Large (Tenebrio molitor) 100ct",1,$1.99,
+8/7/2018 4:12p,Juan Johnson,RDNT443,"Mouse, Pinky (Mus musculus)",1,$1.49,
+8/13/2018 2:07p,Monica Johnson,RDNT443,"Mouse, Pinky (Mus musculus)",1,$1.49,
+8/20/2018 3:31p,Monica Johnson,NSCT201,"Crickets, Adult Live (Gryllus assimilis)",30,$.05,
+8/27/2018 3:05p,Monica Johnson,NSCT443,"Mealworms, Large (Tenebrio molitor) 100ct",1,$1.99,
 9/17/2018 5:57p,Juan Johnson,REPT217,"Lizard, Spinytail (Uromastyx ornatus)",1,$99.95,
 7/3/2018 3:32p,Kyle Kennedy,FOOD121,"Food, Adult Cat 5kg",1,$46.22,
-8/15/2018 3:48p,Kyle Kennedy,FOOD121,"Food, Adult Cat 5kg",1,$46.22,
+8/15/2018 3:48p,Kyle Kennedy,FOOD121,"Food, Adult Cat 5kg",2,$32.95,
 8/16/2018 4:00p,Kyle Kennedy,DOG010,"Dog, Golden Retriever (Canis lupus familiaris)",1,"$2,495.99",
-8/20/2018 9:06a,Kyle Kennedy,DOG010,"Dog, Golden Retriever (Canis lupus familiaris",1,"-$1,247.99",
+8/20/2018 9:06a,Kyle Kennedy,RETURN,"Dog, Golden Retriever (Canis lupus familiaris)",-1,"$1,247.99","-$1,247.99"
+7/6/2018 12:15p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",12,400¥,
+2018-07-18 12:15p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",6,400¥,
+2018-07-24 12:16p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",3,400¥,
+2018-07-20 12:13p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",3,400¥,
+2018-07-24 12:17p,桜 高橋 (Sakura Takahashi),RETURN,"Food, Senior Wet Cat - 3 oz",1,400¥,
+8/13/2018 2:08p,María Fernández,FOOD146,Forti Diet Prohealth Mouse/Rat 3lbs,2,,
