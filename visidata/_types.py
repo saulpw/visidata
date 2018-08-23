@@ -45,7 +45,7 @@ class date(datetime.datetime):
         elif isinstance(s, datetime.datetime):
             r = s
         else:
-            raise Exception('invalid type for date')
+            raise Exception('invalid type for date %s' % type(s).__name__)
 
         t = r.timetuple()
         return super().__new__(cls, *t[:6], microsecond=r.microsecond, tzinfo=r.tzinfo)
