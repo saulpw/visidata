@@ -70,7 +70,7 @@ class date(datetime.datetime):
         if isinstance(n, (int, float)):
             n = datetime.timedelta(days=n)
         elif isinstance(n, (date, datetime.datetime)):
-            return datedelta(super().__sub__(n).total_seconds())
+            return datedelta(super().__sub__(n).total_seconds()/(24*60*60))
         return super().__sub__(n)
 
 class datedelta(datetime.timedelta):
