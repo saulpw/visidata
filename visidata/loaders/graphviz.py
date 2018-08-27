@@ -1,4 +1,4 @@
-from visidata import option, exceptionCaught, TypedWrapper, asyncthread
+from visidata import options, option, exceptionCaught, TypedWrapper, asyncthread, Progress
 from visidata import wrapply, clean_to_id, isNumeric
 
 option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz diagrams')
@@ -6,6 +6,8 @@ option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz
 
 si_levels = ['', 'k', 'M', 'G', 'T', 'P', 'Q']
 def SI(n):
+    if not isinstance(n, (int, float)):
+        return n
     orig_n = n
     try:
         level = 0
@@ -43,12 +45,14 @@ def save_dot(p, vs):
 
             downsrc = clean_to_id(str(src)) or src
             downdst = clean_to_id(str(dst)) or dst
-            edgetype = '-'.join(c.getTypedValue(row) for c in vs.nonKeyVisibleCols if not isNumeric(c))
+            edgenotes = [c.getTypedValue(row) for c in vs.nonKeyVisibleCols if not isNumeric(c)]
+            edgetype = '-'.join(str(x) for x in edgenotes if is_valid(x))
             color = assignedColors.get(edgetype, None)
             if not color:
-                color = assignedColors[edgetype] = unusedColors.pop()
+                color = unusedColors.pop() if unusedColors else 'black'
+                assignedColors[edgetype] = color
 
-            if options.pcap_edge_labels:
+            if options.graphviz_edge_labels:
                 nodelabels = [wrapply(SI, c.getTypedValue(row)) for c in vs.nonKeyVisibleCols if isNumeric(c)]
                 label = '/'.join(str(x) for x in nodelabels if is_valid(x))
             else:
