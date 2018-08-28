@@ -1,0 +1,5 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/messenger.pcap	o	
+messenger	srchost		key-col		!	
+messenger	dsthost		key-col		!	
+messenger			save-sheet	tests/golden/messenger-nosave.dot	^S	

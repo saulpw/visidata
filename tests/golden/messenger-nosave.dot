@@ -1,0 +1,26 @@
+graph { concentrate=true;
+	Unispher_10_15_59[label="Unispher:10:15:59"];
+	Ibm_7b_2d_9b[label="Ibm:7b:2d:9b"];
+	Unispher_10_15_59 -- Ibm_7b_2d_9b[label="2005-06-10/473.0", color=black];
+	Unispher_10_15_59[label="Unispher:10:15:59"];
+	Ibm_7b_2d_9b[label="Ibm:7b:2d:9b"];
+	Unispher_10_15_59 -- Ibm_7b_2d_9b[label="2005-06-10/473.0", color=black];
+	Unispher_10_15_59[label="Unispher:10:15:59"];
+	Ibm_7b_2d_9b[label="Ibm:7b:2d:9b"];
+	Unispher_10_15_59 -- Ibm_7b_2d_9b[label="2005-06-10/473.0", color=black];
+	Unispher_10_15_59[label="Unispher:10:15:59"];
+	Ibm_7b_2d_9b[label="Ibm:7b:2d:9b"];
+	Unispher_10_15_59 -- Ibm_7b_2d_9b[label="2005-06-10/506.0", color=black];
+	Unispher_10_15_59[label="Unispher:10:15:59"];
+	Ibm_7b_2d_9b[label="Ibm:7b:2d:9b"];
+	Unispher_10_15_59 -- Ibm_7b_2d_9b[label="2005-06-10/506.0", color=black];
+	Unispher_10_15_59[label="Unispher:10:15:59"];
+	Ibm_7b_2d_9b[label="Ibm:7b:2d:9b"];
+	Unispher_10_15_59 -- Ibm_7b_2d_9b[label="2005-06-10/828.0", color=black];
+label="messenger"
+node[shape=plaintext];
+subgraph cluster_legend {
+label="Legend";
+key0[label="ether-Unispher-Ibm", fontcolor=black];
+}
+}
