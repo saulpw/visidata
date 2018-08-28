@@ -17,7 +17,7 @@ for i in $TESTS ; do
     outbase=${i##tests/}
     if [ "${i%-nosave.vd}-nosave" == "${i%.vd}" ];
     then
-        PYTHONPATH=. bin/vd --play $i --batch
+        :
     elif [ "${i%-nofail.vd}-nofail" == "${i%.vd}" ];
     then
         PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i --batch --output tests/golden/${outbase%.vd}.tsv
@@ -37,7 +37,7 @@ for i in $TESTS ; do
     outbase=${i##tests/}
     if [ "${i%-nosave.vd}-nosave" == "${i%.vd}" ];
     then
-        :
+        PYTHONPATH=. bin/vd --play $i --batch
     elif [ "${i%-nofail.vd}-nofail" == "${i%.vd}" ];
     then
         :
