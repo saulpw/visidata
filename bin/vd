@@ -108,7 +108,7 @@ def main():
         vd().execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
     if not args.play:
-        if flPipedData and stdinSource not in inputs:  # '|vd' without explicit '-'
+        if flPipedData and not inputs:  # '|vd' without explicit '-'
             inputs.append(stdinSource)
 
         if not inputs:
