@@ -55,7 +55,7 @@ def load_csv(vs):
             vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers))
         else:
             r = wrappedNext(rdr)
-            vs.addRow(wrappedNext(rdr))
+            vs.addRow(r)
             vs.columns = ArrayColumns(len(vs.rows[0]))
 
         vs.recalc()  # make columns usable
