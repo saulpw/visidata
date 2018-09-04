@@ -1190,14 +1190,14 @@ class Sheet(BaseSheet):
         'Returns curses attribute for the given col/row/value'
         attr = 0
         attrpre = 0
-        _colorizers = []
+        _colorizers = set()
 
         for b in [self] + list(self.__class__.__bases__):
             for c in getattr(b, 'colorizers', []):
                 if c.type in colorizerTypes:
-                    _colorizers.append(c)
+                    _colorizers.add(c)
 
-        for colorizer in sorted(_colorizers, key=lambda x: x.precedence):
+        for colorizer in sorted(_colorizers, key=lambda x: x.precedence, reverse=True):
             try:
                 color = colorizer.func(self, col, row, value)
                 if color:
