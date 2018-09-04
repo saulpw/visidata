@@ -80,6 +80,8 @@ class ProfileSheet(Sheet):
         Column('inlinetime_us', type=int, getter=lambda col,row: row.inlinetime*1000000),
         Column('totaltime_us', type=int, getter=lambda col,row: row.totaltime*1000000),
         ColumnAttr('callcount', type=int),
+        Column('avg_inline_us', type=int, getter=lambda col,row: row.inlinetime*1000000/row.callcount),
+        Column('avg_total_us', type=int, getter=lambda col,row: row.totaltime*1000000/row.callcount),
         ColumnAttr('reccallcount', type=int),
         ColumnAttr('calls'),
         Column('callers', getter=lambda col,row: col.sheet.callers[row.code]),
