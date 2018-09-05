@@ -19,7 +19,7 @@ Date,Customer,SKU,Item,Quantity,Unit,Paid
 7/27/2018 12:16p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",3,$1.29,157¥
 7/30/2018 12:17p,桜 高橋 (Sakura Takahashi),RETURN,"Food, Senior Wet Cat - 3 oz",1,$1.29,157¥
 7/31/2018 5:42p,Rubeus Hagrid,CAT060,"Food, Dragon - 50kg",5,$720.42,
-8/1/2018 2:44p,David Attenborough,FOOD360,"Food, Rhinocerous - 400kg",1,$700000.00,
+8/1/2018 2:44p,David Attenborough,FOOD360,"Food, Rhinocerous - 50kg",4,$5.72,
 8/2/2018 5:12p,Susan Ashworth,CAT110,"Cat, Maine Coon (Felix catus)",1,"$1,309.68",
 8/2/2018 5:12p,Susan Ashworth,FOOD130,"Food, Kitten 3kg",3,$14.94,
 8/6/2018 10:21a,Robert Armstrong,FOOD212,BFF Oh My Gravy! Beef & Chicken 2.8oz,4,$12.95,
@@ -46,3 +46,5 @@ Date,Customer,SKU,Item,Quantity,Unit,Paid
 8/29/2018 10:07a,Robert Armstrong,FOOD219,BFF Oh My Gravy! Chicken & Pumpkin 2.8oz,4,$12.95,
 8/31/2018 12:00a,Robert Armstrong,FOOD219,BFF Oh My Gravy! Chicken & Pumpkin 2.8oz,144,$12.95,
 9/17/2018 5:57p,Juan Johnson,REPT217,"Lizard, Spinytail (Uromastyx ornatus)",1,$99.95,
+,Helen Halestorm,LAGO342,Rabbit (Oryctolagus cuniculus),2,$32.94,
+,Helen Halestorm,RETURN,Rabbit (Oryctolagus cuniculus),6,$0,
