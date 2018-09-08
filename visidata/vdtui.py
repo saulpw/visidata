@@ -1855,7 +1855,10 @@ class TypedWrapper:
     def __init__(self, func, *args):
         self.type = func
         self.args = args
-        self.val = args[0]
+        self.val = args[0] if args else None
+
+    def __bool__(self):
+        return False
 
     def __str__(self):
         return '%s(%s)' % (self.type.__name__, ','.join(str(x) for x in self.args))
