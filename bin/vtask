@@ -6,6 +6,7 @@ import tasklib
 from visidata import *
 
 options.disp_date_fmt = '%Y-%m-%d %H:%M'
+theme('color_task_changed', 'reverse yellow', 'color when vtask is changed')
 
 
 def editTask(task):
@@ -74,7 +75,7 @@ class TodoSheet(Sheet):
     ]
     nKeys = 1
     colorizers = Sheet.colorizers + [
-        Colorizer('cell', 8, lambda s,c,r,v: 'reverse yellow' if isChanged(r, c.name) else None),
+        CellColorizer(8, 'color_task_changed', lambda s,c,r,v: isChanged(r, c.name)),
     ]
     def newRow(self, **kwargs):
         return tasklib.Task(self.tw, **kwargs)

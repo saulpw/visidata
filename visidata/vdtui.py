@@ -293,7 +293,7 @@ theme('color_default', 'normal', 'the default color')
 theme('color_default_hdr', 'bold underline', 'color of the column headers')
 theme('color_current_row', 'reverse', 'color of the cursor row')
 theme('color_current_col', 'bold', 'color of the cursor column')
-theme('color_current_hdr', 'reverse underline', 'color of the header for the cursor column')
+theme('color_current_hdr', 'bold reverse underline', 'color of the header for the cursor column')
 theme('color_column_sep', '246 blue', 'color of column separators')
 theme('color_key_col', '81 cyan', 'color of key columns')
 theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
@@ -675,6 +675,7 @@ class VisiData:
     def refresh(self):
         Sheet.visibleCols.fget.cache_clear()
         Sheet.keyCols.fget.cache_clear()
+        colors.colorcache.clear()
 
     def editText(self, y, x, w, record=True, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
@@ -712,7 +713,7 @@ class VisiData:
         attr = 0
         promptlen = clipdraw(self.scr, self.windowHeight-1, 0, prompt, attr, w=self.windowWidth-rstatuslen-1)
         ret = self.editText(self.windowHeight-1, promptlen, self.windowWidth-promptlen-rstatuslen-2,
-                            attr=colors[options.color_edit_cell],
+                            attr=colors.color_edit_cell,
                             unprintablechar=options.disp_unprintable,
                             truncchar=options.disp_truncator,
                             **kwargs)
@@ -746,9 +747,10 @@ class VisiData:
 
     def drawLeftStatus(self, scr, vs):
         'Draw left side of status bar.'
-        attr = colors[options.color_status]
-        error_attr, _ = colors.update(attr, 0, options.color_error, 1)
-        warn_attr, _ = colors.update(attr, 0, options.color_warning, 1)
+        cattr = CursesAttr(colors.color_status)
+        attr = cattr.attr
+        error_attr = cattr.update_attr(colors.color_error, 1).attr
+        warn_attr = cattr.update_attr(colors.color_warning, 2).attr
         sep = options.disp_status_sep
 
         try:
@@ -966,11 +968,14 @@ class CompleteKey:
         opts = [x for x in self.items if x.startswith(val)]
         return opts[state%len(opts)]
 
-class Colorizer:
-    def __init__(self, colorizerType, precedence, colorfunc):
-        self.type = colorizerType
-        self.precedence = precedence
-        self.func = colorfunc
+
+# higher precedence color overrides lower; all non-color attributes combine
+# coloropt is the color option name (like 'color_error')
+# func(sheet,col,row,value) should return a true value if coloropt should be applied
+# if coloropt is None, func() should return a coloropt (or None) instead
+RowColorizer = collections.namedtuple('RowColorizer', 'precedence coloropt func')
+CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt func')
+ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
 
 class BaseSheet:
@@ -1119,6 +1124,45 @@ class BaseSheet:
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
 
+class CursesAttr:
+    def __init__(self, attr=0, precedence=-1):
+        self.attributes = attr & ~curses.A_COLOR
+        self.color = attr & curses.A_COLOR
+        self.precedence = precedence
+
+    def __str__(self):
+        a = self.attr
+        ret = set()
+        for k in dir(curses):
+            v = getattr(curses, k)
+            if v == 0:
+                pass
+            elif k.startswith('A_'):
+                if self.attributes & v == v:
+                    ret.add(k)
+            elif k.startswith('COLOR_'):
+                if self.color == v:
+                    ret.add(k)
+        return (' '.join(k for k in ret) or str(self.color)) + ' %0X' % self.attr
+
+    @property
+    def attr(self):
+        'the composed curses attr'
+        return self.color | self.attributes
+
+    def update_attr(self, newattr, newprec=None):
+        if isinstance(newattr, int):
+            newattr = CursesAttr(newattr)
+        ret = copy(self)
+        if newprec is None:
+            newprec = newattr.precedence
+        ret.attributes |= newattr.attributes
+        if not ret.color or newprec > ret.precedence:
+            if newattr.color:
+                ret.color = newattr.color
+            ret.precedence = newprec
+        return ret
+
 
 class Sheet(BaseSheet):
     'Base class for all tabular sheets.'
@@ -1127,14 +1171,13 @@ class Sheet(BaseSheet):
 
     columns = []  # list of Column
     colorizers = [ # list of Colorizer
-        Colorizer('hdr', 0, lambda s,c,r,v: options.color_default_hdr),
-        Colorizer('hdr', 9, lambda s,c,r,v: options.color_current_hdr if c is s.cursorCol else None),
-        Colorizer('hdr', 8, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
-        Colorizer('col', 5, lambda s,c,r,v: options.color_current_col if c is s.cursorCol else None),
-        Colorizer('col', 6, lambda s,c,r,v: options.color_key_col if c in s.keyCols else None),
-        Colorizer('cell', 2, lambda s,c,r,v: options.color_default),
-        Colorizer('row', 8, lambda s,c,r,v: options.color_selected_row if s.isSelected(r) else None),
-        Colorizer('row', 7, lambda s,c,r,v: options.color_error if isinstance(r, (Exception, TypedExceptionWrapper)) else None),
+        CellColorizer(2, 'color_default_hdr', lambda s,c,r,v: r is None),
+        ColumnColorizer(2, 'color_current_col', lambda s,c,r,v: c is s.cursorCol),
+        ColumnColorizer(1, 'color_key_col', lambda s,c,r,v: c in s.keyCols),
+        CellColorizer(0, 'color_default', lambda s,c,r,v: True),
+#        RowColorizer(-1, 'color_column_sep', lambda s,c,r,v: c is None),
+        RowColorizer(2, 'color_selected_row', lambda s,c,r,v: s.isSelected(r)),
+        RowColorizer(1, 'color_error', lambda s,c,r,v: isinstance(r, (Exception, TypedExceptionWrapper))),
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
@@ -1174,38 +1217,29 @@ class Sheet(BaseSheet):
     def addColorizer(self, c):
         self.colorizers.append(c)
 
-    def colorizeRow(self, row):
-        return self.colorize(('row',), None, row)
-
-    def colorizeColumn(self, col):
-        return self.colorize(('col',), col, None)
-
-    def colorizeHdr(self, col):
-        return self.colorize(('hdr',), col, None)
-
-    def colorizeCell(self, col, row, value):
-        return self.colorize(('col', 'row', 'cell'), col, row, value)
-
-    def colorize(self, colorizerTypes, col, row, value=None):
-        'Returns curses attribute for the given col/row/value'
-        attr = 0
-        attrpre = 0
+    @functools.lru_cache()
+    def getColorizers(self):
         _colorizers = set()
-
         for b in [self] + list(self.__class__.__bases__):
             for c in getattr(b, 'colorizers', []):
-                if c.type in colorizerTypes:
-                    _colorizers.add(c)
+                _colorizers.add(c)
+        return sorted(_colorizers, key=lambda x: x.precedence, reverse=True)
 
-        for colorizer in sorted(_colorizers, key=lambda x: x.precedence, reverse=True):
+    def colorize(self, col, row, value=None):
+        'Returns curses attribute for the given col/row/value'
+
+#        colorstack = tuple(c.coloropt for c in self.getColorizers() if wrapply(c.func, self, col, row, value))
+
+        colorstack = []
+        for colorizer in self.getColorizers():
             try:
-                color = colorizer.func(self, col, row, value)
-                if color:
-                    attr, attrpre = colors.update(attr, attrpre, color, colorizer.precedence)
+                r = colorizer.func(self, col, row, value)
+                if r:
+                    colorstack.append(colorizer.coloropt if colorizer.coloropt else r)
             except Exception as e:
                 exceptionCaught(e)
 
-        return attr
+        return colors.resolve_colors(tuple(colorstack))
 
     def addRow(self, row, index=None):
         if index is None:
@@ -1624,8 +1658,11 @@ class Sheet(BaseSheet):
 
         # hdrattr highlights whole column header
         # sepattr is for header separators and indicators
-        sepattr = colors[options.color_column_sep]
-        hdrattr = self.colorizeHdr(col)
+        sepattr = colors.color_column_sep
+
+        hdrattr = self.colorize(col, None)
+        if vcolidx == self.cursorVisibleColIndex:
+            hdrattr = hdrattr.update_attr(colors.color_current_hdr, 2)
 
         C = options.disp_column_sep
         if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
@@ -1640,8 +1677,8 @@ class Sheet(BaseSheet):
         N = ' ' + col.name  # save room at front for LeftMore
         if len(N) > colwidth-1:
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
-        clipdraw(scr, y, x, N, hdrattr, colwidth)
-        clipdraw(scr, y, x+colwidth-len(T), T, hdrattr, len(T))
+        clipdraw(scr, y, x, N, hdrattr.attr, colwidth)
+        clipdraw(scr, y, x+colwidth-len(T), T, hdrattr.attr, len(T))
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.disp_more_left
@@ -1664,6 +1701,11 @@ class Sheet(BaseSheet):
         if not self.columns:
             return
 
+        color_current_row = CursesAttr(colors.color_current_row, 5)
+        disp_column_sep = options.disp_column_sep
+
+        rowattrs = {}  # [rowidx] -> attr
+        colattrs = {}  # [colidx] -> attr
         self.rowLayout = {}
         self.calcColLayout()
         vcolidx = 0
@@ -1686,36 +1728,38 @@ class Sheet(BaseSheet):
 
                     row = rows[rowidx]
                     cellval = col.getCell(row, colwidth-1)
+#
+                    attr = self.colorize(col, row, cellval)
 
-                    attr = self.colorizeCell(col, row, cellval)
-                    attrpre = 0
-                    sepattr = self.colorizeRow(row)
+                    # sepattr is the attr between cell/columns
+                    rowattr = rowattrs.get(rowidx)
+                    if rowattr is None:
+                        rowattr = rowattrs[rowidx] = self.colorize(None, row)
+                    sepattr = rowattr
 
                     # must apply current row here, because this colorization requires cursorRowIndex
                     if dispRowIdx == self.cursorRowIndex:
-                        attr, attrpre = colors.update(attr, 0, options.color_current_row, 10)
-                        sepattr, _ = colors.update(sepattr, 0, options.color_current_row, 10)
-
-                    sepattr = sepattr or colors[options.color_column_sep]
+                        attr = attr.update_attr(color_current_row)
+                        sepattr = sepattr.update_attr(color_current_row)
 
                     note = getattr(cellval, 'note', None)
                     if note:
-                        noteattr, _ = colors.update(attr, attrpre, cellval.notecolor, 8)
-                        clipdraw(scr, y, x+colwidth-len(note), note, noteattr, len(note))
+                        noteattr = attr.update_attr(colors.get_color(cellval.notecolor), 10)
+                        clipdraw(scr, y, x+colwidth-len(note), note, noteattr.attr, len(note))
 
-                    clipdraw(scr, y, x, disp_column_fill+cellval.display, attr, colwidth-(1 if note else 0))
+                    clipdraw(scr, y, x, disp_column_fill+cellval.display, attr.attr, colwidth-(1 if note else 0))
 
-                    sepchars = options.disp_column_sep
+                    sepchars = disp_column_sep
                     if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
                         sepchars = options.disp_keycol_sep
 
                     if x+colwidth+len(sepchars) <= self.vd.windowWidth:
-                       scr.addstr(y, x+colwidth, sepchars, sepattr)
+                       scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
 
                     y += 1
 
         if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(headerRow, self.vd.windowWidth-2, options.disp_more_right, colors[options.color_column_sep])
+            scr.addstr(headerRow, self.vd.windowWidth-2, options.disp_more_right, colors.color_column_sep)
 
         catchapply(self.checkCursor)
 
@@ -2031,26 +2075,26 @@ class Column:
                 return DisplayWrapper(cellval.val, error=exc.stacktrace,
                                         display=dispval,
                                         note=options.note_getter_exc,
-                                        notecolor=options.color_error)
+                                        notecolor='color_error')
             elif typedval.val is None:  # early out for strict None
                 return DisplayWrapper(None, display='',  # force empty display for None
                                             note=options.disp_note_none,
-                                            notecolor=options.color_note_type)
+                                            notecolor='color_note_type')
             elif isinstance(typedval, TypedExceptionWrapper):  # calc succeeded, type failed
                 return DisplayWrapper(typedval.val, display=str(cellval),
                                             error=typedval.exception.stacktrace,
                                             note=options.note_type_exc,
-                                            notecolor=options.color_warning)
+                                            notecolor='color_warning')
             else:
                 return DisplayWrapper(typedval.val, display=str(typedval.val),
                                             note=options.note_type_exc,
-                                            notecolor=options.color_warning)
+                                            notecolor='color_warning')
 
         elif isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
                                 display=options.disp_pending,
                                 note=options.note_pending,
-                                notecolor=options.color_note_pending)
+                                notecolor='color_note_pending')
 
         dw = DisplayWrapper(cellval)
 
@@ -2064,7 +2108,7 @@ class Column:
             if self.type is anytype and type(cellval) is not str and options.color_note_type:
                 typedesc = typemap.get(type(cellval), None)
                 dw.note = typedesc.icon if typedesc else options.note_unknown_type
-                dw.notecolor = options.color_note_type
+                dw.notecolor = 'color_note_type'
 
         except Exception as e:  # formatting failure
             e.stacktrace = stacktrace()
@@ -2074,7 +2118,7 @@ class Column:
             except Exception as e:
                 dw.display = str(e)
             dw.note = options.note_format_exc
-            dw.notecolor = options.color_warning
+            dw.notecolor = 'color_warning'
 
         return dw
 
@@ -2597,6 +2641,7 @@ class ColorMaker:
     def __init__(self):
         self.attrs = {}
         self.color_attrs = {}
+        self.colorcache = {}
 
     def setup(self):
         if options.use_default_colors:
@@ -2622,22 +2667,39 @@ class ColorMaker:
         return list(self.attrs.keys()) + list(self.color_attrs.keys())
 
     def __getitem__(self, colornamestr):
-        color, prec = self.update(0, 0, colornamestr, 10)
-        return color
+        return self._colornames_to_attr(colornamestr)
 
-    def update(self, attr, attr_prec, colornamestr, newcolor_prec):
-        attr = attr or 0
-        if isinstance(colornamestr, str):
-            for colorname in colornamestr.split(' '):
-                if colorname in self.color_attrs:
-                    if newcolor_prec > attr_prec:
-                        attr &= ~curses.A_COLOR
-                        attr |= self.color_attrs[colorname.lower()]
-                        attr_prec = newcolor_prec
-                elif colorname in self.attrs:
-                    attr |= self.attrs[colorname.lower()]
-        return attr, attr_prec
+    def __getattr__(self, optname):
+        'colors.color_foo returns colors[options.color_foo]'
+        return self.get_color(optname).attr
 
+    @functools.lru_cache()
+    def resolve_colors(self, colorstack):
+        'Returns the curses attribute for the colorstack, a list of color option names sorted highest-precedence color first.'
+        attr = CursesAttr()
+        for coloropt in colorstack:
+            c = self.get_color(coloropt)
+            attr = attr.update_attr(c)
+        return attr
+
+    def _colornames_to_attr(self, colornamestr, precedence=0):
+        attr = CursesAttr(0, precedence)
+        for colorname in colornamestr.split(' '):
+            if colorname in self.color_attrs:
+                if not attr.color:
+                    attr.color = self.color_attrs[colorname.lower()]
+            elif colorname in self.attrs:
+                attr.attributes |= self.attrs[colorname.lower()]
+        return attr
+
+    def get_color(self, optname, precedence=0):
+        'colors.color_foo returns colors[options.color_foo]'
+        r = self.colorcache.get(optname, None)
+        if r is None:
+            coloropt = options._get(optname)
+            colornamestr = coloropt.value if coloropt else optname
+            r = self.colorcache[optname] = self._colornames_to_attr(colornamestr, precedence)
+        return r
 
 colors = ColorMaker()
 

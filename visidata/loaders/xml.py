@@ -39,7 +39,7 @@ class XmlSheet(Sheet):
         ColumnAttr('tail', width=0),
     ]
     colorizers = [
-            Colorizer('row', 8, lambda self,c,r,v: 'green' if r is self.source else None)
+            RowColorizer(8, None, lambda s,c,r,v: 'green' if r is s.source else None)
     ]
 
     def showColumnsBasedOnRow(self, row):

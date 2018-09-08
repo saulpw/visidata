@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import curses
-from visidata import globalCommand, colors, Sheet, Column, Colorizer, wrapply
+from visidata import globalCommand, colors, Sheet, Column, RowColorizer, wrapply
 
 
 globalCommand(None, 'colors', 'vd.push(ColorSheet("vdcolors"))')
@@ -16,7 +16,7 @@ class ColorSheet(Sheet):
         Column('B', getter=lambda col,row: curses.color_content(curses.pair_number(colors[row])-1)[2]),
         ]
     colorizers = [
-        Colorizer('row', 7, lambda s,c,r,v: r)
+        RowColorizer(7, None, lambda s,c,r,v: r)
     ]
 
     def reload(self):

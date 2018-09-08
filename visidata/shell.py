@@ -5,8 +5,10 @@ import grp
 import subprocess
 import contextlib
 
-from visidata import options, Column, Sheet, LazyMapRow, asynccache, exceptionCaught, DeferredSetColumn
-from visidata import Colorizer, Path, ENTER, date, asyncthread, confirm, fail, error, FileExistsError
+from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught, DeferredSetColumn
+from visidata import Path, ENTER, date, asyncthread, confirm, fail, error, FileExistsError
+from visidata import CellColorizer, RowColorizer
+
 
 Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)')
 
@@ -79,9 +81,9 @@ class DirSheet(Sheet):
         Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     colorizers = [
-#        Colorizer('cell', 4, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
-        Colorizer('cell', 8, lambda s,c,r,v: options.color_change_pending if s.changed(c, r) else None),
-        Colorizer('row', 9, lambda s,c,r,v: options.color_delete_pending if r in s.toBeDeleted else None),
+#        CellColorizer(4, None, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
+        CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
+        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: r in s.toBeDeleted),
     ]
     nKeys = 2
 

@@ -38,7 +38,7 @@ class DescribeSheet(ColumnsSheet):
             DescribeColumn('stdev',  type=float),
     ]
     colorizers = [
-        Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r in r.sheet.keyCols else None),
+        RowColorizer(7, 'color_key_col', lambda s,c,r,v: r in r.sheet.keyCols),
     ]
 
     @asyncthread

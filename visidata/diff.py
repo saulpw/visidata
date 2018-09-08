@@ -1,7 +1,7 @@
 from visidata import *
 
-option('color_diff', 'red', 'color of values different from --diff source')
-option('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
+theme('color_diff', 'red', 'color of values different from --diff source')
+theme('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
 
 globalCommand(None, 'setdiff-sheet', 'setDiffSheet(sheet)')
 
@@ -13,11 +13,11 @@ def makeDiffColorizer(othersheet):
         if vcolidx < len(othersheet.visibleCols) and rowidx < len(othersheet.rows):
             otherval = othersheet.visibleCols[vcolidx].getValue(othersheet.rows[rowidx])
             if cellval.value != otherval:
-                return options.color_diff
+                return 'color_diff'
         else:
-            return options.color_diff_add
+            return 'color_diff_add'
     return colorizeDiffs
 
 
 def setDiffSheet(vs):
-    Sheet.colorizers.append(Colorizer("cell", 8, makeDiffColorizer(vs)))
+    Sheet.colorizers.append(CellColorizer(8, None, makeDiffColorizer(vs)))

@@ -1,4 +1,5 @@
-from visidata import globalCommand, Sheet, Column, options, Colorizer, vd, anytype, ENTER, asyncthread, option
+from visidata import globalCommand, Sheet, Column, options, vd, anytype, ENTER, asyncthread, option
+from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
 
@@ -32,8 +33,8 @@ class StatusSheet(Sheet):
         Column('message', getter=lambda col,row: composeStatus(row[1], row[2])),
     ]
     colorizers = [
-        Colorizer('row', 1, lambda s,c,r,v: options.color_error if r[0] == 3 else None),
-        Colorizer('row', 1, lambda s,c,r,v: options.color_warning if r[0] in [1,2] else None),
+        RowColorizer(1, 'color_error', lambda s,c,r,v: r and r[0] == 3),
+        RowColorizer(1, 'color_warning', lambda s,c,r,v: r and r[0] in [1,2]),
     ]
 
     def reload(self):
@@ -61,9 +62,9 @@ class ColumnsSheet(Sheet):
                            setter=lambda col,row,val: setattr(row, 'expr', val)),
     ]
     nKeys = 2
-    colorizers = Sheet.colorizers + [
-            Colorizer('row', 7, lambda self,c,r,v: options.color_key_col if r.keycol else None),
-            Colorizer('row', 8, lambda self,c,r,v: options.color_hidden_col if r.hidden else None),
+    colorizers = [
+        RowColorizer(7, 'color_key_col', lambda s,c,r,v: r.keycol),
+        RowColorizer(8, 'color_hidden_col', lambda s,c,r,v: r.hidden),
     ]
     def reload(self):
         if len(self.source) == 1:
@@ -158,8 +159,8 @@ class OptionsSheet(Sheet):
         Column('description', getter=lambda col,row: options._get(row.name, 'global').helpstr),
         ColumnAttr('replayable'),
     )
-    colorizers = Sheet.colorizers + [
-        Colorizer('cell', 9, lambda s,c,r,v: v.value if c in s.columns[1:3] and r.name.startswith('color_') else None),
+    colorizers = [
+        CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[1:3] and r.name.startswith('color_') else None),
     ]
     nKeys = 1
 
