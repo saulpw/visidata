@@ -84,6 +84,12 @@ def push_pyobj(name, pyobj):
     else:
         status('unknown type ' + type(pyobj))
 
+def view(obj):
+    run(load_pyobj(obj.__name__, obj))
+
+def view_pandas(df):
+    run(PandasSheet('', source=df))
+
 def load_pyobj(name, pyobj):
     'Return Sheet object of appropriate type for given sources in `args`.'
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
