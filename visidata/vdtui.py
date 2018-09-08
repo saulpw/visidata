@@ -1910,7 +1910,7 @@ def wrmap(func, iterable, *args):
         except Exception as e:
             pass
 
-def wrapply(func, *args, **kwargs):
+def wrapply(func, *args, exc_type=Exception, **kwargs):
     'Like apply(), but which wraps Exceptions and passes through Wrappers (if first arg)'
     val = args[0]
     if val is None:
@@ -1926,7 +1926,7 @@ def wrapply(func, *args, **kwargs):
 
     try:
         return func(*args, **kwargs)
-    except Exception as e:
+    except exc_type as e:
         e.stacktrace = stacktrace()
         return TypedExceptionWrapper(func, *args, exception=e)
 
