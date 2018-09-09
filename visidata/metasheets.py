@@ -63,8 +63,8 @@ class ColumnsSheet(Sheet):
     ]
     nKeys = 2
     colorizers = [
-        RowColorizer(7, 'color_key_col', lambda s,c,r,v: r.keycol),
-        RowColorizer(8, 'color_hidden_col', lambda s,c,r,v: r.hidden),
+        RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r.keycol),
+        RowColorizer(8, 'color_hidden_col', lambda s,c,r,v: r and r.hidden),
     ]
     def reload(self):
         if len(self.source) == 1:

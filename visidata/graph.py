@@ -96,7 +96,7 @@ class GraphSheet(InvertedCanvas):
         txt = srccol.format(srccol.type(amt))
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
-        attr = colors[options.color_graph_axis]
+        attr = colors.color_graph_axis
         self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
 
     def add_x_axis_label(self, frac):
@@ -104,7 +104,7 @@ class GraphSheet(InvertedCanvas):
         txt = ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
-        attr = colors[options.color_graph_axis]
+        attr = colors.color_graph_axis
         self.plotlabel(self.plotviewBox.xmin+frac*self.plotviewBox.w, self.plotviewBox.ymax+4, txt, attr)
 
     def createLabels(self):
@@ -128,4 +128,4 @@ class GraphSheet(InvertedCanvas):
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
-        self.plotlabel(0, self.plotviewBox.ymax+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors[options.color_graph_axis])
+        self.plotlabel(0, self.plotviewBox.ymax+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors.color_graph_axis)
