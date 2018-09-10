@@ -22,3 +22,14 @@ class PandasSheet(Sheet):
     def reload(self):
         self.rows = DataFrameAdapter(self.source)
         self.columns = [ColumnItem(col) for col in self.source.columns]
+
+
+def view_pandas(df):
+    run(PandasSheet('', source=df))
+
+
+def open_pandas(p):
+    import pandas
+    filetype = p.ext[1:]
+    readfunc = getattr(pandas, 'read_'+filetype)
+    return PandasSheet(p.name, source=readfunc(p.resolve()))
