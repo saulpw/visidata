@@ -1710,6 +1710,7 @@ class Sheet(BaseSheet):
         self.rowLayout = {}
         self.calcColLayout()
         vcolidx = 0
+        rows = list(self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows])
         for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
             x, colwidth = colinfo
             col = self.visibleCols[vcolidx]
@@ -1719,7 +1720,6 @@ class Sheet(BaseSheet):
                 self.drawColHeader(scr, headerRow, vcolidx)
 
                 y = headerRow + numHeaderRows
-                rows = self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
                 for rowidx in range(0, min(len(rows), self.nVisibleRows)):
                     dispRowIdx = self.topRowIndex + rowidx
                     if dispRowIdx >= self.nRows:
