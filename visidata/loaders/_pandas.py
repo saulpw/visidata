@@ -20,8 +20,18 @@ class DataFrameAdapter:
 # source=DataFrame
 class PandasSheet(Sheet):
     def reload(self):
-        self.rows = DataFrameAdapter(self.source)
-        self.columns = [ColumnItem(col) for col in self.source.columns]
+        import pandas
+        if isinstance(self.source, pandas.DataFrame):
+            self.df = self.source
+            self.rows = DataFrameAdapter(self.source)
+            self.columns = [ColumnItem(col) for col in self.source.columns]
+        elif isinstance(self.source, Path):
+            filetype = self.source.ext[1:]
+            readfunc = getattr(pandas, 'read_'+filetype)
+            self.df = readfunc(self.source.resolve())
+            self.rows = DataFrameAdapter(self.df)
+
+        self.columns = [ColumnItem(col) for col in self.df.columns]
 
 
 def view_pandas(df):
@@ -29,7 +39,4 @@ def view_pandas(df):
 
 
 def open_pandas(p):
-    import pandas
-    filetype = p.ext[1:]
-    readfunc = getattr(pandas, 'read_'+filetype)
-    return PandasSheet(p.name, source=readfunc(p.resolve()))
+    return PandasSheet(p.name, source=p)
