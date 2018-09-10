@@ -43,6 +43,8 @@ class StatusSheet(Sheet):
 
 class ColumnsSheet(Sheet):
     rowtype = 'columns'
+    _rowtype = Column
+    _coltype = ColumnAttr
     precious = False
     class ValueColumn(Column):
         'passthrough to the value on the source cursorRow'
@@ -73,6 +75,11 @@ class ColumnsSheet(Sheet):
             self.columns[0].hide()  # hide 'sheet' column if only one sheet
         else:
             self.rows = [col for vs in self.source for col in vs.visibleCols if vs is not self]
+
+    def newRow(self):
+        c = type(self.source[0])._coltype()
+        c.sheet = self.source[0]
+        return c
 
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)')
 ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or fail("no columns selected to concatenate")))')
@@ -209,4 +216,3 @@ ColumnsSheet.addCommand('g@', 'type-date-selected', 'for c in selectedRows or [c
 ColumnsSheet.addCommand('g$', 'type-currency-selected', 'for c in selectedRows or [cursorRow]: c.type = currency')
 ColumnsSheet.addCommand('g~', 'type-string-selected', 'for c in selectedRows or [cursorRow]: c.type = str')
 ColumnsSheet.addCommand('gz~', 'type-any-selected', 'for c in selectedRows or [cursorRow]: c.type = anytype')
-

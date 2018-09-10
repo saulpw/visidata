@@ -980,6 +980,7 @@ ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt
 
 class BaseSheet:
     _rowtype = object    # callable that returns new empty item
+    _coltype = lambda: lambda c,r: r  # callable that returns new settable view into that item
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
 
@@ -1932,7 +1933,7 @@ def wrapply(func, *args, exc_type=Exception, **kwargs):
 
 
 class Column:
-    def __init__(self, name, *, type=anytype, cache=False, **kwargs):
+    def __init__(self, name='', *, type=anytype, cache=False, **kwargs):
         self.sheet = None     # owning Sheet, set in Sheet.addColumn
         self.name = name      # display visible name
         self.fmtstr = ''      # by default, use str()
@@ -2197,23 +2198,20 @@ def setattrdeep(obj, attr, val):
     setattr(obj, attrs[-1], val)
 
 
-def ColumnAttr(name, attr=None, **kwargs):
+def ColumnAttr(name='', attr=None, **kwargs):
     'Column using getattr/setattr of given attr.'
-    if not attr:
-        attr = name
-
     return Column(name,
-                  getter=lambda col,row,attr=attr: getattrdeep(row, attr),
-                  setter=lambda col,row,val,attr=attr: setattrdeep(row, attr, val),
+                  expr=attr if attr is not None else name,
+                  getter=lambda col,row: getattrdeep(row, col.expr),
+                  setter=lambda col,row,val: setattrdeep(row, col.expr, val),
                   **kwargs)
 
-def ColumnItem(name, key=None, **kwargs):
+def ColumnItem(name='', key=None, **kwargs):
     'Column using getitem/setitem of given key.'
-    if key is None:
-        key = name
     return Column(name,
-            getter=lambda col,row,key=key: row[key],
-            setter=lambda col,row,val,key=key: setitem(row, key, val),
+            expr=key if key is not None else name,
+            getter=lambda col,row: row[col.expr],
+            setter=lambda col,row,val: setitem(row, col.expr, val),
             **kwargs)
 
 def ArrayNamedColumns(columns):
@@ -2229,15 +2227,15 @@ class SubrowColumn(Column):
     def __init__(self, name, origcol, subrowidx, **kwargs):
         super().__init__(name, type=origcol.type, width=origcol.width, **kwargs)
         self.origcol = origcol
-        self.subrowidx = subrowidx
+        self.expr = subrowidx
 
     def getValue(self, row):
-        subrow = row[self.subrowidx]
+        subrow = row[self.expr]
         if subrow is not None:
             return self.origcol.getValue(subrow)
 
     def setValue(self, row, value):
-        subrow = row[self.subrowidx]
+        subrow = row[self.expr]
         if subrow is None:
             fail('no source row')
         self.origcol.setValue(subrow, value)

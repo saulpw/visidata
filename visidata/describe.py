@@ -19,7 +19,7 @@ def isError(col, row):
 
 class DescribeColumn(Column):
     def __init__(self, name, **kwargs):
-        super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.name, ''), **kwargs)
+        super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.expr, ''), expr=name, **kwargs)
 
 # rowdef: Column from source sheet
 class DescribeSheet(ColumnsSheet):

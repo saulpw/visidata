@@ -24,9 +24,14 @@ def removeNulls(fp):
         yield line.replace('\0', '')
 
 class CsvSheet(Sheet):
+    _rowtype = list
+    _coltype = ColumnItem
     @asyncthread
     def reload(self):
         load_csv(self)
+
+    def newRow(self):
+        return [None]*len(self.columns)
 
 def csvoptions():
     return options('csv_')
