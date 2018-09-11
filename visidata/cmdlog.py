@@ -4,8 +4,9 @@ from visidata import *
 import visidata
 
 option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds')
-option('disp_replay_play', '▶', 'status indicator for active replay')
-option('disp_replay_pause', '‖', 'status indicator for paused replay')
+theme('disp_replay_play', '▶', 'status indicator for active replay')
+theme('disp_replay_pause', '‖', 'status indicator for paused replay')
+theme('color_status_replay', 'green', 'color of replay status indicator')
 option('replay_movement', False, 'insert movements during replay')
 option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
@@ -319,7 +320,7 @@ vd().addHook('postexec', vd().cmdlog.afterExecSheet)
 vd().addHook('preedit', vd().cmdlog.getLastArgs)
 vd().addHook('postedit', vd().cmdlog.setLastArgs)
 
-vd().addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'green'))
+vd().addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'color_status_replay'))
 vd().addHook('set_option', vd().cmdlog.setOption)
 
 def loadMacros():

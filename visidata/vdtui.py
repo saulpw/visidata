@@ -299,6 +299,7 @@ theme('color_key_col', '81 cyan', 'color of key columns')
 theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
 
+theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
 theme('color_status', 'bold', 'status line color')
 theme('color_error', 'red', 'error message color')
 theme('color_warning', 'yellow', 'warning message color')
@@ -562,7 +563,7 @@ class VisiData:
         self.hooks = collections.defaultdict(list)  # [hookname] -> list(hooks)
         self.threads = [] # all long-running threads, including main and finished
         self.addThread(threading.current_thread(), endTime=0)
-        self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'white'))
+        self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'color_keystrokes'))
         self.addHook('rstatus', self.rightStatus)
 
     @property
@@ -786,9 +787,9 @@ class VisiData:
         for rstatcolor in self.callHook('rstatus', vs):
             if rstatcolor:
                 try:
-                    rstatus, color = rstatcolor
+                    rstatus, coloropt = rstatcolor
                     rstatus = ' '+rstatus
-                    attr = colors[color]
+                    attr = colors.get_color(coloropt).attr
                     statuslen = clipdraw(scr, self.windowHeight-1, rightx, rstatus, attr, rtl=True)
                     rightx -= statuslen
                     ret += statuslen
@@ -805,7 +806,7 @@ class VisiData:
             status = '%9d  %2d%%' % (len(sheet), sheet.progressPct)
         else:
             status = '%9d %s' % (len(sheet), sheet.rowtype)
-        return status, options.color_status
+        return status, 'color_status'
 
     @property
     def windowHeight(self):

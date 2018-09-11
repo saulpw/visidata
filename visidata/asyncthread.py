@@ -46,12 +46,12 @@ def checkMemoryUsage(vs):
         tot_m, used_m, free_m = map(int, os.popen('free --total --mega').readlines()[-1].split()[1:])
         ret = '[%dMB]' % free_m
         if free_m < min_mem:
-            attr = 'red'
-            status('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
+            attr = 'color_error'
+            warning('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
             cancelThread(*vd().unfinishedThreads)
             curses.flash()
         else:
-            attr = 'green'
+            attr = 'color_status'
         return ret, attr
 
 vd().threadsSheet = ThreadsSheet('thread_history')
