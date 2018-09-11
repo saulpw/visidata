@@ -25,7 +25,7 @@ def removeNulls(fp):
 
 class CsvSheet(Sheet):
     _rowtype = list
-    _coltype = ColumnItem
+#    _coltype = ColumnItem
     @asyncthread
     def reload(self):
         load_csv(self)

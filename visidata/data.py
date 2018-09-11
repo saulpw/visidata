@@ -50,6 +50,7 @@ class SettableColumn(Column):
     def calcValue(self, row):
         return self.cache.get(id(row), None)
 
+Sheet._coltype = SettableColumn
 
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'

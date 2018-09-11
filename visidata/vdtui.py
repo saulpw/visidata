@@ -980,8 +980,8 @@ ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt
 
 
 class BaseSheet:
-    _rowtype = object    # callable that returns new empty item
-    _coltype = lambda: lambda c,r: r  # callable that returns new settable view into that item
+    _rowtype = object    # callable (no parms) that returns new empty item
+    _coltype = None      # callable (no parms) that returns new settable view into that item
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
 
@@ -1942,7 +1942,8 @@ class Column:
         self.getter = lambda col, row: row
         self.setter = lambda col, row, value: fail(col.name+' column cannot be changed')
         self.width = None     # == 0 if hidden, None if auto-compute next time
-        self.keycol = False      # is a key column
+        self.keycol = False   # is a key column
+        self.expr = None      # Column-type-dependent parameter
 
         self._cachedValues = collections.OrderedDict() if cache else None
         for k, v in kwargs.items():
@@ -2110,7 +2111,7 @@ class Column:
                 dw.display = dw.display.rjust(width-1)
 
             # annotate cells with raw value type in anytype columns, except for strings
-            if self.type is anytype and type(cellval) is not str and options.color_note_type:
+            if self.type is anytype and type(cellval) is not str:
                 typedesc = typemap.get(type(cellval), None)
                 dw.note = typedesc.icon if typedesc else options.note_unknown_type
                 dw.notecolor = 'color_note_type'
