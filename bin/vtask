@@ -39,19 +39,6 @@ def editTask(task):
 
 class TodoSheet(Sheet):
     rowtype = 'tasks'  # rowdef: tasklib.Task
-    commands = [
-        Command('^O', 'editTask(cursorRow)', 'edit notes in external $EDITOR', 'edit-notes'),
-        Command('a', 't=newRow(description=input("new task: ")); rows.insert(cursorRowIndex+1, t); t.save(); cursorDown()', 'add new task', 'add-task'),
-        Command('d', 'cursorRow.done(); cursorRow.refresh()', 'mark task as done', 'complete-task'),
-        Command('gd', 'for r in selectedRows: r.done() or r.refresh()', 'mark task as done', 'complete-task'),
-        Command('zd', 'cursorRow.delete(); cursorRow.refresh()', 'delete task', 'delete-task'),
-        Command('gzd', 'for r in selectedRows: r.delete() or r.refresh()', 'delete task', 'delete-task'),
-        Command('z^R', 'cursorRow.refresh()', '', 'refresh-tasks'),
-        Command('z^S', 'cursorRow.save()', '', 'save-task'),
-        Command('^S', 'list(r.save() for r in rows if r.modified)', '', 'save-modified-tasks'),
-        Command(' ', 'cursorRow.stop() if cursorRow["start"] else cursorRow.start()', '', 'start-task'),
-        Command(ENTER, 'vd.push(TaskAnnotationsSheet("cursorRow.description", source=cursorRow))', '', ''),
-    ]
     columns = [
          ColumnItem('id', type=int, width=4),
          ColumnItem('project'),
@@ -75,7 +62,7 @@ class TodoSheet(Sheet):
     ]
     nKeys = 1
     colorizers = Sheet.colorizers + [
-        CellColorizer(8, 'color_task_changed', lambda s,c,r,v: isChanged(r, c.name)),
+        CellColorizer(8, 'color_task_changed', lambda s,c,r,v: r and c and isChanged(r, c.name)),
     ]
     def newRow(self, **kwargs):
         return tasklib.Task(self.tw, **kwargs)
@@ -95,13 +82,22 @@ class TaskAnnotationsSheet(Sheet):
         ColumnItem('entry', type=date),
         ColumnItem('description'),
     ]
-    commands = [
-        Command('a', 'source.add_annotation(input("note: ")); reload()', 'add annotation to task', 'add-task-note'),
-        Command('d', 'source.remove_annotation(cursorRow); reload()', 'remove annotation from task', 'delete-task-note'),
-    ]
     def reload(self):
         self.rows = self.source['annotations']
 
+TodoSheet.addCommand('^O', 'edit-notes', 'editTask(cursorRow)')
+TodoSheet.addCommand('a', 'add-task', 't=newRow(description=input("new task: ")); rows.insert(cursorRowIndex+1, t); t.save(); cursorDown()')
+TodoSheet.addCommand('d', 'complete-task', 'cursorRow.done(); cursorRow.refresh()')
+TodoSheet.addCommand('gd', 'complete-tasks', 'for r in selectedRows: r.done() or r.refresh()')
+TodoSheet.addCommand('zd', 'delete-task', 'cursorRow.delete(); cursorRow.refresh()')
+TodoSheet.addCommand('gzd', 'delete-tasks', 'for r in selectedRows: r.delete() or r.refresh()')
+TodoSheet.addCommand('z^R', 'refresh-tasks', 'cursorRow.refresh()')
+TodoSheet.addCommand('z^S', 'save-task', 'cursorRow.save()')
+TodoSheet.addCommand('^S', 'save-modified-tasks', 'list(r.save() for r in rows if r.modified)')
+TodoSheet.addCommand(' ', 'start-task', 'cursorRow.stop() if cursorRow["start"] else cursorRow.start()')
+TodoSheet.addCommand(ENTER, '', 'vd.push(TaskAnnotationsSheet("cursorRow.description", source=cursorRow))')
+TaskAnnotationsSheet.addCommand('a', 'add-task-note', 'source.add_annotation(input("note: ")); reload()')
+TaskAnnotationsSheet.addCommand('d', 'delete-task-note', 'source.remove_annotation(cursorRow); reload()')
 
 addGlobals(globals())
 
