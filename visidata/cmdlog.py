@@ -115,11 +115,11 @@ class CommandLog(TsvSheet):
         if sheet and cmd.longname != 'open-file':
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             sheetname = sheet.name
-            if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorRow') and sheet.rows:
+            if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.rows:
                 k = sheet.rowkey(sheet.cursorRow)
                 rowname = keystr(k) if k else sheet.cursorRowIndex
 
-            if contains(cmd.execstr, 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
+            if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
         comment = CommandLog.currentReplayRow.comment if CommandLog.currentReplayRow else cmd.helpstr
