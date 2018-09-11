@@ -10,6 +10,7 @@ class DiffRow(list):
     def __hash__(self):
         return hash(u"\uFDD0".join(self))
 
+@asyncthread
 def loaddiff(base, dif):
     base.rows = [DiffRow(x) for x in base.rows]
     dif.rows = [DiffRow(x) for x in dif.rows]   # or do this before?
@@ -36,7 +37,6 @@ def makeDiffColorizer(othersheet):
             except Exception as e:
                 pass
             sheet.diffloaded = True
-            print("Loaded")
         if hasattr(row, 'alternate'):
             vcolidx = sheet.visibleCols.index(col)
             if vcolidx < len(row.alternate):
@@ -45,7 +45,6 @@ def makeDiffColorizer(othersheet):
         elif hasattr(row, 'inserted'):
             return options.color_diff_add
     return colorizeDiffs
-
 
 def setDiffSheet(vs):
     Sheet.colorizers.append(CellColorizer(8, None, makeDiffColorizer(vs)))
