@@ -4,6 +4,7 @@ import threading
 from .vdtui import *
 
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
+theme('color_working', 'green', 'color of system running smoothly')
 
 BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))')
 globalCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))')
@@ -46,12 +47,12 @@ def checkMemoryUsage(vs):
         tot_m, used_m, free_m = map(int, os.popen('free --total --mega').readlines()[-1].split()[1:])
         ret = '[%dMB]' % free_m
         if free_m < min_mem:
-            attr = 'color_error'
+            attr = 'color_warning'
             warning('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
             cancelThread(*vd().unfinishedThreads)
             curses.flash()
         else:
-            attr = 'color_status'
+            attr = 'color_working'
         return ret, attr
 
 vd().threadsSheet = ThreadsSheet('thread_history')
