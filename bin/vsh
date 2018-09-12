@@ -8,19 +8,11 @@ import shlex
 import sh
 import psutil
 
-globalCommand('X', 'shellHistory.execute(input("$ ", type="command"))', 'execute shell command and push sheet with output')
+globalCommand('X', 'exec-sh', 'shellHistory.execute(input("$ ", type="command"))')
 
 
 class ShellHistorySheet(Sheet):
     rowtype = 'commands' # rowdef: sh.Command
-    commands = [
-        Command('x', 'execute(cursorRow.cmdstr)', 're-execute command under cursor'),
-        Command('^C', 'cursorRow.terminate()', 'send SIGKILL to process at cursor'),
-        Command('g^C', 'status(list(r.terminate() for r in selectedRows or rows if r.is_alive()))', 'send SIGTERM to all active processes'),
-        Command('^K', 'sig=input("send signal: "); cursorRow.signal(int(sig))', 'send given signal to process at cursor'),
-        Command('g^K', 'sig=input("send signal to selected: "); status(list(r.signal(int(sig)) for r in selectedRows or rows if r.is_alive()))', 'send given signal to all active processes'),
-        Command('v', '', 'toggle hide/unhide of extra columns'),
-    ]
     columns = [
         Column('realcmd', width=0, getter=lambda c,r: ' '.join(x.decode('utf-8') for x in r.cmd)),
         ColumnAttr('pid', width=10, type=int),
@@ -64,7 +56,17 @@ class ShellHistorySheet(Sheet):
             cwd = '~' + cwd[len(homedir):]
         return cwd + '| '
 
+
+ShellHistorySheet.addCommand('x', 'exec-row', 'execute(cursorRow.cmdstr)')
+ShellHistorySheet.addCommand('^C', 'cancel-row', 'cursorRow.terminate()')
+ShellHistorySheet.addCommand('g^C', 'cancel-rows', 'status(list(r.terminate() for r in selectedRows or rows if r.is_alive()))')
+ShellHistorySheet.addCommand('^K', 'signal-row', 'sig=input("send signal: "); cursorRow.signal(int(sig))')
+ShellHistorySheet.addCommand('g^K', 'signal-rows', 'sig=input("send signal to selected: "); status(list(r.signal(int(sig)) for r in selectedRows or rows if r.is_alive()))')
+#ShellHistorySheet.addCommand('v', '', '')
+
+
 shellHistory = ShellHistorySheet('history')
+
 
 def main():
     addGlobals(globals())
