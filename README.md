@@ -8,7 +8,7 @@ A terminal interface for exploring and arranging tabular data.
 - Python 3.4+
 - python-dateutil
 - other modules may be required for opening particular data sources
-    - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](http://visidata.org/man/#loaders) in the vd manpage
+    - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](https://visidata.org/man/#loaders) in the vd manpage
 
 ## Getting started
 
@@ -37,7 +37,7 @@ Please see [/install](https://visidata.org/install) for detailed instructions, a
     $ vd [<options>] <input> ...
     $ <command> | vd [<options>]
 
-VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more (see the [list of supported sources](http://visidata.org/man#sources)).
+VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more (see the [list of supported sources](https://visidata.org/man#sources)).
 
 Use `-f <filetype>` to force a particular filetype.
 
@@ -58,7 +58,7 @@ If you have a question, issue, or suggestion regarding VisiData, please [create 
 The core `vdtui.py` can be used to quickly create efficient terminal workflows. These have been prototyped as proof of this concept:
 
 - [vgit](https://github.com/saulpw/vgit): a git interface
-- [vsh](http://github.com/saulpw/vsh): a collection of utilities like `vping` and `vtop`.
+- [vsh](https://github.com/saulpw/vsh): a collection of utilities like `vping` and `vtop`.
 - [vdgalcon](https://github.com/saulpw/vdgalcon): a port of the classic game [Galactic Conquest](https://www.galcon.com)
 
 Other workflows should also be created as separate apps using vdtui.  These apps can be very small and provide a lot of functionality; for example, see the included [viewtsv](bin/viewtsv).

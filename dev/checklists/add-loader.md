@@ -9,7 +9,7 @@
 5) set an appropriate `rowtype` string (plural)
 6) make a `# rowdef: ` comment describing the structure of a row (e.g. its base class)
 
-For additional reading, see our detailed guide on [writing loaders for VisiData](http://visidata.org/docs/loaders/).
+For additional reading, see our detailed guide on [writing loaders for VisiData](https://visidata.org/docs/loaders/).
 
 ## Testing the loader
 
