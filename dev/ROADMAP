@@ -102,20 +102,25 @@
 # V. other applications with a vd-like interface
 
 - [vgit](http://github.com/saulpw/vgit) (currently v0.2)
+    like magit but for vim/visidata/python users
 - [vsh](http://github.com/saulpw/vsh) (unreleased)
    - vtop (includes kill/killall/ps)
    - vls (rm/mv/cp/mount/find/grep/mkdir/rmdir/ln/touch)
    - vnet (netstat)
    - vping
    - vproc (explore /proc filesystem with some added goodies)
-- vsql
+- vsql: interacts with remote sql databases; no loading required
+   - save commandlog as .sql
 - vpy (python explorer/debugger)
+   - save commandlog as python code
 - vchat
 - [vdgalcon](http://github.com/saulpw/vdgalcon)
 - vscrape
+   - convenient interface to REST and other APIs
+   - point at a website and collect datasets, tables, textual data
+   - add jq-style selectors
+- vstats
+   - save commandlog as ipynb, markdown, or html
 - vdbg
 - vaws
-
-### someday maybe
-
-- vd --server that pops up a local web server, for a visidata-like web interface to local files
+- `vd --server` pops up a local web server, for a visidata-like web interface to local files
