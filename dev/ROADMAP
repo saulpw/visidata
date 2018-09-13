@@ -1,40 +1,65 @@
 # Roadmap
 
-### 1. plugin api/package manager
+## 1. Stable, Documented Internal Python API
 
+- to reuse internal VisiData components in non-VisiData TUIs
+- to create external plugins/apps for use within VisiData (see below)
+- api.tsv
+- proper sandbox for exec (for some plugin safety)
+
+## 2. plugin api/package manager
+
+- deprecate vdtui.py as single file dropin TUI
+   - same functionality will be available as visidata.vdtui
 - in-app downloadable/installable snippets
 
-### 2. save path to get to current sheet/row/cell
+## 3. split panes
+
+- horizontal or vertical split
+- no more than two panes
+- one pane can be dependent on the other; e.g. move cursor in one, see preview update in other
+
+## 4. Undo #141
+
+- single-level undo
+
+## 5. Simple non-python installers
+
+- .dmg for macos
+- .exe for windows
+- both include full Python install
+
+## 6. save path to get to current sheet/row/cell
 
 - remove superfluous sheets
 - output .sql or .py code
 
-### 3. website content
+## 7. mouse-ability
 
-- front page redesign
-- /features grid
-- /blog of topic/design discussions
-- visidata design/internals
-- make separate webpages for: devops, sysadmins, hackers, git users, bioinfers, etc
+- allow user to disable mouse for system copy/paste
+- clickable column headers to set type/name, click-drag to move columns/rows
+- clickable status items (including motd)
+- info mode: mouse hover describes interface components and/or shows relevant commands
 
-### features
+## 8. integrate DeferredSet to all sheets
 
-#### I. Interface
+- 'modified' indicator on status bar, also enables quitguard
+- sqlite: allow in-memory edits, ^S to commit
+  - index sheet: include rows/cols; allow to be cutnpasted
+  - solve "load in other thread" problem
 
-- mouse-ability
-    - allow user to disable mouse for system copy/paste
-    - clickable column headers to set type/name, click-drag to move columns/rows
-    - clickable status items (including motd)
-    - info mode: mouse hover describes interface components and/or shows relevant commands
-- undo #141
-    - start from previous sheet in commandlog
-    - replay all but last command
+## 9. Loaders and Savers
 
-##### minor points
-#
+- parquet #112
+- .mdb, .accdb
+- google sheets
+- save canvas to .svg (canvassave_svg)
+- multisave_hdf5
+
+## 10. other additions
+
 - 'v' hide cols which have errors on cursor row
    - or should 'v' be 'toggle-visibility' on all sheets?
-- 'modified' indicator on status bar, also enables quitguard
 - [ColumnsSheet] show subcolumns and their parent column (for expand/contract)
 - [cmdlog] add timestamp?
 
@@ -47,19 +72,6 @@
 - error sheet showing row-form traceback
    - ^O to edit
 
-#### III. Loaders and Savers
-
-- parquet #112
-- .mdb, .accdb
-- google sheets
-- sqlite: allow in-memory edits, ^S to commit
-  - index sheet: include rows/cols; allow to be cutnpasted
-  - solve "load in other thread" problem
-- save canvas to .svg (canvassave_svg)
-- multisave_hdf5
-
-#### IV. other commands and features
-
 - numeric binning for freq column and pivot table
 - rowmax aggregator ( rowmax(field) gets whole row)
 - add row number in hidden column on data sheets so that original (load) order can be restored
@@ -71,10 +83,21 @@
 - zip/unzip from dirsheet
 - status rework: use logging module?  use multiple lines on overflow?
 - proper dive on json
+- tech debt: remove all asserts; possibly replace with error()
 
-##### technical debt
+- add "/flags" to regex commands for per-instance regex flags
+- SI() units converter
+- new command: apply action/macro to each selected row
+- add "transforms list" to column (type is last transform)
 
-- remove all asserts; possibly replace with error()
+
+# website
+
+- front page redesign
+- /features grid
+- /blog of topic/design discussions
+- visidata design/internals
+- make separate webpages for: devops, sysadmins, hackers, git users, bioinfers, etc
 
 # V. other applications with a vd-like interface
 
@@ -92,3 +115,7 @@
 - vscrape
 - vdbg
 - vaws
+
+### someday maybe
+
+- vd --server that pops up a local web server, for a visidata-like web interface to local files
