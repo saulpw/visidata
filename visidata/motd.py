@@ -16,6 +16,3 @@ def domotd():
             status(line.split('\t')[0], priority=-1)
     except Exception:
         pass
-
-
-domotd()

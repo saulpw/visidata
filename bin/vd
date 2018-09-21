@@ -63,6 +63,9 @@ def main():
         if optval is not None and optname not in ['inputs', 'play', 'batch', 'output', 'diff']:
             vdtui.options[optname] = optval
 
+    # fetch motd after options parsing/setting
+    domotd()
+
     flPipedData = not sys.stdin.isatty()
 
     # always duplicate stdin for input and reopen tty as stdin
