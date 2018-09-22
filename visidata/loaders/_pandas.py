@@ -40,3 +40,5 @@ def view_pandas(df):
 
 def open_pandas(p):
     return PandasSheet(p.name, source=p)
+
+open_stata = open_dta = open_pandas
