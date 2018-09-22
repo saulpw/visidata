@@ -21,6 +21,16 @@ vd -f sqlite bar.db
 ls -l | vd -f fixed
 ~~~
 
+VisiData has an adapter for pandas. To load a file format which is supported by pandas, execute `vd -f pandas data.foo`. This will call `pandas.read_foo()`.
+
+For example:
+
+~~~
+vd -f pandas data.parquet
+~~~
+
+loads a parquet file. Note that when using the pandas loader, the `.fileformat` file extension is mandatory.
+
 ---
 
 ## How to load multiple datasets simultaneously

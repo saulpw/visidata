@@ -1,5 +1,27 @@
 # VisiData version history
 
+# v1.4 (2018-09-22)
+
+## Bugfixes
+
+- batch mode with no script should use implicit stdin only if no other files given (Closed #182)
+- [pivot] pivot keycolumn copy was yielding strange nulls
+- [join] fix extend join
+- [csv] include first row in file even if `options.header` == 0
+- [sysclip] fix bug where `gzY` did not copy selected rows (Closed #186)
+- [motd] Fix bug with disabling `options.motd_url` (Closed #190)
+
+## Additions and changes
+
+- various improvements in performance and in CPU usage (Closed #184, #153)
+- [pyobj] `visidata.view(obj)` and `visidata.view_pandas(df)`
+- [pandas] `-f pandas` loads file with `pandas.read_<ext>`
+- [TextSheet] wrap made consistent with new options
+- [date] date minus date now gives float number of days instead of seconds
+- [pcap] added support for reading pcapng (thanks @layertwo!)
+- [setcol] limit `gz=` range parameters to the number of rows selected to be filled (thanks @ssiegel!)
+- [anytype] format anytype with simple str()
+
 # v1.3.1 (2018-08-19)
 
 - [http] add `tab-seperated-values` to content_filetypes mapping

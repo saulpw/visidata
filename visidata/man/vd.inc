@@ -806,6 +806,10 @@ add column for xml attributes
 .Pp
 In addition,
 .Sy .zip Ns , Sy .gz Ns , Sy .bz2 Ns , and Sy .xz No files are decompressed on the fly.
+.Pp
+.No VisiData has an adapter for Sy pandas Ns . To load a file format which is supported by Sy pandas Ns , pass Sy -f pandas data.foo Ns . This will call Sy pandas.read_foo() Ns .
+.Pp
+.No For example, Sy vd -f pandas data.parquet No loads a parquet file. Note that when using the Sy pandas No loader, the Sy .fileformat No file extension is mandatory
 .
 .Sh SUPPORTED OUTPUT FORMATS
 These are the supported savers:
