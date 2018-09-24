@@ -19,7 +19,7 @@ option('color_delete_pending', 'red', 'color for files pending delete')
 Sheet.addCommand('R', 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vd.push(vs).rows=random.sample(rows, nrows or nRows)')
 
 Sheet.addCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)')
-Sheet.addCommand('ga', 'add-rows', 'for r in range(int(input("add rows: "))): addRow(newRow(), cursorRowIndex+1)')
+Sheet.addCommand('ga', 'add-rows', 'addRows(sheet, int(input("add rows: ")), cursorRowIndex+1)')
 Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)')
 
 Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)')
@@ -51,6 +51,12 @@ class SettableColumn(Column):
         return self.cache.get(id(row), None)
 
 Sheet._coltype = SettableColumn
+
+@asyncthread
+def addRows(sheet, n, idx):
+    for i in Progress(range(n)):
+        sheet.addRow(sheet.newRow(), idx+1)
+
 
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'
