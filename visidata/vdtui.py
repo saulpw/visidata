@@ -929,12 +929,13 @@ class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
     def __init__(self, obj):
         self.obj = obj
+        self._dir = dir(self.obj)
 
     def keys(self):
-        return dir(self.obj)
+        return self._dir
 
     def __getitem__(self, k):
-        if k not in dir(self.obj):
+        if k not in self._dir:
             raise KeyError(k)
         return getattr(self.obj, k)
 
