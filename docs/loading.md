@@ -29,7 +29,9 @@ For example:
 vd -f pandas data.parquet
 ~~~
 
-loads a parquet file. Note that when using the pandas loader, the `.fileformat` file extension is mandatory.
+loads a parquet file. When using the pandas loader, the `.fileformat` file extension is mandatory.
+
+Note that if you are using Python v3.7, then you will need to manually install pandas >=0.23.2 (our requirements.txt file installs v0.19.2 as the last version compatible with 3.4).
 
 ---
 
