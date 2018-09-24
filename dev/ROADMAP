@@ -1,4 +1,4 @@
-# Roadmap
+# Roadmap to 2.0
 
 ## 1. Stable, Documented Internal Python API
 
@@ -7,13 +7,13 @@
 - api.tsv
 - proper sandbox for exec (for some plugin safety)
 
-## 2. plugin api/package manager
+## 2. Plugin api/package manager
 
 - deprecate vdtui.py as single file dropin TUI
    - same functionality will be available as visidata.vdtui
 - in-app downloadable/installable snippets
 
-## 3. split panes
+## 3. Split panes
 
 - horizontal or vertical split
 - no more than two panes
@@ -29,19 +29,20 @@
 - .exe for windows
 - both include full Python install
 
-## 6. save path to get to current sheet/row/cell
+## 6. save code to get to current sheet/row/cell
 
 - remove superfluous sheets
 - output .sql or .py code
+- or as jupyter-style notebook
 
-## 7. mouse-ability
+## 7. Mouse-ability
 
 - allow user to disable mouse for system copy/paste
 - clickable column headers to set type/name, click-drag to move columns/rows
 - clickable status items (including motd)
 - info mode: mouse hover describes interface components and/or shows relevant commands
 
-## 8. integrate DeferredSet to all sheets
+## 8. Integrate DeferredSet to all sheets
 
 - 'modified' indicator on status bar, also enables quitguard
 - sqlite: allow in-memory edits, ^S to commit
@@ -56,7 +57,7 @@
 - save canvas to .svg (canvassave_svg)
 - multisave_hdf5
 
-## 10. other additions
+## 10. Other additions
 
 - 'v' hide cols which have errors on cursor row
    - or should 'v' be 'toggle-visibility' on all sheets?
@@ -91,15 +92,7 @@
 - add "transforms list" to column (type is last transform)
 
 
-# website
-
-- front page redesign
-- /features grid
-- /blog of topic/design discussions
-- visidata design/internals
-- make separate webpages for: devops, sysadmins, hackers, git users, bioinfers, etc
-
-# V. other applications with a vd-like interface
+# Other applications with a vd-like interface
 
 - [vgit](http://github.com/saulpw/vgit) (currently v0.2)
     like magit but for vim/visidata/python users
