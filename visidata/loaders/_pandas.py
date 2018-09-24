@@ -26,8 +26,8 @@ class PandasSheet(Sheet):
             self.rows = DataFrameAdapter(self.source)
             self.columns = [ColumnItem(col) for col in self.source.columns]
         elif isinstance(self.source, Path):
-            filetype = self.source.ext[1:]
-            readfunc = getattr(pandas, 'read_'+filetype)
+            filetype = getattr(self, 'filetype', self.source.ext[1:])
+            readfunc = getattr(pandas, 'read_'+filetype) or error('no pandas.read_'+filetype)
             self.df = readfunc(self.source.resolve())
             self.rows = DataFrameAdapter(self.df)
 
@@ -41,4 +41,7 @@ def view_pandas(df):
 def open_pandas(p):
     return PandasSheet(p.name, source=p)
 
-open_stata = open_dta = open_pandas
+def open_dta(p):
+    return PandasSheet(p.name, source=p, filetype='stata')
+
+open_stata = open_pandas
