@@ -1,4 +1,4 @@
-.Dd August 19, 2018
+.Dd September 21, 2018
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .

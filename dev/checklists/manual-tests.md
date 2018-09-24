@@ -13,3 +13,5 @@
 8. .visidatarc
     - numerical, boolean and string option
     - sheet-specific and global
+    - motd_url
+9. using the pandas loader

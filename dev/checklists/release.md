@@ -12,6 +12,8 @@
 
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 
+4. Go through the manual tests checklist
+
 4. Verify that setup.py is up-to-date with requirements.
 
 5. Set version number to next most reasonable number (v#.#.#)

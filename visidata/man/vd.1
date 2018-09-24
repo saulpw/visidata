@@ -1,4 +1,4 @@
-.Dd August 19, 2018
+.Dd September 21, 2018
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -824,7 +824,7 @@ color of the column headers
 color of the cursor row
 .It Sy "color_current_col  " No "bold"
 color of the cursor column
-.It Sy "color_current_hdr  " No "reverse underline"
+.It Sy "color_current_hdr  " No "bold reverse underline"
 color of the header for the cursor column
 .It Sy "color_column_sep   " No "246 blue"
 color of column separators
@@ -834,6 +834,8 @@ color of key columns
 color of hidden columns on metasheets
 .It Sy "color_selected_row " No "215 yellow"
 color of selected rows
+.It Sy "color_keystrokes   " No "white"
+color of input keystrokes on status line
 .It Sy "color_status       " No "bold"
 status line color
 .It Sy "color_error        " No "red"
@@ -858,14 +860,20 @@ color for files pending delete
 histogram element character
 .It Sy "disp_histolen      " No "50"
 width of histogram column
+.It Sy "color_working      " No "green"
+color of system running smoothly
 .It Sy "disp_replay_play   " No "\[u25B6]"
 status indicator for active replay
 .It Sy "disp_replay_pause  " No "\[u2016]"
 status indicator for paused replay
+.It Sy "color_status_replay" No "green"
+color of replay status indicator
 .It Sy "disp_pixel_random  " No "False"
 randomly choose attr from set of pixels instead of most common
 .It Sy "color_graph_hidden " No "238 blue"
 color of legend for hidden attribute
+.It Sy "color_graph_selected" No "bold"
+color of selected graph points
 .It Sy "color_graph_axis   " No "bold"
 color for graph axis labels
 .It Sy "color_diff         " No "red"
@@ -998,6 +1006,10 @@ add column for xml attributes
 .Pp
 In addition,
 .Sy .zip Ns , Sy .gz Ns , Sy .bz2 Ns , and Sy .xz No files are decompressed on the fly.
+.Pp
+.No VisiData has an adapter for Sy pandas Ns . To load a file format which is supported by Sy pandas Ns , pass Sy -f pandas data.foo Ns . This will call Sy pandas.read_foo() Ns .
+.Pp
+.No For example, Sy vd -f pandas data.parquet No loads a parquet file. Note that when using the Sy pandas No loader, the Sy .fileformat No file extension is mandatory
 .
 .Sh SUPPORTED OUTPUT FORMATS
 These are the supported savers:

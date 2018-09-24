@@ -9,8 +9,12 @@
 
 set -e
 
+VD=~/git/visidata
 MAN=$VD/visidata/man
 BUILD=$VD/_build   # should be tmpdir
+
+export PYTHONPATH=$VD:$VD/visidata
+export PATH=$VD/bin:$PATH
 
 cp $MAN/* $BUILD/
 $MAN/parse_options.py $BUILD/vd-cli.inc $BUILD/vd-opts.inc
