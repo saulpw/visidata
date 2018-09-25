@@ -17,7 +17,7 @@ def createJoinedSheet(sheets, jointype=''):
     elif jointype == 'extend':
         vs = copy(sheets[0])
         vs.name = '+'.join(vs.name for vs in sheets)
-        vs.reload = functools.partial(ExtendedSheet_reload, vs, sources=sheets)
+        vs.reload = functools.partial(ExtendedSheet_reload, vs, sheets)
         vs.rows = tuple()  # to induce reload on first push, see vdtui
         return vs
     else:
