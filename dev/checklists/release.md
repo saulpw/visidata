@@ -26,7 +26,7 @@
 
    d. bump version in `__version__` in source code (bin/vd, visidata/vdtui.py) and setup.py;
 
-6. Run dev/mkwww.sh to build the manpage and updated website
+6. Run dev/mkman.sh to build the manpage and updated website
 
 7. Push `develop` to testpypi
 
