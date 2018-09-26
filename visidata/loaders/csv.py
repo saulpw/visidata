@@ -17,7 +17,10 @@ def open_csv(p):
     return CsvSheet(p.name, source=p)
 
 def wrappedNext(rdr):
-    return wrapply(next, rdr, exc_type=csv.Error)
+    try:
+        return next(rdr)
+    except csv.Error as e:
+        return ['[csv.Error: %s]' % e]
 
 def removeNulls(fp):
     for line in fp:
