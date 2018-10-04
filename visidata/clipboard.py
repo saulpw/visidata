@@ -30,7 +30,7 @@ Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, it
 Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))')
 Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))')
 Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
-Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\n".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows))')
+Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\\n".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows))')
 
 Sheet.bindkey('KEY_DC', 'delete-cell'),
 Sheet.bindkey('gKEY_DC', 'delete-cells'),
