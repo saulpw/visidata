@@ -105,7 +105,11 @@ class GraphSheet(InvertedCanvas):
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors.color_graph_axis
-        self.plotlabel(self.plotviewBox.xmin+frac*self.plotviewBox.w, self.plotviewBox.ymax+4, txt, attr)
+        xmin = self.plotviewBox.xmin + frac*self.plotviewBox.w
+        if frac == 1.0:
+            xmin -= min(len(txt), self.rightMarginPixels/2)
+
+        self.plotlabel(xmin, self.plotviewBox.ymax+4, txt, attr)
 
     def createLabels(self):
         self.gridlabels = []
