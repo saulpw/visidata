@@ -251,7 +251,7 @@ class Plotter(BaseSheet):
 
                     if cursorBBox.contains(char_x*2, char_y*4) or \
                        cursorBBox.contains(char_x*2+1, char_y*4+3):
-                        attr = CursesAttr(attr, 0).update_attr(colors.color_current_row, 10).attr
+                        attr = CursesAttr(attr).update_attr(colors.color_current_row).attr
 
                     if attr:
                         scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)
