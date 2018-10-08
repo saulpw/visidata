@@ -2,7 +2,7 @@ import os
 import contextlib
 import itertools
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType
+from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught
 from visidata.namedlist import namedlist
 
 
@@ -117,12 +117,14 @@ def save_tsv(p, vs):
             dispvals = []
             for transforms in transformers:
                 try:
+                    dispval = r
                     for t in transforms:
-                        r = t(r)
+                        dispval = t(dispval)
                 except Exception as e:
-                    r = str(e) if save_errors else ''
+                    exceptionCaught(e)
+                    dispval = str(e) if save_errors else ''
 
-                dispvals.append(r)
+                dispvals.append(dispval)
             fp.write(delim.join(dispvals) + '\n')
 
     status('%s save finished' % p)
