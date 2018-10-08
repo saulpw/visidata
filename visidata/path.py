@@ -53,10 +53,11 @@ class Path:
             return open(*args, **kwargs)
 
     def __iter__(self):
+        skip = options.skip
         with Progress(total=self.filesize) as prog:
             for i, line in enumerate(self.open_text()):
                 prog.addProgress(len(line))
-                if i < options.skip:
+                if i < skip:
                     continue
                 yield line[:-1]
 
