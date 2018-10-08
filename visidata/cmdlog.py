@@ -87,6 +87,7 @@ class CommandLog(TsvSheet):
 
     def __init__(self, name, source=None, **kwargs):
         super().__init__(name, source=source, **kwargs)
+        options.set('delimiter', '\t', self)
         self.currentActiveRow = None
 
     def newRow(self, **fields):

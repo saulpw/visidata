@@ -2,7 +2,7 @@ import os
 import contextlib
 import itertools
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, TypedWrapper, FileExistsError
+from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType
 from visidata.namedlist import namedlist
 
 
@@ -38,11 +38,12 @@ class TsvSheet(Sheet):
     def reload_sync(self):
         'Perform synchronous loading of TSV file, discarding header lines.'
         header_lines = options.get('header', self)
+        delim = options.get('delimiter', self)
 
         with self.source.open_text() as fp:
             # get one line anyway to determine number of columns
             lines = list(getlines(fp, int(header_lines) or 1))
-            headers = [L.split(options.delimiter) for L in lines]
+            headers = [L.split(delim) for L in lines]
 
             if header_lines <= 0:
                 self.columns = [ColumnItem('', i) for i in range(len(headers[0]))]
@@ -56,7 +57,6 @@ class TsvSheet(Sheet):
             self._rowtype = namedlist('tsvobj', [c.name for c in self.columns])
 
             self.recalc()
-            delim = options.delimiter
             self.rows = []
 
             with Progress(total=self.source.filesize) as prog:
@@ -75,18 +75,19 @@ class TsvSheet(Sheet):
     def newRow(self):
         return self._rowtype()
 
-def tsv_trdict(delim=None):
+def tsv_trdict(vs):
     'returns string.translate dictionary for replacing tabs and newlines'
-    delim = delim or options.delimiter
-    return {ord(delim): options.tsv_safe_tab, # \t
-            10: options.tsv_safe_newline,  # \n
-            13: options.tsv_safe_newline,  # \r
+    if options.safety_first:
+        delim = options.get('delimiter', vs)
+        return {ord(delim): options.get('tsv_safe_tab', vs), # \t
+            10: options.get('tsv_safe_newline', vs),  # \n
+            13: options.get('tsv_safe_newline', vs),  # \r
             }
-
+    return {}
 
 def save_tsv_header(p, vs):
     'Write tsv header for Sheet `vs` to Path `p`.'
-    trdict = tsv_trdict()
+    trdict = tsv_trdict(vs)
     delim = options.delimiter
 
     with p.open_text(mode='w') as fp:
@@ -98,27 +99,31 @@ def save_tsv_header(p, vs):
 @asyncthread
 def save_tsv(p, vs):
     'Write sheet to file `fn` as TSV.'
-    delim = options.delimiter
-    trdict = tsv_trdict()
+    delim = options.get('delimiter', vs)
+    trdict = tsv_trdict(vs)
 
     save_tsv_header(p, vs)
+    save_errors = options.get('save_errors', vs)
+
+    transformers = []  # list of transformers for each column in order
+    for col in vs.visibleCols:
+        transforms = [col.getValue, col.type, lambda v,fmtfunc=getType(col.type).formatter,fmtstr=col.fmtstr: fmtfunc(fmtstr, '' if v is None else v)]
+        if trdict:
+            transforms.append(lambda v,trdict=trdict: v.translate(trdict))
+        transformers.append(transforms)
 
     with p.open_text(mode='a') as fp:
         for r in Progress(vs.rows):
             dispvals = []
-            for col in vs.visibleCols:
-                v = col.getDisplayValue(r)
-                if isinstance(v, TypedWrapper):
-                    if not options.save_errors:
-                        continue
-                    v = str(v)
+            for transforms in transformers:
+                try:
+                    for t in transforms:
+                        r = t(r)
+                except Exception as e:
+                    r = str(e) if save_errors else ''
 
-                if trdict:
-                    v = str(v).translate(trdict)
-
-                dispvals.append(v)
-            fp.write(delim.join(dispvals))
-            fp.write('\n')
+                dispvals.append(r)
+            fp.write(delim.join(dispvals) + '\n')
 
     status('%s save finished' % p)
 
