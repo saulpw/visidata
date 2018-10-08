@@ -64,8 +64,11 @@ class TsvSheet(Sheet):
                     row = L.split(delim)
                     ncols = self._rowtype.length()  # current number of cols
                     if len(row) > ncols:
+                        # add unnamed columns to the type not found in the header
                         newcols = [ColumnItem('', len(row)+i, width=8) for i in range(len(row)-ncols)]
                         self._rowtype = namedlist(self._rowtype.__name__, list(self._rowtype._fields) + ['_' for c in newcols])
+                        for c in newcols:
+                            self.addColumn(c)
                     self.addRow(self._rowtype(row))
                     prog.addProgress(len(L))
 
