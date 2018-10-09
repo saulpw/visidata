@@ -891,7 +891,12 @@ class VisiData:
             catchapply(sheet.checkCursor)
 
             # no idle redraw unless background threads are running
-            scr.timeout(options.curses_timeout if vd.unfinishedThreads else -1)
+            if vd.unfinishedThreads:
+                scr.timeout(options.curses_timeout)
+            else:
+                time.sleep(0)  # yield to other threads which have yet to start
+                if vd.unfinishedThreads:
+                    scr.timeout(-1)
 
     def replace(self, vs):
         'Replace top sheet with the given sheet `vs`.'
