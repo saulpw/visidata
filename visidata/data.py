@@ -306,7 +306,7 @@ multisave_txt = save_txt
 def loadInternalSheet(klass, p, **kwargs):
     'Load internal sheet of given klass.  Internal sheets are always tsv.'
     vs = klass(p.name, source=p, **kwargs)
-    options.set('encoding', 'utf8', vs)
+    options._set('encoding', 'utf8', vs)
     if p.exists():
         vd.sheets.insert(0, vs)
         vs.reload.__wrapped__(vs)
