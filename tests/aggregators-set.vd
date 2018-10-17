@@ -1,15 +1,17 @@
 sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/sample.tsv	o	open input in VisiData
-sample	Units		type-int		#	set type of current column to int
-sample	Unit_Cost		type-float		%	set type of current column to float
-sample	Total		type-float		%	set type of current column to float
-sample			columns-sheet		C	open Columns Sheet
-sample_columns		キUnits	select-row		s	select current row
-sample_columns		キTotal	select-row		s	select current row
-sample_columns			aggregate-cols	sum	g+	add aggregator to selected source columns
-sample_columns	aggregators	キTotal	edit-cell	sum avg	e	edit contents of current cell
-sample_columns			quit-sheet		q	quit current sheet
-sample	Item		freq-col		F	open Frequency Table grouped on current column
-sample_Item_freq			columns-sheet		C	open Columns Sheet
-sample_Item_freq_columns	name		sort-asc		[	sort ascending by current column
-sample_Item_freq_columns			quit-sheet		q	quit current sheet
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Quantity		type-int		#	
+benchmark	Unit		type-currency		$	
+benchmark	Paid		type-currency		$	
+benchmark			columns-sheet		C	
+benchmark_columns		キQuantity	select-row		s	
+benchmark_columns		キUnit	select-row		s	
+benchmark_columns		キUnit	unselect-row		u	
+benchmark_columns		キPaid	select-row		s	
+benchmark_columns			aggregate-cols	sum	g+	
+benchmark_columns	aggregators	キPaid	edit-cell	sum avg	e	
+benchmark_columns			quit-sheet		q	
+benchmark	Item		freq-col		F	
+benchmark_Item_freq			columns-sheet		C	
+benchmark_Item_freq_columns	name		sort-asc		[	
+benchmark_Item_freq_columns			quit-sheet		q	
