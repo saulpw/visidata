@@ -15,3 +15,4 @@ surveys			delete-selected		gd
 surveys	species_id		key-col		!	
 surveys	hindfoot_length		aggregate-col	mean	+	
 surveys	sex		pivot		W	
+	surveys_pivot_sex	save_errors	set-option	False		
