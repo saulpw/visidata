@@ -91,7 +91,7 @@ def main():
                 startrow, startcol = arg[1:].split(':')
             else:
                 startrow = arg[1:]
-        elif '=' in arg:
+        elif args.play and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
             k, v = arg.split('=')
             fmtkwargs[k] = v
