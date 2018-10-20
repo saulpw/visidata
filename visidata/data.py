@@ -85,6 +85,8 @@ def updateColNames(sheet, rows):
         if not c._name:
             c.name = "_".join(c.getDisplayValue(r) for r in rows)
 
+
+Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
 Sheet.addCommand('z^', 'rename-col-cell', 'sheet.cursorCol.name = cursorDisplay')
 Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow])')
 Sheet.addCommand('gz^', 'rename-cols-selected', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ')
