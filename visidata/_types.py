@@ -21,7 +21,6 @@ Sheet.addCommand('#', 'type-int', 'cursorCol.type = int'),
 Sheet.addCommand('z#', 'type-len', 'cursorCol.type = len'),
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency'),
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float'),
-Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
 
 
 floatchars='+-0123456789.'
