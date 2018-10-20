@@ -50,5 +50,5 @@ def indexWithEscape(s, char, escape_char='\\'):
 def setValuesFromRegex(col, rows, rex):
     transform = regexTransform(col, rex)
     for r in rows:
-        col.setValue(r, transform(col, r))
+        col.setValueSafe(r, transform(col, r))
     col.recalc()
