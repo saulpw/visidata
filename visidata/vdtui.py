@@ -2143,17 +2143,24 @@ class Column:
         'Set our column value on row.  defaults to .setter; override in Column subclass. no type checking'
         return self.setter(self, row, value)
 
+    def setValueSafe(self, row, value):
+        'setValue and ignore exceptions'
+        try:
+            return self.setValue(row, value)
+        except Exception as e:
+            pass # exceptionCaught(e)
+
     def setValues(self, rows, *values):
         'Set our column value for given list of rows to `value`.'
         for r, v in zip(rows, itertools.cycle(values)):
-            self.setValue(r, v)
+            self.setValueSafe(r, v)
         self.recalc()
         return status('set %d cells to %d values' % (len(rows), len(values)))
 
     def setValuesTyped(self, rows, *values):
         'Set values on this column for rows, coerced to the column type.  will stop on first exception in type().'
         for r, v in zip(rows, itertools.cycle(self.type(val) for val in values)):
-            self.setValue(r, v)
+            self.setValueSafe(r, v)
         self.recalc()
         return status('set %d cells to %d values' % (len(rows), len(values)))
 
@@ -2161,7 +2168,7 @@ class Column:
     def setValuesFromExpr(self, rows, expr):
         compiledExpr = compile(expr, '<expr>', 'eval')
         for row in Progress(rows):
-            self.setValue(row, self.sheet.evalexpr(compiledExpr, row))
+            self.setValueSafe(row, self.sheet.evalexpr(compiledExpr, row))
         self.recalc()
         status('set %d values = %s' % (len(rows), expr))
 
