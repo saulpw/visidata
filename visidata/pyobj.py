@@ -63,7 +63,7 @@ def deduceType(v):
 
 class ExpandedColumn(Column):
     def calcValue(self, row):
-        return self.origCol.getValue(row)[self.key]
+        return getitemdef(self.origCol.getValue(row), self.key)
 
     def setValue(self, row, value):
         self.origCol.getValue(row)[self.key] = value

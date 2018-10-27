@@ -2223,11 +2223,17 @@ def ColumnAttr(name='', attr=None, **kwargs):
                   setter=lambda col,row,val: setattrdeep(row, col.expr, val),
                   **kwargs)
 
+def getitemdef(o, k, default=None):
+    try:
+        return default if o is None else o[k]
+    except Exception:
+        return default
+
 def ColumnItem(name='', key=None, **kwargs):
     'Column using getitem/setitem of given key.'
     return Column(name,
             expr=key if key is not None else name,
-            getter=lambda col,row: row[col.expr],
+            getter=lambda col,row: getitemdef(row, col.expr),
             setter=lambda col,row,val: setitem(row, col.expr, val),
             **kwargs)
 
