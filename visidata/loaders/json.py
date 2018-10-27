@@ -80,13 +80,12 @@ class Cell:
 class _vjsonEncoder(json.JSONEncoder):
     def __init__(self, **kwargs):
         super().__init__(sort_keys=True, **kwargs)
+        self.safe_error = options.safe_error
 
     def default(self, cell):
         o = wrapply(cell.col.getTypedValue, cell.row)
         if isinstance(o, TypedExceptionWrapper):
-            if not options.save_errors:
-                return None
-            return str(o.exception)
+            return self.safe_error or str(o.exception)
         elif isinstance(o, TypedWrapper):
             return o.val
         elif isinstance(o, date):

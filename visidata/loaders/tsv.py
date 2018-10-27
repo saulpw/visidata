@@ -96,6 +96,41 @@ def save_tsv_header(p, vs):
             fp.write(colhdr)
 
 
+def genAllValues(rows, cols, trdict={}, format=True):
+    transformers = {}  # list of transformers for each column in order
+    for col in cols:
+        transformers[col] = [ col.type ]
+        if format:
+            transformers[col].append(
+                lambda v,fmtfunc=getType(col.type).formatter,fmtstr=col.fmtstr: fmtfunc(fmtstr, '' if v is None else v)
+            )
+        if trdict:
+            transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
+
+    options_safe_error = options.safe_error
+    for r in Progress(rows):
+        dispvals = []
+        for col, transforms in transformers.items():
+            try:
+                dispval = col.getValue(r)
+            except Exception as e:
+                exceptionCaught(e)
+                dispval = options_safe_error or str(e)
+
+            try:
+                for t in transforms:
+                    if dispval is None:
+                        dispval = ''
+                        break
+                    dispval = t(dispval)
+            except Exception as e:
+                dispval = str(dispval)
+
+            dispvals.append(dispval)
+
+        yield dispvals
+
+
 @asyncthread
 def save_tsv(p, vs):
     'Write sheet to file `fn` as TSV.'
@@ -103,29 +138,11 @@ def save_tsv(p, vs):
     trdict = tsv_trdict(vs)
 
     save_tsv_header(p, vs)
-    save_errors = options.get('save_errors', vs)
-
-    transformers = []  # list of transformers for each column in order
-    for col in vs.visibleCols:
-        transforms = [col.getValue, col.type, lambda v,fmtfunc=getType(col.type).formatter,fmtstr=col.fmtstr: fmtfunc(fmtstr, '' if v is None else v)]
-        if trdict:
-            transforms.append(lambda v,trdict=trdict: v.translate(trdict))
-        transformers.append(transforms)
 
     with p.open_text(mode='a') as fp:
-        for r in Progress(vs.rows):
-            dispvals = []
-            for transforms in transformers:
-                try:
-                    dispval = r
-                    for t in transforms:
-                        dispval = t(dispval)
-                except Exception as e:
-                    exceptionCaught(e)
-                    dispval = str(e) if save_errors else ''
-
-                dispvals.append(dispval)
-            fp.write(delim.join(dispvals) + '\n')
+        for dispvals in genAllValues(vs.rows, vs.visibleCols, trdict, format=True):
+            fp.write(delim.join(dispvals))
+            fp.write('\n')
 
     status('%s save finished' % p)
 

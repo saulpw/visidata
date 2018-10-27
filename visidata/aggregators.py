@@ -18,7 +18,8 @@ def _defaggr(name, type, func):
 def aggregator(name, func, *args, type=None):
     'Define simple aggregator `name` that calls func(values)'
     def _func(col, rows):  # wrap builtins so they can have a .type
-        return func(col.getValues(rows), *args)
+        vals = list(col.getValues(rows))
+        return None if len(vals) == 0 else func(vals, *args)
     aggregators[name] = _defaggr(name, type, _func)
 
 ## specific aggregator implementations

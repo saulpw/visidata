@@ -4,7 +4,7 @@ import random
 from visidata import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
-replayableOption('save_errors', True, 'whether to save or discard errors while saving')
+replayableOption('safe_error', '#ERR', 'error string to use while saving')
 replayableOption('header', 1, 'parse first N rows of .csv/.tsv as column names')
 replayableOption('delimiter', '\t', 'delimiter to use for tsv filetype')
 replayableOption('filetype', '', 'specify file type')
@@ -277,27 +277,13 @@ def open_txt(p):
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, p)
 
-def isWrapper(w):
-    return isinstance(w, TypedWrapper)
-
 @asyncthread
 def save_txt(p, *vsheets):
-    options_save_errors = options.save_errors
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
-            col = vs.visibleCols[0]
-            for r in Progress(vs.rows):
-                if isWrapper(r):
-                    if not options_save_errors:
-                        continue
-                    v = str(r.exception)
-
-                v = wrapply(col.getValue, r)
-                if isWrapper(v):
-                    if not options_save_errors:
-                        continue
-                    v = str(v.exception)
-                fp.write(v or '')
+            col = [vs.visibleCols[0]]
+            for dispvals in genAllValues(vs.rows, [vs.visibleCols[0]]):
+                fp.write(dispvals[0] or '')
                 fp.write('\n')
     status('%s save finished' % p)
 
