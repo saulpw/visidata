@@ -13,8 +13,8 @@ def makeDiffColorizer(othersheet):
         vcolidx = sheet.visibleCols.index(col)
         rowidx = sheet.rows.index(row)
         if vcolidx < len(othersheet.visibleCols) and rowidx < len(othersheet.rows):
-            otherval = othersheet.visibleCols[vcolidx].getValue(othersheet.rows[rowidx])
-            if cellval.value != otherval:
+            otherval = othersheet.visibleCols[vcolidx].getDisplayValue(othersheet.rows[rowidx])
+            if cellval.display != otherval:
                 return 'color_diff'
         else:
             return 'color_diff_add'
