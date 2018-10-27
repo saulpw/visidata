@@ -96,7 +96,7 @@ def addAggregators(cols, aggrnames):
             for c in cols:
                 if not hasattr(c, 'aggregators'):
                     c.aggregators = []
-                if aggr not in c.aggregators:
+                if aggr and aggr not in c.aggregators:
                     c.aggregators += [aggr]
 
 
