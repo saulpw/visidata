@@ -1,6 +1,7 @@
 import os
 import contextlib
 import itertools
+import collections
 
 from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught
 from visidata.namedlist import namedlist
@@ -97,7 +98,7 @@ def save_tsv_header(p, vs):
 
 
 def genAllValues(rows, cols, trdict={}, format=True):
-    transformers = {}  # list of transformers for each column in order
+    transformers = collections.OrderedDict()  # list of transformers for each column in order
     for col in cols:
         transformers[col] = [ col.type ]
         if format:
