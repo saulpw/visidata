@@ -1,8 +1,8 @@
 column	errors	nulls	distinct	mode	min	max	median	mean	stdev
-OrderDate	0	0	43						
+OrderDate	0	0	43	no unique mode; found 43 equally common values					
 Region	0	0	3	Central					
 Rep	0	0	11	Jones					
 Item	0	0	5	Binder					
-Units	0	0	37		2	96	53	49.33	30.08
+Units	0	0	37	no unique mode; found 6 equally common values	2	96	53	49.33	30.08
 Unit_Cost	0	0	12	4.99	1.29	275.0	4.99	20.31	47.35
-Total	0	0	41		9.03	1879.06	299.4	456.46	447.02
+Total	0	0	41	no unique mode; found 2 equally common values	9.03	1879.06	299.4	456.46	447.02

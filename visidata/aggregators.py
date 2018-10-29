@@ -18,7 +18,14 @@ def _defaggr(name, type, func):
 def aggregator(name, func, *args, type=None):
     'Define simple aggregator `name` that calls func(values)'
     def _func(col, rows):  # wrap builtins so they can have a .type
-        return func(col.getValues(rows), *args)
+        vals = list(col.getValues(rows))
+        try:
+            return func(vals, *args)
+        except Exception as e:
+            if len(vals) == 0:
+                return None
+            return e
+
     aggregators[name] = _defaggr(name, type, _func)
 
 ## specific aggregator implementations
@@ -95,7 +102,7 @@ def addAggregators(cols, aggrnames):
             for c in cols:
                 if not hasattr(c, 'aggregators'):
                     c.aggregators = []
-                if aggr not in c.aggregators:
+                if aggr and aggr not in c.aggregators:
                     c.aggregators += [aggr]
 
 
