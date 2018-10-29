@@ -1,6 +1,4 @@
-# VisiData v1.4 
-
-## VisiData v1.4.1 release candidate [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
+# VisiData v1.4 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable)
 
 A terminal interface for exploring and arranging tabular data.
 
