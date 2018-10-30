@@ -303,7 +303,7 @@ class Canvas(Plotter):
     rowtype = 'plots'
     aspectRatio = 0.0
     leftMarginPixels = 10*2
-    rightMarginPixels = 6*2
+    rightMarginPixels = 4*2
     topMarginPixels = 0
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
