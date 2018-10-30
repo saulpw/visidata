@@ -6,6 +6,7 @@
 - [clipboard] fix broken `gzY` (syscopy-cells)
 - [cmdlog] always encode .vd files in utf-8, regardless of options.encoding
 - [tsv] major `save_tsv` performance improvement
+- [tsv] make short rows missing entries editable
 - [shp] reset columns on reload
 - [graph] shift rightmost x-axis label to be visible
 - [http] allow CLI urls to have `=` in them
@@ -22,6 +23,7 @@
 - [aggregators] show-aggregate (`z+`) now aggregates selectedRows
 - [tsv] add unnamed columns if extra cells in rows
 - [diff] now based on display value (more intuitive)
+- [mouse] move to column also
 - [cosmetic] addcol-new (`za`) input new column name on top of new column
 - [cosmetic] include file iteration in progress meter
 
