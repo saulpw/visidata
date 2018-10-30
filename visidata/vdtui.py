@@ -2154,7 +2154,7 @@ class Column:
         try:
             return self.setValue(row, value)
         except Exception as e:
-            pass # exceptionCaught(e)
+            exceptionCaught(e)
 
     def setValues(self, rows, *values):
         'Set our column value for given list of rows to `value`.'
