@@ -256,7 +256,7 @@ def replayableOption(optname, default, helpstr):
 
 
 replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
-replayableOption('encoding_errors', 'surrogateescape', 'encoding errors passed to codecs.open')
+replayableOption('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open')
 
 replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('default_width', 20, 'default column width')
