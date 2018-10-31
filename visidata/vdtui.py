@@ -1380,6 +1380,12 @@ class Sheet(BaseSheet):
         'List of `Column` which are not hidden.'
         return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
 
+    def visibleColAtX(self, x):
+        for vcolidx, (colx, w) in self.visibleColLayout.items():
+            if colx <= x <= colx+w:
+                return vcolidx
+        error('no visible column at x=%d' % x)
+
     @property
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in .refresh()
     def keyCols(self):
@@ -1812,7 +1818,7 @@ Sheet.addCommand('KEY_HOME', 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex
 Sheet.addCommand('KEY_END', 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
 Sheet.addCommand('gl', 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
 
-Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=topRowIndex+mouseY-1'),
+Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=topRowIndex+mouseY-1; sheet.cursorVisibleColIndex=visibleColAtX(mouseX)'),
 Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
 Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
 Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
@@ -2148,7 +2154,7 @@ class Column:
         try:
             return self.setValue(row, value)
         except Exception as e:
-            pass # exceptionCaught(e)
+            exceptionCaught(e)
 
     def setValues(self, rows, *values):
         'Set our column value for given list of rows to `value`.'

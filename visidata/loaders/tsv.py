@@ -70,6 +70,10 @@ class TsvSheet(Sheet):
                         self._rowtype = namedlist(self._rowtype.__name__, list(self._rowtype._fields) + ['_' for c in newcols])
                         for c in newcols:
                             self.addColumn(c)
+                    elif len(row) < ncols:
+                        # extend rows that are missing entries
+                        row.extend([None]*(ncols-len(row)))
+
                     self.addRow(self._rowtype(row))
                     prog.addProgress(len(L))
 

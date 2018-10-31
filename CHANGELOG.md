@@ -1,5 +1,33 @@
 # VisiData version history
 
+# v1.4.1 (2018-10-29)
+
+## Bugfixes
+- [clipboard] fix broken `gzY` (syscopy-cells)
+- [cmdlog] always encode .vd files in utf-8, regardless of options.encoding
+- [tsv] major `save_tsv` performance improvement
+- [tsv] make short rows missing entries editable
+- [shp] reset columns on reload
+- [graph] shift rightmost x-axis label to be visible
+- [http] allow CLI urls to have `=` in them
+- [fixed width] truncate cell edits on fixed width sheets
+- [aggregators] ignore unknown aggregators
+- `visidata.view(obj)`: obj no longer required to have a `__name__`
+
+## Additions and changes
+- [save tsv json] errors are saved as `options.safe_error` (default `#ERR`)
+   - if empty, error message is saved instead
+- [plugins] `~/.visidata` added to sys.path on startup
+   - put plugin in `~/.visidata/vdfoo.py`
+   - put `import vdfoo` in `.visidatarc` to activate
+- [aggregators] show-aggregate (`z+`) now aggregates selectedRows
+- [tsv] add unnamed columns if extra cells in rows
+- [diff] now based on display value (more intuitive)
+- [mouse] move to column also
+- [cosmetic] addcol-new (`za`) input new column name on top of new column
+- [cosmetic] include file iteration in progress meter
+
+
 # v1.4 (2018-09-23)
 
 ## Bugfixes
