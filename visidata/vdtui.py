@@ -37,6 +37,7 @@ from builtins import *
 import sys
 import os
 import collections
+from collections import defaultdict
 from copy import copy, deepcopy
 from contextlib import suppress
 import curses
@@ -561,6 +562,11 @@ class VisiData:
         self.prefixWaiting = False
         self.scr = None  # curses scr
         self.hooks = collections.defaultdict(list)  # [hookname] -> list(hooks)
+        self.mousereg = defaultdict(  # [scr] ->
+                  lambda: defaultdict(  # [y] ->
+                    lambda: defaultdict(  # [x] ->
+                      lambda: defaultdict(  # [button] (like "BUTTON1_CLICKED") ->
+                        lambda: None))))      # func(y, x, button)
         self.threads = [] # all long-running threads, including main and finished
         self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'color_keystrokes'))
@@ -746,6 +752,12 @@ class VisiData:
         if options.debug:
             raise
 
+    def onMouse(self, scr, y, x, h, w, **kwargs):
+        for i in range(y, y+h):
+            for j in range(x, x+w):
+                for button, func in kwargs.items():
+                    self.mousereg[scr][i][j][button] = func
+
     def drawLeftStatus(self, scr, vs):
         'Draw left side of status bar.'
         cattr = CursesAttr(colors.color_status)
@@ -762,6 +774,10 @@ class VisiData:
 
             y = self.windowHeight-1
             x = clipdraw(scr, y, 0, lstatus, attr)
+            self.onMouse(scr, y, 0, 1, x,
+                            BUTTON1_PRESSED='sheets',
+                            BUTTON3_PRESSED='rename-sheet')
+
             one = False
             for (pri, msgparts), n in sorted(self.statuses.items(), key=lambda k: -k[0][0]):
                 if x > self.windowWidth:
@@ -851,22 +867,37 @@ class VisiData:
                 self.statuses.clear()
 
                 if keystroke == 'KEY_MOUSE':
+                    self.keystrokes = ''
+                    clicktype = ''
                     try:
                         devid, x, y, z, bstate = curses.getmouse()
+                        sheet.mouseX, sheet.mouseY = x, y
                         if bstate & curses.BUTTON_CTRL:
-                            self.keystrokes += "CTRL-"
+                            clicktype += "CTRL-"
                             bstate &= ~curses.BUTTON_CTRL
                         if bstate & curses.BUTTON_ALT:
-                            self.keystrokes += "ALT-"
+                            clicktype += "ALT-"
                             bstate &= ~curses.BUTTON_ALT
                         if bstate & curses.BUTTON_SHIFT:
-                            self.keystrokes += "SHIFT-"
+                            clicktype += "SHIFT-"
                             bstate &= ~curses.BUTTON_SHIFT
 
-                        keystroke = curses.mouseEvents.get(bstate, str(bstate))
-                        sheet.mouseX, sheet.mouseY = x, y
+                        keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
+
+                        f = self.mousereg[scr][y][x][keystroke]
+                        if f:
+                            if isinstance(f, str):
+                                for cmd in f.split():
+                                    sheet.exec_keystrokes(cmd)
+                            else:
+                                f(y, x, keystroke)
+
+                            self.keystrokes = keystroke
+                            keystroke = ''
                     except curses.error:
-                        keystroke = ''
+                        pass
+                    except Exception as e:
+                        exceptionCaught(e)
 
                 self.keystrokes += keystroke
 
@@ -1695,6 +1726,7 @@ class Sheet(BaseSheet):
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
         clipdraw(scr, y, x, N, hdrattr.attr, colwidth)
         clipdraw(scr, y, x+colwidth-len(T), T, hdrattr.attr, len(T))
+        vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
 
         if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
             A = options.disp_more_left
@@ -1764,6 +1796,7 @@ class Sheet(BaseSheet):
                         clipdraw(scr, y, x+colwidth-len(note), note, noteattr.attr, len(note))
 
                     clipdraw(scr, y, x, disp_column_fill+cellval.display, attr.attr, colwidth-(1 if note else 0))
+                    vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                     sepchars = disp_column_sep
                     if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
@@ -1820,8 +1853,12 @@ Sheet.addCommand('gl', 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleC
 
 Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=topRowIndex+mouseY-1; sheet.cursorVisibleColIndex=visibleColAtX(mouseX)'),
 Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
+
 Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
 Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
+
+Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
+Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 
