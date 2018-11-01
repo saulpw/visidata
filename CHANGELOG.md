@@ -26,7 +26,7 @@
 - [mouse] move to column also
 - [cosmetic] addcol-new (`za`) input new column name on top of new column
 - [cosmetic] include file iteration in progress meter
-
+- [xls xlsx] use options.header to determine column names
 
 # v1.4 (2018-09-23)
 

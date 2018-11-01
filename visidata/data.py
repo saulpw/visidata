@@ -5,7 +5,7 @@ from visidata import *
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 replayableOption('safe_error', '#ERR', 'error string to use while saving')
-replayableOption('header', 1, 'parse first N rows of .csv/.tsv as column names')
+replayableOption('header', 1, 'parse first N rows of certain formats as column names')
 replayableOption('delimiter', '\t', 'delimiter to use for tsv filetype')
 replayableOption('filetype', '', 'specify file type')
 replayableOption('save_filetype', 'tsv', 'specify default file type to save as')

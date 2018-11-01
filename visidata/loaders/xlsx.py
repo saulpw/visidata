@@ -40,8 +40,18 @@ class xlsxSheet(Sheet):
 
         self.columns = []
         self.rows = []
-        for row in Progress(worksheet.iter_rows(), worksheet.max_row or 0):
-            row = list(wrapply(getattr, cell, 'value') for cell in row)
+
+        rows = worksheet.iter_rows()
+        hdrs = [list(wrapply(getattr, cell, 'value')
+                   for cell in next(rows))
+                       for i in range(options.header)
+               ]
+        colnames = ['\n'.join(str(hdr[i]) for i in range(len(hdr))) for hdr in zip(*hdrs)]
+        for i, colname in enumerate(colnames):
+            self.addColumn(ColumnItem(colname, i))
+
+        for r in Progress(rows, worksheet.max_row or 0):
+            row = list(wrapply(getattr, cell, 'value') for cell in r)
             for i in range(len(self.columns), len(row)):  # no-op if already done
                 self.addColumn(ColumnItem(None, i, width=8))
             self.addRow(row)
@@ -78,9 +88,16 @@ class xlsSheet(Sheet):
     def reload(self):
         worksheet = self.source
         self.columns = []
-        for i in range(worksheet.ncols):
-            self.addColumn(ColumnItem(None, i, width=8))
+        if options.header:
+            hdrs = [list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
+                        for rownum in range(options.header)]
+            colnames = ['\\n'.join(str(hdr[i]) for i in range(len(hdr))) for hdr in zip(*hdrs)]
+        else:
+            colnames = ['']*worksheet.ncols
+
+        for i, colname in enumerate(colnames):
+            self.addColumn(ColumnItem(colname, i))
 
         self.rows = []
-        for rownum in Progress(range(worksheet.nrows)):
+        for rownum in Progress(range(options.header, worksheet.nrows)):
             self.addRow(list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)))
