@@ -1,0 +1,1501 @@
+account number	customer name	sales rep	sku	category	quantity	unit price	ext price	date
+680916	Mueller and Sons	Loring Predovic	GP-14407	Belt	19	88.49	1681.31	2015-11-17 05:58:34
+680916	Mueller and Sons	Loring Predovic	FI-01804	Shirt	3	78.07	234.21	2016-02-13 04:04:11
+530925	Purdy and Sons	Teagan O'Keefe	EO-54210	Shirt	19	30.21	573.99	2015-08-11 12:44:38
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	NZ-99565	Shirt	12	90.29	1083.48	2016-01-23 02:15:50
+398620	Brekke Ltd	Esequiel Schinner	NZ-99565	Shirt	5	72.64	363.2	2015-08-10 07:16:03
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	20	96.62	1932.4	2016-03-17 10:19:05
+398620	Brekke Ltd	Esequiel Schinner	DU-87462	Shirt	10	67.64	676.4	2015-11-25 22:05:36
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	11	91.86	1010.46	2016-04-24 15:05:58
+398620	Brekke Ltd	Esequiel Schinner	NZ-99565	Shirt	18	98.67	1776.06	2015-08-06 08:09:56
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	12	64.48	773.76	2016-01-08 09:52:04
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	20	92.87	1857.4	2016-05-22 06:09:58
+93583	Hegmann-Howell	Esequiel Schinner	HZ-54995	Belt	17	40.56	689.52	2015-07-05 01:05:52
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	17	42.61	724.37	2016-05-16 19:11:55
+453258	Runolfsson-Bayer	Shannen Hudson	FI-01804	Shirt	20	12.31	246.2	2015-08-24 21:32:26
+453258	Runolfsson-Bayer	Shannen Hudson	EO-54210	Shirt	20	67.95	1359	2015-11-24 15:04:30
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	17	23.2	394.4	2015-09-12 13:16:56
+453258	Runolfsson-Bayer	Shannen Hudson	NZ-99565	Shirt	2	30.23	60.46	2016-03-21 11:31:24
+280749	Douglas PLC	Teagan O'Keefe	GP-14407	Belt	3	22.64	67.92	2015-12-02 01:55:28
+398620	Brekke Ltd	Esequiel Schinner	HZ-54995	Belt	1	36.2	36.2	2015-12-07 18:45:54
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	9	82.06	738.54	2016-02-23 17:41:41
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	DU-87462	Shirt	5	28.51	142.55	2016-03-01 19:34:33
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	15	95.6	1434	2015-10-08 03:01:22
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	11	30.8	338.8	2015-11-25 06:07:47
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	6	64.98	389.88	2016-01-15 21:07:30
+758030	Kilback-Abernathy	Trish Deckow	TK-29646	Shoes	19	26.9	511.1	2015-09-28 14:33:34
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	15	30.34	455.1	2016-03-29 21:19:08
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	2	61.01	122.02	2016-05-19 00:05:12
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	8	18.34	146.72	2015-07-24 17:48:46
+530925	Purdy and Sons	Teagan O'Keefe	DU-87462	Shirt	10	18.4	184	2016-03-05 23:45:57
+752312	Watsica-Pfannerstill	Loring Predovic	GP-14407	Belt	15	17.93	268.95	2016-03-18 07:17:35
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	15	83.52	1252.8	2016-04-18 09:46:35
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	13	80.92	1051.96	2015-08-05 11:37:35
+398620	Brekke Ltd	Esequiel Schinner	EO-54210	Shirt	1	55.12	55.12	2016-06-14 06:59:27
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	5	44.35	221.75	2016-03-22 17:17:40
+251881	Zulauf-Grady	Teagan O'Keefe	HZ-54995	Belt	20	21.17	423.4	2016-03-28 21:14:31
+887145	Gislason LLC	Loring Predovic	TK-29646	Shoes	7	60.98	426.86	2016-04-05 16:48:48
+262693	Ziemann-Heidenreich	Loring Predovic	ZY-38455	Shirt	13	33.08	430.04	2015-09-11 13:13:54
+282122	Connelly, Abshire and Von	Beth Skiles	FI-01804	Shirt	6	31.72	190.32	2015-12-26 21:07:48
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	14	71.37	999.18	2016-03-10 17:48:45
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	1	31.1	31.1	2015-08-21 23:43:26
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	12	84.06	1008.72	2015-11-24 10:21:28
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	NZ-99565	Shirt	1	24	24	2016-04-02 11:47:32
+93583	Hegmann-Howell	Esequiel Schinner	NZ-99565	Shirt	13	52.21	678.73	2016-05-12 13:25:51
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	14	92.19	1290.66	2016-04-07 16:35:47
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	20	18.78	375.6	2016-04-03 16:10:50
+759168	Schaefer Inc	Loring Predovic	TK-29646	Shoes	12	80.03	960.36	2015-08-30 22:07:39
+680916	Mueller and Sons	Loring Predovic	FI-01804	Shirt	19	13.83	262.77	2015-06-26 23:55:04
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	3	30.68	92.04	2016-04-10 06:19:52
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	9	93.27	839.43	2016-03-11 15:36:42
+108399	Kuhic, Shields and Volkman	Trish Deckow	TK-29646	Shoes	19	11.68	221.92	2016-01-12 02:26:26
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	7	96.38	674.66	2015-10-08 09:10:36
+887145	Gislason LLC	Loring Predovic	TL-23025	Shoes	17	72.36	1230.12	2016-02-07 19:11:15
+398620	Brekke Ltd	Esequiel Schinner	TL-23025	Shoes	1	94.59	94.59	2016-05-17 04:35:50
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	14	14.75	206.5	2015-09-26 09:52:13
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	1	56.03	56.03	2016-01-01 16:50:06
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	16	76.38	1222.08	2015-11-05 09:07:04
+453258	Runolfsson-Bayer	Shannen Hudson	EO-54210	Shirt	13	95.38	1239.94	2015-08-16 15:49:54
+62592	O'Keefe-Koch	Shannen Hudson	TK-29646	Shoes	10	25.58	255.8	2016-06-01 08:03:06
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	20	66.71	1334.2	2016-02-22 12:49:01
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	13	55.47	721.11	2016-03-12 17:54:20
+759168	Schaefer Inc	Loring Predovic	EO-54210	Shirt	5	93.41	467.05	2015-08-06 10:57:53
+398620	Brekke Ltd	Esequiel Schinner	ZY-38455	Shirt	2	24.48	48.96	2015-11-04 13:26:05
+251881	Zulauf-Grady	Teagan O'Keefe	GJ-90272	Shoes	5	63.31	316.55	2015-12-06 09:20:20
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	10	97.88	978.8	2015-08-24 05:43:32
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	5	37.18	185.9	2015-10-10 04:24:46
+398620	Brekke Ltd	Esequiel Schinner	FI-01804	Shirt	18	92.16	1658.88	2015-12-10 12:13:45
+530925	Purdy and Sons	Teagan O'Keefe	TK-29646	Shoes	4	19.76	79.04	2015-08-04 02:54:20
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GJ-90272	Shoes	13	43.19	561.47	2015-09-04 11:58:47
+108399	Kuhic, Shields and Volkman	Trish Deckow	TK-29646	Shoes	11	29.52	324.72	2016-05-28 10:34:34
+262693	Ziemann-Heidenreich	Loring Predovic	NZ-99565	Shirt	19	41.14	781.66	2016-03-26 06:21:18
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	1	90.45	90.45	2015-11-30 20:10:20
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	1	47.29	47.29	2016-02-17 08:45:05
+108399	Kuhic, Shields and Volkman	Trish Deckow	DU-87462	Shirt	15	48.65	729.75	2016-06-11 11:59:35
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	ZY-38455	Shirt	11	66.93	736.23	2015-11-29 00:44:46
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	11	31.88	350.68	2016-01-06 05:41:19
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	5	82.58	412.9	2015-11-15 22:42:05
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	20	14.6	292	2015-08-11 04:48:36
+759168	Schaefer Inc	Loring Predovic	GJ-90272	Shoes	3	95.63	286.89	2016-03-15 20:36:17
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	17	47.18	802.06	2015-11-10 19:31:36
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	5	90.92	454.6	2016-01-31 14:42:16
+262693	Ziemann-Heidenreich	Loring Predovic	TK-29646	Shoes	1	40.05	40.05	2015-07-30 02:37:28
+453258	Runolfsson-Bayer	Shannen Hudson	HZ-54995	Belt	6	17.37	104.22	2016-01-13 18:19:05
+251881	Zulauf-Grady	Teagan O'Keefe	NZ-99565	Shirt	12	86.12	1033.44	2015-11-02 22:56:31
+398620	Brekke Ltd	Esequiel Schinner	DU-87462	Shirt	10	28.35	283.5	2015-07-21 07:17:41
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	15	94.43	1416.45	2015-12-22 13:40:43
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	ZY-38455	Shirt	3	26.6	79.8	2015-08-16 16:49:11
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	8	38.88	311.04	2015-10-04 20:49:53
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	3	97.19	291.57	2016-01-18 19:48:54
+262693	Ziemann-Heidenreich	Loring Predovic	DU-87462	Shirt	1	26.14	26.14	2015-06-30 06:53:06
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	EO-54210	Shirt	5	43.66	218.3	2016-05-13 00:42:58
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	11	43.62	479.82	2015-08-25 02:25:02
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	8	56.72	453.76	2016-03-20 02:03:56
+758030	Kilback-Abernathy	Trish Deckow	FI-01804	Shirt	20	54.3	1086	2016-02-29 15:22:44
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	10	72.42	724.2	2016-05-19 14:06:38
+280749	Douglas PLC	Teagan O'Keefe	GP-14407	Belt	9	25.95	233.55	2015-07-25 10:53:10
+262693	Ziemann-Heidenreich	Loring Predovic	TK-29646	Shoes	8	51.77	414.16	2016-05-29 07:25:04
+282122	Connelly, Abshire and Von	Beth Skiles	NZ-99565	Shirt	8	88.29	706.32	2015-11-25 04:21:37
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GJ-90272	Shoes	11	92.74	1020.14	2016-02-06 02:38:55
+758030	Kilback-Abernathy	Trish Deckow	GP-14407	Belt	12	20.07	240.84	2015-09-19 03:44:57
+136521	Labadie and Sons	Esequiel Schinner	FI-01804	Shirt	18	75.6	1360.8	2015-08-06 20:29:46
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	10	75.66	756.6	2016-02-06 22:24:02
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	5	55.98	279.9	2016-05-09 11:44:59
+398620	Brekke Ltd	Esequiel Schinner	TL-23025	Shoes	7	54.87	384.09	2016-04-17 08:15:24
+108399	Kuhic, Shields and Volkman	Trish Deckow	TK-29646	Shoes	20	84.49	1689.8	2015-12-17 10:06:40
+93583	Hegmann-Howell	Esequiel Schinner	DU-87462	Shirt	19	81.98	1557.62	2015-07-18 14:12:46
+218667	Jaskolski-O'Hara	Trish Deckow	NZ-99565	Shirt	16	33.38	534.08	2016-02-07 22:29:37
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	13	14.18	184.34	2015-11-18 03:13:45
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	13	68.09	885.17	2016-05-20 21:10:53
+218667	Jaskolski-O'Hara	Trish Deckow	HZ-54995	Belt	5	32.61	163.05	2016-04-16 11:51:15
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	18	33.15	596.7	2015-06-20 14:16:53
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	14	39.17	548.38	2016-01-09 05:48:45
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	19	79.02	1501.38	2015-08-05 21:40:50
+758030	Kilback-Abernathy	Trish Deckow	HZ-54995	Belt	13	35.12	456.56	2016-01-04 01:23:10
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	11	35.75	393.25	2016-02-18 21:04:47
+62592	O'Keefe-Koch	Shannen Hudson	HZ-54995	Belt	12	40.52	486.24	2015-08-04 05:50:33
+758030	Kilback-Abernathy	Trish Deckow	EO-54210	Shirt	11	47.15	518.65	2016-01-15 06:09:23
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	18	28.68	516.24	2016-05-02 00:07:28
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	14	46.86	656.04	2015-07-21 12:27:25
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	12	62.1	745.2	2015-10-11 10:56:53
+758030	Kilback-Abernathy	Trish Deckow	TL-23025	Shoes	4	90.57	362.28	2016-06-11 15:25:49
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	2	82.68	165.36	2016-04-07 01:40:01
+262693	Ziemann-Heidenreich	Loring Predovic	GP-14407	Belt	3	59.09	177.27	2015-09-16 12:44:04
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	9	96.1	864.9	2015-07-07 23:24:18
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	4	27.18	108.72	2015-12-14 00:47:32
+282122	Connelly, Abshire and Von	Beth Skiles	FI-01804	Shirt	13	22.6	293.8	2016-03-24 06:02:09
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	13	24.18	314.34	2015-07-20 16:33:18
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	4	49.78	199.12	2015-12-11 10:55:57
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	12	97.14	1165.68	2016-03-09 21:19:48
+758030	Kilback-Abernathy	Trish Deckow	EO-54210	Shirt	3	59.99	179.97	2015-08-19 16:21:11
+752312	Watsica-Pfannerstill	Loring Predovic	GP-14407	Belt	5	63.28	316.4	2015-09-08 00:01:16
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	9	42.44	381.96	2015-09-02 01:05:17
+759168	Schaefer Inc	Loring Predovic	HZ-54995	Belt	13	65.36	849.68	2015-08-23 13:34:26
+262693	Ziemann-Heidenreich	Loring Predovic	NZ-99565	Shirt	14	59.01	826.14	2016-04-26 10:14:41
+530925	Purdy and Sons	Teagan O'Keefe	TL-23025	Shoes	12	64.17	770.04	2015-10-14 21:03:49
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	12	13.99	167.88	2015-09-03 21:12:58
+759168	Schaefer Inc	Loring Predovic	GJ-90272	Shoes	5	81.98	409.9	2015-10-27 14:56:08
+251881	Zulauf-Grady	Teagan O'Keefe	HZ-54995	Belt	14	99.38	1391.32	2016-04-08 20:59:25
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	13	74.1	963.3	2015-10-05 13:58:23
+887145	Gislason LLC	Loring Predovic	TK-29646	Shoes	11	77.23	849.53	2015-08-11 02:40:07
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	2	31.09	62.18	2015-10-09 16:35:42
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	6	21.32	127.92	2016-03-17 09:56:53
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	19	85.57	1625.83	2016-02-03 11:41:59
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	9	26.14	235.26	2016-04-17 11:45:31
+262693	Ziemann-Heidenreich	Loring Predovic	HZ-54995	Belt	7	24.25	169.75	2015-09-01 23:33:00
+530925	Purdy and Sons	Teagan O'Keefe	DU-87462	Shirt	5	98.34	491.7	2015-10-14 17:20:02
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	2	74.6	149.2	2016-04-25 10:02:27
+453258	Runolfsson-Bayer	Shannen Hudson	TL-23025	Shoes	13	82.54	1073.02	2016-04-27 12:23:15
+93583	Hegmann-Howell	Esequiel Schinner	DU-87462	Shirt	3	99.13	297.39	2015-10-08 14:55:04
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	7	21.3	149.1	2015-10-17 19:48:03
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	18	17.56	316.08	2016-04-05 17:23:36
+136521	Labadie and Sons	Esequiel Schinner	GJ-90272	Shoes	17	66.97	1138.49	2016-06-06 02:17:34
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	20	28.5	570	2016-03-04 03:33:39
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	10	51.52	515.2	2016-04-17 11:16:50
+62592	O'Keefe-Koch	Shannen Hudson	TK-29646	Shoes	18	26.17	471.06	2015-10-23 18:38:12
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	14	91.12	1275.68	2015-07-30 20:05:19
+680916	Mueller and Sons	Loring Predovic	GP-14407	Belt	2	69.38	138.76	2015-10-30 21:56:42
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	19	92.85	1764.15	2015-10-23 07:32:22
+280749	Douglas PLC	Teagan O'Keefe	EO-54210	Shirt	4	11.52	46.08	2016-02-22 06:10:14
+108399	Kuhic, Shields and Volkman	Trish Deckow	GP-14407	Belt	6	78.39	470.34	2016-01-22 14:26:31
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	6	84.56	507.36	2016-02-09 14:03:33
+62592	O'Keefe-Koch	Shannen Hudson	DU-87462	Shirt	11	85.65	942.15	2016-03-31 01:46:55
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	16	15.33	245.28	2016-03-07 13:30:30
+136521	Labadie and Sons	Esequiel Schinner	EO-54210	Shirt	12	10.95	131.4	2015-11-11 17:18:38
+453258	Runolfsson-Bayer	Shannen Hudson	GJ-90272	Shoes	17	40.9	695.3	2016-04-05 05:52:35
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	10	10.72	107.2	2016-06-11 05:43:00
+93583	Hegmann-Howell	Esequiel Schinner	HZ-54995	Belt	8	82.47	659.76	2016-01-30 17:37:04
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	3	34.86	104.58	2015-07-18 23:46:56
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	2	19.82	39.64	2015-11-18 03:36:55
+453258	Runolfsson-Bayer	Shannen Hudson	EO-54210	Shirt	20	26.16	523.2	2016-02-25 23:53:30
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	9	53.67	483.03	2015-06-23 14:42:02
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	3	33.19	99.57	2015-09-06 02:17:30
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	9	37.98	341.82	2015-11-29 06:52:37
+262693	Ziemann-Heidenreich	Loring Predovic	DU-87462	Shirt	20	71.54	1430.8	2015-12-10 09:24:45
+218667	Jaskolski-O'Hara	Trish Deckow	EO-54210	Shirt	13	25.81	335.53	2016-05-26 08:39:22
+453258	Runolfsson-Bayer	Shannen Hudson	EO-54210	Shirt	5	48.02	240.1	2015-08-10 09:38:46
+759168	Schaefer Inc	Loring Predovic	ZY-38455	Shirt	9	27.44	246.96	2015-10-16 18:59:05
+280749	Douglas PLC	Teagan O'Keefe	DU-87462	Shirt	12	44.67	536.04	2015-06-28 09:10:49
+530925	Purdy and Sons	Teagan O'Keefe	FI-01804	Shirt	15	41.55	623.25	2015-06-24 11:00:06
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	1	47.56	47.56	2015-10-23 15:30:45
+218667	Jaskolski-O'Hara	Trish Deckow	TK-29646	Shoes	11	81.01	891.11	2015-09-30 03:47:05
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	16	12.24	195.84	2015-07-12 15:31:43
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	6	90.41	542.46	2015-07-09 15:43:18
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	12	81.93	983.16	2015-12-05 14:13:38
+453258	Runolfsson-Bayer	Shannen Hudson	GP-14407	Belt	18	91.33	1643.94	2016-01-16 06:34:43
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	7	12.98	90.86	2016-02-15 14:42:25
+530925	Purdy and Sons	Teagan O'Keefe	DU-87462	Shirt	4	46.72	186.88	2015-10-15 17:00:46
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	9	31.77	285.93	2016-06-07 21:16:00
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	14	24.71	345.94	2015-09-10 16:35:44
+898496	Weissnat, Veum and Barton	Ansley Cummings	TK-29646	Shoes	11	97.61	1073.71	2016-03-22 07:05:08
+280749	Douglas PLC	Teagan O'Keefe	ZY-38455	Shirt	20	93.38	1867.6	2015-06-28 02:25:36
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	3	53.56	160.68	2015-08-06 09:53:32
+680916	Mueller and Sons	Loring Predovic	TL-23025	Shoes	4	27.01	108.04	2015-06-24 01:32:43
+398620	Brekke Ltd	Esequiel Schinner	TK-29646	Shoes	11	78.27	860.97	2015-07-27 07:51:57
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	13	24.27	315.51	2015-11-03 06:13:59
+251881	Zulauf-Grady	Teagan O'Keefe	NZ-99565	Shirt	5	27.59	137.95	2015-07-25 23:56:50
+758030	Kilback-Abernathy	Trish Deckow	TL-23025	Shoes	8	43.93	351.44	2016-06-13 01:12:12
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	20	59.39	1187.8	2015-10-28 18:54:37
+453258	Runolfsson-Bayer	Shannen Hudson	HZ-54995	Belt	12	93.13	1117.56	2015-07-29 10:17:23
+398620	Brekke Ltd	Esequiel Schinner	EO-54210	Shirt	9	62.67	564.03	2015-10-26 13:42:21
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	12	71.33	855.96	2015-10-04 19:04:54
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	17	79.59	1353.03	2016-05-27 07:32:41
+680916	Mueller and Sons	Loring Predovic	TK-29646	Shoes	8	41	328	2015-06-18 15:24:55
+398620	Brekke Ltd	Esequiel Schinner	NZ-99565	Shirt	16	18.74	299.84	2016-05-23 07:20:47
+262693	Ziemann-Heidenreich	Loring Predovic	HZ-54995	Belt	18	34.21	615.78	2015-07-01 03:43:02
+262693	Ziemann-Heidenreich	Loring Predovic	TL-23025	Shoes	17	93.56	1590.52	2016-01-06 00:58:56
+251881	Zulauf-Grady	Teagan O'Keefe	GP-14407	Belt	17	34.89	593.13	2016-01-06 11:39:29
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	19	97.63	1854.97	2016-01-02 20:36:26
+262693	Ziemann-Heidenreich	Loring Predovic	HZ-54995	Belt	11	82.95	912.45	2016-02-29 23:05:14
+752312	Watsica-Pfannerstill	Loring Predovic	EO-54210	Shirt	17	76.26	1296.42	2015-08-18 07:18:31
+453258	Runolfsson-Bayer	Shannen Hudson	DU-87462	Shirt	8	74.68	597.44	2016-05-30 07:56:58
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	11	22.99	252.89	2015-07-05 15:52:42
+530925	Purdy and Sons	Teagan O'Keefe	TL-23025	Shoes	9	77.96	701.64	2015-10-06 12:40:39
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	15	56.85	852.75	2016-05-02 04:40:57
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	19	37.74	717.06	2016-05-26 18:14:51
+398620	Brekke Ltd	Esequiel Schinner	ZY-38455	Shirt	9	74.43	669.87	2016-02-29 07:47:57
+530925	Purdy and Sons	Teagan O'Keefe	DU-87462	Shirt	16	69.81	1116.96	2015-09-06 16:10:29
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	3	66.25	198.75	2015-12-19 04:01:01
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	ZY-38455	Shirt	2	30.48	60.96	2015-10-04 22:32:39
+136521	Labadie and Sons	Esequiel Schinner	GP-14407	Belt	13	13.03	169.39	2016-05-05 13:42:14
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	8	68.48	547.84	2016-03-06 09:50:26
+93583	Hegmann-Howell	Esequiel Schinner	FI-01804	Shirt	3	83.12	249.36	2015-08-21 22:56:27
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	FI-01804	Shirt	7	95.82	670.74	2016-01-04 11:51:16
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	14	22.54	315.56	2016-01-14 22:14:01
+398620	Brekke Ltd	Esequiel Schinner	FI-01804	Shirt	1	76.83	76.83	2015-12-13 17:14:46
+136521	Labadie and Sons	Esequiel Schinner	NZ-99565	Shirt	3	49.28	147.84	2016-01-13 13:43:25
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	12	99.82	1197.84	2016-01-04 14:58:53
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	5	84.53	422.65	2016-03-19 06:16:28
+752312	Watsica-Pfannerstill	Loring Predovic	FI-01804	Shirt	11	41.66	458.26	2015-08-18 12:53:26
+262693	Ziemann-Heidenreich	Loring Predovic	GJ-90272	Shoes	14	52.85	739.9	2015-09-16 03:49:33
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	20	34.98	699.6	2016-06-12 22:05:46
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	12	78.07	936.84	2015-10-21 06:42:32
+898496	Weissnat, Veum and Barton	Ansley Cummings	ZY-38455	Shirt	12	44.15	529.8	2016-01-06 17:31:51
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	NZ-99565	Shirt	11	15.62	171.82	2016-01-19 08:58:11
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	16	61.25	980	2016-03-31 23:39:04
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	6	47.99	287.94	2016-05-04 09:00:27
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	12	40.56	486.72	2015-12-02 12:36:52
+262693	Ziemann-Heidenreich	Loring Predovic	TK-29646	Shoes	8	41.26	330.08	2015-12-25 14:57:29
+398620	Brekke Ltd	Esequiel Schinner	EO-54210	Shirt	1	44.55	44.55	2016-06-07 17:20:17
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	12	24.31	291.72	2016-02-03 09:28:53
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	3	20.12	60.36	2015-09-18 01:08:48
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	3	99.29	297.87	2016-04-12 05:24:51
+251881	Zulauf-Grady	Teagan O'Keefe	HZ-54995	Belt	15	53.95	809.25	2016-04-09 08:00:57
+680916	Mueller and Sons	Loring Predovic	GP-14407	Belt	3	33.63	100.89	2016-04-04 03:15:32
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	8	37.17	297.36	2015-10-02 08:23:20
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	13	80.87	1051.31	2015-09-26 00:02:26
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	3	22.91	68.73	2015-12-30 05:17:06
+280749	Douglas PLC	Teagan O'Keefe	DU-87462	Shirt	6	82.99	497.94	2016-03-29 20:28:28
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	14	46.14	645.96	2015-11-27 08:00:03
+251881	Zulauf-Grady	Teagan O'Keefe	GP-14407	Belt	15	71.5	1072.5	2016-04-18 05:58:22
+680916	Mueller and Sons	Loring Predovic	ZY-38455	Shirt	8	70.78	566.24	2016-05-24 10:11:34
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	1	62.85	62.85	2015-09-07 08:46:34
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	ZY-38455	Shirt	16	53.29	852.64	2015-11-10 18:50:41
+108399	Kuhic, Shields and Volkman	Trish Deckow	TK-29646	Shoes	1	26.01	26.01	2015-12-15 18:19:50
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	2	57.18	114.36	2015-09-17 16:16:15
+280749	Douglas PLC	Teagan O'Keefe	ZY-38455	Shirt	2	86.1	172.2	2015-06-21 17:34:14
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	10	63.52	635.2	2015-12-21 08:10:37
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	12	66.68	800.16	2015-10-24 18:26:07
+262693	Ziemann-Heidenreich	Loring Predovic	ZY-38455	Shirt	12	90.89	1090.68	2015-10-21 09:27:48
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	11	68.6	754.6	2016-03-31 11:43:58
+398620	Brekke Ltd	Esequiel Schinner	DU-87462	Shirt	1	61.82	61.82	2016-01-16 00:02:26
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	13	94.83	1232.79	2015-11-02 03:41:40
+108399	Kuhic, Shields and Volkman	Trish Deckow	TL-23025	Shoes	3	62.35	187.05	2015-08-30 07:21:47
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	1	86.28	86.28	2015-09-14 17:23:29
+752312	Watsica-Pfannerstill	Loring Predovic	DU-87462	Shirt	2	90.95	181.9	2015-09-21 03:38:21
+680916	Mueller and Sons	Loring Predovic	GP-14407	Belt	15	84.97	1274.55	2015-09-29 18:59:06
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	8	77.21	617.68	2016-04-23 07:43:08
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	7	85.95	601.65	2016-04-13 21:53:45
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	17	27.56	468.52	2016-01-13 19:02:17
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	10	88.51	885.1	2015-08-07 01:57:29
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	14	65.45	916.3	2016-02-09 06:25:34
+280749	Douglas PLC	Teagan O'Keefe	ZY-38455	Shirt	8	60.51	484.08	2016-02-06 14:27:34
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	EO-54210	Shirt	4	48.14	192.56	2015-11-22 00:05:03
+108399	Kuhic, Shields and Volkman	Trish Deckow	DU-87462	Shirt	9	85.35	768.15	2015-09-07 14:57:00
+680916	Mueller and Sons	Loring Predovic	ZY-38455	Shirt	8	64.67	517.36	2016-05-05 05:49:24
+251881	Zulauf-Grady	Teagan O'Keefe	TK-29646	Shoes	3	47.65	142.95	2016-05-11 02:04:13
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	20	94.15	1883	2016-04-05 22:55:49
+282122	Connelly, Abshire and Von	Beth Skiles	DU-87462	Shirt	1	44.26	44.26	2016-02-05 22:50:44
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	6	65.12	390.72	2015-08-23 18:23:53
+453258	Runolfsson-Bayer	Shannen Hudson	ZY-38455	Shirt	14	66.13	925.82	2015-11-17 05:25:37
+251881	Zulauf-Grady	Teagan O'Keefe	TK-29646	Shoes	18	71.94	1294.92	2015-09-11 23:20:58
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	2	41.8	83.6	2016-02-19 11:00:48
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	8	51.47	411.76	2015-09-03 14:59:41
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	2	77.26	154.52	2015-09-05 23:07:48
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	9	96.36	867.24	2015-09-30 23:17:15
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	14	95.18	1332.52	2015-12-20 08:54:39
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	10	81.47	814.7	2016-02-22 00:46:10
+262693	Ziemann-Heidenreich	Loring Predovic	HZ-54995	Belt	18	13.65	245.7	2015-11-17 19:21:52
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	4	46.88	187.52	2015-11-26 19:21:12
+759168	Schaefer Inc	Loring Predovic	ZY-38455	Shirt	20	98.58	1971.6	2015-12-10 22:45:46
+251881	Zulauf-Grady	Teagan O'Keefe	GP-14407	Belt	19	27.22	517.18	2015-08-01 18:52:14
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	3	96.14	288.42	2016-02-08 02:38:57
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	EO-54210	Shirt	20	37.25	745	2016-05-24 02:57:59
+136521	Labadie and Sons	Esequiel Schinner	GP-14407	Belt	4	73.24	292.96	2016-04-20 09:42:33
+759168	Schaefer Inc	Loring Predovic	TK-29646	Shoes	19	14.87	282.53	2016-04-06 15:16:21
+136521	Labadie and Sons	Esequiel Schinner	NZ-99565	Shirt	1	38.43	38.43	2016-02-12 07:44:35
+136521	Labadie and Sons	Esequiel Schinner	GJ-90272	Shoes	16	36.58	585.28	2016-05-23 18:29:31
+262693	Ziemann-Heidenreich	Loring Predovic	TK-29646	Shoes	7	46.84	327.88	2015-06-16 11:11:36
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	4	82.19	328.76	2015-08-25 22:44:23
+530925	Purdy and Sons	Teagan O'Keefe	TK-29646	Shoes	9	57.76	519.84	2015-08-13 03:47:53
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	3	80.6	241.8	2015-07-14 18:22:24
+398620	Brekke Ltd	Esequiel Schinner	TL-23025	Shoes	2	83.63	167.26	2016-06-02 04:32:07
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	17	45.85	779.45	2015-09-22 15:19:59
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	2	74.98	149.96	2015-08-28 00:31:32
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	NZ-99565	Shirt	12	36.05	432.6	2015-12-25 21:33:39
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	15	78.11	1171.65	2015-10-01 05:43:46
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	19	13.68	259.92	2015-08-02 13:16:07
+280749	Douglas PLC	Teagan O'Keefe	HZ-54995	Belt	10	31.77	317.7	2015-10-24 09:58:26
+752312	Watsica-Pfannerstill	Loring Predovic	TL-23025	Shoes	18	56.29	1013.22	2015-10-31 10:20:24
+680916	Mueller and Sons	Loring Predovic	HZ-54995	Belt	4	18.84	75.36	2015-11-27 01:36:45
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	ZY-38455	Shirt	6	18.45	110.7	2016-01-04 16:05:58
+898496	Weissnat, Veum and Barton	Ansley Cummings	TK-29646	Shoes	8	67.4	539.2	2015-09-29 11:58:36
+752312	Watsica-Pfannerstill	Loring Predovic	GP-14407	Belt	4	29.35	117.4	2015-11-17 23:43:19
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	2	28	56	2016-03-31 09:12:37
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	8	82.41	659.28	2015-10-08 10:12:35
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	18	21.15	380.7	2016-05-25 20:49:54
+887145	Gislason LLC	Loring Predovic	DU-87462	Shirt	2	89.48	178.96	2015-12-09 16:23:45
+887145	Gislason LLC	Loring Predovic	DU-87462	Shirt	18	90.53	1629.54	2015-11-14 13:02:53
+680916	Mueller and Sons	Loring Predovic	TL-23025	Shoes	2	11.94	23.88	2015-07-30 05:48:08
+282122	Connelly, Abshire and Von	Beth Skiles	NZ-99565	Shirt	19	58.3	1107.7	2015-09-26 04:18:03
+759168	Schaefer Inc	Loring Predovic	EO-54210	Shirt	6	16.83	100.98	2016-06-03 16:49:41
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	10	20.49	204.9	2015-11-25 19:08:20
+398620	Brekke Ltd	Esequiel Schinner	FI-01804	Shirt	11	89.38	983.18	2015-10-22 10:59:29
+262693	Ziemann-Heidenreich	Loring Predovic	TL-23025	Shoes	13	38.91	505.83	2016-01-21 21:50:18
+282122	Connelly, Abshire and Von	Beth Skiles	ZY-38455	Shirt	13	82.81	1076.53	2015-11-28 17:57:20
+680916	Mueller and Sons	Loring Predovic	FI-01804	Shirt	1	35.11	35.11	2015-06-30 14:05:07
+758030	Kilback-Abernathy	Trish Deckow	NZ-99565	Shirt	6	17.12	102.72	2016-01-08 09:48:38
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	17	45.03	765.51	2016-03-27 21:47:28
+453258	Runolfsson-Bayer	Shannen Hudson	ZY-38455	Shirt	14	18.11	253.54	2016-03-12 04:35:00
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	DU-87462	Shirt	7	52.82	369.74	2016-03-28 23:28:54
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	15	88.94	1334.1	2015-08-31 05:30:36
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	1	31.04	31.04	2016-05-28 04:52:42
+752312	Watsica-Pfannerstill	Loring Predovic	GP-14407	Belt	6	44.53	267.18	2015-10-01 23:14:19
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	12	90.81	1089.72	2015-09-04 13:50:47
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	19	44.26	840.94	2016-03-27 06:13:41
+93583	Hegmann-Howell	Esequiel Schinner	NZ-99565	Shirt	8	98.1	784.8	2015-11-12 17:42:00
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TL-23025	Shoes	13	29.93	389.09	2015-12-20 13:51:00
+758030	Kilback-Abernathy	Trish Deckow	GJ-90272	Shoes	1	84.69	84.69	2016-02-21 09:19:38
+398620	Brekke Ltd	Esequiel Schinner	ZY-38455	Shirt	17	70.29	1194.93	2015-10-26 10:47:56
+251881	Zulauf-Grady	Teagan O'Keefe	EO-54210	Shirt	1	67.53	67.53	2016-01-04 23:30:33
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	12	80.23	962.76	2015-08-02 19:26:21
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	FI-01804	Shirt	7	19.6	137.2	2015-09-14 05:00:48
+108399	Kuhic, Shields and Volkman	Trish Deckow	TL-23025	Shoes	1	20.22	20.22	2015-08-30 05:06:42
+251881	Zulauf-Grady	Teagan O'Keefe	GP-14407	Belt	5	47.05	235.25	2016-04-25 00:59:19
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	11	28.75	316.25	2016-01-31 07:06:53
+251881	Zulauf-Grady	Teagan O'Keefe	HZ-54995	Belt	9	65.76	591.84	2016-03-02 19:10:29
+530925	Purdy and Sons	Teagan O'Keefe	GP-14407	Belt	18	92.56	1666.08	2016-02-14 21:57:48
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	2	43.6	87.2	2016-03-29 02:37:00
+758030	Kilback-Abernathy	Trish Deckow	GP-14407	Belt	4	60.29	241.16	2015-07-31 19:14:37
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	1	14.56	14.56	2015-07-23 15:43:16
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	NZ-99565	Shirt	19	70.12	1332.28	2016-04-15 11:38:26
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	11	98.22	1080.42	2015-08-22 17:45:47
+759168	Schaefer Inc	Loring Predovic	DU-87462	Shirt	18	85.23	1534.14	2016-03-31 22:27:46
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	17	59.25	1007.25	2016-03-08 14:02:03
+93583	Hegmann-Howell	Esequiel Schinner	ZY-38455	Shirt	6	73.79	442.74	2016-06-04 20:01:57
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	13	88.99	1156.87	2016-03-06 00:27:36
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TL-23025	Shoes	6	29.97	179.82	2016-04-30 07:40:44
+759168	Schaefer Inc	Loring Predovic	HZ-54995	Belt	2	82.53	165.06	2016-03-14 22:55:55
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	2	57.13	114.26	2015-08-14 16:06:02
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	6	94.54	567.24	2015-07-23 21:55:07
+530925	Purdy and Sons	Teagan O'Keefe	DU-87462	Shirt	5	83.27	416.35	2015-11-21 21:30:27
+282122	Connelly, Abshire and Von	Beth Skiles	ZY-38455	Shirt	1	92.16	92.16	2016-04-24 22:08:30
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	13	79.96	1039.48	2016-05-08 05:42:02
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	18	72.81	1310.58	2015-10-23 01:51:04
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	4	57.92	231.68	2016-04-25 06:03:36
+680916	Mueller and Sons	Loring Predovic	NZ-99565	Shirt	7	80.35	562.45	2015-10-15 06:41:29
+108399	Kuhic, Shields and Volkman	Trish Deckow	HZ-54995	Belt	18	18.03	324.54	2016-01-21 17:42:01
+680916	Mueller and Sons	Loring Predovic	TL-23025	Shoes	2	28.03	56.06	2016-02-08 05:10:32
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	20	66.16	1323.2	2015-06-17 15:25:53
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	9	94.55	850.95	2015-07-18 17:26:55
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	13	65.26	848.38	2016-03-19 00:27:51
+759168	Schaefer Inc	Loring Predovic	HZ-54995	Belt	15	10.77	161.55	2016-01-30 19:33:41
+759168	Schaefer Inc	Loring Predovic	NZ-99565	Shirt	14	97.43	1364.02	2015-07-12 20:41:56
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	DU-87462	Shirt	19	40.42	767.98	2016-02-17 15:08:32
+680916	Mueller and Sons	Loring Predovic	TL-23025	Shoes	12	68.67	824.04	2016-02-21 05:23:19
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	13	23.75	308.75	2015-12-26 12:48:34
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	17	87.78	1492.26	2016-02-12 05:16:01
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	2	64.36	128.72	2015-09-04 18:23:16
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	ZY-38455	Shirt	19	70.06	1331.14	2016-03-15 05:10:02
+136521	Labadie and Sons	Esequiel Schinner	FI-01804	Shirt	20	14.29	285.8	2016-05-18 22:27:01
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	DU-87462	Shirt	5	67.69	338.45	2016-04-26 19:45:50
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	4	34.81	139.24	2015-12-19 20:07:56
+530925	Purdy and Sons	Teagan O'Keefe	NZ-99565	Shirt	5	61.25	306.25	2016-03-12 01:06:18
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	9	71.3	641.7	2015-08-30 19:35:12
+758030	Kilback-Abernathy	Trish Deckow	FI-01804	Shirt	15	82.49	1237.35	2015-07-16 00:45:45
+108399	Kuhic, Shields and Volkman	Trish Deckow	TK-29646	Shoes	2	96.77	193.54	2015-07-20 06:59:26
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	2	10.27	20.54	2015-11-10 21:37:02
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	20	23.05	461	2015-09-12 15:44:45
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	7	97.32	681.24	2015-09-26 21:42:45
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	3	77.86	233.58	2016-02-12 08:04:05
+680916	Mueller and Sons	Loring Predovic	NZ-99565	Shirt	12	87.59	1051.08	2016-05-12 16:35:06
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	1	92.37	92.37	2016-05-23 02:10:53
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	4	61.45	245.8	2016-06-11 18:41:13
+530925	Purdy and Sons	Teagan O'Keefe	FI-01804	Shirt	15	73.36	1100.4	2016-01-01 08:18:23
+251881	Zulauf-Grady	Teagan O'Keefe	HZ-54995	Belt	1	46.44	46.44	2015-12-29 08:29:36
+108399	Kuhic, Shields and Volkman	Trish Deckow	GP-14407	Belt	9	44.51	400.59	2015-06-25 06:08:36
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	2	79.42	158.84	2016-03-07 21:51:22
+398620	Brekke Ltd	Esequiel Schinner	GP-14407	Belt	1	14.94	14.94	2015-08-29 17:55:05
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	17	37.91	644.47	2016-02-10 03:57:10
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	3	47.12	141.36	2016-02-11 09:46:42
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	9	99.54	895.86	2016-05-09 12:07:19
+262693	Ziemann-Heidenreich	Loring Predovic	ZY-38455	Shirt	8	90.52	724.16	2016-04-20 15:50:33
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	5	73.73	368.65	2015-11-23 15:30:25
+530925	Purdy and Sons	Teagan O'Keefe	GP-14407	Belt	4	40.72	162.88	2015-07-05 00:53:06
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	2	21.11	42.22	2016-05-10 19:38:40
+280749	Douglas PLC	Teagan O'Keefe	GP-14407	Belt	16	69.26	1108.16	2015-07-23 16:02:25
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	15	59.09	886.35	2015-06-28 23:28:07
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	1	89.12	89.12	2015-09-29 04:15:42
+108399	Kuhic, Shields and Volkman	Trish Deckow	HZ-54995	Belt	1	40.82	40.82	2015-06-22 12:30:39
+93583	Hegmann-Howell	Esequiel Schinner	GJ-90272	Shoes	20	38.15	763	2016-03-22 21:05:35
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	11	74.64	821.04	2016-05-01 00:32:51
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	19	22.56	428.64	2016-06-02 00:45:26
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	3	32.66	97.98	2015-08-18 22:21:01
+398620	Brekke Ltd	Esequiel Schinner	TL-23025	Shoes	14	57.02	798.28	2016-04-01 02:58:27
+398620	Brekke Ltd	Esequiel Schinner	NZ-99565	Shirt	16	24.94	399.04	2015-07-01 22:16:30
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	1	82.7	82.7	2015-06-28 20:36:59
+93583	Hegmann-Howell	Esequiel Schinner	GP-14407	Belt	2	31.71	63.42	2015-09-28 21:40:45
+680916	Mueller and Sons	Loring Predovic	FI-01804	Shirt	20	63.57	1271.4	2016-01-28 07:27:11
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	16	52.65	842.4	2015-10-12 07:21:44
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	12	95.45	1145.4	2016-05-27 17:04:55
+680916	Mueller and Sons	Loring Predovic	FI-01804	Shirt	13	56.68	736.84	2015-11-03 17:04:20
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	20	23.96	479.2	2015-06-21 22:34:06
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	19	20.1	381.9	2015-09-17 00:49:53
+758030	Kilback-Abernathy	Trish Deckow	HZ-54995	Belt	5	41.68	208.4	2016-04-20 05:01:20
+758030	Kilback-Abernathy	Trish Deckow	NZ-99565	Shirt	15	98.34	1475.1	2015-07-11 22:55:59
+398620	Brekke Ltd	Esequiel Schinner	GP-14407	Belt	11	32.35	355.85	2016-03-24 18:34:44
+758030	Kilback-Abernathy	Trish Deckow	TL-23025	Shoes	11	38.21	420.31	2016-03-20 19:36:04
+136521	Labadie and Sons	Esequiel Schinner	EO-54210	Shirt	7	53.32	373.24	2015-11-15 17:08:39
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	17	87.04	1479.68	2015-06-27 03:31:16
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	15	72.85	1092.75	2015-08-21 14:17:24
+262693	Ziemann-Heidenreich	Loring Predovic	GJ-90272	Shoes	12	71.21	854.52	2016-03-14 00:09:04
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	2	31.38	62.76	2016-04-28 13:45:23
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	5	35.36	176.8	2016-01-29 07:07:52
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	2	87.9	175.8	2015-10-29 05:15:39
+62592	O'Keefe-Koch	Shannen Hudson	NZ-99565	Shirt	1	24.02	24.02	2015-06-17 05:40:06
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	4	96.13	384.52	2016-02-07 06:20:32
+680916	Mueller and Sons	Loring Predovic	HZ-54995	Belt	4	19.95	79.8	2016-02-28 15:54:04
+758030	Kilback-Abernathy	Trish Deckow	EO-54210	Shirt	13	23.94	311.22	2016-05-20 13:58:02
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	4	35.93	143.72	2015-08-22 16:19:56
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	17	57.4	975.8	2016-02-09 02:24:02
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	8	45.89	367.12	2015-11-06 00:53:43
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	9	71.73	645.57	2015-07-12 15:48:36
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	20	42.25	845	2015-07-31 10:46:21
+218667	Jaskolski-O'Hara	Trish Deckow	EO-54210	Shirt	5	97.15	485.75	2015-11-30 07:56:00
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	18	66.19	1191.42	2015-07-21 19:59:59
+262693	Ziemann-Heidenreich	Loring Predovic	GJ-90272	Shoes	10	35.17	351.7	2016-02-23 08:10:10
+398620	Brekke Ltd	Esequiel Schinner	FI-01804	Shirt	17	37.57	638.69	2016-02-22 12:42:42
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	14	38.43	538.02	2015-07-29 01:36:15
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	11	65.58	721.38	2015-07-01 19:35:33
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	10	88.66	886.6	2016-03-21 19:08:54
+453258	Runolfsson-Bayer	Shannen Hudson	TL-23025	Shoes	19	57.29	1088.51	2016-05-28 06:46:55
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	4	15.5	62	2016-01-04 06:07:17
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	7	39.75	278.25	2016-05-18 05:49:51
+752312	Watsica-Pfannerstill	Loring Predovic	EO-54210	Shirt	20	13.36	267.2	2015-07-26 20:53:51
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	18	30.4	547.2	2016-01-08 07:54:37
+262693	Ziemann-Heidenreich	Loring Predovic	GP-14407	Belt	18	57.17	1029.06	2015-08-01 15:27:18
+758030	Kilback-Abernathy	Trish Deckow	NZ-99565	Shirt	6	83.56	501.36	2015-11-06 20:46:36
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	7	80.34	562.38	2015-12-22 18:06:48
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	5	74.51	372.55	2015-06-17 15:33:42
+93583	Hegmann-Howell	Esequiel Schinner	FI-01804	Shirt	6	36.07	216.42	2015-08-16 15:54:56
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	11	68.02	748.22	2016-03-31 09:48:53
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	DU-87462	Shirt	19	47.84	908.96	2015-07-10 18:45:01
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	17	27.56	468.52	2015-08-13 17:26:13
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	10	20.36	203.6	2016-05-04 11:43:07
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	13	86.75	1127.75	2015-12-11 22:29:56
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	10	14.26	142.6	2015-07-07 00:57:18
+136521	Labadie and Sons	Esequiel Schinner	GJ-90272	Shoes	17	78.75	1338.75	2015-12-26 21:57:47
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	1	11.75	11.75	2015-12-27 04:27:54
+453258	Runolfsson-Bayer	Shannen Hudson	HZ-54995	Belt	17	16.72	284.24	2015-09-17 20:14:18
+759168	Schaefer Inc	Loring Predovic	TK-29646	Shoes	14	62.5	875	2015-11-04 23:13:42
+758030	Kilback-Abernathy	Trish Deckow	FI-01804	Shirt	1	43.14	43.14	2016-04-30 02:00:35
+898496	Weissnat, Veum and Barton	Ansley Cummings	EO-54210	Shirt	5	15.24	76.2	2016-01-25 16:38:33
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	15	18.48	277.2	2016-05-14 16:57:25
+453258	Runolfsson-Bayer	Shannen Hudson	TK-29646	Shoes	12	20.22	242.64	2015-11-27 10:10:48
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	14	55.89	782.46	2015-10-14 05:44:45
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	11	78.26	860.86	2016-04-17 18:42:31
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	10	74.96	749.6	2015-06-18 21:07:15
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	17	42.38	720.46	2016-05-04 14:15:32
+282122	Connelly, Abshire and Von	Beth Skiles	DU-87462	Shirt	16	54.87	877.92	2015-06-25 07:00:40
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	20	86.77	1735.4	2016-02-29 10:05:51
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	7	55.59	389.13	2015-12-28 13:47:46
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	6	25.07	150.42	2016-04-15 12:52:04
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	1	89.66	89.66	2015-11-22 21:55:16
+453258	Runolfsson-Bayer	Shannen Hudson	TL-23025	Shoes	8	68.81	550.48	2015-10-10 10:14:02
+282122	Connelly, Abshire and Von	Beth Skiles	FI-01804	Shirt	20	48.77	975.4	2015-11-02 10:41:05
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	6	81.32	487.92	2015-10-21 01:20:46
+680916	Mueller and Sons	Loring Predovic	GP-14407	Belt	15	50.62	759.3	2016-02-07 14:21:57
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	16	35.7	571.2	2016-05-18 21:01:24
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	HZ-54995	Belt	3	78.73	236.19	2016-03-04 22:39:49
+280749	Douglas PLC	Teagan O'Keefe	HZ-54995	Belt	18	42.44	763.92	2015-12-03 14:44:16
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	1	39.48	39.48	2015-10-06 07:26:06
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	4	75.96	303.84	2015-12-24 11:19:46
+251881	Zulauf-Grady	Teagan O'Keefe	GJ-90272	Shoes	5	89.2	446	2015-07-12 18:59:29
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	6	33.13	198.78	2016-01-29 12:13:07
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	2	90.49	180.98	2015-06-29 06:39:21
+453258	Runolfsson-Bayer	Shannen Hudson	DU-87462	Shirt	9	11.24	101.16	2015-08-13 13:28:50
+453258	Runolfsson-Bayer	Shannen Hudson	DU-87462	Shirt	6	87.86	527.16	2015-11-12 02:44:00
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	9	77.85	700.65	2015-08-16 22:43:35
+752312	Watsica-Pfannerstill	Loring Predovic	TL-23025	Shoes	6	37.31	223.86	2015-08-11 20:20:12
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	19	88.67	1684.73	2015-06-21 15:48:23
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	11	82.51	907.61	2016-04-04 12:30:34
+680916	Mueller and Sons	Loring Predovic	EO-54210	Shirt	3	90.13	270.39	2016-03-30 01:55:33
+108399	Kuhic, Shields and Volkman	Trish Deckow	DU-87462	Shirt	10	93.39	933.9	2016-05-26 06:06:40
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	16	10.52	168.32	2015-07-15 23:13:38
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	5	78.54	392.7	2016-04-05 03:03:05
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	15	30.82	462.3	2015-12-29 02:46:13
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	18	38.31	689.58	2016-02-13 22:07:31
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	9	51.44	462.96	2015-09-18 10:07:09
+282122	Connelly, Abshire and Von	Beth Skiles	DU-87462	Shirt	20	48.29	965.8	2015-08-28 02:43:55
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	16	66.73	1067.68	2016-02-27 18:00:40
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	3	29.63	88.89	2016-05-17 21:31:10
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	17	24.81	421.77	2015-09-18 06:27:42
+93583	Hegmann-Howell	Esequiel Schinner	GJ-90272	Shoes	17	77.87	1323.79	2016-01-31 04:42:23
+251881	Zulauf-Grady	Teagan O'Keefe	TK-29646	Shoes	5	23.78	118.9	2015-10-22 16:25:26
+93583	Hegmann-Howell	Esequiel Schinner	FI-01804	Shirt	20	99.25	1985	2016-04-06 16:25:00
+280749	Douglas PLC	Teagan O'Keefe	DU-87462	Shirt	2	96.51	193.02	2015-10-24 05:50:53
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	4	13.11	52.44	2015-08-30 15:25:22
+280749	Douglas PLC	Teagan O'Keefe	EO-54210	Shirt	13	45.85	596.05	2015-11-01 10:25:14
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	FI-01804	Shirt	18	38.88	699.84	2016-02-25 01:36:57
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	2	10.78	21.56	2016-01-19 12:26:16
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	10	18.87	188.7	2016-04-30 21:04:38
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	2	46.45	92.9	2015-10-16 04:53:06
+398620	Brekke Ltd	Esequiel Schinner	GP-14407	Belt	6	83.4	500.4	2016-03-22 03:14:16
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	6	96.15	576.9	2016-05-05 13:34:56
+752312	Watsica-Pfannerstill	Loring Predovic	DU-87462	Shirt	3	38.31	114.93	2016-04-14 10:03:00
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	16	81.68	1306.88	2016-01-01 02:51:33
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	15	76.98	1154.7	2015-11-27 12:13:20
+108399	Kuhic, Shields and Volkman	Trish Deckow	FI-01804	Shirt	15	88.49	1327.35	2016-02-23 11:02:48
+680916	Mueller and Sons	Loring Predovic	ZY-38455	Shirt	11	86.46	951.06	2015-10-18 21:49:11
+262693	Ziemann-Heidenreich	Loring Predovic	TL-23025	Shoes	19	12.66	240.54	2015-07-15 01:14:22
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GJ-90272	Shoes	15	17.22	258.3	2016-05-20 07:46:24
+887145	Gislason LLC	Loring Predovic	TL-23025	Shoes	11	61.57	677.27	2015-07-28 09:19:07
+530925	Purdy and Sons	Teagan O'Keefe	FI-01804	Shirt	7	72.39	506.73	2016-01-20 10:19:27
+93583	Hegmann-Howell	Esequiel Schinner	NZ-99565	Shirt	11	13.46	148.06	2016-06-03 06:36:55
+218667	Jaskolski-O'Hara	Trish Deckow	TK-29646	Shoes	13	78.53	1020.89	2016-03-22 11:46:03
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GJ-90272	Shoes	14	74.52	1043.28	2015-06-29 12:09:29
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	9	39.14	352.26	2016-02-11 15:27:05
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GJ-90272	Shoes	8	21.21	169.68	2016-03-20 18:19:30
+680916	Mueller and Sons	Loring Predovic	GJ-90272	Shoes	3	69.14	207.42	2015-06-27 11:19:56
+280749	Douglas PLC	Teagan O'Keefe	HZ-54995	Belt	5	81.92	409.6	2015-11-04 16:29:33
+752312	Watsica-Pfannerstill	Loring Predovic	TL-23025	Shoes	8	48.18	385.44	2016-04-19 23:55:10
+898496	Weissnat, Veum and Barton	Ansley Cummings	GP-14407	Belt	1	92.3	92.3	2015-11-18 21:31:14
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	1	85.94	85.94	2016-06-08 20:12:08
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	11	13.75	151.25	2015-08-10 13:06:00
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	16	69.01	1104.16	2016-05-01 20:32:12
+398620	Brekke Ltd	Esequiel Schinner	HZ-54995	Belt	1	68.32	68.32	2016-04-27 05:07:20
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	9	94.67	852.03	2016-01-16 07:35:33
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	16	30.44	487.04	2015-12-24 09:14:03
+398620	Brekke Ltd	Esequiel Schinner	GP-14407	Belt	15	16.66	249.9	2015-12-28 00:54:17
+251881	Zulauf-Grady	Teagan O'Keefe	GJ-90272	Shoes	10	29.52	295.2	2016-03-20 04:57:32
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	13	66.16	860.08	2015-07-12 17:53:46
+680916	Mueller and Sons	Loring Predovic	FI-01804	Shirt	1	83.48	83.48	2015-10-10 12:10:07
+93583	Hegmann-Howell	Esequiel Schinner	DU-87462	Shirt	9	53.76	483.84	2015-11-22 10:39:22
+453258	Runolfsson-Bayer	Shannen Hudson	TK-29646	Shoes	9	98.5	886.5	2015-09-16 20:37:17
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	4	90.59	362.36	2015-12-07 06:48:05
+280749	Douglas PLC	Teagan O'Keefe	GP-14407	Belt	1	89.87	89.87	2015-08-28 11:16:00
+680916	Mueller and Sons	Loring Predovic	TL-23025	Shoes	20	61.65	1233	2016-02-05 07:14:29
+398620	Brekke Ltd	Esequiel Schinner	FI-01804	Shirt	8	84.25	674	2016-01-22 23:37:32
+251881	Zulauf-Grady	Teagan O'Keefe	HZ-54995	Belt	10	47.1	471	2016-01-21 19:22:43
+218667	Jaskolski-O'Hara	Trish Deckow	TL-23025	Shoes	17	49.15	835.55	2016-03-22 17:56:52
+758030	Kilback-Abernathy	Trish Deckow	GJ-90272	Shoes	6	57.32	343.92	2016-02-10 08:22:35
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	17	51.03	867.51	2016-06-10 16:03:27
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	12	14.38	172.56	2015-12-10 21:08:22
+251881	Zulauf-Grady	Teagan O'Keefe	GJ-90272	Shoes	16	74.32	1189.12	2015-07-09 08:48:11
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	15	35.34	530.1	2015-06-18 00:59:00
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	12	62.48	749.76	2016-03-16 04:42:32
+453258	Runolfsson-Bayer	Shannen Hudson	HZ-54995	Belt	17	88.73	1508.41	2015-11-21 21:00:55
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	13	47.89	622.57	2015-10-17 03:08:58
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	7	13.63	95.41	2016-04-14 20:30:01
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	3	37.24	111.72	2015-11-05 06:36:39
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	11	51.56	567.16	2016-05-18 20:33:02
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	10	77.34	773.4	2016-02-12 19:11:47
+759168	Schaefer Inc	Loring Predovic	ZY-38455	Shirt	4	87.6	350.4	2016-05-16 11:43:56
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	18	87.73	1579.14	2016-01-13 08:41:56
+898496	Weissnat, Veum and Barton	Ansley Cummings	ZY-38455	Shirt	20	89.45	1789	2015-10-26 16:05:25
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	14	42.13	589.82	2015-10-26 08:14:20
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	5	30.63	153.15	2016-03-09 19:41:16
+453258	Runolfsson-Bayer	Shannen Hudson	EO-54210	Shirt	15	14.5	217.5	2015-08-27 21:21:05
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	9	95.41	858.69	2015-11-14 17:26:28
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	5	96.79	483.95	2016-04-02 02:33:30
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	20	31.6	632	2015-12-24 15:15:13
+887145	Gislason LLC	Loring Predovic	TK-29646	Shoes	18	31.53	567.54	2015-09-29 01:53:12
+898496	Weissnat, Veum and Barton	Ansley Cummings	GP-14407	Belt	13	67.71	880.23	2015-08-24 08:01:49
+758030	Kilback-Abernathy	Trish Deckow	EO-54210	Shirt	7	14.02	98.14	2016-01-26 13:05:29
+251881	Zulauf-Grady	Teagan O'Keefe	EO-54210	Shirt	14	13.7	191.8	2016-05-04 05:20:47
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	ZY-38455	Shirt	13	42.24	549.12	2015-12-23 18:36:25
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	12	73.5	882	2016-03-27 06:21:34
+108399	Kuhic, Shields and Volkman	Trish Deckow	NZ-99565	Shirt	14	60.97	853.58	2016-03-28 15:22:30
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	20	15.58	311.6	2016-01-25 23:06:19
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	8	74.64	597.12	2016-01-09 16:33:01
+136521	Labadie and Sons	Esequiel Schinner	DU-87462	Shirt	17	75.41	1281.97	2015-10-08 00:27:07
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	18	57.6	1036.8	2015-07-22 08:51:17
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	1	75.59	75.59	2015-08-08 06:45:28
+62592	O'Keefe-Koch	Shannen Hudson	NZ-99565	Shirt	20	89.66	1793.2	2015-11-20 01:28:49
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	7	28.77	201.39	2016-02-06 21:44:08
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	FI-01804	Shirt	15	66.28	994.2	2016-05-17 18:40:02
+251881	Zulauf-Grady	Teagan O'Keefe	GJ-90272	Shoes	2	25.51	51.02	2015-12-21 14:59:20
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	18	67.38	1212.84	2016-03-24 16:37:57
+453258	Runolfsson-Bayer	Shannen Hudson	NZ-99565	Shirt	2	39.99	79.98	2015-10-01 23:00:39
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	5	76.57	382.85	2016-03-16 00:15:08
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	5	82.79	413.95	2016-01-06 21:14:00
+758030	Kilback-Abernathy	Trish Deckow	GP-14407	Belt	6	74.65	447.9	2016-01-15 01:07:52
+251881	Zulauf-Grady	Teagan O'Keefe	HZ-54995	Belt	5	53.26	266.3	2015-12-10 18:11:02
+108399	Kuhic, Shields and Volkman	Trish Deckow	DU-87462	Shirt	11	42.63	468.93	2016-03-27 06:30:56
+887145	Gislason LLC	Loring Predovic	TL-23025	Shoes	4	87.16	348.64	2015-10-03 04:35:36
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	18	13.51	243.18	2016-05-29 17:54:10
+398620	Brekke Ltd	Esequiel Schinner	EO-54210	Shirt	13	25.26	328.38	2016-04-30 18:03:40
+136521	Labadie and Sons	Esequiel Schinner	GP-14407	Belt	9	11.57	104.13	2015-12-21 05:39:51
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	16	30.1	481.6	2016-01-15 10:08:12
+453258	Runolfsson-Bayer	Shannen Hudson	EO-54210	Shirt	9	88.8	799.2	2016-06-06 15:12:51
+218667	Jaskolski-O'Hara	Trish Deckow	HZ-54995	Belt	17	23.92	406.64	2016-03-06 13:51:04
+93583	Hegmann-Howell	Esequiel Schinner	HZ-54995	Belt	13	33.44	434.72	2016-03-21 21:42:03
+282122	Connelly, Abshire and Von	Beth Skiles	NZ-99565	Shirt	6	66.58	399.48	2015-12-11 21:38:53
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	20	31.23	624.6	2015-09-19 18:29:29
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	12	58.36	700.32	2015-09-28 02:34:08
+62592	O'Keefe-Koch	Shannen Hudson	DU-87462	Shirt	17	16.97	288.49	2016-01-14 02:46:54
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	15	62.24	933.6	2016-04-15 02:27:31
+262693	Ziemann-Heidenreich	Loring Predovic	DU-87462	Shirt	7	44.21	309.47	2015-12-23 14:12:04
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	14	75.84	1061.76	2015-07-16 18:34:19
+218667	Jaskolski-O'Hara	Trish Deckow	TK-29646	Shoes	6	92.31	553.86	2015-07-27 03:18:15
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	3	80.39	241.17	2016-06-14 06:59:38
+759168	Schaefer Inc	Loring Predovic	NZ-99565	Shirt	13	89.64	1165.32	2016-01-09 03:54:44
+759168	Schaefer Inc	Loring Predovic	TL-23025	Shoes	16	93.57	1497.12	2016-03-21 21:13:24
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	12	70.1	841.2	2016-01-31 23:50:37
+218667	Jaskolski-O'Hara	Trish Deckow	HZ-54995	Belt	8	86.67	693.36	2015-06-18 23:36:37
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	17	28.87	490.79	2016-02-21 11:47:57
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	19	24.8	471.2	2015-11-29 03:01:53
+530925	Purdy and Sons	Teagan O'Keefe	NZ-99565	Shirt	3	96.91	290.73	2015-11-22 09:16:14
+251881	Zulauf-Grady	Teagan O'Keefe	EO-54210	Shirt	1	72.88	72.88	2015-09-13 05:15:45
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	8	86.55	692.4	2015-12-08 05:11:41
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	19	28.26	536.94	2015-08-10 03:48:07
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	6	85.47	512.82	2015-09-05 15:50:05
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	4	81.97	327.88	2015-11-05 09:50:42
+282122	Connelly, Abshire and Von	Beth Skiles	ZY-38455	Shirt	17	49.68	844.56	2015-08-01 11:46:08
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	14	80.27	1123.78	2016-05-15 05:10:05
+136521	Labadie and Sons	Esequiel Schinner	DU-87462	Shirt	19	59.08	1122.52	2015-11-13 22:50:07
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	19	99.9	1898.1	2016-03-12 09:04:00
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	ZY-38455	Shirt	1	80.39	80.39	2016-01-21 12:16:53
+453258	Runolfsson-Bayer	Shannen Hudson	TL-23025	Shoes	1	19.62	19.62	2015-12-17 09:18:10
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	1	21.23	21.23	2016-03-20 18:13:44
+398620	Brekke Ltd	Esequiel Schinner	TL-23025	Shoes	8	69.58	556.64	2016-04-04 01:48:48
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	11	57.4	631.4	2015-07-19 01:14:00
+887145	Gislason LLC	Loring Predovic	TL-23025	Shoes	14	26.28	367.92	2016-03-28 20:50:14
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	EO-54210	Shirt	7	39.7	277.9	2015-07-01 05:57:09
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	3	67.52	202.56	2015-12-13 20:37:01
+398620	Brekke Ltd	Esequiel Schinner	TL-23025	Shoes	8	18.14	145.12	2016-02-23 05:55:21
+262693	Ziemann-Heidenreich	Loring Predovic	DU-87462	Shirt	3	30.65	91.95	2016-05-25 15:48:53
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	1	79.38	79.38	2015-09-29 22:05:16
+280749	Douglas PLC	Teagan O'Keefe	EO-54210	Shirt	19	99.24	1885.56	2015-10-18 02:05:41
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	9	67.85	610.65	2016-03-05 19:02:44
+282122	Connelly, Abshire and Von	Beth Skiles	NZ-99565	Shirt	9	28.92	260.28	2016-05-31 15:23:54
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	9	99.69	897.21	2016-05-13 17:31:58
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	15	52.17	782.55	2015-09-04 10:04:49
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	1	95.98	95.98	2015-08-15 02:14:49
+758030	Kilback-Abernathy	Trish Deckow	TL-23025	Shoes	3	90.08	270.24	2016-01-15 16:22:49
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	7	27.88	195.16	2016-01-16 10:29:41
+758030	Kilback-Abernathy	Trish Deckow	GP-14407	Belt	2	90.81	181.62	2016-05-04 09:55:57
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	20	95.51	1910.2	2016-02-14 11:16:54
+759168	Schaefer Inc	Loring Predovic	FI-01804	Shirt	9	30.98	278.82	2015-09-07 08:02:32
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	20	73	1460	2016-01-22 12:29:50
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	12	87.85	1054.2	2015-07-29 22:03:25
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	1	26.5	26.5	2015-07-23 16:58:05
+218667	Jaskolski-O'Hara	Trish Deckow	HZ-54995	Belt	5	96.08	480.4	2015-10-15 07:00:10
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	5	17.37	86.85	2015-10-26 09:29:40
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	1	42.75	42.75	2015-09-05 21:27:40
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	11	73.93	813.23	2016-02-13 04:30:59
+93583	Hegmann-Howell	Esequiel Schinner	HZ-54995	Belt	17	76.22	1295.74	2015-10-18 09:53:00
+887145	Gislason LLC	Loring Predovic	GP-14407	Belt	7	51.7	361.9	2015-10-26 00:17:23
+759168	Schaefer Inc	Loring Predovic	TL-23025	Shoes	14	83.77	1172.78	2015-07-05 16:38:06
+62592	O'Keefe-Koch	Shannen Hudson	TK-29646	Shoes	13	42.31	550.03	2015-09-28 21:46:35
+752312	Watsica-Pfannerstill	Loring Predovic	DU-87462	Shirt	17	85.96	1461.32	2015-08-14 09:00:28
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	13	22.62	294.06	2016-03-18 10:59:25
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	DU-87462	Shirt	2	41.75	83.5	2015-07-23 08:09:07
+398620	Brekke Ltd	Esequiel Schinner	EO-54210	Shirt	14	49.36	691.04	2016-03-31 04:59:02
+280749	Douglas PLC	Teagan O'Keefe	HZ-54995	Belt	20	29.81	596.2	2015-10-01 13:58:33
+453258	Runolfsson-Bayer	Shannen Hudson	GP-14407	Belt	1	58.71	58.71	2016-05-20 20:54:07
+887145	Gislason LLC	Loring Predovic	TL-23025	Shoes	6	91.98	551.88	2016-03-20 02:23:19
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	16	26.8	428.8	2015-10-24 10:43:03
+251881	Zulauf-Grady	Teagan O'Keefe	GJ-90272	Shoes	11	33.09	363.99	2015-11-16 13:52:56
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	12	20.12	241.44	2016-05-04 04:17:06
+136521	Labadie and Sons	Esequiel Schinner	DU-87462	Shirt	2	51.4	102.8	2015-07-30 18:12:05
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	15	70.6	1059	2015-06-23 00:24:16
+887145	Gislason LLC	Loring Predovic	DU-87462	Shirt	17	40.63	690.71	2015-12-21 19:13:55
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TL-23025	Shoes	13	11.36	147.68	2015-09-27 02:06:31
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	17	29.89	508.13	2016-03-02 04:26:05
+453258	Runolfsson-Bayer	Shannen Hudson	FI-01804	Shirt	18	38.43	691.74	2015-10-03 00:53:48
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	17	83.88	1425.96	2015-10-29 17:02:31
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	ZY-38455	Shirt	20	30.7	614	2015-06-20 09:15:40
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	FI-01804	Shirt	1	58.27	58.27	2016-02-06 20:22:10
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	10	58.64	586.4	2015-10-04 04:24:29
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	6	90.61	543.66	2015-11-13 15:11:46
+758030	Kilback-Abernathy	Trish Deckow	GP-14407	Belt	15	94.43	1416.45	2016-03-17 03:50:49
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	19	21.77	413.63	2015-08-28 08:18:06
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	14	45.2	632.8	2016-02-27 19:37:13
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	4	22.68	90.72	2016-03-03 00:32:29
+758030	Kilback-Abernathy	Trish Deckow	TK-29646	Shoes	2	79.33	158.66	2015-07-05 07:13:45
+530925	Purdy and Sons	Teagan O'Keefe	TL-23025	Shoes	10	88.81	888.1	2015-10-26 19:44:32
+453258	Runolfsson-Bayer	Shannen Hudson	ZY-38455	Shirt	8	38.21	305.68	2015-09-17 08:02:13
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	5	37.83	189.15	2015-09-12 02:30:27
+759168	Schaefer Inc	Loring Predovic	EO-54210	Shirt	17	94.04	1598.68	2016-06-08 14:23:28
+280749	Douglas PLC	Teagan O'Keefe	DU-87462	Shirt	14	35.51	497.14	2015-06-19 02:44:20
+62592	O'Keefe-Koch	Shannen Hudson	HZ-54995	Belt	10	74.65	746.5	2015-09-20 14:08:02
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	4	68.78	275.12	2015-07-13 07:54:21
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	3	13.92	41.76	2016-02-02 13:43:47
+680916	Mueller and Sons	Loring Predovic	HZ-54995	Belt	19	35.7	678.3	2015-11-02 06:28:15
+262693	Ziemann-Heidenreich	Loring Predovic	TL-23025	Shoes	3	21.77	65.31	2015-12-12 17:56:02
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	1	38.29	38.29	2015-12-21 17:56:11
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	2	25.2	50.4	2015-08-05 06:10:20
+759168	Schaefer Inc	Loring Predovic	DU-87462	Shirt	15	62.53	937.95	2015-11-28 10:44:52
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	2	60.27	120.54	2015-08-10 06:27:56
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	14	35.92	502.88	2015-10-09 02:08:25
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TK-29646	Shoes	6	88.69	532.14	2016-01-07 14:36:42
+680916	Mueller and Sons	Loring Predovic	HZ-54995	Belt	18	17.61	316.98	2015-12-14 09:24:06
+398620	Brekke Ltd	Esequiel Schinner	FI-01804	Shirt	12	36.39	436.68	2015-12-02 05:27:04
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	13	92.17	1198.21	2016-02-21 01:46:10
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	15	44.41	666.15	2015-07-11 18:11:37
+759168	Schaefer Inc	Loring Predovic	HZ-54995	Belt	7	86.04	602.28	2015-11-17 20:34:12
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TK-29646	Shoes	13	99.08	1288.04	2016-04-07 10:45:22
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	9	63.09	567.81	2016-04-28 11:00:46
+398620	Brekke Ltd	Esequiel Schinner	DU-87462	Shirt	8	33.49	267.92	2016-03-05 21:00:49
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	11	76.83	845.13	2016-04-07 21:29:59
+759168	Schaefer Inc	Loring Predovic	DU-87462	Shirt	6	52.15	312.9	2016-06-11 02:11:20
+398620	Brekke Ltd	Esequiel Schinner	HZ-54995	Belt	20	42.21	844.2	2016-06-12 15:35:59
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	17	25.94	440.98	2016-03-21 18:10:30
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	7	31.14	217.98	2016-03-11 04:35:56
+136521	Labadie and Sons	Esequiel Schinner	NZ-99565	Shirt	17	21.78	370.26	2015-11-26 14:45:36
+887145	Gislason LLC	Loring Predovic	GP-14407	Belt	18	30.04	540.72	2016-03-24 06:50:51
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	19	85.18	1618.42	2016-03-04 14:53:59
+136521	Labadie and Sons	Esequiel Schinner	GJ-90272	Shoes	16	57.82	925.12	2015-10-08 02:05:32
+282122	Connelly, Abshire and Von	Beth Skiles	ZY-38455	Shirt	16	32.06	512.96	2015-06-25 23:04:47
+136521	Labadie and Sons	Esequiel Schinner	EO-54210	Shirt	19	84.25	1600.75	2016-05-06 20:22:18
+108399	Kuhic, Shields and Volkman	Trish Deckow	NZ-99565	Shirt	17	55.98	951.66	2015-10-26 18:29:32
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	16	17.63	282.08	2015-06-28 10:57:58
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	3	50.53	151.59	2016-02-20 02:42:24
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	17	68.7	1167.9	2016-04-07 11:15:34
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	5	79.26	396.3	2016-06-06 21:59:01
+758030	Kilback-Abernathy	Trish Deckow	NZ-99565	Shirt	3	67.95	203.85	2015-12-04 00:04:08
+218667	Jaskolski-O'Hara	Trish Deckow	HZ-54995	Belt	19	77.63	1474.97	2016-02-27 18:22:26
+530925	Purdy and Sons	Teagan O'Keefe	TL-23025	Shoes	16	49.24	787.84	2015-11-20 10:41:23
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	10	33.15	331.5	2016-06-11 16:46:22
+262693	Ziemann-Heidenreich	Loring Predovic	HZ-54995	Belt	9	66.92	602.28	2015-08-01 13:45:24
+530925	Purdy and Sons	Teagan O'Keefe	GP-14407	Belt	12	74.12	889.44	2016-04-23 06:51:24
+887145	Gislason LLC	Loring Predovic	GJ-90272	Shoes	4	70.61	282.44	2015-08-13 19:46:11
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	17	59.11	1004.87	2015-06-16 00:22:29
+251881	Zulauf-Grady	Teagan O'Keefe	GJ-90272	Shoes	17	36.23	615.91	2016-02-08 14:07:38
+136521	Labadie and Sons	Esequiel Schinner	EO-54210	Shirt	10	78.55	785.5	2015-10-21 04:11:07
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	15	35.85	537.75	2015-09-07 19:26:46
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	6	82.65	495.9	2016-05-11 21:44:59
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	7	54.9	384.3	2015-09-01 17:14:02
+108399	Kuhic, Shields and Volkman	Trish Deckow	FI-01804	Shirt	5	35.37	176.85	2016-05-07 21:52:57
+262693	Ziemann-Heidenreich	Loring Predovic	ZY-38455	Shirt	13	49.27	640.51	2015-06-29 14:57:30
+136521	Labadie and Sons	Esequiel Schinner	FI-01804	Shirt	17	54.5	926.5	2015-07-07 16:55:49
+282122	Connelly, Abshire and Von	Beth Skiles	DU-87462	Shirt	14	46.71	653.94	2016-01-19 11:35:10
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	14	49.86	698.04	2016-02-07 08:12:27
+898496	Weissnat, Veum and Barton	Ansley Cummings	GP-14407	Belt	18	21.33	383.94	2015-12-10 12:18:06
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	17	31.06	528.02	2015-07-01 13:50:34
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	14	29.8	417.2	2015-08-10 23:13:09
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	15	64.94	974.1	2015-12-31 12:41:21
+262693	Ziemann-Heidenreich	Loring Predovic	DU-87462	Shirt	19	38.12	724.28	2015-08-25 12:50:12
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	1	27.15	27.15	2015-10-25 09:58:45
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	HZ-54995	Belt	7	57.6	403.2	2015-09-29 13:52:45
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	17	88.9	1511.3	2016-01-22 00:16:33
+887145	Gislason LLC	Loring Predovic	TK-29646	Shoes	10	74.8	748	2015-09-15 21:23:19
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	4	87.59	350.36	2015-12-10 13:22:51
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	6	93.94	563.64	2016-05-20 19:46:09
+218667	Jaskolski-O'Hara	Trish Deckow	NZ-99565	Shirt	8	50.54	404.32	2016-03-04 11:16:38
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	15	82.43	1236.45	2015-12-11 20:29:55
+898496	Weissnat, Veum and Barton	Ansley Cummings	TK-29646	Shoes	18	54.49	980.82	2015-12-17 13:03:57
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	20	57.08	1141.6	2015-12-29 11:41:27
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	20	22.69	453.8	2015-12-10 23:35:28
+62592	O'Keefe-Koch	Shannen Hudson	NZ-99565	Shirt	2	48.04	96.08	2016-04-10 09:47:16
+62592	O'Keefe-Koch	Shannen Hudson	GJ-90272	Shoes	3	12.97	38.91	2016-03-10 09:01:55
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	12	41.23	494.76	2016-03-12 19:02:26
+453258	Runolfsson-Bayer	Shannen Hudson	TK-29646	Shoes	19	95.97	1823.43	2015-07-25 07:10:58
+758030	Kilback-Abernathy	Trish Deckow	HZ-54995	Belt	20	37.24	744.8	2016-04-26 13:12:51
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	17	65.63	1115.71	2015-08-27 20:19:42
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	13	88.83	1154.79	2016-02-25 15:25:04
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	13	48.79	634.27	2015-11-27 22:23:09
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	18	21.73	391.14	2016-01-10 00:07:03
+262693	Ziemann-Heidenreich	Loring Predovic	DU-87462	Shirt	6	15.54	93.24	2015-12-26 17:28:43
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	5	27.9	139.5	2016-03-12 19:44:40
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	6	35.25	211.5	2015-12-16 01:37:04
+251881	Zulauf-Grady	Teagan O'Keefe	NZ-99565	Shirt	16	96.6	1545.6	2015-10-26 10:02:50
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	2	37.94	75.88	2016-01-11 07:30:56
+752312	Watsica-Pfannerstill	Loring Predovic	DU-87462	Shirt	5	99.77	498.85	2015-08-14 13:30:18
+453258	Runolfsson-Bayer	Shannen Hudson	HZ-54995	Belt	20	45.9	918	2015-12-24 17:48:43
+752312	Watsica-Pfannerstill	Loring Predovic	DU-87462	Shirt	11	20.19	222.09	2015-08-13 07:01:47
+93583	Hegmann-Howell	Esequiel Schinner	FI-01804	Shirt	4	97.05	388.2	2016-06-02 15:33:33
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	11	46.35	509.85	2016-02-13 01:49:05
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	12	98	1176	2016-04-20 22:18:13
+108399	Kuhic, Shields and Volkman	Trish Deckow	NZ-99565	Shirt	10	32.69	326.9	2015-09-20 23:36:14
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	14	64.72	906.08	2015-10-12 12:13:11
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	17	77.98	1325.66	2016-01-25 19:10:06
+680916	Mueller and Sons	Loring Predovic	GJ-90272	Shoes	5	55.87	279.35	2015-08-13 12:34:51
+251881	Zulauf-Grady	Teagan O'Keefe	TK-29646	Shoes	9	13.86	124.74	2016-02-09 06:49:16
+759168	Schaefer Inc	Loring Predovic	EO-54210	Shirt	14	77.27	1081.78	2016-06-11 07:15:32
+758030	Kilback-Abernathy	Trish Deckow	NZ-99565	Shirt	1	68.6	68.6	2015-08-19 07:13:09
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	7	67.47	472.29	2016-02-07 00:52:06
+453258	Runolfsson-Bayer	Shannen Hudson	NZ-99565	Shirt	14	69.17	968.38	2015-07-07 01:36:32
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	2	31.82	63.64	2015-09-26 05:32:58
+759168	Schaefer Inc	Loring Predovic	TL-23025	Shoes	9	10.33	92.97	2016-03-13 14:29:14
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	3	33.7	101.1	2015-06-20 01:53:54
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	13	85.14	1106.82	2016-05-20 04:18:19
+453258	Runolfsson-Bayer	Shannen Hudson	DU-87462	Shirt	15	60.86	912.9	2015-06-18 04:49:24
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	15	42.41	636.15	2016-05-02 23:13:54
+530925	Purdy and Sons	Teagan O'Keefe	EO-54210	Shirt	15	60.55	908.25	2015-07-30 06:30:48
+62592	O'Keefe-Koch	Shannen Hudson	GP-14407	Belt	14	90.95	1273.3	2016-06-12 22:38:41
+218667	Jaskolski-O'Hara	Trish Deckow	EO-54210	Shirt	1	63.54	63.54	2015-12-17 07:54:32
+136521	Labadie and Sons	Esequiel Schinner	GJ-90272	Shoes	18	24.24	436.32	2015-07-01 08:11:11
+93583	Hegmann-Howell	Esequiel Schinner	GP-14407	Belt	13	11.05	143.65	2015-12-21 09:17:00
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	1	56.21	56.21	2016-05-28 01:54:20
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	DU-87462	Shirt	6	36.62	219.72	2015-08-16 08:02:30
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	12	32.34	388.08	2015-08-15 15:12:14
+282122	Connelly, Abshire and Von	Beth Skiles	FI-01804	Shirt	8	92.32	738.56	2015-09-04 18:49:14
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	2	55.56	111.12	2016-04-17 02:57:35
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	18	35.01	630.18	2015-10-30 22:03:14
+262693	Ziemann-Heidenreich	Loring Predovic	NZ-99565	Shirt	7	44.92	314.44	2016-04-11 10:21:47
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	12	78.64	943.68	2015-08-19 04:16:09
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	19	85.3	1620.7	2016-06-08 22:52:53
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	19	45.33	861.27	2015-10-03 06:41:13
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	8	54.71	437.68	2015-10-04 20:08:28
+752312	Watsica-Pfannerstill	Loring Predovic	TL-23025	Shoes	8	11.56	92.48	2015-09-13 11:59:46
+218667	Jaskolski-O'Hara	Trish Deckow	TL-23025	Shoes	17	84.99	1444.83	2015-12-18 10:22:09
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	12	59.9	718.8	2016-06-13 16:25:36
+752312	Watsica-Pfannerstill	Loring Predovic	GP-14407	Belt	15	30.62	459.3	2015-12-24 06:02:37
+136521	Labadie and Sons	Esequiel Schinner	EO-54210	Shirt	8	15.23	121.84	2015-10-17 20:16:57
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	3	25.41	76.23	2015-08-31 05:52:44
+453258	Runolfsson-Bayer	Shannen Hudson	HZ-54995	Belt	4	69.62	278.48	2016-03-15 05:44:08
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	17	42.83	728.11	2015-08-10 21:03:07
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	6	85.22	511.32	2015-12-25 08:03:32
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	12	59.21	710.52	2016-04-29 14:26:51
+758030	Kilback-Abernathy	Trish Deckow	FI-01804	Shirt	14	22.04	308.56	2016-03-05 22:24:01
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	10	56.21	562.1	2016-04-30 07:46:53
+759168	Schaefer Inc	Loring Predovic	FI-01804	Shirt	4	15.27	61.08	2016-02-01 14:24:47
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	5	22.65	113.25	2015-11-11 22:02:39
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	18	91.63	1649.34	2015-11-12 01:09:42
+453258	Runolfsson-Bayer	Shannen Hudson	FI-01804	Shirt	13	19.85	258.05	2016-02-04 00:35:09
+759168	Schaefer Inc	Loring Predovic	TL-23025	Shoes	8	31.32	250.56	2016-03-08 15:36:31
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	EO-54210	Shirt	19	55.9	1062.1	2015-06-30 13:23:08
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	14	22.97	321.58	2016-02-21 17:28:53
+758030	Kilback-Abernathy	Trish Deckow	TK-29646	Shoes	19	12.43	236.17	2015-09-12 00:00:13
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	7	79.34	555.38	2016-01-12 18:12:36
+759168	Schaefer Inc	Loring Predovic	ZY-38455	Shirt	1	59.62	59.62	2015-08-25 08:39:53
+136521	Labadie and Sons	Esequiel Schinner	EO-54210	Shirt	9	68.86	619.74	2015-08-31 03:44:04
+680916	Mueller and Sons	Loring Predovic	NZ-99565	Shirt	20	96.82	1936.4	2016-04-10 16:44:47
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	20	72.2	1444	2015-12-22 15:26:45
+262693	Ziemann-Heidenreich	Loring Predovic	TL-23025	Shoes	12	23.01	276.12	2015-10-14 15:07:11
+280749	Douglas PLC	Teagan O'Keefe	HZ-54995	Belt	11	11.18	122.98	2015-07-12 23:12:17
+887145	Gislason LLC	Loring Predovic	TL-23025	Shoes	10	64.17	641.7	2016-04-23 10:36:40
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	17	72.21	1227.57	2016-02-19 09:09:36
+93583	Hegmann-Howell	Esequiel Schinner	ZY-38455	Shirt	4	71.95	287.8	2016-02-03 05:50:23
+262693	Ziemann-Heidenreich	Loring Predovic	TK-29646	Shoes	16	59.85	957.6	2015-09-24 07:11:41
+759168	Schaefer Inc	Loring Predovic	TK-29646	Shoes	5	87.47	437.35	2015-10-26 09:44:16
+453258	Runolfsson-Bayer	Shannen Hudson	GP-14407	Belt	4	76.42	305.68	2015-09-07 02:21:17
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	14	37.28	521.92	2015-09-20 16:02:14
+530925	Purdy and Sons	Teagan O'Keefe	TK-29646	Shoes	12	52.48	629.76	2015-09-05 06:57:10
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	10	98.75	987.5	2015-10-04 01:47:05
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	12	38.77	465.24	2015-08-16 13:10:34
+680916	Mueller and Sons	Loring Predovic	TK-29646	Shoes	15	64.23	963.45	2015-09-12 16:38:32
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	16	10.21	163.36	2015-09-11 20:19:48
+218667	Jaskolski-O'Hara	Trish Deckow	EO-54210	Shirt	14	45.47	636.58	2015-10-20 23:02:00
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	ZY-38455	Shirt	2	68.3	136.6	2015-11-25 03:18:34
+282122	Connelly, Abshire and Von	Beth Skiles	FI-01804	Shirt	5	72.81	364.05	2015-09-15 09:12:54
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	10	13.84	138.4	2015-12-27 09:14:45
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	1	35.34	35.34	2015-12-08 07:45:15
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	12	46.58	558.96	2016-04-26 16:34:55
+898496	Weissnat, Veum and Barton	Ansley Cummings	TK-29646	Shoes	5	51.01	255.05	2015-08-06 23:22:41
+887145	Gislason LLC	Loring Predovic	TL-23025	Shoes	19	82.7	1571.3	2015-11-23 11:32:39
+758030	Kilback-Abernathy	Trish Deckow	FI-01804	Shirt	19	77.73	1476.87	2015-09-13 23:36:42
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	7	83.34	583.38	2015-07-11 16:04:28
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	HZ-54995	Belt	1	10.01	10.01	2016-04-15 18:51:27
+93583	Hegmann-Howell	Esequiel Schinner	HZ-54995	Belt	11	22.27	244.97	2016-02-02 04:12:40
+398620	Brekke Ltd	Esequiel Schinner	TK-29646	Shoes	19	75.46	1433.74	2016-03-12 10:05:36
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	8	51.64	413.12	2015-09-23 14:59:21
+680916	Mueller and Sons	Loring Predovic	GJ-90272	Shoes	17	33.65	572.05	2016-01-27 11:12:10
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	13	31.1	404.3	2015-10-31 05:22:29
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	16	55.86	893.76	2015-06-16 17:20:38
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	8	33.21	265.68	2016-04-30 04:50:44
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	17	16.3	277.1	2016-03-18 18:11:55
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	4	14.37	57.48	2015-11-30 02:34:42
+108399	Kuhic, Shields and Volkman	Trish Deckow	TL-23025	Shoes	20	36.78	735.6	2015-09-05 00:01:37
+887145	Gislason LLC	Loring Predovic	GP-14407	Belt	1	25.73	25.73	2016-04-26 02:03:03
+680916	Mueller and Sons	Loring Predovic	GP-14407	Belt	14	92.74	1298.36	2015-09-12 05:25:08
+759168	Schaefer Inc	Loring Predovic	GJ-90272	Shoes	17	88.73	1508.41	2015-09-15 05:06:14
+62592	O'Keefe-Koch	Shannen Hudson	NZ-99565	Shirt	5	99.7	498.5	2016-05-09 17:22:40
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	2	26.74	53.48	2016-05-22 07:47:44
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	11	92.27	1014.97	2015-09-06 10:06:02
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	13	12.73	165.49	2015-12-17 00:28:16
+282122	Connelly, Abshire and Von	Beth Skiles	ZY-38455	Shirt	10	94.57	945.7	2015-10-26 14:00:02
+108399	Kuhic, Shields and Volkman	Trish Deckow	NZ-99565	Shirt	5	34.28	171.4	2016-02-08 18:21:51
+108399	Kuhic, Shields and Volkman	Trish Deckow	TL-23025	Shoes	3	50.58	151.74	2015-08-28 05:18:54
+108399	Kuhic, Shields and Volkman	Trish Deckow	TL-23025	Shoes	6	35.54	213.24	2016-02-04 04:09:28
+758030	Kilback-Abernathy	Trish Deckow	FI-01804	Shirt	2	77.7	155.4	2015-12-09 19:44:19
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	5	35.88	179.4	2016-04-25 08:44:12
+453258	Runolfsson-Bayer	Shannen Hudson	FI-01804	Shirt	18	72.54	1305.72	2015-07-22 22:07:13
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	14	32.39	453.46	2016-03-10 06:05:35
+398620	Brekke Ltd	Esequiel Schinner	NZ-99565	Shirt	10	97.37	973.7	2016-04-09 05:11:19
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	8	22.75	182	2016-03-30 08:23:25
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	13	59.7	776.1	2016-04-30 13:37:43
+262693	Ziemann-Heidenreich	Loring Predovic	GJ-90272	Shoes	9	98.57	887.13	2016-02-08 18:29:37
+398620	Brekke Ltd	Esequiel Schinner	DU-87462	Shirt	18	74.14	1334.52	2016-04-26 05:15:18
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	14	39.04	546.56	2015-10-20 01:10:49
+136521	Labadie and Sons	Esequiel Schinner	DU-87462	Shirt	16	98.29	1572.64	2015-12-23 08:18:27
+453258	Runolfsson-Bayer	Shannen Hudson	GP-14407	Belt	11	90.83	999.13	2015-09-14 15:55:17
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	3	58.45	175.35	2016-06-13 15:28:08
+93583	Hegmann-Howell	Esequiel Schinner	GP-14407	Belt	1	37.51	37.51	2016-02-01 03:56:14
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	6	55.89	335.34	2016-04-19 05:59:39
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	6	62.83	376.98	2016-06-13 13:08:05
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	16	62.11	993.76	2016-02-29 19:09:47
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	17	11.86	201.62	2015-11-27 23:56:34
+453258	Runolfsson-Bayer	Shannen Hudson	NZ-99565	Shirt	13	29.38	381.94	2016-05-19 19:03:16
+887145	Gislason LLC	Loring Predovic	DU-87462	Shirt	1	52.94	52.94	2015-06-16 10:39:19
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	1	29.45	29.45	2015-07-25 06:03:31
+680916	Mueller and Sons	Loring Predovic	EO-54210	Shirt	2	28.76	57.52	2016-01-27 08:32:23
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	9	28.29	254.61	2015-08-20 19:00:48
+898496	Weissnat, Veum and Barton	Ansley Cummings	GP-14407	Belt	6	29.53	177.18	2015-11-19 04:48:36
+759168	Schaefer Inc	Loring Predovic	DU-87462	Shirt	18	29.7	534.6	2015-10-28 20:24:20
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	14	70.47	986.58	2015-08-23 07:27:41
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TK-29646	Shoes	5	45.6	228	2016-03-07 11:43:00
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	2	97.36	194.72	2016-03-19 10:47:22
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	5	76.9	384.5	2015-09-16 18:22:57
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	ZY-38455	Shirt	1	61.25	61.25	2015-06-29 08:03:51
+530925	Purdy and Sons	Teagan O'Keefe	FI-01804	Shirt	19	69.75	1325.25	2015-08-20 21:23:33
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	15	77.73	1165.95	2016-03-03 07:11:38
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	4	73.37	293.48	2015-10-07 21:17:54
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	19	76.67	1456.73	2016-03-19 12:51:52
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	19	26.26	498.94	2015-09-29 03:21:48
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	1	77.8	77.8	2015-08-31 16:20:02
+398620	Brekke Ltd	Esequiel Schinner	ZY-38455	Shirt	15	30.3	454.5	2015-11-04 10:41:23
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	16	61.13	978.08	2015-10-27 03:59:40
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	13	53.28	692.64	2015-12-01 01:04:31
+898496	Weissnat, Veum and Barton	Ansley Cummings	ZY-38455	Shirt	8	10.57	84.56	2015-12-28 10:04:59
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	3	50.87	152.61	2015-07-12 14:44:20
+453258	Runolfsson-Bayer	Shannen Hudson	GP-14407	Belt	15	79.23	1188.45	2016-01-26 15:21:44
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	5	79.88	399.4	2016-06-08 03:56:34
+398620	Brekke Ltd	Esequiel Schinner	DU-87462	Shirt	15	61.17	917.55	2015-08-03 12:30:18
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	5	91.65	458.25	2015-09-22 17:53:59
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	4	29.21	116.84	2016-03-23 11:17:09
+752312	Watsica-Pfannerstill	Loring Predovic	TL-23025	Shoes	5	60.55	302.75	2016-06-11 13:12:56
+898496	Weissnat, Veum and Barton	Ansley Cummings	ZY-38455	Shirt	3	85.3	255.9	2015-09-17 07:26:56
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	12	63.28	759.36	2015-09-25 04:08:26
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	19	46.74	888.06	2016-03-16 16:05:12
+62592	O'Keefe-Koch	Shannen Hudson	DU-87462	Shirt	11	94.04	1034.44	2016-02-25 00:35:46
+93583	Hegmann-Howell	Esequiel Schinner	ZY-38455	Shirt	7	69.01	483.07	2016-01-24 22:28:39
+453258	Runolfsson-Bayer	Shannen Hudson	EO-54210	Shirt	12	50.58	606.96	2015-10-07 03:38:18
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	3	52.79	158.37	2015-12-17 17:20:54
+251881	Zulauf-Grady	Teagan O'Keefe	NZ-99565	Shirt	1	10.21	10.21	2016-03-17 07:07:27
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	18	82.34	1482.12	2015-07-18 00:20:29
+218667	Jaskolski-O'Hara	Trish Deckow	NZ-99565	Shirt	7	62.52	437.64	2015-06-24 16:39:26
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	15	11.58	173.7	2016-01-21 23:11:30
+93583	Hegmann-Howell	Esequiel Schinner	GP-14407	Belt	20	27.61	552.2	2015-10-22 16:20:10
+62592	O'Keefe-Koch	Shannen Hudson	TK-29646	Shoes	8	85.56	684.48	2015-09-09 03:55:03
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	1	59.65	59.65	2016-01-03 03:17:53
+62592	O'Keefe-Koch	Shannen Hudson	HZ-54995	Belt	7	82.86	580.02	2015-09-13 01:48:03
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	11	16.97	186.67	2016-01-27 03:59:56
+453258	Runolfsson-Bayer	Shannen Hudson	GJ-90272	Shoes	19	71.37	1356.03	2015-10-06 09:42:52
+759168	Schaefer Inc	Loring Predovic	DU-87462	Shirt	3	56.42	169.26	2015-08-07 10:12:36
+530925	Purdy and Sons	Teagan O'Keefe	TL-23025	Shoes	10	86.97	869.7	2015-08-02 18:56:42
+282122	Connelly, Abshire and Von	Beth Skiles	DU-87462	Shirt	4	96.17	384.68	2016-03-02 16:46:17
+93583	Hegmann-Howell	Esequiel Schinner	NZ-99565	Shirt	18	17.41	313.38	2016-05-06 06:38:11
+280749	Douglas PLC	Teagan O'Keefe	DU-87462	Shirt	17	71.27	1211.59	2015-09-04 15:54:34
+251881	Zulauf-Grady	Teagan O'Keefe	NZ-99565	Shirt	3	68.73	206.19	2015-09-10 03:39:56
+887145	Gislason LLC	Loring Predovic	GP-14407	Belt	4	19.35	77.4	2015-07-02 05:12:52
+93583	Hegmann-Howell	Esequiel Schinner	FI-01804	Shirt	4	55.93	223.72	2015-06-16 17:47:09
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	19	57.59	1094.21	2015-07-12 23:26:50
+62592	O'Keefe-Koch	Shannen Hudson	FI-01804	Shirt	13	45.98	597.74	2015-07-23 09:32:59
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	9	96.71	870.39	2015-08-05 15:14:26
+887145	Gislason LLC	Loring Predovic	DU-87462	Shirt	5	28.36	141.8	2015-12-18 21:13:33
+898496	Weissnat, Veum and Barton	Ansley Cummings	DU-87462	Shirt	3	61.37	184.11	2015-08-30 06:03:27
+752312	Watsica-Pfannerstill	Loring Predovic	GP-14407	Belt	12	55.44	665.28	2015-07-28 04:36:44
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	6	62.54	375.24	2015-08-26 04:41:14
+530925	Purdy and Sons	Teagan O'Keefe	TL-23025	Shoes	3	87.87	263.61	2016-03-30 06:56:02
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	HZ-54995	Belt	6	29.08	174.48	2015-11-17 14:10:20
+93583	Hegmann-Howell	Esequiel Schinner	ZY-38455	Shirt	16	12.44	199.04	2015-11-28 14:52:21
+887145	Gislason LLC	Loring Predovic	DU-87462	Shirt	12	62.78	753.36	2016-02-01 09:45:39
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	1	33.52	33.52	2015-12-07 21:52:48
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	9	17.2	154.8	2015-09-23 01:11:07
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	12	63.66	763.92	2015-09-26 12:10:43
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	EO-54210	Shirt	14	24.89	348.46	2016-03-27 05:51:30
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	2	97.18	194.36	2015-11-17 15:15:00
+398620	Brekke Ltd	Esequiel Schinner	TK-29646	Shoes	10	74.07	740.7	2016-05-30 18:52:27
+108399	Kuhic, Shields and Volkman	Trish Deckow	GP-14407	Belt	15	14.4	216	2015-07-12 12:26:25
+680916	Mueller and Sons	Loring Predovic	TK-29646	Shoes	20	97.26	1945.2	2016-02-17 23:39:23
+759168	Schaefer Inc	Loring Predovic	FI-01804	Shirt	9	20.33	182.97	2016-04-12 03:25:04
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	6	98.51	591.06	2016-05-06 10:00:11
+262693	Ziemann-Heidenreich	Loring Predovic	TL-23025	Shoes	20	88.09	1761.8	2016-04-20 06:37:35
+251881	Zulauf-Grady	Teagan O'Keefe	NZ-99565	Shirt	9	31.2	280.8	2016-04-19 07:30:54
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	18	97.83	1760.94	2015-09-22 21:18:37
+752312	Watsica-Pfannerstill	Loring Predovic	EO-54210	Shirt	4	39.53	158.12	2016-01-23 21:18:13
+280749	Douglas PLC	Teagan O'Keefe	FI-01804	Shirt	5	63.97	319.85	2015-06-26 16:33:59
+680916	Mueller and Sons	Loring Predovic	EO-54210	Shirt	14	28.79	403.06	2015-07-13 06:48:53
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	2	67.68	135.36	2015-08-05 17:10:41
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	5	70.5	352.5	2016-03-21 06:42:49
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	7	24.96	174.72	2015-11-21 07:01:00
+398620	Brekke Ltd	Esequiel Schinner	EO-54210	Shirt	2	78.94	157.88	2015-10-29 11:34:39
+136521	Labadie and Sons	Esequiel Schinner	FI-01804	Shirt	15	49.31	739.65	2016-05-07 08:01:47
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	3	83.84	251.52	2015-09-08 04:24:41
+752312	Watsica-Pfannerstill	Loring Predovic	DU-87462	Shirt	18	73.45	1322.1	2016-03-07 05:05:25
+759168	Schaefer Inc	Loring Predovic	DU-87462	Shirt	2	58.01	116.02	2015-12-27 14:45:56
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	20	96.9	1938	2015-10-11 11:41:32
+108399	Kuhic, Shields and Volkman	Trish Deckow	TL-23025	Shoes	19	15.52	294.88	2016-06-13 14:29:57
+93583	Hegmann-Howell	Esequiel Schinner	NZ-99565	Shirt	11	12.96	142.56	2016-01-16 07:41:52
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	19	78.44	1490.36	2015-08-30 02:48:44
+280749	Douglas PLC	Teagan O'Keefe	GP-14407	Belt	11	67.72	744.92	2015-10-31 16:35:11
+108399	Kuhic, Shields and Volkman	Trish Deckow	FI-01804	Shirt	10	24.64	246.4	2016-04-28 10:31:43
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	8	32.47	259.76	2015-09-28 04:23:01
+530925	Purdy and Sons	Teagan O'Keefe	TK-29646	Shoes	18	51.12	920.16	2016-03-20 15:42:05
+93583	Hegmann-Howell	Esequiel Schinner	NZ-99565	Shirt	2	68.2	136.4	2015-07-16 05:21:32
+758030	Kilback-Abernathy	Trish Deckow	GJ-90272	Shoes	18	77.45	1394.1	2015-06-18 21:36:35
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	18	89.41	1609.38	2015-08-14 02:36:05
+758030	Kilback-Abernathy	Trish Deckow	GJ-90272	Shoes	17	29.37	499.29	2015-09-06 06:32:02
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	20	53.44	1068.8	2015-06-15 17:58:31
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	13	75.25	978.25	2015-08-18 07:55:12
+262693	Ziemann-Heidenreich	Loring Predovic	TL-23025	Shoes	3	65.71	197.13	2015-11-08 10:22:05
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	20	93.1	1862	2015-09-04 08:15:17
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	14	99.93	1399.02	2015-10-22 18:30:48
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	4	31.1	124.4	2015-09-21 11:40:14
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	11	53.05	583.55	2015-07-05 05:19:51
+262693	Ziemann-Heidenreich	Loring Predovic	ZY-38455	Shirt	4	66.64	266.56	2016-03-06 19:54:10
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	11	12.88	141.68	2015-10-12 04:07:01
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	6	71.73	430.38	2015-11-25 17:31:47
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	11	11.13	122.43	2016-04-29 16:25:24
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	EO-54210	Shirt	7	14.92	104.44	2016-04-04 08:29:17
+752312	Watsica-Pfannerstill	Loring Predovic	EO-54210	Shirt	9	19.42	174.78	2015-10-19 11:14:35
+280749	Douglas PLC	Teagan O'Keefe	HZ-54995	Belt	9	74.92	674.28	2016-02-10 19:49:54
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	8	54.36	434.88	2016-04-13 04:21:15
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	4	69.53	278.12	2015-11-03 16:49:18
+280749	Douglas PLC	Teagan O'Keefe	GP-14407	Belt	3	94.77	284.31	2016-04-21 14:31:05
+530925	Purdy and Sons	Teagan O'Keefe	GP-14407	Belt	12	45.29	543.48	2016-04-12 00:36:27
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	20	40.47	809.4	2015-06-21 17:37:13
+758030	Kilback-Abernathy	Trish Deckow	TL-23025	Shoes	2	52.95	105.9	2015-11-23 14:16:18
+251881	Zulauf-Grady	Teagan O'Keefe	GP-14407	Belt	14	44.6	624.4	2015-06-25 04:18:40
+758030	Kilback-Abernathy	Trish Deckow	HZ-54995	Belt	14	14.44	202.16	2015-07-23 06:08:02
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	3	32.77	98.31	2016-04-27 03:08:52
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	20	14.63	292.6	2015-12-17 07:03:43
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	12	83.53	1002.36	2015-06-23 15:12:05
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	4	12.67	50.68	2015-09-12 05:43:23
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	HZ-54995	Belt	10	19.69	196.9	2015-11-20 09:53:57
+759168	Schaefer Inc	Loring Predovic	FI-01804	Shirt	18	23.11	415.98	2016-03-27 07:08:14
+752312	Watsica-Pfannerstill	Loring Predovic	FI-01804	Shirt	13	66.92	869.96	2016-03-23 20:52:56
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	5	94.8	474	2015-09-29 15:36:25
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	5	46.79	233.95	2016-05-09 12:28:35
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	14	83.31	1166.34	2015-08-07 11:50:14
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	8	16.45	131.6	2015-07-28 09:47:29
+93583	Hegmann-Howell	Esequiel Schinner	HZ-54995	Belt	12	64.9	778.8	2016-03-07 02:36:13
+108399	Kuhic, Shields and Volkman	Trish Deckow	HZ-54995	Belt	11	12.84	141.24	2016-05-05 18:31:30
+93583	Hegmann-Howell	Esequiel Schinner	ZY-38455	Shirt	19	42.66	810.54	2015-07-17 10:13:39
+108399	Kuhic, Shields and Volkman	Trish Deckow	HZ-54995	Belt	19	39.89	757.91	2015-12-04 23:07:40
+262693	Ziemann-Heidenreich	Loring Predovic	GP-14407	Belt	7	44.76	313.32	2016-05-14 18:48:22
+453258	Runolfsson-Bayer	Shannen Hudson	HZ-54995	Belt	17	84.25	1432.25	2016-04-12 06:38:40
+218667	Jaskolski-O'Hara	Trish Deckow	TK-29646	Shoes	12	77.8	933.6	2015-12-29 06:30:23
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	3	31.77	95.31	2015-11-07 07:47:41
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	1	11.7	11.7	2015-10-12 16:53:00
+530925	Purdy and Sons	Teagan O'Keefe	FI-01804	Shirt	8	91.37	730.96	2016-01-24 18:20:03
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	17	29.9	508.3	2015-10-03 14:39:26
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	3	62.16	186.48	2016-01-19 08:53:51
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	17	46.43	789.31	2015-07-25 04:36:40
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	4	60.65	242.6	2016-02-05 13:42:29
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	16	56.94	911.04	2016-05-31 04:11:44
+758030	Kilback-Abernathy	Trish Deckow	EO-54210	Shirt	10	23.5	235	2015-10-10 20:27:25
+898496	Weissnat, Veum and Barton	Ansley Cummings	TK-29646	Shoes	8	92.47	739.76	2015-08-28 03:52:06
+251881	Zulauf-Grady	Teagan O'Keefe	NZ-99565	Shirt	14	35.97	503.58	2015-06-25 12:56:21
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	17	21.94	372.98	2016-02-03 17:01:29
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	10	49.67	496.7	2015-08-12 01:46:43
+759168	Schaefer Inc	Loring Predovic	NZ-99565	Shirt	16	31.75	508	2016-06-02 03:13:35
+251881	Zulauf-Grady	Teagan O'Keefe	ZY-38455	Shirt	11	64.12	705.32	2015-11-03 16:23:28
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	9	61.07	549.63	2015-10-20 22:22:40
+453258	Runolfsson-Bayer	Shannen Hudson	NZ-99565	Shirt	16	68.65	1098.4	2015-10-12 16:13:33
+262693	Ziemann-Heidenreich	Loring Predovic	DU-87462	Shirt	3	77.67	233.01	2016-04-23 01:21:58
+93583	Hegmann-Howell	Esequiel Schinner	ZY-38455	Shirt	9	47.19	424.71	2016-05-01 02:23:54
+136521	Labadie and Sons	Esequiel Schinner	NZ-99565	Shirt	8	69.37	554.96	2015-08-17 17:07:53
+759168	Schaefer Inc	Loring Predovic	FI-01804	Shirt	15	93.99	1409.85	2016-02-12 08:06:58
+758030	Kilback-Abernathy	Trish Deckow	TL-23025	Shoes	7	48.06	336.42	2015-06-20 23:04:18
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	12	29.72	356.64	2016-03-01 18:43:25
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	NZ-99565	Shirt	12	57.1	685.2	2016-03-23 10:27:28
+262693	Ziemann-Heidenreich	Loring Predovic	HZ-54995	Belt	6	96.3	577.8	2015-11-05 18:29:42
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	1	88.49	88.49	2015-10-17 19:56:53
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	19	19.35	367.65	2015-06-15 15:24:05
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	4	37.62	150.48	2015-07-16 08:18:01
+282122	Connelly, Abshire and Von	Beth Skiles	FI-01804	Shirt	11	61.91	681.01	2015-10-19 23:58:04
+280749	Douglas PLC	Teagan O'Keefe	DU-87462	Shirt	1	46.44	46.44	2015-09-11 07:14:00
+898496	Weissnat, Veum and Barton	Ansley Cummings	EO-54210	Shirt	15	62.27	934.05	2016-05-24 02:07:43
+93583	Hegmann-Howell	Esequiel Schinner	DU-87462	Shirt	16	11.04	176.64	2015-09-22 07:24:09
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	6	73.34	440.04	2015-12-08 19:46:18
+108399	Kuhic, Shields and Volkman	Trish Deckow	TK-29646	Shoes	20	78.89	1577.8	2015-08-19 16:10:06
+282122	Connelly, Abshire and Von	Beth Skiles	NZ-99565	Shirt	11	37.4	411.4	2016-03-22 09:11:04
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	6	17	102	2015-08-10 13:00:07
+251881	Zulauf-Grady	Teagan O'Keefe	HZ-54995	Belt	10	20.95	209.5	2015-07-12 06:24:40
+530925	Purdy and Sons	Teagan O'Keefe	FI-01804	Shirt	5	96.59	482.95	2015-07-08 19:24:34
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	13	57.86	752.18	2015-11-11 02:45:44
+453258	Runolfsson-Bayer	Shannen Hudson	NZ-99565	Shirt	7	79.35	555.45	2015-07-06 23:08:49
+251881	Zulauf-Grady	Teagan O'Keefe	TK-29646	Shoes	8	18.41	147.28	2016-04-19 15:59:07
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	11	65.69	722.59	2016-05-29 12:51:02
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	13	24.02	312.26	2016-04-15 22:07:48
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	13	47.75	620.75	2016-05-21 10:28:06
+887145	Gislason LLC	Loring Predovic	GJ-90272	Shoes	19	35.04	665.76	2016-02-25 18:02:18
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	14	56.3	788.2	2015-11-21 19:14:13
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	1	56.68	56.68	2015-07-23 15:20:34
+453258	Runolfsson-Bayer	Shannen Hudson	EO-54210	Shirt	5	30.34	151.7	2016-04-26 14:56:52
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	19	66.56	1264.64	2015-12-22 11:41:21
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	18	78.53	1413.54	2015-07-22 00:20:15
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	8	32.15	257.2	2015-06-23 14:54:59
+282122	Connelly, Abshire and Von	Beth Skiles	TL-23025	Shoes	4	50.64	202.56	2015-11-07 12:18:46
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	9	30.58	275.22	2016-05-14 04:16:37
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	8	52.22	417.76	2016-01-23 23:47:15
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	9	29.43	264.87	2016-01-13 11:00:22
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	11	12	132	2015-10-12 10:39:12
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	3	94.15	282.45	2015-12-15 11:30:04
+453258	Runolfsson-Bayer	Shannen Hudson	TL-23025	Shoes	10	70.72	707.2	2015-10-14 10:39:32
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	12	46.8	561.6	2015-08-05 10:19:57
+93583	Hegmann-Howell	Esequiel Schinner	TL-23025	Shoes	7	40.78	285.46	2016-02-03 09:49:07
+887145	Gislason LLC	Loring Predovic	GJ-90272	Shoes	20	43.4	868	2015-11-23 06:26:18
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	3	93.58	280.74	2016-05-25 04:08:43
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	19	94.1	1787.9	2016-03-21 17:28:38
+398620	Brekke Ltd	Esequiel Schinner	TL-23025	Shoes	19	62.09	1179.71	2015-07-05 04:43:57
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TK-29646	Shoes	15	95.91	1438.65	2016-06-06 01:21:53
+280749	Douglas PLC	Teagan O'Keefe	HZ-54995	Belt	17	95.46	1622.82	2015-11-13 11:03:35
+280749	Douglas PLC	Teagan O'Keefe	GP-14407	Belt	19	47.61	904.59	2016-02-17 11:05:24
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	2	85.44	170.88	2016-01-01 00:27:00
+262693	Ziemann-Heidenreich	Loring Predovic	GP-14407	Belt	3	19.17	57.51	2015-10-17 02:55:08
+136521	Labadie and Sons	Esequiel Schinner	GJ-90272	Shoes	3	80.89	242.67	2015-12-30 09:37:26
+251881	Zulauf-Grady	Teagan O'Keefe	NZ-99565	Shirt	10	86.2	862	2016-05-08 14:59:01
+453258	Runolfsson-Bayer	Shannen Hudson	ZY-38455	Shirt	17	29.59	503.03	2015-10-04 12:03:52
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	1	51.66	51.66	2016-02-21 05:07:18
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	2	99.24	198.48	2015-11-21 12:06:54
+453258	Runolfsson-Bayer	Shannen Hudson	TK-29646	Shoes	2	50.61	101.22	2016-02-01 22:51:35
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	9	83.67	753.03	2016-04-08 05:56:01
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	16	24.06	384.96	2016-05-07 22:06:41
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	6	12.65	75.9	2015-07-15 08:20:02
+758030	Kilback-Abernathy	Trish Deckow	GJ-90272	Shoes	12	91.15	1093.8	2015-08-12 19:27:27
+108399	Kuhic, Shields and Volkman	Trish Deckow	EO-54210	Shirt	18	59.99	1079.82	2016-01-17 02:48:25
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	18	20.1	361.8	2015-08-20 00:46:35
+251881	Zulauf-Grady	Teagan O'Keefe	GP-14407	Belt	20	69.61	1392.2	2016-03-20 03:10:05
+136521	Labadie and Sons	Esequiel Schinner	GP-14407	Belt	7	83.01	581.07	2015-07-30 13:14:31
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	15	38.26	573.9	2016-03-05 10:54:48
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	16	96.67	1546.72	2015-11-13 08:59:59
+108399	Kuhic, Shields and Volkman	Trish Deckow	FI-01804	Shirt	2	53.63	107.26	2016-03-09 05:03:29
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	HZ-54995	Belt	17	29.93	508.81	2016-03-21 03:05:25
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	9	62.45	562.05	2016-06-14 02:31:06
+887145	Gislason LLC	Loring Predovic	GJ-90272	Shoes	8	40.73	325.84	2015-08-07 09:25:06
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	17	70.95	1206.15	2015-11-15 02:03:01
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	17	55.09	936.53	2015-06-25 13:14:00
+62592	O'Keefe-Koch	Shannen Hudson	GJ-90272	Shoes	9	19.34	174.06	2015-08-14 07:37:49
+752312	Watsica-Pfannerstill	Loring Predovic	GJ-90272	Shoes	16	34.07	545.12	2015-11-25 06:52:33
+62592	O'Keefe-Koch	Shannen Hudson	DU-87462	Shirt	9	95.4	858.6	2015-06-15 16:13:54
+530925	Purdy and Sons	Teagan O'Keefe	GP-14407	Belt	11	65.51	720.61	2016-05-26 22:37:49
+680916	Mueller and Sons	Loring Predovic	TK-29646	Shoes	20	64.87	1297.4	2015-11-02 02:26:07
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	NZ-99565	Shirt	19	47.41	900.79	2015-11-12 04:41:55
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	3	66.27	198.81	2016-03-05 01:04:10
+758030	Kilback-Abernathy	Trish Deckow	TL-23025	Shoes	9	25.92	233.28	2016-05-09 23:58:05
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	8	70.95	567.6	2016-04-30 10:36:52
+453258	Runolfsson-Bayer	Shannen Hudson	GP-14407	Belt	19	55.75	1059.25	2016-05-23 21:39:18
+758030	Kilback-Abernathy	Trish Deckow	FI-01804	Shirt	15	70.02	1050.3	2016-04-25 09:15:35
+262693	Ziemann-Heidenreich	Loring Predovic	DU-87462	Shirt	16	29.57	473.12	2015-11-10 00:13:42
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	2	36.25	72.5	2015-10-11 04:08:05
+752312	Watsica-Pfannerstill	Loring Predovic	TL-23025	Shoes	9	47.83	430.47	2015-07-02 00:19:02
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	12	57.35	688.2	2016-02-28 07:41:11
+759168	Schaefer Inc	Loring Predovic	FI-01804	Shirt	17	77.26	1313.42	2015-07-31 16:28:54
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	9	20.3	182.7	2015-09-14 09:27:19
+136521	Labadie and Sons	Esequiel Schinner	NZ-99565	Shirt	16	18.27	292.32	2015-10-17 02:47:41
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	19	69.87	1327.53	2015-06-30 07:06:17
+262693	Ziemann-Heidenreich	Loring Predovic	HZ-54995	Belt	2	39.65	79.3	2016-01-05 18:06:00
+218667	Jaskolski-O'Hara	Trish Deckow	DU-87462	Shirt	11	60.13	661.43	2015-10-10 13:00:55
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	13	36.53	474.89	2015-08-12 20:30:08
+136521	Labadie and Sons	Esequiel Schinner	FI-01804	Shirt	13	99.73	1296.49	2015-07-29 17:08:00
+262693	Ziemann-Heidenreich	Loring Predovic	TL-23025	Shoes	20	76.61	1532.2	2015-10-29 00:43:01
+758030	Kilback-Abernathy	Trish Deckow	HZ-54995	Belt	19	48.05	912.95	2015-08-13 04:45:55
+136521	Labadie and Sons	Esequiel Schinner	GP-14407	Belt	17	96.53	1641.01	2015-11-02 16:23:31
+680916	Mueller and Sons	Loring Predovic	ZY-38455	Shirt	13	23.92	310.96	2015-07-25 09:42:53
+251881	Zulauf-Grady	Teagan O'Keefe	EO-54210	Shirt	12	38.32	459.84	2016-01-08 17:05:36
+282122	Connelly, Abshire and Von	Beth Skiles	ZY-38455	Shirt	9	83.62	752.58	2015-12-06 05:13:28
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	13	94.31	1226.03	2016-02-19 08:00:23
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	2	98.89	197.78	2016-04-08 17:58:31
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	20	85.22	1704.4	2015-07-18 23:36:44
+218667	Jaskolski-O'Hara	Trish Deckow	HZ-54995	Belt	11	17.48	192.28	2016-01-07 00:47:35
+280749	Douglas PLC	Teagan O'Keefe	ZY-38455	Shirt	14	48.82	683.48	2015-06-18 06:39:25
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	5	67.48	337.4	2015-12-29 06:44:00
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	14	46.65	653.1	2016-06-07 17:06:08
+680916	Mueller and Sons	Loring Predovic	ZY-38455	Shirt	9	22.92	206.28	2015-06-30 14:54:36
+758030	Kilback-Abernathy	Trish Deckow	HZ-54995	Belt	4	34.52	138.08	2016-03-11 12:59:52
+752312	Watsica-Pfannerstill	Loring Predovic	TL-23025	Shoes	2	92.93	185.86	2015-11-29 09:17:39
+93583	Hegmann-Howell	Esequiel Schinner	ZY-38455	Shirt	10	33.4	334	2015-10-17 13:50:42
+93583	Hegmann-Howell	Esequiel Schinner	DU-87462	Shirt	14	99.83	1397.62	2016-05-25 18:21:41
+93583	Hegmann-Howell	Esequiel Schinner	DU-87462	Shirt	1	72.58	72.58	2015-08-18 11:48:21
+887145	Gislason LLC	Loring Predovic	TK-29646	Shoes	10	30.56	305.6	2016-02-14 05:49:47
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	12	25.31	303.72	2016-04-09 00:33:12
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	17	27.23	462.91	2015-10-24 22:20:55
+262693	Ziemann-Heidenreich	Loring Predovic	HZ-54995	Belt	19	79.14	1503.66	2016-05-18 18:17:53
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	19	62.79	1193.01	2016-06-02 13:42:25
+280749	Douglas PLC	Teagan O'Keefe	ZY-38455	Shirt	12	95.27	1143.24	2015-11-22 01:48:46
+680916	Mueller and Sons	Loring Predovic	HZ-54995	Belt	1	46.62	46.62	2016-01-19 13:12:44
+262693	Ziemann-Heidenreich	Loring Predovic	FI-01804	Shirt	13	99.17	1289.21	2015-11-26 03:30:51
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	19	99.87	1897.53	2015-10-10 10:49:09
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	9	58.58	527.22	2016-03-04 19:14:45
+280749	Douglas PLC	Teagan O'Keefe	ZY-38455	Shirt	20	32.17	643.4	2016-05-02 23:46:07
+398620	Brekke Ltd	Esequiel Schinner	ZY-38455	Shirt	2	93.65	187.3	2015-07-19 06:40:33
+62592	O'Keefe-Koch	Shannen Hudson	TK-29646	Shoes	19	98.14	1864.66	2015-12-30 01:52:53
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	12	13.65	163.8	2015-08-15 00:14:22
+280749	Douglas PLC	Teagan O'Keefe	DU-87462	Shirt	20	86.47	1729.4	2015-07-19 22:11:06
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	3	14.71	44.13	2016-06-01 10:45:04
+398620	Brekke Ltd	Esequiel Schinner	FI-01804	Shirt	1	94.84	94.84	2015-12-08 11:59:46
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	15	79.89	1198.35	2015-12-27 12:44:01
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	12	34.03	408.36	2015-06-27 12:46:39
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	12	31.74	380.88	2015-12-17 14:13:57
+530925	Purdy and Sons	Teagan O'Keefe	FI-01804	Shirt	18	84.95	1529.1	2016-06-14 09:41:30
+898496	Weissnat, Veum and Barton	Ansley Cummings	GP-14407	Belt	14	44.95	629.3	2016-05-31 22:50:13
+218667	Jaskolski-O'Hara	Trish Deckow	TL-23025	Shoes	1	35.47	35.47	2015-11-15 03:26:28
+680916	Mueller and Sons	Loring Predovic	TK-29646	Shoes	19	57.77	1097.63	2015-10-01 05:23:55
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	10	57.4	574	2016-02-02 15:10:37
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	4	76.6	306.4	2015-07-28 14:21:04
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	15	15.35	230.25	2016-06-07 05:59:20
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	19	56.79	1079.01	2016-02-20 12:42:57
+453258	Runolfsson-Bayer	Shannen Hudson	TK-29646	Shoes	4	69.97	279.88	2015-07-07 05:23:37
+759168	Schaefer Inc	Loring Predovic	GP-14407	Belt	12	84.2	1010.4	2016-04-04 21:08:12
+759168	Schaefer Inc	Loring Predovic	TK-29646	Shoes	2	33.2	66.4	2015-07-16 19:46:08
+251881	Zulauf-Grady	Teagan O'Keefe	GP-14407	Belt	18	66.29	1193.22	2015-08-11 08:41:46
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	17	81.93	1392.81	2016-03-14 08:25:26
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	18	28.91	520.38	2015-12-09 07:21:52
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	9	24.46	220.14	2015-09-12 04:33:24
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	4	28.81	115.24	2016-06-06 09:25:28
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	5	73.18	365.9	2015-12-22 02:05:33
+759168	Schaefer Inc	Loring Predovic	HZ-54995	Belt	16	20.59	329.44	2016-02-24 19:11:17
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GP-14407	Belt	19	91.91	1746.29	2016-01-29 11:13:03
+680916	Mueller and Sons	Loring Predovic	TK-29646	Shoes	14	25.1	351.4	2015-12-17 05:51:15
+93583	Hegmann-Howell	Esequiel Schinner	GP-14407	Belt	19	61.67	1171.73	2015-06-22 23:35:03
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	16	63.91	1022.56	2016-04-11 21:30:05
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	13	61.78	803.14	2016-04-22 12:50:40
+398620	Brekke Ltd	Esequiel Schinner	NZ-99565	Shirt	5	88.95	444.75	2015-10-13 02:33:54
+251881	Zulauf-Grady	Teagan O'Keefe	GJ-90272	Shoes	10	72.48	724.8	2015-10-18 05:38:41
+251881	Zulauf-Grady	Teagan O'Keefe	TK-29646	Shoes	3	71.89	215.67	2016-01-26 05:56:16
+93583	Hegmann-Howell	Esequiel Schinner	GP-14407	Belt	16	73.01	1168.16	2015-12-06 12:48:43
+758030	Kilback-Abernathy	Trish Deckow	GJ-90272	Shoes	12	72	864	2015-11-19 22:39:27
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	5	52.86	264.3	2016-02-26 12:10:45
+62592	O'Keefe-Koch	Shannen Hudson	HZ-54995	Belt	5	89.58	447.9	2015-08-12 01:35:24
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	7	11.85	82.95	2015-07-14 00:35:05
+262693	Ziemann-Heidenreich	Loring Predovic	NZ-99565	Shirt	10	81.84	818.4	2015-12-20 00:23:51
+262693	Ziemann-Heidenreich	Loring Predovic	TK-29646	Shoes	14	59.56	833.84	2016-04-03 06:16:34
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	17	74.02	1258.34	2016-05-10 07:12:36
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	17	37.19	632.23	2015-09-29 19:52:00
+398620	Brekke Ltd	Esequiel Schinner	DU-87462	Shirt	14	97.91	1370.74	2016-05-06 10:34:45
+680916	Mueller and Sons	Loring Predovic	TK-29646	Shoes	7	31.96	223.72	2016-03-29 21:32:14
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TK-29646	Shoes	5	16.63	83.15	2015-10-04 23:30:14
+136521	Labadie and Sons	Esequiel Schinner	DU-87462	Shirt	16	52.96	847.36	2015-12-08 13:11:56
+453258	Runolfsson-Bayer	Shannen Hudson	FI-01804	Shirt	7	12.58	88.06	2016-01-28 02:06:26
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	17	67.32	1144.44	2016-05-26 13:00:14
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	DU-87462	Shirt	12	42.7	512.4	2016-05-08 06:27:36
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	4	49.51	198.04	2016-02-21 08:21:11
+758030	Kilback-Abernathy	Trish Deckow	HZ-54995	Belt	16	70.63	1130.08	2016-03-30 14:00:03
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	10	21.84	218.4	2016-03-31 21:49:31
+282122	Connelly, Abshire and Von	Beth Skiles	NZ-99565	Shirt	7	44.56	311.92	2016-02-02 15:39:41
+93583	Hegmann-Howell	Esequiel Schinner	GJ-90272	Shoes	6	83.25	499.5	2015-11-03 09:49:54
+282122	Connelly, Abshire and Von	Beth Skiles	GP-14407	Belt	8	10.98	87.84	2015-10-03 22:16:08
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	9	53.13	478.17	2015-08-03 22:05:32
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	18	97.49	1754.82	2015-08-15 06:11:14
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	15	23.97	359.55	2016-05-31 00:27:04
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	14	29.93	419.02	2016-05-17 03:07:38
+108399	Kuhic, Shields and Volkman	Trish Deckow	HZ-54995	Belt	3	98.91	296.73	2016-01-19 16:06:30
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	12	22.27	267.24	2015-10-20 12:04:38
+759168	Schaefer Inc	Loring Predovic	TL-23025	Shoes	1	59.26	59.26	2015-07-08 23:54:04
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	1	69.31	69.31	2016-06-03 21:52:57
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	4	77.6	310.4	2016-04-29 02:43:57
+262693	Ziemann-Heidenreich	Loring Predovic	ZY-38455	Shirt	5	66.78	333.9	2015-10-19 06:14:48
+680916	Mueller and Sons	Loring Predovic	EO-54210	Shirt	1	28.03	28.03	2016-03-31 16:58:00
+62592	O'Keefe-Koch	Shannen Hudson	FI-01804	Shirt	1	52.37	52.37	2016-04-11 22:57:14
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	19	46.62	885.78	2016-01-18 02:57:40
+93583	Hegmann-Howell	Esequiel Schinner	GP-14407	Belt	15	47.06	705.9	2015-08-14 23:39:39
+136521	Labadie and Sons	Esequiel Schinner	GJ-90272	Shoes	1	11.35	11.35	2015-08-10 03:09:17
+218667	Jaskolski-O'Hara	Trish Deckow	GP-14407	Belt	12	26.39	316.68	2015-08-27 07:38:04
+680916	Mueller and Sons	Loring Predovic	NZ-99565	Shirt	6	15.69	94.14	2016-06-12 19:47:43
+62592	O'Keefe-Koch	Shannen Hudson	GJ-90272	Shoes	16	69.18	1106.88	2016-03-13 00:51:07
+398620	Brekke Ltd	Esequiel Schinner	GP-14407	Belt	13	55.91	726.83	2015-10-16 12:59:45
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	12	84.83	1017.96	2016-06-08 19:07:52
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	8	76.19	609.52	2016-01-26 18:39:00
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	2	73.12	146.24	2015-08-06 03:08:55
+752312	Watsica-Pfannerstill	Loring Predovic	ZY-38455	Shirt	13	65.42	850.46	2015-12-21 07:24:44
+453258	Runolfsson-Bayer	Shannen Hudson	ZY-38455	Shirt	3	41.76	125.28	2015-06-27 12:46:27
+280749	Douglas PLC	Teagan O'Keefe	EO-54210	Shirt	12	13.58	162.96	2015-08-29 07:58:08
+136521	Labadie and Sons	Esequiel Schinner	GJ-90272	Shoes	18	78.19	1407.42	2016-01-19 10:04:44
+282122	Connelly, Abshire and Von	Beth Skiles	GJ-90272	Shoes	6	55.01	330.06	2015-10-09 13:09:37
+62592	O'Keefe-Koch	Shannen Hudson	ZY-38455	Shirt	14	36.47	510.58	2015-07-28 09:01:16
+759168	Schaefer Inc	Loring Predovic	NZ-99565	Shirt	7	63.18	442.26	2015-09-25 18:56:53
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	19	43	817	2016-03-28 02:57:09
+887145	Gislason LLC	Loring Predovic	GJ-90272	Shoes	3	67.59	202.77	2015-07-13 08:54:37
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	2	28.99	57.98	2015-07-03 11:01:40
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	8	65.3	522.4	2015-08-01 18:46:14
+62592	O'Keefe-Koch	Shannen Hudson	FI-01804	Shirt	10	79.44	794.4	2015-07-27 20:58:05
+262693	Ziemann-Heidenreich	Loring Predovic	NZ-99565	Shirt	16	65.48	1047.68	2015-07-11 10:10:34
+251881	Zulauf-Grady	Teagan O'Keefe	TK-29646	Shoes	2	60.09	120.18	2016-03-10 13:41:05
+62592	O'Keefe-Koch	Shannen Hudson	GJ-90272	Shoes	8	87.92	703.36	2015-06-30 21:27:57
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	TL-23025	Shoes	18	80.5	1449	2016-01-20 04:43:57
+752312	Watsica-Pfannerstill	Loring Predovic	EO-54210	Shirt	1	88.6	88.6	2015-10-21 10:05:59
+108399	Kuhic, Shields and Volkman	Trish Deckow	HZ-54995	Belt	9	24.72	222.48	2016-03-18 13:28:48
+62592	O'Keefe-Koch	Shannen Hudson	TK-29646	Shoes	15	58.91	883.65	2015-09-15 14:41:40
+282122	Connelly, Abshire and Von	Beth Skiles	DU-87462	Shirt	1	80.35	80.35	2015-10-19 21:49:18
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	10	92.51	925.1	2016-05-19 21:13:58
+759168	Schaefer Inc	Loring Predovic	EO-54210	Shirt	5	70.3	351.5	2015-10-04 09:17:45
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	14	37.05	518.7	2015-12-24 14:18:43
+93583	Hegmann-Howell	Esequiel Schinner	TK-29646	Shoes	12	48.35	580.2	2016-03-10 07:03:16
+62592	O'Keefe-Koch	Shannen Hudson	TK-29646	Shoes	8	44.48	355.84	2015-10-10 22:12:29
+530925	Purdy and Sons	Teagan O'Keefe	NZ-99565	Shirt	10	83.23	832.3	2015-06-22 17:47:17
+453258	Runolfsson-Bayer	Shannen Hudson	GJ-90272	Shoes	16	64.55	1032.8	2015-08-12 07:30:32
+530925	Purdy and Sons	Teagan O'Keefe	EO-54210	Shirt	13	76.16	990.08	2016-01-23 04:58:24
+218667	Jaskolski-O'Hara	Trish Deckow	FI-01804	Shirt	7	81.63	571.41	2016-02-03 11:48:32
+280749	Douglas PLC	Teagan O'Keefe	HZ-54995	Belt	19	76.27	1449.13	2015-08-23 19:32:06
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	11	10.23	112.53	2015-07-02 01:12:03
+898496	Weissnat, Veum and Barton	Ansley Cummings	TL-23025	Shoes	2	22.19	44.38	2015-12-15 15:01:48
+752312	Watsica-Pfannerstill	Loring Predovic	FI-01804	Shirt	2	70.45	140.9	2016-04-16 19:14:06
+530925	Purdy and Sons	Teagan O'Keefe	ZY-38455	Shirt	15	87.01	1305.15	2015-07-31 09:20:30
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	19	58.81	1117.39	2016-01-08 08:12:34
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	17	25.75	437.75	2016-01-31 16:45:40
+530925	Purdy and Sons	Teagan O'Keefe	TL-23025	Shoes	3	23.86	71.58	2016-06-06 21:59:05
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	18	42.51	765.18	2015-12-27 03:00:44
+136521	Labadie and Sons	Esequiel Schinner	FI-01804	Shirt	16	60.56	968.96	2015-10-01 15:32:08
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	DU-87462	Shirt	18	29.35	528.3	2016-05-16 11:43:57
+758030	Kilback-Abernathy	Trish Deckow	TL-23025	Shoes	9	57.66	518.94	2015-12-11 15:26:15
+898496	Weissnat, Veum and Barton	Ansley Cummings	FI-01804	Shirt	6	74.03	444.18	2016-03-26 00:48:29
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	19	12.42	235.98	2016-02-17 21:33:21
+262693	Ziemann-Heidenreich	Loring Predovic	NZ-99565	Shirt	11	98.56	1084.16	2015-09-27 16:34:10
+898496	Weissnat, Veum and Barton	Ansley Cummings	HZ-54995	Belt	17	54.3	923.1	2015-09-11 23:10:23
+282122	Connelly, Abshire and Von	Beth Skiles	HZ-54995	Belt	13	12.3	159.9	2015-11-13 13:50:23
+752312	Watsica-Pfannerstill	Loring Predovic	EO-54210	Shirt	8	53.01	424.08	2016-04-11 10:02:27
+108399	Kuhic, Shields and Volkman	Trish Deckow	HZ-54995	Belt	5	83.9	419.5	2015-07-01 04:37:01
+136521	Labadie and Sons	Esequiel Schinner	DU-87462	Shirt	17	70.44	1197.48	2015-12-05 00:59:07
+251881	Zulauf-Grady	Teagan O'Keefe	TK-29646	Shoes	3	33.05	99.15	2015-11-18 00:43:03
+758030	Kilback-Abernathy	Trish Deckow	GP-14407	Belt	14	21.23	297.22	2016-02-15 16:34:36
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	5	88.26	441.3	2015-09-18 23:32:07
+398620	Brekke Ltd	Esequiel Schinner	DU-87462	Shirt	19	94.79	1801.01	2015-08-05 22:16:25
+752312	Watsica-Pfannerstill	Loring Predovic	EO-54210	Shirt	5	58.9	294.5	2016-05-12 05:08:06
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	8	31.13	249.04	2016-05-15 02:25:47
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	11	75.62	831.82	2015-06-22 11:58:37
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	5	38.62	193.1	2015-11-26 08:20:58
+93583	Hegmann-Howell	Esequiel Schinner	DU-87462	Shirt	16	35.27	564.32	2016-04-24 05:51:38
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	15	90.93	1363.95	2015-06-29 11:02:10
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	19	81.56	1549.64	2015-11-25 04:06:09
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	1	46.75	46.75	2016-03-24 14:00:51
+752312	Watsica-Pfannerstill	Loring Predovic	FI-01804	Shirt	8	18.03	144.24	2015-06-17 13:21:25
+759168	Schaefer Inc	Loring Predovic	EO-54210	Shirt	13	24.67	320.71	2015-08-11 19:17:48
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	1	58.76	58.76	2015-11-20 20:19:58
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	20	29.32	586.4	2015-08-14 23:14:27
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	20	81.73	1634.6	2015-09-11 04:43:21
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	8	79.6	636.8	2015-06-28 20:47:20
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GJ-90272	Shoes	7	42.89	300.23	2015-12-04 16:48:06
+759168	Schaefer Inc	Loring Predovic	DU-87462	Shirt	8	59.45	475.6	2016-06-04 10:01:09
+62592	O'Keefe-Koch	Shannen Hudson	EO-54210	Shirt	7	54.74	383.18	2015-12-31 14:59:30
+218667	Jaskolski-O'Hara	Trish Deckow	TL-23025	Shoes	14	53.3	746.2	2015-12-17 03:07:10
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	8	26.97	215.76	2016-03-28 20:38:54
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	14	44.57	623.98	2015-07-18 09:11:49
+62592	O'Keefe-Koch	Shannen Hudson	HZ-54995	Belt	7	69.31	485.17	2015-09-28 15:03:22
+680916	Mueller and Sons	Loring Predovic	GP-14407	Belt	8	30.35	242.8	2015-09-25 08:19:14
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	FI-01804	Shirt	11	55.66	612.26	2015-10-30 16:45:48
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	9	56.4	507.6	2015-08-10 03:13:01
+453258	Runolfsson-Bayer	Shannen Hudson	GP-14407	Belt	10	92.31	923.1	2015-09-22 13:31:48
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	FI-01804	Shirt	9	60.69	546.21	2015-07-22 02:15:29
+62592	O'Keefe-Koch	Shannen Hudson	FI-01804	Shirt	8	98.58	788.64	2016-04-16 03:43:49
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	ZY-38455	Shirt	19	38.76	736.44	2015-06-27 12:21:52
+680916	Mueller and Sons	Loring Predovic	ZY-38455	Shirt	19	42.58	809.02	2016-02-10 11:04:31
+887145	Gislason LLC	Loring Predovic	GJ-90272	Shoes	19	52.07	989.33	2015-12-22 08:11:09
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	12	45.25	543	2015-08-24 19:44:22
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	GJ-90272	Shoes	20	93.67	1873.4	2016-04-24 11:05:11
+93583	Hegmann-Howell	Esequiel Schinner	NZ-99565	Shirt	3	57.51	172.53	2016-01-03 09:43:55
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	7	54.34	380.38	2016-01-22 09:37:00
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	6	73.18	439.08	2015-11-26 04:33:54
+280749	Douglas PLC	Teagan O'Keefe	GP-14407	Belt	9	29.94	269.46	2015-07-29 23:34:01
+758030	Kilback-Abernathy	Trish Deckow	NZ-99565	Shirt	16	65.97	1055.52	2016-05-31 11:12:55
+108399	Kuhic, Shields and Volkman	Trish Deckow	GP-14407	Belt	2	21.3	42.6	2016-03-06 18:33:01
+251881	Zulauf-Grady	Teagan O'Keefe	DU-87462	Shirt	4	74.59	298.36	2016-01-08 10:44:07
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	8	11.73	93.84	2016-06-12 04:31:13
+280749	Douglas PLC	Teagan O'Keefe	TL-23025	Shoes	18	95.05	1710.9	2015-07-22 19:05:21
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	DU-87462	Shirt	12	20.12	241.44	2015-07-27 10:15:02
+759168	Schaefer Inc	Loring Predovic	TL-23025	Shoes	5	24.72	123.6	2016-04-02 14:06:21
+62592	O'Keefe-Koch	Shannen Hudson	DU-87462	Shirt	12	61.21	734.52	2015-09-09 12:15:15
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TL-23025	Shoes	18	14.36	258.48	2015-12-22 19:02:00
+398620	Brekke Ltd	Esequiel Schinner	TL-23025	Shoes	20	43.83	876.6	2015-09-22 16:09:18
+759168	Schaefer Inc	Loring Predovic	GJ-90272	Shoes	3	63.75	191.25	2015-06-19 19:47:22
+108399	Kuhic, Shields and Volkman	Trish Deckow	GP-14407	Belt	15	13.77	206.55	2015-06-19 10:54:34
+280749	Douglas PLC	Teagan O'Keefe	NZ-99565	Shirt	11	66.18	727.98	2016-02-01 11:46:35
+680916	Mueller and Sons	Loring Predovic	EO-54210	Shirt	3	18.49	55.47	2016-04-20 20:43:28
+108399	Kuhic, Shields and Volkman	Trish Deckow	ZY-38455	Shirt	16	48.13	770.08	2015-07-03 10:25:56
+280749	Douglas PLC	Teagan O'Keefe	TK-29646	Shoes	2	81.71	163.42	2016-05-29 04:46:06
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	14	10.9	152.6	2015-09-10 09:35:26
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	17	43.15	733.55	2015-07-30 15:15:07
+680916	Mueller and Sons	Loring Predovic	DU-87462	Shirt	13	57.05	741.65	2015-12-22 03:16:17
+62592	O'Keefe-Koch	Shannen Hudson	FI-01804	Shirt	15	74.01	1110.15	2016-04-21 00:07:39
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	16	42.66	682.56	2016-05-14 22:37:23
+759168	Schaefer Inc	Loring Predovic	ZY-38455	Shirt	6	81.65	489.9	2016-05-31 09:30:24
+280749	Douglas PLC	Teagan O'Keefe	ZY-38455	Shirt	10	34.03	340.3	2016-01-19 21:09:25
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	18	89.18	1605.24	2015-09-23 01:35:44
+62592	O'Keefe-Koch	Shannen Hudson	FI-01804	Shirt	17	81.97	1393.49	2015-09-12 16:51:39
+282122	Connelly, Abshire and Von	Beth Skiles	TK-29646	Shoes	12	94.86	1138.32	2016-02-19 06:48:15
+752312	Watsica-Pfannerstill	Loring Predovic	TK-29646	Shoes	9	83.38	750.42	2016-03-14 05:30:27
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	EO-54210	Shirt	11	25.09	275.99	2016-02-02 07:25:55
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	3	90.02	270.06	2015-12-10 22:11:22
+280749	Douglas PLC	Teagan O'Keefe	GJ-90272	Shoes	3	92.27	276.81	2015-06-23 05:00:05
+62592	O'Keefe-Koch	Shannen Hudson	NZ-99565	Shirt	5	33.29	166.45	2015-11-29 02:54:10
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	EO-54210	Shirt	12	99.92	1199.04	2016-01-18 21:39:45
+93583	Hegmann-Howell	Esequiel Schinner	HZ-54995	Belt	8	97.9	783.2	2015-08-09 03:30:43
+752312	Watsica-Pfannerstill	Loring Predovic	TL-23025	Shoes	4	11.84	47.36	2016-06-08 11:29:06
+758030	Kilback-Abernathy	Trish Deckow	NZ-99565	Shirt	2	92.25	184.5	2016-04-27 05:33:43
+887145	Gislason LLC	Loring Predovic	EO-54210	Shirt	15	88.05	1320.75	2015-06-27 20:31:20
+108399	Kuhic, Shields and Volkman	Trish Deckow	GJ-90272	Shoes	3	72.66	217.98	2015-07-17 10:21:51
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TL-23025	Shoes	1	29.33	29.33	2015-09-12 01:35:23
+218667	Jaskolski-O'Hara	Trish Deckow	NZ-99565	Shirt	2	85.75	171.5	2016-01-29 03:09:46
+218667	Jaskolski-O'Hara	Trish Deckow	EO-54210	Shirt	8	85.19	681.52	2015-07-31 12:40:26
+680916	Mueller and Sons	Loring Predovic	HZ-54995	Belt	1	84.55	84.55	2016-01-13 18:23:08
+759168	Schaefer Inc	Loring Predovic	NZ-99565	Shirt	19	11.6	220.4	2016-02-01 02:23:24
+453258	Runolfsson-Bayer	Shannen Hudson	DU-87462	Shirt	9	89.49	805.41	2015-11-21 07:07:41
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	2	88.64	177.28	2015-10-16 23:24:09
+758030	Kilback-Abernathy	Trish Deckow	HZ-54995	Belt	19	49.62	942.78	2016-01-02 22:18:19
+108399	Kuhic, Shields and Volkman	Trish Deckow	DU-87462	Shirt	5	66.07	330.35	2015-08-27 13:38:11
+136521	Labadie and Sons	Esequiel Schinner	DU-87462	Shirt	9	10.18	91.62	2015-09-03 18:27:31
+898496	Weissnat, Veum and Barton	Ansley Cummings	GP-14407	Belt	12	33.31	399.72	2015-08-07 12:12:11
+758030	Kilback-Abernathy	Trish Deckow	ZY-38455	Shirt	17	80.77	1373.09	2015-10-18 01:47:14
+282122	Connelly, Abshire and Von	Beth Skiles	EO-54210	Shirt	3	96.93	290.79	2016-03-16 14:09:31
+218667	Jaskolski-O'Hara	Trish Deckow	EO-54210	Shirt	1	25.52	25.52	2016-03-21 00:40:24
+218667	Jaskolski-O'Hara	Trish Deckow	TK-29646	Shoes	13	37.61	488.93	2016-04-13 01:17:01
+136521	Labadie and Sons	Esequiel Schinner	FI-01804	Shirt	13	66.82	868.66	2015-12-04 20:48:54
+108399	Kuhic, Shields and Volkman	Trish Deckow	FI-01804	Shirt	9	20.85	187.65	2015-11-21 03:57:23
+136521	Labadie and Sons	Esequiel Schinner	TK-29646	Shoes	4	21.85	87.4	2015-10-25 08:17:15
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	11	35.41	389.51	2015-12-16 19:41:26
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	NZ-99565	Shirt	16	89.22	1427.52	2016-04-29 10:06:43
+887145	Gislason LLC	Loring Predovic	NZ-99565	Shirt	3	47.54	142.62	2016-05-20 22:50:19
+62592	O'Keefe-Koch	Shannen Hudson	DU-87462	Shirt	11	63.24	695.64	2016-05-30 05:24:41
+136521	Labadie and Sons	Esequiel Schinner	NZ-99565	Shirt	18	50.97	917.46	2015-07-24 16:33:22
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	9	27.16	244.44	2016-03-01 10:18:06
+530925	Purdy and Sons	Teagan O'Keefe	TK-29646	Shoes	5	41	205	2016-03-29 02:55:58
+398620	Brekke Ltd	Esequiel Schinner	ZY-38455	Shirt	6	69.22	415.32	2016-05-29 23:02:03
+62592	O'Keefe-Koch	Shannen Hudson	DU-87462	Shirt	13	86.03	1118.39	2015-11-21 00:48:18
+136521	Labadie and Sons	Esequiel Schinner	ZY-38455	Shirt	20	14.71	294.2	2016-01-15 21:05:37
+398620	Brekke Ltd	Esequiel Schinner	GJ-90272	Shoes	18	27.83	500.94	2016-02-29 11:37:51
+136521	Labadie and Sons	Esequiel Schinner	GP-14407	Belt	10	70.39	703.9	2015-09-24 12:08:14
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	10	13.96	139.6	2015-12-21 08:55:15
+453258	Runolfsson-Bayer	Shannen Hudson	TK-29646	Shoes	9	17.17	154.53	2015-07-11 23:55:48
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	9	93.05	837.45	2016-03-10 07:03:27
+758030	Kilback-Abernathy	Trish Deckow	TK-29646	Shoes	6	40.64	243.84	2015-07-14 21:52:12
+93583	Hegmann-Howell	Esequiel Schinner	GJ-90272	Shoes	3	38.07	114.21	2015-08-03 03:44:35
+218667	Jaskolski-O'Hara	Trish Deckow	ZY-38455	Shirt	5	71.26	356.3	2015-12-27 22:16:08
+453258	Runolfsson-Bayer	Shannen Hudson	TK-29646	Shoes	15	42.57	638.55	2015-11-19 05:49:45
+759168	Schaefer Inc	Loring Predovic	TK-29646	Shoes	12	39.34	472.08	2015-07-08 08:57:06
+680916	Mueller and Sons	Loring Predovic	ZY-38455	Shirt	11	72.81	800.91	2015-10-28 06:20:25
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	5	14.09	70.45	2016-04-09 02:52:30
+282122	Connelly, Abshire and Von	Beth Skiles	ZY-38455	Shirt	19	33.73	640.87	2015-10-05 20:08:50
+530925	Purdy and Sons	Teagan O'Keefe	TK-29646	Shoes	13	75.97	987.61	2015-10-13 08:56:20
+62592	O'Keefe-Koch	Shannen Hudson	TL-23025	Shoes	2	18.26	36.52	2015-10-05 09:30:52
+93583	Hegmann-Howell	Esequiel Schinner	GJ-90272	Shoes	10	58.94	589.4	2016-01-31 07:11:00
+680916	Mueller and Sons	Loring Predovic	TK-29646	Shoes	19	91.98	1747.62	2015-10-29 11:24:38
+752312	Watsica-Pfannerstill	Loring Predovic	NZ-99565	Shirt	10	12.63	126.3	2015-11-23 04:36:21
+108399	Kuhic, Shields and Volkman	Trish Deckow	FI-01804	Shirt	12	35.28	423.36	2015-09-27 16:09:58
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	11	41.52	456.72	2015-11-21 19:39:35
+530925	Purdy and Sons	Teagan O'Keefe	EO-54210	Shirt	18	48.26	868.68	2016-02-03 07:33:06
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	5	28.81	144.05	2016-03-31 11:58:09
+262693	Ziemann-Heidenreich	Loring Predovic	ZY-38455	Shirt	10	55.57	555.7	2015-07-04 02:29:54
+136521	Labadie and Sons	Esequiel Schinner	NZ-99565	Shirt	20	91.57	1831.4	2016-01-09 02:30:27
+136521	Labadie and Sons	Esequiel Schinner	TL-23025	Shoes	16	43.17	690.72	2016-06-05 07:18:59
+530925	Purdy and Sons	Teagan O'Keefe	NZ-99565	Shirt	7	42.45	297.15	2015-10-25 16:21:56
+251881	Zulauf-Grady	Teagan O'Keefe	FI-01804	Shirt	4	23.26	93.04	2016-04-21 16:43:51
+398620	Brekke Ltd	Esequiel Schinner	ZY-38455	Shirt	4	74	296	2015-07-24 09:56:02
+758030	Kilback-Abernathy	Trish Deckow	DU-87462	Shirt	4	47.37	189.48	2016-02-05 03:06:08
+93583	Hegmann-Howell	Esequiel Schinner	EO-54210	Shirt	1	37.4	37.4	2015-11-29 17:18:21
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	18	91.74	1651.32	2015-10-17 20:35:41
+758030	Kilback-Abernathy	Trish Deckow	GJ-90272	Shoes	8	36.1	288.8	2015-07-19 00:03:38
+898496	Weissnat, Veum and Barton	Ansley Cummings	NZ-99565	Shirt	5	42.74	213.7	2015-11-14 12:55:00
+251881	Zulauf-Grady	Teagan O'Keefe	EO-54210	Shirt	20	47.05	941	2015-11-11 18:26:48
+759168	Schaefer Inc	Loring Predovic	GJ-90272	Shoes	1	79.93	79.93	2016-05-07 13:20:15
+530925	Purdy and Sons	Teagan O'Keefe	GJ-90272	Shoes	10	90.21	902.1	2016-04-01 01:55:48
+282122	Connelly, Abshire and Von	Beth Skiles	DU-87462	Shirt	16	14.5	232	2016-06-13 09:17:02
+453258	Runolfsson-Bayer	Shannen Hudson	TK-29646	Shoes	15	37.68	565.2	2016-05-12 03:44:39
+251881	Zulauf-Grady	Teagan O'Keefe	TL-23025	Shoes	2	27.22	54.44	2016-02-04 21:42:35
+887145	Gislason LLC	Loring Predovic	FI-01804	Shirt	9	19.96	179.64	2016-05-31 13:09:59
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	18	48.1	865.8	2015-07-21 05:00:37
+887145	Gislason LLC	Loring Predovic	HZ-54995	Belt	3	68.23	204.69	2015-11-09 11:03:57
+759168	Schaefer Inc	Loring Predovic	TL-23025	Shoes	4	73.99	295.96	2015-09-21 23:28:46
+680916	Mueller and Sons	Loring Predovic	HZ-54995	Belt	18	17.93	322.74	2016-04-28 01:57:00
+218667	Jaskolski-O'Hara	Trish Deckow	TK-29646	Shoes	13	57.8	751.4	2015-11-09 12:17:52
+887145	Gislason LLC	Loring Predovic	GP-14407	Belt	5	51.82	259.1	2016-06-08 11:25:05
+93583	Hegmann-Howell	Esequiel Schinner	ZY-38455	Shirt	10	86.25	862.5	2016-05-10 23:48:57
+530925	Purdy and Sons	Teagan O'Keefe	FI-01804	Shirt	13	10.13	131.69	2016-04-01 20:39:41
+752312	Watsica-Pfannerstill	Loring Predovic	HZ-54995	Belt	18	23.48	422.64	2015-07-25 05:51:10
+758030	Kilback-Abernathy	Trish Deckow	TK-29646	Shoes	7	86.67	606.69	2015-08-19 15:35:31
+398620	Brekke Ltd	Esequiel Schinner	GP-14407	Belt	7	16.52	115.64	2016-04-07 10:25:42
+218667	Jaskolski-O'Hara	Trish Deckow	GJ-90272	Shoes	6	36.44	218.64	2015-11-02 20:55:11
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	HZ-54995	Belt	5	48.52	242.6	2016-05-22 12:34:35
+218667	Jaskolski-O'Hara	Trish Deckow	TL-23025	Shoes	14	88.33	1236.62	2015-07-12 15:59:56
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	9	62.85	565.65	2015-08-12 17:07:20
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	GP-14407	Belt	9	55.57	500.13	2016-02-27 03:20:13
+758030	Kilback-Abernathy	Trish Deckow	GJ-90272	Shoes	8	98.87	790.96	2016-02-10 16:51:59
+136521	Labadie and Sons	Esequiel Schinner	FI-01804	Shirt	15	99.43	1491.45	2015-12-17 21:58:31
+898496	Weissnat, Veum and Barton	Ansley Cummings	GJ-90272	Shoes	18	11.05	198.9	2016-04-01 10:19:26
+136521	Labadie and Sons	Esequiel Schinner	HZ-54995	Belt	20	54.67	1093.4	2016-02-20 10:43:41
+218667	Jaskolski-O'Hara	Trish Deckow	TL-23025	Shoes	19	45.97	873.43	2015-08-12 22:53:38
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TL-23025	Shoes	1	55.81	55.81	2016-02-01 17:50:13
+887145	Gislason LLC	Loring Predovic	ZY-38455	Shirt	10	16.37	163.7	2015-10-11 22:11:45
+898496	Weissnat, Veum and Barton	Ansley Cummings	GP-14407	Belt	8	83.37	666.96	2016-01-27 03:26:53
+62592	O'Keefe-Koch	Shannen Hudson	TK-29646	Shoes	18	24.92	448.56	2016-02-11 17:13:23
+530925	Purdy and Sons	Teagan O'Keefe	HZ-54995	Belt	3	90.33	270.99	2015-09-23 07:36:34
+93583	Hegmann-Howell	Esequiel Schinner	GP-14407	Belt	5	45.93	229.65	2016-04-13 22:34:56
+14406	Harber, Lubowitz and Fahey	Esequiel Schinner	ZY-38455	Shirt	16	21.6	345.6	2015-11-18 06:28:56
+136521	Labadie and Sons	Esequiel Schinner	GP-14407	Belt	4	98.57	394.28	2016-06-01 17:28:44
+575704	Lindgren, Thompson and Kirlin	Teagan O'Keefe	TK-29646	Shoes	3	65.16	195.48	2016-04-02 16:38:31
+898496	Weissnat, Veum and Barton	Ansley Cummings	EO-54210	Shirt	17	28.1	477.7	2015-07-20 19:30:10
+62592	O'Keefe-Koch	Shannen Hudson	FI-01804	Shirt	19	94.96	1804.24	2015-10-05 15:55:01
+530925	Purdy and Sons	Teagan O'Keefe	DU-87462	Shirt	3	22.86	68.58	2015-10-07 19:49:38
