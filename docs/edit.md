@@ -40,10 +40,23 @@ In most cases, `^` is the preferred command. Examples which demo `^` can be seen
 
 ###### How to set the header in an Excel sheet?
 
-For the standard filetypes (e.g. csv, tsv) the loaders assume that the dataset's first `options.header` rows contain the column names. The Excel loader does not because an Excel file can have multiple sheets with varying number of header rows.
+For most filetypes (e.g. csv, tsv, xls(x)) the loaders assume that the dataset's first `options.header` rows contain the column names.
+
+To bulk modify the header to match alternative row(s) in the sheet:
 
 1. Press `s` or `t` to select the rows which represent the header rows.
-2. Press `g^` to set the names of the headers to the contents of selected rows.
+2. Press `gz^` to modify the names of the headers to the contents of selected rows.
+
+If the Excel file has multiple sheets with varying number of header rows:
+
+1. Pass `--header==0` while loading the file.
+
+~~~
+vd file.xlsx --header=0
+~~~
+
+2. For each sheet, press `s` or `t` to select the rows which represent the header rows.
+3. Press `g^` to set the names of the headers to the contents of selected rows.
 
 ###### How to rename headers using the Columns sheet
 
