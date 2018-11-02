@@ -42,11 +42,6 @@ In most cases, `^` is the preferred command. Examples which demo `^` can be seen
 
 For most filetypes (e.g. csv, tsv, xls(x)) the loaders assume that the dataset's first `options.header` rows contain the column names.
 
-To bulk modify the header to match alternative row(s) in the sheet:
-
-1. Press `s` or `t` to select the rows which represent the header rows.
-2. Press `gz^` to modify the names of the headers to the contents of selected rows.
-
 If the Excel file has multiple sheets with varying number of header rows:
 
 1. Pass `--header==0` while loading the file.
