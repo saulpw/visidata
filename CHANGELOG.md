@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v1.4.1 (2018-10-29)
+# v1.5 (2018-11-02)
 
 ## Bugfixes
 - [clipboard] fix broken `gzY` (syscopy-cells)
