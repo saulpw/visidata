@@ -1,3 +1,6 @@
 sheet	col	row	longname	input	keystrokes	comment
+	override	header	set-option	0		
 			open-file	sample_data/sample-sales-reps.xlsx	o	
 sample-sales-reps		キsample-salesv4	dive-row		^J	
+sample-sales-reps_sample-salesv4		0	rename-cols-row		g^	
+sample-sales-reps_sample-salesv4		0	delete-row		d	

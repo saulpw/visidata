@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v1.4.1 (2018-10-29)
+# v1.5 (2018-11-02)
 
 ## Bugfixes
 - [clipboard] fix broken `gzY` (syscopy-cells)
@@ -24,9 +24,10 @@
 - [tsv] add unnamed columns if extra cells in rows
 - [diff] now based on display value (more intuitive)
 - [mouse] move to column also
+- [mouse] right-click to rename-col, rename-sheet, or edit-cell
 - [cosmetic] addcol-new (`za`) input new column name on top of new column
 - [cosmetic] include file iteration in progress meter
-
+- [xls xlsx] use options.header to determine column names
 
 # v1.4 (2018-09-23)
 

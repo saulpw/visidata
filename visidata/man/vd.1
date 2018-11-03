@@ -1,4 +1,4 @@
-.Dd September 21, 2018
+.Dd November 1, 2018
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -678,7 +678,7 @@ overwrite existing files without confirmation
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 encoding passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
-encoding errors passed to codecs.open
+encoding_errors passed to codecs.open
 .It Sy --regex-flags Ns = Ns Ar "str           " No "I"
 flags to pass to re.compile() [AILMSUX]
 .It Sy --default-width Ns = Ns Ar "int         " No "20"
@@ -719,10 +719,10 @@ amount to scroll with scrollwheel
 skip first N lines of text input
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
 whether to prompt for overwrite confirmation on save
-.It Sy --save-errors Ns = Ns Ar "bool          " No "True"
-whether to save or discard errors while saving
+.It Sy --safe-error Ns = Ns Ar "str            " No "#ERR"
+error string to use while saving
 .It Sy --header Ns = Ns Ar "int                " No "1"
-parse first N rows of .csv/.tsv as column names
+parse first N rows of certain formats as column names
 .It Sy --delimiter Ns = Ns Ar "str             " No "	"
 delimiter to use for tsv filetype
 .It Sy --filetype Ns = Ns Ar "str              " No ""
