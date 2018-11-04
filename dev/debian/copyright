@@ -1,19 +1,19 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: VisiData
-Upstream-Contact: Saul Pwanson <vd@saul.pw>
+Upstream-Contact: Saul Pwanson <saul@visidata.org>
 Source: https://github.com/saulpw/visidata
 
 Files: *
-Copyright: 2017, Saul Pwanson <vd@saul.pw>
+Copyright: 2017, Saul Pwanson <saul@visidata.org>
 License: GPL-3+
 
 Files: debian/*
-Copyright: 2018, Saul Pwanson <vd@saul.pw>
+Copyright: 2018, Saul Pwanson <saul@visidata.org>
            2018, Anja Boskovic <anja.kefala@gmail.com>
 License: GPL-3+
 
 Files: visidata/vdtui.py
-Copyright: 2017, Saul Pwanson <vd@saul.pw>
+Copyright: 2017, Saul Pwanson <saul@visidata.org>
 License: Expat
 
 License: GPL-3+
