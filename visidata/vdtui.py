@@ -683,6 +683,7 @@ class VisiData:
         Sheet.visibleCols.fget.cache_clear()
         Sheet.keyCols.fget.cache_clear()
         colors.colorcache.clear()
+        self.mousereg.clear()
 
     def editText(self, y, x, w, record=True, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
