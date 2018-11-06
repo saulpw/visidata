@@ -26,7 +26,7 @@
 # Just include this whole file in your project as-is.  If you do make
 # modifications, please keep the base vdtui version and append your own id and
 # version.
-__version__ = '1.5'
+__version__ = '1.5-dev'
 __version_info__ = 'saul.pw/vdtui v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'MIT'
