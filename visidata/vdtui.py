@@ -841,6 +841,7 @@ class VisiData:
             curses.curs_set(0)
 
         self.scr = scr
+        numTimeouts = 0
 
         self.keystrokes = ''
         while True:
@@ -862,6 +863,7 @@ class VisiData:
             keystroke = self.getkeystroke(scr, sheet)
 
             if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
+                numTimeouts = 0
                 if not self.prefixWaiting:
                     self.keystrokes = ''
 
@@ -923,12 +925,15 @@ class VisiData:
             catchapply(sheet.checkCursor)
 
             # no idle redraw unless background threads are running
+            time.sleep(0)  # yield to other threads which may not have started yet
             if vd.unfinishedThreads:
                 scr.timeout(options.curses_timeout)
             else:
-                time.sleep(0)  # yield to other threads which have yet to start
-                if vd.unfinishedThreads:
+                numTimeouts += 1
+                if numTimeouts > 1:
                     scr.timeout(-1)
+                else:
+                    scr.timeout(options.curses_timeout)
 
     def replace(self, vs):
         'Replace top sheet with the given sheet `vs`.'
