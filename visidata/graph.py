@@ -35,11 +35,15 @@ class InvertedCanvas(Canvas):
         return p
 
 # swap directions of up/down
-InvertedCanvas.addCommand(None, 'move-up', 'sheet.cursorBox.ymin += cursorBox.h')
-InvertedCanvas.addCommand(None, 'move-down', 'sheet.cursorBox.ymin -= cursorBox.h')
+InvertedCanvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h')
+InvertedCanvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h')
+InvertedCanvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymax')
+InvertedCanvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymin')
+InvertedCanvas.addCommand(None, 'next-page', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()')
+InvertedCanvas.addCommand(None, 'prev-page', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()')
 
-InvertedCanvas.addCommand(None, 'move-down-one', 'sheet.cursorBox.ymin -= canvasCharHeight')
-InvertedCanvas.addCommand(None, 'move-up-one', 'sheet.cursorBox.ymin += canvasCharHeight')
+InvertedCanvas.addCommand(None, 'go-down-small', 'sheet.cursorBox.ymin -= canvasCharHeight')
+InvertedCanvas.addCommand(None, 'go-up-small', 'sheet.cursorBox.ymin += canvasCharHeight')
 
 InvertedCanvas.addCommand(None, 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight')
 InvertedCanvas.addCommand(None, 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight')

@@ -533,6 +533,11 @@ class Canvas(Plotter):
 
     def checkCursor(self):
         'override Sheet.checkCursor'
+        if self.cursorBox.h < self.canvasCharHeight:
+            self.cursorBox.h = self.canvasCharHeight*3/4
+        if self.cursorBox.w < self.canvasCharWidth:
+            self.cursorBox.w = self.canvasCharWidth*3/4
+
         return False
 
     @property
@@ -621,12 +626,15 @@ class Canvas(Plotter):
 
 Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w')
 Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w')
-Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h')
-Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h')
+Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin -= cursorBox.h')
+Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin += cursorBox.h')
 Canvas.addCommand(None, 'go-leftmost', 'sheet.cursorBox.xmin = visibleBox.xmin')
 Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w')
-Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = cursorBox.ymin')
-Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = cursorBox.ymax-cursorBox.h')
+Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymin')
+Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymax')
+
+Canvas.addCommand(None, 'next-page', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()')
+Canvas.addCommand(None, 'prev-page', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()')
 
 Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth')
 Canvas.addCommand('zl', 'go-right-small', 'sheet.cursorBox.xmin += canvasCharWidth')

@@ -1845,17 +1845,17 @@ class Sheet(BaseSheet):
 
         return r
 
-Sheet.addCommand('KEY_LEFT', 'go-left',  'cursorRight(-1)'),
-Sheet.addCommand('KEY_DOWN', 'go-down',  'cursorDown(+1)'),
-Sheet.addCommand('KEY_UP', 'go-up',    'cursorDown(-1)'),
-Sheet.addCommand('KEY_RIGHT', 'go-right', 'cursorRight(+1)'),
-Sheet.addCommand('KEY_NPAGE', 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
-Sheet.addCommand('KEY_PPAGE', 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
+Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
+Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),
+Sheet.addCommand(None, 'go-up',    'cursorDown(-1)'),
+Sheet.addCommand(None, 'go-right', 'cursorRight(+1)'),
+Sheet.addCommand(None, 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
+Sheet.addCommand(None, 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
 
-Sheet.addCommand('gh', 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
-Sheet.addCommand('KEY_HOME', 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
-Sheet.addCommand('KEY_END', 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
-Sheet.addCommand('gl', 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
+Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
+Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
+Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
+Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
 
 Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=topRowIndex+mouseY-1; sheet.cursorVisibleColIndex=visibleColAtX(mouseX)'),
 Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
@@ -1899,10 +1899,19 @@ Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows 
 
 Sheet.addCommand('V', 'view-cell', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))'),
 
-Sheet.bindkey('gKEY_LEFT', 'go-leftmost'),
-Sheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
-Sheet.bindkey('gKEY_UP', 'go-top'),
-Sheet.bindkey('gKEY_DOWN', 'go-bottom'),
+bindkey('KEY_LEFT', 'go-left')
+bindkey('KEY_DOWN', 'go-down')
+bindkey('KEY_UP', 'go-up')
+bindkey('KEY_RIGHT', 'go-right')
+bindkey('KEY_HOME', 'go-top')
+bindkey('KEY_END', 'go-bottom')
+bindkey('KEY_NPAGE', 'next-page')
+bindkey('KEY_PPAGE', 'prev-page')
+
+bindkey('gKEY_LEFT', 'go-leftmost'),
+bindkey('gKEY_RIGHT', 'go-rightmost'),
+bindkey('gKEY_UP', 'go-top'),
+bindkey('gKEY_DOWN', 'go-bottom'),
 
 
 def isNullFunc():
