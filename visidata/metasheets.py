@@ -51,7 +51,7 @@ class ColumnsSheet(Sheet):
         def calcValue(self, srcCol):
             return srcCol.getDisplayValue(srcCol.sheet.cursorRow)
         def setValue(self, srcCol, val):
-            srcCol.setValue(self.sheet.source.cursorRow, val)
+            srcCol.setValue(srcCol.sheet.cursorRow, val)
 
     columns = [
             ColumnAttr('sheet', type=str),
