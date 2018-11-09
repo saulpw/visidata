@@ -533,10 +533,11 @@ class Canvas(Plotter):
 
     def checkCursor(self):
         'override Sheet.checkCursor'
-        if self.cursorBox.h < self.canvasCharHeight:
-            self.cursorBox.h = self.canvasCharHeight*3/4
-        if self.cursorBox.w < self.canvasCharWidth:
-            self.cursorBox.w = self.canvasCharWidth*3/4
+        if self.cursorBox:
+            if self.cursorBox.h < self.canvasCharHeight:
+                self.cursorBox.h = self.canvasCharHeight*3/4
+            if self.cursorBox.w < self.canvasCharWidth:
+                self.cursorBox.w = self.canvasCharWidth*3/4
 
         return False
 
