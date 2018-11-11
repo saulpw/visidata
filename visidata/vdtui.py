@@ -562,11 +562,7 @@ class VisiData:
         self.prefixWaiting = False
         self.scr = None  # curses scr
         self.hooks = collections.defaultdict(list)  # [hookname] -> list(hooks)
-        self.mousereg = defaultdict(  # [scr] ->
-                  lambda: defaultdict(  # [y] ->
-                    lambda: defaultdict(  # [x] ->
-                      lambda: defaultdict(  # [button] (like "BUTTON1_CLICKED") ->
-                        lambda: None))))      # func(y, x, button)
+        self.mousereg = []
         self.threads = [] # all long-running threads, including main and finished
         self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'color_keystrokes'))
@@ -754,10 +750,12 @@ class VisiData:
             raise
 
     def onMouse(self, scr, y, x, h, w, **kwargs):
-        for i in range(y, y+h):
-            for j in range(x, x+w):
-                for button, func in kwargs.items():
-                    self.mousereg[scr][i][j][button] = func
+        self.mousereg.append((scr, y, x, h, w, kwargs))
+
+    def getMouse(self, _scr, _x, _y, button):
+        for scr, y, x, h, w, kwargs in self.mousereg[::-1]:
+            if scr == _scr and x <= _x <= x+w and y <= _y <= y+h and button in kwargs:
+                return kwargs[button]
 
     def drawLeftStatus(self, scr, vs):
         'Draw left side of status bar.'
@@ -777,7 +775,8 @@ class VisiData:
             x = clipdraw(scr, y, 0, lstatus, attr)
             self.onMouse(scr, y, 0, 1, x,
                             BUTTON1_PRESSED='sheets',
-                            BUTTON3_PRESSED='rename-sheet')
+                            BUTTON3_PRESSED='rename-sheet',
+                            BUTTON3_CLICKED='rename-sheet')
 
             one = False
             for (pri, msgparts), n in sorted(self.statuses.items(), key=lambda k: -k[0][0]):
@@ -887,7 +886,7 @@ class VisiData:
 
                         keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
 
-                        f = self.mousereg[scr][y][x][keystroke]
+                        f = self.getMouse(scr, x, y, keystroke)
                         if f:
                             if isinstance(f, str):
                                 for cmd in f.split():
