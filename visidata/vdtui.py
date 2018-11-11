@@ -522,6 +522,7 @@ class Progress:
 
     def addProgress(self, n):
         self.made += n
+        return True
 
     def __exit__(self, exc_type, exc_val, tb):
         if self.sheet:
@@ -1545,9 +1546,11 @@ class Sheet(BaseSheet):
             except Exception:
                 pass
 
+    @asyncthread
     def orderBy(self, *cols, **kwargs):
         try:
-            self.rows.sort(key=lambda r,cols=cols: tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
+            with Progress(self.rows) as prog:
+                self.rows = sorted(self.rows, key=lambda r,cols=cols,prog=prog: prog.addProgress(1) and tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
         except TypeError as e:
             status('sort incomplete due to TypeError; change column type')
             exceptionCaught(e, status=False)
