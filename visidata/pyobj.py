@@ -82,7 +82,7 @@ def push_pyobj(name, pyobj):
     if vs:
         return vd().push(vs)
     else:
-        status('unknown type ' + type(pyobj))
+        error("cannot push '%s' as pyobj" % type(pyobj).__name__)
 
 def view(obj):
     run(load_pyobj(getattr(obj, '__name__', ''), obj))
@@ -99,7 +99,7 @@ def load_pyobj(name, pyobj):
     elif isinstance(pyobj, object):
         return SheetObject(name, pyobj)
     else:
-        status('unknown type ' + type(pyobj))
+        error("cannot load '%s' as pyobj" % type(pyobj).__name__)
 
 def open_pyobj(path):
     'Provide wrapper for `load_pyobj`.'
