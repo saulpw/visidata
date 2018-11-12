@@ -84,7 +84,7 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 
 ---
 
-## [How to create derivative columns](#derived)
+## [How to create derivative columns](#derived) {#derived}
 
 The `=` command takes a Python expression as input, evaluates the expression, and creates a new column from the result. Column names can be supplied as variables, in order to have the expression performed on the column cell-by-cell. VisiData supports `Tab` autocompletion of column names.
 
