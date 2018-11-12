@@ -63,6 +63,9 @@ def load_csv(vs):
             vs.addRow(r)
             vs.columns = ArrayColumns(len(vs.rows[0]))
 
+        if not vs.columns:
+            vs.columns = [ColumnItem(0)]
+
         vs.recalc()  # make columns usable
         with Progress(total=vs.source.filesize) as prog:
             try:
