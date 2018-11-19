@@ -1,6 +1,6 @@
 # User Documentation
 
-* [VisiData v1.2 Getting Started Tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
+* [Intro to VisiData tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
 * [quick reference guide](/man)
     * comprehensive overview of all available commands and options
     * also available as a manpage via `man vd` and from inside VisiData with `Ctrl+H`

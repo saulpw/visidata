@@ -14,11 +14,11 @@ The process of designing a loader is:
 
 When VisiData tries to open a source with filetype `foo`, it tries to call `open_foo(path)`, which should return an instance of `Sheet`, or raise an error. `path` is a `Path` object of some kind.
 
-    def open_foo(p):
-        return FooSheet(p.name, source=p)
+    def open_foo(path):
+        return FooSheet(path.name, source=path)
 
     class FooSheet(Sheet):
-        rowtype = 'foobits'  # rowdef: foolib.Bar object
+        rowtype = 'foobits'
 
 - The `Sheet` constructor takes the new sheet name as its first argument.
 Any other keyword arguments are set as attributes on the new instance.
@@ -33,7 +33,7 @@ Any other keyword arguments are set as attributes on the new instance.
 Using the Sheet `source`, `reload` populates `rows`:
 
     class FooSheet(Sheet):
-        ...
+        rowtype = 'foobits'  # rowdef: foolib.Bar object
         def reload(self):
             self.rows = []
             for r in crack_foo(self.source):
@@ -55,7 +55,7 @@ Fortunately, making an [async](/docs/async) loader is pretty straightforward:
 
 4. Do not depend on the order of `rows` after they are added; e.g. do not reference `rows[-1]`.  The order of rows may change during an asynchronous loader.
 
-5. Catch any `Exception`s that might be raised while handling a specific row, and add them as the row instead.  Never use a bare `except:` clause or the loader thread will not be killable.
+5. Catch any `Exception`s that might be raised while handling a specific row, and add them as the row instead.  Never use a bare `except:` clause or the loader thread will not be cancelable with `Ctrl+C`.
 
 #### async example
     class FooSheet(Sheet):
@@ -75,15 +75,15 @@ Test the loader with a large dataset to make sure that:
 
 - the first rows appear immediately;
 - the progress percentage is being updated;
-- the loader can be cancelled (with `^C`).
+- the loader can be cancelled (with `Ctrl+C`).
 
 ## 3. Enumerate the columns
 
 Each sheet has a unique list of `columns`. Each `Column` provides a different view into the row.
 
-
     class FooSheet(Sheet):
-        ...
+        rowtype = 'foobits'  # rowdef: foolib.Bar object
+
         columns = [
             ColumnAttr('name'),  # foolib.Bar.name
             Column('bar', getter=lambda col,row: row.inside[2],
@@ -91,8 +91,8 @@ Each sheet has a unique list of `columns`. Each `Column` provides a different vi
             Column('baz', type=int, getter=lambda col,row: row.inside[1]*100)
         ]
 
-In general, set `columns` as a class member.  If the columns aren't known until the data is being loaded, 
-`reload()` should first call `columns.clear()`, and then call `addColumn(col)` for each column at the earliest opportunity.
+In general, set `columns` as a class member.  If the columns aren't known until the data is being loaded,
+`reload()` should first call `self.columns.clear()`, and then call `self.addColumn(col)` for each column at the earliest opportunity.
 
 ### Column properties
 
@@ -158,7 +158,7 @@ Recipes for a couple of recurring patterns:
 
     FooSheet.addCommand('b', 'reset-bar', 'cursorRow.set_bar(0)')
 
-- Optionally, a reasonably intuitive and mnemonic default keybindings could be chosen.
+- Optionally, a reasonably intuitive and mnemonic default keybinding could be chosen.
 - The longname is a mandatory argument and allows the command to be rebound by a more descriptive name, and for the command to be redefined for other contexts (so all keystrokes bound to that command will take on the new action).
 
 See the [commands design document]() and [commands checklist]() for more details.
