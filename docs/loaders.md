@@ -201,7 +201,7 @@ A full-duplex loader requires a **saver**.  The saver iterates over all `rows` a
 
     @asyncthread
     def save_foo(path, sheet):
-        with p.open_text(mode='w') as fp:
+        with path.open_text(mode='w') as fp:
             for i, row in enumerate(Progress(sheet.rows)):
                 for col in sheet.visibleCols:
                     foolib.write(fp, i, col.name, col.getValue(row))
