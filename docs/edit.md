@@ -7,23 +7,25 @@
 
 For a summary of all editing commands, see the [man page](/man#edit).
 
-Command         Operation
---------        ----------
- `e`            edit contents of **current cell**
-`ge` *text*     set contents of **current column for selected rows** to *text*
+Command                    Operation
+--------                   ----------
+ `e`                       edit contents of **current cell**
+`ge` *text*                set contents of **current column for selected rows** to *text*
+`g*` *regex*/*subst*       replace matching *regex* in **current column for selected rows** with *subst*
+`g=` *expr*                evaluate Python *expr* over each selected row and set **current column** to the result
 
 While in editing mode, or anytime VisiData expects input (with e.g. `=`, `;`), typical readline commands become available:
 
 Command             Operation
 --------            ----------
 `Enter`             accepts input
-`^C`  `Esc`           aborts input
-`^O`                opens external $EDITOR to edit contents
-`^R`                reloads initial value
-`^A`  `^E`          moves to beginning/end of line
+`Ctrl+C`/`Esc`      aborts input
+`Ctrl+O`            opens external $EDITOR to edit contents
+`Ctrl+R`            reloads initial value
+`Ctrl+A`/`Ctrl+E`   moves to beginning/end of line
 `Backspace`         deletes previous character
-`Up`  `Down`        sets contents to previous/next in history
-`Tab` `Shift-Tab`   autocompletes input (when available)
+`Up`/`Down`         sets contents to previous/next in history
+`Tab`/`Shift-Tab`   autocompletes input (when available)
 
 ---
 
