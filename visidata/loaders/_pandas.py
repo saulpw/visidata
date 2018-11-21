@@ -28,7 +28,7 @@ class PandasSheet(Sheet):
         elif isinstance(self.source, Path):
             filetype = getattr(self, 'filetype', self.source.ext[1:])
             readfunc = getattr(pandas, 'read_'+filetype) or error('no pandas.read_'+filetype)
-            self.df = readfunc(self.source.resolve())
+            self.df = readfunc(self.source.resolve(), **options('pandas_'))
             self.rows = DataFrameAdapter(self.df)
 
         self.columns = [ColumnItem(col) for col in self.df.columns]
