@@ -1386,7 +1386,7 @@ class Sheet(BaseSheet):
         return self.name
 
     def evalexpr(self, expr, row=None):
-        return eval(expr, getGlobals(), LazyMapRow(self, row) if row else None)
+        return eval(expr, getGlobals(), LazyMapRow(self, row) if row is not None else None)
 
     def inputExpr(self, prompt, *args, **kwargs):
         return input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
