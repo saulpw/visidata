@@ -2826,6 +2826,15 @@ def cursesMain(_scr, sheetlist):
     status('Ctrl+H opens help')
     return vd().run(_scr)
 
+def loadConfigFile(fnrc):
+    p = Path(fnrc)
+    if p.exists():
+        try:
+            code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
+            exec(code, globals())
+        except Exception as e:
+            exceptionCaught(e)
+
 def addGlobals(g):
     'importers can call `addGlobals(globals())` to have their globals accessible to execstrings'
     globals().update(g)

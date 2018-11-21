@@ -49,15 +49,7 @@ def main():
     sys.path.append(Path(options.visidata_dir).resolve())
 
     # user customisations in config file in standard location
-    fnrc = '~/.visidatarc'
-    p = Path(fnrc)
-    if p.exists():
-        try:
-            code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
-            exec(code, globals())
-        except Exception as e:
-            exceptionCaught(e)
-
+    vdtui.loadConfigFile('~/.visidatarc')
     vdtui.addGlobals(globals())
 
     # apply command-line overrides after .visidatarc
