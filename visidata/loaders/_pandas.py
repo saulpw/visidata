@@ -22,16 +22,14 @@ class PandasSheet(Sheet):
     def reload(self):
         import pandas
         if isinstance(self.source, pandas.DataFrame):
-            self.df = self.source
-            self.rows = DataFrameAdapter(self.source)
-            self.columns = [ColumnItem(col) for col in self.source.columns]
+            df = self.source
         elif isinstance(self.source, Path):
             filetype = getattr(self, 'filetype', self.source.ext[1:])
             readfunc = getattr(pandas, 'read_'+filetype) or error('no pandas.read_'+filetype)
-            self.df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
-            self.rows = DataFrameAdapter(self.df)
+            df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
 
-        self.columns = [ColumnItem(col) for col in self.df.columns]
+        self.columns = [ColumnItem(col) for col in df.columns]
+        self.rows = DataFrameAdapter(df)
 
 
 def view_pandas(df):
