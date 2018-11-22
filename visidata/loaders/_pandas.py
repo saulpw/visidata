@@ -21,15 +21,23 @@ class DataFrameAdapter:
 class PandasSheet(Sheet):
     def reload(self):
         import pandas
+        import numpy
+        def dtypeToType(df, colname):
+            t = df[colname].dtype
+            if t == numpy.int64: return int
+            if t == numpy.float64: return float
+            if t == pandas.Timestamp: return date
+            return anytype
+
         if isinstance(self.source, pandas.DataFrame):
-            df = self.source
+            self.df = self.source
         elif isinstance(self.source, Path):
             filetype = getattr(self, 'filetype', self.source.ext[1:])
             readfunc = getattr(pandas, 'read_'+filetype) or error('no pandas.read_'+filetype)
-            df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
+            self.df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
 
-        self.columns = [ColumnItem(col) for col in df.columns]
-        self.rows = DataFrameAdapter(df)
+        self.columns = [ColumnItem(col, type=dtypeToType(self.df, col)) for col in self.df.columns]
+        self.rows = DataFrameAdapter(self.df)
 
 
 def view_pandas(df):
