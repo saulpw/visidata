@@ -197,7 +197,7 @@ def saveSheets(fn, *vsheets, confirm_overwrite=False):
             if confirm_overwrite:
                 confirm('%s already exists. overwrite? ' % fn)
 
-        status('saving to ' + givenpath.fqpn)
+        status('saving to %s as %s' % (givenpath.fqpn, filetype))
         savefunc(givenpath, vsheets[0])
 
 

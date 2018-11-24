@@ -52,6 +52,8 @@ def main():
     vdtui.loadConfigFile('~/.visidatarc')
     vdtui.addGlobals(globals())
 
+    vdtui.globalCommand('gO', 'open-config', 'vd.push(vdtui.TextSheet("visidatarc", Path("~/.visidatarc")))')
+
     # apply command-line overrides after .visidatarc
     for optname, optval in vars(args).items():
         if optval is not None and optname not in ['inputs', 'play', 'batch', 'output', 'diff']:

@@ -2447,6 +2447,7 @@ class TextSheet(Sheet):
 
     def __init__(self, name, source, **kwargs):
         super().__init__(name, source=source, **kwargs)
+        options.set('save_filetype', 'txt', self)
 
     @asyncthread
     def reload(self):

@@ -432,7 +432,7 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Sheets Sheet No (Shift+S) "     jump between sheets or join them together"
 .It Sy " \&."
-.Sy Options Sheet No (Shift+O) "    edit all configurable options"
+.Sy Options Sheet No (Shift+O) "    edit configuration options"
 .It Sy " \&."
 .Sy Commandlog No (Shift+D) "       modify and save commands for replay"
 .It Sy " \&."
@@ -545,12 +545,23 @@ abort async threads for current/selected sheets(s)
 .El
 .
 .Ss Options Sheet (Shift+O)
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Shift+O
+.No edit global options (apply to Sy all sheets Ns )
+.It Ic zO
+.No edit sheet options (apply to Sy this sheet No only)
+.It Ic gO
+.No open Sy ~/.visidatarc
+.El
 .Bl -inset -compact 
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  e"
-edit option
+edit option at current row
 .El
 .
 .Ss CommandLog (Shift+D)
@@ -714,7 +725,7 @@ For example:
 
    aggregator('median', median)
 .Ed
-.
+.Pp
 Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).
 .
 .Sh SUPPORTED SOURCES

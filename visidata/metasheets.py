@@ -8,8 +8,8 @@ globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=v
 globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
 globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
 
-Sheet.addCommand('O', 'options-sheet', 'vd.push(getOptionsSheet(sheet)).reload()')
-Sheet.addCommand('gO', 'options-global', 'vd.push(vd.optionsSheet)')
+Sheet.addCommand('zO', 'options-sheet', 'vd.push(getOptionsSheet(sheet)).reload()')
+Sheet.addCommand('O', 'options-global', 'vd.push(vd.optionsSheet)')
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
 Sheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
 
