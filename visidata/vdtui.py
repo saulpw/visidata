@@ -1762,6 +1762,8 @@ class Sheet(BaseSheet):
 
         rowattrs = {}  # [rowidx] -> attr
         colattrs = {}  # [colidx] -> attr
+        isNull = isNullFunc()
+
         self.rowLayout = {}
         self.calcColLayout()
         vcolidx = 0
@@ -1784,7 +1786,10 @@ class Sheet(BaseSheet):
 
                     row = rows[rowidx]
                     cellval = col.getCell(row, colwidth-1)
-#
+                    if isNull(cellval.value):
+                        cellval.note = options.disp_note_none
+                        cellval.notecolor = 'color_note_type'
+
                     attr = self.colorize(col, row, cellval)
 
                     # sepattr is the attr between cell/columns
