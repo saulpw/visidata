@@ -1,0 +1,408 @@
+#!/usr/bin/env python3
+
+import sys
+import random
+import sh
+from vdtui import *
+
+from git import *
+from merge import GitMerge
+from blame import GitBlame
+from diff import DifferSheet
+
+__version__ = 'saul.pw/vgit v0.3pre'
+
+option('vgit_show_ignored', False)
+
+globalCommand('x', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
+globalCommand('B', 'vd.push(gitBranchesSheet).reload()', 'push branches sheet')
+globalCommand('O', 'vd.push(gitOptionsSheet).reload()', 'push sheet of git options')
+globalCommand('P', 'git("push")', 'git push')
+globalCommand('A', 'abortWhatever()', 'abort the current in-progress action')
+
+globalCommand('H', 'vd.push(LogSheet(branch+"_log", branch))', 'push log of current branch')
+globalCommand('T', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
+globalCommand('R', 'vd.push(gitRemotesSheet).reload()', 'push remotes sheet')
+globalCommand('^S', 'git("stash", "save")', 'stash uncommitted changes')
+globalCommand('^P', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
+
+
+class GitStashes(GitSheet):
+    columns = [
+        ColumnItem('stashid', 0),
+        ColumnItem('start_branch', 1),
+        ColumnItem('sha1', 2),
+        ColumnItem('msg', 3),
+    ]
+    commands = GitSheet.commands + [
+        Command('a', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing'),
+        Command('^P', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),
+        Command('d', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change'),
+        Command('b', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash'),
+        Command(ENTER, 'vd.push(HunksSheet(cursorRow[0]+"_diffs", sheet, "stash", "show", "--no-color", "--patch", cursorRow[0]))', 'show this stashed change'),
+    ]
+
+    def reload(self):
+        self.rows = []
+        for line in git_lines('stash', 'list'):
+            stashid, ctx, rest = line[:-1].split(': ', 2)
+            starting_branch = ctx[len('WIP on '):]
+            sha1, msg = rest.split(' ', 1)
+            self.rows.append([stashid, starting_branch, sha1, msg])
+
+
+class GitUndo:
+    def __init__(self, *args):
+        self.cmdargs = args
+    def __enter__(self):
+        return self
+    def __exit__(self, exctype, exc, tb):
+        out = loggit_all(*self.cmdargs)
+
+def randomBranchName():
+    return ''.join(string.ascii_lowercase[random.randint(0, 25)] for i in range(10))
+
+
+# rowdef: (commit_hash, refnames, author, author_date, body, notes)
+class LogSheet(GitSheet):
+    # corresponding to rowdef
+    GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
+
+    commands = GitSheet.commands + [
+        Command(ENTER, 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit'),
+        Command('Q', '', 'squash selected commits'),
+        Command('c', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch'),
+#       Command('gc', '', 'cherry-pick selected commits onto current branch'),
+        Command('C', 'confirm("amend this commit with the index? "); amendPrevious(cursorRow[0]); reload()', 'amend this commit with changes in the index'),
+        Command('r', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit'),
+    ]
+    columns = [
+            ColumnItem('commitid', 0, width=8),
+            ColumnItem('refnames', 1, width=12),
+            Column('message', getter=lambda c,r: r[4], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
+            Column('author', getter=lambda c,r: r[2], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
+            Column('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
+            Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
+    ]
+    colorizers = [Colorizer('row', 5, lambda s,c,r,v: 'cyan' if not s.inRemoteBranch(r[0]) else None)]
+
+    def amendPrevious(self, targethash):
+        'amend targethash with current index, then rebase newer commits on top'
+
+        prevBranch = loggit_all('rev-parse', '--symbolic-full-name', '--abbrev-ref', 'HEAD').strip()
+
+        ret = loggit_all('commit', '-m', 'MERGE '+targethash) # commit index to viewed branch
+        newChanges = loggit_all('rev-parse', 'HEAD').strip()
+
+        ret += loggit_all('stash', 'save', '--keep-index') # stash everything else
+        with GitUndo('stash', 'pop'):
+            tmpBranch = randomBranchName()
+            ret += loggit_all('checkout', '-b', tmpBranch) # create/switch to tmp branch
+            with GitUndo('checkout', prevBranch), GitUndo('branch', '-D', tmpBranch):
+                ret += loggit_all('reset', '--hard', targethash) # tmpbranch now at targethash
+                ret += loggit_all('cherry-pick', '-n', newChanges)  # pick new change from original branch
+                ret += loggit_all('commit', '--amend', '--no-edit')  # recommit to fix targethash (which will change)
+                ret += loggit_all('rebase', '--onto', tmpBranch, 'HEAD@{1}', prevBranch)  # replay the rest
+
+        return ret.splitlines()
+
+    @functools.lru_cache()
+    def inRemoteBranch(self, commitid):
+        return git_all('branch', '-r', '--contains', commitid)
+
+    @async
+    def reload(self):
+        self.rows = []
+        for record in git_iter('\0', 'log', '--no-color', '-z', '--pretty=format:%s' % '%x1f'.join(self.GIT_LOG_FORMAT), self.source):
+            self.rows.append(record.split('\x1f'))
+
+
+class GitBranches(GitSheet):
+    columns = [
+        Column('branch', getter=lambda c,r: r[1][8:] if r[1].startswith('remotes/') else r[1], width=20),
+        ColumnItem('head_commitid', 2, width=0),
+        ColumnItem('tracking', 3),
+        ColumnItem('upstream', 6),
+        ColumnItem('merge_base', 7, width=20),
+        ColumnItem('extra', 4, width=0),
+        ColumnItem('head_commitmsg', 5, width=50),
+    ]
+    commands = GitSheet.commands + [
+        Command('a', 'git("branch", input("create branch: ", type="branch"))', 'create a new branch off the current checkout'),
+        Command('d', 'git("branch", "--delete", cursorRow[1])', 'delete this branch'),
+        Command('e', 'git("branch", "-v", "--move", cursorRow[1], editCell(0))', 'rename this branch'),
+        Command('c', 'git("checkout", cursorRow[1])', 'checkout this branch'),
+        Command('m', 'git("merge", cursorRow[1])', 'merge this branch into the current branch'),
+        Command(ENTER, 'vd.push(LogSheet(cursorRow[1]+"_log", cursorRow[1]))', 'push log of this branch'),
+    ]
+    colorizers = [
+        Colorizer('row', 10, lambda s,c,r,v: 'underline' if r[0] else None),
+        Colorizer('row', 10, lambda s,c,r,v: 'cyan' if not r[1].startswith('remotes/') else None),
+    ]
+    nKeys = 1
+
+    def __init__(self):
+        super().__init__('branches')
+
+    @async
+    def reload(self):
+        self.rows = []
+        for line in git_lines('branch', '--list', '-vv', '--no-color', '--all'):
+            if '->' in line:
+                continue
+
+            m = re.match(r'''(\*?)\s+
+                             (\S+)\s+
+                             (\w+)\s+
+                             (?:\[
+                               ([^\s\]:]+):?
+                               \s*(.*?)
+                             \])?
+                             \s*(.*)''', line, re.VERBOSE)
+            if m:
+                current, localbranch, refid, remotebranch, extra, msg = m.groups()
+                merge_base = git_all("show-branch", "--merge-base", localbranch, gitStatusSheet.branch, _ok_code=[0,1]).strip()
+                merge_name = git_all("name-rev", "--name-only", merge_base).strip() if merge_base else ''
+
+                self.rows.append(list(m.groups()) + [gitStatusSheet.getBranchStatuses().get(localbranch)] + [merge_name])
+
+
+def getHunksSheet(parent, *files):
+    return HunksSheet('hunks', parent, 'diff',
+                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--patch',
+                  '--inter-hunk-context=2', '-U1',
+                  '--no-color',
+                  '--no-prefix', *[gf.filename for gf in files])
+
+def getStagedHunksSheet(parent, *files):
+    return HunksSheet('staged_hunks', parent, 'diff', '--cached',
+                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--patch',
+                  '--inter-hunk-context=2', '-U1',
+                  '--no-color',
+                  '--no-prefix', *[gf.filename for gf in files])
+
+def getCommitSheet(name, parent, *refids):
+    return HunksSheet(name, parent, 'show',
+                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--patch',
+                  '--inter-hunk-context=2', '-U1',
+                  '--no-color',
+                  '--no-prefix', *refids)
+
+# source is arguments to git()
+class HunksSheet(GitSheet):
+    columns = [
+        ColumnItem('origfn', 0, width=0),
+        ColumnItem('filename', 1),
+        ColumnItem('context', 2),
+        ColumnItem('leftlinenum', 3),
+        ColumnItem('leftcount', 4),
+        ColumnItem('rightlinenum', 5),
+        ColumnItem('rightcount', 6),
+    ]
+    commands = GitSheet.commands + [
+        Command(ENTER, 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunks'),
+        Command('g^J', 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks (or all hunks)'),
+        Command('V', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
+#        Command('gV', '', 'view the raw patch for selected/all hunks'),
+        Command('a', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index'),
+#        Command(['d','r'], 'git_apply(cursorRow, "--reverse")', 'undo this hunk'),
+    ]
+
+    def __init__(self, name, parent, *git_args):
+        super().__init__(name, parent)
+        self.git_args = git_args
+
+    def reload(self):
+        def _parseStartCount(s):
+            sc = s.split(',')
+            if len(sc) == 2:
+                return sc
+            if len(sc) == 1:
+                return sc[0], 1
+
+        self.rows = []
+        leftfn = ''
+        rightfn = ''
+        header_lines = None
+        diff_started = False
+        for line in git_lines(*self.git_args):
+            if line.startswith('diff'):
+                diff_started = True
+                continue
+            if not diff_started:
+                continue
+
+            if line.startswith('---'):
+                header_lines = [line]  # new file
+                leftfn = line[4:]
+            elif line.startswith('+++'):
+                header_lines.append(line)
+                rightfn = line[4:]
+            elif line.startswith('@@'):
+                header_lines.append(line)
+                _, linenums, context = line.split('@@')
+                leftlinenums, rightlinenums = linenums.split()
+                leftstart, leftcount = _parseStartCount(leftlinenums[1:])
+                rightstart, rightcount = _parseStartCount(rightlinenums[1:])
+                self.rows.append((leftfn, rightfn, context, int(leftstart), int(leftcount), int(rightstart), int(rightcount), header_lines))
+                header_lines = header_lines[:2]  # keep file context
+            elif line[0] in ' +-':
+                self.rows[-1][-1].append(line)
+
+
+class HunkViewer(GitSheet):
+    commands = GitSheet.commands + [
+        Command('2', 'srchunks.git_apply(sources.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk'),
+#        Command('1', 'git_apply(sources.pop(0), "--reverse")', 'remove this hunk from the diff'),
+        Command(ENTER, 'sources.pop(0); reload()', 'move to the next hunk without applying this hunk'),
+        Command('d', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch'),
+    ]
+    def __init__(self, srchunks, *hunks):
+        super().__init__('hunk', *hunks)
+        self.srchunks = srchunks
+        self.columns = [
+            ColumnItem('1', 1, width=vd().windowWidth//2-1),
+            ColumnItem('2', 2, width=vd().windowWidth//2-1),
+        ]
+        self.addColorizer(Colorizer('row', 4, HunkViewer.colorDiffRow))
+
+    def reload(self):
+        if not self.sources:
+            self.vd.remove(self)
+            return
+
+        fn, _, context, linenum, _, _, _, patchlines = self.source
+        self.name = '%s:%s' % (fn, linenum)
+        self.rows = []
+        nextDelIdx = None
+        for line in patchlines[3:]:  # diff without the patch headers
+            typech = line[0]
+            line = line[1:]
+            if typech == '-':
+                self.rows.append([typech, line, None])
+                if nextDelIdx is None:
+                    nextDelIdx = len(self.rows)-1
+            elif typech == '+':
+                if nextDelIdx is not None:
+                    if nextDelIdx < len(self.rows):
+                        self.rows[nextDelIdx][2] = line
+                        nextDelIdx += 1
+                        continue
+
+                self.rows.append([typech, None, line])
+                nextDelIdx = None
+            elif typech == ' ':
+                self.rows.append([typech, line, line])
+                nextDelIdx = None
+            else:
+                continue  # header
+
+    def colorDiffRow(self, c, row, v):
+        if row[1] != row[2]:
+            if row[1] is None:
+                return 'green'  # addition
+            elif row[2] is None:
+                return 'red'  # deletion
+            else:
+                return 'yellow'  # difference
+
+
+class GitGrep(GitSheet):
+    columns = [
+        ColumnItem('filename', 0),
+        ColumnItem('linenum', 1),
+        ColumnItem('line', 2),
+    ]
+    commands = [
+        Command(ENTER, 'vd.push(TextSheet(cursorRow[0], open(cursorRow[0]))).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
+    ]
+    def __init__(self, regex):
+        super().__init__(regex, regex)
+
+    def reload(self):
+        self.rows = []
+        for line in git_lines('grep', '--no-color', '-z', '--line-number', '--ignore-case', self.source):
+            self.rows.append((line.split('\0')))
+
+
+class GitOptions(GitSheet):
+    CONFIG_CONTEXTS = ('local', 'local', 'global', 'system')
+    commands = GitSheet.commands + [
+        Command('d', 'git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], cursorRow[0])', 'unset this config value'),
+        Command('gd', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset selected config values'),
+        Command('e', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(sheet, [cursorRow], editCell(i)); sheet.cursorRowIndex += 1', 'edit this option'),
+        Command('ge', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(sheet, selectedRows, input("set selected to: ", value=cursorValue))', 'edit this option for all selected rows'),
+        Command('a', 'git("config", "--add", "--"+CONFIG_CONTEXTS[cursorColIndex], input("option to add: "), "added")', 'add new option'),
+    ]
+    def __init__(self):
+        super().__init__('git config')
+        self.columns = [Column('option', getter=lambda c,r: r[0])]
+        for i, ctx in enumerate(self.CONFIG_CONTEXTS[1:]):
+            self.columns.append(Column(ctx, getter=lambda c,r, i=i: r[1][i], setter=self.config_setter(ctx)))
+
+        self.nKeys = 1
+
+    def config_setter(self, ctx):
+        def setter(r, v):
+            self.git('config', '--'+ctx, r[0], v)
+        return setter
+
+    def reload(self):
+        opts = {}
+        for i, ctx in enumerate(self.CONFIG_CONTEXTS[1:]):
+            try:
+                for line in git_iter('\0', 'config', '--list', '--'+ctx, '-z'):
+                    if line:
+                        k, v = line.splitlines()
+                        if k not in opts:
+                            opts[k] = [None, None, None]
+                        opts[k][i] = v
+            except:
+                pass # exceptionCaught()
+
+        self.rows = sorted(list(opts.items()))
+
+
+# how to incorporate fetch/push/pull?
+class GitRemotes(GitSheet):
+    commands = GitSheet.commands + [
+        Command('d', 'git("remote", "rm", cursorRow[0])', 'delete remote'),
+        Command('a', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
+    ]
+    def __init__(self, **kwargs):
+        super().__init__('remotes', **kwargs)
+        self.columns=[
+            Column('remote', getter=lambda c,r: r[0], setter=lambda c,r,v: c.sheet.git('remote', 'rename', r[0], v)),
+            Column('url', getter=lambda c,r: r[1], setter=lambda c,r,v: c.sheet.git('remote', 'set-url', r[0], v)),
+            Column('type', getter=lambda c,r: r[2]),
+        ]
+
+    def reload(self):
+        self.rows = []
+        for line in git_lines('remote', '-v', 'show'):
+            name, url, paren_type = line.split()
+            self.rows.append((name, url, paren_type[1:-1]))
+
+gitBranchesSheet = GitBranches()
+gitOptionsSheet = GitOptions()
+gitStashesSheet = GitStashes('stashes')
+gitRemotesSheet = GitRemotes()
+
+
+def main():
+    options.wrap = False
+
+    status(__version__)
+
+    addGlobals(globals())
+
+    fn = sys.argv[1] if sys.argv[1:] else '.'
+    os.chdir(fn)
+
+    run(gitStatusSheet)
+
+
+main()
