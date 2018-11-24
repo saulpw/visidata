@@ -695,20 +695,22 @@ overwrite existing files without confirmation
 .
 .Sh EXAMPLES
 .Dl Nm vd Cm foo.tsv
+.No open the file foo.tsv in the current directory
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
+.No open the file bar.db as a sqlite database
 .Pp
 .Dl Nm vd Cm -b countries.fixed -o countries.tsv
+.No convert countries.fixed (in fixed width format) to countries.tsv (in tsv format)
 .Pp
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
+.No open a connection tot the given postgres database
 .Pp
 .Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
+.No replay tests/pivot.vd, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
-.Pp
-.Dl Nm vd Cm -p foo.vd -b -o - > foo.tsv
-.Pp
-.Dl Nm vd --diff foo.tsv bar.tsv
+.No parse the output of ls -l into usable data
 .Pp
 .Sh FILES
 At the start of every session,

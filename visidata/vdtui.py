@@ -26,7 +26,7 @@
 # Just include this whole file in your project as-is.  If you do make
 # modifications, please keep the base vdtui version and append your own id and
 # version.
-__version__ = '1.5-dev'
+__version__ = '1.5-py-dev'
 __version_info__ = 'saul.pw/vdtui v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __license__ = 'MIT'
@@ -308,9 +308,9 @@ theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 
 theme('disp_pending', '', 'string to display in pending cells')
 theme('note_pending', '⌛', 'note to display for pending cells')
-theme('note_format_exc', '?', 'cell note for an exception during type conversion or formatting')
+theme('note_format_exc', '?', 'cell note for an exception during formatting')
 theme('note_getter_exc', '!', 'cell note for an exception during computation')
-theme('note_type_exc', '!', 'cell note for an exception during computation')
+theme('note_type_exc', '!', 'cell note for an exception during type conversion')
 theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
