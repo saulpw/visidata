@@ -104,6 +104,11 @@ class Path:
         fn = os.path.join(*args)
         return Path(fn)
 
+    def joinpath(self, *other):
+        args = list(self.parts) + list(other)
+        fn = os.path.join(*args)
+        return Path(fn)
+
     @property
     def parts(self):
         'Return list of path parts'
