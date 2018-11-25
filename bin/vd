@@ -49,7 +49,7 @@ def main():
     sys.path.append(Path(options.visidata_dir).resolve())
 
     # user customisations in config file in standard location
-    vdtui.loadConfigFile('~/.visidatarc')
+    vdtui.loadConfigFile('~/.visidatarc', globals())
     vdtui.addGlobals(globals())
 
     vdtui.globalCommand('gO', 'open-config', 'vd.push(vdtui.TextSheet("visidatarc", Path("~/.visidatarc")))')
