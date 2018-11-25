@@ -138,7 +138,7 @@ class Command:
         self.execstr = execstr
         self.helpstr = ''
 
-def globalCommand(keystrokes, longname, execstr):
+def globalCommand(keystrokes, longname, execstr, helpstr=''):
     commands.setdefault(longname, Command(longname, execstr))
 
     if keystrokes:
@@ -1043,7 +1043,7 @@ class BaseSheet:
 
 
     @classmethod
-    def addCommand(cls, keystrokes, longname, execstr):
+    def addCommand(cls, keystrokes, longname, execstr, helpstr=''):
         commands.set(longname, Command(longname, execstr), cls)
         if keystrokes:
             bindkeys.set(keystrokes, longname, cls)
