@@ -1,11 +1,10 @@
 import sh
 
-from vdtui import *
-from Path import Path
+from visidata import *
 
 option('gitcmdlogfile', '', 'file to log all git commands run by vgit')
 
-globalCommand('^D', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
+globalCommand(None, 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
 
 # rowdef: CommandOutput
 class GitCmdLog(Sheet):
@@ -13,14 +12,12 @@ class GitCmdLog(Sheet):
         ColumnItem('command', 0),
         ColumnItem('output', 1),
     ]
-    commands = [
-        Command(ENTER, 'vd.push(TextSheet(cursorRow[0], cursorRow[1]))', 'view output of this command'),
-    ]
     def __init__(self, name):
         super().__init__(name)
         self.rows = []
 
-vd().gitcmdlog = GitCmdLog('gitcmdlog')
+GitCmdLog.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], cursorRow[1]))', 'view output of this command'),
+vd.gitcmdlog = GitCmdLog('gitcmdlog')
 
 def loggit(*args, **kwargs):
     r = maybeloggit(*args, **kwargs)
@@ -121,14 +118,11 @@ class GitFile:
 
 
 class GitSheet(Sheet):
-    commands = [
-        Command('f', 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
-    ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_args = []
 
-    @async
+    @asyncthread
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
         self.extra_args.clear()
@@ -182,36 +176,14 @@ class GitSheet(Sheet):
         self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
         status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
+GitSheet.addCommand('f', 'git-force' 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
 
-# rowdef: GitFile
+
 class GitStatus(GitSheet):
-    commands = GitSheet.commands + [
-        Command('a', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),
-        Command('m', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file'),
-        Command('d', 'git("rm", cursorRow.filename)', 'stage this file for deletion'),
-        Command('r', 'git("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file'),
-        Command('c', 'git("checkout", cursorRow.filename)', 'checkout this file'),
-        Command('ga', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging'),
-        Command('gd', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files'),
-        Command('C', 'git("commit", "-m", input("commit message: "))', 'commit changes'),
-        Command('V', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file'),
-        Command('i', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
-        Command('gi', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
-
-        Command(ENTER, 'vd.push(DifferSheet(cursorRow, "HEAD", "index", "working"))', 'push unstaged diffs for this file'),
-        Command('g^J', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files'),
-
-        Command('g/', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
-
-        Command('z^J', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
-        Command('gz^J', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
-
-#        Command('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file'),
-        Command('L', 'vd.push(GitBlame(cursorRow))', 'push blame for this file'),
-    ]
+    rowtype = 'files'  # rowdef: GitFile
     colorizers = [
-        Colorizer('row', 6, lambda s,c,r,v: 'red underline' if 'U' in s.git_status(r)[0] else None),
-        Colorizer('cell', 7, lambda s,c,r,v: 'green' if c.name == 'staged' and s.git_status(r)[0][0] == 'M' else None),
+        RowColorizer(6, 'red underline', lambda s,c,r,v: 'U' in s.git_status(r)[0]),
+        CellColorizer(7, 'green', lambda s,c,r,v: c and c.name == 'staged' and s.git_status(r)[0][0] == 'M'),
     ]
 
     def __init__(self, p):
@@ -219,8 +191,8 @@ class GitStatus(GitSheet):
         self.branch = ''
         self.remotediff = ''  # ahead/behind status
 
-        self._cachedStatus = {}
-        self.addColorizer(Colorizer('row', 3, GitStatus.rowColor))
+        self._cachedStatus = {}  # [] -> ('!!' or '??' status, adds, dels)
+        self.addColorizer(RowColorizer(3, None, GitStatus.rowColor))
         self.columns = [
             Column('path', getter=lambda c,r: str(r)),
             Column('status', getter=lambda c,r: c.sheet.statusText(c.sheet.git_status(r)), width=8),
@@ -250,6 +222,8 @@ class GitStatus(GitSheet):
         return str(self.source)
 
     def rowColor(self, c, row, v):
+        if not row:
+            return None
         st = self.git_status(row)[0]
         x, y = st
         if st == '??': # untracked
@@ -264,7 +238,12 @@ class GitStatus(GitSheet):
         return 'white'
 
     def git_status(self, r):
-        return self._cachedStatus.get(r.filename, ["//", None, None])
+        '''return tuple of (status, adds, dels).
+        status like !! ??
+        adds and dels are lists of additions and deletions.
+        '''
+        ret = self._cachedStatus.get(r.filename, None) if r else None
+        return ret if ret else ["//", None, None]
 
     def ignored(self, fn):
         if options.vgit_show_ignored:
@@ -303,7 +282,7 @@ class GitStatus(GitSheet):
 
         return ret
 
-    @async
+    @asyncthread
     def reload(self):
         files = [GitFile(p, self.source) for p in self.source.iterdir() if p.name not in ('.git', '..')]  # files in working dir
 
@@ -319,8 +298,12 @@ class GitStatus(GitSheet):
 
         for status_line in git_iter('\0', 'status', '-z', '-unormal', '--ignored'):
             if status_line:
-                st = status_line[:2]
-                gf = GitFile(status_line[3:], self.source)
+                if status_line[2:3] == ' ':
+                    st, fn = status_line[:2], status_line[3:]
+                else:
+                    fn = status_line
+                    st = '//'
+                gf = GitFile(fn, self.source)
                 self._cachedStatus[gf.filename] = [st, None, None]
                 if gf.filename not in filenames:
                     if not self.ignored(gf.filename):
@@ -348,6 +331,27 @@ class GitStatus(GitSheet):
 
         self.recalc()  # erase column caches
 
-gitStatusSheet = GitStatus(Path('.'))
+GitSheet.addCommand('a', 'git-add' 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),
+GitSheet.addCommand('m', 'git-mv', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file'),
+GitSheet.addCommand('d', 'git-rm', 'git("rm", cursorRow.filename)', 'stage this file for deletion'),
+GitSheet.addCommand('r', 'git-reset', 'git("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file'),
+GitSheet.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.filename)', 'checkout this file'),
+GitSheet.addCommand('ga', 'git-add-selected', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging'),
+GitSheet.addCommand('gd', 'git-rm-selected', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files'),
+GitSheet.addCommand('C', 'git-commit', 'git("commit", "-m", input("commit message: "))', 'commit changes'),
+GitSheet.addCommand('V', 'open-file', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file'),
+GitSheet.addCommand('i', 'ignore-file', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
+GitSheet.addCommand('gi', 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
 
-addGlobals(globals())
+GitSheet.addCommand(ENTER, 'diff-file-unstaged', 'vd.push(DifferSheet(cursorRow, "HEAD", "index", "working"))', 'push unstaged diffs for this file'),
+GitSheet.addCommand('g^J', 'diff-selected-unstaged', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files'),
+
+GitSheet.addCommand('g/', 'git-grep', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
+
+GitSheet.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
+GitSheet.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
+
+#GitSheet.addCommand('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file'),
+GitSheet.addCommand('L', 'git-blame', 'vd.push(GitBlame(cursorRow))', 'push blame for this file'),
+
+gitStatusSheet = GitStatus(Path('.'))

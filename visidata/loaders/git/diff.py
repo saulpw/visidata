@@ -1,7 +1,7 @@
-from vdtui import *
-from git import GitSheet
+from visidata import *
+from .git import GitSheet, git_lines
 
-option('diff_algorithm', 'minimal')
+option('git_diff_algo', 'minimal', 'algorithm to use for git diff')
 
 
 # one column per ref
@@ -63,13 +63,8 @@ def parseContextLine(line):
 
 
 class DifferSheet(GitSheet):
-    commands = [
-        Command('[', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, -1)', 'go to previous diff'),
-        Command(']', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, +1)', 'go to next diff'),
-        Command('za', '', 'add this line to the index'),
-    ]
     def __init__(self, relfn, *refs):
-        super().__init__(str(relfn)+"_diff", *refs)
+        super().__init__(str(relfn)+"_diff", sources=refs)
         self.fn = str(relfn)
         self.basenum = 0
         self.columns = [
@@ -79,7 +74,7 @@ class DifferSheet(GitSheet):
             ColumnItem(name, i+1, width=vd().windowWidth//len(refs)-1, refnum=i)
                 for i, name in enumerate(refs)
         ])
-        self.addColorizer(Colorizer('row', 4, DifferSheet.colorDiffRow))
+        self.colorizers = [RowColorizer(4, None, DifferSheet.colorDiffRow)]
 
     def findDiffRow(self, refnum, startidx, direction):
         idx = startidx+direction
@@ -165,5 +160,6 @@ class DifferSheet(GitSheet):
                         status(line)
                         continue  # header
 
-
-addGlobals(globals())
+DifferSheet.addCommand('[', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, -1)', 'go to previous diff'),
+DifferSheet.addCommand(']', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, +1)', 'go to next diff'),
+DifferSheet.addCommand('za', '', 'add this line to the index'),

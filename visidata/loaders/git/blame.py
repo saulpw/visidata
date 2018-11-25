@@ -1,13 +1,9 @@
-from vdtui import *
-from git import GitSheet
+from visidata import *
+from .git import GitSheet
 
 # row is (hdr, orig_linenum, linenum, line)
 #   hdr = { 'sha': .., 'orig_linenum': .., 'final_linenum': .. }
 class GitBlame(GitSheet):
-    commands = GitSheet.commands + [
-        Command(ENTER, 'openDiff(str(source), cursorRow[0]["sha"]+"^", cursorRow[0]["sha"])', 'open diff of the commit when this line changed'),
-    ]
-
     columns = [
         Column('sha', width=8, getter=lambda r: r[0]['sha']),
         Column('orig_linenum', width=0, getter=lambda r: r[0]['orig_linenum']),
@@ -58,4 +54,4 @@ class GitBlame(GitSheet):
             self.rows.append((hdr, orig, final, lines[i][1:]))
             i += 1
 
-addGlobals(globals())
+GitBlame.addCommand(ENTER, 'diff-line', 'openDiff(str(source), cursorRow[0]["sha"]+"^", cursorRow[0]["sha"])', 'open diff of the commit when this line changed')

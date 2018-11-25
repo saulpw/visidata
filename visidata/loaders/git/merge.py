@@ -1,6 +1,6 @@
 
-from vdtui import *
-from git import GitSheet
+from visidata import *
+from .git import GitSheet
 
 # show this particular code block in remote/HEAD/index/working
 
