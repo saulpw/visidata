@@ -44,7 +44,7 @@ Use `-f <filetype>` to force a particular filetype.
 
 ### Documentation
 
-* [VisiData v1.2 Getting Started Tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
+* [Intro to VisiData Tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
 * Quick reference: `Ctrl+H` within `vd` will open the [man page](https://visidata.org/man), which has a list of all commands and options.
 * [keyboard list of commands](https://visidata.org/docs/kblayout)
 * [/docs](https://visidata.org/docs) contains a collection of howto recipes.

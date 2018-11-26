@@ -1,5 +1,19 @@
 # VisiData version history
 
+# v1.5.1 (2018-12-xx)
+
+- idle perf regression
+- fix pandas eval (`=`, etc)
+- preserve columns types from DataFrame
+- show null display note in cells which match `options.null_value` (was only for None)
+
+- orderBy now asynchronous #207
+- thread name on right status during async
+- Shift+O now global options (was sheet options); `zO` now sheet options; `gO` now opens .visidatarc which can be edited (was global options)
+
+- visidata.loadConfigFile("~/.visidatarc") for use in REPL
+- `pandas_filetype_*` passed to `pandas.read_<filetype>` (like `csv_*` to Python `csv` module)
+
 # v1.5 (2018-11-02)
 
 ## Bugfixes
