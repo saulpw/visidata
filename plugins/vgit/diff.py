@@ -20,7 +20,7 @@ def git_diff(fn, *args):
             '--find-renames',
             '--no-color',
             '--no-prefix',
-            '--diff-algorithm=' + options.diff_algorithm,
+            '--diff-algorithm=' + options.git_diff_algo,
             '-U999999',
             *args)
 

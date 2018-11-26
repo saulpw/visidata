@@ -16,11 +16,11 @@ option('vgit_show_ignored', False, '')
 
 GitSheet.addCommand('x', 'git-exec', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
 GitSheet.addCommand('B', 'git-branches', 'vd.push(gitBranchesSheet).reload()', 'push branches sheet')
-GitSheet.addCommand('O', 'git-options', 'vd.push(gitOptionsSheet).reload()', 'push sheet of git options')
+GitSheet.addCommand('gO', 'git-options', 'vd.push(gitOptionsSheet).reload()', 'push sheet of git options')
 GitSheet.addCommand('', 'git-push', 'git("push")', 'git push')
 GitSheet.addCommand('A', 'git-abort', 'abortWhatever()', 'abort the current in-progress action')
 
-GitSheet.addCommand('H', 'git-log', 'vd.push(LogSheet(branch+"_log", branch))', 'push log of current branch')
+GitSheet.addCommand('H', 'git-log', 'vd.push(LogSheet(branch+"_log", source=branch))', 'push log of current branch')
 GitSheet.addCommand('T', 'git-stashes', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
 GitSheet.addCommand('R', 'git-remotes', 'vd.push(gitRemotesSheet).reload()', 'push remotes sheet')
 GitSheet.addCommand('', 'git-stash-save', 'git("stash", "save")', 'stash uncommitted changes')
@@ -47,7 +47,7 @@ GitStashes.addCommand('a', 'git-stash-apply', 'git("stash", "apply", cursorRow[0
 GitStashes.addCommand('', 'git-stash-pop-row', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),
 GitStashes.addCommand('d', 'git-stash-drop-row', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change'),
 GitStashes.addCommand('b', 'git-stash-branch', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash'),
-GitStashes.addCommand(ENTER, 'dive-row', 'vd.push(HunksSheet(cursorRow[0]+"_diffs", sheet, "stash", "show", "--no-color", "--patch", cursorRow[0]))', 'show this stashed change'),
+GitStashes.addCommand(ENTER, 'dive-row', 'vd.push(HunksSheet(cursorRow[0]+"_diffs", source=sheet, "stash", "show", "--no-color", "--patch", cursorRow[0]))', 'show this stashed change'),
 
 class GitUndo:
     def __init__(self, *args):
@@ -74,7 +74,7 @@ class LogSheet(GitSheet):
             Column('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
             Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
     ]
-    colorizers = [RowColorizer(5, 'cyan', lambda s,c,r,v: not s.inRemoteBranch(r[0]))]
+    colorizers = [RowColorizer(5, 'cyan', lambda s,c,r,v: r and not s.inRemoteBranch(r[0]))]
 
     def amendPrevious(self, targethash):
         'amend targethash with current index, then rebase newer commits on top'
@@ -164,7 +164,7 @@ GitBranches.addCommand(ENTER, 'dive-row', 'vd.push(LogSheet(cursorRow[1]+"_log",
 
 def getHunksSheet(parent, *files):
     return HunksSheet('hunks', parent, 'diff',
-                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--diff-algorithm=' + options.git_diff_algo,
                   '--patch',
                   '--inter-hunk-context=2', '-U1',
                   '--no-color',
@@ -172,7 +172,7 @@ def getHunksSheet(parent, *files):
 
 def getStagedHunksSheet(parent, *files):
     return HunksSheet('staged_hunks', parent, 'diff', '--cached',
-                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--diff-algorithm=' + options.git_diff_algo,
                   '--patch',
                   '--inter-hunk-context=2', '-U1',
                   '--no-color',
@@ -180,7 +180,7 @@ def getStagedHunksSheet(parent, *files):
 
 def getCommitSheet(name, parent, *refids):
     return HunksSheet(name, parent, 'show',
-                  '--diff-algorithm=' + options.diff_algorithm,
+                  '--diff-algorithm=' + options.git_diff_algo,
                   '--patch',
                   '--inter-hunk-context=2', '-U1',
                   '--no-color',
@@ -199,7 +199,7 @@ class HunksSheet(GitSheet):
     ]
 
     def __init__(self, name, parent, *git_args):
-        super().__init__(name, parent)
+        super().__init__(name, source=parent)
         self.git_args = git_args
 
     def reload(self):
@@ -250,7 +250,7 @@ HunksSheet.addCommand('a', 'git-apply-hunk', 'git_apply(cursorRow, "--cached")',
 
 class HunkViewer(GitSheet):
     def __init__(self, srchunks, *hunks):
-        super().__init__('hunk', *hunks)
+        super().__init__('hunk', sources=hunks)
         self.srchunks = srchunks
         self.columns = [
             ColumnItem('1', 1, width=vd().windowWidth//2-1),
@@ -263,7 +263,7 @@ class HunkViewer(GitSheet):
             self.vd.remove(self)
             return
 
-        fn, _, context, linenum, _, _, _, patchlines = self.source
+        fn, _, context, linenum, _, _, _, patchlines = self.sources[0]
         self.name = '%s:%s' % (fn, linenum)
         self.rows = []
         nextDelIdx = None
@@ -290,7 +290,7 @@ class HunkViewer(GitSheet):
                 continue  # header
 
     def colorDiffRow(self, c, row, v):
-        if row[1] != row[2]:
+        if row and row[1] != row[2]:
             if row[1] is None:
                 return 'green'  # addition
             elif row[2] is None:
