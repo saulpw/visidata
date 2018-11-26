@@ -43,17 +43,20 @@ def elapsed_s(t):
 
 def checkMemoryUsage(vs):
     min_mem = options.min_memory_mb
-    if min_mem and vd().unfinishedThreads:
+    threads = vd.unfinishedThreads
+    if not threads:
+        return None
+    ret = threads[0].name
+    attr = 'color_working'
+    if min_mem:
         tot_m, used_m, free_m = map(int, os.popen('free --total --mega').readlines()[-1].split()[1:])
-        ret = '[%dMB]' % free_m
+        ret = '[%dMB] ' % free_m + ret
         if free_m < min_mem:
             attr = 'color_warning'
             warning('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
             cancelThread(*vd().unfinishedThreads)
             curses.flash()
-        else:
-            attr = 'color_working'
-        return ret, attr
+    return ret, attr
 
 vd().threadsSheet = ThreadsSheet('thread_history')
 vd().addHook('rstatus', checkMemoryUsage)
