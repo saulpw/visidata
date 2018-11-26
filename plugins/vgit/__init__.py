@@ -1,4 +1,3 @@
-import visidata
 from .vgit import *
 
 def open_dir(p):
