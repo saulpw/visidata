@@ -1550,7 +1550,8 @@ class Sheet(BaseSheet):
     def orderBy(self, *cols, **kwargs):
         try:
             with Progress(self.rows) as prog:
-                self.rows = sorted(self.rows, key=lambda r,cols=cols,prog=prog: prog.addProgress(1) and tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
+                # must not reassign self.rows: use .sort() instead of sorted()
+                self.rows.sort(key=lambda r,cols=cols,prog=prog: prog.addProgress(1) and tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
         except TypeError as e:
             status('sort incomplete due to TypeError; change column type')
             exceptionCaught(e, status=False)
