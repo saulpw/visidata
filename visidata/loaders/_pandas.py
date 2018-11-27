@@ -26,7 +26,7 @@ class PandasSheet(Sheet):
             t = df[colname].dtype
             if t == numpy.int64: return int
             if t == numpy.float64: return float
-            if t == pandas.Timestamp: return date
+#            if t == pandas.Timestamp: return date
             return anytype
 
         if isinstance(self.source, pandas.DataFrame):
