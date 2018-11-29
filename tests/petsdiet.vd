@@ -1,0 +1,12 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		key-col		!	
+benchmark	Customer		hide-col		-	
+benchmark	Item		hide-col		-	
+benchmark	Quantity		type-int		#	
+benchmark	SKU		select-col-regex	FOOD	|	
+benchmark			dup-selected		"	
+benchmark_selectedref	Quantity		aggregate-col	mean	+	
+benchmark_selectedref	SKU		freq-col		F	
+benchmark_selectedref_SKU_freq	mean_Quantity		type-int		#	
+benchmark_selectedref_SKU_freq	mean_Quantity		sort-desc		]	
