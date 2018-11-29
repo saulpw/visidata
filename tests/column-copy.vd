@@ -1,8 +1,10 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample.tsv	open file
-sample	Total		%		set type of current column to float
-sample	Total		+	sum	add aggregator to current column
-sample	Rep		F		open Frequency Table grouped on current column
-sample_Rep_freq	sum_Total		'		add a frozen copy of current column with all cells evaluated
-sample_Rep_freq	sum_Total_frozen		^	adj_sum_Total	edit name of current column
-sample_Rep_freq	adj_sum_Total	キJones	e	2000.01	edit contents of current cell
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Unit		type-float		%	
+benchmark	Unit		type-currency		$	
+benchmark	Paid		type-currency		$	
+benchmark	Paid		aggregate-col	sum	+	
+benchmark	Customer		freq-col		F	
+benchmark_Customer_freq	sum_Paid		freeze-col		'	
+benchmark_Customer_freq	sum_Paid_frozen		rename-col	adj_sum_Paid	^	
+benchmark_Customer_freq	adj_sum_Paid	キRobert Armstrong	edit-cell	2,000.00	e	

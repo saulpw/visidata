@@ -1,12 +1,16 @@
-Rep	count	sum_Total	adj_sum_Total
-Jones	8	2363.04	2000.01
-Jardine	5	2812.19	2812.19
-Gill	5	1749.87	1749.87
-Kivell	4	3109.44	3109.44
-Sorvino	4	1283.61	1283.61
-Andrews	4	438.37	438.37
-Morgan	3	1387.77	1387.77
-Parent	3	3102.30	3102.30
-Smith	3	1641.43	1641.43
-Thompson	2	1203.11	1203.11
-Howard	2	536.75	536.75
+Customer	count	sum_Paid	adj_sum_Paid
+Robert Armstrong	10	2,331.00	2,000.00
+Susan Ashworth	6	4,084.27	4,084.27
+桜 高橋 (Sakura Takahashi)	5	785.00	785.00
+Kyle Kennedy	4	1,260.66	1,260.66
+David Attenborough	4	59.43	59.43
+Douglas "Dougie" Powers	3	36.04	36.04
+Rubeus Hagrid	3	3,827.10	3,827.10
+Juan Johnson	3	191.39	191.39
+Monica Johnson	3	4.98	4.98
+Helen Halestorm	2	65.88	65.88
+Jon Arbuckle	2	242.45	242.45
+Wil Wheaton	1	39.95	39.95
+María Fernández	1	4.00	4.00
+Mr. Praline	1	-2,300.00	-2,300.00
+Michael Smith	1	31.85	31.85
