@@ -1787,9 +1787,12 @@ class Sheet(BaseSheet):
 
                     row = rows[rowidx]
                     cellval = col.getCell(row, colwidth-1)
-                    if isNull(cellval.value):
-                        cellval.note = options.disp_note_none
-                        cellval.notecolor = 'color_note_type'
+                    try:
+                        if isNull(cellval.value):
+                            cellval.note = options.disp_note_none
+                            cellval.notecolor = 'color_note_type'
+                    except TypeError:
+                        pass
 
                     attr = self.colorize(col, row, cellval)
 
