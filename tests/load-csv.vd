@@ -1,4 +1,0 @@
-sheet	col	row	longname	input	keystrokes	comment
-	override	safety_first	set-option	True		
-			open-file	sample_data/oscar_age_female.csv	o	
-oscar_age_female	Index		hide-col		-	
