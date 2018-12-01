@@ -231,6 +231,8 @@ class DeferredSetColumn(Column):
 
 def openSource(p, filetype=None):
     'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
+    if not filetype:
+        filetype = options.filetype
     if isinstance(p, str):
         if '://' in p:
             return openSource(UrlPath(p), filetype)  # convert to Path and recurse
@@ -243,7 +245,7 @@ def openSource(p, filetype=None):
         return getGlobals()[openfunc](p, filetype=filetype)
     elif isinstance(p, Path):
         if not filetype:
-            filetype = options.filetype or p.suffix or 'txt'
+            filetype = p.suffix or 'txt'
 
         if os.path.isdir(p.resolve()):
             filetype = 'dir'
