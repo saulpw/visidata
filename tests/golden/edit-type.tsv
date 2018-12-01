@@ -1,8 +1,8 @@
 column	errors	nulls	distinct	mode	min	max	median	mean	stdev
-OrderDate	0	0	43	no unique mode; found 43 equally common values					
-Region	0	0	3	Central					
-Rep	0	0	11	Jones					
-Item	0	0	5	Binder					
-Units	0	0	37	no unique mode; found 6 equally common values	2	96	53	49.33	30.08
-Unit_Cost	0	0	12	4.99	1.29	275.0	4.99	20.31	47.35
-Total	0	0	41	no unique mode; found 2 equally common values	9.03	1879.06	299.4	456.46	447.02
+Date	0	0	45	no unique mode; found 4 equally common values					
+Customer	0	0	15	Robert Armstrong					
+SKU	0	0	32	no unique mode; found 2 equally common values					
+Item	0	0	38	Food, Senior Wet Cat - 3 oz					
+Quantity	0	0	10	1	1	144	2	8.18	21.97
+Unit	0	0	26	12.95	0.0	2495.99	12.95	232.94	596.19
+Paid	0	0	34	51.8	-2300.0	3602.1	51.8	217.63	836.31
