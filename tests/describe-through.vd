@@ -1,8 +1,9 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/birdsdiet.tsv	open input in VisiData
-birdsdiet	Family	0	|	bird	select rows matching regex in current column
-birdsdiet	MaxAbund	0	g=	None	set current column for selected rows to result of Python expression
-birdsdiet	MaxAbund	0	I		open Describe Sheet
-birdsdiet_describe	nulls	1	z^J		open copy of source sheet with rows described in current cell
-birdsdiet_MaxAbund_nulls	AvgAbund	1	%		set type of current column to float
-birdsdiet_MaxAbund_nulls	Mass	1	%		set type of current column to float
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Customer		select-col-regex	Robert	|	
+benchmark	Quantity		setcol-expr	None	g=	
+benchmark	Quantity		type-int		#	
+benchmark			describe-sheet		I	
+benchmark_describe	nulls	キQuantity	dup-cell		z^J	
+benchmark_Quantity_nulls	Unit		type-currency		$	
+benchmark_Quantity_nulls	Paid		type-currency		$	
