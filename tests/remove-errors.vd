@@ -1,18 +1,11 @@
 sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/surveys.csv	o	
-surveys	record_id		addcol-expr	year+'-'+month+'-'+day	=	
-surveys	year+'-'+month+'-'+day		type-date		@	
-surveys	year+'-'+month+'-'+day		rename-col	date	^	
-surveys	month		hide-col		-	
-surveys	day		hide-col		-	
-surveys	year		hide-col		-	
-surveys	hindfoot_length		type-int		#	
-surveys	weight		type-int		#	
-surveys			describe-sheet		I	
-surveys_describe	errors	キhindfoot_length	select-cell		zs	
-surveys_describe			prev-sheet		^^	
-surveys			delete-selected		gd	
-surveys	species_id		key-col		!	
-surveys	hindfoot_length		aggregate-col	mean	+	
-surveys	sex		pivot		W	
-	surveys_pivot_sex	safe_error	set-option	#ERR		
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		type-date		@	
+benchmark	Customer		select-col-regex	Ashworth	|	
+benchmark	Quantity		setcol-expr	'one'	g=	
+benchmark			unselect-rows		gu	
+benchmark	Quantity		type-int		#	
+benchmark			describe-sheet		I	
+benchmark_describe	errors	キQuantity	select-cell		zs	
+benchmark_describe			prev-sheet		^^	
+benchmark			delete-selected		gd	
