@@ -64,7 +64,7 @@ class MeltedSheet(Sheet):
                 aggregators=[aggregators['max']]))
 
         self.rows = []
-        for r in Progress(self.source.rows):
+        for r in Progress(self.source.rows, 'melting'):
             for colnames, cols in valcols.items():
                 meltedrow = {}
                 for varval, c in cols:

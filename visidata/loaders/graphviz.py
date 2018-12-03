@@ -37,7 +37,7 @@ def save_dot(p, vs):
     dstcol = vs.keyCols[1]
     with p.open_text(mode='w') as fp:
         print('graph { concentrate=true;', file=fp)
-        for row in Progress(vs.rows):
+        for row in Progress(vs.rows, 'saving'):
             src = srccol.getTypedValue(row)
             dst = dstcol.getTypedValue(row)
             if not is_valid(src) or not is_valid(dst):

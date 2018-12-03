@@ -47,7 +47,7 @@ class DescribeSheet(ColumnsSheet):
         self.rows = [c for c in self.rows if not c.hidden]
         self.describeData = { col: {} for col in self.rows }
 
-        for srccol in Progress(self.rows):
+        for srccol in Progress(self.rows, 'categorizing'):
             if not srccol.hidden:
                 self.reloadColumn(srccol)
             sync(max_threads)
@@ -62,7 +62,7 @@ class DescribeSheet(ColumnsSheet):
             d['nulls'] = list()
             d['distinct'] = set()
 
-            for sr in Progress(srccol.sheet.rows):
+            for sr in Progress(srccol.sheet.rows, 'calculating'):
                 try:
                     v = srccol.getValue(sr)
                     if isNull(v):

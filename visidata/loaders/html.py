@@ -114,7 +114,7 @@ def save_html(p, *vsheets):
             fp.write('</tr>\n')
 
             # rows
-            for r in Progress(sheet.rows):
+            for r in Progress(sheet.rows, 'saving'):
                 fp.write('<tr>')
                 for col in sheet.visibleCols:
                     fp.write('<td>')

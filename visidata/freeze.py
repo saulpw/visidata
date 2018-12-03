@@ -18,7 +18,7 @@ def StaticColumn(rows, col):
 
     @asyncthread
     def calcRows_async(frozencol, rows, col):
-        for r in Progress(rows):
+        for r in Progress(rows, 'calculating'):
             try:
                 frozencol.setValue(r, col.getTypedValue(r))
             except Exception as e:
@@ -43,7 +43,7 @@ class StaticSheet(Sheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        for r in Progress(self.source.rows):
+        for r in Progress(self.source.rows, 'calculating'):
             row = []
             self.rows.append(row)
             for col in self.source.columns:

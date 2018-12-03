@@ -81,7 +81,7 @@ def save_png(p, vs):
 
     pixels = list([0]*vs.width for y in range(vs.height))
 
-    for x,y,r,g,b,a in Progress(sorted(vs.rows)):
+    for x,y,r,g,b,a in Progress(sorted(vs.rows), 'saving'):
         color = tuple((r,g,b,a))
         colornum = palette.get(color, None)
         if colornum is None:

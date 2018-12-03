@@ -53,7 +53,7 @@ Sheet._coltype = SettableColumn
 
 @asyncthread
 def addRows(sheet, n, idx):
-    for i in Progress(range(n)):
+    for i in Progress(range(n), 'adding'):
         sheet.addRow(sheet.newRow(), idx+1)
 
 

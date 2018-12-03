@@ -600,7 +600,7 @@ class Canvas(Plotter):
         xfactor, yfactor = self.xScaler, self.yScaler
         plotxmin, plotymin = self.plotviewBox.xmin, self.plotviewBox.ymin
 
-        for vertexes, attr, row in Progress(self.polylines):
+        for vertexes, attr, row in Progress(self.polylines, 'rendering'):
             if len(vertexes) == 1:  # single point
                 x1, y1 = vertexes[0]
                 x1, y1 = float(x1), float(y1)
@@ -622,7 +622,7 @@ class Canvas(Plotter):
                     self.plotline(x1, y1, x2, y2, attr, row)
                 prev_x, prev_y = x, y
 
-        for x, y, text, attr, row in Progress(self.gridlabels):
+        for x, y, text, attr, row in Progress(self.gridlabels, 'labeling'):
             self.plotlabel(self.scaleX(x), self.scaleY(y), text, attr, row)
 
 Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w')

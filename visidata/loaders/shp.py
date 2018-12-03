@@ -75,7 +75,7 @@ def save_geojson(p, vs):
     assert isinstance(vs, Canvas), 'need Canvas to save geojson'
 
     features = []
-    for coords, attr, row in Progress(vs.polylines):
+    for coords, attr, row in Progress(vs.polylines, 'saving'):
         feat = {
             'type': 'Feature',
             'geometry': {

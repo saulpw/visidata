@@ -102,7 +102,7 @@ def save_json(p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder(indent=options.json_indent)
-        for chunk in jsonenc.iterencode([_rowdict(vcols, r) for r in Progress(vs.rows)]):
+        for chunk in jsonenc.iterencode([_rowdict(vcols, r) for r in Progress(vs.rows, 'saving')]):
             fp.write(chunk)
 
 
@@ -111,6 +111,6 @@ def save_jsonl(p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
-        for r in Progress(vs.rows):
+        for r in Progress(vs.rows, 'saving'):
             rowdict = _rowdict(vcols, r)
             fp.write(jsonenc.encode(rowdict) + '\n')

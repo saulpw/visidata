@@ -46,7 +46,7 @@ def checkMemoryUsage(vs):
     threads = vd.unfinishedThreads
     if not threads:
         return None
-    ret = threads[0].name
+    ret = ''
     attr = 'color_working'
     if min_mem:
         tot_m, used_m, free_m = map(int, os.popen('free --total --mega').readlines()[-1].split()[1:])

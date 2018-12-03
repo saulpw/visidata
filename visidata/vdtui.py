@@ -509,10 +509,11 @@ def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
 
 
 class Progress:
-    def __init__(self, iterable=None, total=None, sheet=None):
+    def __init__(self, iterable=None, gerund="", total=None, sheet=None):
         self.iterable = iterable
         self.total = total if total is not None else len(iterable)
         self.sheet = sheet if sheet else getattr(threading.current_thread(), 'sheet', None)
+        self.gerund = gerund
         self.made = 0
 
     def __enter__(self):
@@ -536,7 +537,7 @@ class Progress:
 
 @asyncthread
 def _async_deepcopy(vs, newlist, oldlist):
-    for r in Progress(oldlist):
+    for r in Progress(oldlist, 'copying'):
         newlist.append(deepcopy(r))
 
 def async_deepcopy(vs, rowlist):
@@ -820,7 +821,8 @@ class VisiData:
     def rightStatus(self, sheet):
         'Compose right side of status bar.'
         if sheet.currentThreads:
-            status = '%9d  %2d%%' % (len(sheet), sheet.progressPct)
+            gerund = (' '+sheet.progresses[0].gerund) if sheet.progresses else ''
+            status = '%9d  %2d%%%s' % (len(sheet), sheet.progressPct, gerund)
         else:
             status = '%9d %s' % (len(sheet), sheet.rowtype)
         return status, 'color_status'
@@ -1354,7 +1356,7 @@ class Sheet(BaseSheet):
             oldidx += 1
 
         self.rows.clear()
-        for r in Progress(oldrows):
+        for r in Progress(oldrows, 'deleting'):
             if not func(r):
                 self.rows.append(r)
                 if r is row:
@@ -1494,7 +1496,7 @@ class Sheet(BaseSheet):
     @asyncthread
     def toggle(self, rows):
         'Toggle selection of given `rows`.'
-        for r in Progress(rows, len(self.rows)):
+        for r in Progress(rows, 'toggling', total=len(self.rows)):
             if not self.unselectRow(r):
                 self.selectRow(r)
 
@@ -1514,7 +1516,7 @@ class Sheet(BaseSheet):
     def select(self, rows, status=True, progress=True):
         "Select given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
-        for r in (Progress(rows) if progress else rows):
+        for r in (Progress(rows, 'selecting') if progress else rows):
             self.selectRow(r)
         if status:
             vd().status('selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype))
@@ -1523,7 +1525,7 @@ class Sheet(BaseSheet):
     def unselect(self, rows, status=True, progress=True):
         "Unselect given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
-        for r in (Progress(rows) if progress else rows):
+        for r in (Progress(rows, 'unselecting') if progress else rows):
             self.unselectRow(r)
         if status:
             vd().status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
@@ -1549,7 +1551,7 @@ class Sheet(BaseSheet):
     @asyncthread
     def orderBy(self, *cols, **kwargs):
         try:
-            with Progress(self.rows) as prog:
+            with Progress(self.rows, 'sorting') as prog:
                 # must not reassign self.rows: use .sort() instead of sorted()
                 self.rows.sort(key=lambda r,cols=cols,prog=prog: prog.addProgress(1) and tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
         except TypeError as e:
@@ -2097,7 +2099,7 @@ class Column:
         'Generate (val, row) for the given `rows` at this Column, excluding errors and nulls.'
         f = isNullFunc()
 
-        for r in Progress(rows):
+        for r in Progress(rows, 'calculating'):
             try:
                 v = self.getTypedValue(r)
                 if not f(v):
@@ -2236,7 +2238,7 @@ class Column:
     @asyncthread
     def setValuesFromExpr(self, rows, expr):
         compiledExpr = compile(expr, '<expr>', 'eval')
-        for row in Progress(rows):
+        for row in Progress(rows, 'setting'):
             self.setValueSafe(row, self.sheet.evalexpr(compiledExpr, row))
         self.recalc()
         status('set %d values = %s' % (len(rows), expr))

@@ -16,7 +16,7 @@ class TransposeSheet(Sheet):
         self.setKeys(self.columns)
 
         # rows become columns
-        for row in Progress(self.source.rows):
+        for row in Progress(self.source.rows, 'transposing'):
             self.addColumn(Column('_'.join(self.source.rowkey(row)),
                                   getter=lambda c,origcol,row=row: origcol.getValue(row)))
 

@@ -95,5 +95,5 @@ def save_csv(p, sheet):
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):
             cw.writerow(colnames)
-        for r in Progress(sheet.rows):
+        for r in Progress(sheet.rows, 'saving'):
             cw.writerow([col.getDisplayValue(r) for col in sheet.visibleCols])

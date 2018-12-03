@@ -68,7 +68,7 @@ class GraphSheet(InvertedCanvas):
         catcols = [c for c in self.xcols if not isNumeric(c)]
         numcols = numericCols(self.xcols)
         for ycol in self.ycols:
-            for rownum, row in enumerate(Progress(self.sourceRows)):  # rows being plotted from source
+            for rownum, row in enumerate(Progress(self.sourceRows, 'plotting')):  # rows being plotted from source
                 try:
                     k = tuple(c.getValue(row) for c in catcols) if catcols else (ycol.name,)
 

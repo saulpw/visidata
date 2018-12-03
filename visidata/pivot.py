@@ -39,7 +39,7 @@ class SheetPivot(Sheet):
                 aggname = '%s_%s' % (aggcol.name, aggregator.__name__)
 
                 allValues = set()
-                for value in Progress(col.getValues(self.source.rows), total=len(self.source.rows)):
+                for value in Progress(col.getValues(self.source.rows), 'pivoting', total=len(self.source.rows)):
                     if value not in allValues:
                         allValues.add(value)
                         c = Column('%s_%s' % (aggname, value),
@@ -64,7 +64,7 @@ class SheetPivot(Sheet):
     def reloadRows(self):
         rowidx = {}
         self.rows = []
-        for r in Progress(self.source.rows):
+        for r in Progress(self.source.rows, 'pivoting'):
             keys = tuple(forward(keycol.origcol.getTypedValue(r)) for keycol in self.nonpivotKeyCols)
             formatted_keys = tuple(wrapply(c.format, v) for v, c in zip(keys, self.nonpivotKeyCols))
 

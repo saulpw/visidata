@@ -75,7 +75,7 @@ class SheetFreqTable(Sheet):
         # separate rows with errors at the column from those without errors
         errorbin = []
         allbin = []
-        for row in Progress(self.source.rows):
+        for row in Progress(self.source.rows, 'binning'):
             try:
                 v = origCol.getTypedValue(row)
                 allbin.append((v, row))
@@ -133,7 +133,7 @@ class SheetFreqTable(Sheet):
 
     def discreteBinning(self):
         rowidx = {}
-        for r in Progress(self.source.rows):
+        for r in Progress(self.source.rows, 'binning'):
             keys = list(forward(c.getTypedValue(r)) for c in self.origCols)
 
             # wrapply will pass-through a key-able TypedWrapper
