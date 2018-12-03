@@ -56,19 +56,20 @@ def addRows(sheet, n, idx):
     for i in Progress(range(n), 'adding'):
         sheet.addRow(sheet.newRow(), idx+1)
 
-
+@asyncthread
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'
     lastval = None
     nullfunc = isNullFunc()
     n = 0
-    for r in rows:
+    rowsToFill = list(rows)
+    for r in Progress(col.sheet.rows, 'filling'):  # loop over all rows
         try:
             val = col.getValue(r)
         except Exception as e:
             val = e
 
-        if nullfunc(val):
+        if nullfunc(val) and r in rowsToFill:
             if lastval:
                 col.setValue(r, lastval)
                 n += 1
