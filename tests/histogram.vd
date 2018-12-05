@@ -1,7 +1,7 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample.tsv	open input in VisiData
-sample	Units	0	#		set type of current column to int
-sample	Units	0	=	Units > 10	create new column from Python expression, with column names as variables
-sample	Units > 10	0	|	True	select rows matching regex in current column
-sample	Units > 10	0	"		open duplicate sheet with only selected rows
-sample_selectedref	Item	0	F		open Frequency Table grouped on current column
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Quantity		type-int		#	
+benchmark	Quantity		addcol-expr	Quantity > 1	=	
+benchmark	Quantity > 1		select-col-regex	True	|	
+benchmark			dup-selected		"	
+benchmark_selectedref	Quantity		freq-col		F	
