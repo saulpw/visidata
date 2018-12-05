@@ -50,7 +50,7 @@ class xlsxSheet(Sheet):
         for i, colname in enumerate(colnames):
             self.addColumn(ColumnItem(colname, i))
 
-        for r in Progress(rows, worksheet.max_row or 0):
+        for r in Progress(rows, 'loading', worksheet.max_row or 0):
             row = list(wrapply(getattr, cell, 'value') for cell in r)
             for i in range(len(self.columns), len(row)):  # no-op if already done
                 self.addColumn(ColumnItem(None, i, width=8))
