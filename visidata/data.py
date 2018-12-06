@@ -80,16 +80,16 @@ def fillNullValues(col, rows):
     status("filled %d values" % n)
 
 
-def updateColNames(sheet, rows):
+def updateColNames(sheet, rows, overwrite=False):
     for c in sheet.visibleCols:
-        if not c._name:
+        if not c._name or overwrite:
             c.name = "_".join(c.getDisplayValue(r) for r in rows)
 
 
 Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)'),
-Sheet.addCommand('z^', 'rename-col-cell', 'sheet.cursorCol.name = cursorDisplay')
+Sheet.addCommand('z^', 'rename-col-selected', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ')
 Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow])')
-Sheet.addCommand('gz^', 'rename-cols-selected', 'sheet.cursorCol.name = "_".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows or [cursorRow]) ')
+Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedRows or [cursorRow], overwrite=True)')
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)')
 # gz^ with no selectedRows is same as z^
 

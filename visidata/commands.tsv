@@ -134,9 +134,9 @@ Sheet	next-page		^F	^F	n	n	n	n			scroll one page forward
 Sheet	next-search		n	n	n	n	n	n	2	view-find-forward-repeat	move to next match from last search
 Sheet	next-selected		}	}	n	use	n	n	2	view-go-next-selected	move down the current column to the next selected row
 Sheet	next-value		>	>	n	n	n	n		view-go-next-value	move down the current column to the next value
+Sheet	open-config	g	O	gO	y	n	n	y			open ~/.visidatarc as text sheet
 Sheet	options-global		O	O	meta static	n	n	n		meta-options	open global OptionsSheet
 Sheet	options-sheet	z	O	zO	meta static	n	n	n		meta-options	open OptionsSheet for current SheetType
-Sheet	open-config	g	O	gO	y	n	n	y			open ~/.visidatarc as text sheet
 Sheet	page-left				n	n	n	n			move cursor one page left
 Sheet	page-right				n	n	n	n			move cursor one page right
 Sheet	paste-after		p	p	n	n	y	y	5	data-clipboard-paste-after	paste clipboard rows after current row
@@ -160,9 +160,9 @@ Sheet	reload-row	z	^R	z^R	n	n	unmodifies	y
 Sheet	reload-selected	gz	^R	gz^R	n	n	unmodifies	y			
 Sheet	reload-sheet		^R	^R	n	n	should confirm if modified; marks as unmodified	y	4,5	sheet-reload	reload current sheet
 Sheet	rename-col		^	^	n	n	y	y	3	column-name-input	edit name of current column
-Sheet	rename-col-cell	z	^	z^	n	n	y	y		column-name-cell	set name of current column to current cell
-Sheet	rename-cols-row	g	^	g^	n	n	y	y		column-name-all-selected	set names of all visible columns to contents of selected rows (or current row)
-Sheet	rename-cols-selected	gz	^	gz^	n	use	y	y		column-name-selected	set current column name to combined contents of current cell in selected rows (or current row)
+Sheet	rename-col-selected	z	^	z^	n	y	y	y		column-name-cell	set name of current column to combined contents of current cell in selected rows (or current row)
+Sheet	rename-cols-row	g	^	g^	n	n	y	y		column-name-all-selected	set names of all unnamed visible columns to contents of selected rows (or current row)
+Sheet	rename-cols-selected	gz	^	gz^	n	use	y	y		column-name-selected	set names of all visible columns to combined contents of selected rows (or current row)
 Sheet	resize-col	z	_	z_	n	n	n	n		column-width-input	adjust current column width to given number
 Sheet	resize-col-half	z	-	z-	n	n	n	n		column-width-half	reduce width of current column by half
 Sheet	resize-col-max		_	_	n	n	n	n	2	column-width-full	adjust width of current column to full
