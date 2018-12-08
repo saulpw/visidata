@@ -1,12 +1,16 @@
-Rep	Units_sum_Pencil	Units_sum_Binder	Units_sum_Pen	Units_sum_Desk	Units_sum_Pen Set	Total_Units_sum	Total_count
-Jones	130	124	64	0	78	396	8
-Kivell	0	50	0	5	138	193	4
-Jardine	126	105	0	0	50	281	5
-Gill	60	126	27	0	0	213	5
-Sorvino	56	7	76	3	0	142	4
-Andrews	155	28	0	0	0	183	4
-Thompson	32	57	0	0	0	89	2
-Morgan	90	28	0	0	55	173	3
-Howard	0	29	96	0	0	125	2
-Parent	0	81	15	0	74	170	3
-Smith	67	87	0	2	0	156	3
+Customer	Quantity_sum_BFF Oh My Gravy! Beef & Salmon 2.8oz	Quantity_sum_Food, Adult Cat - 3.5 oz	Quantity_sum_Food, Adult Cat 3.5 oz	Quantity_sum_Food, Senior Wet Cat - 3 oz	Quantity_sum_Food, Salamander	Quantity_sum_Cat, Korat (Felis catus)	Quantity_sum_Food, Kitten 3kg	Quantity_sum_Monster, Rust (Monstrus gygaxus)	Quantity_sum_BFF Oh My Gravy! Chicken & Shrimp 2.8oz	Quantity_sum_BFF Oh My Gravy! Duck & Tuna 2.8oz	Quantity_sum_Rabbit (Oryctolagus cuniculus)	Quantity_sum_Food, Dog - 5kg	Quantity_sum_Food, Premium Wet Cat - 3.5 oz	Quantity_sum_BFF Oh My Gravy! Lamb & Tuna 2.8oz	Quantity_sum_Laser Pointer	Quantity_sum_Food, Shark - 10 kg	Quantity_sum_Food, Dragon - 50kg	Quantity_sum_Food, Rhinocerous - 50kg	Quantity_sum_Cat, Maine Coon (Felix catus)	Quantity_sum_BFF Oh My Gravy! Beef & Chicken 2.8oz	Quantity_sum_Kingsnake, California (Lampropeltis getula)	Quantity_sum_Mouse, Pinky (Mus musculus)	Quantity_sum_BFF Oh My Gravy! Chicken & Turkey 2.8oz	Quantity_sum_Forti Diet Prohealth Mouse/Rat 3lbs	Quantity_sum_Parrot, Norwegian Blue (Mopsitta tanta)	Quantity_sum_Dog, Golden Retriever (Canis lupus familiaris)	Quantity_sum_Parakeet, Blue (Melopsittacus undulatus)	Quantity_sum_Food, Spider	Quantity_sum_Crickets, Adult Live (Gryllus assimilis)	Quantity_sum_Food, Pangolin	Quantity_sum_BFF Oh My Gravy! Duck & Salmon 2.8oz	Quantity_sum_Food, Quoll	Quantity_sum_Food, Adult Dog - 5kg	Quantity_sum_BFF Oh My Gravy! Chicken & Salmon 2.8oz	Quantity_sum_Mealworms, Large (Tenebrio molitor) 100ct	Quantity_sum_Cat, Scottish Fold (Felis catus)	Quantity_sum_BFF Oh My Gravy! Chicken & Pumpkin 2.8oz	Quantity_sum_Lizard, Spinytail (Uromastyx ornatus)	Total_Quantity_sum	Total_count
+Robert Armstrong	4	0	0	0	0	0	0	0	4	4	0	0	0	4	0	0	0	0	0	4	0	0	4	0	0	0	0	0	0	0	4	0	0	4	0	0	148	0	180	10
+Kyle Kennedy	0	3	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	0	0	0	0	0	0	0	0	0	0	0	0	5	4
+Douglas "Dougie" Powers	0	0	1	0	0	0	0	0	0	0	0	0	0	0	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	3	3
+桜 高橋 (Sakura Takahashi)	0	0	0	25	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	25	5
+David Attenborough	0	0	0	0	30	0	0	0	0	0	0	0	0	0	0	0	0	4	0	0	0	0	0	0	0	0	0	0	0	30	0	1	0	0	0	0	0	0	65	4
+Susan Ashworth	0	0	0	0	0	1	6	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	9	6
+Wil Wheaton	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1
+Helen Halestorm	0	0	0	0	0	0	0	0	0	0	8	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	8	2
+Rubeus Hagrid	0	0	0	0	0	0	0	0	0	0	0	5	0	0	0	0	5	0	0	0	0	0	0	0	0	0	0	5	0	0	0	0	0	0	0	0	0	0	15	3
+Jon Arbuckle	0	0	0	0	0	0	0	0	0	0	0	0	50	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	51	2
+Juan Johnson	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	3	3
+Monica Johnson	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	30	0	0	0	0	0	1	0	0	0	32	3
+María Fernández	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	1
+Mr. Praline	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1
+Michael Smith	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	1	1
