@@ -1,8 +1,8 @@
 sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/sample.tsv	o	
-sample	OrderDate		type-date		@	
-sample			columns-sheet		C	
-sample_columns	fmtstr	キOrderDate	edit-cell	%Y	e	
-sample_columns			quit-sheet		q	
-sample	OrderDate		freq-col		F	
-sample_OrderDate_freq	histogram		hide-col		-	
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		type-date		@	
+benchmark			columns-sheet		C	
+benchmark_columns	fmtstr	キDate	edit-cell	%Y-%m	e	
+benchmark_columns			quit-sheet		q	
+benchmark	Date		freq-col		F	
+benchmark_Date_freq	histogram		hide-col		-	

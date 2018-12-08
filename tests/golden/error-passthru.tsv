@@ -1,2 +1,2 @@
-Item.foo	count	percent	histogram
-'TypedWrapper' object has no attribute 'foo'	43	100.00	*********************
+Quantity.foo	count	percent	histogram
+'str' object has no attribute 'foo'	49	100.00	************************

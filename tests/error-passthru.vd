@@ -1,6 +1,6 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/sample.tsv	open file
-sample	Item	2	,		
-sample	Item		gzd		
-sample	Item		=	Item.foo	
-sample	Item.foo		F		
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Quantity	1	select-equal-cell		,	
+benchmark	Quantity		delete-cells		gzd	
+benchmark	Quantity		addcol-expr	Quantity.foo	=	
+benchmark	Quantity.foo		freq-col		F	
