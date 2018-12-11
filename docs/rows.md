@@ -49,6 +49,12 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
 
 ---
 
+## How to filter a random subset of rows
+
+1. Type `R` followed by the *number* of rows you wish included in your random population sample.
+
+---
+
 ## How to move, copy and remove rows
 
 Command(s)         Operation
