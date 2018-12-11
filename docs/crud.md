@@ -5,7 +5,7 @@
 
 ## How to configure the cursor to move right after a successful edit
 
-1. Press `Shift+O` to enter the options menu.
+1. Press `O` to enter the global options menu.
 2. Type `r` followed by `cmd` to move the cursor to the **cmd\_after\_edit** option.
 3. Press `Enter` to edit the option, and type `go-right`.  Press `Enter` to save the option.
 

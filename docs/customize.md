@@ -15,8 +15,8 @@ Examples of **SheetType**s include (but are not limited to):
 
 Within the application itself:
 
-* Press `O` to access the **Options sheet** for the current **SheetType**.
-* Press `gO` to access the global **Options sheet**.
+* Press `zO` to access the **Options sheet** for the current **SheetType**.
+* Press `O` to access the global **Options sheet**.
 
 An option can be edited either by pressing `Enter` or by using [standard editing commands](/man#edit).
 
