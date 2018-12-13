@@ -1,5 +1,5 @@
-- Update: 2018-08-19
-- Version: VisiData 1.3.1
+- Update: 2018-12-12
+- Version: VisiData 1.5.1
 
 # Rows
 

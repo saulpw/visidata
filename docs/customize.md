@@ -1,5 +1,5 @@
-- Updated: 2018-07-21
-- Version: VisiData 1.3
+- Updated: 2018-12-12
+- Version: VisiData 1.5.1
 
 # Customizing VisiData
 

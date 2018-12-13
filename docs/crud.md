@@ -1,5 +1,5 @@
-- Update: 2018-02-10
-- Version: VisiData 1.1
+- Update: 2018-12-12
+- Version: VisiData 1.5.1
 
 # Creating sheets, rows and columns
 
