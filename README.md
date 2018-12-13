@@ -51,7 +51,7 @@ Use `-f <filetype>` to force a particular filetype.
 
 ### Help and Support
 
-If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues).
+If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues) or chat with us at #visidata on [freenode.net](https://webchat.freenode.net/).
 
 ## vdtui
 
