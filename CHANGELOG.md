@@ -2,17 +2,28 @@
 
 # v1.5.1 (2018-12-xx)
 
-- idle perf regression
-- fix pandas eval (`=`, etc) #208
-- preserve columns types from DataFrame #208
-- show null display note in cells which match `options.null_value` (was only for None) # 213
+## Bugfixes
+- [canvas] fix mouse right-click and cursor movement on canvas
+- [idle performance] fix regression
+- [columns] fix editing of "value" column on ColumnsSheet
+- [csv] always create at least one column
+- [pandas] fix pandas eval (`=`, etc) #208
+- [pandas] preserve columns types from DataFrame #208
+- [pandas] remove data autodetect #208
 
-- orderBy now asynchronous #207
-- thread name on right status during async
-- Shift+O now global options (was sheet options); `zO` now sheet options; `gO` now opens .visidatarc which can be edited (was global options)
+## Additions and changes
+- [options] Shift+O now global options (was sheet options); `zO` now sheet options; `gO` now opens .visidatarc which can be edited (was global options)
+- [sort] orderBy now asynchronous #207
+- [fill] fill now async; uses previous non-null regardless of selectedness #217
+- [pandas] `options.pandas_filetype_*` passed to `pandas.read_<filetype>` (like `csv_*` to Python `csv` module) # 210
+- [vdtui null] show null display note in cells which match `options.null_value` (was only for None) # 213
+- [vdtui] visidata.loadConfigFile("~/.visidatarc") for use in REPL #211
+- [progress] include thread name on right status during async
+- [progress] add gerund to display (instead of threadname)
+- [http] user specified filetype overrieds mime type
+    - e.g. vd https://url.com/data -f html
 
-- visidata.loadConfigFile("~/.visidatarc") for use in REPL #211
-- `pandas_filetype_*` passed to `pandas.read_<filetype>` (like `csv_*` to Python `csv` module) # 208
+
 
 # v1.5 (2018-11-02)
 
