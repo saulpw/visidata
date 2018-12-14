@@ -27,8 +27,8 @@ Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(sheet.cursorCol.get
 Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
 Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)')
 
-Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.filetype or "csv"))')
-Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.filetype or "csv"))')
+Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.save_filetype))')
+Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.save_filetype))')
 Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
 Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\\n".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows))')
 
@@ -113,7 +113,7 @@ def copyToClipboard(value):
 @asyncthread
 def saveToClipboard(sheet, rows, filetype=None):
     'copy rows from sheet to system clipboard'
-    filetype = filetype or options.filetype
+    filetype = filetype or options.save_filetype
     vs = copy(sheet)
     vs.rows = rows
     status('copying rows to clipboard')
