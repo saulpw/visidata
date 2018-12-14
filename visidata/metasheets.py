@@ -8,10 +8,10 @@ globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=v
 globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
 globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
 
-Sheet.addCommand('zO', 'options-sheet', 'vd.push(getOptionsSheet(sheet)).reload()')
-Sheet.addCommand('O', 'options-global', 'vd.push(vd.optionsSheet)')
+globalCommand('zO', 'options-sheet', 'vd.push(getOptionsSheet(sheet)).reload()')
+globalCommand('O', 'options-global', 'vd.push(vd.optionsSheet)')
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
-Sheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+globalCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
 
