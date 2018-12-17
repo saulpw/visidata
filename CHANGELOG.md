@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v1.5.1 (2018-12-16)
+# v1.5.1 (2018-12-17)
 
 ## Bugfixes
 - [canvas] fix mouse right-click and cursor movement on canvas
