@@ -1275,7 +1275,7 @@ class Sheet(BaseSheet):
             for b in cls.__bases__:
                 yield from allParents(b)
 
-        for b in [self] + list(allParents(self.__class__))
+        for b in [self] + list(allParents(self.__class__)):
             for c in getattr(b, 'colorizers', []):
                 _colorizers.add(c)
         return sorted(_colorizers, key=lambda x: x.precedence, reverse=True)
