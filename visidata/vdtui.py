@@ -1270,7 +1270,12 @@ class Sheet(BaseSheet):
     @functools.lru_cache()
     def getColorizers(self):
         _colorizers = set()
-        for b in [self] + list(self.__class__.__bases__):
+        def allParents(cls):
+            yield from cls.__bases__
+            for b in cls.__bases__:
+                yield from allParents(b)
+
+        for b in [self] + list(allParents(self.__class__))
             for c in getattr(b, 'colorizers', []):
                 _colorizers.add(c)
         return sorted(_colorizers, key=lambda x: x.precedence, reverse=True)
