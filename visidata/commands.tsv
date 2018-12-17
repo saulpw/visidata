@@ -198,7 +198,8 @@ Sheet	select-rows	g	s	gs	n	change	n	y	5	rows-select-all	select all rows
 Sheet	set-option				n	n		y			set option on current sheet
 Sheet	setcol-expr	g	=	g=	n	use	y	y	3,5	modify-set-column-selected-expr	set current column for selected rows to result of Python expression
 Sheet	setcol-range	gz	=	gz=	n	use	y	y	3	modify-set-column-sequence	set current column for selected rows to the items in result of Python sequence expression
-Sheet	setcol-subst	g	*	g*	n	use	y	y	4	modify-add-column-regex-transform-foo	regex/subst - replace regex with subst, which may include backreferences (\1 etc)
+Sheet	setcol-subst	g	*	g*	n	use	y	y	4	modify-add-column-regex-transform-foo	regex/subst - modify selected rows replacing regex with subst, which may include backreferences) \1 etc) for current column
+Sheet	setcol-subst-all	gz	*	gz*	n	use	y	y			regex/subst - modify selected rows replacing regex with subst, which may include backreferences (\1 etc) for all visible columns
 Sheet	show-aggregate	z	+	z+	n	n	n	y	1	column-aggregator-show	display result of aggregator over all values in current column
 Sheet	show-cursor		^G	^G	n	n	n	n		info-sheet	show cursor position and bounds of current sheet on status line
 Sheet	show-expr	z	=	z=	n	n	n	y		python-eval-row	evaluate Python expression on current row and show result on status line

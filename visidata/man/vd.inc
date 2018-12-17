@@ -1,4 +1,4 @@
-.Dd November 1, 2018
+.Dd December 16, 2018
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -191,8 +191,8 @@ reset cache for current/all visible column(s)
 .No add new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
 .It Ic " *" Ar regex Ns Sy / Ns Ar subst
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
-.It Ic "g*" Ar regex Ns Sy / Ns Ar subst
-.No modify selected rows in current column, replacing Ar regex No with Ar subst
+.It Ic "g*  gz*" Ar regex Ns Sy / Ns Ar subst
+.No modify selected rows in current/all visible column(s), replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .Pp
 .It Ic " (   g("
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) fully

@@ -12,6 +12,7 @@
 - [pandas] remove data autodetect #208
 
 ## Additions and changes
+- [setcol-subst-all] add gz* to substitude over all visible cols
 - [options] Shift+O now global options (was sheet options); `zO` now sheet options; `gO` now opens .visidatarc which can be edited (was global options)
 - [sort] orderBy now asynchronous #207
 - [fill] fill now async; uses previous non-null regardless of selectedness #217
@@ -22,6 +23,7 @@
 - [progress] add gerund to display (instead of threadname)
 - [http] user specified filetype overrieds mime type
     - e.g. vd https://url.com/data -f html
+- [clipboard] use options.save_filetype for default format
 
 
 
