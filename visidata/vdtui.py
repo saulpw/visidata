@@ -261,6 +261,7 @@ replayableOption('encoding_errors', 'surrogateescape', 'encoding_errors passed t
 replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('default_width', 20, 'default column width')
 option('wrap', False, 'wrap text to fit window width on TextSheet')
+replayableOption('bulk_select_clear', False, 'clear selected rows before new bulk selections')
 
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
@@ -1514,12 +1515,18 @@ class Sheet(BaseSheet):
 
     @asyncthread
     def select(self, rows, status=True, progress=True):
-        "Select given rows. Don't show progress if progress=False; don't show status if status=False."
+        "Bulk select given rows. Don't show progress if progress=False; don't show status if status=False."
         before = len(self._selectedRows)
+        if options.bulk_select_clear:
+            self._selectedRows.clear()
         for r in (Progress(rows, 'selecting') if progress else rows):
             self.selectRow(r)
         if status:
-            vd().status('selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype))
+            if options.bulk_select_clear:
+                msg = 'selected %s %s%s' % (len(self._selectedRows), self.rowtype, ' instead' if before > 0 else '')
+            else:
+                msg = 'selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype)
+            vd.status(msg)
 
     @asyncthread
     def unselect(self, rows, status=True, progress=True):

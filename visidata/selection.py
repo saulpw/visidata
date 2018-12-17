@@ -1,7 +1,7 @@
 from visidata import Sheet
 
 Sheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)'),
-Sheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)'),
+Sheet.addCommand('s', 'select-row', 'selectRow(cursorRow); cursorDown(1)'),
 Sheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)'),
 
 Sheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)'),
