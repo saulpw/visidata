@@ -13,13 +13,13 @@
 - [pandas] remove data autodetect #208 (thanks to @nickray for suggesting)
 
 ## Additions and changes
-- [selection] `options.bulk_select_clear` per #229 (thanks to @aburroso for suggesting)
-- [setcol-subst-all] add `gz*` to substitute over all visible cols
+- [selection] `options.bulk_select_clear` per #229 (thanks to @aborruso for suggesting)
+- [setcol-subst-all] add `gz*` to substitute over all visible cols (thanks to @aborruso for suggesting)
 - [options] Shift+O now global options (was sheet options); `zO` now sheet options; `gO` now opens .visidatarc which can be edited (was global options)
 - [sort] orderBy now asynchronous #207 (thanks to @apnewberry for suggesting)
-- [fill] fill now async; uses previous non-null regardless of selectedness #217 (thanks to @aburroso for suggesting)
+- [fill] fill now async; uses previous non-null regardless of selectedness #217 (thanks to @aborruso for suggesting)
 - [pandas] `options.pandas_filetype_*` passed to `pandas.read_<filetype>` (like `csv_*` to Python `csv` module) # 210 (thanks to @pigmonkey for suggesting)
-- [vdtui null] show null display note in cells which match `options.null_value` (was only for None) # 213 (thanksto @aburroso for suggesting)
+- [vdtui null] show null display note in cells which match `options.null_value` (was only for None) # 213 (thanksto @aborruso for suggesting)
 - [vdtui] visidata.loadConfigFile("~/.visidatarc") for use in REPL #211 (thanks to @apnewberry for suggesting)
 - [progress] include thread name on right status during async
 - [progress] add gerund to display (instead of threadname)
