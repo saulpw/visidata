@@ -1,0 +1,3 @@
+sheet	col	row	longname	input	keystrokes	comment
+	override	filetype	set-option	pandas		
+			open-file	sample_data/co3.stata	o	
