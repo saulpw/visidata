@@ -1,4 +1,4 @@
-.Dd November 1, 2018
+.Dd December 16, 2018
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -162,9 +162,9 @@ edit name of current column
 .It Ic " g^"
 set names of all unnamed visible columns to contents of selected rows (or current row)
 .It Ic " z^"
-set name of current column to contents of current cell
+set name of current column to combined contents of current cell in selected rows (or current row)
 .It Ic "gz^"
-set name of current column to combined contents of current column for selected rows (or current row)
+set name of all visible columns to combined contents of current column for selected rows (or current row)
 .Pp
 .It Ic "  =" Ar expr
 .No create new column from Python Ar expr Ns , with column names as variables
@@ -191,8 +191,8 @@ reset cache for current/all visible column(s)
 .No add new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
 .It Ic " *" Ar regex Ns Sy / Ns Ar subst
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
-.It Ic "g*" Ar regex Ns Sy / Ns Ar subst
-.No modify selected rows in current column, replacing Ar regex No with Ar subst
+.It Ic "g*  gz*" Ar regex Ns Sy / Ns Ar subst
+.No modify selected rows in current/all visible column(s), replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .Pp
 .It Ic " (   g("
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) fully
@@ -432,7 +432,7 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Sheets Sheet No (Shift+S) "     jump between sheets or join them together"
 .It Sy " \&."
-.Sy Options Sheet No (Shift+O) "    edit configuration options for all sheets"
+.Sy Options Sheet No (Shift+O) "    edit configuration options"
 .It Sy " \&."
 .Sy Commandlog No (Shift+D) "       modify and save commands for replay"
 .It Sy " \&."
@@ -696,6 +696,8 @@ flags to pass to re.compile() [AILMSUX]
 default column width
 .It Sy --wrap Ns = Ns Ar "bool                 " No "False"
 wrap text to fit window width on TextSheet
+.It Sy --bulk-select-clear Ns = Ns Ar "bool    " No "False"
+clear selected rows before new bulk selections
 .It Sy --cmd-after-edit Ns = Ns Ar "str        " No "go-down"
 command longname to execute after successful edit
 .It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
@@ -717,11 +719,11 @@ curses use default terminal colors
 .It Sy --note-pending Ns = Ns Ar "str          " No "\[u231B]"
 note to display for pending cells
 .It Sy --note-format-exc Ns = Ns Ar "str       " No "?"
-cell note for an exception during type conversion or formatting
+cell note for an exception during formatting
 .It Sy --note-getter-exc Ns = Ns Ar "str       " No "!"
 cell note for an exception during computation
 .It Sy --note-type-exc Ns = Ns Ar "str         " No "!"
-cell note for an exception during computation
+cell note for an exception during type conversion
 .It Sy --note-unknown-type Ns = Ns Ar "str     " No ""
 cell note for unknown types in anytype column
 .It Sy --scroll-incr Ns = Ns Ar "int           " No "3"
@@ -895,20 +897,22 @@ color of rows/columns added to --diff source
 .
 .Sh EXAMPLES
 .Dl Nm vd Cm foo.tsv
+.No open the file foo.tsv in the current directory
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
+.No open the file bar.db as a sqlite database
 .Pp
 .Dl Nm vd Cm -b countries.fixed -o countries.tsv
+.No convert countries.fixed (in fixed width format) to countries.tsv (in tsv format)
 .Pp
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
+.No open a connection tot the given postgres database
 .Pp
 .Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
+.No replay tests/pivot.vd, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
-.Pp
-.Dl Nm vd Cm -p foo.vd -b -o - > foo.tsv
-.Pp
-.Dl Nm vd --diff foo.tsv bar.tsv
+.No parse the output of ls -l into usable data
 .Pp
 .Sh FILES
 At the start of every session,
@@ -925,7 +929,7 @@ For example:
 
    aggregator('median', median)
 .Ed
-.
+.Pp
 Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).
 .
 .Sh SUPPORTED SOURCES
