@@ -704,7 +704,7 @@ overwrite existing files without confirmation
 .No convert countries.fixed (in fixed width format) to countries.tsv (in tsv format)
 .Pp
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
-.No open a connection tot the given postgres database
+.No open a connection to the given postgres database
 .Pp
 .Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
 .No replay tests/pivot.vd, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
