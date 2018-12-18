@@ -1,0 +1,8 @@
+sheet	col	row	longname	input	keystrokes	comment
+	override	filetype	set-option	pandas		
+			open-file	sample_data/benchmark.parquet	o	
+benchmark	Unit		type-currency		$	
+benchmark	Unit		addcol-expr	Quantity * Unit	=	
+benchmark	Paid		hide-col		-	
+benchmark	Quantity * Unit		rename-col	Paid	^	
+benchmark	Paid		type-currency		$	
