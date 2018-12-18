@@ -14,7 +14,11 @@
 
 4. Go through the manual tests checklist
 
-4. Verify that setup.py is up-to-date with requirements.
+5. Verify that setup.py is up-to-date with requirements.
+
+    a. Review current dependency versions and if a new version of Python has been released.
+
+    b. Update any new plugins or extras in setup.py
 
 5. Set version number to next most reasonable number (v#.#.#)
 
