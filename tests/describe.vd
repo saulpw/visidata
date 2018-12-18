@@ -1,0 +1,7 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		type-date		@	
+benchmark	Quantity		type-int		#	
+benchmark	Unit		type-currency		$	
+benchmark	Paid		type-currency		$	
+benchmark			describe-sheet		I	

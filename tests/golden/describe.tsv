@@ -1,0 +1,8 @@
+column	errors	nulls	distinct	mode	min	max	median	mean	stdev
+Date	0	0	45	no unique mode; found 4 equally common values	2018-07-03	2018-08-31	2018-08-06	can't convert type 'date' to numerator/denominator	can't convert type 'date' to numerator/denominator
+Customer	0	0	15	Robert Armstrong					
+SKU	0	0	32	no unique mode; found 2 equally common values					
+Item	0	0	38	Food, Senior Wet Cat - 3 oz					
+Quantity	0	0	10	1	1	144	2	8.18	21.97
+Unit	0	0	26	12.95	0.0	2495.99	12.95	232.94	596.19
+Paid	0	0	34	51.8	-2300.0	3602.1	51.8	217.63	836.31
