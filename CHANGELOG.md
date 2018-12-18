@@ -19,6 +19,7 @@
 - [sort] orderBy now asynchronous #207 (thanks to @apnewberry for suggesting)
 - [fill] fill now async; uses previous non-null regardless of selectedness #217 (thanks to @aborruso for suggesting)
 - [pandas] `options.pandas_filetype_*` passed to `pandas.read_<filetype>` (like `csv_*` to Python `csv` module) # 210 (thanks to @pigmonkey for suggesting)
+- [rename-col-selected] `z^` now renames the current column to contents of selected rows (previously `gz^`); `gz^` now renames all visible columns to contents of selected rows #220 (thanks to @aborruso for suggesting)
 - [vdtui null] show null display note in cells which match `options.null_value` (was only for None) # 213 (thanksto @aborruso for suggesting)
 - [vdtui] visidata.loadConfigFile("~/.visidatarc") for use in REPL #211 (thanks to @apnewberry for suggesting)
 - [progress] include thread name on right status during async
