@@ -21,6 +21,10 @@ vd -f sqlite bar.db
 ls -l | vd -f fixed
 ~~~
 
+---
+
+## How to load any source supported by pandas
+
 VisiData has an adapter for pandas. To load a file format which is supported by pandas, execute `vd -f pandas data.foo`. This will call `pandas.read_foo()`.
 
 For example:
@@ -32,6 +36,30 @@ vd -f pandas data.parquet
 loads a parquet file. When using the pandas loader, the `.fileformat` file extension is mandatory.
 
 Note that if you are using Python v3.7, then you will need to manually install pandas >=0.23.2 (our requirements.txt file installs v0.19.2 as the last version compatible with 3.4).
+
+---
+
+## How to open an R data frame with VisiData
+
+@paulklemm has wonderfully developed a small `R` package which bridges the gap between `R` and VisiData.
+
+To install `rvisidata` using [devtools](https://cran.r-project.org/web/packages/devtools/index.html) run:
+
+~~~
+devtools::install_github('paulklemm/rvisidata')
+~~~
+
+from within the `R` interpreter.
+
+Any data frame can then be opened by VisiData:
+
+~~~
+vd(iris)
+~~~
+
+Please note, that this tool opens the data frame in readonly mode. Any changes made will be discarded.
+
+For more more details, questions, and feedback, check out the [rvisidata repository](https://github.com/paulklemm/rvisidata).
 
 ---
 

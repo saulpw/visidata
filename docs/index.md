@@ -10,6 +10,8 @@
 
 * [Loading Data](/docs/loading)
     * How to specify a source
+    * How to load any source supported by pandas
+    * How to open an R data frame with VisiData
     * How to load multiple datasets simultaneously
     * How to access other loaded or derived sheets
     * How to convert a dataset from one supported filetype into another
