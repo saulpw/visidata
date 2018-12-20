@@ -41,7 +41,7 @@ Note that if you are using Python v3.7, then you will need to manually install p
 
 ## How to open an R data frame with VisiData
 
-@paulklemm has wonderfully developed a small `R` package which bridges the gap between `R` and VisiData.
+[@paulklemm](https://github.com/paulklemm) has wonderfully developed a small `R` package which bridges the gap between `R` and VisiData.
 
 To install `rvisidata` using [devtools](https://cran.r-project.org/web/packages/devtools/index.html) run:
 
