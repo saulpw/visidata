@@ -1123,7 +1123,7 @@ class BaseSheet:
 
         try:
             self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
-        except Exception:
+        except Exception as e:
             self.vd.exceptionCaught(e)
 
         catchapply(self.checkCursor)
