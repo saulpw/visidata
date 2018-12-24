@@ -1,6 +1,7 @@
 # VisiData version history
 
-# upcoming
+# v1.6-dev ()
+
 - separating out vdtui components
 - remove MIT license from vdtui; all code now licensed under GPL3
 
