@@ -7,6 +7,7 @@ __status__ = 'Production/Stable'
 __copyright__ = 'Copyright (c) 2016-2019 ' + __author__
 
 from .vdtui import *
+from .vdtui.textsheet import TextSheet
 from .path import *
 from .errors import *
 from .urlcache import *
