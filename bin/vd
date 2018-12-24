@@ -7,6 +7,7 @@ __version__ = '1.6-dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 import os
+import io
 import sys
 
 from visidata import vd, options, sync, status, run
