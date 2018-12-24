@@ -1145,45 +1145,6 @@ class BaseSheet:
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
 
-class CursesAttr:
-    def __init__(self, attr=0, precedence=-1):
-        self.attributes = attr & ~curses.A_COLOR
-        self.color = attr & curses.A_COLOR
-        self.precedence = precedence
-
-    def __str__(self):
-        a = self.attr
-        ret = set()
-        for k in dir(curses):
-            v = getattr(curses, k)
-            if v == 0:
-                pass
-            elif k.startswith('A_'):
-                if self.attributes & v == v:
-                    ret.add(k)
-            elif k.startswith('COLOR_'):
-                if self.color == v:
-                    ret.add(k)
-        return (' '.join(k for k in ret) or str(self.color)) + ' %0X' % self.attr
-
-    @property
-    def attr(self):
-        'the composed curses attr'
-        return self.color | self.attributes
-
-    def update_attr(self, newattr, newprec=None):
-        if isinstance(newattr, int):
-            newattr = CursesAttr(newattr)
-        ret = copy(self)
-        if newprec is None:
-            newprec = newattr.precedence
-        ret.attributes |= newattr.attributes
-        if not ret.color or newprec > ret.precedence:
-            if newattr.color:
-                ret.color = newattr.color
-            ret.precedence = newprec
-        return ret
-
 
 class Sheet(BaseSheet):
     'Base class for all tabular sheets.'
@@ -2500,6 +2461,8 @@ class ColorMaker:
         return r
 
 colors = ColorMaker()
+=======
+>>>>>>> [vdtui] move ColorMaker and CursesAttr to vdtui.color
 
 def setupcolors(stdscr, f, *args):
     curses.raw()    # get control keys instead of signals
@@ -2558,3 +2521,6 @@ def getGlobals():
 
 from .cliptext import clipdraw, clipstr
 from .editline import editline
+from .color import ColorMaker, CursesAttr
+
+colors = ColorMaker()
