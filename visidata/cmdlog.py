@@ -53,7 +53,7 @@ def keystr(k):
     return options.rowkey_prefix + ','.join(map(str, k))
 
 def isLoggableSheet(sheet):
-    return sheet is not vd().cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
+    return sheet is not vd.cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
 
 def isLoggableCommand(keystrokes, longname):
     if keystrokes in nonLogKeys:
@@ -104,7 +104,7 @@ class CommandLog(TsvSheet):
         macropath = Path(fnSuffix(options.visidata_dir+"macro-{0}.vd"))
         save_vd(macropath, vs)
         setMacro(ks, vs)
-        append_tsv_row(vd().macrosheet, (ks, macropath.resolve()))
+        append_tsv_row(vd.macrosheet, (ks, macropath.resolve()))
 
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
         if not isLoggableSheet(sheet):
@@ -141,9 +141,9 @@ class CommandLog(TsvSheet):
             if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes, self.currentActiveRow.longname):
                 self.addRow(self.currentActiveRow)
                 if options.cmdlog_histfile:
-                    if not getattr(vd(), 'sessionlog', None):
-                        vd().sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
-                    append_tsv_row(vd().sessionlog, self.currentActiveRow)
+                    if not getattr(vd, 'sessionlog', None):
+                        vd.sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
+                    append_tsv_row(vd.sessionlog, self.currentActiveRow)
 
         self.currentActiveRow = None
 
@@ -176,9 +176,9 @@ class CommandLog(TsvSheet):
 
         try:
             sheetidx = int(r.sheet)
-            vs = vd().sheets[sheetidx]
+            vs = vd.sheets[sheetidx]
         except ValueError:
-            vs = vd().getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
+            vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
 
         if r.row:
             try:
@@ -237,7 +237,7 @@ class CommandLog(TsvSheet):
         else:
             vs = self.moveToReplayContext(r)
 
-            vd().keystrokes = r.keystrokes
+            vd.keystrokes = r.keystrokes
             # <=v1.2 used keystrokes in longname column; getCommand fetches both
             escaped = vs.exec_command(vs.getCommand(longname if longname else r.keystrokes), keystrokes=r.keystrokes)
 
@@ -257,7 +257,7 @@ class CommandLog(TsvSheet):
                     status('replay canceled')
                     return
 
-                vd().statuses.clear()
+                vd.statuses.clear()
                 try:
                     if self.replayOne(self.cursorRow):
                         self.cancel()
@@ -313,16 +313,16 @@ CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
 CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))')
 options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
-vd().cmdlog = CommandLog('cmdlog')
-vd().cmdlog.rows = []
+vd.cmdlog = CommandLog('cmdlog')
+vd.cmdlog.rows = []
 
-vd().addHook('preexec', vd().cmdlog.beforeExecHook)
-vd().addHook('postexec', vd().cmdlog.afterExecSheet)
-vd().addHook('preedit', vd().cmdlog.getLastArgs)
-vd().addHook('postedit', vd().cmdlog.setLastArgs)
+vd.addHook('preexec', vd.cmdlog.beforeExecHook)
+vd.addHook('postexec', vd.cmdlog.afterExecSheet)
+vd.addHook('preedit', vd.cmdlog.getLastArgs)
+vd.addHook('postedit', vd.cmdlog.setLastArgs)
 
-vd().addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'color_status_replay'))
-vd().addHook('set_option', vd().cmdlog.setOption)
+vd.addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'color_status_replay'))
+vd.addHook('set_option', vd.cmdlog.setOption)
 
 def loadMacros():
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
@@ -338,4 +338,4 @@ def setMacro(ks, vs):
     bindkeys.set(ks, vs.name, 'override')
     commands.set(vs.name, vs, 'override')
 
-vd().macrosheet = loadMacros()
+vd.macrosheet = loadMacros()

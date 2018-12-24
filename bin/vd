@@ -7,7 +7,11 @@ __version__ = '1.6-dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 import os
-from visidata import *
+import sys
+
+from visidata import vd, options, sync, status, run
+from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand
+from visidata import Path, PathFd, openSource, saveSheets, setDiffSheet, domotd
 
 
 # for --play
@@ -17,8 +21,8 @@ def eval_vd(logpath, *args, **kwargs):
     src = PathFd(logpath.fqpn, io.StringIO(log), filesize=len(log))
     vs = openSource(src, filetype='vd')
     vs.name += '_vd'
-    vd().push(vs)
-    vs.vd = vd()
+    vd.push(vs)
+    vs.vd = vd
     return vs
 
 
@@ -38,10 +42,10 @@ def main():
     parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
     parser.add_argument('-v', '--version', action='version', version=__version_info__)
 
-    for optname in vdtui.options.keys('global'):
+    for optname in options.keys('global'):
         if optname.startswith('color_') or optname.startswith('disp_'):
             continue
-        action = 'store_true' if vdtui.options[optname] is False else 'store'
+        action = 'store_true' if options[optname] is False else 'store'
         parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=options._opts._get(optname).helpstr)
 
     args = parser.parse_args()
@@ -49,15 +53,15 @@ def main():
     sys.path.append(Path(options.visidata_dir).resolve())
 
     # user customisations in config file in standard location
-    vdtui.loadConfigFile('~/.visidatarc', globals())
-    vdtui.addGlobals(globals())
+    loadConfigFile('~/.visidatarc', getGlobals())
+    addGlobals(globals())
 
-    vdtui.globalCommand('gO', 'open-config', 'vd.push(vdtui.TextSheet("visidatarc", Path("~/.visidatarc")))')
+    globalCommand('gO', 'open-config', 'vd.push(TextSheet("visidatarc", Path("~/.visidatarc")))')
 
     # apply command-line overrides after .visidatarc
     for optname, optval in vars(args).items():
         if optval is not None and optname not in ['inputs', 'play', 'batch', 'output', 'diff']:
-            vdtui.options[optname] = optval
+            options[optname] = optval
 
     # fetch motd after options parsing/setting
     domotd()
@@ -69,12 +73,12 @@ def main():
         stdin = open(os.dup(0))
         f = open('/dev/tty')
         os.dup2(f.fileno(), 0)
-        vd().stdin = stdin
+        vd.stdin = stdin
     except Exception as e:
         print(e)
-        vd().stdin = sys.stdin
+        vd.stdin = sys.stdin
 
-    stdinSource = PathFd('-', vd().stdin)
+    stdinSource = PathFd('-', vd.stdin)
 
     # parse args, including +4:3 starting row:col
     startrow, startcol = None, None
@@ -99,12 +103,12 @@ def main():
 
     if args.diff:
         vs = openSource(args.diff)
-        vd().push(vs)
+        vd.push(vs)
         setDiffSheet(vs)
 
     if args.batch:
-        vd().status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
-        vd().execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
+        vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
+        vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
     if not args.play:
         if flPipedData and not inputs:  # '|vd' without explicit '-'
@@ -116,7 +120,7 @@ def main():
         sources = []
         for src in inputs:
             vs = openSource(src)
-            vdtui.vd().cmdlog.openHook(vs, src)
+            vd.cmdlog.openHook(vs, src)
             sources.append(vs)
             if startrow is not None:
                 vs.cursorRowIndex = int(startrow)-1
@@ -124,10 +128,10 @@ def main():
                 vs.cursorVisibleColIndex = int(startcol)-1
 
         if args.batch:
-            vd().sheets = sources
+            vd.sheets = sources
             sources[0].reload()
         else:
-            vdtui.run(*sources)
+            run(*sources)
     else:
         if args.play == '-':
             vdfile = stdinSource
@@ -143,12 +147,12 @@ def main():
             vs.replay()
             run()
 
-    if args.output and vd().sheets:
-        saveSheets(args.output, vd().sheets[0], confirm_overwrite=False)
+    if args.output and vd.sheets:
+        saveSheets(args.output, vd.sheets[0], confirm_overwrite=False)
         sync()
 
 if __name__ == '__main__':
-    vdtui.status(__version_info__)
+    status(__version_info__)
     main()
     sys.stderr.flush()
     os._exit(0)  # cleanup can be expensive with large datasets

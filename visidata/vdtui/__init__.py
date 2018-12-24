@@ -178,7 +178,7 @@ class OptionsObject:
                 v = t(v)
 
             if curval != v and self._get(k, 'global').replayable:
-                vd().callHook('set_option', k, v, obj)
+                vd.callHook('set_option', k, v, obj)
         else:
             curval = None
             warning('setting unknown option %s' % k)
@@ -382,14 +382,14 @@ def warning(s):
     status(s, priority=1)
 
 def status(*args, **kwargs):
-    return vd().status(*args, **kwargs)
+    return vd.status(*args, **kwargs)
 
 def debug(*args, **kwargs):
     if options.debug:
-        return vd().status(*args, **kwargs)
+        return vd.status(*args, **kwargs)
 
 def input(*args, **kwargs):
-    return vd().input(*args, **kwargs)
+    return vd.input(*args, **kwargs)
 
 def rotate_range(n, idx, reverse=False):
     if reverse:
@@ -423,7 +423,7 @@ def composeStatus(msgparts, n):
     return msg
 
 def exceptionCaught(e, **kwargs):
-    return vd().exceptionCaught(e, **kwargs)
+    return vd.exceptionCaught(e, **kwargs)
 
 def stacktrace(e=None):
     if not e:
@@ -450,7 +450,7 @@ def regex_flags():
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
 def sync(expectedThreads=0):
-    vd().sync(expectedThreads)
+    vd.sync(expectedThreads)
 
 
 # define @asyncthread for potentially long-running functions
@@ -459,7 +459,7 @@ def asyncthread(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
     @functools.wraps(func)
     def _execAsync(*args, **kwargs):
-        return vd().execAsync(func, *args, **kwargs)
+        return vd.execAsync(func, *args, **kwargs)
     return _execAsync
 
 
@@ -474,7 +474,7 @@ def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
         def _execAsync(*args, **kwargs):
             k = key(*args, **kwargs)
             if k not in d:
-                d[k] = vd().execAsync(_func, k, *args, **kwargs)
+                d[k] = vd.execAsync(_func, k, *args, **kwargs)
             return d.get(k)
         return _execAsync
     return _decorator
@@ -522,6 +522,7 @@ class VisiData:
     allPrefixes = 'gz'  # embig'g'en, 'z'mallify
 
     def __call__(self):
+        'Deprecated; use plain "vd"'
         return self
 
     def __init__(self):
@@ -547,7 +548,7 @@ class VisiData:
         return self.sheets[0] if self.sheets else None
 
     def getSheet(self, sheetname):
-        matchingSheets = [x for x in vd().sheets if x.name == sheetname]
+        matchingSheets = [x for x in vd.sheets if x.name == sheetname]
         if matchingSheets:
             if len(matchingSheets) > 1:
                 status('more than one sheet named "%s"' % sheetname)
@@ -555,7 +556,7 @@ class VisiData:
         if sheetname == 'options':
             vs = self.optionsSheet
             vs.reload()
-            vs.vd = vd()
+            vs.vd = vd
             return vs
 
     def status(self, *args, priority=0):
@@ -1006,7 +1007,7 @@ class BaseSheet:
 
     def __init__(self, name, **kwargs):
         self.name = name
-        self.vd = vd()
+        self.vd = vd
 
         # for progress bar
         self.progresses = []  # list of Progress objects
@@ -1077,7 +1078,7 @@ class BaseSheet:
             vdglobals = getGlobals()
 
         if not self.vd:
-            self.vd = vd()
+            self.vd = vd
 
         self.sheet = self
 
@@ -1511,7 +1512,7 @@ class Sheet(BaseSheet):
         for r in (Progress(rows, 'unselecting') if progress else rows):
             self.unselectRow(r)
         if status:
-            vd().status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
+            vd.status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
 
     def selectByIdx(self, rowIdxs):
         'Select given row indexes, without progress bar.'
@@ -1738,7 +1739,7 @@ class Sheet(BaseSheet):
         numHeaderRows = 1
         scr.erase()  # clear screen before every re-draw
 
-        vd().refresh()
+        vd.refresh()
 
         if not self.columns:
             return
@@ -2446,7 +2447,7 @@ class TextSheet(Sheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        winWidth = min(self.columns[1].width or 78, vd().windowWidth-2)
+        winWidth = min(self.columns[1].width or 78, vd.windowWidth-2)
         wrap = options.wrap
         for startingLine, text in enumerate(self.source):
             if wrap and text:
@@ -2677,7 +2678,7 @@ def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
         prew = clipdraw(scr, y, x, dispval[:dispi], attr, w)
         clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1)
         scr.move(y, x+prew)
-        ch = vd().getkeystroke(scr)
+        ch = vd.getkeystroke(scr)
         if ch == '':                               continue
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
@@ -2819,10 +2820,10 @@ def cursesMain(_scr, sheetlist):
     colors.setup()
 
     for vs in sheetlist:
-        vd().push(vs)  # first push does a reload
+        vd.push(vs)  # first push does a reload
 
     status('Ctrl+H opens help')
-    return vd().run(_scr)
+    return vd.run(_scr)
 
 def loadConfigFile(fnrc, _globals=None):
     p = Path(fnrc)

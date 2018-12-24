@@ -253,8 +253,8 @@ class HunkViewer(GitSheet):
         super().__init__('hunk', sources=hunks)
         self.srchunks = srchunks
         self.columns = [
-            ColumnItem('1', 1, width=vd().windowWidth//2-1),
-            ColumnItem('2', 2, width=vd().windowWidth//2-1),
+            ColumnItem('1', 1, width=vd.windowWidth//2-1),
+            ColumnItem('2', 2, width=vd.windowWidth//2-1),
         ]
         self.addColorizer(RowColorizer(4, None, HunkViewer.colorDiffRow))
 

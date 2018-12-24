@@ -12,7 +12,7 @@ class EditTextTestCase(unittest.TestCase):
         self.scr.addstr = Mock()
         self.scr.move = Mock()
         self.chars = []
-        visidata.vd().getkeystroke = Mock(side_effect=self.chars)
+        visidata.vd.getkeystroke = Mock(side_effect=self.chars)
 
     def ungetkeystroke(self, *chars):
         self.chars.extend(chars)

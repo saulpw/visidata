@@ -23,7 +23,7 @@ def loggit(*args, **kwargs):
     r = maybeloggit(*args, **kwargs)
 
     cmdstr = 'git ' + ' '.join(args)
-    vd().gitcmdlog.addRow((cmdstr, r))
+    vd.gitcmdlog.addRow((cmdstr, r))
     return r
 
 def maybeloggit(*args, **kwargs):
@@ -62,7 +62,7 @@ def git_lines(*args, git=maybeloggit, **kwargs):
         for line in errlines:
             status(line)
     else:
-        vd().push(TextSheet('git ' + ' '.join(args), errlines))
+        vd.push(TextSheet('git ' + ' '.join(args), errlines))
 
 
 def git_iter(sep, *args, git=maybeloggit, **kwargs):
@@ -95,7 +95,7 @@ def git_iter(sep, *args, git=maybeloggit, **kwargs):
         for line in errlines:
             status(line)
     else:
-        vd().push(TextSheet('git ' + ' '.join(args), errlines))
+        vd.push(TextSheet('git ' + ' '.join(args), errlines))
 
 def loggit_lines(*args, **kwargs):
     return git_lines(*args, git=loggit, **kwargs)

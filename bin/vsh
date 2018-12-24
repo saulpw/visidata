@@ -46,7 +46,7 @@ class ShellHistorySheet(Sheet):
         self.rows.append(ret)
         ret.cmdstr = cmdstr
         ret.proc = psutil.Process(ret.pid)
-        vd().push(TextSheet(ret.cmdstr, ret))
+        vd.push(TextSheet(ret.cmdstr, ret))
         ret.wait()
 
     def leftStatus(self):

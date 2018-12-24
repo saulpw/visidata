@@ -53,8 +53,8 @@ class CommandsTestCase(unittest.TestCase):
                 continue
 #            print(testname)
 
-#            visidata.vd.cache_clear()  # so vd() returns a new VisiData object for each command
-            vd = visidata.vd()
+#            visidata.vd.cache_clear()  # so vd returns a new VisiData object for each command
+            vd = visidata.vd
             vd.scr = self.scr
 
             if testname in inputLines:
