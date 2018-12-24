@@ -231,7 +231,6 @@ replayableOption('encoding_errors', 'surrogateescape', 'encoding_errors passed t
 
 replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('default_width', 20, 'default column width')
-option('wrap', False, 'wrap text to fit window width on TextSheet')
 replayableOption('bulk_select_clear', False, 'clear selected rows before new bulk selections')
 
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
@@ -1894,8 +1893,6 @@ Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_dee
 Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)'),
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))'),
 
-Sheet.addCommand('V', 'view-cell', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))'),
-
 bindkey('KEY_LEFT', 'go-left')
 bindkey('KEY_DOWN', 'go-down')
 bindkey('KEY_UP', 'go-up')
@@ -2428,36 +2425,6 @@ def clipstr(s, dispw):
 
     return ret, w
 
-
-## text viewer and dir browser
-# rowdef: (linenum, str)
-class TextSheet(Sheet):
-    'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
-    rowtype = 'lines'
-    filetype = 'txt'
-    columns = [
-        ColumnItem('linenum', 0, type=int, width=0),
-        ColumnItem('text', 1),
-    ]
-
-    def __init__(self, name, source, **kwargs):
-        super().__init__(name, source=source, **kwargs)
-        options.set('save_filetype', 'txt', self)
-
-    @asyncthread
-    def reload(self):
-        self.rows = []
-        winWidth = min(self.columns[1].width or 78, vd.windowWidth-2)
-        wrap = options.wrap
-        for startingLine, text in enumerate(self.source):
-            if wrap and text:
-                for i, L in enumerate(textwrap.wrap(str(text), width=winWidth)):
-                    self.addRow([startingLine+i+1, L])
-            else:
-                self.addRow([startingLine+1, text])
-
-TextSheet.addCommand('v', 'visibility', 'options.set("wrap", not options.wrap, sheet); reload(); status("text%s wrapped" % ("" if options.wrap else " NOT")); ')
-
 ### Curses helpers
 
 def clipdraw(scr, y, x, s, attr, w=None, rtl=False):
@@ -2663,6 +2630,3 @@ def getGlobals():
     return globals()
 
 from .editline import editline
-
-if __name__ == '__main__':
-    run(*(TextSheet('contents', open(src)) for src in sys.argv[1:]))
