@@ -4,7 +4,7 @@ from visidata.vdtui import clipdraw, vd, EscapeException, launchExternalEditor, 
 
 
 # history: earliest entry first
-def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
+def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
     'A better curses line editing widget.'
     ESC='^['
     ENTER='^J'
