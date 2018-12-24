@@ -2,9 +2,10 @@
 
 # v1.6-dev ()
 
-- separate out vdtui components into module
+- separate out vdtui components into submodules: editText
 - remove MIT license from vdtui; all code now licensed under GPL3
-- convert all `vd()` to `vd`
+- update style
+  - convert all `vd()` to `vd`
 
 # v1.5.2 (2019-01-12)
 
