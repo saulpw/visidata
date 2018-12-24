@@ -53,22 +53,19 @@ Use `-f <filetype>` to force a particular filetype.
 
 If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues) or chat with us at #visidata on [freenode.net](https://webchat.freenode.net/).
 
-## vdtui
+## Other applications within the VisiData ecosystem
 
-The core `vdtui.py` can be used to quickly create efficient terminal workflows. These have been prototyped as proof of this concept:
+The core interface paradigm--rows and columns--can be used to create efficient terminal workflows with a minimum of effort for almost any application. These have been prototyped as proof of this concept:
 
-- [vgit](https://github.com/saulpw/vgit): a git interface
+- [vgit](https://github.com/saulpw/visidata/tree/stable/plugins/vgit): a git interface
 - [vsh](https://github.com/saulpw/vsh): a collection of utilities like `vping` and `vtop`.
 - [vdgalcon](https://github.com/saulpw/vdgalcon): a port of the classic game [Galactic Conquest](https://www.galcon.com)
 
-Other workflows should also be created as separate apps using vdtui.  These apps can be very small and provide a lot of functionality; for example, see the included [viewtsv](bin/viewtsv).
-
+Other workflows can also be created as separate apps using the visidata module.  These apps can be very small and provide a lot of functionality; for example, see the included [viewtsv](https://visidata.org/docs/viewtsv).
 
 ## License
 
-The innermost core file, `vdtui.py`, is a single-file stand-alone library that provides a solid framework for building text user interface apps. It is distributed under the MIT free software license, and freely available for inclusion in other projects.
-
-Other VisiData components, including the main `vd` application, addons, loaders, and other code in this repository, are available for use and distribution under GPLv3.
+VisiData, including the main `vd` application, addons, loaders, and other code in this repository, is available for use and redistribution under GPLv3.
 
 ## Credits
 

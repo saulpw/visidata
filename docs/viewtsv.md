@@ -4,29 +4,29 @@
 # viewtsv
 
 [viewtsv](https://github.com/saulpw/visidata/blob/stable/bin/viewtsv)
-is a great example of a minimal [vdtui](https://github.com/saulpw/visidata/blob/stable/visidata/vdtui.py) application.  This is an extremely functional utility in 25 lines of code.  Here it is in its entirety, with line by line annotations:
+is a great example of a minimal VisiData application.  This is an extremely functional utility in 25 lines of code, leveraging the essence of the VisiData architecture.  Here it is in its entirety, with line by line annotations:
 
     #!/usr/bin/env python3
 
-VisiData 1.0 requires Python 3.4+.
+VisiData 1.x requires Python 3.4+.
 
     import sys
-    import vdtui
+    from visidata import Sheet, ColumnItem, options, asyncthread, run
 
-Copy `vdtui.py` into an application verbatim.  It's freely usable under the MIT license, and then it can just be imported like this and used without adding any external dependencies to the project.
+Import the relevant components used below.
 
-    class TsvSheet(vdtui.Sheet):
+    class TsvSheet(Sheet):
         rowtype = 'rows'  # rowdef: tuple of values
 
 All tabular data sheets inherit from `Sheet`.  The rowtype is displayed on the right status bar.  The `rowdef` comment declares the structure of every row object, and should be present for every Sheet.
 
-        columns = [vdtui.ColumnItem('tsv', 0)]
+        columns = [ColumnItem('tsv', 0)]
 
 An initial column.  Generally the class-level `columns` is set to the actual columns of the sheet, but in this case, the columns aren't known until the source is loaded.
 (See the `reload()` function below where they are set from the contents of the first row.)  This line is not strictly necessary but makes loading feel a bit more responsive.
 
 
-        @vdtui.asyncthread
+        @asyncthread
 
 @[asyncthread](/docs/async) marks the function to spawn a new thread whenever it is called.
 
@@ -38,7 +38,7 @@ The [`reload()`](/docs/loaders) function collects data from the source and puts 
 
 `rows` is a list of Python objects.  The row definition ('rowdef') for the TsvSheet is a tuple of values, with each position corresponding to one column.
 
-            with open(self.source, encoding=vdtui.options.encoding) as fp:
+            with open(self.source, encoding=options.encoding) as fp:
 
 `source` is the filename, which has been passed to the constructor (see the last line with `run()`).
 
@@ -50,7 +50,7 @@ The [`reload()`](/docs/loaders) function collects data from the source and puts 
 For each line, strip the included newline character, and filter out any blank lines.  Add each split tuple to `rows`.
 
             self.columns = [
-                vdtui.ColumnItem(colname, i)
+                ColumnItem(colname, i)
                     for i, colname in enumerate(self.rows[0])
             ]
 
@@ -61,7 +61,7 @@ The actual columns are set from the first (header) row.
 
 The header row is removed from the list of rows.  (Column names are displayed on the first row anyway).
 
-    vdtui.run(*(TsvSheet(fn, source=fn) for fn in sys.argv[1:]))
+    run(*(TsvSheet(fn, source=fn) for fn in sys.argv[1:]))
 
 `run(*sheets)` is the toplevel entry point for vdtui.
 
