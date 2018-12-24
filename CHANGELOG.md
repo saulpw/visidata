@@ -2,7 +2,7 @@
 
 # v1.6-dev ()
 
-- separate out vdtui components into submodules: editline, textsheet, cliptext, color
+- separate out vdtui components into submodules: editline, textsheet, cliptext, color, column
 - remove MIT license from vdtui; all code now licensed under GPL3
 - update style
   - convert all `vd()` to `vd`
