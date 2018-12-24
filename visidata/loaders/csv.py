@@ -57,11 +57,13 @@ def load_csv(vs):
 
         if headers:
             # columns ideally reflect the max number of fields over all rows
-            vs.columns = ArrayNamedColumns('\\n'.join(x) for x in zip(*headers))
+            vs.columns = [ColumnItem(colname, i)
+                    for i, colname in enumerate('\\n'.join(x) for x in zip(*headers))]
         else:
             r = wrappedNext(rdr)
             vs.addRow(r)
-            vs.columns = ArrayColumns(len(vs.rows[0]))
+            ncols = len(vs.rows[0])
+            vs.columns = [ColumnItem('', i, width=8) for i in range(ncols)]
 
         if not vs.columns:
             vs.columns = [ColumnItem(0)]
