@@ -241,7 +241,7 @@ replayableOption('null_value', None, 'a value to be counted as null')
 
 replayableOption('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 option('debug', False, 'exit on error and display stacktrace')
-option('curses_timeout', 100, 'curses timeout in ms')
+curses_timeout = 100 # curses timeout in ms
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 theme('use_default_colors', False, 'curses use default terminal colors')
 
@@ -807,7 +807,7 @@ class VisiData:
     def run(self, scr):
         'Manage execution of keystrokes and subsequent redrawing of screen.'
         global sheet
-        scr.timeout(int(options.curses_timeout))
+        scr.timeout(curses_timeout)
         with suppress(curses.error):
             curses.curs_set(0)
 
@@ -898,13 +898,13 @@ class VisiData:
             # no idle redraw unless background threads are running
             time.sleep(0)  # yield to other threads which may not have started yet
             if vd.unfinishedThreads:
-                scr.timeout(options.curses_timeout)
+                scr.timeout(curses_timeout)
             else:
                 numTimeouts += 1
                 if numTimeouts > 1:
                     scr.timeout(-1)
                 else:
-                    scr.timeout(options.curses_timeout)
+                    scr.timeout(curses_timeout)
 
     def replace(self, vs):
         'Replace top sheet with the given sheet `vs`.'

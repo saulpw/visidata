@@ -7,6 +7,8 @@
 - update style
   - convert all `vd()` to `vd`
   - remove ArrayColumns, NamedArrayColumns
+- clean up options
+  - remove `curses_timeout` option (fix to 100ms)
 
 # v1.5.1 (2018-12-17)
 
