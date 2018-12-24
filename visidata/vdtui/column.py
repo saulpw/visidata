@@ -16,8 +16,6 @@ __all__ = [
     'getitemdef',
     'ColumnAttr',
     'ColumnItem',
-    'ArrayNamedColumns',
-    'ArrayColumns',
     'SubrowColumn',
     'ColumnEnum',
     'LazyMapRow',
@@ -315,14 +313,6 @@ def ColumnItem(name='', key=None, **kwargs):
             getter=lambda col,row: getitemdef(row, col.expr),
             setter=lambda col,row,val: setitem(row, col.expr, val),
             **kwargs)
-
-def ArrayNamedColumns(columns):
-    'Return list of ColumnItems from given list of column names.'
-    return [ColumnItem(colname, i) for i, colname in enumerate(columns)]
-
-def ArrayColumns(ncols):
-    'Return list of ColumnItems for given row length.'
-    return [ColumnItem('', i, width=8) for i in range(ncols)]
 
 
 class SubrowColumn(Column):

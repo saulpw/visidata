@@ -6,6 +6,7 @@
 - remove MIT license from vdtui; all code now licensed under GPL3
 - update style
   - convert all `vd()` to `vd`
+  - remove ArrayColumns, NamedArrayColumns
 
 # v1.5.2 (2019-01-12)
 

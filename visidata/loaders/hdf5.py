@@ -17,7 +17,8 @@ class SheetH5Obj(Sheet):
                 self.columns = [ColumnItem(colname, colname) for colname in self.source.dtype.names or [0]]
                 self.rows = self.source[:]  # copy
             elif len(self.source.shape) == 2:  # matrix
-                self.columns = ArrayColumns(self.source.shape[1])
+                ncols = self.source.shape[1]
+                self.columns = [ColumnItem('', i, width=8) for i in range(ncols)]
                 self.rows = self.source[:]  # copy
             else:
                 status('too many dimensions in shape %s' % str(self.source.shape))
