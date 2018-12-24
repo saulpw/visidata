@@ -661,7 +661,7 @@ class VisiData:
         v = self.callHook('preedit') if record else None
         if not v or v[0] is None:
             with EnableCursor():
-                v = editText(self.scr, y, x, w, **kwargs)
+                v = editline(self.scr, y, x, w, **kwargs)
         else:
             v = v[0]
 
@@ -2661,7 +2661,7 @@ def addGlobals(g):
 def getGlobals():
     return globals()
 
-from .editline import editText
+from .editline import editline
 
 if __name__ == '__main__':
     run(*(TextSheet('contents', open(src)) for src in sys.argv[1:]))

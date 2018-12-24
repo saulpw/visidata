@@ -3,7 +3,6 @@ from unittest import skip
 from unittest.mock import Mock, patch
 
 import visidata
-#from visidata import editText, EscapeException
 
 
 class EditTextTestCase(unittest.TestCase):
@@ -23,9 +22,9 @@ class EditTextTestCase(unittest.TestCase):
 
         if exception:
             with self.assertRaises(exception):
-                visidata.editText(self.scr, 0, 0, 0, **kwargs)
+                visidata.editline(self.scr, 0, 0, 0, **kwargs)
         else:
-            r = visidata.editText(self.scr, 0, 0, 0, **kwargs)
+            r = visidata.editline(self.scr, 0, 0, 0, **kwargs)
             self.assertEqual(r, result)
 
     def tests(self):
