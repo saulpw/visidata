@@ -30,7 +30,7 @@
 .Op Ar field Ns Cm = Ns Ar value No ...
 .
 .Sh DESCRIPTION
-.Nm VisiData No is a multipurpose tool built on the Sy vdtui No platform that can be used to explore, clean, edit, and restructure data.
+.Nm VisiData No is an easy-to-use multipurpose tool to explore, clean, edit, and restructure data.
 Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; and workflows can be saved, documented, and replayed.
 .
 .Ss REPLAY MODE

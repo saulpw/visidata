@@ -1,7 +1,11 @@
-
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-from .vdtui import __version__, __version_info__
+__version__ = '1.6'
+__version_info__ = 'VisiData v' + __version__
+__author__ = 'Saul Pwanson <vd@saul.pw>'
+__status__ = 'Production/Stable'
+__copyright__ = 'Copyright (c) 2016-2019 ' + __author__
+
 from .vdtui import *
 from .path import *
 from .errors import *

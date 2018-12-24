@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 
 import sys
-import vdtui
+from visidata import Sheet, ColumnItem, asyncthread, options, run
 
-class TsvSheet(vdtui.Sheet):
+class TsvSheet(Sheet):
     rowtype = 'rows'
-    columns = [vdtui.ColumnItem('tsv', 0)]
+    columns = [ColumnItem('tsv', 0)]
 
-    @vdtui.asyncthread
+    @asyncthread
     def reload(self):
         self.rows = []
 
-        with open(self.source, encoding=vdtui.options.encoding) as fp:
+        with open(self.source, encoding=options.encoding) as fp:
             for line in fp:
                 line = line[:-1]
                 if line:
                     self.addRow(line.split('\t'))
 
-        self.columns = [vdtui.ColumnItem(colname, i) for i, colname in enumerate(self.rows[0])]
+        self.columns = [ColumnItem(colname, i) for i, colname in enumerate(self.rows[0])]
         self.rows = self.rows[1:]
 
-vdtui.run(*(TsvSheet(fn, source=fn) for fn in sys.argv[1:]))
+run(*(TsvSheet(fn, source=fn) for fn in sys.argv[1:]))

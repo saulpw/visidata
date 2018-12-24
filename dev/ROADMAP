@@ -9,8 +9,8 @@
 
 ## 2. Plugin api/package manager
 
-- deprecate vdtui.py as single file dropin TUI
-   - same functionality will be available as visidata.vdtui
++ deprecate vdtui.py as single file dropin TUI
+   + same functionality will be available as visidata.vdtui
 - in-app downloadable/installable snippets
 
 ## 3. Split panes

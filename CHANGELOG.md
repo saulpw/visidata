@@ -1,5 +1,10 @@
 # VisiData version history
 
+# upcoming
+- separating out vdtui components
+- remove MIT license from vdtui; all code now licensed under GPL3
+
+
 # v1.5.1 (2018-12-17)
 
 ## Bugfixes
