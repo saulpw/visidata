@@ -34,7 +34,7 @@ def expand_cols_deep(sheet, cols, row, depth=0):  # depth == 0 means drill all t
     return ret
 
 def _addExpandedColumns(col, row, idx):
-    val = col.getTypedValueNoExceptions(row)
+    val = col.getTypedValue(row)
     if isinstance(val, dict):
         ret = [
             ExpandedColumn('%s.%s' % (col.name, k), type=deduceType(val[k]), origCol=col, key=k)

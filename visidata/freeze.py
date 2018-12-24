@@ -48,6 +48,6 @@ class StaticSheet(Sheet):
             self.rows.append(row)
             for col in self.source.columns:
                 try:
-                    row.append(col.getTypedValueOrException(r))
+                    row.append(col.getTypedValue(r))
                 except Exception as e:
                     row.append(None)
