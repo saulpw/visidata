@@ -1536,7 +1536,7 @@ class Sheet(BaseSheet):
         try:
             with Progress(self.rows, 'sorting') as prog:
                 # must not reassign self.rows: use .sort() instead of sorted()
-                self.rows.sort(key=lambda r,cols=cols,prog=prog: prog.addProgress(1) and tuple(c.getTypedValueNoExceptions(r) for c in cols), **kwargs)
+                self.rows.sort(key=lambda r,cols=cols,prog=prog: prog.addProgress(1) and tuple(c.getTypedValue(r) for c in cols), **kwargs)
         except TypeError as e:
             status('sort incomplete due to TypeError; change column type')
             exceptionCaught(e, status=False)
@@ -1617,7 +1617,7 @@ class Sheet(BaseSheet):
 
     def rowkey(self, row):
         'returns a tuple of the key for the given row'
-        return tuple(c.getTypedValueOrException(row) for c in self.keyCols)
+        return tuple(c.getTypedValue(row) for c in self.keyCols)
 
     def checkCursor(self):
         'Keep cursor in bounds of data and screen.'
@@ -2096,16 +2096,7 @@ class Column:
         return (self.getter)(self, row)
 
     def getTypedValue(self, row):
-        'Returns the properly-typed value for the given row at this column.'
-        return wrapply(self.type, wrapply(self.getValue, row))
-
-    def getTypedValueOrException(self, row):
-        'Returns the properly-typed value for the given row at this column, or an Exception object.'
-        return wrapply(self.type, wrapply(self.getValue, row))
-
-    def getTypedValueNoExceptions(self, row):
-        '''Returns the properly-typed value for the given row at this column.
-           Returns the type's default value if either the getter or the type conversion fails.'''
+        'Returns the properly-typed value for the given row at this column, or a TypedWrapper object.'
         return wrapply(self.type, wrapply(self.getValue, row))
 
     def getValue(self, row):
