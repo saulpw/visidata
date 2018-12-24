@@ -108,7 +108,7 @@ The VisiData singleton (accessible via `vd` or `sheet.vd`) maintains:
 
 ## run()
 
-`VisiData.run(scr)` is the main display loop.  It calls `draw()` on the top sheet, left and right statuses, and handles commands, until there are no more sheets.  This times out every `curses_timeout`; everything is recomputed every frame if not cached.  This keeps the interface 'live'.
+`VisiData.run(scr)` is the main display loop.  It calls `draw()` on the top sheet, left and right statuses, and handles commands, until there are no more sheets.
 
 VisiData exits when this function returns.
 
