@@ -4,6 +4,8 @@ import copy
 
 from visidata.vdtui import options
 
+__all__ = ['CursesAttr', 'colors']
+
 
 class CursesAttr:
     def __init__(self, attr=0, precedence=-1):
@@ -108,3 +110,5 @@ class ColorMaker:
             colornamestr = coloropt.value if coloropt else optname
             r = self.colorcache[optname] = self._colornames_to_attr(colornamestr, precedence)
         return r
+
+colors = ColorMaker()
