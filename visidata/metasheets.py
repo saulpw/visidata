@@ -116,7 +116,7 @@ SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("descri
 class GraveyardSheet(SheetsSheet):
     rowtype = 'undead sheets'  # rowdef: BaseSheet
     def reload(self):
-        self.rows = list(vs for vs in self.source.keys() if vs not in vd().sheets)
+        self.rows = list(vs for vs in self.source.keys() if vs not in vd.sheets)
 
 
 class HelpSheet(Sheet):
@@ -196,8 +196,8 @@ bindkeys.set(ENTER, 'edit-option', OptionsSheet)
 
 vd.optionsSheet = OptionsSheet('global_options', source='override')
 
-vd.sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
-vd.graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd().allSheets)
+vd.sheetsSheet = SheetsSheet("sheets", source=vd.sheets)
+vd.graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd.allSheets)
 
 
 def combineColumns(cols):

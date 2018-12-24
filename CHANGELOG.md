@@ -2,9 +2,9 @@
 
 # v1.6-dev ()
 
-- separating out vdtui components
+- separate out vdtui components into module
 - remove MIT license from vdtui; all code now licensed under GPL3
-
+- convert all `vd()` to `vd`
 
 # v1.5.1 (2018-12-17)
 

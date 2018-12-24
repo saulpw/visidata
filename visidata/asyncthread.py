@@ -34,7 +34,7 @@ class ThreadsSheet(Sheet):
         ColumnAttr('exception'),
     ]
     def reload(self):
-        self.rows = vd().threads
+        self.rows = vd.threads
 
 ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)')
 
@@ -54,9 +54,9 @@ def checkMemoryUsage(vs):
         if free_m < min_mem:
             attr = 'color_warning'
             warning('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
-            cancelThread(*vd().unfinishedThreads)
+            cancelThread(*vd.unfinishedThreads)
             curses.flash()
     return ret, attr
 
-vd().threadsSheet = ThreadsSheet('thread_history')
-vd().addHook('rstatus', checkMemoryUsage)
+vd.threadsSheet = ThreadsSheet('thread_history')
+vd.addHook('rstatus', checkMemoryUsage)

@@ -32,7 +32,7 @@ def toggleProfiling(t):
     status('profiling ' + ('ON' if t.profile else 'OFF'))
 
 
-@functools.wraps(vd().toplevelTryFunc)
+@functools.wraps(vd.toplevelTryFunc)
 def threadProfileCode(func, *args, **kwargs):
     'Toplevel thread profile wrapper.'
     with ThreadProfiler(threading.current_thread()) as prof:
@@ -69,7 +69,7 @@ class ThreadProfiler:
         else:
             # remove very-short-lived async actions
             if elapsed_s(self.thread) < min_thread_time_s:
-                vd().threads.remove(self.thread)
+                vd.threads.remove(self.thread)
 
 class ProfileSheet(Sheet):
     columns = [

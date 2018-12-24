@@ -97,14 +97,14 @@ Notes:
    - rows could be list(self.source.items()); but then when an item changes, this sheet would not change until reload (^R)
    - could take generic dict; use source
 
-## class VisiData and vd()
+## class VisiData and vd
 
-The VisiData singleton (accessible via `vd()` or `sheet.vd`) maintains:
+The VisiData singleton (accessible via `vd` or `sheet.vd`) maintains:
 
 - `scr`: the curses screen object
 - `sheets`: a list; `sheets[0]` is the actively displayed sheet
 
-`vd().windowWidth` and `vd().windowHeight` are the current window dimensions.
+`vd.windowWidth` and `vd.windowHeight` are the current window dimensions.
 
 ## run()
 

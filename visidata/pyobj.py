@@ -80,7 +80,7 @@ def closeColumn(sheet, col):
 def push_pyobj(name, pyobj):
     vs = load_pyobj(name, pyobj)
     if vs:
-        return vd().push(vs)
+        return vd.push(vs)
     else:
         error("cannot push '%s' as pyobj" % type(pyobj).__name__)
 

@@ -71,7 +71,7 @@ class DifferSheet(GitSheet):
 #                ColumnItem('linenum', 0)
         ]
         self.columns.extend([
-            ColumnItem(name, i+1, width=vd().windowWidth//len(refs)-1, refnum=i)
+            ColumnItem(name, i+1, width=vd.windowWidth//len(refs)-1, refnum=i)
                 for i, name in enumerate(refs)
         ])
         self.colorizers = [RowColorizer(4, None, DifferSheet.colorDiffRow)]
