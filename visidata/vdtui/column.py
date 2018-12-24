@@ -1,8 +1,9 @@
 import collections
+import itertools
 import threading
 import re
 
-from visidata.vdtui import options, fail, anytype, stacktrace
+from visidata.vdtui import options, fail, anytype, stacktrace, status
 from visidata.vdtui import getType, typemap, isNumeric, isNullFunc
 from visidata.vdtui import asyncthread, Progress, exceptionCaught
 from visidata.vdtui import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
