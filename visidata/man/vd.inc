@@ -831,6 +831,8 @@ These are the supported savers:
 .It Sy tsv No (tab-separated value)
 .It Sy csv No (comma-separated value)
 .It Sy json No (one object with all rows)
+.It Sy jsonl No (one object per line/row)
+.It Sy sqlite No (multisave capable)
 .Bl -inset -compact -offset xxx
 .It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
 .It Sy .shp No files can be saved as Sy geoJSON Ns .
