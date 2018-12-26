@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import ENTER, Sheet, ColumnItem, anytype, status, clean_to_id, Progress, asyncthread, currency, Path
 
 def open_sqlite(path):
     vs = SqliteSheet(path.name + '_tables', path, 'sqlite_master')
@@ -36,7 +36,7 @@ class SqliteSheet(Sheet):
             if t == 'integer':
                 c.type = int
             elif t == 'text':
-                c.type = str
+                c.type = anytype
             elif t == 'blob':
                 c.type = str
             elif t == 'real':
@@ -51,3 +51,36 @@ class SqliteSheet(Sheet):
         return cols
 
 SqliteSheet.addCommand(ENTER, 'dive-row', 'error("sqlite dbs are readonly")')
+
+def sqlite_type(t):
+    if t is int: return 'INTEGER'
+    if t in [float, currency]: return 'REAL'
+    return 'TEXT'
+
+
+@asyncthread
+def multisave_sqlite(p, *vsheets):
+    import sqlite3
+    conn = sqlite3.connect(p.resolve())
+    c = conn.cursor()
+
+    for vs in vsheets:
+        tblname = clean_to_id(vs.name)
+        sqlcols = []
+        for col in vs.visibleCols:
+            sqlcols.append('%s %s' % (col.name, sqlite_type(col.type)))
+        sql = 'CREATE TABLE IF NOT EXISTS %s (%s)' % (tblname, ', '.join(sqlcols))
+        c.execute(sql)
+
+        for r in Progress(vs.rows, 'saving'):
+            sqlvals = []
+            for col in vs.visibleCols:
+                sqlvals.append(col.getTypedValue(r))
+            sql = 'INSERT INTO %s VALUES (%s)' % (tblname, ','.join(['?']*len(sqlvals)))
+            c.execute(sql, sqlvals)
+
+    conn.commit()
+
+    status("%s save finished" % p)
+
+save_db = save_sqlite = multisave_db = multisave_sqlite
