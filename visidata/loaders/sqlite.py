@@ -1,4 +1,4 @@
-from visidata import ENTER, Sheet, ColumnItem, anytype, status, clean_to_id, Progress, asyncthread, currency, Path
+from visidata import ENTER, Sheet, ColumnItem, anytype, status, clean_to_id, Progress, asyncthread, currency, Path, DeferredSetColumn, CellColorizer, RowColorizer, DeferredSaveSheet, vd, options
 
 def open_sqlite(path):
     vs = SqliteSheet(path.name + '_tables', source=path, tableName='sqlite_master')
@@ -7,29 +7,90 @@ def open_sqlite(path):
 open_db = open_sqlite
 
 
-class SqliteSheet(Sheet):
+class SqliteSheet(DeferredSaveSheet):
     'Provide functionality for importing SQLite databases.'
+    colorizers = [
+        CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
+#        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: r in s.toBeDeleted),
+    ]
 
     def resolve(self):
         'Resolve all the way back to the original source Path.'
         return self.source.resolve()
 
+    def conn(self):
+        import sqlite3
+        return sqlite3.connect(self.resolve())
+
+    def execute(self, conn, sql, where={}, parms=None):
+        parms = parms or []
+        if where:
+            sql += ' WHERE %s' % " AND ".join("%s=?" % k for k in where)
+        status(sql)
+        parms += list(where.values())
+        return conn.execute(sql, parms)
+
     @asyncthread
     def reload(self):
-        import sqlite3
-        conn = sqlite3.connect(self.resolve())
-        tblname = self.tableName
-        self.columns = self.getColumns(tblname, conn)
-        r = conn.execute('SELECT COUNT(*) FROM %s' % tblname).fetchall()
-        rowcount = r[0][0]
-        self.rows = []
-        for row in Progress(conn.execute("SELECT * FROM %s" % tblname), total=rowcount-1):
-            self.addRow(row)
+        self.reload_sync()
+
+    def reload_sync(self, _conn=None):
+        self.reset()
+        with (_conn or self.conn()) as conn:
+            tblname = self.tableName
+            self.columns = self.getColumns(tblname, conn)
+            r = self.execute(conn, 'SELECT COUNT(*) FROM %s' % tblname).fetchall()
+            rowcount = r[0][0]
+            self.rows = []
+            for row in Progress(self.execute(conn, "SELECT * FROM %s" % tblname), total=rowcount-1):
+                self.addRow(row)
+        vd.scr.clear()
+
+    def commit(self, adds, changes, deletes):
+        options_safe_error = options.safe_error
+        def value(row, col):
+            v = col.getTypedValue(row)
+            if isinstance(v, TypedWrapper):
+                if isinstance(v, TypedExceptionWrapper):
+                    return options_safe_error
+                else:
+                    return None
+            return v
+
+        def values(row, cols):
+            vals = []
+            for c in cols:
+                vals.append(value(row, c))
+            return vals
+
+        with self.conn() as conn:
+            wherecols = self.keyCols or self.visibleCols
+            for r in adds:
+                sql = 'INSERT INTO %s ' % self.tableName
+                sql += 'VALUES (%s)' % ','.join('?' for v in vals)
+                self.execute(conn, sql, parms=values(r, self.visibleCols))
+
+            for r, changedcols in changes:
+                sql = 'UPDATE %s SET ' % self.tableName
+                sql += ', '.join('%s=?' % c.name for c in changedcols)
+                self.execute(conn, sql,
+                            where={c.name: c.getSavedValue(r) for c in wherecols},
+                            parms=values(r, changedcols))
+
+            for r in deletes:
+                self.execute(conn, 'DELETE FROM %s ' % self.tableName,
+                              where={c.name: c.getTypedValue(r) for c in wherecols})
+
+            conn.commit()
+
+        self.reload()
 
     def getColumns(self, tableName, conn):
         cols = []
-        for i, r in enumerate(conn.execute('PRAGMA TABLE_INFO(%s)' % tableName)):
-            c = ColumnItem(r[1], i)
+        for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO(%s)' % tableName)):
+            c = DeferredSetColumn(r[1],
+                    getter=lambda col,row,idx=i: row[idx],
+                    setter=lambda col,row,val: col.sheet.commit())
             t = r[2].lower()
             if t == 'integer':
                 c.type = int

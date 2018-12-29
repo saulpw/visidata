@@ -12,9 +12,9 @@ replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
 replayableOption('tsv_safe_newline', '\u001e', 'replacement for tab character when saving to tsv')
 replayableOption('tsv_safe_tab', '\u001f', 'replacement for newline character when saving to tsv')
 
-option('color_change_pending', 'reverse yellow', 'color for file attributes pending modification')
-option('color_delete_pending', 'red', 'color for files pending delete')
-
+option('color_add_pending', 'green', 'color for rows pending add')
+option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
+option('color_delete_pending', 'red', 'color for rows pending delete')
 
 Sheet.addCommand('R', 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vd.push(vs).rows=random.sample(rows, nrows or nRows)')
 
@@ -209,6 +209,9 @@ class DeferredSetColumn(Column):
         self.setter = self.deferredSet
         self._modifiedValues = {}
 
+    def rollback(self):
+        self._modifiedValues.clear()
+
     @staticmethod
     def deferredSet(col, row, val):
         if col.getValue(row) != val:
@@ -222,6 +225,9 @@ class DeferredSetColumn(Column):
     def getValue(self, row):
         if id(row) in self._modifiedValues:
             return self._modifiedValues.get(id(row))  # overrides cache
+        return Column.getValue(self, row)
+
+    def getSavedValue(self, row):
         return Column.getValue(self, row)
 
     def __copy__(self):
