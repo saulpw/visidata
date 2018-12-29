@@ -48,8 +48,75 @@ class ColumnShell(Column):
         except Exception as e:
             exceptionCaught(e)
 
+class DeferredSaveSheet(Sheet):
+    colorizers = [
+        CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
+        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: id(r) in s.toBeDeleted),
+        RowColorizer(9, 'color_add_pending', lambda s,c,r,v: id(r) in s.addedRows),
+    ]
 
-class DirSheet(Sheet):
+    def reset(self):
+        'reset deferred caches'
+        self.addedRows = {} # [id(row)] -> row
+        self.toBeDeleted = {}  # [id(row)] -> row
+
+    def newRow(self):
+        row = Sheet.newRow(self)
+        self.addedRows[id(row)] = row
+        return row
+
+    def changed(self, col, row):
+        try:
+            return isinstance(col, DeferredSetColumn) and col.changed(row)
+        except Exception:
+            return False
+
+    def undoMod(self, row):
+        for col in self.visibleCols:
+            if getattr(col, '_modifiedValues', None) and id(row) in col._modifiedValues:
+                del col._modifiedValues[id(row)]
+
+        if row in self.toBeDeleted:
+            del self.toBeDeleted[id(row)]
+
+        self.restat(row)
+
+    def delete(self, rows):
+        for r in rows:
+            self.toBeDeleted[id(r)] = r
+
+    def save(self, *rows):
+        changes = {}  # [rowid] -> (row, [changed_cols])
+        for r in list(rows or self.rows):  # copy list because elements may be removed
+            if id(r) not in self.addedRows and id(r) not in self.toBeDeleted:
+                changedcols = [col for col in self.visibleCols if self.changed(col, r)]
+                if changedcols:
+                    changes[id(r)] = (r, changedcols)
+
+        if not self.addedRows and not changes and not self.toBeDeleted:
+            fail('nothing to save')
+
+        cstr = ''
+        if self.addedRows:
+            cstr += 'add %d %s' % (len(self.addedRows), self.rowtype)
+
+        if changes:
+            if cstr: cstr += ' and '
+            cstr += 'change %d values' % sum(len(cols) for row, cols in changes.values())
+
+        if self.toBeDeleted:
+            if cstr: cstr += ' and '
+            cstr += 'delete %d %s' % (len(self.toBeDeleted), self.rowtype)
+
+        confirm('really %s? ' % cstr)
+
+        self.commit(self.addedRows.values(), changes.values(), self.toBeDeleted.values())
+
+        self.toBeDeleted.clear()
+        self.addedRows.clear()
+
+
+class DirSheet(DeferredSaveSheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
     columns = [
@@ -80,11 +147,7 @@ class DirSheet(Sheet):
             setter=lambda col,row,val: os.chmod(row.resolve(), int(val, 8))),
         Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
-    colorizers = [
 #        CellColorizer(4, None, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
-        CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
-        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: r in s.toBeDeleted),
-    ]
     nKeys = 2
 
     @staticmethod
@@ -100,17 +163,6 @@ class DirSheet(Sheet):
             if mode & stat.S_IXUSR: ret = 'bold '
             if mode & stat.S_IWUSR: return ret + 'green'
             if mode & stat.S_IRUSR: return ret + 'yellow'
-
-    def changed(self, col, row):
-        try:
-            return isinstance(col, DeferredSetColumn) and col.changed(row)
-        except Exception:
-            return False
-
-    def deleteFiles(self, rows):
-        for r in rows:
-            if r not in self.toBeDeleted:
-                self.toBeDeleted.append(r)
 
     def moveFile(self, row, val):
         fn = row.name + row.ext
@@ -142,43 +194,8 @@ class DirSheet(Sheet):
         else:
             os.remove(path.resolve())
 
-    def undoMod(self, row):
-        for col in self.visibleCols:
-            if getattr(col, '_modifiedValues', None) and id(row) in col._modifiedValues:
-                del col._modifiedValues[id(row)]
-
-        if row in self.toBeDeleted:
-            self.toBeDeleted.remove(row)
-        self.restat(row)
-
-    def save(self, *rows):
-        changes = []
-        deletes = {}
-        for r in list(rows or self.rows):  # copy list because elements may be removed
-            if r in self.toBeDeleted:
-                deletes[id(r)] = r
-            else:
-                for col in self.visibleCols:
-                    if self.changed(col, r):
-                        changes.append((col, r))
-
-        if not changes and not deletes:
-            fail('nothing to save')
-
-        cstr = ''
-        if changes:
-            cstr += 'change %d attributes' % len(changes)
-
-        if deletes:
-            if cstr: cstr += ' and '
-            cstr += 'delete %d files' % len(deletes)
-
-        confirm('really %s? ' % cstr)
-
-        self._commit(changes, deletes)
-
     @asyncthread
-    def _commit(self, changes, deletes):
+    def commit(self, adds, changes, deletes):
         oldrows = self.rows
         self.rows = []
         for r in oldrows:
@@ -190,16 +207,20 @@ class DirSheet(Sheet):
             except Exception as e:
                 exceptionCaught(e)
 
-        for col, row in changes:
-            try:
-                col.realsetter(col, row, col._modifiedValues[id(row)])
-                self.restat(r)
-            except Exception as e:
-                exceptionCaught(e)
+        for row, cols in changes.values():
+            for col in cols:
+                try:
+                    col.realsetter(col, row, col._modifiedValues[id(row)])
+                    self.restat(row)
+                except Exception as e:
+                    exceptionCaught(e)
+
+        for row in adds.values():
+            self.restat(row)
 
     @asyncthread
     def reload(self):
-        self.toBeDeleted = []
+        self.reset()  # reset deferred caches
         self.rows = []
         basepath = self.source.resolve()
         for folder, subdirs, files in os.walk(basepath):
@@ -220,9 +241,9 @@ DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r.resolve()))')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.resolve())')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in selectedRows))')
-DirSheet.addCommand('^S', 'save-sheet', 'save()')
-DirSheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
-DirSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')
-DirSheet.addCommand('gz^R', 'reload-rows', 'for r in self.selectedRows: undoMod(r)')
-DirSheet.addCommand(None, 'delete-row', 'if cursorRow not in toBeDeleted: toBeDeleted.append(cursorRow); cursorRowIndex += 1')
-DirSheet.addCommand(None, 'delete-selected', 'deleteFiles(selectedRows)')
+DeferredSaveSheet.addCommand('^S', 'save-sheet', 'save()')
+DeferredSaveSheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
+DeferredSaveSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')
+DeferredSaveSheet.addCommand('gz^R', 'reload-rows', 'for r in self.selectedRows: undoMod(r)')
+DeferredSaveSheet.addCommand(None, 'delete-row', 'delete([cursorRow]); cursorRowIndex += 1')
+DeferredSaveSheet.addCommand(None, 'delete-selected', 'delete(selectedRows)')

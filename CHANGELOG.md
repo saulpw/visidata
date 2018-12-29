@@ -2,7 +2,9 @@
 
 # v1.6-dev ()
 
-- add "multisave to sqlite" (CREATE/INSERT only; for wholesale saving, not updates)
+- add `--config` option to specify visidatarc file to use (suggested by @jsvine)
+- [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
+- [sqlite] `Ctrl+S` to commit add/edit/deletes
 
 - separate out vdtui components into submodules: editline, textsheet, cliptext, color, column, sheet
 - remove MIT license from vdtui; all code now licensed under GPL3
