@@ -10,10 +10,11 @@ import os
 import io
 import sys
 
-from visidata import vd, options, sync, status, run
+from visidata import vd, option, options, sync, status, run
 from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand
 from visidata import Path, PathFd, openSource, saveSheets, setDiffSheet, domotd
 
+option('config', '~/.visidatarc', 'config file to exec in Python')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -51,13 +52,13 @@ def main():
 
     args = parser.parse_args()
 
-    sys.path.append(Path(options.visidata_dir).resolve())
-
     # user customisations in config file in standard location
-    loadConfigFile('~/.visidatarc', getGlobals())
+    loadConfigFile(Path(options.config).resolve(), getGlobals())
     addGlobals(globals())
 
-    globalCommand('gO', 'open-config', 'vd.push(TextSheet("visidatarc", Path("~/.visidatarc")))')
+    globalCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, Path(fn)))')
+
+    sys.path.append(Path(options.visidata_dir).resolve())
 
     # apply command-line overrides after .visidatarc
     for optname, optval in vars(args).items():
