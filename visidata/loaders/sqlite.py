@@ -11,10 +11,6 @@ open_db = open_sqlite
 
 class SqliteSheet(DeferredSaveSheet):
     'Provide functionality for importing SQLite databases.'
-    colorizers = [
-        CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
-#        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: r in s.toBeDeleted),
-    ]
 
     def resolve(self):
         'Resolve all the way back to the original source Path.'
@@ -67,9 +63,11 @@ class SqliteSheet(DeferredSaveSheet):
         with self.conn() as conn:
             wherecols = self.keyCols or self.visibleCols
             for r in adds:
+                cols = self.visibleCols
                 sql = 'INSERT INTO %s ' % self.tableName
-                sql += 'VALUES (%s)' % ','.join('?' for v in vals)
-                self.execute(conn, sql, parms=values(r, self.visibleCols))
+                sql += '(%s)' % ','.join(c.name for c in cols)
+                sql += 'VALUES (%s)' % ','.join('?' for c in cols)
+                self.execute(conn, sql, parms=values(r, cols))
 
             for r, changedcols in changes:
                 sql = 'UPDATE %s SET ' % self.tableName
