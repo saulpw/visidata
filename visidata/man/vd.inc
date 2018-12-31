@@ -124,7 +124,7 @@ move up/down to next selected row
 .It Ic " r" Ar regex
 .No move to next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No move to column/row Ar number
+.No move to column/row Ar number (0-based)
 .Pp
 .It Ic " H   J   K   L"
 slide current row/column left/down/up/right
