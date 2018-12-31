@@ -1,4 +1,6 @@
 from visidata import ENTER, Sheet, ColumnItem, anytype, status, clean_to_id, Progress, asyncthread, currency, Path, DeferredSetColumn, CellColorizer, RowColorizer, DeferredSaveSheet, vd, options
+from visidata import TypedWrapper, TypedExceptionWrapper
+
 
 def open_sqlite(path):
     vs = SqliteSheet(path.name + '_tables', source=path, tableName='sqlite_master')
@@ -44,7 +46,6 @@ class SqliteSheet(DeferredSaveSheet):
             self.rows = []
             for row in Progress(self.execute(conn, "SELECT * FROM %s" % tblname), total=rowcount-1):
                 self.addRow(row)
-        vd.scr.clear()
 
     def commit(self, adds, changes, deletes):
         options_safe_error = options.safe_error
