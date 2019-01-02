@@ -1,5 +1,6 @@
 import collections
 import functools
+import re
 from copy import copy
 
 from visidata.vdtui import (Command, bindkeys, commands, options, isNullFunc, error, Column,
