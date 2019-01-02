@@ -50,8 +50,9 @@ def indexWithEscape(s, char, escape_char='\\'):
 
 @asyncthread
 def setValuesFromRegex(cols, rows, rex):
-    transform = regexTransform(col, rex)
+    transforms = [regexTransform(col, rex) for col in cols]
     for r in Progress(rows, 'replacing'):
-        for col in cols:
+        for col, transform in zip(cols, transforms):
             col.setValueSafe(r, transform(col, r))
-    col.recalc()
+    for col in cols:
+        col.recalc()
