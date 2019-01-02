@@ -1,0 +1,4 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark			setcol-subst-all	food/nutri	gz*	
+benchmark	SKU		setcol-subst	nutri/NUTRI	g*	
