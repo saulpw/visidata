@@ -1002,6 +1002,11 @@ class BaseSheet:
         self.currentThreads = []
         self.__dict__.update(kwargs)
 
+    def __lt__(self, other):
+        if self.name != other.name:
+            return self.name < other.name
+        else:
+            return id(self) < id(other)
 
     @classmethod
     def addCommand(cls, keystrokes, longname, execstr, helpstr=''):
