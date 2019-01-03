@@ -1,12 +1,13 @@
 from visidata import *
 
-Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, cursorRow, input("split regex: ", type="regex-split"))')
-Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, cursorRow, input("match regex: ", type="regex-capture"))')
+Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, input("split regex: ", type="regex-split"))')
+Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, input("match regex: ", type="regex-capture"))')
 Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)')
 Sheet.addCommand('g*', 'setcol-subst', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex([cursorCol], selectedRows or rows, rex)')
 Sheet.addCommand('gz*', 'setcol-subst-all', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex(visibleCols, selectedRows or rows, rex)')
 
 replayableOption('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
+replayableOption('default_sample_size', 100, 'number of rows to sample for regex.split')
 
 def makeRegexSplitter(regex, origcol):
     return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=maxsplit)
@@ -14,16 +15,22 @@ def makeRegexSplitter(regex, origcol):
 def makeRegexMatcher(regex, origcol):
     return lambda row, regex=regex, origcol=origcol: regex.search(origcol.getDisplayValue(row)).groups()
 
-def addRegexColumns(regexMaker, vs, colIndex, origcol, exampleRow, regexstr):
+@asyncthread
+def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
     regex = re.compile(regexstr, regex_flags())
 
     func = regexMaker(regex, origcol)
-    result = func(exampleRow)
 
-    for i, g in enumerate(result):
-        c = Column(origcol.name+'_re'+str(i), getter=lambda col,row,i=i,func=func: func(row)[i])
-        c.origCol = origcol
-        vs.addColumn(c, index=colIndex+i+1)
+    exampleRows = random.sample(vs.rows, options.default_sample_size or len(vs.rows))
+
+    ncols = 0  # number of new columns added already
+    for r in Progress(exampleRows + vs.cursorRow):
+        if len(func(r)) > ncols:
+            c = Column(origcol.name+'_'+str(ncols),
+                            getter=lambda col,row,i=ncols,func=func: func(row)[i],
+                            origCol=origcol)
+            vs.addColumn(c, index=colIndex+ncols+1)
+            ncols += 1
 
 
 def regexTransform(origcol, instr):

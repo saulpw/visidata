@@ -8,6 +8,7 @@
 
 ## Improvements and additions
 
+- `options.default_sample_size` to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso)
 - [replay] exit with error code on error during replay
 - [vd] add `--config` option to specify visidatarc file (suggested by @jsvine #236)
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
