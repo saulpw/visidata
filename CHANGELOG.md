@@ -2,6 +2,13 @@
 
 # v1.6-dev ()
 
+## Bugfixes
+
+- make Sheet sortable
+
+## Improvements and additions
+
+- [replay] exit with error code on error during replay
 - [vd] add `--config` option to specify visidatarc file (suggested by @jsvine #236)
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
