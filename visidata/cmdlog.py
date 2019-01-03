@@ -261,12 +261,12 @@ class CommandLog(TsvSheet):
                 try:
                     if self.replayOne(self.cursorRow):
                         self.cancel()
-                        return
+                        return True
                 except Exception as e:
                     self.cancel()
                     exceptionCaught(e)
                     status('replay canceled')
-                    return
+                    return True
 
                 self.cursorRowIndex += 1
                 prog.addProgress(1)

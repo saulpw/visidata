@@ -144,7 +144,8 @@ def main():
 
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
         if args.batch:
-            vs.replay_sync()
+            if vs.replay_sync():
+                os._exit(1)
         else:
             vs.replay()
             run()
