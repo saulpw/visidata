@@ -26,7 +26,7 @@ def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
     ncols = 0  # number of new columns added already
     for r in Progress(exampleRows + vs.cursorRow):
         if len(func(r)) > ncols:
-            c = Column(origcol.name+'_'+str(ncols),
+            c = Column(origcol.name+'_re'+str(ncols),
                             getter=lambda col,row,i=ncols,func=func: func(row)[i],
                             origCol=origcol)
             vs.addColumn(c, index=colIndex+ncols+1)
