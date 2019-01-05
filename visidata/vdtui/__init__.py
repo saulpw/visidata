@@ -428,17 +428,33 @@ def stacktrace(e=None):
 def chooseOne(choices):
     'Return one of `choices` elements (if list) or values (if dict).'
     ret = chooseMany(choices)
-    assert len(ret) == 1, 'need one choice only'
+    if not ret:
+        raise EscapeException()
+    if len(ret) > 1:
+        error('need only one choice')
     return ret[0]
 
 def chooseMany(choices):
     'Return list of `choices` elements (if list) or values (if dict).'
     if isinstance(choices, dict):
-        choosed = input('/'.join(choices.keys()) + ': ', completer=CompleteKey(choices)).split()
-        return [choices[c] for c in choosed]
+        prompt = '/'.join(choices.keys())
+        chosen = []
+        for c in input(prompt+': ', completer=CompleteKey(choices)).split():
+            poss = [choices[p] for p in choices if p.startswith(c)]
+            if not poss:
+                warning('invalid choice "%s"' % c)
+            else:
+                chosen.extend(poss)
     else:
-        return input('/'.join(str(x) for x in choices) + ': ', completer=CompleteKey(choices)).split()
-
+        prompt = '/'.join(str(x) for x in choices)
+        chosen = []
+        for c in input(prompt+': ', completer=CompleteKey(choices)).split():
+            poss = [p for p in choices if p.startswith(c)]
+            if not poss:
+                warning('invalid choice "%s"' % c)
+            else:
+                chosen.extend(poss)
+    return chosen
 
 def regex_flags():
     'Return flags to pass to regex functions from options'
