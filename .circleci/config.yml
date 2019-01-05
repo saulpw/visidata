@@ -4,6 +4,7 @@ workflows:
   test:
     jobs:
       - test-3.4
+      - test-3.5
       - test-3.6
 jobs:
   test-3.4: &test-template
@@ -22,6 +23,10 @@ jobs:
       - run:
           command: |
             dev/test.sh
+  test-3.5:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.5
   test-3.6:
     <<: *test-template
     docker:
