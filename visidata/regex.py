@@ -21,11 +21,15 @@ def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
 
     func = regexMaker(regex, origcol)
 
-    exampleRows = random.sample(vs.rows, options.default_sample_size or len(vs.rows))
+    n = options.default_sample_size
+    if n and n < len(vs.rows):
+        exampleRows = random.sample(vs.rows, max(0, n-1))  # -1 to account for included cursorRow
+    else:
+        exampleRows = vs.rows
 
     ncols = 0  # number of new columns added already
-    for r in Progress(exampleRows + vs.cursorRow):
-        if len(func(r)) > ncols:
+    for r in Progress(exampleRows + [vs.cursorRow]):
+        for _ in range(len(func(r))-ncols):
             c = Column(origcol.name+'_re'+str(ncols),
                             getter=lambda col,row,i=ncols,func=func: func(row)[i],
                             origCol=origcol)
