@@ -821,7 +821,6 @@ class VisiData:
 
     def run(self, scr):
         'Manage execution of keystrokes and subsequent redrawing of screen.'
-        global sheet
         scr.timeout(curses_timeout)
         with suppress(curses.error):
             curses.curs_set(0)
@@ -1067,7 +1066,6 @@ class BaseSheet:
 
     def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
-        global sheet
         sheet = vd.sheets[0]
 
         if not cmd:
