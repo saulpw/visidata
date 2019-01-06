@@ -52,13 +52,14 @@ def main():
 
     args = parser.parse_args()
 
+    # add visidata_dir to path before loading config file (can only be set from cli)
+    sys.path.append(Path(options.visidata_dir).resolve())
+
     # user customisations in config file in standard location
     loadConfigFile(Path(options.config).resolve(), getGlobals())
     addGlobals(globals())
 
     globalCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, Path(fn)))')
-
-    sys.path.append(Path(options.visidata_dir).resolve())
 
     # apply command-line overrides after .visidatarc
     for optname, optval in vars(args).items():
