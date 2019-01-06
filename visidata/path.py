@@ -86,7 +86,7 @@ class Path:
             try:
                 self._stat = os.stat(self.resolve())
             except Exception as e:
-                self._stat = e
+                self._stat = None
         return self._stat
 
     def resolve(self):
@@ -121,7 +121,13 @@ class Path:
 
     @property
     def filesize(self):
-        return self.stat().st_size
+        st = self.stat()
+        return st and st.st_size
+
+    @property
+    def mtime(self):
+        st = self.stat()
+        return st and st.st_mtime
 
     def __str__(self):
         return self.fqpn
