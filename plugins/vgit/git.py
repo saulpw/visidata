@@ -200,7 +200,7 @@ class GitStatus(GitSheet):
             Column('unstaged', getter=lambda c,r: c.sheet.git_status(r)[1]),
             Column('type', getter=lambda c,r: r.is_dir and '/' or r.path.suffix, width=0),
             Column('size', type=int, getter=lambda c,r: r.path.filesize),
-            Column('mtime', type=date, getter=lambda c,r: r.path.stat().st_mtime),
+            Column('mtime', type=date, getter=lambda c,r: r.path.mtime),
         ]
 
     def statusText(self, st):
@@ -327,7 +327,7 @@ class GitStatus(GitSheet):
 
         self.rows.extend(gf for fn, gf in filenames.items() if not self.ignored(gf.filename))
 
-        self.rows.sort(key=lambda r,col=self.columns[-1]: col.getValue(r), reverse=True)  # sort by -mtime
+        self.orderBy(self.columns[-1], reverse=True)
 
         self.recalc()  # erase column caches
 

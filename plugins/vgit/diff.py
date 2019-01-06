@@ -13,7 +13,7 @@ def getDiffSheet(fn, *refs):
 
 
 def git_diff(fn, *args):
-    args = args + ['--', fn]
+    args = list(args) + ['--', fn]
     return git_lines('diff',
             '--patch',
             '--inter-hunk-context=2',
@@ -88,6 +88,8 @@ class DifferSheet(GitSheet):
         return startidx
 
     def colorDiffRow(self, c, row, v):
+        if not row:
+            return
         baseval = row[self.basenum+1]
         for c in self.columns[1:]:
             v = c.getValue(row)
