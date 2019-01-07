@@ -40,7 +40,7 @@ def git_all(*args, git=loggit, **kwargs):
     'Return entire output of git command.'
 
     try:
-        cmd = git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
+        cmd = git('--no-pager', *args, _err_to_out=True, _decode_errors='replace', **kwargs)
         out = cmd.stdout
     except sh.ErrorReturnCode as e:
         status('git '+' '.join(args), 'error=%s' % e.exit_code)
