@@ -45,13 +45,13 @@
 ## 8. Integrate DeferredSet to all sheets
 
 - 'modified' indicator on status bar, also enables quitguard
-- sqlite: allow in-memory edits, ^S to commit
++ sqlite: allow in-memory edits, ^S to commit
   - index sheet: include rows/cols; allow to be cutnpasted
-  - solve "load in other thread" problem
+  + solve "load in other thread" problem
 
 ## 9. Loaders and Savers
 
-- parquet #112
++ parquet #112
 - .mdb, .accdb
 - google sheets
 - save canvas to .svg (canvassave_svg)

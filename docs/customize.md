@@ -61,7 +61,9 @@ The maximum option name length should be 20.
 
 ## How to configure commands
 
-The contents of **.visidatarc** in the user's home directory (and also the current directory) are `exec()`d on startup. Longnames are names given to particular flavours of executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, these are bound to the keystroke `s`.
+The **.visidatarc** in the user's home directory is plain Python code, and can contain additional commands or key bindings.
+
+Longnames are names given to particular flavours of executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, these are bound to the keystroke `s`.
 
 ### Creating command aliases for existing commands
 
