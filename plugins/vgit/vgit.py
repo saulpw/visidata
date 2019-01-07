@@ -130,6 +130,8 @@ class GitBranches(GitSheet):
         ColumnItem('merge_base', 'merge_name', width=20),
         ColumnItem('extra', width=0),
         ColumnItem('head_commitmsg', 'msg', width=50),
+        ColumnItem('last_commit', type=date),
+        ColumnItem('last_author'),
     ]
     colorizers = [
         RowColorizer(10, 'underline', lambda s,c,r,v: r and r['current']),
@@ -161,6 +163,8 @@ class GitBranches(GitSheet):
             merge_base = git_all("show-branch", "--merge-base", row.localbranch, self.rootSheet.branch, _ok_code=[0,1]).strip()
             row.merge_name = git_all("name-rev", "--name-only", merge_base).strip() if merge_base else ''
             row.upstream = self.rootSheet.getBranchStatuses().get(row.localbranch)
+            row.last_commit = git_all("show", "--no-patch", '--pretty=%ai', row.localbranch).strip()
+            row.last_author = git_all("show", "--no-patch", '--pretty=%an', row.localbranch).strip()
 
 
 GitBranches.addCommand('a', 'git-branch-create', 'git("branch", input("create branch: ", type="branch"))', 'create a new branch off the current checkout'),
