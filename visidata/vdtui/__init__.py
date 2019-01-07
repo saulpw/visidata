@@ -132,6 +132,13 @@ class Option:
     def __str__(self):
         return str(self.value)
 
+class AttrDict(dict):
+    def __getattr__(self, k):
+        return self[k]
+
+    def __setattr__(self, k, v):
+        self[k] = v
+
 class OptionsObject:
     'minimalist options framework'
     def __init__(self, mgr):

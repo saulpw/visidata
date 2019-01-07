@@ -24,6 +24,14 @@ def namedlist(objname, fieldnames):
         def length(cls):
             return len(cls._fields)
 
+        def __getattr__(self, k):
+            'to enable .fieldname'
+            return self[self._fields.index(k)]
+
+        def __setattr__(self, k, v):
+            'to enable .fieldname ='
+            self[self._fields.index(k)] = v
+
     for i, attrname in enumerate(fieldnames):
         # create property getter/setter for each field
         setattr(NamedListTemplate, attrname, property(operator.itemgetter(i), itemsetter(i)))

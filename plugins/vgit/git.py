@@ -1,71 +1,73 @@
 import sh
 
 from visidata import *
+from visidata.namedlist import namedlist
 
-option('gitcmdlogfile', '', 'file to log all git commands run by vgit')
+option('vgit_logfile', '', 'file to log all git commands run by vgit')
 
-globalCommand(None, 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
+GitCmd = namedlist('GitCmd', 'sheet command output'.split())
 
-# rowdef: CommandOutput
 class GitCmdLog(Sheet):
+    rowtype = 'git commands'  # rowdef: GitCmd
     columns = [
-        ColumnItem('command', 0),
-        ColumnItem('output', 1),
+        ColumnAttr('sheet'),
+        ColumnAttr('command'),
+        ColumnAttr('output'),
     ]
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, **kwargs):
+        super().__init__(name, **kwargs)
         self.rows = []
 
 GitCmdLog.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], cursorRow[1]))', 'view output of this command'),
 vd.gitcmdlog = GitCmdLog('gitcmdlog')
 
 def loggit(*args, **kwargs):
-    r = maybeloggit(*args, **kwargs)
+    output = maybeloggit(*args, **kwargs)
 
     cmdstr = 'git ' + ' '.join(args)
-    vd.gitcmdlog.addRow((cmdstr, r))
-    return r
+    vd.gitcmdlog.addRow(GitCmd([vd.sheet, cmdstr, output]))
+    return output
 
 def maybeloggit(*args, **kwargs):
-    if options.gitcmdlogfile:
+    if options.vgit_logfile:
         cmdstr = 'git ' + ' '.join(args)
-        with open(options.gitcmdlogfile, 'a') as fp:
+        with open(options.vgit_logfile, 'a') as fp:
             fp.write(cmdstr + '\n')
 
     return sh.git(*args, **kwargs)
 
-def git_all(*args, git=maybeloggit, **kwargs):
+def git_all(*args, git=loggit, **kwargs):
     'Return entire output of git command.'
 
     try:
         cmd = git(*args, _err_to_out=True, _decode_errors='replace', **kwargs)
         out = cmd.stdout
     except sh.ErrorReturnCode as e:
-        status('exit_code=%s' % e.exit_code)
+        status('git '+' '.join(args), 'error=%s' % e.exit_code)
         out = e.stdout
 
     out = out.decode('utf-8')
 
     return out
 
-def git_lines(*args, git=maybeloggit, **kwargs):
+def git_lines(*args, git=loggit, **kwargs):
     'Generator of stdout lines from given git command'
     err = io.StringIO()
     try:
         for line in git('--no-pager', _err=err, *args, _decode_errors='replace', _iter=True, _bg_exc=False, **kwargs):
             yield line[:-1]  # remove EOL
     except sh.ErrorReturnCode as e:
-        status('exit_code=%s' % e.exit_code)
+        status('git '+' '.join(args), 'error=%s' % e.exit_code)
 
     errlines = err.getvalue().splitlines()
     if len(errlines) < 3:
         for line in errlines:
-            status(line)
+            status('stderr: '+line)
     else:
         vd.push(TextSheet('git ' + ' '.join(args), errlines))
 
 
-def git_iter(sep, *args, git=maybeloggit, **kwargs):
+def git_iter(sep, *args, git=loggit, **kwargs):
     'Generator of chunks of stdout from given git command, delineated by sep character'
     bufsize = 512
     err = io.StringIO()
@@ -84,7 +86,7 @@ def git_iter(sep, *args, git=maybeloggit, **kwargs):
 
         chunks.append(data)
     except sh.ErrorReturnCode as e:
-        status('exit_code=%s' % e.exit_code)
+        status('git '+' '.join(args), 'error=%s' % e.exit_code)
 
     r = ''.join(chunks)
     if r:
@@ -130,10 +132,8 @@ class GitSheet(Sheet):
         for line in loggit_lines(*args, **kwargs):
             status(line)
 
-        gitStatusSheet.reload()
-
-        if self.sources and isinstance(self.sources[0], GitSheet):
-            self.sources[0].reload()
+        if isinstance(self.source, GitSheet):
+            self.source.reload()
 
         self.reload()
 
@@ -165,10 +165,16 @@ class GitSheet(Sheet):
         else:
             status('nothing to abort')
 
+    @property
+    def rootSheet(self):
+        if isinstance(self.source, GitSheet):
+            return self.source.rootSheet
+        return self
+
     def leftStatus(self):
         inp = self.inProgress()
         ret = ('[%s] ' % inp) if inp else ''
-        ret += '‹%s%s› ' % (gitStatusSheet.branch, gitStatusSheet.remotediff)
+        ret += '‹%s%s› ' % (self.rootSheet.branch, self.rootSheet.remotediff)
 
         return ret + super().leftStatus()
 
@@ -176,36 +182,44 @@ class GitSheet(Sheet):
         self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
         status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
-GitSheet.addCommand('f', 'git-force' 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
+GitSheet.addCommand('f', 'git-force', 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
 
+
+# cached by GitStatus sheets
+FileStatus = namedlist('FileStatus', 'status adds dels'.split())
 
 class GitStatus(GitSheet):
     rowtype = 'files'  # rowdef: GitFile
     colorizers = [
-        RowColorizer(6, 'red underline', lambda s,c,r,v: 'U' in s.git_status(r)[0]),
-        CellColorizer(7, 'green', lambda s,c,r,v: c and c.name == 'staged' and s.git_status(r)[0][0] == 'M'),
+        CellColorizer(3, 'green',   lambda s,c,r,v: r and c and c.name == 'staged' and s.git_status(r).status[0] == 'M'), # staged mod
+        CellColorizer(1, 'red',     lambda s,c,r,v: r and c and c.name == 'staged' and s.git_status(r).status == 'D '), # staged delete
+        RowColorizer(1, 'magenta',  lambda s,c,r,v: r and s.git_status(r).status in ['A ', 'M ']), # staged add/mod
+        RowColorizer(1, '88',       lambda s,c,r,v: r and s.git_status(r).status[1] == 'D'), # unstaged delete
+        RowColorizer(1, '237 blue', lambda s,c,r,v: r and s.git_status(r).status == '!!'),  # ignored
+        RowColorizer(1, '237 blue', lambda s,c,r,v: r and s.git_status(r).status == '??'),  # untracked
     ]
+    columns = [
+        Column('path', getter=lambda c,r: str(r)),
+        Column('status', getter=lambda c,r: c.sheet.statusText(c.sheet.git_status(r)), width=8),
+        Column('status_raw', getter=lambda c,r: c.sheet.git_status(r), width=0),
+        Column('staged', getter=lambda c,r: c.sheet.git_status(r).dels),
+        Column('unstaged', getter=lambda c,r: c.sheet.git_status(r).adds),
+        Column('type', getter=lambda c,r: r.is_dir and '/' or r.path.suffix, width=0),
+        Column('size', type=int, getter=lambda c,r: r.path.filesize),
+        Column('mtime', type=date, getter=lambda c,r: r.path.mtime),
+    ]
+    nKeys = 1
 
     def __init__(self, p):
         super().__init__(p.relpath(''), source=p)
         self.branch = ''
         self.remotediff = ''  # ahead/behind status
 
-        self._cachedStatus = {}  # [] -> ('!!' or '??' status, adds, dels)
-        self.addColorizer(RowColorizer(3, None, GitStatus.rowColor))
-        self.columns = [
-            Column('path', getter=lambda c,r: str(r)),
-            Column('status', getter=lambda c,r: c.sheet.statusText(c.sheet.git_status(r)), width=8),
-            Column('staged', getter=lambda c,r: c.sheet.git_status(r)[2]),
-            Column('unstaged', getter=lambda c,r: c.sheet.git_status(r)[1]),
-            Column('type', getter=lambda c,r: r.is_dir and '/' or r.path.suffix, width=0),
-            Column('size', type=int, getter=lambda c,r: r.path.filesize),
-            Column('mtime', type=date, getter=lambda c,r: r.path.mtime),
-        ]
+        self._cachedStatus = {}  # [filename] -> FileStatus(['!!' or '??' status, adds, dels])
 
     def statusText(self, st):
         vmod = {'A': 'add', 'D': 'rm', 'M': 'mod', 'T': 'chmod', '?': 'out', '!': 'ignored', 'U': 'unmerged'}
-        x, y = st[0]
+        x, y = st.status
         if st == '??': # untracked
             return 'new'
         elif st == '!!':  # ignored
@@ -221,36 +235,26 @@ class GitStatus(GitSheet):
     def workdir(self):
         return str(self.source)
 
-    def rowColor(self, c, row, v):
-        if not row:
-            return None
-        st = self.git_status(row)[0]
-        x, y = st
-        if st == '??': # untracked
-            return 'yellow'
-        elif st == '!!':  # ignored
-            return '237 blue'
-        elif x in 'AMD' and y == ' ': # staged add/mod/rm
-            return 'green'
-        elif y in 'AMD': # unstaged add/mod/rm
-            return 'red'
-
-        return 'white'
-
     def git_status(self, r):
         '''return tuple of (status, adds, dels).
         status like !! ??
         adds and dels are lists of additions and deletions.
         '''
-        ret = self._cachedStatus.get(r.filename, None) if r else None
-        return ret if ret else ["//", None, None]
+        if not r:
+            return None
+        ret = self._cachedStatus.get(r.filename, None)
+        if not ret:
+            ret = FileStatus(["//", None, None])
+            self._cachedStatus[r.filename] = ret
+
+        return ret
 
     def ignored(self, fn):
         if options.vgit_show_ignored:
             return False
 
         if fn in self._cachedStatus:
-            return self._cachedStatus[fn][0] == '!!'
+            return self._cachedStatus[fn].status == '!!'
 
         return False
 
@@ -294,7 +298,7 @@ class GitStatus(GitSheet):
         self.rows = []
         self._cachedStatus.clear()
         for fn in git_iter('\0', 'ls-files', '-z'):
-            self._cachedStatus[fn] = ['  ', None, None]  # status, adds, dels
+            self._cachedStatus[fn] = FileStatus(['  ', None, None])  # status, adds, dels
 
         for status_line in git_iter('\0', 'status', '-z', '-unormal', '--ignored'):
             if status_line:
@@ -304,7 +308,7 @@ class GitStatus(GitSheet):
                     fn = status_line
                     st = '//'
                 gf = GitFile(fn, self.source)
-                self._cachedStatus[gf.filename] = [st, None, None]
+                self._cachedStatus[gf.filename] = FileStatus([st, None, None])
                 if gf.filename not in filenames:
                     if not self.ignored(gf.filename):
                         self.rows.append(gf)
@@ -313,17 +317,17 @@ class GitStatus(GitSheet):
             if not line: continue
             adds, dels, fn = line.split('\t')
             if fn not in self._cachedStatus:
-                self._cachedStatus[fn] = ['##', None, None]
+                self._cachedStatus[fn] = FileStatus(['##', None, None])
             cs = self._cachedStatus[fn]
-            cs[1] = '+%s/-%s' % (adds, dels)
+            cs.adds = '+%s/-%s' % (adds, dels)
 
         for line in git_iter('\0', 'diff-index', '--cached', '--numstat', '-z', 'HEAD'):
             if not line: continue
             adds, dels, fn = line.split('\t')
             if fn not in self._cachedStatus:
-                self._cachedStatus[fn] = ['$$', None, None]
+                self._cachedStatus[fn] = FileStatus(['$$', None, None])
             cs = self._cachedStatus[fn]
-            cs[2] = '+%s/-%s' % (adds, dels)
+            cs.dels = '+%s/-%s' % (adds, dels)
 
         self.rows.extend(gf for fn, gf in filenames.items() if not self.ignored(gf.filename))
 
@@ -351,7 +355,10 @@ GitSheet.addCommand('g/', 'git-grep', 'vd.push(GitGrep(input("git grep: ")))', '
 GitSheet.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
 GitSheet.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
 
+GitSheet.addCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
+
+
 #GitSheet.addCommand('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file'),
 GitSheet.addCommand('L', 'git-blame', 'vd.push(GitBlame(cursorRow))', 'push blame for this file'),
 
-gitStatusSheet = GitStatus(Path('.'))
+options.set('disp_note_none', '', GitSheet)

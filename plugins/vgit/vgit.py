@@ -15,14 +15,14 @@ __version__ = 'saul.pw/vgit v0.3pre'
 option('vgit_show_ignored', False, '')
 
 GitSheet.addCommand('x', 'git-exec', 'i = input("git ", type="git"); git(*i.split())', 'execute arbitrary git command')
-GitSheet.addCommand('B', 'git-branches', 'vd.push(gitBranchesSheet).reload()', 'push branches sheet')
-GitSheet.addCommand('gO', 'git-options', 'vd.push(gitOptionsSheet).reload()', 'push sheet of git options')
+GitSheet.addCommand('B', 'git-branches', 'vd.push(gitBranchesSheet)', 'push branches sheet')
+GitSheet.addCommand('gO', 'git-options', 'vd.push(gitOptionsSheet)', 'push sheet of git options')
 GitSheet.addCommand('', 'git-push', 'git("push")', 'git push')
 GitSheet.addCommand('A', 'git-abort', 'abortWhatever()', 'abort the current in-progress action')
 
-GitSheet.addCommand('H', 'git-log', 'vd.push(LogSheet(branch+"_log", source=branch))', 'push log of current branch')
-GitSheet.addCommand('T', 'git-stashes', 'vd.push(gitStashesSheet).reload()', 'push stashes sheet')
-GitSheet.addCommand('R', 'git-remotes', 'vd.push(gitRemotesSheet).reload()', 'push remotes sheet')
+GitSheet.addCommand('H', 'git-log', 'vd.push(LogSheet(branch+"_log", ref=branch))', 'push log of current branch')
+GitSheet.addCommand('T', 'git-stashes', 'vd.push(gitStashesSheet)', 'push stashes sheet')
+GitSheet.addCommand('R', 'git-remotes', 'vd.push(gitRemotesSheet)', 'push remotes sheet')
 GitSheet.addCommand('', 'git-stash-save', 'git("stash", "save")', 'stash uncommitted changes')
 GitSheet.addCommand('', 'git-stash-pop', 'git("stash", "pop")', 'apply the most recent stashed change and drop it')
 
@@ -65,7 +65,7 @@ def randomBranchName():
 class LogSheet(GitSheet):
     # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
-
+    rowtype = 'commits'
     columns = [
             ColumnItem('commitid', 0, width=8),
             ColumnItem('refnames', 1, width=12),
@@ -74,7 +74,7 @@ class LogSheet(GitSheet):
             Column('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
             Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
     ]
-    colorizers = [RowColorizer(5, 'cyan', lambda s,c,r,v: r and not s.inRemoteBranch(r[0]))]
+#    colorizers = [RowColorizer(5, 'cyan', lambda s,c,r,v: r and not s.inRemoteBranch(r[0]))]
 
     def amendPrevious(self, targethash):
         'amend targethash with current index, then rebase newer commits on top'
@@ -103,9 +103,9 @@ class LogSheet(GitSheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        for record in git_iter('\0', 'log', '--no-color', '-z', '--pretty=format:%s' % '%x1f'.join(self.GIT_LOG_FORMAT), self.source):
-            self.rows.append(record.split('\x1f'))
-
+        lines = git_iter('\0', 'log', '--no-color', '-z', '--pretty=format:%s' % '%x1f'.join(self.GIT_LOG_FORMAT), self.ref)
+        for record in Progress(tuple(lines)):
+            self.addRow(record.split('\x1f'))
 
 LogSheet.addCommand(ENTER, 'dive-row', 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit'),
 #LogSheet.addCommand('', 'git-squash-selected', '', 'squash selected commits'),
@@ -114,53 +114,61 @@ LogSheet.addCommand('gx', 'git-pick-selected', '', 'cherry-pick selected commits
 LogSheet.addCommand('C', 'git-commit-amend', 'confirm("amend this commit with the index? "); amendPrevious(cursorRow[0]); reload()', 'amend this commit with changes in the index'),
 LogSheet.addCommand('r', 'git-reset-here', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit'),
 
+def remove_prefix(text, prefix):
+    if text.startswith(prefix):
+        return text[len(prefix):]
+    return text
+
 class GitBranches(GitSheet):
+    rowtype = 'branches'  # rowdef: AttrDict from regex (in reload below)
     columns = [
-        Column('branch', getter=lambda c,r: r[1][8:] if r[1].startswith('remotes/') else r[1], width=20),
-        ColumnItem('head_commitid', 2, width=0),
-        ColumnItem('tracking', 3),
-        ColumnItem('upstream', 6),
-        ColumnItem('merge_base', 7, width=20),
-        ColumnItem('extra', 4, width=0),
-        ColumnItem('head_commitmsg', 5, width=50),
+        Column('branch', getter=lambda c,r: remove_prefix(r['localbranch'], 'remotes/'), width=20),
+#        Column('remote', getter=lambda c,r: r['localbranch'].startswith('remotes/') and '*' or '', width=3),
+        ColumnItem('head_commitid', 'refid', width=0),
+        ColumnItem('tracking', 'remotebranch'),
+        ColumnItem('upstream'),
+        ColumnItem('merge_base', 'merge_name', width=20),
+        ColumnItem('extra', width=0),
+        ColumnItem('head_commitmsg', 'msg', width=50),
     ]
     colorizers = [
-        RowColorizer(10, 'underline', lambda s,c,r,v: r[0]),
-        RowColorizer(10, 'cyan', lambda s,c,r,v: not r[1].startswith('remotes/')),
+        RowColorizer(10, 'underline', lambda s,c,r,v: r and r['current']),
+#        RowColorizer(10, 'cyan', lambda s,c,r,v: r and not r['localbranch'].startswith('remotes/')),
     ]
     nKeys = 1
-
-    def __init__(self):
-        super().__init__('branches')
 
     @asyncthread
     def reload(self):
         self.rows = []
-        for line in git_lines('branch', '--list', '-vv', '--no-color', '--all'):
+        branches_lines = git_lines('branch', '--list', '-vv', '--no-color', '--all')
+        for line in branches_lines:
             if '->' in line:
                 continue
 
-            m = re.match(r'''(\*?)\s+
-                             (\S+)\s+
-                             (\w+)\s+
+            m = re.match(r'''(?P<current>\*?)\s+
+                             (?P<localbranch>\S+)\s+
+                             (?P<refid>\w+)\s+
                              (?:\[
-                               ([^\s\]:]+):?
-                               \s*(.*?)
+                               (?P<remotebranch>[^\s\]:]+):?
+                               \s*(?P<extra>.*?)
                              \])?
-                             \s*(.*)''', line, re.VERBOSE)
+                             \s*(?P<msg>.*)''', line, re.VERBOSE)
             if m:
-                current, localbranch, refid, remotebranch, extra, msg = m.groups()
-                merge_base = git_all("show-branch", "--merge-base", localbranch, gitStatusSheet.branch, _ok_code=[0,1]).strip()
-                merge_name = git_all("name-rev", "--name-only", merge_base).strip() if merge_base else ''
+                row = AttrDict(m.groupdict())
+                self.addRow(row)
 
-                self.rows.append(list(m.groups()) + [gitStatusSheet.getBranchStatuses().get(localbranch)] + [merge_name])
+        for row in Progress(self.rows):
+            merge_base = git_all("show-branch", "--merge-base", row.localbranch, self.rootSheet.branch, _ok_code=[0,1]).strip()
+            row.merge_name = git_all("name-rev", "--name-only", merge_base).strip() if merge_base else ''
+            row.upstream = self.rootSheet.getBranchStatuses().get(row.localbranch)
+
 
 GitBranches.addCommand('a', 'git-branch-create', 'git("branch", input("create branch: ", type="branch"))', 'create a new branch off the current checkout'),
-GitBranches.addCommand('d', 'git-branch-delete', 'git("branch", "--delete", cursorRow[1])', 'delete this branch'),
-GitBranches.addCommand('e', 'git-branch-rename', 'git("branch", "-v", "--move", cursorRow[1], editCell(0))', 'rename this branch'),
-GitBranches.addCommand('c', 'git-checkout', 'git("checkout", cursorRow[1])', 'checkout this branch'),
-GitBranches.addCommand('m', 'git-branch-merge', 'git("merge", cursorRow[1])', 'merge this branch into the current branch'),
-GitBranches.addCommand(ENTER, 'dive-row', 'vd.push(LogSheet(cursorRow[1]+"_log", cursorRow[1]))', 'push log of this branch'),
+GitBranches.addCommand('d', 'git-branch-delete', 'git("branch", "--delete", cursorRow.localbranch)', 'delete this branch'),
+GitBranches.addCommand('e', 'git-branch-rename', 'git("branch", "-v", "--move", cursorRow.localbranch, editCell(0))', 'rename this branch'),
+GitBranches.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.localbranch)', 'checkout this branch'),
+GitBranches.addCommand('m', 'git-branch-merge', 'git("merge", cursorRow.localbranch)', 'merge this branch into the current branch'),
+GitBranches.addCommand(ENTER, 'dive-row', 'vd.push(LogSheet(cursorRow.localbranch+"_log", source=sheet, ref=cursorRow.localbranch))', 'push log of this branch'),
 
 def getHunksSheet(parent, *files):
     return HunksSheet('hunks', parent, 'diff',
@@ -239,8 +247,8 @@ class HunksSheet(GitSheet):
             elif line[0] in ' +-':
                 self.rows[-1][-1].append(line)
 
-HunksSheet.addCommand(ENTER, 'dive-row', 'vd.push(HunkViewer(sheet, cursorRow))', 'view the diff for this hunks'),
-HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(sheet, *(selectedRows or rows)))', 'view the diffs for the selected hunks (or all hunks)'),
+HunksSheet.addCommand(ENTER, 'dive-row', 'vd.push(HunkViewer(sheet, hunks=[cursorRow]))', 'view the diff for this hunks'),
+HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(sheet, hunks=selectedRows or rows))', 'view the diffs for the selected hunks (or all hunks)'),
 HunksSheet.addCommand('V', 'git-view-patch', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
 #HunksSheet.addCommand('gV', 'git-view-patch-selected', '', 'view the raw patch for selected/all hunks'),
 HunksSheet.addCommand('a', 'git-apply-hunk', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index'),
@@ -321,8 +329,8 @@ GitGrep.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], open(curs
 
 class GitOptions(GitSheet):
     CONFIG_CONTEXTS = ('local', 'local', 'global', 'system')
-    def __init__(self):
-        super().__init__('git config')
+    def __init__(self, name, **kwargs):
+        super().__init__(name, **kwargs)
         self.columns = [Column('option', getter=lambda c,r: r[0])]
         for i, ctx in enumerate(self.CONFIG_CONTEXTS[1:]):
             self.columns.append(Column(ctx, getter=lambda c,r, i=i: r[1][i], setter=self.config_setter(ctx)))
@@ -357,13 +365,11 @@ GitOptions.addCommand('a', 'git-config-add', 'git("config", "--add", "--"+CONFIG
 
 # how to incorporate fetch/push/pull?
 class GitRemotes(GitSheet):
-    def __init__(self, **kwargs):
-        super().__init__('remotes', **kwargs)
-        self.columns=[
+    columns=[
             Column('remote', getter=lambda c,r: r[0], setter=lambda c,r,v: c.sheet.git('remote', 'rename', r[0], v)),
             Column('url', getter=lambda c,r: r[1], setter=lambda c,r,v: c.sheet.git('remote', 'set-url', r[0], v)),
             Column('type', getter=lambda c,r: r[2]),
-        ]
+    ]
 
     def reload(self):
         self.rows = []
@@ -373,11 +379,6 @@ class GitRemotes(GitSheet):
 
 GitRemotes.addCommand('d', 'git-remote-delete', 'git("remote", "rm", cursorRow[0])', 'delete remote'),
 GitRemotes.addCommand('a', 'git-remote-add', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
-
-gitBranchesSheet = GitBranches()
-gitOptionsSheet = GitOptions()
-gitStashesSheet = GitStashes('stashes')
-gitRemotesSheet = GitRemotes()
 
 # options.wrap = False
 # os.chdir(fn)
