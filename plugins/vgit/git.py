@@ -335,14 +335,14 @@ class GitStatus(GitSheet):
 
         self.recalc()  # erase column caches
 
-GitSheet.addCommand('a', 'git-add' 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),
+GitSheet.addCommand('a', 'git-add', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),
 GitSheet.addCommand('m', 'git-mv', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file'),
 GitSheet.addCommand('d', 'git-rm', 'git("rm", cursorRow.filename)', 'stage this file for deletion'),
 GitSheet.addCommand('r', 'git-reset', 'git("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file'),
 GitSheet.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.filename)', 'checkout this file'),
 GitSheet.addCommand('ga', 'git-add-selected', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging'),
 GitSheet.addCommand('gd', 'git-rm-selected', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files'),
-GitSheet.addCommand('C', 'git-commit', 'git("commit", "-m", input("commit message: "))', 'commit changes'),
+GitSheet.addCommand(None, 'git-commit', 'git("commit", "-m", input("commit message: "))', 'commit changes'),
 GitSheet.addCommand('V', 'open-file', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file'),
 GitSheet.addCommand('i', 'ignore-file', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
 GitSheet.addCommand('gi', 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
