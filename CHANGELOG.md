@@ -8,9 +8,16 @@
 
 ## Improvements and additions
 
-- `options.default_sample_size` to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso)
+- `sort-*-add` bound to z[] and gz[] to add additional sort columns
+- output pipes now work as expected
+   - `ls|vd|lpr` to interactively select which filenames to send to the printer
+   - `q`/`gq` to output nothing
+   - `Ctrl+Q` to output current sheet (like at end of -b)
+   - `vd -o-` to send directly to the terminal (can also be used with redirection, but not necessary)
+- `options.undo` (default False) infinite linear undo/redo provisionally bound to `^[` and `^]` (enabled with options.undo=True)
+- `options.default_sample_size` (default 100) to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso)
 - [replay] exit with error code on error during replay
-- [vd] add `--config` option to specify visidatarc file (suggested by @jsvine #236)
+- [vd] `--config` option to specify visidatarc file (suggested by @jsvine #236)
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
 

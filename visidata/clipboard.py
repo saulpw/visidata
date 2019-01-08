@@ -7,25 +7,29 @@ import functools
 
 from visidata import vd, asyncthread, sync, status, fail, option, options
 from visidata import Sheet, saveSheets
+from visidata import undoEditCell, undoEditCells, undoSheetRows
 
 vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
 vd.clipcells = []  # list of strings
 
-Sheet.addCommand('y', 'copy-row', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]')
-Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]')
-Sheet.addCommand('p', 'paste-after', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)')
-Sheet.addCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)')
+def setslice(L, a, b, M):
+    L[a:b] = M
 
-Sheet.addCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()')
+Sheet.addCommand('y', 'copy-row', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]')
+Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', undo='lambda s=sheet,r=cursorRow,ridx=cursorRowIndex: s.rows.insert(ridx, r)')
+Sheet.addCommand('p', 'paste-after', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.pop(ridx+1)')
+Sheet.addCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.pop(ridx)')
+
+Sheet.addCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', undo=undoSheetRows)
 Sheet.addCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))')
 
 Sheet.addCommand('zy', 'copy-cell', 'vd.clipcells = [cursorDisplay]')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])')
-Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)')
-Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])', undo=undoEditCell)
+Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', undo=undoEditCell)
+Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)', undo=undoEditCells)
 
 Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
-Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)')
+Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)', undo=undoEditCells)
 
 Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.save_filetype))')
 Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.save_filetype))')

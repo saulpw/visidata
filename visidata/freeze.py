@@ -1,7 +1,7 @@
 from visidata import *
 from copy import deepcopy
 
-Sheet.addCommand("'", 'freeze-col', 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)')
+Sheet.addCommand("'", 'freeze-col', 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', undo=undoAddCols)
 Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)')
 Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()')
 Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()')

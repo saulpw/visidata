@@ -85,6 +85,6 @@ class DescribeSheet(ColumnsSheet):
         return r
 
 
-DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)')
-DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)')
+DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)', undo=undoSelection('cursorRow.sheet'))
+DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)', undo=undoSelection('cursorRow.sheet'))
 DescribeSheet.addCommand('z'+ENTER, 'dup-cell', 'isinstance(cursorValue, list) or error(cursorValue); vs=copy(cursorRow.sheet); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)')

@@ -7,10 +7,10 @@ import contextlib
 
 from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught, DeferredSetColumn
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, error, FileExistsError
-from visidata import CellColorizer, RowColorizer
+from visidata import CellColorizer, RowColorizer, undoAddCols, undoBlocked
 
 
-Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)')
+Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)', undo=undoAddCols)
 
 
 def open_dir(p):
@@ -241,9 +241,9 @@ DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r.resolve()))')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.resolve())')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in selectedRows))')
-DeferredSaveSheet.addCommand('^S', 'save-sheet', 'save()')
-DeferredSaveSheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
+DeferredSaveSheet.addCommand('^S', 'save-sheet', 'save()', undo=undoBlocked)
+DeferredSaveSheet.addCommand('z^S', 'save-row', 'save(cursorRow)', undo=undoBlocked)
 DeferredSaveSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')
 DeferredSaveSheet.addCommand('gz^R', 'reload-rows', 'for r in self.selectedRows: undoMod(r)')
-DeferredSaveSheet.addCommand(None, 'delete-row', 'delete([cursorRow]); cursorRowIndex += 1')
-DeferredSaveSheet.addCommand(None, 'delete-selected', 'delete(selectedRows)')
+DeferredSaveSheet.addCommand(None, 'delete-row', 'delete([cursorRow]); cursorRowIndex += 1', undo='lambda r=cursorRow: undoMod(r)')
+DeferredSaveSheet.addCommand(None, 'delete-selected', 'delete(selectedRows)', undo='lambda rows=selectedRows: list(map(undoMod, rows))')

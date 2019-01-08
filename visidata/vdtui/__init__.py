@@ -104,17 +104,44 @@ class SettingsMgr(collections.OrderedDict):
 
 
 class Command:
-    def __init__(self, longname, execstr):
+    def __init__(self, longname, execstr, helpstr='', undo=''):
         self.longname = longname
         self.execstr = execstr
-        self.helpstr = ''
+        self.helpstr = helpstr
+        self.undo = undo
 
-def globalCommand(keystrokes, longname, execstr, helpstr=''):
-    commands.setdefault(longname, Command(longname, execstr))
+def globalCommand(keystrokes, longname, execstr, **kwargs):
+    commands.setdefault(longname, Command(longname, execstr, **kwargs))
 
     if keystrokes:
         assert not bindkeys._get(keystrokes), keystrokes
         bindkeys.setdefault(keystrokes, longname)
+
+# undoers
+def undoAttr(objs, attrname):
+    'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value as reference.'
+    return '''lambda oldvals=[(o, getattr(o, "{attrname}")) for o in {objs}] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)
+
+def undoAttrCopy(objs, attrname):
+    'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value which is copied.'
+    return '''lambda oldvals=[ (o, copy(getattr(o, "{attrname}"))) for o in {objs} ] : list(setattr(o, "{attrname}", v) for o, v in oldvals) '''.format(attrname=attrname, objs=objs)
+
+def undoSetValues(rowstr='[cursorRow]', colstr='[cursorCol]'):
+    return 'lambda oldvals=[(c, r, c.getValue(r)) for c,r in itertools.product({colstr}, {rowstr})]: list(c.setValue(r, v) for c, r, v in oldvals)'.format(rowstr=rowstr, colstr=colstr)
+
+def undoRows(sheetstr):
+    return undoAttrCopy('[%s]'%sheetstr, 'rows')
+
+def undoSelection(sheetstr):
+    return undoAttrCopy('[%s]'%sheetstr, '_selectedRows')
+
+undoBlocked = 'lambda: error("cannot undo")'
+undoSheetRows = undoRows('sheet')
+undoSheetCols = 'lambda sheet=sheet,oldcols=[copy(c) for c in columns]: setattr(sheet, "columns", oldcols)'
+undoAddCols = undoAttrCopy('[sheet]', 'columns')
+undoEditCell = undoSetValues('[cursorRow]', '[cursorCol]')
+undoEditCells = undoSetValues('selectedRows or rows', '[cursorCol]')
+undoSheetSelection = undoAttrCopy('[sheet]', '_selectedRows')
 
 def bindkey(keystrokes, longname):
     bindkeys.setdefault(keystrokes, longname)
@@ -1031,8 +1058,8 @@ class BaseSheet:
             return id(self) < id(other)
 
     @classmethod
-    def addCommand(cls, keystrokes, longname, execstr, helpstr=''):
-        commands.set(longname, Command(longname, execstr), cls)
+    def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
+        commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
         if keystrokes:
             bindkeys.set(keystrokes, longname, cls)
 
@@ -1370,4 +1397,4 @@ from .cliptext import clipdraw, clipstr
 from .editline import editline
 from .column import *
 from .color import colors, CursesAttr
-from ._sheet import RowColorizer, CellColorizer, ColumnColorizer, Sheet
+from ._sheet import *

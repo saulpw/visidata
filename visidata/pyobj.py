@@ -10,12 +10,12 @@ Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); push_pyobj("%s[%s]
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)')
 globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)')
 
-Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)')
-Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)')
-Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))')
-Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))')
+Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)', undo=undoSheetCols)
+Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)', undo=undoSheetCols)
+Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))', undo=undoSheetCols)
+Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))', undo=undoSheetCols)
 
-Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)')
+Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol.origCol)', undo=undoSheetCols)
 
 class PythonSheet(Sheet):
     pass
@@ -69,11 +69,10 @@ class ExpandedColumn(Column):
         self.origCol.getValue(row)[self.key] = value
 
 
-def closeColumn(sheet, col):
-    col.origCol.width = options.default_width
-    cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not getattr(col, "origCol", col)]
+def closeColumn(sheet, origCol):
+    origCol.width = options.default_width
+    cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not origCol]
     sheet.columns = cols
-
 
 
 #### generic list/dict/object browsing
@@ -196,7 +195,7 @@ class SheetDict(PythonSheet):
         push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
 
 
-SheetDict.addCommand('e', 'edit-cell', 'edit()')
+SheetDict.addCommand('e', 'edit-cell', 'edit()', undo=undoEditCell)
 SheetDict.addCommand(ENTER, 'dive-row', 'dive()')
 
 class ColumnSourceAttr(Column):
@@ -233,7 +232,7 @@ class SheetObject(PythonSheet):
         self.setKeys(self.columns[0:1])
 
 SheetObject.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)')
-SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()')
+SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', undo='lambda s=source,attr=cursorRow,val=getattr(source, cursorRow): setattr(s, attr, val)')
 SheetObject.addCommand('v', 'visibility', 'options.set("visibility", 0 if options.visibility else 2, sheet); reload()')
 SheetObject.addCommand('gv', 'show-hidden', 'options.visibility = 2; reload()')
 SheetObject.addCommand('zv', 'hide-hidden', 'options.visibility -= 1; reload()')

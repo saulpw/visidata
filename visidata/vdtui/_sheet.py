@@ -5,7 +5,8 @@ from copy import copy
 
 from visidata.vdtui import (Command, bindkeys, commands, options, isNullFunc, error, Column,
 TypedExceptionWrapper, regex_flags, Progress, asyncthread, getGlobals, LazyMapRow, CompleteExpr,
-rotate_range, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, vd, CursesAttr, colors, input)
+rotate_range, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, vd, CursesAttr, colors, input, undoAddCols, undoEditCell, undoEditCells, undoAttr, Extensible)
+
 
 __all__ = [ 'RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet' ]
 
@@ -703,31 +704,33 @@ Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 Sheet.addCommand('_', 'resize-col-max', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
 Sheet.addCommand('z_', 'resize-col', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))'),
 
-Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()'),
+Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()', undo=undoAttr('[cursorCol]', 'width'))
 Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.width = cursorCol.width//2'),
-Sheet.addCommand('gv', 'unhide-cols', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)'),
+Sheet.addCommand('gv', 'unhide-cols', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)', undo=undoAttr('[columns]', 'width'))
 
-Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])'),
-Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])'),
+undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
+
+Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', undo=undoRestoreKey),
+Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', undo=undoRestoreKey),
 Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
 
-Sheet.addCommand('[', 'sort-asc', 'orderBy(cursorCol)'),
-Sheet.addCommand(']', 'sort-desc', 'orderBy(cursorCol, reverse=True)'),
-Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(*keyCols)'),
-Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(*keyCols, reverse=True)'),
+Sheet.addCommand('[', 'sort-asc', 'orderBy(cursorCol)', undo=undoNotImpl),
+Sheet.addCommand(']', 'sort-desc', 'orderBy(cursorCol, reverse=True)', undo=undoNotImpl),
+Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(*keyCols)', undo=undoNotImpl),
+Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(*keyCols, reverse=True)', undo=undoNotImpl),
 
 Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 
-Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)'),
-Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValuesTyped(selectedRows or rows, input("set selected to: ", value=cursorDisplay))'),
+Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', undo=undoEditCell)
+Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValuesTyped(selectedRows or rows, input("set selected to: ", value=cursorDisplay))', undo=undoEditCells),
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.rows=tuple(); vs.reload=lambda vs=vs,rows=selectedRows or rows: setattr(vs, "rows", list(rows)); vd.push(vs)'),
 Sheet.addCommand('g"', 'dup-rows', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),
 Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
 Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
 
-Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)'),
-Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))'),
+Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', undo=undoAddCols),
+Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))', undo=undoEditCells),
 
 bindkey('KEY_LEFT', 'go-left')
 bindkey('KEY_DOWN', 'go-down')

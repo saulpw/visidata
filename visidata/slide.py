@@ -2,14 +2,14 @@
 
 from visidata import Sheet, moveListItem, globalCommand
 
-Sheet.addCommand('H', 'slide-left', 'i = sheet.cursorVisibleColIndex; sheet.cursorVisibleColIndex = moveVisibleCol(sheet, i, i-1)')
-Sheet.addCommand('L', 'slide-right', 'i = sheet.cursorVisibleColIndex; sheet.cursorVisibleColIndex = moveVisibleCol(sheet, i, i+1)')
-Sheet.addCommand('J', 'slide-down', 'i = sheet.cursorRowIndex; sheet.cursorRowIndex = moveListItem(rows, i, i+1)')
-Sheet.addCommand('K', 'slide-up', 'i = sheet.cursorRowIndex; sheet.cursorRowIndex = moveListItem(rows, i, i-1)')
-Sheet.addCommand('gH', 'slide-leftmost', 'columns.insert(0, columns.pop(cursorColIndex))')
-Sheet.addCommand('gL', 'slide-rightmost', 'columns.append(columns.pop(cursorColIndex))')
-Sheet.addCommand('gJ', 'slide-bottom', 'rows.append(rows.pop(cursorRowIndex))')
-Sheet.addCommand('gK', 'slide-top', 'rows.insert(0, rows.pop(cursorRowIndex))')
+Sheet.addCommand('H', 'slide-left', 'i = sheet.cursorVisibleColIndex; sheet.cursorVisibleColIndex = moveVisibleCol(sheet, i, i-1)', undo='lambda s=sheet,cidx=cursorVisibleColIndex: moveVisibleCol(s, cidx-1, cidx)')
+Sheet.addCommand('L', 'slide-right', 'i = sheet.cursorVisibleColIndex; sheet.cursorVisibleColIndex = moveVisibleCol(sheet, i, i+1)', undo='lambda s=sheet,cidx=cursorVisibleColIndex: moveVisibleCol(s, cidx+1, cidx)')
+Sheet.addCommand('J', 'slide-down', 'i = sheet.cursorRowIndex; sheet.cursorRowIndex = moveListItem(rows, i, i+1)', undo='lambda s=sheet,ridx=cursorRowIndex: moveListItem(s.rows, ridx+1, ridx)')
+Sheet.addCommand('K', 'slide-up', 'i = sheet.cursorRowIndex; sheet.cursorRowIndex = moveListItem(rows, i, i-1)', undo='lambda s=sheet,ridx=cursorRowIndex: moveListItem(s.rows, ridx-1, ridx)')
+Sheet.addCommand('gH', 'slide-leftmost', 'columns.insert(0, columns.pop(cursorColIndex))', undo='lambda cidx=cursorColIndex, s=sheet: s.columns.insert(cidx, s.columns.pop(0))')
+Sheet.addCommand('gL', 'slide-rightmost', 'columns.append(columns.pop(cursorColIndex))', undo='lambda s=sheet,cidx=cursorColIndex: s.columns.insert(cidx, s.columns.pop())')
+Sheet.addCommand('gJ', 'slide-bottom', 'rows.append(rows.pop(cursorRowIndex))', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.insert(ridx, s.rows.pop())')
+Sheet.addCommand('gK', 'slide-top', 'rows.insert(0, rows.pop(cursorRowIndex))', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.insert(ridx, s.rows.pop(0))')
 Sheet.addCommand('zH', 'slide-left-n', 'i = sheet.cursorVisibleColIndex; n=int(input("slide col left n=", value=1)); sheet.cursorVisibleColIndex = moveVisibleCol(sheet, i, i-n)')
 Sheet.addCommand('zL', 'slide-right-n', 'i = sheet.cursorVisibleColIndex; n=int(input("slide col right n=", value=1)); sheet.cursorVisibleColIndex = moveVisibleCol(sheet, i, i+n)')
 Sheet.addCommand('zJ', 'slide-down-n', 'i = sheet.cursorRowIndex; n=int(input("slide row down n=", value=1)); sheet.cursorRowIndex = moveListItem(rows, i, i+n)')

@@ -21,7 +21,7 @@
 
 ## 4. Undo #141
 
-- single-level undo
++ infinite linear undo/redo
 
 ## 5. Simple non-python installers
 

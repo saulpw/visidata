@@ -3,6 +3,7 @@ import threading
 from visidata import *
 import visidata
 
+option('undo', False, 'enable undo/redo')
 option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds')
 theme('disp_replay_play', '▶', 'status indicator for active replay')
 theme('disp_replay_pause', '‖', 'status indicator for paused replay')
@@ -22,11 +23,14 @@ globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
 globalCommand(None, 'status', 'status(input("status: "))')
 globalCommand('^V', 'check-version', 'status(__version_info__); checkVersion(input("require version: ", value=__version_info__))')
 
+globalCommand('^[', 'undo-last', 'vd.cmdlog.undo()')
+globalCommand('^]', 'redo-last', 'vd.cmdlog.redo()')
+
 # not necessary to log movements and scrollers
-nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g? g_ _ z_'.split()
+nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g? g_ _ z_ z-'.split()
 nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c Q'.split()
 nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
-nonLogKeys += '^^ ^Z ^A ^L ^C ^U ^K ^I ^D ^G KEY_RESIZE KEY_F(1) ^H KEY_BACKSPACE'.split()
+nonLogKeys += '^^ ^Z ^A ^L ^C ^U ^K ^I ^D ^G ^[ ^] KEY_RESIZE KEY_F(1) ^H KEY_BACKSPACE'.split()
 nonLogKeys += [' ']
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
@@ -76,8 +80,17 @@ class CommandLog(TsvSheet):
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
-    _rowtype = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment'.split())
-    columns = [ColumnAttr(x) for x in _rowtype._fields]
+    _rowtype = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment undofunc'.split())
+    columns = [
+        ColumnAttr('sheet'),
+        ColumnAttr('col'),
+        ColumnAttr('row'),
+        ColumnAttr('longname'),
+        ColumnAttr('input'),
+        ColumnAttr('keystrokes'),
+        ColumnAttr('comment'),
+        ColumnAttr('undo', 'undofunc', type=bool, width=0)
+    ]
 
     paused = False
     currentReplay = None     # CommandLog replaying currently
@@ -89,6 +102,7 @@ class CommandLog(TsvSheet):
         super().__init__(name, source=source, **kwargs)
         options.set('delimiter', '\t', self)
         self.currentActiveRow = None
+        self.undone = []  # list of CommandLogRow for redo
 
     def newRow(self, **fields):
         return self._rowtype(**fields)
@@ -127,6 +141,14 @@ class CommandLog(TsvSheet):
         self.currentActiveRow = self.newRow(sheet=sheetname, col=colname, row=rowname,
                                               keystrokes=keystrokes, input=args,
                                               longname=cmd.longname, comment=comment)
+
+        if cmd.undo:
+            self.checkpoint(cmd, sheet, self.currentActiveRow)
+
+    @asyncthread
+    def checkpoint(self, cmd, sheet, cmdlogrow):
+        if options.undo:
+            cmdlogrow.undofunc = eval(cmd.undo, getGlobals(), LazyMap(sheet))
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
@@ -306,6 +328,27 @@ class CommandLog(TsvSheet):
         self.addRow(self.newRow(col=objname, row=optname,
                     keystrokes='', input=str(optval),
                     longname='set-option'))
+
+    def undo(self):
+        for cmdlogrow in self.rows[::-1]:
+            if cmdlogrow.undofunc:
+                cmdlogrow.undofunc()
+                self.undone.append(cmdlogrow)
+                self.rows.remove(cmdlogrow)
+                vd.refresh()
+                vs = self.moveToReplayContext(cmdlogrow)
+                if vs is not vd.sheet:
+                    vd.push(vs)
+                status("%s undone" % cmdlogrow.longname)
+                return
+        error("nothing to undo")
+
+    def redo(self):
+        self.undone or error("nothing to redo")
+        cmdlogrow = self.undone.pop()
+        self.replayOne(cmdlogrow)
+        status("%s redone" % cmdlogrow.longname)
+
 
 CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
 CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')

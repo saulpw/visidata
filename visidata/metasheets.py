@@ -2,6 +2,7 @@ from visidata import globalCommand, Sheet, Column, options, vd, anytype, ENTER, 
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
+from visidata import undoAttr, undoAddCols
 
 globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
@@ -82,7 +83,7 @@ class ColumnsSheet(Sheet):
         return c
 
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)')
-ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or fail("no columns selected to concatenate")))')
+ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or fail("no columns selected to concatenate")))', undo=undoAddCols)
 
 
 class SheetsSheet(Sheet):
@@ -189,7 +190,7 @@ class OptionsSheet(Sheet):
             self.addRow(opt)
         self.columns[1].name = 'global_value' if self.source == 'override' else 'sheet_value'
 
-OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
+OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lambda source=source,opt=cursorRow,val=options.get(cursorRow.name,source): options.set(opt.name, val, source)')
 
 bindkeys.set('e', 'edit-option', OptionsSheet)
 bindkeys.set(ENTER, 'edit-option', OptionsSheet)
@@ -206,13 +207,14 @@ def combineColumns(cols):
                   getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
 
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(selectedRows or [cursorRow])')
-ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(selectedRows or [cursorRow])')
-ColumnsSheet.addCommand('g-', 'hide-selected', 'for c in selectedRows or [cursorRow]: c.hide()')
-ColumnsSheet.addCommand('g%', 'type-float-selected', 'for c in selectedRows or [cursorRow]: c.type = float')
-ColumnsSheet.addCommand('g#', 'type-int-selected', 'for c in selectedRows or [cursorRow]: c.type = int')
-ColumnsSheet.addCommand('gz#', 'type-len-selected', 'for c in selectedRows or [cursorRow]: c.type = len')
-ColumnsSheet.addCommand('g@', 'type-date-selected', 'for c in selectedRows or [cursorRow]: c.type = date')
-ColumnsSheet.addCommand('g$', 'type-currency-selected', 'for c in selectedRows or [cursorRow]: c.type = currency')
-ColumnsSheet.addCommand('g~', 'type-string-selected', 'for c in selectedRows or [cursorRow]: c.type = str')
-ColumnsSheet.addCommand('gz~', 'type-any-selected', 'for c in selectedRows or [cursorRow]: c.type = anytype')
+undoColTypes = undoAttr('selectedRows or [cursorRow]', 'type')
+ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(selectedRows or [cursorRow])', undo=undoAttr('selectedRows or [cursorRow]', 'keycol'))
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(selectedRows or [cursorRow])', undo=undoAttr('selectedRows or [cursorRow]', 'keycol'))
+ColumnsSheet.addCommand('g-', 'hide-selected', 'for c in selectedRows or [cursorRow]: c.hide()', undo=undoAttr('selectedRows or [cursorRow]', 'width'))
+ColumnsSheet.addCommand('g%', 'type-float-selected', 'for c in selectedRows or [cursorRow]: c.type = float', undo=undoColTypes)
+ColumnsSheet.addCommand('g#', 'type-int-selected', 'for c in selectedRows or [cursorRow]: c.type = int', undo=undoColTypes)
+ColumnsSheet.addCommand('gz#', 'type-len-selected', 'for c in selectedRows or [cursorRow]: c.type = len', undo=undoColTypes)
+ColumnsSheet.addCommand('g@', 'type-date-selected', 'for c in selectedRows or [cursorRow]: c.type = date', undo=undoColTypes)
+ColumnsSheet.addCommand('g$', 'type-currency-selected', 'for c in selectedRows or [cursorRow]: c.type = currency', undo=undoColTypes)
+ColumnsSheet.addCommand('g~', 'type-string-selected', 'for c in selectedRows or [cursorRow]: c.type = str', undo=undoColTypes)
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'for c in selectedRows or [cursorRow]: c.type = anytype', undo=undoColTypes)
