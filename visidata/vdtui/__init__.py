@@ -1438,4 +1438,4 @@ from .cliptext import clipdraw, clipstr
 from .editline import editline
 from .column import *
 from .color import colors, CursesAttr
-from .sheet import RowColorizer, CellColorizer, ColumnColorizer, Sheet
+from ._sheet import RowColorizer, CellColorizer, ColumnColorizer, Sheet
