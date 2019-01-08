@@ -26,11 +26,17 @@ def namedlist(objname, fieldnames):
 
         def __getattr__(self, k):
             'to enable .fieldname'
-            return self[self._fields.index(k)]
+            try:
+                return self[self._fields.index(k)]
+            except ValueError:
+                raise AttributeError
 
         def __setattr__(self, k, v):
             'to enable .fieldname ='
-            self[self._fields.index(k)] = v
+            try:
+                self[self._fields.index(k)] = v
+            except ValueError:
+                super().__setattr__(k, v)
 
     for i, attrname in enumerate(fieldnames):
         # create property getter/setter for each field
