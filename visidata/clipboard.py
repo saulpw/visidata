@@ -22,15 +22,15 @@ Sheet.addCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, 
 Sheet.addCommand('zy', 'copy-cell', 'vd.clipcells = [cursorDisplay]')
 Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])')
 Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)')
-Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)')
+Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)')
 
-Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
+Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
 Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)')
 
 Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.save_filetype))')
 Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.save_filetype))')
 Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
-Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\\n".join(sheet.cursorCol.getDisplayValue(r) for r in selectedRows))')
+Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\\n".join(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows))')
 
 Sheet.bindkey('KEY_DC', 'delete-cell'),
 Sheet.bindkey('gKEY_DC', 'delete-cells'),
