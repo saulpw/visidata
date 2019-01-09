@@ -146,7 +146,7 @@ def main():
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
         if args.batch:
             if vs.replay_sync():
-                os._exit(1)
+                return 1
         else:
             vs.replay()
             run()
@@ -155,8 +155,10 @@ def main():
         saveSheets(args.output, vd.sheets[0], confirm_overwrite=False)
         sync()
 
+    return 0
+
 if __name__ == '__main__':
     status(__version_info__)
-    main()
+    rc = main()
     sys.stderr.flush()
-    os._exit(0)  # cleanup can be expensive with large datasets
+    os._exit(rc)  # cleanup can be expensive with large datasets
