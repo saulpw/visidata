@@ -356,7 +356,7 @@ class GitOptions(GitSheet):
                         if k not in opts:
                             opts[k] = [None, None, None]
                         opts[k][i] = v
-            except:
+            except Exception:
                 pass # exceptionCaught()
 
         self.rows = sorted(list(opts.items()))

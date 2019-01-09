@@ -47,7 +47,7 @@ class GitBlame(GitSheet):
                 try:
                     k, v = lines[i].split(maxsplit=1)
                     hdr[k] = v
-                except:
+                except Exception:
                     status(lines[i])
                 i += 1
 
