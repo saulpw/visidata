@@ -13,7 +13,7 @@ option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
 globalCommand('gD', 'visidata-dir', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))')
 globalCommand('D', 'cmdlog', 'vd.push(vd.cmdlog)')
-globalCommand('^D', 'save-cmdlog', 'saveSheets(inputFilename("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)')
+globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)')
 globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
 globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
 globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')

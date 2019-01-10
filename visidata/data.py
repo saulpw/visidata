@@ -94,9 +94,9 @@ BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to:
 # gz^ with no selectedRows is same as z^
 
 globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))')
-Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputFilename("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
-globalCommand('g^S', 'save-all', 'saveSheets(inputFilename("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
-Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputFilename("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)')
+Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
+globalCommand('g^S', 'save-all', 'saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
+Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = selectedRows or rows; saveSheets(inputPath("save to: ", value=getDefaultSaveName(vs)), vs, confirm_overwrite=options.confirm_overwrite)')
 
 Sheet.addCommand('z=', 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 
@@ -121,6 +121,9 @@ def newSheet(ncols):
 
 def inputFilename(prompt, *args, **kwargs):
     return input(prompt, "filename", *args, completer=completeFilename, **kwargs)
+
+def inputPath(*args, **kwargs):
+    return Path(inputFilename(*args, **kwargs))
 
 def completeFilename(val, state):
     i = val.rfind('/')
@@ -149,9 +152,9 @@ def getDefaultSaveName(sheet):
     else:
         return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype)
 
-def saveSheets(fn, *vsheets, confirm_overwrite=False):
-    'Save sheet `vs` with given filename `fn`.'
-    givenpath = Path(fn)
+def saveSheets(givenpath, *vsheets, confirm_overwrite=False):
+    'Save all vsheets to givenpath'
+    fn = givenpath.fqpn
 
     # determine filetype to save as
     filetype = ''

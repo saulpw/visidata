@@ -69,17 +69,21 @@ def main():
     # fetch motd after options parsing/setting
     domotd()
 
-    flPipedData = not sys.stdin.isatty()
+    flPipedInput = not sys.stdin.isatty()
+    flPipedOutput = not sys.stdout.isatty()
 
     # always duplicate stdin for input and reopen tty as stdin
     try:
-        stdin = open(os.dup(0))
-        f = open('/dev/tty')
-        os.dup2(f.fileno(), 0)
-        vd.stdin = stdin
+        fin = open('/dev/tty')
+        fout = open('/dev/tty', mode='w')
+        vd.stdin = open(os.dup(0))
+        vd.stdout = open(os.dup(1))  # for dumping to stdout from interface
+        os.dup2(fin.fileno(), 0)
+        os.dup2(fout.fileno(), 1)
     except Exception as e:
         print(e)
         vd.stdin = sys.stdin
+        vd.stdout = sys.stdout
 
     stdinSource = PathFd('-', vd.stdin)
 
@@ -114,7 +118,7 @@ def main():
         vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
     if not args.play:
-        if flPipedData and not inputs:  # '|vd' without explicit '-'
+        if flPipedInput and not inputs:  # '|vd' without explicit '-'
             inputs.append(stdinSource)
 
         if not inputs:
@@ -145,15 +149,18 @@ def main():
 
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
         if args.batch:
-            if vs.replay_sync():
+            if vs.replay_sync():  # error
                 return 1
         else:
             vs.replay()
             run()
 
-    if args.output and vd.sheets:
-        saveSheets(args.output, vd.sheets[0], confirm_overwrite=False)
+    if vd.sheets and (flPipedOutput or args.output):
+        outpath = Path(args.output or '-')
+        saveSheets(outpath, vd.sheets[0], confirm_overwrite=False)
         sync()
+
+    vd.stdout.flush()
 
     return 0
 
@@ -161,4 +168,5 @@ if __name__ == '__main__':
     status(__version_info__)
     rc = main()
     sys.stderr.flush()
+    sys.stdout.flush()
     os._exit(rc)  # cleanup can be expensive with large datasets
