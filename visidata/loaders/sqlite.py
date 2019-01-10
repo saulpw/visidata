@@ -37,6 +37,7 @@ class SqliteSheet(DeferredSaveSheet):
         with (_conn or self.conn()) as conn:
             tblname = self.tableName
             self.columns = self.getColumns(tblname, conn)
+            self.recalc()
             r = self.execute(conn, 'SELECT COUNT(*) FROM %s' % tblname).fetchall()
             rowcount = r[0][0]
             self.rows = []
