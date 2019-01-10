@@ -6,6 +6,7 @@ def joinSheetnames(*sheetnames):
 
 def moveListItem(L, fromidx, toidx):
     "Move element within list `L` and return element's new index."
+    toidx = max(toidx, 0)
     r = L.pop(fromidx)
     L.insert(toidx, r)
     return toidx
