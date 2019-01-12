@@ -2672,6 +2672,9 @@ def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
     left_truncchar = right_truncchar = truncchar
 
     def rfind_nonword(s, a, b):
+        if not s:
+            return 0
+
         while not s[b].isalnum() and b >= a:  # first skip non-word chars
             b -= 1
         while s[b].isalnum() and b >= a:
