@@ -8,7 +8,6 @@ replayableOption('safe_error', '#ERR', 'error string to use while saving')
 replayableOption('header', 1, 'parse first N rows of certain formats as column names')
 replayableOption('delimiter', '\t', 'delimiter to use for tsv filetype')
 replayableOption('filetype', '', 'specify file type')
-replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
 replayableOption('tsv_safe_newline', '\u001e', 'replacement for tab character when saving to tsv')
 replayableOption('tsv_safe_tab', '\u001f', 'replacement for newline character when saving to tsv')
 
