@@ -1,11 +1,12 @@
 import textwrap
 
-from visidata.vdtui import vd, option, options, Sheet, ColumnItem, asyncthread
+from visidata.vdtui import vd, option, options, Sheet, ColumnItem, asyncthread, replayableOption
 
 __all__ = [ 'TextSheet' ]
 
 
 option('wrap', False, 'wrap text to fit window width on TextSheet')
+replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
 
 
 ## text viewer and dir browser
@@ -21,7 +22,6 @@ class TextSheet(Sheet):
 
     def __init__(self, name, source, **kwargs):
         super().__init__(name, source=source, **kwargs)
-        options.set('save_filetype', 'txt', self)
 
     @asyncthread
     def reload(self):
@@ -34,6 +34,8 @@ class TextSheet(Sheet):
                     self.addRow([startingLine+i+1, L])
             else:
                 self.addRow([startingLine+1, text])
+
+options.set('save_filetype', 'txt', TextSheet)
 
 TextSheet.addCommand('v', 'visibility', 'options.set("wrap", not options.wrap, sheet); reload(); status("text%s wrapped" % ("" if options.wrap else " NOT")); ')
 
