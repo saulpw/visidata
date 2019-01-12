@@ -124,7 +124,7 @@ def undoAttr(objs, attrname):
 
 def undoAttrCopy(objs, attrname):
     'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value which is copied.'
-    return '''lambda oldvals=[ (o, copy(getattr(o, "{attrname}"))) for o in {objs} ] : list(setattr(o, "{attrname}", v) for o, v in oldvals) '''.format(attrname=attrname, objs=objs)
+    return '''lambda oldvals=[ (o, copy(getattr(o, "{attrname}"))) for o in {objs} ] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)
 
 def undoSetValues(rowstr='[cursorRow]', colstr='[cursorCol]'):
     return 'lambda oldvals=[(c, r, c.getValue(r)) for c,r in itertools.product({colstr}, {rowstr})]: list(c.setValue(r, v) for c, r, v in oldvals)'.format(rowstr=rowstr, colstr=colstr)

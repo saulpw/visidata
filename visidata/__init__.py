@@ -40,6 +40,7 @@ from .transpose import *
 from .diff import *
 from .shell import *
 from .movement import *
+import visidata.sort
 from ._profile import *
 
 from .vimkeys import *

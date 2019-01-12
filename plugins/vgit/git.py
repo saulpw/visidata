@@ -331,7 +331,7 @@ class GitStatus(GitSheet):
 
         self.rows.extend(gf for fn, gf in filenames.items() if not self.ignored(gf.filename))
 
-        self.orderBy(self.columns[-1], reverse=True)
+        self.orderBy(None, self.columns[-1], reverse=True)
 
         self.recalc()  # erase column caches
 

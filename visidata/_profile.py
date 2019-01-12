@@ -91,7 +91,7 @@ class ProfileSheet(Sheet):
 
     def reload(self):
         self.rows = self.source
-        self.orderBy(self.column('inlinetime_us'), reverse=True)
+        self.orderBy(None, self.column('inlinetime_us'), reverse=True)
         self.callers = collections.defaultdict(list)  # [row.code] -> list(code)
 
         for r in self.rows:

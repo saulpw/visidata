@@ -62,6 +62,20 @@ class Sheet(BaseSheet):
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
+    @classmethod
+    def init(cls, membername, initfunc):
+        'Sheet.init("attr", T) adds `self.attr=T()` to Sheet.__init__'
+        old = cls.__init__
+        def new(self, *args, **kwargs):
+            old(self, *args, **kwargs)
+            setattr(self, membername, initfunc())
+        cls.__init__ = new
+
+    @classmethod
+    def api(cls, func):
+        setattr(cls, func.__name__, func)
+        return func
+
     def __len__(self):
         return self.nRows
 
@@ -367,16 +381,6 @@ class Sheet(BaseSheet):
                     yield r
             except Exception:
                 pass
-
-    @asyncthread
-    def orderBy(self, *cols, **kwargs):
-        try:
-            with Progress(self.rows, 'sorting') as prog:
-                # must not reassign self.rows: use .sort() instead of sorted()
-                self.rows.sort(key=lambda r,cols=cols,prog=prog: prog.addProgress(1) and tuple(c.getTypedValue(r) for c in cols), **kwargs)
-        except TypeError as e:
-            status('sort incomplete due to TypeError; change column type')
-            exceptionCaught(e, status=False)
 
     @property
     def selectedRows(self):
@@ -713,11 +717,6 @@ undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', undo=undoRestoreKey),
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', undo=undoRestoreKey),
 Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
-
-Sheet.addCommand('[', 'sort-asc', 'orderBy(cursorCol)', undo=undoNotImpl),
-Sheet.addCommand(']', 'sort-desc', 'orderBy(cursorCol, reverse=True)', undo=undoNotImpl),
-Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(*keyCols)', undo=undoNotImpl),
-Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(*keyCols, reverse=True)', undo=undoNotImpl),
 
 Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 
