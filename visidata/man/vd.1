@@ -1,4 +1,4 @@
-.Dd December 16, 2018
+.Dd January 12, 2019
 .Dt vd \&1 "Quick Reference Guide" 
 .Os Linux/MacOS
 .
@@ -30,7 +30,7 @@
 .Op Ar field Ns Cm = Ns Ar value No ...
 .
 .Sh DESCRIPTION
-.Nm VisiData No is a multipurpose tool built on the Sy vdtui No platform that can be used to explore, clean, edit, and restructure data.
+.Nm VisiData No is an easy-to-use multipurpose tool to explore, clean, edit, and restructure data.
 Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; and workflows can be saved, documented, and replayed.
 .
 .Ss REPLAY MODE
@@ -124,7 +124,7 @@ move up/down to next selected row
 .It Ic " r" Ar regex
 .No move to next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No move to column/row Ar number
+.No move to column/row Ar number (0-based)
 .Pp
 .It Ic " H   J   K   L"
 slide current row/column left/down/up/right
@@ -694,27 +694,23 @@ encoding_errors passed to codecs.open
 flags to pass to re.compile() [AILMSUX]
 .It Sy --default-width Ns = Ns Ar "int         " No "20"
 default column width
-.It Sy --wrap Ns = Ns Ar "bool                 " No "False"
-wrap text to fit window width on TextSheet
-.It Sy --bulk-select-clear Ns = Ns Ar "bool    " No "False"
+.It Sy --bulk-select-clear No "         False"
 clear selected rows before new bulk selections
 .It Sy --cmd-after-edit Ns = Ns Ar "str        " No "go-down"
 command longname to execute after successful edit
 .It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
 max number of cache entries in each cached column
-.It Sy --quitguard Ns = Ns Ar "bool            " No "False"
+.It Sy --quitguard No "                 False"
 confirm before quitting last sheet
 .It Sy --null-value Ns = Ns Ar "NoneType       " No "None"
 a value to be counted as null
-.It Sy --force-valid-colnames Ns = Ns Ar "bool " No "False"
+.It Sy --force-valid-colnames No "      False"
 clean column names to be valid Python identifiers
-.It Sy --debug Ns = Ns Ar "bool                " No "False"
+.It Sy --debug No "                     False"
 exit on error and display stacktrace
-.It Sy --curses-timeout Ns = Ns Ar "int        " No "100"
-curses timeout in ms
-.It Sy --force-256-colors Ns = Ns Ar "bool     " No "False"
+.It Sy --force-256-colors No "          False"
 use 256 colors even if curses reports fewer
-.It Sy --use-default-colors Ns = Ns Ar "bool   " No "False"
+.It Sy --use-default-colors No "        False"
 curses use default terminal colors
 .It Sy --note-pending Ns = Ns Ar "str          " No "\[u231B]"
 note to display for pending cells
@@ -728,6 +724,10 @@ cell note for an exception during type conversion
 cell note for unknown types in anytype column
 .It Sy --scroll-incr Ns = Ns Ar "int           " No "3"
 amount to scroll with scrollwheel
+.It Sy --wrap No "                      False"
+wrap text to fit window width on TextSheet
+.It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
+specify default file type to save as
 .It Sy --skip Ns = Ns Ar "int                  " No "0"
 skip first N lines of text input
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
@@ -740,8 +740,6 @@ parse first N rows of certain formats as column names
 delimiter to use for tsv filetype
 .It Sy --filetype Ns = Ns Ar "str              " No ""
 specify file type
-.It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
-specify default file type to save as
 .It Sy --tsv-safe-newline Ns = Ns Ar "str      " No ""
 replacement for tab character when saving to tsv
 .It Sy --tsv-safe-tab Ns = Ns Ar "str          " No ""
@@ -754,7 +752,7 @@ visibility level (0=low, 1=high)
 minimum memory to continue loading and async processing
 .It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
 time to wait between replayed commands, in seconds
-.It Sy --replay-movement Ns = Ns Ar "bool      " No "False"
+.It Sy --replay-movement No "           False"
 insert movements during replay
 .It Sy --visidata-dir Ns = Ns Ar "str          " No "~/.visidata/"
 directory to load and store macros
@@ -764,6 +762,8 @@ string prefix for rowkey in the cmdlog
 file to autorecord each cmdlog action to
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
 maxsplit to pass to regex.split
+.It Sy --default-sample-size Ns = Ns Ar "int   " No "100"
+number of rows to sample for regex.split
 .It Sy --show-graph-labels Ns = Ns Ar "bool    " No "True"
 show axes and legend on graph
 .It Sy --plot-colors Ns = Ns Ar "str           " No ""
@@ -784,7 +784,7 @@ quotechar passed to csv.reader
 skipinitialspace passed to csv.reader
 .It Sy --csv-escapechar Ns = Ns Ar "NoneType   " No "None"
 escapechar passed to csv.reader
-.It Sy --safety-first Ns = Ns Ar "bool         " No "False"
+.It Sy --safety-first No "              False"
 sanitize input/output to handle edge cases, with a performance cost
 .It Sy --json-indent Ns = Ns Ar "NoneType      " No "None"
 indent to use when saving json
@@ -865,10 +865,12 @@ color of note in pending cells
 cell note for numeric types in anytype columns
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
 default fmtstr to strftime for date values
+.It Sy "color_add_pending  " No "green"
+color for rows pending add
 .It Sy "color_change_pending" No "reverse yellow"
-color for file attributes pending modification
+color for cells pending modification
 .It Sy "color_delete_pending" No "red"
-color for files pending delete
+color for rows pending delete
 .It Sy "disp_histogram     " No "*"
 histogram element character
 .It Sy "disp_histolen      " No "50"
@@ -1033,6 +1035,8 @@ These are the supported savers:
 .It Sy tsv No (tab-separated value)
 .It Sy csv No (comma-separated value)
 .It Sy json No (one object with all rows)
+.It Sy jsonl No (one object per line/row)
+.It Sy sqlite No (multisave capable)
 .Bl -inset -compact -offset xxx
 .It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
 .It Sy .shp No files can be saved as Sy geoJSON Ns .
