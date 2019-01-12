@@ -2723,7 +2723,7 @@ def editText(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch()); i += 1  # literal character
         elif ch == '^W':                           j = rfind_nonword(v, 0, i-1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch == '^Z':                           v = suspend()
+        elif ch == '^Z':                           suspend()
         elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
         elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
         elif ch.startswith('KEY_'):                pass
