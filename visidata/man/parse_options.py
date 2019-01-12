@@ -16,6 +16,10 @@ options_cli_skel = '''.It Sy --{cli_optname} Ns = Ns Ar "{type}" No "{default}"
 {description}
 '''
 
+options_cli_skel_bool = '''.It Sy --{cli_optname} No "{default}"
+{description}
+'''
+
 options_menu_skel = '''.It Sy "{optname:<19}" No "{default}"
 {description}
 '''
@@ -49,11 +53,19 @@ with open(fncli, 'w') as cliOut:
                 cli_optname=opt.name.replace('_', '-')
                 cli_type=type(opt.value).__name__
                 optlen = len(cli_optname)+len(cli_type)+1
-                cliOut.write(options_cli_skel.format(cli_optname=cli_optname,
-                                                optname = opt.name,
-                                                type=cli_type+" "*(padding-optlen),
-                                                default=visidata.options.get(opt.name, 'global'),
-                                                 description=opt.helpstr))
+                if cli_type != 'bool' or visidata.options.get(opt.name, 'global' == True):
+                    cliOut.write(options_cli_skel.format(cli_optname=cli_optname,
+                                                    optname = opt.name,
+                                                    type=cli_type+" "*(padding-optlen),
+                                                    default=visidata.options.get(opt.name, 'global'),
+                                                     description=opt.helpstr))
+                else:
+
+                    cliOut.write(options_cli_skel_bool.format(cli_optname=cli_optname,
+                                                    optname = opt.name,
+                                                    type=cli_type+" "*(padding-optlen),
+                                                    default=" "*(padding-optlen+5)+str(visidata.options.get(opt.name, 'global')),
+                                                     description=opt.helpstr))
 
         menuOut.write('.El')
         cliOut.write('.El')
