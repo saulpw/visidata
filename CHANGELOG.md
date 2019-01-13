@@ -22,6 +22,16 @@
 - clean up options
   - remove `curses_timeout` option (fix to 100ms)
 
+# v1.5.2 (2019-01-12)
+
+## Bugfixes
+- [regex] fix `g*` #239 (thanks to @jsvine for bug hunting)
+- [editline] suspend during editline will resume in editline
+- [editline] `Ctrl+W` on an empty value in editline now works
+
+## Docs
+- [manpage] update the manpage to be more accurate for boolean command line options
+
 # v1.5.1 (2018-12-17)
 
 ## Bugfixes

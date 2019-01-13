@@ -1311,7 +1311,6 @@ def suspend():
     with SuspendCurses():
         os.kill(os.getpid(), signal.SIGSTOP)
 
-
 def setupcolors(stdscr, f, *args):
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"

@@ -47,7 +47,7 @@ replay in batch mode (with no interface)
 .Lo o output file
 .No save final visible sheet to Ar file No as .tsv
 .
-.It Sy --replay-movement= Ns Ar bool
+.It Sy --replay-movement
 .No toggle Sy --play No to move cursor cell-by-cell
 .It Ar field Ns Cm = Ns Ar value
 .No replace \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
@@ -72,7 +72,7 @@ In most cases, commands that affect selected rows will affect all rows if no row
 view this man page
 .It Ic "z^H"
 view sheet of commands and keybindings
-.It Ic ^Q
+.It Ic " ^Q"
 abort program immediately
 .It Ic " ^C"
 cancel user input or abort all async threads on current sheet
