@@ -7,6 +7,7 @@ from visidata.vdtui import options, fail, anytype, stacktrace, status
 from visidata.vdtui import getType, typemap, isNumeric, isNullFunc
 from visidata.vdtui import asyncthread, Progress, exceptionCaught
 from visidata.vdtui import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
+from visidata.vdtui import Extensible
 
 __all__ = [
     'clean_to_id',
@@ -28,7 +29,7 @@ def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s))
 
 
-class Column:
+class Column(Extensible):
     def __init__(self, name='', *, type=anytype, cache=False, **kwargs):
         self.sheet = None     # owning Sheet, set in Sheet.addColumn
         self.name = name      # display visible name

@@ -1393,6 +1393,21 @@ def addGlobals(g):
 def getGlobals():
     return globals()
 
+class Extensible:
+    @classmethod
+    def init(cls, membername, initfunc):
+        'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T)'
+        old = cls.__init__
+        def new(self, *args, **kwargs):
+            old(self, *args, **kwargs)
+            setattr(self, membername, initfunc())
+        cls.__init__ = new
+
+    @classmethod
+    def api(cls, func):
+        setattr(cls, func.__name__, func)
+        return func
+
 from .cliptext import clipdraw, clipstr
 from .editline import editline
 from .column import *

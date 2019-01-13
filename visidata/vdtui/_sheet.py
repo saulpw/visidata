@@ -22,7 +22,7 @@ CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt fun
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
 
-class Sheet(BaseSheet):
+class Sheet(BaseSheet, Extensible):
     'Base class for all tabular sheets.'
     _rowtype = lambda: collections.defaultdict(lambda: None)
     rowtype = 'rows'
@@ -61,20 +61,6 @@ class Sheet(BaseSheet):
         self._selectedRows = {}  # id(row) -> row
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
-
-    @classmethod
-    def init(cls, membername, initfunc):
-        'Sheet.init("attr", T) adds `self.attr=T()` to Sheet.__init__'
-        old = cls.__init__
-        def new(self, *args, **kwargs):
-            old(self, *args, **kwargs)
-            setattr(self, membername, initfunc())
-        cls.__init__ = new
-
-    @classmethod
-    def api(cls, func):
-        setattr(cls, func.__name__, func)
-        return func
 
     def __len__(self):
         return self.nRows
