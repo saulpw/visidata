@@ -9,7 +9,7 @@ class HttpPath(PathFd):
     def __init__(self, url, req):
         from urllib.parse import urlparse
         obj = urlparse(url)
-        super().__init__(obj.path, req)
+        super().__init__(url, req)
         self.req = req
 
 
