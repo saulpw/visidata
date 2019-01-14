@@ -135,6 +135,10 @@ class Column(Extensible):
         'Returns the properly-typed value for the given row at this column, or a TypedWrapper object.'
         return wrapply(self.type, wrapply(self.getValue, row))
 
+    @asyncthread
+    def _putValue(self, row):
+        self._cachedValues[id(row)] = wrapply(self.calcValue, row)
+
     def getValue(self, row):
         'Memoize calcValue with key id(row)'
         if self._cachedValues is None:
@@ -144,8 +148,8 @@ class Column(Extensible):
         if k in self._cachedValues:
             return self._cachedValues[k]
 
-        ret = self.calcValue(row)
-        self._cachedValues[k] = ret
+        self._cachedValues[k] = None
+        self._putValue(row)
 
         cachesize = options.col_cache_size
         if cachesize > 0 and len(self._cachedValues) > cachesize:
