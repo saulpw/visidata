@@ -94,6 +94,10 @@ class Path:
         'Resolve pathname shell variables and ~userdir'
         return os.path.expandvars(os.path.expanduser(self.fqpn))
 
+    def abspath(self):
+        return os.path.abspath(self.resolve())
+
+
     def relpath(self, start):
         ourpath = self.resolve()
         if ourpath == start:
