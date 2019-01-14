@@ -226,11 +226,17 @@ class DirSheet(DeferredSaveSheet):
         self.reset()  # reset deferred caches
         self.rows = []
         basepath = self.source.resolve()
+
+        folders = set()
         for folder, subdirs, files in os.walk(basepath):
             subfolder = folder[len(basepath)+1:]
-            if subfolder.startswith('.'): continue
+            if subfolder in ['.', '..']: continue
+
+            if folder not in folders:
+                self.rows.append(Path(folder))
+
             for fn in files:
-                if fn.startswith('.'): continue
+#                if fn.startswith('.'): continue
                 p = Path(os.path.join(folder, fn))
                 self.rows.append(p)
 
