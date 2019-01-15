@@ -58,6 +58,15 @@ GitOverview.addCommand(ENTER, 'dive-row', 'vd.push(open_git(cursorRow.path))')
 GitOverview.addCommand('z'+ENTER, 'dive-cell', 'view(cursorValue)')
 
 
+def open_git(p):
+    p.joinpath('.git').is_dir() or error('not a git repo')
+    vs = vgit.GitStatus(p)
+    vs.gitBranchesSheet = vgit.GitBranches('branches', source=vs)
+    vs.gitOptionsSheet = vgit.GitOptions('git-options', source=vs)
+    vs.gitStashesSheet = vgit.GitStashes('stashes', source=vs)
+    vs.gitRemotesSheet = vgit.GitRemotes('remotes', source=vs)
+    return vs
+
 def main():
     vs = GitOverview('gitrepos', source='.')
     run(vs)
