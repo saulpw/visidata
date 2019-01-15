@@ -4,7 +4,7 @@ import os.path
 import sys
 from visidata import Sheet, Column, ColumnAttr, run, status, Command, Path, ENTER, asyncthread
 from visidata import namedlist, date
-import plugins.vgit as vgit
+import vgit
 
 __version__ = 'v0.4-dev'
 __version_info__ = 'saul.pw/vgit ' + __version__
