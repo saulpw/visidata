@@ -11,7 +11,7 @@ option('profile', '', 'filename to save binary profiling data')
 
 globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())')
 
-ThreadsSheet.addCommand(ENTER, 'profile-row', 'vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile.getstats()))')
+ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile.getstats())) or warning("no profile")')
 
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
