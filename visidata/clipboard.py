@@ -6,7 +6,7 @@ import tempfile
 import functools
 
 from visidata import vd, asyncthread, sync, status, fail, option, options
-from visidata import Sheet, saveSheets
+from visidata import Sheet, saveSheets, Path
 from visidata import undoEditCell, undoEditCells, undoSheetRows
 
 vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
@@ -98,7 +98,7 @@ class _Clipboard:
 
         # use NTF to generate filename and delete file on context exit
         with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
-            saveSheets(temp.name, vs)
+            saveSheets(Path(temp.name), vs)
             sync(1)
             p = subprocess.Popen(
                 self.command,
