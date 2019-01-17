@@ -41,7 +41,7 @@ class Column(Extensible):
         self.keycol = False   # is a key column
         self.expr = None      # Column-type-dependent parameter
 
-        self._cachedValues = collections.OrderedDict() if cache else None
+        self.setCache(cache)
         for k, v in kwargs.items():
             setattr(self, k, v)  # instead of __dict__.update(kwargs) to invoke property.setters
 
@@ -135,9 +135,20 @@ class Column(Extensible):
         'Returns the properly-typed value for the given row at this column, or a TypedWrapper object.'
         return wrapply(self.type, wrapply(self.getValue, row))
 
+    def setCache(self, cache):
+        'cache=False: always call CalcValue; True: maintain cache of options.col_cache_size; "async": maintain an infinite cache and launch threads'
+        self.cache = cache
+        self._cachedValues = collections.OrderedDict() if self.cache else None
+
     @asyncthread
+    def _putValue_async(self, row):
+        self._cachedValues[id(row)] = None
+        self._putValue(row)
+
     def _putValue(self, row):
-        self._cachedValues[id(row)] = wrapply(self.calcValue, row)
+        ret = wrapply(self.calcValue, row)
+        self._cachedValues[id(row)] = ret
+        return ret
 
     def getValue(self, row):
         'Memoize calcValue with key id(row)'
@@ -148,12 +159,14 @@ class Column(Extensible):
         if k in self._cachedValues:
             return self._cachedValues[k]
 
-        self._cachedValues[k] = None
-        self._putValue(row)
+        if self.cache == 'async':
+            ret = self._putValue_async(row)
+        else:
+            ret = self._putValue(row)
 
-        cachesize = options.col_cache_size
-        if cachesize > 0 and len(self._cachedValues) > cachesize:
-            self._cachedValues.popitem(last=False)
+            cachesize = options.col_cache_size
+            if cachesize > 0 and len(self._cachedValues) > cachesize:
+                self._cachedValues.popitem(last=False)
 
         return ret
 
@@ -383,8 +396,8 @@ class LazyMapRow:
 
 
 class ColumnExpr(Column):
-    def __init__(self, name, expr=None):
-        super().__init__(name)
+    def __init__(self, name, cache=True, expr=None, **kwargs):
+        super().__init__(name, **kwargs)
         self.expr = expr or name
 
     def calcValue(self, row):

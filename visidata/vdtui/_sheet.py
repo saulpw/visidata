@@ -1,5 +1,6 @@
 import collections
 import functools
+import threading
 import re
 from copy import copy
 
@@ -586,6 +587,9 @@ class Sheet(BaseSheet, Extensible):
             col = self.visibleCols[vcolidx]
 
             if x < self.vd.windowWidth:  # only draw inside window
+              timer = threading.Timer(0.2, lambda col=col: status("setting %s async" % col.name) and col.setCache('async'))
+              timer.start()
+              try:
                 headerRow = 0
                 self.drawColHeader(scr, headerRow, vcolidx)
 
@@ -635,6 +639,8 @@ class Sheet(BaseSheet, Extensible):
                        scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
 
                     y += 1
+              finally:
+                    timer.cancel()
 
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.vd.windowWidth-2, options.disp_more_right, colors.color_column_sep)

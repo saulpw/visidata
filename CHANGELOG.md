@@ -8,6 +8,8 @@
 
 ## Improvements and additions
 
+- [column] if drawing a particular column takes more than 200ms, the column becomes async
+- expr columns are now set to cache automatically
 - `sort-*-add` bound to z[] and gz[] to add additional sort columns
 - output pipes now work as expected
    - `ls|vd|lpr` to interactively select which filenames to send to the printer
