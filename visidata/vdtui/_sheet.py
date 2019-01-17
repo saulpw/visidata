@@ -221,7 +221,7 @@ class Sheet(BaseSheet, Extensible):
     @property
     def cursorRow(self):
         'The row object at the row cursor.'
-        return self.rows[self.cursorRowIndex]
+        return self.rows[self.cursorRowIndex] if self.rows else None
 
     @property
     def visibleRows(self):  # onscreen rows
