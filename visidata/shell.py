@@ -54,6 +54,9 @@ class DeferredSaveSheet(Sheet):
         RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: id(r) in s.toBeDeleted),
         RowColorizer(9, 'color_add_pending', lambda s,c,r,v: id(r) in s.addedRows),
     ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reset()
 
     def reset(self):
         'reset deferred caches'
