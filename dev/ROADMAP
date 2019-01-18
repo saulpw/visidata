@@ -9,8 +9,7 @@
 
 ## 2. Plugin api/package manager
 
-+ deprecate vdtui.py as single file dropin TUI
-   + same functionality will be available as visidata.vdtui
+[done] deprecate vdtui.py as single file dropin TUI
 - in-app downloadable/installable snippets
 
 ## 3. Split panes
@@ -21,7 +20,7 @@
 
 ## 4. Undo #141
 
-+ infinite linear undo/redo
+- [done] infinite linear undo/redo
 
 ## 5. Simple non-python installers
 
@@ -45,13 +44,12 @@
 ## 8. Integrate DeferredSet to all sheets
 
 - 'modified' indicator on status bar, also enables quitguard
-+ sqlite: allow in-memory edits, ^S to commit
+[done] sqlite: allow in-memory edits, ^S to commit
   - index sheet: include rows/cols; allow to be cutnpasted
-  + solve "load in other thread" problem
 
 ## 9. Loaders and Savers
 
-+ parquet #112
+[done] parquet #112
 - .mdb, .accdb
 - google sheets
 - save canvas to .svg (canvassave_svg)
