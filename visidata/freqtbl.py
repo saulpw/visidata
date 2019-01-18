@@ -43,7 +43,7 @@ class SheetFreqTable(Sheet):
         nkeys = len(self.keyCols)
 
         self.columns.extend([
-            Column('count', type=int, getter=lambda col,row: len(row.sourcerows), sql='COUNT(*)'),
+            ColumnAttr('count', 'sourcerows', type=len, sql='COUNT(*)'),
             Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows, sql=''),
             Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//col.sheet.largest), width=options.disp_histolen+2, sql=''),
         ])
