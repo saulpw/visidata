@@ -37,7 +37,7 @@ class SheetFreqTable(Sheet):
         ]
         for origCol in self.origCols:
             if isNumeric(origCol):
-                self.addColumn(Column(origCol.name, width=origCol.width*2, getter=lambda c,r,origCol=origCol: ' - '.join(origCol.format(x) for x in r.numrange)))
+                self.addColumn(Column(origCol.name, width=origCol.width and origCol.width*2, getter=lambda c,r,origCol=origCol: ' - '.join(origCol.format(x) for x in r.numrange)))
 
         self.setKeys(self.columns)  # origCols are now key columns
         nkeys = len(self.keyCols)
