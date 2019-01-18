@@ -1,4 +1,5 @@
 import math
+import collections
 
 from visidata import *
 
@@ -8,8 +9,7 @@ globalCommand('zF', 'freq-rows', 'vd.push(SheetFreqTable(sheet, Column("Total", 
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
-#option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
-#option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
+option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 
 ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(source[0], cursorRow))')
 
@@ -17,10 +17,12 @@ def valueNames(vals):
     return '-'.join(str(v) for v in vals)
 
 
-# rowdef: (keys, source_rows)
+FreqRow = collections.namedtuple('FreqRow', ['keys', 'numrange', 'sourcerows'])
+
 class SheetFreqTable(Sheet):
     'Generate frequency-table sheet on currently selected column.'
-    rowtype = 'bins'
+    rowtype = 'bins'  # rowdef FreqRow(keys, sourcerows)
+
     def __init__(self, sheet, *columns):
         fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in columns))
         super().__init__(fqcolname, source=sheet)
@@ -29,22 +31,26 @@ class SheetFreqTable(Sheet):
 
         self.columns = [
             Column(c.name, type=c.type if c.type in typemap else anytype, width=c.width, fmtstr=c.fmtstr,
-                        getter=lambda col,row,i=i: row[0][i],
-                        setter=lambda col,row,v,i=i,origCol=c: setitem(row[0], i, v) and origCol.setValues(row[1], v))
-                for i, c in enumerate(self.origCols)
+                        getter=lambda col,row,i=i: row.keys[i],
+                        setter=lambda col,row,v,i=i,origCol=c: setitem(row.keys, i, v) and origCol.setValues(row.sourcerows, v))
+                for i, c in enumerate(self.origCols) if not isNumeric(c)
         ]
+        for origCol in self.origCols:
+            if isNumeric(origCol):
+                self.addColumn(Column(origCol.name, width=origCol.width*2, getter=lambda c,r,origCol=origCol: ' - '.join(origCol.format(x) for x in r.numrange)))
+
         self.setKeys(self.columns)  # origCols are now key columns
         nkeys = len(self.keyCols)
 
         self.columns.extend([
-            Column('count', type=int, getter=lambda col,row: len(row[1]), sql='COUNT(*)'),
-            Column('percent', type=float, getter=lambda col,row: len(row[1])*100/col.sheet.source.nRows, sql=''),
-            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=options.disp_histolen+2, sql=''),
+            Column('count', type=int, getter=lambda col,row: len(row.sourcerows), sql='COUNT(*)'),
+            Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows, sql=''),
+            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//col.sheet.largest), width=options.disp_histolen+2, sql=''),
         ])
 
         aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
                                  type=aggregator.type or c.type,
-                                 getter=lambda col,row,origcol=c,aggr=aggregator: aggr(origcol, row[1]),
+                                 getter=lambda col,row,origcol=c,aggr=aggregator: aggr(origcol, row.sourcerows),
                                  sql='%s(%s)' % (aggregator, c.name) )
                              for c in self.source.visibleCols
                                 for aggregator in getattr(c, 'aggregators', [])
@@ -59,113 +65,68 @@ class SheetFreqTable(Sheet):
         self.orderby = [(self.columns[nkeys], -1)]  # count desc
 
     def selectRow(self, row):
-        self.source.select(row[1])     # select all entries in the bin on the source sheet
+        self.source.select(row.sourcerows)     # select all entries in the bin on the source sheet
         return super().selectRow(row)  # then select the bin itself on this sheet
 
     def unselectRow(self, row):
-        self.source.unselect(row[1])
+        self.source.unselect(row.sourcerows)
         return super().unselectRow(row)
-
-    def numericBinning(self):
-        nbins = options.histogram_bins or int(len(self.source.rows) ** (1./2))
-
-        origCol = self.origCols[0]
-        self.columns[0].type = str
-
-        # separate rows with errors at the column from those without errors
-        errorbin = []
-        allbin = []
-        for row in Progress(self.source.rows, 'binning'):
-            try:
-                v = origCol.getTypedValue(row)
-                allbin.append((v, row))
-            except Exception as e:
-                errorbin.append((e, row))
-
-        # find bin pivots from non-error values
-        binPivots = []
-        sortedValues = sorted(allbin, key=lambda x: x[0])
-
-        if options.histogram_even_interval:
-            binsize = len(sortedValues)/nbins
-            pivotIdx = 0
-            for i in range(math.ceil(len(sortedValues)/binsize)):
-                firstVal = sortedValues[int(pivotIdx)][0]
-                binPivots.append(firstVal)
-                pivotIdx += binsize
-
-        else:
-            minval, maxval = sortedValues[0][0], sortedValues[-1][0]
-            binWidth = (maxval - minval)/nbins
-            binPivots = list((minval + binWidth*i) for i in range(0, nbins))
-
-        binPivots.append(None)
-
-        # put rows into bins (as self.rows) based on values
-        binMinIdx = 0
-        binMin = 0
-
-        for binMax in binPivots[1:-1]:
-            binrows = []
-            for i, (v, row) in enumerate(sortedValues[binMinIdx:]):
-                if binMax != binPivots[-2] and v > binMax:
-                    break
-                binrows.append(row)
-
-            binMaxDispVal = origCol.format(binMax)
-            binMinDispVal = origCol.format(binMin)
-            if binMinIdx == 0:
-                binName = '<=%s' % binMaxDispVal
-            elif binMax == binPivots[-2]:
-                binName = '>=%s' % binMinDispVal
-            else:
-                binName = '%s-%s' % (binMinDispVal, binMaxDispVal)
-
-            self.addRow((binName, binrows))
-            binMinIdx += i
-            binMin = binMax
-
-        if errorbin:
-            self.rows.insert(0, ('errors', errorbin))
-
-        ntallied = sum(len(x[1]) for x in self.rows)
-        assert ntallied == len(self.source.rows), (ntallied, len(self.source.rows))
-
-    def discreteBinning(self):
-        rowidx = {}
-        for r in Progress(self.source.rows, 'binning'):
-            keys = list(forward(c.getTypedValue(r)) for c in self.origCols)
-
-            # wrapply will pass-through a key-able TypedWrapper
-            formatted_keys = tuple(wrapply(c.format, c.getTypedValue(r)) for c in self.origCols)
-            histrow = rowidx.get(formatted_keys)
-            if histrow is None:
-                histrow = (keys, [])
-                rowidx[formatted_keys] = histrow
-                self.addRow(histrow)
-            histrow[1].append(r)
-            self.largest = max(self.largest, len(histrow[1]))
-
-        self.rows.sort(key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
-
 
     @asyncthread
     def reload(self):
-        'Generate histrow for each row and then reverse-sort by length.'
+        'Generate FreqRow(s) for each row and then reverse-sort by length.'
         self.rows = []
 
-#        if len(self.origCols) == 1 and self.origCols[0].type in (int, float, currency):
-#            self.numericBinning()
-#        else:
-        self.discreteBinning()
+        numericCols = [c for c in self.origCols if isNumeric(c)]
+        discreteCols = [c for c in self.origCols if not isNumeric(c)]
+        if len(numericCols) > 1:
+            error('only one numeric column can be binned')
+
+        if numericCols:
+            nbins = options.histogram_bins or int(len(self.source.rows) ** (1./2))
+            vals = tuple(numericCols[0].getValues(self.source.rows))
+            minval = min(vals)
+            maxval = max(vals)
+            width = (maxval - minval)/nbins
+            buckets = [(minval+width*i, minval+width*(i+1)) for i in range(nbins)]
+        else:
+            buckets = []
+
+        rowidx = {}  # [formatted_keys] -> FreqRow(keys, numrange, sourcerows)
+        for r in Progress(self.source.rows, 'binning'):
+            keys = tuple(forward(c.getTypedValue(r)) for c in discreteCols)
+            # wrapply will pass-through a key-able TypedWrapper
+            formatted_keys = tuple(wrapply(c.format, c.getTypedValue(r)) for c in discreteCols)
+            histrows, mainrow = rowidx.get(formatted_keys, (None, None))
+            if histrows is None:
+                mainrow = FreqRow(keys, None, [])
+                histrows = [FreqRow(keys, b, []) for b in buckets]
+                rowidx[formatted_keys] = (histrows, mainrow)
+                for histrow in histrows:
+                    self.addRow(histrow)
+                self.addRow(mainrow)
+
+            freqrow = mainrow  # error row if numericCols
+
+            if numericCols:
+                val = numericCols[0].getTypedValue(r)
+                if minval <= val <= maxval:  # within range (not
+                    b = int((val-minval)//width)
+                    freqrow = histrows[min(b, nbins-1)]
+
+            freqrow.sourcerows.append(r)
+            self.largest = max(self.largest, len(freqrow.sourcerows))
+
+        if not numericCols:
+            self.rows.sort(key=lambda r: len(r.sourcerows), reverse=True)  # sort by num reverse
 
         # automatically add cache to all columns now that everything is binned
         for c in self.nonKeyVisibleCols:
             c._cachedValues = collections.OrderedDict()
 
+
 SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
 SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
 SheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
 
-SheetFreqTable.addCommand(ENTER, 'dup-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)')
-#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
+SheetFreqTable.addCommand(ENTER, 'dup-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.keys); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)')

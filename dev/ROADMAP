@@ -59,6 +59,7 @@
 
 ## 10. Other additions
 
+- numeric binning for pivot table
 - 'v' hide cols which have errors on cursor row
    - or should 'v' be 'toggle-visibility' on all sheets?
 - [ColumnsSheet] show subcolumns and their parent column (for expand/contract)
@@ -73,7 +74,6 @@
 - error sheet showing row-form traceback
    - ^O to edit
 
-- numeric binning for freq column and pivot table
 - rowmax aggregator ( rowmax(field) gets whole row)
 - add row number in hidden column on data sheets so that original (load) order can be restored
 - handle timezone for datetime

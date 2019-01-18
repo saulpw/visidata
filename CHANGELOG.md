@@ -8,6 +8,7 @@
 
 ## Improvements and additions
 
+- numeric binning for frequency table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
 - [column] if drawing a particular column takes more than 200ms, the column becomes async
 - expr columns are now set to cache automatically
 - `sort-*-add` bound to z[] and gz[] to add additional sort columns
