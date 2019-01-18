@@ -550,9 +550,12 @@ class Sheet(BaseSheet, Extensible):
         clipdraw(scr, y, x+colwidth-len(T), T, hdrattr.attr, len(T))
         self.vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
 
-        if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
-            A = options.disp_more_left
-            scr.addstr(y, x, A, sepattr)
+        try:
+            if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
+                A = options.disp_more_left
+                scr.addstr(y, x, A, sepattr)
+        except ValueError:  # from .index
+            pass
 
         if C and x+colwidth+len(C) < self.vd.windowWidth:
             scr.addstr(y, x+colwidth, C, sepattr)
