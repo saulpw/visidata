@@ -216,7 +216,8 @@ class Sheet(BaseSheet, Extensible):
     @property
     def cursorCol(self):
         'Current Column object.'
-        return self.visibleCols[self.cursorVisibleColIndex]
+        vcols = self.visibleCols
+        return vcols[min(self.cursorVisibleColIndex, len(vcols)-1)]
 
     @property
     def cursorRow(self):
