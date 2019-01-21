@@ -591,7 +591,7 @@ class Sheet(BaseSheet, Extensible):
             col = self.visibleCols[vcolidx]
 
             if x < self.vd.windowWidth:  # only draw inside window
-              timer = threading.Timer(0.2, lambda col=col: status("setting %s async" % col.name) and col.setCache('async'))
+              timer = threading.Timer(0.3, lambda col=col: status("setting %s async" % col.name) and col.setCache('async'))
               timer.start()
               try:
                 headerRow = 0
