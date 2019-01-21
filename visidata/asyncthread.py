@@ -2,6 +2,7 @@ import ctypes
 import threading
 
 from .vdtui import *
+from visidata import SheetsSheet
 
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 theme('color_working', 'green', 'color of system running smoothly')

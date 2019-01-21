@@ -25,10 +25,10 @@ from .pyobj import *
 from .metasheets import *
 from .join import *
 from .describe import *
-from .freqtbl import *
-from .aggregators import *
 from .asyncthread import *
+from .aggregators import *
 from .pivot import *
+from .freqtbl import *
 from .tidydata import *
 from .cmdlog import *
 from .freeze import *
