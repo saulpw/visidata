@@ -164,7 +164,7 @@ class OptionsSheet(Sheet):
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source)),
         Column('default', getter=lambda col,row: options.get(row.name, 'global')),
-        Column('description', getter=lambda col,row: options._get(row.name, 'global').helpstr),
+        Column('description', width=40, getter=lambda col,row: options._get(row.name, 'global').helpstr),
         ColumnAttr('replayable'),
     )
     colorizers = [
