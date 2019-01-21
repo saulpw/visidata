@@ -276,6 +276,7 @@ replayableOption('null_value', None, 'a value to be counted as null')
 replayableOption('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 option('debug', False, 'exit on error and display stacktrace')
 curses_timeout = 100 # curses timeout in ms
+timeouts_before_idle = 10
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 theme('use_default_colors', False, 'curses use default terminal colors')
 
@@ -949,7 +950,7 @@ class VisiData:
                 scr.timeout(curses_timeout)
             else:
                 numTimeouts += 1
-                if numTimeouts > 1:
+                if numTimeouts > timeouts_before_idle:
                     scr.timeout(-1)
                 else:
                     scr.timeout(curses_timeout)
