@@ -205,6 +205,12 @@ class ColumnSourceAttr(Column):
     def setValue(self, attrname, value):
         return setattr(self.sheet.source, attrname, value)
 
+def docstring(obj, attr):
+    v = getattr(obj, attr)
+    if callable(v):
+        return v.__doc__
+    return '<type %s>' % type(v).__name__
+
 # rowdef: attrname
 class SheetObject(PythonSheet):
     rowtype = 'attributes'
@@ -225,7 +231,7 @@ class SheetObject(PythonSheet):
         self.columns = [
             Column(type(self.source).__name__ + '_attr'),
             ColumnSourceAttr('value'),
-            ColumnExpr('docstring', 'value.__doc__ if callable(value) else type(value).__name__')
+            Column('docstring', getter=lambda c,r: docstring(c.sheet.source, r))
         ]
         self.recalc()
 
