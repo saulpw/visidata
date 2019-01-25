@@ -94,7 +94,7 @@ def load_pyobj(name, pyobj):
         else:
             return SheetList(name, pyobj)
     elif isinstance(pyobj, dict):
-        return SheetDict(name, pyobj)
+        return SheetDict(name, source=pyobj)
     elif isinstance(pyobj, object):
         return SheetObject(name, pyobj)
     else:
@@ -176,27 +176,19 @@ class SheetNamedTuple(PythonSheet):
 
 SheetNamedTuple.addCommand(ENTER, 'dive-row', 'dive()')
 
+# source is dict
 class SheetDict(PythonSheet):
-    rowtype = 'items'  # rowdef: [key, value]  (editable)
-    def __init__(self, name, source, **kwargs): # source is dict()
-        super().__init__(name, source=source, **kwargs)
-
+    rowtype = 'items'  # rowdef: keys
+    columns = [
+        Column('key'),
+        Column('value', getter=lambda c,r: c.sheet.source[r],
+                        setter=lambda c,r,v: setitem(c.sheet.source, r, v)),
+    ]
+    nKeys = 1
     def reload(self):
-        self.columns = [ColumnItem('key', 0)]
-        self.rows = list(list(x) for x in self.source.items())
-        self.columns.append(ColumnItem('value', 1))
+        self.rows = list(self.source.keys())
 
-    def edit(self):
-        self.source[self.cursorRow[0]][1] = self.editCell(1)
-        self.cursorRowIndex += 1
-        self.reload()
-
-    def dive(self):
-        push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
-
-
-SheetDict.addCommand('e', 'edit-cell', 'edit()', undo=undoEditCell)
-SheetDict.addCommand(ENTER, 'dive-row', 'dive()')
+SheetDict.addCommand(ENTER, 'dive-row', 'push_pyobj(joinSheetnames(name, cursorRow), source[cursorRow])')
 
 class ColumnSourceAttr(Column):
     'Use row as attribute name on sheet source'

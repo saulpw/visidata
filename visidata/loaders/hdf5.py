@@ -27,7 +27,7 @@ class SheetH5Obj(Sheet):
         self.recalc()
 
 SheetH5Obj.addCommand(ENTER, 'dive-row', 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), source=cursorRow))')
-SheetH5Obj.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))')
+SheetH5Obj.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", source=cursorRow.attrs))')
 
 class open_hdf5(SheetH5Obj):
     def __init__(self, p):
