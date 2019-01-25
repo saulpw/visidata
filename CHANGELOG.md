@@ -5,11 +5,12 @@
 ## Bugfixes
 
 - make Sheet sortable
+- [pyobj] SheetDict nested editing #245
 
 ## Improvements and additions
 
-- numeric binning for frequency table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
-- [column] if drawing a particular column takes more than 200ms, the column becomes async
+- numeric binning for frequency/pivot table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
+- [column] if drawing a particular column takes more than 300ms, the column becomes async
 - expr columns are now set to cache automatically
 - `sort-*-add` bound to z[] and gz[] to add additional sort columns
 - output pipes now work as expected
@@ -31,6 +32,12 @@
   - remove ArrayColumns, NamedArrayColumns
 - clean up options
   - remove `curses_timeout` option (fix to 100ms)
+
+## API
+- VisiData, Sheet, Column inherit from Extensible base class
+  - internal modules and plugins can be self-contained
+  - `@VisiData.cached_property`, `Sheet.init()`, `@Column.api`
+
 
 # v1.5.2 (2019-01-12)
 
