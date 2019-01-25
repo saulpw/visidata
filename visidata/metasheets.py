@@ -2,26 +2,27 @@ from visidata import globalCommand, Sheet, Column, options, vd, anytype, ENTER, 
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
-from visidata import undoAttr, undoAddCols
+from visidata import undoAttr, undoAddCols, VisiData
 
 globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
 globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
 globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
 
-globalCommand('zO', 'options-sheet', 'vd.push(getOptionsSheet(sheet)).reload()')
-globalCommand('O', 'options-global', 'vd.push(vd.optionsSheet)')
+globalCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
+globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)')
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
 globalCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
 
-def getOptionsSheet(sheet):
-    optsheet = getattr(sheet, 'optionsSheet', None)
-    if not optsheet:
-        sheet.optionsSheet = OptionsSheet(sheet.name+"_options", source=sheet)
+@Sheet.cached_property
+def optionsSheet(sheet):
+    return OptionsSheet(sheet.name+"_options", source=sheet)
 
-    return sheet.optionsSheet
+@VisiData.cached_property
+def globalOptionsSheet(vd):
+    return OptionsSheet('global_options', source='override')
 
 
 class StatusSheet(Sheet):
@@ -194,8 +195,6 @@ OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lamb
 
 bindkeys.set('e', 'edit-option', OptionsSheet)
 bindkeys.set(ENTER, 'edit-option', OptionsSheet)
-
-vd.optionsSheet = OptionsSheet('global_options', source='override')
 
 vd.sheetsSheet = SheetsSheet("sheets", source=vd.sheets)
 vd.graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd.allSheets)

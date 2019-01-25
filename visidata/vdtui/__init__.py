@@ -564,7 +564,34 @@ def async_deepcopy(vs, rowlist):
     return ret
 
 
-class VisiData:
+class Extensible:
+    @classmethod
+    def init(cls, membername, initfunc):
+        'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T)'
+        old = cls.__init__
+        def new(self, *args, **kwargs):
+            old(self, *args, **kwargs)
+            setattr(self, membername, initfunc())
+        cls.__init__ = new
+
+    @classmethod
+    def api(cls, func):
+        setattr(cls, func.__name__, func)
+        return func
+
+    @classmethod
+    def cached_property(cls, func):
+        @property
+        @functools.wraps(func)
+        def get_if_not(self):
+            name = '_' + func.__name__
+            if not hasattr(self, name):
+                setattr(self, name, func(self))
+            return getattr(self, name)
+        setattr(cls, func.__name__, get_if_not)
+        return get_if_not
+
+class VisiData(Extensible):
     allPrefixes = 'gz'  # embig'g'en, 'z'mallify
 
     def __call__(self):
@@ -1393,21 +1420,6 @@ def addGlobals(g):
 
 def getGlobals():
     return globals()
-
-class Extensible:
-    @classmethod
-    def init(cls, membername, initfunc):
-        'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T)'
-        old = cls.__init__
-        def new(self, *args, **kwargs):
-            old(self, *args, **kwargs)
-            setattr(self, membername, initfunc())
-        cls.__init__ = new
-
-    @classmethod
-    def api(cls, func):
-        setattr(cls, func.__name__, func)
-        return func
 
 from .cliptext import clipdraw, clipstr
 from .editline import editline
