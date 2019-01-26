@@ -228,8 +228,8 @@ Sheet	syscopy-cell	z	Y	zY	n	n	n	n		data-clipboard-copy-system-cell	yank (copy) c
 Sheet	syscopy-cells	gz	Y	gzY	n	use	n	n		data-clipboard-copy-system-cell	yank (copy) cells in current column from selected rows to system clipboard
 Sheet	syscopy-row		Y	Y	n	n	n	n		data-clipboard-copy-system-row	yank (copy) current row to system clipboard
 Sheet	syscopy-selected	g	Y	gY	n	use	n	n		data-clipboard-copy-system-selected	yank (copy) selected rows to system clipboard
-Sheet	sysopen-cell	z	^O	z^O	external	n	y	y			
-Sheet	sysopen-row		^O	^O	external	n	y	y	1		
+Sheet	sysopen-cell	z	^O	z^O	external	n	y	n			
+Sheet	sysopen-row		^O	^O	external	n	y	n	1		
 Sheet	transpose		T	T	derived	n	n	y		data-transpose	open new sheet with rows and columns transposed
 Sheet	type-any	z	~	z~	n	n	n	y		column-type-any	set type of current column to anytype
 Sheet	type-currency		$	$	n	n	n	y	1	column-type-currency	set type of current column to currency
@@ -263,8 +263,8 @@ DirSheet	open-row		Enter	Enter	y	n	n	y		sheet-open-row	open current file as a ne
 DirSheet	open-rows	g	Enter	gEnter		use	n	y		sheet-open-rows	open selected files as new sheets
 DirSheet	reload-row	z	^R	z^R	n	n	unmodifies			sheet-specific-apply-edits	undo pending changes to current row
 DirSheet	reload-rows	gz	^R	gz^R	n	use	unmodifies				undo pending changes to selected rows
-DirSheet	save-row	z	^S	z^S	n	n	n			sheet-specific-apply-edits	apply changes to current row
-DirSheet	save-sheet		^S	^S	n	n	n			sheet-specific-apply-edits	apply all changes on all rows
+DirSheet	save-row	z	^S	z^S	n	n	n	y		sheet-specific-apply-edits	apply changes to current row
+DirSheet	save-sheet		^S	^S	n	n	n	y		sheet-specific-apply-edits	apply all changes on all rows
 DirSheet	sysopen-row		^O	^O	external	n			1	edit-row-external	open current file in external $EDITOR
 DirSheet	sysopen-rows	g	^O	g^O	external	use			1	edit-rows-external	open selected files in external $EDITOR
 DescribeSheet	dup-cell	z	Enter	zEnter	y	n	n	y		open-cell-source	open copy of source sheet with rows described in current cell
@@ -281,7 +281,7 @@ ColumnsSheet	hide-selected	g	-	g-	n	use	n	y		column-hide-selected	hide selected 
 ColumnsSheet	join-cols		&	&	n	use	n	y			add column from concatenating selected source columns
 ColumnsSheet	key-off-selected	gz	!	gz!	n	use	n	y			unset selected rows as key columns on source sheet
 ColumnsSheet	key-selected	g	!	g!	n	use	n	y			toggle selected rows as key columns on source sheet
-ColumnsSheet	resize-source-rows				n	use	n	y		column-source-width-max	adjust widths of selected source columns
+ColumnsSheet	resize-source-rows				n	use	n	n		column-source-width-max	adjust widths of selected source columns
 ColumnsSheet	type-any-selected	gz	~	gz~	n	use	n	y		column-type-any-selected	set type of selected columns to anytype
 ColumnsSheet	type-currency-selected	g	$	g$	n	use	n	y	1	column-type-currency-selected	set type of selected columns to currency
 ColumnsSheet	type-date-selected	g	@	g@	n	use	n	y		column-type-date-selected	set type of selected columns to date

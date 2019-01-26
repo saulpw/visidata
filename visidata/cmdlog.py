@@ -26,12 +26,12 @@ globalCommand('^V', 'check-version', 'status(__version_info__); checkVersion(inp
 globalCommand('^[', 'undo-last', 'vd.cmdlog.undo()')
 globalCommand('^]', 'redo-last', 'vd.cmdlog.redo()')
 
-# not necessary to log movements and scrollers
-nonLogKeys = 'KEY_DOWN KEY_UP KEY_NPAGE KEY_PPAGE j k gj gk ^F ^B r < > { } / ? n N gg G g/ g? g_ _ z_ z-'.split()
-nonLogKeys += 'KEY_LEFT KEY_RIGHT h l gh gl c Q'.split()
-nonLogKeys += 'zk zj zt zz zb zh zl zKEY_LEFT zKEY_RIGHT'.split()
-nonLogKeys += '^^ ^Z ^A ^L ^C ^U ^K ^I ^D ^G ^[ ^] KEY_RESIZE KEY_F(1) ^H KEY_BACKSPACE'.split()
-nonLogKeys += [' ']
+# prefixes which should not be logged
+nonLogged = '''quit forget check-version exec-longname undo redo
+error status errors statuses options threads cmdlog
+replay stop pause cancel advance
+go- search scroll prev next page go start end zoom
+suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
@@ -60,14 +60,9 @@ def isLoggableSheet(sheet):
     return sheet is not vd.cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
 
 def isLoggableCommand(keystrokes, longname):
-    if keystrokes in nonLogKeys:
-        return False
-    if longname.startswith('go-'):
-        return False
-    if keystrokes.startswith('BUTTON'):  # mouse click
-        return False
-    if keystrokes.startswith('REPORT'):  # scrollwheel/mouse position
-        return False
+    for n in nonLogged:
+        if longname.startswith(n):
+            return False
     return True
 
 def open_vd(p):
