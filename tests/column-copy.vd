@@ -5,6 +5,6 @@ benchmark	Unit		type-currency		$
 benchmark	Paid		type-currency		$	
 benchmark	Paid		aggregate-col	sum	+	
 benchmark	Customer		freq-col		F	
-benchmark_Customer_freq	sum_Paid		freeze-col		'	
-benchmark_Customer_freq	sum_Paid_frozen		rename-col	adj_sum_Paid	^	
+benchmark_Customer_freq	Paid_sum		freeze-col		'	
+benchmark_Customer_freq	Paid_sum_frozen		rename-col	adj_sum_Paid	^	
 benchmark_Customer_freq	adj_sum_Paid	キRobert Armstrong	edit-cell	2,000.00	e	

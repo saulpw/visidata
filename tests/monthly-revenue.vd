@@ -7,4 +7,4 @@ benchmark	Paid		type-currency		$
 benchmark	Paid		aggregate-col	sum	+	
 benchmark	Date		freq-col		F	
 benchmark_Date_freq	Date		sort-asc		[	
-benchmark_Date_freq	sum_Paid		rename-col	Revenue	^	
+benchmark_Date_freq	Paid_sum		rename-col	Revenue	^	
