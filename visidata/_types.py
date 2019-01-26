@@ -20,10 +20,9 @@ Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', undo=undoColType)
 Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', undo=undoColType),
 Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', undo=undoColType),
 Sheet.addCommand('#', 'type-int', 'cursorCol.type = int', undo=undoColType),
-Sheet.addCommand('z#', 'type-len', 'cursorCol.type = len', undo=undoColType),
+Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', undo=undoColType),
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', undo=undoColType),
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', undo=undoColType),
-
 
 floatchars='+-0123456789.'
 def currency(s=''):
@@ -31,6 +30,18 @@ def currency(s=''):
     if isinstance(s, str):
         s = ''.join(ch for ch in s if ch in floatchars)
     return float(s) if s else TypedWrapper(float, None)
+
+
+class vlen(int):
+    def __new__(cls, v):
+        if isinstance(v, vlen):
+            return super(vlen, cls).__new__(cls, v)
+        else:
+            return super(vlen, cls).__new__(cls, len(v))
+
+    def __len__(self):
+        return self
+
 
 class date(datetime.datetime):
     'datetime wrapper, constructed from time_t or from str with dateutil.parse'
@@ -78,6 +89,8 @@ class datedelta(datetime.timedelta):
     def __float__(self):
         return self.total_seconds()
 
+
+vdtype(vlen, '♯', '{:.0f}')
 vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
 vdtype(currency, '$', '{:,.02f}')
 

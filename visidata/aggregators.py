@@ -74,7 +74,7 @@ aggregator('avg', mean, type=float)
 aggregator('mean', mean, type=float)
 aggregator('median', median)
 aggregator('sum', sum)
-aggregator('distinct', set, type=len)
+aggregator('distinct', set, type=vlen)
 aggregator('count', lambda values: sum(1 for v in values), type=int)
 
 aggregators['q3'] = quantiles(3)

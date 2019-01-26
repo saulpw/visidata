@@ -27,9 +27,9 @@ class DescribeSheet(ColumnsSheet):
     columns = [
             ColumnAttr('sheet', 'sheet'),
             ColumnAttr('column', 'name'),
-            DescribeColumn('errors', type=len),
-            DescribeColumn('nulls',  type=len),
-            DescribeColumn('distinct',type=len),
+            DescribeColumn('errors', type=vlen),
+            DescribeColumn('nulls',  type=vlen),
+            DescribeColumn('distinct',type=vlen),
             DescribeColumn('mode',   type=str),
             DescribeColumn('min',    type=str),
             DescribeColumn('max',    type=str),

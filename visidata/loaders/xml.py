@@ -34,7 +34,7 @@ class XmlSheet(Sheet):
         ColumnAttr('nstag', 'tag', width=0),
         Column('path', width=0, getter=lambda c,r: c.sheet.source.getpath(r)),
         Column('tag', getter=lambda c,r: unns(r.tag)),
-        Column('children', type=len, getter=lambda c,r: r.getchildren()),
+        Column('children', type=vlen, getter=lambda c,r: r.getchildren()),
         ColumnAttr('text'),
         ColumnAttr('tail', width=0),
     ]

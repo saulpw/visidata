@@ -212,7 +212,7 @@ ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(selectedRows or [c
 ColumnsSheet.addCommand('g-', 'hide-selected', 'for c in selectedRows or [cursorRow]: c.hide()', undo=undoAttr('selectedRows or [cursorRow]', 'width'))
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'for c in selectedRows or [cursorRow]: c.type = float', undo=undoColTypes)
 ColumnsSheet.addCommand('g#', 'type-int-selected', 'for c in selectedRows or [cursorRow]: c.type = int', undo=undoColTypes)
-ColumnsSheet.addCommand('gz#', 'type-len-selected', 'for c in selectedRows or [cursorRow]: c.type = len', undo=undoColTypes)
+ColumnsSheet.addCommand('gz#', 'type-len-selected', 'for c in selectedRows or [cursorRow]: c.type = vlen', undo=undoColTypes)
 ColumnsSheet.addCommand('g@', 'type-date-selected', 'for c in selectedRows or [cursorRow]: c.type = date', undo=undoColTypes)
 ColumnsSheet.addCommand('g$', 'type-currency-selected', 'for c in selectedRows or [cursorRow]: c.type = currency', undo=undoColTypes)
 ColumnsSheet.addCommand('g~', 'type-string-selected', 'for c in selectedRows or [cursorRow]: c.type = str', undo=undoColTypes)

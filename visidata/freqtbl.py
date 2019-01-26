@@ -44,7 +44,7 @@ class SheetFreqTable(SheetPivot):
 
         # add default bonus columns
         for c in [
-                    ColumnAttr('count', 'sourcerows', type=len),
+                    ColumnAttr('count', 'sourcerows', type=vlen),
                     Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows),
                     Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//col.sheet.largest), width=options.disp_histolen+2),
                     ]:

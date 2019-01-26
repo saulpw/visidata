@@ -80,7 +80,7 @@ class SheetPivot(Sheet):
         }
 
         if not aggcols:
-#            self.addColumn(ColumnAttr('count', 'sourcerows', type=len))
+#            self.addColumn(ColumnAttr('count', 'sourcerows', type=vlen))
             return
 
         # aggregators without pivot

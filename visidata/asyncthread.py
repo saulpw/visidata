@@ -2,7 +2,7 @@ import ctypes
 import threading
 
 from .vdtui import *
-from visidata import SheetsSheet
+from visidata import SheetsSheet, vlen
 
 option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 theme('color_working', 'green', 'color of system running smoothly')
@@ -21,7 +21,7 @@ def cancelThread(*threads, exception=EscapeException):
 
 
 SheetsSheet.columns += [
-    ColumnAttr('threads', 'currentThreads', type=len),
+    ColumnAttr('threads', 'currentThreads', type=vlen),
 ]
 
 # each row is an augmented threading.Thread object

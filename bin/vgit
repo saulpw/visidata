@@ -34,9 +34,9 @@ class GitOverview(vgit.GitSheet):
     rowtype = 'repos'  # rowdef: GitRepo
     columns = [
         ColumnAttr('repo', 'path', type=str),
-        GitLinesColumn('stashes', 'git stash list', type=len),
-        GitLinesColumn('cached', 'git diff --cached', type=len),
-        GitLinesColumn('branches', 'git branch --no-color', type=len),
+        GitLinesColumn('stashes', 'git stash list', type=vlen),
+        GitLinesColumn('cached', 'git diff --cached', type=vlen),
+        GitLinesColumn('branches', 'git branch --no-color', type=vlen),
         GitAllColumn('branch', 'git rev-parse --abbrev-ref HEAD'),
         Column('modtime', type=date, getter=lambda c,r: r.path.stat().st_mtime),
     ]

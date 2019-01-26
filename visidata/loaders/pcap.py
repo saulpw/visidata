@@ -237,7 +237,7 @@ class EtherSheet(Sheet):
         Column('ether_manuf', getter=lambda col,row: mac_manuf(macaddr(row.src))),
         Column('ether_src', getter=lambda col,row: macaddr(row.src), width=6),
         Column('ether_dst', getter=lambda col,row: macaddr(row.dst), width=6),
-        ColumnAttr('ether_data', 'data', type=len, width=0),
+        ColumnAttr('ether_data', 'data', type=vlen, width=0),
     ]
 
 
@@ -284,7 +284,7 @@ class UDPSheet(IPSheet):
     columns = IPSheet.columns + [
         ColumnAttr('udp_srcport', 'ip.udp.sport', type=int, width=8, helpstr="UDP Source Port"),
         ColumnAttr('udp_dstport', 'ip.udp.dport', type=int, width=8, helpstr="UDP Dest Port"),
-        ColumnAttr('ip.udp.data', type=len, width=0),
+        ColumnAttr('ip.udp.data', type=vlen, width=0),
         ColumnAttr('ip.udp.ulen', type=int, width=0),
     ]
 
@@ -309,11 +309,11 @@ class PcapSheet(Sheet):
         ColumnAttr('ether_proto', 'type', type=lambda v: protocols['ethernet'].get(v), width=0),
         ColumnAttr('tcp_flags', 'ip.tcp.flags', type=FlagGetter('tcp'), helpstr="TCP Flags"),
         Column('service', getter=lambda col,row: getService(getTuple(row))),
-        ColumnAttr('data', type=len),
+        ColumnAttr('data', type=vlen),
         ColumnAttr('ip.len', type=int),
-        ColumnAttr('tcp', 'ip.tcp', width=4, type=len),
-        ColumnAttr('udp', 'ip.udp', width=4, type=len),
-        ColumnAttr('icmp', 'ip.icmp', width=4, type=len),
+        ColumnAttr('tcp', 'ip.tcp', width=4, type=vlen),
+        ColumnAttr('udp', 'ip.udp', width=4, type=vlen),
+        ColumnAttr('icmp', 'ip.icmp', width=4, type=vlen),
         ColumnAttr('dns', width=4),
     ]
 
@@ -359,7 +359,7 @@ class PcapFlowsSheet(Sheet):
         Column('dst', getter=lambda col,row: row.dst),
         ColumnAttr('dport', type=int),
         Column('service', width=8, getter=lambda col,row: getService(getTuple(row.packets[0]))),
-        ColumnAttr('packets', type=len),
+        ColumnAttr('packets', type=vlen),
         Column('connect_latency_ms', type=float, getter=lambda col,row: col.sheet.latency[getTuple(row.packets[0])]),
     ]
 

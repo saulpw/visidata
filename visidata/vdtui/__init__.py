@@ -387,12 +387,11 @@ vdtype(anytype, '', formatter=lambda _,v: str(v))
 vdtype(str, '~', formatter=lambda _,v: v)
 vdtype(int, '#', '{:.0f}')
 vdtype(float, '%', '{:.02f}')
-vdtype(len, '♯', '{:.0f}')
 vdtype(dict, '')
 vdtype(list, '')
 
 def isNumeric(col):
-    return col.type in (int,len,float,currency,date)
+    return col.type in (int,vlen,float,currency,date)
 
 ###
 
