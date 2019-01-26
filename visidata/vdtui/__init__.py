@@ -325,7 +325,7 @@ theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 ENTER='^J'
 ESC='^['
 globalCommand('KEY_RESIZE', 'no-op', '')
-globalCommand('q', 'quit-sheet',  'vd.sheets[1:] or options.quitguard and confirm("quit last sheet? "); vd.sheets.pop(0)')
+globalCommand('q', 'quit-sheet',  'vd.cmdlog.removeSheet(vd.quit())')
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
 globalCommand('^L', 'redraw', 'vd.scr.clear()')
@@ -614,6 +614,11 @@ class VisiData(Extensible):
         self.addThread(threading.current_thread(), endTime=0)
         self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'color_keystrokes'))
         self.addHook('rstatus', self.rightStatus)
+
+    def quit(self):
+        if len(vd.sheets) == 1 and options.quitguard:
+            confirm("quit last sheet? ")
+        return vd.sheets.pop(0)
 
     @property
     def sheet(self):
@@ -998,13 +1003,14 @@ class VisiData(Extensible):
             vs.vd = self
             if vs in self.sheets:
                 self.sheets.remove(vs)
-                self.sheets.insert(0, vs)
-            elif not vs.loaded:
-                self.sheets.insert(0, vs)
+            else:
+                vs.creatingCommand = self.cmdlog.currentActiveRow
+
+            self.sheets.insert(0, vs)
+
+            if not vs.loaded:
                 vs.reload()
                 vs.recalc()  # set up Columns
-            else:
-                self.sheets.insert(0, vs)
 
             if vs.precious and vs not in vs.vd.allSheets:
                 vs.vd.allSheets[vs] = vs.name
@@ -1113,6 +1119,13 @@ class BaseSheet:
 
     def __len__(self):
         return 0
+
+    def __contains__(self, vs):
+        if self.source is vs:
+            return True
+        if isinstance(self.source, BaseSheet):
+            return vs in self.source
+        return False
 
     @property
     def loaded(self):

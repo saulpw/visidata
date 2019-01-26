@@ -18,8 +18,6 @@ globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
 globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
 globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
 
-globalCommand('Q', 'forget-sheet', 'vd.cmdlog.removeSheet(vd.sheets.pop(0))')
-
 globalCommand(None, 'status', 'status(input("status: "))')
 globalCommand('^V', 'check-version', 'status(__version_info__); checkVersion(input("require version: ", value=__version_info__))')
 
@@ -103,9 +101,19 @@ class CommandLog(TsvSheet):
         return self._rowtype(**fields)
 
     def removeSheet(self, vs):
-        'Remove all traces of sheets named vs.name from the cmdlog.'
-        self.rows = [r for r in self.rows if r.sheet != vs.name]
-        status('removed "%s" from cmdlog' % vs.name)
+        'Remove all traces of sheets named vs.name from the cmdlog if no other sheet on the cmdlog exists and refers to it.'
+        newrows = []  # without vs.name
+        for cmdlogrow in self.rows:
+            if cmdlogrow.sheet != vs.name:
+                if getattr(vs, 'creatingCommand', None) == cmdlogrow:
+                    continue
+                newrows.append(cmdlogrow)
+                cmdsheet = vd.getSheet(cmdlogrow.sheet)
+                if cmdsheet and vs in cmdsheet:
+                    return  # a sheet still on the cmdlog sources from it
+
+        self.rows = newrows
+        debug('removed "%s" from cmdlog' % vs.name)
 
     def saveMacro(self, rows, ks):
         vs = copy(self)
