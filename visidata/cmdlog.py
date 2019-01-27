@@ -19,7 +19,8 @@ globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no rep
 globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
 
 globalCommand(None, 'status', 'status(input("status: "))')
-globalCommand('^V', 'check-version', 'status(__version_info__); checkVersion(input("require version: ", value=__version_info__))')
+globalCommand('^V', 'show-version', 'status(__version_info__);')
+globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))')
 
 globalCommand('^[', 'undo-last', 'vd.cmdlog.undo()')
 globalCommand('^]', 'redo-last', 'vd.cmdlog.redo()')
@@ -36,7 +37,7 @@ option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 
 
 def checkVersion(desired_version):
-    if desired_version != visidata.__version__:
+    if desired_version != visidata.__version_info__:
         fail("version %s required" % desired_version)
 
 def fnSuffix(template):
