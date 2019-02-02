@@ -98,8 +98,7 @@ class _Clipboard:
 
         # use NTF to generate filename and delete file on context exit
         with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
-            saveSheets(Path(temp.name), vs)
-            sync(1)
+            saveSheets(Path(temp.name), vs).join()
             p = subprocess.Popen(
                 self.command,
                 stdin=open(temp.name, 'r', encoding=options.encoding),
