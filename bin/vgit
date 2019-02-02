@@ -3,7 +3,7 @@
 import os.path
 import sys
 from visidata import Sheet, Column, ColumnAttr, run, status, Command, Path, ENTER, asyncthread
-from visidata import namedlist, date
+from visidata import namedlist, date, vlen
 import vgit
 
 __version__ = 'v0.4-dev'
