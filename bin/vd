@@ -28,6 +28,23 @@ def eval_vd(logpath, *args, **kwargs):
     return vs
 
 
+def duptty():
+    'Duplicate stdin/stdout for input/output and reopen tty as stdin/stdout.  Return (stdin, stdout).'
+    try:
+        fin = open('/dev/tty')
+        fout = open('/dev/tty', mode='w')
+        stdin = open(os.dup(0))
+        stdout = open(os.dup(1))  # for dumping to stdout from interface
+        os.dup2(fin.fileno(), 0)
+        os.dup2(fout.fileno(), 1)
+    except Exception as e:
+        print(e)
+        stdin = sys.stdin
+        stdout = sys.stdout
+
+    return stdin, stdout
+
+
 def main():
     'Open the given sources using the VisiData interface.'
     import argparse
@@ -72,18 +89,7 @@ def main():
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
 
-    # always duplicate stdin for input and reopen tty as stdin
-    try:
-        fin = open('/dev/tty')
-        fout = open('/dev/tty', mode='w')
-        vd.stdin = open(os.dup(0))
-        vd.stdout = open(os.dup(1))  # for dumping to stdout from interface
-        os.dup2(fin.fileno(), 0)
-        os.dup2(fout.fileno(), 1)
-    except Exception as e:
-        print(e)
-        vd.stdin = sys.stdin
-        vd.stdout = sys.stdout
+    vd.stdin, vd.stdout = duptty()  # always dup stdin/stdout
 
     stdinSource = PathFd('-', vd.stdin)
 
