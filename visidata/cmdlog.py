@@ -360,18 +360,14 @@ CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
 CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))')
 options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
-vd.cmdlog = CommandLog('cmdlog')
-vd.cmdlog.rows = []
+@VisiData.cached_property
+def cmdlog(self):
+    vs = CommandLog('cmdlog')
+    vs.rows = []
+    return vs
 
-vd.addHook('preexec', vd.cmdlog.beforeExecHook)
-vd.addHook('postexec', vd.cmdlog.afterExecSheet)
-vd.addHook('preedit', vd.cmdlog.getLastArgs)
-vd.addHook('postedit', vd.cmdlog.setLastArgs)
-
-vd.addHook('rstatus', lambda sheet: CommandLog.currentReplay and (CommandLog.currentReplay.replayStatus, 'color_status_replay'))
-vd.addHook('set_option', vd.cmdlog.setOption)
-
-def loadMacros():
+@VisiData.cached_property
+def macrosheet(vd):
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
     macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or error('error loading macros')
 
@@ -384,5 +380,3 @@ def loadMacros():
 def setMacro(ks, vs):
     bindkeys.set(ks, vs.name, 'override')
     commands.set(vs.name, vs, 'override')
-
-vd.macrosheet = loadMacros()

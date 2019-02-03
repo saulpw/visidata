@@ -2,7 +2,7 @@ from visidata import globalCommand, Sheet, Column, options, vd, anytype, ENTER, 
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
-from visidata import undoAttr, undoAddCols, VisiData
+from visidata import undoAttr, undoAddCols, VisiData, vlen
 
 globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
@@ -99,6 +99,7 @@ class SheetsSheet(Sheet):
         ColumnAttr('keyColNames'),
         ColumnAttr('source'),
         ColumnAttr('progressPct'),
+        ColumnAttr('threads', 'currentThreads', type=vlen),
     ]
     nKeys = 1
 
@@ -106,19 +107,21 @@ class SheetsSheet(Sheet):
         return Sheet('', columns=[ColumnItem('', 0)], rows=[])
 
     def reload(self):
-        self.rows = self.source
+        self.rows = vd.sheets
 
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
 SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
 SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))')
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows or rows[1:]))')
+SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
+SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
 
 # source: vd.allSheets (with BaseSheet as weakref keys)
 class GraveyardSheet(SheetsSheet):
     rowtype = 'undead sheets'  # rowdef: BaseSheet
     def reload(self):
-        self.rows = list(vs for vs in self.source.keys() if vs not in vd.sheets)
+        self.rows = list(vs for vs in vd.allSheets.keys() if vs not in vd.sheets)
 
 
 class HelpSheet(Sheet):
@@ -196,8 +199,13 @@ OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lamb
 bindkeys.set('e', 'edit-option', OptionsSheet)
 bindkeys.set(ENTER, 'edit-option', OptionsSheet)
 
-vd.sheetsSheet = SheetsSheet("sheets", source=vd.sheets)
-vd.graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd.allSheets)
+@VisiData.cached_property
+def sheetsSheet(vd):
+    return SheetsSheet("sheets")
+
+@VisiData.cached_property
+def graveyardSheet(vd):
+    return GraveyardSheet("sheets_graveyard")
 
 
 def combineColumns(cols):

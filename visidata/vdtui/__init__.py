@@ -132,16 +132,12 @@ def undoSetValues(rowstr='[cursorRow]', colstr='[cursorCol]'):
 def undoRows(sheetstr):
     return undoAttrCopy('[%s]'%sheetstr, 'rows')
 
-def undoSelection(sheetstr):
-    return undoAttrCopy('[%s]'%sheetstr, '_selectedRows')
-
 undoBlocked = 'lambda: error("cannot undo")'
 undoSheetRows = undoRows('sheet')
 undoSheetCols = 'lambda sheet=sheet,oldcols=[copy(c) for c in columns]: setattr(sheet, "columns", oldcols)'
 undoAddCols = undoAttrCopy('[sheet]', 'columns')
 undoEditCell = undoSetValues('[cursorRow]', '[cursorCol]')
 undoEditCells = undoSetValues('selectedRows or rows', '[cursorCol]')
-undoSheetSelection = undoAttrCopy('[sheet]', '_selectedRows')
 
 def bindkey(keystrokes, longname):
     bindkeys.setdefault(keystrokes, longname)
@@ -212,7 +208,8 @@ class OptionsObject:
                 v = t(v)
 
             if curval != v and self._get(k, 'global').replayable:
-                vd.callHook('set_option', k, v, obj)
+                if vd.cmdlog:  # options set on init aren't recorded
+                    vd.cmdlog.set_option(k, v, obj)
         else:
             curval = None
             warning('setting unknown option %s' % k)
@@ -265,7 +262,6 @@ replayableOption('encoding_errors', 'surrogateescape', 'encoding_errors passed t
 
 replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('default_width', 20, 'default column width')
-replayableOption('bulk_select_clear', False, 'clear selected rows before new bulk selections')
 
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
@@ -423,23 +419,6 @@ def debug(*args, **kwargs):
 def input(*args, **kwargs):
     return vd.input(*args, **kwargs)
 
-def rotate_range(n, idx, reverse=False):
-    if reverse:
-        rng = range(idx-1, -1, -1)
-        rng2 = range(n-1, idx-1, -1)
-    else:
-        rng = range(idx+1, n)
-        rng2 = range(0, idx+1)
-
-    wrapped = False
-    with Progress(total=n) as prog:
-        for r in itertools.chain(rng, rng2):
-            prog.addProgress(1)
-            if not wrapped and r in rng2:
-                status('search wrapped')
-                wrapped = True
-            yield r
-
 def middleTruncate(s, w):
     if len(s) <= w:
         return s
@@ -505,61 +484,6 @@ def asyncthread(func):
     return _execAsync
 
 
-def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
-    def _decorator(func):
-        'Function decorator, so first call to `func()` spawns a separate thread. Calls return the Thread until the wrapped function returns; subsequent calls return the cached return value.'
-        d = {}  # per decoration cache
-        def _func(k, *args, **kwargs):
-            d[k] = func(*args, **kwargs)
-
-        @functools.wraps(func)
-        def _execAsync(*args, **kwargs):
-            k = key(*args, **kwargs)
-            if k not in d:
-                d[k] = vd.execAsync(_func, k, *args, **kwargs)
-            return d.get(k)
-        return _execAsync
-    return _decorator
-
-
-class Progress:
-    def __init__(self, iterable=None, gerund="", total=None, sheet=None):
-        self.iterable = iterable
-        self.total = total if total is not None else len(iterable)
-        self.sheet = sheet if sheet else getattr(threading.current_thread(), 'sheet', None)
-        self.gerund = gerund
-        self.made = 0
-
-    def __enter__(self):
-        if self.sheet:
-            self.sheet.progresses.append(self)
-        return self
-
-    def addProgress(self, n):
-        self.made += n
-        return True
-
-    def __exit__(self, exc_type, exc_val, tb):
-        if self.sheet:
-            self.sheet.progresses.remove(self)
-
-    def __iter__(self):
-        with self as prog:
-            for item in self.iterable:
-                yield item
-                self.made += 1
-
-@asyncthread
-def _async_deepcopy(vs, newlist, oldlist):
-    for r in Progress(oldlist, 'copying'):
-        newlist.append(deepcopy(r))
-
-def async_deepcopy(vs, rowlist):
-    ret = []
-    _async_deepcopy(vs, ret, rowlist)
-    return ret
-
-
 class Extensible:
     @classmethod
     def init(cls, membername, initfunc):
@@ -574,6 +498,15 @@ class Extensible:
     def api(cls, func):
         setattr(cls, func.__name__, func)
         return func
+
+    @classmethod
+    def property(cls, func):
+#        @functools.wraps(func)
+        @property
+        def dofunc(self):
+            return func(self)
+        setattr(cls, func.__name__, dofunc)
+        return dofunc
 
     @classmethod
     def cached_property(cls, func):
@@ -605,12 +538,8 @@ class VisiData(Extensible):
         self.inInput = False
         self.prefixWaiting = False
         self.scr = None  # curses scr
-        self.hooks = collections.defaultdict(list)  # [hookname] -> list(hooks)
         self.mousereg = []
-        self.threads = [] # all long-running threads, including main and finished
-        self.addThread(threading.current_thread(), endTime=0)
-        self.addHook('rstatus', lambda sheet,self=self: (self.keystrokes, 'color_keystrokes'))
-        self.addHook('rstatus', self.rightStatus)
+        self.cmdlog = None  # CommandLog
 
     def quit(self):
         if len(vd.sheets) == 1 and options.quitguard:
@@ -647,87 +576,6 @@ class VisiData(Extensible):
         self.statusHistory.append([priority, args, 1])
         return True
 
-    def addHook(self, hookname, hookfunc):
-        'Add hookfunc by hookname, to be called by corresponding `callHook`.'
-        self.hooks[hookname].insert(0, hookfunc)
-
-    def callHook(self, hookname, *args, **kwargs):
-        'Call all functions registered with `addHook` for the given hookname.'
-        r = []
-        for f in self.hooks[hookname]:
-            try:
-                r.append(f(*args, **kwargs))
-            except Exception as e:
-                exceptionCaught(e)
-        return r
-
-    def addThread(self, t, endTime=None):
-        t.startTime = time.process_time()
-        t.endTime = endTime
-        t.status = ''
-        t.profile = None
-        t.exception = None
-        self.threads.append(t)
-
-    def execAsync(self, func, *args, **kwargs):
-        'Execute `func(*args, **kwargs)` in a separate thread.'
-
-        thread = threading.Thread(target=self.toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
-        self.addThread(thread)
-
-        if self.sheets:
-            currentSheet = self.sheets[0]
-            currentSheet.currentThreads.append(thread)
-        else:
-            currentSheet = None
-
-        thread.sheet = currentSheet
-        thread.start()
-
-        return thread
-
-    @staticmethod
-    def toplevelTryFunc(func, *args, **kwargs):
-        'Thread entry-point for `func(*args, **kwargs)` with try/except wrapper'
-        t = threading.current_thread()
-        t.name = func.__name__
-        ret = None
-        try:
-            ret = func(*args, **kwargs)
-        except EscapeException as e:  # user aborted
-            t.status += 'aborted by user'
-            status('%s aborted' % t.name, priority=2)
-        except Exception as e:
-            t.exception = e
-            exceptionCaught(e)
-
-        if t.sheet:
-            t.sheet.currentThreads.remove(t)
-        return ret
-
-    @property
-    def unfinishedThreads(self):
-        'A list of unfinished threads (those without a recorded `endTime`).'
-        return [t for t in self.threads if getattr(t, 'endTime', None) is None]
-
-    def checkForFinishedThreads(self):
-        'Mark terminated threads with endTime.'
-        for t in self.unfinishedThreads:
-            if not t.is_alive():
-                t.endTime = time.process_time()
-                if getattr(t, 'status', None) is None:
-                    t.status = 'ended'
-
-    def sync(self, *joiningThreads):
-        'Wait for joiningThreads to finish. If no joiningThreads specified, wait for all but current thread to finish.'
-        joiningThreads = joiningThreads or (set(self.unfinishedThreads)-set([threading.current_thread()]))
-        while any(t in self.unfinishedThreads for t in joiningThreads):
-            for t in joiningThreads:
-                try:
-                    t.join()
-                except RuntimeError:  # maybe thread hasn't started yet or has already joined
-                    pass
-
     def refresh(self):
         Sheet.visibleCols.fget.cache_clear()
         Sheet.keyCols.fget.cache_clear()
@@ -736,16 +584,18 @@ class VisiData(Extensible):
 
     def editText(self, y, x, w, record=True, **kwargs):
         'Wrap global editText with `preedit` and `postedit` hooks.'
-        v = self.callHook('preedit') if record else None
-        if not v or v[0] is None:
+        v = None
+        if record and self.cmdlog:
+            v = self.cmdlog.getLastArgs()
+
+        if v is None:
             with EnableCursor():
                 v = editline(self.scr, y, x, w, **kwargs)
-        else:
-            v = v[0]
 
         if kwargs.get('display', True):
             status('"%s"' % v)
-            self.callHook('postedit', v) if record else None
+            if record and self.cmdlog:
+                self.cmdlog.setLastArgs(v)
         return v
 
     def input(self, prompt, type='', defaultLast=False, **kwargs):
@@ -853,7 +703,16 @@ class VisiData(Extensible):
         rightx = self.windowWidth-1
 
         ret = 0
-        for rstatcolor in self.callHook('rstatus', vs):
+        statcolors = [
+            self.checkMemoryUsage(),
+            self.rightStatus(vs),
+            (self.keystrokes, 'color_keystrokes'),
+        ]
+
+        if self.cmdlog and self.cmdlog.currentReplay:
+            statcolors.insert(0, (self.cmdlog.currentReplay.replayStatus, 'color_status_replay'))
+
+        for rstatcolor in statcolors:
             if rstatcolor:
                 try:
                     rstatus, coloropt = rstatcolor
@@ -871,8 +730,8 @@ class VisiData(Extensible):
 
     def rightStatus(self, sheet):
         'Compose right side of status bar.'
-        if sheet.currentThreads:
-            gerund = (' '+sheet.progresses[0].gerund) if sheet.progresses else ''
+        gerund = sheet.processing
+        if gerund:
             status = '%9d  %2d%%%s' % (len(sheet), sheet.progressPct, gerund)
         else:
             status = '%9d %s' % (len(sheet), sheet.rowtype)
@@ -973,7 +832,6 @@ class VisiData(Extensible):
                 self.prefixWaiting = False
 
             self.checkForFinishedThreads()
-            self.callHook('predraw')
             catchapply(sheet.checkCursor)
 
             # no idle redraw unless background threads are running
@@ -1005,7 +863,7 @@ class VisiData(Extensible):
             if vs in self.sheets:
                 self.sheets.remove(vs)
             else:
-                vs.creatingCommand = self.cmdlog.currentActiveRow
+                vs.creatingCommand = self.cmdlog and self.cmdlog.currentActiveRow
 
             self.sheets.insert(0, vs)
 
@@ -1017,8 +875,6 @@ class VisiData(Extensible):
                 vs.vd.allSheets[vs] = vs.name
             return vs
 # end VisiData class
-
-vd = VisiData()
 
 class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
@@ -1068,7 +924,7 @@ class CompleteKey:
         return opts[state%len(opts)]
 
 
-class BaseSheet:
+class BaseSheet(Extensible):
     _rowtype = object    # callable (no parms) that returns new empty item
     _coltype = None      # callable (no parms) that returns new settable view into that item
     rowtype = 'objects'  # one word, plural, describing the items
@@ -1077,9 +933,6 @@ class BaseSheet:
     def __init__(self, name, **kwargs):
         self.name = name
         self.vd = vd
-
-        # for progress bar
-        self.progresses = []  # list of Progress objects
 
         # track all async threads from sheet
         self.currentThreads = []
@@ -1163,7 +1016,8 @@ class BaseSheet:
         self.sheet = self
 
         try:
-            self.vd.callHook('preexec', self, cmd, '', keystrokes)
+            if vd.cmdlog:
+                vd.cmdlog.beforeExecHook(self, cmd, '', keystrokes)
             exec(cmd.execstr, vdglobals, LazyMap(self))
         except EscapeException as e:  # user aborted
             status('aborted')
@@ -1174,7 +1028,9 @@ class BaseSheet:
             escaped = True
 
         try:
-            self.vd.callHook('postexec', self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
+            if vd.cmdlog:
+                # sheet may have changed
+                vd.cmdlog.afterExecSheet(self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
         except Exception as e:
             self.vd.exceptionCaught(e)
 
@@ -1191,21 +1047,6 @@ class BaseSheet:
     def name(self, name):
         'Set name without spaces.'
         self._name = name.strip().replace(' ', '_')
-
-    @property
-    def progressMade(self):
-        return sum(prog.made for prog in self.progresses)
-
-    @property
-    def progressTotal(self):
-        return sum(prog.total for prog in self.progresses)
-
-    @property
-    def progressPct(self):
-        'Percent complete as indicated by async actions.'
-        if self.progressTotal != 0:
-            return int(self.progressMade*100/self.progressTotal)
-        return 0
 
     def recalc(self):
         'Clear any calculated value caches.'
@@ -1433,6 +1274,8 @@ def addGlobals(g):
 
 def getGlobals():
     return globals()
+
+vd = VisiData()
 
 from .cliptext import clipdraw, clipstr
 from .editline import editline

@@ -1,4 +1,111 @@
-from visidata import Sheet, undoSheetSelection
+from visidata import Sheet, undoAttrCopy, Progress, replayableOption, asyncthread, options
+
+__all__ = ['undoSheetSelection', 'undoSelection']
+
+replayableOption('bulk_select_clear', False, 'clear selected rows before new bulk selections')
+
+Sheet.init('_selectedRows', dict)  # id(row) -> row
+
+@Sheet.api
+def isSelected(self, row):
+    'True if given row is selected. O(log n).'
+    return id(row) in self._selectedRows
+
+@Sheet.api
+@asyncthread
+def toggle(self, rows):
+    'Toggle selection of given `rows`.'
+    for r in Progress(rows, 'toggling', total=len(self.rows)):
+        if not self.unselectRow(r):
+            self.selectRow(r)
+
+@Sheet.api
+def selectRow(self, row):
+    'Select given row. O(log n)'
+    self._selectedRows[id(row)] = row
+
+@Sheet.api
+def unselectRow(self, row):
+    'Unselect given row, return True if selected; else return False. O(log n)'
+    if id(row) in self._selectedRows:
+        del self._selectedRows[id(row)]
+        return True
+    else:
+        return False
+
+@Sheet.api
+@asyncthread
+def select(self, rows, status=True, progress=True):
+    "Bulk select given rows. Don't show progress if progress=False; don't show status if status=False."
+    before = len(self._selectedRows)
+    if options.bulk_select_clear:
+        self._selectedRows.clear()
+    for r in (Progress(rows, 'selecting') if progress else rows):
+        self.selectRow(r)
+    if status:
+        if options.bulk_select_clear:
+            msg = 'selected %s %s%s' % (len(self._selectedRows), self.rowtype, ' instead' if before > 0 else '')
+        else:
+            msg = 'selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype)
+        self.vd.status(msg)
+
+@Sheet.api
+@asyncthread
+def unselect(self, rows, status=True, progress=True):
+    "Unselect given rows. Don't show progress if progress=False; don't show status if status=False."
+    before = len(self._selectedRows)
+    for r in (Progress(rows, 'unselecting') if progress else rows):
+        self.unselectRow(r)
+    if status:
+        self.vd.status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
+
+@Sheet.api
+def selectByIdx(self, rowIdxs):
+    'Select given row indexes, without progress bar.'
+    self.select((self.rows[i] for i in rowIdxs), progress=False)
+
+@Sheet.api
+def unselectByIdx(self, rowIdxs):
+    'Unselect given row indexes, without progress bar.'
+    self.unselect((self.rows[i] for i in rowIdxs), progress=False)
+
+@Sheet.api
+def gatherBy(self, func):
+    'Generate only rows for which the given func returns True.'
+    for i in rotate_range(len(self.rows), self.cursorRowIndex):
+        try:
+            r = self.rows[i]
+            if func(r):
+                yield r
+        except Exception:
+            pass
+
+@Sheet.property
+def selectedRows(self):
+    'List of selected rows in sheet order. [O(nRows*log(nSelected))]'
+    if len(self._selectedRows) <= 1:
+        return list(self._selectedRows.values())
+    return [r for r in self.rows if id(r) in self._selectedRows]
+
+@Sheet.property
+def nSelected(self):
+    return len(self._selectedRows)
+
+@Sheet.api
+@asyncthread
+def deleteSelected(self):
+    'Delete all selected rows.'
+    ndeleted = self.deleteBy(self.isSelected)
+    nselected = len(self._selectedRows)
+    self._selectedRows.clear()
+    if ndeleted != nselected:
+        error('expected %s' % nselected)
+
+undoSheetSelection = undoAttrCopy('[sheet]', '_selectedRows')
+
+def undoSelection(sheetstr):
+    return undoAttrCopy('[%s]'%sheetstr, '_selectedRows')
+
 
 Sheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)', undo=undoSheetSelection),
 Sheet.addCommand('s', 'select-row', 'selectRow(cursorRow); cursorDown(1)', undo=undoSheetSelection),

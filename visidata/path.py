@@ -2,7 +2,7 @@ import os
 import os.path
 import sys
 
-from .vdtui import *
+from visidata import *
 
 replayableOption('skip', 0, 'skip first N lines of text input')
 

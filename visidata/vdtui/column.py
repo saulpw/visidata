@@ -5,7 +5,7 @@ import re
 
 from visidata.vdtui import options, fail, anytype, stacktrace, status
 from visidata.vdtui import getType, typemap, isNumeric, isNullFunc
-from visidata.vdtui import asyncthread, Progress, exceptionCaught
+from visidata.vdtui import asyncthread, exceptionCaught
 from visidata.vdtui import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
 from visidata.vdtui import Extensible
 
@@ -111,22 +111,6 @@ class Column(Extensible):
         if self.width is None:
             return False
         return self.width <= 0
-
-    def getValueRows(self, rows):
-        'Generate (val, row) for the given `rows` at this Column, excluding errors and nulls.'
-        f = isNullFunc()
-
-        for r in Progress(rows, 'calculating'):
-            try:
-                v = self.getTypedValue(r)
-                if not f(v):
-                    yield v, r
-            except Exception:
-                pass
-
-    def getValues(self, rows):
-        for v, r in self.getValueRows(rows):
-            yield v
 
     def calcValue(self, row):
         return (self.getter)(self, row)
@@ -259,14 +243,6 @@ class Column(Extensible):
             self.setValueSafe(r, v)
         self.recalc()
         return status('set %d cells to %d values' % (len(rows), len(values)))
-
-    @asyncthread
-    def setValuesFromExpr(self, rows, expr):
-        compiledExpr = compile(expr, '<expr>', 'eval')
-        for row in Progress(rows, 'setting'):
-            self.setValueSafe(row, self.sheet.evalexpr(compiledExpr, row))
-        self.recalc()
-        status('set %d values = %s' % (len(rows), expr))
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'

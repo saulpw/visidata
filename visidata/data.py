@@ -1,7 +1,10 @@
 import itertools
 import random
 
+from copy import copy
+from visidata import Sheet, Column, asyncthread, Progress, status, error
 from visidata import *
+
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 replayableOption('safe_error', '#ERR', 'error string to use while saving')
@@ -311,3 +314,40 @@ def loadInternalSheet(klass, p, **kwargs):
         vs.reload.__wrapped__(vs)
         vd.sheets.pop(0)
     return vs
+
+
+@Sheet.api
+def deleteBy(self, func):
+    'Delete rows for which func(row) is true.  Returns number of deleted rows.'
+    oldrows = copy(self.rows)
+    oldidx = self.cursorRowIndex
+    ndeleted = 0
+
+    row = None   # row to re-place cursor after
+    while oldidx < len(oldrows):
+        if not func(oldrows[oldidx]):
+            row = self.rows[oldidx]
+            break
+        oldidx += 1
+
+    self.rows.clear()
+    for r in Progress(oldrows, 'deleting'):
+        if not func(r):
+            self.rows.append(r)
+            if r is row:
+                self.cursorRowIndex = len(self.rows)-1
+        else:
+            ndeleted += 1
+
+    status('deleted %s %s' % (ndeleted, self.rowtype))
+    return ndeleted
+
+
+@Sheet.api
+@asyncthread
+def delete(self, rows):
+    rowdict = {id(r): r for r in rows}
+    ndeleted = self.deleteBy(lambda r,rowdict=rowdict: id(r) in rowdict)
+    nrows = len(rows)
+    if ndeleted != nrows:
+        warning('expected %s' % nrows)

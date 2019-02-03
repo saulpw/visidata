@@ -1,9 +1,29 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, error, status, Sheet, Column, regex_flags, rotate_range, fail
+from visidata import vd, VisiData, error, status, Sheet, Column, regex_flags, fail, Progress
 
-vd.searchContext = {}  # regex, columns, backward to kwargs from previous search
+__all__ = ['rotate_range']
+
+vd.searchContext = {}  # [(regex, columns, backward)] -> kwargs from previous search
+
+def rotate_range(n, idx, reverse=False):
+    if reverse:
+        rng = range(idx-1, -1, -1)
+        rng2 = range(n-1, idx-1, -1)
+    else:
+        rng = range(idx+1, n)
+        rng2 = range(0, idx+1)
+
+    wrapped = False
+    with Progress(total=n) as prog:
+        for r in itertools.chain(rng, rng2):
+            prog.addProgress(1)
+            if not wrapped and r in rng2:
+                status('search wrapped')
+                wrapped = True
+            yield r
+
 
 Sheet.addCommand('c', 'go-col-regex', 'sheet.cursorVisibleColIndex=nextColRegex(sheet, input("column name regex: ", type="regex-col", defaultLast=True))')
 Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; vd.moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp')
@@ -27,6 +47,7 @@ Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnu
 Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
 
 
+@Sheet.api
 def moveToNextRow(vs, func, reverse=False):
     'Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria.'
     rng = range(vs.cursorRowIndex-1, -1, -1) if reverse else range(vs.cursorRowIndex+1, vs.nRows)
@@ -41,9 +62,8 @@ def moveToNextRow(vs, func, reverse=False):
 
     return False
 
-Sheet.moveToNextRow = moveToNextRow
 
-
+@Sheet.api
 def nextColRegex(sheet, colregex):
     'Go to first visible column after the cursor matching `colregex`.'
     pivot = sheet.cursorVisibleColIndex
@@ -55,12 +75,13 @@ def nextColRegex(sheet, colregex):
     fail('no column name matches /%s/' % colregex)
 
 
+@VisiData.api
 def moveRegex(vd, sheet, *args, **kwargs):
     list(vd.searchRegex(sheet, *args, moveCursor=True, **kwargs))
 
-VisiData.moveRegex = moveRegex
 
 # kwargs: regex=None, columns=None, backward=False
+@VisiData.api
 def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
         'Set row index if moveCursor, otherwise return list of row indexes.'
         def findMatchingColumn(sheet, row, columns, func):
@@ -105,6 +126,3 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
                     yield r
 
         status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
-
-
-VisiData.searchRegex = searchRegex

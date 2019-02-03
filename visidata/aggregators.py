@@ -2,7 +2,28 @@ import math
 import functools
 import collections
 
+from visidata import Progress, isNullFunc, Column
 from visidata import *
+
+
+@Column.api
+def getValueRows(self, rows):
+    'Generate (val, row) for the given `rows` at this Column, excluding errors and nulls.'
+    f = isNullFunc()
+
+    for r in Progress(rows, 'calculating'):
+        try:
+            v = self.getTypedValue(r)
+            if not f(v):
+                yield v, r
+        except Exception:
+            pass
+
+@Column.api
+def getValues(self, rows):
+    for v, r in self.getValueRows(rows):
+        yield v
+
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
 Sheet.addCommand('z+', 'show-aggregate', 'agg=chooseOne(aggregators); status(cursorCol.format(wrapply(agg.type or cursorCol.type, agg(cursorCol, selectedRows or rows))))')

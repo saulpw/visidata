@@ -5,8 +5,8 @@ import re
 from copy import copy
 
 from visidata.vdtui import (Command, bindkeys, commands, options, isNullFunc, error, Column,
-TypedExceptionWrapper, regex_flags, Progress, asyncthread, getGlobals, LazyMapRow, CompleteExpr,
-rotate_range, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, vd, CursesAttr, colors, input, undoAddCols, undoEditCell, undoEditCells, undoAttr, Extensible)
+TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow, CompleteExpr,
+vd, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, CursesAttr, colors, input, undoAddCols, undoEditCell, undoEditCells, undoAttr)
 
 
 __all__ = [ 'RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet' ]
@@ -23,7 +23,7 @@ CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt fun
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
 
-class Sheet(BaseSheet, Extensible):
+class Sheet(BaseSheet):
     'Base class for all tabular sheets.'
     _rowtype = lambda: collections.defaultdict(lambda: None)
     rowtype = 'rows'
@@ -59,7 +59,6 @@ class Sheet(BaseSheet, Extensible):
         self.recalc()  # set .sheet on columns and start caches
 
         self.setKeys(self.columns[:self.nKeys])  # initial list of key columns
-        self._selectedRows = {}  # id(row) -> row
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
@@ -146,7 +145,6 @@ class Sheet(BaseSheet, Extensible):
         ret.recalc()  # set .sheet on columns
         ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
-        ret.progresses = []
         ret.currentThreads = []
         ret.precious = True  # copies can be precious even if originals aren't
         return ret
@@ -156,48 +154,6 @@ class Sheet(BaseSheet, Extensible):
         ret = self.__copy__()
         memo[id(self)] = ret
         return ret
-
-    def deleteBy(self, func):
-        'Delete rows for which func(row) is true.  Returns number of deleted rows.'
-        oldrows = copy(self.rows)
-        oldidx = self.cursorRowIndex
-        ndeleted = 0
-
-        row = None   # row to re-place cursor after
-        while oldidx < len(oldrows):
-            if not func(oldrows[oldidx]):
-                row = self.rows[oldidx]
-                break
-            oldidx += 1
-
-        self.rows.clear()
-        for r in Progress(oldrows, 'deleting'):
-            if not func(r):
-                self.rows.append(r)
-                if r is row:
-                    self.cursorRowIndex = len(self.rows)-1
-            else:
-                ndeleted += 1
-
-        status('deleted %s %s' % (ndeleted, self.rowtype))
-        return ndeleted
-
-    @asyncthread
-    def deleteSelected(self):
-        'Delete all selected rows.'
-        ndeleted = self.deleteBy(self.isSelected)
-        nselected = len(self._selectedRows)
-        self._selectedRows.clear()
-        if ndeleted != nselected:
-            error('expected %s' % nselected)
-
-    @asyncthread
-    def delete(self, rows):
-        rowdict = {id(r): r for r in rows}
-        ndeleted = self.deleteBy(lambda r,rowdict=rowdict: id(r) in rowdict)
-        nrows = len(rows)
-        if ndeleted != nrows:
-            error('expected %s' % nrows)
 
     def __repr__(self):
         return self.name
@@ -285,7 +241,7 @@ class Sheet(BaseSheet, Extensible):
     @property
     def statusLine(self):
         'String of row and column stats.'
-        rowinfo = 'row %d/%d (%d selected)' % (self.cursorRowIndex, self.nRows, len(self._selectedRows))
+        rowinfo = 'row %d/%d (%d selected)' % (self.cursorRowIndex, self.nRows, self.nSelected)
         colinfo = 'col %d/%d (%d visible)' % (self.cursorColIndex, self.nCols, len(self.visibleCols))
         return '%s  %s' % (rowinfo, colinfo)
 
@@ -303,81 +259,6 @@ class Sheet(BaseSheet, Extensible):
     def nVisibleCols(self):
         'Number of visible columns on this sheet.'
         return len(self.visibleCols)
-
-## selection code
-    def isSelected(self, row):
-        'True if given row is selected. O(log n).'
-        return id(row) in self._selectedRows
-
-    @asyncthread
-    def toggle(self, rows):
-        'Toggle selection of given `rows`.'
-        for r in Progress(rows, 'toggling', total=len(self.rows)):
-            if not self.unselectRow(r):
-                self.selectRow(r)
-
-    def selectRow(self, row):
-        'Select given row. O(log n)'
-        self._selectedRows[id(row)] = row
-
-    def unselectRow(self, row):
-        'Unselect given row, return True if selected; else return False. O(log n)'
-        if id(row) in self._selectedRows:
-            del self._selectedRows[id(row)]
-            return True
-        else:
-            return False
-
-    @asyncthread
-    def select(self, rows, status=True, progress=True):
-        "Bulk select given rows. Don't show progress if progress=False; don't show status if status=False."
-        before = len(self._selectedRows)
-        if options.bulk_select_clear:
-            self._selectedRows.clear()
-        for r in (Progress(rows, 'selecting') if progress else rows):
-            self.selectRow(r)
-        if status:
-            if options.bulk_select_clear:
-                msg = 'selected %s %s%s' % (len(self._selectedRows), self.rowtype, ' instead' if before > 0 else '')
-            else:
-                msg = 'selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype)
-            self.vd.status(msg)
-
-    @asyncthread
-    def unselect(self, rows, status=True, progress=True):
-        "Unselect given rows. Don't show progress if progress=False; don't show status if status=False."
-        before = len(self._selectedRows)
-        for r in (Progress(rows, 'unselecting') if progress else rows):
-            self.unselectRow(r)
-        if status:
-            self.vd.status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
-
-    def selectByIdx(self, rowIdxs):
-        'Select given row indexes, without progress bar.'
-        self.select((self.rows[i] for i in rowIdxs), progress=False)
-
-    def unselectByIdx(self, rowIdxs):
-        'Unselect given row indexes, without progress bar.'
-        self.unselect((self.rows[i] for i in rowIdxs), progress=False)
-
-    def gatherBy(self, func):
-        'Generate only rows for which the given func returns True.'
-        for i in rotate_range(len(self.rows), self.cursorRowIndex):
-            try:
-                r = self.rows[i]
-                if func(r):
-                    yield r
-            except Exception:
-                pass
-
-    @property
-    def selectedRows(self):
-        'List of selected rows in sheet order. [O(nRows*log(nSelected))]'
-        if len(self._selectedRows) <= 1:
-            return list(self._selectedRows.values())
-        return [r for r in self.rows if id(r) in self._selectedRows]
-
-## end selection code
 
     def cursorDown(self, n=1):
         'Move cursor down `n` rows (or up if `n` is negative).'

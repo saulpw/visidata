@@ -19,7 +19,10 @@ class GitCmdLog(Sheet):
         self.rows = []
 
 GitCmdLog.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], cursorRow[1]))', 'view output of this command'),
-vd.gitcmdlog = GitCmdLog('gitcmdlog')
+
+@VisiData.cached_property
+def gitcmdlog(vd):
+    return GitCmdLog('gitcmdlog')
 
 def loggit(*args, **kwargs):
     output = maybeloggit(*args, **kwargs)

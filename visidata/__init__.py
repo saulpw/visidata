@@ -8,6 +8,8 @@ __copyright__ = 'Copyright (c) 2016-2019 ' + __author__
 
 from .vdtui import *
 from .vdtui.textsheet import TextSheet
+from .asyncthread import *
+from .movement import *
 from .path import *
 from .errors import *
 from .urlcache import *
@@ -20,12 +22,12 @@ from .clipboard import *
 from .utils import *
 from .slide import *
 from .search import *
+from .expr import *
 
 from .pyobj import *
 from .metasheets import *
 from .join import *
 from .describe import *
-from .asyncthread import *
 from .aggregators import *
 from .pivot import *
 from .freqtbl import *
@@ -39,9 +41,7 @@ from .motd import *
 from .transpose import *
 from .diff import *
 from .shell import *
-from .movement import *
 import visidata.sort
-from ._profile import *
 
 from .vimkeys import *
 
