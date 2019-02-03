@@ -10,7 +10,7 @@ import os
 import io
 import sys
 
-from visidata import vd, option, options, sync, status, run
+from visidata import vd, option, options, status, run
 from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand
 from visidata import Path, PathFd, openSource, saveSheets, setDiffSheet, domotd
 
@@ -158,7 +158,7 @@ def main():
     if vd.sheets and (flPipedOutput or args.output):
         outpath = Path(args.output or '-')
         saveSheets(outpath, vd.sheets[0], confirm_overwrite=False)
-        sync()
+        vd.sync()
 
     vd.stdout.flush()
 

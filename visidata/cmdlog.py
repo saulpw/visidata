@@ -297,7 +297,7 @@ class CommandLog(TsvSheet):
                 self.cursorRowIndex += 1
                 prog.addProgress(1)
 
-                sync(1 if live else 0)  # expect this thread also if playing live
+                vd.sync()
                 while not self.delay():
                     pass
 

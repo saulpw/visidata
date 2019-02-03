@@ -494,9 +494,6 @@ def regex_flags():
     'Return flags to pass to regex functions from options'
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
-def sync(expectedThreads=0):
-    vd.sync(expectedThreads)
-
 
 # define @asyncthread for potentially long-running functions
 #   when function is called, instead launches a thread
@@ -721,11 +718,15 @@ class VisiData(Extensible):
                 if getattr(t, 'status', None) is None:
                     t.status = 'ended'
 
-    def sync(self, expectedThreads=0):
-        'Wait for all but expectedThreads async threads to finish.'
-        while len(self.unfinishedThreads) > expectedThreads:
-            time.sleep(.3)
-            self.checkForFinishedThreads()
+    def sync(self, *joiningThreads):
+        'Wait for joiningThreads to finish. If no joiningThreads specified, wait for all but current thread to finish.'
+        joiningThreads = joiningThreads or (set(self.unfinishedThreads)-set([threading.current_thread()]))
+        while any(t in self.unfinishedThreads for t in joiningThreads):
+            for t in joiningThreads:
+                try:
+                    t.join()
+                except RuntimeError:  # maybe thread hasn't started yet or has already joined
+                    pass
 
     def refresh(self):
         Sheet.visibleCols.fget.cache_clear()

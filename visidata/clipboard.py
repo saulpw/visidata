@@ -5,7 +5,7 @@ import sys
 import tempfile
 import functools
 
-from visidata import vd, asyncthread, sync, status, fail, option, options
+from visidata import vd, asyncthread, status, fail, option, options
 from visidata import Sheet, saveSheets, Path
 from visidata import undoEditCell, undoEditCells, undoSheetRows
 
