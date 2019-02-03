@@ -26,10 +26,10 @@ globalCommand('^[', 'undo-last', 'vd.cmdlog.undo()')
 globalCommand('^]', 'redo-last', 'vd.cmdlog.redo()')
 
 # prefixes which should not be logged
-nonLogged = '''quit forget check-version exec-longname undo redo
+nonLogged = '''quit forget exec-longname undo redo
 error status errors statuses options threads cmdlog
 replay stop pause cancel advance
-go- search scroll prev next page go start end zoom
+go- search scroll prev next page go start end zoom resize
 suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
