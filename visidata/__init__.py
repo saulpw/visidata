@@ -23,6 +23,7 @@ from .utils import *
 from .slide import *
 from .search import *
 from .expr import *
+from .input import *
 
 from .pyobj import *
 from .metasheets import *

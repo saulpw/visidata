@@ -333,11 +333,6 @@ globalCommand(' ', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
 bindkey('KEY_RESIZE', 'redraw')
 
-def input_longname(sheet):
-    longnames = set(k for (k, obj), v in commands.iter(sheet))
-    return input("command name: ", completer=CompleteKey(sorted(longnames)))
-
-
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
 #
 #    o = typetype(val)   # for interpreting raw value
@@ -416,9 +411,6 @@ def debug(*args, **kwargs):
     if options.debug:
         return vd.status(*args, **kwargs)
 
-def input(*args, **kwargs):
-    return vd.input(*args, **kwargs)
-
 def middleTruncate(s, w):
     if len(s) <= w:
         return s
@@ -438,36 +430,6 @@ def stacktrace(e=None):
         return traceback.format_exc().strip().splitlines()
     return traceback.format_exception_only(type(e), e)
 
-def chooseOne(choices):
-    'Return one of `choices` elements (if list) or values (if dict).'
-    ret = chooseMany(choices)
-    if not ret:
-        raise EscapeException()
-    if len(ret) > 1:
-        error('need only one choice')
-    return ret[0]
-
-def chooseMany(choices):
-    'Return list of `choices` elements (if list) or values (if dict).'
-    if isinstance(choices, dict):
-        prompt = '/'.join(choices.keys())
-        chosen = []
-        for c in input(prompt+': ', completer=CompleteKey(choices)).split():
-            poss = [choices[p] for p in choices if p.startswith(c)]
-            if not poss:
-                warning('invalid choice "%s"' % c)
-            else:
-                chosen.extend(poss)
-    else:
-        prompt = '/'.join(str(x) for x in choices)
-        chosen = []
-        for c in input(prompt+': ', completer=CompleteKey(choices)).split():
-            poss = [p for p in choices if p.startswith(c)]
-            if not poss:
-                warning('invalid choice "%s"' % c)
-            else:
-                chosen.extend(poss)
-    return chosen
 
 def regex_flags():
     'Return flags to pass to regex functions from options'
@@ -533,9 +495,7 @@ class VisiData(Extensible):
         self.statuses = collections.OrderedDict()  # (priority, statusmsg) -> num_repeats; shown until next action
         self.statusHistory = []  # list of [priority, statusmsg, repeats] for all status messages ever
         self.lastErrors = []
-        self.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
         self.keystrokes = ''
-        self.inInput = False
         self.prefixWaiting = False
         self.scr = None  # curses scr
         self.mousereg = []
@@ -581,51 +541,6 @@ class VisiData(Extensible):
         Sheet.keyCols.fget.cache_clear()
         colors.colorcache.clear()
         self.mousereg.clear()
-
-    def editText(self, y, x, w, record=True, **kwargs):
-        'Wrap global editText with `preedit` and `postedit` hooks.'
-        v = None
-        if record and self.cmdlog:
-            v = self.cmdlog.getLastArgs()
-
-        if v is None:
-            with EnableCursor():
-                v = editline(self.scr, y, x, w, **kwargs)
-
-        if kwargs.get('display', True):
-            status('"%s"' % v)
-            if record and self.cmdlog:
-                self.cmdlog.setLastArgs(v)
-        return v
-
-    def input(self, prompt, type='', defaultLast=False, **kwargs):
-        'Get user input, with history of `type`, defaulting to last history item if no input and defaultLast is True.'
-        if type:
-            histlist = list(self.lastInputs[type].keys())
-            ret = self._inputLine(prompt, history=histlist, **kwargs)
-            if ret:
-                self.lastInputs[type][ret] = ret
-            elif defaultLast:
-                histlist or fail("no previous input")
-                ret = histlist[-1]
-        else:
-            ret = self._inputLine(prompt, **kwargs)
-
-        return ret
-
-    def _inputLine(self, prompt, **kwargs):
-        'Add prompt to bottom of screen and get line of input from user.'
-        self.inInput = True
-        rstatuslen = self.drawRightStatus(self.scr, self.sheets[0])
-        attr = 0
-        promptlen = clipdraw(self.scr, self.windowHeight-1, 0, prompt, attr, w=self.windowWidth-rstatuslen-1)
-        ret = self.editText(self.windowHeight-1, promptlen, self.windowWidth-promptlen-rstatuslen-2,
-                            attr=colors.color_edit_cell,
-                            unprintablechar=options.disp_unprintable,
-                            truncchar=options.disp_truncator,
-                            **kwargs)
-        self.inInput = False
-        return ret
 
     def getkeystroke(self, scr, vs=None):
         'Get keystroke and display it on status bar.'
@@ -892,37 +807,6 @@ class LazyMap:
     def __setitem__(self, k, v):
         setattr(self.obj, k, v)
 
-class CompleteExpr:
-    def __init__(self, sheet=None):
-        self.sheet = sheet
-
-    def __call__(self, val, state):
-        i = len(val)-1
-        while val[i:].isidentifier() and i >= 0:
-            i -= 1
-
-        if i < 0:
-            base = ''
-            partial = val
-        elif val[i] == '.':  # no completion of attributes
-            return None
-        else:
-            base = val[:i+1]
-            partial = val[i+1:]
-
-        varnames = []
-        varnames.extend(sorted((base+col.name) for col in self.sheet.columns if col.name.startswith(partial)))
-        varnames.extend(sorted((base+x) for x in globals() if x.startswith(partial)))
-        return varnames[state%len(varnames)]
-
-class CompleteKey:
-    def __init__(self, items):
-        self.items = items
-
-    def __call__(self, val, state):
-        opts = [x for x in self.items if x.startswith(val)]
-        return opts[state%len(opts)]
-
 
 class BaseSheet(Extensible):
     _rowtype = object    # callable (no parms) that returns new empty item
@@ -1163,13 +1047,6 @@ class DisplayWrapper:
 
 ###
 
-def confirm(prompt):
-    yn = input(prompt, value='no', record=False)[:1]
-    if not yn or yn not in 'Yy':
-        fail('disconfirmed')
-    return True
-
-
 # https://stackoverflow.com/questions/19833315/running-system-commands-in-python-using-curses-and-panel-and-come-back-to-previ
 class SuspendCurses:
     'Context Manager to temporarily leave curses mode'
@@ -1278,7 +1155,6 @@ def getGlobals():
 vd = VisiData()
 
 from .cliptext import clipdraw, clipstr
-from .editline import editline
 from .column import *
 from .color import colors, CursesAttr
 from ._sheet import *

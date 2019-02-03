@@ -1,6 +1,11 @@
+import collections
 import curses
 
-from visidata.vdtui import clipdraw, vd, EscapeException, launchExternalEditor, suspend
+from visidata import EscapeException, EnableCursor, clipdraw, Sheet, VisiData
+from visidata import vd, status, error, warning, fail, options, colors, commands
+from visidata import launchExternalEditor, suspend
+
+vd.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
 
 
 # history: earliest entry first
@@ -181,3 +186,135 @@ def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
         complete_state.reset()
 
     return v
+
+
+@VisiData.api
+def editText(self, y, x, w, record=True, **kwargs):
+    'Wrap global editText with `preedit` and `postedit` hooks.'
+    v = None
+    if record and self.cmdlog:
+        v = self.cmdlog.getLastArgs()
+
+    if v is None:
+        with EnableCursor():
+            v = editline(self.scr, y, x, w, **kwargs)
+
+    if kwargs.get('display', True):
+        status('"%s"' % v)
+        if record and self.cmdlog:
+            self.cmdlog.setLastArgs(v)
+    return v
+
+@VisiData.api
+def input(self, prompt, type='', defaultLast=False, **kwargs):
+    'Get user input, with history of `type`, defaulting to last history item if no input and defaultLast is True.'
+    if type:
+        histlist = list(self.lastInputs[type].keys())
+        ret = self._inputLine(prompt, history=histlist, **kwargs)
+        if ret:
+            self.lastInputs[type][ret] = ret
+        elif defaultLast:
+            histlist or fail("no previous input")
+            ret = histlist[-1]
+    else:
+        ret = self._inputLine(prompt, **kwargs)
+
+    return ret
+
+
+@VisiData.api
+def _inputLine(self, prompt, **kwargs):
+    'Add prompt to bottom of screen and get line of input from user.'
+    rstatuslen = self.drawRightStatus(self.scr, self.sheets[0])
+    attr = 0
+    promptlen = clipdraw(self.scr, self.windowHeight-1, 0, prompt, attr, w=self.windowWidth-rstatuslen-1)
+    ret = self.editText(self.windowHeight-1, promptlen, self.windowWidth-promptlen-rstatuslen-2,
+                        attr=colors.color_edit_cell,
+                        unprintablechar=options.disp_unprintable,
+                        truncchar=options.disp_truncator,
+                        **kwargs)
+    return ret
+
+
+def confirm(prompt):
+    yn = input(prompt, value='no', record=False)[:1]
+    if not yn or yn not in 'Yy':
+        fail('disconfirmed')
+    return True
+
+
+class CompleteKey:
+    def __init__(self, items):
+        self.items = items
+
+    def __call__(self, val, state):
+        opts = [x for x in self.items if x.startswith(val)]
+        return opts[state%len(opts)]
+
+
+def input_longname(sheet):
+    longnames = set(k for (k, obj), v in commands.iter(sheet))
+    return input("command name: ", completer=CompleteKey(sorted(longnames)))
+
+
+def input(*args, **kwargs):
+    return vd.input(*args, **kwargs)
+
+def chooseOne(choices):
+    'Return one of `choices` elements (if list) or values (if dict).'
+    ret = chooseMany(choices)
+    if not ret:
+        raise EscapeException()
+    if len(ret) > 1:
+        error('need only one choice')
+    return ret[0]
+
+def chooseMany(choices):
+    'Return list of `choices` elements (if list) or values (if dict).'
+    if isinstance(choices, dict):
+        prompt = '/'.join(choices.keys())
+        chosen = []
+        for c in input(prompt+': ', completer=CompleteKey(choices)).split():
+            poss = [choices[p] for p in choices if p.startswith(c)]
+            if not poss:
+                warning('invalid choice "%s"' % c)
+            else:
+                chosen.extend(poss)
+    else:
+        prompt = '/'.join(str(x) for x in choices)
+        chosen = []
+        for c in input(prompt+': ', completer=CompleteKey(choices)).split():
+            poss = [p for p in choices if p.startswith(c)]
+            if not poss:
+                warning('invalid choice "%s"' % c)
+            else:
+                chosen.extend(poss)
+    return chosen
+
+@Sheet.api
+def editCell(self, vcolidx=None, rowidx=None, **kwargs):
+    'Call `editText` at its place on the screen.  Returns the new value, properly typed'
+
+    if vcolidx is None:
+        vcolidx = self.cursorVisibleColIndex
+    x, w = self.visibleColLayout.get(vcolidx, (0, 0))
+
+    col = self.visibleCols[vcolidx]
+    if rowidx is None:
+        rowidx = self.cursorRowIndex
+    if rowidx < 0:  # header
+        y = 0
+        currentValue = col.name
+    else:
+        y = self.rowLayout.get(rowidx, 0)
+        currentValue = col.getDisplayValue(self.rows[self.cursorRowIndex])
+
+    editargs = dict(value=currentValue,
+                    fillchar=options.disp_edit_fill,
+                    truncchar=options.disp_truncator)
+    editargs.update(kwargs)  # update with user-specified args
+    r = self.vd.editText(y, x, w, **editargs)
+    if rowidx >= 0:  # if not header
+        r = col.type(r)  # convert input to column type, let exceptions be raised
+
+    return r

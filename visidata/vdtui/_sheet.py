@@ -5,8 +5,8 @@ import re
 from copy import copy
 
 from visidata.vdtui import (Command, bindkeys, commands, options, isNullFunc, error, Column,
-TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow, CompleteExpr,
-vd, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, CursesAttr, colors, input, undoAddCols, undoEditCell, undoEditCells, undoAttr)
+TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow,
+vd, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
 
 __all__ = [ 'RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet' ]
@@ -160,9 +160,6 @@ class Sheet(BaseSheet):
 
     def evalexpr(self, expr, row=None):
         return eval(expr, getGlobals(), LazyMapRow(self, row) if row is not None else None)
-
-    def inputExpr(self, prompt, *args, **kwargs):
-        return input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
 
     @property
     def nVisibleRows(self):
@@ -532,32 +529,6 @@ class Sheet(BaseSheet):
 
         catchapply(self.checkCursor)
 
-    def editCell(self, vcolidx=None, rowidx=None, **kwargs):
-        'Call `editText` at its place on the screen.  Returns the new value, properly typed'
-
-        if vcolidx is None:
-            vcolidx = self.cursorVisibleColIndex
-        x, w = self.visibleColLayout.get(vcolidx, (0, 0))
-
-        col = self.visibleCols[vcolidx]
-        if rowidx is None:
-            rowidx = self.cursorRowIndex
-        if rowidx < 0:  # header
-            y = 0
-            currentValue = col.name
-        else:
-            y = self.rowLayout.get(rowidx, 0)
-            currentValue = col.getDisplayValue(self.rows[self.cursorRowIndex])
-
-        editargs = dict(value=currentValue,
-                        fillchar=options.disp_edit_fill,
-                        truncchar=options.disp_truncator)
-        editargs.update(kwargs)  # update with user-specified args
-        r = self.vd.editText(y, x, w, **editargs)
-        if rowidx >= 0:  # if not header
-            r = col.type(r)  # convert input to column type, let exceptions be raised
-
-        return r
 
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),
@@ -604,9 +575,6 @@ Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"
 Sheet.addCommand('g"', 'dup-rows', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),
 Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows or rows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
 Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
-
-Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', undo=undoAddCols),
-Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))', undo=undoEditCells),
 
 bindkey('KEY_LEFT', 'go-left')
 bindkey('KEY_DOWN', 'go-down')
