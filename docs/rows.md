@@ -26,17 +26,27 @@ An example usage follows.
 ## How to filter rows
 
 1. Press `s` or `t` on the rows to filter.
+
 2. Press
 
-    a. `gd` to delete the selected rows.
+    a. `gd` to delete the selected rows.  The rows can be pasted elsewhere on any sheet of the same type with `gp`.
 
     **or**
 
-    b. `"` to open a duplicate sheet with references to the selected rows.  Edits performed within the duplicate sheet will also propagate to the source sheet.
+    b. `"` to open a duplicate sheet which has references to the selected rows.  Edits performed within the duplicate sheet will also propagate to the source sheet.
 
     **or**
 
-    c. `gz"` to open a duplicate sheet with copies of the selected rows.  Any changes will not affect the source sheet.
+    c. `g"` to open a duplicate sheet which has references to all rows, and keeping the selected rows selected.  The selection can be modified on the parent sheet and the new sheet independently, but any changes will be reflected on both sheets.
+
+    **or**
+
+    d. `z"` to open a copy of the sheet which has copies of the selected rows.  Any changes will not affect the source sheet.
+
+    **or**
+
+    d. `gz"` to open a copy of the sheet which has copies of all rows.  Any changes will be reflected on the source sheet
+
 
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
