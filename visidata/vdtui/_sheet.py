@@ -164,7 +164,7 @@ class Sheet(BaseSheet):
     @property
     def nVisibleRows(self):
         'Number of visible rows at the current window height.'
-        return self.vd.windowHeight-2
+        return vd.windowHeight-2
 
     @property
     def cursorCol(self):
@@ -370,7 +370,7 @@ class Sheet(BaseSheet):
                     continue
 
                 cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
-                if cur_x+cur_w < self.vd.windowWidth:  # current columns fit entirely on screen
+                if cur_x+cur_w < vd.windowWidth:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
 
@@ -378,7 +378,7 @@ class Sheet(BaseSheet):
         'Set right-most visible column, based on calculation.'
         minColWidth = len(options.disp_more_left)+len(options.disp_more_right)
         sepColWidth = len(options.disp_column_sep)
-        winWidth = self.vd.windowWidth
+        winWidth = vd.windowWidth
         self.visibleColLayout = {}
         x = 0
         vcolidx = 0
@@ -427,7 +427,7 @@ class Sheet(BaseSheet):
             N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
         clipdraw(scr, y, x, N, hdrattr.attr, colwidth)
         clipdraw(scr, y, x+colwidth-len(T), T, hdrattr.attr, len(T))
-        self.vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
+        vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
@@ -436,7 +436,7 @@ class Sheet(BaseSheet):
         except ValueError:  # from .index
             pass
 
-        if C and x+colwidth+len(C) < self.vd.windowWidth:
+        if C and x+colwidth+len(C) < vd.windowWidth:
             scr.addstr(y, x+colwidth, C, sepattr)
 
     def isVisibleIdxKey(self, vcolidx):
@@ -468,7 +468,7 @@ class Sheet(BaseSheet):
             x, colwidth = colinfo
             col = self.visibleCols[vcolidx]
 
-            if x < self.vd.windowWidth:  # only draw inside window
+            if x < vd.windowWidth:  # only draw inside window
               timer = threading.Timer(0.3, lambda col=col: status("setting %s async" % col.name) and col.setCache('async'))
               timer.start()
               try:
@@ -517,7 +517,7 @@ class Sheet(BaseSheet):
                     if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
                         sepchars = options.disp_keycol_sep
 
-                    if x+colwidth+len(sepchars) <= self.vd.windowWidth:
+                    if x+colwidth+len(sepchars) <= vd.windowWidth:
                        scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
 
                     y += 1
@@ -525,7 +525,7 @@ class Sheet(BaseSheet):
                     timer.cancel()
 
         if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(headerRow, self.vd.windowWidth-2, options.disp_more_right, colors.color_column_sep)
+            scr.addstr(headerRow, vd.windowWidth-2, options.disp_more_right, colors.color_column_sep)
 
         catchapply(self.checkCursor)
 

@@ -812,7 +812,6 @@ class BaseSheet(Extensible):
 
     def __init__(self, name, **kwargs):
         self.name = name
-        self.vd = vd
 
         # track all async threads from sheet
         self.currentThreads = []
@@ -890,9 +889,6 @@ class BaseSheet(Extensible):
         if vdglobals is None:
             vdglobals = getGlobals()
 
-        if not self.vd:
-            self.vd = vd
-
         self.sheet = self
 
         try:
@@ -904,19 +900,19 @@ class BaseSheet(Extensible):
             escaped = True
         except Exception as e:
             debug(cmd.execstr)
-            err = self.vd.exceptionCaught(e)
+            err = vd.exceptionCaught(e)
             escaped = True
 
         try:
             if vd.cmdlog:
                 # sheet may have changed
-                vd.cmdlog.afterExecSheet(self.vd.sheets[0] if self.vd.sheets else None, escaped, err)
+                vd.cmdlog.afterExecSheet(vd.sheets[0] if vd.sheets else None, escaped, err)
         except Exception as e:
-            self.vd.exceptionCaught(e)
+            vd.exceptionCaught(e)
 
         catchapply(self.checkCursor)
 
-        self.vd.clear_caches()
+        vd.clear_caches()
         return escaped
 
     @property

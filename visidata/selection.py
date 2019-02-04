@@ -1,4 +1,4 @@
-from visidata import Sheet, undoAttrCopy, Progress, replayableOption, asyncthread, options
+from visidata import vd, Sheet, undoAttrCopy, Progress, replayableOption, asyncthread, options
 
 __all__ = ['undoSheetSelection', 'undoSelection']
 
@@ -47,7 +47,7 @@ def select(self, rows, status=True, progress=True):
             msg = 'selected %s %s%s' % (len(self._selectedRows), self.rowtype, ' instead' if before > 0 else '')
         else:
             msg = 'selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype)
-        self.vd.status(msg)
+        vd.status(msg)
 
 @Sheet.api
 @asyncthread
@@ -57,7 +57,7 @@ def unselect(self, rows, status=True, progress=True):
     for r in (Progress(rows, 'unselecting') if progress else rows):
         self.unselectRow(r)
     if status:
-        self.vd.status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
+        vd.status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
 
 @Sheet.api
 def selectByIdx(self, rowIdxs):

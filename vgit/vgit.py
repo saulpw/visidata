@@ -272,7 +272,7 @@ class HunkViewer(GitSheet):
 
     def reload(self):
         if not self.sources:
-            self.vd.remove(self)
+            vd.remove(self)
             return
 
         fn, _, context, linenum, _, _, _, patchlines = self.sources[0]
