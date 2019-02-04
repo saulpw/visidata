@@ -339,7 +339,7 @@ class CommandLog(TsvSheet):
                 cmdlogrow.undofunc()
                 self.undone.append(cmdlogrow)
                 self.rows.remove(cmdlogrow)
-                vd.refresh()
+                vd.clear_caches()
                 vs = self.moveToReplayContext(cmdlogrow)
                 if vs is not vd.sheet:
                     vd.push(vs)

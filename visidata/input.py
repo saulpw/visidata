@@ -7,6 +7,8 @@ from visidata import launchExternalEditor, suspend
 
 vd.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
 
+__all__ = ['confirm', 'editline', 'chooseOne', 'chooseMany', 'input_longname']
+
 
 # history: earliest entry first
 def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
@@ -237,7 +239,7 @@ def _inputLine(self, prompt, **kwargs):
 
 
 def confirm(prompt):
-    yn = input(prompt, value='no', record=False)[:1]
+    yn = vd.input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
         fail('disconfirmed')
     return True
@@ -254,11 +256,8 @@ class CompleteKey:
 
 def input_longname(sheet):
     longnames = set(k for (k, obj), v in commands.iter(sheet))
-    return input("command name: ", completer=CompleteKey(sorted(longnames)))
+    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)))
 
-
-def input(*args, **kwargs):
-    return vd.input(*args, **kwargs)
 
 def chooseOne(choices):
     'Return one of `choices` elements (if list) or values (if dict).'
@@ -274,7 +273,7 @@ def chooseMany(choices):
     if isinstance(choices, dict):
         prompt = '/'.join(choices.keys())
         chosen = []
-        for c in input(prompt+': ', completer=CompleteKey(choices)).split():
+        for c in vd.input(prompt+': ', completer=CompleteKey(choices)).split():
             poss = [choices[p] for p in choices if p.startswith(c)]
             if not poss:
                 warning('invalid choice "%s"' % c)
@@ -283,7 +282,7 @@ def chooseMany(choices):
     else:
         prompt = '/'.join(str(x) for x in choices)
         chosen = []
-        for c in input(prompt+': ', completer=CompleteKey(choices)).split():
+        for c in vd.input(prompt+': ', completer=CompleteKey(choices)).split():
             poss = [p for p in choices if p.startswith(c)]
             if not poss:
                 warning('invalid choice "%s"' % c)

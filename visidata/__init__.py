@@ -9,6 +9,7 @@ __copyright__ = 'Copyright (c) 2016-2019 ' + __author__
 from .vdtui import *
 from .vdtui.textsheet import TextSheet
 from .asyncthread import *
+from .input import *
 from .movement import *
 from .path import *
 from .errors import *
@@ -23,7 +24,6 @@ from .utils import *
 from .slide import *
 from .search import *
 from .expr import *
-from .input import *
 
 from .pyobj import *
 from .metasheets import *

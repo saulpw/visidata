@@ -536,7 +536,8 @@ class VisiData(Extensible):
         self.statusHistory.append([priority, args, 1])
         return True
 
-    def refresh(self):
+    def clear_caches(self):
+        'Invalidate internal caches between command inputs.'
         Sheet.visibleCols.fget.cache_clear()
         Sheet.keyCols.fget.cache_clear()
         colors.colorcache.clear()
@@ -793,19 +794,23 @@ class VisiData(Extensible):
 
 class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
-    def __init__(self, obj):
-        self.obj = obj
+    def __init__(self, *objs):
+        self.objs = objs
 
     def keys(self):
-        return dir(self.obj)
+        return list(sum(set(dir(obj)) for obj in objs))
 
     def __getitem__(self, k):
-        if k not in dir(self.obj):
-            raise KeyError(k)
-        return getattr(self.obj, k)
+        for obj in self.objs:
+            if k in dir(obj):
+                return getattr(obj, k)
+        raise KeyError(k)
 
     def __setitem__(self, k, v):
-        setattr(self.obj, k, v)
+        for obj in self.objs:
+            if k in dir(obj):
+                return setattr(self.objs[0], k, v)
+        return setattr(self.objs[-1], k, v)
 
 
 class BaseSheet(Extensible):
@@ -902,7 +907,7 @@ class BaseSheet(Extensible):
         try:
             if vd.cmdlog:
                 vd.cmdlog.beforeExecHook(self, cmd, '', keystrokes)
-            exec(cmd.execstr, vdglobals, LazyMap(self))
+            exec(cmd.execstr, vdglobals, LazyMap(vd, self))
         except EscapeException as e:  # user aborted
             status('aborted')
             escaped = True
@@ -920,7 +925,7 @@ class BaseSheet(Extensible):
 
         catchapply(self.checkCursor)
 
-        self.vd.refresh()
+        self.vd.clear_caches()
         return escaped
 
     @property

@@ -83,7 +83,7 @@ class ColorMaker:
         'colors.color_foo returns colors[options.color_foo]'
         return self.get_color(optname).attr
 
-    @functools.lru_cache()
+    @functools.lru_cache()  # cleared in vd.clear_caches()
     def resolve_colors(self, colorstack):
         'Returns the curses attribute for the colorstack, a list of color option names sorted highest-precedence color first.'
         attr = CursesAttr()

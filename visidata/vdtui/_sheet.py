@@ -183,7 +183,7 @@ class Sheet(BaseSheet):
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
-    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in .refresh()
+    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
     def visibleCols(self):  # non-hidden cols
         'List of `Column` which are not hidden.'
         return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
@@ -195,7 +195,7 @@ class Sheet(BaseSheet):
         error('no visible column at x=%d' % x)
 
     @property
-    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in .refresh()
+    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
     def keyCols(self):
         'Cached list of visible key columns (Columns with .key=True)'
         return [c for c in self.columns if c.keycol and not c.hidden]
@@ -448,7 +448,7 @@ class Sheet(BaseSheet):
         numHeaderRows = 1
         scr.erase()  # clear screen before every re-draw
 
-        vd.refresh()
+        vd.clear_caches()
 
         if not self.columns:
             return

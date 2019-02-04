@@ -123,7 +123,7 @@ def newSheet(ncols):
     return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
 def inputFilename(prompt, *args, **kwargs):
-    return input(prompt, "filename", *args, completer=completeFilename, **kwargs)
+    return vd.input(prompt, "filename", *args, completer=completeFilename, **kwargs)
 
 def inputPath(*args, **kwargs):
     return Path(inputFilename(*args, **kwargs))
