@@ -6,9 +6,12 @@
 
 - make Sheet sortable
 - [pyobj] SheetDict nested editing #245
+- do not log resize commands
 
 ## Improvements and additions
 
+- split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
+- quit scrubs cmdlog of the dropped sheet if it was a leaf/orphan (no other sheet has it as a source)
 - numeric binning for frequency/pivot table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
 - [column] if drawing a particular column takes more than 300ms, the column becomes async
 - expr columns are now set to cache automatically
@@ -34,10 +37,12 @@
   - remove `curses_timeout` option (fix to 100ms)
 
 ## API
-- VisiData, Sheet, Column inherit from Extensible base class
+- VisiData, BaseSheet, Column inherit from Extensible base class
   - internal modules and plugins can be self-contained
-  - `@VisiData.cached_property`, `Sheet.init()`, `@Column.api`
-
+  - `@X.property @X.cached_property`, `X.init()`, `@X.api`
+- remove Sheet.vd; 'vd' attrs now available in execstr
+- remove hooks
+- `vd.sync(*threads)` waits on specific threads (returned by calls to `@asyncthread` functions)
 
 # v1.5.2 (2019-01-12)
 
