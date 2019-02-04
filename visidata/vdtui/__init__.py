@@ -383,25 +383,6 @@ def catchapply(func, *args, **kwargs):
     except Exception as e:
         exceptionCaught(e)
 
-def error(s):
-    'Log an error and raise an exception.'
-    status(s, priority=3)
-    raise ExpectedException(s)
-
-def fail(s):
-    status(s, priority=2)
-    raise ExpectedException(s)
-
-def warning(s):
-    status(s, priority=1)
-
-def status(*args, **kwargs):
-    return vd.status(*args, **kwargs)
-
-def debug(*args, **kwargs):
-    if options.debug:
-        return vd.status(*args, **kwargs)
-
 def middleTruncate(s, w):
     if len(s) <= w:
         return s
@@ -412,9 +393,6 @@ def composeStatus(msgparts, n):
     if n > 1:
         msg = '[%sx] %s' % (n, msg)
     return msg
-
-def exceptionCaught(e, **kwargs):
-    return vd.exceptionCaught(e, **kwargs)
 
 def stacktrace(e=None):
     if not e:
@@ -455,7 +433,14 @@ class Extensible:
         cls.__copy__ = newcopy
 
     @classmethod
-    def api(cls, func):
+    def global_api(cls, func):
+        setattr(cls, func.__name__, func)
+        def _vdfunc(*args, **kwargs):
+            return func(vd, *args, **kwargs)
+        return _vdfunc
+
+    @classmethod
+    def api(cls, func, g=False):
         setattr(cls, func.__name__, func)
         return func
 
@@ -520,20 +505,6 @@ class VisiData(Extensible):
             vs.vd = vd
             return vs
 
-    def status(self, *args, priority=0):
-        'Add status message to be shown until next action.'
-        k = (priority, args)
-        self.statuses[k] = self.statuses.get(k, 0) + 1
-
-        if self.statusHistory:
-            prevpri, prevargs, prevn = self.statusHistory[-1]
-            if prevpri == priority and prevargs == args:
-                self.statusHistory[-1][2] += 1
-                return True
-
-        self.statusHistory.append([priority, args, 1])
-        return True
-
     def clear_caches(self):
         'Invalidate internal caches between command inputs.'
         Sheet.visibleCols.fget.cache_clear()
@@ -555,16 +526,6 @@ class VisiData(Extensible):
                 return k
             k = ord(k)
         return curses.keyname(k).decode('utf-8')
-
-    def exceptionCaught(self, exc=None, **kwargs):
-        'Maintain list of most recent errors and return most recent one.'
-        if isinstance(exc, ExpectedException):  # already reported, don't log
-            return
-        self.lastErrors.append(stacktrace())
-        if kwargs.get('status', True):
-            status(self.lastErrors[-1][-1], priority=2)  # last line of latest error
-        if options.debug:
-            raise
 
     def onMouse(self, scr, y, x, h, w, **kwargs):
         self.mousereg.append((scr, y, x, h, w, kwargs))
@@ -789,6 +750,52 @@ class VisiData(Extensible):
                 vs.vd.allSheets[vs] = vs.name
             return vs
 # end VisiData class
+
+@VisiData.global_api
+def status(self, *args, priority=0):
+    'Add status message to be shown until next action.'
+    k = (priority, args)
+    self.statuses[k] = self.statuses.get(k, 0) + 1
+
+    if self.statusHistory:
+        prevpri, prevargs, prevn = self.statusHistory[-1]
+        if prevpri == priority and prevargs == args:
+            self.statusHistory[-1][2] += 1
+            return True
+
+    self.statusHistory.append([priority, args, 1])
+    return True
+
+@VisiData.global_api
+def error(vd, s):
+    'Log an error and raise an exception.'
+    vd.status(s, priority=3)
+    raise ExpectedException(s)
+
+@VisiData.global_api
+def fail(vd, s):
+    vd.status(s, priority=2)
+    raise ExpectedException(s)
+
+@VisiData.global_api
+def warning(vd, s):
+    vd.status(s, priority=1)
+
+@VisiData.global_api
+def debug(vd, *args, **kwargs):
+    if options.debug:
+        return vd.status(*args, **kwargs)
+
+@VisiData.global_api
+def exceptionCaught(self, exc=None, **kwargs):
+    'Maintain list of most recent errors and return most recent one.'
+    if isinstance(exc, ExpectedException):  # already reported, don't log
+        return
+    self.lastErrors.append(stacktrace())
+    if kwargs.get('status', True):
+        status(self.lastErrors[-1][-1], priority=2)  # last line of latest error
+    if options.debug:
+        raise
 
 class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'

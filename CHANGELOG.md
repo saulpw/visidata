@@ -11,7 +11,7 @@
 ## Improvements and additions
 
 - split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
-- quit scrubs cmdlog of the dropped sheet if it was a leaf/orphan (no other sheet has it as a source)
+- `q`uit scrubs cmdlog of the dropped sheet if it was a leaf/orphan (no other sheet has it as a source)
 - numeric binning for frequency/pivot table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
 - [column] if drawing a particular column takes more than 300ms, the column becomes async
 - expr columns are now set to cache automatically
