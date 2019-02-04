@@ -18,6 +18,8 @@ option('min_memory_mb', 0, 'minimum memory to continue loading and async process
 
 theme('color_working', 'green', 'color of system running smoothly')
 
+BaseSheet.init('currentThreads', list)
+
 def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
     def _decorator(func):
         'Function decorator, so first call to `func()` spawns a separate thread. Calls return the Thread until the wrapped function returns; subsequent calls return the cached return value.'

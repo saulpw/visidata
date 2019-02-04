@@ -439,13 +439,20 @@ def asyncthread(func):
 
 class Extensible:
     @classmethod
-    def init(cls, membername, initfunc):
-        'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T)'
-        old = cls.__init__
-        def new(self, *args, **kwargs):
-            old(self, *args, **kwargs)
+    def init(cls, membername, initfunc, **kwargs):
+        'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T[, copy=True])'
+        oldinit = cls.__init__
+        def newinit(self, *args, **kwargs):
+            oldinit(self, *args, **kwargs)
             setattr(self, membername, initfunc())
-        cls.__init__ = new
+        cls.__init__ = newinit
+
+        oldcopy = cls.__copy__
+        def newcopy(self, *args, **kwargs):
+            ret = oldcopy(self, *args, **kwargs)
+            setattr(ret, membername, getattr(self, membername) if kwargs.get('copy', False) else initfunc())
+            return ret
+        cls.__copy__ = newcopy
 
     @classmethod
     def api(cls, func):
@@ -814,7 +821,6 @@ class BaseSheet(Extensible):
         self.name = name
 
         # track all async threads from sheet
-        self.currentThreads = []
         self.__dict__.update(kwargs)
 
     def __lt__(self, other):
@@ -822,6 +828,13 @@ class BaseSheet(Extensible):
             return self.name < other.name
         else:
             return id(self) < id(other)
+
+    def __copy__(self):
+        cls = self.__class__
+        ret = cls.__new__(cls)
+        ret.__dict__.update(self.__dict__)
+        ret.precious = True  # copies can be precious even if originals aren't
+        return ret
 
     @classmethod
     def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):

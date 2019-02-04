@@ -135,18 +135,13 @@ class Sheet(BaseSheet):
 
     def __copy__(self):
         'copy sheet design (no rows).  deepcopy columns so their attributes (width, type, name) may be adjusted independently.'
-        cls = self.__class__
-        ret = cls.__new__(cls)
-        ret.__dict__.update(self.__dict__)
+        ret = super().__copy__()
         ret.rows = []                     # a fresh list without incurring any overhead
         ret.columns = [copy(c) for c in self.keyCols]
         ret.setKeys(ret.columns)
         ret.columns.extend(copy(c) for c in self.columns if c not in self.keyCols)
         ret.recalc()  # set .sheet on columns
-        ret._selectedRows = {}
         ret.topRowIndex = ret.cursorRowIndex = 0
-        ret.currentThreads = []
-        ret.precious = True  # copies can be precious even if originals aren't
         return ret
 
     def __deepcopy__(self, memo):
