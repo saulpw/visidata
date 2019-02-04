@@ -14,7 +14,7 @@ Sheet.addCommand('z]', 'sort-desc-add', 'orderBy(cursorCol, reverse=True)', undo
 Sheet.addCommand('gz[', 'sort-keys-asc-add', 'orderBy(*keyCols)', undo=undoSort),
 Sheet.addCommand('gz]', 'sort-keys-desc-add', 'orderBy(*keyCols, reverse=True)', undo=undoSort),
 
-Sheet.init('_ordering', list)  # (cols, reverse:bool)
+Sheet.init('_ordering', list, copy=True)  # (cols, reverse:bool)
 
 @Sheet.api
 def orderBy(self, *cols, reverse=False):
