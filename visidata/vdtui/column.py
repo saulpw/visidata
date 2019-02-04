@@ -3,11 +3,13 @@ import itertools
 import threading
 import re
 
-from visidata.vdtui import options, fail, anytype, stacktrace, status
+from visidata.vdtui import option, options, fail, anytype, stacktrace, status
 from visidata.vdtui import getType, typemap, isNumeric, isNullFunc
 from visidata.vdtui import asyncthread, exceptionCaught
 from visidata.vdtui import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
 from visidata.vdtui import Extensible
+
+option('col_cache_size', 0, 'max number of cache entries in each cached column')
 
 __all__ = [
     'clean_to_id',

@@ -264,10 +264,7 @@ replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('default_width', 20, 'default column width')
 
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
-option('col_cache_size', 0, 'max number of cache entries in each cached column')
 option('quitguard', False, 'confirm before quitting last sheet')
-
-replayableOption('null_value', None, 'a value to be counted as null')
 
 replayableOption('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
 option('debug', False, 'exit on error and display stacktrace')
