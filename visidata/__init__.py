@@ -8,6 +8,7 @@ __copyright__ = 'Copyright (c) 2016-2019 ' + __author__
 
 from .vdtui import *
 from .vdtui.textsheet import TextSheet
+from .helpers import *
 from .asyncthread import *
 from .input import *
 from .movement import *
