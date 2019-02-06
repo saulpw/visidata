@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, undoAttrCopy, Progress, replayableOption, asyncthread, options
+from visidata import vd, Sheet, undoAttrCopy, Progress, replayableOption, asyncthread, options, rotate_range
 
 __all__ = ['undoSheetSelection', 'undoSelection']
 
