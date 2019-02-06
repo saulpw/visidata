@@ -327,7 +327,7 @@ class CommandLog(TsvSheet):
         x = options.disp_replay_pause if self.paused else options.disp_replay_play
         return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
-    def setOption(self, optname, optval, obj=None):
+    def set_option(self, optname, optval, obj=None):
         objname = options._opts.objname(obj)
         self.addRow(self.newRow(col=objname, row=optname,
                     keystrokes='', input=str(optval),
