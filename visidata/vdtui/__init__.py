@@ -826,6 +826,7 @@ class BaseSheet(Extensible):
 
     def __init__(self, name, **kwargs):
         self.name = name
+        self.source = None
 
         # track all async threads from sheet
         self.__dict__.update(kwargs)
