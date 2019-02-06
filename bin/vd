@@ -147,8 +147,7 @@ def main():
             run(*sources)
     else:
         if args.play == '-':
-            vdfile = stdinSource
-            assert isinstance(vdfile, PathFd)
+            vdfile = stdinSource  # PathFd
             vdfile.name = 'stdin.vd'
         else:
             vdfile = Path(args.play)

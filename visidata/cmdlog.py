@@ -197,7 +197,6 @@ class CommandLog(TsvSheet):
     def moveToReplayContext(self, r):
         'set the sheet/row/col to the values in the replay row.  return sheet'
         if not r.sheet:
-#            assert not r.col and not r.row
             return self  # any old sheet should do, row/column don't matter
 
         try:
