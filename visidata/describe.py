@@ -50,7 +50,7 @@ class DescribeSheet(ColumnsSheet):
         for srccol in Progress(self.rows, 'categorizing'):
             if not srccol.hidden:
                 self.reloadColumn(srccol)
-            sync(max_threads)
+            vd.sync(max_threads)
 
     @asyncthread
     def reloadColumn(self, srccol):
