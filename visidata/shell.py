@@ -113,7 +113,7 @@ class DeferredSaveSheet(Sheet):
 
         confirm('really %s? ' % cstr)
 
-        self.commit(self.addedRows.values(), changes.values(), self.toBeDeleted.values())
+        self.commit(self.addedRows, changes, self.toBeDeleted)
 
         self.toBeDeleted.clear()
         self.addedRows.clear()
