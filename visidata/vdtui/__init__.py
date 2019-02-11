@@ -1093,6 +1093,7 @@ def getGlobals():
 
 vd = VisiData()
 
+from .helpers import *
 from .cliptext import clipdraw, clipstr
 from .color import colors, CursesAttr
 from .wrappers import *

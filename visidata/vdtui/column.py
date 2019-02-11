@@ -7,7 +7,7 @@ from visidata.vdtui import option, options, fail, anytype, stacktrace, status
 from visidata.vdtui import getType, typemap, isNumeric, isNullFunc
 from visidata.vdtui import asyncthread, exceptionCaught
 from visidata.vdtui import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
-from visidata.vdtui import Extensible
+from visidata.vdtui import Extensible, LazyMap, AttrDict
 
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
 
@@ -350,10 +350,10 @@ class ColumnEnum(Column):
             value = self.mapping.get(value, value)
         setattr(row, self.name, value or self.default)
 
-
-class LazyMapRow:
+class LazyMapRow(LazyMap):
     'Calculate column values as needed.'
     def __init__(self, sheet, row):
+        super().__init__(sheet, AttrDict(row=row, sheet=sheet))
         self.row = row
         self.sheet = sheet
         self._keys = [c.name for c in self.sheet.columns]
@@ -366,11 +366,7 @@ class LazyMapRow:
             i = self._keys.index(colid)
             return self.sheet.columns[i].getTypedValue(self.row)
         except ValueError:
-            if colid in ['row', '__row__']:
-                return self.row
-            elif colid in ['sheet', '__sheet__']:
-                return self.sheet
-            raise KeyError(colid)
+            return super().__getitem__(colid)
 
 
 class ColumnExpr(Column):
