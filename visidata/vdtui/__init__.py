@@ -243,13 +243,14 @@ bindkeys = SettingsMgr()
 _options = SettingsMgr()
 options = OptionsObject(_options)
 
-def option(name, default, helpstr):
-    return options.setdefault(name, default, helpstr)
-
+def option(name, default, helpstr, replay=False):
+    opt = options.setdefault(name, default, helpstr)
+    opt.replayable = replay
+    return opt
 
 theme = option
 def replayableOption(optname, default, helpstr):
-    option(optname, default, helpstr).replayable = True
+    option(optname, default, helpstr, replay=True)
 
 
 replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
