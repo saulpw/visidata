@@ -7,7 +7,7 @@ import urllib.parse
 from visidata import __version_info__, Path, options
 
 
-def urlcache(url, cachesecs=24*60*60):
+def urlcache(url, cachesecs=24*60*60, text=True):
     'Returns Path object to local cache of url contents.'
     p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
     if p.exists():

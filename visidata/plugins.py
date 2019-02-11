@@ -3,66 +3,101 @@ import zipfile
 
 from visidata import *
 
-#option('plugins_url', 'https://visidata.org/plugins/', 'source of plugins sheet')
-option('plugins_url', 'file:///home/saul/git/visidata/plugins/', 'plugins url ')
 
-globalCommand(None, 'open-plugins', 'openPlugins()')
-
-def openPlugins():
-    vs = openSource(urlcache(options.plugins_url+"plugins.tsv", 0))
-    vs.name = 'visidata.org/plugins'
-    vs.rowtype = "plugins"
-    vs.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)')
-    vs.addCommand('d', 'delete-plugin', 'confirm("remove plugin? ") and removePlugin(cursorRow)')
-    vd.push(vs)
-
-def plugin_url(pluginname):
-    return options.plugins_url+pluginname+".zip"
-
-def plugin_path(pluginname):
-    return Path(os.path.join(options.visidata_dir, "plugins", pluginname))
-
-def plugin_import(pluginname):
-    return "import plugins."+pluginname
+option('plugins_url', 'https://visidata.org/plugins/', 'source of plugins sheet')
 
 @VisiData.api
-def installPlugin(vd, plugin):
-    # pip3 install requirements
-    outpath = plugin_path(plugin.name)
-    if outpath.exists():
-        confirm("plugin path already exists, overwrite? ")
+def openPlugins(vd):
+    return openSource(urlcache(options.plugins_url+"plugins.tsv", 0), filetype="plugins")
 
-    _install(plugin)
+def open_plugins(p):
+    'Support the "plugins" phony filetype as PluginsSheet'
+    return PluginsSheet('visidata.org/plugins', source=p)
 
+def _plugin_zip(plugin):
+    return "%s%s-%s.zip" % (options.plugins_url, plugin.name, plugin.plugin_ver)
 
-@asyncthread
-def _install(plugin):
-    outpath = plugin_path(plugin.name)
-    with zipfile.ZipFile(urlcache(plugin_url(plugin.name), text=False).open_bytes()) as zf:
-        zf.extractall(path=outpath.resolve())
+def _plugin_path(plugin):
+    return Path(os.path.join(options.visidata_dir, "plugins", plugin.name))
 
-    p = subprocess.Popen(['pip3', 'install']+plugin.requirements.split())
-    status(tuple(p.communicate()))
+def _plugin_import(plugin):
+    return "import " + _plugin_import_name(plugin)
 
-    with Path(options.config).open_text(mode='a') as fprc:
-        print(plugin_import(plugin.name), file=fprc)
-
-    warning("restart visidata to use new plugin")
+def _plugin_import_name(plugin):
+    return "plugins."+plugin.name
 
 
-def removePlugin(plugin):
-    vdrc = Path(options.config).resolve()
-    oldvdrc = vdrc+'.bak'
-    try:
-        shutil.copyfile(vdrc, oldvdrc)
-        vdrc_contents = Path(oldvdrc).read_text().replace(plugin_import(plugin.name), '')
+class PluginsSheet(TsvSheet):
+    rowtype = "plugins"
 
-        with Path(options.config).open_text(mode='w') as fprc:  # replace without import line
-            fprc.write(vdrc_contents)
-    except FileNotFoundError:
-        warning("no visidatarc file")
+    @asyncthread
+    def reload(self):
+        vd.sync(super().reload())
 
-    try:
-        shutil.rmtree(plugin_path(plugin.name).resolve())
-    except FileNotFoundError:
-        warning("%s plugin not installed" % plugin.name)
+        self.addColumn(Column('installed', getter=lambda c,r: c.sheet.installedStatus(r)), index=1)
+        self.addColumn(Column('loaded', getter=lambda c,r: c.sheet.loadedVersion(r)), index=2)
+
+    def installedStatus(self, plugin):
+        import importlib
+        return importlib.util.find_spec(_plugin_import_name(plugin))
+
+    def loadedVersion(self, plugin):
+        name = _plugin_import_name(plugin)
+        if name not in sys.modules:
+            return None
+        mod = getattr(__import__(name), name)
+        return getattr(mod, '__version__', 'unknown version installed')
+
+    def installPlugin(self, plugin):
+        # pip3 install requirements
+        outpath = _plugin_path(plugin)
+        if outpath.exists():
+            confirm("plugin path already exists, overwrite? ")
+
+        self._install(plugin)
+
+    @asyncthread
+    def _install(self, plugin):
+        outpath = _plugin_path(plugin)
+        with zipfile.ZipFile(urlcache(_plugin_zip(plugin), text=False).open_bytes()) as zf:
+            zf.extractall(path=outpath.resolve())
+
+        p = subprocess.Popen(['pip3', 'install']+plugin.requirements.split())
+        status(tuple(p.communicate()))
+
+        with Path(options.config).open_text(mode='a') as fprc:
+            print(_plugin_import(plugin), file=fprc)
+
+        warning("restart visidata to use new plugin")
+
+    def removePluginIfExists(self, plugin):
+        ver = loadedVersion()
+        if not ver:
+            warning('plugin is not installed')
+            return
+
+        confirm("remove plugin? ")
+        self.removePlugin(plugin)
+
+    def removePlugin(self, plugin):
+        vdrc = Path(options.config).resolve()
+        oldvdrc = vdrc+'.bak'
+        try:
+            shutil.copyfile(vdrc, oldvdrc)
+            vdrc_contents = Path(oldvdrc).read_text().replace('\n'+_plugin_import(plugin), '')
+
+            with Path(options.config).open_text(mode='w') as fprc:  # replace without import line
+                fprc.write(vdrc_contents)
+        except FileNotFoundError:
+            warning("no visidatarc file")
+
+        try:
+            shutil.rmtree(_plugin_path(plugin).resolve())
+        except FileNotFoundError:
+            warning("%s plugin not installed" % plugin.name)
+
+
+globalCommand(None, 'open-plugins', 'vd.push(openPlugins())')
+
+PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)')
+PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)')
