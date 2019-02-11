@@ -70,6 +70,8 @@ from .loaders.yaml import *
 from .loaders._pandas import *
 from .loaders.graphviz import *
 
+from .plugins import *
+
 from .colors import *   # ColorsSheet
 
 from math import *

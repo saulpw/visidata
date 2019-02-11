@@ -22,8 +22,13 @@ def urlcache(url, cachesecs=24*60*60):
 
     req = urllib.request.Request(url)
     with urllib.request.urlopen(req) as fp:
-        ret = fp.read().decode('utf-8').strip()
-        with p.open_text(mode='w') as fpout:
-            fpout.write(ret)
+        ret = fp.read()
+        if text:
+            ret = ret.decode('utf-8').strip()
+            with p.open_text(mode='w') as fpout:
+                fpout.write(ret)
+        else:
+            with p.open_bytes(mode='w') as fpout:
+                fpout.write(ret)
 
     return p

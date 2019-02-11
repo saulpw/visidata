@@ -1,2 +1,2 @@
-plugin	plugin_ver	release_date	author	visidata_ver	url	requirements	import_line
-faker	0.9	2019-02-08	Saul Pwanson <vd@saul.pw>	1.6	https://visidata.org/plugins/faker.py	Faker	import plugins.faker
+name	plugin_ver	release_date	author	visidata_ver	description	requirements
+vfake	0.9	2019-02-08	Saul Pwanson <vd@saul.pw>	1.6	replace column with fake values	Faker

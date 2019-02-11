@@ -66,8 +66,10 @@ class Path:
         with self.open_text() as fp:
             return fp.read()
 
-    def open_bytes(self):
-        return self._open(self.resolve(), 'rb')
+    def open_bytes(self, mode='rb'):
+        if 'b' not in mode:
+            mode += 'b'
+        return self._open(self.resolve(), mode=mode)
 
     def read_bytes(self):
         with self._open(self.resolve(), 'rb') as fp:
