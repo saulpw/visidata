@@ -24,7 +24,7 @@ class SheetFreqTable(SheetPivot):
     def __init__(self, sheet, *groupByCols):
         fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in groupByCols))
         super().__init__(fqcolname, groupByCols, [], source=sheet)
-        self.largest = 100
+        self.largest = 1
 
     def selectRow(self, row):
         self.source.select(row.sourcerows)     # select all entries in the bin on the source sheet
