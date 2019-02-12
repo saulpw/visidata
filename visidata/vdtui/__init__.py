@@ -800,22 +800,23 @@ def exceptionCaught(self, exc=None, **kwargs):
 class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
     def __init__(self, *objs):
-        self.objs = objs
+        self.locals = {}
+        self.objs = list(objs) + [self.locals]
 
     def keys(self):
-        return list(sum(set(dir(obj)) for obj in objs))
+        return list(sum(set(dir(obj)) for obj in self.objs))
 
     def __getitem__(self, k):
         for obj in self.objs:
             if k in dir(obj):
                 return getattr(obj, k)
-        raise KeyError(k)
+        return self.locals[k]
 
     def __setitem__(self, k, v):
         for obj in self.objs:
             if k in dir(obj):
-                return setattr(self.objs[0], k, v)
-        return setattr(self.objs[-1], k, v)
+                return setattr(obj, k, v)
+        self.locals[k] = v
 
 
 class BaseSheet(Extensible):
