@@ -63,6 +63,7 @@ def parseContextLine(line):
 
 
 class DifferSheet(GitSheet):
+    rowtype = 'lines' # rowdef:  list of refs (1 per source)
     def __init__(self, relfn, *refs):
         super().__init__(str(relfn)+"_diff", sources=refs)
         self.fn = str(relfn)

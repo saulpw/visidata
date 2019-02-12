@@ -1,9 +1,12 @@
 from visidata import *
 from .git import GitSheet
 
-# row is (hdr, orig_linenum, linenum, line)
+
+# rowdef: (hdr, orig_linenum, linenum, line)
 #   hdr = { 'sha': .., 'orig_linenum': .., 'final_linenum': .. }
+# source = GitFile
 class GitBlame(GitSheet):
+    rowtype = 'lines'
     columns = [
         Column('sha', width=8, getter=lambda r: r[0]['sha']),
         Column('orig_linenum', width=0, getter=lambda r: r[0]['orig_linenum']),
@@ -14,11 +17,13 @@ class GitBlame(GitSheet):
         Column('committer', width=0, getter=lambda r: '{committer} {committer-mail}'.format(**r[0])),
         Column('committer_date', width=0, type=date, getter=lambda r: int(r[0].get('committer-time', 0)) or None),
         Column('linenum', width=5, getter=lambda r: r[2]),
-        Column('code', getter=lambda r: r[3]),
+        Column('HEAD', getter=lambda r: r[3]),
+        Column('index', getter=lambda r: r[3]),
+        Column('working', getter=lambda r: r[3]),
     ]
 
     def __init__(self, gf, ref='HEAD'):
-        super().__init__('blame_'+str(gf), gf)
+        super().__init__('blame_'+str(gf), source=gf)
 
     def reload(self):
         self.rows = []
@@ -55,3 +60,6 @@ class GitBlame(GitSheet):
             i += 1
 
 GitBlame.addCommand(ENTER, 'diff-line', 'openDiff(str(source), cursorRow[0]["sha"]+"^", cursorRow[0]["sha"])', 'open diff of the commit when this line changed')
+
+
+GitFileSheet = GitBlame

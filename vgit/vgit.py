@@ -7,8 +7,7 @@ from visidata import *
 
 from .git import *
 from .merge import GitMerge
-from .blame import GitBlame
-from .diff import DifferSheet
+from .blame import GitBlame, GitFileSheet
 
 __version__ = 'saul.pw/vgit v0.3pre'
 
@@ -316,20 +315,22 @@ HunkViewer.addCommand(ENTER, 'git-skip-hunk', 'sources.pop(0); reload()', 'move 
 HunkViewer.addCommand('d', 'delete-line', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch'),
 
 class GitGrep(GitSheet):
+    rowtype = 'results' # list(file, line, line_contents)
     columns = [
         ColumnItem('filename', 0),
         ColumnItem('linenum', 1),
         ColumnItem('line', 2),
     ]
     def __init__(self, regex):
-        super().__init__(regex, regex)
+        super().__init__(regex, source=regex)
 
     def reload(self):
         self.rows = []
         for line in git_lines('grep', '--no-color', '-z', '--line-number', '--ignore-case', self.source):
             self.rows.append((line.split('\0')))
 
-GitGrep.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], open(cursorRow[0]))).cursorRowIndex = int(cursorRow[1])-1', 'go to this match')
+GitGrep.addCommand(ENTER, 'dive-row', 'vs=GitFileSheet(cursorRow[0]); vs.cursorRowIndex = int(cursorRow[1])-1; vd.push(vs).reload()', 'go to this match')
+GitGrep.addCommand('^O', 'sysopen-row', 'launchExternalEditor(cursorRow[0], linenum=cursorRow[1]); reload()', 'open this file in $EDITOR')
 
 class GitOptions(GitSheet):
     CONFIG_CONTEXTS = ('local', 'local', 'global', 'system')
