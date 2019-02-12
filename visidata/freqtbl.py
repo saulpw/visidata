@@ -54,7 +54,7 @@ class SheetFreqTable(SheetPivot):
         vd.sync(self.addAggregateCols(),
                 self.groupRows(self.updateLargest))
 
-        if self.nCols > 4:  # hide percent/histogram if aggregations added
+        if self.nCols > len(self.groupByCols)+3:  # hide percent/histogram if aggregations added
             self.column('percent').hide()
             self.column('histogram').hide()
 
