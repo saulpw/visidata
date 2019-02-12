@@ -23,7 +23,7 @@ def editTask(task):
 
     # add final sentinel to indicate how to separate if no notes
     taskdesc += "\n---\n"
-    ret = launchExternalEditor(taskdesc)
+    ret = launchExternalEditorValue(taskdesc)
 
     # unpack annotations separated by ---
     newnotes = ret.split("\n---\n")

@@ -998,6 +998,7 @@ class EnableCursor:
             curses.curs_set(0)
             curses.mousemask(-1)
 
+
 def launchEditor(*args):
     editor = os.environ.get('EDITOR') or fail('$EDITOR not set')
     args = [editor] + list(args)
@@ -1009,17 +1010,26 @@ def launchExternalEditor(v, linenum=0):
     with tempfile.NamedTemporaryFile() as temp:
         with open(temp.name, 'w') as fp:
             fp.write(v)
+        return launchExternalEditorPath(Path(temp.name))
 
+def launchExternalEditorPath(path, linenum=0):
+        fn = path.resolve()
         if linenum:
-            launchEditor(temp.name, '+%s' % linenum)
+            launchEditor(fn, '+%s' % linenum)
         else:
-            launchEditor(temp.name)
+            launchEditor(fn)
 
-        with open(temp.name, 'r') as fp:
-            r = fp.read()
-            if r[-1] == '\n':  # trim inevitable trailing newline
-                r = r[:-1]
-            return r
+        with open(fn, 'r') as fp:
+            try:
+                r = fp.read()
+                if r[:-1] == '\n':  # trim inevitable trailing newline
+                    r = r[:-1]
+                return r
+            except Exception as e:
+                exceptionCaught(e)
+                return ''
+
+        launchExternalEditor(Path(temp.name))
 
 def suspend():
     import signal
