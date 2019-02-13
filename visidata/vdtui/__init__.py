@@ -801,7 +801,7 @@ class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
     def __init__(self, *objs):
         self.locals = {}
-        self.objs = list(objs) + [self.locals]
+        self.objs = list(objs)
 
     def keys(self):
         return list(sum(set(dir(obj)) for obj in self.objs))
