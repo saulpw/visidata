@@ -8,12 +8,21 @@ from visidata import ColumnItem, ColumnExpr, SubrowColumn, Sheet, Column
 from visidata import SheetsSheet
 
 SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
+Sheet.addCommand('&', 'append-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype="append"))')
+Sheet.addCommand('g&', 'append-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype="append"))')
 
 def createJoinedSheet(sheets, jointype=''):
     sheets[1:] or error("join requires more than 1 sheet")
 
     if jointype == 'append':
-        return SheetConcat('&'.join(vs.name for vs in sheets), sources=sheets)
+        keyedcols = collections.defaultdict(list, {col.name:[col] for col in sheets[0].visibleCols})
+        for s in sheets[1:] or fail('need to join more than one sheet'):
+            for col in s.visibleCols:
+                key = col.name if col.name in keyedcols else col.sheet.visibleCols.index(col)
+                keyedcols[key].append(col)
+
+        return SheetConcat('&'.join(vs.name for vs in sheets), sourceCols=list(keyedcols.values()))
+
     elif jointype == 'extend':
         vs = copy(sheets[0])
         vs.name = '+'.join(vs.name for vs in sheets)
@@ -154,52 +163,47 @@ def ExtendedSheet_reload(self, sheets):
 
 ## for SheetConcat
 class ColumnConcat(Column):
-    def __init__(self, name, colsBySheet, **kwargs):
+    def __init__(self, name, cols, **kwargs):
         super().__init__(name, **kwargs)
-        self.colsBySheet = colsBySheet
+        self.cols = cols
+
+    def getColBySheet(self, s):
+        for c in self.cols:
+            if c.sheet is s:
+                return c
 
     def calcValue(self, row):
         srcSheet, srcRow = row
-        srcCol = self.colsBySheet.get(srcSheet, None)
+        srcCol = self.getColBySheet(srcSheet)
         if srcCol:
             return srcCol.calcValue(srcRow)
 
     def setValue(self, row, v):
         srcSheet, srcRow = row
-        srcCol = self.colsBySheet.get(srcSheet, None)
+        srcCol = self.getColBySheet(srcSheet)
         if srcCol:
             srcCol.setValue(srcRow, v)
         else:
             fail('column not on source sheet')
 
 
-# rowdef: (Sheet, row)
+# rowdef: (srcSheet, srcRow)
 class SheetConcat(Sheet):
-    'combination of multiple sheets by row concatenation'
+    'combination of multiple sheets by row concatenation. sourceCols=list(cols). '
+    @asyncthread
     def reload(self):
         self.rows = []
-        for sheet in self.sources:
-            for r in sheet.rows:
-                self.addRow((sheet, r))
+        sourceSheets = []
+        for cols in self.sourceCols:
+            for c in cols:
+                if c.sheet not in sourceSheets:
+                    sourceSheets.append(c.sheet)
 
         self.columns = []
-        self.addColumn(ColumnItem('origin_sheet', 0))
-        allColumns = {}
-        for srcsheet in self.sources:
-            for srccol in srcsheet.visibleCols:
-                colsBySheet = allColumns.get(srccol.name, None)
-                if colsBySheet is None:
-                    colsBySheet = {}  # dict of [Sheet] -> Column
-                    allColumns[srccol.name] = colsBySheet
-                    if isinstance(srccol, ColumnExpr):
-                        combinedCol = copy(srccol)
-                    else:
-                        combinedCol = ColumnConcat(srccol.name, colsBySheet, type=srccol.type)
-                    self.addColumn(combinedCol)
+        self.addColumn(ColumnItem('origin_sheet', 0, width=0))
+        for cols in self.sourceCols:
+            self.addColumn(ColumnConcat(cols[0].name, cols, type=cols[0].type))
 
-                if srcsheet in colsBySheet:
-                    status('%s has multiple columns named "%s"' % (srcsheet.name, srccol.name))
-
-                colsBySheet[srcsheet] = srccol
-
-        self.recalc()  # to set .sheet on columns, needed if this reload becomes async
+        for sheet in sourceSheets:
+            for r in Progress(sheet.rows):
+                self.addRow((sheet, r))
