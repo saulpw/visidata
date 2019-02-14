@@ -143,7 +143,7 @@ def progressPct(self):
 def processing(self):
     'String of current activity in gerund form for display.'
     if self.currentThreads:
-        return (' '+self.progresses[0].gerund) if self.progresses else 'processing'
+        return ' '+(self.progresses[0].gerund if self.progresses else 'processing')
     return ''
 
 ## threads
