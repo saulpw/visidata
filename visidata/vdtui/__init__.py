@@ -282,16 +282,6 @@ theme('disp_more_right', '>', 'header note indicating more columns to the right'
 theme('disp_error_val', '', 'displayed contents for computation exception')
 theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
 
-theme('color_default', 'normal', 'the default color')
-theme('color_default_hdr', 'bold underline', 'color of the column headers')
-theme('color_current_row', 'reverse', 'color of the cursor row')
-theme('color_current_col', 'bold', 'color of the cursor column')
-theme('color_current_hdr', 'bold reverse underline', 'color of the header for the cursor column')
-theme('color_column_sep', '246 blue', 'color of column separators')
-theme('color_key_col', '81 cyan', 'color of key columns')
-theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
-theme('color_selected_row', '215 yellow', 'color of selected rows')
-
 theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
 theme('color_status', 'bold', 'status line color')
 theme('color_error', 'red', 'error message color')
@@ -509,6 +499,7 @@ class VisiData(Extensible):
         'Invalidate internal caches between command inputs.'
         Sheet.visibleCols.fget.cache_clear()
         Sheet.keyCols.fget.cache_clear()
+        Sheet.nHeaderRows.fget.cache_clear()
         colors.colorcache.clear()
         self.mousereg.clear()
 

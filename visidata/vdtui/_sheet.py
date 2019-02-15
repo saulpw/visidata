@@ -4,7 +4,7 @@ import threading
 import re
 from copy import copy
 
-from visidata.vdtui import (Command, bindkeys, commands, options, isNullFunc, error, Column,
+from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, error, Column,
 TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow,
 vd, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
@@ -21,6 +21,17 @@ disp_column_fill = ' ' # pad chars after column value
 RowColorizer = collections.namedtuple('RowColorizer', 'precedence coloropt func')
 CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt func')
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
+
+theme('color_default', 'normal', 'the default color')
+theme('color_default_hdr', 'bold', 'color of the column headers')
+theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
+theme('color_current_row', 'reverse', 'color of the cursor row')
+theme('color_current_col', 'bold', 'color of the cursor column')
+theme('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
+theme('color_column_sep', '246 blue', 'color of column separators')
+theme('color_key_col', '81 cyan', 'color of key columns')
+theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
+theme('color_selected_row', '215 yellow', 'color of selected rows')
 
 
 class Sheet(BaseSheet):
@@ -159,7 +170,7 @@ class Sheet(BaseSheet):
     @property
     def nVisibleRows(self):
         'Number of visible rows at the current window height.'
-        return vd.windowHeight-2
+        return vd.windowHeight-self.nHeaderRows-1
 
     @property
     def cursorCol(self):
@@ -341,12 +352,12 @@ class Sheet(BaseSheet):
 
         # (x,y) is relative cell within screen viewport
         x = self.cursorVisibleColIndex - self.leftVisibleColIndex
-        y = self.cursorRowIndex - self.topRowIndex + 1  # header
+        y = self.cursorRowIndex - self.topRowIndex + self.nHeaderRows  # header
 
         # check bounds, scroll if necessary
-        if y < 1:
+        if y < self.nHeaderRows:
             self.topRowIndex = self.cursorRowIndex
-        elif y > self.nVisibleRows:
+        elif y > self.nHeaderRows+self.nVisibleRows-1:
             self.topRowIndex = self.cursorRowIndex-self.nVisibleRows+1
 
         if x <= 0:
@@ -395,7 +406,7 @@ class Sheet(BaseSheet):
 
         self.rightVisibleColIndex = vcolidx
 
-    def drawColHeader(self, scr, y, vcolidx):
+    def drawColHeader(self, scr, y, h, vcolidx):
         'Compose and draw column header for given vcolidx.'
         col = self.visibleCols[vcolidx]
 
@@ -413,16 +424,30 @@ class Sheet(BaseSheet):
 
         x, colwidth = self.visibleColLayout[vcolidx]
 
-        # ANameTC
+        # AnameTC
         T = typeIcon(col.type)
         if T is None:  # still allow icon to be explicitly non-displayed ''
             T = '?'
-        N = ' ' + col.name  # save room at front for LeftMore
-        if len(N) > colwidth-1:
-            N = N[:colwidth-len(options.disp_truncator)] + options.disp_truncator
-        clipdraw(scr, y, x, N, hdrattr.attr, colwidth)
-        clipdraw(scr, y, x+colwidth-len(T), T, hdrattr.attr, len(T))
-        vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
+
+        hdrs = col.name.split('\n')
+        for i in range(h):
+            name = ' '  # save room at front for LeftMore
+            if h-i-1 < len(hdrs):
+                name += hdrs[::-1][h-i-1]
+
+            if len(name) > colwidth-1:
+                name = name[:colwidth-len(options.disp_truncator)] + options.disp_truncator
+
+            if i == h-1:
+                hdrattr = hdrattr.update_attr(colors.color_bottom_hdr, 5)
+
+            clipdraw(scr, y+i, x, name, hdrattr.attr, colwidth)
+            vd.onMouse(scr, y+i, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
+
+            if C and x+colwidth+len(C) < vd.windowWidth:
+                scr.addstr(y+i, x+colwidth, C, sepattr)
+
+        clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrattr.attr, len(T))
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
@@ -431,16 +456,18 @@ class Sheet(BaseSheet):
         except ValueError:  # from .index
             pass
 
-        if C and x+colwidth+len(C) < vd.windowWidth:
-            scr.addstr(y, x+colwidth, C, sepattr)
-
     def isVisibleIdxKey(self, vcolidx):
         'Return boolean: is given column index a key column?'
         return self.visibleCols[vcolidx] in self.keyCols
 
+    @property
+    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
+    def nHeaderRows(self):
+        vcols = self.visibleCols
+        return max(len(col.name.split('\n')) for col in vcols) if vcols else 0
+
     def draw(self, scr):
         'Draw entire screen onto the `scr` curses object.'
-        numHeaderRows = 1
         scr.erase()  # clear screen before every re-draw
 
         vd.clear_caches()
@@ -457,6 +484,8 @@ class Sheet(BaseSheet):
 
         self.rowLayout = {}
         self.calcColLayout()
+
+        numHeaderRows = self.nHeaderRows
         vcolidx = 0
         rows = list(self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows])
         for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
@@ -468,7 +497,7 @@ class Sheet(BaseSheet):
               timer.start()
               try:
                 headerRow = 0
-                self.drawColHeader(scr, headerRow, vcolidx)
+                self.drawColHeader(scr, headerRow, numHeaderRows, vcolidx)
 
                 y = headerRow + numHeaderRows
                 for rowidx in range(0, min(len(rows), self.nVisibleRows)):
