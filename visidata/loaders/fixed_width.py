@@ -51,9 +51,7 @@ class FixedWidthColumnsSheet(Sheet):
         self.columns = []
         # compute fixed width columns
         for i, j in columnize(list(r[0] for r in self.rows[:options.fixed_rows])):
-            c = FixedWidthColumn('', i, j)
-            c.name = '_'.join(c.getValue(r) for r in self.rows[:options.header])
-            self.addColumn(c)
+            self.addColumn(FixedWidthColumn('', i, j))
 
-        # discard header rows
-        self.rows = self.rows[options.header:]
+        self.setColNames(rows[:options.header])
+        self.rows = rows[options.header:]

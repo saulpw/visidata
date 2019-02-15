@@ -36,25 +36,27 @@ xlsxContents.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 class xlsxSheet(Sheet):
     @asyncthread
     def reload(self):
-        worksheet = self.source
-
         self.columns = []
         self.rows = []
 
-        rows = worksheet.iter_rows()
-        hdrs = [list(wrapply(getattr, cell, 'value')
-                   for cell in next(rows))
-                       for i in range(options.header)
-               ]
-        colnames = ['\n'.join(str(hdr[i]) for i in range(len(hdr))) for hdr in zip(*hdrs)]
-        for i, colname in enumerate(colnames):
-            self.addColumn(ColumnItem(colname, i))
+        iterrows = self.iterload()
 
+        self.setColNames([next(iterrows) for i in range(options.header)])
+
+        try:
+            while True:
+                self.addRow(next(iterrows))
+        except StopIteration:
+            pass
+
+    def iterload(self):
+        worksheet = self.source
+        rows = worksheet.iter_rows()
         for r in Progress(rows, total=worksheet.max_row or 0):
             row = list(wrapply(getattr, cell, 'value') for cell in r)
             for i in range(len(self.columns), len(row)):  # no-op if already done
                 self.addColumn(ColumnItem(None, i, width=8))
-            self.addRow(row)
+            yield row
 
 
 class open_xls(Sheet):

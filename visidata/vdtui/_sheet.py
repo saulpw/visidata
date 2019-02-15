@@ -466,6 +466,10 @@ class Sheet(BaseSheet):
         vcols = self.visibleCols
         return max(len(col.name.split('\n')) for col in vcols) if vcols else 0
 
+    def setColNames(self, rows):
+        for c in self.visibleCols:
+            c.name = '\n'.join(str(c.getDisplayValue(r)) for r in rows)
+
     def draw(self, scr):
         'Draw entire screen onto the `scr` curses object.'
         scr.erase()  # clear screen before every re-draw
