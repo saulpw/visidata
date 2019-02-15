@@ -170,7 +170,12 @@ class Sheet(BaseSheet):
     @property
     def nVisibleRows(self):
         'Number of visible rows at the current window height.'
-        return vd.windowHeight-self.nHeaderRows-1
+        return vd.windowHeight-self.nHeaderRows-self.nFooterRows
+
+    @property
+    def nFooterRows(self):
+        'Number of lines reserved at the bottom, including status line.'
+        return 1
 
     @property
     def cursorCol(self):
