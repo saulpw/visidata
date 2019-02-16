@@ -230,8 +230,8 @@ min_thread_time_s = 0.10 # only keep threads that take longer than this number o
 def open_pyprof(p):
     return ProfileSheet(p.name, p.open_bytes())
 
-
-def toggleProfiling(t):
+@VisiData.api
+def toggleProfiling(vd, t):
     if not t.profile:
         t.profile = cProfile.Profile()
         t.profile.enable()
