@@ -137,4 +137,5 @@ class GraphSheet(InvertedCanvas):
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
-        self.plotlabel(0, self.plotviewBox.ymax+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors.color_graph_axis)
+        xname, _ = clipstr(xname, self.leftMarginPixels//2-2)
+        self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', colors.color_graph_axis)
