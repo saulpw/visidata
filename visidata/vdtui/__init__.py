@@ -810,6 +810,13 @@ class LazyMap:
                 return setattr(obj, k, v)
         self.locals[k] = v
 
+@asyncthread
+def exec_shell(*args):
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if err or out:
+        lines = err.decode('utf8').splitlines() + out.decode('utf8').splitlines()
+        vd.push(TextSheet(' '.join(args), lines))
 
 class BaseSheet(Extensible):
     _rowtype = object    # callable (no parms) that returns new empty item
@@ -911,6 +918,11 @@ class BaseSheet(Extensible):
             exec(cmd.execstr, vdglobals, LazyMap(vd, self))
         except EscapeException as e:  # user aborted
             status('aborted')
+            escaped = True
+        except ModuleNotFoundError as e:
+            if confirm('%s not installed.  run `pip3 install %s`? ' % (e.name, e.name), exc=None):
+                warning('installing %s' % e.name)
+                exec_shell('pip3', 'install', e.name)
             escaped = True
         except Exception as e:
             debug(cmd.execstr)
