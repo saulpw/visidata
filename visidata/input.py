@@ -1,7 +1,7 @@
 import collections
 import curses
 
-from visidata import EscapeException, EnableCursor, clipdraw, Sheet, VisiData
+from visidata import EscapeException, ExpectedException, EnableCursor, clipdraw, Sheet, VisiData
 from visidata import vd, status, error, warning, fail, options, colors, commands
 from visidata import launchExternalEditor, suspend
 
@@ -241,10 +241,13 @@ def _inputLine(self, prompt, **kwargs):
     return ret
 
 
-def confirm(prompt):
+def confirm(prompt, exc=ExpectedException):
     yn = vd.input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
-        fail('disconfirmed')
+        if exc:
+            raise exc('disconfirmed')
+        warning('disconfirmed')
+        return False
     return True
 
 
