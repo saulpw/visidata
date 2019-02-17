@@ -1,0 +1,3 @@
+[submodule "deps/dateutil"]
+	path = deps/dateutil
+	url = git@github.com:dateutil/dateutil.git
