@@ -5,6 +5,7 @@
 'vdtui: a curses framework for columnar data'
 
 from builtins import *
+from inspect import isclass
 import sys
 import os
 import collections
@@ -50,7 +51,7 @@ class SettingsMgr(collections.OrderedDict):
             v = 'override'
         elif isinstance(obj, BaseSheet):
             v = obj.name
-        elif issubclass(obj, BaseSheet):
+        elif isclass(obj) and issubclass(obj, BaseSheet):
             v = obj.__name__
         else:
             return None
