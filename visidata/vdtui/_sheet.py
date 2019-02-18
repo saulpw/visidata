@@ -325,6 +325,7 @@ class Sheet(BaseSheet):
                 index = len(self.columns)
             col.sheet = self
             self.columns.insert(index, col)
+            Sheet.visibleCols.fget.cache_clear()
             return col
 
     def setColNames(self, rows):
