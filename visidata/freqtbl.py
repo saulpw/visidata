@@ -13,8 +13,12 @@ option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 
 ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(source[0], cursorRow))')
 
-def valueNames(*vals):
-    return '-'.join(str(v) for v in vals)
+def valueNames(discrete_vals, numeric_vals):
+    ret = [ '+'.join(discrete_vals) ]
+    if numeric_vals != (0, 0):
+        ret.append('%s-%s' % numeric_vals)
+
+    return '+'.join(ret)
 
 
 class SheetFreqTable(SheetPivot):
@@ -64,4 +68,4 @@ SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1
 SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
 SheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
 
-SheetFreqTable.addCommand(ENTER, 'dup-row', 'vs = copy(source); vs.name += "_"+valueNames(*cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)')
+SheetFreqTable.addCommand(ENTER, 'dup-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)')
