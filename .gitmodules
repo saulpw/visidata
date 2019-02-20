@@ -1,3 +1,9 @@
 [submodule "deps/dateutil"]
 	path = deps/dateutil
 	url = git@github.com:dateutil/dateutil.git
+[submodule "pyxlsb"]
+	path = deps/pyxlsb
+	url = git@github.com:wwwiiilll/pyxlsb.git
+[submodule "deps/pyxlsb"]
+	path = deps/pyxlsb
+	url = git@github.com:saulpw/pyxlsb.git
