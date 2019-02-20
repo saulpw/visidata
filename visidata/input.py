@@ -98,7 +98,7 @@ class HistoryState:
 
 
 # history: earliest entry first
-def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True):
+def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None):
     'A better curses line editing widget.'
     ESC='^['
     ENTER='^J'
@@ -127,6 +127,8 @@ def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
         return b
 
     while True:
+        updater(v)
+
         if display:
             dispval = clean_printable(v)
         else:
