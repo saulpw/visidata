@@ -383,5 +383,5 @@ class ColumnExpr(Column):
 
     @expr.setter
     def expr(self, expr):
-        self._expr = expr
         self.compiledExpr = compile(expr, '<expr>', 'eval') if expr else None
+        self._expr = expr

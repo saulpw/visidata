@@ -1,7 +1,4 @@
-from visidata import Progress, status, Sheet, Column, asyncthread, vd, undoAddCols, undoEditCells
-from visidata import EscapeException, fail, VisiData, ColumnExpr, options, option
-
-option('evalexpr_live', True, 'eval expr while being input')
+from visidata import Progress, status, Sheet, Column, asyncthread, vd, undoAddCols, undoEditCells, ColumnExpr
 
 
 class CompleteExpr:
@@ -43,34 +40,5 @@ def inputExpr(self, prompt, *args, **kwargs):
     return vd.input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
 
 
-@Column.api
-def updateExpr(col, val):
-    col.name = val
-    col.expr = val
-    col.sheet.draw(vd.scr)
-
-
-@VisiData.api
-def addcol_expr(vd, sheet, colidx):
-    if not options.evalexpr_live:
-        return sheet.addColumn(ColumnExpr(sheet.inputExpr("new column expr=")), index=colidx)
-
-    try:
-        c = sheet.addColumn(ColumnExpr("", width=options.default_width), index=colidx)
-        oldidx = sheet.cursorVisibleColIndex
-        sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
-
-        expr = sheet.editCell(sheet.cursorVisibleColIndex, -1,
-                                completer=CompleteExpr(sheet),
-                                updater=lambda val,col=c: col.updateExpr(val))
-
-        c.expr = expr or fail("no expr")
-        c.width = None
-    except (Exception, EscapeException):
-        sheet.columns.remove(c)
-        sheet.cursorVisibleColIndex = oldidx
-        raise
-
-
-Sheet.addCommand('=', 'addcol-expr', 'addcol_expr(sheet, cursorColIndex+1)', undo=undoAddCols)
+Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', undo=undoEditCells)
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows or rows, inputExpr("set selected="))', undo=undoEditCells)
