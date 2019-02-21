@@ -42,3 +42,4 @@ def addcol_expr(vd, sheet, colidx):
 
 
 Sheet.addCommand(None, 'addcol-expr', 'addcol_expr(sheet, cursorColIndex+1)', undo=undoAddCols)
+Sheet.addCommand(None, 'addcol-new', 'c=addColumn(SettableColumn("", width=options.default_width), cursorColIndex+1); draw(vd.scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None', undo=undoAddCols)
