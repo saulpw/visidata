@@ -6,6 +6,7 @@
 
 from builtins import *
 from inspect import isclass
+from unittest import mock
 import sys
 import os
 import collections
@@ -472,7 +473,7 @@ class VisiData(Extensible):
         self.lastErrors = []
         self.keystrokes = ''
         self.prefixWaiting = False
-        self.scr = None  # curses scr
+        self.scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
         self.mousereg = []
         self.cmdlog = None  # CommandLog
 
