@@ -383,9 +383,5 @@ class ColumnExpr(Column):
 
     @expr.setter
     def expr(self, expr):
-        try:
-            self.compiledExpr = compile(expr, '<expr>', 'eval') if expr else None
-            self._expr = expr
-        except SyntaxError as e:
-            self._expr = None
-            pass
+        self.compiledExpr = compile(expr, '<expr>', 'eval') if expr else None
+        self._expr = expr
