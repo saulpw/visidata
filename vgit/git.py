@@ -181,7 +181,8 @@ class GitSheet(Sheet):
     def leftStatus(self):
         inp = self.inProgress()
         ret = ('[%s] ' % inp) if inp else ''
-        ret += '‹%s%s› ' % (self.rootSheet.branch, self.rootSheet.remotediff)
+        if hasattr(self.rootSheet, 'branch'):
+            ret += '‹%s%s› ' % (self.rootSheet.branch, self.rootSheet.remotediff)
 
         return ret + super().leftStatus()
 
