@@ -922,7 +922,8 @@ class BaseSheet(Extensible):
         try:
             if vd.cmdlog:
                 vd.cmdlog.beforeExecHook(self, cmd, '', keystrokes)
-            exec(cmd.execstr, vdglobals, LazyMap(vd, self))
+            code = compile(cmd.execstr, cmd.longname, 'exec')
+            exec(code, vdglobals, LazyMap(vd, self))
         except EscapeException as e:  # user aborted
             status('aborted')
             escaped = True
