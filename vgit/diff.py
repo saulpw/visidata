@@ -31,8 +31,8 @@ def parseContextLine(line):
 
 class DifferSheet(GitSheet):
     rowtype = 'lines' # rowdef:  list of refs (1 per source)
-    def __init__(self, relfn, *refs):
-        super().__init__(str(relfn)+"_diff", sources=refs)
+    def __init__(self, relfn, *refs, **kwargs):
+        super().__init__(str(relfn)+"_diff", refs=refs, **kwargs)
         self.fn = str(relfn)
         self.basenum = 0
         self.columns = [
@@ -83,7 +83,7 @@ class DifferSheet(GitSheet):
         self.rows.insert(i, self.newRow(linenum, refnum, line))
 
     def newRow(self, linenum, refnum, line):
-        r = [None] * (len(self.sources)+1)  # one for base linenum and one for each ref
+        r = [None] * (len(self.refs)+1)  # one for base linenum and one for each ref
         r[0] = linenum
         r[refnum+1] = line
         return r
@@ -123,11 +123,11 @@ class DifferSheet(GitSheet):
     def reload(self):
         self.rows = []
 
-        baseref = self.sources[self.basenum]
+        baseref = self.refs[self.basenum]
         for linenum, line in enumerate(git_lines('show', baseref+':'+self.fn)):
             self.rows.append(self.newRow(linenum, self.basenum, line))
 
-        for refnum, ref in enumerate(self.sources):
+        for refnum, ref in enumerate(self.refs):
             cmd = self.getDiffCmd(self.fn, baseref, ref)
             if not cmd:
                 continue
