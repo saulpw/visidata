@@ -4,6 +4,8 @@ import os.path
 import sys
 from visidata import Sheet, Column, ColumnAttr, run, status, Command, Path, ENTER, asyncthread
 from visidata import namedlist, date, vlen, option, getGlobals, loadConfigFile, options
+from visidata import unbindkey, globalCommand
+
 import vgit
 
 __version__ = 'v0.4-dev'
@@ -58,6 +60,15 @@ class GitOverview(Sheet):
 
 GitOverview.addCommand(ENTER, 'dive-row', 'vd.push(open_git(Path(cursorRow.path.abspath())))')
 GitOverview.addCommand('z'+ENTER, 'dive-cell', 'view(cursorValue)')
+
+
+unbindkey('gD')
+globalCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
+globalCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
+
+@vgit.GitSheet.api
+def git_exec(sheet, cmdstr):
+    vd.push(TextSheet(cmdstr, sheet.git_lines(*cmdstr.split())))
 
 
 def open_git(p):

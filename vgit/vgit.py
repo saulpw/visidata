@@ -9,6 +9,7 @@ from .git import *
 from .merge import GitMerge
 from .blame import GitBlame, GitFileSheet
 from .diff import *
+from .status import *
 
 __version__ = 'saul.pw/vgit v0.3pre'
 
@@ -330,6 +331,9 @@ class GitGrep(GitSheet):
         self.rows = []
         for line in git_lines('grep', '--no-color', '-z', '--line-number', '--ignore-case', self.source):
             self.rows.append((line.split('\0')))
+
+globalCommand('g/', 'git-grep', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
+Sheet.unbindkey('g/')
 
 GitGrep.addCommand(ENTER, 'dive-row', 'vs=GitFileSheet(cursorRow[0]); vs.cursorRowIndex = int(cursorRow[1])-1; vd.push(vs).reload()', 'go to this match')
 GitGrep.addCommand('^O', 'sysopen-row', 'launchExternalEditor(cursorRow[0], linenum=cursorRow[1]); reload()', 'open this file in $EDITOR')
