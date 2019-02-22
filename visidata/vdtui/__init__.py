@@ -537,21 +537,26 @@ class VisiData(Extensible):
         warn_attr = cattr.update_attr(colors.color_warning, 2).attr
         sep = options.disp_status_sep
 
+        x = 0
+        y = self.windowHeight-1
         try:
             lstatus = vs.leftStatus()
             maxwidth = options.disp_lstatus_max
             if maxwidth > 0:
                 lstatus = middleTruncate(lstatus, maxwidth//2)
 
-            y = self.windowHeight-1
             x = clipdraw(scr, y, 0, lstatus, attr)
+
             self.onMouse(scr, y, 0, 1, x,
                             BUTTON1_PRESSED='sheets',
                             BUTTON3_PRESSED='rename-sheet',
                             BUTTON3_CLICKED='rename-sheet')
+        except Exception as e:
+            self.exceptionCaught(e)
 
-            one = False
-            for (pri, msgparts), n in sorted(self.statuses.items(), key=lambda k: -k[0][0]):
+        one = False
+        for (pri, msgparts), n in sorted(self.statuses.items(), key=lambda k: -k[0][0]):
+            try:
                 if x > self.windowWidth:
                     break
                 if one:  # any messages already:
@@ -564,8 +569,8 @@ class VisiData(Extensible):
                 elif pri == 1: msgattr = warn_attr
                 else: msgattr = attr
                 x += clipdraw(scr, y, x, msg, msgattr, self.windowWidth)
-        except Exception as e:
-            self.exceptionCaught(e)
+            except Exception as e:
+                self.exceptionCaught(e)
 
     def drawRightStatus(self, scr, vs):
         'Draw right side of status bar.  Return length displayed.'
