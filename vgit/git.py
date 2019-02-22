@@ -127,6 +127,10 @@ class GitSheet(Sheet):
         super().__init__(*args, **kwargs)
         self.extra_args = []
 
+    @Sheet.name.setter
+    def name(self, name):
+        self._name = name.strip()
+
     @asyncthread
     def git(self, *args, **kwargs):
         args = list(args) + self.extra_args
