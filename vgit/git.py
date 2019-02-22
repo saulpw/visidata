@@ -233,7 +233,7 @@ class GitStatus(GitSheet):
     nKeys = 1
 
     def __init__(self, p):
-        super().__init__(p.relpath(''), source=p)
+        super().__init__('/'.join(Path(p.abspath()).parts[-2:]), source=p)
         self.branch = ''
         self.remotediff = ''  # ahead/behind status
 

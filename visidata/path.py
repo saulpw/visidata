@@ -119,7 +119,10 @@ class Path:
     @property
     def parts(self):
         'Return list of path parts'
-        return os.path.split(self.fqpn)
+        ret = self.fqpn.split('/')
+        if self.fqpn[0] == '/':
+            ret = ['/'] + ret
+        return ret
 
     @property
     def parent(self):
