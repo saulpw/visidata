@@ -30,7 +30,7 @@ class GitAllColumn(GitLinesColumn):
         return vgit.git_all('--git-dir', r.path.joinpath('.git').abspath(), *self.cmd).strip()
 
 
-class GitOverview(vgit.GitSheet):
+class GitOverview(Sheet):
     rowtype = 'repos'  # rowdef: GitRepo
     columns = [
         ColumnAttr('repo', 'path', type=str),
