@@ -64,6 +64,9 @@ class SettingsMgr(collections.OrderedDict):
         'Inverse of objname(obj); returns obj if available'
         return self.allobjs.get(objname)
 
+    def unset(self, k, obj='global'):
+        del self[k][self.objname(obj)]
+
     def set(self, k, v, obj='override'):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
         if k not in self:
@@ -146,6 +149,9 @@ def bindkey(keystrokes, longname):
 
 def bindkey_override(keystrokes, longname):
     bindkeys.set(keystrokes, longname)
+
+def unbindkey(keystrokes):
+    bindkeys.unset(keystrokes)
 
 class Option:
     def __init__(self, name, value, helpstr=''):
@@ -863,6 +869,10 @@ class BaseSheet(Extensible):
         if oldlongname:
             warning('%s was already bound to %s' % (keystrokes, oldlongname))
         bindkeys.set(keystrokes, longname, cls)
+
+    @classmethod
+    def unbindkey(cls, keystrokes):
+        bindkeys.unset(keystrokes, cls)
 
     def getCommand(self, keystrokes_or_longname):
         longname = bindkeys._get(keystrokes_or_longname)

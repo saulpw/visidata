@@ -380,7 +380,8 @@ GitSheet.addCommand('gi', 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").w
 GitSheet.addCommand(ENTER, 'diff-file-unstaged', 'vd.push(DifferSheet(cursorRow, "HEAD", "index", "working", source=sheet))', 'push unstaged diffs for this file'),
 GitSheet.addCommand('g^J', 'diff-selected-unstaged', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files'),
 
-GitSheet.addCommand('g/', 'git-grep', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
+globalCommand('g/', 'git-grep', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
+Sheet.unbindkey('g/')
 
 GitSheet.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
 GitSheet.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
