@@ -8,6 +8,7 @@ from visidata import *
 from .git import *
 from .merge import GitMerge
 from .blame import GitBlame, GitFileSheet
+from .diff import *
 
 __version__ = 'saul.pw/vgit v0.3pre'
 
@@ -250,8 +251,8 @@ class HunksSheet(GitSheet):
             elif line[0] in ' +-':
                 self.rows[-1][-1].append(line)
 
-HunksSheet.addCommand(ENTER, 'dive-row', 'vd.push(HunkViewer(sheet, hunks=[cursorRow]))', 'view the diff for this hunks'),
-HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(sheet, hunks=selectedRows or rows))', 'view the diffs for the selected hunks (or all hunks)'),
+HunksSheet.addCommand(ENTER, 'dive-row', 'vd.push(HunkViewer(sheet, [cursorRow]))', 'view the diff for this hunks'),
+HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(sheet, selectedRows or rows))', 'view the diffs for the selected hunks (or all hunks)'),
 HunksSheet.addCommand('V', 'git-view-patch', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
 #HunksSheet.addCommand('gV', 'git-view-patch-selected', '', 'view the raw patch for selected/all hunks'),
 HunksSheet.addCommand('a', 'git-apply-hunk', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index'),
@@ -260,7 +261,7 @@ HunksSheet.addCommand('a', 'git-apply-hunk', 'git_apply(cursorRow, "--cached")',
 
 
 class HunkViewer(GitSheet):
-    def __init__(self, srchunks, *hunks):
+    def __init__(self, srchunks, hunks):
         super().__init__('hunk', sources=hunks)
         self.srchunks = srchunks
         self.columns = [
