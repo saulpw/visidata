@@ -305,7 +305,7 @@ theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 ENTER='^J'
 ESC='^['
 globalCommand('KEY_RESIZE', 'no-op', '')
-globalCommand('q', 'quit-sheet',  'vd.cmdlog.removeSheet(vd.quit())')
+globalCommand('q', 'quit-sheet',  'vd.quit()')
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
 globalCommand('^L', 'redraw', 'vd.scr.clear()')
