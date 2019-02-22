@@ -365,20 +365,34 @@ class GitStatus(GitSheet):
 
         self.recalc()  # erase column caches
 
-GitSheet.addCommand('a', 'git-add', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),
-GitSheet.addCommand('m', 'git-mv', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file'),
-GitSheet.addCommand('d', 'git-rm', 'git("rm", cursorRow.filename)', 'stage this file for deletion'),
-GitSheet.addCommand('r', 'git-reset', 'git("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file'),
-GitSheet.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.filename)', 'checkout this file'),
-GitSheet.addCommand('ga', 'git-add-selected', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging'),
-GitSheet.addCommand('gd', 'git-rm-selected', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files'),
-GitSheet.addCommand(None, 'git-commit', 'git("commit", "-m", input("commit message: "))', 'commit changes'),
-GitSheet.addCommand('V', 'open-file', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file'),
-GitSheet.addCommand('i', 'ignore-file', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
-GitSheet.addCommand('gi', 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
+GitStatus.addCommand('a', 'git-add', 'git("add", cursorRow.filename)', 'add this new file or modified file to staging'),
+GitStatus.addCommand('m', 'git-mv', 'git("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file'),
+GitStatus.addCommand('d', 'git-rm', 'git("rm", cursorRow.filename)', 'stage this file for deletion'),
+GitStatus.addCommand('r', 'git-reset', 'git("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file'),
+GitStatus.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.filename)', 'checkout this file'),
+GitStatus.addCommand('ga', 'git-add-selected', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging'),
+GitStatus.addCommand('gd', 'git-rm-selected', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files'),
+GitStatus.addCommand(None, 'git-commit', 'git("commit", "-m", input("commit message: "))', 'commit changes'),
+GitStatus.addCommand('V', 'open-file', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file'),
+GitSheet.addCommand(None, 'ignore-file', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
+GitSheet.addCommand(None, 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
 
-GitSheet.addCommand(ENTER, 'diff-file-unstaged', 'vd.push(DifferSheet(cursorRow, "HEAD", "index", "working", source=sheet))', 'push unstaged diffs for this file'),
-GitSheet.addCommand('g^J', 'diff-selected-unstaged', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files'),
+
+@GitStatus.api
+def dive_rows(sheet, *gitfiles):
+    if len(gitfiles) == 1:
+        gf = gitfiles[0]
+        if gf.is_dir:
+            vs = GitStatus(gf.path)
+        else:
+            vs = DifferSheet(gf, "HEAD", "index", "working", source=sheet)
+    else:
+        vs = getHunksSheet(sheet, *gitfiles)
+    vd.push(vs)
+
+GitStatus.addCommand(ENTER, 'dive-row', 'sheet.dive_rows(cursorRow)', 'push unstaged diffs for this file or dive into directory'),
+GitStatus.addCommand('g'+ENTER, 'dive-rows', 'sheet.dive_rows(*(selectedRows or rows))', 'push unstaged diffs for selected files or all files'),
+
 
 globalCommand('g/', 'git-grep', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
 Sheet.unbindkey('g/')
@@ -387,6 +401,12 @@ GitSheet.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(shee
 GitSheet.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
 
 GitSheet.addCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
+
+globalCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
+
+@GitSheet.api
+def git_exec(sheet, cmdstr):
+    vd.push(TextSheet(cmdstr, sheet.git_lines(*cmdstr.split())))
 
 
 #GitSheet.addCommand('2', 'vd.push(GitMerge(cursorRow))', 'push merge for this file'),

@@ -115,8 +115,8 @@ class Command:
         self.helpstr = helpstr
         self.undo = undo
 
-def globalCommand(keystrokes, longname, execstr, **kwargs):
-    commands.setdefault(longname, Command(longname, execstr, **kwargs))
+def globalCommand(keystrokes, longname, execstr, helpstr='', **kwargs):
+    commands.setdefault(longname, Command(longname, execstr, helpstr=helpstr, **kwargs))
 
     if keystrokes:
         assert not bindkeys._get(keystrokes), keystrokes
