@@ -119,24 +119,30 @@ class GitSheet(Sheet):
         self.extra_args = []
 
     @property
-    def repopath(self):
+    def worktree(self):
         if isinstance(self.source, GitSheet):
-            return self.source.repopath
+            return self.source.worktree
         elif isinstance(self.source, Path):
             return self.source
+
+    def _git_args(self):
+        return [
+            '--git-dir', self.worktree.joinpath('.git').abspath(),
+            '--work-tree', self.worktree.abspath()
+        ]
 
     @Sheet.name.setter
     def name(self, name):
         self._name = name.strip()
 
     def git_iter(self, *args, **kwargs):
-        yield from git_iter('--git-dir', self.repopath.joinpath('.git').abspath(), *args, **kwargs)
+        yield from git_iter(*self._git_args(), *args, **kwargs)
 
     def git_lines(self, *args, **kwargs):
-        return git_lines('--git-dir', self.repopath.joinpath('.git').abspath(), *args, **kwargs)
+        return git_lines(*self._git_args(), *args, **kwargs)
 
     def git_all(self, *args, **kwargs):
-        return git_all('--git-dir', self.repopath.joinpath('.git').abspath(), *args, **kwargs)
+        return git_all(*self._git_args(), *args, **kwargs)
 
     @asyncthread
     def git(self, *args, **kwargs):
