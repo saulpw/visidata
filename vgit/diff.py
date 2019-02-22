@@ -12,39 +12,6 @@ def getDiffSheet(fn, *refs):
     'one column per ref'
 
 
-def git_diff(fn, *args):
-    args = list(args) + ['--', fn]
-    return git_lines('diff',
-            '--patch',
-            '--inter-hunk-context=2',
-            '--find-renames',
-            '--no-color',
-            '--no-prefix',
-            '--diff-algorithm=' + options.git_diff_algo,
-            '-U999999',
-            *args)
-
-
-def getDiffCmd(fn, base, ref):
-    if ref == base:
-        return None
-
-    if base == 'index':
-        if ref == 'working':
-            return git_diff(fn)
-        else:
-            error('notimpl: index as diff base for ref')
-    elif base == 'working':
-        error('notimpl: working as diff base for ref')
-    else:
-        if ref == 'working':
-            return git_diff(fn, base)
-        elif ref == 'index':
-            return git_diff(fn, '--cached', base)
-        else:
-            return git_diff(fn, base, ref)
-
-
 # @@ -2,7 +2,7 @@ context
 # returns leftstart, leftcount, rightstart, rightcount, context
 def parseContextLine(line):
@@ -121,6 +88,38 @@ class DifferSheet(GitSheet):
         r[refnum+1] = line
         return r
 
+    def git_diff(self, fn, *args):
+        args = list(args) + ['--', fn]
+        return self.git_lines('diff',
+            '--patch',
+            '--inter-hunk-context=2',
+            '--find-renames',
+            '--no-color',
+            '--no-prefix',
+            '--diff-algorithm=' + options.git_diff_algo,
+            '-U999999',
+            *args)
+
+
+    def getDiffCmd(self, fn, base, ref):
+        if ref == base:
+            return None
+
+        if base == 'index':
+            if ref == 'working':
+                return self.git_diff(fn)
+            else:
+                error('notimpl: index as diff base for ref')
+        elif base == 'working':
+            error('notimpl: working as diff base for ref')
+        else:
+            if ref == 'working':
+                return self.git_diff(fn, base)
+            elif ref == 'index':
+                return self.git_diff(fn, '--cached', base)
+            else:
+                return self.git_diff(fn, base, ref)
+
     def reload(self):
         self.rows = []
 
@@ -129,7 +128,7 @@ class DifferSheet(GitSheet):
             self.rows.append(self.newRow(linenum, self.basenum, line))
 
         for refnum, ref in enumerate(self.sources):
-            cmd = getDiffCmd(self.fn, baseref, ref)
+            cmd = self.getDiffCmd(self.fn, baseref, ref)
             if not cmd:
                 continue
 

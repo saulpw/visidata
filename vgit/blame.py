@@ -28,7 +28,7 @@ class GitBlame(GitSheet):
     def reload(self):
         self.rows = []
 
-        lines = list(git_lines('blame', '--porcelain', str(self.source)))
+        lines = list(self.git_lines('blame', '--porcelain', str(self.source)))
         i = 0
         headers = {}  # [sha1] -> hdr
         while i < len(lines):

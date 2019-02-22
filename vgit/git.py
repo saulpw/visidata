@@ -127,16 +127,33 @@ class GitSheet(Sheet):
         super().__init__(*args, **kwargs)
         self.extra_args = []
 
+    @property
+    def repopath(self):
+        if isinstance(self.source, GitSheet):
+            return self.source.repopath
+        elif isinstance(self.source, Path):
+            return self.source
+
     @Sheet.name.setter
     def name(self, name):
         self._name = name.strip()
 
+    def git_iter(self, *args, **kwargs):
+        yield from git_iter('--git-dir', self.repopath.joinpath('.git').abspath(), *args, **kwargs)
+
+    def git_lines(self, *args, **kwargs):
+        return git_lines('--git-dir', self.repopath.joinpath('.git').abspath(), *args, **kwargs)
+
+    def git_all(self, *args, **kwargs):
+        return git_all('--git-dir', self.repopath.joinpath('.git').abspath(), *args, **kwargs)
+
     @asyncthread
     def git(self, *args, **kwargs):
+        'Run git command that modifies the repo'
         args = list(args) + self.extra_args
         self.extra_args.clear()
 
-        for line in loggit_lines(*args, **kwargs):
+        for line in self.git_lines(*args, **kwargs):
             status(line)
 
         if isinstance(self.source, GitSheet):
@@ -267,10 +284,9 @@ class GitStatus(GitSheet):
         return False
 
 
-    @staticmethod
-    def getBranchStatuses():
+    def getBranchStatuses(self):
         ret = {}  # localbranchname -> "+5/-2"
-        for branch_status in git_lines('for-each-ref', '--format=%(refname:short) %(upstream:short) %(upstream:track)', 'refs/heads'):
+        for branch_status in self.git_lines('for-each-ref', '--format=%(refname:short) %(upstream:short) %(upstream:track)', 'refs/heads'):
             m = re.search(r'''(\S+)\s*
                               (\S+)?\s*
                               (\[
@@ -296,19 +312,19 @@ class GitStatus(GitSheet):
 
     @asyncthread
     def reload(self):
-        files = [GitFile(p, self.source) for p in self.source.iterdir() if p.name not in ('.git', '..')]  # files in working dir
+        files = [GitFile(p, self.source) for p in self.source.iterdir() if p.name not in ('.git', '')]  # files in working dir
 
         filenames = dict((gf.filename, gf) for gf in files)
 
-        self.branch = git_all('rev-parse', '--abbrev-ref', 'HEAD').strip()
+        self.branch = self.git_all('rev-parse', '--abbrev-ref', 'HEAD').strip()
         self.remotediff = self.getBranchStatuses().get(self.branch, 'no branch')
 
         self.rows = []
         self._cachedStatus.clear()
-        for fn in git_iter('\0', 'ls-files', '-z'):
+        for fn in self.git_iter('\0', 'ls-files', '-z'):
             self._cachedStatus[fn] = FileStatus(['  ', None, None])  # status, adds, dels
 
-        for status_line in git_iter('\0', 'status', '-z', '-unormal', '--ignored'):
+        for status_line in self.git_iter('\0', 'status', '-z', '-unormal', '--ignored'):
             if status_line:
                 if status_line[2:3] == ' ':
                     st, fn = status_line[:2], status_line[3:]
@@ -321,7 +337,7 @@ class GitStatus(GitSheet):
                     if not self.ignored(gf.filename):
                         self.rows.append(gf)
 
-        for line in git_iter('\0', 'diff-files', '--numstat', '-z'):
+        for line in self.git_iter('\0', 'diff-files', '--numstat', '-z'):
             if not line: continue
             adds, dels, fn = line.split('\t')
             if fn not in self._cachedStatus:
@@ -329,7 +345,7 @@ class GitStatus(GitSheet):
             cs = self._cachedStatus[fn]
             cs.adds = '+%s/-%s' % (adds, dels)
 
-        for line in git_iter('\0', 'diff-index', '--cached', '--numstat', '-z', 'HEAD'):
+        for line in self.git_iter('\0', 'diff-index', '--cached', '--numstat', '-z', 'HEAD'):
             if not line: continue
             adds, dels, fn = line.split('\t')
             if fn not in self._cachedStatus:
@@ -355,7 +371,7 @@ GitSheet.addCommand('V', 'open-file', 'vd.push(TextSheet(cursorRow.filename, Pat
 GitSheet.addCommand('i', 'ignore-file', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
 GitSheet.addCommand('gi', 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
 
-GitSheet.addCommand(ENTER, 'diff-file-unstaged', 'vd.push(DifferSheet(cursorRow, "HEAD", "index", "working"))', 'push unstaged diffs for this file'),
+GitSheet.addCommand(ENTER, 'diff-file-unstaged', 'vd.push(DifferSheet(cursorRow, "HEAD", "index", "working", source=sheet))', 'push unstaged diffs for this file'),
 GitSheet.addCommand('g^J', 'diff-selected-unstaged', 'vd.push(getHunksSheet(sheet, *(selectedRows or rows)))', 'push unstaged diffs for selected files or all files'),
 
 GitSheet.addCommand('g/', 'git-grep', 'vd.push(GitGrep(input("git grep: ")))', 'find in all files'),
