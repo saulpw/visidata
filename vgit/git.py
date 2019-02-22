@@ -14,7 +14,8 @@ class GitCmdLog(Sheet):
     columns = [
         ColumnAttr('sheet'),
         ColumnAttr('command'),
-        ColumnAttr('output'),
+        ColumnAttr('output.stdout'),
+        ColumnAttr('output.stderr'),
     ]
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
@@ -29,11 +30,13 @@ def gitcmdlog(vd):
 
 
 def loggit(*args, **kwargs):
-    output = maybeloggit(*args, **kwargs)
-
     cmdstr = 'git ' + ' '.join(args)
-    vd.gitcmdlog.addRow(GitCmd([vd.sheet, cmdstr, output]))
-    return output
+    gcmd = GitCmd([vd.sheet, cmdstr, None])
+    vd.gitcmdlog.addRow(gcmd)
+
+    gcmd.output = maybeloggit(*args, **kwargs)
+
+    return gcmd.output
 
 
 def maybeloggit(*args, **kwargs):
@@ -49,7 +52,7 @@ def git_all(*args, git=loggit, **kwargs):
     'Return entire output of git command.'
 
     try:
-        cmd = git('--no-pager', *args, _err_to_out=True, _decode_errors='replace', **kwargs)
+        cmd = git('--no-pager', *args, _decode_errors='replace', **kwargs)
         out = cmd.stdout
     except sh.ErrorReturnCode as e:
         status('git '+' '.join(args), 'error=%s' % e.exit_code)
@@ -117,22 +120,35 @@ def git_iter(*args, git=loggit, sep='\0', **kwargs):
         vd.push(TextSheet('git ' + ' '.join(args), errlines))
 
 
+class GitUndo:
+    def __init__(self, *args):
+        self.cmdargs = args
+    def __enter__(self):
+        return self
+    def __exit__(self, exctype, exc, tb):
+        out = git_all(*self.cmdargs)
+
+
+def getRootSheet(sheet):
+    if isinstance(sheet.source, GitSheet):
+        return getRootSheet(sheet.source)
+    elif isinstance(sheet.source, Path):
+        return sheet
+    else:
+        error('no apparent root GitStatus')
+
+
 class GitSheet(Sheet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_args = []
-
-    @property
-    def worktree(self):
-        if isinstance(self.source, GitSheet):
-            return self.source.worktree
-        elif isinstance(self.source, Path):
-            return self.source
+        assert isinstance(self.source, (Path, GitSheet))
 
     def _git_args(self):
+        worktree = getRootSheet(self).source  # Path
         return [
-            '--git-dir', self.worktree.joinpath('.git').abspath(),
-            '--work-tree', self.worktree.abspath()
+            '--git-dir', worktree.joinpath('.git').abspath(),
+            '--work-tree', worktree.abspath()
         ]
 
     @Sheet.name.setter

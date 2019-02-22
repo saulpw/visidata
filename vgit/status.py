@@ -3,6 +3,8 @@ from visidata import *
 from .git import GitSheet
 from .diff import DifferSheet
 
+option('vgit_show_ignored', False, '')
+
 # cached by GitStatus sheets
 FileStatus = namedlist('FileStatus', 'status adds dels'.split())
 
@@ -178,7 +180,7 @@ GitStatus.addCommand(None, 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").
 
 GitStatus.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
 GitStatus.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
-GitStatus.addCommand('L', 'git-blame', 'vd.push(GitBlame(cursorRow))', 'push blame for this file'),
+GitStatus.addCommand(None, 'git-blame', 'vd.push(GitBlame(cursorRow))', 'push blame for this file'),
 
 
 @GitStatus.api
@@ -195,5 +197,3 @@ def dive_rows(sheet, *gitfiles):
 
 GitStatus.addCommand(ENTER, 'dive-row', 'sheet.dive_rows(cursorRow)', 'push unstaged diffs for this file or dive into directory'),
 GitStatus.addCommand('g'+ENTER, 'dive-rows', 'sheet.dive_rows(*(selectedRows or rows))', 'push unstaged diffs for selected files or all files'),
-
-

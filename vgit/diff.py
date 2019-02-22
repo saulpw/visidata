@@ -1,7 +1,9 @@
 from visidata import *
-from .git import GitSheet, git_lines
+from .git import GitSheet
 
 option('git_diff_algo', 'minimal', 'algorithm to use for git diff')
+
+__all__ = ['DifferSheet', 'HunksSheet', 'HunkViewer', 'getCommitSheet', 'getStagedHunksSheet', 'getHunksSheet']
 
 
 # one column per ref
@@ -124,7 +126,7 @@ class DifferSheet(GitSheet):
         self.rows = []
 
         baseref = self.refs[self.basenum]
-        for linenum, line in enumerate(git_lines('show', baseref+':'+self.fn)):
+        for linenum, line in enumerate(self.git_lines('show', baseref+':'+self.fn)):
             self.rows.append(self.newRow(linenum, self.basenum, line))
 
         for refnum, ref in enumerate(self.refs):
@@ -161,6 +163,148 @@ class DifferSheet(GitSheet):
                     else:
                         status(line)
                         continue  # header
+
+
+def getHunksSheet(parent, *files):
+    return HunksSheet('hunks', 'diff',
+                  '--diff-algorithm=' + options.git_diff_algo,
+                  '--patch',
+                  '--inter-hunk-context=2', '-U1',
+                  '--no-color',
+                  '--no-prefix', *[gf.filename for gf in files], source=parent)
+
+def getStagedHunksSheet(parent, *files):
+    return HunksSheet('staged_hunks', 'diff', '--cached',
+                  '--diff-algorithm=' + options.git_diff_algo,
+                  '--patch',
+                  '--inter-hunk-context=2', '-U1',
+                  '--no-color',
+                  '--no-prefix', *[gf.filename for gf in files], source=parent)
+
+def getCommitSheet(name, parent, *refids):
+    return HunksSheet(name, 'show',
+                  '--diff-algorithm=' + options.git_diff_algo,
+                  '--patch',
+                  '--inter-hunk-context=2', '-U1',
+                  '--no-color',
+                  '--no-prefix', *refids, source=parent)
+
+# source is arguments to git()
+class HunksSheet(GitSheet):
+    columns = [
+        ColumnItem('origfn', 0, width=0),
+        ColumnItem('filename', 1),
+        ColumnItem('context', 2),
+        ColumnItem('leftlinenum', 3),
+        ColumnItem('leftcount', 4),
+        ColumnItem('rightlinenum', 5),
+        ColumnItem('rightcount', 6),
+    ]
+
+    def __init__(self, name, *git_args, **kwargs):
+        super().__init__(name, **kwargs)
+        self.git_args = git_args
+
+    def reload(self):
+        def _parseStartCount(s):
+            sc = s.split(',')
+            if len(sc) == 2:
+                return sc
+            if len(sc) == 1:
+                return sc[0], 1
+
+        self.rows = []
+        leftfn = ''
+        rightfn = ''
+        header_lines = None
+        diff_started = False
+        for line in git_lines(*self.git_args):
+            if line.startswith('diff'):
+                diff_started = True
+                continue
+            if not diff_started:
+                continue
+
+            if line.startswith('---'):
+                header_lines = [line]  # new file
+                leftfn = line[4:]
+            elif line.startswith('+++'):
+                header_lines.append(line)
+                rightfn = line[4:]
+            elif line.startswith('@@'):
+                header_lines.append(line)
+                _, linenums, context = line.split('@@')
+                leftlinenums, rightlinenums = linenums.split()
+                leftstart, leftcount = _parseStartCount(leftlinenums[1:])
+                rightstart, rightcount = _parseStartCount(rightlinenums[1:])
+                self.rows.append((leftfn, rightfn, context, int(leftstart), int(leftcount), int(rightstart), int(rightcount), header_lines))
+                header_lines = header_lines[:2]  # keep file context
+            elif line[0] in ' +-':
+                self.rows[-1][-1].append(line)
+
+
+class HunkViewer(GitSheet):
+    def __init__(self, hunks, **kwargs):
+        super().__init__('hunk', hunks=hunks, **kwargs)
+        self.columns = [
+            ColumnItem('1', 1, width=vd.windowWidth//2-1),
+            ColumnItem('2', 2, width=vd.windowWidth//2-1),
+        ]
+        self.addColorizer(RowColorizer(4, None, HunkViewer.colorDiffRow))
+
+    def reload(self):
+        if not self.hunks:
+            vd.remove(self)
+            return
+
+        fn, _, context, linenum, _, _, _, patchlines = self.hunks[0]
+        self.name = '%s:%s' % (fn, linenum)
+        self.rows = []
+        nextDelIdx = None
+        for line in patchlines[3:]:  # diff without the patch headers
+            typech = line[0]
+            line = line[1:]
+            if typech == '-':
+                self.rows.append([typech, line, None])
+                if nextDelIdx is None:
+                    nextDelIdx = len(self.rows)-1
+            elif typech == '+':
+                if nextDelIdx is not None:
+                    if nextDelIdx < len(self.rows):
+                        self.rows[nextDelIdx][2] = line
+                        nextDelIdx += 1
+                        continue
+
+                self.rows.append([typech, None, line])
+                nextDelIdx = None
+            elif typech == ' ':
+                self.rows.append([typech, line, line])
+                nextDelIdx = None
+            else:
+                continue  # header
+
+    def colorDiffRow(self, c, row, v):
+        if row and row[1] != row[2]:
+            if row[1] is None:
+                return 'green'  # addition
+            elif row[2] is None:
+                return 'red'  # deletion
+            else:
+                return 'yellow'  # difference
+
+
+HunkViewer.addCommand('2', 'git-apply-hunk', 'source.git_apply(hunks.pop(0), "--cached"); reload()', 'apply this hunk to the index and move to the next hunk'),
+#HunkViewer.addCommand('1', 'git-remove-hunk', 'git_apply(hunks.pop(0), "--reverse")', 'remove this hunk from the diff'),
+HunkViewer.addCommand(ENTER, 'git-skip-hunk', 'hunks.pop(0); reload()', 'move to the next hunk without applying this hunk'),
+HunkViewer.addCommand('d', 'delete-line', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch'),
+
+HunksSheet.addCommand(ENTER, 'dive-row', 'vd.push(HunkViewer([cursorRow], source=sheet))', 'view the diff for this hunks'),
+HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(selectedRows or rows, source=sheet))', 'view the diffs for the selected hunks (or all hunks)'),
+HunksSheet.addCommand('V', 'git-view-patch', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
+#HunksSheet.addCommand('gV', 'git-view-patch-selected', '', 'view the raw patch for selected/all hunks'),
+HunksSheet.addCommand('a', 'git-apply-hunk', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index'),
+#HunksSheet.addCommand('r', 'git-reverse-hunk', 'git_apply(cursorRow, "--reverse")', 'undo this hunk'),
+#HunksSheet.bindkey('d', 'git-reverse-hunk')
 
 DifferSheet.addCommand('[', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, -1)', 'go to previous diff'),
 DifferSheet.addCommand(']', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, +1)', 'go to next diff'),
