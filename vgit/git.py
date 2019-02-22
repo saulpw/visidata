@@ -70,7 +70,7 @@ def git_lines(*args, git=loggit, **kwargs):
         vd.push(TextSheet('git ' + ' '.join(args), errlines))
 
 
-def git_iter(sep, *args, git=loggit, **kwargs):
+def git_iter(*args, git=loggit, sep='\0', **kwargs):
     'Generator of chunks of stdout from given git command, delineated by sep character'
     bufsize = 512
     err = io.StringIO()
@@ -312,10 +312,10 @@ class GitStatus(GitSheet):
 
         self.rows = []
         self._cachedStatus.clear()
-        for fn in self.git_iter('\0', 'ls-files', '-z'):
+        for fn in self.git_iter('ls-files', '-z'):
             self._cachedStatus[fn] = FileStatus(['  ', None, None])  # status, adds, dels
 
-        for status_line in self.git_iter('\0', 'status', '-z', '-unormal', '--ignored'):
+        for status_line in self.git_iter('status', '-z', '-unormal', '--ignored'):
             if status_line:
                 if status_line[2:3] == ' ':
                     st, fn = status_line[:2], status_line[3:]
@@ -328,7 +328,7 @@ class GitStatus(GitSheet):
                     if not self.ignored(gf.filename):
                         self.rows.append(gf)
 
-        for line in self.git_iter('\0', 'diff-files', '--numstat', '-z'):
+        for line in self.git_iter('diff-files', '--numstat', '-z'):
             if not line: continue
             adds, dels, fn = line.split('\t')
             if fn not in self._cachedStatus:
@@ -336,7 +336,7 @@ class GitStatus(GitSheet):
             cs = self._cachedStatus[fn]
             cs.adds = '+%s/-%s' % (adds, dels)
 
-        for line in self.git_iter('\0', 'diff-index', '--cached', '--numstat', '-z', 'HEAD'):
+        for line in self.git_iter('diff-index', '--cached', '--numstat', '-z', 'HEAD'):
             if not line: continue
             adds, dels, fn = line.split('\t')
             if fn not in self._cachedStatus:

@@ -103,7 +103,7 @@ class LogSheet(GitSheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        lines = git_iter('\0', 'log', '--no-color', '-z', '--pretty=format:%s' % '%x1f'.join(self.GIT_LOG_FORMAT), self.ref)
+        lines = git_iter('log', '--no-color', '-z', '--pretty=format:%s' % '%x1f'.join(self.GIT_LOG_FORMAT), self.ref)
         for record in Progress(tuple(lines)):
             self.addRow(record.split('\x1f'))
 
@@ -352,7 +352,7 @@ class GitOptions(GitSheet):
         opts = {}
         for i, ctx in enumerate(self.CONFIG_CONTEXTS[1:]):
             try:
-                for line in git_iter('\0', 'config', '--list', '--'+ctx, '-z'):
+                for line in git_iter('config', '--list', '--'+ctx, '-z'):
                     if line:
                         k, v = line.splitlines()
                         if k not in opts:
