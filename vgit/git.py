@@ -102,15 +102,6 @@ def git_iter(sep, *args, git=loggit, **kwargs):
     else:
         vd.push(TextSheet('git ' + ' '.join(args), errlines))
 
-def loggit_lines(*args, **kwargs):
-    return git_lines(*args, git=loggit, **kwargs)
-
-def loggit_all(*args, **kwargs):
-    return git_all(*args, git=loggit, **kwargs)
-
-def loggit_iter(*args, **kwargs):
-    return git_iter(*args, git=loggit, **kwargs)
-
 
 class GitFile:
     def __init__(self, f, gitsrc):
