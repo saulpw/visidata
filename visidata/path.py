@@ -82,7 +82,7 @@ class Path:
         return os.path.exists(self.resolve())
 
     def iterdir(self):
-        return [self.parent] + [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
+        return [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
 
     def stat(self, force=False):
         if force or self._stat is None:
@@ -99,12 +99,8 @@ class Path:
     def abspath(self):
         return os.path.abspath(self.resolve())
 
-
     def relpath(self, start):
-        ourpath = self.resolve()
-        if ourpath == start:
-            return ''
-        return os.path.relpath(os.path.realpath(ourpath), start)
+        return os.path.relpath(self.abspath(), start.abspath())
 
     def with_name(self, name):
         args = list(self.parts[:-1]) + [name]
