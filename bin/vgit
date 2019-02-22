@@ -48,8 +48,6 @@ class GitOverview(Sheet):
     @asyncthread
     def reload(self):
         import glob
-        self.branch = ''
-        self.remotediff = ''
         self.rows = []
         for fn in glob.glob(os.path.join('**', '.git/'), recursive=True):
             if fn == '.git/':
