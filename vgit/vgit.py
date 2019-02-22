@@ -386,5 +386,4 @@ class GitRemotes(GitSheet):
 GitRemotes.addCommand('d', 'git-remote-delete', 'git("remote", "rm", cursorRow[0])', 'delete remote'),
 GitRemotes.addCommand('a', 'git-remote-add', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
 
-# options.wrap = False
 # os.chdir(fn)

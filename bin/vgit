@@ -40,6 +40,7 @@ class GitOverview(Sheet):
         GitAllColumn('branch', 'git rev-parse --abbrev-ref HEAD'),
         Column('modtime', type=date, getter=lambda c,r: r.path.stat().st_mtime),
     ]
+    nKeys = 1
 
     @asyncthread
     def reload(self):
