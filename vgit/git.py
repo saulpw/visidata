@@ -1,3 +1,4 @@
+import os.path
 import sh
 
 from visidata import *
@@ -111,9 +112,9 @@ def git_iter(*args, git=loggit, sep='\0', **kwargs):
 
 
 class GitFile:
-    def __init__(self, f, gitsrc):
-        self.path = f if isinstance(f, Path) else Path(f)
-        self.filename = self.path.relpath(str(gitsrc) + '/')
+    def __init__(self, path, gitsrc):
+        self.path = path
+        self.filename = os.path.relpath(path.abspath(), gitsrc.abspath())
         self.is_dir = self.path.is_dir()
 
     def __str__(self):
@@ -316,10 +317,9 @@ class GitStatus(GitSheet):
 
     @asyncthread
     def reload(self):
-        files = [GitFile(p, self.source) for p in self.source.iterdir() if p.name not in ('.git', '')]  # files in working dir
+        files = [GitFile(p, self.source) for p in self.source.iterdir() if p.name not in ('.git')]  # files in working dir
 
         filenames = dict((gf.filename, gf) for gf in files)
-
         self.branch = self.git_all('rev-parse', '--abbrev-ref', 'HEAD').strip()
         self.remotediff = self.getBranchStatuses().get(self.branch, 'no branch')
 
@@ -335,7 +335,7 @@ class GitStatus(GitSheet):
                 else:
                     fn = status_line
                     st = '//'
-                gf = GitFile(fn, self.source)
+                gf = GitFile(self.source.joinpath(fn), self.source)
                 self._cachedStatus[gf.filename] = FileStatus([st, None, None])
                 if gf.filename not in filenames:
                     if not self.ignored(gf.filename):

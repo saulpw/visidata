@@ -56,7 +56,7 @@ class GitOverview(Sheet):
                 path = Path(fn).parent.parent
             self.addRow(GitRepo([path]))
 
-GitOverview.addCommand(ENTER, 'dive-row', 'vd.push(open_git(cursorRow.path))')
+GitOverview.addCommand(ENTER, 'dive-row', 'vd.push(open_git(Path(cursorRow.path.abspath())))')
 GitOverview.addCommand('z'+ENTER, 'dive-cell', 'view(cursorValue)')
 
 
