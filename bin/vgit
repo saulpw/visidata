@@ -3,11 +3,14 @@
 import os.path
 import sys
 from visidata import Sheet, Column, ColumnAttr, run, status, Command, Path, ENTER, asyncthread
-from visidata import namedlist, date, vlen
+from visidata import namedlist, date, vlen, option, getGlobals, loadConfigFile, options
 import vgit
 
 __version__ = 'v0.4-dev'
 __version_info__ = 'saul.pw/vgit ' + __version__
+
+
+option('config', '~/.vgitrc', 'config file to exec in Python')
 
 
 GitRepo = namedlist('GitRepo', 'path stashes cached changes'.split())
@@ -68,8 +71,20 @@ def open_git(p):
     vs.gitRemotesSheet = vgit.GitRemotes('remotes', source=vs)
     return vs
 
+
 def main():
-    vs = GitOverview('gitrepos', source='.')
+    loadConfigFile(Path(options.config).resolve(), getGlobals())
+
+    if len(sys.argv) > 1:
+        topdir = Path(sys.argv[1])
+    else:
+        topdir = Path('.')
+
+    if topdir.joinpath('.git').is_dir():
+        vs = open_git(topdir)
+    else:
+        vs = GitOverview('gitrepos', source=topdir)
+
     run(vs)
 
 
