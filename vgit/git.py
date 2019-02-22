@@ -89,7 +89,14 @@ def git_iter(*args, git=loggit, sep='\0', **kwargs):
 
         chunks.append(data)
     except sh.ErrorReturnCode as e:
-        status('git '+' '.join(args), 'error=%s' % e.exit_code)
+        errlines = err.getvalue().splitlines()
+        if len(errlines) < 3:
+            for line in errlines:
+                status(line)
+        else:
+            vd.push(TextSheet('git ' + ' '.join(args), errlines))
+
+        error('git '+' '.join(args), 'error=%s' % e.exit_code)
 
     r = ''.join(chunks)
     if r:
