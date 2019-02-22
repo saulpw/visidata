@@ -7,3 +7,6 @@
 [submodule "deps/pyxlsb"]
 	path = deps/pyxlsb
 	url = git@github.com:saulpw/pyxlsb.git
+[submodule "deps/sh"]
+	path = deps/sh
+	url = git@github.com:amoffat/sh.git
