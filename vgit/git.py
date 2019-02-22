@@ -339,7 +339,7 @@ class GitStatus(GitSheet):
                 self._cachedStatus[gf.filename] = FileStatus([st, None, None])
                 if gf.filename not in filenames:
                     if not self.ignored(gf.filename):
-                        self.rows.append(gf)
+                        self.addRow(gf)
 
         for line in self.git_iter('diff-files', '--numstat', '-z'):
             if not line: continue
@@ -357,7 +357,9 @@ class GitStatus(GitSheet):
             cs = self._cachedStatus[fn]
             cs.dels = '+%s/-%s' % (adds, dels)
 
-        self.rows.extend(gf for fn, gf in filenames.items() if not self.ignored(gf.filename))
+        for fn, gf in filenames.items():
+            if not self.ignored(gf.filename):
+                self.addRow(gf)
 
         self.orderBy(None, self.columns[-1], reverse=True)
 
