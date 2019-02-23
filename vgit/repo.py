@@ -36,7 +36,7 @@ class GitBranches(GitSheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        branches_lines = git_lines('branch', '--list', '-vv', '--no-color', '--all')
+        branches_lines = self.git_lines('branch', '--list', '-vv', '--no-color', '--all')
         for line in branches_lines:
             if '->' in line:
                 continue
@@ -54,11 +54,11 @@ class GitBranches(GitSheet):
                 self.addRow(row)
 
         for row in Progress(self.rows):
-            merge_base = git_all("show-branch", "--merge-base", row.localbranch, self.rootSheet.branch, _ok_code=[0,1]).strip()
-            row.merge_name = git_all("name-rev", "--name-only", merge_base).strip() if merge_base else ''
+            merge_base = self.git_all("show-branch", "--merge-base", row.localbranch, self.rootSheet.branch, _ok_code=[0,1]).strip()
+            row.merge_name = self.git_all("name-rev", "--name-only", merge_base).strip() if merge_base else ''
             row.upstream = self.rootSheet.getBranchStatuses().get(row.localbranch)
-            row.last_commit = git_all("show", "--no-patch", '--pretty=%ai', row.localbranch).strip()
-            row.last_author = git_all("show", "--no-patch", '--pretty=%an', row.localbranch).strip()
+            row.last_commit = self.git_all("show", "--no-patch", '--pretty=%ai', row.localbranch).strip()
+            row.last_author = self.git_all("show", "--no-patch", '--pretty=%an', row.localbranch).strip()
 
 
 class GitOptions(GitSheet):
@@ -102,7 +102,7 @@ class GitRemotes(GitSheet):
 
     def reload(self):
         self.rows = []
-        for line in git_lines('remote', '-v', 'show'):
+        for line in self.git_lines('remote', '-v', 'show'):
             name, url, paren_type = line.split()
             self.rows.append((name, url, paren_type[1:-1]))
 
@@ -119,7 +119,7 @@ class GitStashes(GitSheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        for line in git_lines('stash', 'list'):
+        for line in self.git_lines('stash', 'list'):
             stashid, ctx, rest = line[:-1].split(': ', 2)
             starting_branch = ctx[len('WIP on '):]
             sha1, msg = rest.split(' ', 1)
@@ -143,7 +143,7 @@ class GitLogSheet(GitSheet):
 
     @functools.lru_cache()
     def inRemoteBranch(self, commitid):
-        return git_all('branch', '-r', '--contains', commitid)
+        return self.git_all('branch', '-r', '--contains', commitid)
 
     @asyncthread
     def reload(self):

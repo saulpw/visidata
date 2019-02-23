@@ -106,7 +106,7 @@ def git_iter(*args, git=loggit, sep='\0', **kwargs):
         else:
             vd.push(TextSheet('git ' + ' '.join(args), errlines))
 
-        error('git '+' '.join(args), 'error=%s' % e.exit_code)
+        error('git '+' '.join(args)+'error=%s' % e.exit_code)
 
     r = ''.join(chunks)
     if r:
