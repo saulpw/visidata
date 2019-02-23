@@ -9,4 +9,4 @@
 	url = git@github.com:saulpw/pyxlsb.git
 [submodule "deps/sh"]
 	path = deps/sh
-	url = git@github.com:amoffat/sh.git
+	url = git@github.com:saulpw/sh.git
