@@ -197,3 +197,4 @@ def dive_rows(sheet, *gitfiles):
 
 GitStatus.addCommand(ENTER, 'dive-row', 'sheet.dive_rows(cursorRow)', 'push unstaged diffs for this file or dive into directory'),
 GitStatus.addCommand('g'+ENTER, 'dive-rows', 'sheet.dive_rows(*(selectedRows or rows))', 'push unstaged diffs for selected files or all files'),
+GitStatus.addCommand('^O', 'sysopen-row', 'launchExternalEditorPath(Path(cursorRow.path))', 'open this file in $EDITOR')

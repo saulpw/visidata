@@ -218,7 +218,7 @@ class HunksSheet(GitSheet):
         rightfn = ''
         header_lines = None
         diff_started = False
-        for line in git_lines(*self.git_args):
+        for line in self.git_lines(*self.git_args):
             if line.startswith('diff'):
                 diff_started = True
                 continue

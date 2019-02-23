@@ -152,7 +152,7 @@ class GitSheet(Sheet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_args = []
-        assert isinstance(self.source, (Path, GitSheet))
+#        assert isinstance(self.source, (Path, GitSheet))
 
     def _git_args(self):
         worktree = getRepoPath(getRootSheet(self).source)  # Path
