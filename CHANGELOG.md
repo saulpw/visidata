@@ -2,13 +2,15 @@
 
 # v1.6-dev ()
 
+- stopped at include python3.5 in circleci test
+
 ## Bugfixes
 
-- make Sheet sortable
+- [vdtui] make Sheet sortable (related to an issue found by @jsvine #241)
 - [pyobj] SheetDict nested editing #245
 - do not log resize commands
 
-## Improvements and additions
+## Additions and improvements
 
 - bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
@@ -23,19 +25,20 @@
    - `Ctrl+Q` to output current sheet (like at end of -b)
    - `vd -o-` to send directly to the terminal (can also be used with redirection, but not necessary)
 - `options.undo` (default False) to enable infinite linear undo/redo provisionally bound to `^[` and `^]`
-- `options.default_sample_size` (default 100) to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso)
-- [replay] exit with error code on error during replay
+- [regex+] `options.default_sample_size` (default 100) to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso #219)
+- [replay] exit with error code on error during replay (suggested by @cwarden #240)
 - [vd] `--config` option to specify visidatarc file (suggested by @jsvine #236)
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
+- [chooseMany] error() on invalid choice #169
 
-- separate out vdtui components into submodules: editline, textsheet, cliptext, color, column, sheet
-- remove MIT license from vdtui; all code now licensed under GPL3
-- update style
+- [vdtui] separate out vdtui components into submodules: editline, textsheet, cliptext, color, column, sheet
+- [vdtui license] remove MIT license from vdtui; all code now licensed under GPL3
+- [vdtui style] update style
   - convert all `vd()` to `vd`
   - remove ArrayColumns, NamedArrayColumns
 - clean up options
-  - remove `curses_timeout` option (fix to 100ms)
+  - [vdtui] remove `curses_timeout` option (fix to 100ms)
 
 ## API
 - VisiData, BaseSheet, Column inherit from Extensible base class
