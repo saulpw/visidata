@@ -184,7 +184,7 @@ GitBranches.addCommand('d', 'git-branch-delete', 'git("branch", "--delete", curs
 GitBranches.addCommand('e', 'git-branch-rename', 'git("branch", "-v", "--move", cursorRow.localbranch, editCell(0))', 'rename this branch'),
 GitBranches.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.localbranch)', 'checkout this branch'),
 GitBranches.addCommand('m', 'git-branch-merge', 'git("merge", cursorRow.localbranch)', 'merge this branch into the current branch'),
-GitBranches.addCommand(ENTER, 'dive-row', 'vd.push(LogSheet(cursorRow.localbranch+"_log", source=sheet, ref=cursorRow.localbranch))', 'push log of this branch'),
+GitBranches.addCommand(ENTER, 'dive-row', 'vd.push(GitLogSheet(cursorRow.localbranch+"_log", source=sheet, ref=cursorRow.localbranch))', 'push log of this branch'),
 
 GitStashes.addCommand('a', 'git-stash-apply', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing'),
 GitStashes.addCommand('', 'git-stash-pop-row', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),
