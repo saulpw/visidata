@@ -153,6 +153,29 @@ class GitLogSheet(GitSheet):
             self.addRow(record.split('\x1f'))
 
 
+@vgit.GitStatus.cached_property
+def gitBranchesSheet(self):
+    return vgit.GitBranches('branches', source=self)
+
+@vgit.GitStatus.cached_property
+def gitOptionsSheet(self):
+    return vgit.GitOptions('git-options', source=self)
+
+@vgit.GitStatus.cached_property
+def gitStashesSheet(self):
+    return vgit.GitStashes('stashes', source=self)
+
+@vgit.GitStatus.cached_property
+def gitRemotesSheet(self):
+    return vgit.GitRemotes('remotes', source=self)
+
+BaseSheet.addCommand('B', 'git-branches', 'vd.push(getRootSheet(sheet).gitBranchesSheet)', 'push branches sheet')
+BaseSheet.addCommand('gO', 'git-options', 'vd.push(getRootSheet(sheet).gitOptionsSheet)', 'push sheet of git options')
+BaseSheet.addCommand('T', 'git-stashes', 'vd.push(getRootSheet(sheet).gitStashesSheet)', 'push stashes sheet')
+BaseSheet.addCommand('R', 'git-remotes', 'vd.push(getRootSheet(sheet).gitRemotesSheet)', 'push remotes sheet')
+Sheet.unbindkey('R')
+
+
 GitBranches.addCommand('a', 'git-branch-create', 'git("branch", input("create branch: ", type="branch"))', 'create a new branch off the current checkout'),
 GitBranches.addCommand('d', 'git-branch-delete', 'git("branch", "--delete", cursorRow.localbranch)', 'delete this branch'),
 GitBranches.addCommand('e', 'git-branch-rename', 'git("branch", "-v", "--move", cursorRow.localbranch, editCell(0))', 'rename this branch'),

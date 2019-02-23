@@ -81,22 +81,6 @@ def open_git(p):
     p.joinpath('.git').is_dir()
     return vgit.GitStatus(p)
 
-@vgit.GitStatus.cached_property
-def gitBranchesSheet(self):
-    return vgit.GitBranches('branches', source=self)
-
-@vgit.GitStatus.cached_property
-def gitOptionsSheet(self):
-    return vgit.GitOptions('git-options', source=self)
-
-@vgit.GitStatus.cached_property
-def gitStashesSheet(self):
-    return vgit.GitStashes('stashes', source=self)
-
-@vgit.GitStatus.cached_property
-def gitRemotesSheet(self):
-    return vgit.GitRemotes('remotes', source=self)
-
 def main():
     loadConfigFile(Path(options.config).resolve(), getGlobals())
 
@@ -122,12 +106,6 @@ GitOverview.addCommand('z'+ENTER, 'dive-cell', 'view(cursorValue)')
 globalCommand('g/', 'git-grep', 'vd.push(GitGrep(regex=input("git grep: "), source=sheet))', 'find in all files in this repo'),
 globalCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
 globalCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
-
-BaseSheet.addCommand('B', 'git-branches', 'vd.push(getRootSheet(sheet).gitBranchesSheet)', 'push branches sheet')
-BaseSheet.addCommand('gO', 'git-options', 'vd.push(getRootSheet(sheet).gitOptionsSheet)', 'push sheet of git options')
-BaseSheet.addCommand('T', 'git-stashes', 'vd.push(getRootSheet(sheet).gitStashesSheet)', 'push stashes sheet')
-BaseSheet.addCommand('R', 'git-remotes', 'vd.push(getRootSheet(sheet).gitRemotesSheet)', 'push remotes sheet')
-Sheet.unbindkey('R')
 
 GitGrep.addCommand(ENTER, 'dive-row', 'vs=GitFileSheet(cursorRow[0]); vs.cursorRowIndex = int(cursorRow[1])-1; vd.push(vs).reload()', 'go to this match')
 GitGrep.addCommand('^O', 'sysopen-row', 'launchExternalEditor(cursorRow[0], linenum=cursorRow[1]); reload()', 'open this file in $EDITOR')
