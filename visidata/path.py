@@ -123,7 +123,10 @@ class Path:
     @property
     def parent(self):
         'Return Path to parent directory.'
-        return Path(os.path.join(*self.parts[:-1]))
+        parts = self.parts
+        if parts[:-1]:
+            return Path(os.path.join(*parts[:-1]))
+        return Path('/' if parts and parts[0].startswith('/') else '')
 
     @property
     def filesize(self):
