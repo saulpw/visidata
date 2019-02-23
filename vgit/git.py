@@ -138,6 +138,16 @@ def getRootSheet(sheet):
         error('no apparent root GitStatus')
 
 
+def getRepoPath(p):
+    'Return path at p or above which has .git subdir'
+    p = Path(p.abspath())
+    if p.joinpath('.git').is_dir():
+        return p
+    if p.fqpn in ['/','']:
+        return None
+    return getRepoPath(p.parent)
+
+
 class GitSheet(Sheet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -145,7 +155,7 @@ class GitSheet(Sheet):
         assert isinstance(self.source, (Path, GitSheet))
 
     def _git_args(self):
-        worktree = getRootSheet(self).source  # Path
+        worktree = getRepoPath(getRootSheet(self).source)  # Path
         return [
             '--git-dir', worktree.joinpath('.git').abspath(),
             '--work-tree', worktree.abspath()

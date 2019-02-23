@@ -89,7 +89,7 @@ def main():
     else:
         topdir = Path('.')
 
-    if topdir.joinpath('.git').is_dir():
+    if topdir.joinpath('.git').is_dir() or vgit.getRepoPath(topdir):
         vs = open_git(topdir)
     else:
         vs = GitOverview('gitrepos', source=topdir)
