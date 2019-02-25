@@ -148,7 +148,7 @@ def getRepoPath(p):
     return getRepoPath(p.parent)
 
 
-class GitSheet(Sheet):
+class GitContext:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.extra_args = []
@@ -233,6 +233,9 @@ class GitSheet(Sheet):
     def git_apply(self, hunk, *args):
         self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
         status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
+
+class GitSheet(GitContext, Sheet):
+    pass
 
 GitSheet.addCommand('f', 'git-force', 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
 

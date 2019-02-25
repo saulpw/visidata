@@ -3,7 +3,7 @@
 import re
 
 from visidata import *
-from . import GitSheet, GitStatus
+from . import GitSheet, GitStatus, GitContext
 
 __all__ = ['GitBranches', 'GitOptions', 'GitStashes', 'GitRemotes', 'GitLogSheet']
 
@@ -127,16 +127,16 @@ class GitStashes(GitSheet):
 
 
 # rowdef: (commit_hash, refnames, author, author_date, body, notes)
-class GitLogSheet(GitSheet):
+class GitLogSheet(GitContext, DeferredSaveSheet):
     # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
     rowtype = 'commits'
     columns = [
             ColumnItem('commitid', 0, width=8),
             ColumnItem('refnames', 1, width=12),
-            Column('message', getter=lambda c,r: r[4], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
-            Column('author', getter=lambda c,r: r[2], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
-            Column('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
+            DeferredSetColumn('message', getter=lambda c,r: r[4], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
+            DeferredSetColumn('author', getter=lambda c,r: r[2], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
+            DeferredSetColumn('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
             Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
     ]
 #    colorizers = [RowColorizer(5, 'cyan', lambda s,c,r,v: r and not s.inRemoteBranch(r[0]))]
@@ -151,6 +151,24 @@ class GitLogSheet(GitSheet):
         lines = self.git_iter('log', '--no-color', '-z', '--pretty=format:%s' % '%x1f'.join(self.GIT_LOG_FORMAT), self.ref)
         for record in Progress(tuple(lines)):
             self.addRow(record.split('\x1f'))
+
+    @asyncthread
+    def commit(self, adds, changes, deletes):
+
+        assert not adds
+        assert not deletes
+
+        for row, cols in changes.values():
+            for col in cols:
+                try:
+                    col.realsetter(col, row, col._modifiedValues[id(row)])
+                except Exception as e:
+                    exceptionCaught(e)
+
+        self.reload()
+
+GitLogSheet.addCommand(None, 'delete-row', 'error("delete is not supported")')
+GitLogSheet.addCommand(None, 'add-row', 'error("commits cannot be added")')
 
 
 @GitStatus.cached_property
