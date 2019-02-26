@@ -146,13 +146,12 @@ class CommandLog(TsvSheet):
                                               keystrokes=keystrokes, input=args,
                                               longname=cmd.longname, comment=comment)
 
-        if cmd.undo:
+        if options.undo and cmd.undo:
             self.checkpoint(cmd, sheet, self.currentActiveRow)
 
     @asyncthread
     def checkpoint(self, cmd, sheet, cmdlogrow):
-        if options.undo:
-            cmdlogrow.undofunc = eval(cmd.undo, getGlobals(), LazyMap(sheet))
+        cmdlogrow.undofunc = eval(cmd.undo, getGlobals(), LazyMap(sheet))
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'

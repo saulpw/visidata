@@ -120,6 +120,7 @@ def main():
         setDiffSheet(vs)
 
     if args.batch:
+        options.undo = False
         vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
         vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
