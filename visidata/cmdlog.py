@@ -269,7 +269,7 @@ class CommandLog(TsvSheet):
         CommandLog.currentReplayRow = None
 
         if escaped:  # escape during replay aborts replay
-            warning('replay aborted')
+            warning('replay aborted during %s' % (longname or r.keystrokes))
         return escaped
 
     def replay_sync(self, live=False):

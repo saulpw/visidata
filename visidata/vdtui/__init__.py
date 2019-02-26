@@ -940,12 +940,14 @@ class BaseSheet(Extensible):
             if vd.cmdlog:
                 vd.cmdlog.beforeExecHook(self, cmd, '', keystrokes)
             code = compile(cmd.execstr, cmd.longname, 'exec')
+            debug(cmd.longname)
             exec(code, vdglobals, LazyMap(vd, self))
         except EscapeException as e:  # user aborted
-            status('aborted')
+            warning('aborted')
             escaped = True
         except ModuleNotFoundError as e:
-            if confirm('%s not installed.  run `pip3 install %s`? ' % (e.name, e.name), exc=None):
+            warning('%s not installed' % e.name)
+            if confirm('run `pip3 install %s`? ' % e.name, exc=None):
                 warning('installing %s' % e.name)
                 exec_shell('pip3', 'install', e.name)
             escaped = True
