@@ -378,7 +378,7 @@ class LazyMapRow:
 
 class ColumnExpr(Column):
     def __init__(self, name, cache=True, expr=None, **kwargs):
-        super().__init__(name, **kwargs)
+        super().__init__(name, cache=cache, **kwargs)
         self.expr = expr or name
 
     def calcValue(self, row):
