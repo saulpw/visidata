@@ -64,6 +64,9 @@ class ColumnsSheet(Sheet):
             ValueColumn('value', width=options.default_width),
             Column('expr', getter=lambda col,row: getattr(row, 'expr', ''),
                            setter=lambda col,row,val: setattr(row, 'expr', val)),
+            ColumnAttr('ncalcs', type=int, width=0, cache=False),
+            ColumnAttr('maxtime', type=float, width=0, cache=False),
+            ColumnAttr('totaltime', type=float, width=0, cache=False),
     ]
     nKeys = 2
     colorizers = [

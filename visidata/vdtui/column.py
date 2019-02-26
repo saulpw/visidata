@@ -2,6 +2,7 @@ import collections
 import itertools
 import threading
 import re
+import time
 
 from visidata.vdtui import option, options, fail, anytype, stacktrace, status
 from visidata.vdtui import getType, typemap, isNumeric, isNullFunc
@@ -380,9 +381,18 @@ class ColumnExpr(Column):
     def __init__(self, name, cache=True, expr=None, **kwargs):
         super().__init__(name, cache=cache, **kwargs)
         self.expr = expr or name
+        self.ncalcs = 0
+        self.totaltime = 0
+        self.maxtime = 0
 
     def calcValue(self, row):
-        return self.sheet.evalexpr(self.compiledExpr, row)
+        t0 = time.perf_counter()
+        r = self.sheet.evalexpr(self.compiledExpr, row)
+        t1 = time.perf_counter()
+        self.ncalcs += 1
+        self.maxtime = max(self.maxtime, t1-t0)
+        self.totaltime += (t1-t0)
+        return r
 
     @property
     def expr(self):
