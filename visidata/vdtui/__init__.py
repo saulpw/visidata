@@ -509,6 +509,7 @@ class VisiData(Extensible):
         Sheet.visibleCols.fget.cache_clear()
         Sheet.keyCols.fget.cache_clear()
         Sheet.nHeaderRows.fget.cache_clear()
+        Sheet.colsByName.fget.cache_clear()
         colors.colorcache.clear()
         self.mousereg.clear()
 

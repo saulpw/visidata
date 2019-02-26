@@ -122,11 +122,16 @@ class Sheet(BaseSheet):
             self.rows.insert(index, row)
         return row
 
-    def column(self, colregex):
-        'Return first column whose Column.name matches colregex.'
-        for c in self.columns:
-            if re.search(colregex, c.name, regex_flags()):
-                return c
+    @property
+    @functools.lru_cache()
+    def colsByName(self):
+        'Return dict of colname:col'
+        # dict comprehension in reverse order so first column with the name is used
+        return {col.name:col for col in self.columns[::-1]}
+
+    def column(self, colname):
+        'Return first column whose Column.name matches colname.'
+        return self.colsByName.get(colname) or error('no column matching "%s"' % colname)
 
     def recalc(self):
         'Clear caches and set col.sheet to this sheet for all columns.'
