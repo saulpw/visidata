@@ -435,7 +435,7 @@ class Extensible:
     def global_api(cls, func):
         setattr(cls, func.__name__, func)
         def _vdfunc(*args, **kwargs):
-            return func(vd, *args, **kwargs)
+            return getattr(vd, func.__name__)(*args, **kwargs)  # getattr in case of replacement
         return _vdfunc
 
     @classmethod
