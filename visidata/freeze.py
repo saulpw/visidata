@@ -34,7 +34,7 @@ class StaticSheet(Sheet):
         super().__init__(source.name + "'", source=source)
 
         self.columns = []
-        for i, col in enumerate(self.source.columns):
+        for i, col in enumerate(self.source.visibleCols):
             colcopy = ColumnItem(col.name, i, width=col.width, type=col.type, fmtstr=col.fmtstr)
             self.addColumn(colcopy)
             if col in self.source.keyCols:
@@ -46,7 +46,7 @@ class StaticSheet(Sheet):
         for r in Progress(self.source.rows, 'calculating'):
             row = []
             self.rows.append(row)
-            for col in self.source.columns:
+            for col in self.source.visibleCols:
                 try:
                     row.append(col.getTypedValue(r))
                 except Exception as e:
