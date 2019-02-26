@@ -806,21 +806,28 @@ class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
     def __init__(self, *objs):
         self.locals = {}
-        self.objs = list(objs)
+        self.objs = {} # [k] -> obj
+        for obj in objs:
+            for k in dir(obj):
+                if k not in self.objs:
+                    self.objs[k] = obj
 
     def keys(self):
-        return list(sum(set(dir(obj)) for obj in self.objs))
+        return list(self.objs.keys())  # sum(set(dir(obj)) for obj in self.objs))
+
+    def clear(self):
+        self.locals.clear()
 
     def __getitem__(self, k):
-        for obj in self.objs:
-            if k in dir(obj):
-                return getattr(obj, k)
+        obj = self.objs.get(k, None)
+        if obj:
+            return getattr(obj, k)
         return self.locals[k]
 
     def __setitem__(self, k, v):
-        for obj in self.objs:
-            if k in dir(obj):
-                return setattr(obj, k, v)
+        obj = self.objs.get(k, None)
+        if obj:
+            return setattr(obj, k, v)
         self.locals[k] = v
 
 @asyncthread

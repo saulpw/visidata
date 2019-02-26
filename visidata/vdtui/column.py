@@ -350,24 +350,31 @@ class ColumnEnum(Column):
             value = self.mapping.get(value, value)
         setattr(row, self.name, value or self.default)
 
-class LazyMapRow(LazyMap):
+class LazyMapRow:
     'Calculate column values as needed.'
     def __init__(self, sheet, row):
-        super().__init__(sheet, AttrDict(row=row, sheet=sheet))
         self.row = row
         self.sheet = sheet
+        if not hasattr(self.sheet, 'lazymap'):
+            self.sheet.lazymap = LazyMap(sheet)
+        else:
+            self.sheet.lazymap.clear()  # reset locals on lazymap
         self._keys = [c.name for c in self.sheet.columns]
 
     def keys(self):
-        return self._keys
+        return self._keys + self.sheet.lazymap.keys()
 
     def __getitem__(self, colid):
         try:
             i = self._keys.index(colid)
             return self.sheet.columns[i].getTypedValue(self.row)
         except ValueError:
-            return super().__getitem__(colid)
-
+            try:
+                return self.sheet.lazymap[colid]
+            except (KeyError, AttributeError):
+                if colid in ['row', 'sheet']:
+                    return getattr(self, colid)   # finally, handle 'row' and 'sheet' fake columns
+                raise KeyError(colid)
 
 class ColumnExpr(Column):
     def __init__(self, name, cache=True, expr=None, **kwargs):
