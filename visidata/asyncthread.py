@@ -10,7 +10,7 @@ from .vdtui import *
 from visidata import vd, option, options, status, globalCommand, Sheet, EscapeException
 from visidata import ColumnAttr, Column, ENTER
 
-__all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet']
+__all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet', 'codestr']
 
 
 option('profile', '', 'filename to save binary profiling data')
