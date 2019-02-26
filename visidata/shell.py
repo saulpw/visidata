@@ -124,7 +124,7 @@ class DirSheet(DeferredSaveSheet):
     rowtype = 'files' # rowdef: Path
     columns = [
         DeferredSetColumn('directory',
-            getter=lambda col,row: row.parent.relpath(col.sheet.source.resolve()),
+            getter=lambda col,row: row.parent.relpath(col.sheet.source),
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         DeferredSetColumn('filename',
             getter=lambda col,row: row.name + row.ext,
