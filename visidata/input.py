@@ -5,7 +5,7 @@ from visidata import EscapeException, ExpectedException, EnableCursor, clipdraw,
 from visidata import vd, status, error, warning, fail, options, theme, colors, commands
 from visidata import launchExternalEditor, suspend
 
-__all__ = ['confirm', 'editline', 'chooseOne', 'chooseMany', 'input_longname']
+__all__ = ['confirm', 'editline', 'choose', 'chooseOne', 'chooseMany', 'input_longname']
 
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
@@ -275,14 +275,17 @@ def input_longname(sheet):
     return vd.input("command name: ", completer=CompleteKey(sorted(longnames)))
 
 
-def chooseOne(choices):
+def chooseOne(L):
+    return choose(L, 1)
+
+
+def choose(choices, n=None):
     'Return one of `choices` elements (if list) or values (if dict).'
-    ret = chooseMany(choices)
-    if not ret:
-        raise EscapeException()
-    if len(ret) > 1:
-        error('need only one choice')
-    return ret[0]
+    ret = chooseMany(choices) or fail('no choice made')
+    if n and len(ret) > n:
+        error('can only choose %s' % n)
+    return ret[0] if n==1 else ret
+
 
 def chooseMany(choices):
     'Return list of `choices` elements (if list) or values (if dict).'
