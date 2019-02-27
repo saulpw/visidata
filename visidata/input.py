@@ -259,7 +259,7 @@ class CompleteKey:
 
     def __call__(self, val, state):
         opts = [x for x in self.items if x.startswith(val)]
-        return opts[state%len(opts)]
+        return opts[state%len(opts)] if opts else val
 
 
 def input_longname(sheet):
