@@ -2,13 +2,16 @@ import collections
 import curses
 
 from visidata import EscapeException, ExpectedException, EnableCursor, clipdraw, Sheet, VisiData
-from visidata import vd, status, error, warning, fail, options, colors, commands
+from visidata import vd, status, error, warning, fail, options, theme, colors, commands
 from visidata import launchExternalEditor, suspend
-
-vd.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
 
 __all__ = ['confirm', 'editline', 'chooseOne', 'chooseMany', 'input_longname']
 
+theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
+theme('disp_edit_fill', '_', 'edit field fill character')
+theme('disp_unprintable', '.', 'substitute character for unprintables')
+
+vd.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
 
 # editline helpers
 
@@ -23,17 +26,21 @@ def until_get_wch(scr):
 
     return ret
 
+
 def splice(v, i, s):
     'Insert `s` into string `v` at `i` (such that v[i] == s[0]).'
     return v if i < 0 else v[:i] + s + v[i:]
+
 
 def clean_printable(s):
     'Escape unprintable characters.'
     return ''.join(c if c.isprintable() else ('<%04X>' % ord(c)) for c in str(s))
 
+
 def delchar(s, i, remove=1):
     'Delete `remove` characters from str `s` beginning at position `i`.'
     return s if i < 0 else s[:i] + s[i+remove:]
+
 
 class CompleteState:
     def __init__(self, completer_func):
@@ -51,7 +58,7 @@ class CompleteState:
         try:
             r = self.completer_func(v[:self.former_i], self.comps_idx)
         except Exception as e:
-            # beep/flash; how to report exception?
+            # raise  # beep/flash; how to report exception?
             return v, i
 
         if not r:
@@ -212,6 +219,7 @@ def editText(self, y, x, w, record=True, **kwargs):
             self.cmdlog.setLastArgs(v)
     return v
 
+
 @VisiData.api
 def input(self, prompt, type='', defaultLast=False, **kwargs):
     'Get user input, with history of `type`, defaulting to last history item if no input and defaultLast is True.'
@@ -297,6 +305,7 @@ def chooseMany(choices):
             else:
                 chosen.extend(poss)
     return chosen
+
 
 @Sheet.api
 def editCell(self, vcolidx=None, rowidx=None, **kwargs):
