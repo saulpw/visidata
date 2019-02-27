@@ -89,7 +89,7 @@ def updateColNames(sheet, rows, cols, overwrite=False):
 
 undoRenameCols=undoAttr('visibleCols', 'name')
 
-Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', undo=undoAttr('[cursorCol]', 'name'))
+Sheet.addCommand('^', 'rename-col', 'cursorCol.name = edit(cursorCol, None)', undo=undoAttr('[cursorCol]', 'name'))
 Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(sheet, selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', undo=undoRenameCols)
 Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols)', undo=undoRenameCols)
 Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', undo=undoRenameCols)
