@@ -5,7 +5,7 @@ from visidata import EscapeException, ExpectedException, EnableCursor, clipdraw,
 from visidata import vd, status, error, warning, fail, options, theme, colors, commands
 from visidata import launchExternalEditor, suspend
 
-__all__ = ['confirm', 'editline', 'choose', 'chooseOne', 'chooseMany', 'input_longname']
+__all__ = ['confirm', 'editline', 'choose', 'chooseOne', 'chooseMany']
 
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
@@ -268,11 +268,6 @@ class CompleteKey:
     def __call__(self, val, state):
         opts = [x for x in self.items if x.startswith(val)]
         return opts[state%len(opts)] if opts else val
-
-
-def input_longname(sheet):
-    longnames = set(k for (k, obj), v in commands.iter(sheet))
-    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)))
 
 
 def chooseOne(L):

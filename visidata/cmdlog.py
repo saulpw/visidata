@@ -25,6 +25,9 @@ globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", v
 globalCommand('^[', 'undo-last', 'vd.cmdlog.undo()')
 globalCommand('^]', 'redo-last', 'vd.cmdlog.redo()')
 
+globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
+
+
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo
 error status errors statuses options threads cmdlog
@@ -45,6 +48,10 @@ def fnSuffix(template):
         fn = template.format(i)
         if not Path(fn).exists():
             return fn
+
+def inputLongname(sheet):
+    longnames = set(k for (k, obj), v in commands.iter(sheet))
+    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)))
 
 def indexMatch(L, func):
     'returns the smallest i for which func(L[i]) is true'

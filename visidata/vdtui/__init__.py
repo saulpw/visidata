@@ -316,8 +316,6 @@ globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); v
 
 globalCommand('^Z', 'suspend', 'suspend()')
 
-globalCommand(' ', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
-
 bindkey('KEY_RESIZE', 'redraw')
 
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
