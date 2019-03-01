@@ -10,11 +10,6 @@ test_columns		キqty	select-row		s
 test_columns		キamt	select-row		s	
 test_columns			aggregate-cols	min	g+	
 test_columns			aggregate-cols	max	g+	
-test_columns			aggregate-cols	mean	g+	
-test_columns			aggregate-cols	median	g+	
-test_columns			aggregate-cols	sum	g+	
-test_columns			aggregate-cols	distinct	g+	
-test_columns			aggregate-cols	count	g+	
 test_columns			quit-sheet		q	
 test	key2		pivot		W	
 test_pivot_key2			columns-sheet		C	
