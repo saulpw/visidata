@@ -26,7 +26,7 @@ globalCommand('^[', 'undo-last', 'vd.cmdlog.undo()')
 globalCommand('^]', 'redo-last', 'vd.cmdlog.redo()')
 
 # prefixes which should not be logged
-nonLogged = '''quit forget exec-longname undo redo
+nonLogged = '''forget exec-longname undo redo
 error status errors statuses options threads cmdlog
 replay stop pause cancel advance save-cmdlog
 go- search scroll prev next page go start end zoom resize
