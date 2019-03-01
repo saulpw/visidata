@@ -1,39 +1,39 @@
-Item	avg_Paid	count	sum_Paid	sum_Quantity
-Food, Senior Wet Cat - 3 oz	157.00	5	785.00	25
-Food, Kitten 3kg	29.88	3	89.64	6
-Food, Adult Cat - 3.5 oz	6.33	2	12.66	3
-Rabbit (Oryctolagus cuniculus)	32.94	2	65.88	8
-Mouse, Pinky (Mus musculus)	1.49	2	2.98	2
-Dog, Golden Retriever (Canis lupus familiaris)	624.00	2	1,248.00	2
-BFF Oh My Gravy! Chicken & Pumpkin 2.8oz	958.30	2	1,916.60	148
-BFF Oh My Gravy! Beef & Salmon 2.8oz	51.80	1	51.80	4
-Food, Adult Cat 3.5 oz	4.22	1	4.22	1
-Food, Salamander	1.50	1	1.50	30
-Cat, Korat (Felis catus)	720.42	1	720.42	1
-Monster, Rust (Monstrus gygaxus)	39.95	1	39.95	1
-BFF Oh My Gravy! Chicken & Shrimp 2.8oz	51.80	1	51.80	4
-BFF Oh My Gravy! Duck & Tuna 2.8oz	51.80	1	51.80	4
-Food, Dog - 5kg	224.75	1	224.75	5
-Food, Premium Wet Cat - 3.5 oz	197.50	1	197.50	50
-BFF Oh My Gravy! Lamb & Tuna 2.8oz	51.80	1	51.80	4
-Laser Pointer	16.12	1	16.12	1
-Food, Shark - 10 kg	15.70	1	15.70	1
-Food, Dragon - 50kg	3602.10	1	3,602.10	5
-Food, Rhinocerous - 50kg	22.88	1	22.88	4
-Cat, Maine Coon (Felix catus)	1309.68	1	1,309.68	1
-BFF Oh My Gravy! Beef & Chicken 2.8oz	51.80	1	51.80	4
-Kingsnake, California (Lampropeltis getula)	89.95	1	89.95	1
-BFF Oh My Gravy! Chicken & Turkey 2.8oz	51.80	1	51.80	4
-Forti Diet Prohealth Mouse/Rat 3lbs	4.00	1	4.00	2
-Parrot, Norwegian Blue (Mopsitta tanta)	-2300.00	1	-2,300.00	1
-Parakeet, Blue (Melopsittacus undulatus)	31.85	1	31.85	1
-Food, Spider	0.25	1	0.25	5
-Crickets, Adult Live (Gryllus assimilis)	1.50	1	1.50	30
-Food, Pangolin	5.10	1	5.10	30
-BFF Oh My Gravy! Duck & Salmon 2.8oz	51.80	1	51.80	4
-Food, Quoll	29.95	1	29.95	1
-Food, Adult Dog - 5kg	44.95	1	44.95	1
-BFF Oh My Gravy! Chicken & Salmon 2.8oz	51.80	1	51.80	4
-Mealworms, Large (Tenebrio molitor) 100ct	1.99	1	1.99	1
-Cat, Scottish Fold (Felis catus)	1964.53	1	1,964.53	1
-Lizard, Spinytail (Uromastyx ornatus)	99.95	1	99.95	1
+Item	Paid_avg	Paid_sum	Quantity_sum	count
+Food, Senior Wet Cat - 3 oz	157.00	785.00	25	1
+Food, Kitten 3kg	29.88	89.64	6	1
+Food, Adult Cat - 3.5 oz	6.33	12.66	3	1
+Rabbit (Oryctolagus cuniculus)	32.94	65.88	8	1
+Mouse, Pinky (Mus musculus)	1.49	2.98	2	1
+Dog, Golden Retriever (Canis lupus familiaris)	624.00	1,248.00	2	1
+BFF Oh My Gravy! Chicken & Pumpkin 2.8oz	958.30	1,916.60	148	1
+BFF Oh My Gravy! Beef & Salmon 2.8oz	51.80	51.80	4	1
+Food, Adult Cat 3.5 oz	4.22	4.22	1	1
+Food, Salamander	1.50	1.50	30	1
+Cat, Korat (Felis catus)	720.42	720.42	1	1
+Monster, Rust (Monstrus gygaxus)	39.95	39.95	1	1
+BFF Oh My Gravy! Chicken & Shrimp 2.8oz	51.80	51.80	4	1
+BFF Oh My Gravy! Duck & Tuna 2.8oz	51.80	51.80	4	1
+Food, Dog - 5kg	224.75	224.75	5	1
+Food, Premium Wet Cat - 3.5 oz	197.50	197.50	50	1
+BFF Oh My Gravy! Lamb & Tuna 2.8oz	51.80	51.80	4	1
+Laser Pointer	16.12	16.12	1	1
+Food, Shark - 10 kg	15.70	15.70	1	1
+Food, Dragon - 50kg	3602.10	3,602.10	5	1
+Food, Rhinocerous - 50kg	22.88	22.88	4	1
+Cat, Maine Coon (Felix catus)	1309.68	1,309.68	1	1
+BFF Oh My Gravy! Beef & Chicken 2.8oz	51.80	51.80	4	1
+Kingsnake, California (Lampropeltis getula)	89.95	89.95	1	1
+BFF Oh My Gravy! Chicken & Turkey 2.8oz	51.80	51.80	4	1
+Forti Diet Prohealth Mouse/Rat 3lbs	4.00	4.00	2	1
+Parrot, Norwegian Blue (Mopsitta tanta)	-2300.00	-2,300.00	1	1
+Parakeet, Blue (Melopsittacus undulatus)	31.85	31.85	1	1
+Food, Spider	0.25	0.25	5	1
+Crickets, Adult Live (Gryllus assimilis)	1.50	1.50	30	1
+Food, Pangolin	5.10	5.10	30	1
+BFF Oh My Gravy! Duck & Salmon 2.8oz	51.80	51.80	4	1
+Food, Quoll	29.95	29.95	1	1
+Food, Adult Dog - 5kg	44.95	44.95	1	1
+BFF Oh My Gravy! Chicken & Salmon 2.8oz	51.80	51.80	4	1
+Mealworms, Large (Tenebrio molitor) 100ct	1.99	1.99	1	1
+Cat, Scottish Fold (Felis catus)	1964.53	1,964.53	1	1
+Lizard, Spinytail (Uromastyx ornatus)	99.95	99.95	1	1
