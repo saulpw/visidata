@@ -134,7 +134,8 @@ class Column(Extensible):
 
     def _putValue(self, row):
         ret = wrapply(self.calcValue, row)
-        self._cachedValues[id(row)] = ret
+        if not isinstance(ret, TypedExceptionWrapper):
+            self._cachedValues[id(row)] = ret
         return ret
 
     def getValue(self, row):
