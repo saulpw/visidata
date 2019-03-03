@@ -326,11 +326,11 @@ def edit(self, col, row, **kwargs):
     vcolidx = self.visibleCols.index(col)
     x, w = self.visibleColLayout.get(vcolidx, (0, 0))
 
-    if row is None:  # header
-        rowidx = -1
-        y = 0
-        currentValue = col.name
-    else:
+    # default to header
+    y = 0
+    rowidx = -1
+    currentValue = col.name
+    if row is not None:
         for rowidx, y in self.rowLayout.items():
             if self.rows[rowidx] is row:
                 break  # let y be as it is
