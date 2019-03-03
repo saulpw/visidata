@@ -114,7 +114,7 @@ def getPublicAttrs(obj):
 
 def PyobjColumns(obj):
     'Return columns for each public attribute on an object.'
-    return [ColumnAttr(k, type(getattr(obj, k))) for k in getPublicAttrs(obj)]
+    return [ColumnAttr(k) for k in getPublicAttrs(obj)]
 
 def AttrColumns(attrnames):
     'Return column names for all elements of list `attrnames`.'
