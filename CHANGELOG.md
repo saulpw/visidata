@@ -2,7 +2,13 @@
 
 # v1.6-dev ()
 
-- stopped at include python3.5 in circleci test
+## Major features
+
+  - vgit
+  - undo
+  - numeric binning
+  - stdout pipe/redirect
+  - plugin framework
 
 ## Bugfixes
 
@@ -14,7 +20,6 @@
 
 - bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
-- `q`uit scrubs cmdlog of the dropped sheet if it was a leaf/orphan (no other sheet has it as a source)
 - numeric binning for frequency/pivot table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
 - [column] if drawing a particular column takes more than 300ms, the column becomes async
 - expr columns are now set to cache automatically
