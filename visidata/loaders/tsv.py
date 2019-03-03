@@ -117,7 +117,7 @@ def genAllValues(rows, cols, trdict={}, format=True):
         dispvals = []
         for col, transforms in transformers.items():
             try:
-                dispval = col.getDisplayValue(r)
+                dispval = col.getValue(r)
             except Exception as e:
                 exceptionCaught(e)
                 dispval = options_safe_error or str(e)

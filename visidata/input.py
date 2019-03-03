@@ -1,16 +1,31 @@
+from contextlib import suppress
 import collections
 import curses
 
-from visidata import EscapeException, ExpectedException, EnableCursor, clipdraw, Sheet, VisiData
-from visidata import vd, status, error, warning, fail, options, colors, commands
+from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
+from visidata import vd, status, error, warning, fail, options, theme, colors, commands
 from visidata import launchExternalEditor, suspend
 
-vd.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
+__all__ = ['confirm', 'editline', 'choose', 'chooseOne', 'chooseMany', 'CompleteKey']
 
-__all__ = ['confirm', 'editline', 'chooseOne', 'chooseMany', 'input_longname']
+theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
+theme('disp_edit_fill', '_', 'edit field fill character')
+theme('disp_unprintable', '.', 'substitute character for unprintables')
 
+vd.lastInputs = collections.defaultdict(list)  # [input_type] -> list of prevInputs
 
 # editline helpers
+
+class EnableCursor:
+    def __enter__(self):
+        with suppress(curses.error):
+            curses.mousemask(0)
+            curses.curs_set(1)
+
+    def __exit__(self, exc_type, exc_val, tb):
+        with suppress(curses.error):
+            curses.curs_set(0)
+            curses.mousemask(-1)
 
 def until_get_wch(scr):
     'Ignores get_wch timeouts'
@@ -23,17 +38,21 @@ def until_get_wch(scr):
 
     return ret
 
+
 def splice(v, i, s):
     'Insert `s` into string `v` at `i` (such that v[i] == s[0]).'
     return v if i < 0 else v[:i] + s + v[i:]
+
 
 def clean_printable(s):
     'Escape unprintable characters.'
     return ''.join(c if c.isprintable() else ('<%04X>' % ord(c)) for c in str(s))
 
+
 def delchar(s, i, remove=1):
     'Delete `remove` characters from str `s` beginning at position `i`.'
     return s if i < 0 else s[:i] + s[i+remove:]
+
 
 class CompleteState:
     def __init__(self, completer_func):
@@ -51,7 +70,7 @@ class CompleteState:
         try:
             r = self.completer_func(v[:self.former_i], self.comps_idx)
         except Exception as e:
-            # beep/flash; how to report exception?
+            # raise  # beep/flash; how to report exception?
             return v, i
 
         if not r:
@@ -99,7 +118,8 @@ class HistoryState:
 
 # history: earliest entry first
 def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None):
-    'A better curses line editing widget.'
+  'A better curses line editing widget.'
+  with EnableCursor():
     ESC='^['
     ENTER='^J'
     TAB='^I'
@@ -196,42 +216,35 @@ def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
 
 
 @VisiData.api
-def editText(self, y, x, w, record=True, **kwargs):
-    'Wrap global editText with `preedit` and `postedit` hooks.'
+def editText(self, y, x, w, record=True, display=True, **kwargs):
+    'Wrap editline; if record=True, get input from the cmdlog in batch mode, save input to the cmdlog if display=True.'
     v = None
     if record and self.cmdlog:
         v = self.cmdlog.getLastArgs()
 
     if v is None:
-        with EnableCursor():
-            v = editline(self.scr, y, x, w, **kwargs)
+        v = editline(self.scr, y, x, w, display=display, **kwargs)
 
-    if kwargs.get('display', True):
+    if display:
         status('"%s"' % v)
         if record and self.cmdlog:
             self.cmdlog.setLastArgs(v)
     return v
 
+
 @VisiData.api
-def input(self, prompt, type='', defaultLast=False, **kwargs):
-    'Get user input, with history of `type`, defaulting to last history item if no input and defaultLast is True.'
+def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
+    '''Display prompt and return line of user input.
+
+        type: list of previous items, or a string indicating the type of input.
+        defaultLast:  on empty input, if True, return last history item
+    '''
     if type:
-        histlist = list(self.lastInputs[type].keys())
-        ret = self._inputLine(prompt, history=histlist, **kwargs)
-        if ret:
-            self.lastInputs[type][ret] = ret
-        elif defaultLast:
-            histlist or fail("no previous input")
-            ret = histlist[-1]
-    else:
-        ret = self._inputLine(prompt, **kwargs)
+        if isinstance(type, str):
+            history = self.lastInputs[type]
+        else:
+            history = type
 
-    return ret
-
-
-@VisiData.api
-def _inputLine(self, prompt, **kwargs):
-    'Add prompt to bottom of screen and get line of input from user.'
     rstatuslen = self.drawRightStatus(self.scr, self.sheets[0])
     attr = 0
     promptlen = clipdraw(self.scr, self.windowHeight-1, 0, prompt, attr, w=self.windowWidth-rstatuslen-1)
@@ -239,7 +252,16 @@ def _inputLine(self, prompt, **kwargs):
                         attr=colors.color_edit_cell,
                         unprintablechar=options.disp_unprintable,
                         truncchar=options.disp_truncator,
+                        history=history,
                         **kwargs)
+
+    if ret:
+        if isinstance(type, str):
+            self.lastInputs[type].append(ret)
+    elif defaultLast:
+        histlist or fail("no previous input")
+        ret = histlist[-1]
+
     return ret
 
 
@@ -259,22 +281,20 @@ class CompleteKey:
 
     def __call__(self, val, state):
         opts = [x for x in self.items if x.startswith(val)]
-        return opts[state%len(opts)]
+        return opts[state%len(opts)] if opts else val
 
 
-def input_longname(sheet):
-    longnames = set(k for (k, obj), v in commands.iter(sheet))
-    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)))
+def chooseOne(L):
+    return choose(L, 1)
 
 
-def chooseOne(choices):
+def choose(choices, n=None):
     'Return one of `choices` elements (if list) or values (if dict).'
-    ret = chooseMany(choices)
-    if not ret:
-        raise EscapeException()
-    if len(ret) > 1:
-        error('need only one choice')
-    return ret[0]
+    ret = chooseMany(choices) or fail('no choice made')
+    if n and len(ret) > n:
+        error('can only choose %s' % n)
+    return ret[0] if n==1 else ret
+
 
 def chooseMany(choices):
     'Return list of `choices` elements (if list) or values (if dict).'
@@ -298,30 +318,30 @@ def chooseMany(choices):
                 chosen.extend(poss)
     return chosen
 
+
 @Sheet.api
-def editCell(self, vcolidx=None, rowidx=None, **kwargs):
+def edit(self, col, row, **kwargs):
     'Call `editText` at its place on the screen.  Returns the new value, properly typed'
 
-    if vcolidx is None:
-        vcolidx = self.cursorVisibleColIndex
+    vcolidx = self.visibleCols.index(col)
     x, w = self.visibleColLayout.get(vcolidx, (0, 0))
 
-    col = self.visibleCols[vcolidx]
-    if rowidx is None:
-        rowidx = self.cursorRowIndex
-    if rowidx < 0:  # header
-        y = 0
-        currentValue = col.name
-    else:
-        y = self.rowLayout.get(rowidx, 0)
-        currentValue = col.getDisplayValue(self.rows[self.cursorRowIndex])
+    # default to header
+    y = 0
+    rowidx = -1
+    currentValue = col.name
+    if row is not None:
+        for rowidx, y in self.rowLayout.items():
+            if self.rows[rowidx] is row:
+                break  # let y be as it is
+        currentValue = col.getDisplayValue(row)
 
     editargs = dict(value=currentValue,
                     fillchar=options.disp_edit_fill,
                     truncchar=options.disp_truncator)
     editargs.update(kwargs)  # update with user-specified args
     r = vd.editText(y, x, w, **editargs)
-    if rowidx >= 0:  # if not header
+    if row is not None:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised
 
     return r

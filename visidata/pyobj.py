@@ -114,7 +114,7 @@ def getPublicAttrs(obj):
 
 def PyobjColumns(obj):
     'Return columns for each public attribute on an object.'
-    return [ColumnAttr(k, type(getattr(obj, k))) for k in getPublicAttrs(obj)]
+    return [ColumnAttr(k) for k in getPublicAttrs(obj)]
 
 def AttrColumns(attrnames):
     'Return column names for all elements of list `attrnames`.'
@@ -234,7 +234,7 @@ class SheetObject(PythonSheet):
         self.setKeys(self.columns[0:1])
 
 SheetObject.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)')
-SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', undo='lambda s=source,attr=cursorRow,val=getattr(source, cursorRow): setattr(s, attr, val)')
+SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(edit(column("value")))); sheet.cursorRowIndex += 1; reload()', undo='lambda s=source,attr=cursorRow,val=getattr(source, cursorRow): setattr(s, attr, val)')
 SheetObject.addCommand('v', 'visibility', 'options.set("visibility", 0 if options.visibility else 2, sheet); reload()')
 SheetObject.addCommand('gv', 'show-hidden', 'options.visibility = 2; reload()')
 SheetObject.addCommand('zv', 'hide-hidden', 'options.visibility -= 1; reload()')

@@ -1,5 +1,19 @@
 # CHANGELOG
+
+## 0.4
+
+- opening page:
+  - GitStatus if vgit run in/on worktree with .git at toplevel
+  - GitOverview with any descendent .gits
+  - currently does not open GitStatus worktree below toplevel
+-  unbind ignore-file and ignore-wildcard
+- g/ from anywhere does 'git grep'.
+  - ENTER to go to git blame (needs love),
+  - ^O to open in $EDITOR
+- 
 ## 0.3
+
+
 - log all git commands which vgit executes to gitcmd.log
 - git log sheet
     - `Shift-C` amends the selected commit to contain the currently staged changes

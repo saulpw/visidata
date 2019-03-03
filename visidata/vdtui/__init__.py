@@ -279,13 +279,11 @@ theme('use_default_colors', False, 'curses use default terminal colors')
 theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
-theme('disp_unprintable', '.', 'substitute character for unprintables')
 theme('disp_column_sep', '|', 'separator between columns')
 theme('disp_keycol_sep', '\u2016', 'separator between key columns and rest of columns')
 theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
 theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
-theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_more_left', '<', 'header note indicating more columns to the left')
 theme('disp_more_right', '>', 'header note indicating more columns to the right')
 theme('disp_error_val', '', 'displayed contents for computation exception')
@@ -295,7 +293,6 @@ theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
 theme('color_status', 'bold', 'status line color')
 theme('color_error', 'red', 'error message color')
 theme('color_warning', 'yellow', 'warning message color')
-theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 
 theme('disp_pending', '', 'string to display in pending cells')
 theme('note_pending', '⌛', 'note to display for pending cells')
@@ -318,8 +315,6 @@ globalCommand('^L', 'redraw', 'vd.scr.clear()')
 globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
 globalCommand('^Z', 'suspend', 'suspend()')
-
-globalCommand(' ', 'exec-longname', 'exec_keystrokes(input_longname(sheet))')
 
 bindkey('KEY_RESIZE', 'redraw')
 
@@ -1018,17 +1013,6 @@ class SuspendCurses:
         newscr = curses.initscr()
         newscr.refresh()
         curses.doupdate()
-
-class EnableCursor:
-    def __enter__(self):
-        with suppress(curses.error):
-            curses.mousemask(0)
-            curses.curs_set(1)
-
-    def __exit__(self, exc_type, exc_val, tb):
-        with suppress(curses.error):
-            curses.curs_set(0)
-            curses.mousemask(-1)
 
 
 def launchEditor(*args):

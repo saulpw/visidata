@@ -14,7 +14,7 @@ option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(source[0], cursorRow))')
 
 def valueNames(discrete_vals, numeric_vals):
-    ret = [ '+'.join(discrete_vals) ]
+    ret = [ '+'.join(str(x) for x in discrete_vals) ]
     if numeric_vals != (0, 0):
         ret.append('%s-%s' % numeric_vals)
 

@@ -146,19 +146,20 @@ class HelpSheet(Sheet):
         from pkg_resources import resource_filename
         cmdlist = TsvSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
         cmdlist.reload_sync()
-        self.cmddict = {}
-        for cmdrow in cmdlist.rows:
-            self.cmddict[(cmdrow.sheet, cmdrow.longname)] = cmdrow
 
-        self.revbinds = {
-            longname:keystrokes
-                for (keystrokes, _), longname in bindkeys.iter(self.source)
-                    if keystrokes not in self.revbinds
-        }
         self.rows = []
         for (k, o), v in commands.iter(self.source):
             self.addRow(v)
             v.sheet = o
+
+        self.cmddict = {}
+        for cmdrow in cmdlist.rows:
+            self.cmddict[(cmdrow.sheet, cmdrow.longname)] = cmdrow
+
+        self.revbinds = {}  # [longname] -> keystrokes
+        for (keystrokes, _), longname in bindkeys.iter(self.source):
+            if keystrokes not in self.revbinds:
+                self.revbinds[longname] = keystrokes
 
 
 class OptionsSheet(Sheet):
@@ -188,7 +189,7 @@ class OptionsSheet(Sheet):
         if isinstance(row.value, bool):
             options.set(row.name, not options.get(row.name, self.source), self.source)
         else:
-            options.set(row.name, self.editCell(1), self.source)
+            options.set(row.name, self.edit(column("value")), self.source)
 
     def reload(self):
         self.rows = []
