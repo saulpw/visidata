@@ -114,7 +114,7 @@ def getPublicAttrs(obj):
 
 def PyobjColumns(obj):
     'Return columns for each public attribute on an object.'
-    return [ColumnAttr(k) for k in getPublicAttrs(obj)]
+    return [ColumnAttr(k, type=deduceType(getattr(obj, k))) for k in getPublicAttrs(obj)]
 
 def AttrColumns(attrnames):
     'Return column names for all elements of list `attrnames`.'
@@ -145,8 +145,12 @@ class ListOfPyobjSheet(PythonSheet):
     def reload(self):
         self.rows = self.source
         self.columns = [Column(self.name,
+                               width=0,
                                getter=lambda col,row: row,
                                setter=lambda col,row,val: setitem(col.sheet.source, col.sheet.source.index(row), val))]
+
+        for c in PyobjColumns(self.rows[0]):
+            self.addColumn(c)
 
 # rowdef: dict
 class ListOfDictSheet(PythonSheet):
