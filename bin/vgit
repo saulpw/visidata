@@ -4,7 +4,7 @@ import os.path
 import sys
 from visidata import Sheet, Column, ColumnAttr, run, status, Command, Path, ENTER, asyncthread
 from visidata import namedlist, date, vlen, option, getGlobals, loadConfigFile, options
-from visidata import unbindkey, globalCommand, BaseSheet, ColumnItem
+from visidata import unbindkey, globalCommand, BaseSheet, ColumnItem, domotd
 
 import vgit
 
@@ -13,7 +13,7 @@ __version_info__ = 'saul.pw/vgit ' + __version__
 
 
 option('config', '~/.vgitrc', 'config file to exec in Python')
-
+options.motd_url = 'https://visidata.org/vgit/motd-' + __version__
 
 GitRepo = namedlist('GitRepo', 'path stashes cached changes'.split())
 
@@ -83,6 +83,8 @@ def open_git(p):
 
 def main():
     loadConfigFile(Path(options.config).resolve(), getGlobals())
+
+    domotd()
 
     if len(sys.argv) > 1:
         topdir = Path(sys.argv[1])
