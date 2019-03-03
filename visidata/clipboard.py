@@ -4,9 +4,10 @@ import subprocess
 import sys
 import tempfile
 import functools
+import pyperclip
 
 from visidata import vd, asyncthread, status, fail, option, options
-from visidata import Sheet, saveSheets, Path
+from visidata import Sheet, saveSheets, Path, Column
 from visidata import undoEditCell, undoEditCells, undoSheetRows
 
 vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
@@ -35,6 +36,9 @@ Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input(
 Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.save_filetype))')
 Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
 Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\\n".join(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows))')
+
+Sheet.addCommand('CTRL-BUTTON1_PRESSED', 'paste-mouse',
+                 'pasteFromClipboard(visibleColAtX(mouseX), topRowIndex+mouseY-1, sheet)'),
 
 Sheet.bindkey('KEY_DC', 'delete-cell'),
 Sheet.bindkey('gKEY_DC', 'delete-cells'),
@@ -106,6 +110,14 @@ class _Clipboard:
                 close_fds=True)
             p.communicate()
 
+def pasteFromClipboard(col_idx, row_idx, sheet):
+    text = pyperclip.paste()
+    for t in text.split('\n'):
+        try:
+            sheet.columns[col_idx].setValue(sheet.rows[row_idx], t)
+        except IndexError:
+            break
+        row_idx += 1
 
 def copyToClipboard(value):
     'copy single value to system clipboard'
