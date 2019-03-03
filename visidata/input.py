@@ -1,19 +1,31 @@
+from contextlib import suppress
 import collections
 import curses
 
-from visidata import EscapeException, ExpectedException, EnableCursor, clipdraw, Sheet, VisiData
+from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
 from visidata import vd, status, error, warning, fail, options, theme, colors, commands
 from visidata import launchExternalEditor, suspend
 
-__all__ = ['confirm', 'editline', 'choose', 'chooseOne', 'chooseMany']
+__all__ = ['confirm', 'editline', 'choose', 'chooseOne', 'chooseMany', 'CompleteKey']
 
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_unprintable', '.', 'substitute character for unprintables')
 
-vd.lastInputs = collections.defaultdict(collections.OrderedDict)  # [input_type] -> prevInputs
+vd.lastInputs = collections.defaultdict(list)  # [input_type] -> list of prevInputs
 
 # editline helpers
+
+class EnableCursor:
+    def __enter__(self):
+        with suppress(curses.error):
+            curses.mousemask(0)
+            curses.curs_set(1)
+
+    def __exit__(self, exc_type, exc_val, tb):
+        with suppress(curses.error):
+            curses.curs_set(0)
+            curses.mousemask(-1)
 
 def until_get_wch(scr):
     'Ignores get_wch timeouts'
@@ -106,7 +118,8 @@ class HistoryState:
 
 # history: earliest entry first
 def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None):
-    'A better curses line editing widget.'
+  'A better curses line editing widget.'
+  with EnableCursor():
     ESC='^['
     ENTER='^J'
     TAB='^I'
@@ -203,17 +216,16 @@ def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
 
 
 @VisiData.api
-def editText(self, y, x, w, record=True, **kwargs):
-    'Wrap global editText with `preedit` and `postedit` hooks.'
+def editText(self, y, x, w, record=True, display=True, **kwargs):
+    'Wrap editline; if record=True, get input from the cmdlog in batch mode, save input to the cmdlog if display=True.'
     v = None
     if record and self.cmdlog:
         v = self.cmdlog.getLastArgs()
 
     if v is None:
-        with EnableCursor():
-            v = editline(self.scr, y, x, w, **kwargs)
+        v = editline(self.scr, y, x, w, display=display, **kwargs)
 
-    if kwargs.get('display', True):
+    if display:
         status('"%s"' % v)
         if record and self.cmdlog:
             self.cmdlog.setLastArgs(v)
@@ -221,25 +233,18 @@ def editText(self, y, x, w, record=True, **kwargs):
 
 
 @VisiData.api
-def input(self, prompt, type='', defaultLast=False, **kwargs):
-    'Get user input, with history of `type`, defaulting to last history item if no input and defaultLast is True.'
+def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
+    '''Display prompt and return line of user input.
+
+        type: list of previous items, or a string indicating the type of input.
+        defaultLast:  on empty input, if True, return last history item
+    '''
     if type:
-        histlist = list(self.lastInputs[type].keys())
-        ret = self._inputLine(prompt, history=histlist, **kwargs)
-        if ret:
-            self.lastInputs[type][ret] = ret
-        elif defaultLast:
-            histlist or fail("no previous input")
-            ret = histlist[-1]
-    else:
-        ret = self._inputLine(prompt, **kwargs)
+        if isinstance(type, str):
+            history = self.lastInputs[type]
+        else:
+            history = type
 
-    return ret
-
-
-@VisiData.api
-def _inputLine(self, prompt, **kwargs):
-    'Add prompt to bottom of screen and get line of input from user.'
     rstatuslen = self.drawRightStatus(self.scr, self.sheets[0])
     attr = 0
     promptlen = clipdraw(self.scr, self.windowHeight-1, 0, prompt, attr, w=self.windowWidth-rstatuslen-1)
@@ -247,7 +252,16 @@ def _inputLine(self, prompt, **kwargs):
                         attr=colors.color_edit_cell,
                         unprintablechar=options.disp_unprintable,
                         truncchar=options.disp_truncator,
+                        history=history,
                         **kwargs)
+
+    if ret:
+        if isinstance(type, str):
+            self.lastInputs[type].append(ret)
+    elif defaultLast:
+        histlist or fail("no previous input")
+        ret = histlist[-1]
+
     return ret
 
 
