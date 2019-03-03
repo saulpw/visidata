@@ -10,6 +10,12 @@
   - stdout pipe/redirect
   - plugin framework
 
+## plugins
+
+- inplace: breaks replay
+- vfake
+
+
 ## Bugfixes
 
 - [vdtui] make Sheet sortable (related to an issue found by @jsvine #241)
