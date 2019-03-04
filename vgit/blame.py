@@ -56,7 +56,7 @@ class GitBlame(GitSheet):
                     status(lines[i])
                 i += 1
 
-            self.rows.append((hdr, orig, final, lines[i][1:]))
+            self.addRow((hdr, orig, final, lines[i][1:]))
             i += 1
 
 GitBlame.addCommand(ENTER, 'diff-line', 'openDiff(str(source), cursorRow[0]["sha"]+"^", cursorRow[0]["sha"])', 'open diff of the commit when this line changed')

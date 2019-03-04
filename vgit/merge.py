@@ -117,7 +117,7 @@ class GitMerge(GitSheet):
 #        for gh in sorted(allHunks, key=lambda gh: (gh.fn, min(gh.leftstart, gh.rightstart))):
 #            while max(allIndexes) < gh.leftstart:
 #                r = [nextLineIdx] + [f[
-#                self.rows.append(r)
+#                self.addRow(r)
 #            for line in gh.difflines:
 #                typech = line[0]
 #                line = line[1:]

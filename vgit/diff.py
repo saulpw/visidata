@@ -127,7 +127,7 @@ class DifferSheet(GitSheet):
 
         baseref = self.refs[self.basenum]
         for linenum, line in enumerate(self.git_lines('show', baseref+':'+self.fn)):
-            self.rows.append(self.newRow(linenum, self.basenum, line))
+            self.addRow(self.newRow(linenum, self.basenum, line))
 
         for refnum, ref in enumerate(self.refs):
             cmd = self.getDiffCmd(self.fn, baseref, ref)
@@ -237,7 +237,7 @@ class HunksSheet(GitSheet):
                 leftlinenums, rightlinenums = linenums.split()
                 leftstart, leftcount = _parseStartCount(leftlinenums[1:])
                 rightstart, rightcount = _parseStartCount(rightlinenums[1:])
-                self.rows.append((leftfn, rightfn, context, int(leftstart), int(leftcount), int(rightstart), int(rightcount), header_lines))
+                self.addRow((leftfn, rightfn, context, int(leftstart), int(leftcount), int(rightstart), int(rightcount), header_lines))
                 header_lines = header_lines[:2]  # keep file context
             elif line[0] in ' +-':
                 self.rows[-1][-1].append(line)
@@ -265,7 +265,7 @@ class HunkViewer(GitSheet):
             typech = line[0]
             line = line[1:]
             if typech == '-':
-                self.rows.append([typech, line, None])
+                self.addRow([typech, line, None])
                 if nextDelIdx is None:
                     nextDelIdx = len(self.rows)-1
             elif typech == '+':
@@ -275,10 +275,10 @@ class HunkViewer(GitSheet):
                         nextDelIdx += 1
                         continue
 
-                self.rows.append([typech, None, line])
+                self.addRow([typech, None, line])
                 nextDelIdx = None
             elif typech == ' ':
-                self.rows.append([typech, line, line])
+                self.addRow([typech, line, line])
                 nextDelIdx = None
             else:
                 continue  # header

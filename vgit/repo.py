@@ -104,7 +104,7 @@ class GitRemotes(GitSheet):
         self.rows = []
         for line in self.git_lines('remote', '-v', 'show'):
             name, url, paren_type = line.split()
-            self.rows.append((name, url, paren_type[1:-1]))
+            self.addRow((name, url, paren_type[1:-1]))
 
 
 class GitStashes(GitSheet):
