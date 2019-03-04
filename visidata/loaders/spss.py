@@ -18,5 +18,4 @@ class SpssSheet(Sheet):
 
             self.rows = []
             for r in Progress(reader, total=reader.shape.nrows):
-                self.rows.append(r)
-
+                self.addRow(r)

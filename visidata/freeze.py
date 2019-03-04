@@ -45,7 +45,7 @@ class StaticSheet(Sheet):
         self.rows = []
         for r in Progress(self.source.rows, 'calculating'):
             row = []
-            self.rows.append(row)
+            self.addRow(row)
             for col in self.source.visibleCols:
                 try:
                     row.append(col.getTypedValue(r))

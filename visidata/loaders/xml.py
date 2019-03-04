@@ -61,7 +61,7 @@ class XmlSheet(Sheet):
             self.addRow(elem)
 
     def addRow(self, elem):
-        self.rows.append(elem)
+        super().addRow(elem)
         for k in elem.attrib:
             if k not in self.attribcols:
                 c = AttribColumn(unns(k), k)

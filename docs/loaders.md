@@ -37,7 +37,7 @@ Using the Sheet `source`, `reload` populates `rows`:
         def reload(self):
             self.rows = []
             for r in crack_foo(self.source):
-                self.rows.append(r)
+                self.addRow(r)
 
 - A `rowdef` comment should declare the **internal structure of each row**.
 - `rows` must be set to a **new list object**; do **not** call `list.clear()`.
@@ -68,7 +68,7 @@ Fortunately, making an [async](/docs/async) loader is pretty straightforward:
                     r = foolib.parse(bar)
                 except Exception as e:
                     r = e
-                self.rows.append(r)
+                self.addRow(r)
 
 
 Test the loader with a large dataset to make sure that:
@@ -191,7 +191,7 @@ This would be a completely functional read-only viewer for the fictional foolib.
                     r = foolib.parse(bar)
                 except Exception as e:
                     r = e
-                self.rows.append(r)
+                self.addRow(r)
 
     FooSheet.addCommand('b', 'reset-bar', 'cursorRow.set_bar(0)')
 

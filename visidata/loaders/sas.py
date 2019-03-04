@@ -27,7 +27,7 @@ class XptSheet(Sheet):
 
             self.rows = []
             for row in self.rdr:
-                self.rows.append(row)
+                self.addRow(row)
 
 
 class SasSheet(Sheet):
@@ -42,4 +42,4 @@ class SasSheet(Sheet):
         with self.dat as fp:
             self.rows = []
             for row in Progress(fp, total=self.dat.properties.row_count):
-                self.rows.append(row)
+                self.addRow(row)

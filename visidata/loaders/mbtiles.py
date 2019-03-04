@@ -75,7 +75,7 @@ class PbfSheet(Sheet):
         props = set()  # property names
         self.rows = []
         for r in getFeatures(self.source.getTile(*self.sourceRow)):
-            self.rows.append(r)
+            self.addRow(r)
             props.update(r[1]['properties'].keys())
 
         for key in props:

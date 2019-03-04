@@ -45,7 +45,7 @@ The [`reload()`](/docs/loaders) function collects data from the source and puts 
                 for line in fp:
                     line = line[:-1]
                     if line:
-                        self.rows.append(line.split('\t'))
+                        self.addRow(line.split('\t'))
 
 For each line, strip the included newline character, and filter out any blank lines.  Add each split tuple to `rows`.
 

@@ -29,7 +29,7 @@ class xlsxContents(Sheet):
         for sheetname in self.workbook.sheetnames:
             vs = xlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook[sheetname])
             vs.reload()
-            self.rows.append(vs)
+            self.addRow(vs)
 
 xlsxContents.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
@@ -81,7 +81,7 @@ class open_xls(Sheet):
         for sheetname in self.workbook.sheet_names():
             vs = xlsSheet(joinSheetnames(self.name, sheetname), source=self.workbook.sheet_by_name(sheetname))
             vs.reload()
-            self.rows.append(vs)
+            self.addRow(vs)
 
 open_xls.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
