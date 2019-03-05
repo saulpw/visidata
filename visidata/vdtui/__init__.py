@@ -941,7 +941,7 @@ class BaseSheet(Extensible):
         except EscapeException as e:  # user aborted
             warning('aborted')
             escaped = True
-        except ModuleNotFoundError as e:
+        except ImportError as e:
             warning('%s not installed' % e.name)
             if confirm('run `pip3 install %s`? ' % e.name, exc=None):
                 warning('installing %s' % e.name)
