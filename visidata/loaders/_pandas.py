@@ -20,8 +20,8 @@ class DataFrameAdapter:
 # source=DataFrame
 class PandasSheet(Sheet):
     def reload(self):
-        import pandas
         import numpy
+        import pandas
         def dtypeToType(df, colname):
             t = df[colname].dtype
             if t == numpy.int64: return int
