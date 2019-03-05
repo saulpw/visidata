@@ -15,7 +15,7 @@ from copy import copy, deepcopy
 from contextlib import suppress
 import curses
 import datetime
-import functools
+from functools import wraps
 import io
 import itertools
 import string
@@ -402,7 +402,7 @@ def regex_flags():
 #   when function is called, instead launches a thread
 def asyncthread(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
-    @functools.wraps(func)
+    @wraps(func)
     def _execAsync(*args, **kwargs):
         return vd.execAsync(func, *args, **kwargs)
     return _execAsync
@@ -427,19 +427,21 @@ class Extensible:
 
     @classmethod
     def global_api(cls, func):
-        setattr(cls, func.__name__, func)
+        'make global func() and identical vd.func()'
         def _vdfunc(*args, **kwargs):
             return func(vd, *args, **kwargs)
-        return _vdfunc
+        return cls.api(wraps(func)(_vdfunc))
 
     @classmethod
-    def api(cls, func, g=False):
+    def api(cls, func):
+        oldfunc = getattr(cls, func.__name__, None)
+        if oldfunc:
+            func = wraps(oldfunc)(func)
         setattr(cls, func.__name__, func)
         return func
 
     @classmethod
     def property(cls, func):
-#        @functools.wraps(func)
         @property
         def dofunc(self):
             return func(self)
@@ -449,7 +451,7 @@ class Extensible:
     @classmethod
     def cached_property(cls, func):
         @property
-        @functools.wraps(func)
+        @wraps(func)
         def get_if_not(self):
             name = '_' + func.__name__
             if not hasattr(self, name):
@@ -457,6 +459,7 @@ class Extensible:
             return getattr(self, name)
         setattr(cls, func.__name__, get_if_not)
         return get_if_not
+
 
 class VisiData(Extensible):
     allPrefixes = 'gz'  # embig'g'en, 'z'mallify
