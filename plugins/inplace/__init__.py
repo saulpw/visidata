@@ -12,6 +12,15 @@ def updateExpr(col, val):
     col.sheet.draw(vd.scr)
 
 
+@Column.api  # expr.setter
+def expr(self, expr):
+    try:
+        self.compiledExpr = compile(expr, '<expr>', 'eval') if expr else None
+        self._expr = expr
+    except SyntaxError as e:
+        self._expr = None
+
+
 @VisiData.api
 def addcol_expr(vd, sheet, colidx):
     try:
@@ -24,6 +33,7 @@ def addcol_expr(vd, sheet, colidx):
                                 updater=lambda val,col=c: col.updateExpr(val))
 
         c.expr = expr or fail("no expr")
+        c.name = expr
         c.width = None
     except (Exception, EscapeException):
         sheet.columns.remove(c)
