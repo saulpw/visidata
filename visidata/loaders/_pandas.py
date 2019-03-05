@@ -39,6 +39,16 @@ class PandasSheet(Sheet):
         self.columns = [ColumnItem(col, type=dtypeToType(self.df, col)) for col in self.df.columns]
         self.rows = DataFrameAdapter(self.df)
 
+    @asyncthread
+    def sort(self):
+        'Sort rows according to the current self._ordering.'
+        by_cols = []
+        ascending = []
+        for cols, reverse in self._ordering[::-1]:
+            by_cols += [col.name for col in cols]
+            ascending += [not reverse] * len(cols)
+        self.rows.sort_values(by=by_cols, ascending=ascending, inplace=True)
+
 
 def view_pandas(df):
     run(PandasSheet('', source=df))
