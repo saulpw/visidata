@@ -427,13 +427,6 @@ class Extensible:
         cls.__copy__ = newcopy
 
     @classmethod
-    def global_api(cls, func):
-        'Make global func() and identical vd.func()'
-        def _vdfunc(*args, **kwargs):
-            return func(vd, *args, **kwargs)
-        return cls.api(wraps(func)(_vdfunc))
-
-    @classmethod
     def api(cls, func):
         oldfunc = getattr(cls, func.__name__, None)
         if oldfunc:
@@ -468,6 +461,14 @@ class VisiData(Extensible):
     def __call__(self):
         'Deprecated; use plain "vd"'
         return self
+
+    @classmethod
+    def global_api(cls, func):
+        'Make global func() and identical vd.func()'
+        def _vdfunc(*args, **kwargs):
+            return func(vd, *args, **kwargs)
+        setattr(vd, func.__name__, _vdfunc)
+        return wraps(func)(_vdfunc)
 
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
@@ -754,6 +755,8 @@ class VisiData(Extensible):
                 vs.vd.allSheets[vs] = vs.name
             return vs
 # end VisiData class
+
+vd = VisiData()
 
 @VisiData.global_api
 def status(self, *args, priority=0):
@@ -1109,8 +1112,6 @@ def addGlobals(g):
 
 def getGlobals():
     return globals()
-
-vd = VisiData()
 
 from .helpers import *
 from .cliptext import clipdraw, clipstr
