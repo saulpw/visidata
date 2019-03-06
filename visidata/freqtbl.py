@@ -62,7 +62,8 @@ class SheetFreqTable(SheetPivot):
             self.column('percent').hide()
             self.column('histogram').hide()
 
-        self.orderBy(self.column('count'), reverse=True)
+        if not [c for c in self.groupByCols if isNumeric(c)]:
+            self.orderBy(self.column('count'), reverse=True)
 
 SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
 SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
