@@ -272,6 +272,9 @@ class CommandLog(TsvSheet):
             else:
                 vs = self  # any old sheet should do, row/column don't matter
 
+            if r.comment:
+                status(r.comment)
+
             vd.keystrokes = r.keystrokes
             # <=v1.2 used keystrokes in longname column; getCommand fetches both
             escaped = vs.exec_command(vs.getCommand(longname if longname else r.keystrokes), keystrokes=r.keystrokes)
