@@ -13,8 +13,7 @@
 ## plugins
 
 - inplace: breaks replay
-- vfake
-
+- vfake: anonymizes columns
 
 ## Bugfixes
 
@@ -24,6 +23,7 @@
 
 ## Additions and improvements
 
+- `py` filetype to import and explore a python module: `vd -f py curses`
 - bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
 - numeric binning for frequency/pivot table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)

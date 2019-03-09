@@ -104,9 +104,12 @@ def load_pyobj(name, pyobj):
     else:
         error("cannot load '%s' as pyobj" % type(pyobj).__name__)
 
-def open_pyobj(path):
+
+def open_py(p):
     'Provide wrapper for `load_pyobj`.'
-    return load_pyobj(path.name, eval(path.read_text()))
+    import importlib
+    return load_pyobj(p.name, importlib.import_module('.'.join(p.parts[:-1] + [p.name])))
+
 
 def getPublicAttrs(obj):
     'Return all public attributes (not methods or `_`-prefixed) on object.'
