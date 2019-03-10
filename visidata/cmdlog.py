@@ -203,7 +203,7 @@ class CommandLog(TsvSheet):
     def moveToReplayContext(self, r):
         'set the sheet/row/col to the values in the replay row.  return sheet'
         if not r.sheet:
-            return self  # any old sheet should do, row/column don't matter
+            return None
 
         try:
             sheetidx = int(r.sheet)
@@ -267,6 +267,10 @@ class CommandLog(TsvSheet):
                 escaped = True
         else:
             vs = self.moveToReplayContext(r)
+            if vs:
+                vd.push(vs)
+            else:
+                vs = self  # any old sheet should do, row/column don't matter
 
             vd.keystrokes = r.keystrokes
             # <=v1.2 used keystrokes in longname column; getCommand fetches both
