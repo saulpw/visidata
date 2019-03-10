@@ -131,7 +131,7 @@ class Sheet(BaseSheet):
 
     def column(self, colname):
         'Return first column whose Column.name matches colname.'
-        return self.colsByName.get(colname) or error('no column matching "%s"' % colname)
+        return self.colsByName.get(colname) or fail('no column matching "%s"' % colname)
 
     def recalc(self):
         'Clear caches and set col.sheet to this sheet for all columns.'
