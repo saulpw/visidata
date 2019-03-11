@@ -105,7 +105,7 @@ Sheet.addCommand('z=', 'show-expr', 'status(evalexpr(inputExpr("show expr="), cu
 
 Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows or rows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows or rows))))', undo=undoEditCells)
 
-globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: "))))')
+globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: ")), name="unnamed"))')
 
 # in VisiData, ^H refers to the man page
 globalCommand('^H', 'sysopen-help', 'openManPage()')
@@ -119,8 +119,8 @@ def openManPage():
     with SuspendCurses():
         os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
 
-def newSheet(ncols):
-    return Sheet('unnamed', columns=[ColumnItem('', i, width=8) for i in range(ncols)])
+def newSheet(ncols, name=''):
+    return Sheet(name, columns=[ColumnItem('', i, width=8) for i in range(ncols)])
 
 def inputFilename(prompt, *args, **kwargs):
     return vd.input(prompt, "filename", *args, completer=completeFilename, **kwargs)
@@ -268,7 +268,13 @@ def openSource(p, filetype=None):
             warning('no %s function' % openfunc)
             filetype = 'txt'
             openfunc = 'open_txt'
-        vs = getGlobals()[openfunc](p)
+
+        if p.exists():
+            vs = getGlobals()[openfunc](p)
+        else:
+            warning('%s does not exist, creating new sheet' % p)
+            vs = newSheet(1, name=p.name)
+
     else:  # some other object
         status('unknown object type %s' % type(p))
         vs = None
