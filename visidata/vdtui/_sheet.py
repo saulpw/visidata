@@ -4,7 +4,7 @@ import threading
 import re
 from copy import copy
 
-from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, error, Column,
+from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, error, fail, Column,
 TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow,
 vd, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 

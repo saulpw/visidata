@@ -189,7 +189,7 @@ class OptionsSheet(Sheet):
         if isinstance(row.value, bool):
             options.set(row.name, not options.get(row.name, self.source), self.source)
         else:
-            options.set(row.name, self.edit(column("value")), self.source)
+            options.set(row.name, self.edit(self.column('value')), self.source)
 
     def reload(self):
         self.rows = []
