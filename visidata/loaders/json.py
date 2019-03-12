@@ -6,6 +6,7 @@ from visidata import wrapply, TypedExceptionWrapper, TypedWrapper
 
 
 option('json_indent', None, 'indent to use when saving json')
+option('json_sort_keys', True, 'sort object keys when saving to json')
 
 
 def open_json(p):
@@ -79,7 +80,7 @@ class Cell:
 
 class _vjsonEncoder(json.JSONEncoder):
     def __init__(self, **kwargs):
-        super().__init__(sort_keys=True, **kwargs)
+        super().__init__(sort_keys=options.json_sort_keys, **kwargs)
         self.safe_error = options.safe_error
 
     def default(self, cell):
