@@ -97,6 +97,7 @@ aggregator('median', median)
 aggregator('sum', sum)
 aggregator('distinct', set, type=vlen)
 aggregator('count', lambda values: sum(1 for v in values), type=int)
+aggregator('list', list)
 
 aggregators['q3'] = quantiles(3)
 aggregators['q4'] = quantiles(4)

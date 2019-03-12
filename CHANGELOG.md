@@ -23,6 +23,8 @@
 
 ## Additions and improvements
 
+- add `list` aggregator (thanks @chocolateboy)
+- add `options.json_sort_keys` to sort keys when saving to JSON (default True) (thanks @chocolateboy)
 - `py` filetype to import and explore a python module: `vd -f py curses`
 - bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
