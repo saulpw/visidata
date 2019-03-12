@@ -37,6 +37,7 @@
    - `vd -o-` to send directly to the terminal (can also be used with redirection, but not necessary)
 - `options.undo` (default False) to enable infinite linear undo/redo provisionally bound to `^[` and `^]`
 - [regex+] `options.default_sample_size` (default 100) to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso #219)
+- [json] `options.json_sort_keys` (default True) to enable/disable sorting keys when saving JSON files (thanks @chocolateboy for PR #262)
 - [replay] exit with error code on error during replay (suggested by @cwarden #240)
 - [vd] `--config` option to specify visidatarc file (suggested by @jsvine #236)
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
