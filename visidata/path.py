@@ -144,6 +144,7 @@ class Path:
     def __lt__(self, a):
         return self.name < a.name
 
+
 class UrlPath(Path):
     def __init__(self, url):
         from urllib.parse import urlparse
@@ -156,6 +157,9 @@ class UrlPath(Path):
 
     def __getattr__(self, k):
         return getattr(self.obj, k)
+
+    def exists(self):
+        return True
 
 
 class PathFd(Path):
@@ -175,6 +179,9 @@ class PathFd(Path):
     @property
     def filesize(self):
         return self._filesize
+
+    def exists(self):
+        return True
 
 
 class RepeatFile:
@@ -211,6 +218,10 @@ class RepeatFile:
 
     def __next__(self):
         return next(self.iter)
+
+    def exists(self):
+        return True
+
 
 class RepeatFileIter:
     def __init__(self, rf):
