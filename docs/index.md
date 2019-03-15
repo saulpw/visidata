@@ -59,6 +59,7 @@
     * How to configure VisiData (dev)
     * How to have configurations persist
     * How to configure commands
+* [Plugins - extending VisiData functionality](/docs/plugins)
 
 # For developers
 
