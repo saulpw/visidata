@@ -10,7 +10,7 @@
     - is the command a `Sheet` command (for commands that require rows/columns)
     - or is sheet-specific (only supposed to exist on a particular sheet)
     - note [the relevant syntax](https://github.com/saulpw/visidata/blob/develop/dev/design/169-settings.md#ii-commandskeybindings)
-3) at minimum, each command requires a [longname]() and [execstr]();
+3) at minimum, each command requires a [longname]() and [execstr](); if a command modifies and is in base VisiData, it also requires an [undo]() 
 4) optional: choose a default keybinding (see the [available keystrokes](https://visidata.org/kblayout)).
     - [design schema of keystrokes]() (e.g. why we decide to map a command to Ctrl, Shift, g, z, etc)
 
