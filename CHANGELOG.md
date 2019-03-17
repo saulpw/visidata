@@ -16,6 +16,7 @@
   - `fill-nulls` renamed to `setcol-fill`
   - `paste-cells` renamed to `setcol-clipboard`
   - `undoEditCells` assumes commands modified only selectedRows
+  - `save-col` always saves all rows in current column (instead of selectedRows or rows)
 
 
 ## plugins
