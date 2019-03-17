@@ -608,7 +608,7 @@ Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.get
 Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], edit(cursorCol, cursorRow)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', undo=undoEditCell)
-Sheet.addCommand('ge', 'edit-cells', 'cursorCol.setValuesTyped(selectedRows or rows, input("set selected to: ", value=cursorDisplay))', undo=undoEditCells),
+Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', undo=undoEditCells),
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.rows=tuple(); vs.reload=lambda vs=vs,rows=selectedRows or rows: setattr(vs, "rows", list(rows)); vd.push(vs)'),
 Sheet.addCommand('g"', 'dup-rows', 'vs = copy(sheet); vs.name += "_copy"; vs.rows = list(rows); vs.select(selectedRows); vd.push(vs)'),

@@ -28,5 +28,5 @@ def setValuesFromFaker(col, faketype, rows):
         col.setValue(r, newv)
 
 
-Sheet.addCommand(None, 'setcol-fake', 'cursorCol.setValuesFromFaker(input("faketype: ", type="faketype"), selectedRows or rows)', undo=undoEditCells)
+Sheet.addCommand(None, 'setcol-fake', 'cursorCol.setValuesFromFaker(input("faketype: ", type="faketype"), selectedRows)', undo=undoEditCells)
 Sheet.addCommand(None, 'reset-fake', 'vd.fakeMap.clear()')

@@ -142,7 +142,7 @@ undoSheetRows = undoRows('sheet')
 undoSheetCols = 'lambda sheet=sheet,oldcols=[copy(c) for c in columns]: setattr(sheet, "columns", oldcols)'
 undoAddCols = undoAttrCopy('[sheet]', 'columns')
 undoEditCell = undoSetValues('[cursorRow]', '[cursorCol]')
-undoEditCells = undoSetValues('selectedRows or rows', '[cursorCol]')
+undoEditCells = undoSetValues('selectedRows', '[cursorCol]')
 
 def bindkey(keystrokes, longname):
     bindkeys.setdefault(keystrokes, longname)

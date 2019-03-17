@@ -96,13 +96,11 @@ Sheet	dup-rows-deep	gz	"	gz"	copy	use	n	y		sheet-duplicate-deepcopy	open duplica
 Sheet	dup-selected		"	"	derived	use	n	y	2	sheet-duplicate-selected	open duplicate sheet with only selected rows
 Sheet	dup-selected-deep	z	"	z"	copy	use	n	y		sheet-duplicate-deepcopy-selected	open duplicate sheet with deepcopy of selected rows
 Sheet	edit-cell		e	e	n	n	y	y	3,4,5	modify-edit-cell	edit contents of current cell
-Sheet	edit-cells	g	e	ge	n	use	y	y	4,5	modify-edit-column-selected	set contents of current column for selected rows to same input
 Sheet	error-cell	z	^E	z^E	meta	n	n	n			view traceback for error in current cell
 Sheet	expand-col		(	(	n	n	n	y	5	expand_col	expand current column of containers fully
 Sheet	expand-col-depth	z	(	z(	n	n	n	y		expand_col_deep	expand current column of containers to given depth (0=fully)
 Sheet	expand-cols	g	(	g(	n	n	n	y		expand_vcols	expand all visible columns of containers fully
 Sheet	expand-cols-depth	gz	(	gz(	n	n	n	y		expand_vcols_deep	expand all visible columns of containers to given depth (0=fully)
-Sheet	fill-nulls		f	f	n	n	y	y		modify-fill-column	fills null cells in current column with contents of non-null cells up the current column
 Sheet	freeze-col		'	'	n	n	n	y		column-freeze	add a frozen copy of current column with all cells evaluated
 Sheet	freeze-sheet	g	'	g'	copy	n	n	y		sheet-freeze	open a frozen copy of current sheet with all visible columns evaluated
 Sheet	freq-col		F	F	derived	n	n	y		data-aggregate-column	open Frequency Table grouped on current column
@@ -143,7 +141,6 @@ Sheet	paste-after		p	p	n	n	y	y	5	data-clipboard-paste-after	paste clipboard rows
 Sheet	paste-before		P	P	n	n	y	y		data-clipboard-paste-before	paste clipboard rows before current row
 Sheet	paste-cell	z	p	zp	n	n	y	y		data-clipboard-paste-cell	set contents of current cell to last clipboard value
 Sheet	paste-cell-before	z	P	zP	n	n	y	y			prepend to contents of current column for current row to last clipboard value
-Sheet	paste-cells	gz	y	gzp	n	use	y	y			set current column for selected rows to the items from last clipboard
 Sheet	paste-selected	gz	p	gzp	n	change	y	y		data-clipboard-paste-selected	set cells of current column for selected rows to last clipboard value
 Sheet	pivot		W	W	derived	n	n	y	5	data-pivot	Pivot the current column into a new sheet
 Sheet	plot-column		.	.	canvas	n	n	y	2,3	data-plot-column	graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determine color
@@ -196,7 +193,10 @@ Sheet	select-expr	z	|	z|	n	change	n	y		rows-select-expr	select rows with a Pytho
 Sheet	select-row		s	s	n	change	n	y	2,5	rows-select-current	select current row
 Sheet	select-rows	g	s	gs	n	change	n	y	5	rows-select-all	select all rows
 Sheet	set-option				n	n		y			set option on current sheet
+Sheet	setcol-clipboard	gz	p	gzp	n	use	y	y			set current column for selected rows to the items from last clipboard
 Sheet	setcol-expr	g	=	g=	n	use	y	y	3,5	modify-set-column-selected-expr	set current column for selected rows to result of Python expression
+Sheet	setcol-fill		f	f	n	n	y	y		modify-fill-column	fills null cells in selected rows of current column with contents of non-null cells up the current column
+Sheet	setcol-input	g	e	ge	n	use	y	y	4,5	modify-edit-column-selected	set contents of current column for selected rows to same input
 Sheet	setcol-range	gz	=	gz=	n	use	y	y	3	modify-set-column-sequence	set current column for selected rows to the items in result of Python sequence expression
 Sheet	setcol-subst	g	*	g*	n	use	y	y	4	modify-add-column-regex-transform-foo	regex/subst - modify selected rows replacing regex with subst, which may include backreferences) \1 etc) for current column
 Sheet	setcol-subst-all	gz	*	gz*	n	use	y	y			regex/subst - modify selected rows replacing regex with subst, which may include backreferences (\1 etc) for all visible columns

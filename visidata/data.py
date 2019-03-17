@@ -25,7 +25,7 @@ Sheet.addCommand('ga', 'add-rows', 'addRows(sheet, int(input("add rows: ")), cur
 Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)', undo=undoAddCols)
 Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)
 
-Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows or rows)', undo=undoEditCells)
+Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows)', undo=undoEditCells)
 
 bindkey('KEY_SLEFT', 'slide-left')
 bindkey('KEY_SR', 'slide-left')
@@ -103,7 +103,7 @@ Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol];
 
 Sheet.addCommand('z=', 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 
-Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows or rows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows or rows))))', undo=undoEditCells)
+Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', undo=undoEditCells)
 
 globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new sheet: ")), name="unnamed"))')
 

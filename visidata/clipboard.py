@@ -29,7 +29,7 @@ Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol
 Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)', undo=undoEditCells)
 
 Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows]; status("%d values to clipboard" % len(vd.clipcells))')
-Sheet.addCommand('gzp', 'paste-cells', 'for r, v in zip(selectedRows or rows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)', undo=undoEditCells)
+Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(selectedRows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)', undo=undoEditCells)
 
 Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.save_filetype))')
 Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows or rows, input("copy rows to system clipboard as filetype: ", value=options.save_filetype))')

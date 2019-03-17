@@ -3,8 +3,8 @@ from visidata import *
 Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, input("split regex: ", type="regex-split"))', undo=undoAddCols)
 Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, input("match regex: ", type="regex-capture"))', undo=undoAddCols)
 Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)', undo=undoAddCols)
-Sheet.addCommand('g*', 'setcol-subst', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex([cursorCol], selectedRows or rows, rex)', undo=undoEditCells)
-Sheet.addCommand('gz*', 'setcol-subst-all', 'rex=input("transform columns by regex: ", type="regex-subst"); setValuesFromRegex(visibleCols, selectedRows or rows, rex)', undo=undoSetValues('selectedRows or rows', 'visibleCols'))
+Sheet.addCommand('g*', 'setcol-subst', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex([cursorCol], selectedRows, rex)', undo=undoEditCells)
+Sheet.addCommand('gz*', 'setcol-subst-all', 'rex=input("transform columns by regex: ", type="regex-subst"); setValuesFromRegex(visibleCols, selectedRows, rex)', undo=undoSetValues('selectedRows', 'visibleCols'))
 
 replayableOption('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 replayableOption('default_sample_size', 100, 'number of rows to sample for regex.split')

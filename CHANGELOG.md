@@ -10,6 +10,14 @@
   - stdout pipe/redirect
   - plugin framework
 
+## interface changes
+  - `setcol-*` use only selectedRows (do not use all rows if none selected) #265 (thanks @cwarden)
+  - `edit-cells` renamed to `setcol-input`
+  - `fill-nulls` renamed to `setcol-fill`
+  - `paste-cells` renamed to `setcol-clipboard`
+  - `undoEditCells` assumes commands modified only selectedRows
+
+
 ## plugins
 
 - inplace: breaks replay
