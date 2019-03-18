@@ -1,5 +1,5 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/sunshinelist.html	open input in VisiData
-sunshinelist		0	^J		open this table
-datatable-disclosures	0		^	Year	edit name of current column
-datatable-disclosures	2		^	Sector	edit name of current column
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sunshinelist.html	o	open input in VisiData
+sunshinelist		0	dive-row		^J	open this table
+datatable-disclosures	Year_ Year   All  1997  1998  1999  2000  2001  2002  2003  2004  2005  2006  2007  2008  2009  2010  2011  2012  2013  2014  2015  2016  2017		rename-col	Year	^	edit name of current column
+datatable-disclosures	Sector_ Sector   All  Children & Youth Services  College  Community & Social Services  Community Safety & Correctional Services  Crown  Education  Electricity  Energy  Health & Long–Term Care  Hospital  Judiciary  Labour  Legislative  Legislative Assembly & Offices  Ministry  Municipality  Ontario Public Service  Other  School Board  Seconded  University  Unknown		rename-col	Sector	^	edit name of current column

@@ -1,17 +1,17 @@
-sheet	col	row	keystrokes	input	comment
-graph-sincos-nosave_vd	sheet	0	A	1	open new blank sheet with number columns
-unnamed	0	0	ga	360	add N blank rows
-unnamed	0	0	gz=	range(360)	set selected rows in this column to the values in the given Python sequence expression
-unnamed	0	0	^	xdeg	edit name of current column
-unnamed	xdeg	0	#		set type of current column to int
-unnamed	xdeg	0	=	xdeg*math.pi/180	create new column from Python expression, with column names as variables
-unnamed	xdeg*math.pi/180	0	^	xrad	edit name of current column
-unnamed	xrad	0	%		set type of current column to float
-unnamed	xrad	0	=	math.sin(xrad)	create new column from Python expression, with column names as variables
-unnamed	math.sin(xrad)	0	%		set type of current column to float
-unnamed	xdeg	0	!		pin current column on the left as a key column
-unnamed	math.sin(xrad)	0	=	math.cos(xrad)	create new column from Python expression, with column names as variables
-unnamed	math.sin(xrad)	0	%		set type of current column to float
-unnamed	math.cos(xrad)	0	%		set type of current column to float
-unnamed	xrad	0	-		hide current column
-unnamed	math.sin(xrad)	0	g.		graph all numeric columns vs the first key column (or row number)
+sheet	col	row	longname	input	keystrokes	comment
+graph-sincos-nosave_vd			add-sheet	1	A	open new blank sheet with number columns
+unnamed			add-rows	360	ga	add N blank rows
+unnamed	0		setcol-range	range(360)	gz=	set selected rows in this column to the values in the given Python sequence expression
+unnamed	0		rename-col	xdeg	^	edit name of current column
+unnamed	xdeg		type-int		#	set type of current column to int
+unnamed	xdeg		addcol-expr	xdeg*math.pi/180	=	create new column from Python expression, with column names as variables
+unnamed	xdeg*math.pi/180		rename-col	xrad	^	edit name of current column
+unnamed	xrad		type-float		%	set type of current column to float
+unnamed	xrad		addcol-expr	math.sin(xrad)	=	create new column from Python expression, with column names as variables
+unnamed	math.sin(xrad)		type-float		%	set type of current column to float
+unnamed	xdeg		key-col		!	pin current column on the left as a key column
+unnamed	math.sin(xrad)		addcol-expr	math.cos(xrad)	=	create new column from Python expression, with column names as variables
+unnamed	math.sin(xrad)		type-float		%	set type of current column to float
+unnamed	math.cos(xrad)		type-float		%	set type of current column to float
+unnamed	xrad		hide-col		-	hide current column
+unnamed			plot-numerics		g.	graph all numeric columns vs the first key column (or row number)

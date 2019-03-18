@@ -1,5 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
-	override	filetype	set-option	fixed		tests replayability of cmdline options
+	override	filetype	set-option	fixed		
 			open-file	sample_data/countries	o	
 countries	country-name--------------------------------		rename-col	country name	^	
 countries	keywords-------------------------------------------		rename-col	keywords	^	
