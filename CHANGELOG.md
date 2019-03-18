@@ -12,7 +12,7 @@
 
 ## interface changes
 
-  - `setcol-*` use only selectedRows (do not use all rows if none selected) #265 (thanks @cwarden)
+  - `setcol-*`, `dive-selected`, `dup-selected-*`, `columns-selected`, `describe-selected` use only selectedRows (do not use all rows if none selected) #265 (thanks @cwarden)
   - `edit-cells` renamed to `setcol-input`
   - `fill-nulls` renamed to `setcol-fill`
   - `paste-cells` renamed to `setcol-clipboard`
@@ -20,6 +20,7 @@
   - `save-col` always saves all rows in current column (instead of selectedRows or rows)
   - `copy-*` use only selectedRows, warning if none selected (cmdlog safe)
   - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
+  - all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
 
 
 ## plugins

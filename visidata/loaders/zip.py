@@ -27,4 +27,4 @@ class open_zip(Sheet):
 
 
 open_zip.addCommand(ENTER, 'dive-row', 'vd.push(openZipFileEntry(cursorRow))')
-open_zip.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows or rows: vd.push(openZipFileEntry(r))')
+open_zip.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openZipFileEntry(r))')

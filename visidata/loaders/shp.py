@@ -67,7 +67,7 @@ class ShapeMap(InvertedCanvas):
         self.refresh()
 
 ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))')
-ShapeSheet.addCommand('g.', 'plot-selected', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows, textCol=cursorCol))')
+ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))')
 ShapeMap.addCommand('^S', 'save-geojson', 'save_geojson(Path(input("json to save: ", value=name+".geojson")), sheet)')
 
 

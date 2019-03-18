@@ -59,7 +59,7 @@ class MbtilesSheet(Sheet):
 
 MbtilesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PbfSheet(tilename(cursorRow), source=sheet, sourceRow=cursorRow))')
 MbtilesSheet.addCommand('.', 'plot-row', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn, sourceRows=list(getFeatures(getTile(*cursorRow))))))')
-#MbtilesSheet.addCommand('g.', '', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn), sourceRows=sum((list(getFeatures(getTile(*r))) for r in selectedRows or rows), [])))', 'plot selected tiles'),
+#MbtilesSheet.addCommand('g.', '', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn), sourceRows=sum((list(getFeatures(getTile(*r))) for r in rows), [])))', 'plot selected tiles'),
 
 
 class PbfSheet(Sheet):
@@ -127,4 +127,4 @@ class PbfCanvas(InvertedCanvas):
 
 
 PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))')
-PbfSheet.addCommand('g.', 'plot-selected', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows, textCol=cursorCol))')
+PbfSheet.addCommand('g.', 'plot-rows', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))')
