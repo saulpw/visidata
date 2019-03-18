@@ -6,7 +6,7 @@ import tempfile
 import functools
 
 from visidata import vd, asyncthread, status, fail, option, options
-from visidata import Sheet, saveSheets, Path
+from visidata import Sheet, saveSheets, Path, Column
 from visidata import undoEditCell, undoEditCells, undoSheetRows
 
 vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
@@ -36,49 +36,75 @@ Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows 
 Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
 Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\\n".join(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows))')
 
+Sheet.addCommand('BUTTON2_PRESSED', 'syspaste-mouse',
+                 'pasteFromClipboard(visibleColAtX(mouseX), topRowIndex+mouseY-1, sheet)')
+# use these to quiet errors, TODO do something better here
+do_nothing = lambda: None
+Sheet.addCommand('BUTTON2_RELEASED', 'nothing', 'do_nothing()')
+Sheet.addCommand('BUTTON2_CLICKED', 'nothing', 'do_nothing()')
+
 Sheet.bindkey('KEY_DC', 'delete-cell'),
 Sheet.bindkey('gKEY_DC', 'delete-cells'),
 
 
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
+option('clipboard_paste_cmd', '', 'command to get contents of system clipboard')
 
-__clipboard_commands = [
-    ('win32',  'clip', ''),                                      # Windows Vista+
-    ('darwin', 'pbcopy', 'w'),                                   # macOS
-    (None,     'xclip', '-selection clipboard -filter'),         # Linux etc.
-    (None,     'xsel', '--clipboard --input'),                   # Linux etc.
-]
+# mapping of OS to list of possible (command name, command args) for copy and
+# paste commands
+__copy_commands = {
+    # TODO TEST WINDOWS AND MAC
+    'win32': [('clip', '')],
+    'darwin': [('pbcopy', 'w')],
+    # try these for all other platforms
+    None: [('xclip', '-selection clipboard -filter'),
+           ('xsel', '--clipboard --input')]
+}
+__paste_commands = {
+    # TODO TEST WINDOWS AND MAC
+    'win32': [('clip', '')],
+    'darwin': [('pbpaste', '')],
+    # try these for all other platforms
+    None: [('xclip', '-selection clipboard -o'),
+           ('xsel', '--clipboard')]
+}
 
 def detect_command(cmdlist):
     '''Detect available clipboard util and return cmdline to copy data to the system clipboard.
     cmddict is list of (platform, progname, argstr).'''
 
-    for platform, command, args in cmdlist:
-        if platform is None or sys.platform == platform:
-            path = shutil.which(command)
-            if path:
-                return ' '.join([path, args])
-
+    for cmd, args in cmdlist.get(sys.platform, cmdlist[None]):
+        path = shutil.which(cmd)
+        if path: # see if command exists on system
+            return ' '.join([path, args])
     return ''
 
-detect_clipboard_command = lambda: detect_command(__clipboard_commands)
+detect_copy_command = lambda: detect_command(__copy_commands)
+detect_paste_command = lambda: detect_command(__paste_commands)
+
 
 @functools.lru_cache()
 def clipboard():
     'Detect cmd and set option at first use, to allow option to be changed by user later.'
     if not options.clipboard_copy_cmd:
-        options.clipboard_copy_cmd = detect_clipboard_command()
+        options.clipboard_copy_cmd = detect_copy_command()
+    if not options.clipboard_paste_cmd:
+        options.clipboard_paste_cmd = detect_paste_command()
     return _Clipboard()
 
 
 class _Clipboard:
     'Cross-platform helper to copy a cell or multiple rows to the system clipboard.'
 
-    @property
-    def command(self):
-        'Return cmdline cmd+args (as list for Popen) to copy data to the system clipboard.'
-        cmd = options.clipboard_copy_cmd or fail('options.clipboard_copy_cmd not set')
+    def get_command(self, name):
+        if name not in {'copy', 'paste'}:
+            raise ValueError()
+        name = 'clipboard_{}_cmd'.format(name)
+        cmd = getattr(options, name) or fail('options.{} not set'.format(name))
         return cmd.split()
+
+    def paste(self):
+        return subprocess.check_output(self.get_command('paste')).decode('utf-8')
 
     def copy(self, value):
         'Copy a cell to the system clipboard.'
@@ -88,7 +114,7 @@ class _Clipboard:
                 fp.write(str(value))
 
             p = subprocess.Popen(
-                self.command,
+                self.get_command('copy'),
                 stdin=open(temp.name, 'r', encoding=options.encoding),
                 stdout=subprocess.DEVNULL)
             p.communicate()
@@ -100,12 +126,19 @@ class _Clipboard:
         with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
             saveSheets(Path(temp.name), vs).join()
             p = subprocess.Popen(
-                self.command,
+                self.get_command('copy'),
                 stdin=open(temp.name, 'r', encoding=options.encoding),
                 stdout=subprocess.DEVNULL,
                 close_fds=True)
             p.communicate()
 
+def pasteFromClipboard(col_idx, row_idx, sheet):
+    text = clipboard().paste()
+    for t in text.split('\n'):
+        if row_idx >= len(sheet.rows):
+            break
+        sheet.columns[col_idx].setValue(sheet.rows[row_idx], t)
+        row_idx += 1
 
 def copyToClipboard(value):
     'copy single value to system clipboard'
