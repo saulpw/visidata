@@ -23,6 +23,7 @@
 
 ## Additions and improvements
 
+- add `syspaste-cells` to paste into vd from system clipboard (thanks kovasap #258)
 - add `list` aggregator (thanks @chocolateboy #263)
 - `py` filetype to import and explore a python module: `vd -f py curses`
 - bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
