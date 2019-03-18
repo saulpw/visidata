@@ -36,12 +36,10 @@ Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRows 
 Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
 Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\\n".join(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows))')
 
-Sheet.addCommand('BUTTON2_PRESSED', 'syspaste-mouse',
-                 'pasteFromClipboard(visibleColAtX(mouseX), topRowIndex+mouseY-1, sheet)')
-# use these to quiet errors, TODO do something better here
-do_nothing = lambda: None
-Sheet.addCommand('BUTTON2_RELEASED', 'nothing', 'do_nothing()')
-Sheet.addCommand('BUTTON2_CLICKED', 'nothing', 'do_nothing()')
+Sheet.bindkey('BUTTON2_PRESSED', 'go-mouse')
+Sheet.addCommand('BUTTON2_RELEASED', 'syspaste-cells',
+        'pasteFromClipboard(visibleCols[cursorVisibleColIndex:], rows[cursorRowIndex:])')
+Sheet.bindkey('BUTTON2_CLICKED', 'go-mouse')
 
 Sheet.bindkey('KEY_DC', 'delete-cell'),
 Sheet.bindkey('gKEY_DC', 'delete-cells'),
@@ -132,13 +130,11 @@ class _Clipboard:
                 close_fds=True)
             p.communicate()
 
-def pasteFromClipboard(col_idx, row_idx, sheet):
+def pasteFromClipboard(cols, rows):
     text = clipboard().paste()
-    for t in text.split('\n'):
-        if row_idx >= len(sheet.rows):
-            break
-        sheet.columns[col_idx].setValue(sheet.rows[row_idx], t)
-        row_idx += 1
+    for line, r in zip(text.split('\n'), rows):
+        for v, c in zip(line.split('\t'), cols):
+            c.setValue(r, v)
 
 def copyToClipboard(value):
     'copy single value to system clipboard'
