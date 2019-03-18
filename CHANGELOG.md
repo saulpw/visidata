@@ -17,6 +17,8 @@
   - `paste-cells` renamed to `setcol-clipboard`
   - `undoEditCells` assumes commands modified only selectedRows
   - `save-col` always saves all rows in current column (instead of selectedRows or rows)
+  - `copy-*` and `syscopy-*` use only selectedRows
+     - warning if none selected (do not use all rows)
 
 
 ## plugins
