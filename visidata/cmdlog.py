@@ -33,7 +33,7 @@ nonLogged = '''forget exec-longname undo redo
 error status errors statuses options threads cmdlog
 replay stop pause cancel advance save-cmdlog
 go- search scroll prev next page go start end zoom resize
-suspend redraw no-op help syscopy sysopen profile toggle'''.split()
+suspend redraw no-op help syscopy syspaste sysopen profile toggle'''.split()
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')

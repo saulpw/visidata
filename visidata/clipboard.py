@@ -5,41 +5,79 @@ import sys
 import tempfile
 import functools
 
-from visidata import vd, asyncthread, status, fail, option, options
+from visidata import vd, asyncthread, status, fail, option, options, warning
 from visidata import Sheet, saveSheets, Path, Column
 from visidata import undoEditCell, undoEditCells, undoSheetRows
 
 vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
 vd.clipcells = []  # list of strings
 
+
 def setslice(L, a, b, M):
     L[a:b] = M
 
-Sheet.addCommand('y', 'copy-row', 'vd.cliprows = [(sheet, cursorRowIndex, cursorRow)]')
+
+@Sheet.api
+def copyRows(sheet, rows):
+    vd.cliprows = list((sheet, i, r) for i, r in enumerate(rows))
+    if not rows:
+        warning('no %s selected; clipboard emptied' % sheet.rowtype)
+    else:
+        status('copied %d %s to clipboard' % (len(rows), sheet.rowtype))
+
+
+@Sheet.api
+def copyCells(sheet, col, rows):
+    vd.clipcells = [col.getDisplayValue(r) for r in rows]
+    if not rows:
+        warning('no %s selected; clipboard emptied' % sheet.rowtype)
+        return
+    status('copied %d %s.%s to clipboard' % (len(rows), sheet.rowtype, col.name))
+
+
+@Sheet.api
+def syscopyRows(sheet, rows):
+    if not rows:
+        fail('no %s selected' % sheet.rowtype)
+    filetype = input("copy %d %s to system clipboard as filetype: " % (len(rows), sheet.rowtype), value=options.save_filetype)
+    saveToClipboard(sheet, rows, filetype)
+    status('copied %d %s to system clipboard' % (len(rows), sheet.rowtype))
+
+
+@Sheet.api
+def syscopyCells(sheet, col, rows):
+    if not rows:
+        fail('no %s selected' % sheet.rowtype)
+    clipboard().copy("\\n".join(col.getDisplayValue(r) for r in rows))
+    status('copied %s from %d %s to system clipboard' % (col.name, len(rows), sheet.rowtype))
+
+
+Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRows])')
 Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', undo='lambda s=sheet,r=cursorRow,ridx=cursorRowIndex: s.rows.insert(ridx, r)')
 Sheet.addCommand('p', 'paste-after', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.pop(ridx+1)')
 Sheet.addCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.pop(ridx)')
 
-Sheet.addCommand('gd', 'delete-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRows)); deleteSelected()', undo=undoSheetRows)
-Sheet.addCommand('gy', 'copy-selected', 'vd.cliprows = list((None, i, r) for i, r in enumerate(selectedRowsOrWarning)); status("%d %s to clipboard" % (len(vd.cliprows), rowtype))')
+Sheet.addCommand('gd', 'delete-selected', 'copyRows(selectedRows); deleteSelected()', undo=undoSheetRows)
+Sheet.addCommand('gy', 'copy-selected', 'copyRows(selectedRows)')
 
-Sheet.addCommand('zy', 'copy-cell', 'vd.clipcells = [cursorDisplay]')
+Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow])')
 Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])', undo=undoEditCell)
 Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', undo=undoEditCell)
 Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)', undo=undoEditCells)
-
-Sheet.addCommand('gzy', 'copy-cells', 'vd.clipcells = [vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRowsOrWarning]; status("%d values to clipboard" % len(vd.clipcells))')
-Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(selectedRows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)', undo=undoEditCells)
-
-Sheet.addCommand('Y', 'syscopy-row', 'saveToClipboard(sheet, [cursorRow], input("copy current row to system clipboard as filetype: ", value=options.save_filetype))')
-Sheet.addCommand('gY', 'syscopy-selected', 'saveToClipboard(sheet, selectedRowsOrWarning, input("copy rows to system clipboard as filetype: ", value=options.save_filetype))')
-Sheet.addCommand('zY', 'syscopy-cell', 'copyToClipboard(cursorDisplay)')
-Sheet.addCommand('gzY', 'syscopy-cells', 'copyToClipboard("\\n".join(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRowsOrWarning))')
 
 Sheet.bindkey('BUTTON2_PRESSED', 'go-mouse')
 Sheet.addCommand('BUTTON2_RELEASED', 'syspaste-cells',
         'pasteFromClipboard(visibleCols[cursorVisibleColIndex:], rows[cursorRowIndex:])')
 Sheet.bindkey('BUTTON2_CLICKED', 'go-mouse')
+
+Sheet.addCommand('gzy', 'copy-cells', 'copyCells(cursorCol, selectedRows)')
+Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(selectedRows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)', undo=undoEditCells)
+
+Sheet.addCommand('Y', 'syscopy-row', 'syscopyRows([cursorRow])')
+
+Sheet.addCommand('gY', 'syscopy-selected', 'syscopyRows(selectedRows)')
+Sheet.addCommand('zY', 'syscopy-cell', 'syscopyCells(cursorCol, [cursorRow])')
+Sheet.addCommand('gzY', 'syscopy-cells', 'syscopyCells(cursorCol, selectedRows)')
 
 Sheet.bindkey('KEY_DC', 'delete-cell'),
 Sheet.bindkey('gKEY_DC', 'delete-cells'),
@@ -122,7 +160,7 @@ class _Clipboard:
 
         # use NTF to generate filename and delete file on context exit
         with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
-            saveSheets(Path(temp.name), vs).join()
+            vd.sync(saveSheets(Path(temp.name), vs))
             p = subprocess.Popen(
                 self.get_command('copy'),
                 stdin=open(temp.name, 'r', encoding=options.encoding),
@@ -130,16 +168,13 @@ class _Clipboard:
                 close_fds=True)
             p.communicate()
 
+
 def pasteFromClipboard(cols, rows):
-    text = clipboard().paste()
+    text = clipboard().paste().strip() or error('system clipboard is empty')
+
     for line, r in zip(text.split('\n'), rows):
         for v, c in zip(line.split('\t'), cols):
             c.setValue(r, v)
-
-def copyToClipboard(value):
-    'copy single value to system clipboard'
-    clipboard().copy(value)
-    status('copied value to clipboard')
 
 
 @asyncthread

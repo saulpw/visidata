@@ -11,14 +11,15 @@
   - plugin framework
 
 ## interface changes
+
   - `setcol-*` use only selectedRows (do not use all rows if none selected) #265 (thanks @cwarden)
   - `edit-cells` renamed to `setcol-input`
   - `fill-nulls` renamed to `setcol-fill`
   - `paste-cells` renamed to `setcol-clipboard`
   - `undoEditCells` assumes commands modified only selectedRows
   - `save-col` always saves all rows in current column (instead of selectedRows or rows)
-  - `copy-*` and `syscopy-*` use only selectedRows
-     - warning if none selected (do not use all rows)
+  - `copy-*` use only selectedRows, warning if none selected (cmdlog safe)
+  - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
 
 
 ## plugins
