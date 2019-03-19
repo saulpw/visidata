@@ -60,7 +60,8 @@ SheetObject	visibility		v	v	n	n	n	y			toggle show/hide for methods and hidden pr
 SheetNamedTuple	dive-row		Enter	Enter	y	n	n	y			dive further into Python object
 SheetH5Obj	dive-metadata		A	A	y	n	n	y			open metadata sheet for this object
 SheetH5Obj	dive-row		Enter	Enter	y	n	n	y			load table referenced in current row into memory
-SheetFreqTable	dup-row		Enter	Enter	y	n	n	y		open-cell-source	open copy of source sheet with rows described in current cell
+SheetFreqTable	dup-row		Enter	Enter	y	n	n	y		open-cell-source	open copy of source sheet with rows grouped in current cell
+SheetFreqTable	dup-rows	g	Enter	gEnter	y	use	n	y			open copy of source sheet with rows grouped in selected rows
 SheetFreqTable	select-row		s	s	n	change	n	y		filter-source-select-bin	select these entries in source sheet
 SheetFreqTable	stoggle-row		t	t	n	change	n	y		filter-source-toggle-bin	toggle these entries in source sheet
 SheetFreqTable	unselect-row		u	u	n	change	n	y		filter-source-unselect-bin	unselect these entries in source sheet

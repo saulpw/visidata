@@ -64,7 +64,6 @@ cancel current replay
 .El
 .
 .Ss GLOBAL COMMANDS
-In most cases, commands that affect selected rows will affect all rows if no rows are selected.
 .Pp
 .Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -606,8 +605,8 @@ open one-line summary for selected rows
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " s   t   u"
 select/toggle/unselect these entries in source sheet
-.It Ic " Enter"
-open sheet of source rows that are grouped in current cell
+.It Ic " Enter  gEnter"
+open sheet of source rows that are grouped in current cell / selected rows
 .El
 .
 .Ss Describe Sheet (Shift+I)
