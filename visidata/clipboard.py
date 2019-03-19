@@ -39,7 +39,7 @@ def copyCells(sheet, col, rows):
 def syscopyRows(sheet, rows):
     if not rows:
         fail('no %s selected' % sheet.rowtype)
-    filetype = input("copy %d %s to system clipboard as filetype: " % (len(rows), sheet.rowtype), value=options.save_filetype)
+    filetype = vd.input("copy %d %s to system clipboard as filetype: " % (len(rows), sheet.rowtype), value=options.save_filetype)
     saveToClipboard(sheet, rows, filetype)
     status('copied %d %s to system clipboard' % (len(rows), sheet.rowtype))
 
