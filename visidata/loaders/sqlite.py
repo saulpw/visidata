@@ -6,7 +6,7 @@ def open_sqlite(path):
     vs = SqliteSheet(path.name + '_tables', source=path, tableName='sqlite_master')
     vs.addCommand(ENTER, 'dive-row', 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), source=sheet, tableName=cursorRow[1]))')
     return vs
-open_db = open_sqlite
+open_db = open_sqlite3 = open_sqlite
 
 
 class SqliteSheet(DeferredSaveSheet):
