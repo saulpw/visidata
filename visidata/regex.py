@@ -1,10 +1,25 @@
-from visidata import *
+import re
+import random
+
+from visidata import asyncthread, warning, replayableOption, options, vd, regex_flags
+from visidata import Sheet, Column, Progress
+from visidata import undoEditCells, undoSetValues, undoAddCols
 
 Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, input("split regex: ", type="regex-split"))', undo=undoAddCols)
 Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, input("match regex: ", type="regex-capture"))', undo=undoAddCols)
 Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)', undo=undoAddCols)
-Sheet.addCommand('g*', 'setcol-subst', 'rex=input("transform column by regex: ", type="regex-subst"); setValuesFromRegex([cursorCol], selectedRows, rex)', undo=undoEditCells)
-Sheet.addCommand('gz*', 'setcol-subst-all', 'rex=input("transform columns by regex: ", type="regex-subst"); setValuesFromRegex(visibleCols, selectedRows, rex)', undo=undoSetValues('selectedRows', 'visibleCols'))
+Sheet.addCommand('g*', 'setcol-subst', 'setSubst([cursorCol], selectedRows)', undo=undoEditCells)
+Sheet.addCommand('gz*', 'setcol-subst-all', 'setSubst(visibleCols, selectedRows)', undo=undoSetValues('selectedRows', 'visibleCols'))
+
+@Sheet.api
+def setSubst(sheet, cols, rows):
+    if not rows:
+        warning('no %s selected' % sheet.rowtype)
+        return
+    modified = 'column' if len(cols) == 1 else 'columns'
+    rex = vd.input("transform %s by regex: " % modified, type="regex-subst")
+    setValuesFromRegex(cols, rows, rex)
+
 
 replayableOption('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 replayableOption('default_sample_size', 100, 'number of rows to sample for regex.split')
