@@ -73,6 +73,8 @@ from .loaders._pandas import *
 from .loaders.graphviz import *
 from .loaders.npy import *
 
+from .loaders.pandas_freqtbl import *
+
 from .plugins import *
 
 from .colors import *   # ColorsSheet

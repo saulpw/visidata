@@ -3,6 +3,8 @@ from visidata import *
 
 class DataFrameAdapter:
     def __init__(self, df):
+        import pandas as pd
+        assert isinstance(df, pd.DataFrame)
         self.df = df
 
     def __len__(self):
@@ -19,24 +21,48 @@ class DataFrameAdapter:
 
 # source=DataFrame
 class PandasSheet(Sheet):
-    def reload(self):
-        import numpy
-        import pandas
-        def dtypeToType(df, colname):
-            t = df[colname].dtype
-            if t == numpy.int64: return int
-            if t == numpy.float64: return float
-#            if t == pandas.Timestamp: return date
-            return anytype
+    def dtype_to_type(self, dtype):
+        import numpy as np
+        try:
+            if np.issubdtype(dtype, np.int):
+                return int 
+            if np.issubdtype(dtype, np.float):
+              return float
+            if np.issubdtype(dtype, np.datetime64):
+                return date
+        except TypeError:
+            # For categoricals and other pandas-defined dtypes
+            pass
+        return anytype
+   
+    def read_tsv(self, path, **kwargs):
+        """Partial function for reading TSV files using pd.read_csv"""
+        import pandas as pd
+        return pd.read_csv(path, sep='\t', **kwargs)
 
+    # @property
+    # def selectedRows(self):
+    #     if len(self._selectedRows) <= 1:
+    #         return list(self._selectedRows.values())
+    #     return [self.rows.iloc[i] for i in range(self.rows.shape[0]) if id(self.rows.iloc[i]) in self._selectedRows]
+
+    # def selectRow(self, row):
+    #     super().selectRow(row)
+    #     raise ValueError(self.selectedRows)
+
+    def reload(self):
+        import pandas
         if isinstance(self.source, pandas.DataFrame):
             self.df = self.source
         elif isinstance(self.source, Path):
             filetype = getattr(self, 'filetype', self.source.ext[1:])
-            readfunc = getattr(pandas, 'read_'+filetype) or error('no pandas.read_'+filetype)
+            if filetype == 'tsv':
+                readfunc = self.read_tsv 
+            else:
+                readfunc = getattr(pandas, 'read_'+filetype) or error('no pandas.read_'+filetype)
             self.df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
 
-        self.columns = [ColumnItem(col, type=dtypeToType(self.df, col)) for col in self.df.columns]
+        self.columns = [ColumnItem(col, type=self.dtype_to_type(self.df[col])) for col in self.df.columns]
         self.rows = DataFrameAdapter(self.df)
 
     @asyncthread
