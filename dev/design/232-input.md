@@ -13,7 +13,7 @@
     VisiData.choose(L:Sequence, n=None) -> element or list:
       - input choices separated by spaces.  may have a better interface eventually.
 
-    Sheet.edit(col, row, **editargs) -> str:
+    Sheet.editCell(vcolidx, rowidx, **editargs) -> str:
       - edit a cell value in-place on the screen
       - return value converted to column type
 

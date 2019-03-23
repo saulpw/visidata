@@ -320,28 +320,29 @@ def chooseMany(choices):
 
 
 @Sheet.api
-def edit(self, col, row, **kwargs):
+def editCell(self, vcolidx=None, rowidx=None, **kwargs):
     'Call `editText` at its place on the screen.  Returns the new value, properly typed'
 
-    vcolidx = self.visibleCols.index(col)
+    if vcolidx is None:
+        vcolidx = self.cursorVisibleColIndex
     x, w = self.visibleColLayout.get(vcolidx, (0, 0))
 
-    # default to header
-    y = 0
-    rowidx = -1
-    currentValue = col.name
-    if row is not None:
-        for rowidx, y in self.rowLayout.items():
-            if self.rows[rowidx] is row:
-                break  # let y be as it is
-        currentValue = col.getDisplayValue(row)
+    col = self.visibleCols[vcolidx]
+    if rowidx is None:
+        rowidx = self.cursorRowIndex
+    if rowidx < 0:  # header
+        y = 0
+        currentValue = col.name
+    else:
+        y = self.rowLayout.get(rowidx, 0)
+        currentValue = col.getDisplayValue(self.rows[self.cursorRowIndex])
 
     editargs = dict(value=currentValue,
                     fillchar=options.disp_edit_fill,
                     truncchar=options.disp_truncator)
     editargs.update(kwargs)  # update with user-specified args
     r = vd.editText(y, x, w, **editargs)
-    if row is not None:  # if not header
+    if rowidx >= 0:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised
 
     return r
