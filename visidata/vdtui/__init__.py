@@ -472,7 +472,7 @@ class VisiData(Extensible):
 
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
-        self.allSheets = weakref.WeakKeyDictionary()  # [BaseSheet] -> sheetname (all non-precious sheets ever pushed)
+        self.allSheets = []  # list of all non-precious sheets ever pushed
         self.statuses = collections.OrderedDict()  # (priority, statusmsg) -> num_repeats; shown until next action
         self.statusHistory = []  # list of [priority, statusmsg, repeats] for all status messages ever
         self.lastErrors = []
@@ -489,6 +489,7 @@ class VisiData(Extensible):
 
     @property
     def sheet(self):
+        'the top sheet on the stack'
         return self.sheets[0] if self.sheets else None
 
     def getSheet(self, sheetname):
@@ -752,7 +753,7 @@ class VisiData(Extensible):
                 vs.recalc()  # set up Columns
 
             if vs.precious and vs not in vs.vd.allSheets:
-                vs.vd.allSheets[vs] = vs.name
+                vs.vd.allSheets.append(vs)
             return vs
 # end VisiData class
 

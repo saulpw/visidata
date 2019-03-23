@@ -506,8 +506,8 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic gS
-.No open Sy Sheets Graveyard No which includes references to closed sheets
+.It Ic zS
+.No open Sy Sheets Stack No which shows only the active sheets on the stack
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)

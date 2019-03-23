@@ -6,8 +6,8 @@ from visidata import undoAttr, undoAddCols, VisiData, vlen
 
 globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
-globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
-globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
+globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
+globalCommand('S', 'sheets-all', 'vd.push(vd.sheetsSheet)')
 
 globalCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)')
@@ -104,13 +104,16 @@ class SheetsSheet(Sheet):
         ColumnAttr('progressPct'),
         ColumnAttr('threads', 'currentThreads', type=vlen),
     ]
+    colorizers = [
+        RowColorizer(1.5, 'color_hidden_col', lambda s,c,r,v: r and r not in vd.sheets),
+    ]
     nKeys = 1
 
     def newRow(self):
         return Sheet('', columns=[ColumnItem('', 0)], rows=[])
 
     def reload(self):
-        self.rows = vd.sheets
+        self.rows = self.source
 
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
 SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
@@ -119,13 +122,6 @@ SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_colu
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
-
-# source: vd.allSheets (with BaseSheet as weakref keys)
-class GraveyardSheet(SheetsSheet):
-    rowtype = 'undead sheets'  # rowdef: BaseSheet
-    def reload(self):
-        self.rows = list(vs for vs in vd.allSheets.keys() if vs not in vd.sheets)
-
 
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
@@ -205,11 +201,7 @@ bindkeys.set(ENTER, 'edit-option', OptionsSheet)
 
 @VisiData.cached_property
 def sheetsSheet(vd):
-    return SheetsSheet("sheets")
-
-@VisiData.cached_property
-def graveyardSheet(vd):
-    return GraveyardSheet("sheets_graveyard")
+    return SheetsSheet("sheets_all", source=vd.allSheets)
 
 
 def combineColumns(cols):

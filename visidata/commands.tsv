@@ -26,8 +26,8 @@ global	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected shee
 global	save-all	g	^S	g^S	n	n	n	y		sheet-save-all	save all sheets to given file or directory)
 global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd file
 global	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
-global	sheets		S	S	static meta	n	n	y		meta-sheets	open Sheets Sheet
-global	sheets-graveyard	g	S	gS	static meta	n	n	y		sheets-graveyard	open Sheets Graveyard
+global	sheets-all		S	S	static meta	n	n	y		meta-sheets	open Sheets Sheet
+global	sheets-stack	z	S	gS	static meta	n	n	y			open current Sheets Stack
 global	show-version		^V	^V	n	n	n	n		info-version	show version information on status line
 global	status				n	n	n	n			show given message on status line
 global	statuses		^P	^P	static meta	n	n	n		meta-status-history	open Status History

@@ -42,6 +42,10 @@ The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw
 
 ## How to move between sheets
 
+The Sheets Sheet is a list of all sheets that have ever been opened (in order of opening).
+
+The Sheets Stack (`z Shift+S`is the list of active sheets (most recently used at top).
+
 ###### Jumping to sheets
 
 1. Press `S` to open the **Sheets sheet**.
@@ -55,6 +59,7 @@ Command(s)              Operation
 `Ctrl+^`                jump to the previous sheet, without closing the current one
 `q`                     quit the current sheet (closes it)
 
-**Note**: When sheets are 'closed', they are no longer referenced by the **Sheets sheet**. Press `gS` to find them again through the **Sheets graveyard**.
+**Note**: A quit/closed sheet is grayed out on the Sheets Sheet.
+Closed sheets are removed from the active sheets stack, and the next sheet is then shown.  When the active sheets stack is empty, VisiData exits.
 
 ---
