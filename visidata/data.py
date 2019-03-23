@@ -118,8 +118,8 @@ def openManPage():
     with SuspendCurses():
         os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
 
-def newSheet(ncols, name=''):
-    return Sheet(name, columns=[ColumnItem('', i, width=8) for i in range(ncols)])
+def newSheet(ncols, name='', **kwargs):
+    return Sheet(name, columns=[ColumnItem('', i, width=8) for i in range(ncols)], **kwargs)
 
 def inputFilename(prompt, *args, **kwargs):
     return vd.input(prompt, "filename", *args, completer=completeFilename, **kwargs)
@@ -272,7 +272,7 @@ def openSource(p, filetype=None):
             vs = getGlobals()[openfunc](p)
         else:
             warning('%s does not exist, creating new sheet' % p)
-            vs = newSheet(1, name=p.name)
+            vs = newSheet(1, name=p.name, source=p)
 
     else:  # some other object
         status('unknown object type %s' % type(p))
