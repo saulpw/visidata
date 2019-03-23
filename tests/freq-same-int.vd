@@ -1,0 +1,12 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		type-date		@	
+benchmark	Date		key-col		!	
+benchmark			select-rows		gs	
+benchmark	Quantity	キ2018-07-03	setcol-input	3	ge	
+benchmark			unselect-rows		gu	
+benchmark	Quantity		type-int		#	
+benchmark	Quantity		freq-col		F	
+benchmark_Quantity_freq			quit-sheet		q	
+benchmark	Quantity	キ2018-07-03	edit-cell	2	e	
+benchmark	Quantity		freq-col		F	

@@ -9,19 +9,25 @@ Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))')
 # pivotrows is { pivot_values: list(source.rows in group with pivot_values) }
 PivotGroupRow = collections.namedtuple('PivotGroupRow', 'discrete_keys numeric_key sourcerows pivotrows'.split())
 
-nankey = float('inf')
-
 def Pivot(source, groupByCols, pivotCols):
     return SheetPivot(source.name+'_pivot_'+''.join(c.name for c in pivotCols),
             groupByCols,
             pivotCols,
             source=source)
 
+def makeErrorKey(col):
+    if col.type is date:
+        return date('0-1-1')
+    else:
+        return col.type()
 
 def formatRange(col, numeric_key):
     a, b = numeric_key
-    if a is b:
+    nankey = makeErrorKey(col)
+    if a is nankey and b is nankey:
         return '#ERR'
+    elif a == b:
+        return col.format(a)
     return ' - '.join(col.format(x) for x in numeric_key)
 
 class RangeColumn(Column):
@@ -143,13 +149,23 @@ class SheetPivot(Sheet):
             error('only one numeric column can be binned')
 
         numericBins = []
+        degenerateBinning = False
         if numericCols:
             nbins = options.histogram_bins or int(len(self.source.rows) ** (1./2))
             vals = tuple(numericCols[0].getValues(self.source.rows))
             minval = min(vals)
             maxval = max(vals)
             width = (maxval - minval)/nbins
-            numericBins = [(minval+width*i, minval+width*(i+1)) for i in range(nbins)]
+
+            if width == 0:
+                # only one value (and maybe errors)
+                numericBins = [(minval, maxval)]
+            elif numericCols[0].type in (int, vlen) and nbins > width:
+                # more bins than int vals, just use the vals
+                degenerateBinning = True
+                numericBins = [(minval+i, minval+i) for i in range(maxval-minval+1)]
+            else:
+                numericBins = [(minval+width*i, minval+width*(i+1)) for i in range(nbins)]
 
         # group rows by their keys (groupByCols), and separate by their pivot values (pivotCols)
         groups = {}  # [formattedDiscreteKeys] -> (numericGroupRows:dict(formattedNumericKeyRange -> PivotGroupRow), groupRow:PivotGroupRow)  # groupRow is main/error row
@@ -174,7 +190,12 @@ class SheetPivot(Sheet):
                     val = numericCols[0].getValue(sourcerow)
                     if val is not None:
                         val = numericCols[0].type(val)
-                    binidx = int((val-minval)//width)
+                    if not width:
+                        binidx = 0
+                    elif degenerateBinning:
+                        binidx = val-minval
+                    else:
+                        binidx = int((val-minval)//width)
                     groupRow = numericGroupRows[formatRange(numericCols[0], numericBins[min(binidx, nbins-1)])]
                 except Exception as e:
                     # leave in main/error bin
@@ -182,7 +203,7 @@ class SheetPivot(Sheet):
 
             # add the main bin if no numeric bin (error, or no numeric cols)
             if groupRow is None:
-                nankey = numericCols[0].type() if numericCols else 0
+                nankey = makeErrorKey(numericCols[0]) if numericCols else 0
                 groupRow = PivotGroupRow(discreteKeys, (nankey, nankey), [], {})
                 groups[formattedDiscreteKeys] = (numericGroupRows, groupRow)
                 self.addRow(groupRow)
