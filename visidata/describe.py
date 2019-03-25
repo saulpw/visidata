@@ -24,6 +24,7 @@ class DescribeColumn(Column):
 # rowdef: Column from source sheet
 class DescribeSheet(ColumnsSheet):
 #    rowtype = 'columns'
+    precious = True
     columns = [
             ColumnAttr('sheet', 'sheet'),
             ColumnAttr('column', 'name'),
