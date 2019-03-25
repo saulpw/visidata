@@ -34,30 +34,34 @@ def unselectRow(self, row):
         return False
 
 @Sheet.api
+def unselectAll(self):
+    self._selectedRows.clear()
+
+@Sheet.api
 @asyncthread
 def select(self, rows, status=True, progress=True):
     "Bulk select given rows. Don't show progress if progress=False; don't show status if status=False."
-    before = len(self._selectedRows)
+    before = self.nSelected
     if options.bulk_select_clear:
-        self._selectedRows.clear()
+        self.unselectAll()
     for r in (Progress(rows, 'selecting') if progress else rows):
         self.selectRow(r)
     if status:
         if options.bulk_select_clear:
-            msg = 'selected %s %s%s' % (len(self._selectedRows), self.rowtype, ' instead' if before > 0 else '')
+            msg = 'selected %s %s%s' % (self.nSelected, self.rowtype, ' instead' if before > 0 else '')
         else:
-            msg = 'selected %s%s %s' % (len(self._selectedRows)-before, ' more' if before > 0 else '', self.rowtype)
+            msg = 'selected %s%s %s' % (self.nSelected-before, ' more' if before > 0 else '', self.rowtype)
         vd.status(msg)
 
 @Sheet.api
 @asyncthread
 def unselect(self, rows, status=True, progress=True):
     "Unselect given rows. Don't show progress if progress=False; don't show status if status=False."
-    before = len(self._selectedRows)
+    before = self.nSelected
     for r in (Progress(rows, 'unselecting') if progress else rows):
         self.unselectRow(r)
     if status:
-        vd.status('unselected %s/%s %s' % (before-len(self._selectedRows), before, self.rowtype))
+        vd.status('unselected %s/%s %s' % (before-self.nSelected, before, self.rowtype))
 
 @Sheet.api
 def selectByIdx(self, rowIdxs):
@@ -83,12 +87,13 @@ def gatherBy(self, func):
 @Sheet.property
 def selectedRows(self):
     'List of selected rows in sheet order. [O(nRows*log(nSelected))]'
-    if len(self._selectedRows) <= 1:
+    if self.nSelected <= 1:
         return list(self._selectedRows.values())
     return [r for r in self.rows if id(r) in self._selectedRows]
 
 @Sheet.property
 def nSelected(self):
+    'Number of selected rows.'
     return len(self._selectedRows)
 
 @Sheet.api
@@ -96,8 +101,8 @@ def nSelected(self):
 def deleteSelected(self):
     'Delete all selected rows.'
     ndeleted = self.deleteBy(self.isSelected)
-    nselected = len(self._selectedRows)
-    self._selectedRows.clear()
+    nselected = self.nSelected
+    self.unselectAll()
     if ndeleted != nselected:
         error('expected %s' % nselected)
 
@@ -113,7 +118,7 @@ Sheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', un
 
 Sheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)', undo=undoSheetSelection),
 Sheet.addCommand('gs', 'select-rows', 'select(rows)', undo=undoSheetSelection),
-Sheet.addCommand('gu', 'unselect-rows', '_selectedRows.clear()', undo=undoSheetSelection),
+Sheet.addCommand('gu', 'unselect-rows', 'unselectAll()', undo=undoSheetSelection),
 
 Sheet.addCommand('zt', 'stoggle-before', 'toggle(rows[:cursorRowIndex])', undo=undoSheetSelection),
 Sheet.addCommand('zs', 'select-before', 'select(rows[:cursorRowIndex])', undo=undoSheetSelection),
