@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # Copyright 2017-2018 Saul Pwanson  http://visidata.org
 
 'vdtui: a curses framework for columnar data'
