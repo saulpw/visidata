@@ -1,4 +1,5 @@
 import itertools
+import os
 import random
 
 from copy import copy
@@ -114,9 +115,26 @@ bindkey('zKEY_F(1)', 'help-commands')
 bindkey('zKEY_BACKSPACE', 'help-commands')
 
 def openManPage():
-    from pkg_resources import resource_filename
+    import site
+    import sys
+    import sysconfig
+    if '__file__' not in globals():
+        # Just hope this works.
+        manpage = 'vd.1'
+    elif __file__.startswith(sysconfig.get_path('purelib')):
+        # Global install
+        manpage = os.path.join(sys.prefix, 'share/man/man1/vd.1')
+        if not os.path.exists(manpage):
+            # Definitely a package install and compressed, so don't use a path.
+            manpage = 'vd.1'
+    elif __file__.startswith(site.USER_BASE):
+        # User install
+        manpage = os.path.join(site.USER_BASE, 'share/man/man1/vd.1')
+    else:
+        # Using PYTHONPATH or an editable install; look for file nearby
+        manpage = os.path.join(os.path.dirname(__file__), 'man/vd.1')
     with SuspendCurses():
-        os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
+        os.system(' '.join(['man', manpage]))
 
 def newSheet(ncols, name='', **kwargs):
     return Sheet(name, columns=[ColumnItem('', i, width=8) for i in range(ncols)], **kwargs)
