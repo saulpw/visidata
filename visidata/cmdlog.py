@@ -22,8 +22,8 @@ globalCommand(None, 'status', 'status(input("status: "))')
 globalCommand('^V', 'show-version', 'status(__version_info__);')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))')
 
-globalCommand('^[', 'undo-last', 'vd.cmdlog.undo()')
-globalCommand('^]', 'redo-last', 'vd.cmdlog.redo()')
+globalCommand('U', 'undo-last', 'vd.cmdlog.undo()')
+globalCommand('R', 'redo-last', 'vd.cmdlog.redo()')
 
 globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
 

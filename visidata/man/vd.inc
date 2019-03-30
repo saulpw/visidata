@@ -319,9 +319,6 @@ open
 .No save Sy CommandLog No to Ar filename.vd No file
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
-.It Ic "R" Ar number
-pushes sheet with random population subset of
-.Ar number No rows
 .It Ic "T"
 open new sheet with rows and columns transposed
 .Pp

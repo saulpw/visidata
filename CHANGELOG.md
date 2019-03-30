@@ -5,7 +5,7 @@
 ## Major features
 
   - vgit
-  - undo
+  - undo/redo
   - numeric binning
   - stdout pipe/redirect
   - plugin framework
@@ -22,6 +22,7 @@
   - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
   - all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
   - Shift+S pushes `sheets-all`; zS pushes `sheets` stack. removed gS and the graveyard sheet.
+  - `random-rows` is no longer bound to any key by default (was Shift+R).
 
 
 ## plugins
@@ -51,7 +52,7 @@
    - `q`/`gq` to output nothing
    - `Ctrl+Q` to output current sheet (like at end of -b)
    - `vd -o-` to send directly to the terminal (can also be used with redirection, but not necessary)
-- `options.undo` (default False) to enable infinite linear undo/redo provisionally bound to `^[` and `^]`
+- `options.undo` (default False) to enable infinite linear undo/redo provisionally bound to `Shift+U` and `Shift+R`
 - [regex+] `options.default_sample_size` (default 100) to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso #219)
 - [json] add `options.json_sort_keys` (default True) to sort keys when saving to JSON (default True) (thanks @chocolateboy for PR #262)
 - [replay] exit with error code on error during replay (suggested by @cwarden #240)
