@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, error, status, Sheet, Column, regex_flags, fail, Progress
+from visidata import vd, VisiData, error, status, Sheet, Column, regex_flags, fail, Progress, globalCommand, ESC
 
 __all__ = ['rotate_range']
 
@@ -45,6 +45,9 @@ Sheet.addCommand('}', 'next-selected', 'moveToNextRow(lambda row,sheet=sheet: sh
 
 Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
 Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
+
+for i in range(1, 11):
+    globalCommand(ESC+str(i)[-1], 'jump-sheet-'+str(i), 'vd.allSheets[%s:] or fail("no sheet"); vd.push(vd.allSheets[%s])' % (i-1, i-1))
 
 
 @Sheet.api

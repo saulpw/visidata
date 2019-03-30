@@ -304,7 +304,7 @@ theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype c
 theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
 ENTER='^J'
-ESC='^['
+ALT=ESC='^['
 globalCommand('KEY_RESIZE', 'no-op', '')
 globalCommand('q', 'quit-sheet',  'vd.quit()')
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
@@ -454,7 +454,7 @@ class Extensible:
 
 
 class VisiData(Extensible):
-    allPrefixes = 'gz'  # embig'g'en, 'z'mallify
+    allPrefixes = ['g', 'z', ESC]  # embig'g'en, 'z'mallify, ESC=Alt/Meta
 
     def __call__(self):
         'Deprecated; use plain "vd"'
@@ -708,7 +708,6 @@ class VisiData(Extensible):
                 sheet.exec_keystrokes(self.keystrokes)
                 self.prefixWaiting = False
             elif keystroke in self.allPrefixes:
-                self.keystrokes = ''.join(sorted(set(self.keystrokes)))  # prefix order/quantity does not matter
                 self.prefixWaiting = True
             else:
                 status('no command for "%s"' % (self.keystrokes))

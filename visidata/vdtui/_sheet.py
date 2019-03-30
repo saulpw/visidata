@@ -568,6 +568,8 @@ class Sheet(BaseSheet):
 
         catchapply(self.checkCursor)
 
+        scr.refresh()
+
 
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),

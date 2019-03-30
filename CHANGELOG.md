@@ -23,6 +23,7 @@
   - all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
   - Shift+S pushes `sheets-all`; zS pushes `sheets` stack. removed gS and the graveyard sheet.
   - `random-rows` is no longer bound to any key by default (was Shift+R).
+  - add ALT/ESC as prefix; ALT+N to go to that sheet
 
 
 ## plugins
@@ -76,6 +77,8 @@
 - remove Sheet.vd; 'vd' attrs now available in execstr
 - remove hooks
 - `vd.sync(*threads)` waits on specific threads (returned by calls to `@asyncthread` functions)
+- add Sheet.num and VisiData.nSheets for left status prompt
+
 
 # v1.5.2 (2019-01-12)
 
