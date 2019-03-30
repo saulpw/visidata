@@ -64,7 +64,6 @@ cancel current replay
 .El
 .
 .Ss GLOBAL COMMANDS
-In most cases, commands that affect selected rows will affect all rows if no rows are selected.
 .Pp
 .Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -504,8 +503,8 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic gS
-.No open Sy Sheets Graveyard No which includes references to closed sheets
+.It Ic zS
+.No open Sy Sheets Stack No which shows only the active sheets on the stack
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -603,8 +602,8 @@ open one-line summary for selected rows
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " s   t   u"
 select/toggle/unselect these entries in source sheet
-.It Ic " Enter"
-open sheet of source rows that are grouped in current cell
+.It Ic " Enter  gEnter"
+open sheet of source rows that are grouped in current cell / selected rows
 .El
 .
 .Ss Describe Sheet (Shift+I)
@@ -747,6 +746,8 @@ replacement for newline character when saving to tsv
 replacement for tab character when saving to tsv
 .It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No ""
 command to copy stdin to system clipboard
+.It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No ""
+command to get contents of system clipboard
 .It Sy --visibility Ns = Ns Ar "int            " No "0"
 visibility level (0=low, 1=high)
 .It Sy --histogram-bins Ns = Ns Ar "int        " No "0"
@@ -789,6 +790,8 @@ escapechar passed to csv.reader
 sanitize input/output to handle edge cases, with a performance cost
 .It Sy --json-indent Ns = Ns Ar "NoneType      " No "None"
 indent to use when saving json
+.It Sy --json-sort-keys Ns = Ns Ar "bool       " No "True"
+sort object keys when saving to json
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
@@ -810,20 +813,16 @@ visible contents of a cell whose value is None
 indicator that the contents are only partially visible
 .It Sy "disp_oddspace      " No "\[u00B7]"
 displayable character for odd whitespace
-.It Sy "disp_unprintable   " No "."
-substitute character for unprintables
 .It Sy "disp_column_sep    " No "|"
 separator between columns
 .It Sy "disp_keycol_sep    " No "\[u2016]"
 separator between key columns and rest of columns
-.It Sy "disp_status_fmt    " No "{sheet.name}| "
+.It Sy "disp_status_fmt    " No "[{sheet.num}/{vd.nSheets}] {sheet.name}| "
 status line prefix
 .It Sy "disp_lstatus_max   " No "0"
 maximum length of left status line
 .It Sy "disp_status_sep    " No " | "
 separator between statuses
-.It Sy "disp_edit_fill     " No "_"
-edit field fill character
 .It Sy "disp_more_left     " No "<"
 header note indicating more columns to the left
 .It Sy "disp_more_right    " No ">"
@@ -840,8 +839,6 @@ status line color
 error message color
 .It Sy "color_warning      " No "yellow"
 warning message color
-.It Sy "color_edit_cell    " No "normal"
-cell color to use when editing cell
 .It Sy "disp_pending       " No ""
 string to display in pending cells
 .It Sy "color_note_pending " No "bold magenta"
@@ -870,6 +867,12 @@ color of hidden columns on metasheets
 color of selected rows
 .It Sy "color_working      " No "green"
 color of system running smoothly
+.It Sy "color_edit_cell    " No "normal"
+cell color to use when editing cell
+.It Sy "disp_edit_fill     " No "_"
+edit field fill character
+.It Sy "disp_unprintable   " No "."
+substitute character for unprintables
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
 default fmtstr to strftime for date values
 .It Sy "color_add_pending  " No "green"
