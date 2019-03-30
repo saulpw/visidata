@@ -7,4 +7,5 @@ globalCommand('g^E', 'errors-all', 'vd.push(ErrorSheet("last_errors", sum(vd.las
 Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet("cell_error", getattr(cursorCell, "error", None) or fail("no error this cell")))')
 
 class ErrorSheet(TextSheet):
+    precious = False
     pass

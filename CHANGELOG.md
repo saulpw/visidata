@@ -61,6 +61,7 @@
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
 - [chooseMany] error() on invalid choice #169
+- [precious] describe-sheet is now precious; error-sheet is not
 
 - [vdtui] separate out vdtui components into submodules: editline, textsheet, cliptext, color, column, sheet
 - [vdtui license] remove MIT license from vdtui; all code now licensed under GPL3
