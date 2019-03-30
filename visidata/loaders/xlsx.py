@@ -2,8 +2,8 @@
 from visidata import *
 
 def open_xlsx(p):
-    vs = xlsxContents(p)
-    return vs
+    xlsxContents(p).reload()
+    return vd.sheetsSheet
 
 
 class xlsxContents(Sheet):
@@ -28,6 +28,7 @@ class xlsxContents(Sheet):
         self.rows = []
         for sheetname in self.workbook.sheetnames:
             vs = xlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook[sheetname])
+            vd.push(vs)
             vs.reload()
             self.addRow(vs)
 

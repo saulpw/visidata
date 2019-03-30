@@ -142,7 +142,7 @@ def main():
                 vs.cursorVisibleColIndex = int(startcol)-1
 
         if args.batch:
-            vd.sheets = sources
+            vd.sheets.extend(sources)
             sources[0].reload()
         else:
             run(*sources)
