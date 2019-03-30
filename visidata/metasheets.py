@@ -1,4 +1,4 @@
-from visidata import globalCommand, Sheet, Column, options, vd, anytype, ENTER, asyncthread, option
+from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
@@ -95,6 +95,7 @@ class SheetsSheet(Sheet):
     precious = False
     columns = [
         ColumnAttr('name', width=30),
+        Column('num', getter=lambda c,r: r.num),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
         ColumnAttr('nVisibleCols', type=int),

@@ -279,7 +279,7 @@ theme('disp_truncator', '…', 'indicator that the contents are only partially v
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
 theme('disp_column_sep', '|', 'separator between columns')
 theme('disp_keycol_sep', '\u2016', 'separator between key columns and rest of columns')
-theme('disp_status_fmt', '{sheet.name}| ', 'status line prefix')
+theme('disp_status_fmt', '[{sheet.num}/{vd.nSheets}] {sheet.name}| ', 'status line prefix')
 theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
 theme('disp_more_left', '<', 'header note indicating more columns to the left')
@@ -489,6 +489,10 @@ class VisiData(Extensible):
     def sheet(self):
         'the top sheet on the stack'
         return self.sheets[0] if self.sheets else None
+
+    @property
+    def nSheets(self):
+        return len(self.sheets)
 
     def getSheet(self, sheetname):
         matchingSheets = [x for x in vd.sheets if x.name == sheetname]
@@ -910,9 +914,19 @@ class BaseSheet(Extensible):
     def loaded(self):
         return False
 
+    @property
+    def num(self):
+        if self in vd.allSheets:
+            return str(vd.allSheets.index(self)+1)
+
+        if hasattr(self, 'creatingCommand') and self.creatingCommand:
+            return self.creatingCommand.keystrokes
+
+        return ''
+
     def leftStatus(self):
         'Compose left side of status bar for this sheet (overridable).'
-        return options.disp_status_fmt.format(sheet=self)
+        return options.disp_status_fmt.format(sheet=self, vd=vd)
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):
         return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
