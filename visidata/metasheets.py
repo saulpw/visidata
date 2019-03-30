@@ -9,14 +9,14 @@ globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=v
 globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
 globalCommand('S', 'sheets-all', 'vd.push(vd.sheetsSheet)')
 
-globalCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
+BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)')
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
-globalCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
 
-@Sheet.cached_property
+@BaseSheet.cached_property
 def optionsSheet(sheet):
     return OptionsSheet(sheet.name+"_options", source=sheet)
 
