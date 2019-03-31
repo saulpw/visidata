@@ -132,6 +132,8 @@ class CommandLog(TsvSheet):
         append_tsv_row(vd.macrosheet, (ks, macropath.resolve()))
 
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
+        if not isLoggableSheet(sheet):
+            return  # don't record editlog commands
         if self.currentActiveRow:
             self.afterExecSheet(sheet, False, '')
 
@@ -160,10 +162,8 @@ class CommandLog(TsvSheet):
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
-        if not isLoggableSheet(sheet):
-            return  # don't record editlog commands
-
-        assert self.currentActiveRow
+        if not self.currentActiveRow:  # nothing to record
+            return
 
         if err:
             self.currentActiveRow[-1] += ' [%s]' % err
