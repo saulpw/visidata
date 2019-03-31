@@ -75,10 +75,14 @@ view sheet of commands and keybindings
 abort program immediately
 .It Ic " ^C"
 cancel user input or abort all async threads on current sheet
-.It Ic " q"
+.It Ic "  q"
 quit current sheet
-.It Ic "gq"
+.It Ic " gq"
 quit all sheets (clean exit)
+.It Ic "  U"
+.No undoes the most recent modification ( requires enabling of Sy options.undo Ns )
+.It Ic "  R"
+.No redoes the most recent undo ( requires enabling of Sy options.undo Ns )
 .El
 .Ss "Cursor Movement"
 .
@@ -505,6 +509,8 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic zS
 .No open Sy Sheets Stack No which shows only the active sheets on the stack
+.It Ic "Alt" Ar number
+.No jump to Ar number Ns th sheet
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)

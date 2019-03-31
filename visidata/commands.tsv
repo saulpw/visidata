@@ -12,6 +12,7 @@ global	exec-longname		Space	Space				n		meta-exec-cmd	execute command by name
 global	exec-python	g	^X	g^X	n	n	n	y		python-exec	execute Python statement in the global scope
 global	forget-sheet		Q	Q	quit	n	n	n		sheet-quit-remove	quit current sheet and remove it from the cmdlog
 global	freq-rows	z	F	zF	y	use	n	y		data-aggregate-summary	open one-line summary for all selected rows
+global	jump-sheet-	Alt	[1-9]	Alt+[1-9]	y			y			jump to sheet of provided number
 global	no-op		KEY_RESIZE	KEY_RESIZE	n	n	n	n			no operation
 global	open-file		o	o	y	n	n	y		sheet-open-path	open input in VisiData
 global	pause-replay		^U	^U	n	n	n	n		meta-replay-toggle	pause/resume replay
@@ -22,6 +23,7 @@ global	pyobj-sheet	g	^Y	g^Y	meta	n	n	y		python-push-sheet-object	open current sh
 global	quit-all	g	q	gq	quit	n	n	n		sheet-quit-all	quit all sheets (clean exit)
 global	quit-sheet		q	q	quit	n	n	y	*	sheet-quit-current	quit current sheet
 global	redraw		^L	^L	n	n	n	n			refresh screen
+global	redo-last		R	R							redoes the most recent undo (requires enabling of options.undo)
 global	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
 global	save-all	g	^S	g^S	n	n	n	y		sheet-save-all	save all sheets to given file or directory)
 global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd file
@@ -36,6 +38,7 @@ global	suspend		^Z	^Z	suspend	n	n	n			suspend VisiData process
 global	sysopen-help		^H	^H	external	n	n	n			view vd man page
 global	threads-all		^T	^T	meta	n	n	n		meta-threads	open Threads Sheet
 global	toggle-profile		^_	^_	n	n	n	n		meta-threads-profile	turn profiling on for main process
+global	undo-last		U	U				n			undoes the most recent modification (requires enabling of options.undo)
 global	visidata-dir	g	D	gD	static	n	n	y		meta-visidata-dir	open .visidata directory
 XmlSheet	addcol-xmlattr	z	a	za	n	n	y	y			add column for xml attribute
 XmlSheet	dive-row		Enter	Enter	y	n	n	y			load table referenced in current row into memory
@@ -153,7 +156,7 @@ Sheet	prev-selected		{	{	n	use	n	n	2	view-go-prev-selected	move up the current c
 Sheet	prev-value		<	<	n	n	n	n		view-go-prev-value	move up the current column to the next value
 Sheet	pyobj-cell	z	^Y	z^Y	meta	n	n	y		python-push-cell-object	open current cell as Python object
 Sheet	pyobj-row		^Y	^Y	meta	n	n	y		python-push-row-object	open current row as Python object
-Sheet	random-rows		R	R	derived	n	n	y		rows-select-random	open duplicate sheet with a random population subset of # rows
+Sheet	random-rows				derived	n	n	y		rows-select-random	open duplicate sheet with a random population subset of # rows
 Sheet	reload-row	z	^R	z^R	n	n	unmodifies	y			
 Sheet	reload-selected	gz	^R	gz^R	n	n	unmodifies	y			
 Sheet	reload-sheet		^R	^R	n	n	should confirm if modified; marks as unmodified	y	4,5	sheet-reload	reload current sheet
