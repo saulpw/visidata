@@ -2,6 +2,8 @@
 
 A terminal interface for exploring and arranging tabular data.
 
+![Frequency table](http://visidata.org/freq-move-row.gif)
+
 ## Dependencies
 
 - Linux or OS/X
@@ -53,6 +55,14 @@ Use `-f <filetype>` to force a particular filetype.
 
 If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues) or chat with us at #visidata on [freenode.net](https://webchat.freenode.net/).
 
+Here are some concrete ways you can help make VisiData even more awesome:
+
+* Write a blogpost (or tweet or whatever) about a VisiData command or feature you use frequently, and share it with us!
+* Expand VisiData to support .xyz proprietary data format.  Creating a loader [is really straightforward](http://visidata.org/docs/loaders/).
+* Pandas users can [help improve the PandasSheet](https://github.com/saulpw/visidata/labels/pandas) with optimizations and pandas-specific integration.
+* Create and maintain [new installation packages](https://github.com/saulpw/visidata/labels/packaging).
+* Acknowledge the realities of late-stage capitalism and [give regular old money](https://www.patreon.com/saulpw).
+
 ## Other applications within the VisiData ecosystem
 
 The core interface paradigm--rows and columns--can be used to create efficient terminal workflows with a minimum of effort for almost any application. These have been prototyped as proof of this concept:
@@ -73,4 +83,4 @@ VisiData is conceived and developed by Saul Pwanson `<vd@saul.pw>`.
 
 Anja Kefala `<anja.kefala@gmail.com>` maintains the documentation and packages for all platforms.
 
-Many thanks to numerous other contributors, and to those wonderful users who provide feedback, for helping to make VisiData the awesome tool that it is.
+Many thanks to numerous other [contributors](https://visidata.org/credits/), and to those wonderful users who provide feedback, for helping to make VisiData the awesome tool that it is.
