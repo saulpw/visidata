@@ -1,7 +1,7 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	tests/data1.tsv	o	open file
 			open-file	tests/data2.tsv	o	open file
-data2			sheets		S	open Sheets Sheet
+data2			sheets-stack		S	open Sheets Sheet
 sheets		キdata2	select-row		s	select current row
 sheets		キdata1	select-row		s	select current row
 sheets			columns-selected		gC	open Columns Sheet with all columns from selected sheets
