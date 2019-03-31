@@ -346,6 +346,9 @@ class CommandLog(TsvSheet):
                     longname='set-option'))
 
     def undo(self):
+        if not options.undo:
+            fail("options.undo not enabled")
+
         for cmdlogrow in self.rows[::-1]:
             if cmdlogrow.undofunc:
                 cmdlogrow.undofunc()
@@ -357,7 +360,8 @@ class CommandLog(TsvSheet):
                     vd.push(vs)
                 status("%s undone" % cmdlogrow.longname)
                 return
-        error("nothing to undo")
+
+        fail("nothing to undo")
 
     def redo(self):
         self.undone or error("nothing to redo")
