@@ -210,7 +210,7 @@ class Column(Extensible):
 
         except Exception as e:  # formatting failure
             e.stacktrace = stacktrace()
-            dw.error = e
+            dw.error = e.stacktrace
             try:
                 dw.display = str(cellval)
             except Exception as e:
