@@ -16,6 +16,7 @@ import datetime
 from functools import wraps
 import io
 import itertools
+import locale
 import string
 import re
 import textwrap
@@ -337,7 +338,7 @@ anytype.__name__ = ''
 
 def _defaultFormatter(fmtstr, typedval):
     if fmtstr:
-        return fmtstr.format(typedval)
+        return locale.format_string(fmtstr, typedval)
     return str(typedval)
 
 def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
@@ -359,8 +360,8 @@ def typeIcon(typetype):
 vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
 vdtype(str, '~', formatter=lambda _,v: v)
-vdtype(int, '#', '{:.0f}')
-vdtype(float, '%', '{:.02f}')
+vdtype(int, '#', '%.0f')
+vdtype(float, '%', '%.02f')
 vdtype(dict, '')
 vdtype(list, '')
 

@@ -9,6 +9,7 @@ __version_info__ = 'saul.pw/VisiData v' + __version__
 import os
 import io
 import sys
+import locale
 
 from visidata import vd, option, options, status, run
 from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand
@@ -85,6 +86,8 @@ def main():
 
     # fetch motd after options parsing/setting
     domotd()
+
+    locale.setlocale(locale.LC_ALL, '')
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()

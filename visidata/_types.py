@@ -2,6 +2,7 @@
 
 import functools
 import datetime
+import locale
 from visidata import options, theme, Sheet, TypedWrapper, undoAttr
 
 from .vdtui import vdtype
@@ -90,9 +91,9 @@ class datedelta(datetime.timedelta):
         return self.total_seconds()
 
 
-vdtype(vlen, '♯', '{:.0f}')
+vdtype(vlen, '♯', '%.0f')
 vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
-vdtype(currency, '$', '{:,.02f}')
+vdtype(currency, '$', formatter=lambda fmtstr,val: locale.currency(val, symbol=False))
 
 # simple constants, for expressions like 'timestamp+15*minutes'
 years=365.25
