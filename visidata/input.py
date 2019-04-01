@@ -259,8 +259,8 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         if isinstance(type, str):
             self.lastInputs[type].append(ret)
     elif defaultLast:
-        histlist or fail("no previous input")
-        ret = histlist[-1]
+        history or fail("no previous input")
+        ret = history[-1]
 
     return ret
 
