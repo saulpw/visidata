@@ -502,27 +502,43 @@ class Sheet(BaseSheet):
 
         numHeaderRows = self.nHeaderRows
         vcolidx = 0
-        rows = list(self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows])
+
+        headerRow = 0
         for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
-            x, colwidth = colinfo
-            col = self.visibleCols[vcolidx]
+            self.drawColHeader(scr, headerRow, numHeaderRows, vcolidx)
 
-            if x < vd.windowWidth:  # only draw inside window
-              timer = threading.Timer(0.3, lambda col=col: status("setting %s async" % col.name) and col.setCache('async'))
-              timer.start()
-              try:
-                headerRow = 0
-                self.drawColHeader(scr, headerRow, numHeaderRows, vcolidx)
+        y = headerRow + numHeaderRows
 
-                y = headerRow + numHeaderRows
-                for rowidx in range(0, min(len(rows), self.nVisibleRows)):
-                    dispRowIdx = self.topRowIndex + rowidx
-                    if dispRowIdx >= self.nRows:
-                        break
+        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nVisibleRows, self.nRows)]
 
-                    self.rowLayout[dispRowIdx] = y
+        for rowidx, row in enumerate(rows):
+            dispRowIdx = self.topRowIndex + rowidx
 
-                    row = rows[rowidx]
+            self.rowLayout[dispRowIdx] = y
+
+            # sepattr is the attr between cell/columns
+            rowattr = rowattrs.get(rowidx)
+            if rowattr is None:
+                rowattr = rowattrs[rowidx] = self.colorize(None, row)
+            sepattr = rowattr
+
+            # must apply current row here, because this colorization requires cursorRowIndex
+            if dispRowIdx == self.cursorRowIndex:
+                basecellattr = rowattr.update_attr(color_current_row)
+                sepattr = sepattr.update_attr(color_current_row)
+            else:
+                basecellattr = rowattr
+
+            for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
+                x, colwidth = colinfo
+                col = self.visibleCols[vcolidx]
+
+                if x >= vd.windowWidth:  # only draw inside window
+                    break
+
+                timer = threading.Timer(0.1, lambda col=col: status("setting %s async" % col.name) and col.setCache('async'))
+                timer.start()
+                try:
                     cellval = col.getCell(row, colwidth-1)
                     try:
                         if isNull(cellval.value):
@@ -532,17 +548,7 @@ class Sheet(BaseSheet):
                         pass
 
                     attr = self.colorize(col, row, cellval)
-
-                    # sepattr is the attr between cell/columns
-                    rowattr = rowattrs.get(rowidx)
-                    if rowattr is None:
-                        rowattr = rowattrs[rowidx] = self.colorize(None, row)
-                    sepattr = rowattr
-
-                    # must apply current row here, because this colorization requires cursorRowIndex
-                    if dispRowIdx == self.cursorRowIndex:
-                        attr = attr.update_attr(color_current_row)
-                        sepattr = sepattr.update_attr(color_current_row)
+                    attr = attr.update_attr(basecellattr)
 
                     note = getattr(cellval, 'note', None)
                     if note:
@@ -558,10 +564,10 @@ class Sheet(BaseSheet):
 
                     if x+colwidth+len(sepchars) <= vd.windowWidth:
                        scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
-
-                    y += 1
-              finally:
+                finally:
                     timer.cancel()
+
+            y += 1
 
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, vd.windowWidth-2, options.disp_more_right, colors.color_column_sep)
