@@ -234,9 +234,9 @@ class EtherSheet(Sheet):
     rowtype = 'packets'
     columns = [
         ColumnAttr('timestamp', type=date, fmtstr="%H:%M:%S.%f"),
-        Column('ether_manuf', getter=lambda col,row: mac_manuf(macaddr(row.src))),
-        Column('ether_src', getter=lambda col,row: macaddr(row.src), width=6),
-        Column('ether_dst', getter=lambda col,row: macaddr(row.dst), width=6),
+        Column('ether_manuf', type=str, getter=lambda col,row: mac_manuf(macaddr(row.src))),
+        Column('ether_src', type=str, getter=lambda col,row: macaddr(row.src), width=6),
+        Column('ether_dst', type=str, getter=lambda col,row: macaddr(row.dst), width=6),
         ColumnAttr('ether_data', 'data', type=vlen, width=0),
     ]
 
@@ -245,18 +245,18 @@ class IPSheet(Sheet):
     rowtype = 'packets'
     columns = [
         ColumnAttr('timestamp', type=date, fmtstr="%H:%M:%S.%f"),
-        ColumnAttr('ip', width=0),
-        Column('ip_src', width=14, getter=lambda col,row: ipaddress.ip_address(row.ip.src)),
-        Column('ip_dst', width=14, getter=lambda col,row: ipaddress.ip_address(row.ip.dst)),
-        ColumnAttr('ip_hdrlen', 'ip.hl', width=0, helpstr="IPv4 Header Length"),
+        ColumnAttr('ip', type=str, width=0),
+        Column('ip_src', type=str, width=14, getter=lambda col,row: ipaddress.ip_address(row.ip.src)),
+        Column('ip_dst', type=str, width=14, getter=lambda col,row: ipaddress.ip_address(row.ip.dst)),
+        ColumnAttr('ip_hdrlen', 'ip.hl', type=int, width=0, helpstr="IPv4 Header Length"),
         ColumnAttr('ip_proto', 'ip.p', type=lambda v: protocols['ip'].get(v), width=8, helpstr="IPv4 Protocol"),
-        ColumnAttr('ip_id', 'ip.id', width=0, helpstr="IPv4 Identification"),
-        ColumnAttr('ip_rf', 'ip.rf', width=0, helpstr="IPv4 Reserved Flag (Evil Bit)"),
-        ColumnAttr('ip_df', 'ip.df', width=0, helpstr="IPv4 Don't Fragment flag"),
-        ColumnAttr('ip_mf', 'ip.mf', width=0, helpstr="IPv4 More Fragments flag"),
-        ColumnAttr('ip_tos', 'ip.tos', width=0, type=FlagGetter('ip_tos'), helpstr="IPv4 Type of Service"),
-        ColumnAttr('ip_ttl', 'ip.ttl', width=0, helpstr="IPv4 Time To Live"),
-        ColumnAttr('ip_ver', 'ip.v', width=0, helpstr="IPv4 Version"),
+        ColumnAttr('ip_id', 'ip.id', type=int, width=10, helpstr="IPv4 Identification"),
+        ColumnAttr('ip_rf', 'ip.rf', type=int, width=10, helpstr="IPv4 Reserved Flag (Evil Bit)"),
+        ColumnAttr('ip_df', 'ip.df', type=int, width=10, helpstr="IPv4 Don't Fragment flag"),
+        ColumnAttr('ip_mf', 'ip.mf', type=int, width=10, helpstr="IPv4 More Fragments flag"),
+        ColumnAttr('ip_tos', 'ip.tos', width=10, type=FlagGetter('ip_tos'), helpstr="IPv4 Type of Service"),
+        ColumnAttr('ip_ttl', 'ip.ttl', type=int, width=10, helpstr="IPv4 Time To Live"),
+        ColumnAttr('ip_ver', 'ip.v', type=int, width=10, helpstr="IPv4 Version"),
     ]
 
     def reload(self):
@@ -300,21 +300,21 @@ class PcapSheet(Sheet):
     columns = [
         ColumnAttr('timestamp', type=date, fmtstr="%H:%M:%S.%f"),
         Column('transport', type=get_transport, width=5),
-        Column('srcmanuf', getter=lambda col,row: manuf(macaddr(row.src))),
-        Column('srchost', getter=lambda col,row: row.srchost),
+        Column('srcmanuf', type=str, getter=lambda col,row: manuf(macaddr(row.src))),
+        Column('srchost', type=str, getter=lambda col,row: row.srchost),
         Column('srcport', type=int, getter=lambda col,row: get_port(row, 'sport')),
-        Column('dstmanuf', getter=lambda col,row: manuf(macaddr(row.dst))),
-        Column('dsthost', getter=lambda col,row: row.dsthost),
+        Column('dstmanuf', type=str, getter=lambda col,row: manuf(macaddr(row.dst))),
+        Column('dsthost', type=str, getter=lambda col,row: row.dsthost),
         Column('dstport', type=int, getter=lambda col,row: get_port(row, 'dport')),
         ColumnAttr('ether_proto', 'type', type=lambda v: protocols['ethernet'].get(v), width=0),
         ColumnAttr('tcp_flags', 'ip.tcp.flags', type=FlagGetter('tcp'), helpstr="TCP Flags"),
-        Column('service', getter=lambda col,row: getService(getTuple(row))),
+        Column('service', type=str, getter=lambda col,row: getService(getTuple(row))),
         ColumnAttr('data', type=vlen),
-        ColumnAttr('ip.len', type=int),
+        ColumnAttr('ip.len', 'ip_len', type=int),
         ColumnAttr('tcp', 'ip.tcp', width=4, type=vlen),
         ColumnAttr('udp', 'ip.udp', width=4, type=vlen),
         ColumnAttr('icmp', 'ip.icmp', width=4, type=vlen),
-        ColumnAttr('dns', width=4),
+        ColumnAttr('dns', type=str, width=4),
     ]
 
     @asyncthread
@@ -353,12 +353,12 @@ class PcapFlowsSheet(Sheet):
     _rowtype = flowtype
 
     columns = [
-        ColumnAttr('transport'),
-        Column('src', getter=lambda col,row: row.src),
+        ColumnAttr('transport', type=str),
+        Column('src', type=str, getter=lambda col,row: row.src),
         ColumnAttr('sport', type=int),
-        Column('dst', getter=lambda col,row: row.dst),
+        Column('dst', type=str, getter=lambda col,row: row.dst),
         ColumnAttr('dport', type=int),
-        Column('service', width=8, getter=lambda col,row: getService(getTuple(row.packets[0]))),
+        Column('service', type=str, width=8, getter=lambda col,row: getService(getTuple(row.packets[0]))),
         ColumnAttr('packets', type=vlen),
         Column('connect_latency_ms', type=float, getter=lambda col,row: col.sheet.latency[getTuple(row.packets[0])]),
     ]
