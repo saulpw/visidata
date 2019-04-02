@@ -310,7 +310,7 @@ class PcapSheet(Sheet):
         ColumnAttr('tcp_flags', 'ip.tcp.flags', type=FlagGetter('tcp'), helpstr="TCP Flags"),
         Column('service', type=str, getter=lambda col,row: getService(getTuple(row))),
         ColumnAttr('data', type=vlen),
-        ColumnAttr('ip.len', 'ip_len', type=int),
+        ColumnAttr('ip_len', 'ip.len', type=int),
         ColumnAttr('tcp', 'ip.tcp', width=4, type=vlen),
         ColumnAttr('udp', 'ip.udp', width=4, type=vlen),
         ColumnAttr('icmp', 'ip.icmp', width=4, type=vlen),
