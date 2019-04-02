@@ -45,7 +45,6 @@
 - bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
 - numeric binning for frequency/pivot table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
-- [column] if drawing a particular column takes more than 300ms, the column becomes async
 - expr columns are now set to cache automatically
 - `sort-*-add` bound to z[] and gz[] to add additional sort columns
 - output pipes now work as expected

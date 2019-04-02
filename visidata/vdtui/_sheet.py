@@ -533,12 +533,7 @@ class Sheet(BaseSheet):
                 x, colwidth = colinfo
                 col = self.visibleCols[vcolidx]
 
-                if x >= vd.windowWidth:  # only draw inside window
-                    break
-
-                timer = threading.Timer(0.1, lambda col=col: status("setting %s async" % col.name) and col.setCache('async'))
-                timer.start()
-                try:
+                if x < vd.windowWidth:  # only draw inside window
                     cellval = col.getCell(row, colwidth-1)
                     try:
                         if isNull(cellval.value):
@@ -564,8 +559,6 @@ class Sheet(BaseSheet):
 
                     if x+colwidth+len(sepchars) <= vd.windowWidth:
                        scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
-                finally:
-                    timer.cancel()
 
             y += 1
 
