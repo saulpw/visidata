@@ -1,5 +1,5 @@
 .Dd January 12, 2019
-.Dt vd \&1 "Quick Reference Guide" 
+.Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
 .\" Long option with arg: .Lo f filetype format
@@ -531,7 +531,7 @@ abort async threads for current/selected sheets(s)
 .It Ic " &" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
-.Bl -tag -width x -compact -offset XXXXXXXXXXXXXXXXXXXX 
+.Bl -tag -width x -compact -offset XXXXXXXXXXXXXXXXXXXX
 .It Sy "\&."
 .Sy inner No " keep only rows which match keys on all sheets"
 .It Sy "\&."
@@ -558,7 +558,7 @@ abort async threads for current/selected sheets(s)
 .It Ic gO
 .No open Sy ~/.visidatarc
 .El
-.Bl -inset -compact 
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -745,8 +745,8 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy csv No (comma-separated value)
 .Bl -inset -compact -offset xxx
-.It .csv files are a scourge upon the earth, and still regrettably common.  
-.It See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.  
+.It .csv files are a scourge upon the earth, and still regrettably common.
+.It See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.
 .It Accepted dialects are Ic excel-tab Ns , Ic unix Ns , and Ic excel Ns .
 .El
 .El
@@ -770,7 +770,7 @@ These are the supported sources:
 .El
 .Pp
 .Bl -inset -compact -offset xxx
-.It Sy pcap No ( requires Sy xpkt Ns , Sy dnslib Ns )
+.It Sy pcap No ( requires Sy dpkt Ns , Sy dnslib Ns )
 .Bl -inset -compact -offset xxx
 .It View and investigate captured network traffic in a tabular format.
 .El
