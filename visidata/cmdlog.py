@@ -3,7 +3,7 @@ import threading
 from visidata import *
 import visidata
 
-option('undo', False, 'enable undo/redo')
+option('undo', True, 'enable undo/redo')
 option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds')
 theme('disp_replay_play', '▶', 'status indicator for active replay')
 theme('disp_replay_pause', '‖', 'status indicator for paused replay')
@@ -22,8 +22,8 @@ globalCommand(None, 'status', 'status(input("status: "))')
 globalCommand('^V', 'show-version', 'status(__version_info__);')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))')
 
-globalCommand('U', 'undo-last', 'vd.cmdlog.undo()')
-globalCommand('R', 'redo-last', 'vd.cmdlog.redo()')
+globalCommand('U', 'undo-last', 'vd.cmdlog.undo(sheet)')
+globalCommand('R', 'redo-last', 'vd.cmdlog.redo(sheet)')
 
 globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
 
@@ -345,12 +345,12 @@ class CommandLog(TsvSheet):
                     keystrokes='', input=str(optval),
                     longname='set-option'))
 
-    def undo(self):
+    def undo(self, sheet):
         if not options.undo:
             fail("options.undo not enabled")
 
         for cmdlogrow in self.rows[::-1]:
-            if cmdlogrow.undofunc:
+            if cmdlogrow.undofunc and str(cmdlogrow.sheet) == sheet.name:
                 cmdlogrow.undofunc()
                 self.undone.append(cmdlogrow)
                 self.rows.remove(cmdlogrow)
@@ -361,7 +361,7 @@ class CommandLog(TsvSheet):
                 status("%s undone" % cmdlogrow.longname)
                 return
 
-        fail("nothing to undo")
+        fail("nothing to undo on current sheet")
 
     def redo(self):
         self.undone or error("nothing to redo")
