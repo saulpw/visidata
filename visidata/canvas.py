@@ -206,7 +206,7 @@ class Plotter(BaseSheet):
         'return list of deduped rows within bbox'
         ret = {}
         for y in range(bbox.ymin, bbox.ymax+1):
-            for x in range(bbox.xmin, bbox.xmax+1):
+            for x in range(bbox.xmin, min(len(self.pixels[y]), bbox.xmax+1)):
                 for attr, rows in self.pixels[y][x].items():
                     if attr not in self.hiddenAttrs:
                         for r in rows:
