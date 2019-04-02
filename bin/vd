@@ -20,7 +20,10 @@ option('config', '~/.visidatarc', 'config file to exec in Python')
 # for --play
 def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
-    log = logpath.read_text().format(*args, **kwargs)
+    log = logpath.read_text()
+    if args or kwargs:
+        log = log.format(*args, **kwargs)
+
     src = PathFd(logpath.fqpn, io.StringIO(log), filesize=len(log))
     vs = openSource(src, filetype='vd')
     vs.name += '_vd'
