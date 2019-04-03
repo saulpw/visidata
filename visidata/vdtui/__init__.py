@@ -754,6 +754,12 @@ class VisiData(Extensible):
 
             if vs.precious and vs not in vs.vd.allSheets:
                 vs.vd.allSheets.append(vs)
+                vs.num = len(vs.vd.allSheets)
+            elif hasattr(self, 'creatingCommand') and self.creatingCommand:
+                vs.num = vs.num or self.creatingCommand.keystrokes
+            else:
+                vs.num = vs.num or '?'
+
             return vs
 # end VisiData class
 
@@ -850,6 +856,7 @@ class BaseSheet(Extensible):
     def __init__(self, name, **kwargs):
         self.name = name
         self.source = None
+        self.num = ''
 
         # track all async threads from sheet
         self.__dict__.update(kwargs)
@@ -911,16 +918,6 @@ class BaseSheet(Extensible):
     @property
     def loaded(self):
         return False
-
-    @property
-    def num(self):
-        if self in vd.allSheets:
-            return str(vd.allSheets.index(self)+1)
-
-        if hasattr(self, 'creatingCommand') and self.creatingCommand:
-            return self.creatingCommand.keystrokes
-
-        return ''
 
     def leftStatus(self):
         'Compose left side of status bar for this sheet (overridable).'
