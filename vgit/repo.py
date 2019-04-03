@@ -191,7 +191,6 @@ BaseSheet.addCommand('B', 'git-branches', 'vd.push(getRootSheet(sheet).gitBranch
 BaseSheet.addCommand('gO', 'git-options', 'vd.push(getRootSheet(sheet).gitOptionsSheet)', 'push sheet of git options')
 BaseSheet.addCommand('T', 'git-stashes', 'vd.push(getRootSheet(sheet).gitStashesSheet)', 'push stashes sheet')
 BaseSheet.addCommand('R', 'git-remotes', 'vd.push(getRootSheet(sheet).gitRemotesSheet)', 'push remotes sheet')
-Sheet.unbindkey('R')
 Sheet.unbindkey('T')
 Sheet.unbindkey('L')
 #unbindkey('gO')
