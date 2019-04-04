@@ -10,7 +10,7 @@ __all__ = ['confirm', 'editline', 'choose', 'chooseOne', 'chooseMany', 'Complete
 
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
-theme('disp_unprintable', '.', 'substitute character for unprintables')
+theme('disp_unprintable', '·', 'substitute character for unprintables')
 
 vd.lastInputs = collections.defaultdict(list)  # [input_type] -> list of prevInputs
 
@@ -46,7 +46,7 @@ def splice(v, i, s):
 
 def clean_printable(s):
     'Escape unprintable characters.'
-    return ''.join(c if c.isprintable() else ('<%04X>' % ord(c)) for c in str(s))
+    return ''.join(c if c.isprintable() else options.disp_unprintable for c in str(s))
 
 
 def delchar(s, i, remove=1):
