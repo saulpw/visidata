@@ -3,11 +3,32 @@ import functools
 import threading
 import re
 from copy import copy
+import textwrap
 
-from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, error, fail, Column,
+from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, error, fail, Column, option,
 TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow,
 vd, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
+option('textwrap_cells', True, 'wordwrap text for multiline rows')
+
+theme('disp_column_sep', '╵', 'separator between columns')
+theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
+theme('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
+theme('disp_rowmid_sep', '│', '') # ┃┊│█
+theme('disp_rowbot_sep', '╵', '') # ┊┴╿⌞█⍿╵⎢┴⌊
+theme('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
+theme('disp_keytop_sep', '║', '') # ╽╿┃╖╟
+theme('disp_keymid_sep', '║', '') # ╽╿┃
+theme('disp_keybot_sep', '║', '') # ╽╿┃╜‖
+theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
+theme('disp_endmid_sep', '║', '') # ╽╿┃
+theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
+
+def splitcell(s, width=None):
+    if not width or not options.textwrap_cells:
+        return [s]
+
+    return textwrap.wrap(s, width=width, break_long_words=False)
 
 __all__ = [ 'RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet' ]
 
@@ -62,7 +83,7 @@ class Sheet(BaseSheet):
         self.rightVisibleColIndex = 0
 
         # as computed during draw()
-        self.rowLayout = {}      # [rowidx] -> y
+        self.rowLayout = {}      # [rowidx] -> (y, w)
         self.visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # list of all columns in display order
@@ -160,6 +181,10 @@ class Sheet(BaseSheet):
         ret.topRowIndex = ret.cursorRowIndex = 0
         return ret
 
+    @property
+    def bottomRowIndex(self):
+        return max(self.rowLayout.keys())
+
     def __deepcopy__(self, memo):
         'same as __copy__'
         ret = self.__copy__()
@@ -175,7 +200,7 @@ class Sheet(BaseSheet):
     @property
     def nVisibleRows(self):
         'Number of visible rows at the current window height.'
-        return vd.windowHeight-self.nHeaderRows-self.nFooterRows
+        return len(self.rowLayout) or (vd.windowHeight-self.nHeaderRows-self.nFooterRows)
 
     @property
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
@@ -201,7 +226,7 @@ class Sheet(BaseSheet):
 
     @property
     def visibleRows(self):  # onscreen rows
-        'List of rows onscreen. '
+        'List of rows onscreen.'
         return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
 
     @property
@@ -373,7 +398,7 @@ class Sheet(BaseSheet):
 
         # (x,y) is relative cell within screen viewport
         x = self.cursorVisibleColIndex - self.leftVisibleColIndex
-        y = self.cursorRowIndex - self.topRowIndex + self.nHeaderRows  # header
+        y = self.cursorRowIndex - self.topRowIndex + self.nHeaderRows
 
         # check bounds, scroll if necessary
         if y < self.nHeaderRows:
@@ -490,14 +515,9 @@ class Sheet(BaseSheet):
         if not self.columns:
             return
 
-        color_current_row = CursesAttr(colors.color_current_row, 5)
-        disp_column_sep = options.disp_column_sep
-
-        rowattrs = {}  # [rowidx] -> attr
-        colattrs = {}  # [colidx] -> attr
         isNull = isNullFunc()
 
-        self.rowLayout = {}
+        self.rowLayout = {}  # [rowidx] -> (y, height)
         self.calcColLayout()
 
         numHeaderRows = self.nHeaderRows
@@ -510,30 +530,52 @@ class Sheet(BaseSheet):
         y = headerRow + numHeaderRows
 
         rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nVisibleRows, self.nRows)]
+        catchapply(self.checkCursor)
 
         for rowidx, row in enumerate(rows):
-            dispRowIdx = self.topRowIndex + rowidx
+            if y >= vd.windowHeight-1:
+                break
 
-            self.rowLayout[dispRowIdx] = y
+            rowattr = self.colorize(None, row)
+
+            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowattr, maxheight=vd.windowHeight-y, isNull=isNull)
+
+        if vcolidx+1 < self.nVisibleCols:
+            scr.addstr(headerRow, vd.windowWidth-2, options.disp_more_right, colors.color_column_sep)
+
+        scr.refresh()
+
+    def drawRow(self, scr, row, rowidx, ybase, rowattr, maxheight, isNull=isNullFunc()):
+            topsep = options.disp_rowtop_sep
+            midsep = options.disp_rowmid_sep
+            botsep = options.disp_rowbot_sep
+            endsep = options.disp_rowend_sep
+            keytopsep = options.disp_keytop_sep
+            keymidsep = options.disp_keymid_sep
+            keybotsep = options.disp_keybot_sep
+            endtopsep = options.disp_endtop_sep
+            endmidsep = options.disp_endmid_sep
+            endbotsep = options.disp_endbot_sep
+
+            colsep = options.disp_column_sep
+            keysep = options.disp_keycol_sep
 
             # sepattr is the attr between cell/columns
-            rowattr = rowattrs.get(rowidx)
-            if rowattr is None:
-                rowattr = rowattrs[rowidx] = self.colorize(None, row)
             sepattr = rowattr
 
-            # must apply current row here, because this colorization requires cursorRowIndex
-            if dispRowIdx == self.cursorRowIndex:
+            # apply current row here instead of in a colorizer, because it needs to know dispRowIndex
+            if rowidx == self.cursorRowIndex:
+                color_current_row = CursesAttr(colors.color_current_row, 5)
                 basecellattr = rowattr.update_attr(color_current_row)
                 sepattr = sepattr.update_attr(color_current_row)
             else:
                 basecellattr = rowattr
 
-            for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
-                x, colwidth = colinfo
-                col = self.visibleCols[vcolidx]
+            displines = {}  # [vcolidx] -> list of lines in that cell
 
+            for vcolidx, (x, colwidth) in sorted(self.visibleColLayout.items()):
                 if x < vd.windowWidth:  # only draw inside window
+                    col = self.visibleCols[vcolidx]
                     cellval = col.getCell(row, colwidth-1)
                     try:
                         if isNull(cellval.value):
@@ -542,32 +584,75 @@ class Sheet(BaseSheet):
                     except TypeError:
                         pass
 
+                    displines[vcolidx] = (col, cellval, splitcell(cellval.display, width=colwidth-1))
+
+            heights = []
+            for col, cellval, lines in displines.values():
+                h = len(lines)   # of this cell
+                heights.append(min(col.height, h))
+
+            height = min(max(heights), maxheight)
+
+            self.rowLayout[rowidx] = (ybase, height)
+
+            for vcolidx, (col, cellval, lines) in displines.items():
+                    x, colwidth = self.visibleColLayout[vcolidx]
+
                     attr = self.colorize(col, row, cellval)
                     attr = attr.update_attr(basecellattr)
 
                     note = getattr(cellval, 'note', None)
                     if note:
                         noteattr = attr.update_attr(colors.get_color(cellval.notecolor), 10)
-                        clipdraw(scr, y, x+colwidth-len(note), note, noteattr.attr, len(note))
+                        clipdraw(scr, ybase, x+colwidth-len(note), note, noteattr.attr, len(note))
 
-                    clipdraw(scr, y, x, disp_column_fill+cellval.display, attr.attr, colwidth-(1 if note else 0))
-                    vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
+                    if len(lines) > height:
+                        lines[height-1] = '\n'.join(lines[height-1:])
+                        del lines[height:]
+                    elif len(lines) < height:
+                        lines.extend(['']*(height-len(lines)))
 
-                    sepchars = disp_column_sep
-                    if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
-                        sepchars = options.disp_keycol_sep
+                    for i, line in enumerate(lines):
+                        y = ybase+i
 
-                    if x+colwidth+len(sepchars) <= vd.windowWidth:
-                       scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
+                        if vcolidx == self.rightVisibleColIndex:  # right edge of sheet
+                            if len(lines) == 1:
+                                sepchars = endsep
+                            else:
+                                if i == 0:
+                                    sepchars = endtopsep
+                                elif i == len(lines)-1:
+                                    sepchars = endbotsep
+                                else:
+                                    sepchars = endmidsep
+                        elif (self.keyCols and col is self.keyCols[-1]): # last keycol
+                            if len(lines) == 1:
+                                sepchars = keysep
+                            else:
+                                if i == 0:
+                                    sepchars = keytopsep
+                                elif i == len(lines)-1:
+                                    sepchars = keybotsep
+                                else:
+                                    sepchars = keymidsep
+                        else:
+                            if len(lines) == 1:
+                                sepchars = colsep
+                            else:
+                                if i == 0:
+                                    sepchars = topsep
+                                elif i == len(lines)-1:
+                                    sepchars = botsep
+                                else:
+                                    sepchars = midsep
 
-            y += 1
+                        clipdraw(scr, y, x, disp_column_fill+line, attr.attr, colwidth-(1 if note else 0))
+                        vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
-        if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(headerRow, vd.windowWidth-2, options.disp_more_right, colors.color_column_sep)
+                        if x+colwidth+len(sepchars) <= vd.windowWidth:
+                            scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
 
-        catchapply(self.checkCursor)
-
-        scr.refresh()
+            return height
 
 
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),

@@ -59,6 +59,7 @@ class ColumnsSheet(Sheet):
             ColumnAttr('sheet', type=str),
             ColumnAttr('name', width=options.default_width),
             ColumnAttr('width', type=int),
+            ColumnAttr('height', type=int, width=0),
             ColumnEnum('type', getGlobals(), default=anytype),
             ColumnAttr('fmtstr'),
             ValueColumn('value', width=options.default_width),

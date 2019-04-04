@@ -41,6 +41,7 @@ class Column(Extensible):
         self.getter = lambda col, row: row
         self.setter = lambda col, row, value: fail(col.name+' column cannot be changed')
         self.width = None     # == 0 if hidden, None if auto-compute next time
+        self.height = 1       # max height, None/0 to auto-compute for each row
         self.keycol = False   # is a key column
         self.expr = None      # Column-type-dependent parameter
 
