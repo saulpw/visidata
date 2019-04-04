@@ -678,18 +678,10 @@ Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 
-Sheet.addCommand('_', 'resize-col-max', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
-Sheet.addCommand('z_', 'resize-col', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))'),
-
-Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()', undo=undoAttr('[cursorCol]', 'width'))
-Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.width = cursorCol.width//2'),
-Sheet.addCommand('gv', 'unhide-cols', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)', undo=undoAttr('[columns]', 'width'))
-
 undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', undo=undoRestoreKey),
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', undo=undoRestoreKey),
-Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
 
 Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 

@@ -256,13 +256,6 @@ class Column(Extensible):
             w = max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name))+2
         return max(w, len(self.name))
 
-    def toggleWidth(self, width):
-        'Change column width to either given `width` or default value.'
-        if self.width != width:
-            self.width = width
-        else:
-            self.width = int(options.default_width)
-
 
 # ---- Column makers
 
