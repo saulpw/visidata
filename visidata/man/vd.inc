@@ -600,7 +600,7 @@ abort replay
 .It Ic gF
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-open one-line summary for selected rows
+open one-line summary for all rows
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
