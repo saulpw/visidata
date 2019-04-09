@@ -4,7 +4,7 @@ import collections
 from visidata import *
 
 PandasSheet.addCommand('F', 'freq-col', 'vd.push(PandasSheetFreqTable(sheet, cursorCol))')
-# Sheet.addCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
+PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasSheetFreqTable(sheet, *keyCols))')
 # globalCommand('zF', 'freq-rows', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))')
 # 
 # theme('disp_histogram', '*', 'histogram element character')
@@ -92,52 +92,68 @@ class PandasSheetFreqTable(SheetPivot):
     def updateLargest(self, grouprow):
         self.largest = max(self.largest, len(grouprow.sourcerows))
 
-    # @asyncthread
+    @asyncthread
     def reload(self):
         'Generate frequency table then reverse-sort by length.'
+        import pandas as pd
+
         # Conditions:
-        # (1) this only works if len(groupByCols) == 1 since it relies on value_counts()
         # (2) this assumes some amount of non-degeneracy (non-empty dataframe with non-null values)
+        # Note: visidata's base FrequencyTable bins numeric data in ranges (e.g. as a histogram).
+        # We currently don't provide support for this for PandasSheet.
         super().initCols(use_range=False)
         # columns now the same as the original table
         # raise ValueError(str([c.name for c in self.columns]))
 
         df = self.source.rows
-
-        if len(self.groupByCols) > 1:
-            raise NotImplementedError("Frequency Table for > 1 columns currently not supported for PandasSheet")
-        # TODO: does this make a copy?
-        # raise ValueError(str(type(self.groupByCols[0])) + " " + str(self.groupByCols[0].name))
-        this_column = df.loc[:, str(self.groupByCols[0].name)]
-        value_counts = this_column.value_counts()
+        
+        if len(self.groupByCols) == 1:
+            this_column = df.loc[:, str(self.groupByCols[0].name)]
+            value_counts = this_column.value_counts()
+        elif len(self.groupByCols) >= 1:
+            this_column = df.loc[:, str(self.groupByCols[0].name)]
+            # Compute cross-tabulation to get counts, and sort/remove zero-entries.
+            # Note that this is not space-efficient: the initial cross-tabulation will
+            # have space on the order of product of number of unique elements for each
+            # column, even though its possible the combinations present are sparse
+            # and most combinations have zero count.
+            value_counts = pd.crosstab(this_column, [df.df[c.name] for c in self.groupByCols[1:]])
+            value_counts = value_counts.stack(list(range(len(self.groupByCols) - 1)))
+            value_counts = value_counts.loc[value_counts > 0].sort_values(ascending=False) 
+        else:
+            fail("Unable to do FrequencyTable, no columns to group on provided")
 
         # add default bonus columns
         for c in [
-                    Column('count', type=int, getter=lambda col,row: len(row.sourcerows)),
-                    Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/df.shape[0]),
-                    Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//value_counts.max()), width=options.disp_histolen+2),
+                    Column('count', type=int,
+                           getter=lambda col,row: len(row.sourcerows)),
+                    Column('percent', type=float,
+                           getter=lambda col,row: len(row.sourcerows)*100/df.shape[0]),
+                    Column('histogram', type=str,
+                           getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//value_counts.max()), 
+                           width=options.disp_histolen+2),
                     ]:
             self.addColumn(c)
 
         # TODO: can make this part async w/ progress bar
-        for element in value_counts.index:
+        for element in Progress(value_counts.index):
+            if len(self.groupByCols) == 1:
+                element = (element,)
+            assert len(element) == len(self.groupByCols)
+            mask = df.df[self.groupByCols[0].name] == element[0]
+            for i in range(1, len(self.groupByCols)):
+                mask = mask & (df.df[self.groupByCols[i].name] == element[i])
+
             self.addRow(PivotGroupRow(
-                (element,),
+                element,
                 (nankey, nankey),
-                DataFrameRowSliceAdapter(df.df, this_column == element),
+                DataFrameRowSliceAdapter(df.df, mask),
                 {}
             ))
-
-        # two more threads
-        # vd.sync(self.addAggregateCols(),
-        #         self.groupRows(self.updateLargest))
 
         # if self.nCols > len(self.groupByCols)+3:  # hide percent/histogram if aggregations added
         #     self.column('percent').hide()
         #     self.column('histogram').hide()
-
-        # if not [c for c in self.groupByCols if isNumeric(c)]:
-        #     self.orderBy(self.column('count'), reverse=True)
 
 PandasSheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
 PandasSheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
@@ -145,7 +161,7 @@ PandasSheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cur
 
 def expand_source_rows(source, vd, cursorRow):
     vs = copy(source)
-    vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key)
+    vs.name += "_" + valueNames(cursorRow.discrete_keys, cursorRow.numeric_key)
     if cursorRow.sourcerows is None:
         error("no source rows")
     vs.rows = cursorRow.sourcerows
