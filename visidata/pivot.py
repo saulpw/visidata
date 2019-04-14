@@ -17,7 +17,7 @@ def Pivot(source, groupByCols, pivotCols):
 
 def makeErrorKey(col):
     if col.type is date:
-        return date('0-1-1')
+        return date.min # date('2000-01-01')
     else:
         return col.type()
 
