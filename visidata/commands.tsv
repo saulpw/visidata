@@ -79,6 +79,8 @@ Sheet	addcol-sh	z	;	z;	n	n	y	y			create new column from bash expression, with $c
 Sheet	addcol-subst		*	*	n	n	y	y	5	modify-add-column-regex-transform	add column derived from current column, replay regex with subst (may include \1 backrefs)
 Sheet	aggregate-col		+	+	n	n	n	y	5	column-aggregator-add	add aggregator to current column
 Sheet	aggregate-numerics	g	+	g+	n	n	n	y			add aggregator to all numeric columns
+Sheet	append-sheets-all	g	&	g&	y	n	n	y			concatenate all sheets in the sheets-stack
+Sheet	append-sheets-top2		&	&	y	n	n	y			concatenate top two sheets in the sheets-stack
 Sheet	cache-col	z	'	z'	n	n	n	y		column-cache-clear	add/reset cache for current column
 Sheet	cache-cols	gz	'	gz'	n	n	n	y		column-cache-clear-all	add/reset cache for all visible columns
 Sheet	capture-col		;	;	n	n	n	y	1,5	modify-add-column-regex-capture	add new column from capture groups of regex; requires example row

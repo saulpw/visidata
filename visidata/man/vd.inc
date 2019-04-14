@@ -330,6 +330,10 @@ open new sheet with rows and columns transposed
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column
+.It Ic " &"
+.No concatenate top two sheets in the sheets-stack
+.It Ic "g&"
+.No concatenate all sheets in the sheets-stack
 .Pp
 .El
 .Ss Data Visualization
