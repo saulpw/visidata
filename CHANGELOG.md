@@ -47,14 +47,14 @@
 
 ## Bugfixes
 
-- [vdtui] make Sheet sortable (related to an issue found by @jsvine #241)
-- [pyobj] SheetDict nested editing (thanks @egwynn for the bug report #245)
-- [txt] TextSheets now save as .txt
 - [addcol-new] addcol-new now works in batch mode (thanks @cwarden for the bug report #251)
 - [canvas] clipstr xname to prevent overlap with 1st element in xaxis
-- [go-col-regex] nextColRegex sheet is implicit parameter
-- [DirSheet] Since commit 264dd4, an unresolved path is expected; DirSheet was not picking up the directories of files
 - [DirSheet] delete-selected now deletes all of the selected files upon save-sheet (thanks @cwarden for the bug report #261)
+- [go-col-regex] nextColRegex sheet is implicit parameter
+- [pyobj] SheetDict nested editing (thanks @egwynn for the bug report #245)
+- [txt] TextSheets now save as .txt
+- [vdtui] make Sheet sortable (related to an issue found by @jsvine #241)
+
 
 ## Additions and improvements
 
