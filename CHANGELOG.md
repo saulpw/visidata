@@ -21,9 +21,10 @@
   - `copy-*` use only selectedRows, warning if none selected (cmdlog safe)
   - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
   - all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
-  - Shift+S pushes `sheets-all`; zS pushes `sheets` stack. removed gS and the graveyard sheet.
+  - Shift+S pushes `sheets-all`; zS pushes `sheets-stack`. removed gS and the graveyard sheet.
   - `random-rows` is no longer bound to any key by default (was Shift+R).
   - add ALT/ESC as prefix; ALT+N to go to that sheet
+    - [freq-summary] was `freq-rows`; adds summary for selected rows
 
 
 ## plugins

@@ -5,7 +5,7 @@ from visidata import *
 
 Sheet.addCommand('F', 'freq-col', 'vd.push(SheetFreqTable(sheet, cursorCol))')
 Sheet.addCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
-globalCommand('zF', 'freq-rows', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))')
+Sheet.addCommand('zF', 'freq-summary', 'vd.push(SheetFreqTableSummary(sheet, Column("Total", getter=lambda col, row: "Total")))')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
@@ -64,6 +64,15 @@ class SheetFreqTable(SheetPivot):
 
         if not [c for c in self.groupByCols if isNumeric(c)]:
             self.orderBy(self.column('count'), reverse=True)
+
+
+class SheetFreqTableSummary(SheetFreqTable):
+    'Append a PivotGroupRow to FreqTable with only selectedRows.'
+    @asyncthread
+    def reload(self):
+        SheetFreqTable.reload.__wrapped__(self)
+        self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
+
 
 SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
 SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
