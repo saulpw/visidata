@@ -4,27 +4,40 @@
 
 ## Major features
 
-  - vgit
-  - undo/redo
-  - numeric binning
-  - stdout pipe/redirect
-  - plugin framework
+    - vgit
+    - undo/redo
+        - [new command] `options.undo` (default False) to enable infinite linear undo/redo
+        - provisionally bound to `Shift+U` and `Shift+R`
+        - `undoEditCells` assumes commands modified only selectedRows
+    - numeric binning
+        - [feature freqtbl] numeric binning for frequency/pivot table
+        - `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
+        - (thanks paulklemm for the issue #244)
+    - stdout pipe/redirect
+        - `ls|vd|lpr` to interactively select which filenames to send to the printer
+        - `q`/`gq` to output nothing
+        - `Ctrl+Q` to output current sheet (like at end of -b)
+        - `vd -o-` to send directly to the terminal (can also be used with redirection, but not necessary)
+    - plugin framework
 
 ## interface changes
 
-  - `setcol-*`, `dive-selected`, `dup-selected-*`, `columns-selected`, `describe-selected` use only selectedRows (do not use all rows if none selected) #265 (thanks @cwarden)
-  - `edit-cells` renamed to `setcol-input`
-  - `fill-nulls` renamed to `setcol-fill`
-  - `paste-cells` renamed to `setcol-clipboard`
-  - `undoEditCells` assumes commands modified only selectedRows
-  - `save-col` always saves all rows in current column (instead of selectedRows or rows)
-  - `copy-*` use only selectedRows, warning if none selected (cmdlog safe)
-  - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
-  - all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
-  - Shift+S pushes `sheets-all`; zS pushes `sheets-stack`. removed gS and the graveyard sheet.
-  - `random-rows` is no longer bound to any key by default (was Shift+R).
-  - add ALT/ESC as prefix; ALT+N to go to that sheet
-    - [freq-summary] was `freq-rows`; adds summary for selected rows
+- `setcol-*`, `dive-selected`, `dup-selected-*`, `columns-selected`, `describe-selected` use only selectedRows (do not use all rows if none selected) #265 (thanks @cwarden)
+- `edit-cells` renamed to `setcol-input`
+- `fill-nulls` renamed to `setcol-fill`
+- `paste-cells` renamed to `setcol-clipboard`
+- `save-col` always saves all rows in current column (instead of selectedRows or rows)
+- `copy-*` use only selectedRows, warning if none selected (cmdlog safe)
+- `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
+- all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
+- Shift+S pushes `sheets-all`; zS pushes `sheets-stack`. removed gS and the graveyard sheet.
+    - add ALT/ESC as prefix; ALT+N to go to that sheet
+- `random-rows` is no longer bound to any key by default (was Shift+R).
+- `freq-summary` was `freq-rows`; adds summary for selected rows
+- cmdlog is now based on longname instead of keystrokes
+- cmdlog does not log resize commands
+- exit with error code on error during replay (suggested by @cwarden #240)
+- split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
 
 
 ## plugins
@@ -35,41 +48,44 @@
 ## Bugfixes
 
 - [vdtui] make Sheet sortable (related to an issue found by @jsvine #241)
-- [pyobj] SheetDict nested editing #245
-- do not log resize commands
+- [pyobj] SheetDict nested editing (thanks @egwynn for the bug report #245)
+- [txt] TextSheets now save as .txt
+- [addcol-new] addcol-new now works in batch mode (thanks @cwarden for the bug report #251)
+- [canvas] clipstr xname to prevent overlap with 1st element in xaxis
+- [go-col-regex] nextColRegex sheet is implicit parameter
+- [DirSheet] Since commit 264dd4, an unresolved path is expected; DirSheet was not picking up the directories of files
+- [DirSheet] delete-selected now deletes all of the selected files upon save-sheet (thanks @cwarden for the bug report #261)
 
 ## Additions and improvements
 
-- add `syspaste-cells` to paste into vd from system clipboard (thanks kovasap #258)
-- add `list` aggregator (thanks @chocolateboy #263)
-- `py` filetype to import and explore a python module: `vd -f py curses`
-- bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
-- split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
-- numeric binning for frequency/pivot table; `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
-- expr columns are now set to cache automatically
-- `sort-*-add` bound to z[] and gz[] to add additional sort columns
-- output pipes now work as expected
-   - `ls|vd|lpr` to interactively select which filenames to send to the printer
-   - `q`/`gq` to output nothing
-   - `Ctrl+Q` to output current sheet (like at end of -b)
-   - `vd -o-` to send directly to the terminal (can also be used with redirection, but not necessary)
-- `options.undo` (default False) to enable infinite linear undo/redo provisionally bound to `Shift+U` and `Shift+R`
-- [regex+] `options.default_sample_size` (default 100) to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso #219)
-- [json] add `options.json_sort_keys` (default True) to sort keys when saving to JSON (default True) (thanks @chocolateboy for PR #262)
-- [replay] exit with error code on error during replay (suggested by @cwarden #240)
-- [vd] `--config` option to specify visidatarc file (suggested by @jsvine #236)
+- [aggr] add `list` aggregator (thanks @chocolateboy #263)
+- [chooseMany] error() on invalid choice #169
+- [command append join] add append-sheets-top2 (`&`) / append-sheets-all (`g&`) to concatenate top 2/all sheets in sheets-stack
+- [command sort] `sort-*-add` bound to z[] and gz[] to add additional sort columns
+- [command syspaste-cells] add `syspaste-cells` to paste into vd from system clipboard (thanks kovasap for PR #258)
+- [DirSheet] include folders and hidden files
+- [freeze-sheet] only freeze visibleCols
+- [license] remove MIT license from vdtui; all code now licensed under GPL3
+- [loader Pyobj] `py` filetype to import and explore a python module: `vd -f py curses`
+- [loader pyxlsb] add .xlsb loader (suggested by @woutervdijke #246)
+- [mouse] bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
+- [openSource] create new blank sheet if file does not exist
+- [option json] add `options.json_sort_keys` (default True) to sort keys when saving to JSON (default True) (thanks @chocolateboy for PR #262)
+- [option regex+] `options.default_sample_size` (default 100) to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso #219)
+- [option vd] `--config` option to specify visidatarc file (suggested by @jsvine #236)
+- [option vdtui] remove `curses_timeout` option (fix to 100ms)
+- [pandas] support multi-line column names (suggested by @jtrakk #223)
+- [pandas] impement sort() for pandas DataFrame (suggested by @migueldvb #257)
+- [pcap] adds saver for .pcap to json (thanks @layertwo for PR #272)
+- [perf] expr columns are now set to cache automatically
+- [precious] describe-sheet is now precious; error-sheet is not
+- [replay] show comments as status (suggested by @cwarden)
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
-- [chooseMany] error() on invalid choice #169
-- [precious] describe-sheet is now precious; error-sheet is not
+- [sqlite] add support for .sqlite3 extension
+- [xls xlsx] push all sheets on file open
 
-- [vdtui] separate out vdtui components into submodules: editline, textsheet, cliptext, color, column, sheet
-- [vdtui license] remove MIT license from vdtui; all code now licensed under GPL3
-- [vdtui style] update style
-  - convert all `vd()` to `vd`
-  - remove ArrayColumns, NamedArrayColumns
-- clean up options
-  - [vdtui] remove `curses_timeout` option (fix to 100ms)
+
 
 ## API
 - VisiData, BaseSheet, Column inherit from Extensible base class
@@ -79,6 +95,22 @@
 - remove hooks
 - `vd.sync(*threads)` waits on specific threads (returned by calls to `@asyncthread` functions)
 - add Sheet.num and VisiData.nSheets for left status prompt
+- pivot and frequency table have been consolidated for numeric binning
+- add Sheet.nFooterRows property
+- Sheet.column() takes colname instead of regex; add Sheet.colsByName cached property
+- use addRow to rows.append in reload()
+- Selection API is overloadable for subclasses of Sheet whose rows don't have a stable id() (like pandas)
+- use locale.format_string and .currency
+    - uses user default locale settings at startup
+    - changes fmtstr back to %fmt (from {:fmt})
+- separate out vdtui components into submodules: editline, textsheet, cliptext, color, column, sheet
+- convert all `vd()` to `vd`
+- remove ArrayColumns, NamedArrayColumns
+
+## Deps
+- add dateutil as submodule
+- add submodule fork of pyxlsb for VisiData integration
+- add amoffat/sh as submodule for vgit and vsh
 
 
 # v1.5.2 (2019-01-12)
