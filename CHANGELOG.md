@@ -39,6 +39,7 @@
 - cmdlog does not log resize commands
 - exit with error code on error during replay (suggested by @cwarden #240)
 - split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
+- `show-expr` now unbound from `z=`
 
 
 ## plugins

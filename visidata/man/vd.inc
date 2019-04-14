@@ -176,7 +176,7 @@ set name of all visible columns to combined contents of current column for selec
 .It Ic "gz=" Ar expr
 .No set current column for selected rows to the items in result of Python sequence Ar expr
 .It Ic " z=" Ar expr
-.No evaluate Python expression on current row and show result on status line
+.No evaluate Python expression on current row and set current cell with result of Python Ar expr
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " '" Ns " (tick)"
@@ -604,7 +604,7 @@ abort replay
 .It Ic gF
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-open one-line summary for all rows
+open summary of all rows and selected rows
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)

@@ -1,4 +1,4 @@
-from visidata import Progress, status, Sheet, Column, asyncthread, vd, undoAddCols, undoEditCells, ColumnExpr
+from visidata import Progress, status, Sheet, Column, asyncthread, vd, undoAddCols, undoEditCells, ColumnExpr, undoEditCell
 
 
 class CompleteExpr:
@@ -42,3 +42,4 @@ def inputExpr(self, prompt, *args, **kwargs):
 
 Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', undo=undoAddCols)
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows, inputExpr("set selected="))', undo=undoEditCells)
+Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalexpr(inputExpr("set expr="), cursorRow))', undo=undoEditCell)

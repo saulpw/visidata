@@ -199,6 +199,7 @@ Sheet	select-expr	z	|	z|	n	change	n	y		rows-select-expr	select rows with a Pytho
 Sheet	select-row		s	s	n	change	n	y	2,5	rows-select-current	select current row
 Sheet	select-rows	g	s	gs	n	change	n	y	5	rows-select-all	select all rows
 Sheet	set-option				n	n		y			set option on current sheet
+Sheet	setcell-expr	z	=	z=	n	n	n	y		python-eval-row	evaluate Python expression on current row and set current cell with result
 Sheet	setcol-clipboard	gz	p	gzp	n	use	y	y			set current column for selected rows to the items from last clipboard
 Sheet	setcol-expr	g	=	g=	n	use	y	y	3,5	modify-set-column-selected-expr	set current column for selected rows to result of Python expression
 Sheet	setcol-fill		f	f	n	n	y	y		modify-fill-column	fills null cells in selected rows of current column with contents of non-null cells up the current column
