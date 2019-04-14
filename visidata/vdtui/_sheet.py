@@ -241,6 +241,12 @@ class Sheet(BaseSheet):
                 return vcolidx
         error('no visible column at x=%d' % x)
 
+    def visibleRowAtY(self, y):
+        for rowidx, (rowy, h) in self.rowLayout.items():
+            if rowy <= y <= rowy+h-1:
+                return rowidx
+        error('no row at y=%d' % y)
+
     @property
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
     def keyCols(self):
@@ -670,7 +676,7 @@ Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0')
 Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
 Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
 
-Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=topRowIndex+mouseY-1; sheet.cursorVisibleColIndex=visibleColAtX(mouseX)'),
+Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=visibleRowAtY(mouseY); sheet.cursorVisibleColIndex=visibleColAtX(mouseX)'),
 Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
 
 Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
