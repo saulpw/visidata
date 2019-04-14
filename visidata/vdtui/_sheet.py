@@ -5,7 +5,7 @@ import re
 from copy import copy
 import textwrap
 
-from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, error, fail, Column, option,
+from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, error, fail, Column, option,
 TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow,
 vd, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
@@ -576,7 +576,10 @@ class Sheet(BaseSheet):
             for vcolidx, (x, colwidth) in sorted(self.visibleColLayout.items()):
                 if x < vd.windowWidth:  # only draw inside window
                     col = self.visibleCols[vcolidx]
-                    cellval = col.getCell(row, colwidth-1)
+                    cellval = col.getCell(row)
+                    if colwidth > 1 and isNumeric(col):
+                        cellval.display = cellval.display.rjust(colwidth-2)
+
                     try:
                         if isNull(cellval.value):
                             cellval.note = options.disp_note_none

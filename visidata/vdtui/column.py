@@ -159,7 +159,7 @@ class Column(Extensible):
 
         return ret
 
-    def getCell(self, row, width=None):
+    def getCell(self, row):
         'Return DisplayWrapper for displayable cell value.'
         cellval = wrapply(self.getValue, row)
         typedval = wrapply(self.type, cellval)
@@ -199,9 +199,6 @@ class Column(Extensible):
 
         try:
             dw.display = self.format(typedval) or ''
-
-            if width and isNumeric(self):
-                dw.display = dw.display.rjust(width-1)
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str:
