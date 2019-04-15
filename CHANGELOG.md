@@ -26,6 +26,7 @@
 - `edit-cells` renamed to `setcol-input`
 - `fill-nulls` renamed to `setcol-fill`
 - `paste-cells` renamed to `setcol-clipboard`
+- `dup-` on SheetFreqTable and DescribeSeet renamed to `dive-`
 - `save-col` always saves all rows in current column (instead of selectedRows or rows)
 - `copy-*` use only selectedRows, warning if none selected (cmdlog safe)
 - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
@@ -70,7 +71,7 @@
 - [loader pyxlsb] add .xlsb loader (suggested by @woutervdijke #246)
 - [mouse] bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - [openSource] create new blank sheet if file does not exist
-- [option json] add `options.json_sort_keys` (default True) to sort keys when saving to JSON (default True) (thanks @chocolateboy for PR #262)
+- [option json] add `options.json_sort_keys` (default True) to sort keys when saving to JSON (thanks @chocolateboy for PR #262)
 - [option regex+] `options.default_sample_size` (default 100) to set number of example rows for regex split/capture (now async).  use None for all rows. (thanks @aborruso #219)
 - [option vd] `--config` option to specify visidatarc file (suggested by @jsvine #236)
 - [option vdtui] remove `curses_timeout` option (fix to 100ms)
