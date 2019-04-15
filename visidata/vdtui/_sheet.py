@@ -591,7 +591,7 @@ class Sheet(BaseSheet):
                 h = len(lines)   # of this cell
                 heights.append(min(col.height, h))
 
-            height = min(max(heights), maxheight)
+            height = min(max(heights), maxheight) or 1  # display even empty rows
 
             self.rowLayout[rowidx] = (ybase, height)
 
