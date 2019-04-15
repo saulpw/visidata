@@ -22,8 +22,8 @@ global	pyobj-expr-row	z	^X	z^X	n	n	n	y		python-eval-status	evaluate Python expre
 global	pyobj-sheet	g	^Y	g^Y	meta	n	n	y		python-push-sheet-object	open current sheet as Python object
 global	quit-all	g	q	gq	quit	n	n	n		sheet-quit-all	quit all sheets (clean exit)
 global	quit-sheet		q	q	quit	n	n	y	*	sheet-quit-current	quit current sheet
-global	redraw		^L	^L	n	n	n	n			refresh screen
 global	redo-last		R	R							redoes the most recent undo (requires enabling of options.undo)
+global	redraw		^L	^L	n	n	n	n			refresh screen
 global	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
 global	save-all	g	^S	g^S	n	n	n	y		sheet-save-all	save all sheets to given file or directory)
 global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd file
@@ -63,8 +63,8 @@ SheetObject	visibility		v	v	n	n	n	y			toggle show/hide for methods and hidden pr
 SheetNamedTuple	dive-row		Enter	Enter	y	n	n	y			dive further into Python object
 SheetH5Obj	dive-metadata		A	A	y	n	n	y			open metadata sheet for this object
 SheetH5Obj	dive-row		Enter	Enter	y	n	n	y			load table referenced in current row into memory
-SheetFreqTable	dup-row		Enter	Enter	y	n	n	y		open-cell-source	open copy of source sheet with rows grouped in current cell
-SheetFreqTable	dup-rows	g	Enter	gEnter	y	use	n	y			open copy of source sheet with rows grouped in selected rows
+SheetFreqTable	dive-row		Enter	Enter	y	n	n	y		open-cell-source	open copy of source sheet with rows grouped in current cell
+SheetFreqTable	dive-rows	g	Enter	gEnter	y	use	n	y			open copy of source sheet with rows grouped in selected rows
 SheetFreqTable	select-row		s	s	n	change	n	y		filter-source-select-bin	select these entries in source sheet
 SheetFreqTable	stoggle-row		t	t	n	change	n	y		filter-source-toggle-bin	toggle these entries in source sheet
 SheetFreqTable	unselect-row		u	u	n	change	n	y		filter-source-unselect-bin	unselect these entries in source sheet
@@ -273,7 +273,7 @@ DirSheet	save-row	z	^S	z^S	n	n	n	y		sheet-specific-apply-edits	apply changes to 
 DirSheet	save-sheet		^S	^S	n	n	n	y		sheet-specific-apply-edits	apply all changes on all rows
 DirSheet	sysopen-row		^O	^O	external	n			1	edit-row-external	open current file in external $EDITOR
 DirSheet	sysopen-rows	g	^O	g^O	external	use			1	edit-rows-external	open selected files in external $EDITOR
-DescribeSheet	dup-cell	z	Enter	zEnter	y	n	n	y		open-cell-source	open copy of source sheet with rows described in current cell
+DescribeSheet	dive-cell	z	Enter	zEnter	y	n	n	y		open-cell-source	open copy of source sheet with rows described in current cell
 DescribeSheet	freq-row			ENTER	y	n	n	y		data-aggregate-source-column	open a Frequency Table sheet grouped on column referenced in current row
 DescribeSheet	select-cell	z	s	zs	n	change		y		rows-select-source-cell	select rows on source sheet which are being described in current cell
 DescribeSheet	unselect-cell	z	u	zu	n	change	n	y		rows-unselect-source-cell	unselect rows on source sheet which are being described in current cell
