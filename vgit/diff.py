@@ -44,7 +44,6 @@ class DifferSheet(GitSheet):
             ColumnItem(name, i+1, width=vd.windowWidth//len(refs)-1, refnum=i)
                 for i, name in enumerate(refs)
         ])
-        self.colorizers = [RowColorizer(4, None, DifferSheet.colorDiffRow)]
 
     def findDiffRow(self, refnum, startidx, direction):
         idx = startidx+direction
