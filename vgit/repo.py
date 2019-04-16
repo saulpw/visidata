@@ -127,7 +127,7 @@ class GitStashes(GitSheet):
 
 
 # rowdef: (commit_hash, refnames, author, author_date, body, notes)
-class GitLogSheet(GitContext, DeferredSaveSheet):
+class GitLogSheet(GitSheet, DeferredSaveSheet):
     # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
     rowtype = 'commits'
