@@ -334,7 +334,7 @@ def editCell(self, vcolidx=None, rowidx=None, **kwargs):
         y = 0
         currentValue = col.name
     else:
-        y, h = self.rowLayout.get(rowidx, 0)
+        y, h = self.rowLayout.get(rowidx, (0, 0))
         currentValue = col.getDisplayValue(self.rows[self.cursorRowIndex])
 
     editargs = dict(value=currentValue,
