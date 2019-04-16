@@ -15,6 +15,26 @@ Sheet.addCommand('zL', 'slide-right-n', 'i = sheet.cursorVisibleColIndex; n=int(
 Sheet.addCommand('zJ', 'slide-down-n', 'i = sheet.cursorRowIndex; n=int(input("slide row down n=", value=1)); sheet.cursorRowIndex = moveListItem(rows, i, i+n)')
 Sheet.addCommand('zK', 'slide-up-n', 'i = sheet.cursorRowIndex; n=int(input("slide row up n=", value=1)); sheet.cursorRowIndex = moveListItem(rows, i, i-n)')
 
+Sheet.addCommand('BUTTON1_RELEASED','release-mouse','onRelease(cursorVisibleColIndex, cursorRowIndex, mouseX, mouseY)')
+
+@Sheet.api
+def onClick(sheet, vcolidx, rowidx):
+    pass
+
+@Sheet.api
+def onRelease(sheet, vcolidx, rowidx, destx, desty):
+    newvcolidx = sheet.visibleColAtX(destx)
+    newrowidx = sheet.visibleRowAtY(desty)
+    if newvcolidx != vcolidx:
+        sheet.cursorVisibleColIndex = moveVisibleCol(sheet, vcolidx, newvcolidx)
+
+    # else: only move row if within same column (if column not moved above)
+    elif newrowidx != rowidx:
+        sheet.cursorRowIndex = moveListItem(sheet.rows, rowidx, newrowidx)
+
+    else:
+        sheet.onClick(vcolidx, rowidx)
+
 
 def moveVisibleCol(sheet, fromVisColIdx, toVisColIdx):
     'Move visible column to another visible index in sheet.'
