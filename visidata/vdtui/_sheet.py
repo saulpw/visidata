@@ -24,11 +24,14 @@ theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
 theme('disp_endmid_sep', '║', '') # ╽╿┃
 theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 
-def splitcell(s, width=None):
-    if not width or not options.textwrap_cells:
+def splitcell(s, width=0):
+    if width <= 0 or not options.textwrap_cells:
         return [s]
 
-    return textwrap.wrap(s, width=width, break_long_words=False)
+    ret = []
+    for L in s.splitlines():
+        ret.extend(textwrap.wrap(L, width=width, break_long_words=False, replace_whitespace=False))
+    return ret
 
 __all__ = [ 'RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet' ]
 
