@@ -86,7 +86,6 @@
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
 - [sqlite] add support for .sqlite3 extension
-- [xls xlsx] push all sheets on file open
 
 
 
