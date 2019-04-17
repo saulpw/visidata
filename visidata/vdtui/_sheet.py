@@ -7,7 +7,7 @@ import textwrap
 
 from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, error, fail, Column, option,
 TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow,
-vd, exceptionCaught, status, catchapply, bindkey, typeIcon, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
+vd, exceptionCaught, status, catchapply, bindkey, getType, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
 option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
@@ -478,7 +478,7 @@ class Sheet(BaseSheet):
         x, colwidth = self.visibleColLayout[vcolidx]
 
         # AnameTC
-        T = typeIcon(col.type)
+        T = getType(col.type).icon
         if T is None:  # still allow icon to be explicitly non-displayed ''
             T = '?'
 

@@ -348,12 +348,7 @@ def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
 typemap = {}
 
 def getType(typetype):
-    return typemap.get(typetype) or _vdtype(anytype, '', '', _defaultFormatter)
-
-def typeIcon(typetype):
-    t = typemap.get(typetype, None)
-    if t:
-        return t.icon
+    return typemap.get(typetype) or _vdtype(anytype, None, '', _defaultFormatter)
 
 vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
