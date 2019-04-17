@@ -593,7 +593,7 @@ class Sheet(BaseSheet):
                     except TypeError:
                         pass
 
-                    displines[vcolidx] = (col, cellval, splitcell(cellval.display, width=colwidth-1))
+                    displines[vcolidx] = (col, cellval, splitcell(cellval.display, width=colwidth-2))
 
             heights = []
             for col, cellval, lines in displines.values():
