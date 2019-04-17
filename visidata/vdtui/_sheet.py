@@ -616,7 +616,8 @@ class Sheet(BaseSheet):
                         clipdraw(scr, ybase, x+colwidth-len(note), note, noteattr.attr, len(note))
 
                     if len(lines) > height:
-                        lines[height-1] = '\n'.join(lines[height-1:])
+                        firstn = sum(len(i)+1 for i in lines[:height-1])
+                        lines[height-1] = cellval.display[firstn:]
                         del lines[height:]
                     elif len(lines) < height:
                         lines.extend(['']*(height-len(lines)))
