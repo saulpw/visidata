@@ -4,6 +4,12 @@ from .git import GitSheet
 from .diff import DifferSheet
 
 option('vgit_show_ignored', False, '')
+theme('color_vgit_staged_mod', 'green', 'files staged with modifications')
+theme('color_vgit_staged_del', 'red', 'files staged for deletion')
+theme('color_vgit_staged_add', 'magenta', 'files staged for addition')
+theme('color_vgit_unstaged_del', '88', 'files deleted but unstaged')
+theme('color_vgit_untracked', '237 blue', 'ignored/untracked files')
+
 
 # cached by GitStatus sheets
 FileStatus = namedlist('FileStatus', 'status adds dels'.split())
@@ -21,12 +27,12 @@ class GitFile:
 class GitStatus(GitSheet):
     rowtype = 'files'  # rowdef: GitFile
     colorizers = [
-        CellColorizer(3, 'green',   lambda s,c,r,v: r and c and c.name == 'staged' and s.git_status(r).status[0] == 'M'), # staged mod
-        CellColorizer(1, 'red',     lambda s,c,r,v: r and c and c.name == 'staged' and s.git_status(r).status == 'D '), # staged delete
-        RowColorizer(1, 'magenta',  lambda s,c,r,v: r and s.git_status(r).status in ['A ', 'M ']), # staged add/mod
-        RowColorizer(1, '88',       lambda s,c,r,v: r and s.git_status(r).status[1] == 'D'), # unstaged delete
-        RowColorizer(1, '237 blue', lambda s,c,r,v: r and s.git_status(r).status == '!!'),  # ignored
-        RowColorizer(1, '237 blue', lambda s,c,r,v: r and s.git_status(r).status == '??'),  # untracked
+        CellColorizer(3, 'color_vgit_staged_mod',   lambda s,c,r,v: r and c and c.name == 'staged' and s.git_status(r).status[0] == 'M'), # staged mod
+        CellColorizer(1, 'color_vgit_staged_del',     lambda s,c,r,v: r and c and c.name == 'staged' and s.git_status(r).status == 'D '), # staged delete
+        RowColorizer(1, 'color_vgit_staged_add',  lambda s,c,r,v: r and s.git_status(r).status in ['A ', 'M ']), # staged add/mod
+        RowColorizer(1, 'color_vgit_unstaged_del',       lambda s,c,r,v: r and s.git_status(r).status[1] == 'D'), # unstaged delete
+        RowColorizer(1, 'color_vgit_untracked', lambda s,c,r,v: r and s.git_status(r).status == '!!'),  # ignored
+        RowColorizer(1, 'color_vgit_untracked', lambda s,c,r,v: r and s.git_status(r).status == '??'),  # untracked
     ]
     columns = [
         Column('path', getter=lambda c,r: str(r)),

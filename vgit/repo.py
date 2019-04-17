@@ -7,6 +7,9 @@ from . import GitSheet, GitStatus, GitContext
 
 __all__ = ['GitBranches', 'GitOptions', 'GitStashes', 'GitRemotes', 'GitLogSheet']
 
+theme('color_vgit_unpushed', 'cyan', 'unpushed commits on log sheet')
+theme('color_vgit_current_branch', 'underline', 'current branch on branches sheet')
+theme('color_vgit_local_branch', 'cyan', 'color of non-remote branches')
 
 def remove_prefix(text, prefix):
     if text.startswith(prefix):
@@ -28,8 +31,8 @@ class GitBranches(GitSheet):
         ColumnItem('last_author'),
     ]
     colorizers = [
-        RowColorizer(10, 'underline', lambda s,c,r,v: r and r['current']),
-#        RowColorizer(10, 'cyan', lambda s,c,r,v: r and not r['localbranch'].startswith('remotes/')),
+        RowColorizer(10, 'color_vgit_current_branch', lambda s,c,r,v: r and r['current']),
+        RowColorizer(10, 'color_vgit_local_branch', lambda s,c,r,v: r and not r['localbranch'].startswith('remotes/')),
     ]
     nKeys = 1
 
@@ -139,7 +142,9 @@ class GitLogSheet(GitSheet, DeferredSaveSheet):
             DeferredSetColumn('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
             Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
     ]
-#    colorizers = [RowColorizer(5, 'cyan', lambda s,c,r,v: r and not s.inRemoteBranch(r[0]))]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.addColorizer(RowColorizer(5, 'color_vgit_unpushed', lambda s,c,r,v: r and not s.inRemoteBranch(r[0])))
 
     @functools.lru_cache()
     def inRemoteBranch(self, commitid):
