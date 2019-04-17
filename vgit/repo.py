@@ -222,5 +222,5 @@ GitLogSheet.addCommand(ENTER, 'dive-row', 'vd.push(getCommitSheet(cursorRow[0][:
 #GitLogSheet.addCommand('', 'git-squash-selected', '', 'squash selected commits'),
 GitLogSheet.addCommand('x', 'git-pick', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch'),
 GitLogSheet.addCommand('gx', 'git-pick-selected', '', 'cherry-pick selected commits onto current branch'),
-GitLogSheet.addCommand('C', 'git-commit-amend', 'confirm("amend this commit with the index? "); amendPrevious(cursorRow[0]); reload()', 'amend this commit with changes in the index'),
+GitLogSheet.addCommand(None, 'git-commit-amend', 'confirm("amend this commit with the index? "); amendPrevious(cursorRow[0]); reload()', 'amend this commit with changes in the index'),
 GitLogSheet.addCommand('r', 'git-reset-here', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit'),
