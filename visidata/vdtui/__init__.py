@@ -757,8 +757,6 @@ class VisiData(Extensible):
                 vs.num = len(vs.vd.allSheets)
             elif hasattr(self, 'creatingCommand') and self.creatingCommand:
                 vs.num = vs.num or self.creatingCommand.keystrokes
-            else:
-                vs.num = vs.num or '?'
 
             return vs
 # end VisiData class
