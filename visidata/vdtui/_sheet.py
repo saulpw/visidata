@@ -220,7 +220,7 @@ class Sheet(BaseSheet):
     def cursorCol(self):
         'Current Column object.'
         vcols = self.visibleCols
-        return vcols[min(self.cursorVisibleColIndex, len(vcols)-1)]
+        return vcols[min(self.cursorVisibleColIndex, len(vcols)-1)] if vcols else None
 
     @property
     def cursorRow(self):
