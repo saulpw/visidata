@@ -17,7 +17,7 @@ jobs:
       - run: sudo chown -R circleci:circleci /usr/local/share
       - run: sudo chown -R circleci:circleci /usr/local/lib
       - run: sudo locale-gen en_CA.UTF-8 && sudo locale-gen en en_CA.UTF-8 && sudo dpkg-reconfigure locales
-      - run: update-locale LANG=en_CA.UTF-8
+      - run: update-locale LANG=en_US.UTF-8
       - run:
           name: dependencies
           command: |
