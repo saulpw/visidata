@@ -25,11 +25,12 @@ def onClick(sheet, vcolidx, rowidx):
 def onRelease(sheet, vcolidx, rowidx, destx, desty):
     newvcolidx = sheet.visibleColAtX(destx)
     newrowidx = sheet.visibleRowAtY(desty)
-    if newvcolidx != vcolidx:
+
+    if newvcolidx is not None and newvcolidx != vcolidx:
         sheet.cursorVisibleColIndex = moveVisibleCol(sheet, vcolidx, newvcolidx)
 
     # else: only move row if within same column (if column not moved above)
-    elif newrowidx != rowidx:
+    elif newrowidx is not None and newrowidx != rowidx:
         sheet.cursorRowIndex = moveListItem(sheet.rows, rowidx, newrowidx)
 
     else:
