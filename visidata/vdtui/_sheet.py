@@ -593,12 +593,12 @@ class Sheet(BaseSheet):
                         if isNull(cellval.value):
                             cellval.note = options.disp_note_none
                             cellval.notecolor = 'color_note_type'
-                    except TypeError:
+                    except (TypeError, ValueError):
                         pass
 
                     displines[vcolidx] = (col, cellval, splitcell(cellval.display, width=colwidth-2))
 
-            heights = []
+            heights = [0]
             for col, cellval, lines in displines.values():
                 h = len(lines)   # of this cell
                 heights.append(min(col.height, h))
