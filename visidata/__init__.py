@@ -70,6 +70,7 @@ from .loaders.xml import *
 from .loaders.yaml import *
 from .loaders._pandas import *
 from .loaders.graphviz import *
+from .loaders.npy import *
 
 from .plugins import *
 
