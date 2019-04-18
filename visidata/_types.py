@@ -55,13 +55,15 @@ class date(datetime.datetime):
             r = datetime.datetime.fromtimestamp(s)
         elif isinstance(s, str):
             r = dateutil.parser.parse(s)
-        elif isinstance(s, datetime.datetime):
+        elif isinstance(s, (datetime.datetime, datetime.date)):
             r = s
         else:
             raise Exception('invalid type for date %s' % type(s).__name__)
 
         t = r.timetuple()
-        return super().__new__(cls, *t[:6], microsecond=r.microsecond, tzinfo=r.tzinfo)
+        ms = getattr(r, 'microsecond', 0)
+        tzinfo = getattr(r, 'tzinfo', None)
+        return super().__new__(cls, *t[:6], microsecond=ms, tzinfo=tzinfo)
 
     def __str__(self):
         return self.strftime(options.disp_date_fmt)
