@@ -750,8 +750,8 @@ class VisiData(Extensible):
             if vs.precious and vs not in vs.vd.allSheets:
                 vs.vd.allSheets.append(vs)
                 vs.num = len(vs.vd.allSheets)
-            elif hasattr(self, 'creatingCommand') and self.creatingCommand:
-                vs.num = vs.num or self.creatingCommand.keystrokes
+            elif hasattr(vs, 'creatingCommand') and vs.creatingCommand:
+                vs.num = vs.num or vs.creatingCommand.keystrokes
 
             return vs
 # end VisiData class
