@@ -225,6 +225,7 @@ class SheetObject(PythonSheet):
         vislevel = options.visibility
         for r in dir(self.source):
             try:
+                if vislevel <= 2 and r.startswith('__'): continue
                 if vislevel <= 1 and r.startswith('_'): continue
                 if vislevel <= 0 and callable(getattr(self.source, r)): continue
                 self.addRow(r)
