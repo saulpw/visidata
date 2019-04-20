@@ -184,10 +184,11 @@ class OptionsSheet(Sheet):
         return val if val != default else ''
 
     def editOption(self, row):
+        currentValue = options.get(row.name, self.source)
         if isinstance(row.value, bool):
-            options.set(row.name, not options.get(row.name, self.source), self.source)
+            options.set(row.name, not currentValue, self.source)
         else:
-            options.set(row.name, self.editCell(1), self.source)
+            options.set(row.name, self.editCell(1, value=currentValue), self.source)
 
     def reload(self):
         self.rows = []

@@ -320,7 +320,7 @@ def chooseMany(choices):
 
 
 @Sheet.api
-def editCell(self, vcolidx=None, rowidx=None, **kwargs):
+def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     'Call `editText` at its place on the screen.  Returns the new value, properly typed'
 
     if vcolidx is None:
@@ -330,14 +330,15 @@ def editCell(self, vcolidx=None, rowidx=None, **kwargs):
     col = self.visibleCols[vcolidx]
     if rowidx is None:
         rowidx = self.cursorRowIndex
+
     if rowidx < 0:  # header
         y = 0
-        currentValue = col.name
+        value = value or col.name
     else:
         y, h = self.rowLayout.get(rowidx, (0, 0))
-        currentValue = col.getDisplayValue(self.rows[self.cursorRowIndex])
+        value = value or col.getDisplayValue(self.rows[self.cursorRowIndex])
 
-    editargs = dict(value=currentValue,
+    editargs = dict(value=value,
                     fillchar=options.disp_edit_fill,
                     truncchar=options.disp_truncator)
     editargs.update(kwargs)  # update with user-specified args
