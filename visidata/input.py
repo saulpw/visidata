@@ -223,7 +223,7 @@ def editText(self, y, x, w, record=True, display=True, **kwargs):
         v = self.cmdlog.getLastArgs()
 
     if v is None:
-        v = editline(self.scr, y, x, w, display=display, **kwargs)
+        v = editline(self._scr, y, x, w, display=display, **kwargs)
 
     if display:
         status('"%s"' % v)
@@ -245,9 +245,9 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         else:
             history = type
 
-    rstatuslen = self.drawRightStatus(self.scr, self.sheets[0])
+    rstatuslen = self.drawRightStatus(self._scr, self.sheets[0])
     attr = 0
-    promptlen = clipdraw(self.scr, self.windowHeight-1, 0, prompt, attr, w=self.windowWidth-rstatuslen-1)
+    promptlen = clipdraw(self._scr, self.windowHeight-1, 0, prompt, attr, w=self.windowWidth-rstatuslen-1)
     ret = self.editText(self.windowHeight-1, promptlen, self.windowWidth-promptlen-rstatuslen-2,
                         attr=colors.color_edit_cell,
                         unprintablechar=options.disp_unprintable,

@@ -294,7 +294,7 @@ class Plotter(BaseSheet):
                         char_x, char_y, txt, attr, row = o
                         clipdraw(scr, char_y, char_x, txt, attr, len(txt))
 
-Plotter.addCommand('^L', 'redraw', 'vd.scr.clear(); refresh()')
+Plotter.addCommand('^L', 'redraw', 'vd._scr.clear(); refresh()')
 Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels')
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)

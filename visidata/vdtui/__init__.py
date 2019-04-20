@@ -308,7 +308,7 @@ globalCommand('KEY_RESIZE', 'no-op', '')
 globalCommand('q', 'quit-sheet',  'vd.quit()')
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
-globalCommand('^L', 'redraw', 'vd.scr.clear()')
+globalCommand('^L', 'redraw', 'vd._scr.clear()')
 globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
 globalCommand('^Z', 'suspend', 'suspend()')
@@ -469,8 +469,7 @@ class VisiData(Extensible):
         self.statusHistory = []  # list of [priority, statusmsg, repeats] for all status messages ever
         self.lastErrors = []
         self.keystrokes = ''
-        self.prefixWaiting = False
-        self.scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
+        self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
         self.mousereg = []
         self.cmdlog = None  # CommandLog
 
@@ -616,11 +615,22 @@ class VisiData(Extensible):
 
     @property
     def windowHeight(self):
-        return self.scr.getmaxyx()[0] if self.scr else 25
+        return self._scr.getmaxyx()[0] if self._scr else 25
 
     @property
     def windowWidth(self):
-        return self.scr.getmaxyx()[1] if self.scr else 80
+        return self._scr.getmaxyx()[1] if self._scr else 80
+
+    def draw(self, scr, *sheets):
+        'Redraw full screen.'
+        for sheet in sheets:
+            try:
+                sheet.draw(scr)
+            except Exception as e:
+                self.exceptionCaught(e)
+
+        self.drawLeftStatus(scr, sheet)
+        self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
     def run(self, scr):
         'Manage execution of keystrokes and subsequent redrawing of screen.'
@@ -628,8 +638,9 @@ class VisiData(Extensible):
         with suppress(curses.error):
             curses.curs_set(0)
 
-        self.scr = scr
+        self._scr = scr
         numTimeouts = 0
+        prefixWaiting = False
 
         self.keystrokes = ''
         while True:
@@ -640,19 +651,13 @@ class VisiData(Extensible):
             sheet = self.sheets[0]
             threading.current_thread().sheet = sheet
 
-            try:
-                sheet.draw(scr)
-            except Exception as e:
-                self.exceptionCaught(e)
-
-            self.drawLeftStatus(scr, sheet)
-            self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
+            self.draw(scr, sheet)
 
             keystroke = self.getkeystroke(scr, sheet)
 
             if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
                 numTimeouts = 0
-                if not self.prefixWaiting:
+                if not prefixWaiting:
                     self.keystrokes = ''
 
                 self.statuses.clear()
@@ -700,12 +705,12 @@ class VisiData(Extensible):
                 return self.lastErrors and '\n'.join(self.lastErrors[-1])
             elif bindkeys._get(self.keystrokes):
                 sheet.exec_keystrokes(self.keystrokes)
-                self.prefixWaiting = False
+                prefixWaiting = False
             elif keystroke in self.allPrefixes:
-                self.prefixWaiting = True
+                prefixWaiting = True
             else:
                 status('no command for "%s"' % (self.keystrokes))
-                self.prefixWaiting = False
+                prefixWaiting = False
 
             self.checkForFinishedThreads()
             catchapply(sheet.checkCursor)
@@ -851,7 +856,6 @@ class BaseSheet(Extensible):
         self.source = None
         self.shortcut = ''
 
-        # track all async threads from sheet
         self.__dict__.update(kwargs)
 
     def __lt__(self, other):
