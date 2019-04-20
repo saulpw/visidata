@@ -362,7 +362,7 @@ class CommandLog(TsvSheet):
         fail("nothing to undo on current sheet")
 
     def redo(self, sheet):
-        sheet.undone or error("nothing to redo")
+        sheet.undone or fail("nothing to redo")
         cmdlogrow = sheet.undone.pop()
         self.replayOne(cmdlogrow)
         status("%s redone" % cmdlogrow.longname)
