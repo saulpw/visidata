@@ -96,7 +96,7 @@ class SheetsSheet(Sheet):
     precious = False
     columns = [
         ColumnAttr('name', width=30),
-        Column('num', getter=lambda c,r: r.num),
+        ColumnAttr('shortcut'),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
         ColumnAttr('nVisibleCols', type=int),

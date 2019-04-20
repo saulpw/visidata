@@ -278,7 +278,7 @@ theme('use_default_colors', False, 'curses use default terminal colors')
 theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
 theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
-theme('disp_status_fmt', '{sheet.num}〉{sheet.name}| ', 'status line prefix')
+theme('disp_status_fmt', '{sheet.shortcut}〉{sheet.name}| ', 'status line prefix')
 theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
 theme('disp_more_left', '<', 'header note indicating more columns to the left')
@@ -749,9 +749,9 @@ class VisiData(Extensible):
 
             if vs.precious and vs not in vs.vd.allSheets:
                 vs.vd.allSheets.append(vs)
-                vs.num = len(vs.vd.allSheets)
+                vs.shortcut = len(vs.vd.allSheets)
             elif hasattr(vs, 'creatingCommand') and vs.creatingCommand:
-                vs.num = vs.num or vs.creatingCommand.keystrokes
+                vs.shortcut = vs.shortcut or vs.creatingCommand.keystrokes
 
             return vs
 # end VisiData class
@@ -849,7 +849,7 @@ class BaseSheet(Extensible):
     def __init__(self, name, **kwargs):
         self.name = name
         self.source = None
-        self.num = ''
+        self.shortcut = ''
 
         # track all async threads from sheet
         self.__dict__.update(kwargs)
