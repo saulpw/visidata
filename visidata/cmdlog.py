@@ -28,6 +28,8 @@ globalCommand('R', 'redo-last', 'vd.cmdlog.redo(sheet)')
 globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
 
 
+BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
+
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo
 error status errors statuses options threads cmdlog
@@ -103,7 +105,6 @@ class CommandLog(TsvSheet):
         super().__init__(name, source=source, **kwargs)
         options.set('delimiter', '\t', self)
         self.currentActiveRow = None
-        self.undone = []  # list of CommandLogRow for redo
 
     def newRow(self, **fields):
         return self._rowtype(**fields)
@@ -352,20 +353,17 @@ class CommandLog(TsvSheet):
         for cmdlogrow in self.rows[::-1]:
             if cmdlogrow.undofunc and str(cmdlogrow.sheet) == sheet.name:
                 cmdlogrow.undofunc()
-                self.undone.append(cmdlogrow)
+                sheet.undone.append(cmdlogrow)
                 self.rows.remove(cmdlogrow)
                 vd.clear_caches()
-                vs = self.moveToReplayContext(cmdlogrow)
-                if vs is not vd.sheet:
-                    vd.push(vs)
                 status("%s undone" % cmdlogrow.longname)
                 return
 
         fail("nothing to undo on current sheet")
 
-    def redo(self):
-        self.undone or error("nothing to redo")
-        cmdlogrow = self.undone.pop()
+    def redo(self, sheet):
+        sheet.undone or error("nothing to redo")
+        cmdlogrow = sheet.undone.pop()
         self.replayOne(cmdlogrow)
         status("%s redone" % cmdlogrow.longname)
 
