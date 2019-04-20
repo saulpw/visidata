@@ -86,6 +86,7 @@ def cancelThread(*threads, exception=EscapeException):
 # each row is an augmented threading.Thread object
 class ThreadsSheet(Sheet):
     rowtype = 'threads'
+    precious = False
     columns = [
         ColumnAttr('name'),
         Column('process_time', type=float, getter=lambda col,row: elapsed_s(row)),
