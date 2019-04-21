@@ -6,6 +6,7 @@ from visidata.namedlist import namedlist
 
 
 option('vgit_logfile', '', 'file to log all git commands run by vgit')
+theme('disp_status_fmt', '{sheet.progressStatus}‹{sheet.branchStatus}› {sheet.name}| ', 'status line prefix')
 
 GitCmd = namedlist('GitCmd', 'sheet command output'.split())
 
@@ -222,13 +223,16 @@ class GitContext:
             return self.source.rootSheet
         return self
 
-    def leftStatus(self):
+    @property
+    def progressStatus(self):
         inp = self.inProgress()
-        ret = ('[%s] ' % inp) if inp else ''
-        if hasattr(self.rootSheet, 'branch'):
-            ret += '‹%s%s› ' % (self.rootSheet.branch, self.rootSheet.remotediff)
+        return ('[%s] ' % inp) if inp else ''
 
-        return ret + super().leftStatus()
+    @property
+    def branchStatus(self):
+        if hasattr(self.rootSheet, 'branch'):
+            return '%s%s' % (self.rootSheet.branch, self.rootSheet.remotediff)
+        return ''
 
     def git_apply(self, hunk, *args):
         self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
