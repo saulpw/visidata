@@ -113,13 +113,13 @@ class PandasSheet(Sheet):
         self._selectedMask.loc[[row.name for row in rows]] = False
     def selectByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
-        self._selectedMask.loc[start:end] = True
+        self._selectedMask.iloc[start:end] = True
     def unselectByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
-        self._selectedMask.loc[start:end] = False
+        self._selectedMask.iloc[start:end] = False
     def toggleByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
-        self._selectedMask.loc[start:end] = ~select._selectedMask
+        self._selectedMask.iloc[start:end] = ~self._selectedMask.iloc[start:end]
 
 def view_pandas(df):
     run(PandasSheet('', source=df))
@@ -133,16 +133,18 @@ def open_dta(p):
 
 open_stata = open_pandas
 
-# Override with vectorized implementations
-PandasSheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)', undo=undoSheetSelection),
-PandasSheet.addCommand('gs', 'select-rows', 'select(rows)', undo=undoSheetSelection),
-PandasSheet.addCommand('gu', 'unselect-rows', 'unselect(rows)', undo=undoSheetSelection),
+undoSheetSelection = undoAttrCopy('[sheet]', '_selectedMask')
 
-PandasSheet.addCommand('zt', 'stoggle-before', 'toggle(rows[:cursorRowIndex])', undo=undoSheetSelection),
-PandasSheet.addCommand('zs', 'select-before', 'select(rows[:cursorRowIndex])', undo=undoSheetSelection),
-PandasSheet.addCommand('zu', 'unselect-before', 'unselect(rows[:cursorRowIndex])', undo=undoSheetSelection),
-PandasSheet.addCommand('gzt', 'stoggle-after', 'toggle(rows[cursorRowIndex:])', undo=undoSheetSelection),
-PandasSheet.addCommand('gzs', 'select-after', 'select(rows[cursorRowIndex:])', undo=undoSheetSelection),
-PandasSheet.addCommand('gzu', 'unselect-after', 'unselect(rows[cursorRowIndex:])', undo=undoSheetSelection),
+# Override with vectorized implementations
+PandasSheet.addCommand('gt', 'stoggle-rows', 'toggleByIndex()', undo=undoSheetSelection),
+PandasSheet.addCommand('gs', 'select-rows', 'selectByIndex()', undo=undoSheetSelection),
+PandasSheet.addCommand('gu', 'unselect-rows', 'unselectByIndex()', undo=undoSheetSelection),
+
+PandasSheet.addCommand('zt', 'stoggle-before', 'toggleByIndex(end=cursorRowIndex)', undo=undoSheetSelection),
+PandasSheet.addCommand('zs', 'select-before', 'selectByIndex(end=cursorRowIndex)', undo=undoSheetSelection),
+PandasSheet.addCommand('zu', 'unselect-before', 'unselectByIndex(end=cursorRowIndex)', undo=undoSheetSelection),
+PandasSheet.addCommand('gzt', 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)', undo=undoSheetSelection),
+PandasSheet.addCommand('gzs', 'select-after', 'selectByIndex(start=cursorRowIndex)', undo=undoSheetSelection),
+PandasSheet.addCommand('gzu', 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', undo=undoSheetSelection),
 
 
