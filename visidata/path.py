@@ -30,10 +30,10 @@ class Path:
 
         if self.fqpn == '-':
             if 'r' in mode:
-                return vd.stdin
+                return vd._stdin
             elif 'w' in mode or 'a' in mode:
                 # convert 'a' to 'w' for stdout: https://bugs.python.org/issue27805
-                return open(os.dup(vd.stdout.fileno()), 'wt')
+                return open(os.dup(vd._stdout.fileno()), 'wt')
             else:
                 error('invalid mode "%s" for Path.open_text()' % mode)
                 return sys.stderr

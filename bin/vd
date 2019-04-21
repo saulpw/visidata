@@ -95,9 +95,9 @@ def main():
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
 
-    vd.stdin, vd.stdout = duptty()  # always dup stdin/stdout
+    vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
 
-    stdinSource = PathFd('-', vd.stdin)
+    stdinSource = PathFd('-', vd._stdin)
 
     # parse args, including +4:3 starting row:col
     startrow, startcol = None, None
@@ -172,7 +172,7 @@ def main():
         saveSheets(outpath, vd.sheets[0], confirm_overwrite=False)
         vd.sync()
 
-    vd.stdout.flush()
+    vd._stdout.flush()
 
     return 0
 
