@@ -140,7 +140,7 @@ class Plotter(BaseSheet):
         self.labels = []  # (x, y, text, attr, row)
         self.hiddenAttrs = set()
         self.needsRefresh = False
-        self.resetCanvasDimensions(vd.windowHeight, vd.windowWidth)
+        self.resetCanvasDimensions(self.windowHeight, self.windowWidth)
 
     def __len__(self):
         return (self.plotwidth* self.plotheight)
@@ -224,6 +224,7 @@ class Plotter(BaseSheet):
         if self.pixels:
             cursorBBox = self.plotterCursorBox
             getPixelAttr = self.getPixelAttrRandom if options.disp_pixel_random else self.getPixelAttrMost
+
             for char_y in range(0, self.plotheight//4):
                 for char_x in range(0, self.plotwidth//2):
                     block_attrs = [

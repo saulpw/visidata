@@ -304,11 +304,10 @@ theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 
 ENTER='^J'
 ALT=ESC='^['
-globalCommand('KEY_RESIZE', 'no-op', '')
 globalCommand('q', 'quit-sheet',  'vd.quit()')
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
-globalCommand('^L', 'redraw', 'vd._scr.clear()')
+globalCommand('^L', 'redraw', 'vd.refresh()')
 globalCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
 
 globalCommand('^Z', 'suspend', 'suspend()')
@@ -512,6 +511,7 @@ class VisiData(Extensible):
         'Get keystroke and display it on status bar.'
         k = None
         try:
+            scr.refresh()
             k = scr.get_wch()
             self.drawRightStatus(scr, vs or self.sheets[0]) # continue to display progress %
         except curses.error:
@@ -624,6 +624,7 @@ class VisiData(Extensible):
     def draw(self, scr, *sheets):
         'Redraw full screen.'
         for sheet in sheets:
+            sheet._scr = scr
             try:
                 sheet.draw(scr)
             except Exception as e:
@@ -855,6 +856,7 @@ class BaseSheet(Extensible):
         self.name = name
         self.source = None
         self.shortcut = ''
+        self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
 
         self.__dict__.update(kwargs)
 
@@ -915,6 +917,16 @@ class BaseSheet(Extensible):
     @property
     def loaded(self):
         return False
+
+    @property
+    def windowHeight(self):
+        'Height of the current sheet, in terminal lines'
+        return self._scr.getmaxyx()[0] if self._scr else 25
+
+    @property
+    def windowWidth(self):
+        'Width of the current sheet, in single-width characters'
+        return self._scr.getmaxyx()[1] if self._scr else 80
 
     def leftStatus(self):
         'Compose left side of status bar for this sheet (overridable).'
@@ -988,6 +1000,10 @@ class BaseSheet(Extensible):
 
     def draw(self, scr):
         error('no draw')
+
+    def refresh(self):
+        self._scr.clear()
+        self._scr.refresh()
 
     def reload(self):
         error('no reload')

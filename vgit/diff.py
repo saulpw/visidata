@@ -41,7 +41,7 @@ class DifferSheet(GitSheet):
 #                ColumnItem('linenum', 0)
         ]
         self.columns.extend([
-            ColumnItem(name, i+1, width=vd.windowWidth//len(refs)-1, refnum=i)
+            ColumnItem(name, i+1, width=self.windowWidth//len(refs)-1, refnum=i)
                 for i, name in enumerate(refs)
         ])
 
@@ -246,8 +246,8 @@ class HunkViewer(GitSheet):
     def __init__(self, hunks, **kwargs):
         super().__init__('hunk', hunks=hunks, **kwargs)
         self.columns = [
-            ColumnItem('1', 1, width=vd.windowWidth//2-1),
-            ColumnItem('2', 2, width=vd.windowWidth//2-1),
+            ColumnItem('1', 1, width=self.windowWidth//2-1),
+            ColumnItem('2', 2, width=self.windowWidth//2-1),
         ]
         self.addColorizer(RowColorizer(4, None, HunkViewer.colorDiffRow))
 

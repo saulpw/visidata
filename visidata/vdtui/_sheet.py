@@ -203,7 +203,7 @@ class Sheet(BaseSheet):
     @property
     def nVisibleRows(self):
         'Number of visible rows at the current window height.'
-        return len(self.rowLayout) or (vd.windowHeight-self.nHeaderRows-self.nFooterRows)
+        return len(self.rowLayout) or (self.windowHeight-self.nHeaderRows-self.nFooterRows)
 
     @property
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
@@ -429,7 +429,7 @@ class Sheet(BaseSheet):
                     continue
 
                 cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
-                if cur_x+cur_w < vd.windowWidth:  # current columns fit entirely on screen
+                if cur_x+cur_w < self.windowWidth:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
 
@@ -437,7 +437,7 @@ class Sheet(BaseSheet):
         'Set right-most visible column, based on calculation.'
         minColWidth = len(options.disp_more_left)+len(options.disp_more_right)
         sepColWidth = len(options.disp_column_sep)
-        winWidth = vd.windowWidth
+        winWidth = self.windowWidth
         self.visibleColLayout = {}
         x = 0
         vcolidx = 0
@@ -497,7 +497,7 @@ class Sheet(BaseSheet):
             clipdraw(scr, y+i, x, name, hdrattr.attr, colwidth)
             vd.onMouse(scr, y+i, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
 
-            if C and x+colwidth+len(C) < vd.windowWidth:
+            if C and x+colwidth+len(C) < self.windowWidth:
                 scr.addstr(y+i, x+colwidth, C, sepattr)
 
         clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrattr.attr, len(T))
@@ -540,15 +540,15 @@ class Sheet(BaseSheet):
         catchapply(self.checkCursor)
 
         for rowidx, row in enumerate(rows):
-            if y >= vd.windowHeight-1:
+            if y >= self.windowHeight-1:
                 break
 
             rowattr = self.colorize(None, row)
 
-            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowattr, maxheight=vd.windowHeight-y, isNull=isNull)
+            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowattr, maxheight=self.windowHeight-y, isNull=isNull)
 
         if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(headerRow, vd.windowWidth-2, options.disp_more_right, colors.color_column_sep)
+            scr.addstr(headerRow, self.windowWidth-2, options.disp_more_right, colors.color_column_sep)
 
         scr.refresh()
 
@@ -581,7 +581,7 @@ class Sheet(BaseSheet):
             displines = {}  # [vcolidx] -> list of lines in that cell
 
             for vcolidx, (x, colwidth) in sorted(self.visibleColLayout.items()):
-                if x < vd.windowWidth:  # only draw inside window
+                if x < self.windowWidth:  # only draw inside window
                     col = self.visibleCols[vcolidx]
                     cellval = col.getCell(row)
                     if colwidth > 1 and isNumeric(col):
@@ -660,7 +660,7 @@ class Sheet(BaseSheet):
                         clipdraw(scr, y, x, disp_column_fill+line, attr.attr, colwidth-(1 if note else 0))
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
-                        if x+colwidth+len(sepchars) <= vd.windowWidth:
+                        if x+colwidth+len(sepchars) <= self.windowWidth:
                             scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
 
             return height

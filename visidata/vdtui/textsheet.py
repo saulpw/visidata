@@ -26,7 +26,7 @@ class TextSheet(Sheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        winWidth = min(self.columns[1].width or 78, vd.windowWidth-2)
+        winWidth = min(self.columns[1].width or 78, self.windowWidth-2)
         wrap = options.wrap
         for startingLine, text in enumerate(self.source):
             if wrap and text:
