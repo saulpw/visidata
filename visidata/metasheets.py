@@ -6,8 +6,6 @@ from visidata import undoAttr, undoAddCols, VisiData, vlen
 
 globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
-globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
-globalCommand('S', 'sheets-all', 'vd.push(vd.sheetsSheet)')
 
 BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)')
@@ -91,40 +89,6 @@ ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows o
 ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or fail("no columns selected to concatenate")))', undo=undoAddCols)
 
 
-class SheetsSheet(Sheet):
-    rowtype = 'sheets'
-    precious = False
-    columns = [
-        ColumnAttr('name', width=30),
-        ColumnAttr('shortcut'),
-        ColumnAttr('nRows', type=int),
-        ColumnAttr('nCols', type=int),
-        ColumnAttr('nVisibleCols', type=int),
-        ColumnAttr('cursorDisplay'),
-        ColumnAttr('keyColNames'),
-        ColumnAttr('source'),
-        ColumnAttr('progressPct'),
-        ColumnAttr('threads', 'currentThreads', type=vlen),
-    ]
-    colorizers = [
-        RowColorizer(1.5, 'color_hidden_col', lambda s,c,r,v: r and r not in vd.sheets),
-    ]
-    nKeys = 1
-
-    def newRow(self):
-        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
-
-    def reload(self):
-        self.rows = self.source
-
-SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
-SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
-SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
-SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))')
-SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))')
-SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
-SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
-
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
     rowtype = 'commands'
@@ -201,11 +165,6 @@ OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lamb
 
 bindkeys.set('e', 'edit-option', OptionsSheet)
 bindkeys.set(ENTER, 'edit-option', OptionsSheet)
-
-@VisiData.cached_property
-def sheetsSheet(vd):
-    return SheetsSheet("sheets_all", source=vd.allSheets)
-
 
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'

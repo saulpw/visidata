@@ -726,42 +726,6 @@ class VisiData(Extensible):
                     scr.timeout(-1)
                 else:
                     scr.timeout(curses_timeout)
-
-    def replace(self, vs):
-        'Replace top sheet with the given sheet `vs`.'
-        self.sheets.pop(0)
-        return self.push(vs)
-
-    def remove(self, vs):
-        if vs in self.sheets:
-            self.sheets.remove(vs)
-        else:
-            fail('sheet not on stack')
-
-    def push(self, vs, sheets=None):
-        'Move given sheet `vs` to index 0 of list `sheets`.'
-        if sheets is None:
-            sheets = self.sheets
-        if vs:
-            vs.vd = self
-            if vs in sheets:
-                sheets.remove(vs)
-            else:
-                vs.creatingCommand = self.cmdlog and self.cmdlog.currentActiveRow
-
-            sheets.insert(0, vs)
-
-            if not vs.loaded:
-                vs.reload()
-                vs.recalc()  # set up Columns
-
-            if vs.precious and vs not in vs.vd.allSheets:
-                vs.vd.allSheets.append(vs)
-                vs.shortcut = len(vs.vd.allSheets)
-            elif hasattr(vs, 'creatingCommand') and vs.creatingCommand:
-                vs.shortcut = vs.shortcut or vs.creatingCommand.keystrokes
-
-            return vs
 # end VisiData class
 
 vd = VisiData()

@@ -16,6 +16,7 @@ from .errors import *
 from .urlcache import *
 from .zscroll import *
 from ._types import *
+from .sheets import *
 from .selection import *
 from .loaders.tsv import *
 from .data import *
