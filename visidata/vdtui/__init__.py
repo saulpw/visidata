@@ -449,10 +449,6 @@ class Extensible:
 class VisiData(Extensible):
     allPrefixes = ['g', 'z', ESC]  # embig'g'en, 'z'mallify, ESC=Alt/Meta
 
-    def __call__(self):
-        'Deprecated; use plain "vd"'
-        return self
-
     @classmethod
     def global_api(cls, func):
         'Make global func() and identical vd.func()'

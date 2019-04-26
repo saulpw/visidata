@@ -1,3 +1,4 @@
+from visidata import VisiData
 import visidata
 
 
@@ -9,6 +10,13 @@ def deprecated(ver):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+@deprecated('1.6')
+@VisiData.api
+def __call__(vd):
+    'Deprecated; use plain "vd"'
+    return vd
 
 
 @deprecated('1.6')
