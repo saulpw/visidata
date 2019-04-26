@@ -76,6 +76,8 @@ from .plugins import *
 
 from .colors import *   # ColorsSheet
 
+from .deprecated import *
+
 from math import *
 
 
