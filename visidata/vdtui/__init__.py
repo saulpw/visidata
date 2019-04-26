@@ -738,16 +738,18 @@ class VisiData(Extensible):
         else:
             fail('sheet not on stack')
 
-    def push(self, vs):
+    def push(self, vs, sheets=None):
         'Move given sheet `vs` to index 0 of list `sheets`.'
+        if sheets is None:
+            sheets = self.sheets
         if vs:
             vs.vd = self
-            if vs in self.sheets:
-                self.sheets.remove(vs)
+            if vs in sheets:
+                sheets.remove(vs)
             else:
                 vs.creatingCommand = self.cmdlog and self.cmdlog.currentActiveRow
 
-            self.sheets.insert(0, vs)
+            sheets.insert(0, vs)
 
             if not vs.loaded:
                 vs.reload()
