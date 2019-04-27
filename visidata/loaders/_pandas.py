@@ -36,6 +36,9 @@ class PandasSheet(Sheet):
             readfunc = getattr(pandas, 'read_'+filetype) or error('no pandas.read_'+filetype)
             self.df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
 
+        if type(self.df.index) is not pandas.RangeIndex:
+            self.df = self.df.reset_index()
+
         self.columns = [ColumnItem(col, type=dtypeToType(self.df, col)) for col in self.df.columns]
         self.rows = DataFrameAdapter(self.df)
 
