@@ -9,6 +9,7 @@
         - [new command] `options.undo` (default False) to enable infinite linear undo/redo
         - provisionally bound to `Shift+U` and `Shift+R`
         - `undoEditCells` assumes commands modified only selectedRows
+        - will undo most recent modification on current sheet
     - numeric binning
         - [feature freqtbl] numeric binning for frequency/pivot table
         - `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
@@ -70,6 +71,7 @@
 - [license] remove MIT license from vdtui; all code now licensed under GPL3
 - [loader Pyobj] `py` filetype to import and explore a python module: `vd -f py curses`
 - [loader pyxlsb] add .xlsb loader (suggested by @woutervdijke #246)
+- [loader npy] add .npy loader
 - [mouse] bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - [mouse] slide columns/rows with left-click and drag
 - [openSource] create new blank sheet if file does not exist
@@ -81,7 +83,7 @@
 - [pandas] impement sort() for pandas DataFrame (suggested by @migueldvb #257)
 - [pcap] adds saver for .pcap to json (thanks @layertwo for PR #272)
 - [perf] expr columns are now set to cache automatically
-- [precious] describe-sheet is now precious; error-sheet is not
+- [precious] describe-sheet is now precious; error-sheet and threads-sheet are not
 - [replay] show comments as status (suggested by @cwarden)
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
