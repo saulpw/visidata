@@ -742,7 +742,7 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy tsv No (tab-separated value)
 .Bl -inset -compact -offset xxx
-.It Plain and simple.  Nm VisiData No writes tsv format by default.  See the Sy --delimiter No option.
+.It Plain and simple.  Nm VisiData No writes tsv format by default.  See the Sy --tsv-delimiter No option.
 .El
 .El
 .Pp

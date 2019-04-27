@@ -61,7 +61,7 @@ def main():
     parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
     parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output (as .tsv) at the end of replay')
     parser.add_argument('-w', dest='replay_wait', default=0, help='time to wait between replayed commands, in seconds')
-    parser.add_argument('-d', dest='delimiter', help='delimiter to use for tsv filetype')
+    parser.add_argument('-d', dest='tsv_delimiter', help='delimiter to use for tsv filetype')
     parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
     parser.add_argument('-v', '--version', action='version', version=__version_info__)
 

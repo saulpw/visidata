@@ -9,10 +9,7 @@ from visidata import *
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 replayableOption('safe_error', '#ERR', 'error string to use while saving')
 replayableOption('header', 1, 'parse first N rows of certain formats as column names')
-replayableOption('delimiter', '\t', 'delimiter to use for tsv filetype')
 replayableOption('filetype', '', 'specify file type')
-replayableOption('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv')
-replayableOption('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv')
 
 option('color_add_pending', 'green', 'color for rows pending add')
 option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
@@ -293,7 +290,7 @@ def open_vd(p):
 def open_txt(p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     with p.open_text() as fp:
-        if options.delimiter in next(fp):    # peek at the first line
+        if options.tsv_delimiter in next(fp):    # peek at the first line
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, p)
 

@@ -3,8 +3,12 @@ import contextlib
 import itertools
 import collections
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught
+from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught, replayableOption
 from visidata.namedlist import namedlist
+
+replayableOption('tsv_delimiter', '\t', 'delimiter to use for tsv filetype')
+replayableOption('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv')
+replayableOption('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv')
 
 
 def getlines(fp, maxlines=None):
@@ -39,7 +43,7 @@ class TsvSheet(Sheet):
     def reload_sync(self):
         'Perform synchronous loading of TSV file, discarding header lines.'
         header_lines = options.get('header', self)
-        delim = options.get('delimiter', self)
+        delim = options.get('tsv_delimiter', self)
 
         with self.source.open_text() as fp:
             # get one line anyway to determine number of columns
@@ -83,7 +87,7 @@ class TsvSheet(Sheet):
 def tsv_trdict(vs):
     'returns string.translate dictionary for replacing tabs and newlines'
     if options.safety_first:
-        delim = options.get('delimiter', vs)
+        delim = options.get('tsv_delimiter', vs)
         return {ord(delim): options.get('tsv_safe_tab', vs), # \t
             10: options.get('tsv_safe_newline', vs),  # \n
             13: options.get('tsv_safe_newline', vs),  # \r
@@ -93,7 +97,7 @@ def tsv_trdict(vs):
 def save_tsv_header(p, vs):
     'Write tsv header for Sheet `vs` to Path `p`.'
     trdict = tsv_trdict(vs)
-    delim = options.delimiter
+    delim = options.tsv_delimiter
 
     with p.open_text(mode='w') as fp:
         colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
@@ -139,7 +143,7 @@ def genAllValues(rows, cols, trdict={}, format=True):
 @asyncthread
 def save_tsv(p, vs):
     'Write sheet to file `fn` as TSV.'
-    delim = options.get('delimiter', vs)
+    delim = options.get('tsv_delimiter', vs)
     trdict = tsv_trdict(vs)
 
     save_tsv_header(p, vs)
