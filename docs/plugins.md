@@ -30,12 +30,12 @@ To install it
 
 ## From within VisiData
 
-visidata.org maintains a set of plugins which can be downloaded and installed from within the application itself.
+We maintain a list of plugins which can be downloaded and installed from within the application itself. To incorporate a plugin into this list, add it to [plugins.tsv](https://github.com/saulpw/visidata/blob/develop/plugins/plugins.tsv), and create a PR off of the `develop` branch.
 
 * Press <kbd>Space</kbd>, and then type `open-plugins` to open the **PluginsSheet**.
-* To add a plugin, move the cursor to its row and press `a`.
-* To remove a plugin, move the cursor to its row and press `d`.
+* To download and install a plugin, move the cursor to its row and press `a` (add).
+* To uninstall a plugin, move the cursor to its row and press `d` (delete).
 
 Adding a plugin performs all the manual steps above, automatically.
 
-Removing a plugin will delete its directory from `~/.visidata` and its import from `~/.visidatarc`. It will not remove any of its dependencies.
+Removing a plugin will delete its its import from `~/.visidatarc`. It will not remove the plugin itself from ~/.visidata nor any of its dependencies.

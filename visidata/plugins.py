@@ -4,21 +4,18 @@ import zipfile
 from visidata import *
 
 
-option('plugins_url', 'https://visidata.org/plugins/', 'source of plugins sheet')
+option('plugins_url', 'https://visidata.org/plugins/plugins.tsv', 'source of plugins sheet')
 
 @VisiData.api
 def openPlugins(vd):
-    return openSource(urlcache(options.plugins_url+"plugins.tsv", 0), filetype="plugins")
+    return openSource(urlcache(options.plugins_url, 0), filetype="plugins")
 
 def open_plugins(p):
     'Support the "plugins" phony filetype as PluginsSheet'
-    return PluginsSheet('visidata.org/plugins', source=p)
-
-def _plugin_zip(plugin):
-    return "%s%s-%s.zip" % (options.plugins_url, plugin.name, plugin.plugin_ver)
+    return PluginsSheet('plugins', source=p)
 
 def _plugin_path(plugin):
-    return Path(os.path.join(options.visidata_dir, "plugins", plugin.name))
+    return Path(os.path.join(options.visidata_dir, "plugins", plugin.name+".py"))
 
 def _plugin_import(plugin):
     return "import " + _plugin_import_name(plugin)
@@ -26,27 +23,28 @@ def _plugin_import(plugin):
 def _plugin_import_name(plugin):
     return "plugins."+plugin.name
 
+def _installedStatus(plugin):
+    import importlib
+    return '*' if importlib.util.find_spec(_plugin_import_name(plugin)) else ''
+
+def _loadedVersion(plugin):
+    name = _plugin_import_name(plugin)
+    if name not in sys.modules:
+        return ''
+    mod = sys.modules[name]
+    return getattr(mod, '__version__', 'unknown version installed')
+
 
 class PluginsSheet(TsvSheet):
     rowtype = "plugins"
 
     @asyncthread
     def reload(self):
-        vd.sync(super().reload())
+        super().reload_sync()
 
-        self.addColumn(Column('installed', getter=lambda c,r: c.sheet.installedStatus(r)), index=1)
-        self.addColumn(Column('loaded', getter=lambda c,r: c.sheet.loadedVersion(r)), index=2)
-
-    def installedStatus(self, plugin):
-        import importlib
-        return importlib.util.find_spec(_plugin_import_name(plugin))
-
-    def loadedVersion(self, plugin):
-        name = _plugin_import_name(plugin)
-        if name not in sys.modules:
-            return None
-        mod = getattr(__import__(name), name)
-        return getattr(mod, '__version__', 'unknown version installed')
+        self.addColumn(Column('installed', getter=lambda c,r: _installedStatus(r)), index=1)
+        self.addColumn(Column('loaded', getter=lambda c,r: _loadedVersion(r)), index=2)
+        self.setKeys([self.column("name")])
 
     def installPlugin(self, plugin):
         # pip3 install requirements
@@ -59,11 +57,15 @@ class PluginsSheet(TsvSheet):
     @asyncthread
     def _install(self, plugin):
         outpath = _plugin_path(plugin)
-        with zipfile.ZipFile(urlcache(_plugin_zip(plugin), text=False).open_bytes()) as zf:
-            zf.extractall(path=outpath.resolve())
+        os.makedirs(outpath.parent.resolve(), exist_ok=True)
 
-        p = subprocess.Popen(['pip3', 'install']+plugin.requirements.split())
-        status(tuple(p.communicate()))
+        with urlcache(plugin.url, 0).open_text() as pyfp:
+            with outpath.open_text(mode='w') as outfp:
+                outfp.write(pyfp.read())
+
+        if plugin.requirements:
+            p = subprocess.Popen(['pip3', 'install']+plugin.requirements.split())
+            status(tuple(p.communicate()))
 
         with Path(options.config).open_text(mode='a') as fprc:
             print(_plugin_import(plugin), file=fprc)
@@ -71,12 +73,6 @@ class PluginsSheet(TsvSheet):
         warning("restart visidata to use new plugin")
 
     def removePluginIfExists(self, plugin):
-        ver = loadedVersion()
-        if not ver:
-            warning('plugin is not installed')
-            return
-
-        confirm("remove plugin? ")
         self.removePlugin(plugin)
 
     def removePlugin(self, plugin):
@@ -90,12 +86,6 @@ class PluginsSheet(TsvSheet):
                 fprc.write(vdrc_contents)
         except FileNotFoundError:
             warning("no visidatarc file")
-
-        try:
-            shutil.rmtree(_plugin_path(plugin).resolve())
-        except FileNotFoundError:
-            warning("%s plugin not installed" % plugin.name)
-
 
 globalCommand(None, 'open-plugins', 'vd.push(openPlugins())')
 

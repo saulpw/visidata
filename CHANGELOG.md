@@ -20,6 +20,12 @@
         - `Ctrl+Q` to output current sheet (like at end of -b)
         - `vd -o-` to send directly to the terminal (can also be used with redirection, but not necessary)
     - plugin framework
+        - plugins are optional Python modules that extend or modify base VisiData's functionality
+        - this release establishes a structure for creating plugins, and provides an interface within VisiData for installing them
+            - `open-plugins` opens the **PluginsSheet**
+            - to download and install a plugin, move the cursor to its row and press `a` (add)
+            - to uninstall a plugin, move the cursor to its row and press `d` (delete).
+        - for more information see (https://visidata.org/docs/plugins)
 
 ## interface changes
 
