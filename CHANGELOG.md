@@ -15,10 +15,10 @@
         - `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
         - (thanks paulklemm for the issue #244)
     - stdout pipe/redirect
-        - `ls|vd|lpr` to interactively select which filenames to send to the printer
+        - `ls|vd|lpr` to interactively select a list of filenames to send to the printer
         - `q`/`gq` to output nothing
         - `Ctrl+Q` to output current sheet (like at end of -b)
-        - `vd -o-` to send directly to the terminal (can also be used with redirection, but not necessary)
+        - `vd -o-` to send directly to the terminal (not necessary if already redirected)
     - plugin framework
         - plugins are optional Python modules that extend or modify base VisiData's functionality
         - this release establishes a structure for creating plugins, and provides an interface within VisiData for installing them
