@@ -105,7 +105,7 @@
 - remove Sheet.vd; 'vd' attrs now available in execstr
 - remove hooks
 - `vd.sync(*threads)` waits on specific threads (returned by calls to `@asyncthread` functions)
-- add Sheet.num and VisiData.nSheets for left status prompt
+- add Sheet.num for left status prompt
 - pivot and frequency table have been consolidated for numeric binning
 - add Sheet.nFooterRows property
 - Sheet.column() takes colname instead of regex; add Sheet.colsByName cached property

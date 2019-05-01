@@ -1,4 +1,4 @@
-# Copyright 2017-2018 Saul Pwanson  http://visidata.org
+# Copyright 2017-2019 Saul Pwanson  http://visidata.org
 
 'vdtui: a curses framework for columnar data'
 
@@ -476,10 +476,6 @@ class VisiData(Extensible):
     def sheet(self):
         'the top sheet on the stack'
         return self.sheets[0] if self.sheets else None
-
-    @property
-    def nSheets(self):
-        return len(self.sheets)
 
     def getSheet(self, sheetname):
         matchingSheets = [x for x in vd.sheets if x.name == sheetname]
