@@ -75,10 +75,14 @@ view sheet of commands and keybindings
 abort program immediately
 .It Ic " ^C"
 cancel user input or abort all async threads on current sheet
-.It Ic " q"
+.It Ic "  q"
 quit current sheet
-.It Ic "gq"
+.It Ic " gq"
 quit all sheets (clean exit)
+.It Ic "  U"
+.No undoes the most recent modification ( requires enabling of Sy options.undo Ns )
+.It Ic "  R"
+.No redoes the most recent undo ( requires enabling of Sy options.undo Ns )
 .El
 .Ss "Cursor Movement"
 .
@@ -172,7 +176,7 @@ set name of all visible columns to combined contents of current column for selec
 .It Ic "gz=" Ar expr
 .No set current column for selected rows to the items in result of Python sequence Ar expr
 .It Ic " z=" Ar expr
-.No evaluate Python expression on current row and show result on status line
+.No evaluate Python expression on current row and set current cell with result of Python Ar expr
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " '" Ns " (tick)"
@@ -326,6 +330,10 @@ open new sheet with rows and columns transposed
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column
+.It Ic " &"
+.No concatenate top two sheets in the sheets-stack
+.It Ic "g&"
+.No concatenate all sheets in the sheets-stack
 .Pp
 .El
 .Ss Data Visualization
@@ -505,6 +513,8 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic zS
 .No open Sy Sheets Stack No which shows only the active sheets on the stack
+.It Ic "Alt" Ar number
+.No jump to Ar number Ns th sheet
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -594,7 +604,7 @@ abort replay
 .It Ic gF
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-open one-line summary for selected rows
+open summary of all rows and selected rows
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -718,6 +728,8 @@ amount to scroll with scrollwheel
 a value to be counted as null
 .It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
 max number of cache entries in each cached column
+.It Sy --textwrap-cells Ns = Ns Ar "bool       " No "True"
+wordwrap text for multiline rows
 .It Sy --wrap No "                      False"
 wrap text to fit window width on TextSheet
 .It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
@@ -730,20 +742,20 @@ minimum memory to continue loading and async processing
 skip first N lines of text input
 .It Sy --bulk-select-clear No "         False"
 clear selected rows before new bulk selections
+.It Sy --tsv-delimiter Ns = Ns Ar "str         " No "	"
+delimiter to use for tsv filetype
+.It Sy --tsv-safe-newline Ns = Ns Ar "str      " No ""
+replacement for newline character when saving to tsv
+.It Sy --tsv-safe-tab Ns = Ns Ar "str          " No ""
+replacement for tab character when saving to tsv
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
 whether to prompt for overwrite confirmation on save
 .It Sy --safe-error Ns = Ns Ar "str            " No "#ERR"
 error string to use while saving
 .It Sy --header Ns = Ns Ar "int                " No "1"
 parse first N rows of certain formats as column names
-.It Sy --delimiter Ns = Ns Ar "str             " No "	"
-delimiter to use for tsv filetype
 .It Sy --filetype Ns = Ns Ar "str              " No ""
 specify file type
-.It Sy --tsv-safe-newline Ns = Ns Ar "str      " No ""
-replacement for newline character when saving to tsv
-.It Sy --tsv-safe-tab Ns = Ns Ar "str          " No ""
-replacement for tab character when saving to tsv
 .It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No ""
 command to copy stdin to system clipboard
 .It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No ""
@@ -752,7 +764,7 @@ command to get contents of system clipboard
 visibility level (0=low, 1=high)
 .It Sy --histogram-bins Ns = Ns Ar "int        " No "0"
 number of bins for histogram of numeric columns
-.It Sy --undo No "                      False"
+.It Sy --undo Ns = Ns Ar "bool                 " No "True"
 enable undo/redo
 .It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
 time to wait between replayed commands, in seconds
@@ -798,7 +810,7 @@ number of rows to check for fixed width columns
 (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
 .It Sy --graphviz-edge-labels Ns = Ns Ar "bool " No "True"
 whether to include edge labels on graphviz diagrams
-.It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/"
+.It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/plugins.tsv"
 source of plugins sheet
 .El
 .
@@ -813,11 +825,7 @@ visible contents of a cell whose value is None
 indicator that the contents are only partially visible
 .It Sy "disp_oddspace      " No "\[u00B7]"
 displayable character for odd whitespace
-.It Sy "disp_column_sep    " No "|"
-separator between columns
-.It Sy "disp_keycol_sep    " No "\[u2016]"
-separator between key columns and rest of columns
-.It Sy "disp_status_fmt    " No "[{sheet.num}/{vd.nSheets}] {sheet.name}| "
+.It Sy "disp_status_fmt    " No "{sheet.shortcut}\[u3009]{sheet.name}| "
 status line prefix
 .It Sy "disp_lstatus_max   " No "0"
 maximum length of left status line
@@ -845,6 +853,30 @@ string to display in pending cells
 color of note in pending cells
 .It Sy "color_note_type    " No "226 yellow"
 cell note for numeric types in anytype columns
+.It Sy "disp_column_sep    " No "\[u2575]"
+separator between columns
+.It Sy "disp_keycol_sep    " No "\[u2551]"
+separator between key columns and rest of columns
+.It Sy "disp_rowtop_sep    " No "\[u2502]"
+
+.It Sy "disp_rowmid_sep    " No "\[u2502]"
+
+.It Sy "disp_rowbot_sep    " No "\[u2575]"
+
+.It Sy "disp_rowend_sep    " No "\[u2551]"
+
+.It Sy "disp_keytop_sep    " No "\[u2551]"
+
+.It Sy "disp_keymid_sep    " No "\[u2551]"
+
+.It Sy "disp_keybot_sep    " No "\[u2551]"
+
+.It Sy "disp_endtop_sep    " No "\[u2551]"
+
+.It Sy "disp_endmid_sep    " No "\[u2551]"
+
+.It Sy "disp_endbot_sep    " No "\[u2551]"
+
 .It Sy "color_default      " No "normal"
 the default color
 .It Sy "color_default_hdr  " No "bold"
@@ -871,7 +903,7 @@ color of system running smoothly
 cell color to use when editing cell
 .It Sy "disp_edit_fill     " No "_"
 edit field fill character
-.It Sy "disp_unprintable   " No "."
+.It Sy "disp_unprintable   " No "\[u00B7]"
 substitute character for unprintables
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
 default fmtstr to strftime for date values
@@ -948,7 +980,7 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy tsv No (tab-separated value)
 .Bl -inset -compact -offset xxx
-.It Plain and simple.  Nm VisiData No writes tsv format by default.  See the Sy --delimiter No option.
+.It Plain and simple.  Nm VisiData No writes tsv format by default.  See the Sy --tsv-delimiter No option.
 .El
 .El
 .Pp
