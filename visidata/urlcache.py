@@ -7,12 +7,12 @@ import urllib.parse
 from visidata import __version_info__, Path, options
 
 
-def urlcache(url, cachesecs=24*60*60, text=True):
-    'Returns Path object to local cache of url contents.'
+def urlcache(url, days=1, text=True):
+    'Return Path object to local cache of url contents.'
     p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
     if p.exists():
         secs = time.time() - p.stat().st_mtime
-        if secs < cachesecs:
+        if secs < days*24*60*60:
             return p
 
     if not p.parent.exists():

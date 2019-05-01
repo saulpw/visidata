@@ -8,7 +8,7 @@ option('plugins_url', 'https://visidata.org/plugins/plugins.tsv', 'source of plu
 
 @VisiData.api
 def openPlugins(vd):
-    return openSource(urlcache(options.plugins_url, 0), filetype="plugins")
+    return openSource(urlcache(options.plugins_url, days=0), filetype="plugins")
 
 def open_plugins(p):
     'Support the "plugins" phony filetype as PluginsSheet'

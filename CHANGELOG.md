@@ -117,6 +117,7 @@
 - separate out vdtui components into submodules: editline, textsheet, cliptext, color, column, sheet
 - convert all `vd()` to `vd`
 - remove ArrayColumns, NamedArrayColumns
+- urlcache now takes days=n
 
 ## Deps
 - add dateutil as submodule
