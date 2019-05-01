@@ -200,6 +200,10 @@ class Sheet(BaseSheet):
     def evalexpr(self, expr, row=None):
         return eval(expr, getGlobals(), LazyMapRow(self, row) if row is not None else None)
 
+    def rowid(self, row):
+        'Return a fast, unique, and stable hash of the given row object.  Must be fast.  Overrideable.'
+        return id(row)
+
     @property
     def nVisibleRows(self):
         'Number of visible rows at the current window height.'

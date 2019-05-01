@@ -4,6 +4,8 @@
 
 ## Major features
 
+    - add ALT/ESC as prefix; ALT+N to go to that sheet
+       - ALT+ layer not otherwise used; bind with `^[x` for `ALT+X`
     - vgit
     - undo/redo
         - [new command] `options.undo` (default False) to enable infinite linear undo/redo
@@ -39,7 +41,6 @@
 - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
 - all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
 - Shift+S pushes `sheets-all`; zS pushes `sheets-stack`. removed gS and the graveyard sheet.
-    - add ALT/ESC as prefix; ALT+N to go to that sheet
 - `random-rows` is no longer bound to any key by default (was Shift+R).
 - `freq-summary` was `freq-rows`; adds summary for selected rows
 - cmdlog is now based on longname instead of keystrokes
@@ -52,8 +53,9 @@
 
 ## plugins
 
-- inplace: breaks replay
+- inplace: shows expressions while typing [breaks replay]
 - vfake: anonymizes columns
+- rownum: add column of original row ordering
 
 ## Bugfixes
 
