@@ -307,7 +307,7 @@ ALT=ESC='^['
 globalCommand('q', 'quit-sheet',  'vd.quit()')
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
-globalCommand('^L', 'redraw', 'vd.refresh()')
+globalCommand('^L', 'redraw', 'sheet.refresh()')
 
 globalCommand('^Z', 'suspend', 'suspend()')
 
