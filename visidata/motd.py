@@ -1,3 +1,13 @@
+'''motd: display a low-priority random Message Of The Day on startup.
+
+Call `domotd()` to spawn an asyncthread to read and/or fetch
+a motd file from a url.  The file may be text or unheaded TSV, with one message per row in the first column.
+
+Any Exception ends the thread silently.
+
+options.motd_url may be set to another URL, or empty to disable entirely.
+'''
+
 import random
 
 from visidata import option, options, asyncthread, urlcache, status
