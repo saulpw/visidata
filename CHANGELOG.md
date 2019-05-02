@@ -120,6 +120,7 @@
 - convert all `vd()` to `vd`
 - remove ArrayColumns, NamedArrayColumns
 - urlcache now takes days=n
+- Sheet.rowid
 
 ## Deps
 - add dateutil as submodule

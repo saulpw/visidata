@@ -166,7 +166,7 @@ class GitLogSheet(GitSheet, DeferredSaveSheet):
         for row, cols in changes.values():
             for col in cols:
                 try:
-                    col.realsetter(col, row, col._modifiedValues[id(row)])
+                    col.realsetter(col, row, col._modifiedValues[self.rowid(row)])
                 except Exception as e:
                     exceptionCaught(e)
 

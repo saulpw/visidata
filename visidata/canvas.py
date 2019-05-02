@@ -210,7 +210,7 @@ class Plotter(BaseSheet):
                 for attr, rows in self.pixels[y][x].items():
                     if attr not in self.hiddenAttrs:
                         for r in rows:
-                            ret[id(r)] = r
+                            ret[self.source.rowid(r)] = r
         return list(ret.values())
 
     def draw(self, scr):

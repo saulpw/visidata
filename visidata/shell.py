@@ -31,7 +31,7 @@ class ColumnShell(Column):
         super().__init__(name, **kwargs)
         self.expr = cmd or name
 
-    @asynccache(lambda col,row: (col, id(row)))
+    @asynccache(lambda col,row: (col, col.sheet.rowid(row)))
     def calcValue(self, row):
         try:
             import shlex
@@ -51,8 +51,8 @@ class ColumnShell(Column):
 class DeferredSaveSheet(Sheet):
     colorizers = [
         CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
-        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: id(r) in s.toBeDeleted),
-        RowColorizer(9, 'color_add_pending', lambda s,c,r,v: id(r) in s.addedRows),
+        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: s.rowid(r) in s.toBeDeleted),
+        RowColorizer(9, 'color_add_pending', lambda s,c,r,v: s.rowid(r) in s.addedRows),
     ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -60,12 +60,12 @@ class DeferredSaveSheet(Sheet):
 
     def reset(self):
         'reset deferred caches'
-        self.addedRows = {} # [id(row)] -> row
-        self.toBeDeleted = {}  # [id(row)] -> row
+        self.addedRows = {} # [s.rowid(row)] -> row
+        self.toBeDeleted = {}  # [s.rowid(row)] -> row
 
     def newRow(self):
         row = Sheet.newRow(self)
-        self.addedRows[id(row)] = row
+        self.addedRows[s.rowid(row)] = row
         return row
 
     def changed(self, col, row):
@@ -76,25 +76,25 @@ class DeferredSaveSheet(Sheet):
 
     def undoMod(self, row):
         for col in self.visibleCols:
-            if getattr(col, '_modifiedValues', None) and id(row) in col._modifiedValues:
-                del col._modifiedValues[id(row)]
+            if getattr(col, '_modifiedValues', None) and self.rowid(row) in col._modifiedValues:
+                del col._modifiedValues[self.rowid(row)]
 
         if row in self.toBeDeleted:
-            del self.toBeDeleted[id(row)]
+            del self.toBeDeleted[self.rowid(row)]
 
         self.restat(row)
 
     def delete(self, rows):
         for r in rows:
-            self.toBeDeleted[id(r)] = r
+            self.toBeDeleted[self.rowid(r)] = r
 
     def save(self, *rows):
         changes = {}  # [rowid] -> (row, [changed_cols])
         for r in list(rows or self.rows):  # copy list because elements may be removed
-            if id(r) not in self.addedRows and id(r) not in self.toBeDeleted:
+            if self.rowid(r) not in self.addedRows and self.rowid(r) not in self.toBeDeleted:
                 changedcols = [col for col in self.visibleCols if self.changed(col, r)]
                 if changedcols:
-                    changes[id(r)] = (r, changedcols)
+                    changes[self.rowid(r)] = (r, changedcols)
 
         if not self.addedRows and not changes and not self.toBeDeleted:
             fail('nothing to save')
@@ -203,7 +203,7 @@ class DirSheet(DeferredSaveSheet):
         self.rows = []
         for r in oldrows:
             try:
-                if id(r) in deletes:
+                if self.rowid(r) in deletes:
                     self.removeFile(r)
                 else:
                     self.rows.append(r)
@@ -213,7 +213,7 @@ class DirSheet(DeferredSaveSheet):
         for row, cols in changes.values():
             for col in cols:
                 try:
-                    col.realsetter(col, row, col._modifiedValues[id(row)])
+                    col.realsetter(col, row, col._modifiedValues[self.rowid(row)])
                     self.restat(row)
                 except Exception as e:
                     exceptionCaught(e)

@@ -130,21 +130,21 @@ class Column(Extensible):
 
     @asyncthread
     def _putValue_async(self, row):
-        self._cachedValues[id(row)] = None
+        self._cachedValues[self.sheet.rowid(row)] = None
         self._putValue(row)
 
     def _putValue(self, row):
         ret = wrapply(self.calcValue, row)
         if not isinstance(ret, TypedExceptionWrapper):
-            self._cachedValues[id(row)] = ret
+            self._cachedValues[self.sheet.rowid(row)] = ret
         return ret
 
     def getValue(self, row):
-        'Memoize calcValue with key id(row)'
+        'Memoize calcValue with key sheet.rowid(row)'
         if self._cachedValues is None:
             return self.calcValue(row)
 
-        k = id(row)
+        k = self.sheet.rowid(row)
         if k in self._cachedValues:
             return self._cachedValues[k]
 

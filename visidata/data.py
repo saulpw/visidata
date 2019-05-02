@@ -43,10 +43,10 @@ class SettableColumn(Column):
         self.cache = {}
 
     def setValue(self, row, value):
-        self.cache[id(row)] = value
+        self.cache[self.sheet.rowid(row)] = value
 
     def calcValue(self, row):
-        return self.cache.get(id(row), None)
+        return self.cache.get(self.sheet.rowid(row), None)
 
 Sheet._coltype = SettableColumn
 
@@ -208,7 +208,7 @@ class DeferredSetColumn(Column):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.realsetter = self.setter
-        self.setter = self.deferredSet
+        self.setter = self.deferredSet  # this makes it overrideable with .setter
         self._modifiedValues = {}
 
     def rollback(self):
@@ -217,16 +217,16 @@ class DeferredSetColumn(Column):
     @staticmethod
     def deferredSet(col, row, val):
         if col.getValue(row) != val:
-            col._modifiedValues[id(row)] = val
+            col._modifiedValues[col.sheet.rowid(row)] = val
 
     def changed(self, row):
         curval = self.calcValue(row)
-        newval = self._modifiedValues.get(id(row), curval)
+        newval = self._modifiedValues.get(self.sheet.rowid(row), curval)
         return self.type(newval) != self.type(curval)
 
     def getValue(self, row):
-        if id(row) in self._modifiedValues:
-            return self._modifiedValues.get(id(row))  # overrides cache
+        if self.sheet.rowid(row) in self._modifiedValues:
+            return self._modifiedValues.get(self.sheet.rowid(row))  # overrides cache
         return Column.getValue(self, row)
 
     def getSavedValue(self, row):
@@ -348,8 +348,8 @@ def deleteBy(self, func):
 @Sheet.api
 @asyncthread
 def delete(self, rows):
-    rowdict = {id(r): r for r in rows}
-    ndeleted = self.deleteBy(lambda r,rowdict=rowdict: id(r) in rowdict)
+    rowdict = {self.rowid(r): r for r in rows}
+    ndeleted = self.deleteBy(lambda r,rowdict=rowdict: self.rowid(r) in rowdict)
     nrows = len(rows)
     if ndeleted != nrows:
         warning('expected %s' % nrows)

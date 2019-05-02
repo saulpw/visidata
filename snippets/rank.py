@@ -8,7 +8,7 @@ class RankColumn(Column):
         self.resetCache()
 
     def calcValue(self, row):
-        return self.srcValues.get(id(row), None)
+        return self.srcValues.get(self.sheet.rowid(row), None)
 
     @asyncthread
     def resetCache(self):
@@ -22,4 +22,4 @@ class RankColumn(Column):
                 prevval = v
                 previ = i+1
 
-            self.srcValues[id(r)] = previ
+            self.srcValues[self.sheet.rowid(r)] = previ

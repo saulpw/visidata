@@ -4,12 +4,12 @@ __all__ = ['undoSheetSelection', 'undoSelection']
 
 replayableOption('bulk_select_clear', False, 'clear selected rows before new bulk selections')
 
-Sheet.init('_selectedRows', dict)  # id(row) -> row
+Sheet.init('_selectedRows', dict)  # rowid(row) -> row
 
 @Sheet.api
 def isSelected(self, row):
     'True if given row is selected. O(log n).'
-    return id(row) in self._selectedRows
+    return self.rowid(row) in self._selectedRows
 
 @Sheet.api
 @asyncthread
@@ -22,13 +22,13 @@ def toggle(self, rows):
 @Sheet.api
 def selectRow(self, row):
     'Select given row. O(log n)'
-    self._selectedRows[id(row)] = row
+    self._selectedRows[self.rowid(row)] = row
 
 @Sheet.api
 def unselectRow(self, row):
     'Unselect given row, return True if selected; else return False. O(log n)'
-    if id(row) in self._selectedRows:
-        del self._selectedRows[id(row)]
+    if self.rowid(row) in self._selectedRows:
+        del self._selectedRows[self.rowid(row)]
         return True
     else:
         return False
@@ -89,7 +89,7 @@ def selectedRows(self):
     'List of selected rows in sheet order. [O(nRows*log(nSelected))]'
     if self.nSelected <= 1:
         return list(self._selectedRows.values())
-    return [r for r in self.rows if id(r) in self._selectedRows]
+    return [r for r in self.rows if self.rowid(r) in self._selectedRows]
 
 @Sheet.property
 def nSelected(self):
