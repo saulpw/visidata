@@ -6,7 +6,7 @@ from .diff import DifferSheet
 option('vgit_show_ignored', False, '')
 theme('color_vgit_staged_mod', 'green', 'files staged with modifications')
 theme('color_vgit_staged_del', 'red', 'files staged for deletion')
-theme('color_vgit_staged_add', 'magenta', 'files staged for addition')
+theme('color_vgit_staged_add', 'green', 'files staged for addition')
 theme('color_vgit_unstaged_del', '88', 'files deleted but unstaged')
 theme('color_vgit_untracked', '237 blue', 'ignored/untracked files')
 
