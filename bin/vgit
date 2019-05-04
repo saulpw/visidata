@@ -18,63 +18,9 @@ options.motd_url = 'https://visidata.org/vgit/motd-' + __version__
 GitRepo = namedlist('GitRepo', 'path stashes cached changes'.split())
 
 
-class GitLinesColumn(Column):
-    def __init__(self, name, cmd, *args, **kwargs):
-        super().__init__(name, cache=True, **kwargs)
-        cmdparts = cmd.split()
-        if cmdparts[0] == 'git':
-            cmdparts = cmdparts[1:]
-        self.cmd = cmdparts + list(args)
-
-    def calcValue(self, r):
-        return list(vgit.git_lines('--git-dir', r.path.joinpath('.git').abspath(), *self.cmd))
-
-
-class GitAllColumn(GitLinesColumn):
-    def calcValue(self, r):
-        return vgit.git_all('--git-dir', r.path.joinpath('.git').abspath(), *self.cmd).strip()
-
-
-class GitOverview(Sheet):
-    rowtype = 'repos'  # rowdef: GitRepo
-    columns = [
-        ColumnAttr('repo', 'path', type=str),
-        GitLinesColumn('stashes', 'git stash list', type=vlen),
-        GitLinesColumn('cached', 'git diff --cached', type=vlen),
-        GitLinesColumn('branches', 'git branch --no-color', type=vlen),
-        GitAllColumn('branch', 'git rev-parse --abbrev-ref HEAD'),
-        Column('modtime', type=date, getter=lambda c,r: r.path.stat().st_mtime),
-    ]
-    nKeys = 1
-
-    @asyncthread
-    def reload(self):
-        import glob
-        self.rows = []
-        for fn in glob.glob(os.path.join('**', '.git/'), recursive=True):
-            if fn == '.git/':
-                path = Path('.')
-            else:
-                path = Path(fn).parent.parent
-            self.addRow(GitRepo([path]))
-
 @vgit.GitSheet.api
 def git_exec(sheet, cmdstr):
     vd.push(TextSheet(cmdstr, sheet.git_lines(*cmdstr.split())))
-
-
-class GitGrep(vgit.GitSheet):
-    rowtype = 'results' # rowdef: list(file, line, line_contents)
-    columns = [
-        ColumnItem('filename', 0),
-        ColumnItem('linenum', 1),
-        ColumnItem('line', 2),
-    ]
-    @asyncthread
-    def reload(self):
-        self.rows = []
-        for line in self.git_lines('grep', '--no-color', '-z', '--line-number', '--ignore-case', self.regex):
-            self.addRow(line.split('\0'))
 
 
 def open_git(p):
@@ -99,18 +45,10 @@ def main():
     run(vs)
 
 
-Sheet.unbindkey('g/')
 unbindkey('gD')
 
-GitOverview.addCommand(ENTER, 'dive-row', 'vd.push(open_git(Path(cursorRow.path.abspath())))')
-GitOverview.addCommand('z'+ENTER, 'dive-cell', 'view(cursorValue)')
-
-globalCommand('g/', 'git-grep', 'rex=input("git grep: "); vd.push(GitGrep(rex, regex=rex, source=sheet))', 'find in all files in this repo'),
 globalCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
 globalCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
-
-GitGrep.addCommand(ENTER, 'dive-row', 'vs=GitFileSheet(cursorRow[0]); vs.cursorRowIndex=int(cursorRow[1])-1; vd.push(vs).reload()', 'go to this match')
-GitGrep.addCommand('^O', 'sysopen-row', 'launchExternalEditorPath(Path(cursorRow[0]), linenum=cursorRow[1]); reload()', 'open this file in $EDITOR')
 
 BaseSheet.addCommand('^A', 'git-abort', 'abortWhatever()', 'abort the current in-progress action')
 BaseSheet.addCommand('L', 'git-log', 'vd.push(GitLogSheet(branch+"_log", ref=branch, source=sheet))', 'push log of current branch')
