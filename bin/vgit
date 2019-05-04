@@ -2,9 +2,10 @@
 
 import os.path
 import sys
+import subprocess
 from visidata import Sheet, Column, ColumnAttr, run, status, Command, Path, ENTER, asyncthread
-from visidata import namedlist, date, vlen, option, getGlobals, loadConfigFile, options
-from visidata import unbindkey, globalCommand, BaseSheet, ColumnItem, domotd
+from visidata import option, getGlobals, loadConfigFile, options
+from visidata import domotd, TextSheet
 
 import vgit
 
@@ -14,44 +15,47 @@ __version_info__ = 'saul.pw/vgit ' + __version__
 
 option('config', '~/.vgitrc', 'config file to exec in Python')
 options.motd_url = 'https://visidata.org/vgit/motd-' + __version__
-
-GitRepo = namedlist('GitRepo', 'path stashes cached changes'.split())
-
-
-@vgit.GitSheet.api
-def git_exec(sheet, cmdstr):
-    vd.push(TextSheet(cmdstr, sheet.git_lines(*cmdstr.split())))
+option('vgit_pager', False, 'fallback to pager instead of passthrough')
 
 
-def open_git(p):
-    p.joinpath('.git').is_dir()
-    return vgit.GitStatus(p)
+def somegit(args):
+    cwd = Path('.')
+
+    if not args:
+        if cwd.joinpath('.git').is_dir() or vgit.getRepoPath(cwd):
+            return vgit.GitStatus(cwd)
+        else:
+            return vgit.GitOverview('gitrepos', source=cwd)
+
+    cmd = args[0]
+
+    if cmd == 'grep':
+        return vgit.GitGrep(args[1], regex=args[1], source=vgit.GitStatus(cwd))
+
+    if cmd == 'status':
+        return vgit.GitStatus(cwd)
+
+    if cmd == 'log':
+        return vgit.GitLogSheet(cwd)
+
+
 
 def main():
     loadConfigFile(Path(options.config).resolve(), getGlobals())
 
+    args = sys.argv[1:]
+
+    vs = somegit(args)
+    if sys.argv[0] == 'vgit':
+        cmdstr = ' '.join(args)
+        return TextSheet(cmdstr, somegit().git_lines(*args))
+
+    if not vs:
+        return subprocess.run(['git', *args]).returncode
+
     domotd()
-
-    if len(sys.argv) > 1:
-        topdir = Path(sys.argv[1])
-    else:
-        topdir = Path('.')
-
-    if topdir.joinpath('.git').is_dir() or vgit.getRepoPath(topdir):
-        vs = open_git(topdir)
-    else:
-        vs = GitOverview('gitrepos', source=topdir)
-
     run(vs)
 
-
-unbindkey('gD')
-
-globalCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
-globalCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
-
-BaseSheet.addCommand('^A', 'git-abort', 'abortWhatever()', 'abort the current in-progress action')
-BaseSheet.addCommand('L', 'git-log', 'vd.push(GitLogSheet(branch+"_log", ref=branch, source=sheet))', 'push log of current branch')
 
 vgit.addGlobals(globals())
 

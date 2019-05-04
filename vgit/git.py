@@ -238,9 +238,19 @@ class GitContext:
         self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
         status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
+
 class GitSheet(GitContext, Sheet):
-    pass
+    def git_exec(self, cmdstr):
+        vd.push(TextSheet(cmdstr, sheet.git_lines(*cmdstr.split())))
+
 
 GitSheet.addCommand('f', 'git-force', 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
+GitSheet.addCommand('^A', 'git-abort', 'abortWhatever()', 'abort the current in-progress action')
 
 options.set('disp_note_none', '', GitSheet)
+
+unbindkey('gD')
+
+globalCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
+globalCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
+
