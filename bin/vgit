@@ -21,11 +21,13 @@ option('vgit_pager', False, 'fallback to pager instead of passthrough')
 def somegit(args):
     cwd = Path('.')
 
+    if cwd.joinpath('.git').is_dir() or vgit.getRepoPath(cwd):
+        top = vgit.GitStatus(cwd)
+    else:
+        top = vgit.GitOverview('gitrepos', source=cwd)
+
     if not args:
-        if cwd.joinpath('.git').is_dir() or vgit.getRepoPath(cwd):
-            return vgit.GitStatus(cwd)
-        else:
-            return vgit.GitOverview('gitrepos', source=cwd)
+        return top
 
     cmd = args[0]
 
@@ -36,7 +38,7 @@ def somegit(args):
         return vgit.GitStatus(cwd)
 
     if cmd == 'log':
-        return vgit.GitLogSheet(cwd)
+        return vgit.GitLogSheet(top.branch+"_log", ref=top.branch, source=top)
 
 
 
