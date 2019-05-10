@@ -1,6 +1,7 @@
 __pycache__
 .tox/
 .idea/
+.vscode/
 visidata.egg-info/
 *v_env*
 *~

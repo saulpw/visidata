@@ -45,7 +45,7 @@ class SheetPivot(Sheet):
         self.pivotCols = pivotCols  # whose values become columns
         self.groupByCols = groupByCols  # whose values become rows
 
-    def initCols(self):
+    def initCols(self, use_range=True):
         self.columns = []
 
         # add key columns (grouped by)
@@ -53,7 +53,7 @@ class SheetPivot(Sheet):
             if c in self.pivotCols:
                 continue
 
-            if isNumeric(c):
+            if use_range and isNumeric(c):
                 newcol = RangeColumn(c.name, origcol=c, width=c.width and c.width*2, getter=lambda c,r: r.numeric_key)
             else:
                 newcol = Column(c.name, width=c.width, fmtstr=c.fmtstr,
@@ -182,6 +182,7 @@ class SheetPivot(Sheet):
                 numericGroupRows = {formatRange(numericCols[0], numRange): PivotGroupRow(discreteKeys, numRange, [], {}) for numRange in numericBins}
                 groups[formattedDiscreteKeys] = (numericGroupRows, None)
                 for r in numericGroupRows.values():
+                    # raise ValueError(str(r))
                     self.addRow(r)
 
             # find the grouprow this sourcerow belongs in, by numericbin
@@ -206,6 +207,7 @@ class SheetPivot(Sheet):
                 nankey = makeErrorKey(numericCols[0]) if numericCols else 0
                 groupRow = PivotGroupRow(discreteKeys, (nankey, nankey), [], {})
                 groups[formattedDiscreteKeys] = (numericGroupRows, groupRow)
+                # raise ValueError(str(groupRow))
                 self.addRow(groupRow)
 
             # add the sourcerow to its all bin
@@ -221,6 +223,7 @@ class SheetPivot(Sheet):
 
             if rowfunc:
                 rowfunc(groupRow)
+            # raise ValueError(str(groupRow))
 
         # automatically add cache to all columns now that everything is binned
         for c in self.nonKeyVisibleCols:
