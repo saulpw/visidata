@@ -2,6 +2,7 @@ from visidata import *
 
 
 class DataFrameAdapter:
+
     def __init__(self, df):
         import pandas as pd
         assert isinstance(df, pd.DataFrame)
@@ -21,7 +22,7 @@ class DataFrameAdapter:
 
 # source=DataFrame
 class PandasSheet(Sheet):
-    """Sheet sourced from a pandas.DataFrame
+    '''Sheet sourced from a pandas.DataFrame
 
     Warning:
         The index of the pandas.DataFrame input must be unique.
@@ -31,13 +32,14 @@ class PandasSheet(Sheet):
 
     Note:
         Columns starting with "__vd_" are reserved for internal usage
-        by the visidata loader. 
-    """
+        by the VisiData loader.
+    '''
+
     def dtype_to_type(self, dtype):
         import numpy as np
         try:
             if np.issubdtype(dtype, np.integer):
-                return int 
+                return int
             if np.issubdtype(dtype, np.floating):
                 return float
             if np.issubdtype(dtype, np.datetime64):
@@ -46,9 +48,9 @@ class PandasSheet(Sheet):
             # For categoricals and other pandas-defined dtypes
             pass
         return anytype
-   
+
     def read_tsv(self, path, **kwargs):
-        """Partial function for reading TSV files using pd.read_csv"""
+        'Partial function for reading TSV files using pd.read_csv'
         import pandas as pd
         return pd.read_csv(path, sep='\t', **kwargs)
 
@@ -59,7 +61,7 @@ class PandasSheet(Sheet):
         elif isinstance(self.source, Path):
             filetype = getattr(self, 'filetype', self.source.ext[1:])
             if filetype == 'tsv':
-                readfunc = self.read_tsv 
+                readfunc = self.read_tsv
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or error('no pandas.read_'+filetype)
             self.df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
@@ -70,6 +72,7 @@ class PandasSheet(Sheet):
             for col in self.df.columns
             if not col.startswith("__vd_")  # reserved for internal usage
         ]
+
         self.rows = DataFrameAdapter(self.df)
         self._selectedMask = pd.Series(False, index=self.df.index)
         if self.df.index.nunique() != self.df.shape[0]:
@@ -88,9 +91,7 @@ class PandasSheet(Sheet):
     def _checkSelectedIndex(self):
         import pandas as pd
         if self._selectedMask.index is not self.df.index:
-            # self.df was modified inplace, so the selection
-            # is no longer valid -- just delete it. Maybe too heavy but erring
-            # on side of correctness here.
+            # self.df was modified inplace, so the selection is no longer valid
             vd.status('pd.DataFrame.index updated, clearing {} selected rows'
                       .format(self._selectedMask.sum()))
             self._selectedMask = pd.Series(False, index=self.df.index)
@@ -104,23 +105,28 @@ class PandasSheet(Sheet):
             return False
         self._checkSelectedIndex()
         return self._selectedMask.loc[row.name]
+
     def selectRow(self, row):
         'Select given row'
         self._checkSelectedIndex()
         self._selectedMask.loc[row.name] = True
+
     def unselectRow(self, row):
         self._checkSelectedIndex()
         is_selected = self._selectedMask.loc[row.name]
         self._selectedMask.loc[row.name] = False
         return is_selected
+
     @property
     def nSelected(self):
         self._checkSelectedIndex()
         return self._selectedMask.sum()
+
     @property
     def selectedRows(self):
         self._checkSelectedIndex()
         return DataFrameAdapter(self.df.loc[self._selectedMask])
+
     # Vectorized implementation of multi-row selections
     def select(self, rows, status=True, progress=True):
         self._checkSelectedIndex()
@@ -131,15 +137,18 @@ class PandasSheet(Sheet):
     def selectByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
         self._selectedMask.iloc[start:end] = True
+
     def unselectByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
         self._selectedMask.iloc[start:end] = False
+
     def toggleByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
         self._selectedMask.iloc[start:end] = ~self._selectedMask.iloc[start:end]
+
     def _selectByILoc(self, mask, selected=True):
         self._checkSelectedIndex()
-        self._selectedMask.iloc[mask] = selected 
+        self._selectedMask.iloc[mask] = selected
 
 def view_pandas(df):
     run(PandasSheet('', source=df))

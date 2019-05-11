@@ -8,7 +8,7 @@ PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasSheetFreqTable(sheet, *
 
 class DataFrameRowSliceAdapter:
     """Tracks original dataframe and a boolean row mask
-    
+
     This is a workaround to (1) save memory (2) keep id(row)
     consistent when iterating, as id() is used significantly
     by visidata's selectRow implementation.
@@ -98,7 +98,7 @@ class PandasSheetFreqTable(SheetPivot):
         df = self.source.rows.df
 
         # Implementation (special case): for one row, this degenerates
-        # to .value_counts(); however this does not order in a stable manner. 
+        # to .value_counts(); however this does not order in a stable manner.
         # if len(self.groupByCols) == 1:
         #     this_column = df.loc[:, str(self.groupByCols[0].name)]
         #     value_counts = this_column.value_counts()
@@ -106,7 +106,7 @@ class PandasSheetFreqTable(SheetPivot):
             # Implementation (1): add a dummy column to aggregate over in a pd.pivot_table.
             # Is there a way to avoid having to mutate the dataframe? We can delete the
             # column afterwards but we do incur the overhead of block consolidation.
-            _pivot_count_column = "__vd_pivot_count" 
+            _pivot_count_column = "__vd_pivot_count"
             if _pivot_count_column not in df.columns:
                 df[_pivot_count_column] = 1
             # Aggregate count over columns to group, and then apply a stable sort
@@ -120,7 +120,7 @@ class PandasSheetFreqTable(SheetPivot):
             # we exit visidata?
             # del df["__vd_pivot_count"]
 
-            # Implementation (2) which does not require adding a dummy column: 
+            # Implementation (2) which does not require adding a dummy column:
             # Compute cross-tabulation to get counts, and sort/remove zero-entries.
             # Note that this is not space-efficient: the initial cross-tabulation will
             # have space on the order of product of number of unique elements for each
@@ -129,7 +129,7 @@ class PandasSheetFreqTable(SheetPivot):
             # this_column = df.loc[:, str(self.groupByCols[0].name)]
             # value_counts = pd.crosstab(this_column, [df.df[c.name] for c in self.groupByCols[1:]])
             # value_counts = value_counts.stack(list(range(len(self.groupByCols) - 1)))
-            # value_counts = value_counts.loc[value_counts > 0].sort_values(ascending=False) 
+            # value_counts = value_counts.loc[value_counts > 0].sort_values(ascending=False)
         else:
             fail("Unable to do FrequencyTable, no columns to group on provided")
 
@@ -140,7 +140,7 @@ class PandasSheetFreqTable(SheetPivot):
                     Column('percent', type=float,
                            getter=lambda col,row: len(row.sourcerows)*100/df.shape[0]),
                     Column('histogram', type=str,
-                           getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//value_counts.max()), 
+                           getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//value_counts.max()),
                            width=options.disp_histolen+2),
                     ]:
             self.addColumn(c)
