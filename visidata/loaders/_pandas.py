@@ -131,12 +131,16 @@ class PandasSheet(Sheet):
         return DataFrameAdapter(self.df.loc[self._selectedMask])
 
     # Vectorized implementation of multi-row selections
+    @asyncthread
     def select(self, rows, status=True, progress=True):
-        self._checkSelectedIndex()
-        self._selectedMask.loc[[row.name for row in rows]] = True
+        for row in (Progress(rows, 'selecting') if progress else rows):
+            self.selectRow(row)
+
+    @asyncthread
     def unselect(self, rows, status=True, progress=True):
-        self._checkSelectedIndex()
-        self._selectedMask.loc[[row.name for row in rows]] = False
+        for row in (Progress(rows, 'unselecting') if progress else rows):
+            select.unselectRow(row)
+
     def selectByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
         self._selectedMask.iloc[start:end] = True
