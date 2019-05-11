@@ -155,14 +155,10 @@ class PandasSheetFreqTable(SheetPivot):
 
             self.addRow(PivotGroupRow(
                 element,
-                (nankey, nankey),
+                (0, 0),
                 DataFrameRowSliceAdapter(df, mask),
                 {}
             ))
-
-        # if self.nCols > len(self.groupByCols)+3:  # hide percent/histogram if aggregations added
-        #     self.column('percent').hide()
-        #     self.column('histogram').hide()
 
 PandasSheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
 PandasSheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
