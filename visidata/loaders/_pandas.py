@@ -96,6 +96,9 @@ class PandasSheet(Sheet):
                       .format(self._selectedMask.sum()))
             self._selectedMask = pd.Series(False, index=self.df.index)
 
+    def rowid(self, row):
+        return row.name
+
     # Base selection API. Refer to GH #266: using id() will not identify
     # pandas rows since iterating on rows / selecting rows will return
     # different copies. Instead, re-implement the selection API by
