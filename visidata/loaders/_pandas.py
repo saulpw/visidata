@@ -66,7 +66,10 @@ class PandasSheet(Sheet):
                 readfunc = getattr(pd, 'read_'+filetype) or error('no pandas.read_'+filetype)
             self.df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
 
-        # TODO: should we reset the index here and add it as a key column?
+        # reset the index here
+        if type(self.df.index) is not pd.RangeIndex:
+            self.df = self.df.reset_index()
+
         self.columns = [
             ColumnItem(col, type=self.dtype_to_type(self.df[col]))
             for col in self.df.columns
