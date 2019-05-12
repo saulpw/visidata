@@ -5,12 +5,12 @@ import sys
 import tempfile
 import functools
 
-from visidata import vd, asyncthread, status, fail, option, options, warning
+from visidata import VisiData, vd, asyncthread, status, fail, option, options, warning
 from visidata import Sheet, saveSheets, Path, Column
 from visidata import undoEditCell, undoEditCells, undoSheetRows
 
-vd.cliprows = []  # list of (source_sheet, source_row_idx, source_row)
-vd.clipcells = []  # list of strings
+VisiData.init('cliprows', list) # list of (source_sheet, source_row_idx, source_row)
+VisiData.init('clipcells', list) # list of strings
 
 
 def setslice(L, a, b, M):

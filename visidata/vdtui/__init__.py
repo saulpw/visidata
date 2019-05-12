@@ -453,7 +453,7 @@ class VisiData(Extensible):
         'Make global func() and identical vd.func()'
         def _vdfunc(*args, **kwargs):
             return func(vd, *args, **kwargs)
-        setattr(vd, func.__name__, _vdfunc)
+        setattr(cls, func.__name__, func)
         return wraps(func)(_vdfunc)
 
     def __init__(self):
@@ -465,7 +465,25 @@ class VisiData(Extensible):
         self.keystrokes = ''
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
         self.mousereg = []
-        self.cmdlog = None  # CommandLog
+        self.cmdlog = None
+
+    def __copy__(self):
+        'Dummy method for Extensible.init()'
+        pass
+
+    def finalInit(self):
+        'Initialize members specified in other modules with init()'
+        pass
+
+    @classmethod
+    def init(cls, membername, initfunc, **kwargs):
+        'Overload Extensible.init() to call finalInit instead of __init__'
+        oldinit = cls.finalInit
+        def newinit(self, *args, **kwargs):
+            oldinit(self, *args, **kwargs)
+            setattr(self, membername, initfunc())
+        cls.finalInit = newinit
+        super().init(membername, lambda: None, **kwargs)
 
     def quit(self):
         if len(vd.sheets) == 1 and options.quitguard:

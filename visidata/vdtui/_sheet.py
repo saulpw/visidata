@@ -556,7 +556,7 @@ class Sheet(BaseSheet):
 
         scr.refresh()
 
-    def drawRow(self, scr, row, rowidx, ybase, rowattr, maxheight, isNull=isNullFunc()):
+    def drawRow(self, scr, row, rowidx, ybase, rowattr, maxheight, isNull=None):
             topsep = options.disp_rowtop_sep
             midsep = options.disp_rowmid_sep
             botsep = options.disp_rowbot_sep

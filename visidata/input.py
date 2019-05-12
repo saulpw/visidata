@@ -12,7 +12,7 @@ theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_unprintable', '·', 'substitute character for unprintables')
 
-vd.lastInputs = collections.defaultdict(list)  # [input_type] -> list of prevInputs
+VisiData.init('lastInputs', lambda: collections.defaultdict(list))  # [input_type] -> list of prevInputs
 
 # editline helpers
 

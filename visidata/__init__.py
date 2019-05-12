@@ -83,5 +83,6 @@ from .deprecated import *
 
 from math import *
 
+vd.finalInit()
 
 addGlobals(globals())

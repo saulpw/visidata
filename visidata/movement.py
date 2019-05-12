@@ -5,7 +5,7 @@ from visidata import vd, VisiData, error, status, Sheet, Column, regex_flags, fa
 
 __all__ = ['rotate_range']
 
-vd.searchContext = {}  # [(regex, columns, backward)] -> kwargs from previous search
+VisiData.init('searchContext', dict) # [(regex, columns, backward)] -> kwargs from previous search
 
 def rotate_range(n, idx, reverse=False):
     if reverse:
