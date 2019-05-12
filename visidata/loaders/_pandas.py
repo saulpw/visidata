@@ -76,6 +76,10 @@ class PandasSheet(Sheet):
             if not col.startswith("__vd_")  # reserved for internal usage
         ]
 
+        if self.columns[0].name == 'index': # if the df contains an index column
+            self.column('index').hide()
+
+
         self.rows = DataFrameAdapter(self.df)
         self._selectedMask = pd.Series(False, index=self.df.index)
         if self.df.index.nunique() != self.df.shape[0]:
