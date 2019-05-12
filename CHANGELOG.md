@@ -13,6 +13,7 @@
         - `undoEditCells` assumes commands modified only selectedRows
         - will undo most recent modification on current sheet
     - numeric binning
+        - options.numeric_binning (default: False) is the feature flag
         - [feature freqtbl] numeric binning for frequency/pivot table
         - `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
         - (thanks paulklemm for the issue #244)
@@ -90,6 +91,9 @@
 - [option vdtui] remove `curses_timeout` option (fix to 100ms)
 - [pandas] support multi-line column names (suggested by @jtrakk #223)
 - [pandas] impement sort() for pandas DataFrame (suggested by @migueldvb #257)
+- [pandas] use value_counts() for PandasSheetFreqTable (thanks @azjps for PR #267)
+- [pandas] selection support for PandasSheet (thanks @azjps for PR #267)
+- [pandas] if the df contains an index column, hide it
 - [pcap] adds saver for .pcap to json (thanks @layertwo for PR #272)
 - [perf] expr columns are now set to cache automatically
 - [precious] describe-sheet is now precious; error-sheet and threads-sheet are not
@@ -106,6 +110,7 @@
   - `@X.property @X.cached_property`, `X.init()`, `@X.api`
 - remove Sheet.vd; 'vd' attrs now available in execstr
 - remove hooks
+- add @deprecated(ver) decorator; put deprecations in deprecated.py
 - `vd.sync(*threads)` waits on specific threads (returned by calls to `@asyncthread` functions)
 - add Sheet.num for left status prompt
 - pivot and frequency table have been consolidated for numeric binning
@@ -121,6 +126,11 @@
 - remove ArrayColumns, NamedArrayColumns
 - urlcache now takes days=n
 - Sheet.rowid
+- add windowWidth and windowHeight
+    - Sheets use their own .scr, in preparation for split-screen
+- add VisiData.finalInit() stage
+    - call vd.finalInit() at end of module imports to initialise VisiData.init() members
+    - so that e.g. cmdlog is not created until all internal sheet-specific options has been set
 
 ## Deps
 - add dateutil as submodule
