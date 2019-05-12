@@ -45,7 +45,10 @@ class SheetPivot(Sheet):
         self.pivotCols = pivotCols  # whose values become columns
         self.groupByCols = groupByCols  # whose values become rows
 
-    def initCols(self, use_range=True):
+    def isNumericRange(self, col):
+        return isNumeric(col) and options.hist_numeric_ranges
+
+    def initCols(self):
         self.columns = []
 
         # add key columns (grouped by)
@@ -53,7 +56,7 @@ class SheetPivot(Sheet):
             if c in self.pivotCols:
                 continue
 
-            if use_range and isNumeric(c):
+            if self.isNumericRange(c):
                 newcol = RangeColumn(c.name, origcol=c, width=c.width and c.width*2, getter=lambda c,r: r.numeric_key)
             else:
                 newcol = Column(c.name, width=c.width, fmtstr=c.fmtstr,
@@ -142,9 +145,10 @@ class SheetPivot(Sheet):
     def groupRows(self, rowfunc=None):
         self.rows = []
 
-        discreteCols = [c for c in self.groupByCols if not isNumeric(c)]
+        discreteCols = [c for c in self.groupByCols if not self.isNumericRange(c)]
 
-        numericCols = [c for c in self.groupByCols if isNumeric(c)]
+        numericCols = [c for c in self.groupByCols if self.isNumericRange(c)]
+
         if len(numericCols) > 1:
             error('only one numeric column can be binned')
 

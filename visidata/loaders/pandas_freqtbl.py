@@ -93,7 +93,7 @@ class PandasSheetFreqTable(SheetPivot):
         # (e.g. as a histogram). We currently don't provide support for this
         # for PandasSheet, although we could implement it with a pd.Grouper
         # that operates similarly to pd.cut.
-        super().initCols(use_range=False)
+        super().initCols()
 
         df = self.source.rows.df
 
@@ -174,3 +174,4 @@ def expand_source_rows(source, vd, cursorRow):
     vd.push(vs)
 
 PandasSheetFreqTable.addCommand(ENTER, 'dup-row', 'expand_source_rows(source, vd, cursorRow)')
+options.set('hist_numeric_ranges', False, PandasSheetFreqTable)
