@@ -374,11 +374,12 @@ CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
 CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))')
 options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
-@VisiData.cached_property
-def cmdlog(self):
+def initCmdlog():
     vs = CommandLog('cmdlog')
     vs.rows = []
     return vs
+
+VisiData.init('cmdlog', initCmdlog)
 
 @VisiData.cached_property
 def macrosheet(vd):
