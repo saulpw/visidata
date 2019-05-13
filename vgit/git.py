@@ -189,23 +189,8 @@ class GitContext:
 
         self.reload()
 
-    @staticmethod
-    def inProgress():
-        if Path('.git/rebase-merge').exists() or Path('.git/rebase-apply/rebasing').exists():
-            return 'rebasing'
-        elif Path('.git/rebase-apply').exists():
-            return 'applying'
-        elif Path('.git/CHERRY_PICK_HEAD').exists():
-            return 'cherry-picking'
-        elif Path('.git/MERGE_HEAD').exists():
-            return 'merging'
-        elif Path('.git/BISECT_LOG').exists():
-            return 'bisecting'
-        return ''
-
-
     def abortWhatever(self):
-        inp = self.inProgress()
+        inp = inProgress()
         if inp.startswith('cherry-pick'):
             self.git('cherry-pick', '--abort')
         elif inp.startswith('merg'):
@@ -216,23 +201,6 @@ class GitContext:
             self.git('rebase', '--abort')  # or --quit?
         else:
             status('nothing to abort')
-
-    @property
-    def rootSheet(self):
-        if isinstance(self.source, GitSheet):
-            return self.source.rootSheet
-        return self
-
-    @property
-    def progressStatus(self):
-        inp = self.inProgress()
-        return ('[%s] ' % inp) if inp else ''
-
-    @property
-    def branchStatus(self):
-        if hasattr(self.rootSheet, 'branch'):
-            return '%s%s' % (self.rootSheet.branch, self.rootSheet.remotediff)
-        return ''
 
     def git_apply(self, hunk, *args):
         self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
@@ -254,3 +222,33 @@ unbindkey('gD')
 globalCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
 globalCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
 
+def inProgress():
+    if Path('.git/rebase-merge').exists() or Path('.git/rebase-apply/rebasing').exists():
+        return 'rebasing'
+    elif Path('.git/rebase-apply').exists():
+        return 'applying'
+    elif Path('.git/CHERRY_PICK_HEAD').exists():
+        return 'cherry-picking'
+    elif Path('.git/MERGE_HEAD').exists():
+        return 'merging'
+    elif Path('.git/BISECT_LOG').exists():
+        return 'bisecting'
+    return ''
+
+
+@BaseSheet.property
+def progressStatus(sheet):
+    inp = inProgress()
+    return ('[%s] ' % inp) if inp else ''
+
+@BaseSheet.property
+def branchStatus(sheet):
+    if hasattr(sheet.rootSheet, 'branch'):
+        return '%s%s' % (sheet.rootSheet.branch, sheet.rootSheet.remotediff)
+    return ''
+
+@BaseSheet.property
+def rootSheet(sheet):
+    if isinstance(sheet.source, GitSheet):
+        return sheet.source.rootSheet
+    return sheet
