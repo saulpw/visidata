@@ -1,6 +1,7 @@
 from visidata import VisiData
 import visidata
 
+alias = visidata.bindkey
 
 def deprecated(ver):
     def decorator(func):
@@ -22,3 +23,11 @@ def __call__(vd):
 @deprecated('1.6')
 def copyToClipboard(value):
     return visidata.clipboard().copy(value)
+
+
+alias('edit-cells', 'setcol-input')  # 1.6
+alias('fill-nulls', 'setcol-fill')  # 1.6
+alias('paste-cells', 'setcol-clipboard')  # 1.6
+alias('frequency-rows', 'frequency-summary')  # 1.6
+alias('dup-cell', 'dive-cell')  # 1.6
+alias('dup-row', 'dive-row')  # 1.6
