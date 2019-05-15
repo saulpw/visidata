@@ -46,7 +46,7 @@ class SheetPivot(Sheet):
         self.groupByCols = groupByCols  # whose values become rows
 
     def isNumericRange(self, col):
-        return isNumeric(col) and options.hist_numeric_ranges
+        return isNumeric(col) and options.numeric_binning
 
     def initCols(self):
         self.columns = []
