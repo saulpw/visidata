@@ -10,6 +10,24 @@ disp_column_fill = ' '
 
 ### Curses helpers
 
+def get_character_display_width(cc):
+    '''Get the display width of a character.
+
+    East Asian full-width characters are twice as wide as ASCII characters for
+    terminal display.'''
+    eaw = unicodedata.east_asian_width(cc)
+    if eaw == 'A':  # ambiguous
+        return options.disp_ambig_width
+    elif eaw in 'WF': # wide/full
+        return 2
+    elif not unicodedata.combining(cc):
+        return 1
+    else:
+        return 0
+
+def get_string_display_width(ss):
+    return sum( (get_character_display_width(cc) for cc in ss) )
+
 @functools.lru_cache(maxsize=8192)
 def clipstr(s, dispw):
     '''Return clipped string and width in terminal display characters.
@@ -25,13 +43,7 @@ def clipstr(s, dispw):
         if c:
             c = c[0]  # multi-char disp_oddspace just uses the first char
             ret += c
-            eaw = unicodedata.east_asian_width(c)
-            if eaw == 'A':  # ambiguous
-                w += ambig_width
-            elif eaw in 'WF': # wide/full
-                w += 2
-            elif not unicodedata.combining(c):
-                w += 1
+            w += get_character_display_width(c)
 
         if w > dispw-len(options.disp_truncator)+1:
             ret = ret[:-2] + options.disp_truncator  # replace final char with ellipsis

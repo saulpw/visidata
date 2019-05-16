@@ -9,6 +9,7 @@ from visidata.vdtui import getType, typemap, isNumeric, isNullFunc
 from visidata.vdtui import asyncthread, exceptionCaught
 from visidata.vdtui import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
 from visidata.vdtui import Extensible, LazyMap, AttrDict
+from visidata.vdtui import get_string_display_width
 
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
 
@@ -249,9 +250,10 @@ class Column(Extensible):
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'
         w = 0
+        nlen = get_string_display_width(self.name)
         if len(rows) > 0:
-            w = max(max(len(self.getDisplayValue(r)) for r in rows), len(self.name))+2
-        return max(w, len(self.name))
+            w = max(max(get_string_display_width(self.getDisplayValue(r)) for r in rows), nlen)+2
+        return max(w, nlen)
 
 
 # ---- Column makers
