@@ -4,8 +4,7 @@ import functools
 import datetime
 import locale
 from visidata import options, theme, Sheet, TypedWrapper, undoAttr
-
-from .vdtui import vdtype
+from visidata import vdtype
 
 try:
     import dateutil.parser

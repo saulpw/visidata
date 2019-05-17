@@ -7,8 +7,16 @@ __status__ = 'Production/Stable'
 __copyright__ = 'Copyright (c) 2016-2019 ' + __author__
 
 from .vdtui import *
-from .vdtui.textsheet import TextSheet
-from .asyncthread import *
+
+from .helpers import *
+from .cliptext import clipdraw, clipstr
+from .color import colors, CursesAttr
+from .wrappers import *
+from .column import *
+from ._sheet import *
+
+from .textsheet import TextSheet
+from .threads import *
 from .input import *
 from .movement import *
 from .path import *

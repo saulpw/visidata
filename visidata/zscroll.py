@@ -1,4 +1,4 @@
-from .vdtui import *
+from visidata import Sheet, bindkey
 
 # vim-style scrolling with the 'z' prefix
 Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nVisibleRows/2)')

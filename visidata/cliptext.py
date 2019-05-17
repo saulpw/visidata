@@ -2,7 +2,7 @@ import unicodedata
 import sys
 import functools
 
-from visidata.vdtui import options
+from visidata import options
 
 __all__ = ['clipstr', 'clipdraw']
 

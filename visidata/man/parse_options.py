@@ -3,7 +3,6 @@
 # Usage: $0 visidata-cli.inc visidata-opts.inc
 
 import sys
-import vdtui
 import visidata
 
 

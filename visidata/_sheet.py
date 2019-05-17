@@ -5,7 +5,7 @@ import re
 from copy import copy
 import textwrap
 
-from visidata.vdtui import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, error, fail, Column, option,
+from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, error, fail, Column, option,
 TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow,
 vd, exceptionCaught, status, catchapply, bindkey, getType, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 

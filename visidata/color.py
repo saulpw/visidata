@@ -2,7 +2,7 @@ import curses
 import functools
 import copy
 
-from visidata.vdtui import options
+from visidata import options
 
 __all__ = ['CursesAttr', 'colors']
 

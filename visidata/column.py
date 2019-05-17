@@ -4,12 +4,11 @@ import threading
 import re
 import time
 
-from visidata.vdtui import option, options, fail, anytype, stacktrace, status
-from visidata.vdtui import getType, typemap, isNumeric, isNullFunc
-from visidata.vdtui import asyncthread, exceptionCaught
-from visidata.vdtui import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
-from visidata.vdtui import Extensible, LazyMap, AttrDict
-from visidata.vdtui import get_string_display_width
+from visidata import option, options, fail, anytype, stacktrace, status
+from visidata import getType, typemap, isNumeric, isNullFunc
+from visidata import asyncthread, exceptionCaught
+from visidata import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
+from visidata import Extensible, LazyMap, AttrDict
 
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
 

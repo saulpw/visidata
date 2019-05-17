@@ -3,7 +3,7 @@
 import copy
 import functools
 
-from visidata.vdtui import options, stacktrace, replayableOption
+from visidata import options, stacktrace, replayableOption
 
 __all__ = ['isNullFunc', 'forward', 'wrmap', 'wrapply', 'TypedWrapper', 'TypedExceptionWrapper']
 

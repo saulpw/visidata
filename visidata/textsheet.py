@@ -1,6 +1,6 @@
 import textwrap
 
-from visidata.vdtui import vd, option, options, Sheet, ColumnItem, asyncthread, replayableOption
+from visidata import vd, option, options, Sheet, ColumnItem, asyncthread, replayableOption
 
 __all__ = [ 'TextSheet' ]
 
