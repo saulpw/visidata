@@ -25,6 +25,10 @@ def copyToClipboard(value):
     return visidata.clipboard().copy(value)
 
 
+# deprecated('1.6')
+SubrowColumn = visidata.SubColumnFunc
+
+
 alias('edit-cells', 'setcol-input')  # 1.6
 alias('fill-nulls', 'setcol-fill')  # 1.6
 alias('paste-cells', 'setcol-clipboard')  # 1.6

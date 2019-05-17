@@ -4,7 +4,7 @@ import functools
 from copy import copy
 
 from visidata import asyncthread, Progress, status, fail, error
-from visidata import ColumnItem, ColumnExpr, SubrowColumn, Sheet, Column
+from visidata import ColumnItem, ColumnExpr, SubColumnItem, Sheet, Column
 from visidata import SheetsSheet
 
 SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
@@ -73,7 +73,7 @@ class SheetJoin(Sheet):
         # first columns are the key columns from the first sheet, using its row (0)
         self.columns = []
         for i, c in enumerate(sheets[0].keyCols):
-            self.addColumn(SubrowColumn(c.name, ColumnItem(c.name, i, type=c.type, width=c.width), 0))
+            self.addColumn(SubColumnItem(0, ColumnItem(c.name, i, type=c.type, width=c.width)))
         self.setKeys(self.columns)
 
         for sheetnum, vs in enumerate(sheets):
@@ -81,7 +81,7 @@ class SheetJoin(Sheet):
             ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
             for c in vs.nonKeyVisibleCols:
                 newname = c.name if ctr[c.name] == 1 else '%s_%s' % (vs.name, c.name)
-                self.addColumn(SubrowColumn(newname, c, sheetnum+1))
+                self.addColumn(SubColumnItem(sheetnum+1, c, name=newname))
 
         rowsBySheetKey = {}
         rowsByKey = {}

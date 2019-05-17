@@ -22,7 +22,9 @@ __all__ = [
     'getitemdef',
     'ColumnAttr',
     'ColumnItem',
-    'SubrowColumn',
+    'SubColumnFunc',
+    'SubColumnItem',
+    'SubColumnAttr',
     'ColumnEnum',
     'LazyMapRow',
     'ColumnExpr',
@@ -306,20 +308,21 @@ def ColumnItem(name='', key=None, **kwargs):
             setter=lambda col,row,val: setitem(row, col.expr, val),
             **kwargs)
 
-
-class SubrowColumn(Column):
-    def __init__(self, name, origcol, subrowidx, **kwargs):
+class SubColumnFunc(Column):
+    'getValue/setValue do row=subfunc(row, self.expr) first'
+    def __init__(self, name='', origcol=None, expr=None, subfunc=getitemdef, **kwargs):
         super().__init__(name, type=origcol.type, width=origcol.width, **kwargs)
         self.origcol = origcol
-        self.expr = subrowidx
+        self.subfunc = subfunc
+        self.expr = expr
 
     def getValue(self, row):
-        subrow = row[self.expr]
+        subrow = self.subfunc(row, self.expr)
         if subrow is not None:
             return self.origcol.getValue(subrow)
 
     def setValue(self, row, value):
-        subrow = row[self.expr]
+        subrow = self.subfunc(row, self.expr)
         if subrow is None:
             fail('no source row')
         self.origcol.setValue(subrow, value)
@@ -328,6 +331,16 @@ class SubrowColumn(Column):
         Column.recalc(self, sheet)
         self.origcol.recalc()  # reset cache but don't change sheet
 
+
+def SubColumnAttr(attrname, c, **kwargs):
+    if 'name' not in kwargs:
+        kwargs['name'] = c.name
+    return SubColumnFunc(origcol=c, subfunc=getattrdeep, expr=attrname, **kwargs)
+
+def SubColumnItem(idx, c, **kwargs):
+    if 'name' not in kwargs:
+        kwargs['name'] = c.name
+    return SubColumnFunc(origcol=c, subfunc=getitemdef, expr=idx, **kwargs)
 
 class ColumnEnum(Column):
     'types and aggregators. row.<name> should be kept to the values in the mapping m, and can be set by the a string key into the mapping.'
@@ -344,6 +357,7 @@ class ColumnEnum(Column):
         if isinstance(value, str):  # first try to get the actual value from the mapping
             value = self.mapping.get(value, value)
         setattr(row, self.name, value or self.default)
+
 
 class LazyMapRow:
     'Calculate column values as needed.'
