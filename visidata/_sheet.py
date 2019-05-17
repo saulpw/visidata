@@ -57,6 +57,7 @@ theme('color_key_col', '81 cyan', 'color of key columns')
 theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
 
+UNLOADED = object()  # sentinel for a sheet not yet loaded for the first time
 
 class Sheet(BaseSheet):
     'Base class for all tabular sheets.'
@@ -77,7 +78,7 @@ class Sheet(BaseSheet):
 
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
-        self.rows = tuple()      # list of opaque row objects (tuple until first reload)
+        self.rows = UNLOADED      # list of opaque row objects
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
 
@@ -102,7 +103,7 @@ class Sheet(BaseSheet):
 
     @property
     def loaded(self):
-        if self.rows == tuple():
+        if self.rows is UNLOADED:
             self.rows = list()
             return False
         return True
@@ -176,7 +177,7 @@ class Sheet(BaseSheet):
     def __copy__(self):
         'copy sheet design (no rows).  deepcopy columns so their attributes (width, type, name) may be adjusted independently.'
         ret = super().__copy__()
-        ret.rows = []                     # a fresh list without incurring any overhead
+        ret.rows = UNLOADED
         ret.columns = [copy(c) for c in self.keyCols]
         ret.setKeys(ret.columns)
         ret.columns.extend(copy(c) for c in self.columns if c not in self.keyCols)
@@ -704,7 +705,7 @@ Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")')
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', undo=undoEditCell)
 Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', undo=undoEditCells),
 
-Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.rows=tuple(); vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)'),
+Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)'),
 Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)'),
 Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
 Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
