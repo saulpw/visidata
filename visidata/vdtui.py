@@ -309,8 +309,6 @@ globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
 globalCommand('^L', 'redraw', 'sheet.refresh()')
 
-globalCommand('^Z', 'suspend', 'suspend()')
-
 bindkey('KEY_RESIZE', 'redraw')
 
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
@@ -1003,54 +1001,6 @@ class DisplayWrapper:
 
 ###
 
-# https://stackoverflow.com/questions/19833315/running-system-commands-in-python-using-curses-and-panel-and-come-back-to-previ
-class SuspendCurses:
-    'Context Manager to temporarily leave curses mode'
-    def __enter__(self):
-        curses.endwin()
-
-    def __exit__(self, exc_type, exc_val, tb):
-        newscr = curses.initscr()
-        newscr.refresh()
-        curses.doupdate()
-
-
-def launchEditor(*args):
-    editor = os.environ.get('EDITOR') or fail('$EDITOR not set')
-    args = [editor] + list(args)
-    with SuspendCurses():
-        return subprocess.call(args)
-
-def launchExternalEditor(v, linenum=0):
-    import tempfile
-    with tempfile.NamedTemporaryFile() as temp:
-        with open(temp.name, 'w') as fp:
-            fp.write(v)
-        return launchExternalEditorPath(Path(temp.name))
-
-def launchExternalEditorPath(path, linenum=0):
-        fn = path.resolve()
-        if linenum:
-            launchEditor(fn, '+%s' % linenum)
-        else:
-            launchEditor(fn)
-
-        with open(fn, 'r') as fp:
-            try:
-                r = fp.read()
-                if r[:-1] == '\n':  # trim inevitable trailing newline
-                    r = r[:-1]
-                return r
-            except Exception as e:
-                exceptionCaught(e)
-                return ''
-
-        launchExternalEditor(Path(temp.name))
-
-def suspend():
-    import signal
-    with SuspendCurses():
-        os.kill(os.getpid(), signal.SIGSTOP)
 
 def setupcolors(stdscr, f, *args):
     curses.raw()    # get control keys instead of signals
