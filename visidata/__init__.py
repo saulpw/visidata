@@ -14,7 +14,7 @@ from .cliptext import clipdraw, clipstr
 from .color import colors, CursesAttr
 from .wrappers import *
 from .column import *
-from ._sheet import *
+from .sheets import *
 
 from .textsheet import TextSheet
 from .threads import *
@@ -25,7 +25,6 @@ from .errors import *
 from .urlcache import *
 from .zscroll import *
 from ._types import *
-from .sheets import *
 from .selection import *
 from .loaders.tsv import *
 from .data import *
