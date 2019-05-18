@@ -63,6 +63,7 @@
 - [addcol-new] addcol-new now works in batch mode (thanks @cwarden for the bug report #251)
 - [canvas] clipstr xname to prevent overlap with 1st element in xaxis
 - [DirSheet] delete-selected now deletes all of the selected files upon save-sheet (thanks @cwarden for the bug report #261)
+- [display] fix resizing issue with wide chars (thanks @polm for the bug report #279 and for the fix #284 )
 - [go-col-regex] nextColRegex sheet is implicit parameter
 - [pyobj] SheetDict nested editing (thanks @egwynn for the bug report #245)
 - [txt] TextSheets now save as .txt
