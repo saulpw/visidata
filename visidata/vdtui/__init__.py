@@ -1108,7 +1108,7 @@ def getGlobals():
     return globals()
 
 from .helpers import *
-from .cliptext import clipdraw, clipstr
+from .cliptext import clipdraw, clipstr, get_string_display_width
 from .color import colors, CursesAttr
 from .wrappers import *
 from .column import *
