@@ -29,6 +29,18 @@ theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
 theme('disp_endmid_sep', '║', '') # ╽╿┃
 theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 
+theme('color_default', 'normal', 'the default color')
+theme('color_default_hdr', 'bold', 'color of the column headers')
+theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
+theme('color_current_row', 'reverse', 'color of the cursor row')
+theme('color_current_col', 'bold', 'color of the cursor column')
+theme('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
+theme('color_column_sep', '246 blue', 'color of column separators')
+theme('color_key_col', '81 cyan', 'color of key columns')
+theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
+theme('color_selected_row', '215 yellow', 'color of selected rows')
+
+
 def splitcell(s, width=0):
     if width <= 0 or not options.textwrap_cells:
         return [s]
@@ -47,17 +59,6 @@ disp_column_fill = ' ' # pad chars after column value
 RowColorizer = collections.namedtuple('RowColorizer', 'precedence coloropt func')
 CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt func')
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
-
-theme('color_default', 'normal', 'the default color')
-theme('color_default_hdr', 'bold', 'color of the column headers')
-theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
-theme('color_current_row', 'reverse', 'color of the cursor row')
-theme('color_current_col', 'bold', 'color of the cursor column')
-theme('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
-theme('color_column_sep', '246 blue', 'color of column separators')
-theme('color_key_col', '81 cyan', 'color of key columns')
-theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
-theme('color_selected_row', '215 yellow', 'color of selected rows')
 
 UNLOADED = object()  # sentinel for a sheet not yet loaded for the first time
 
@@ -673,58 +674,34 @@ class Sheet(BaseSheet):
             return height
 
 
-Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
-Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),
-Sheet.addCommand(None, 'go-up',    'cursorDown(-1)'),
-Sheet.addCommand(None, 'go-right', 'cursorRight(+1)'),
-Sheet.addCommand(None, 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
-Sheet.addCommand(None, 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
+class SheetsSheet(Sheet):
+    rowtype = 'sheets'
+    precious = False
+    columns = [
+        ColumnAttr('name', width=30),
+        ColumnAttr('shortcut'),
+        ColumnAttr('nRows', type=int),
+        ColumnAttr('nCols', type=int),
+        ColumnAttr('nVisibleCols', type=int),
+        ColumnAttr('cursorDisplay'),
+        ColumnAttr('keyColNames'),
+        ColumnAttr('source'),
+        ColumnAttr('progressPct'),
+#        ColumnAttr('threads', 'currentThreads', type=vlen),
+    ]
+    colorizers = [
+        RowColorizer(1.5, 'color_hidden_col', lambda s,c,r,v: r and r not in vd.sheets),
+    ]
+    nKeys = 1
 
-Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
-Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
-Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
-Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
+    def newRow(self):
+        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
 
-Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=visibleRowAtY(mouseY) or sheet.cursorRowIndex; sheet.cursorVisibleColIndex=visibleColAtX(mouseX) or sheet.cursorVisibleColIndex'),
+    def reload(self):
+        self.rows = self.source
 
-Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
 
-Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
-Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
-
-Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
-Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
-
-Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
-
-undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
-
-Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', undo=undoRestoreKey),
-Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', undo=undoRestoreKey),
-
-Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
-
-Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', undo=undoEditCell)
-Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', undo=undoEditCells),
-
-Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)'),
-Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)'),
-Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
-Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
-
-bindkey('KEY_LEFT', 'go-left')
-bindkey('KEY_DOWN', 'go-down')
-bindkey('KEY_UP', 'go-up')
-bindkey('KEY_RIGHT', 'go-right')
-bindkey('KEY_HOME', 'go-top')
-bindkey('KEY_END', 'go-bottom')
-bindkey('KEY_NPAGE', 'next-page')
-bindkey('KEY_PPAGE', 'prev-page')
-
-bindkey('gKEY_LEFT', 'go-leftmost'),
-bindkey('gKEY_RIGHT', 'go-rightmost'),
-bindkey('gKEY_UP', 'go-top'),
-bindkey('gKEY_DOWN', 'go-bottom'),
+## VisiData sheet manipulation
 
 @VisiData.global_api
 def replace(vd, vs):
@@ -773,33 +750,44 @@ def sheetsSheet(vd):
     return SheetsSheet("sheets_all", source=vd.allSheets)
 
 
-class SheetsSheet(Sheet):
-    rowtype = 'sheets'
-    precious = False
-    columns = [
-        ColumnAttr('name', width=30),
-        ColumnAttr('shortcut'),
-        ColumnAttr('nRows', type=int),
-        ColumnAttr('nCols', type=int),
-        ColumnAttr('nVisibleCols', type=int),
-        ColumnAttr('cursorDisplay'),
-        ColumnAttr('keyColNames'),
-        ColumnAttr('source'),
-        ColumnAttr('progressPct'),
-#        ColumnAttr('threads', 'currentThreads', type=vlen),
-    ]
-    colorizers = [
-        RowColorizer(1.5, 'color_hidden_col', lambda s,c,r,v: r and r not in vd.sheets),
-    ]
-    nKeys = 1
+undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
 
-    def newRow(self):
-        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
+globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
+globalCommand('S', 'sheets-all', 'vd.push(vd.sheetsSheet)')
 
-    def reload(self):
-        self.rows = self.source
+Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
+Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),
+Sheet.addCommand(None, 'go-up',    'cursorDown(-1)'),
+Sheet.addCommand(None, 'go-right', 'cursorRight(+1)'),
+Sheet.addCommand(None, 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
+Sheet.addCommand(None, 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
 
+Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
+Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
+Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
+Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
 
+Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=visibleRowAtY(mouseY) or sheet.cursorRowIndex; sheet.cursorVisibleColIndex=visibleColAtX(mouseX) or sheet.cursorVisibleColIndex'),
+
+Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
+
+Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
+Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
+
+Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
+
+Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', undo=undoRestoreKey),
+Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', undo=undoRestoreKey),
+
+Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
+
+Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', undo=undoEditCell)
+Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', undo=undoEditCells),
+
+Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)'),
+Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)'),
+Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
+Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
 SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
 SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
@@ -808,5 +796,19 @@ SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("descri
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
 
-globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
-globalCommand('S', 'sheets-all', 'vd.push(vd.sheetsSheet)')
+bindkey('KEY_LEFT', 'go-left')
+bindkey('KEY_DOWN', 'go-down')
+bindkey('KEY_UP', 'go-up')
+bindkey('KEY_RIGHT', 'go-right')
+bindkey('KEY_HOME', 'go-top')
+bindkey('KEY_END', 'go-bottom')
+bindkey('KEY_NPAGE', 'next-page')
+bindkey('KEY_PPAGE', 'prev-page')
+
+bindkey('gKEY_LEFT', 'go-leftmost'),
+bindkey('gKEY_RIGHT', 'go-rightmost'),
+bindkey('gKEY_UP', 'go-top'),
+bindkey('gKEY_DOWN', 'go-bottom'),
+
+Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
+Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
