@@ -15,6 +15,7 @@ from .helpers import *
 from .cliptext import *
 from .color import colors, CursesAttr
 from .wrappers import *
+from ._types import *
 from .column import *
 from .sheets import *
 from .statusbar import *
@@ -27,7 +28,6 @@ from .path import *
 from .errors import *
 from .urlcache import *
 from .zscroll import *
-from ._types import *
 from .selection import *
 from .loaders.tsv import *
 from .data import *

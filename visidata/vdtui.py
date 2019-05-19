@@ -64,52 +64,6 @@ curses_timeout = 100 # curses timeout in ms
 timeouts_before_idle = 10
 ENTER='^J'
 ALT=ESC='^['
-# _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
-#
-#    o = typetype(val)   # for interpreting raw value
-#    o = typetype(str)   # for conversion from string (when setting)
-#    o = typetype()      # for default value to be used when conversion fails
-#
-# The resulting object o must be orderable and convertible to a string for display and certain outputs (like csv).
-#
-# .icon is a single character that appears in the notes field of cells and column headers.
-# .formatter(fmtstr, typedvalue) returns a string of the formatted typedvalue according to fmtstr.
-# .fmtstr is the default fmtstr passed to .formatter.
-
-_vdtype = collections.namedtuple('type', 'typetype icon fmtstr formatter')
-
-def anytype(r=None):
-    'minimalist "any" passthrough type'
-    return r
-anytype.__name__ = ''
-
-def _defaultFormatter(fmtstr, typedval):
-    if fmtstr:
-        return locale.format_string(fmtstr, typedval)
-    return str(typedval)
-
-def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
-    t = _vdtype(typetype, icon, fmtstr, formatter)
-    typemap[typetype] = t
-    return t
-
-# typemap [typetype] -> _vdtype
-typemap = {}
-
-def getType(typetype):
-    return typemap.get(typetype) or _vdtype(anytype, None, '', _defaultFormatter)
-
-vdtype(None, '∅')
-vdtype(anytype, '', formatter=lambda _,v: str(v))
-vdtype(str, '~', formatter=lambda _,v: v)
-vdtype(int, '#', '%.0f')
-vdtype(float, '%', '%.02f')
-vdtype(dict, '')
-vdtype(list, '')
-
-def isNumeric(col):
-    return col.type in (int,vlen,float,currency,date)
-
 ###
 
 def catchapply(func, *args, **kwargs):

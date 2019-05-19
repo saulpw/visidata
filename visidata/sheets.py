@@ -765,6 +765,17 @@ Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"
 Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)'),
 Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
 Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
+
+undoColType = undoAttr('[cursorCol]', 'type')
+
+Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', undo=undoColType),
+Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', undo=undoColType),
+Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', undo=undoColType),
+Sheet.addCommand('#', 'type-int', 'cursorCol.type = int', undo=undoColType),
+Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', undo=undoColType),
+Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', undo=undoColType),
+Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', undo=undoColType),
+
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
 SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
 SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
