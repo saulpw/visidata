@@ -545,42 +545,6 @@ def exceptionCaught(self, exc=None, **kwargs):
     if options.debug:
         raise
 
-class LazyMap:
-    'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
-    def __init__(self, *objs):
-        self.locals = {}
-        self.objs = {} # [k] -> obj
-        for obj in objs:
-            for k in dir(obj):
-                if k not in self.objs:
-                    self.objs[k] = obj
-
-    def keys(self):
-        return list(self.objs.keys())  # sum(set(dir(obj)) for obj in self.objs))
-
-    def clear(self):
-        self.locals.clear()
-
-    def __getitem__(self, k):
-        obj = self.objs.get(k, None)
-        if obj:
-            return getattr(obj, k)
-        return self.locals[k]
-
-    def __setitem__(self, k, v):
-        obj = self.objs.get(k, None)
-        if obj:
-            return setattr(obj, k, v)
-        self.locals[k] = v
-
-@asyncthread
-def exec_shell(*args):
-    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    if err or out:
-        lines = err.decode('utf8').splitlines() + out.decode('utf8').splitlines()
-        vd.push(TextSheet(' '.join(args), lines))
-
 class DisplayWrapper:
     def __init__(self, value, **kwargs):
         self.value = value

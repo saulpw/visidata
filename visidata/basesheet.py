@@ -1,5 +1,35 @@
-from visidata import Extensible, getGlobals, debug, vd, warning, EscapeException, exec_shell, catchapply, error, LazyMap
+import visidata
+from visidata import Extensible, getGlobals, debug, vd, warning, EscapeException, catchapply, error
 from unittest import mock
+
+
+class LazyMap:
+    'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
+    def __init__(self, *objs):
+        self.locals = {}
+        self.objs = {} # [k] -> obj
+        for obj in objs:
+            for k in dir(obj):
+                if k not in self.objs:
+                    self.objs[k] = obj
+
+    def keys(self):
+        return list(self.objs.keys())  # sum(set(dir(obj)) for obj in self.objs))
+
+    def clear(self):
+        self.locals.clear()
+
+    def __getitem__(self, k):
+        obj = self.objs.get(k, None)
+        if obj:
+            return getattr(obj, k)
+        return self.locals[k]
+
+    def __setitem__(self, k, v):
+        obj = self.objs.get(k, None)
+        if obj:
+            return setattr(obj, k, v)
+        self.locals[k] = v
 
 
 class BaseSheet(Extensible):
@@ -82,12 +112,6 @@ class BaseSheet(Extensible):
             exec(code, vdglobals, LazyMap(vd, self))
         except EscapeException as e:  # user aborted
             warning('aborted')
-            escaped = True
-        except ImportError as e:
-            warning('%s not installed' % e.name)
-            if vd.confirm('run `pip3 install %s`? ' % e.name, exc=None):
-                warning('installing %s' % e.name)
-                exec_shell('pip3', 'install', e.name)
             escaped = True
         except Exception as e:
             debug(cmd.execstr)

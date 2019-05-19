@@ -13,6 +13,15 @@ from visidata import CellColorizer, RowColorizer, undoAddCols, undoBlocked
 Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)', undo=undoAddCols)
 
 
+@asyncthread
+def exec_shell(*args):
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if err or out:
+        lines = err.decode('utf8').splitlines() + out.decode('utf8').splitlines()
+        vd.push(TextSheet(' '.join(args), lines))
+
+
 def open_dir(p):
     return DirSheet(p.name, source=p)
 
