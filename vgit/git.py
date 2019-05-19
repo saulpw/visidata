@@ -1,5 +1,6 @@
 import os.path
 import sh
+import io
 
 from visidata import *
 from visidata import namedlist
