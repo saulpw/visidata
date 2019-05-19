@@ -31,7 +31,7 @@ from .basesheet import *
 from .settings import *
 from .errors import *
 from .editor import *
-from .helpers import *
+from .utils import *
 from .cliptext import *
 from .color import colors, CursesAttr
 from .mainloop import *
@@ -54,7 +54,6 @@ from .selection import *
 from .loaders.tsv import *
 from .data import *
 from .clipboard import *
-from .utils import *
 from .slide import *
 from .search import *
 from .expr import *

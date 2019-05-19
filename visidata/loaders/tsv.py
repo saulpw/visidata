@@ -4,7 +4,7 @@ import itertools
 import collections
 
 from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught, replayableOption
-from visidata.namedlist import namedlist
+from visidata import namedlist
 
 replayableOption('tsv_delimiter', '\t', 'delimiter to use for tsv filetype')
 replayableOption('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv')

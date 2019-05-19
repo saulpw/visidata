@@ -2,7 +2,7 @@ import os.path
 import sh
 
 from visidata import *
-from visidata.namedlist import namedlist
+from visidata import namedlist
 
 
 option('vgit_logfile', '', 'file to log all git commands run by vgit')
