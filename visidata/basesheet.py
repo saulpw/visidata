@@ -1,5 +1,5 @@
 import visidata
-from visidata import Extensible, getGlobals, debug, vd, warning, EscapeException, catchapply, error
+from visidata import Extensible, getGlobals, vd, EscapeException, catchapply
 from unittest import mock
 
 
@@ -93,7 +93,7 @@ class BaseSheet(Extensible):
     def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
         if not cmd:
-            debug('no command "%s"' % keystrokes)
+            vd.debug('no command "%s"' % keystrokes)
             return True
 
         escaped = False
@@ -108,13 +108,13 @@ class BaseSheet(Extensible):
             if vd.cmdlog:
                 vd.cmdlog.beforeExecHook(self, cmd, '', keystrokes)
             code = compile(cmd.execstr, cmd.longname, 'exec')
-            debug(cmd.longname)
+            vd.debug(cmd.longname)
             exec(code, vdglobals, LazyMap(vd, self))
         except EscapeException as e:  # user aborted
-            warning('aborted')
+            vd.warning('aborted')
             escaped = True
         except Exception as e:
-            debug(cmd.execstr)
+            vd.debug(cmd.execstr)
             err = vd.exceptionCaught(e)
             escaped = True
 
@@ -144,14 +144,14 @@ class BaseSheet(Extensible):
         pass
 
     def draw(self, scr):
-        error('no draw')
+        vd.error('no draw')
 
     def refresh(self):
         self._scr.clear()
         self._scr.refresh()
 
     def reload(self):
-        error('no reload')
+        vd.error('no reload')
 
     def checkCursor(self):
         pass

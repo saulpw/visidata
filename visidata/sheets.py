@@ -6,8 +6,8 @@ from unittest import mock
 from copy import copy
 import textwrap
 
-from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, fail, ENTER, EscapeException, debug, LazyMap, replayableOption
-from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, error, fail, Column, option,
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, LazyMap, replayableOption
+from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet,
 vd, exceptionCaught, catchapply, getType, clipdraw, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
@@ -136,7 +136,7 @@ class Sheet(BaseSheet):
 
     def column(self, colname):
         'Return first column whose Column.name matches colname.'
-        return self.colsByName.get(colname) or fail('no column matching "%s"' % colname)
+        return self.colsByName.get(colname) or vd.fail('no column matching "%s"' % colname)
 
     def recalc(self):
         'Clear caches and set col.sheet to this sheet for all columns.'
@@ -692,7 +692,7 @@ def remove(vd, vs):
     if vs in vd.sheets:
         vd.sheets.remove(vs)
     else:
-        fail('sheet not on stack')
+        vd.fail('sheet not on stack')
 
 
 @VisiData.global_api

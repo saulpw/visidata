@@ -4,7 +4,7 @@ import threading
 import re
 import time
 
-from visidata import option, options, fail, anytype, stacktrace, vd, replayableOption
+from visidata import option, options, anytype, stacktrace, vd, replayableOption
 from visidata import getType, typemap, isNumeric, isNullFunc
 from visidata import asyncthread, exceptionCaught, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
@@ -54,7 +54,7 @@ class Column(Extensible):
         self.fmtstr = ''      # by default, use str()
         self.type = type      # anytype/str/int/float/date/func
         self.getter = lambda col, row: row
-        self.setter = lambda col, row, value: fail(col.name+' column cannot be changed')
+        self.setter = lambda col, row, value: vd.fail(col.name+' column cannot be changed')
         self.width = None     # == 0 if hidden, None if auto-compute next time
         self.height = 1       # max height, None/0 to auto-compute for each row
         self.keycol = False   # is a key column
@@ -336,7 +336,7 @@ class SubColumnFunc(Column):
     def setValue(self, row, value):
         subrow = self.subfunc(row, self.expr)
         if subrow is None:
-            fail('no source row')
+            vd.fail('no source row')
         self.origcol.setValue(subrow, value)
 
     def recalc(self, sheet=None):

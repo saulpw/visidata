@@ -3,7 +3,7 @@ import curses
 from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, CursesAttr, options, colors, wrmap, clipdraw
 
 
-__all__ = ['StatusSheet', 'status']
+__all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
 
 
 @VisiData.global_api
@@ -20,6 +20,26 @@ def status(self, *args, priority=0):
 
     self.statusHistory.append([priority, args, 1])
     return True
+
+@VisiData.global_api
+def error(vd, s):
+    'Log an error and raise an exception.'
+    vd.status(s, priority=3)
+    raise ExpectedException(s)
+
+@VisiData.global_api
+def fail(vd, s):
+    vd.status(s, priority=2)
+    raise ExpectedException(s)
+
+@VisiData.global_api
+def warning(vd, s):
+    vd.status(s, priority=1)
+
+@VisiData.global_api
+def debug(vd, *args, **kwargs):
+    if options.debug:
+        return vd.status(*args, **kwargs)
 
 
 def middleTruncate(s, w):

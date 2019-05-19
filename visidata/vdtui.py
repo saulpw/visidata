@@ -354,27 +354,6 @@ class VisiData(Extensible):
 
 vd = VisiData()
 
-
-@VisiData.global_api
-def error(vd, s):
-    'Log an error and raise an exception.'
-    vd.status(s, priority=3)
-    raise ExpectedException(s)
-
-@VisiData.global_api
-def fail(vd, s):
-    vd.status(s, priority=2)
-    raise ExpectedException(s)
-
-@VisiData.global_api
-def warning(vd, s):
-    vd.status(s, priority=1)
-
-@VisiData.global_api
-def debug(vd, *args, **kwargs):
-    if options.debug:
-        return vd.status(*args, **kwargs)
-
 @VisiData.global_api
 def exceptionCaught(self, exc=None, **kwargs):
     'Maintain list of most recent errors and return most recent one.'
