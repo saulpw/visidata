@@ -102,7 +102,7 @@ def run(self, scr):
         elif keystroke in self.allPrefixes:
             prefixWaiting = True
         else:
-            status('no command for "%s"' % (self.keystrokes))
+            vd.status('no command for "%s"' % (self.keystrokes))
             prefixWaiting = False
 
         self.checkForFinishedThreads()
