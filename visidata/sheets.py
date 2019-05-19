@@ -9,7 +9,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, LazyMap, replayableOption
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet,
-vd, exceptionCaught, catchapply, getType, clipdraw, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
+vd, exceptionCaught, getType, clipdraw, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'SheetsSheet']
@@ -522,7 +522,7 @@ class Sheet(BaseSheet):
         y = headerRow + numHeaderRows
 
         rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nVisibleRows, self.nRows)]
-        catchapply(self.checkCursor)
+        self.checkCursorNoExceptions()
 
         for rowidx, row in enumerate(rows):
             if y >= self.windowHeight-1:

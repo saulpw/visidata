@@ -4,7 +4,7 @@ import curses
 import threading
 import time
 
-from visidata import vd, VisiData, colors, catchapply, bindkeys
+from visidata import vd, VisiData, colors, bindkeys
 
 curses_timeout = 100 # curses timeout in ms
 timeouts_before_idle = 10
@@ -106,7 +106,7 @@ def run(self, scr):
             prefixWaiting = False
 
         self.checkForFinishedThreads()
-        catchapply(sheet.checkCursor)
+        sheet.checkCursorNoExceptions()
 
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet

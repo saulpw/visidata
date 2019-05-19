@@ -63,12 +63,6 @@ ENTER='^J'
 ALT=ESC='^['
 ###
 
-def catchapply(func, *args, **kwargs):
-    try:
-        return func(*args, **kwargs)
-    except Exception as e:
-        exceptionCaught(e)
-
 def stacktrace(e=None):
     if not e:
         return traceback.format_exc().strip().splitlines()

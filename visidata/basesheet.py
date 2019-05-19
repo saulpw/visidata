@@ -1,5 +1,5 @@
 import visidata
-from visidata import Extensible, getGlobals, vd, EscapeException, catchapply
+from visidata import Extensible, getGlobals, vd, EscapeException
 from unittest import mock
 
 
@@ -125,7 +125,7 @@ class BaseSheet(Extensible):
         except Exception as e:
             vd.exceptionCaught(e)
 
-        catchapply(self.checkCursor)
+        self.checkCursorNoExceptions()
 
         vd.clear_caches()
         return escaped
@@ -154,7 +154,14 @@ class BaseSheet(Extensible):
         vd.error('no reload')
 
     def checkCursor(self):
+        'Check cursor and fix if out-of-bounds.  Overrideable.'
         pass
+
+    def checkCursorNoExceptions(self):
+        try:
+            return self.checkCursor()
+        except Exception as e:
+            vd.exceptionCaught(e)
 
     def newRow(self):
         return type(self)._rowtype()
