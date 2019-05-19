@@ -4,17 +4,14 @@ import functools
 
 from visidata import options
 
-__all__ = ['clipstr', 'clipdraw']
+__all__ = ['clipstr', 'clipdraw', 'dispwidth']
 
 disp_column_fill = ' '
 
 ### Curses helpers
 
-def get_character_display_width(cc):
-    '''Get the display width of a character.
-
-    East Asian full-width characters are twice as wide as ASCII characters for
-    terminal display.'''
+def dispwidth_char(cc):
+    '(internal; use dispwidth) Return display width of given single character.'
     eaw = unicodedata.east_asian_width(cc)
     if eaw == 'A':  # ambiguous
         return options.disp_ambig_width
@@ -25,13 +22,13 @@ def get_character_display_width(cc):
     else:
         return 0
 
-def get_string_display_width(ss):
-    return sum( (get_character_display_width(cc) for cc in ss) )
+def dispwidth(ss):
+    'Return display width of string, according to unicodedata width and options.disp_ambig_width.'
+    return sum( (dispwidth_char(cc) for cc in ss) )
 
 @functools.lru_cache(maxsize=8192)
 def clipstr(s, dispw):
     '''Return clipped string and width in terminal display characters.
-
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
     w = 0
     ret = ''
@@ -43,7 +40,7 @@ def clipstr(s, dispw):
         if c:
             c = c[0]  # multi-char disp_oddspace just uses the first char
             ret += c
-            w += get_character_display_width(c)
+            w += dispwidth(c)
 
         if w > dispw-len(options.disp_truncator)+1:
             ret = ret[:-2] + options.disp_truncator  # replace final char with ellipsis

@@ -12,7 +12,7 @@ from .basesheet import *
 from .settings import *
 from .editor import *
 from .helpers import *
-from .cliptext import clipdraw, clipstr
+from .cliptext import *
 from .color import colors, CursesAttr
 from .wrappers import *
 from .column import *

@@ -6,7 +6,7 @@ import time
 
 from visidata import option, options, fail, anytype, stacktrace, status, replayableOption
 from visidata import getType, typemap, isNumeric, isNullFunc
-from visidata import asyncthread, exceptionCaught
+from visidata import asyncthread, exceptionCaught, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
 from visidata import Extensible, LazyMap, AttrDict
 
@@ -252,9 +252,9 @@ class Column(Extensible):
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'
         w = 0
-        nlen = get_string_display_width(self.name)
+        nlen = dispwidth(self.name)
         if len(rows) > 0:
-            w = max(max(get_string_display_width(self.getDisplayValue(r)) for r in rows), nlen)+2
+            w = max(max(dispwidth(self.getDisplayValue(r)) for r in rows), nlen)+2
         return max(w, nlen)
 
 
