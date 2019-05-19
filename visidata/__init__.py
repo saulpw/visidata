@@ -17,6 +17,8 @@ from .cliptext import *
 from .color import colors, CursesAttr
 from .mainloop import *
 from .wrappers import *
+from .undo import *
+
 from ._types import *
 from .column import *
 from .sheets import *
