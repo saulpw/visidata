@@ -1,5 +1,5 @@
 import visidata
-from visidata import Extensible, getGlobals, vd, EscapeException
+from visidata import Extensible, VisiData, getGlobals, vd, EscapeException
 from unittest import mock
 
 
@@ -165,3 +165,30 @@ class BaseSheet(Extensible):
 
     def newRow(self):
         return type(self)._rowtype()
+
+
+@VisiData.api
+def quit(self):
+    if len(vd.sheets) == 1 and options.quitguard:
+        vd.confirm("quit last sheet? ")
+    return vd.sheets.pop(0)
+
+
+@VisiData.property
+def sheet(self):
+    'the top sheet on the stack'
+    return self.sheets[0] if self.sheets else None
+
+
+@VisiData.api
+def getSheet(self, sheetname):
+    matchingSheets = [x for x in vd.sheets if x.name == sheetname]
+    if matchingSheets:
+        if len(matchingSheets) > 1:
+            vd.status('more than one sheet named "%s"' % sheetname)
+        return matchingSheets[0]
+    if sheetname == 'options':
+        vs = self.optionsSheet
+        vs.reload()
+        vs.vd = vd
+        return vs

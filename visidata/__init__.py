@@ -6,6 +6,8 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
 __copyright__ = 'Copyright (c) 2016-2019 ' + __author__
 
+from .extensible import *
+from .vdobj import *
 from .vdtui import *
 
 from .basesheet import *
