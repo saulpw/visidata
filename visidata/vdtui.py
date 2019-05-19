@@ -153,8 +153,6 @@ class VisiData(Extensible):
     def __init__(self):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
         self.allSheets = []  # list of all non-precious sheets ever pushed
-        self.statuses = collections.OrderedDict()  # (priority, statusmsg) -> num_repeats; shown until next action
-        self.statusHistory = []  # list of [priority, statusmsg, repeats] for all status messages ever
         self.lastErrors = []
         self.keystrokes = ''
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
@@ -244,18 +242,6 @@ class VisiData(Extensible):
 # end VisiData class
 
 vd = VisiData()
-
-@VisiData.global_api
-def exceptionCaught(self, exc=None, **kwargs):
-    'Maintain list of most recent errors and return most recent one.'
-    if isinstance(exc, ExpectedException):  # already reported, don't log
-        return
-    self.lastErrors.append(stacktrace())
-    if kwargs.get('status', True):
-        status(self.lastErrors[-1][-1], priority=2)  # last line of latest error
-    if options.debug:
-        raise
-
 
 ### external interface
 def addGlobals(g):

@@ -1,9 +1,14 @@
+import collections
 import curses
 
 from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, CursesAttr, options, colors, wrmap, clipdraw
 
 
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
+
+
+VisiData.init('statuses', collections.OrderedDict)  # (priority, statusmsg) -> num_repeats; shown until next action
+VisiData.init('statusHistory', list)  # list of [priority, statusmsg, repeats] for all status messages ever
 
 
 @VisiData.global_api
@@ -40,7 +45,6 @@ def warning(vd, s):
 def debug(vd, *args, **kwargs):
     if options.debug:
         return vd.status(*args, **kwargs)
-
 
 def middleTruncate(s, w):
     if len(s) <= w:

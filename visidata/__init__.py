@@ -10,6 +10,7 @@ from .vdtui import *
 
 from .basesheet import *
 from .settings import *
+from .errors import *
 from .editor import *
 from .helpers import *
 from .cliptext import *
@@ -21,12 +22,11 @@ from .column import *
 from .sheets import *
 from .statusbar import *
 
-from .textsheet import TextSheet
+from .textsheet import *
 from .threads import *
 from .input import *
 from .movement import *
 from .path import *
-from .errors import *
 from .urlcache import *
 from .zscroll import *
 from .selection import *
