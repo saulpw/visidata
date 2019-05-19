@@ -1,6 +1,10 @@
 import collections
+import sys
 import inspect
-from visidata import BaseSheet, vd
+import argparse
+import pathlib
+from visidata import VisiData, BaseSheet, vd, getGlobals, addGlobals
+
 
 # [settingname] -> { objname(Sheet-instance/Sheet-type/'override'/'global'): Option/Command/longname }
 class SettingsMgr(collections.OrderedDict):
@@ -233,3 +237,41 @@ def getCommand(self, keystrokes_or_longname):
             return commands._get(keystrokes_or_longname) or fail('no binding for %s' % keystrokes_or_longname)
     except Exception:
         return None
+
+
+def loadConfigFile(fnrc, _globals=None):
+    p = pathlib.Path(fnrc)
+    if p.exists():
+        try:
+            code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
+            exec(code, _globals or globals())
+        except Exception as e:
+            exceptionCaught(e)
+
+
+@VisiData.api
+def parseArgs(vd, parser:argparse.ArgumentParser):
+    for optname in options.keys('global'):
+        if optname.startswith('color_') or optname.startswith('disp_'):
+            continue
+        action = 'store_true' if options[optname] is False else 'store'
+        parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=options._opts._get(optname).helpstr)
+
+    args = parser.parse_args()
+
+    # add visidata_dir to path before loading config file (can only be set from cli)
+    sys.path.append(pathlib.Path(args.visidata_dir or options.visidata_dir).resolve())
+
+    # user customisations in config file in standard location
+    loadConfigFile(pathlib.Path(options.config).resolve(), getGlobals())
+    addGlobals(globals())
+
+    # apply command-line overrides after .visidatarc
+    for optname, optval in vars(args).items():
+        if optval is not None and optname not in ['inputs', 'play', 'batch', 'output', 'diff']:
+            options[optname] = optval
+
+    return args
+
+
+BaseSheet.addCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, Path(fn)))')

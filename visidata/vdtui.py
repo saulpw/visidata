@@ -258,15 +258,6 @@ def exceptionCaught(self, exc=None, **kwargs):
 
 
 ### external interface
-def loadConfigFile(fnrc, _globals=None):
-    p = Path(fnrc)
-    if p.exists():
-        try:
-            code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
-            exec(code, _globals or globals())
-        except Exception as e:
-            exceptionCaught(e)
-
 def addGlobals(g):
     'importers can call `addGlobals(globals())` to have their globals accessible to execstrings'
     globals().update(g)

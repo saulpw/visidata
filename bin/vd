@@ -65,27 +65,7 @@ def main():
     parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
     parser.add_argument('-v', '--version', action='version', version=__version_info__)
 
-    for optname in options.keys('global'):
-        if optname.startswith('color_') or optname.startswith('disp_'):
-            continue
-        action = 'store_true' if options[optname] is False else 'store'
-        parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=options._opts._get(optname).helpstr)
-
-    args = parser.parse_args()
-
-    # add visidata_dir to path before loading config file (can only be set from cli)
-    sys.path.append(Path(options.visidata_dir).resolve())
-
-    # user customisations in config file in standard location
-    loadConfigFile(Path(options.config).resolve(), getGlobals())
-    addGlobals(globals())
-
-    globalCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, Path(fn)))')
-
-    # apply command-line overrides after .visidatarc
-    for optname, optval in vars(args).items():
-        if optval is not None and optname not in ['inputs', 'play', 'batch', 'output', 'diff']:
-            options[optname] = optval
+    args = vd.parseArgs(parser)
 
     # fetch motd after options parsing/setting
     domotd()
