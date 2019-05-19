@@ -1,7 +1,7 @@
 from visidata import VisiData
 import visidata
 
-alias = visidata.bindkey
+alias = visidata.BaseSheet.bindkey
 
 def deprecated(ver):
     def decorator(func):

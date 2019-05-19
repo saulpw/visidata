@@ -21,6 +21,7 @@ def setSubst(sheet, cols, rows):
     setValuesFromRegex(cols, rows, rex)
 
 
+replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
 replayableOption('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
 replayableOption('default_sample_size', 100, 'number of rows to sample for regex.split')
 

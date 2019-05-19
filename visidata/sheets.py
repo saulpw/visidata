@@ -2,43 +2,19 @@ import collections
 import functools
 import threading
 import re
+from unittest import mock
 from copy import copy
 import textwrap
 
-from visidata import VisiData, globalCommand, ColumnAttr, ColumnItem, vd, fail, ENTER
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, fail, ENTER, EscapeException, debug, LazyMap, replayableOption
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, error, fail, Column, option,
-TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow,
-vd, exceptionCaught, status, catchapply, bindkey, getType, clipdraw, BaseSheet, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
+TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow, BaseSheet,
+vd, exceptionCaught, status, catchapply, getType, clipdraw, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'SheetsSheet']
 
-
-option('textwrap_cells', True, 'wordwrap text for multiline rows')
-
-theme('disp_column_sep', '╵', 'separator between columns')
-theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
-theme('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
-theme('disp_rowmid_sep', '│', '') # ┃┊│█
-theme('disp_rowbot_sep', '╵', '') # ┊┴╿⌞█⍿╵⎢┴⌊
-theme('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
-theme('disp_keytop_sep', '║', '') # ╽╿┃╖╟
-theme('disp_keymid_sep', '║', '') # ╽╿┃
-theme('disp_keybot_sep', '║', '') # ╽╿┃╜‖
-theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
-theme('disp_endmid_sep', '║', '') # ╽╿┃
-theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
-
-theme('color_default', 'normal', 'the default color')
-theme('color_default_hdr', 'bold', 'color of the column headers')
-theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
-theme('color_current_row', 'reverse', 'color of the cursor row')
-theme('color_current_col', 'bold', 'color of the cursor column')
-theme('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
-theme('color_column_sep', '246 blue', 'color of column separators')
-theme('color_key_col', '81 cyan', 'color of key columns')
-theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
-theme('color_selected_row', '215 yellow', 'color of selected rows')
+replayableOption('default_width', 20, 'default column width')
 
 
 def splitcell(s, width=0):
@@ -61,6 +37,12 @@ CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt fun
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
 UNLOADED = object()  # sentinel for a sheet not yet loaded for the first time
+
+@BaseSheet.api
+def leftStatus(self):
+    'Compose left side of status bar for this sheet (overridable).'
+    return options.disp_status_fmt.format(sheet=self, vd=vd)
+
 
 class Sheet(BaseSheet):
     'Base class for all tabular sheets.'
@@ -755,6 +737,8 @@ undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
 globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
 globalCommand('S', 'sheets-all', 'vd.push(vd.sheetsSheet)')
 
+BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
+
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),
 Sheet.addCommand(None, 'go-up',    'cursorDown(-1)'),
@@ -779,8 +763,6 @@ Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', undo=undoRestoreKey),
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', undo=undoRestoreKey),
 
-Sheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
-
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', undo=undoEditCell)
 Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', undo=undoEditCells),
 
@@ -796,19 +778,86 @@ SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("descri
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
 
-bindkey('KEY_LEFT', 'go-left')
-bindkey('KEY_DOWN', 'go-down')
-bindkey('KEY_UP', 'go-up')
-bindkey('KEY_RIGHT', 'go-right')
-bindkey('KEY_HOME', 'go-top')
-bindkey('KEY_END', 'go-bottom')
-bindkey('KEY_NPAGE', 'next-page')
-bindkey('KEY_PPAGE', 'prev-page')
+BaseSheet.bindkey('KEY_LEFT', 'go-left')
+BaseSheet.bindkey('KEY_DOWN', 'go-down')
+BaseSheet.bindkey('KEY_UP', 'go-up')
+BaseSheet.bindkey('KEY_RIGHT', 'go-right')
+BaseSheet.bindkey('KEY_HOME', 'go-top')
+BaseSheet.bindkey('KEY_END', 'go-bottom')
+BaseSheet.bindkey('KEY_NPAGE', 'next-page')
+BaseSheet.bindkey('KEY_PPAGE', 'prev-page')
 
-bindkey('gKEY_LEFT', 'go-leftmost'),
-bindkey('gKEY_RIGHT', 'go-rightmost'),
-bindkey('gKEY_UP', 'go-top'),
-bindkey('gKEY_DOWN', 'go-bottom'),
+BaseSheet.bindkey('gKEY_LEFT', 'go-leftmost'),
+BaseSheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
+BaseSheet.bindkey('gKEY_UP', 'go-top'),
+BaseSheet.bindkey('gKEY_DOWN', 'go-bottom'),
 
 Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
 Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
+
+globalCommand('q', 'quit-sheet',  'vd.quit()')
+globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
+
+globalCommand('^L', 'redraw', 'sheet.refresh()')
+
+BaseSheet.bindkey('KEY_RESIZE', 'redraw')
+
+
+# options can only be defined after BaseSheet is defined
+option('textwrap_cells', True, 'wordwrap text for multiline rows')
+
+option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
+option('quitguard', False, 'confirm before quitting last sheet')
+option('debug', False, 'exit on error and display stacktrace')
+theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
+theme('use_default_colors', False, 'curses use default terminal colors')
+
+theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
+theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
+theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
+theme('disp_status_fmt', '{sheet.shortcut}〉{sheet.name}| ', 'status line prefix')
+theme('disp_lstatus_max', 0, 'maximum length of left status line')
+theme('disp_status_sep', ' | ', 'separator between statuses')
+theme('disp_more_left', '<', 'header note indicating more columns to the left')
+theme('disp_more_right', '>', 'header note indicating more columns to the right')
+theme('disp_error_val', '', 'displayed contents for computation exception')
+theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
+
+theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
+theme('color_status', 'bold', 'status line color')
+theme('color_error', 'red', 'error message color')
+theme('color_warning', 'yellow', 'warning message color')
+
+theme('disp_pending', '', 'string to display in pending cells')
+theme('note_pending', '⌛', 'note to display for pending cells')
+theme('note_format_exc', '?', 'cell note for an exception during formatting')
+theme('note_getter_exc', '!', 'cell note for an exception during computation')
+theme('note_type_exc', '!', 'cell note for an exception during type conversion')
+theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
+
+theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
+theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
+theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
+theme('disp_column_sep', '╵', 'separator between columns')
+theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
+theme('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
+theme('disp_rowmid_sep', '│', '') # ┃┊│█
+theme('disp_rowbot_sep', '╵', '') # ┊┴╿⌞█⍿╵⎢┴⌊
+theme('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
+theme('disp_keytop_sep', '║', '') # ╽╿┃╖╟
+theme('disp_keymid_sep', '║', '') # ╽╿┃
+theme('disp_keybot_sep', '║', '') # ╽╿┃╜‖
+theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
+theme('disp_endmid_sep', '║', '') # ╽╿┃
+theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
+
+theme('color_default', 'normal', 'the default color')
+theme('color_default_hdr', 'bold', 'color of the column headers')
+theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
+theme('color_current_row', 'reverse', 'color of the cursor row')
+theme('color_current_col', 'bold', 'color of the cursor column')
+theme('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
+theme('color_column_sep', '246 blue', 'color of column separators')
+theme('color_key_col', '81 cyan', 'color of key columns')
+theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
+theme('color_selected_row', '215 yellow', 'color of selected rows')

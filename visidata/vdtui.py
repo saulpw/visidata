@@ -3,12 +3,10 @@
 'vdtui: a curses framework for columnar data'
 
 from builtins import *
-from inspect import isclass
 from unittest import mock
 import sys
 import os
 import collections
-from collections import defaultdict
 from copy import copy, deepcopy
 from contextlib import suppress
 import curses
@@ -38,88 +36,6 @@ class ExpectedException(Exception):
 vd = None  # will be filled in later
 
 
-# [settingname] -> { objname(Sheet-instance/Sheet-type/'override'/'global'): Option/Command/longname }
-class SettingsMgr(collections.OrderedDict):
-    def __init__(self):
-        super().__init__()
-        self.allobjs = {}
-
-    def objname(self, obj):
-        if isinstance(obj, str):
-            v = obj
-        elif obj is None:
-            v = 'override'
-        elif isinstance(obj, BaseSheet):
-            v = obj.name
-        elif isclass(obj) and issubclass(obj, BaseSheet):
-            v = obj.__name__
-        else:
-            return None
-
-        self.allobjs[v] = obj
-        return v
-
-    def getobj(self, objname):
-        'Inverse of objname(obj); returns obj if available'
-        return self.allobjs.get(objname)
-
-    def unset(self, k, obj='global'):
-        del self[k][self.objname(obj)]
-
-    def set(self, k, v, obj='override'):
-        'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
-        if k not in self:
-            self[k] = dict()
-        self[k][self.objname(obj)] = v
-        return v
-
-    def setdefault(self, k, v):
-        return self.set(k, v, 'global')
-
-    def _mappings(self, obj):
-        if obj:
-            mappings = [self.objname(obj)]
-            mro = [self.objname(cls) for cls in inspect.getmro(type(obj))]
-            mappings.extend(mro)
-        else:
-            mappings = []
-
-        mappings += ['override', 'global']
-        return mappings
-
-    def _get(self, key, obj=None):
-        d = self.get(key, None)
-        if d:
-            for m in self._mappings(obj or vd.sheet):
-                v = d.get(m)
-                if v:
-                    return v
-
-    def iter(self, obj=None):
-        'Iterate through all keys considering context of obj. If obj is None, uses the context of the top sheet.'
-        if obj is None and vd:
-            obj = vd.sheet
-
-        for o in self._mappings(obj):
-            for k in self.keys():
-                for o2 in self[k]:
-                    if o == o2:
-                        yield (k, o), self[k][o2]
-
-
-class Command:
-    def __init__(self, longname, execstr, helpstr='', undo=''):
-        self.longname = longname
-        self.execstr = execstr
-        self.helpstr = helpstr
-        self.undo = undo
-
-def globalCommand(keystrokes, longname, execstr, helpstr='', **kwargs):
-    commands.setdefault(longname, Command(longname, execstr, helpstr=helpstr, **kwargs))
-
-    if keystrokes:
-        assert not bindkeys._get(keystrokes), keystrokes
-        bindkeys.setdefault(keystrokes, longname)
 
 # undoers
 def undoAttr(objs, attrname):
@@ -143,174 +59,11 @@ undoAddCols = undoAttrCopy('[sheet]', 'columns')
 undoEditCell = undoSetValues('[cursorRow]', '[cursorCol]')
 undoEditCells = undoSetValues('selectedRows', '[cursorCol]')
 
-def bindkey(keystrokes, longname):
-    bindkeys.setdefault(keystrokes, longname)
 
-def bindkey_override(keystrokes, longname):
-    bindkeys.set(keystrokes, longname)
-
-def unbindkey(keystrokes):
-    bindkeys.unset(keystrokes)
-
-class Option:
-    def __init__(self, name, value, helpstr=''):
-        self.name = name
-        self.value = value
-        self.helpstr = helpstr
-        self.replayable = False
-
-    def __str__(self):
-        return str(self.value)
-
-
-class OptionsObject:
-    'minimalist options framework'
-    def __init__(self, mgr):
-        object.__setattr__(self, '_opts', mgr)
-        object.__setattr__(self, '_cache', {})
-
-    def keys(self, obj=None):
-        for k, d in self._opts.items():
-            if obj is None or self._opts.objname(obj) in d:
-                yield k
-
-    def _get(self, k, obj=None):
-        'Return Option object for k in context of obj. Cache result until any set().'
-        opt = self._cache.get((k, obj), None)
-        if opt is None:
-            opt = self._opts._get(k, obj)
-            self._cache[(k, obj or vd.sheet)] = opt
-        return opt
-
-    def _set(self, k, v, obj=None, helpstr=''):
-        self._cache.clear()  # invalidate entire cache on any set()
-        return self._opts.set(k, Option(k, v, helpstr), obj)
-
-    def get(self, k, obj=None):
-        return self._get(k, obj).value
-
-    def getdefault(self, k):
-        return self._get(k, 'global').value
-
-    def set(self, k, v, obj='override'):
-        opt = self._get(k)
-        if opt:
-            curval = opt.value
-            t = type(curval)
-            if v is None and curval is not None:
-                v = t()           # empty value
-            elif isinstance(v, str) and t is bool: # special case for bool options
-                v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
-            elif type(v) is t:    # if right type, no conversion
-                pass
-            elif curval is None:  # if None, do not apply type conversion
-                pass
-            else:
-                v = t(v)
-
-            if curval != v and self._get(k, 'global').replayable:
-                if vd.cmdlog:  # options set on init aren't recorded
-                    vd.cmdlog.set_option(k, v, obj)
-        else:
-            curval = None
-            warning('setting unknown option %s' % k)
-
-        return self._set(k, v, obj)
-
-    def setdefault(self, k, v, helpstr):
-        return self._set(k, v, 'global', helpstr=helpstr)
-
-    def getall(self, kmatch):
-        return {obj:opt for (k, obj), opt in self._opts.items() if k == kmatch}
-
-    def __getattr__(self, k):      # options.foo
-        return self.__getitem__(k)
-
-    def __setattr__(self, k, v):   # options.foo = v
-        self.__setitem__(k, v)
-
-    def __getitem__(self, k):      # options[k]
-        opt = self._get(k)
-        if not opt:
-            error('no option "%s"' % k)
-        return opt.value
-
-    def __setitem__(self, k, v):   # options[k] = v
-        self.set(k, v)
-
-    def __call__(self, prefix=''):
-        return { optname[len(prefix):] : options[optname]
-                    for optname in options.keys()
-                        if optname.startswith(prefix) }
-
-
-commands = SettingsMgr()
-bindkeys = SettingsMgr()
-_options = SettingsMgr()
-options = OptionsObject(_options)
-
-def option(name, default, helpstr, replay=False):
-    opt = options.setdefault(name, default, helpstr)
-    opt.replayable = replay
-    return opt
-
-theme = option
-def replayableOption(optname, default, helpstr):
-    option(optname, default, helpstr, replay=True)
-
-
-replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
-replayableOption('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open')
-
-replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
-replayableOption('default_width', 20, 'default column width')
-
-option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
-option('quitguard', False, 'confirm before quitting last sheet')
-
-replayableOption('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
-option('debug', False, 'exit on error and display stacktrace')
 curses_timeout = 100 # curses timeout in ms
 timeouts_before_idle = 10
-theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-theme('use_default_colors', False, 'curses use default terminal colors')
-
-theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
-theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
-theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
-theme('disp_status_fmt', '{sheet.shortcut}〉{sheet.name}| ', 'status line prefix')
-theme('disp_lstatus_max', 0, 'maximum length of left status line')
-theme('disp_status_sep', ' | ', 'separator between statuses')
-theme('disp_more_left', '<', 'header note indicating more columns to the left')
-theme('disp_more_right', '>', 'header note indicating more columns to the right')
-theme('disp_error_val', '', 'displayed contents for computation exception')
-theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
-
-theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
-theme('color_status', 'bold', 'status line color')
-theme('color_error', 'red', 'error message color')
-theme('color_warning', 'yellow', 'warning message color')
-
-theme('disp_pending', '', 'string to display in pending cells')
-theme('note_pending', '⌛', 'note to display for pending cells')
-theme('note_format_exc', '?', 'cell note for an exception during formatting')
-theme('note_getter_exc', '!', 'cell note for an exception during computation')
-theme('note_type_exc', '!', 'cell note for an exception during type conversion')
-theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
-
-theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
-theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
-theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
-
 ENTER='^J'
 ALT=ESC='^['
-globalCommand('q', 'quit-sheet',  'vd.quit()')
-globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
-
-globalCommand('^L', 'redraw', 'sheet.refresh()')
-
-bindkey('KEY_RESIZE', 'redraw')
-
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
 #
 #    o = typetype(val)   # for interpreting raw value
@@ -420,6 +173,15 @@ class Extensible:
         if oldfunc:
             func = wraps(oldfunc)(func)
         setattr(cls, func.__name__, func)
+        return func
+
+    @classmethod
+    def class_api(cls, func):
+        name = func.__get__(None, dict).__func__.__name__
+        oldfunc = getattr(cls, name, None)
+        if oldfunc:
+            func = wraps(oldfunc)(func)
+        setattr(cls, name, func)
         return func
 
     @classmethod
@@ -818,178 +580,6 @@ def exec_shell(*args):
     if err or out:
         lines = err.decode('utf8').splitlines() + out.decode('utf8').splitlines()
         vd.push(TextSheet(' '.join(args), lines))
-
-class BaseSheet(Extensible):
-    _rowtype = object    # callable (no parms) that returns new empty item
-    _coltype = None      # callable (no parms) that returns new settable view into that item
-    rowtype = 'objects'  # one word, plural, describing the items
-    precious = True      # False for a few discardable metasheets
-
-    def __init__(self, name, **kwargs):
-        self.name = name
-        self.source = None
-        self.shortcut = ''
-        self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
-
-        self.__dict__.update(kwargs)
-
-    def __lt__(self, other):
-        if self.name != other.name:
-            return self.name < other.name
-        else:
-            return id(self) < id(other)
-
-    def __copy__(self):
-        cls = self.__class__
-        ret = cls.__new__(cls)
-        ret.__dict__.update(self.__dict__)
-        ret.precious = True  # copies can be precious even if originals aren't
-        return ret
-
-    @classmethod
-    def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
-        commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
-        if keystrokes:
-            bindkeys.set(keystrokes, longname, cls)
-
-    @classmethod
-    def bindkey(cls, keystrokes, longname):
-        oldlongname = bindkeys._get(keystrokes, cls)
-        if oldlongname:
-            warning('%s was already bound to %s' % (keystrokes, oldlongname))
-        bindkeys.set(keystrokes, longname, cls)
-
-    @classmethod
-    def unbindkey(cls, keystrokes):
-        bindkeys.unset(keystrokes, cls)
-
-    def getCommand(self, keystrokes_or_longname):
-        longname = bindkeys._get(keystrokes_or_longname)
-        try:
-            if longname:
-                return commands._get(longname) or fail('no command "%s"' % longname)
-            else:
-                return commands._get(keystrokes_or_longname) or fail('no binding for %s' % keystrokes_or_longname)
-        except Exception:
-            return None
-
-    def __bool__(self):
-        'an instantiated Sheet always tests true'
-        return True
-
-    def __len__(self):
-        return 0
-
-    def __contains__(self, vs):
-        if self.source is vs:
-            return True
-        if isinstance(self.source, BaseSheet):
-            return vs in self.source
-        return False
-
-    @property
-    def loaded(self):
-        return False
-
-    @property
-    def windowHeight(self):
-        'Height of the current sheet, in terminal lines'
-        return self._scr.getmaxyx()[0] if self._scr else 25
-
-    @property
-    def windowWidth(self):
-        'Width of the current sheet, in single-width characters'
-        return self._scr.getmaxyx()[1] if self._scr else 80
-
-    def leftStatus(self):
-        'Compose left side of status bar for this sheet (overridable).'
-        return options.disp_status_fmt.format(sheet=self, vd=vd)
-
-    def exec_keystrokes(self, keystrokes, vdglobals=None):
-        return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
-
-    def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
-        "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
-        if not cmd:
-            debug('no command "%s"' % keystrokes)
-            return True
-
-        if isinstance(cmd, CommandLog):
-            cmd.replay()
-            return False
-
-        escaped = False
-        err = ''
-
-        if vdglobals is None:
-            vdglobals = getGlobals()
-
-        self.sheet = self
-
-        try:
-            if vd.cmdlog:
-                vd.cmdlog.beforeExecHook(self, cmd, '', keystrokes)
-            code = compile(cmd.execstr, cmd.longname, 'exec')
-            debug(cmd.longname)
-            exec(code, vdglobals, LazyMap(vd, self))
-        except EscapeException as e:  # user aborted
-            warning('aborted')
-            escaped = True
-        except ImportError as e:
-            warning('%s not installed' % e.name)
-            if confirm('run `pip3 install %s`? ' % e.name, exc=None):
-                warning('installing %s' % e.name)
-                exec_shell('pip3', 'install', e.name)
-            escaped = True
-        except Exception as e:
-            debug(cmd.execstr)
-            err = vd.exceptionCaught(e)
-            escaped = True
-
-        try:
-            if vd.cmdlog:
-                # sheet may have changed
-                vd.cmdlog.afterExecSheet(vd.sheets[0] if vd.sheets else None, escaped, err)
-        except Exception as e:
-            vd.exceptionCaught(e)
-
-        catchapply(self.checkCursor)
-
-        vd.clear_caches()
-        return escaped
-
-    @property
-    def name(self):
-        return self._name or ''
-
-    @name.setter
-    def name(self, name):
-        'Set name without spaces.'
-        self._name = name.strip().replace(' ', '_')
-
-    def recalc(self):
-        'Clear any calculated value caches.'
-        pass
-
-    def draw(self, scr):
-        error('no draw')
-
-    def refresh(self):
-        self._scr.clear()
-        self._scr.refresh()
-
-    def reload(self):
-        error('no reload')
-
-    def checkCursor(self):
-        pass
-
-    def newRow(self):
-        return type(self)._rowtype()
-
-
-BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); status("reloaded")')
-
 
 class DisplayWrapper:
     def __init__(self, value, **kwargs):

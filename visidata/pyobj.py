@@ -22,7 +22,7 @@ class PythonSheet(Sheet):
 
 # used as ENTER in several pyobj sheets
 PythonSheet.addCommand(None, 'dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow)')
-bindkey(ENTER, 'dive-row')
+BaseSheet.bindkey(ENTER, 'dive-row')
 
 def expand_cols_deep(sheet, cols, row, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'

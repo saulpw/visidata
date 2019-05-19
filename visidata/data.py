@@ -24,17 +24,17 @@ Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "
 
 Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows)', undo=undoEditCells)
 
-bindkey('KEY_SLEFT', 'slide-left')
-bindkey('KEY_SR', 'slide-left')
-bindkey('kDN', 'slide-down')
-bindkey('kUP', 'slide-up')
-bindkey('KEY_SRIGHT', 'slide-right')
-bindkey('KEY_SF', 'slide-right')
+BaseSheet.bindkey('KEY_SLEFT', 'slide-left')
+BaseSheet.bindkey('KEY_SR', 'slide-left')
+BaseSheet.bindkey('kDN', 'slide-down')
+BaseSheet.bindkey('kUP', 'slide-up')
+BaseSheet.bindkey('KEY_SRIGHT', 'slide-right')
+BaseSheet.bindkey('KEY_SF', 'slide-right')
 
-bindkey('gKEY_SLEFT', 'slide-leftmost')
-bindkey('gkDN', 'slide-bottom')
-bindkey('gkUP', 'slide-top')
-bindkey('gKEY_SRIGHT', 'slide-rightmost')
+BaseSheet.bindkey('gKEY_SLEFT', 'slide-leftmost')
+BaseSheet.bindkey('gkDN', 'slide-bottom')
+BaseSheet.bindkey('gkUP', 'slide-top')
+BaseSheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
 
 
 class SettableColumn(Column):
@@ -105,10 +105,10 @@ globalCommand('A', 'add-sheet', 'vd.push(newSheet(int(input("num columns for new
 
 # in VisiData, ^H refers to the man page
 globalCommand('^H', 'sysopen-help', 'openManPage()')
-bindkey('KEY_F(1)', 'sysopen-help')
-bindkey('KEY_BACKSPACE', 'sysopen-help')
-bindkey('zKEY_F(1)', 'help-commands')
-bindkey('zKEY_BACKSPACE', 'help-commands')
+BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
+BaseSheet.bindkey('KEY_BACKSPACE', 'sysopen-help')
+BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
+BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
 
 def openManPage():
     from pkg_resources import resource_filename

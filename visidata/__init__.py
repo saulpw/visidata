@@ -8,6 +8,8 @@ __copyright__ = 'Copyright (c) 2016-2019 ' + __author__
 
 from .vdtui import *
 
+from .basesheet import *
+from .settings import *
 from .editor import *
 from .helpers import *
 from .cliptext import clipdraw, clipstr

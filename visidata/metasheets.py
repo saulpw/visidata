@@ -1,7 +1,7 @@
 from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
-from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
+from visidata import getGlobals, TsvSheet, Path, commands, composeStatus, Option
 from visidata import undoAttr, undoAddCols, VisiData, vlen
 
 globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
@@ -163,8 +163,8 @@ class OptionsSheet(Sheet):
 
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lambda source=source,opt=cursorRow,val=options.get(cursorRow.name,source): options.set(opt.name, val, source)')
 
-bindkeys.set('e', 'edit-option', OptionsSheet)
-bindkeys.set(ENTER, 'edit-option', OptionsSheet)
+OptionsSheet.bindkey('e', 'edit-option')
+OptionsSheet.bindkey(ENTER, 'edit-option')
 
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
