@@ -17,6 +17,7 @@ from .color import colors, CursesAttr
 from .wrappers import *
 from .column import *
 from .sheets import *
+from .statusbar import *
 
 from .textsheet import TextSheet
 from .threads import *

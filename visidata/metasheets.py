@@ -1,10 +1,9 @@
 from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
-from visidata import getGlobals, TsvSheet, Path, commands, composeStatus, Option
+from visidata import getGlobals, TsvSheet, Path, commands, Option
 from visidata import undoAttr, undoAddCols, VisiData, vlen
 
-globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
 
 BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
@@ -21,24 +20,6 @@ def optionsSheet(sheet):
 @VisiData.cached_property
 def globalOptionsSheet(vd):
     return OptionsSheet('global_options', source='override')
-
-
-class StatusSheet(Sheet):
-    precious = False
-    rowtype = 'statuses'  # rowdef: (priority, args, nrepeats)
-    columns = [
-        ColumnItem('priority', 0, type=int, width=0),
-        ColumnItem('nrepeats', 2, type=int, width=0),
-        ColumnItem('args', 1, width=0),
-        Column('message', getter=lambda col,row: composeStatus(row[1], row[2])),
-    ]
-    colorizers = [
-        RowColorizer(1, 'color_error', lambda s,c,r,v: r and r[0] == 3),
-        RowColorizer(1, 'color_warning', lambda s,c,r,v: r and r[0] in [1,2]),
-    ]
-
-    def reload(self):
-        self.rows = vd.statusHistory[::-1]
 
 
 class ColumnsSheet(Sheet):

@@ -118,17 +118,6 @@ def catchapply(func, *args, **kwargs):
     except Exception as e:
         exceptionCaught(e)
 
-def middleTruncate(s, w):
-    if len(s) <= w:
-        return s
-    return s[:w] + options.disp_truncator + s[-w:]
-
-def composeStatus(msgparts, n):
-    msg = '; '.join(wrmap(str, msgparts))
-    if n > 1:
-        msg = '[%sx] %s' % (n, msg)
-    return msg
-
 def stacktrace(e=None):
     if not e:
         return traceback.format_exc().strip().splitlines()
@@ -294,88 +283,6 @@ class VisiData(Extensible):
             if scr == _scr and x <= _x < x+w and y <= _y < y+h and button in kwargs:
                 return kwargs[button]
 
-    def drawLeftStatus(self, scr, vs):
-        'Draw left side of status bar.'
-        cattr = CursesAttr(colors.color_status)
-        attr = cattr.attr
-        error_attr = cattr.update_attr(colors.color_error, 1).attr
-        warn_attr = cattr.update_attr(colors.color_warning, 2).attr
-        sep = options.disp_status_sep
-
-        x = 0
-        y = self.windowHeight-1
-        try:
-            lstatus = vs.leftStatus()
-            maxwidth = options.disp_lstatus_max
-            if maxwidth > 0:
-                lstatus = middleTruncate(lstatus, maxwidth//2)
-
-            x = clipdraw(scr, y, 0, lstatus, attr)
-
-            self.onMouse(scr, y, 0, 1, x,
-                            BUTTON1_PRESSED='sheets',
-                            BUTTON3_PRESSED='rename-sheet',
-                            BUTTON3_CLICKED='rename-sheet')
-        except Exception as e:
-            self.exceptionCaught(e)
-
-        one = False
-        for (pri, msgparts), n in sorted(self.statuses.items(), key=lambda k: -k[0][0]):
-            try:
-                if x > self.windowWidth:
-                    break
-                if one:  # any messages already:
-                    x += clipdraw(scr, y, x, sep, attr, self.windowWidth)
-                one = True
-                msg = composeStatus(msgparts, n)
-
-                if pri == 3: msgattr = error_attr
-                elif pri == 2: msgattr = warn_attr
-                elif pri == 1: msgattr = warn_attr
-                else: msgattr = attr
-                x += clipdraw(scr, y, x, msg, msgattr, self.windowWidth)
-            except Exception as e:
-                self.exceptionCaught(e)
-
-    def drawRightStatus(self, scr, vs):
-        'Draw right side of status bar.  Return length displayed.'
-        rightx = self.windowWidth-1
-
-        ret = 0
-        statcolors = [
-            self.checkMemoryUsage(),
-            self.rightStatus(vs),
-            (self.keystrokes, 'color_keystrokes'),
-        ]
-
-        if self.cmdlog and self.cmdlog.currentReplay:
-            statcolors.insert(0, (self.cmdlog.currentReplay.replayStatus, 'color_status_replay'))
-
-        for rstatcolor in statcolors:
-            if rstatcolor:
-                try:
-                    rstatus, coloropt = rstatcolor
-                    rstatus = ' '+rstatus
-                    attr = colors.get_color(coloropt).attr
-                    statuslen = clipdraw(scr, self.windowHeight-1, rightx, rstatus, attr, rtl=True)
-                    rightx -= statuslen
-                    ret += statuslen
-                except Exception as e:
-                    self.exceptionCaught(e)
-
-        if scr:
-            curses.doupdate()
-        return ret
-
-    def rightStatus(self, sheet):
-        'Compose right side of status bar.'
-        gerund = sheet.processing
-        if gerund:
-            status = '%9d  %2d%%%s' % (len(sheet), sheet.progressPct, gerund)
-        else:
-            status = '%9d %s' % (len(sheet), sheet.rowtype)
-        return status, 'color_status'
-
     @property
     def windowHeight(self):
         return self._scr.getmaxyx()[0] if self._scr else 25
@@ -493,20 +400,6 @@ class VisiData(Extensible):
 
 vd = VisiData()
 
-@VisiData.global_api
-def status(self, *args, priority=0):
-    'Add status message to be shown until next action.'
-    k = (priority, args)
-    self.statuses[k] = self.statuses.get(k, 0) + 1
-
-    if self.statusHistory:
-        prevpri, prevargs, prevn = self.statusHistory[-1]
-        if prevpri == priority and prevargs == args:
-            self.statusHistory[-1][2] += 1
-            return True
-
-    self.statusHistory.append([priority, args, 1])
-    return True
 
 @VisiData.global_api
 def error(vd, s):

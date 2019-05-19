@@ -4,7 +4,7 @@ import threading
 import re
 import time
 
-from visidata import option, options, fail, anytype, stacktrace, status, replayableOption
+from visidata import option, options, fail, anytype, stacktrace, vd, replayableOption
 from visidata import getType, typemap, isNumeric, isNullFunc
 from visidata import asyncthread, exceptionCaught, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
@@ -252,14 +252,14 @@ class Column(Extensible):
         for r, v in zip(rows, itertools.cycle(values)):
             self.setValueSafe(r, v)
         self.recalc()
-        return status('set %d cells to %d values' % (len(rows), len(values)))
+        return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
     def setValuesTyped(self, rows, *values):
         'Set values on this column for rows, coerced to the column type.  will stop on first exception in type().'
         for r, v in zip(rows, itertools.cycle(self.type(val) for val in values)):
             self.setValueSafe(r, v)
         self.recalc()
-        return status('set %d cells to %d values' % (len(rows), len(values)))
+        return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header.'

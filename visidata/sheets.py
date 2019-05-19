@@ -9,7 +9,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, fail, ENTER, EscapeException, debug, LazyMap, replayableOption
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, error, fail, Column, option,
 TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet,
-vd, exceptionCaught, status, catchapply, getType, clipdraw, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
+vd, exceptionCaught, catchapply, getType, clipdraw, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'SheetsSheet']
@@ -37,11 +37,6 @@ CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt fun
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
 UNLOADED = object()  # sentinel for a sheet not yet loaded for the first time
-
-@BaseSheet.api
-def leftStatus(self):
-    'Compose left side of status bar for this sheet (overridable).'
-    return options.disp_status_fmt.format(sheet=self, vd=vd)
 
 
 class Sheet(BaseSheet):
