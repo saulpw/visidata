@@ -7,7 +7,7 @@ import time
 from visidata import option, options, fail, anytype, stacktrace, status, replayableOption
 from visidata import getType, typemap, isNumeric, isNullFunc
 from visidata import asyncthread, exceptionCaught, dispwidth
-from visidata import wrapply, TypedWrapper, TypedExceptionWrapper, DisplayWrapper
+from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, LazyMap, AttrDict
 
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
@@ -28,8 +28,20 @@ __all__ = [
     'ColumnEnum',
     'LazyMapRow',
     'ColumnExpr',
+    'DisplayWrapper',
 ]
 
+
+class DisplayWrapper:
+    def __init__(self, value=None, *, error=None, display=None, note=None, notecolor=None, stacktrace=None):
+        self.value = value      # actual value (any type)
+        self.display = display  # displayed string
+        self.note = note        # single unicode character displayed in cell far right
+        self.notecolor = notecolor  # configurable color name (like 'color_warning')
+        self.stacktrace = stacktrace  # list of strings for stacktrace
+
+    def __bool__(self):
+        return self.value
 
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s))

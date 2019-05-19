@@ -545,14 +545,6 @@ def exceptionCaught(self, exc=None, **kwargs):
     if options.debug:
         raise
 
-class DisplayWrapper:
-    def __init__(self, value, **kwargs):
-        self.value = value
-        self.__dict__.update(kwargs)
-
-    def __bool__(self):
-        return self.value
-
 ###
 
 
