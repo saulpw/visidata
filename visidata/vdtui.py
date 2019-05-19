@@ -8,7 +8,6 @@ import sys
 import os
 import collections
 from copy import copy, deepcopy
-from contextlib import suppress
 import curses
 import datetime
 from functools import wraps
@@ -60,8 +59,6 @@ undoEditCell = undoSetValues('[cursorRow]', '[cursorCol]')
 undoEditCells = undoSetValues('selectedRows', '[cursorCol]')
 
 
-curses_timeout = 100 # curses timeout in ms
-timeouts_before_idle = 10
 ENTER='^J'
 ALT=ESC='^['
 ###
@@ -244,112 +241,6 @@ class VisiData(Extensible):
     @property
     def windowWidth(self):
         return self._scr.getmaxyx()[1] if self._scr else 80
-
-    def draw(self, scr, *sheets):
-        'Redraw full screen.'
-        for sheet in sheets:
-            sheet._scr = scr
-            try:
-                sheet.draw(scr)
-            except Exception as e:
-                self.exceptionCaught(e)
-
-        self.drawLeftStatus(scr, sheet)
-        self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
-
-    def run(self, scr):
-        'Manage execution of keystrokes and subsequent redrawing of screen.'
-        scr.timeout(curses_timeout)
-        with suppress(curses.error):
-            curses.curs_set(0)
-
-        self._scr = scr
-        numTimeouts = 0
-        prefixWaiting = False
-
-        self.keystrokes = ''
-        while True:
-            if not self.sheets:
-                # if no more sheets, exit
-                return
-
-            sheet = self.sheets[0]
-            threading.current_thread().sheet = sheet
-
-            self.draw(scr, sheet)
-
-            keystroke = self.getkeystroke(scr, sheet)
-
-            if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
-                numTimeouts = 0
-                if not prefixWaiting:
-                    self.keystrokes = ''
-
-                self.statuses.clear()
-
-                if keystroke == 'KEY_MOUSE':
-                    self.keystrokes = ''
-                    clicktype = ''
-                    try:
-                        devid, x, y, z, bstate = curses.getmouse()
-                        sheet.mouseX, sheet.mouseY = x, y
-                        if bstate & curses.BUTTON_CTRL:
-                            clicktype += "CTRL-"
-                            bstate &= ~curses.BUTTON_CTRL
-                        if bstate & curses.BUTTON_ALT:
-                            clicktype += "ALT-"
-                            bstate &= ~curses.BUTTON_ALT
-                        if bstate & curses.BUTTON_SHIFT:
-                            clicktype += "SHIFT-"
-                            bstate &= ~curses.BUTTON_SHIFT
-
-                        keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
-
-                        f = self.getMouse(scr, x, y, keystroke)
-                        if f:
-                            if isinstance(f, str):
-                                for cmd in f.split():
-                                    sheet.exec_keystrokes(cmd)
-                            else:
-                                f(y, x, keystroke)
-
-                            self.keystrokes = keystroke
-                            keystroke = ''
-                    except curses.error:
-                        pass
-                    except Exception as e:
-                        exceptionCaught(e)
-
-                self.keystrokes += keystroke
-
-            self.drawRightStatus(scr, sheet)  # visible for commands that wait for input
-
-            if not keystroke:  # timeout instead of keypress
-                pass
-            elif keystroke == '^Q':
-                return self.lastErrors and '\n'.join(self.lastErrors[-1])
-            elif bindkeys._get(self.keystrokes):
-                sheet.exec_keystrokes(self.keystrokes)
-                prefixWaiting = False
-            elif keystroke in self.allPrefixes:
-                prefixWaiting = True
-            else:
-                status('no command for "%s"' % (self.keystrokes))
-                prefixWaiting = False
-
-            self.checkForFinishedThreads()
-            catchapply(sheet.checkCursor)
-
-            # no idle redraw unless background threads are running
-            time.sleep(0)  # yield to other threads which may not have started yet
-            if vd.unfinishedThreads:
-                scr.timeout(curses_timeout)
-            else:
-                numTimeouts += 1
-                if numTimeouts > timeouts_before_idle:
-                    scr.timeout(-1)
-                else:
-                    scr.timeout(curses_timeout)
 # end VisiData class
 
 vd = VisiData()
@@ -365,48 +256,8 @@ def exceptionCaught(self, exc=None, **kwargs):
     if options.debug:
         raise
 
-###
-
-
-def setupcolors(stdscr, f, *args):
-    curses.raw()    # get control keys instead of signals
-    curses.meta(1)  # allow "8-bit chars"
-    curses.mousemask(-1) # even more than curses.ALL_MOUSE_EVENTS
-    curses.mouseinterval(0) # very snappy but does not allow for [multi]click
-    curses.mouseEvents = {}
-
-    for k in dir(curses):
-        if k.startswith('BUTTON') or k == 'REPORT_MOUSE_POSITION':
-            curses.mouseEvents[getattr(curses, k)] = k
-
-    return f(stdscr, *args)
-
-def wrapper(f, *args):
-    return curses.wrapper(setupcolors, f, *args)
 
 ### external interface
-
-def run(*sheetlist):
-    'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
-
-    # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
-    os.putenv('ESCDELAY', '25')
-
-    ret = wrapper(cursesMain, sheetlist)
-    if ret:
-        print(ret)
-
-def cursesMain(_scr, sheetlist):
-    'Populate VisiData object with sheets from a given list.'
-
-    colors.setup()
-
-    for vs in sheetlist:
-        vd.push(vs)  # first push does a reload
-
-    status('Ctrl+H opens help')
-    return vd.run(_scr)
-
 def loadConfigFile(fnrc, _globals=None):
     p = Path(fnrc)
     if p.exists():
