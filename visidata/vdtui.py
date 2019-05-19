@@ -27,11 +27,6 @@ class EscapeException(BaseException):
     'Inherits from BaseException to avoid "except Exception" clauses.  Do not use a blanket "except:" or the task will be uncancelable.'
     pass
 
-class ExpectedException(Exception):
-    'an expected exception'
-    pass
-
-
 vd = None  # will be filled in later
 
 
@@ -62,11 +57,6 @@ undoEditCells = undoSetValues('selectedRows', '[cursorCol]')
 ENTER='^J'
 ALT=ESC='^['
 ###
-
-def stacktrace(e=None):
-    if not e:
-        return traceback.format_exc().strip().splitlines()
-    return traceback.format_exception_only(type(e), e)
 
 # define @asyncthread for potentially long-running functions
 #   when function is called, instead launches a thread

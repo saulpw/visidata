@@ -1,4 +1,20 @@
-from visidata import vd, VisiData, ExpectedException, options, stacktrace
+import traceback
+
+from visidata import vd, VisiData, options
+
+__all__ = ['stacktrace', 'exceptionCaught', 'ExpectedException']
+
+
+class ExpectedException(Exception):
+    'an expected exception'
+    pass
+
+
+def stacktrace(e=None):
+    if not e:
+        return traceback.format_exc().strip().splitlines()
+    return traceback.format_exception_only(type(e), e)
+
 
 @VisiData.global_api
 def exceptionCaught(vd, exc=None, **kwargs):
