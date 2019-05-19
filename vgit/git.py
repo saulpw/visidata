@@ -217,10 +217,8 @@ GitSheet.addCommand('^A', 'git-abort', 'abortWhatever()', 'abort the current in-
 
 options.set('disp_note_none', '', GitSheet)
 
-unbindkey('gD')
-
-globalCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
-globalCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
+BaseSheet.addCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
+BaseSheet.addCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
 
 def inProgress():
     if Path('.git/rebase-merge').exists() or Path('.git/rebase-apply/rebasing').exists():
