@@ -727,6 +727,13 @@ def sheetsSheet(vd):
     return SheetsSheet("sheets_all", source=vd.allSheets)
 
 
+@VisiData.api
+def quit(self):
+    if len(vd.sheets) == 1 and options.quitguard:
+        vd.confirm("quit last sheet? ")
+    return vd.sheets.pop(0)
+
+
 undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
 
 globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')

@@ -167,13 +167,6 @@ class BaseSheet(Extensible):
         return type(self)._rowtype()
 
 
-@VisiData.api
-def quit(self):
-    if len(vd.sheets) == 1 and options.quitguard:
-        vd.confirm("quit last sheet? ")
-    return vd.sheets.pop(0)
-
-
 @VisiData.property
 def sheet(self):
     'the top sheet on the stack'
