@@ -1,8 +1,8 @@
 import re
 import random
 
-from visidata import asyncthread, warning, replayableOption, options, vd, regex_flags
-from visidata import Sheet, Column, Progress
+from visidata import asyncthread, warning, replayableOption, options, vd
+from visidata import BaseSheet, Sheet, Column, Progress
 from visidata import undoEditCells, undoSetValues, undoAddCols
 
 Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, input("split regex: ", type="regex-split"))', undo=undoAddCols)
@@ -33,7 +33,7 @@ def makeRegexMatcher(regex, origcol):
 
 @asyncthread
 def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
-    regex = re.compile(regexstr, regex_flags())
+    regex = re.compile(regexstr, vs.regex_flags())
 
     func = regexMaker(regex, origcol)
 
@@ -61,7 +61,7 @@ def regexTransform(origcol, instr):
     else:
         before = instr[:i]
         after = instr[i+1:]
-    return lambda col,row,origcol=origcol,before=before, after=after: re.sub(before, after, origcol.getDisplayValue(row), flags=regex_flags())
+    return lambda col,row,origcol=origcol,before=before,after=after,flags=origcol.sheet.regex_flags(): re.sub(before, after, origcol.getDisplayValue(row), flags=flags)
 
 def indexWithEscape(s, char, escape_char='\\'):
     i=0
@@ -83,3 +83,9 @@ def setValuesFromRegex(cols, rows, rex):
             col.setValueSafe(r, transform(col, r))
     for col in cols:
         col.recalc()
+
+
+@BaseSheet.api
+def regex_flags(sheet):
+    'Return flags to pass to regex functions from options'
+    return sum(getattr(re, f.upper()) for f in options.regex_flags)

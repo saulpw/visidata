@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, error, status, Sheet, Column, regex_flags, fail, Progress, globalCommand, ESC
+from visidata import vd, VisiData, error, status, Sheet, Column, fail, Progress, globalCommand, ESC
 
 __all__ = ['rotate_range']
 
@@ -72,7 +72,7 @@ def nextColRegex(sheet, colregex):
     pivot = sheet.cursorVisibleColIndex
     for i in itertools.chain(range(pivot+1, len(sheet.visibleCols)), range(0, pivot+1)):
         c = sheet.visibleCols[i]
-        if re.search(colregex, c.name, regex_flags()):
+        if re.search(colregex, c.name, sheet.regex_flags()):
             return i
 
     fail('no column name matches /%s/' % colregex)
@@ -97,7 +97,7 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
 
         regex = kwargs.get("regex")
         if regex:
-            vd.searchContext["regex"] = re.compile(regex, regex_flags()) or error('invalid regex: %s' % regex)
+            vd.searchContext["regex"] = re.compile(regex, sheet.regex_flags()) or error('invalid regex: %s' % regex)
 
         regex = vd.searchContext.get("regex") or fail("no regex")
 

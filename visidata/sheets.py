@@ -8,7 +8,7 @@ import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, fail, ENTER, EscapeException, debug, LazyMap, replayableOption
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, error, fail, Column, option,
-TypedExceptionWrapper, regex_flags, getGlobals, LazyMapRow, BaseSheet,
+TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet,
 vd, exceptionCaught, status, catchapply, getType, clipdraw, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
 
 

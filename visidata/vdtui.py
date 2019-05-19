@@ -134,12 +134,6 @@ def stacktrace(e=None):
         return traceback.format_exc().strip().splitlines()
     return traceback.format_exception_only(type(e), e)
 
-
-def regex_flags():
-    'Return flags to pass to regex functions from options'
-    return sum(getattr(re, f.upper()) for f in options.regex_flags)
-
-
 # define @asyncthread for potentially long-running functions
 #   when function is called, instead launches a thread
 def asyncthread(func):
