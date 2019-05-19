@@ -6,9 +6,26 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
 __copyright__ = 'Copyright (c) 2016-2019 ' + __author__
 
+
+class EscapeException(BaseException):
+    'Inherits from BaseException to avoid "except Exception" clauses.  Do not use a blanket "except:" or the task will be uncancelable.'
+    pass
+
+
+def addGlobals(g):
+    'importers can call `addGlobals(globals())` to have their globals accessible to execstrings'
+    globals().update(g)
+
+
+def getGlobals():
+    return globals()
+
+from builtins import *
+
 from .extensible import *
 from .vdobj import *
-from .vdtui import *
+
+vd = VisiData()
 
 from .basesheet import *
 from .settings import *
@@ -28,7 +45,7 @@ from .statusbar import *
 
 from .textsheet import *
 from .threads import *
-from .input import *
+from ._input import *
 from .movement import *
 from .path import *
 from .urlcache import *

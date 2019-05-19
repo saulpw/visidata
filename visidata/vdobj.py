@@ -4,8 +4,22 @@ import curses
 
 import visidata
 
+__all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData']
+
+
 ENTER='^J'
 ALT=ESC='^['
+
+
+# define @asyncthread for potentially long-running functions
+#   when function is called, instead launches a thread
+def asyncthread(func):
+    'Function decorator, to make calls to `func()` spawn a separate thread if available.'
+    @wraps(func)
+    def _execAsync(*args, **kwargs):
+        return visidata.vd.execAsync(func, *args, **kwargs)
+    return _execAsync
+
 
 class VisiData(visidata.Extensible):
     allPrefixes = ['g', 'z', ESC]  # embig'g'en, 'z'mallify, ESC=Alt/Meta
@@ -85,4 +99,3 @@ class VisiData(visidata.Extensible):
     @property
     def windowWidth(self):
         return self._scr.getmaxyx()[1] if self._scr else 80
-# end VisiData class

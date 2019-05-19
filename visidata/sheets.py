@@ -9,7 +9,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, LazyMap, replayableOption
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet,
-vd, exceptionCaught, getType, clipdraw, CursesAttr, colors, input, undoEditCell, undoEditCells, undoAttr)
+vd, exceptionCaught, getType, clipdraw, CursesAttr, colors, undoEditCell, undoEditCells, undoAttr)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'SheetsSheet']

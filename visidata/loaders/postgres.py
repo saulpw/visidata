@@ -1,5 +1,7 @@
 from visidata import *
 
+__all__ = ['openurl_postgres', 'PgTable', 'PgTablesSheet']
+
 def codeToType(type_code, colname):
     import psycopg2
     try:
@@ -101,6 +103,3 @@ class PgTable(Sheet):
             self.columns = cursorToColumns(cur)
             for r in cur:
                 self.addRow(r)
-
-
-addGlobals(globals())
