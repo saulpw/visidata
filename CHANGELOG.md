@@ -49,7 +49,7 @@
 - exit with error code on error during replay (suggested by @cwarden #240)
 - split `Ctrl+V` (check-version) into `Ctrl+V` (show-version) and `z Ctrl+V` (require-version)
 - `show-expr` now unbound from `z=`
-- `options.delimiter` renamed to `options.tsv_delimiter`. `--delimiter` CLI option removed (`-d` still shortcut for `--tsv-delimiter`).
+- add `options.row_delimiter` (default to `\n`)
 
 
 ## plugins

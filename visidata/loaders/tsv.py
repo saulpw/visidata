@@ -6,8 +6,8 @@ import collections
 from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught, option
 from visidata import namedlist
 
-option('tsv_delimiter', '\t', 'field delimiter to use for tsv filetype', replay=True)
-option('tsv_row_delimiter', '\n', 'row delimiter to use for tsv filetype', replay=True)
+option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
+option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
 option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
@@ -65,8 +65,8 @@ class TsvSheet(Sheet):
     def reload_sync(self):
         'Perform synchronous loading of TSV file, discarding header lines.'
         header_lines = options.get('header', self)
-        delim = options.get('tsv_delimiter', self)
-        rowdelim = options.get('tsv_row_delimiter', self)
+        delim = options.get('delimiter', self)
+        rowdelim = options.get('row_delimiter', self)
 
 
         with self.source.open_text() as fp:
@@ -113,7 +113,7 @@ class TsvSheet(Sheet):
 def tsv_trdict(vs):
     'returns string.translate dictionary for replacing tabs and newlines'
     if options.safety_first:
-        delim = options.get('tsv_delimiter', vs)
+        delim = options.get('delimiter', vs)
         return {ord(delim): options.get('tsv_safe_tab', vs), # \t
             10: options.get('tsv_safe_newline', vs),  # \n
             13: options.get('tsv_safe_newline', vs),  # \r
@@ -123,10 +123,10 @@ def tsv_trdict(vs):
 def save_tsv_header(p, vs):
     'Write tsv header for Sheet `vs` to Path `p`.'
     trdict = tsv_trdict(vs)
-    unitsep = options.tsv_delimiter
+    unitsep = options.delimiter
 
     with p.open_text(mode='w') as fp:
-        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.tsv_row_delimiter
+        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
 
@@ -169,8 +169,8 @@ def genAllValues(rows, cols, trdict={}, format=True):
 @asyncthread
 def save_tsv(p, vs):
     'Write sheet to file `fn` as TSV.'
-    unitsep = options.get('tsv_delimiter', vs)
-    rowsep = options.get('tsv_row_delimiter', vs)
+    unitsep = options.get('delimiter', vs)
+    rowsep = options.get('row_delimiter', vs)
     trdict = tsv_trdict(vs)
 
     save_tsv_header(p, vs)

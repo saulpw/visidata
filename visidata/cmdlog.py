@@ -103,7 +103,8 @@ class CommandLog(TsvSheet):
 
     def __init__(self, name, source=None, **kwargs):
         super().__init__(name, source=source, **kwargs)
-        options.set('tsv_delimiter', '\t', self)
+        options.set('delimiter', '\t', self)  # enforce standard delimiter for internal tsv
+        options.set('row_delimiter', '\n', self)
         self.currentActiveRow = None
 
     def newRow(self, **fields):
