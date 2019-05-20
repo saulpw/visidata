@@ -6,23 +6,45 @@ import collections
 from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught, option
 from visidata import namedlist
 
-option('tsv_delimiter', '\t', 'delimiter to use for tsv filetype', replay=True)
+option('tsv_delimiter', '\t', 'field delimiter to use for tsv filetype', replay=True)
+option('tsv_row_delimiter', '\n', 'row delimiter to use for tsv filetype', replay=True)
 option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
 
-def getlines(fp, maxlines=None):
+def splitter(fp, delim='\n'):
+    'Generates one line/row/record at a time from fp, separated by delim'
+
+    remainder = ''
+    while True:
+        nextbuf = fp.read(512)
+        if not nextbuf:
+            if remainder:
+                yield remainder
+            break
+        buf = remainder + nextbuf
+        rows = buf.split(delim)
+        if buf[-1] != delim:
+            remainder = rows[-1]
+            yield from rows[:-1]
+        else:
+            remainder = ''
+            yield from rows
+
+
+def getlines(iter, maxlines=None, delim='\n'):
     i = 0
+
     while True:
         if maxlines is not None and i >= maxlines:
             break
 
         try:
-            L = next(fp)
+            L = next(iter)
         except StopIteration:
             break
 
-        L = L.rstrip('\n')
+        L = L.rstrip(delim)
         if L:
             yield L
         i += 1
@@ -44,10 +66,14 @@ class TsvSheet(Sheet):
         'Perform synchronous loading of TSV file, discarding header lines.'
         header_lines = options.get('header', self)
         delim = options.get('tsv_delimiter', self)
+        rowdelim = options.get('tsv_row_delimiter', self)
+
 
         with self.source.open_text() as fp:
+            rdr = splitter(fp, rowdelim)
+
             # get one line anyway to determine number of columns
-            lines = list(getlines(fp, int(header_lines) or 1))
+            lines = list(getlines(rdr, int(header_lines) or 1, rowdelim))
             headers = [L.split(delim) for L in lines]
 
             if header_lines <= 0:
@@ -65,7 +91,7 @@ class TsvSheet(Sheet):
             self.rows = []
 
             with Progress(total=self.source.filesize) as prog:
-                for L in itertools.chain(lines, getlines(fp)):
+                for L in itertools.chain(lines, getlines(rdr, delim=rowdelim)):
                     row = L.split(delim)
                     ncols = self._rowtype.length()  # current number of cols
                     if len(row) > ncols:
@@ -97,10 +123,10 @@ def tsv_trdict(vs):
 def save_tsv_header(p, vs):
     'Write tsv header for Sheet `vs` to Path `p`.'
     trdict = tsv_trdict(vs)
-    delim = options.tsv_delimiter
+    unitsep = options.tsv_delimiter
 
     with p.open_text(mode='w') as fp:
-        colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
+        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.tsv_row_delimiter
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
 
@@ -143,15 +169,16 @@ def genAllValues(rows, cols, trdict={}, format=True):
 @asyncthread
 def save_tsv(p, vs):
     'Write sheet to file `fn` as TSV.'
-    delim = options.get('tsv_delimiter', vs)
+    unitsep = options.get('tsv_delimiter', vs)
+    rowsep = options.get('tsv_row_delimiter', vs)
     trdict = tsv_trdict(vs)
 
     save_tsv_header(p, vs)
 
     with p.open_text(mode='a') as fp:
         for dispvals in genAllValues(vs.rows, vs.visibleCols, trdict, format=True):
-            fp.write(delim.join(dispvals))
-            fp.write('\n')
+            fp.write(unitsep.join(dispvals))
+            fp.write(rowsep)
 
     status('%s save finished' % p)
 

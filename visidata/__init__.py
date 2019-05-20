@@ -104,6 +104,7 @@ from .loaders.yaml import *
 from .loaders._pandas import *
 from .loaders.graphviz import *
 from .loaders.npy import *
+from .loaders.usv import *
 
 from .loaders.pandas_freqtbl import *
 
