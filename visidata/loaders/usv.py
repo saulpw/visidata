@@ -2,6 +2,8 @@ import copy
 
 from visidata import TsvSheet, options, save_tsv
 
+__all__ = ['open_usv', 'save_usv', 'UsvSheet']
+
 def open_usv(p):
     return UsvSheet(p.name, source=p)
 

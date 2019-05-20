@@ -21,6 +21,7 @@ def getGlobals():
     return globals()
 
 from builtins import *
+from copy import copy, deepcopy
 
 from .extensible import *
 from .vdobj import *
