@@ -149,6 +149,8 @@ class SheetPivot(Sheet):
 
         numericCols = [c for c in self.groupByCols if self.isNumericRange(c)]
 
+        self.rowtype = '-'.join(c.name for c in self.groupByCols)+'s'
+
         if len(numericCols) > 1:
             error('only one numeric column can be binned')
 
