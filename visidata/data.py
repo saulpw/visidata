@@ -7,9 +7,9 @@ from visidata import *
 
 
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
-replayableOption('safe_error', '#ERR', 'error string to use while saving')
-replayableOption('header', 1, 'parse first N rows of certain formats as column names')
-replayableOption('filetype', '', 'specify file type')
+option('safe_error', '#ERR', 'error string to use while saving', replay=True)
+option('header', 1, 'parse first N rows of certain formats as column names', replay=True)
+option('filetype', '', 'specify file type', replay=True)
 
 option('color_add_pending', 'green', 'color for rows pending add')
 option('color_change_pending', 'reverse yellow', 'color for cells pending modification')

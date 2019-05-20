@@ -4,9 +4,9 @@ import sys
 
 from visidata import *
 
-replayableOption('encoding', 'utf-8', 'encoding passed to codecs.open')
-replayableOption('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open')
-replayableOption('skip', 0, 'skip first N lines of text input')
+option('encoding', 'utf-8', 'encoding passed to codecs.open', replay=True)
+option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
+option('skip', 0, 'skip first N lines of text input', replay=True)
 
 class Path:
     'File and path-handling class, modeled on `pathlib.Path`.'

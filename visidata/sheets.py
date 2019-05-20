@@ -6,7 +6,7 @@ from unittest import mock
 from copy import copy
 import textwrap
 
-from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, LazyMap, replayableOption
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, LazyMap
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet,
 vd, exceptionCaught, getType, clipdraw, CursesAttr, colors, undoEditCell, undoEditCells, undoAttr)
@@ -14,7 +14,7 @@ vd, exceptionCaught, getType, clipdraw, CursesAttr, colors, undoEditCell, undoEd
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'SheetsSheet']
 
-replayableOption('default_width', 20, 'default column width')
+option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
 
 
 def splitcell(s, width=0):

@@ -2,12 +2,12 @@
 from visidata import *
 import csv
 
-replayableOption('csv_dialect', 'excel', 'dialect passed to csv.reader')
-replayableOption('csv_delimiter', ',', 'delimiter passed to csv.reader')
-replayableOption('csv_quotechar', '"', 'quotechar passed to csv.reader')
-replayableOption('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader')
-replayableOption('csv_escapechar', None, 'escapechar passed to csv.reader')
-replayableOption('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost')
+option('csv_dialect', 'excel', 'dialect passed to csv.reader', replay=True)
+option('csv_delimiter', ',', 'delimiter passed to csv.reader', replay=True)
+option('csv_quotechar', '"', 'quotechar passed to csv.reader', replay=True)
+option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader', replay=True)
+option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True)
+option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
 
 csv.field_size_limit(sys.maxsize)
 

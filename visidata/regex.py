@@ -1,7 +1,7 @@
 import re
 import random
 
-from visidata import asyncthread, warning, replayableOption, options, vd
+from visidata import asyncthread, warning, option, options, vd
 from visidata import BaseSheet, Sheet, Column, Progress
 from visidata import undoEditCells, undoSetValues, undoAddCols
 
@@ -21,9 +21,9 @@ def setSubst(sheet, cols, rows):
     setValuesFromRegex(cols, rows, rex)
 
 
-replayableOption('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]')
-replayableOption('regex_maxsplit', 0, 'maxsplit to pass to regex.split')
-replayableOption('default_sample_size', 100, 'number of rows to sample for regex.split')
+option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]', replay=True)
+option('regex_maxsplit', 0, 'maxsplit to pass to regex.split', replay=True)
+option('default_sample_size', 100, 'number of rows to sample for regex.split', replay=True)
 
 def makeRegexSplitter(regex, origcol):
     return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=maxsplit)

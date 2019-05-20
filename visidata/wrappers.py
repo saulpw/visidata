@@ -3,11 +3,11 @@
 import copy
 import functools
 
-from visidata import options, stacktrace, replayableOption
+from visidata import options, stacktrace, option
 
 __all__ = ['isNullFunc', 'forward', 'wrmap', 'wrapply', 'TypedWrapper', 'TypedExceptionWrapper']
 
-replayableOption('null_value', None, 'a value to be counted as null')
+option('null_value', None, 'a value to be counted as null', replay=True)
 
 def isNullFunc():
     return lambda v,nulls=set([None, options.null_value]): v in nulls or isinstance(v, TypedWrapper)

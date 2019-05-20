@@ -4,14 +4,14 @@ import threading
 import re
 import time
 
-from visidata import option, options, anytype, stacktrace, vd, replayableOption
+from visidata import option, options, anytype, stacktrace, vd
 from visidata import getType, typemap, isNumeric, isNullFunc
 from visidata import asyncthread, exceptionCaught, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, LazyMap, AttrDict
 
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
-replayableOption('force_valid_colnames', False, 'clean column names to be valid Python identifiers')
+option('force_valid_colnames', False, 'clean column names to be valid Python identifiers', replay=True)
 
 __all__ = [
     'clean_to_id',

@@ -1,8 +1,8 @@
-from visidata import vd, Sheet, undoAttrCopy, Progress, replayableOption, asyncthread, options, rotate_range
+from visidata import vd, Sheet, undoAttrCopy, Progress, option, asyncthread, options, rotate_range
 
 __all__ = ['undoSheetSelection', 'undoSelection']
 
-replayableOption('bulk_select_clear', False, 'clear selected rows before new bulk selections')
+option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
 
 Sheet.init('_selectedRows', dict)  # rowid(row) -> row
 

@@ -3,12 +3,12 @@ import contextlib
 import itertools
 import collections
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught, replayableOption
+from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught, option
 from visidata import namedlist
 
-replayableOption('tsv_delimiter', '\t', 'delimiter to use for tsv filetype')
-replayableOption('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv')
-replayableOption('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv')
+option('tsv_delimiter', '\t', 'delimiter to use for tsv filetype', replay=True)
+option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
+option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
 
 def getlines(fp, maxlines=None):

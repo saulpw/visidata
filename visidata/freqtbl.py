@@ -10,7 +10,7 @@ Sheet.addCommand('zF', 'freq-summary', 'vd.push(SheetFreqTableSummary(sheet, Col
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
 option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
-replayableOption('numeric_binning', False, 'bin numeric columns into ranges')
+option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
 
 ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(source[0], cursorRow))')
 

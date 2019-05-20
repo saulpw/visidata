@@ -25,9 +25,13 @@ def copyToClipboard(value):
     return visidata.clipboard().copy(value)
 
 
-# deprecated('1.6')
-SubrowColumn = visidata.SubColumnFunc
+@deprecated('1.6')
+def replayableOption(optname, default, helpstr):
+    option(optname, default, helpstr, replay=True)
 
+@deprecated('1.6')
+def SubrowColumn(*args, **kwargs):
+    return visidata.SubColumnFunc(*args, **kwargs)
 
 alias('edit-cells', 'setcol-input')  # 1.6
 alias('fill-nulls', 'setcol-fill')  # 1.6

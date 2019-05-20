@@ -1,13 +1,13 @@
 import textwrap
 
-from visidata import vd, option, options, Sheet, ColumnItem, asyncthread, replayableOption
+from visidata import vd, option, options, Sheet, ColumnItem, asyncthread
 from visidata import globalCommand, error, stacktrace
 
 __all__ = ['TextSheet', 'ErrorSheet']
 
 
 option('wrap', False, 'wrap text to fit window width on TextSheet')
-replayableOption('save_filetype', 'tsv', 'specify default file type to save as')
+option('save_filetype', 'tsv', 'specify default file type to save as', replay=True)
 
 
 ## text viewer and dir browser

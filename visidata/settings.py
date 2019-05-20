@@ -203,8 +203,6 @@ def option(name, default, helpstr, replay=False):
     return opt
 
 theme = option
-def replayableOption(optname, default, helpstr):
-    option(optname, default, helpstr, replay=True)
 
 
 @BaseSheet.class_api
