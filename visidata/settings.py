@@ -2,7 +2,8 @@ import collections
 import sys
 import inspect
 import argparse
-import pathlib
+
+import visidata
 from visidata import VisiData, BaseSheet, vd, getGlobals, addGlobals
 
 
@@ -238,13 +239,13 @@ def getCommand(self, keystrokes_or_longname):
 
 
 def loadConfigFile(fnrc, _globals=None):
-    p = pathlib.Path(fnrc)
+    p = visidata.Path(fnrc)
     if p.exists():
         try:
             code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
             exec(code, _globals or globals())
         except Exception as e:
-            exceptionCaught(e)
+            vd.exceptionCaught(e)
 
 
 @VisiData.api
@@ -258,11 +259,11 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
     args = parser.parse_args()
 
     # add visidata_dir to path before loading config file (can only be set from cli)
-    sys.path.append(pathlib.Path(args.visidata_dir or options.visidata_dir).resolve())
+    sys.path.append(visidata.Path(args.visidata_dir or options.visidata_dir).resolve())
 
     # user customisations in config file in standard location
-    loadConfigFile(pathlib.Path(options.config).resolve(), getGlobals())
-    addGlobals(globals())
+    loadConfigFile(visidata.Path(options.config).resolve(), getGlobals())
+    addGlobals(getGlobals())
 
     # apply command-line overrides after .visidatarc
     for optname, optval in vars(args).items():
