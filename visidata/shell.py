@@ -74,7 +74,7 @@ class DeferredSaveSheet(Sheet):
 
     def newRow(self):
         row = Sheet.newRow(self)
-        self.addedRows[s.rowid(row)] = row
+        self.addedRows[self.rowid(row)] = row
         return row
 
     def changed(self, col, row):
