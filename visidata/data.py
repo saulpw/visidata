@@ -19,7 +19,7 @@ Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select:
 
 Sheet.addCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', undo=undoSheetRows)
 Sheet.addCommand('ga', 'add-rows', 'addRows(sheet, int(input("add rows: ")), cursorRowIndex+1)', undo=undoSheetRows)
-Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(input("new column name: ")), cursorColIndex+1)', undo=undoAddCols)
+Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)
 Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)
 
 Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows)', undo=undoEditCells)
