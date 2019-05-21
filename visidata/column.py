@@ -322,17 +322,16 @@ def ColumnItem(name='', key=None, **kwargs):
             **kwargs)
 
 class SubColumnFunc(Column):
-    'getValue/setValue do row=subfunc(row, self.expr) first'
+    'calcValue/setValue do row=subfunc(row, self.expr) first'
     def __init__(self, name='', origcol=None, expr=None, subfunc=getitemdef, **kwargs):
-        super().__init__(name, type=origcol.type, width=origcol.width, **kwargs)
+        super().__init__(name, type=origcol.type, width=origcol.width, expr=expr, **kwargs)
         self.origcol = origcol
         self.subfunc = subfunc
-        self.expr = expr
 
-    def getValue(self, row):
+    def calcValue(self, row):
         subrow = self.subfunc(row, self.expr)
         if subrow is not None:
-            return self.origcol.getValue(subrow)
+            return self.origcol.calcValue(subrow)
 
     def setValue(self, row, value):
         subrow = self.subfunc(row, self.expr)
@@ -362,7 +361,7 @@ class ColumnEnum(Column):
         self.mapping = m
         self.default = default
 
-    def getValue(self, row):
+    def calcValue(self, row):
         v = getattr(row, self.name, None)
         return v.__name__ if v else None
 

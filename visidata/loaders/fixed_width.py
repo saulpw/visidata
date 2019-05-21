@@ -11,7 +11,7 @@ class FixedWidthColumn(Column):
         super().__init__(name, **kwargs)
         self.i, self.j = i, j
 
-    def getValue(self, row):
+    def calcValue(self, row):
         return row[0][self.i:self.j]
 
     def setValue(self, row, value):
