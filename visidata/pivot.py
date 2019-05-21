@@ -106,7 +106,7 @@ class SheetPivot(Sheet):
         # add pivoted columns
         for pivotcol in self.pivotCols:
             allValues = set()
-            for value in pivotcol.getValues(self.source.rows): # Progress(pivotcol.getValues(self.source.rows), 'pivoting', total=len(self.source.rows)):
+            for value in Progress(pivotcol.getValues(self.source.rows), 'pivoting', total=len(self.source.rows)):
                 if value in allValues:
                     continue
                 allValues.add(value)
