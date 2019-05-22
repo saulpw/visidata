@@ -2,19 +2,27 @@ from visidata import *
 
 
 def open_npy(p):
-    return NumpySheet(p.name, source=p)
+    return NpySheet(p.name, source=p.resolve())
+
+
+def open_npz(p):
+    return NpzSheet(p)
 
 
 class NumpySheet(Sheet):
-    @asyncthread
     def reload(self):
-        import numpy
+        self.reloadCols()
 
-        self.npy = numpy.load(self.source.resolve(), encoding='bytes')
+        self.rows = []
+        for row in Progress(self.npy):
+            self.addRow(row)
+
+    def reloadCols(self):
         self.columns = []
-
-        for i, (name, fmt) in enumerate(self.npy.dtype.descr):
-            if 'M' in fmt:
+        for i, (name, fmt, *shape) in enumerate(self.npy.dtype.descr):
+            if shape:
+                t = anytype
+            elif 'M' in fmt:
                 self.addColumn(Column(name, type=date, getter=lambda c,r,i=i: str(r[i])))
                 continue
             elif 'i' in fmt:
@@ -25,9 +33,27 @@ class NumpySheet(Sheet):
                 t = anytype
             self.addColumn(ColumnItem(name, i, type=t))
 
-        self.rows = []
-        for row in Progress(self.npy):
-            self.addRow(row)
+
+class NpySheet(NumpySheet):
+    @asyncthread
+    def reload(self):
+        import numpy
+        self.npy = numpy.load(self.source, encoding='bytes')
+        super().reload()
+
+
+
+class NpzSheet(open_zip):
+    columns = [
+        ColumnItem('name', 0),
+        ColumnItem('length', 1, type=vlen),
+    ]
+    @asyncthread
+    def reload(self):
+        import numpy
+        self.npz = numpy.load(self.source.resolve(), encoding='bytes')
+        self.rows = list(self.npz.items())
+
 
 
 @asyncthread
@@ -62,3 +88,6 @@ def save_npy(p, sheet):
     arr = np.array(data, dtype=dtype)
     with p.open_bytes(mode='w') as outf:
         np.save(outf, arr, allow_pickle=False)
+
+
+NpzSheet.addCommand(None, 'dive-row', 'vd.push(NumpySheet(cursorRow[0], npy=cursorRow[1]))')
