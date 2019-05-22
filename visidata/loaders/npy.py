@@ -79,10 +79,15 @@ def save_npy(p, sheet):
     for row in Progress(sheet.rows):
         nprow = []
         for col in sheet.visibleCols:
-            if col.type is date:
-                nprow.append(np.datetime64(col.getTypedValue(row).isoformat()))
-            else:
-                nprow.append(col.getTypedValue(row))
+            val = col.getTypedValue(row)
+            if isinstance(val, TypedWrapper):
+                if col.type is anytype:
+                    val = ''
+                else:
+                    val = col.type()
+            elif col.type is date:
+                val = np.datetime64(val.isoformat())
+            nprow.append(val)
         data.append(tuple(nprow))
 
     arr = np.array(data, dtype=dtype)
