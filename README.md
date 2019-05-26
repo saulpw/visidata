@@ -24,13 +24,14 @@ Base loaders: tsv, csv, json, sqlite, and fixed width text.
 
 |Platform           |Package Manager                        | Command                                       | Out-of-box Loaders   |
 |-------------------|----------------------------------------|----------------------------------------------|----------------------|
-|Python3.4+         |[pip3](https://visidata.org/install#pip3) | `pip3 install visidata`                    | Base                 |
-|Python3.4+         |[conda](https://visidata.org/install#conda) | `conda install --channel conda-forge visidata` | Base, http, html, xls(x) |
+|all         |[pip3](https://visidata.org/install#pip3) | `pip3 install visidata`                    | Base                 |
+|all         |[conda](https://visidata.org/install#conda) | `conda install --channel conda-forge visidata` | Base, http, html, xls(x) |
 |MacOS              |[Homebrew](https://visidata.org/install#brew) | `brew install saulpw/vd/visidata`            | Base, http, html, xls(x) |
 |Linux (Debian/Ubuntu) |[apt](https://visidata.org/install#apt) | [full instructions](https://visidata.org/install#apt)                      | Base, http, html, xls(x) |
 |Linux (Debian/Ubuntu) |[dpkg](https://visidata.org/install#dpkg) | [full instructions](https://visidata.org/install#dpkg)                | Base, http, html, xls(x) |
 |Windows               |[WSL](https://visidata.org/install#wsl) | Windows is not directly supported (use WSL) | N/A |
-|Python3.4+            |[github](https://visidata.org/install#git) | `pip3 install git+https://github.com/saulpw/visidata.git@stable` | Base |
+|all            |[github](https://visidata.org/install#git) | `pip3 install git+https://github.com/saulpw/visidata.git@stable` | Base |
+|Linux (NixOS)|[nix](https://visidata.org/install#nix)| `nix-env -i visidata`|Base, yaml, xls(x), hdf5, html, pandas, shp |
 
 Please see [/install](https://visidata.org/install) for detailed instructions, additional information, and troubleshooting.
 
