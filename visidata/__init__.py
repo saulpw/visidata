@@ -108,6 +108,7 @@ from .loaders.npy import *
 from .loaders.usv import *
 
 from .loaders.pandas_freqtbl import *
+from .loaders.xword import *
 
 from .plugins import *
 
