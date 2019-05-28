@@ -151,7 +151,8 @@ def getDefaultSaveName(sheet):
     else:
         return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype)
 
-def saveSheets(givenpath, *vsheets, confirm_overwrite=False):
+@VisiData.global_api
+def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     'Save all vsheets to givenpath'
     fn = givenpath.fqpn
 
@@ -182,8 +183,11 @@ def saveSheets(givenpath, *vsheets, confirm_overwrite=False):
         assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
 
         # get save function to call
-        savefunc = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
+        savefunc = getattr(vs, 'save_'+filetype, None)
+        if not savefunc:
+            savefunc = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
 
+        # confirm overwrite only once for the whole save
         if givenpath.exists():
             if confirm_overwrite:
                 confirm('%s already exists. overwrite? ' % fn)
@@ -194,14 +198,17 @@ def saveSheets(givenpath, *vsheets, confirm_overwrite=False):
             savefunc(p, vs)
     else:
         # get save function to call
-        savefunc = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
+        savefunc = getattr(vsheets[0], 'save_'+filetype, None)
+        if not savefunc:
+            f = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
+            savefunc = lambda p,vs=vsheets[0],f=f: f(p, vs)
 
         if givenpath.exists():
             if confirm_overwrite:
                 confirm('%s already exists. overwrite? ' % fn)
 
         status('saving to %s as %s' % (givenpath.fqpn, filetype))
-        savefunc(givenpath, vsheets[0])
+        savefunc(givenpath)
 
 
 class DeferredSetColumn(Column):
