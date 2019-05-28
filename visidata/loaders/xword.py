@@ -1,12 +1,18 @@
+from collections import defaultdict
 import string
 
 from visidata import *
+
+theme('color_xword_active', 'green', 'color of active clue')
 
 def open_puz(p):
     return PuzSheet(p.name, source=p)
 
 def open_xd(p):
+    if p.is_dir():
+        return CrosswordsSheet(p.name, source=p)
     return CrosswordSheet(p.name, source=p)
+
 
 class CrosswordsSheet(Sheet):
     rowtype = 'puzzles'
@@ -21,22 +27,20 @@ class CrosswordsSheet(Sheet):
 
     @asyncthread
     def reload(self):
-        import puz
-
         self.rows = []
-
-        contents = self.source.open_bytes().read()
-        puzobj = puz.load(contents)
-        self.addRow(puzobj)
+        for p in self.source.iterdir():
+            self.addRow(Crossword(p.read(), p.resolve()))
 
 
 class GridSheet(Sheet):
     rowtype = 'gridrow'  # rowdef: puzzle_row:str
+    colorizers = [
+        CellColorizer(7, 'color_xword_active', lambda s,c,r,v: r and s.pos in s.cells[(s.rows.index(r),c)])
+    ]
 
     @asyncthread
     def reload(self):
-
-        grid = self.source
+        grid = self.source.xd.grid
 
         ncols = len(grid[0])
         self.columns = [ColumnItem('', i, width=2) for i in range(ncols)]
@@ -44,6 +48,21 @@ class GridSheet(Sheet):
         for row in grid:
             row = list(row)
             self.addRow(row)
+
+        self.cells = defaultdict(list) # [rownum, col] -> [ Apos, Dpos ] or [] (if black)
+
+        # find starting r,c from self.pos
+        for cluedir, cluenum, answer, r, c in self.source.xd.iteranswers_full():
+            # across
+            if cluedir == 'A':
+                for i in range(0, len(answer)):
+                    self.cells[(r, self.columns[c+i])].append(('A', cluenum))
+            if cluedir == 'D':
+                for i in range(0, len(answer)):
+                    self.cells[(r+i, self.columns[c])].append(('D', cluenum))
+
+                if cluenum == self.pos[1]:
+                    self.cursorRowIndex, self.cursorVisibleColIndex = r, c
 
 
 class CrosswordSheet(Sheet):
@@ -69,12 +88,13 @@ class PuzSheet(CrosswordSheet):
         self.rows = self.xd.clues
 
 
-def save_xd(p, vs):
+@CrosswordSheet.api
+def save_xd(vs, p):
     with p.open_text(mode='w') as fp:
         fp.write(vs.xd.to_unicode())
 
 
 CrosswordsSheet.addCommand(ENTER, 'open-clues', 'vd.push(CrosswordSheet("clues_"+cursorRow.title, source=cursorRow))')
-CrosswordSheet.addCommand('X', 'open-grid', 'vd.push(GridSheet("grid", source=xd.grid))')
+CrosswordSheet.addCommand(ENTER, 'open-grid', 'vd.push(GridSheet("grid", source=sheet, pos=cursorRow[0]))')
 
 options.set('disp_column_sep', '', GridSheet)
