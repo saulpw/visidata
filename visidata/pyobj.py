@@ -148,12 +148,14 @@ class ListOfPyobjSheet(PythonSheet):
     def reload(self):
         self.rows = self.source
         self.columns = [Column(self.name,
-                               width=0,
                                getter=lambda col,row: row,
                                setter=lambda col,row,val: setitem(col.sheet.source, col.sheet.source.index(row), val))]
 
         for c in PyobjColumns(self.rows[0]):
             self.addColumn(c)
+
+        if len(self.columns) > 1:
+            self.columns[0].width = 0
 
 # rowdef: dict
 class ListOfDictSheet(PythonSheet):
