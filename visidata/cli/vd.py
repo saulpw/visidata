@@ -156,9 +156,12 @@ def main():
 
     return 0
 
-if __name__ == '__main__':
+def vd_cli():
     status(__version_info__)
     rc = main()
     sys.stderr.flush()
     sys.stdout.flush()
     os._exit(rc)  # cleanup can be expensive with large datasets
+
+if __name__ == '__main__':
+    vd_cli()

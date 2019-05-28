@@ -63,8 +63,12 @@ class ColorMaker:
         self.color_attrs['black'] = curses.color_pair(0)
 
         for c in range(0, options.force_256_colors and 256 or curses.COLORS):
-            curses.init_pair(c+1, c, default_bg)
-            self.color_attrs[str(c)] = curses.color_pair(c+1)
+            try:
+                curses.init_pair(c+1, c, default_bg)
+                self.color_attrs[str(c)] = curses.color_pair(c+1)
+            except curses.error as e:
+                # curses.init_pair gives a curses error on Windows, just ignore:
+                pass
 
         for c in 'red green yellow blue magenta cyan white'.split():
             colornum = getattr(curses, 'COLOR_' + c.upper())

@@ -1,9 +1,12 @@
 import os
 import stat
-import pwd
-import grp
 import subprocess
 import contextlib
+try:
+    import pwd
+    import grp
+except ImportError:
+    pass  # pwd, grp modules not available on Windows
 
 from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught, DeferredSetColumn
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, error, FileExistsError
