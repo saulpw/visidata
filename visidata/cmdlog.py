@@ -53,7 +53,7 @@ def fnSuffix(template):
 
 def inputLongname(sheet):
     longnames = set(k for (k, obj), v in commands.iter(sheet))
-    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)))
+    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname')
 
 def indexMatch(L, func):
     'returns the smallest i for which func(L[i]) is true'
