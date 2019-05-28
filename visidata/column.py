@@ -33,12 +33,12 @@ __all__ = [
 
 
 class DisplayWrapper:
-    def __init__(self, value=None, *, error=None, display=None, note=None, notecolor=None, stacktrace=None):
+    def __init__(self, value=None, *, display=None, note=None, notecolor=None, error=None):
         self.value = value      # actual value (any type)
         self.display = display  # displayed string
         self.note = note        # single unicode character displayed in cell far right
         self.notecolor = notecolor  # configurable color name (like 'color_warning')
-        self.stacktrace = stacktrace  # list of strings for stacktrace
+        self.error = error      # list of strings for stacktrace
 
     def __bool__(self):
         return self.value
@@ -196,11 +196,12 @@ class Column(Extensible):
                                             notecolor='color_note_type')
             elif isinstance(typedval, TypedExceptionWrapper):  # calc succeeded, type failed
                 return DisplayWrapper(typedval.val, display=str(cellval),
-                                            error=typedval.exception.stacktrace,
+                                            error=typedval.stacktrace,
                                             note=options.note_type_exc,
                                             notecolor='color_warning')
             else:
                 return DisplayWrapper(typedval.val, display=str(typedval.val),
+                                            error='unknown',
                                             note=options.note_type_exc,
                                             notecolor='color_warning')
 
