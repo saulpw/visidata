@@ -1,3 +1,6 @@
+import collections
+import re
+
 from visidata import *
 
 Sheet.addCommand('M', 'melt', 'vd.push(MeltedSheet(sheet))')
