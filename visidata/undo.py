@@ -1,3 +1,7 @@
+import itertools
+
+from visidata import VisiData
+
 # undoers
 def undoAttr(objs, attrname):
     'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value as reference.'
@@ -6,6 +10,14 @@ def undoAttr(objs, attrname):
 def undoAttrCopy(objs, attrname):
     'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value which is copied.'
     return '''lambda oldvals=[ (o, copy(getattr(o, "{attrname}"))) for o in {objs} ] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)
+
+@VisiData.api
+def addUndoSetValues(vd, rows, cols):
+    oldvals = [(c, r, c.getValue(r)) for c,r in itertools.product(cols, rows)]
+    def _undo():
+        for c, r, v in oldvals:
+            c.setValue(r, v)
+    vd.cmdlog.onUndo(_undo)
 
 def undoSetValues(rowstr='[cursorRow]', colstr='[cursorCol]'):
     return 'lambda oldvals=[(c, r, c.getValue(r)) for c,r in itertools.product({colstr}, {rowstr})]: list(c.setValue(r, v) for c, r, v in oldvals)'.format(rowstr=rowstr, colstr=colstr)

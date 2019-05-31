@@ -83,7 +83,7 @@ class CommandLog(TsvSheet):
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
-    _rowtype = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment undofunc'.split())
+    _rowtype = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment undofuncs'.split())
     columns = [
         ColumnAttr('sheet'),
         ColumnAttr('col'),
@@ -92,7 +92,7 @@ class CommandLog(TsvSheet):
         ColumnAttr('input'),
         ColumnAttr('keystrokes'),
         ColumnAttr('comment'),
-        ColumnAttr('undo', 'undofunc', type=bool, width=0)
+        ColumnAttr('undo', 'undofuncs', type=vlen, width=0)
     ]
 
     paused = False
@@ -160,7 +160,11 @@ class CommandLog(TsvSheet):
 
     @asyncthread
     def checkpoint(self, cmd, sheet, cmdlogrow):
-        cmdlogrow.undofunc = eval(cmd.undo, getGlobals(), LazyMap(sheet))
+        cmdlogrow.undofuncs = [eval(cmd.undo, getGlobals(), LazyMap(sheet))]
+
+    def onUndo(self, undofunc):
+        'On undo of latest command, call undofunc()'
+        self.currentActiveRow.undofuncs.append(undofunc)
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records currentActiveRow'
@@ -352,8 +356,9 @@ class CommandLog(TsvSheet):
             fail("options.undo not enabled")
 
         for cmdlogrow in self.rows[::-1]:
-            if cmdlogrow.undofunc and str(cmdlogrow.sheet) == sheet.name:
-                cmdlogrow.undofunc()
+            if cmdlogrow.undofuncs and str(cmdlogrow.sheet) == sheet.name:
+                for undofunc in cmdlogrow.undofuncs:
+                    undofunc()
                 sheet.undone.append(cmdlogrow)
                 self.rows.remove(cmdlogrow)
                 vd.clear_caches()
