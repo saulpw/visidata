@@ -1,7 +1,7 @@
 from visidata import *
 from copy import deepcopy
 
-Sheet.addCommand("'", 'freeze-col', 'addColumn(StaticColumn(sheet.rows, cursorCol), cursorColIndex+1)', undo=undoAddCols)
+Sheet.addCommand("'", 'freeze-col', 'StaticColumn(sheet, sheet.rows, cursorCol, cursorColIndex+1), cursorColIndex+1', undo=undoAddCols)
 Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)')
 Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()')
 Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()')
@@ -13,8 +13,9 @@ def resetCache(self):
 Column.resetCache = resetCache
 
 
-def StaticColumn(rows, col):
+def StaticColumn(sheet, rows, col, pos):
     frozencol = SettableColumn(col.name+'_frozen', width=col.width, type=col.type, fmtstr=col.fmtstr)
+    sheet.addColumn(frozencol, pos)
 
     @asyncthread
     def calcRows_async(frozencol, rows, col):
