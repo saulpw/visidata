@@ -161,7 +161,7 @@ class OptionsObject:
                     vd.cmdlog.set_option(k, v, obj)
         else:
             curval = None
-            warning('setting unknown option %s' % k)
+            vd.warning('setting unknown option %s' % k)
 
         return self._set(k, v, obj)
 
@@ -218,7 +218,7 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
 def bindkey(cls, keystrokes, longname):
     oldlongname = bindkeys._get(keystrokes, cls)
     if oldlongname:
-        warning('%s was already bound to %s' % (keystrokes, oldlongname))
+        vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))
     bindkeys.set(keystrokes, longname, cls)
 
 @BaseSheet.class_api
