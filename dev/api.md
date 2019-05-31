@@ -43,9 +43,9 @@ d) `statuses` and its docstring will be shown on the Shift+V VisiData menu
 
 --
 
-Renames:
+# Renames
 
-VisiData:
+## VisiData
     allPrefixes -> prefixes?
     allSheets -> sheets.rows
     clipboard() -> vd.clipboard
@@ -70,6 +70,7 @@ VisiData:
 
     globalCommand -> vd.addCommand
     BHQ: vd.addCommand -> vd.command?
+
     Sheet.addCommnd -> Sheet.command?
     Sheet.option() and vd.option()?
     Sheet.options for sure
@@ -88,7 +89,7 @@ VisiData:
     Graph -> GraphSheet?
     Canvas -> CanvasSheet?
 
-Then VisiData would have:
+### Then VisiData would have:
 
     sheets       S
     cmdlog       D
@@ -116,6 +117,25 @@ Then VisiData would have:
     freq
     copy
     filter
+
+## Column renames
+
+[override these]
+    calcValue -> realGetValue
+        calls getter by default
+
+     -> realSetValue actually modifies the row, and the backing data store depending on the sheet
+       - data sheets don't do this internally, but the behavior is the same; ^S required for writing anything to disk
+
+    getter/setter can be passed in to Sheet; the default realGetValue/realSetValue call them
+
+[don't override these]
+    getValue caches if column.cache=True
+    setValue defers if column.defer=True
+
+##
+
+# topics
 
 ## `urlcache(url, days=1, encoding='utf-8'): Path`
    - convenient way to fetch a url while being polite to everyone's network connection

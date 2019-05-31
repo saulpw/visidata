@@ -6,7 +6,7 @@ import cProfile
 import threading
 import collections
 
-from visidata import vd, option, options, status, globalCommand, Sheet, EscapeException
+from visidata import VisiData, vd, option, options, status, globalCommand, Sheet, EscapeException
 from visidata import ColumnAttr, Column, ENTER
 from visidata import *
 
@@ -77,7 +77,8 @@ def async_deepcopy(vs, rowlist):
     return ret
 
 
-def cancelThread(*threads, exception=EscapeException):
+@VisiData.global_api
+def cancelThread(vd, *threads, exception=EscapeException):
     'Raise exception on another thread.'
     for t in threads:
         ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(t.ident), ctypes.py_object(exception))
@@ -165,24 +166,24 @@ def threadsSheet(self):
     return ThreadsSheet('threads')
 
 @VisiData.api
-def execAsync(self, func, *args, **kwargs):
+def execAsync(self, func, *args, sheet=None, **kwargs):
     'Execute `func(*args, **kwargs)` in a separate thread.'
 
     thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
     self.threads.append(_annotate_thread(thread))
 
-    if self.sheets:
-        currentSheet = self.sheets[0]
-        currentSheet.currentThreads.append(thread)
-    else:
-        currentSheet = None
+    if sheet is None and self.sheets:
+        sheet = self.sheets[0]
 
-    thread.sheet = currentSheet
+    if sheet is not None:
+        sheet.currentThreads.append(thread)
+
+    thread.sheet = sheet
     thread.start()
 
     return thread
 
-def _toplevelTryFunc(func, *args, **kwargs):
+def _toplevelTryFunc(func, *args, status=status, **kwargs):
   with ThreadProfiler(threading.current_thread()) as prof:
     t = threading.current_thread()
     t.name = func.__name__
@@ -190,7 +191,8 @@ def _toplevelTryFunc(func, *args, **kwargs):
         t.status = func(*args, **kwargs)
     except EscapeException as e:  # user aborted
         t.status = 'aborted by user'
-        status('%s aborted' % t.name, priority=2)
+        if status:
+            status('%s aborted' % t.name, priority=2)
     except Exception as e:
         t.exception = e
         t.status = 'exception'
