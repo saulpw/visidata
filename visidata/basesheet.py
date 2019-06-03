@@ -163,9 +163,6 @@ class BaseSheet(Extensible):
         except Exception as e:
             vd.exceptionCaught(e)
 
-    def newRow(self):
-        return type(self)._rowtype()
-
 
 @VisiData.property
 def sheet(self):

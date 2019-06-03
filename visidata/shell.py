@@ -5,7 +5,7 @@ import grp
 import subprocess
 import contextlib
 
-from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught, DeferredSetColumn
+from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, error, FileExistsError
 from visidata import CellColorizer, RowColorizer, undoAddCols, undoBlocked
 
@@ -57,104 +57,34 @@ class ColumnShell(Column):
         except Exception as e:
             exceptionCaught(e)
 
-class DeferredSaveSheet(Sheet):
-    colorizers = [
-        CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
-        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: s.rowid(r) in s.toBeDeleted),
-        RowColorizer(9, 'color_add_pending', lambda s,c,r,v: s.rowid(r) in s.addedRows),
-    ]
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.reset()
 
-    def reset(self):
-        'reset deferred caches'
-        self.addedRows = {} # [s.rowid(row)] -> row
-        self.toBeDeleted = {}  # [s.rowid(row)] -> row
-
-    def newRow(self):
-        row = Sheet.newRow(self)
-        self.addedRows[self.rowid(row)] = row
-        return row
-
-    def changed(self, col, row):
-        try:
-            return isinstance(col, DeferredSetColumn) and col.changed(row)
-        except Exception:
-            return False
-
-    def undoMod(self, row):
-        for col in self.visibleCols:
-            if getattr(col, '_modifiedValues', None) and self.rowid(row) in col._modifiedValues:
-                del col._modifiedValues[self.rowid(row)]
-
-        if row in self.toBeDeleted:
-            del self.toBeDeleted[self.rowid(row)]
-
-        self.restat(row)
-
-    def delete(self, rows):
-        for r in rows:
-            self.toBeDeleted[self.rowid(r)] = r
-
-    def save(self, *rows):
-        changes = {}  # [rowid] -> (row, [changed_cols])
-        for r in list(rows or self.rows):  # copy list because elements may be removed
-            if self.rowid(r) not in self.addedRows and self.rowid(r) not in self.toBeDeleted:
-                changedcols = [col for col in self.visibleCols if self.changed(col, r)]
-                if changedcols:
-                    changes[self.rowid(r)] = (r, changedcols)
-
-        if not self.addedRows and not changes and not self.toBeDeleted:
-            fail('nothing to save')
-
-        cstr = ''
-        if self.addedRows:
-            cstr += 'add %d %s' % (len(self.addedRows), self.rowtype)
-
-        if changes:
-            if cstr: cstr += ' and '
-            cstr += 'change %d values' % sum(len(cols) for row, cols in changes.values())
-
-        if self.toBeDeleted:
-            if cstr: cstr += ' and '
-            cstr += 'delete %d %s' % (len(self.toBeDeleted), self.rowtype)
-
-        confirm('really %s? ' % cstr)
-
-        self.commit(dict(self.addedRows), changes, dict(self.toBeDeleted))
-
-        self.toBeDeleted.clear()
-        self.addedRows.clear()
-
-
-class DirSheet(DeferredSaveSheet):
+class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
     columns = [
-        DeferredSetColumn('directory',
+        Column('directory',
             getter=lambda col,row: row.parent.relpath(col.sheet.source),
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
-        DeferredSetColumn('filename',
+        Column('filename',
             getter=lambda col,row: row.name + row.ext,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
-        DeferredSetColumn('pathname', width=0,
+        Column('pathname', width=0,
             getter=lambda col,row: row.resolve(),
             setter=lambda col,row,val: os.rename(row.resolve(), val)),
         Column('ext', getter=lambda col,row: row.is_dir() and '/' or row.suffix),
-        DeferredSetColumn('size', type=int,
+        Column('size', type=int,
             getter=lambda col,row: row.stat().st_size,
             setter=lambda col,row,val: os.truncate(row.resolve(), int(val))),
-        DeferredSetColumn('modtime', type=date,
+        Column('modtime', type=date,
             getter=lambda col,row: row.stat().st_mtime,
             setter=lambda col,row,val: os.utime(row.resolve(), times=((row.stat().st_atime, float(val))))),
-        DeferredSetColumn('owner', width=0,
+        Column('owner', width=0,
             getter=lambda col,row: pwd.getpwuid(row.stat().st_uid).pw_name,
             setter=lambda col,row,val: os.chown(row.resolve(), pwd.getpwnam(val).pw_uid, -1)),
-        DeferredSetColumn('group', width=0,
+        Column('group', width=0,
             getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name,
             setter=lambda col,row,val: os.chown(row.resolve(), -1, grp.getgrnam(val).pw_gid)),
-        DeferredSetColumn('mode', width=0,
+        Column('mode', width=0,
             getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
             setter=lambda col,row,val: os.chmod(row.resolve(), int(val, 8))),
         Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
@@ -209,7 +139,7 @@ class DirSheet(DeferredSaveSheet):
     @asyncthread
     def commit(self, adds, changes, deletes):
         oldrows = self.rows
-        self.rows = []
+        self.rows.clear()
         for r in oldrows:
             try:
                 if self.rowid(r) in deletes:
@@ -222,7 +152,7 @@ class DirSheet(DeferredSaveSheet):
         for row, cols in changes.values():
             for col in cols:
                 try:
-                    col.realsetter(col, row, col._modifiedValues[self.rowid(row)])
+                    col.putValue(row, col._modifiedValues[self.rowid(row)])
                     self.restat(row)
                 except Exception as e:
                     exceptionCaught(e)
@@ -259,9 +189,3 @@ DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r.resolve()))')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.resolve())')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in selectedRows))')
-DeferredSaveSheet.addCommand('^S', 'save-sheet', 'save()', undo=undoBlocked)
-DeferredSaveSheet.addCommand('z^S', 'save-row', 'save(cursorRow)', undo=undoBlocked)
-DeferredSaveSheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')
-DeferredSaveSheet.addCommand('gz^R', 'reload-rows', 'for r in self.selectedRows: undoMod(r)')
-DeferredSaveSheet.addCommand(None, 'delete-row', 'delete([cursorRow]); cursorRowIndex += 1', undo='lambda r=cursorRow: undoMod(r)')
-DeferredSaveSheet.addCommand(None, 'delete-selected', 'delete(selectedRows)', undo='lambda rows=selectedRows: list(map(undoMod, rows))')

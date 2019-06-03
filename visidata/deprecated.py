@@ -33,6 +33,11 @@ def replayableOption(optname, default, helpstr):
 def SubrowColumn(*args, **kwargs):
     return visidata.SubColumnFunc(*args, **kwargs)
 
+@deprecated('1.6')
+def DeferredSetColumn(*args, **kwargs):
+    return Column(*args, defer=True, **kwargs)
+
+
 alias('edit-cells', 'setcol-input')  # 1.6
 alias('fill-nulls', 'setcol-fill')  # 1.6
 alias('paste-cells', 'setcol-clipboard')  # 1.6

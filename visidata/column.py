@@ -1,3 +1,4 @@
+from copy import copy
 import collections
 import itertools
 import threading
@@ -59,6 +60,9 @@ class Column(Extensible):
         self.height = 1       # max height, None/0 to auto-compute for each row
         self.keycol = False   # is a key column
         self.expr = None      # Column-type-dependent parameter
+        self.defer = False    # deferred setting
+
+        self._modifiedValues = collections.OrderedDict()
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -69,6 +73,7 @@ class Column(Extensible):
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
         ret.keycol = False   # column copies lose their key status
+        ret._modifiedValues = copy(self._modifiedValues)
         if self._cachedValues is not None:
             ret._cachedValues = collections.OrderedDict()  # an unrelated cache for copied columns
         return ret
@@ -144,11 +149,11 @@ class Column(Extensible):
         self._cachedValues = collections.OrderedDict() if self.cache else None
 
     @asyncthread
-    def _putValue_async(self, row):
+    def _calcIntoCacheAsync(self, row):
         self._cachedValues[self.sheet.rowid(row)] = None
-        self._putValue(row)
+        self._calcIntoCache(row)
 
-    def _putValue(self, row):
+    def _calcIntoCache(self, row):
         ret = wrapply(self.calcValue, row)
         if not isinstance(ret, TypedExceptionWrapper):
             self._cachedValues[self.sheet.rowid(row)] = ret
@@ -156,6 +161,10 @@ class Column(Extensible):
 
     def getValue(self, row):
         'Memoize calcValue with key sheet.rowid(row)'
+
+        if self.sheet.rowid(row) in self._modifiedValues:
+            return self._modifiedValues.get(self.sheet.rowid(row))
+
         if self._cachedValues is None:
             return self.calcValue(row)
 
@@ -164,9 +173,9 @@ class Column(Extensible):
             return self._cachedValues[k]
 
         if self.cache == 'async':
-            ret = self._putValue_async(row)
+            ret = self._calcIntoCacheAsync(row)
         else:
-            ret = self._putValue(row)
+            ret = self._calcIntoCache(row)
 
             cachesize = options.col_cache_size
             if cachesize > 0 and len(self._cachedValues) > cachesize:
@@ -237,9 +246,27 @@ class Column(Extensible):
     def getDisplayValue(self, row):
         return self.getCell(row).display
 
-    def setValue(self, row, value):
+    def putValue(self, row, value):
         'Set our column value on row.  defaults to .setter; override in Column subclass. no type checking'
         return self.setter(self, row, value)
+
+    def setValue(self, row, val):
+        if self.defer:
+            if self.getValue(row) != val:
+                self._modifiedValues[self.sheet.rowid(row)] = val
+        else:
+            self.putValue(row, val)
+
+    def rollback(self):
+        self._modifiedValues.clear()
+
+    def changed(self, row):
+        curval = self.calcValue(row)
+        newval = self._modifiedValues.get(self.sheet.rowid(row), curval)
+        return self.type(newval) != self.type(curval)
+
+    def getSavedValue(self, row):
+        return Column.calcValue(self, row)
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions'
@@ -333,11 +360,11 @@ class SubColumnFunc(Column):
         if subrow is not None:
             return self.origcol.calcValue(subrow)
 
-    def setValue(self, row, value):
+    def putValue(self, row, value):
         subrow = self.subfunc(row, self.expr)
         if subrow is None:
             vd.fail('no source row')
-        self.origcol.setValue(subrow, value)
+        self.origcol.putValue(subrow, value)
 
     def recalc(self, sheet=None):
         Column.recalc(self, sheet)
@@ -365,7 +392,7 @@ class ColumnEnum(Column):
         v = getattr(row, self.name, None)
         return v.__name__ if v else None
 
-    def setValue(self, row, value):
+    def putValue(self, row, value):
         if isinstance(value, str):  # first try to get the actual value from the mapping
             value = self.mapping.get(value, value)
         setattr(row, self.name, value or self.default)

@@ -53,7 +53,7 @@ def syscopyCells(sheet, col, rows):
 
 
 Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])')
-Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', undo='lambda s=sheet,r=cursorRow,ridx=cursorRowIndex: s.rows.insert(ridx, r)')
+Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, markDeleted(cursorRow))]; cursorDown(1)', undo='lambda s=sheet,r=cursorRow,ridx=cursorRowIndex: markDeleted(r, False) if isDeleted(r) else addRow(r, ridx)')
 Sheet.addCommand('p', 'paste-after', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.pop(ridx+1)')
 Sheet.addCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.pop(ridx)')
 

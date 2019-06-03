@@ -1,4 +1,4 @@
-from visidata import ENTER, Sheet, ColumnItem, anytype, status, clean_to_id, Progress, asyncthread, currency, Path, DeferredSetColumn, CellColorizer, RowColorizer, DeferredSaveSheet, vd, options
+from visidata import ENTER, Sheet, ColumnItem, anytype, status, clean_to_id, Progress, asyncthread, currency, Path, CellColorizer, RowColorizer, vd, options
 from visidata import TypedWrapper, TypedExceptionWrapper
 
 
@@ -9,7 +9,7 @@ def open_sqlite(path):
 open_db = open_sqlite3 = open_sqlite
 
 
-class SqliteSheet(DeferredSaveSheet):
+class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
 
     def resolve(self):
@@ -88,7 +88,7 @@ class SqliteSheet(DeferredSaveSheet):
     def getColumns(self, tableName, conn):
         cols = []
         for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO(%s)' % tableName)):
-            c = DeferredSetColumn(r[1],
+            c = Column(r[1],
                     getter=lambda col,row,idx=i: row[idx],
                     setter=lambda col,row,val: col.sheet.commit())
             t = r[2].lower()

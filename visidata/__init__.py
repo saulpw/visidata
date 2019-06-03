@@ -77,6 +77,7 @@ from .transpose import *
 from .diff import *
 from .shell import *
 from .layout import *
+from .saving import *
 import visidata.sort
 
 from .vimkeys import *

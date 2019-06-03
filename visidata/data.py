@@ -39,10 +39,10 @@ BaseSheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
 
 class SettableColumn(Column):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, defer=True, **kwargs)
         self.cache = {}
 
-    def setValue(self, row, value):
+    def putValue(self, row, value):
         self.cache[self.sheet.rowid(row)] = value
 
     def calcValue(self, row):
@@ -211,40 +211,6 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         savefunc(givenpath)
 
 
-class DeferredSetColumn(Column):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.realsetter = self.setter
-        self.setter = self.deferredSet  # this makes it overrideable with .setter
-        self._modifiedValues = {}
-
-    def rollback(self):
-        self._modifiedValues.clear()
-
-    @staticmethod
-    def deferredSet(col, row, val):
-        if col.getValue(row) != val:
-            col._modifiedValues[col.sheet.rowid(row)] = val
-
-    def changed(self, row):
-        curval = self.calcValue(row)
-        newval = self._modifiedValues.get(self.sheet.rowid(row), curval)
-        return self.type(newval) != self.type(curval)
-
-    def getValue(self, row):
-        if self.sheet.rowid(row) in self._modifiedValues:
-            return self._modifiedValues.get(self.sheet.rowid(row))  # overrides cache
-        return Column.getValue(self, row)
-
-    def getSavedValue(self, row):
-        return Column.getValue(self, row)
-
-    def __copy__(self):
-        ret = Column.__copy__(self)
-        ret._modifiedValues = collections.OrderedDict()  # force a new, unrelated modified set
-        return ret
-
-
 def openSource(p, filetype=None):
     'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
     if not filetype:
@@ -342,10 +308,11 @@ def deleteBy(self, func):
     self.rows.clear()
     for r in Progress(oldrows, 'deleting'):
         if not func(r):
-            self.rows.append(r)
+            self.rows.append(r)  # NOT addRow
             if r is row:
                 self.cursorRowIndex = len(self.rows)-1
         else:
+            self.markDeleted(r)
             ndeleted += 1
 
     status('deleted %s %s' % (ndeleted, self.rowtype))

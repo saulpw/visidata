@@ -130,16 +130,16 @@ class GitStashes(GitSheet):
 
 
 # rowdef: (commit_hash, refnames, author, author_date, body, notes)
-class GitLogSheet(GitSheet, DeferredSaveSheet):
+class GitLogSheet(GitSheet):
     # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
     rowtype = 'commits'
     columns = [
             ColumnItem('commitid', 0, width=8),
             ColumnItem('refnames', 1, width=12),
-            DeferredSetColumn('message', height=3, getter=lambda c,r: r[4], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
-            DeferredSetColumn('author', getter=lambda c,r: r[2], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
-            DeferredSetColumn('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
+            Column('message', height=3, getter=lambda c,r: r[4], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
+            Column('author', getter=lambda c,r: r[2], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
+            Column('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
             Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
     ]
     def __init__(self, *args, **kwargs):
@@ -166,7 +166,7 @@ class GitLogSheet(GitSheet, DeferredSaveSheet):
         for row, cols in changes.values():
             for col in cols:
                 try:
-                    col.realsetter(col, row, col._modifiedValues[self.rowid(row)])
+                    col.putValue(row, col._modifiedValues[self.rowid(row)])
                 except Exception as e:
                     exceptionCaught(e)
 
