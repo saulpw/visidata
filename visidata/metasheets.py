@@ -1,4 +1,4 @@
-from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet
+from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, bindkeys
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, commands, Option
