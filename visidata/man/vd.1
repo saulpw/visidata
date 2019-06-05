@@ -1008,7 +1008,7 @@ These are the supported sources:
 .El
 .Pp
 .Bl -inset -compact -offset xxx
-.It Sy json No (single object) and Sy jsonl No (one object per line).
+.It Sy json No (single object) and Sy jsonl Ns / Ns Sy ndjson Ns / Ns Sy ldjson No (one object per line).
 .Bl -inset -compact -offset xxx
 .It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be expanded into new columns with Sy "\&(" No and unexpanded with Sy "\&)" Ns .
 .El
@@ -1082,7 +1082,7 @@ These are the supported savers:
 .It Sy tsv No (tab-separated value)
 .It Sy csv No (comma-separated value)
 .It Sy json No (one object with all rows)
-.It Sy jsonl No (one object per line/row)
+.It Sy jsonl Ns / Ns Sy ndjson Ns / Ns Sy ldjson No (one object per line/row)
 .It Sy sqlite No (multisave capable)
 .Bl -inset -compact -offset xxx
 .It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
