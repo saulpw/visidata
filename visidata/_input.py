@@ -266,7 +266,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
 
 
 @VisiData.global_api
-def confirm(prompt, exc=ExpectedException):
+def confirm(vd, prompt, exc=ExpectedException):
     yn = vd.input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
         if exc:
