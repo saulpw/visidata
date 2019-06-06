@@ -15,6 +15,9 @@ def open_json(p):
 def open_jsonl(p):
     return JSONSheet(p.name, source=p, jsonlines=True)
 
+open_ndjson = open_jsonl
+open_ldjson = open_jsonl
+
 
 class JSONSheet(PythonSheet):
     @asyncthread
@@ -115,3 +118,6 @@ def save_jsonl(p, vs):
         for r in Progress(vs.rows, 'saving'):
             rowdict = _rowdict(vcols, r)
             fp.write(jsonenc.encode(rowdict) + '\n')
+
+save_ndjson = save_jsonl
+save_ldjson = save_jsonl

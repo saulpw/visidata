@@ -23,4 +23,5 @@ pandas		1	0	2008	Wes McKinney	special adapter for the Python pandas library; any
 MapBox Tileset	mbtiles	1	0	2011	MapBox	based on sqlite	yes		plottable	https://docs.mapbox.com/help/glossary/mbtiles/
 Protocolbuffer Binary Format	pbf	1	0	2011	OpenStreetMap	OpenStreetMap data file	yes			https://wiki.openstreetmap.org/wiki/PBF_Format
 JSON Lines	jsonl	1	1	2013	Ian Ward	JSON derivative; streamable	yes			http://jsonlines.org/
+Newline Delimited JSON	ndjson ldjson	1	1	2013		JSON derivative; streamable	yes			http://ndjson.org/
 VisiData command log	vd	2	0	2017	Saul Pwanson	replayable	yes			http://visidata.org/docs/save-restore/
