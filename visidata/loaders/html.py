@@ -49,6 +49,9 @@ class HtmlTableSheet(Sheet):
     def reload(self):
         self.rows = []
         headers = []
+
+        maxlinks = {}  # [colnum] -> nlinks:int
+
         for rownum, r in enumerate(self.source.iter('tr')):
             row = []
 
@@ -64,6 +67,8 @@ class HtmlTableSheet(Sheet):
                 colspan = int(cell.attrib.get('colspan', 1))
                 rowspan = int(cell.attrib.get('rowspan', 1))
                 cellval = ' '.join(x.strip() for x in cell.itertext())  # text only without markup
+                links = [x.get('href') for x in cell.iter('a')]
+                maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))
 
                 if is_header(cell):
                     for k in range(rownum, rownum+rowspan):
@@ -78,7 +83,7 @@ class HtmlTableSheet(Sheet):
                 else:
                     while colnum >= len(row):
                         row.append(None)
-                    row[colnum] = cellval
+                    row[colnum] = (cellval, links)
 
                 colnum += colspan
 
@@ -87,12 +92,16 @@ class HtmlTableSheet(Sheet):
 
         self.columns = []
         if headers:
-            for i, names in enumerate(itertools.zip_longest(*headers, fillvalue='')):
-                self.addColumn(ColumnItem('_'.join(x for x in names if x), i))
+            it = itertools.zip_longest(*headers, fillvalue='')
         else:
-            for i, name in enumerate(self.rows[0]):
-                self.addColumn(ColumnItem(name, i))
+            it = [list(x) for x in self.rows[0]]
             self.rows = self.rows[1:]
+
+        for colnum, names in enumerate(it):
+            name = '_'.join(x for x in names if x)
+            self.addColumn(Column(name, getter=lambda c,r,i=colnum: r[i][0]))
+            for linknum in range(maxlinks.get(colnum)):
+                self.addColumn(Column(name+'_link'+str(linknum), width=20, getter=lambda c,r,i=colnum,j=linknum: r[i][1][j]))
 
 
 @asyncthread
