@@ -44,7 +44,8 @@ class SqliteSheet(Sheet):
             for row in Progress(self.execute(conn, "SELECT * FROM %s" % tblname), total=rowcount-1):
                 self.addRow(row)
 
-    def commit(self, adds, changes, deletes):
+    def save(self):
+        adds, changes, deletes = self.getDeferredChanges()
         options_safe_error = options.safe_error
         def value(row, col):
             v = col.getTypedValue(row)
@@ -83,14 +84,10 @@ class SqliteSheet(Sheet):
 
             conn.commit()
 
-        self.reload()
-
     def getColumns(self, tableName, conn):
         cols = []
         for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO(%s)' % tableName)):
-            c = Column(r[1],
-                    getter=lambda col,row,idx=i: row[idx],
-                    setter=lambda col,row,val: col.sheet.commit())
+            c = Column(r[1], getter=lambda col,row,idx=i: row[idx])
             t = r[2].lower()
             if t == 'integer':
                 c.type = int
