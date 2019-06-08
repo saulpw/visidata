@@ -11,9 +11,11 @@ class GitGrep(vgit.GitSheet):
     ]
     @asyncthread
     def reload(self):
+        tmp = (self.topRowIndex, self.cursorRowIndex)
         self.rows = []
         for line in self.git_lines('grep', '--no-color', '-z', '--line-number', '--ignore-case', self.regex):
             self.addRow(line.split('\0'))
+        self.topRowIndex, self.cursorRowIndex = tmp
 
 
 Sheet.unbindkey('g/')
