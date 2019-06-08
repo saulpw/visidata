@@ -1,4 +1,4 @@
-from visidata import ENTER, Sheet, ColumnItem, anytype, status, clean_to_id, Progress, asyncthread, currency, Path, CellColorizer, RowColorizer, vd, options
+from visidata import ENTER, Sheet, Column, anytype, status, clean_to_id, Progress, asyncthread, currency, Path, CellColorizer, RowColorizer, vd, options
 from visidata import TypedWrapper, TypedExceptionWrapper
 
 
@@ -44,8 +44,7 @@ class SqliteSheet(Sheet):
             for row in Progress(self.execute(conn, "SELECT * FROM %s" % tblname), total=rowcount-1):
                 self.addRow(row)
 
-    def save(self):
-        adds, changes, deletes = self.getDeferredChanges()
+    def commit(self, adds, mods, dels):
         options_safe_error = options.safe_error
         def value(row, col):
             v = col.getTypedValue(row)
@@ -71,14 +70,14 @@ class SqliteSheet(Sheet):
                 sql += 'VALUES (%s)' % ','.join('?' for c in cols)
                 self.execute(conn, sql, parms=values(r, cols))
 
-            for r, changedcols in changes.values():
+            for row, rowmods in mods.values():
                 sql = 'UPDATE %s SET ' % self.tableName
-                sql += ', '.join('%s=?' % c.name for c in changedcols)
+                sql += ', '.join('%s=?' % c.name for c, _ in rowmods.items())
                 self.execute(conn, sql,
-                            where={c.name: c.getSavedValue(r) for c in wherecols},
-                            parms=values(r, changedcols))
+                            where={c.name: c.getSavedValue(row) for c in wherecols},
+                            parms=values(row, [c for c, _ in rowmods.items()]))
 
-            for r in deletes.values():
+            for r in dels.values():
                 self.execute(conn, 'DELETE FROM %s ' % self.tableName,
                               where={c.name: c.getTypedValue(r) for c in wherecols})
 

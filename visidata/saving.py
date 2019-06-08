@@ -1,9 +1,9 @@
-from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer
+from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer, asyncthread, options
 
 
 # deferred cached
 Sheet.init('_deferredAdds', dict) # [s.rowid(row)] -> row
-Sheet.init('_deferredMods', dict) # [s.rowid(row)] -> val
+Sheet.init('_deferredMods', dict) # [s.rowid(row)] -> (row, { [col] -> val })
 Sheet.init('_deferredDels', dict) # [s.rowid(row)] -> row
 
 Sheet.init('defer', lambda: True) # set to False for add/delete to take place immediately
@@ -33,28 +33,68 @@ def newRow(self):
 @Sheet.api
 def changed(self, col, row):
     try:
-        return col.changed(row)
+        row, rowmods = self._deferredMods[self.rowid(row)]
+        newval = rowmods[col]
+        curval = col.calcValue(row)
+        return col.type(newval) != col.type(curval)
+    except KeyError:
+        return False
     except Exception:
         return False
 
 
 @Sheet.api
 def undoMod(self, row):
-    for col in self.visibleCols:
-        if getattr(col, '_deferredMods', None) and self.rowid(row) in col._deferredMods:
-            del col._deferredMods[self.rowid(row)]
+    rowid = self.rowid(row)
 
-    if row in self._deferredDels:
-        del self._deferredDels[self.rowid(row)]
+    if rowid in self._deferredMods:
+        del col._deferredMods[rowid]
 
-    self.restat(row)
+    if rowid in self._deferredDels:
+        del self._deferredDels[rowid]
+
+    if rowid in self._deferredAdds:
+        del self._deferredAdds[rowid]
 
 
 @Sheet.api
-def markDeleted(self, row):
-    if self.defer:
+def deleteBy(self, func):
+    'Delete rows for which func(row) is true.  Returns number of deleted rows.'
+    oldrows = copy(self.rows)
+    oldidx = self.cursorRowIndex
+    ndeleted = 0
+
+    row = None   # row to re-place cursor after
+    while oldidx < len(oldrows):
+        if not func(oldrows[oldidx]):
+            row = self.rows[oldidx]
+            break
+        oldidx += 1
+
+    self.rows.clear()
+    for r in Progress(oldrows, 'deleting'):
+        if not func(r):
+            self.rows.append(r)  # NOT addRow
+            if r is row:
+                self.cursorRowIndex = len(self.rows)-1
+        else:
+            self.deleteRows([r])
+            ndeleted += 1
+
+    status('deleted %s %s' % (ndeleted, self.rowtype))
+    return ndeleted
+
+
+@Sheet.api
+@asyncthread
+def deleteRows(self, rows):
+    for row in rows:
         self._deferredDels[self.rowid(row)] = row
-    return row
+
+    if self.defer:
+        return
+
+    self.deleteBy(lambda r,self=self,dels=self._deferredDels: self.rowid(r) in dels)
 
 
 @Sheet.api
@@ -71,25 +111,36 @@ def resetDeferredChanges(self):
 
 @Sheet.api
 def getDeferredChanges(self):
-    'Return dict(rowid(row): (row, [changed_cols]))'
-    mods = {}  # [rowid] -> (row, [changed_cols])
-    for r in list(rows or self.rows):  # copy list because elements may be removed
-        if self.rowid(r) not in self._deferredAdds and self.rowid(r) not in self._deferredDels:
-            changedcols = [col for col in self.visibleCols if self.changed(col, r)]
-            if changedcols:
-                mods[self.rowid(r)] = (r, changedcols)
+    'Return adds:dict(rowid:row), mods:dict(rowid:(row, dict(col:val))), dels:dict(rowid:row)'
+
+    # only report mods if they aren't adds or deletes
+    mods = {}  # [rowid] -> (row, dict(col:val))
+    for row, rowmods in self._deferredMods.values():
+        rowid = self.rowid(row)
+        if rowid not in self._deferredAdds and rowid not in self._deferredDels:
+            mods[rowid] = (row, {col:val for col, val in rowmods.items() if self.changed(col, row)})
 
     return self._deferredAdds, mods, self._deferredDels
 
 
-def changestr(self, adds, changes, deletes):
+@Sheet.api
+def markDeleted(self, row, mark=True):
+    if mark:
+        self._deferredDels[self.rowid(row)] = row
+    else:
+        del self._deferredDels[self.rowid(row)]
+    return row
+
+
+@Sheet.api
+def changestr(self, adds, mods, deletes):
     cstr = ''
     if adds:
         cstr += 'add %d %s' % (len(adds), self.rowtype)
 
     if mods:
         if cstr: cstr += ' and '
-        cstr += 'change %d values' % sum(len(cols) for row, cols in mods.values())
+        cstr += 'change %d values' % sum(len(rowmods) for row, rowmods in mods.values())
 
     if deletes:
         if cstr: cstr += ' and '
@@ -100,14 +151,14 @@ def changestr(self, adds, changes, deletes):
 @Sheet.api
 def save(self, *rows):
     adds, mods, deletes = self.getDeferredChanges()
-    cstr = changestr(adds, mods, deletes)
+    cstr = self.changestr(adds, mods, deletes)
     if options.confirm_overwrite:
         if not cstr:
             warning('no diffs')
         else:
             confirm('really %s? ' % cstr)
 
-    save.commit(dict(adds), mods, dict(deletes))
+    self.commit(adds, mods, deletes)
 
     self.resetDeferredChanges()
 

@@ -62,8 +62,6 @@ class Column(Extensible):
         self.expr = None      # Column-type-dependent parameter
         self.defer = False    # deferred setting
 
-        self._modifiedValues = collections.OrderedDict()
-
         self.setCache(cache)
         for k, v in kwargs.items():
             setattr(self, k, v)  # instead of __dict__.update(kwargs) to invoke property.setters
@@ -73,7 +71,6 @@ class Column(Extensible):
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
         ret.keycol = False   # column copies lose their key status
-        ret._modifiedValues = copy(self._modifiedValues)
         if self._cachedValues is not None:
             ret._cachedValues = collections.OrderedDict()  # an unrelated cache for copied columns
         return ret
@@ -162,8 +159,11 @@ class Column(Extensible):
     def getValue(self, row):
         'Memoize calcValue with key sheet.rowid(row)'
 
-        if self.sheet.rowid(row) in self._modifiedValues:
-            return self._modifiedValues.get(self.sheet.rowid(row))
+        try:
+            row, rowmods = self.sheet._deferredMods[self.sheet.rowid(row)]
+            return rowmods[self]
+        except KeyError:
+            pass
 
         if self._cachedValues is None:
             return self.calcValue(row)
@@ -253,17 +253,15 @@ class Column(Extensible):
     def setValue(self, row, val):
         if self.defer:
             if self.getValue(row) != val:
-                self._modifiedValues[self.sheet.rowid(row)] = val
+                rowid = self.sheet.rowid(row)
+                if rowid not in self.sheet._deferredMods:
+                    rowmods = {}
+                    self.sheet._deferredMods[rowid] = (row, rowmods)
+                else:
+                    _, rowmods = self.sheet._deferredMods[rowid]
+                rowmods[self] = val
         else:
             self.putValue(row, val)
-
-    def rollback(self):
-        self._modifiedValues.clear()
-
-    def changed(self, row):
-        curval = self.calcValue(row)
-        newval = self._modifiedValues.get(self.sheet.rowid(row), curval)
-        return self.type(newval) != self.type(curval)
 
     def getSavedValue(self, row):
         return Column.calcValue(self, row)

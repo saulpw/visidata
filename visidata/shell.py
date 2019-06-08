@@ -149,15 +149,18 @@ class DirSheet(Sheet):
             except Exception as e:
                 exceptionCaught(e)
 
-        for row, cols in changes.values():
-            for col in cols:
-                try:
-                    col.putValue(row, col._modifiedValues[self.rowid(row)])
-                    self.restat(row)
-                except Exception as e:
-                    exceptionCaught(e)
+        modrows = {}  # rowid(row) -> row
+        for col, row, val in changes.values():
+            try:
+                col.putValue(row, val)
+                modrows[self.rowid(row)] = row
+            except Exception as e:
+                exceptionCaught(e)
 
         for row in adds.values():
+            self.restat(row)
+
+        for row in modrows.values():
             self.restat(row)
 
     @asyncthread

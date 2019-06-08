@@ -158,15 +158,15 @@ class GitLogSheet(GitSheet):
             self.addRow(record.split('\x1f'))
 
     @asyncthread
-    def commit(self, adds, changes, deletes):
+    def commit(self, adds, mods, dels):
 
         assert not adds
-        assert not deletes
+        assert not dels
 
-        for row, cols in changes.values():
-            for col in cols:
+        for row, rowmods in mods.values():
+            for col, val in rowmods.values():
                 try:
-                    col.putValue(row, col._modifiedValues[self.rowid(row)])
+                    col.putValue(row, val)
                 except Exception as e:
                     exceptionCaught(e)
 
