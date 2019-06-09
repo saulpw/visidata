@@ -158,11 +158,11 @@ def changestr(self, adds, mods, deletes):
 def save(sheet, *rows):
     adds, mods, deletes = sheet.getDeferredChanges()
     cstr = sheet.changestr(adds, mods, deletes)
-    save_to_source = sheet.save_to_source
+    savingToSource = sheet.savesToSource
     confirm_overwrite = options.confirm_overwrite
     if not cstr:
         warning('no diffs')
-    if save_to_source:
+    if savingToSource:
         if isinstance(sheet.source, Path):
             path = sheet.source
         else:
@@ -170,12 +170,12 @@ def save(sheet, *rows):
     else:
         path = inputPath("save to: ", value=getDefaultSaveName(sheet))
         if str(path) == str(sheet.source):
-            save_to_source = True
+            savingToSource = True
 
-    if confirm_overwrite and save_to_source:
+    if confirm_overwrite and savingToSource:
         confirm('really %s? ' % cstr)
 
-    elif not save_to_source and path.exists():
+    elif not savingToSource and path.exists():
         confirm("%s already exists. overwrite? " % path.fqpn)
 
     sheet.commit(path, adds, mods, deletes)

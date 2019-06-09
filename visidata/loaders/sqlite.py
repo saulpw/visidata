@@ -11,7 +11,7 @@ open_db = open_sqlite3 = open_sqlite
 
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
-    save_to_source = True
+    savesToSource = True
 
     def resolve(self):
         'Resolve all the way back to the original source Path.'

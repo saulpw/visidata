@@ -61,7 +61,7 @@ class ColumnShell(Column):
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
-    save_to_source = True
+    savesToSource = True
     columns = [
         Column('directory',
             getter=lambda col,row: row.parent.relpath(col.sheet.source),

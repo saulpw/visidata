@@ -135,7 +135,7 @@ class GitLogSheet(GitSheet):
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
     rowtype = 'commits'
     defer = True
-    save_to_source = True
+    savesToSource = True
     columns = [
             ColumnItem('commitid', 0, width=8),
             ColumnItem('refnames', 1, width=12),
