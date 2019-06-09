@@ -162,6 +162,9 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     filetype = filetype or options.save_filetype
 
     if len(vsheets) > 1:
+        if givenpath.exists():
+            confirm("overwrite multiple? ")
+
         if not fn.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
             savefunc = getGlobals().get('multisave_' + filetype, None)
             if savefunc:
@@ -171,23 +174,26 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         # more than one sheet; either no specific multisave for save filetype, or path ends with /
 
         # save as individual files in the givenpath directory
-        if not givenpath.exists():
-            try:
-                os.makedirs(givenpath.resolve(), exist_ok=True)
-            except FileExistsError:
-                pass
+        try:
+            os.makedirs(givenpath.resolve(), exist_ok=True)
+        except FileExistsError:
+            pass
 
         assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
 
-        # get save function to call
-        savefunc = getattr(vs, 'save_'+filetype, None)
-        if not savefunc:
-            savefunc = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
+        globalsavefunc = getGlobals().get('save_' + filetype)
 
+        # get save function to call
         status('saving %s sheets to %s' % (len(vsheets), givenpath.fqpn))
         for vs in vsheets:
-            p = Path(os.path.join(givenpath.fqpn, vs.name+'.'+filetype))
-            savefunc(p, vs)
+            savefunc = getattr(vs, 'save_'+filetype, None)
+            if not savefunc:
+                savefunc = lambda p,vs=vs,f=globalsavefunc: f(p, vs)
+            if savefunc:
+                p = Path(os.path.join(givenpath.fqpn, vs.name+'.'+filetype))
+                savefunc(p)
+            else:
+                warning('no function to save %s as type %s' % (vs, filetype))
     else:
         # get save function to call
         savefunc = getattr(vsheets[0], 'save_'+filetype, None)
