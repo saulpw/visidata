@@ -61,6 +61,7 @@ class ColumnShell(Column):
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
+    save_to_source = True
     columns = [
         Column('directory',
             getter=lambda col,row: row.parent.relpath(col.sheet.source),
@@ -137,7 +138,7 @@ class DirSheet(Sheet):
             os.remove(path.resolve())
 
     @asyncthread
-    def commit(self, adds, changes, deletes):
+    def commit(self, path, adds, changes, deletes):
         oldrows = self.rows
         self.rows.clear()
         for r in oldrows:
@@ -162,6 +163,8 @@ class DirSheet(Sheet):
 
         for row in modrows.values():
             self.restat(row)
+
+        self.resetDeferredChanges()
 
     @asyncthread
     def reload(self):

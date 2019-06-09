@@ -134,6 +134,8 @@ class GitLogSheet(GitSheet):
     # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
     rowtype = 'commits'
+    defer = True
+    save_to_source = True
     columns = [
             ColumnItem('commitid', 0, width=8),
             ColumnItem('refnames', 1, width=12),
@@ -158,7 +160,7 @@ class GitLogSheet(GitSheet):
             self.addRow(record.split('\x1f'))
 
     @asyncthread
-    def commit(self, adds, mods, dels):
+    def commit(self, path, adds, mods, dels):
 
         assert not adds
         assert not dels
@@ -171,6 +173,7 @@ class GitLogSheet(GitSheet):
                     exceptionCaught(e)
 
         self.reload()
+        self.resetDeferredCommit()
 
 GitLogSheet.addCommand(None, 'delete-row', 'error("delete is not supported")')
 GitLogSheet.addCommand(None, 'add-row', 'error("commits cannot be added")')

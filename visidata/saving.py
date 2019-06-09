@@ -1,4 +1,4 @@
-from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer, asyncthread, options
+from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer, asyncthread, options, saveSheets, inputPath, getDefaultSaveName, warning, status, Path
 
 
 # deferred cached
@@ -91,15 +91,21 @@ def deleteRows(self, rows):
     for row in rows:
         self._deferredDels[self.rowid(row)] = row
 
-    if self.defer:
+    if self.sheet.defer:
         return
 
     self.deleteBy(lambda r,self=self,dels=self._deferredDels: self.rowid(r) in dels)
 
 
+@asyncthread
 @Sheet.api
-def commit(self, adds, changes, deletes):
-    return saveSheets(inputPath("save to: ", value=getDefaultSaveName(self)), self, confirm_overwrite=options.confirm_overwrite)
+def commit(sheet, path, adds, changes, deletes):
+    saveSheets(path, sheet, confirm_overwrite=options.confirm_overwrite)
+    for row, rowmods in sheet._deferredMods.values():
+        for col, val in rowmods.items():
+            col.putValue(row, val)
+
+    sheet.resetDeferredChanges()
 
 
 @Sheet.api
@@ -149,18 +155,31 @@ def changestr(self, adds, mods, deletes):
 
 
 @Sheet.api
-def save(self, *rows):
-    adds, mods, deletes = self.getDeferredChanges()
-    cstr = self.changestr(adds, mods, deletes)
-    if options.confirm_overwrite:
-        if not cstr:
-            warning('no diffs')
+def save(sheet, *rows):
+    adds, mods, deletes = sheet.getDeferredChanges()
+    cstr = sheet.changestr(adds, mods, deletes)
+    save_to_source = sheet.save_to_source
+    confirm_overwrite = options.confirm_overwrite
+    if not cstr:
+        warning('no diffs')
+    if save_to_source:
+        if isinstance(sheet.source, Path):
+            path = sheet.source
         else:
-            confirm('really %s? ' % cstr)
+            path = None
+    else:
+        path = inputPath("save to: ", value=getDefaultSaveName(sheet))
+        if str(path) == str(sheet.source):
+            save_to_source = True
 
-    self.commit(adds, mods, deletes)
+    if confirm_overwrite and save_to_source:
+        confirm('really %s? ' % cstr)
 
-    self.resetDeferredChanges()
+    elif not save_to_source and path.exists():
+        confirm("%s already exists. overwrite? " % path.fqpn)
+
+    sheet.commit(path, adds, mods, deletes)
+
 
 Sheet.addCommand('^S', 'save-sheet', 'save()')
 Sheet.addCommand('z^S', 'save-row', 'save(cursorRow)')

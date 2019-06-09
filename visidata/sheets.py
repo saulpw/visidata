@@ -655,6 +655,7 @@ class Sheet(BaseSheet):
 class SheetsSheet(Sheet):
     rowtype = 'sheets'
     precious = False
+    defer = False
     columns = [
         ColumnAttr('name', width=30),
         ColumnAttr('shortcut'),

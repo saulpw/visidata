@@ -101,7 +101,6 @@ def _rowdict(cols, row):
     return {c.name: Cell(c, row) for c in cols}
 
 
-@asyncthread
 def save_json(p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
@@ -110,7 +109,6 @@ def save_json(p, vs):
             fp.write(chunk)
 
 
-@asyncthread
 def save_jsonl(p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols

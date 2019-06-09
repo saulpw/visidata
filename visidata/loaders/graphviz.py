@@ -28,7 +28,6 @@ def is_valid(v):
     return True
 
 
-@asyncthread
 def save_dot(p, vs):
     unusedColors = 'orange green purple cyan red blue black'.split()
     assignedColors = {}

@@ -89,7 +89,6 @@ def load_csv(vs):
     return vs
 
 
-@asyncthread
 def save_csv(p, sheet):
     'Save as single CSV file, handling column names as first line.'
     with p.open_text(mode='w') as fp:

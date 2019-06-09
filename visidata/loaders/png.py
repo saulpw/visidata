@@ -67,7 +67,6 @@ class PNGDrawing(Canvas):
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))')
 PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)')
 
-@asyncthread
 def save_png(p, vs):
     if isinstance(vs, PNGSheet):
         pass

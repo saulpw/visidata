@@ -184,11 +184,6 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         if not savefunc:
             savefunc = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
 
-        # confirm overwrite only once for the whole save
-        if givenpath.exists():
-            if confirm_overwrite:
-                confirm('%s already exists. overwrite? ' % fn)
-
         status('saving %s sheets to %s' % (len(vsheets), givenpath.fqpn))
         for vs in vsheets:
             p = Path(os.path.join(givenpath.fqpn, vs.name+'.'+filetype))
@@ -199,10 +194,6 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         if not savefunc:
             f = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
             savefunc = lambda p,vs=vsheets[0],f=f: f(p, vs)
-
-        if givenpath.exists():
-            if confirm_overwrite:
-                confirm('%s already exists. overwrite? ' % fn)
 
         status('saving to %s as %s' % (givenpath.fqpn, filetype))
         savefunc(givenpath)
@@ -264,7 +255,6 @@ def open_txt(p):
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, p)
 
-@asyncthread
 def save_txt(p, *vsheets):
     with p.open_text(mode='w') as fp:
         for vs in vsheets:

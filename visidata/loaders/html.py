@@ -104,7 +104,6 @@ class HtmlTableSheet(Sheet):
                 self.addColumn(Column(name+'_link'+str(linknum), width=20, getter=lambda c,r,i=colnum,j=linknum: r[i][1][j]))
 
 
-@asyncthread
 def save_html(p, *vsheets):
     'Save vsheets as HTML tables in a single file'
 

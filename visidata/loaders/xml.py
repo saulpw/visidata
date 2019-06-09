@@ -8,7 +8,6 @@ def open_xml(p):
 open_svg = open_xml
 
 
-@asyncthread
 def save_xml(p, vs):
     vs.source.write(p.resolve(), encoding=options.encoding, standalone=False, pretty_print=True)
 save_svg = save_xml

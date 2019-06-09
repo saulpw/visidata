@@ -60,7 +60,6 @@ class Column(Extensible):
         self.height = 1       # max height, None/0 to auto-compute for each row
         self.keycol = False   # is a key column
         self.expr = None      # Column-type-dependent parameter
-        self.defer = False    # deferred setting
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -251,7 +250,7 @@ class Column(Extensible):
         return self.setter(self, row, value)
 
     def setValue(self, row, val):
-        if self.defer:
+        if self.sheet.defer:
             if self.getValue(row) != val:
                 rowid = self.sheet.rowid(row)
                 if rowid not in self.sheet._deferredMods:

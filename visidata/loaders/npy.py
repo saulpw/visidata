@@ -56,7 +56,6 @@ class NpzSheet(open_zip):
 
 
 
-@asyncthread
 def save_npy(p, sheet):
     import numpy as np
 
