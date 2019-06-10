@@ -693,6 +693,8 @@ def replace(vd, vs):
 def remove(vd, vs):
     if vs in vd.sheets:
         vd.sheets.remove(vs)
+        vd.allSheets.remove(vs)
+        vd.allSheets.append(vs)
     else:
         vd.fail('sheet not on stack')
 
@@ -733,7 +735,7 @@ def sheetsSheet(vd):
 def quit(self):
     if len(vd.sheets) == 1 and options.quitguard:
         vd.confirm("quit last sheet? ")
-    return vd.sheets.pop(0)
+    return vd.remove(vd.sheets[0])
 
 
 undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
