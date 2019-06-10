@@ -9,7 +9,7 @@ option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader', re
 option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True)
 option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
 
-csv.field_size_limit(sys.maxsize)
+csv.field_size_limit(2**31-1) # Windows has max 32-bit
 
 options_num_first_rows = 10
 
