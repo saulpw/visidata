@@ -33,6 +33,8 @@
             - to download and install a plugin, move the cursor to its row and press `a` (add)
             - to uninstall a plugin, move the cursor to its row and press `d` (delete).
         - for more information see (https://visidata.org/docs/plugins)
+    - deferred changes
+        - modifications are now highlighted with yellow, until committed to with `^S` (`save-sheet`)
 
 ## interface changes
 
@@ -76,17 +78,23 @@
 
 ## Additions and improvements
 
+- [addcol-new] does not ask for column name
 - [aggr] add `list` aggregator (thanks @chocolateboy #263)
 - [chooseMany] error() on invalid choice #169
 - [command append join] add append-sheets-top2 (`&`) / append-sheets-all (`g&`) to concatenate top 2/all sheets in sheets-stack
 - [command sort] `sort-*-add` bound to z[] and gz[] to add additional sort columns
 - [command syspaste-cells] add `syspaste-cells` to paste into vd from system clipboard (thanks kovasap for PR #258)
 - [DirSheet] include folders and hidden files
+- [exec-longname] enable history
 - [freeze-sheet] only freeze visibleCols
+- [html] add links column where hrefs available (suggested by @am-zed #278)
 - [license] remove MIT license from vdtui; all code now licensed under GPL3
 - [loader Pyobj] `py` filetype to import and explore a python module: `vd -f py curses`
 - [loader pyxlsb] add .xlsb loader (suggested by @woutervdijke #246)
-- [loader npy] add .npy loader
+- [loader ndjson ldjson] add as aliases for jsonl
+- [loader npy] add .npy loader, including type detection
+- [loader npz] add support for .npz index
+- [loader usv] add .usv loader
 - [mouse] bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - [mouse] slide columns/rows with left-click and drag
 - [openSource] create new blank sheet if file does not exist
@@ -98,6 +106,7 @@
 - [pandas] impement sort() for pandas DataFrame (suggested by @migueldvb #257)
 - [pandas] use value_counts() for PandasSheetFreqTable (thanks @azjps for PR #267)
 - [pandas] selection support for PandasSheet (thanks @azjps for PR #267)
+- [pandas] reset index (thanks @danlat #277)
 - [pandas] if the df contains an index column, hide it
 - [pcap] adds saver for .pcap to json (thanks @layertwo for PR #272)
 - [perf] expr columns are now set to cache automatically
@@ -106,6 +115,7 @@
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
 - [sqlite] add support for .sqlite3 extension
+- [win] several changes made for increased windows-compatibility (thanks @scholer!)
 
 
 
@@ -126,7 +136,8 @@
 - use locale.format_string and .currency
     - uses user default locale settings at startup
     - changes fmtstr back to %fmt (from {:fmt})
-- separate out vdtui components into submodules: editline, textsheet, cliptext, color, column, sheet
+- vdtui broken apart into separate modules: editline, textsheet, cliptext, color, column, sheet
+    - much code reorganization throughout
 - convert all `vd()` to `vd`
 - remove ArrayColumns, NamedArrayColumns
 - urlcache now takes days=n
@@ -136,6 +147,7 @@
 - add VisiData.finalInit() stage
     - call vd.finalInit() at end of module imports to initialise VisiData.init() members
     - so that e.g. cmdlog is not created until all internal sheet-specific options has been set
+- remove replayableOption() (now replay an argument within option())
 
 ## Deps
 - add dateutil as submodule
