@@ -16,6 +16,10 @@ setup(name='visidata',
       url='https://visidata.org',
       download_url='https://github.com/saulpw/visidata/tarball/' + __version__,
       scripts=['bin/vd'],
+      entry_points={'console_scripts': [
+          'visidata=visidata.main:vd_cli'
+        ],
+      },
       py_modules = ['visidata'],
       packages=['visidata',  'visidata.loaders'],
       include_package_data=True,
