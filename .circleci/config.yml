@@ -3,8 +3,6 @@ workflows:
   version: 2
   test:
     jobs:
-      - test-3.4
-      - test-3.5
       - test-3.6
 jobs:
   test-3.4: &test-template

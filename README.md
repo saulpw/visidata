@@ -7,7 +7,7 @@ A terminal interface for exploring and arranging tabular data.
 ## Dependencies
 
 - Linux or OS/X
-- Python 3.4+
+- Python 3.6+
 - python-dateutil
 - other modules may be required for opening particular data sources
     - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](https://visidata.org/man/#loaders) in the vd manpage

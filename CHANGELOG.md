@@ -2,6 +2,10 @@
 
 # v2.-3 ()
 
+## Major changes
+
+    - Minimum Python requirement bumped to 3.6
+
 ## Major features
 
     - add ALT/ESC as prefix; ALT+N to go to that sheet
