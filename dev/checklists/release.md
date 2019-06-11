@@ -28,7 +28,7 @@
 
    c. update version number on README and front page of website (update dates here too);
 
-   d. bump version in `__version__` in source code (bin/vd, visidata/vdtui.py) and setup.py;
+   d. bump version in `__version__` in source code (visidata/main.py, visidata/vdtui.py) and setup.py;
 
 6. Run dev/mkman.sh to build the manpage and updated website
 

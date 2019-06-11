@@ -1,6 +1,6 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.-3dev'
+__version__ = '2.-1dev'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
