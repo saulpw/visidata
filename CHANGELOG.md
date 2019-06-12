@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.-1 ()
+# v2.-1 (TBD)
 
 ## Major changes
 
@@ -8,8 +8,8 @@
 
 ## Major features
 
-    - add ALT/ESC as prefix; ALT+N to go to that sheet
-       - ALT+ layer not otherwise used; bind with `^[x` for `ALT+X`
+    - add Alt/Esc as prefix; Alt+# to go to that sheet
+       - Alt+ layer not otherwise used; bind with `^[x` for Alt+X
     - vgit
     - undo/redo
         - [new command] `options.undo` (default False) to enable infinite linear undo/redo

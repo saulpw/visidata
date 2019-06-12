@@ -10,7 +10,7 @@ from visidata import VisiData, vd, option, options, status, globalCommand, Sheet
 from visidata import ColumnAttr, Column, ENTER
 from visidata import *
 
-__all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet', 'codestr']
+__all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet', 'codestr', 'asyncsingle']
 
 
 option('profile', '', 'filename to save binary profiling data')
@@ -200,6 +200,23 @@ def _toplevelTryFunc(func, *args, status=status, **kwargs):
 
     if t.sheet:
         t.sheet.currentThreads.remove(t)
+
+def asyncsingle(func):
+    'Decorator for an @asyncthread singleton.  Calls `func(...)` in a separate thread, canceling any previous thread for this function.'
+    @functools.wraps(func)
+    def _execAsync(*args, **kwargs):
+        def _func(*args, **kwargs):
+            func(*args, **kwargs)
+            _execAsync.searchThread = None
+            # end of thread
+
+        # cancel previous thread if running
+        if _execAsync.searchThread:
+            cancelThread(_execAsync.searchThread)
+
+        _execAsync.searchThread = vd.execAsync(_func, *args, **kwargs)
+    _execAsync.searchThread = None
+    return _execAsync
 
 @VisiData.property
 def unfinishedThreads(self):
