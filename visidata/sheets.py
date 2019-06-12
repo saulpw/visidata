@@ -693,8 +693,9 @@ def replace(vd, vs):
 def remove(vd, vs):
     if vs in vd.sheets:
         vd.sheets.remove(vs)
-        vd.allSheets.remove(vs)
-        vd.allSheets.append(vs)
+        if vs in vd.allSheets:
+            vd.allSheets.remove(vs)
+            vd.allSheets.append(vs)
     else:
         vd.fail('sheet not on stack')
 
