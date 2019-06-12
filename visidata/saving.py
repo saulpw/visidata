@@ -6,9 +6,6 @@ Sheet.init('_deferredAdds', dict) # [s.rowid(row)] -> row
 Sheet.init('_deferredMods', dict) # [s.rowid(row)] -> (row, { [col] -> val })
 Sheet.init('_deferredDels', dict) # [s.rowid(row)] -> row
 
-Sheet.init('defer', lambda: True) # set to False for add/delete to take place immediately
-Column.init('defer', lambda: True) # set to False to call putValue immediately on set
-
 Sheet.colorizers += [
         CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
         RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: s.rowid(r) in s._deferredDels),
