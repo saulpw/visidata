@@ -724,7 +724,10 @@ def push(vd, vs, sheets=None):
     'Move given sheet `vs` to index 0 of list `sheets`.'
     if sheets is None:
         sheets = vd.sheets
-    if vs:
+
+    if not isinstance(vs, BaseSheet):
+        return  # return instead of raise, some commands
+    else:
         vs.vd = vd
         if vs in sheets:
             sheets.remove(vs)
