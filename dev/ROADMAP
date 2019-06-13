@@ -1,99 +1,64 @@
 # Roadmap to 2.0
 
-## 1. Stable, Documented Internal Python API
+## API
 
-- to reuse internal VisiData components in non-VisiData TUIs
-- to create external plugins/apps for use within VisiData (see below)
+The primary goal of 2.0 is a stable, documented Python API that can be used to create an broad ecosystem of loaders, plugins, and apps.
+
+Deliverables:
+
 - api.tsv
 - proper sandbox for exec (for some plugin safety)
 
-## 2. Plugin api/package manager
-
-[done] deprecate vdtui.py as single file dropin TUI
-- in-app downloadable/installable snippets
-
-## 3. Split panes
+## Split panes
 
 - horizontal or vertical split
-- no more than two panes
 - one pane can be dependent on the other; e.g. move cursor in one, see preview update in other
+- use for choosing aggregators, command help, other choose()
 
-## 4. Undo #141
+## Installers
 
-- [done] infinite linear undo/redo
-
-## 5. Simple non-python installers
-
-- .dmg for macos
+- .pkg for macos
 - .exe for windows
-- both include full Python install
+- snap for linux
 
-## 6. save code to get to current sheet/row/cell
-
-- remove superfluous sheets
-- output .sql or .py code
-- or as jupyter-style notebook
-
-## 7. Mouse-ability
-
-- allow user to disable mouse for system copy/paste
-- clickable column headers to set type/name, click-drag to move columns/rows
-- clickable status items (including motd)
-- info mode: mouse hover describes interface components and/or shows relevant commands
-
-## 8. Integrate DeferredSet to all sheets
+## Minor features
 
 - 'modified' indicator on status bar, also enables quitguard
-[done] sqlite: allow in-memory edits, ^S to commit
-  - index sheet: include rows/cols; allow to be cutnpasted
 
-## 9. Loaders and Savers
-
-[done] parquet #112
-- .mdb, .accdb
-- google sheets
-- save canvas to .svg (canvassave_svg)
-- multisave_hdf5
-
-## 10. Other additions
+## Refactor and Cleanup
 
 - numeric binning for pivot table
-- 'v' hide cols which have errors on cursor row
-   - or should 'v' be 'toggle-visibility' on all sheets?
+- remove all asserts; replace with error() on case-by-case basis
+
+## Loaders and Savers
+
+- [google sheets] loader with savesToSource
+- [sqlite] index sheet, include rows/cols; allow to be cutnpasted
+- [canvas] Canvas.save_svg
+- [hdf5] multisave_hdf5
+- [ipybnb] Sheet.save_ipynb
+- [sql] Sheet.save_sql
+
+# Polish Wishlist
+
+- [options] allow list or dict of enum values
+- [datetime] handle timezone
+- [currency] track currency kind/symbol
+- SI display format (1210000000 -> 1.21G)
+- [columns] add helpstr for all specialized-sheet columns
+- [columns] add "transforms list" to column (type is last transform)
+- [status] use multiple lines on overflow
+- [dirsheet] archive/extract (zip/unzip and relatives)
+- [regex] add "/flags" to regex commands for per-instance regex flags
+
+# Maybe Someday
+
 - [ColumnsSheet] show subcolumns and their parent column (for expand/contract)
-- [cmdlog] add timestamp?
 
-- graveyard sheet improvements
-   - start/drop datetimes
-   - number of derivative sheets (two columns, for immediate children and to any depth)
-   - number of commands executed on that sheet (as a list so they can be viewed separately)
+- [sheets] start/drop datetimes
+   - [sheets] number of derivative sheets (two columns, for immediate children and to any depth)
+   - [sheets] number of commands executed on that sheet (as a list so they can be viewed separately)
 
-- error history with error objects
-- error sheet showing row-form traceback
-   - ^O to edit
-
-- rowmax aggregator ( rowmax(field) gets whole row)
-- add row number in hidden column on data sheets so that original (load) order can be restored
-- handle timezone for datetime
-- options should allow list or dict of enum values
-- column helpstr (esp for non-data sheets)
-- macro parameterization
-- g^D bug report
-- zip/unzip from dirsheet
-- status rework: use logging module?  use multiple lines on overflow?
-- proper dive on json
-- tech debt: remove all asserts; possibly replace with error()
-
-- add "/flags" to regex commands for per-instance regex flags
-- SI() units converter
-- new command: apply action/macro to each selected row
-- add "transforms list" to column (type is last transform)
-
-
-# Other applications with a vd-like interface
-
-- [vgit](http://github.com/saulpw/vgit) (currently v0.2)
-    like magit but for vim/visidata/python users
 - [vsh](http://github.com/saulpw/vsh) (unreleased)
    - vtop (includes kill/killall/ps)
    - vls (rm/mv/cp/mount/find/grep/mkdir/rmdir/ln/touch)
@@ -101,17 +66,12 @@
    - vping
    - vproc (explore /proc filesystem with some added goodies)
 - vsql: interacts with remote sql databases; no loading required
-   - save commandlog as .sql
-- vpy (python explorer/debugger)
-   - save commandlog as python code
-- vchat
+- vpy: python explorer/debugger
+- vchat: wechat with data features
 - [vdgalcon](http://github.com/saulpw/vdgalcon)
-- vscrape
-   - convenient interface to REST and other APIs
-   - point at a website and collect datasets, tables, textual data
-   - add jq-style selectors
+- vscrape: point at a website and collect datasets, tables, textual data
+- vapi: convenient interface to REST and other APIs
 - vstats
    - save commandlog as ipynb, markdown, or html
-- vdbg
 - vaws
 - `vd --server` pops up a local web server, for a visidata-like web interface to local files
