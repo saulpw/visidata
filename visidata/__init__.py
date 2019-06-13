@@ -50,7 +50,6 @@ from ._input import *
 from .movement import *
 from .path import *
 from .urlcache import *
-from .zscroll import *
 from .selection import *
 from .loaders.tsv import *
 from .data import *
@@ -79,8 +78,6 @@ from .shell import *
 from .layout import *
 from .saving import *
 import visidata.sort
-
-from .vimkeys import *
 
 from .loaders.csv import *
 from .loaders.json import *

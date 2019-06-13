@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, error, status, Sheet, Column, fail, Progress, globalCommand, ESC
+from visidata import vd, VisiData, error, status, BaseSheet, Sheet, Column, fail, Progress, globalCommand, ESC
 
 __all__ = ['rotate_range']
 
@@ -24,30 +24,41 @@ def rotate_range(n, idx, reverse=False):
                 wrapped = True
             yield r
 
+@Sheet.api
+def pageLeft(self):
+    '''Redraw page one screen to the left.
 
-Sheet.addCommand('c', 'go-col-regex', 'sheet.cursorVisibleColIndex=nextColRegex(input("column name regex: ", type="regex-col", defaultLast=True))')
-Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; vd.moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp')
-Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))')
-Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))')
+    Note: keep the column cursor in the same general relative position:
 
-Sheet.addCommand('/', 'search-col', 'vd.moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)'),
-Sheet.addCommand('?', 'searchr-col', 'vd.moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)'),
-Sheet.addCommand('n', 'next-search', 'vd.moveRegex(sheet, reverse=False)'),
-Sheet.addCommand('N', 'prev-search', 'vd.moveRegex(sheet, reverse=True)'),
+     - if it is on the furthest right column, then it should stay on the
+       furthest right column if possible
 
-Sheet.addCommand('g/', 'search-cols', 'vd.moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")'),
-Sheet.addCommand('g?', 'searchr-cols', 'vd.moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")'),
+     - likewise on the left or in the middle
 
-Sheet.addCommand('<', 'prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True) or status("no different value up this column")'),
-Sheet.addCommand('>', 'next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val) or status("no different value down this column")'),
-Sheet.addCommand('{', 'prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
-Sheet.addCommand('}', 'next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
+    So really both the `leftIndex` and the `cursorIndex` should move in
+    tandem until things are correct.'''
 
-Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
-Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
+    targetIdx = self.leftVisibleColIndex  # for rightmost column
+    firstNonKeyVisibleColIndex = self.visibleCols.index(self.nonKeyVisibleCols[0])
+    while self.rightVisibleColIndex != targetIdx and self.leftVisibleColIndex > firstNonKeyVisibleColIndex:
+        self.cursorVisibleColIndex -= 1
+        self.leftVisibleColIndex -= 1
+        self.calcColLayout()  # recompute rightVisibleColIndex
 
-for i in range(1, 11):
-    globalCommand(ESC+str(i)[-1], 'jump-sheet-'+str(i), 'vd.allSheets[%s:] or fail("no sheet"); vd.push(vd.allSheets[%s])' % (i-1, i-1))
+    # in case that rightmost column is last column, try to squeeze maximum real estate from screen
+    if self.rightVisibleColIndex == self.nVisibleCols-1:
+        # try to move further left while right column is still full width
+        while self.leftVisibleColIndex > 0:
+            rightcol = self.visibleCols[self.rightVisibleColIndex]
+            if rightcol.width > self.visibleColLayout[self.rightVisibleColIndex][1]:
+                # went too far
+                self.cursorVisibleColIndex += 1
+                self.leftVisibleColIndex += 1
+                break
+            else:
+                self.cursorVisibleColIndex -= 1
+                self.leftVisibleColIndex -= 1
+                self.calcColLayout()  # recompute rightVisibleColIndex
 
 
 @Sheet.api
@@ -129,3 +140,104 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
                     yield r
 
         status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
+
+
+Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
+Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),
+Sheet.addCommand(None, 'go-up',    'cursorDown(-1)'),
+Sheet.addCommand(None, 'go-right', 'cursorRight(+1)'),
+Sheet.addCommand(None, 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
+Sheet.addCommand(None, 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
+
+Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
+Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
+Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
+Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
+
+Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=visibleRowAtY(mouseY) or sheet.cursorRowIndex; sheet.cursorVisibleColIndex=visibleColAtX(mouseX) or sheet.cursorVisibleColIndex'),
+
+Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
+
+Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
+Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
+
+Sheet.addCommand('c', 'go-col-regex', 'sheet.cursorVisibleColIndex=nextColRegex(input("column name regex: ", type="regex-col", defaultLast=True))')
+Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; vd.moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp')
+Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))')
+Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))')
+
+Sheet.addCommand('/', 'search-col', 'vd.moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)'),
+Sheet.addCommand('?', 'searchr-col', 'vd.moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)'),
+Sheet.addCommand('n', 'next-search', 'vd.moveRegex(sheet, reverse=False)'),
+Sheet.addCommand('N', 'prev-search', 'vd.moveRegex(sheet, reverse=True)'),
+
+Sheet.addCommand('g/', 'search-cols', 'vd.moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")'),
+Sheet.addCommand('g?', 'searchr-cols', 'vd.moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")'),
+
+Sheet.addCommand('<', 'prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True) or status("no different value up this column")'),
+Sheet.addCommand('>', 'next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val) or status("no different value down this column")'),
+Sheet.addCommand('{', 'prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")'),
+Sheet.addCommand('}', 'next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")'),
+
+Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")'),
+Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
+
+for i in range(1, 11):
+    globalCommand(ESC+str(i)[-1], 'jump-sheet-'+str(i), 'vd.allSheets[%s:] or fail("no sheet"); vd.push(vd.allSheets[%s])' % (i-1, i-1))
+
+BaseSheet.bindkey('KEY_LEFT', 'go-left')
+BaseSheet.bindkey('KEY_DOWN', 'go-down')
+BaseSheet.bindkey('KEY_UP', 'go-up')
+BaseSheet.bindkey('KEY_RIGHT', 'go-right')
+BaseSheet.bindkey('KEY_HOME', 'go-top')
+BaseSheet.bindkey('KEY_END', 'go-bottom')
+BaseSheet.bindkey('KEY_NPAGE', 'next-page')
+BaseSheet.bindkey('KEY_PPAGE', 'prev-page')
+
+BaseSheet.bindkey('gKEY_LEFT', 'go-leftmost'),
+BaseSheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
+BaseSheet.bindkey('gKEY_UP', 'go-top'),
+BaseSheet.bindkey('gKEY_DOWN', 'go-bottom'),
+
+Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
+Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
+
+# vim-style scrolling with the 'z' prefix
+Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nVisibleRows/2)')
+
+Sheet.addCommand(None, 'page-right', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex')
+Sheet.addCommand(None, 'page-left', 'pageLeft()')
+Sheet.addCommand('zh', 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr')
+Sheet.addCommand('zl', 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr')
+Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex')
+Sheet.addCommand(None, 'scroll-rightmost', 'tmp = cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColIndex = tmp')
+
+Sheet.addCommand(None, 'go-end',  'sheet.cursorRowIndex = len(rows)-1; sheet.cursorVisibleColIndex = len(visibleCols)-1')
+Sheet.addCommand(None, 'go-home', 'sheet.topRowIndex = sheet.cursorRowIndex = 0; sheet.leftVisibleColIndex = sheet.cursorVisibleColIndex = 0')
+
+BaseSheet.bindkey('CTRL-BUTTON4_PRESSED', 'scroll-left')
+BaseSheet.bindkey('CTRL-REPORT_MOUSE_POSITION', 'scroll-right')
+
+BaseSheet.bindkey('zk', 'scroll-up')
+BaseSheet.bindkey('zj', 'scroll-down')
+BaseSheet.bindkey('zKEY_UP', 'scroll-up')
+BaseSheet.bindkey('zKEY_DOWN', 'scroll-down')
+BaseSheet.bindkey('zKEY_LEFT', 'scroll-left')
+BaseSheet.bindkey('zKEY_RIGHT', 'scroll-right')
+
+# vim-like keybindings
+
+BaseSheet.bindkey('h', 'go-left'),
+BaseSheet.bindkey('j', 'go-down'),
+BaseSheet.bindkey('k', 'go-up'),
+BaseSheet.bindkey('l', 'go-right'),
+BaseSheet.bindkey('^F', 'next-page'),
+BaseSheet.bindkey('^B', 'prev-page'),
+BaseSheet.bindkey('gg', 'go-top'),
+BaseSheet.bindkey('G',  'go-bottom'),
+BaseSheet.bindkey('gj', 'go-bottom'),
+BaseSheet.bindkey('gk', 'go-top'),
+BaseSheet.bindkey('gh', 'go-leftmost'),
+BaseSheet.bindkey('gl', 'go-rightmost')
+
+BaseSheet.addCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')

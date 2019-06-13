@@ -16,6 +16,63 @@ __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'SheetsS
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
+option('textwrap_cells', True, 'wordwrap text for multiline rows')
+
+option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
+option('quitguard', False, 'confirm before quitting last sheet')
+option('debug', False, 'exit on error and display stacktrace')
+theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
+theme('use_default_colors', False, 'curses use default terminal colors')
+
+theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
+theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
+theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
+theme('disp_status_fmt', '{sheet.shortcut}〉{sheet.name}| ', 'status line prefix')
+theme('disp_lstatus_max', 0, 'maximum length of left status line')
+theme('disp_status_sep', ' | ', 'separator between statuses')
+theme('disp_more_left', '<', 'header note indicating more columns to the left')
+theme('disp_more_right', '>', 'header note indicating more columns to the right')
+theme('disp_error_val', '', 'displayed contents for computation exception')
+theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
+
+theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
+theme('color_status', 'bold', 'status line color')
+theme('color_error', 'red', 'error message color')
+theme('color_warning', 'yellow', 'warning message color')
+
+theme('disp_pending', '', 'string to display in pending cells')
+theme('note_pending', '⌛', 'note to display for pending cells')
+theme('note_format_exc', '?', 'cell note for an exception during formatting')
+theme('note_getter_exc', '!', 'cell note for an exception during computation')
+theme('note_type_exc', '!', 'cell note for an exception during type conversion')
+theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
+
+theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
+theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
+theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
+theme('disp_column_sep', '╵', 'separator between columns')
+theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
+theme('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
+theme('disp_rowmid_sep', '│', '') # ┃┊│█
+theme('disp_rowbot_sep', '╵', '') # ┊┴╿⌞█⍿╵⎢┴⌊
+theme('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
+theme('disp_keytop_sep', '║', '') # ╽╿┃╖╟
+theme('disp_keymid_sep', '║', '') # ╽╿┃
+theme('disp_keybot_sep', '║', '') # ╽╿┃╜‖
+theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
+theme('disp_endmid_sep', '║', '') # ╽╿┃
+theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
+
+theme('color_default', 'normal', 'the default color')
+theme('color_default_hdr', 'bold', 'color of the column headers')
+theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
+theme('color_current_row', 'reverse', 'color of the cursor row')
+theme('color_current_col', 'bold', 'color of the cursor column')
+theme('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
+theme('color_column_sep', '246 blue', 'color of column separators')
+theme('color_key_col', '81 cyan', 'color of key columns')
+theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
+theme('color_selected_row', '215 yellow', 'color of selected rows')
 
 
 def splitcell(s, width=0):
@@ -297,41 +354,6 @@ class Sheet(BaseSheet):
         'Move cursor right `n` visible columns (or left if `n` is negative).'
         self.cursorVisibleColIndex += n
         self.calcColLayout()
-
-    def pageLeft(self):
-        '''Redraw page one screen to the left.
-
-        Note: keep the column cursor in the same general relative position:
-
-         - if it is on the furthest right column, then it should stay on the
-           furthest right column if possible
-
-         - likewise on the left or in the middle
-
-        So really both the `leftIndex` and the `cursorIndex` should move in
-        tandem until things are correct.'''
-
-        targetIdx = self.leftVisibleColIndex  # for rightmost column
-        firstNonKeyVisibleColIndex = self.visibleCols.index(self.nonKeyVisibleCols[0])
-        while self.rightVisibleColIndex != targetIdx and self.leftVisibleColIndex > firstNonKeyVisibleColIndex:
-            self.cursorVisibleColIndex -= 1
-            self.leftVisibleColIndex -= 1
-            self.calcColLayout()  # recompute rightVisibleColIndex
-
-        # in case that rightmost column is last column, try to squeeze maximum real estate from screen
-        if self.rightVisibleColIndex == self.nVisibleCols-1:
-            # try to move further left while right column is still full width
-            while self.leftVisibleColIndex > 0:
-                rightcol = self.visibleCols[self.rightVisibleColIndex]
-                if rightcol.width > self.visibleColLayout[self.rightVisibleColIndex][1]:
-                    # went too far
-                    self.cursorVisibleColIndex += 1
-                    self.leftVisibleColIndex += 1
-                    break
-                else:
-                    self.cursorVisibleColIndex -= 1
-                    self.leftVisibleColIndex -= 1
-                    self.calcColLayout()  # recompute rightVisibleColIndex
 
     def addColumn(self, col, index=None):
         'Insert column at given index or after all columns.'
@@ -741,26 +763,6 @@ globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.she
 globalCommand('S', 'sheets-all', 'vd.push(vd.sheetsSheet)')
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
-
-Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
-Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),
-Sheet.addCommand(None, 'go-up',    'cursorDown(-1)'),
-Sheet.addCommand(None, 'go-right', 'cursorRight(+1)'),
-Sheet.addCommand(None, 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
-Sheet.addCommand(None, 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
-
-Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
-Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
-Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nVisibleRows'),
-Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1'),
-
-Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=visibleRowAtY(mouseY) or sheet.cursorRowIndex; sheet.cursorVisibleColIndex=visibleColAtX(mouseX) or sheet.cursorVisibleColIndex'),
-
-Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
-
-Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr'),
-Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr'),
-
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', undo=undoRestoreKey),
@@ -792,86 +794,9 @@ SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("descri
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
 
-BaseSheet.bindkey('KEY_LEFT', 'go-left')
-BaseSheet.bindkey('KEY_DOWN', 'go-down')
-BaseSheet.bindkey('KEY_UP', 'go-up')
-BaseSheet.bindkey('KEY_RIGHT', 'go-right')
-BaseSheet.bindkey('KEY_HOME', 'go-top')
-BaseSheet.bindkey('KEY_END', 'go-bottom')
-BaseSheet.bindkey('KEY_NPAGE', 'next-page')
-BaseSheet.bindkey('KEY_PPAGE', 'prev-page')
-
-BaseSheet.bindkey('gKEY_LEFT', 'go-leftmost'),
-BaseSheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
-BaseSheet.bindkey('gKEY_UP', 'go-top'),
-BaseSheet.bindkey('gKEY_DOWN', 'go-bottom'),
-
-Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
-Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
-
 globalCommand('q', 'quit-sheet',  'vd.quit()')
 globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
 
 globalCommand('^L', 'redraw', 'sheet.refresh()')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')
-
-
-# options can only be defined after BaseSheet is defined
-option('textwrap_cells', True, 'wordwrap text for multiline rows')
-
-option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
-option('quitguard', False, 'confirm before quitting last sheet')
-option('debug', False, 'exit on error and display stacktrace')
-theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-theme('use_default_colors', False, 'curses use default terminal colors')
-
-theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
-theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
-theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
-theme('disp_status_fmt', '{sheet.shortcut}〉{sheet.name}| ', 'status line prefix')
-theme('disp_lstatus_max', 0, 'maximum length of left status line')
-theme('disp_status_sep', ' | ', 'separator between statuses')
-theme('disp_more_left', '<', 'header note indicating more columns to the left')
-theme('disp_more_right', '>', 'header note indicating more columns to the right')
-theme('disp_error_val', '', 'displayed contents for computation exception')
-theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
-
-theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
-theme('color_status', 'bold', 'status line color')
-theme('color_error', 'red', 'error message color')
-theme('color_warning', 'yellow', 'warning message color')
-
-theme('disp_pending', '', 'string to display in pending cells')
-theme('note_pending', '⌛', 'note to display for pending cells')
-theme('note_format_exc', '?', 'cell note for an exception during formatting')
-theme('note_getter_exc', '!', 'cell note for an exception during computation')
-theme('note_type_exc', '!', 'cell note for an exception during type conversion')
-theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
-
-theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
-theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
-theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
-theme('disp_column_sep', '╵', 'separator between columns')
-theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
-theme('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
-theme('disp_rowmid_sep', '│', '') # ┃┊│█
-theme('disp_rowbot_sep', '╵', '') # ┊┴╿⌞█⍿╵⎢┴⌊
-theme('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
-theme('disp_keytop_sep', '║', '') # ╽╿┃╖╟
-theme('disp_keymid_sep', '║', '') # ╽╿┃
-theme('disp_keybot_sep', '║', '') # ╽╿┃╜‖
-theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
-theme('disp_endmid_sep', '║', '') # ╽╿┃
-theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
-
-theme('color_default', 'normal', 'the default color')
-theme('color_default_hdr', 'bold', 'color of the column headers')
-theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
-theme('color_current_row', 'reverse', 'color of the cursor row')
-theme('color_current_col', 'bold', 'color of the cursor column')
-theme('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
-theme('color_column_sep', '246 blue', 'color of column separators')
-theme('color_key_col', '81 cyan', 'color of key columns')
-theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
-theme('color_selected_row', '215 yellow', 'color of selected rows')
