@@ -145,6 +145,38 @@ class OptionsSheet(Sheet):
             self.addRow(opt)
         self.columns[1].name = 'global_value' if self.source == 'override' else 'sheet_value'
 
+
+class VisiDataSheet(Sheet):
+    rowtype = 'metasheets'
+    columns = [
+        ColumnItem('shortcut', 3, width=10),
+        ColumnItem('name', 1),
+        ColumnItem('command', 2, width=0),
+        ColumnItem('description', 4),
+    ]
+
+    def reload(self):
+        self.rows = [
+            (vd.sheetsSheet, 'sheets', 'open-sheets', 'z Shift S', 'current sheet stack'),
+            (vd.allSheets, 'sheets_all', 'open-sheets-all', 'Shift S', 'all sheets ever opened'),
+            (vd.cmdlog, 'cmdlog', 'open-cmdlog', 'Shift D', 'log of commands this session'),
+            (vd.globalOptionsSheet, 'options_global', 'open-options', 'Shift O', 'default option values applying to every sheet'),
+            (vd.lastErrors, 'errors', 'open-errors', 'Ctrl E', 'stacktrace of most recent error'),
+            (vd.statusHistory, 'statuses', 'open-statuses', 'Ctrl P', 'status messages from current session'),
+            (vd.threadsSheet, 'threads', 'open-threads', 'Ctrl T', 'threads and profiling'),
+            (vd.pluginsSheet, 'plugins', 'open-plugins', '', 'plugins repository'),
+        ]
+
+
+@VisiData.cached_property
+def vdmenu(self):
+    vs = VisiDataSheet('VisiData Main Menu', source=vd)
+    vs.reload()
+    return vs
+
+BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)')
+VisiDataSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow[0])')
+
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lambda source=source,opt=cursorRow,val=options.get(cursorRow.name,source): options.set(opt.name, val, source)')
 
 OptionsSheet.bindkey('e', 'edit-option')

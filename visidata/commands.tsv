@@ -253,7 +253,7 @@ Sheet	unselect-cols-regex	g	\	g\	n	change	n	y		rows-unselect-regex-all	unselect 
 Sheet	unselect-expr	z	\	z\	n	change	n	y		rows-unselect-expr	unselect rows with a Python expression
 Sheet	unselect-row		u	u	n	change	n	y		rows-unselect-current	unselect current row
 Sheet	unselect-rows	g	u	gu	n	change	n	y	2,5	rows-unselect-all	unselect all rows
-Sheet	view-cell		V	V	derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
+Sheet	view-cell				derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
 Sheet	visibility		v	v	n	n	n	y			
 ProfileSheet	dive-cell	z	Enter	zEnter	y	n	n	y			open ProfileSheet for caller referenced in current cell
 ProfileSheet	dive-row		Enter	Enter	y	n	n	y			open ProfileSheet for calls referenced in current row
