@@ -125,14 +125,6 @@ class CommandLog(TsvSheet):
         self.rows = newrows
         debug('removed "%s" from cmdlog' % vs.name)
 
-    def saveMacro(self, rows, ks):
-        vs = copy(self)
-        vs.rows = self.selectedRows
-        macropath = Path(fnSuffix(options.visidata_dir+"macro-{0}.vd"))
-        save_vd(macropath, vs)
-        setMacro(ks, vs)
-        append_tsv_row(vd.macrosheet, (ks, macropath.resolve()))
-
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
         if not isLoggableSheet(sheet):
             return  # don't record editlog commands
@@ -377,7 +369,6 @@ class CommandLog(TsvSheet):
 CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
 CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
 CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
-CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))')
 options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
 def initCmdlog():
@@ -386,18 +377,3 @@ def initCmdlog():
     return vs
 
 VisiData.init('cmdlog', initCmdlog)
-
-@VisiData.cached_property
-def macrosheet(vd):
-    macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
-    macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or error('error loading macros')
-
-    for ks, fn in macrosheet.rows:
-        vs = loadInternalSheet(CommandLog, Path(fn))
-        setMacro(ks, vs)
-
-    return macrosheet
-
-def setMacro(ks, vs):
-    bindkeys.set(ks, vs.name, 'override')
-    commands.set(vs.name, vs, 'override')
