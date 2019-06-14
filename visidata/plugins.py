@@ -6,13 +6,11 @@ from visidata import *
 
 option('plugins_url', 'https://visidata.org/plugins/plugins.tsv', 'source of plugins sheet')
 
-@VisiData.api
-def openPlugins(vd):
-    return openSource(urlcache(options.plugins_url, days=0), filetype="plugins")
 
-def open_plugins(p):
+@VisiData.cached_property
+def pluginsSheet(p):
     'Support the "plugins" phony filetype as PluginsSheet'
-    return PluginsSheet('plugins', source=p)
+    return PluginsSheet('plugins', source=urlcache(options.plugins_url, days=0))
 
 def _plugin_path(plugin):
     return Path(os.path.join(options.visidata_dir, "plugins", plugin.name+".py"))
@@ -84,10 +82,11 @@ class PluginsSheet(TsvSheet):
 
             with Path(options.config).open_text(mode='w') as fprc:  # replace without import line
                 fprc.write(vdrc_contents)
+            warning('plugin {0} will not be imported in the future'.format(plugin[0]))
         except FileNotFoundError:
             warning("no visidatarc file")
 
-globalCommand(None, 'open-plugins', 'vd.push(openPlugins())')
+globalCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)')
 
 PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)')
 PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)')

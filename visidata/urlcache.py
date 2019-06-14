@@ -4,7 +4,7 @@ import time
 import urllib.request
 import urllib.parse
 
-from visidata import __version_info__, Path, options
+from visidata import __version_info__, Path, options, asyncthread
 
 
 def urlcache(url, days=1, text=True):
@@ -20,6 +20,11 @@ def urlcache(url, days=1, text=True):
 
     assert p.parent.is_dir(), p.parent
 
+    return p
+
+
+@asyncthread
+def _do_request(p, url, text=True):
     req = urllib.request.Request(url)
     with urllib.request.urlopen(req) as fp:
         ret = fp.read()
@@ -30,5 +35,3 @@ def urlcache(url, days=1, text=True):
         else:
             with p.open_bytes(mode='w') as fpout:
                 fpout.write(ret)
-
-    return p
