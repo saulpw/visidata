@@ -219,8 +219,12 @@ def docstring(obj, attr):
 # rowdef: attrname
 class SheetObject(PythonSheet):
     rowtype = 'attributes'
-    def __init__(self, name, obj, **kwargs):
-        super().__init__(name, source=obj, **kwargs)
+    columns = [
+        Column('attribute'),
+        ColumnSourceAttr('value'),
+        Column('docstring', getter=lambda c,r: docstring(c.sheet.source, r))
+    ]
+    nKeys = 1
 
     def reload(self):
         self.rows = []
@@ -234,14 +238,6 @@ class SheetObject(PythonSheet):
             except Exception:
                 pass
 
-        self.columns = [
-            Column(type(self.source).__name__ + '_attr'),
-            ColumnSourceAttr('value'),
-            Column('docstring', getter=lambda c,r: docstring(c.sheet.source, r))
-        ]
-        self.recalc()
-
-        self.setKeys(self.columns[0:1])
 
 SheetObject.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)')
 SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', undo='lambda s=source,attr=cursorRow,val=getattr(source, cursorRow): setattr(s, attr, val)')
