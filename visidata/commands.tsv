@@ -55,11 +55,11 @@ SheetsSheet	open-rows	g	Enter	gEnter	y	use	n	y		sheet-open-rows	push selected sh
 SheetsSheet	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
 SheetPivot	dive-cell	z	Enter	zEnter	y	n	n	y		open-source-cell	open sheet of source rows aggregated in current cell
 SheetPivot	dive-row		Enter	Enter	y	n	n	y		open-source-row	open sheet of source rows aggregated in current row
-SheetObject	dive-row		Enter	Enter	y	n	n	y		python-dive-row	dive further into Python object
-SheetObject	edit-cell		e	e	n	n	y	y			edit contents of current cell
-SheetObject	hide-hidden	z	v	zv	n	n	n	y			hide methods and hidden properties
-SheetObject	show-hidden	g	v	gv	n	n	n	y			show methods and hidden properties
-SheetObject	visibility		v	v	n	n	n	y			toggle show/hide for methods and hidden properties
+PyobjSheet	dive-row		Enter	Enter	y	n	n	y		python-dive-row	dive further into Python object
+PyobjSheet	edit-cell		e	e	n	n	y	y			edit contents of current cell
+PyobjSheet	hide-hidden	z	v	zv	n	n	n	y			hide methods and hidden properties
+PyobjSheet	show-hidden	g	v	gv	n	n	n	y			show methods and hidden properties
+PyobjSheet	visibility		v	v	n	n	n	y			toggle show/hide for methods and hidden properties
 SheetNamedTuple	dive-row		Enter	Enter	y	n	n	y			dive further into Python object
 SheetH5Obj	dive-metadata		A	A	y	n	n	y			open metadata sheet for this object
 SheetH5Obj	dive-row		Enter	Enter	y	n	n	y			load table referenced in current row into memory

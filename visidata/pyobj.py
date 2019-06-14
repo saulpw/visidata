@@ -100,7 +100,7 @@ def load_pyobj(name, pyobj):
     elif isinstance(pyobj, bytes):
         return TextSheet(name, pyobj.decode(options.encoding).splitlines())
     elif isinstance(pyobj, object):
-        return SheetObject(name, pyobj)
+        return PyobjSheet(name, pyobj)
     else:
         error("cannot load '%s' as pyobj" % type(pyobj).__name__)
 
@@ -217,7 +217,7 @@ def docstring(obj, attr):
     return '<type %s>' % type(v).__name__
 
 # rowdef: attrname
-class SheetObject(PythonSheet):
+class PyobjSheet(PythonSheet):
     rowtype = 'attributes'
     columns = [
         Column('attribute'),
@@ -239,8 +239,8 @@ class SheetObject(PythonSheet):
                 pass
 
 
-SheetObject.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)')
-SheetObject.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', undo='lambda s=source,attr=cursorRow,val=getattr(source, cursorRow): setattr(s, attr, val)')
-SheetObject.addCommand('v', 'visibility', 'options.set("visibility", 0 if options.visibility else 2, sheet); reload()')
-SheetObject.addCommand('gv', 'show-hidden', 'options.visibility = 2; reload()')
-SheetObject.addCommand('zv', 'hide-hidden', 'options.visibility -= 1; reload()')
+PyobjSheet.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(joinSheetnames(name, cursorRow), v() if callable(v) else v)')
+PyobjSheet.addCommand('e', 'edit-cell', 'setattr(source, cursorRow, type(getattr(source, cursorRow))(editCell(1))); sheet.cursorRowIndex += 1; reload()', undo='lambda s=source,attr=cursorRow,val=getattr(source, cursorRow): setattr(s, attr, val)')
+PyobjSheet.addCommand('v', 'visibility', 'options.set("visibility", 0 if options.visibility else 2, sheet); reload()')
+PyobjSheet.addCommand('gv', 'show-hidden', 'options.visibility = 2; reload()')
+PyobjSheet.addCommand('zv', 'hide-hidden', 'options.visibility -= 1; reload()')

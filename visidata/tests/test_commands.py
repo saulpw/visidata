@@ -17,7 +17,7 @@ inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
                  '|': '.',
                  '\\': '.',
 #                 'e': '',               # no change should not error
-                 'c': 'value',          # column name in SheetObject
+                 'c': 'value',          # column name in PyobjSheet
                  'r': '5',              # go to row 5
                  '=': 'value',          # just copy the column
                  ':': '_',
@@ -45,7 +45,7 @@ class CommandsTestCase(unittest.TestCase):
 
         cmdlist = visidata.baseCommands
 
-        vs = visidata.SheetObject('test_commands', self)
+        vs = visidata.PyobjSheet('test_commands', self)
         vs.reload()
         for keystrokes in cmdlist.keys():
             testname = keystrokes
@@ -63,7 +63,7 @@ class CommandsTestCase(unittest.TestCase):
             else:
                 vd.getkeystroke = Mock(side_effect=['^J'])
 
-            vs = visidata.SheetObject('test_commands', 'some object')
+            vs = visidata.PyobjSheet('test_commands', 'some object')
             vs.vd = vd
             vs.reload()
             vd.sheets = [vs]
