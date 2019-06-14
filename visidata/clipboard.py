@@ -48,7 +48,7 @@ def syscopyRows(sheet, rows):
 def syscopyCells(sheet, col, rows):
     if not rows:
         fail('no %s selected' % sheet.rowtype)
-    clipboard().copy("\\n".join(col.getDisplayValue(r) for r in rows))
+    clipboard().copy("\n".join(col.getDisplayValue(r) for r in rows))
     status('copied %s from %d %s to system clipboard' % (col.name, len(rows), sheet.rowtype))
 
 
