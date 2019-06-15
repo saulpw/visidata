@@ -88,8 +88,8 @@ def load_csv(vs):
     vs.recalc()
     return vs
 
-
-def save_csv(p, sheet):
+@Sheet.api
+def save_csv(sheet, p):
     'Save as single CSV file, handling column names as first line.'
     with p.open_text(mode='w') as fp:
         cw = csv.writer(fp, **csvoptions())

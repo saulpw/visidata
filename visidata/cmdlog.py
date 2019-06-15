@@ -76,7 +76,7 @@ def isLoggableCommand(keystrokes, longname):
 def open_vd(p):
     return CommandLog(p.name, source=p)
 
-save_vd = save_tsv
+Sheet.save_vd = Sheet.save_tsv
 
 # rowdef: namedlist (like TsvSheet)
 class CommandLog(TsvSheet):

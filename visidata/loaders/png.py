@@ -67,14 +67,14 @@ class PNGDrawing(Canvas):
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))')
 PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)')
 
-def save_png(p, vs):
-    if isinstance(vs, PNGSheet):
-        pass
-    elif isinstance(vs, PNGDrawing):
-        vs = vs.source
-    else:
-        error('sheet must be from png loader (for now)')
 
+@PNGDrawing.api
+def save_png(vs, p):
+    return vs.source.save_png(p)
+
+
+@PNGSheet.api
+def save_png(vs, p):
     palette = collections.OrderedDict()
     palette[(0,0,0,0)] = 0   # invisible black is 0
 

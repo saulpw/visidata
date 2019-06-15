@@ -68,12 +68,10 @@ class ShapeMap(InvertedCanvas):
 
 ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))')
 ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))')
-ShapeMap.addCommand('^S', 'save-geojson', 'save_geojson(Path(input("json to save: ", value=name+".geojson")), sheet)')
 
 
-def save_geojson(p, vs):
-    assert isinstance(vs, Canvas), 'need Canvas to save geojson'
-
+@Canvas.api
+def save_geojson(vs, p):
     features = []
     for coords, attr, row in Progress(vs.polylines, 'saving'):
         feat = {

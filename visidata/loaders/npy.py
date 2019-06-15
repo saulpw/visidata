@@ -63,8 +63,8 @@ class NpzSheet(ArchiveSheet):
 
         return load_pyobj(tablename, tbl)
 
-
-def save_npy(p, sheet):
+@Sheet.api
+def save_npy(sheet, p):
     import numpy as np
 
     dtype = []

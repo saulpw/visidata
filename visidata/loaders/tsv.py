@@ -166,7 +166,8 @@ def genAllValues(rows, cols, trdict={}, format=True):
         yield dispvals
 
 
-def save_tsv(p, vs):
+@Sheet.api
+def save_tsv(vs, p):
     'Write sheet to file `fn` as TSV.'
     unitsep = options.get('delimiter', vs)
     rowsep = options.get('row_delimiter', vs)

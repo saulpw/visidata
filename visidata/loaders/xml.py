@@ -8,11 +8,6 @@ def open_xml(p):
 open_svg = open_xml
 
 
-def save_xml(p, vs):
-    vs.source.write(p.resolve(), encoding=options.encoding, standalone=False, pretty_print=True)
-save_svg = save_xml
-
-
 def unns(k):
     if '}' in k:
         return k[k.find('}')+1:]
@@ -68,7 +63,11 @@ class XmlSheet(Sheet):
                 self.attribcols[k] = c
                 c.nstag = k
 
+    def save_xml(self, p):
+        self.source.write(p.resolve(), encoding=options.encoding, standalone=False, pretty_print=True)
+
+    save_svg = save_xml
+
 XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)', undo=undoAddCols)
 XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)')
 XmlSheet.addCommand(ENTER, 'dive-row', 'r=cursorRow; vd.push(XmlSheet("%s_%s" % (unns(r.tag), r.attrib.get("id")), source=r))')
-
