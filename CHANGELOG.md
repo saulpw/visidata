@@ -95,6 +95,7 @@
 - [loader npy] add .npy loader, including type detection
 - [loader npz] add support for .npz index
 - [loader usv] add .usv loader
+- [macros] is now deprecated
 - [mouse] bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - [mouse] slide columns/rows with left-click and drag
 - [openSource] create new blank sheet if file does not exist

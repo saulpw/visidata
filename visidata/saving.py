@@ -172,7 +172,7 @@ def save(sheet, *rows):
     if confirm_overwrite and savingToSource:
         confirm('really %s? ' % cstr)
 
-    elif not savingToSource and path.exists():
+    elif not savingToSource and path.exists() and confirm_overwrite:
         confirm("%s already exists. overwrite? " % path.fqpn)
 
     sheet.commit(path, adds, mods, deletes)
