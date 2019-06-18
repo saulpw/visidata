@@ -14,7 +14,7 @@ class FixedWidthColumn(Column):
     def calcValue(self, row):
         return row[0][self.i:self.j]
 
-    def setValue(self, row, value):
+    def putValue(self, row, value):
         value = str(value)[:self.j-self.i]
         row[0] = row[0][:self.i] + '%-*s' % (self.j-self.i, value) + row[0][self.j:]
 
