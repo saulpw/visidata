@@ -6,6 +6,7 @@ Sheet.addCommand('T', 'transpose', 'vd.push(TransposeSheet(name+"_T", source=she
 
 # rowdef: Column
 class TransposeSheet(Sheet):
+    defer = False
     @asyncthread
     def reload(self):
         # key rows become column names

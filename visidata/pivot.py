@@ -39,6 +39,7 @@ class RangeColumn(Column):
 class SheetPivot(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     rowtype = 'grouped rows'  # rowdef: PivotGroupRow
+    defer = False
     def __init__(self, name, groupByCols, pivotCols, **kwargs):
         super().__init__(name, **kwargs)
 

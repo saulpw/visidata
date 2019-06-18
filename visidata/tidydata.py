@@ -15,6 +15,7 @@ class MeltedSheet(Sheet):
     "Perform 'melt', the inverse of 'pivot', on input sheet."
 
     rowtype = 'melted values'
+    defer = False
 
     def __init__(self, sheet, regex='(.*)', **kwargs):
         super().__init__(sheet.name + '_melted', source=sheet, **kwargs)

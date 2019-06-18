@@ -63,6 +63,7 @@ def groupRowsByKey(sheets, rowsBySheetKey, rowsByKey):
 #   if a sheet does not have this key, sheet#_row is None
 class SheetJoin(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
+    defer = False
 
     @asyncthread
     def reload(self):
