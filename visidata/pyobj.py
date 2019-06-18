@@ -100,7 +100,7 @@ def load_pyobj(name, pyobj):
     elif isinstance(pyobj, bytes):
         return TextSheet(name, pyobj.decode(options.encoding).splitlines())
     elif isinstance(pyobj, object):
-        return PyobjSheet(name, pyobj)
+        return PyobjSheet(name, source=pyobj)
     else:
         error("cannot load '%s' as pyobj" % type(pyobj).__name__)
 
