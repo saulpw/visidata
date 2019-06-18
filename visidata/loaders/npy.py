@@ -44,6 +44,7 @@ class NpySheet(NumpySheet):
 
 
 class NpzSheet(open_zip):
+    # rowdef = (tablename, table)
     columns = [
         ColumnItem('name', 0),
         ColumnItem('length', 1, type=vlen),
@@ -54,6 +55,13 @@ class NpzSheet(open_zip):
         self.npz = numpy.load(self.source.resolve(), encoding='bytes')
         self.rows = list(self.npz.items())
 
+    def getInnerSheet(self, row):
+        import numpy
+        tablename, tbl = row
+        if isinstance(tbl, numpy.ndarray):
+            return NumpySheet(tablename, npy=tbl)
+
+        return load_pyobj(tablename, tbl)
 
 
 def save_npy(p, sheet):
@@ -94,4 +102,4 @@ def save_npy(p, sheet):
         np.save(outf, arr, allow_pickle=False)
 
 
-NpzSheet.addCommand(None, 'dive-row', 'vd.push(NumpySheet(cursorRow[0], npy=cursorRow[1]))')
+NpzSheet.addCommand(None, 'dive-row', 'vd.push(getInnerSheet(cursorRow))')
