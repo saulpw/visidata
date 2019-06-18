@@ -355,13 +355,14 @@ class SubColumnFunc(Column):
     def calcValue(self, row):
         subrow = self.subfunc(row, self.expr)
         if subrow is not None:
-            return self.origcol.calcValue(subrow)
+            # call getValue to use deferred values from source sheet
+            return self.origcol.getValue(subrow)
 
     def putValue(self, row, value):
         subrow = self.subfunc(row, self.expr)
         if subrow is None:
             vd.fail('no source row')
-        self.origcol.putValue(subrow, value)
+        self.origcol.setValue(subrow, value)
 
     def recalc(self, sheet=None):
         Column.recalc(self, sheet)
