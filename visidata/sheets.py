@@ -82,13 +82,6 @@ class Sheet(BaseSheet):
     def __len__(self):
         return self.nRows
 
-    @property
-    def loaded(self):
-        if self.rows is UNLOADED:
-            self.rows = list()
-            return False
-        return True
-
     def addColorizer(self, c):
         self.colorizers.append(c)
 
@@ -714,7 +707,8 @@ def push(vd, vs, sheets=None):
 
         sheets.insert(0, vs)
 
-        if not vs.loaded:
+        if vs.rows is UNLOADED:
+            vs.rows = []  # prevent auto-reload from running twice
             vs.reload()
             vs.recalc()  # set up Columns
 
@@ -723,8 +717,6 @@ def push(vd, vs, sheets=None):
             vs.shortcut = len(vd.allSheets)
         elif hasattr(vs, 'creatingCommand') and vs.creatingCommand:
             vs.shortcut = vs.shortcut or vs.creatingCommand.keystrokes
-
-        return vs
 
 
 @VisiData.cached_property
