@@ -187,10 +187,10 @@ class Plotter(BaseSheet):
     def getPixelAttrMost(self, x, y):
         'most common attr at this pixel.'
         r = self.pixels[y][x]
-        c = sorted((len(rows), attr, rows) for attr, rows in list(r.items()) if attr and attr not in self.hiddenAttrs)
+        c = [(len(rows), attr, rows) for attr, rows in list(r.items()) if attr and attr not in self.hiddenAttrs]
         if not c:
             return 0
-        _, attr, rows = c[-1]
+        _, attr, rows = max(c)
         if isinstance(self.source, BaseSheet) and anySelected(self.source, rows):
             attr = CursesAttr(attr, 8).update_attr(colors.color_graph_selected, 10).attr
         return attr
