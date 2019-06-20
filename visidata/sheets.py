@@ -339,7 +339,7 @@ class Sheet(BaseSheet):
         if col:
             if index is None:
                 index = len(self.columns)
-            col.sheet = self
+            col.recalc(self)
             self.columns.insert(index, col)
             Sheet.visibleCols.fget.cache_clear()
             return col

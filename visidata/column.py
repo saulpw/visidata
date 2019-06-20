@@ -50,7 +50,7 @@ def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
 
 class Column(Extensible):
     def __init__(self, name='', *, type=anytype, cache=False, **kwargs):
-        self.sheet = None     # owning Sheet, set in Sheet.addColumn
+        self.sheet = None     # owning Sheet, set in .recalc() via Sheet.addColumn
         self.name = name      # display visible name
         self.fmtstr = ''      # by default, use str()
         self.type = type      # anytype/str/int/float/date/func

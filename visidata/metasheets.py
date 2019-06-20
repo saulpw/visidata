@@ -64,7 +64,7 @@ class ColumnsSheet(Sheet):
 
     def newRow(self):
         c = type(self.source[0])._coltype()
-        c.sheet = self.source[0]
+        c.recalc(self.source[0])
         return c
 
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)')
