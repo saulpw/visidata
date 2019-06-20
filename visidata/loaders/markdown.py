@@ -1,6 +1,9 @@
 from visidata import *
 
-def markdown_escape(s):
+def markdown_escape(s, style='orgmode'):
+    if style == 'jira':
+        return s
+
     ret = ''
     for ch in s:
         if ch in '\`*_{}[]()>#+-.!':
@@ -15,19 +18,36 @@ def markdown_colhdr(col):
     else:
         return '-' * (col.width or options.default_width)
 
-def save_md(p, *vsheets):
+def write_md(p, *vsheets, md_style='orgmode'):
     'pipe tables compatible with org-mode'
+
+    if md_style == 'jira':
+        delim = '||'
+    else:
+        delim = '|'
+
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
             if len(vsheets) > 1:
                 fp.write('# %s\n\n' % vs.name)
-            fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.name)) for col in vs.visibleCols) + '|\n')
-            fp.write('|' + '|'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
+
+            fp.write(delim + delim.join('%-*s' % (col.width or options.default_width, markdown_escape(col.name, md_style)) for col in vs.visibleCols) + '|\n')
+            if md_style == 'orgmode':
+                fp.write('|' + '|'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
 
             for row in Progress(vs.rows, 'saving'):
-                fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.getDisplayValue(row))) for col in vs.visibleCols) + '|\n')
+                fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.getDisplayValue(row), md_style)) for col in vs.visibleCols) + '|\n')
             fp.write('\n')
 
     status('%s save finished' % p)
+
+
+def save_md(p, vsheets):
+    write_md(p, vsheets, md_style='orgmode')
+
+
+def save_jira(p, vsheets):
+    write_md(p, vsheets, md_style='jira')
+
 
 multisave_md = save_md
