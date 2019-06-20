@@ -22,7 +22,7 @@ def save_md(p, *vsheets):
             if len(vsheets) > 1:
                 fp.write('# %s\n\n' % vs.name)
             fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.name)) for col in vs.visibleCols) + '|\n')
-            fp.write('|' + '+'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
+            fp.write('|' + '|'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
 
             for row in Progress(vs.rows, 'saving'):
                 fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.getDisplayValue(row))) for col in vs.visibleCols) + '|\n')
