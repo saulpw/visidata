@@ -95,7 +95,6 @@ from .loaders.shp import *
 from .loaders.mbtiles import *
 from .loaders.http import *
 from .loaders.html import *
-from .loaders.jira import *
 from .loaders.markdown import *
 from .loaders.pcap import *
 from .loaders.png import *
