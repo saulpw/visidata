@@ -3,6 +3,9 @@ from visidata import Extensible, VisiData, getGlobals, vd, EscapeException
 from unittest import mock
 
 
+UNLOADED = object()  # sentinel for a sheet not yet loaded for the first time
+
+
 class LazyMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
     def __init__(self, *objs):
@@ -43,6 +46,7 @@ class BaseSheet(Extensible):
     def __init__(self, name, **kwargs):
         self.name = name
         self.source = None
+        self.rows = UNLOADED      # list of opaque objects
         self.shortcut = ''
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
 
@@ -73,10 +77,6 @@ class BaseSheet(Extensible):
             return True
         if isinstance(self.source, BaseSheet):
             return vs in self.source
-        return False
-
-    @property
-    def loaded(self):
         return False
 
     @property

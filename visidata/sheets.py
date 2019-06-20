@@ -8,7 +8,7 @@ import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, LazyMap
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
-TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet,
+TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet, UNLOADED,
 vd, exceptionCaught, getType, clipdraw, CursesAttr, colors, undoEditCell, undoEditCells, undoAttr, undoBlocked)
 
 
@@ -37,7 +37,6 @@ RowColorizer = collections.namedtuple('RowColorizer', 'precedence coloropt func'
 CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt func')
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
-UNLOADED = object()  # sentinel for a sheet not yet loaded for the first time
 
 
 class Sheet(BaseSheet):
@@ -59,7 +58,7 @@ class Sheet(BaseSheet):
 
     def __init__(self, name, **kwargs):
         super().__init__(name, **kwargs)
-        self.rows = UNLOADED      # list of opaque row objects
+        self.rows = UNLOADED      # list of opaque row objects (UNLOADED before first reload)
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
 
