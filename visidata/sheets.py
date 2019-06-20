@@ -560,7 +560,10 @@ class Sheet(BaseSheet):
 
             for vcolidx, (x, colwidth) in sorted(self.visibleColLayout.items()):
                 if x < self.windowWidth:  # only draw inside window
-                    col = self.visibleCols[vcolidx]
+                    vcols = self.visibleCols
+                    if vcolidx >= len(vcols):
+                        continue
+                    col = vcols[vcolidx]
                     cellval = col.getCell(row)
                     if colwidth > 1 and isNumeric(col):
                         cellval.display = cellval.display.rjust(colwidth-2)
@@ -584,6 +587,8 @@ class Sheet(BaseSheet):
             self.rowLayout[rowidx] = (ybase, height)
 
             for vcolidx, (col, cellval, lines) in displines.items():
+                    if vcolidx not in self.visibleColLayout:
+                        continue
                     x, colwidth = self.visibleColLayout[vcolidx]
 
                     attr = self.colorize(col, row, cellval)
