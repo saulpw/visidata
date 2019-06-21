@@ -21,7 +21,7 @@ class ArchiveSheet(Sheet):
                 ColumnAttr('filename'),
                 ColumnAttr('file_size', type=int),
                 Column('date_time', type=date,
-                getter=lambda col, row: datetime.datetime(*row.date_time)),
+                       getter=lambda col, row: datetime.datetime(*row.date_time)),
                 ColumnAttr('compress_size', type=int)
             ]
         if self.archive_type == 'tar':
