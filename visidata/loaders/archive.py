@@ -42,7 +42,7 @@ class read_archive(Sheet):
     def openArchiveFileEntry(self, fi):
         if self.archive_type == 'zip':
             zfp = zipfile.ZipFile(self.source.resolve(), 'r')
-            decodedfp = codecs.iterdecode(zfp.open(zi),
+            decodedfp = codecs.iterdecode(zfp.open(fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
             name = fi.filename
