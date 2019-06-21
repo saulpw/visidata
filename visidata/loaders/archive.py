@@ -5,18 +5,23 @@ import zipfile
 from visidata import *
 
 
-class read_archive(Sheet):
+class ArchiveSheet(Sheet):
     'Provide wrapper around `zipfile` and `tarfile` libraries for opening archive files.'
-    rowtype = 'files'
+    rowtype = 'files' # rowdef ZipInfo or TarInfo
 
     def __init__(self, p, archive_type='zip'):
         super().__init__(p.name, source=p)
         self.archive_type = archive_type
+
+    @asyncthread
+    def reload(self):
+
         if self.archive_type == 'zip':
             self.columns = [
                 ColumnAttr('filename'),
                 ColumnAttr('file_size', type=int),
-                Column('date_time', type=date, getter=lambda col, row: datetime.datetime(*row.date_time)),
+                Column('date_time', type=date,
+                getter=lambda col, row: datetime.datetime(*row.date_time)),
                 ColumnAttr('compress_size', type=int)
             ]
         if self.archive_type == 'tar':
@@ -30,43 +35,54 @@ class read_archive(Sheet):
                 ColumnAttr('gname')
             ]
 
-    def reload(self):
+        self.recalc()
         if self.archive_type == 'zip':
-            with zipfile.ZipFile(self.source.resolve(), 'r') as zfp:
-                self.rows = zfp.infolist()
+            contents = zipfile.ZipFile(self.source.resolve(), 'r').infolist()
 
         if self.archive_type == 'tar':
-            with tarfile.open(name=self.source.resolve()) as tfp:
-                self.rows = tfp.getmembers()
+            contents = tarfile.open(name=self.source.resolve()).getmembers()
 
-    def openArchiveFileEntry(self, fi):
+        with Progress(total=len(contents)) as prog:
+            contents = iter(contents)
+            try:
+                samplelen = 0
+                for i in range(options_num_first_rows):  # for progress below
+                    self.addRow(next(contents))
+                    samplelen += 1
+
+                while True:
+                    self.addRow(next(contents))
+                    prog.addProgress(samplelen)
+            except StopIteration:
+                pass  # as expected
+
+        self.recalc()
+
+    def open_archive_file(self, fi):
+
         if self.archive_type == 'zip':
             zfp = zipfile.ZipFile(self.source.resolve(), 'r')
             decodedfp = codecs.iterdecode(zfp.open(fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
-            name = fi.filename
-            size = fi.file_size
+            return openSource(PathFd(fi.filename, decodedfp, fi.file_size))
 
         if self.archive_type == 'tar':
             tfp = tarfile.open(name=self.source.resolve())
             decodedfp = codecs.iterdecode(tfp.extractfile(fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
-            name = fi.name
-            size = fi.size
+            return openSource(PathFd(fi.name, decodedfp, fi.size))
 
-        return openSource(PathFd(name, decodedfp, size))
-
-read_archive.addCommand(ENTER, 'dive-row', 'vd.push(openArchiveFileEntry(cursorRow))')
-read_archive.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openArchiveFileEntry(r))')
+ArchiveSheet.addCommand(ENTER, 'dive-row', 'vd.push(open_archive_file(cursorRow))')
+ArchiveSheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(open_archive_file(r))')
 
 def open_zip(p):
-    return read_archive(p, archive_type='zip')
+    return ArchiveSheet(p, archive_type='zip')
 
 
 def open_tar(p):
-    return read_archive(p, archive_type='tar')
+    return ArchiveSheet(p, archive_type='tar')
 
 open_tgz = open_tar
 open_txz = open_tar
