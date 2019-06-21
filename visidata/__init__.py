@@ -84,7 +84,7 @@ from .vimkeys import *
 
 from .loaders.csv import *
 from .loaders.json import *
-from .loaders.zip import *
+from .loaders.archive import *
 from .loaders.xlsx import *
 from .loaders.xlsb import *
 from .loaders.hdf5 import *
@@ -107,7 +107,6 @@ from .loaders._pandas import *
 from .loaders.graphviz import *
 from .loaders.npy import *
 from .loaders.usv import *
-from .loaders.tar import *
 
 from .loaders.pandas_freqtbl import *
 from .loaders.xword import *
