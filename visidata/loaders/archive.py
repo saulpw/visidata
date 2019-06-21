@@ -42,19 +42,8 @@ class ArchiveSheet(Sheet):
         if self.archive_type == 'tar':
             contents = tarfile.open(name=self.source.resolve()).getmembers()
 
-        with Progress(total=len(contents)) as prog:
-            contents = iter(contents)
-            try:
-                samplelen = 0
-                for i in range(options_num_first_rows):  # for progress below
-                    self.addRow(next(contents))
-                    samplelen += 1
-
-                while True:
-                    self.addRow(next(contents))
-                    prog.addProgress(samplelen)
-            except StopIteration:
-                pass  # as expected
+        for row in Progress(contents):
+            self.addRow(row)
 
         self.recalc()
 
