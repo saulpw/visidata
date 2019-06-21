@@ -6,7 +6,7 @@ from visidata import *
 
 
 class read_archive(Sheet):
-    'Provide wrapper around `tarfile` library for opening TAR files.'
+    'Provide wrapper around `zipfile` and `tarfile` libraries for opening archive files.'
     rowtype = 'files'
 
     def __init__(self, p, archive_type='zip'):
@@ -16,7 +16,7 @@ class read_archive(Sheet):
             self.columns = [
                 ColumnAttr('filename'),
                 ColumnAttr('file_size', type=int),
-                Column('date_time', type=date, getter=lambda col,row: datetime.datetime(*row.date_time)),
+                Column('date_time', type=date, getter=lambda col, row: datetime.datetime(*row.date_time)),
                 ColumnAttr('compress_size', type=int)
             ]
         if self.archive_type == 'tar':
@@ -58,16 +58,15 @@ class read_archive(Sheet):
 
         return openSource(PathFd(name, decodedfp, size))
 
-
-def open_tar(p):
-    return read_archive(p, archive_type='tar')
+read_archive.addCommand(ENTER, 'dive-row', 'vd.push(openArchiveFileEntry(cursorRow))')
+read_archive.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openArchiveFileEntry(r))')
 
 def open_zip(p):
     return read_archive(p, archive_type='zip')
 
 
-read_archive.addCommand(ENTER, 'dive-row', 'vd.push(openArchiveFileEntry(cursorRow))')
-read_archive.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openArchiveFileEntry(r))')
+def open_tar(p):
+    return read_archive(p, archive_type='tar')
 
 open_tgz = open_tar
 open_txz = open_tar
