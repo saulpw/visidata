@@ -35,13 +35,13 @@ class ArchiveSheet(Sheet):
                 ColumnAttr('gname')
             ]
 
-        self.recalc()
         if self.archive_type == 'zip':
             contents = zipfile.ZipFile(self.source.resolve(), 'r').infolist()
 
         if self.archive_type == 'tar':
             contents = tarfile.open(name=self.source.resolve()).getmembers()
 
+        self.rows = []
         for row in Progress(contents):
             self.addRow(row)
 
