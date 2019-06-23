@@ -80,6 +80,7 @@ from .layout import *
 from .saving import *
 import visidata.sort
 
+from .sparkline import *
 from .vimkeys import *
 
 from .loaders.csv import *
