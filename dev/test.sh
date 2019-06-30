@@ -7,7 +7,7 @@ set -e
 trap "echo aborted; exit;" SIGINT SIGTERM
 
 if [ -z "$1" ] ; then
-    TESTS=tests/*.vd
+    TESTS="tests/*.vd"
 else
     TESTS=tests/$1.vd
 fi
@@ -20,7 +20,7 @@ for i in $TESTS ; do
         :
     elif [ "${i%-nofail.vd}-nofail" == "${i%.vd}" ];
     then
-        PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i --batch --output tests/golden/${outbase%.vd}.tsv
+        PYTHONPATH=. bin/vd --confirm-overwrite=False --play "$i" --batch --output tests/golden/"${outbase%.vd}".tsv
     else
         :
     fi
@@ -37,12 +37,12 @@ for i in $TESTS ; do
     outbase=${i##tests/}
     if [ "${i%-nosave.vd}-nosave" == "${i%.vd}" ];
     then
-        PYTHONPATH=. bin/vd --play $i --batch
+        PYTHONPATH=. bin/vd --play "$i" --batch
     elif [ "${i%-nofail.vd}-nofail" == "${i%.vd}" ];
     then
         :
     else
-        PYTHONPATH=. bin/vd --confirm-overwrite=False --play $i --batch --output tests/golden/${outbase%.vd}.tsv
+        PYTHONPATH=. bin/vd --confirm-overwrite=False --play "$i" --batch --output tests/golden/"${outbase%.vd}".tsv
     fi
 done
 
