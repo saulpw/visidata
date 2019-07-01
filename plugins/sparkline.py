@@ -1,17 +1,17 @@
-from visidata import *
+from visidata import Column, ColumnsSheet, Sheet, option, options, BaseException
 
 
 option('disp_sparkline', '▁▂▃▄▅▆▇', 'characters to display sparkline')
 
 
 class SparklineColumn(Column):
-    def calcValue(self, r):
-        return sparkline(*tuple(c.getTypedValue(r) for c in self.source))
 
+    def calcValue(self, r):
+        return self.sparkline(*tuple(c.getTypedValue(r) for c in self.source))
 
     def sparkline(*values):
         lines = options.disp_sparkline
-        values = [int(v) for v in values]
+        values = [v for v in values if isinstance(v, (int, float))]
         mx = max(values)
         mn = min(values)
         w = (mx - mn) / len(lines)
