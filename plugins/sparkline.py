@@ -9,7 +9,7 @@ class SparklineColumn(Column):
     def calcValue(self, r):
         return self.sparkline(*tuple(c.getTypedValue(r) for c in self.source))
 
-    def sparkline(*values):
+    def sparkline(self, *values):
         lines = options.disp_sparkline
         values = [v for v in values if isinstance(v, (int, float))]
         mx = max(values)
