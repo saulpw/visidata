@@ -16,17 +16,17 @@ Plugins are optional Python modules that extend or modify base VisiData's functi
 
 ## Manually
 
-1. Move the plugin module into `~/.visidata`.
-2. Ensure its dependencies are installed.
-3. Import the module within `~/.visidatarc`.
+1. Make your plugin directory: `mkdir -p ~/.visidata/plugins`
+2. Copy the plugin Python file there: `cp myplugin.py ~/.visidata/plugins` 
+3. Add a line to your ~/.visidatarc to import the plugin: `import plugins.myplugin`
 
 For example, the plugin **vfake** contains commands for creating columns with anonymised data.
 
 To install it
 
-1. Copy `vfake/` from the [repo](https://github.com/saulpw/visidata/tree/develop/plugins) to `~/.visidata`.
+1. Copy `vfake/` from the [repo](https://github.com/saulpw/visidata/tree/develop/plugins) to `~/.visidata/plugins`.
 2. Type `pip3 install -r ~/.visidata/vfake/requirements.txt` (or `pip3 install faker`) to install its dependency [faker](https://github.com/joke2k/faker).
-3. Add `from vfake import *` to `~/.visidatarc`.
+3. Add `import plugins.vfake` to `~/.visidatarc`.
 
 ## From within VisiData
 
