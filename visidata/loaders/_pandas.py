@@ -59,7 +59,7 @@ class PandasSheet(Sheet):
         if isinstance(self.source, pd.DataFrame):
             self.df = self.source
         elif isinstance(self.source, Path):
-            filetype = getattr(self, 'filetype', self.source.ext[1:])
+            filetype = getattr(self, 'filetype', self.source.ext)
             if filetype == 'tsv':
                 readfunc = self.read_tsv
             else:

@@ -69,7 +69,7 @@ def load_csv(vs):
             vs.columns = [ColumnItem(0)]
 
         vs.recalc()  # make columns usable
-        with Progress(total=vs.source.filesize) as prog:
+        with Progress(total=filesize(vs.source)) as prog:
             try:
                 samplelen = 0
                 for i in range(options_num_first_rows):  # for progress below

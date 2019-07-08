@@ -4,14 +4,14 @@ import time
 import urllib.request
 import urllib.parse
 
-from visidata import __version_info__, Path, options, asyncthread
+from visidata import __version_info__, Path, options, asyncthread, modtime
 
 
 def urlcache(url, days=1, text=True):
     'Return Path object to local cache of url contents.'
     p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
     if p.exists():
-        secs = time.time() - p.stat().st_mtime
+        secs = time.time() - modtime(p)
         if secs < days*24*60*60:
             return p
 

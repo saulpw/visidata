@@ -4,7 +4,7 @@ import itertools
 import collections
 
 from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught, option
-from visidata import namedlist
+from visidata import namedlist, filesize
 
 option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
 option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
@@ -90,7 +90,7 @@ class TsvSheet(Sheet):
             self.recalc()
             self.rows = []
 
-            with Progress(total=self.source.filesize) as prog:
+            with Progress(total=filesize(self.source)) as prog:
                 for L in itertools.chain(lines, getlines(rdr, delim=rowdelim)):
                     row = L.split(delim)
                     ncols = self._rowtype.length()  # current number of cols

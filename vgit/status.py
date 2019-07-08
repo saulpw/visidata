@@ -17,11 +17,11 @@ FileStatus = namedlist('FileStatus', 'status adds dels'.split())
 class GitFile:
     def __init__(self, path, gitsrc):
         self.path = path
-        self.filename = os.path.relpath(path.abspath(), gitsrc.abspath())
+        self.filename = path.relative_to(gitsrc)
         self.is_dir = self.path.is_dir()
 
     def __str__(self):
-        return self.filename + (self.is_dir and '/' or '')
+        return str(self.filename) + (self.is_dir and '/' or '')
 
 
 class GitStatus(GitSheet):
@@ -41,13 +41,13 @@ class GitStatus(GitSheet):
         Column('staged', getter=lambda c,r: c.sheet.git_status(r).dels),
         Column('unstaged', getter=lambda c,r: c.sheet.git_status(r).adds),
         Column('type', getter=lambda c,r: r.is_dir and '/' or r.path.suffix, width=0),
-        Column('size', type=int, getter=lambda c,r: r.path.filesize),
-        Column('mtime', type=date, getter=lambda c,r: r.path.mtime),
+        Column('size', type=int, getter=lambda c,r: filesize(r.path)),
+        Column('modtime', type=date, getter=lambda c,r: modtime(r.path)),
     ]
     nKeys = 1
 
     def __init__(self, p):
-        super().__init__('/'.join(Path(p.abspath()).parts[-2:]), source=p)
+        super().__init__('/'.join(p.parts[-2:]), source=p)
         self.branch = ''
         self.remotediff = ''  # ahead/behind status
 

@@ -23,7 +23,7 @@ def eval_vd(logpath, *args, **kwargs):
     if args or kwargs:
         log = log.format(*args, **kwargs)
 
-    src = PathFd(logpath.fqpn, io.StringIO(log), filesize=len(log))
+    src = PathFd(logpath.given, io.StringIO(log), filesize=len(log))
     vs = openSource(src, filetype='vd')
     vs.name += '_vd'
     vd.push(vs)

@@ -14,12 +14,12 @@ class GitLinesColumn(Column):
         self.cmd = cmdparts + list(args)
 
     def calcValue(self, r):
-        return list(vgit.git_lines('--git-dir', r.path.joinpath('.git').abspath(), *self.cmd))
+        return list(vgit.git_lines('--git-dir', r.path.joinpath('.git'), *self.cmd))
 
 
 class GitAllColumn(GitLinesColumn):
     def calcValue(self, r):
-        return vgit.git_all('--git-dir', r.path.joinpath('.git').abspath(), *self.cmd).strip()
+        return vgit.git_all('--git-dir', r.path.joinpath('.git'), *self.cmd).strip()
 
 
 
@@ -31,7 +31,7 @@ class GitOverview(Sheet):
         GitLinesColumn('cached', 'git diff --cached', type=vlen),
         GitLinesColumn('branches', 'git branch --no-color', type=vlen),
         GitAllColumn('branch', 'git rev-parse --abbrev-ref HEAD'),
-        Column('modtime', type=date, getter=lambda c,r: r.path.stat().st_mtime),
+        Column('modtime', type=date, getter=lambda c,r: modtime(r.path)),
     ]
     nKeys = 1
 
@@ -48,5 +48,5 @@ class GitOverview(Sheet):
             self.addRow(GitRepo([path]))
 
 
-GitOverview.addCommand(ENTER, 'dive-row', 'vd.push(open_git(Path(cursorRow.path.abspath())))')
+GitOverview.addCommand(ENTER, 'dive-row', 'vd.push(open_git(cursorRow.path))')
 GitOverview.addCommand('z'+ENTER, 'dive-cell', 'view(cursorValue)')

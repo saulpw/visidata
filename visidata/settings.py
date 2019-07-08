@@ -242,7 +242,7 @@ def loadConfigFile(fnrc, _globals=None):
     p = visidata.Path(fnrc)
     if p.exists():
         try:
-            code = compile(open(p.resolve()).read(), p.resolve(), 'exec')
+            code = compile(open(p).read(), str(p), 'exec')
             exec(code, _globals or globals())
         except Exception as e:
             vd.exceptionCaught(e)
@@ -262,7 +262,7 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
     sys.path.append(visidata.Path(args.visidata_dir or options.visidata_dir).resolve())
 
     # user customisations in config file in standard location
-    loadConfigFile(visidata.Path(options.config).resolve(), getGlobals())
+    loadConfigFile(visidata.Path(options.config), getGlobals())
     addGlobals(getGlobals())
 
     # apply command-line overrides after .visidatarc

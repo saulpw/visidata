@@ -151,21 +151,14 @@ def getDefaultSaveName(sheet):
 @VisiData.global_api
 def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     'Save all vsheets to givenpath'
-    fn = givenpath.fqpn
 
-    # determine filetype to save as
-    filetype = ''
-    basename, ext = os.path.splitext(fn)
-    if ext:
-        filetype = ext[1:]
-
-    filetype = filetype or options.save_filetype
+    filetype = givenpath.ext or options.save_filetype
 
     if len(vsheets) > 1:
         if givenpath.exists():
             confirm("overwrite multiple? ")
 
-        if not fn.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
+        if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
             savefunc = getGlobals().get('multisave_' + filetype, None)
             if savefunc:
                 # use specific multisave function
@@ -184,14 +177,13 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         globalsavefunc = getGlobals().get('save_' + filetype)
 
         # get save function to call
-        status('saving %s sheets to %s' % (len(vsheets), givenpath.fqpn))
+        status('saving %s sheets to %s' % (len(vsheets), givenpath.given))
         for vs in vsheets:
             savefunc = getattr(vs, 'save_'+filetype, None)
             if not savefunc:
                 savefunc = lambda p,vs=vs,f=globalsavefunc: f(p, vs)
             if savefunc:
-                p = Path(os.path.join(givenpath.fqpn, vs.name+'.'+filetype))
-                savefunc(p)
+                savefunc(givenpath.with_suffix('.'+filetype))
             else:
                 warning('no function to save %s as type %s' % (vs, filetype))
     else:
@@ -201,7 +193,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             f = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
             savefunc = lambda p,vs=vsheets[0],f=f: f(p, vs)
 
-        status('saving to %s as %s' % (givenpath.fqpn, filetype))
+        status('saving to %s as %s' % (givenpath.given, filetype))
         savefunc(givenpath)
 
 
@@ -216,12 +208,12 @@ def openSource(p, filetype=None):
             return openSource(PathFd('-', vd._stdin), filetype)
         else:
             return openSource(Path(p), filetype)  # convert to Path and recurse
-    elif isinstance(p, UrlPath):
+    elif hasattr(p, 'scheme'): # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
         return getGlobals()[openfunc](p, filetype=filetype)
     elif isinstance(p, Path):
         if not filetype:
-            filetype = p.suffix or 'txt'
+            filetype = p.ext or 'txt'
 
         if os.path.isdir(p.resolve()):
             filetype = 'dir'

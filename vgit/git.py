@@ -32,7 +32,7 @@ def gitcmdlog(vd):
 
 
 def loggit(*args, **kwargs):
-    cmdstr = 'git ' + ' '.join(args)
+    cmdstr = 'git ' + ' '.join(str(x) for x in args)
     gcmd = GitCmd([vd.sheet, cmdstr, None])
     vd.gitcmdlog.addRow(gcmd)
 
@@ -142,10 +142,9 @@ def getRootSheet(sheet):
 
 def getRepoPath(p):
     'Return path at p or above which has .git subdir'
-    p = Path(p.abspath())
     if p.joinpath('.git').is_dir():
         return p
-    if p.fqpn in ['/','']:
+    if getattr(p, 'given', None) in ['/','']:
         return None
     return getRepoPath(p.parent)
 
@@ -159,8 +158,8 @@ class GitContext:
     def _git_args(self):
         worktree = getRepoPath(getRootSheet(self).source)  # Path
         return [
-            '--git-dir', worktree.joinpath('.git').abspath(),
-            '--work-tree', worktree.abspath()
+            '--git-dir', worktree.joinpath('.git').resolve(),
+            '--work-tree', worktree.resolve()
         ]
 
     @Sheet.name.setter

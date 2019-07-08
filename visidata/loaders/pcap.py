@@ -323,7 +323,7 @@ class PcapSheet(Sheet):
 
         self.pcap = read_pcap(self.source)
         self.rows = []
-        with Progress(total=self.source.filesize) as prog:
+        with Progress(total=filesize(self.source)) as prog:
             for ts, buf in self.pcap:
                 eth = dpkt.ethernet.Ethernet(buf)
                 self.addRow(eth)

@@ -1,6 +1,7 @@
 import os
 import os.path
 import sys
+import pathlib
 
 from visidata import *
 
@@ -8,29 +9,72 @@ option('encoding', 'utf-8', 'encoding passed to codecs.open', replay=True)
 option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
 option('skip', 0, 'skip first N lines of text input', replay=True)
 
-class Path:
-    'File and path-handling class, modeled on `pathlib.Path`.'
-    def __init__(self, fqpn):
-        self.fqpn = fqpn
-        fn = self.parts[-1]
+@functools.lru_cache()
+def vstat(path, force=False):
+    try:
+        return os.stat(path.resolve())
+    except Exception as e:
+        return None
 
-        self.name, self.ext = os.path.splitext(fn)
+def filesize(path):
+    if hasattr(path, 'filesize'):
+        return path.filesize
+    st = vstat(path)
+    return st and st.st_size
+
+def modtime(path):
+    st = path.stat()
+    return st and st.st_mtime
+
+
+class Path(os.PathLike):
+    'File and path-handling class, modeled on `pathlib.Path`.'
+    def __init__(self, given):
+        # Resolve pathname shell variables and ~userdir
+        self.given = os.path.expandvars(os.path.expanduser(given))
+
+    @property
+    def given(self):
+        return self._given
+
+    @given.setter
+    def given(self, given):
+        self._given = given
+        self._path = pathlib.Path(given)
+
+        self.ext = self.suffix[1:]
+        self.name = self._path.name[:-len(self.suffix)]
 
         # check if file is compressed
-        if self.ext in ['.gz', '.bz2', '.xz']:
-            self.compression = self.ext[1:]
-            self.name, self.ext = os.path.splitext(self.name)
+        if self.suffix in ['.gz', '.bz2', '.xz']:
+            self.compression = self.ext
+            uncompressedpath = Path(self.given[:-len(self.suffix)])
+            self.name = uncompressedpath.name
+            self.ext = uncompressedpath.ext
         else:
             self.compression = None
 
-        self.suffix = self.ext[1:]
         self._stat = None
+
+    def __getattr__(self, k):
+        if hasattr(self.__dict__, k):
+            return getattr(self.__dict__, k)
+        return getattr(self._path, k)
+
+    def __fspath__(self):
+        return self._path.__fspath__()
+
+    def __lt__(self, a):
+        return self._path.__lt__(a)
+
+    def __truediv__(self, a):
+        return Path(self._path.__truediv__(a))
 
     def open_text(self, mode='rt'):
         if 't' not in mode:
             mode += 't'
 
-        if self.fqpn == '-':
+        if self.given == '-':
             if 'r' in mode:
                 return vd._stdin
             elif 'w' in mode or 'a' in mode:
@@ -40,111 +84,45 @@ class Path:
                 error('invalid mode "%s" for Path.open_text()' % mode)
                 return sys.stderr
 
-        return self._open(self.resolve(), mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+        return self.open(mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
-    def _open(self, *args, **kwargs):
+    def open(self, *args, **kwargs):
+        fn = self.resolve()
         if self.compression == 'gz':
             import gzip
-            return gzip.open(*args, **kwargs)
+            return gzip.open(fn, *args, **kwargs)
         elif self.compression == 'bz2':
             import bz2
-            return bz2.open(*args, **kwargs)
+            return bz2.open(fn, *args, **kwargs)
         elif self.compression == 'xz':
             import lzma
-            return lzma.open(*args, **kwargs)
+            return lzma.open(fn, *args, **kwargs)
         else:
-            return open(*args, **kwargs)
+            return self._path.open(*args, **kwargs)
 
     def __iter__(self):
         skip = options.skip
-        with Progress(total=self.filesize) as prog:
+        with Progress(total=filesize(self)) as prog:
             for i, line in enumerate(self.open_text()):
                 prog.addProgress(len(line))
                 if i < skip:
                     continue
                 yield line[:-1]
 
-    def read_text(self):
-        with self.open_text() as fp:
-            return fp.read()
-
     def open_bytes(self, mode='rb'):
         if 'b' not in mode:
             mode += 'b'
-        return self._open(self.resolve(), mode=mode)
+        return self.open(mode=mode)
 
     def read_bytes(self):
-        with self._open(self.resolve(), 'rb') as fp:
+        with self.open(mode='rb') as fp:
             return fp.read()
 
-    def is_dir(self):
-        return os.path.isdir(self.resolve())
-
-    def exists(self):
-        return os.path.exists(self.resolve())
-
     def iterdir(self):
-        return [Path(os.path.join(self.fqpn, f)) for f in os.listdir(self.resolve())]
-
-    def stat(self, force=False):
-        if force or self._stat is None:
-            try:
-                self._stat = os.stat(self.resolve())
-            except Exception as e:
-                self._stat = None
-        return self._stat
-
-    def resolve(self):
-        'Resolve pathname shell variables and ~userdir'
-        return os.path.expandvars(os.path.expanduser(self.fqpn))
-
-    def abspath(self):
-        return os.path.abspath(self.resolve())
-
-    def relpath(self, start):
-        return os.path.relpath(self.abspath(), start.abspath())
-
-    def with_name(self, name):
-        args = list(self.parts[:-1]) + [name]
-        fn = os.path.join(*args)
-        return Path(fn)
-
-    def joinpath(self, *other):
-        args = list(self.parts) + list(other)
-        fn = os.path.join(*args)
-        return Path(fn)
-
-    @property
-    def parts(self):
-        'Return list of path parts'
-        ret = self.fqpn.split('/')
-        if self.fqpn[0] == '/':
-            ret = ['/'] + ret
-        return ret
-
-    @property
-    def parent(self):
-        'Return Path to parent directory.'
-        parts = self.parts
-        if parts[:-1]:
-            return Path(os.path.join(*parts[:-1]))
-        return Path('/' if parts and parts[0].startswith('/') else '')
-
-    @property
-    def filesize(self):
-        st = self.stat()
-        return st and st.st_size
-
-    @property
-    def mtime(self):
-        st = self.stat()
-        return st and st.st_mtime
+        return [Path(os.path.join(self.given, f)) for f in os.listdir(self.resolve())]
 
     def __str__(self):
-        return self.fqpn
-
-    def __lt__(self, a):
-        return self.name < a.name
+        return str(self._path)
 
 
 class UrlPath(Path):
@@ -158,10 +136,16 @@ class UrlPath(Path):
         return self.url
 
     def __getattr__(self, k):
-        return getattr(self.obj, k)
+        if hasattr(self.obj, k):
+            return getattr(self.obj, k)
+        return super().__getattr__(k)
 
     def exists(self):
         return True
+
+    def __str__(self):
+        return self.given
+
 
 
 class PathFd(Path):
@@ -170,17 +154,13 @@ class PathFd(Path):
         super().__init__(pathname)
         self.fp = fp
         self.alreadyRead = []  # shared among all RepeatFile instances
-        self._filesize = filesize
+        self.filesize = filesize
 
     def read_text(self):
         return self.fp.read()
 
     def open_text(self):
         return RepeatFile(self)
-
-    @property
-    def filesize(self):
-        return self._filesize
 
     def exists(self):
         return True
