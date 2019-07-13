@@ -187,7 +187,7 @@ def append_tsv_row(vs, row):
     'Append `row` to vs.source, creating file with correct headers if necessary. For internal use only.'
     if not vs.source.exists():
         with contextlib.suppress(FileExistsError):
-            parentdir = vs.source.parent.resolve()
+            parentdir = vs.source.parent
             if parentdir:
                 os.makedirs(parentdir)
 

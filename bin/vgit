@@ -43,7 +43,7 @@ def somegit(args):
 
 
 def main():
-    loadConfigFile(Path(options.config).resolve(), getGlobals())
+    loadConfigFile(options.config, getGlobals())
 
     args = sys.argv[1:]
 

@@ -19,7 +19,7 @@ class SqliteSheet(Sheet):
 
     def conn(self):
         import sqlite3
-        return sqlite3.connect(self.resolve())
+        return sqlite3.connect(str(self.resolve()))
 
     def execute(self, conn, sql, where={}, parms=None):
         parms = parms or []
@@ -121,7 +121,7 @@ def sqlite_type(t):
 @asyncthread
 def multisave_sqlite(p, *vsheets):
     import sqlite3
-    conn = sqlite3.connect(p.resolve())
+    conn = sqlite3.connect(str(p))
     c = conn.cursor()
 
     for vs in vsheets:

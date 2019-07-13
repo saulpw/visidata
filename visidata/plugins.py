@@ -55,7 +55,7 @@ class PluginsSheet(TsvSheet):
     @asyncthread
     def _install(self, plugin):
         outpath = _plugin_path(plugin)
-        os.makedirs(outpath.parent.resolve(), exist_ok=True)
+        os.makedirs(outpath.parent, exist_ok=True)
 
         with urlcache(plugin.url, 0).open_text() as pyfp:
             with outpath.open_text(mode='w') as outfp:
@@ -74,7 +74,7 @@ class PluginsSheet(TsvSheet):
         self.removePlugin(plugin)
 
     def removePlugin(self, plugin):
-        vdrc = Path(options.config).resolve()
+        vdrc = Path(options.config)
         oldvdrc = vdrc+'.bak'
         try:
             shutil.copyfile(vdrc, oldvdrc)

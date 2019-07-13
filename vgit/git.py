@@ -158,8 +158,8 @@ class GitContext:
     def _git_args(self):
         worktree = getRepoPath(getRootSheet(self).source)  # Path
         return [
-            '--git-dir', worktree.joinpath('.git').resolve(),
-            '--work-tree', worktree.resolve()
+            '--git-dir', str(worktree.joinpath('.git')),
+            '--work-tree', str(worktree),
         ]
 
     @Sheet.name.setter

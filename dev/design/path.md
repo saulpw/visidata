@@ -25,8 +25,6 @@ Differences from pathlib.Path:
     - handles uncompressing before passing to pathlib.Path.open()
 
 TODO:
-- look through all resolve()
-    - eventually, deprecate all uses of resolve()
 - pathlib.Path has a property suffixes which has a list of the path's file extensions
 - change DirSheet owner/group to Path.owner()/group()
 - move __iter__ off visidata.Path into global function

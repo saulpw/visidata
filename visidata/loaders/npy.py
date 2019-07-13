@@ -2,7 +2,7 @@ from visidata import *
 
 
 def open_npy(p):
-    return NpySheet(p.name, source=p.resolve())
+    return NpySheet(p.name, source=p)
 
 
 def open_npz(p):
@@ -38,7 +38,7 @@ class NpySheet(NumpySheet):
     @asyncthread
     def reload(self):
         import numpy
-        self.npy = numpy.load(self.source, encoding='bytes')
+        self.npy = numpy.load(str(self.source), encoding='bytes')
         super().reload()
 
 
@@ -52,7 +52,7 @@ class NpzSheet(ArchiveSheet):
     @asyncthread
     def reload(self):
         import numpy
-        self.npz = numpy.load(self.source.resolve(), encoding='bytes')
+        self.npz = numpy.load(str(self.source), encoding='bytes')
         self.rows = list(self.npz.items())
 
     def getInnerSheet(self, row):

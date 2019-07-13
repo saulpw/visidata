@@ -134,7 +134,7 @@ def completeFilename(val, state):
         partial = val[i+1:]
 
     files = []
-    for f in os.listdir(Path(base or '.').resolve()):
+    for f in os.listdir(Path(base or '.')):
         if f.startswith(partial):
             files.append(os.path.join(base, f))
 
@@ -168,7 +168,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
         # save as individual files in the givenpath directory
         try:
-            os.makedirs(givenpath.resolve(), exist_ok=True)
+            os.makedirs(givenpath, exist_ok=True)
         except FileExistsError:
             pass
 
@@ -215,7 +215,7 @@ def openSource(p, filetype=None):
         if not filetype:
             filetype = p.ext or 'txt'
 
-        if os.path.isdir(p.resolve()):
+        if p.is_dir():
             filetype = 'dir'
 
         openfunc = 'open_' + filetype.lower()
@@ -235,7 +235,7 @@ def openSource(p, filetype=None):
         vs = None
 
     if vs:
-        status('opening %s as %s' % (p.name, filetype))
+        status('opening %s as %s' % (p.given, filetype))
 
     return vs
 

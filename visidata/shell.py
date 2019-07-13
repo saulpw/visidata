@@ -73,7 +73,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: row.name + row.suffix,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
         Column('abspath', width=0,
-            getter=lambda col,row: row.resolve(),
+            getter=lambda col,row: row,
             setter=lambda col,row,val: os.rename(row, val)),
         Column('ext', getter=lambda col,row: row.is_dir() and '/' or row.ext),
         Column('size', type=int,
@@ -91,7 +91,7 @@ class DirSheet(Sheet):
         Column('mode', width=0,
             getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
             setter=lambda col,row,val: os.chmod(row, int(val, 8))),
-        Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row.resolve()], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
+        Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
 #        CellColorizer(4, None, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
     nKeys = 2
@@ -191,6 +191,6 @@ class DirSheet(Sheet):
         vstat.cache_clear()
 
 DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
-DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r.resolve()))')
-DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.resolve())')
-DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.resolve() for r in selectedRows))')
+DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))')
+DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)')
+DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)')

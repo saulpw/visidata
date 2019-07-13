@@ -64,7 +64,7 @@ class PandasSheet(Sheet):
                 readfunc = self.read_tsv
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or error('no pandas.read_'+filetype)
-            self.df = readfunc(self.source.resolve(), **options('pandas_'+filetype+'_'))
+            self.df = readfunc(str(self.source), **options('pandas_'+filetype+'_'))
 
         # reset the index here
         if type(self.df.index) is not pd.RangeIndex:

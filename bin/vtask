@@ -68,7 +68,7 @@ class TodoSheet(Sheet):
         return tasklib.Task(self.tw, **kwargs)
 
     def reload(self):
-        self.tw = tasklib.TaskWarrior(data_location=self.source.resolve(), create=True)
+        self.tw = tasklib.TaskWarrior(data_location=str(self.source), create=True)
         self.rows = list(self.tw.tasks.pending())
         self.orderBy(None, self.column('urgency'), reverse=True)
 

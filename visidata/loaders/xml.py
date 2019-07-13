@@ -64,7 +64,7 @@ class XmlSheet(Sheet):
                 c.nstag = k
 
     def save_xml(self, p):
-        self.source.write(p.resolve(), encoding=options.encoding, standalone=False, pretty_print=True)
+        self.source.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
 
     save_svg = save_xml
 

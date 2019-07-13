@@ -36,10 +36,10 @@ class ArchiveSheet(Sheet):
             ]
 
         if self.archive_type == 'zip':
-            contents = zipfile.ZipFile(self.source.resolve(), 'r').infolist()
+            contents = zipfile.ZipFile(str(self.source), 'r').infolist()
 
         if self.archive_type == 'tar':
-            contents = tarfile.open(name=self.source.resolve()).getmembers()
+            contents = tarfile.open(name=str(self.source)).getmembers()
 
         self.rows = []
         for row in Progress(contents):
@@ -50,14 +50,14 @@ class ArchiveSheet(Sheet):
     def open_archive_file(self, fi):
 
         if self.archive_type == 'zip':
-            zfp = zipfile.ZipFile(self.source.resolve(), 'r')
+            zfp = zipfile.ZipFile(str(self.source), 'r')
             decodedfp = codecs.iterdecode(zfp.open(fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
             return openSource(PathFd(fi.filename, decodedfp, fi.file_size))
 
         if self.archive_type == 'tar':
-            tfp = tarfile.open(name=self.source.resolve())
+            tfp = tarfile.open(name=str(self.source))
             decodedfp = codecs.iterdecode(tfp.extractfile(fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)

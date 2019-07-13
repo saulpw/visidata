@@ -37,7 +37,7 @@ class MbtilesSheet(Sheet):
     def getTile(self, zoom_level, tile_col, tile_row):
         import mapbox_vector_tile
 
-        con = sqlite3.connect(self.source.resolve())
+        con = sqlite3.connect(str(self.source))
         tile_data = con.execute('''
        SELECT tile_data FROM tiles
            WHERE zoom_level = ?
@@ -48,7 +48,7 @@ class MbtilesSheet(Sheet):
 
     @asyncthread
     def reload(self):
-        con = sqlite3.connect(self.source.resolve())
+        con = sqlite3.connect(str(self.source))
 
         self.metadata = dict(con.execute('SELECT name, value FROM metadata').fetchall())
 

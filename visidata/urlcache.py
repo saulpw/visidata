@@ -16,7 +16,7 @@ def urlcache(url, days=1, text=True):
             return p
 
     if not p.parent.exists():
-        os.makedirs(p.parent.resolve(), exist_ok=True)
+        os.makedirs(p.parent, exist_ok=True)
 
     assert p.parent.is_dir(), p.parent
 

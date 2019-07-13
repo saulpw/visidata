@@ -18,7 +18,7 @@ class XptSheet(Sheet):
     @asyncthread
     def reload(self):
         import xport
-        with open(self.source.resolve(), 'rb') as fp:
+        with open(self.source, 'rb') as fp:
             self.rdr = xport.Reader(fp)
 
             self.columns = []
@@ -34,7 +34,7 @@ class SasSheet(Sheet):
     @asyncthread
     def reload(self):
         import sas7bdat
-        self.dat = sas7bdat.SAS7BDAT(self.source.resolve(), skip_header=True, log_level=logging.CRITICAL)
+        self.dat = sas7bdat.SAS7BDAT(str(self.source), skip_header=True, log_level=logging.CRITICAL)
         self.columns = []
         for col in self.dat.columns:
             self.addColumn(ColumnItem(col.name.decode('utf-8'), col.col_id, type=SASTypes.get(col.type, anytype)))

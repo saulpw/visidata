@@ -12,7 +12,7 @@ option('skip', 0, 'skip first N lines of text input', replay=True)
 @functools.lru_cache()
 def vstat(path, force=False):
     try:
-        return os.stat(path.resolve())
+        return os.stat(path)
     except Exception as e:
         return None
 
@@ -87,7 +87,7 @@ class Path(os.PathLike):
         return self.open(mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
     def open(self, *args, **kwargs):
-        fn = self.resolve()
+        fn = self
         if self.compression == 'gz':
             import gzip
             return gzip.open(fn, *args, **kwargs)
@@ -117,9 +117,6 @@ class Path(os.PathLike):
     def read_bytes(self):
         with self.open(mode='rb') as fp:
             return fp.read()
-
-    def iterdir(self):
-        return [Path(os.path.join(self.given, f)) for f in os.listdir(self.resolve())]
 
     def __str__(self):
         return str(self._path)

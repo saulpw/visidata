@@ -9,7 +9,7 @@ class SpssSheet(Sheet):
     @asyncthread
     def reload(self):
         import savReaderWriter
-        self.rdr = savReaderWriter.SavReader(self.source.resolve())
+        self.rdr = savReaderWriter.SavReader(str(self.source))
         with self.rdr as reader:
             self.columns = []
             for i, vname in enumerate(reader.varNames):

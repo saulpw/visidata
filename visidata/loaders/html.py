@@ -107,7 +107,7 @@ class HtmlTableSheet(Sheet):
 def save_html(p, *vsheets):
     'Save vsheets as HTML tables in a single file'
 
-    with open(p.resolve(), 'w', encoding='ascii', errors='xmlcharrefreplace') as fp:
+    with open(p, 'w', encoding='ascii', errors='xmlcharrefreplace') as fp:
         for sheet in vsheets:
 
             fp.write('<h2 class="sheetname">%s</h2>\n'.format(sheetname=html.escape(sheet.name)))

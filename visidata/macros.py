@@ -24,7 +24,7 @@ def saveMacro(self, rows, ks):
         macropath = Path(fnSuffix(options.visidata_dir+"macro-{0}.vd"))
         save_vd(macropath, vs)
         setMacro(ks, vs)
-        append_tsv_row(vd.macrosheet, (ks, macropath.resolve()))
+        append_tsv_row(vd.macrosheet, (ks, macropath))
 
 
 CommandLog.addCommand('z^S', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))')

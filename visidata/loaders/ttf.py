@@ -24,7 +24,7 @@ class TTFTablesSheet(Sheet):
     def reload(self):
         import fontTools.ttLib
 
-        self.ttf = fontTools.ttLib.TTFont(self.source.resolve(), 0, allowVID=0, ignoreDecompileErrors=True, fontNumber=-1)
+        self.ttf = fontTools.ttLib.TTFont(str(self.source), 0, allowVID=0, ignoreDecompileErrors=True, fontNumber=-1)
         self.rows = []
         for cmap in self.ttf["cmap"].tables:
             self.addRow(cmap)

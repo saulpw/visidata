@@ -34,13 +34,12 @@ def launchExternalEditor(v, linenum=0):
 
 
 def launchExternalEditorPath(path, linenum=0):
-        fn = path.resolve()
         if linenum:
-            launchEditor(fn, '+%s' % linenum)
+            launchEditor(path, '+%s' % linenum)
         else:
-            launchEditor(fn)
+            launchEditor(path)
 
-        with open(fn, 'r') as fp:
+        with open(path, 'r') as fp:
             try:
                 r = fp.read()
                 if r[:-1] == '\n':  # trim inevitable trailing newline

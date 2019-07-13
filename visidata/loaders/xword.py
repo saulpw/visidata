@@ -29,7 +29,7 @@ class CrosswordsSheet(Sheet):
     def reload(self):
         self.rows = []
         for p in self.source.iterdir():
-            self.addRow(Crossword(p.read(), p.resolve()))
+            self.addRow(Crossword(p.read(), str(p)))
 
 
 class GridSheet(Sheet):
@@ -84,7 +84,7 @@ class PuzSheet(CrosswordSheet):
     @asyncthread
     def reload(self):
         import xdfile.puz2xd
-        self.xd = xdfile.puz2xd.parse_puz(self.source.read_bytes(), self.source.resolve())
+        self.xd = xdfile.puz2xd.parse_puz(self.source.read_bytes(), str(self.source))
         self.rows = self.xd.clues
 
 

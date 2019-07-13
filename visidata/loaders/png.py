@@ -90,7 +90,7 @@ def save_png(vs, p):
     status('saving %sx%sx%s' % (vs.width, vs.height, len(palette)))
 
     import png
-    with open(p.resolve(), 'wb') as fp:
+    with open(p, 'wb') as fp:
         w = png.Writer(vs.width, vs.height, palette=list(palette.keys()))
         w.write(fp, pixels)
 
