@@ -259,7 +259,7 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
     args = parser.parse_args()
 
     # add visidata_dir to path before loading config file (can only be set from cli)
-    sys.path.append(visidata.Path(args.visidata_dir or options.visidata_dir).resolve())
+    sys.path.append(str(visidata.Path(args.visidata_dir or options.visidata_dir)))
 
     # user customisations in config file in standard location
     loadConfigFile(visidata.Path(options.config), getGlobals())
