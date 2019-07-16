@@ -13,7 +13,7 @@ option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
 globalCommand('gD', 'visidata-dir', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))')
 globalCommand('D', 'cmdlog', 'vd.push(vd.cmdlog)')
-globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save to: ", value=fnSuffix("cmdlog-{0}.vd") or "cmdlog.vd"), vd.cmdlog)')
+globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save to: ", value=fnSuffix(name)), vd.cmdlog)')
 globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
 globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
 globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
@@ -45,11 +45,14 @@ def checkVersion(desired_version):
     if desired_version != visidata.__version_info__:
         fail("version %s required" % desired_version)
 
-def fnSuffix(template):
-    for i in range(1, 1000):
-        fn = template.format(i)
-        if not Path(fn).exists():
-            return fn
+def fnSuffix(prefix):
+    i = 0
+    fn = prefix + '.vd'
+    while Path(fn).exists():
+        i += 1
+        fn = f'{prefix}-{i}.vd'
+
+    return fn
 
 def inputLongname(sheet):
     longnames = set(k for (k, obj), v in commands.iter(sheet))

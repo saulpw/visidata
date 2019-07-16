@@ -21,7 +21,7 @@ def setMacro(ks, vs):
 def saveMacro(self, rows, ks):
         vs = copy(self)
         vs.rows = self.selectedRows
-        macropath = Path(fnSuffix(options.visidata_dir+"macro-{0}.vd"))
+        macropath = Path(fnSuffix(options.visidata_dir+"macro"))
         save_vd(macropath, vs)
         setMacro(ks, vs)
         append_tsv_row(vd.macrosheet, (ks, macropath))
