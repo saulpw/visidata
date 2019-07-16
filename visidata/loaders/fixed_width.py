@@ -2,6 +2,7 @@
 from visidata import *
 
 option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
+option('fixed_maxcols', 0, 'max number of fixed-width columns to create (0 is no max)')
 
 def open_fixed(p):
     return FixedWidthColumnsSheet(p.name, source=p)
@@ -45,13 +46,15 @@ class FixedWidthColumnsSheet(Sheet):
     @asyncthread
     def reload(self):
         self.rows = []
+        maxcols = options.fixed_maxcols
         for line in self.source:
             self.addRow([line])
 
         self.columns = []
         # compute fixed width columns
         for i, j in columnize(list(r[0] for r in self.rows[:options.fixed_rows])):
-            self.addColumn(FixedWidthColumn('', i, j))
+            if maxcols and self.nCols < maxcols:
+                self.addColumn(FixedWidthColumn('', i, j))
 
         self.setColNames(self.rows[:options.header])
         self.rows = self.rows[options.header:]
