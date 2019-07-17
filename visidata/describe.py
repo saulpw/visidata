@@ -37,6 +37,7 @@ class DescribeSheet(ColumnsSheet):
             DescribeColumn('median', type=str),
             DescribeColumn('mean',   type=float),
             DescribeColumn('stdev',  type=float),
+            DescribeColumn('sum')
     ]
     colorizers = [
         RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r in r.sheet.keyCols),
@@ -77,7 +78,7 @@ class DescribeSheet(ColumnsSheet):
 
             d['mode'] = self.calcStatistic(d, mode, vals)
             if isNumeric(srccol):
-                for func in [min, max, median, mean, stdev]:
+                for func in [min, max, median, mean, stdev, sum]:
                     d[func.__name__] = self.calcStatistic(d, func, vals)
 
     def calcStatistic(self, d, func, *args, **kwargs):
