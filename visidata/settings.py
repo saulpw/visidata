@@ -180,7 +180,7 @@ class OptionsObject:
     def __getitem__(self, k):      # options[k]
         opt = self._get(k)
         if not opt:
-            error('no option "%s"' % k)
+            vd.error('no option "%s"' % k)
         return opt.value
 
     def __setitem__(self, k, v):   # options[k] = v
