@@ -47,7 +47,7 @@ def aggregator(name, func, *args, type=None):
                 return None
             return e
 
-    aggregators[name] = _defaggr(name, type, _func)
+    aggregators[name] = [_defaggr(name, type, _func)]
 
 ## specific aggregator implementations
 
@@ -118,9 +118,7 @@ ColumnsSheet.columns += [
 def addAggregators(cols, aggrnames):
     'add aggregator for each aggrname to each of cols'
     for aggrname in aggrnames:
-        aggrs = aggregators.get(aggrname)
-        aggrs = aggrs if isinstance(aggrs, list) else [aggrs]
-        for aggr in aggrs:
+        for aggr in aggregators.get(aggrname):
             for c in cols:
                 if not hasattr(c, 'aggregators'):
                     c.aggregators = []
