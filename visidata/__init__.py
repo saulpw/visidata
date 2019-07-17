@@ -61,8 +61,8 @@ from .expr import *
 from .pyobj import *
 from .metasheets import *
 from .join import *
-from .describe import *
 from .aggregators import *
+from .describe import *
 from .pivot import *
 from .freqtbl import *
 from .tidydata import *
