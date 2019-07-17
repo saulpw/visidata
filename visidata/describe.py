@@ -52,9 +52,7 @@ class DescribeSheet(ColumnsSheet):
         for srccol in Progress(self.rows, 'categorizing'):
             if not srccol.hidden:
                 self.reloadColumn(srccol)
-            vd.sync(max_threads)
 
-    @asyncthread
     def reloadColumn(self, srccol):
             d = self.describeData[srccol]
             isNull = isNullFunc()
