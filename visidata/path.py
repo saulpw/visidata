@@ -40,7 +40,10 @@ class Path(os.PathLike):
     @given.setter
     def given(self, given):
         self._given = given
-        self._path = pathlib.Path(given)
+        if isinstance(given, os.PathLike):
+            self._path = given
+        else:
+            self._path = pathlib.Path(given)
 
         self.ext = self.suffix[1:]
         if self.suffix:
