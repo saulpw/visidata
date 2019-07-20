@@ -53,7 +53,7 @@ class FixedWidthColumnsSheet(Sheet):
         self.columns = []
         # compute fixed width columns
         for i, j in columnize(list(r[0] for r in self.rows[:options.fixed_rows])):
-            if maxcols and self.nCols < maxcols:
+            if not maxcols or self.nCols < maxcols:
                 self.addColumn(FixedWidthColumn('', i, j))
 
         self.setColNames(self.rows[:options.header])
