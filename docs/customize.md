@@ -59,18 +59,33 @@ The maximum option name length should be 20.
 
 ---
 
-## How to configure commands
+## How to configure commands {#commands}
 
 The **.visidatarc** in the user's home directory is plain Python code, and can contain additional commands or key bindings.
 
-Longnames are names given to particular flavours of executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, these are bound to the keystroke `s`.
+Longnames are names given to particular flavours of executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, this longname is bound to the keystroke `s`.
 
-### Creating command aliases for existing commands
+From within VisiData, type `z^H` to open the **Commands Sheet**. This is a reference for all of the commands available on the current sheet. For a deeper exploration of commands, check out [the book of VisiData](https://github.com/saulpw/visidata-book/blob/master/commands.md).
+
+### Setting/changing keybindings for existing commands
 
 1. Use `zCtrl+H` to open the **Commands Sheet** and discover the [longname]() for the functionality in question.
 
 2. a) To create a global keybinding, add `bindkey(keystroke, longname)` to your **.visidatarc**.
 b) To set the binding for a particular sheet type, add `<Sheet>.bindkey(keystroke, longname)` to your **.visidatarc**, where `<Sheet>` is a **SheetType**.
+
+~~~
+Warning: bindings defined in a .visidatarc will overwrite default ones.
+~~~
+
+#### Example: Bind `i` to edit-cell globally
+
+In VisiData, pressing `e` enters edit mode for the current cell. Seasoned vim users might prefer to press `i` instead.
+
+1. Open `~/.visidatarc` in an editor.
+2. Add the line `bindkey('i', 'edit-cell')` to globally bind the keystroke `i` to the longname `edit-cell`.
+3. Launch VisiData, and press `i`.
+
 
 ### Creating new commands
 
