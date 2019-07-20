@@ -1,4 +1,4 @@
-.Dd January 12, 2019
+.Dd July 19, 2019
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -64,6 +64,7 @@ cancel current replay
 .El
 .
 .Ss GLOBAL COMMANDS
+.No All keystrokes are case sensitive. The Sy ^ No prefix is shorthand for Sy Ctrl Ns .
 .Pp
 .Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -811,6 +812,8 @@ indent to use when saving json
 sort object keys when saving to json
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
+.It Sy --fixed-maxcols Ns = Ns Ar "int         " No "0"
+max number of fixed-width columns to create (0 is no max)
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
 (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
 .It Sy --graphviz-edge-labels Ns = Ns Ar "bool " No "True"

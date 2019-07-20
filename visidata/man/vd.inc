@@ -1,4 +1,4 @@
-.Dd January 12, 2019
+.Dd July 19, 2019
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -64,6 +64,7 @@ cancel current replay
 .El
 .
 .Ss GLOBAL COMMANDS
+.No All keystrokes are case sensitive. The Sy ^ No prefix is shorthand for Sy Ctrl Ns .
 .Pp
 .Ss Keystrokes for the Cautious
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
