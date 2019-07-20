@@ -43,7 +43,10 @@ class Path(os.PathLike):
         self._path = pathlib.Path(given)
 
         self.ext = self.suffix[1:]
-        self.name = self._path.name[:-len(self.suffix)]
+        if self.suffix:
+            self.name = self._path.name[:-len(self.suffix)]
+        else:
+            self.name = self._path.name
 
         # check if file is compressed
         if self.suffix in ['.gz', '.bz2', '.xz']:
