@@ -148,6 +148,9 @@ class PandasSheet(Sheet):
         for row in (Progress(rows, 'unselecting') if progress else rows):
             select.unselectRow(row)
 
+    def clearSelected(self):
+        self._selectedMask = pd.Series(False, index=self.df.index)
+
     def selectByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
         self._selectedMask.iloc[start:end] = True

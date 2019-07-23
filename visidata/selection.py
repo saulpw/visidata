@@ -34,7 +34,8 @@ def unselectRow(self, row):
         return False
 
 @Sheet.api
-def unselectAll(self):
+def clearSelected(self):
+    'Removes all selected rows from selection, without calling unselectRow.  Override for sheet-specific selection implementation.'
     self._selectedRows.clear()
 
 @Sheet.api
@@ -43,7 +44,7 @@ def select(self, rows, status=True, progress=True):
     "Bulk select given rows. Don't show progress if progress=False; don't show status if status=False."
     before = self.nSelected
     if options.bulk_select_clear:
-        self.unselectAll()
+        self.clearSelected()
     for r in (Progress(rows, 'selecting') if progress else rows):
         self.selectRow(r)
     if status:
@@ -102,7 +103,7 @@ def deleteSelected(self):
     'Delete all selected rows.'
     ndeleted = self.deleteBy(self.isSelected)
     nselected = self.nSelected
-    self.unselectAll()
+    self.clearSelected()
     if ndeleted != nselected:
         error('expected %s' % nselected)
 
@@ -118,7 +119,7 @@ Sheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', un
 
 Sheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)', undo=undoSheetSelection),
 Sheet.addCommand('gs', 'select-rows', 'select(rows)', undo=undoSheetSelection),
-Sheet.addCommand('gu', 'unselect-rows', 'unselectAll()', undo=undoSheetSelection),
+Sheet.addCommand('gu', 'unselect-rows', 'clearSelected()', undo=undoSheetSelection),
 
 Sheet.addCommand('zt', 'stoggle-before', 'toggle(rows[:cursorRowIndex])', undo=undoSheetSelection),
 Sheet.addCommand('zs', 'select-before', 'select(rows[:cursorRowIndex])', undo=undoSheetSelection),

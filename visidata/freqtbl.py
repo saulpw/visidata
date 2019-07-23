@@ -75,9 +75,7 @@ class SheetFreqTableSummary(SheetFreqTable):
         self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
 
 
-SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
-SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
-SheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
+SheetFreqTable.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)')
 
 SheetFreqTable.addCommand(ENTER, 'dive-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)')
 SheetFreqTable.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)')
