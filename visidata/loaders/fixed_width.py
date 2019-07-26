@@ -17,7 +17,8 @@ class FixedWidthColumn(Column):
 
     def putValue(self, row, value):
         value = str(value)[:self.j-self.i]
-        row[0] = row[0][:self.i] + '%-*s' % (self.j-self.i, value) + row[0][self.j:]
+        j = self.j or len(row)
+        row[0] = row[0][:self.i] + '%-*s' % (j-self.i, value) + row[0][self.j:]
 
 def columnize(rows):
     'Generate (i,j) indexes for fixed-width columns found in rows'
@@ -54,7 +55,7 @@ class FixedWidthColumnsSheet(Sheet):
         # compute fixed width columns
         for i, j in columnize(list(r[0] for r in self.rows[:options.fixed_rows])):
             if maxcols and self.nCols >= maxcols-1:
-                self.addColumn(FixedWidthColumn('', i, len(self.rows[0][0])))
+                self.addColumn(FixedWidthColumn('', i, None))
                 break
             else:
                 self.addColumn(FixedWidthColumn('', i, j))
