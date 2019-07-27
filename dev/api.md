@@ -9,19 +9,6 @@
 
 Of note:
 
-a) Core visidata objects are subclassed from Extensible
-  - `@cached_property`
-     - create on first use is necessary to avoid circular source dependencies
-     - same sheet is pushed every time
-  - `@property`
-  - `@api`: a function on the VisiData singleton object
-  - `@global_api`: a function on VisiData, that is also in the 'global' scope for convenient access (status, input, etc)
-  - `init('member', constructor)`
-    - BaseSheet.init('undone', list)
-
-
-b) In these modular member functions, the first argument would normally be 'self'.  But as they are removed from the actual class definition it seems better to use a specific local object name: `vd`, `sheet`, 'col'.
-
 c) every sheet needs a name and a source.  SomeSheet.reload() should know how to get the rows from the source.
 
 d) `statuses` and its docstring will be shown on the Shift+V VisiData menu

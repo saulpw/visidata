@@ -46,7 +46,7 @@ Command    Type
 ` %`      float
 ` $`      currency
 ` @`      date
-`z#`      len
+`z#`      vlen
 `z~`      anytype
 
 Columns usually begin as untyped. Odd results while working with numerical or datetime data is usually due to values being considered as strings, and the problem is solved by setting the correct type.
