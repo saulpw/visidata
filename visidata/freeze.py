@@ -15,7 +15,7 @@ Column.resetCache = resetCache
 
 @Sheet.api
 def StaticColumn(sheet, col, pos):
-    frozencol = SettableColumn(col.name+'_frozen', width=col.width, type=col.type, fmtstr=col.fmtstr)
+    frozencol = SettableColumn(col.name+'_frozen', width=col.width, type=col.type, fmtstr=col._fmtstr)
     sheet.addColumn(frozencol, pos)
 
     @asyncthread
@@ -37,7 +37,7 @@ class StaticSheet(Sheet):
 
         self.columns = []
         for i, col in enumerate(self.source.visibleCols):
-            colcopy = ColumnItem(col.name, i, width=col.width, type=col.type, fmtstr=col.fmtstr)
+            colcopy = ColumnItem(col.name, i, width=col.width, type=col.type, fmtstr=col._fmtstr)
             self.addColumn(colcopy)
             if col in self.source.keyCols:
                 self.setKeys([colcopy])

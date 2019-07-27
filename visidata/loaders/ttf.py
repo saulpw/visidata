@@ -33,7 +33,7 @@ class TTFTablesSheet(Sheet):
 class TTFGlyphsSheet(Sheet):
     rowtype = 'glyphs'  # rowdef: (codepoint, glyphid, fontTools.ttLib.ttFont._TTGlyphGlyf)
     columns = [
-        ColumnItem('codepoint', 0, type=int, fmtstr='{:0X}'),
+        ColumnItem('codepoint', 0, type=int, fmtstr='%0X'),
         ColumnItem('glyphid', 1),
         SubColumnItem(2, ColumnAttr('height', type=int)),
         SubColumnItem(2, ColumnAttr('width', type=int)),

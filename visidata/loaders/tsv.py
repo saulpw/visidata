@@ -137,6 +137,7 @@ def genAllValues(rows, cols, trdict={}, format=True):
         transformers[col] = [ col.type ]
         if format:
             transformers[col].append(
+                # optimization: only lookup fmtstr once (it may have to get an option value)
                 lambda v,fmtfunc=getType(col.type).formatter,fmtstr=col.fmtstr: fmtfunc(fmtstr, '' if v is None else v)
             )
         if trdict:
