@@ -20,8 +20,8 @@ def draw(self, scr, *sheets):
         except Exception as e:
             self.exceptionCaught(e)
 
-    self.drawLeftStatus(scr, sheet)
-    self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
+    self.drawLeftStatus(scr, sheets[0])
+    self.drawRightStatus(scr, sheets[0])  # visible during this getkeystroke
 
 
 @VisiData.api
