@@ -5,7 +5,7 @@ __all__ = ['Extensible']
 
 class Extensible:
     @classmethod
-    def init(cls, membername, initfunc, **kwargs):
+    def init(cls, membername, initfunc, copy=False):
         'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T[, copy=True])'
         oldinit = cls.__init__
         def newinit(self, *args, **kwargs):
@@ -16,7 +16,7 @@ class Extensible:
         oldcopy = cls.__copy__
         def newcopy(self, *args, **kwargs):
             ret = oldcopy(self, *args, **kwargs)
-            setattr(ret, membername, getattr(self, membername) if kwargs.get('copy', False) else initfunc())
+            setattr(ret, membername, getattr(self, membername) if copy else initfunc())
             return ret
         cls.__copy__ = newcopy
 
