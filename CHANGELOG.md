@@ -149,6 +149,8 @@
     - call vd.finalInit() at end of module imports to initialise VisiData.init() members
     - so that e.g. cmdlog is not created until all internal sheet-specific options has been set
 - remove replayableOption() (now replay an argument within option())
+- CursesAttr is now ColorAttr
+    - variables that contain a ColorAttr have been renamed from attr to cattr for readability
 
 ## Deps
 - add dateutil as submodule
