@@ -110,7 +110,7 @@ from .loaders.xword import *
 
 from .plugins import *
 
-from .colors import *   # ColorsSheet
+from .colorsheet import *
 
 from .deprecated import *
 
