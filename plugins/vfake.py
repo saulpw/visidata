@@ -6,27 +6,25 @@ __version__ = '0.9'
 
 option('locale', 'en_US', 'default locale to use for Faker', replay=True)
 
-vd.fakeMap = {}
-
 @Column.api
 @asyncthread
 def setValuesFromFaker(col, faketype, rows):
     import faker
     fake = faker.Faker(options.locale)
-    fakefunc = getattr(fake, faketype, None) or error('no such faker function')
+    fakefunc = getattr(fake, faketype, None) or vd.error('no such faker function')
 
-    vd.fakeMap[None] = None
-    vd.fakeMap[options.null_value] = options.null_value
+    fakeMap = {}
+    fakeMap[None] = None
+    fakeMap[options.null_value] = options.null_value
 
     for r in Progress(rows):
         v = col.getValue(r)
-        if v in vd.fakeMap:
-            newv = vd.fakeMap[v]
+        if v in fakeMap:
+            newv = fakeMap[v]
         else:
             newv = fakefunc()
-            vd.fakeMap[v] = newv
+            fakeMap[v] = newv
         col.setValue(r, newv)
 
 
 Sheet.addCommand(None, 'setcol-fake', 'cursorCol.setValuesFromFaker(input("faketype: ", type="faketype"), selectedRows)', undo=undoEditCells)
-Sheet.addCommand(None, 'reset-fake', 'vd.fakeMap.clear()')
