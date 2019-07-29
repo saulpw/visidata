@@ -9,7 +9,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, LazyMap
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet, UNLOADED,
-vd, exceptionCaught, getType, clipdraw, CursesAttr, colors, undoEditCell, undoEditCells, undoAttr, undoBlocked)
+vd, exceptionCaught, getType, clipdraw, ColorAttr, colors, undoEditCell, undoEditCells, undoAttr, undoBlocked)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'SheetsSheet']
@@ -107,7 +107,6 @@ class Sheet(BaseSheet):
         ColumnColorizer(2, 'color_current_col', lambda s,c,r,v: c is s.cursorCol),
         ColumnColorizer(1, 'color_key_col', lambda s,c,r,v: c in s.keyCols),
         CellColorizer(0, 'color_default', lambda s,c,r,v: True),
-#        RowColorizer(-1, 'color_column_sep', lambda s,c,r,v: c is None),
         RowColorizer(2, 'color_selected_row', lambda s,c,r,v: s.isSelected(r)),
         RowColorizer(1, 'color_error', lambda s,c,r,v: isinstance(r, (Exception, TypedExceptionWrapper))),
     ]
@@ -154,8 +153,8 @@ class Sheet(BaseSheet):
                 _colorizers.add(c)
         return sorted(_colorizers, key=lambda x: x.precedence, reverse=True)
 
-    def colorize(self, col, row, value=None):
-        'Returns curses attribute for the given col/row/value'
+    def colorize(self, col, row, value=None) -> ColorAttr:
+        'Returns ColorAttr for the given col/row/value'
 
 #        colorstack = tuple(c.coloropt for c in self.getColorizers() if wrapply(c.func, self, col, row, value))
 
@@ -465,11 +464,11 @@ class Sheet(BaseSheet):
 
         # hdrattr highlights whole column header
         # sepattr is for header separators and indicators
-        sepattr = colors.color_column_sep
+        sepcattr = ColorAttr(colors.color_column_sep)
 
-        hdrattr = self.colorize(col, None)
+        hdrcattr = self.colorize(col, None)
         if vcolidx == self.cursorVisibleColIndex:
-            hdrattr = hdrattr.update_attr(colors.color_current_hdr, 2)
+            hdrcattr = hdrcattr.update_attr(colors.color_current_hdr, 2)
 
         C = options.disp_column_sep
         if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
@@ -492,20 +491,20 @@ class Sheet(BaseSheet):
                 name = name[:colwidth-len(options.disp_truncator)] + options.disp_truncator
 
             if i == h-1:
-                hdrattr = hdrattr.update_attr(colors.color_bottom_hdr, 5)
+                hdrcattr = hdrcattr.update_attr(colors.color_bottom_hdr, 5)
 
-            clipdraw(scr, y+i, x, name, hdrattr.attr, colwidth)
+            clipdraw(scr, y+i, x, name, hdrcattr.attr, colwidth)
             vd.onMouse(scr, y+i, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
 
             if C and x+colwidth+len(C) < self.windowWidth:
-                scr.addstr(y+i, x+colwidth, C, sepattr)
+                scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
-        clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrattr.attr, len(T))
+        clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrcattr.attr, len(T))
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
                 A = options.disp_more_left
-                scr.addstr(y, x, A, sepattr)
+                scr.addstr(y, x, A, sepcattr.attr)
         except ValueError:  # from .index
             pass
 
@@ -543,16 +542,16 @@ class Sheet(BaseSheet):
             if y >= self.windowHeight-1:
                 break
 
-            rowattr = self.colorize(None, row)
+            rowcattr = self.colorize(None, row)
 
-            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowattr, maxheight=self.windowHeight-y, isNull=isNull)
+            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y, isNull=isNull)
 
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.windowWidth-2, options.disp_more_right, colors.color_column_sep)
 
         scr.refresh()
 
-    def drawRow(self, scr, row, rowidx, ybase, rowattr, maxheight, isNull=None):
+    def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight, isNull=None):
             topsep = options.disp_rowtop_sep
             midsep = options.disp_rowmid_sep
             botsep = options.disp_rowbot_sep
@@ -568,17 +567,17 @@ class Sheet(BaseSheet):
             keysep = options.disp_keycol_sep
 
             # sepattr is the attr between cell/columns
-            sepattr = rowattr
-            sepattr = sepattr.update_attr(colors.color_column_sep, newprec=1)
+            sepcattr = rowcattr
+            sepcattr = sepcattr.update_attr(colors.color_column_sep, newprec=1)
 
             # apply current row here instead of in a colorizer, because it needs to know dispRowIndex
             if rowidx == self.cursorRowIndex:
-                color_current_row = CursesAttr(colors.color_current_row, 5)
-                basecellattr = rowattr.update_attr(color_current_row)
-                sepattr = rowattr
-                sepattr = sepattr.update_attr(color_current_row)
+                color_current_row = ColorAttr(colors.color_current_row, 5)
+                basecellcattr = rowcattr.update_attr(color_current_row)
+                sepcattr = rowcattr
+                sepcattr = sepcattr.update_attr(color_current_row)
             else:
-                basecellattr = rowattr
+                basecellcattr = rowcattr
 
             displines = {}  # [vcolidx] -> list of lines in that cell
 
@@ -615,13 +614,13 @@ class Sheet(BaseSheet):
                         continue
                     x, colwidth = self.visibleColLayout[vcolidx]
 
-                    attr = self.colorize(col, row, cellval)
-                    attr = attr.update_attr(basecellattr)
+                    cattr = self.colorize(col, row, cellval)
+                    cattr = cattr.update_attr(basecellcattr)
 
                     note = getattr(cellval, 'note', None)
                     if note:
-                        noteattr = attr.update_attr(colors.get_color(cellval.notecolor), 10)
-                        clipdraw(scr, ybase, x+colwidth-len(note), note, noteattr.attr, len(note))
+                        notecattr = cattr.update_attr(colors.get_color(cellval.notecolor), 10)
+                        clipdraw(scr, ybase, x+colwidth-len(note), note, notecattr.attr, len(note))
 
                     if len(lines) > height:
                         firstn = sum(len(i)+1 for i in lines[:height-1])
@@ -664,11 +663,11 @@ class Sheet(BaseSheet):
                                 else:
                                     sepchars = midsep
 
-                        clipdraw(scr, y, x, disp_column_fill+line, attr.attr, colwidth-(1 if note else 0))
+                        clipdraw(scr, y, x, disp_column_fill+line, cattr.attr, colwidth-(1 if note else 0))
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
-                            scr.addstr(y, x+colwidth, sepchars, sepattr.attr)
+                            scr.addstr(y, x+colwidth, sepchars, sepcattr.attr)
 
             return height
 

@@ -1,7 +1,7 @@
 import collections
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, CursesAttr, options, colors, wrmap, clipdraw, ExpectedException
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, ColorAttr, options, colors, wrmap, clipdraw, ExpectedException
 
 
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
@@ -68,7 +68,7 @@ def leftStatus(sheet):
 @VisiData.api
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
-    cattr = CursesAttr(colors.color_status)
+    cattr = ColorAttr(colors.color_status)
     attr = cattr.attr
     error_attr = cattr.update_attr(colors.color_error, 1).attr
     warn_attr = cattr.update_attr(colors.color_warning, 2).attr
