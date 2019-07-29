@@ -569,11 +569,13 @@ class Sheet(BaseSheet):
 
             # sepattr is the attr between cell/columns
             sepattr = rowattr
+            sepattr = sepattr.update_attr(colors.color_column_sep, newprec=1)
 
             # apply current row here instead of in a colorizer, because it needs to know dispRowIndex
             if rowidx == self.cursorRowIndex:
                 color_current_row = CursesAttr(colors.color_current_row, 5)
                 basecellattr = rowattr.update_attr(color_current_row)
+                sepattr = rowattr
                 sepattr = sepattr.update_attr(color_current_row)
             else:
                 basecellattr = rowattr
