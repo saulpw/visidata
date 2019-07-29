@@ -80,7 +80,7 @@ class ColorMaker:
         return list(self.attrs.keys()) + list(self.color_attrs.keys())
 
     def __getitem__(self, colornamestr):
-        return self._colornames_to_attr(colornamestr)
+        return self._colornames_to_attr(colornamestr).attr
 
     def __getattr__(self, optname):
         'colors.color_foo returns colors[options.color_foo]'

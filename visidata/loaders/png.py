@@ -4,10 +4,10 @@ from visidata import *
 @functools.lru_cache(256)
 def rgb_to_attr(r,g,b,a):
     if a == 0: return 0
-    if r > g and r > b: return colors['red'].attr
-    if g > r and g > b: return colors['green'].attr
-    if b > r and b > g: return colors['blue'].attr
-    if a == 255: return colors['white'].attr
+    if r > g and r > b: return colors['red']
+    if g > r and g > b: return colors['green']
+    if b > r and b > g: return colors['blue']
+    if a == 255: return colors['white']
     return 0
 
 

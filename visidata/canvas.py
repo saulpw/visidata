@@ -333,7 +333,7 @@ class Canvas(Plotter):
         self.polylines.clear()
         self.legends.clear()
         self.plotAttrs.clear()
-        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))].attr for colorname in options.plot_colors.split())
+        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in options.plot_colors.split())
 
     def plotColor(self, k):
         attr = self.plotAttrs.get(k, None)
