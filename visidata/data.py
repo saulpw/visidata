@@ -162,7 +162,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             savefunc = getGlobals().get('multisave_' + filetype, None)
             if savefunc:
                 # use specific multisave function
-                return savefunc(givenpath, *vsheets)
+                vd.execAsync(savefunc, givenpath, *vsheets)
 
         # more than one sheet; either no specific multisave for save filetype, or path ends with /
 
@@ -183,7 +183,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             if not savefunc:
                 savefunc = lambda p,vs=vs,f=globalsavefunc: f(p, vs)
             if savefunc:
-                savefunc(givenpath.with_suffix('.'+filetype))
+                vd.execAsync(savefunc, givenpath.with_suffix('.'+filetype))
             else:
                 warning('no function to save %s as type %s' % (vs, filetype))
     else:
@@ -194,7 +194,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             savefunc = lambda p,vs=vsheets[0],f=f: f(p, vs)
 
         status('saving to %s as %s' % (givenpath.given, filetype))
-        savefunc(givenpath)
+        vd.execAsync(savefunc, givenpath)
 
 
 def openSource(p, filetype=None):
