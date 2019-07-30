@@ -4,10 +4,10 @@ import copy
 
 from visidata import options
 
-__all__ = ['CursesAttr', 'colors']
+__all__ = ['ColorAttr', 'colors']
 
 
-class CursesAttr:
+class ColorAttr:
     def __init__(self, attr=0, precedence=-1):
         self.attributes = attr & ~curses.A_COLOR
         self.color = attr & curses.A_COLOR
@@ -35,7 +35,7 @@ class CursesAttr:
 
     def update_attr(self, newattr, newprec=None):
         if isinstance(newattr, int):
-            newattr = CursesAttr(newattr)
+            newattr = ColorAttr(newattr)
         ret = copy.copy(self)
         if newprec is None:
             newprec = newattr.precedence
@@ -80,7 +80,7 @@ class ColorMaker:
         return list(self.attrs.keys()) + list(self.color_attrs.keys())
 
     def __getitem__(self, colornamestr):
-        return self._colornames_to_attr(colornamestr)
+        return self._colornames_to_cattr(colornamestr).attr
 
     def __getattr__(self, optname):
         'colors.color_foo returns colors[options.color_foo]'
@@ -88,22 +88,22 @@ class ColorMaker:
 
     @functools.lru_cache()  # cleared in vd.clear_caches()
     def resolve_colors(self, colorstack):
-        'Returns the curses attribute for the colorstack, a list of color option names sorted highest-precedence color first.'
-        attr = CursesAttr()
+        'Returns the ColorAttr for the colorstack, a list of color option names sorted highest-precedence color first.'
+        cattr = ColorAttr()
         for coloropt in colorstack:
             c = self.get_color(coloropt)
-            attr = attr.update_attr(c)
-        return attr
+            cattr = cattr.update_attr(c)
+        return cattr
 
-    def _colornames_to_attr(self, colornamestr, precedence=0):
-        attr = CursesAttr(0, precedence)
+    def _colornames_to_cattr(self, colornamestr, precedence=0):
+        cattr = ColorAttr(0, precedence)
         for colorname in colornamestr.split(' '):
             if colorname in self.color_attrs:
-                if not attr.color:
-                    attr.color = self.color_attrs[colorname.lower()]
+                if not cattr.color:
+                    cattr.color = self.color_attrs[colorname.lower()]
             elif colorname in self.attrs:
-                attr.attributes |= self.attrs[colorname.lower()]
-        return attr
+                cattr.attributes |= self.attrs[colorname.lower()]
+        return cattr
 
     def get_color(self, optname, precedence=0):
         'colors.color_foo returns colors[options.color_foo]'
@@ -111,7 +111,7 @@ class ColorMaker:
         if r is None:
             coloropt = options._get(optname)
             colornamestr = coloropt.value if coloropt else optname
-            r = self.colorcache[optname] = self._colornames_to_attr(colornamestr, precedence)
+            r = self.colorcache[optname] = self._colornames_to_cattr(colornamestr, precedence)
         return r
 
 colors = ColorMaker()

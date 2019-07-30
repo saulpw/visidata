@@ -34,7 +34,7 @@ from .errors import *
 from .editor import *
 from .utils import *
 from .cliptext import *
-from .color import colors, CursesAttr
+from .color import colors, ColorAttr
 from .mainloop import *
 from .wrappers import *
 from .undo import *
@@ -110,7 +110,7 @@ from .loaders.xword import *
 
 from .plugins import *
 
-from .colors import *   # ColorsSheet
+from .colorsheet import *
 
 from .deprecated import *
 
