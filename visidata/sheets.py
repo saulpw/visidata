@@ -567,8 +567,7 @@ class Sheet(BaseSheet):
             keysep = options.disp_keycol_sep
 
             # sepattr is the attr between cell/columns
-            sepcattr = rowcattr
-            sepcattr = sepcattr.update_attr(colors.color_column_sep, newprec=1)
+            sepcattr = rowcattr.update_attr(colors.color_column_sep, newprec=1)
 
             # apply current row here instead of in a colorizer, because it needs to know dispRowIndex
             if rowidx == self.cursorRowIndex:
