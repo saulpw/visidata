@@ -35,8 +35,8 @@ class SettingsMgr(collections.OrderedDict):
     def unset(self, k, obj='global'):
         del self[k][self.objname(obj)]
 
-    def set(self, k, v, obj='override'):
-        'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="default" means last resort.'
+    def set(self, k, v, obj):
+        'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="global" means last resort.'
         if k not in self:
             self[k] = dict()
         self[k][self.objname(obj)] = v
@@ -46,6 +46,17 @@ class SettingsMgr(collections.OrderedDict):
         return self.set(k, v, 'global')
 
     def _mappings(self, obj):
+        '''Return list of contexts in order to resolve settings. ordering is, from lowest to highest precedence:
+
+        1. "global": default specified in option() definition
+        2. "override": in order of program execution:
+            a. .visidatarc
+            b. command-line options, applied on top of the overrides in .visidatarc)
+            c. at runtime via 'O'ptions meta-sheet
+        3. objname(type(obj)): current sheet class and parents, recursively
+        4. objname(obj): the specific sheet instance
+            a. can override at runtime, replace value for sheet instance
+        '''
         if obj:
             mappings = [self.objname(obj)]
             mro = [self.objname(cls) for cls in inspect.getmro(type(obj))]
