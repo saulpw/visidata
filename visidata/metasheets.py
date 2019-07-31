@@ -13,6 +13,8 @@ BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_command
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
 
+vd_system_sep = '\t'
+
 @BaseSheet.cached_property
 def optionsSheet(sheet):
     return OptionsSheet(sheet.name+"_options", source=sheet)
@@ -89,6 +91,7 @@ class HelpSheet(Sheet):
     def reload(self):
         from pkg_resources import resource_filename
         cmdlist = TsvSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
+        options.set('delimiter', vd_system_sep, cmdlist)
         cmdlist.reload_sync()
 
         self.rows = []
