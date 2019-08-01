@@ -163,8 +163,8 @@ class Plotter(BaseSheet):
     def plotlabel(self, x, y, text, attr=0, row=None):
         self.labels.append((x, y, text, attr, row))
 
-    def plotlegend(self, i, txt, attr=0):
-        self.plotlabel(self.plotwidth-30, i*4, txt, attr)
+    def plotlegend(self, i, txt, attr=0, width=15):
+        self.plotlabel(self.plotwidth-width*2, i*4, txt, attr)
 
     @property
     def plotterCursorBox(self):
@@ -332,6 +332,7 @@ class Canvas(Plotter):
         'clear everything in preparation for a fresh reload()'
         self.polylines.clear()
         self.legends.clear()
+        self.legendwidth = 0
         self.plotAttrs.clear()
         self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in options.plot_colors.split())
 
@@ -345,6 +346,7 @@ class Canvas(Plotter):
                 attr = self.unusedAttrs[0]
                 legend = '[other]'
 
+            self.legendwidth = max(self.legendwidth, len(legend))
             self.legends[legend] = attr
             self.plotAttrs[k] = attr
             self.plotlegends()
@@ -530,7 +532,7 @@ class Canvas(Plotter):
             self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr)) #, 'toggle display of "%s"' % legend)
             if attr in self.hiddenAttrs:
                 attr = colors.color_graph_hidden
-            self.plotlegend(i, '%s:%s'%(i+1,legend), attr)
+            self.plotlegend(i, '%s:%s'%(i+1,legend), attr, width=self.legendwidth+4)
 
     def checkCursor(self):
         'override Sheet.checkCursor'
