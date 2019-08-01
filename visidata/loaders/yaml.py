@@ -10,7 +10,7 @@ class YamlSheet(Sheet):
     def reload(self):
         import yaml
         with self.source.open_text() as fp:
-            self.rows = yaml.load(fp)
+            self.rows = yaml.load(fp, Loader=yaml.FullLoader)
         self.columns = []
         for k in self.rows[0]:
             c = ColumnItem(k, type=deduceType(self.rows[0][k]))
