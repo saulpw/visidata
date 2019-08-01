@@ -62,6 +62,7 @@ Here are some concrete ways you can help make VisiData even more awesome:
 * Expand VisiData to support .xyz proprietary data format.  Creating a loader [is really straightforward](http://visidata.org/docs/loaders/).
 * Pandas users can [help improve the PandasSheet](https://github.com/saulpw/visidata/labels/pandas) with optimizations and pandas-specific integration.
 * Create and maintain [new installation packages](https://github.com/saulpw/visidata/labels/packaging).
+* Drive one of the tasks on the [maybe someday list](https://github.com/saulpw/visidata/blob/develop/dev/ROADMAP-someday.md).
 * Acknowledge the realities of late-stage capitalism and [give regular old money](https://www.patreon.com/saulpw).
 
 ## Other applications within the VisiData ecosystem
