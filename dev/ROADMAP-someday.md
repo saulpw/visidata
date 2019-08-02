@@ -7,6 +7,7 @@ These are tasks that are not on the immediate developer roadmap, and are looking
 - sniff filetype from the data itself: [issue](https://github.com/saulpw/visidata/issues/130)
     - detect utf16 byte-order-marker and set encoding: [issue](https://github.com/saulpw/visidata/issues/200)
 - [loader] RSS reader: [issue](https://github.com/saulpw/visidata/issues/157)
+- [loader] Frictionless Data Packages: [issue](https://github.com/saulpw/visidata/issues/237)
 
 - [ColumnsSheet] show subcolumns and their parent column (for expand/contract)
 
