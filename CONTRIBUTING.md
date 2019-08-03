@@ -6,7 +6,7 @@ If you encounter any bugs or have any problems, please [create an issue on Githu
 
 If you get an unexpected error, please include the full stack trace from `Ctrl+E` (you can save the trace with `Ctrl+S`).
 
-Attach the commandlog (saved with `Ctrl-D`) to show the steps that led to the issue.  Please include a small subset of the source data that elicits the problem.
+Attach the commandlog (saved with `Ctrl+D`) to show the steps that led to the issue.  Please include a small subset of the source data that elicits the problem.
 
 ### Submitting code
 

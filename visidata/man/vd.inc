@@ -100,7 +100,7 @@ move all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
 .Pp
-.It Ic "^^" No (Ctrl-^)
+.It Ic "^^" No (Ctrl+^)
 jump to previous sheet (swaps with current sheet)
 .Pp
 .It Ic  " /   ?" Ar regex

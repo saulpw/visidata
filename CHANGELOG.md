@@ -611,12 +611,12 @@ Command additions/changes:
     - `d` deletes row and move to clipboard; `gd` moves all selected rows
     - `p` now pastes the row most recently added to the clipboard after current row; `gp` pastes all rows from clipboard after current row
     - `Shift-B` opens clipboard sheet
-    - `Ctrl-z` now undoes the most recent delete; `gCtrl-z` undoes all deletes
+    - `Ctrl+z` now undoes the most recent delete; `gCtrl+z` undoes all deletes
 - Fix cursor row highlighting of identical rows
 
 ## v0.95.2
 - move some functionality out of vdtui into seperate python files
-- add Ctrl-z command to launch external $EDITOR
+- add Ctrl+z command to launch external $EDITOR
 - add ``options.force_valid_names``
 
 ## v0.94 (2017-08-02)
@@ -635,7 +635,7 @@ Command additions/changes:
 - `F`requency sheet groups numeric data into intervals
    - added `histogram_bins` and `histogram_even_interval` options
    - added `w` command on the sheet that toggles `histogram_even_interval`
-- change key for 'eval Python expression as new pyobj sheet' from Ctrl-O to Ctrl-X
+- change key for 'eval Python expression as new pyobj sheet' from Ctrl+O to Ctrl+X
 
 ## v0.91 (2017-06-28)
 - make options automatically typed based on default
