@@ -7,11 +7,11 @@ assignees: ''
 
 ---
 
-We prefer to build loaders with folks that are intimately familiar with the nature of the format and its peculiarities.
+We love to build loaders with people that are familiar with the format and how it is used.  Knowing about quirks and variations and usage-in-the-wild is very hepful.
 
-To that end, we require the following help:
+To that end, a new loader can be created quite quickly with the following:
 
-1) A sample representative data in that format.
+1) A small sample representative dataset in that format.
 
-2) A Python script which queries and engages with the data.
+2) A basic Python script which queries and dumps the data (possibly using an external package).
 
