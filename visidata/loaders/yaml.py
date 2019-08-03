@@ -11,6 +11,8 @@ class YamlSheet(Sheet):
         import yaml
         with self.source.open_text() as fp:
             self.rows = yaml.load(fp, Loader=yaml.FullLoader)
+        if not isinstance(self.rows, list):
+            self.rows = [self.rows]
         self.columns = []
         for k in self.rows[0]:
             c = ColumnItem(k, type=deduceType(self.rows[0][k]))
