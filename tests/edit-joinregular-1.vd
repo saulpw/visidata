@@ -1,0 +1,15 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/data1.tsv	o	open file
+			open-file	tests/data2.tsv	o	open file
+data2			sheets-stack		S	open Sheets Sheet
+sheets		キdata2	select-row		s	select current row
+sheets		キdata1	select-row		s	select current row
+sheets			columns-selected		gC	open Columns Sheet with all columns from selected sheets
+all_columns		キdata2,Key	key-selected		g!	toggle selected rows as key columns on source sheet
+all_columns		キdata1,Key	key-selected		g!	toggle selected rows as key columns on source sheet
+all_columns			quit-sheet		q	quit current sheet
+sheets			join-sheets	full	&	merge the selected sheets with visible columns from all, keeping rows according to jointype
+data2+data1	A		key-col		!	toggle current column as a key column
+data2+data1			sort-keys-asc		g[	sort ascending by all key columns
+data2+data1	A		key-col		!	toggle current column as a key column
+data2+data1	C	キ2	edit-cell	a3	e	

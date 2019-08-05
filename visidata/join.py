@@ -4,7 +4,7 @@ import functools
 from copy import copy
 
 from visidata import asyncthread, Progress, status, fail, error
-from visidata import ColumnItem, ColumnExpr, SubColumnItem, Sheet, Column
+from visidata import ColumnItem, ColumnExpr, SubColumnItem, Sheet, Column, getitemdef
 from visidata import SheetsSheet
 
 SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
@@ -55,11 +55,37 @@ def groupRowsByKey(sheets, rowsBySheetKey, rowsByKey):
                     # multiplicative for non-unique keys
                     rowsByKey[key] = []
                     for crow in itertools.product(*[rowsBySheetKey[vs2].get(key, [None]) for vs2 in sheets]):
-                        rowsByKey[key].append([key] + list(crow))
+                        rowsByKey[key].append(list(crow))
+
+class JoinKeyColumn(Column):
+    def __init__(self, name='', keycols=None, **kwargs):
+        super().__init__(name, type=keycols[0].type, width=keycols[0].width, **kwargs)
+        self.keycols = keycols
+
+    def calcValue(self, row):
+        vals = set()
+        for i, c in enumerate(self.keycols):
+            if row[i] is not None:
+                vals.add(c.getValue(row[i]))
+        if len(vals) == 1:
+            return vals.pop()
+        else:
+            raise Exception(f'inconsistent keys--reload join')
+
+    def putValue(self, row, value):
+        for i, c in enumerate(self.keycols):
+            if row[i] is not None:
+                c.setValue(row[i], value)
+
+    def recalc(self, sheet=None):
+        Column.recalc(self, sheet)
+        for c in self.keycols:
+            c.recalc()
+
 
 
 #### slicing and dicing
-# rowdef: [(key, ...), sheet1_row, sheet2_row, ...]
+# rowdef: [sheet1_row, sheet2_row, ...]
 #   if a sheet does not have this key, sheet#_row is None
 class SheetJoin(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
@@ -72,8 +98,14 @@ class SheetJoin(Sheet):
         # first item in joined row is the key tuple from the first sheet.
         # first columns are the key columns from the first sheet, using its row (0)
         self.columns = []
-        for i, c in enumerate(sheets[0].keyCols):
-            self.addColumn(SubColumnItem(0, ColumnItem(c.name, i, type=c.type, width=c.width)))
+        keyDict = collections.defaultdict(list)
+
+        for s in sheets:
+            for keyCol in s.keyCols:
+                keyDict[keyCol.name].append(keyCol)
+
+        for i, cols in enumerate(keyDict.values()):
+            self.addColumn(JoinKeyColumn(name=cols[0].name, keycols=cols)) # ColumnItem(c.name, i, sheet=sheets[0], type=c.type, width=c.width)))
         self.setKeys(self.columns)
 
         for sheetnum, vs in enumerate(sheets):
@@ -81,7 +113,7 @@ class SheetJoin(Sheet):
             ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
             for c in vs.nonKeyVisibleCols:
                 newname = c.name if ctr[c.name] == 1 else '%s_%s' % (vs.name, c.name)
-                self.addColumn(SubColumnItem(sheetnum+1, c, name=newname))
+                self.addColumn(SubColumnItem(sheetnum, c, name=newname))
 
         rowsBySheetKey = {}
         rowsByKey = {}
