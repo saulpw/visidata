@@ -137,7 +137,7 @@ class SheetJoin(Sheet):
 
                 elif self.jointype == 'outer':  # all rows from first sheet
                     for combinedRow in combinedRows:
-                        if combinedRow[1]:
+                        if combinedRow[0]:
                             self.addRow(combinedRow)
 
                 elif self.jointype == 'diff':  # only rows without matching key on all sheets
@@ -172,14 +172,14 @@ def ExtendedSheet_reload(self, sheets):
 
     for sheetnum, vs in enumerate(sheets[1:]):
         # subsequent elements are the rows from each source, in order of the source sheets
-        ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
+#        ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
         for c in vs.nonKeyVisibleCols:
             newname = '%s_%s' % (vs.name, c.name)
             newcol = ExtendedColumn(newname, sheetnum=sheetnum+1, sourceCol=c)
             self.addColumn(newcol)
 
     self.rowsBySheetKey = {}  # [srcSheet][key] -> list(rowobjs from sheets[0])
-    rowsByKey = {}  # [key] -> [key, rows0, rows1, ...]
+    rowsByKey = {}  # [key] -> [rows0, rows1, ...]
 
     groupRowsByKey(sheets, self.rowsBySheetKey, rowsByKey)
 
@@ -189,8 +189,8 @@ def ExtendedSheet_reload(self, sheets):
         for k, combinedRows in rowsByKey.items():
             prog.addProgress(1)
             for combinedRow in combinedRows:
-                if combinedRow[1]:
-                    self.addRow(combinedRow[1])
+                if combinedRow[0]:
+                    self.addRow(combinedRow[0])
 
 
 ## for SheetConcat
