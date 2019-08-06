@@ -55,11 +55,6 @@ SheetsSheet	open-rows	g	Enter	gEnter	y	use	n	y		sheet-open-rows	push selected sh
 SheetsSheet	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
 SheetPivot	dive-cell	z	Enter	zEnter	y	n	n	y		open-source-cell	open sheet of source rows aggregated in current cell
 SheetPivot	dive-row		Enter	Enter	y	n	n	y		open-source-row	open sheet of source rows aggregated in current row
-PyobjSheet	dive-row		Enter	Enter	y	n	n	y		python-dive-row	dive further into Python object
-PyobjSheet	edit-cell		e	e	n	n	y	y			edit contents of current cell
-PyobjSheet	hide-hidden	z	v	zv	n	n	n	y			hide methods and hidden properties
-PyobjSheet	show-hidden	g	v	gv	n	n	n	y			show methods and hidden properties
-PyobjSheet	visibility		v	v	n	n	n	y			toggle show/hide for methods and hidden properties
 SheetNamedTuple	dive-row		Enter	Enter	y	n	n	y			dive further into Python object
 SheetH5Obj	dive-metadata		A	A	y	n	n	y			open metadata sheet for this object
 SheetH5Obj	dive-row		Enter	Enter	y	n	n	y			load table referenced in current row into memory
@@ -79,8 +74,6 @@ Sheet	addcol-sh	z	;	z;	n	n	y	y			create new column from bash expression, with $c
 Sheet	addcol-subst		*	*	n	n	y	y	5	modify-add-column-regex-transform	add column derived from current column, replay regex with subst (may include \1 backrefs)
 Sheet	aggregate-col		+	+	n	n	n	y	5	column-aggregator-add	add aggregator to current column
 Sheet	aggregate-numerics	g	+	g+	n	n	n	y			add aggregator to all numeric columns
-Sheet	append-sheets-all	g	&	g&	y	n	n	y			concatenate all sheets in the sheets-stack
-Sheet	append-sheets-top2		&	&	y	n	n	y			concatenate top two sheets in the sheets-stack
 Sheet	cache-col	z	'	z'	n	n	n	y		column-cache-clear	add/reset cache for current column
 Sheet	cache-cols	gz	'	gz'	n	n	n	y		column-cache-clear-all	add/reset cache for all visible columns
 Sheet	capture-col		;	;	n	n	n	y	1,5	modify-add-column-regex-capture	add new column from capture groups of regex; requires example row
@@ -128,6 +121,8 @@ Sheet	go-top	g	k	gk	n	n	n	n			move all the way to the top of sheet
 Sheet	go-up		k	k	n	n	n	n	*		move up
 Sheet	help-commands	z	^H	z^H	meta	n	n	n		meta-commands	view sheet of commands and keybindings
 Sheet	hide-col		-	-	n	n	n	y	2	column-hide	hide current column
+Sheet	join-sheets-all	g	&	g&	y	n	n	y			concatenate all sheets in the sheets-stack
+Sheet	join-sheets-top2		&	&	y	n	n	y			concatenate top two sheets in the sheets-stack
 Sheet	key-col		!	!	n	n	n	y	2,3,5	column-key-toggle	toggle current column as a key column
 Sheet	key-col-off	z	!	z!	n	n	n	y		column-key-unset	unset current column as a key column
 Sheet	key-col-on	g	!	g!	n	n	n	y			set current column as a key column
@@ -255,6 +250,11 @@ Sheet	unselect-row		u	u	n	change	n	y		rows-unselect-current	unselect current row
 Sheet	unselect-rows	g	u	gu	n	change	n	y	2,5	rows-unselect-all	unselect all rows
 Sheet	view-cell				derived	n	?	y		sheet-open-cell	view contents of current cell in a new sheet
 Sheet	visibility		v	v	n	n	n	y			
+PyobjSheet	dive-row		Enter	Enter	y	n	n	y		python-dive-row	dive further into Python object
+PyobjSheet	edit-cell		e	e	n	n	y	y			edit contents of current cell
+PyobjSheet	hide-hidden	z	v	zv	n	n	n	y			hide methods and hidden properties
+PyobjSheet	show-hidden	g	v	gv	n	n	n	y			show methods and hidden properties
+PyobjSheet	visibility		v	v	n	n	n	y			toggle show/hide for methods and hidden properties
 ProfileSheet	dive-cell	z	Enter	zEnter	y	n	n	y			open ProfileSheet for caller referenced in current cell
 ProfileSheet	dive-row		Enter	Enter	y	n	n	y			open ProfileSheet for calls referenced in current row
 ProfileSheet	save-profile	z	^S	z^S	n	n	n	y		sheet-save-profile	save profile

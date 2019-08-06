@@ -81,7 +81,7 @@
 - [addcol-new] does not ask for column name
 - [aggr] add `list` aggregator (thanks @chocolateboy #263)
 - [chooseMany] error() on invalid choice #169
-- [command append join] add append-sheets-top2 (`&`) / append-sheets-all (`g&`) to concatenate top 2/all sheets in sheets-stack
+- [command join] add join-sheets-top2 (`&`) / join-sheets-all (`g&`) to Sheet to join top 2/all sheets in sheets-stack
 - [command sort] `sort-*-add` bound to z[] and gz[] to add additional sort columns
 - [command syspaste-cells] add `syspaste-cells` to paste into vd from system clipboard (thanks kovasap for PR #258)
 - [DirSheet] include folders and hidden files

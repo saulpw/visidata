@@ -8,8 +8,8 @@ from visidata import ColumnItem, ColumnExpr, SubColumnItem, Sheet, Column, getit
 from visidata import SheetsSheet
 
 SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
-Sheet.addCommand('&', 'append-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype="append"))')
-Sheet.addCommand('g&', 'append-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype="append"))')
+Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))')
+Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))')
 
 def createJoinedSheet(sheets, jointype=''):
     sheets[1:] or error("join requires more than 1 sheet")
