@@ -29,7 +29,7 @@ def createJoinedSheet(sheets, jointype=''):
         vs.reload = functools.partial(ExtendedSheet_reload, vs, sheets)
         return vs
     else:
-        return SheetJoin('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
+        return JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
 
 jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append", "extend"]}
 
@@ -87,7 +87,7 @@ class JoinKeyColumn(Column):
 #### slicing and dicing
 # rowdef: [sheet1_row, sheet2_row, ...]
 #   if a sheet does not have this key, sheet#_row is None
-class SheetJoin(Sheet):
+class JoinSheet(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
     defer = False
 
@@ -194,7 +194,7 @@ def ExtendedSheet_reload(self, sheets):
 
 
 ## for ConcatSheet
-class ColumnConcat(Column):
+class ConcatColumn(Column):
     def __init__(self, name, cols, **kwargs):
         super().__init__(name, **kwargs)
         self.cols = cols
@@ -234,7 +234,7 @@ class ConcatSheet(Sheet):
         self.columns = []
         self.addColumn(ColumnItem('origin_sheet', 0, width=0))
         for cols in self.sourceCols:
-            self.addColumn(ColumnConcat(cols[0].name, cols, type=cols[0].type))
+            self.addColumn(ConcatColumn(cols[0].name, cols, type=cols[0].type))
 
         for sheet in sourceSheets:
             for r in Progress(sheet.rows):
