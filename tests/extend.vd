@@ -6,7 +6,7 @@ data1	Key		key-col		!
 data1			jump-sheet-2		^[2	
 data2	Key		key-col		!	
 data2			jump-sheet-1		^[1	
-data1			append-sheets-top2	extend	&	
+data1			join-sheets-top2	extend	&	
 data1+data2	A		freq-col		F	
 data1+data2_A_freq			jump-sheet-1		^[1	
 data1			dup-rows		g"	

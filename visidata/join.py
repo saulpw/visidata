@@ -12,16 +12,16 @@ Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:
 Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))')
 
 def createJoinedSheet(sheets, jointype=''):
-    sheets[1:] or error("join requires more than 1 sheet")
+    sheets[1:] or fail("join requires more than 1 sheet")
 
     if jointype == 'append':
         keyedcols = collections.defaultdict(list, {col.name:[col] for col in sheets[0].visibleCols})
-        for s in sheets[1:] or fail('need to join more than one sheet'):
+        for s in sheets[1:]:
             for col in s.visibleCols:
                 key = col.name if col.name in keyedcols else col.sheet.visibleCols.index(col)
                 keyedcols[key].append(col)
 
-        return SheetConcat('&'.join(vs.name for vs in sheets), sourceCols=list(keyedcols.values()))
+        return ConcatSheet('&'.join(vs.name for vs in sheets), sourceCols=list(keyedcols.values()))
 
     elif jointype == 'extend':
         vs = copy(sheets[0])
@@ -193,7 +193,7 @@ def ExtendedSheet_reload(self, sheets):
                     self.addRow(combinedRow[0])
 
 
-## for SheetConcat
+## for ConcatSheet
 class ColumnConcat(Column):
     def __init__(self, name, cols, **kwargs):
         super().__init__(name, **kwargs)
@@ -220,7 +220,7 @@ class ColumnConcat(Column):
 
 
 # rowdef: (srcSheet, srcRow)
-class SheetConcat(Sheet):
+class ConcatSheet(Sheet):
     'combination of multiple sheets by row concatenation. sourceCols=list(cols). '
     @asyncthread
     def reload(self):
