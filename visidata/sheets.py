@@ -516,7 +516,23 @@ class Sheet(BaseSheet):
         if not self.columns:
             return
 
-        isNull = isNullFunc()
+        drawparams = {
+            'isNull': isNullFunc(),
+
+            'topsep': options.disp_rowtop_sep,
+            'midsep': options.disp_rowmid_sep,
+            'botsep': options.disp_rowbot_sep,
+            'endsep': options.disp_rowend_sep,
+            'keytopsep': options.disp_keytop_sep,
+            'keymidsep': options.disp_keymid_sep,
+            'keybotsep': options.disp_keybot_sep,
+            'endtopsep': options.disp_endtop_sep,
+            'endmidsep': options.disp_endmid_sep,
+            'endbotsep': options.disp_endbot_sep,
+
+            'colsep': options.disp_column_sep,
+            'keysep': options.disp_keycol_sep,
+        }
 
         self.rowLayout = {}  # [rowidx] -> (y, height)
         self.calcColLayout()
@@ -539,27 +555,28 @@ class Sheet(BaseSheet):
 
             rowcattr = self._colorize(RowColorizer, None, row)
 
-            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y, isNull=isNull)
+            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y, **drawparams)
 
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.windowWidth-2, options.disp_more_right, colors.color_column_sep)
 
         scr.refresh()
 
-    def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight, isNull=None):
-            topsep = options.disp_rowtop_sep
-            midsep = options.disp_rowmid_sep
-            botsep = options.disp_rowbot_sep
-            endsep = options.disp_rowend_sep
-            keytopsep = options.disp_keytop_sep
-            keymidsep = options.disp_keymid_sep
-            keybotsep = options.disp_keybot_sep
-            endtopsep = options.disp_endtop_sep
-            endmidsep = options.disp_endmid_sep
-            endbotsep = options.disp_endbot_sep
-
-            colsep = options.disp_column_sep
-            keysep = options.disp_keycol_sep
+    def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight,
+            isNull='',
+            topsep='',
+            midsep='',
+            botsep='',
+            endsep='',
+            keytopsep='',
+            keymidsep='',
+            keybotsep='',
+            endtopsep='',
+            endmidsep='',
+            endbotsep='',
+            colsep='',
+            keysep=''
+       ):
 
             # sepattr is the attr between cell/columns
             sepcattr = update_attr(rowcattr, colors.color_column_sep, 1)
