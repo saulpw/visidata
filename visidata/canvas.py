@@ -192,7 +192,7 @@ class Plotter(BaseSheet):
             return 0
         _, attr, rows = max(c)
         if isinstance(self.source, BaseSheet) and anySelected(self.source, rows):
-            attr = ColorAttr(attr, 8).update_attr(colors.color_graph_selected, 10).attr
+            attr = update_attr(ColorAttr(attr, 0, 8, attr), colors.color_graph_selected, 10).attr
         return attr
 
     def hideAttr(self, attr, hide=True):
@@ -252,7 +252,7 @@ class Plotter(BaseSheet):
 
                     if cursorBBox.contains(char_x*2, char_y*4) or \
                        cursorBBox.contains(char_x*2+1, char_y*4+3):
-                        attr = ColorAttr(attr).update_attr(colors.color_current_row).attr
+                        attr = update_attr(ColorAttr(attr, 0, 0, attr), colors.color_current_row).attr
 
                     if attr:
                         scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)

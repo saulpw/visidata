@@ -3,48 +3,37 @@ import functools
 import copy
 
 from visidata import options
+from collections import namedtuple
 
-__all__ = ['ColorAttr', 'colors']
+__all__ = ['ColorAttr', 'colors', 'update_attr']
 
 
-class ColorAttr:
-    def __init__(self, attr=0, precedence=-1):
-        self.attributes = attr & ~curses.A_COLOR
-        self.color = attr & curses.A_COLOR
-        self.precedence = precedence
+ColorAttr = namedtuple('ColorAttr', ('color', 'attributes', 'precedence', 'attr'))
 
-    def __str__(self):
-        a = self.attr
-        ret = set()
-        for k in dir(curses):
-            v = getattr(curses, k)
-            if v == 0:
-                pass
-            elif k.startswith('A_'):
-                if self.attributes & v == v:
-                    ret.add(k)
-            elif k.startswith('COLOR_'):
-                if self.color == v:
-                    ret.add(k)
-        return (' '.join(k for k in ret) or str(self.color)) + ' %0X' % self.attr
 
-    @property
-    def attr(self):
-        'the composed curses attr'
-        return self.color | self.attributes
+def update_attr(oldattr, updattr, updprec=None):
+    if isinstance(updattr, ColorAttr):
+        if updprec is None:
+            updprec = updattr.precedence
+        updcolor = updattr.color
+        updattr = updattr.attributes
+    else:
+        updcolor = updattr & curses.A_COLOR
+        updattr = updattr & ~curses.A_COLOR
+        if updprec is None:
+            updprec = 0
 
-    def update_attr(self, newattr, newprec=None):
-        if isinstance(newattr, int):
-            newattr = ColorAttr(newattr)
-        ret = copy.copy(self)
-        if newprec is None:
-            newprec = newattr.precedence
-        ret.attributes |= newattr.attributes
-        if not ret.color or newprec > ret.precedence:
-            if newattr.color:
-                ret.color = newattr.color
-            ret.precedence = newprec
-        return ret
+    # starting values, work backwards
+    newcolor = oldattr.color
+    newattr = oldattr.attributes | updattr
+    newprec = oldattr.precedence
+
+    if not newcolor or updprec > newprec:
+        if updcolor:
+            newcolor = updcolor
+        newprec = updprec
+
+    return ColorAttr(newcolor, newattr, newprec, newcolor | newattr)
 
 
 class ColorMaker:
@@ -89,21 +78,21 @@ class ColorMaker:
     @functools.lru_cache()  # cleared in vd.clear_caches()
     def resolve_colors(self, colorstack):
         'Returns the ColorAttr for the colorstack, a list of color option names sorted highest-precedence color first.'
-        cattr = ColorAttr()
+        cattr = ColorAttr(0,0,0,0)
         for coloropt in colorstack:
             c = self.get_color(coloropt)
-            cattr = cattr.update_attr(c)
+            cattr = update_attr(cattr, c)
         return cattr
 
     def _colornames_to_cattr(self, colornamestr, precedence=0):
-        cattr = ColorAttr(0, precedence)
+        color, attr = 0, 0
         for colorname in colornamestr.split(' '):
             if colorname in self.color_attrs:
-                if not cattr.color:
-                    cattr.color = self.color_attrs[colorname.lower()]
+                if not color:
+                    color = self.color_attrs[colorname.lower()]
             elif colorname in self.attrs:
-                cattr.attributes |= self.attrs[colorname.lower()]
-        return cattr
+                attr = self.attrs[colorname.lower()]
+        return ColorAttr(color, attr, precedence, color | attr)
 
     def get_color(self, optname, precedence=0):
         'colors.color_foo returns colors[options.color_foo]'

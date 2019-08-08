@@ -34,7 +34,7 @@ from .errors import *
 from .editor import *
 from .utils import *
 from .cliptext import *
-from .color import colors, ColorAttr
+from .color import *
 from .mainloop import *
 from .wrappers import *
 from .undo import *
