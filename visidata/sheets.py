@@ -152,14 +152,18 @@ class Sheet(BaseSheet):
                 _colorizers[type(c)].add(c)
         return {k:sorted(v, key=lambda x: x.precedence, reverse=True) for k,v in _colorizers.items()}
 
-    def _colorize(self, k, col, row, value=None) -> ColorAttr:
-        'Returns ColorAttr for the given col/row/value'
+    def _colorize(self, colorizers, col, row, value=None) -> ColorAttr:
+        'Returns ColorAttr for the given colorizers/col/row/value'
+
+        if not type(colorizers) is list and not type(colorizers) is tuple:
+            colorizers = [colorizers]
 
         colorstack = []
-        for colorizer in self._getColorizers()[k]:
-            r = colorizer.func(self, col, row, value)
-            if r:
-                colorstack.append(colorizer.coloropt if colorizer.coloropt else r)
+        for i in range(len(colorizers)):
+            for colorizer in self._getColorizers()[colorizers[i]]:
+                r = colorizer.func(self, col, row, value)
+                if r:
+                    colorstack.append(colorizer.coloropt if colorizer.coloropt else r)
 
         return colors.resolve_colors(tuple(colorstack))
 
@@ -460,7 +464,7 @@ class Sheet(BaseSheet):
         # sepattr is for header separators and indicators
         sepcattr = colors.get_color('color_column_sep')
 
-        hdrcattr = self._colorize(ColumnColorizer, col, None)
+        hdrcattr = self._colorize((ColumnColorizer,), col, None)
         if vcolidx == self.cursorVisibleColIndex:
             hdrcattr = update_attr(hdrcattr, colors.color_current_hdr, 2)
 
@@ -552,7 +556,7 @@ class Sheet(BaseSheet):
             if y >= self.windowHeight-1:
                 break
 
-            rowcattr = self._colorize(RowColorizer, None, row)
+            rowcattr = self._colorize((RowColorizer,), None, row)
 
             y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y, **drawparams)
 
@@ -626,7 +630,7 @@ class Sheet(BaseSheet):
                         continue
                     x, colwidth = self.visibleColLayout[vcolidx]
 
-                    cattr = self._colorize(CellColorizer, col, row, cellval)
+                    cattr = self._colorize((CellColorizer, ColumnColorizer), col, row, cellval)
                     cattr = update_attr(cattr, basecellcattr)
 
                     note = getattr(cellval, 'note', None)

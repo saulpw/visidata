@@ -121,8 +121,8 @@ Sheet	go-top	g	k	gk	n	n	n	n			move all the way to the top of sheet
 Sheet	go-up		k	k	n	n	n	n	*		move up
 Sheet	help-commands	z	^H	z^H	meta	n	n	n		meta-commands	view sheet of commands and keybindings
 Sheet	hide-col		-	-	n	n	n	y	2	column-hide	hide current column
-Sheet	join-sheets-all	g	&	g&	y	n	n	y			concatenate all sheets in the sheets-stack
-Sheet	join-sheets-top2		&	&	y	n	n	y			concatenate top two sheets in the sheets-stack
+Sheet	join-sheets-all	g	&	g&	y	n	n	y			merges all sheets in the sheets-stack
+Sheet	join-sheets-top2		&	&	y	n	n	y			merges top two sheets in the sheets-stack
 Sheet	key-col		!	!	n	n	n	y	2,3,5	column-key-toggle	toggle current column as a key column
 Sheet	key-col-off	z	!	z!	n	n	n	y		column-key-unset	unset current column as a key column
 Sheet	key-col-on	g	!	g!	n	n	n	y			set current column as a key column
