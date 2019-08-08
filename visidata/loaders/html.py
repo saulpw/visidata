@@ -98,9 +98,9 @@ class HtmlTableSheet(Sheet):
             self.rows = self.rows[1:]
 
         for colnum, names in enumerate(it):
-            name = '_'.join(x for x in names if x)
+            name = '_'.join(str(x) for x in names if x)
             self.addColumn(Column(name, getter=lambda c,r,i=colnum: r[i][0]))
-            for linknum in range(maxlinks.get(colnum)):
+            for linknum in range(maxlinks.get(colnum, 0)):
                 self.addColumn(Column(name+'_link'+str(linknum), width=20, getter=lambda c,r,i=colnum,j=linknum: r[i][1][j]))
 
 
