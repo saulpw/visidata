@@ -227,8 +227,9 @@ class Column(Extensible):
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str:
                 typedesc = typemap.get(type(cellval), None)
-                dw.note = typedesc.icon if typedesc else options.note_unknown_type
-                dw.notecolor = 'color_note_type'
+                if typedesc:
+                    dw.note = typedesc.icon
+                    dw.notecolor = 'color_note_type'
 
         except Exception as e:  # formatting failure
             e.stacktrace = stacktrace()

@@ -45,7 +45,6 @@ theme('note_pending', '⌛', 'note to display for pending cells')
 theme('note_format_exc', '?', 'cell note for an exception during formatting')
 theme('note_getter_exc', '!', 'cell note for an exception during computation')
 theme('note_type_exc', '!', 'cell note for an exception during type conversion')
-theme('note_unknown_type', '', 'cell note for unknown types in anytype column')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
 theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
