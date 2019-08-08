@@ -10,29 +10,29 @@ disp_column_fill = ' '
 
 ### Curses helpers
 
-def dispwidth_char(cc):
-    '(internal; use dispwidth) Return display width of given single character.'
-    eaw = unicodedata.east_asian_width(cc)
-    if eaw == 'A':  # ambiguous
-        return options.disp_ambig_width
-    elif eaw in 'WF': # wide/full
-        return 2
-    elif not unicodedata.combining(cc):
-        return 1
-    else:
-        return 0
-
 def dispwidth(ss):
     'Return display width of string, according to unicodedata width and options.disp_ambig_width.'
-    return sum( (dispwidth_char(cc) for cc in ss) )
+    disp_ambig_width = options.disp_ambig_width
+    w = 0
 
-@functools.lru_cache(maxsize=8192)
+    for cc in ss:
+        eaw = unicodedata.east_asian_width(cc)
+        if eaw == 'A':  # ambiguous
+            w += disp_ambig_width
+        elif eaw in 'WF': # wide/full
+            w += 2
+        elif not unicodedata.combining(cc):
+            w += 1
+    return w
+
+
+@functools.lru_cache(maxsize=100000)
 def clipstr(s, dispw):
     '''Return clipped string and width in terminal display characters.
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
     w = 0
     ret = ''
-    ambig_width = options.disp_ambig_width
+    trunch = options.disp_truncator
     for c in s:
         if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
             c = options.disp_oddspace
@@ -42,9 +42,9 @@ def clipstr(s, dispw):
             ret += c
             w += dispwidth(c)
 
-        if w > dispw-len(options.disp_truncator)+1:
-            ret = ret[:-2] + options.disp_truncator  # replace final char with ellipsis
-            w += len(options.disp_truncator)
+        if w > dispw-len(trunch)+1:
+            ret = ret[:-2] + trunch # replace final char with ellipsis
+            w += len(trunch)
             break
 
     return ret, w

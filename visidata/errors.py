@@ -26,3 +26,5 @@ def exceptionCaught(vd, exc=None, **kwargs):
         vd.status(vd.lastErrors[-1][-1], priority=2)  # last line of latest error
     if options.debug:
         raise
+
+# see textsheet.py for ErrorSheet and associated commands
