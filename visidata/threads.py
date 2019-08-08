@@ -244,7 +244,7 @@ def sync(self, *joiningThreads):
                 pass
 
 
-ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile.getstats())) or warning("no profile")')
+ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile)) or warning("no profile")')
 
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
@@ -313,7 +313,7 @@ class ProfileSheet(Sheet):
     nKeys=3
 
     def reload(self):
-        self.rows = self.source
+        self.rows = self.source.getstats()
         self.orderBy(None, self.column('inlinetime_us'), reverse=True)
         self.callers = collections.defaultdict(list)  # [row.code] -> list(code)
 
@@ -330,7 +330,7 @@ def codestr(code):
     return code.co_name
 
 
-ProfileSheet.addCommand('z^S', 'save-profile', 'profile.dump_stats(input("save profile to: ", value=name+".prof"))')
+ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))')
 ProfileSheet.addCommand(ENTER, 'dive-row', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_calls", source=cursorRow.calls or fail("no calls")))')
 ProfileSheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_"+cursorCol.name, source=cursorValue or fail("no callers")))')
 ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)')
