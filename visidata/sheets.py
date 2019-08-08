@@ -606,7 +606,11 @@ class Sheet(BaseSheet):
                     except (TypeError, ValueError):
                         pass
 
-                    displines[vcolidx] = (col, cellval, splitcell(cellval.display, width=colwidth-2))
+                    if col.height > 1:
+                        lines = splitcell(cellval.display, width=colwidth-2)
+                    else:
+                        lines = [cellval.display]
+                    displines[vcolidx] = (col, cellval, lines)
 
             heights = [0]
             for col, cellval, lines in displines.values():
