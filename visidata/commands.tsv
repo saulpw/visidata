@@ -114,6 +114,8 @@ Sheet	go-home				n	n	n	n			go to first row and first column
 Sheet	go-left		h	h	n	n	n	n	*		move left
 Sheet	go-leftmost	g	h	gh	n	n	n	n		view-go-far-left	move all the way to the left
 Sheet	go-mouse			BUTTON1_PRESSED	n	n	n	n		view-go-mouse-row	
+Sheet	go-pagedown		^F	^F	n	n	n	n			scroll one page forward
+Sheet	go-pageup		^B	^B	n	n	n	n			scroll one page backward
 Sheet	go-right		l	l	n	n	n	n	*		move right
 Sheet	go-rightmost	g	l	gl	n	n	n	n		view-go-far-right	move all the way to the right of sheet
 Sheet	go-row-number	z	r	zr	n	n	n	n		view-go-row-number	move to the given row number
@@ -129,7 +131,6 @@ Sheet	key-col-on	g	!	g!	n	n	n	y			set current column as a key column
 Sheet	melt		M	M	derived	n	n	y	1,5	data-melt	open melted sheet (unpivot)
 Sheet	melt-regex	g	M	gM	derived	n	n	y		data-melt-regex	open melted sheet (unpivot), factoring columns
 Sheet	next-null	z	>	z>	n	n	n	n		view-go-next-null	move down the current column to the next null value
-Sheet	next-page		^F	^F	n	n	n	n			scroll one page forward
 Sheet	next-search		n	n	n	n	n	n	2	view-find-forward-repeat	move to next match from last search
 Sheet	next-selected		}	}	n	use	n	n	2	view-go-next-selected	move down the current column to the next selected row
 Sheet	next-value		>	>	n	n	n	n		view-go-next-value	move down the current column to the next value
@@ -147,7 +148,6 @@ Sheet	pivot		W	W	derived	n	n	y	5	data-pivot	Pivot the current column into a new 
 Sheet	plot-column		.	.	canvas	n	n	y	2,3	data-plot-column	graph the current column vs key columns Numeric key column is on the x-axis, while categorical key columns determine color
 Sheet	plot-numerics	g	.	g.	canvas	n	n	y		data-plot-allnumeric	open a graph of all visible numeric columns vs key column
 Sheet	prev-null	z	<	z<	n	n	n	n		view-go-prev-null	move up the current column to the next null value
-Sheet	prev-page		^B	^B	n	n	n	n			scroll one page backward
 Sheet	prev-search		N	N	n	n	n	n		view-find-backward-repeat	move to previous match from last search
 Sheet	prev-selected		{	{	n	use	n	n	2	view-go-prev-selected	move up the current column to the previous selected row
 Sheet	prev-value		<	<	n	n	n	n		view-go-prev-value	move up the current column to the next value

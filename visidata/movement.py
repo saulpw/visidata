@@ -146,8 +146,8 @@ Sheet.addCommand(None, 'go-left',  'cursorRight(-1)'),
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)'),
 Sheet.addCommand(None, 'go-up',    'cursorDown(-1)'),
 Sheet.addCommand(None, 'go-right', 'cursorRight(+1)'),
-Sheet.addCommand(None, 'next-page', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
-Sheet.addCommand(None, 'prev-page', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
+Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nVisibleRows); sheet.topRowIndex += nVisibleRows'),
+Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nVisibleRows); sheet.topRowIndex -= nVisibleRows'),
 
 Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0'),
 Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0'),
@@ -191,8 +191,8 @@ BaseSheet.bindkey('KEY_UP', 'go-up')
 BaseSheet.bindkey('KEY_RIGHT', 'go-right')
 BaseSheet.bindkey('KEY_HOME', 'go-top')
 BaseSheet.bindkey('KEY_END', 'go-bottom')
-BaseSheet.bindkey('KEY_NPAGE', 'next-page')
-BaseSheet.bindkey('KEY_PPAGE', 'prev-page')
+BaseSheet.bindkey('KEY_NPAGE', 'go-pagedown')
+BaseSheet.bindkey('KEY_PPAGE', 'go-pageup')
 
 BaseSheet.bindkey('gKEY_LEFT', 'go-leftmost'),
 BaseSheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
@@ -231,8 +231,8 @@ BaseSheet.bindkey('h', 'go-left'),
 BaseSheet.bindkey('j', 'go-down'),
 BaseSheet.bindkey('k', 'go-up'),
 BaseSheet.bindkey('l', 'go-right'),
-BaseSheet.bindkey('^F', 'next-page'),
-BaseSheet.bindkey('^B', 'prev-page'),
+BaseSheet.bindkey('^F', 'go-pagedown'),
+BaseSheet.bindkey('^B', 'go-pageup'),
 BaseSheet.bindkey('gg', 'go-top'),
 BaseSheet.bindkey('G',  'go-bottom'),
 BaseSheet.bindkey('gj', 'go-bottom'),
