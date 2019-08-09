@@ -53,7 +53,9 @@ class NpzSheet(ArchiveSheet):
     def reload(self):
         import numpy
         self.npz = numpy.load(str(self.source), encoding='bytes')
-        self.rows = list(self.npz.items())
+        self.rows = []
+        for r in Progress(self.npz.items()):
+            self.addRow(r)
 
     def getInnerSheet(self, row):
         import numpy
