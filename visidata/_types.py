@@ -69,7 +69,7 @@ def currency(s=''):
     'dirty float (strip non-numeric characters)'
     if isinstance(s, str):
         s = ''.join(ch for ch in s if ch in floatchars)
-    return float(s) if s else TypedWrapper(float, None)
+    return float(s) if s not in ['', None] else TypedWrapper(float, None)
 
 
 class vlen(int):
