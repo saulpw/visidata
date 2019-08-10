@@ -117,7 +117,7 @@ class Sheet(BaseSheet):
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
 
-        self.topRowIndex = 0     # cursorRowIndex of topmost row
+        self._topRowIndex = 0     # cursorRowIndex of topmost row
         self.leftVisibleColIndex = 0    # cursorVisibleColIndex of leftmost column
         self.rightVisibleColIndex = 0
 
@@ -132,6 +132,15 @@ class Sheet(BaseSheet):
         self.setKeys(self.columns[:self.nKeys])  # initial list of key columns
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
+
+    @property
+    def topRowIndex(self):
+        return self._topRowIndex
+
+    @topRowIndex.setter
+    def topRowIndex(self, v):
+        self._topRowIndex = v
+        self.rowLayout.clear()
 
     def __len__(self):
         return self.nRows
@@ -231,9 +240,9 @@ class Sheet(BaseSheet):
         return id(row)
 
     @property
-    def nVisibleRows(self):
+    def nScreenRows(self):
         'Number of visible rows at the current window height.'
-        return len(self.rowLayout) or (self.windowHeight-self.nHeaderRows-self.nFooterRows)
+        return self.windowHeight-self.nHeaderRows-self.nFooterRows
 
     @property
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
@@ -260,7 +269,7 @@ class Sheet(BaseSheet):
     @property
     def visibleRows(self):  # onscreen rows
         'List of rows onscreen.'
-        return self.rows[self.topRowIndex:self.topRowIndex+self.nVisibleRows]
+        return self.rows[self.topRowIndex:self.topRowIndex+self.nScreenRows]
 
     @property
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
@@ -393,22 +402,22 @@ class Sheet(BaseSheet):
         elif self.cursorVisibleColIndex >= self.nVisibleCols:
             self.cursorVisibleColIndex = self.nVisibleCols-1
 
-        if self.topRowIndex <= 0:
+        if self.topRowIndex < 0:
             self.topRowIndex = 0
         elif self.topRowIndex > self.nRows-1:
             self.topRowIndex = self.nRows-1
 
-        # (x,y) is relative cell within screen viewport
-        x = self.cursorVisibleColIndex - self.leftVisibleColIndex
-        y = self.cursorRowIndex - self.topRowIndex + self.nHeaderRows
-
         # check bounds, scroll if necessary
-        if y < self.nHeaderRows:
+        if self.topRowIndex > self.cursorRowIndex:
             self.topRowIndex = self.cursorRowIndex
-        elif y > self.nHeaderRows+self.nVisibleRows-1:
-            self.topRowIndex = self.cursorRowIndex-self.nVisibleRows+1
+        else:
+            if self.topRowIndex < self.cursorRowIndex-self.nScreenRows+1:
+                self.topRowIndex = self.cursorRowIndex-self.nScreenRows+1
+            elif self.rowLayout: # only check this if topRowIndex has not been set (which clears rowLayout)
+                if self.cursorRowIndex > self.bottomRowIndex:
+                    self._topRowIndex += self.bottomRowIndex-self.cursorRowIndex+2
 
-        if x <= 0:
+        if self.leftVisibleColIndex >= self.cursorVisibleColIndex:
             self.leftVisibleColIndex = self.cursorVisibleColIndex
         else:
             while True:
@@ -547,7 +556,7 @@ class Sheet(BaseSheet):
 
         y = headerRow + numHeaderRows
 
-        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nVisibleRows, self.nRows)]
+        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nScreenRows, self.nRows)]
         self.checkCursorNoExceptions()
 
         for rowidx, row in enumerate(rows):
