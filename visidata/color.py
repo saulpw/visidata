@@ -5,7 +5,7 @@ import copy
 from visidata import options
 from collections import namedtuple
 
-__all__ = ['ColorAttr', 'colors', 'update_attr']
+__all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker']
 
 
 ColorAttr = namedtuple('ColorAttr', ('color', 'attributes', 'precedence', 'attr'))

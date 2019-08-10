@@ -66,6 +66,7 @@ class VisiData(visidata.Extensible):
         visidata.Sheet.nHeaderRows.fget.cache_clear()
         visidata.Sheet.colsByName.fget.cache_clear()
         visidata.colors.colorcache.clear()
+        visidata.ColorMaker.resolve_colors.cache_clear()
         self.mousereg.clear()
 
     def getkeystroke(self, scr, vs=None):
