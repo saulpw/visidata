@@ -51,7 +51,7 @@ Note that if you are using Python v3.7, then you will need to manually install p
 
 ---
 
-## How to open an R data frame with VisiData
+## Opening an R data frame with VisiData
 
 [@paulklemm](https://github.com/paulklemm) has wonderfully developed a small `R` package which bridges the gap between `R` and VisiData.
 
@@ -75,7 +75,7 @@ For more more details, questions, and feedback, check out the [rvisidata reposit
 
 ---
 
-## How to load multiple datasets simultaneously
+## Loading multiple datasets simultaneously
 
 Multiple files can be passed as inputs through the commandline.
 
@@ -89,7 +89,7 @@ To load files from within a VisiData session, press `o` and enter a filepath.
 
 ---
 
-## How to access other loaded or derived sheets:
+## Accessing other loaded or derived sheets
 
 1. Press `S` to open the **Sheets sheet**.
 2. Move the cursor to the row containing the desired sheet.
@@ -103,7 +103,7 @@ To load files from within a VisiData session, press `o` and enter a filepath.
 vd -b countries.fixed -o countries.tsv
 ~~~
 
-**Note**: Not all filetypes which are supported as loaders are also supported as savers. See the [manpage](/man#loaders) for the supported output formats.
+**Note**: Not all filetypes which are supported as loaders are also supported as savers. See the [formats page](/formats#output) for the supported output formats.
 
 
 ---

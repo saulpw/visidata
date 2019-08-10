@@ -32,10 +32,10 @@ Inspired by [Daniele Procida](https://www.divio.com/blog/documentation/), the do
 * [Loading Data](/docs/loading)
     * [Specifying a source file](/docs/loading#specifying-a-source-file)
     * [Loading sources supported by pandas](/docs/loading#loading-sources-supported-by-pandas)
-    * Opening an R data frame with VisiData
-    * Loading multiple datasets simultaneously
-    * Accessing other loaded or derived sheets
-    * Converting a dataset from one supported filetype into another
+    * [Opening an R data frame with VisiData](/docs/loading#opening-an-r-data-frame-with-visidata)
+    * [Loading multiple datasets simultaneously](/docs/loading#loading-multiple-datasets-simultaneously)
+    * [Accessing other loaded or derived sheets](/docs/loading#accessing-other-loaded-or-derived-sheets)
+    * [Converting a dataset from one supported filetype into another](/docs/loading#convert)
 * [Navigation](/docs/navigate)
     * How to rapidly scroll through a sheet
     * How to search within a sheet
