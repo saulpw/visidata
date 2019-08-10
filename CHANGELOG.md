@@ -5,19 +5,19 @@
 ## Major changes
 
     - Minimum Python requirement bumped to 3.6
+    - Several interface changes (see below)
 
 ## Major features
 
     - add Alt/Esc as prefix; Alt+# to go to that sheet
        - Alt+ layer not otherwise used; bind with `^[x` for Alt+X
-    - vgit
     - undo/redo
-        - [new command] `options.undo` (default False) to enable infinite linear undo/redo
+        - [new command] `options.undo` (default: True) to enable infinite linear undo/redo
         - provisionally bound to `Shift+U` and `Shift+R`
-        - `undoEditCells` assumes commands modified only selectedRows
         - will undo most recent modification on current sheet
+        - `undoEditCells` assumes commands modified only selectedRows
     - numeric binning
-        - options.numeric_binning (default: False) is the feature flag
+        - `options.numeric_binning` (default: False) is the feature flag
         - [feature freqtbl] numeric binning for frequency/pivot table
         - `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
         - (thanks paulklemm for the issue #244)
@@ -31,7 +31,7 @@
         - this release establishes a structure for creating plugins, and provides an interface within VisiData for installing them
             - `open-plugins` opens the **PluginsSheet**
             - to download and install a plugin, move the cursor to its row and press `a` (add)
-            - to uninstall a plugin, move the cursor to its row and press `d` (delete).
+            - to turn off a plugin, move the cursor to its row and press `d` (delete).
         - for more information see (https://visidata.org/docs/plugins)
     - deferred changes
         - modifications are now highlighted with yellow, until committed to with `^S` (`save-sheet`)
@@ -43,11 +43,12 @@
 - `fill-nulls` renamed to `setcol-fill`
 - `paste-cells` renamed to `setcol-clipboard`
 - `dup-cell`/`dup-row` on SheetFreqTable and DescribeSeet renamed to `dive-cell`/`dive-row`
+- `next-page`/`prev-page` renamed to `go-pagedown`/`go-pageup`
 - `save-col` always saves all rows in current column (instead of selectedRows or rows)
 - `copy-*` use only selectedRows, warning if none selected (cmdlog safe)
 - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
 - all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
-- Shift+S pushes `sheets-all`; zS pushes `sheets-stack`. removed gS and the graveyard sheet.
+- Shift+S pushes `sheets-stack`; gS pushes `sheets-all`. removed graveyard sheet.
 - `random-rows` is no longer bound to any key by default (was Shift+R).
 - `freq-summary` was `freq-rows`; adds summary for selected rows
 - cmdlog is now based on longname instead of keystrokes
@@ -62,17 +63,24 @@
 
 - inplace: shows expressions while typing [breaks replay]
 - vfake: anonymizes columns
+- livesearch: filter rows as you search
 - rownum: add column of original row ordering
+- sparkline: add a sparkline column to visualise trends of numeric cells in a row (thanks @layertwo #297)
 
 ## Bugfixes
 
 - [addcol-new] addcol-new now works in batch mode (thanks @cwarden for the bug report #251)
 - [canvas] clipstr xname to prevent overlap with 1st element in xaxis
+- [color] column separator color applies to regular rows (thanks @mightymiff for bug report #321)
 - [DirSheet] delete-selected now deletes all of the selected files upon save-sheet (thanks @cwarden for the bug report #261)
 - [display] fix resizing issue with wide chars (thanks @polm for the bug report #279 and for the fix #284 )
+- [freqtbl] unselect-rows now updates source rows (thanks @cwarden for bug report #318)
 - [go-col-regex] nextColRegex sheet is implicit parameter
+- [help] use tab as sep for system sheets (thanks @frosencrantz for bug report #323)
+- [plot] graphing currency values now works
 - [pyobj] SheetDict nested editing (thanks @egwynn for the bug report #245)
 - [txt] TextSheets now save as .txt
+- [yaml] handle sources that do not load as lists (thanks @frosencrantz for bug report #327)
 - [vdtui] make Sheet sortable (related to an issue found by @jsvine #241)
 
 
@@ -80,15 +88,21 @@
 
 - [addcol-new] does not ask for column name
 - [aggr] add `list` aggregator (thanks @chocolateboy #263)
+- [canvas] add legend width to fit max key (thanks @nicwaller for request)
 - [chooseMany] error() on invalid choice #169
 - [command join] add join-sheets-top2 (`&`) / join-sheets-all (`g&`) to Sheet to join top 2/all sheets in sheets-stack
 - [command sort] `sort-*-add` bound to z[] and gz[] to add additional sort columns
 - [command syspaste-cells] add `syspaste-cells` to paste into vd from system clipboard (thanks kovasap for PR #258)
+- [describe] add `sum` (thanks @pigmonkey for suggestion #315)
 - [DirSheet] include folders and hidden files
 - [exec-longname] enable history
 - [freeze-sheet] only freeze visibleCols
 - [html] add links column where hrefs available (suggested by @am-zed #278)
 - [license] remove MIT license from vdtui; all code now licensed under GPL3
+- [loader fixed] provide a way to limit the max nmber of columns created (thanks @frosencrantz for suggestion #313)
+    - added `options.fixed_maxcols` (default: no limit)
+- [loader fixed] loaders override putValue, not setValue (thanks @aborruso for bug report #298)
+- [loader jira] add suport for jira filetype, a markdown derivative compatible with Atlassian JIRA (thanks @layertwo #301)
 - [loader Pyobj] `py` filetype to import and explore a python module: `vd -f py curses`
 - [loader pyxlsb] add .xlsb loader (suggested by @woutervdijke #246)
 - [loader ndjson ldjson] add as aliases for jsonl
@@ -96,6 +110,7 @@
 - [loader npz] add support for .npz index
 - [loader usv] add .usv loader
 - [macros] is now deprecated
+- [motd] domotd is asyncsingle and thus not sync-able
 - [mouse] bind Ctrl+scrollwheel to scroll-left/right; change to move cursor by `options.scroll_incr` (like scroll-up/down)
 - [mouse] slide columns/rows with left-click and drag
 - [openSource] create new blank sheet if file does not exist
@@ -111,13 +126,20 @@
 - [pandas] if the df contains an index column, hide it
 - [pcap] adds saver for .pcap to json (thanks @layertwo for PR #272)
 - [perf] expr columns are now set to cache automatically
+- [perf] drawing performance improvements
+- [perf] minor improvements to cliptext
+- [perf] several minor optimisations to color
 - [precious] describe-sheet is now precious; error-sheet and threads-sheet are not
 - [replay] show comments as status (suggested by @cwarden)
+- [save] make all `save_` callers async
 - [sqlite] add save (CREATE/INSERT only; for wholesale saving, not updates)
 - [sqlite] `Ctrl+S` to commit add/edit/deletes
 - [sqlite] add support for .sqlite3 extension
+- [tar] add support for opening tar files (thanks @layertwo #302)
+- [vdmenu] `Shift+V` opens menu of core sheets
+    - press `Enter` to open sheet described in current row
 - [win] several changes made for increased windows-compatibility (thanks @scholer!)
-
+- [yaml] bump min required version (thanks @frosencrantz for suggestion #326)
 
 
 ## API
@@ -149,13 +171,20 @@
     - call vd.finalInit() at end of module imports to initialise VisiData.init() members
     - so that e.g. cmdlog is not created until all internal sheet-specific options has been set
 - remove replayableOption() (now replay an argument within option())
-- CursesAttr is now ColorAttr
+- CursesAttr is now ColorAttr; ColorAttr now a named tuple
     - variables that contain a ColorAttr have been renamed from attr to cattr for readability
+- improvements to scrolling API
+- rename most cases of Sheet*/Column* to *Sheet/*Column
+- use pathlib.Path in visidata.Path
+- remove BaseSheet.loaded; add BaseSheet.rows = UNLOADED
+- vd.push no longer returns sheet
+- add @asyncsingle for asyncthread singleton
 
 ## Deps
 - add dateutil as submodule
 - add submodule fork of pyxlsb for VisiData integration
 - add amoffat/sh as submodule for vgit and vsh
+- [postgres] swap for binary version of dep
 
 
 # v1.5.2 (2019-01-12)
