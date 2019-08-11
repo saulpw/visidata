@@ -5,10 +5,10 @@ workflows:
     jobs:
       - test-3.6
 jobs:
-  test-3.4: &test-template
+  test-3.6: &test-template
     working_directory: ~/visidata
     docker:
-      - image: circleci/python:3.4
+      - image: circleci/python:3.6
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -22,11 +22,3 @@ jobs:
       - run:
           command: |
             dev/test.sh
-  test-3.5:
-    <<: *test-template
-    docker:
-      - image: circleci/python:3.5
-  test-3.6:
-    <<: *test-template
-    docker:
-      - image: circleci/python:3.6
