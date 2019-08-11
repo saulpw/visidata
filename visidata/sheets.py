@@ -786,8 +786,8 @@ def quit(self):
 
 undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
 
-globalCommand('zS', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
-globalCommand('S', 'sheets-all', 'vd.push(vd.sheetsSheet)')
+globalCommand('S', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
+globalCommand('gS', 'sheets-all', 'vd.push(vd.sheetsSheet)')
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
