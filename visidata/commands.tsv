@@ -15,6 +15,7 @@ global	freq-summary	z	F	zF	y	n	n	y		data-aggregate-summary	open summary for all 
 global	jump-sheet-	Alt	[1-9]	Alt+[1-9]	y			y			jump to sheet of provided number
 global	no-op		KEY_RESIZE	KEY_RESIZE	n	n	n	n			no operation
 global	open-file		o	o	y	n	n	y		sheet-open-path	open input in VisiData
+global	open-plugins				y	n	n	y			open Plugins Sheet
 global	pause-replay		^U	^U	n	n	n	n		meta-replay-toggle	pause/resume replay
 global	prev-sheet		^^	^^	swap	n	n	n		view-go-sheet-swap	jump to previous sheet (swap with current sheet)
 global	pyobj-expr		^X	^X	y	n	n	y		python-eval-push	evaluate Python expression and open result as Python object
@@ -28,8 +29,8 @@ global	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected shee
 global	save-all	g	^S	g^S	n	n	n	y		sheet-save-all	save all sheets to given file or directory)
 global	save-cmdlog		^D	^D	n	n	n	n		meta-cmdlog-save	save CommandLog to new .vd file
 global	setdiff-sheet									sheet-set-diff	set this sheet as the diff sheet for all new sheets
-global	sheets-all		S	S	static meta	n	n	y		meta-sheets	open Sheets Sheet
-global	sheets-stack	z	S	gS	static meta	n	n	y			open current Sheets Stack
+global	sheets-all	g	S	gS	static meta	n	n	y		meta-sheets	open Sheets Sheet
+global	sheets-stack		S	S	static meta	n	n	y			open current Sheets Stack
 global	show-version		^V	^V	n	n	n	n		info-version	show version information on status line
 global	status				n	n	n	n			show given message on status line
 global	statuses		^P	^P	static meta	n	n	n		meta-status-history	open Status History
@@ -230,8 +231,7 @@ Sheet	syscopy-cell	z	Y	zY	n	n	n	n		data-clipboard-copy-system-cell	yank (copy) c
 Sheet	syscopy-cells	gz	Y	gzY	n	use	n	n		data-clipboard-copy-system-cell	yank (copy) cells in current column from selected rows to system clipboard
 Sheet	syscopy-row		Y	Y	n	n	n	n		data-clipboard-copy-system-row	yank (copy) current row to system clipboard
 Sheet	syscopy-selected	g	Y	gY	n	use	n	n		data-clipboard-copy-system-selected	yank (copy) selected rows to system clipboard
-Sheet	sysopen-cell	z	^O	z^O	external	n	y	n			
-Sheet	sysopen-row		^O	^O	external	n	y	n	1		
+Sheet	syspaste-cells				n	y	y	y			paste into VisiData from system clipboard
 Sheet	transpose		T	T	derived	n	n	y		data-transpose	open new sheet with rows and columns transposed
 Sheet	type-any	z	~	z~	n	n	n	y		column-type-any	set type of current column to anytype
 Sheet	type-currency		$	$	n	n	n	y	1	column-type-currency	set type of current column to currency
@@ -259,6 +259,8 @@ ProfileSheet	dive-cell	z	Enter	zEnter	y	n	n	y			open ProfileSheet for caller ref
 ProfileSheet	dive-row		Enter	Enter	y	n	n	y			open ProfileSheet for calls referenced in current row
 ProfileSheet	save-profile	z	^S	z^S	n	n	n	y		sheet-save-profile	save profile
 ProfileSheet	sysopen-row		^O	^O	external	n		n			open current file at referenced row in external $EDITOR
+PluginsSheet	add-plugin		a	a	n	n	n	y			install plugin referenced in current row
+PluginsSheet	delete-plugin		d	d	n	n	n	y			turn off plugin referenced in current row
 Plotter	redraw		^L	^L	n	n	n	n			redraw all pixels on canvas
 Plotter	visibility		v	v	n	n	n	y			toggle show_graph_labels
 PNGSheet	plot-sheet		.	.	y	n	n	y		data-plot-png	plot this png
@@ -280,7 +282,6 @@ DescribeSheet	select-cell	z	s	zs	n	change		y		rows-select-source-cell	select row
 DescribeSheet	unselect-cell	z	u	zu	n	change	n	y		rows-unselect-source-cell	unselect rows on source sheet which are being described in current cell
 CommandLog	replay-all	g	x	gx	n	n	n	n			replay contents of entire CommandLog
 CommandLog	replay-row			x	n	n	n	n			replay command in current row
-CommandLog	save-macro	z	^S	z^S	n	y	n	n			save macro
 CommandLog	stop-replay			^C	n	n	n	n			abort replay
 ColumnsSheet	aggregate-cols	g	+	g+	n	use	n	y		column-aggregate-add-all	add aggregators to selected source columns
 ColumnsSheet	freq-col		Enter	Enter	y	n	n	y		data-aggregate-source-column	open a Frequency Table grouped on column referenced in current row

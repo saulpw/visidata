@@ -383,10 +383,10 @@ scroll canvas
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "Q"
 .No quit current sheet and remove it from the Sy CommandLog
-.It Ic "V"
-view contents of current cell in a new TextSheet
-.It Ic "  v"
-toggle sheet-specific visibility (text wrap on TextSheet, legends/axes on Graph)
+.It Ic "v"
+toggle sheet-specific visibility (multi-row on Sheet, legends/axes on Graph)
+.It Ic "Shift+V"
+open menu of core sheets
 .Pp
 .It Ic "Space" Ar longname
 .No execute command by its Ar longname
@@ -718,6 +718,12 @@ overwrite existing files without confirmation
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
 .No parse the output of ls -l into usable data
+.Pp
+.Dl Ic ls | vd | lpr
+.No interactively select a list of filenames to send to the printer
+.Pp
+.Dl Ic vd newfile.tsv
+.No open a blank sheet named Ar newfile No if file does not exist
 .Pp
 .Sh FILES
 At the start of every session,

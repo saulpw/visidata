@@ -42,12 +42,12 @@
 - `edit-cells` renamed to `setcol-input`
 - `fill-nulls` renamed to `setcol-fill`
 - `paste-cells` renamed to `setcol-clipboard`
-- `dup-cell`/`dup-row` on SheetFreqTable and DescribeSeet renamed to `dive-cell`/`dive-row`
+- `dup-cell`/`dup-row` on SheetFreqTable and DescribeSheet renamed to `dive-cell`/`dive-row`
 - `next-page`/`prev-page` renamed to `go-pagedown`/`go-pageup`
 - `save-col` always saves all rows in current column (instead of selectedRows or rows)
 - `copy-*` use only selectedRows, warning if none selected (cmdlog safe)
 - `syscopy-*` use only selectedRows, fail if none selected (not cmdlog safe)
-- all `plot-selected` are now `plot-rows`; `plot-rows` uses all rows
+- all `plot-selected` are now `plot-numerics`; `plot-numerics` uses all rows
 - Shift+S pushes `sheets-stack`; gS pushes `sheets-all`. removed graveyard sheet.
 - `random-rows` is no longer bound to any key by default (was Shift+R).
 - `freq-summary` was `freq-rows`; adds summary for selected rows
@@ -61,7 +61,6 @@
 
 ## plugins
 
-- inplace: shows expressions while typing [breaks replay]
 - vfake: anonymizes columns
 - livesearch: filter rows as you search
 - rownum: add column of original row ordering
@@ -99,7 +98,7 @@
 - [freeze-sheet] only freeze visibleCols
 - [html] add links column where hrefs available (suggested by @am-zed #278)
 - [license] remove MIT license from vdtui; all code now licensed under GPL3
-- [loader fixed] provide a way to limit the max nmber of columns created (thanks @frosencrantz for suggestion #313)
+- [loader fixed] provide a way to limit the max number of columns created (thanks @frosencrantz for suggestion #313)
     - added `options.fixed_maxcols` (default: no limit)
 - [loader fixed] loaders override putValue, not setValue (thanks @aborruso for bug report #298)
 - [loader jira] add suport for jira filetype, a markdown derivative compatible with Atlassian JIRA (thanks @layertwo #301)

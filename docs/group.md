@@ -25,6 +25,7 @@ Aggregator      Description
 `distinct`      number of distinct values in the group
 `count`         number of values in the group
 `keymax`        key of the row with the largest value in the group
+`list`          gathers values in column into a list
 
 The follow howtos will have examples of workflows involving grouping of data and statistical aggregation.
 
