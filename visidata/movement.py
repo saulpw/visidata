@@ -203,7 +203,7 @@ Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
 Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 
 # vim-style scrolling with the 'z' prefix
-Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nVisibleRows/2)')
+Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nScreenRows/2)')
 
 Sheet.addCommand(None, 'page-right', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex')
 Sheet.addCommand(None, 'page-left', 'pageLeft()')
