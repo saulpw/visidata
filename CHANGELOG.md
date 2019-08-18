@@ -16,7 +16,9 @@
         - provisionally bound to `Shift+U` and `Shift+R`
         - will undo most recent modification on current sheet
         - `undoEditCells` assumes commands modified only selectedRows
-    - numeric binning
+    - multi-line rows
+        - toggle by pressing `v` on any sheets with truncated values
+    - range binning for numeric columns
         - `options.numeric_binning` (default: False) is the feature flag
         - [feature freqtbl] numeric binning for frequency/pivot table
         - `options.histogram_bins` to set number of bins (0 to choose a reasonable default)
