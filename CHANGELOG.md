@@ -182,7 +182,6 @@
 - add @asyncsingle for asyncthread singleton
 
 ## Deps
-- add dateutil as submodule
 - add submodule fork of pyxlsb for VisiData integration
 - add amoffat/sh as submodule for vgit and vsh
 - [postgres] swap for binary version of dep
