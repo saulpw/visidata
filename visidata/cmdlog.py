@@ -81,6 +81,47 @@ def open_vd(p):
 
 Sheet.save_vd = Sheet.save_tsv
 
+@Sheet.api
+def moveToRow(vs, rowstr):
+    try:
+        rowidx = int(rowstr)
+    except ValueError:
+        rowidx = indexMatch(vs.rows, lambda r,vs=vs,k=rowstr: keystr(vs.rowkey(r)) == k)
+
+    if rowidx is None:
+        return False
+
+    if options.replay_movement:
+        while vs.cursorRowIndex != rowidx:
+            vs.cursorRowIndex += 1 if (rowidx - vs.cursorRowIndex) > 0 else -1
+            while not self.delay(0.5):
+                pass
+    else:
+        vs.cursorRowIndex = rowidx
+
+    return True
+
+
+@Sheet.api
+def moveToCol(vs, colstr):
+    try:
+        vcolidx = int(colstr)
+    except ValueError:
+        vcolidx = indexMatch(vs.visibleCols, lambda c,name=colstr: name == c.name)
+
+    if vcolidx is None:
+        return False
+
+    if options.replay_movement:
+        while vs.cursorVisibleColIndex != vcolidx:
+            vs.cursorVisibleColIndex += 1 if (vcolidx - vs.cursorVisibleColIndex) > 0 else -1
+            while not self.delay(0.5):
+                pass
+    else:
+        vs.cursorVisibleColIndex = vcolidx
+
+    return True
+
 # rowdef: namedlist (like TsvSheet)
 class CommandLog(TsvSheet):
     'Log of commands for current session.'
@@ -203,50 +244,17 @@ class CommandLog(TsvSheet):
 
     def moveToReplayContext(self, r):
         'set the sheet/row/col to the values in the replay row.  return sheet'
-        if not r.sheet:
+        if r.sheet:
+            vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
+        else:
             return None
 
-        try:
-            sheetidx = int(r.sheet)
-            vs = vd.sheets[sheetidx]
-        except ValueError:
-            vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
-
         if r.row:
-            try:
-                rowidx = int(r.row)
-            except ValueError:
-                rowidx = indexMatch(vs.rows, lambda r,vs=vs,k=r.row: keystr(vs.rowkey(r)) == k)
-
-            if rowidx is None:
-                error('no "%s" row' % r.row)
-
-            if options.replay_movement:
-                while vs.cursorRowIndex != rowidx:
-                    vs.cursorRowIndex += 1 if (rowidx - vs.cursorRowIndex) > 0 else -1
-                    while not self.delay(0.5):
-                        pass
-            else:
-                vs.cursorRowIndex = rowidx
+            vs.moveToRow(r.row) or error('no "%s" row' % rowstr)
 
         if r.col:
-            try:
-                vcolidx = int(r.col)
-            except ValueError:
-                vcolidx = indexMatch(vs.visibleCols, lambda c,name=r.col: name == c.name)
+            vs.moveToCol(r.col) or error('no "%s" column' % r.col)
 
-            if vcolidx is None:
-                error('no "%s" column' % r.col)
-
-            if options.replay_movement:
-                while vs.cursorVisibleColIndex != vcolidx:
-                    vs.cursorVisibleColIndex += 1 if (vcolidx - vs.cursorVisibleColIndex) > 0 else -1
-                    while not self.delay(0.5):
-                        pass
-
-                assert vs.cursorVisibleColIndex == vcolidx
-            else:
-                vs.cursorVisibleColIndex = vcolidx
         return vs
 
     def delay(self, factor=1):

@@ -78,17 +78,30 @@ def main():
 
     stdinSource = PathFd('-', vd._stdin)
 
-    # parse args, including +4:3 starting row:col
-    startrow, startcol = None, None
+    # parse args, including +:sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
+    start_positions = []  # (list_of_sheetstr, str, str)  # empty sheetstr means all sheets
+    startsheets, startrow, startcol = [], None, None
     fmtargs = []
     fmtkwargs = {}
     inputs = []
     for arg in args.inputs:
         if arg.startswith('+'):  # position cursor at start
             if ':' in arg:
-                startrow, startcol = arg[1:].split(':')
+                pos = arg[1:].split(':')
+                if len(pos) == 1:
+                    startsheet = [Path(inputs[-1]).name] if inputs else None
+                    start_positions.append((startsheet, pos[0], None))
+                elif len(pos) == 2:
+                    startsheet = [Path(inputs[-1]).name] if inputs else None
+                    startrow, startcol = pos
+                    start_positions.append((None, startrow, startcol))
+                elif len(pos) >= 3:
+                    startsheets = pos[:-2]
+                    startrow, startcol = pos[-2:]
+                    start_positions.append((startsheets, startrow, startcol))
             else:
-                startrow = arg[1:]
+                start_positions.append((None, arg[1:], None))
+
         elif args.play and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
             k, v = arg.split('=')
@@ -121,15 +134,34 @@ def main():
             vs = openSource(src)
             vd.cmdlog.openHook(vs, src)
             sources.append(vs)
-            if startrow is not None:
-                vs.cursorRowIndex = int(startrow)-1
-            if startcol is not None:
-                vs.cursorVisibleColIndex = int(startcol)-1
 
+        vd.sheets.extend(sources)
         if args.batch:
-            vd.sheets.extend(sources)
-            sources[0].reload()
-        else:
+            vd.push(sources[0])
+
+        for startsheets, startrow, startcol in start_positions:
+            sheets = []  # sheets to apply startrow:startcol to
+            if not startsheets:
+                sheets = sources  # apply row/col to all sheets
+            else:
+                vs = vd.getSheet(startsheets[0]) or sources[-1]
+                vd.sync(vs.reload())
+                for startsheet in startsheets[1:]:
+                    vs = vs.getSheet(startsheet) or vd.warning(f'no sheet "{startsheet}"')
+                vd.push(vs)
+                sheets = [vs]
+
+            if startrow:
+                for vs in sheets:
+                    if vs:
+                        vs.moveToRow(startrow) or vd.warning(f'{vs} has no row "{startrow}"')
+
+            if startcol:
+                for vs in sheets:
+                    if vs:
+                        vs.moveToCol(startcol) or vd.warning(f'{vs} has no column "{startcol}"')
+
+        if not args.batch:
             run(*sources)
     else:
         if args.play == '-':

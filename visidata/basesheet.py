@@ -173,12 +173,19 @@ def sheet(self):
 
 
 @VisiData.api
-def getSheet(self, sheetname):
+def getSheet(vd, sheetname):
     matchingSheets = [x for x in vd.sheets if x.name == sheetname]
     if matchingSheets:
         if len(matchingSheets) > 1:
             vd.status('more than one sheet named "%s"' % sheetname)
         return matchingSheets[0]
+
+    try:
+        sheetidx = int(sheetname)
+        return vd.sheets[sheetidx]
+    except ValueError:
+        pass
+
     if sheetname == 'options':
         vs = self.optionsSheet
         vs.reload()

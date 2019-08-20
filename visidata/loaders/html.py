@@ -6,6 +6,12 @@ def open_html(p):
     return HtmlTablesSheet(p.name, source=p)
 open_htm = open_html
 
+@Sheet.api
+def getSheet(sheet, k):
+    for vs in sheet.rows:
+        if vs.name == k:
+            return vs
+
 
 class HtmlTablesSheet(Sheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
@@ -30,6 +36,7 @@ class HtmlTablesSheet(Sheet):
                 vs.reload()
                 vs.html = e
                 self.addRow(vs)
+
 HtmlTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
 def is_header(elem):
