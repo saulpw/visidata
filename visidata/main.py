@@ -10,7 +10,7 @@ import io
 import sys
 import locale
 
-from visidata import vd, option, options, status, run
+from visidata import vd, option, options, status, run, UNLOADED
 from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand
 from visidata import Path, PathFd, openSource, saveSheets, setDiffSheet, domotd
 
@@ -78,7 +78,7 @@ def main():
 
     stdinSource = PathFd('-', vd._stdin)
 
-    # parse args, including +:sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
+    # parse args, including +sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
     start_positions = []  # (list_of_sheetstr, str, str)  # empty sheetstr means all sheets
     startsheets, startrow, startcol = [], None, None
     fmtargs = []
@@ -145,11 +145,18 @@ def main():
                 sheets = sources  # apply row/col to all sheets
             else:
                 vs = vd.getSheet(startsheets[0]) or sources[-1]
-                vd.sync(vs.reload())
+                if vs.rows is UNLOADED:
+                    vd.sync(vs.reload())
                 for startsheet in startsheets[1:]:
-                    vs = vs.getSheet(startsheet) or vd.warning(f'no sheet "{startsheet}"')
-                vd.push(vs)
-                sheets = [vs]
+                    rowidx = vs.getRowIndexFromStr(startsheet)
+                    if rowidx is None:
+                        vs = None
+                        vd.warning(f'no sheet "{startsheet}"')
+                        break
+                    vs = vs.rows[rowidx]
+                if vs:
+                    vd.push(vs)
+                    sheets = [vs]
 
             if startrow:
                 for vs in sheets:
@@ -162,7 +169,7 @@ def main():
                         vs.moveToCol(startcol) or vd.warning(f'{vs} has no column "{startcol}"')
 
         if not args.batch:
-            run(*sources)
+            run(vd.sheets[0])
     else:
         if args.play == '-':
             vdfile = stdinSource  # PathFd
