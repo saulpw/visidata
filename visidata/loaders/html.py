@@ -6,22 +6,17 @@ def open_html(p):
     return HtmlTablesSheet(p.name, source=p)
 open_htm = open_html
 
-@Sheet.api
-def getSheet(sheet, k):
-    for vs in sheet.rows:
-        if vs.name == k:
-            return vs
-
-
 class HtmlTablesSheet(Sheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
     columns = [
+        ColumnAttr('name'),
         Column('tag', getter=lambda col,row: row.html.tag),
         Column('id', getter=lambda col,row: row.html.attrib.get('id')),
         Column('nrows', type=int, getter=lambda col,row: len(row.rows)),
         Column('ncols', type=int, getter=lambda col,row: len(row.columns)),
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
     ]
+    nKeys = 1
     @asyncthread
     def reload(self):
         import lxml.html
