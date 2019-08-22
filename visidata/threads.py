@@ -235,10 +235,13 @@ def checkForFinishedThreads(self):
 @VisiData.api
 def sync(self, *joiningThreads):
     'Wait for joiningThreads to finish. If no joiningThreads specified, wait for all but current thread to finish.'
-    joiningThreads = joiningThreads or (set(self.unfinishedThreads)-set([threading.current_thread()]))
+    joiningThreads = list(joiningThreads) or (set(self.unfinishedThreads)-set([threading.current_thread()]))
     while any(t in self.unfinishedThreads for t in joiningThreads):
         for t in joiningThreads:
             try:
+                if not t.is_alive():
+                    joiningThreads.remove(t)
+                    break
                 t.join()
             except RuntimeError:  # maybe thread hasn't started yet or has already joined
                 pass
