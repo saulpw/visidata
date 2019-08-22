@@ -83,11 +83,7 @@ Sheet.save_vd = Sheet.save_tsv
 
 @Sheet.api
 def moveToRow(vs, rowstr):
-    try:
-        rowidx = int(rowstr)
-    except ValueError:
-        rowidx = indexMatch(vs.rows, lambda r,vs=vs,k=rowstr: keystr(vs.rowkey(r)) == k)
-
+    rowidx = vs.getRowIndexFromStr(rowstr)
     if rowidx is None:
         return False
 
@@ -101,6 +97,13 @@ def moveToRow(vs, rowstr):
 
     return True
 
+@Sheet.api
+def getRowIndexFromStr(vs, rowstr):
+    try:
+        return int(rowstr)
+    except ValueError:
+        index = indexMatch(vs.rows, lambda r,vs=vs,k=rowstr: keystr(vs.rowkey(r)).endswith(k))
+        return index
 
 @Sheet.api
 def moveToCol(vs, colstr):
