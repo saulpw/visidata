@@ -33,7 +33,9 @@ class SettingsMgr(collections.OrderedDict):
         return self.allobjs.get(objname)
 
     def unset(self, k, obj='global'):
-        del self[k][self.objname(obj)]
+        objstr = self.objname(obj)
+        if objstr in self[k]:
+            del self[k][objstr]
 
     def set(self, k, v, obj):
         'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="global" means last resort.'
