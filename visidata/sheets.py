@@ -825,6 +825,8 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', undo=undoColType),
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', undo=undoColType),
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', undo=undoColType),
 
+IndexSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
+
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
 SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
 SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
