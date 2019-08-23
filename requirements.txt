@@ -19,4 +19,6 @@ PyYAML>=5.1         # yaml/yml
 dpkt                # pcap
 dnslib              # pcap
 namestand           # graphviz
+frictionless        # frictionless .json
+
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb
