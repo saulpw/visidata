@@ -12,7 +12,7 @@ import locale
 
 from visidata import vd, option, options, status, run, UNLOADED
 from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand
-from visidata import Path, PathFd, openSource, saveSheets, setDiffSheet, domotd
+from visidata import Path, openSource, saveSheets, setDiffSheet, domotd
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
 
@@ -23,7 +23,7 @@ def eval_vd(logpath, *args, **kwargs):
     if args or kwargs:
         log = log.format(*args, **kwargs)
 
-    src = PathFd(logpath.given, io.StringIO(log), filesize=len(log))
+    src = Path(logpath.given, fp=io.StringIO(log), filesize=len(log))
     vs = openSource(src, filetype='vd')
     vs.name += '_vd'
     vd.push(vs)
@@ -76,7 +76,7 @@ def main():
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
 
-    stdinSource = PathFd('-', vd._stdin)
+    stdinSource = Path('-', fp=vd._stdin)
 
     # parse args, including +sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
     start_positions = []  # (list_of_sheetstr, str, str)  # empty sheetstr means all sheets
@@ -172,7 +172,7 @@ def main():
             run(vd.sheets[0])
     else:
         if args.play == '-':
-            vdfile = stdinSource  # PathFd
+            vdfile = stdinSource
             vdfile.name = 'stdin.vd'
         else:
             vdfile = Path(args.play)
