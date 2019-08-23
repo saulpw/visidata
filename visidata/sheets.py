@@ -12,7 +12,7 @@ TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet, UNLOADED,
 vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoEditCell, undoEditCells, undoAttr, undoBlocked)
 
 
-__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'SheetsSheet']
+__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet']
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
@@ -694,11 +694,32 @@ class Sheet(BaseSheet):
 
             return height
 
-
-class SheetsSheet(Sheet):
+class IndexSheet(Sheet):
     rowtype = 'sheets'
     precious = False
     defer = False
+
+    columns = [
+        ColumnAttr('name'),
+        ColumnAttr('rows', 'nRows', type=int),
+        ColumnAttr('cols', 'nCols', type=int),
+        ColumnAttr('keys', 'keyColNames'),
+        ColumnAttr('source'),
+    ]
+    nKeys = 1
+
+    def newRow(self):
+        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
+
+    def reload(self):
+        self.rows = self.source
+
+    def getSheet(self, k):
+        for vs in self.rows:
+            if vs.name == k:
+                return vs
+
+class SheetsSheet(IndexSheet):
     columns = [
         ColumnAttr('name', width=30),
         ColumnAttr('shortcut'),
@@ -711,16 +732,7 @@ class SheetsSheet(Sheet):
         ColumnAttr('progressPct'),
 #        ColumnAttr('threads', 'currentThreads', type=vlen),
     ]
-    colorizers = [
-        RowColorizer(1.5, 'color_hidden_col', lambda s,c,r,v: r and r not in vd.sheets),
-    ]
     nKeys = 1
-
-    def newRow(self):
-        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
-
-    def reload(self):
-        self.rows = self.source
 
 
 ## VisiData sheet manipulation
