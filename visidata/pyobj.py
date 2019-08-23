@@ -147,9 +147,10 @@ class ListOfPyobjSheet(PythonSheet):
     rowtype = 'python objects'
     def reload(self):
         self.rows = self.source
-        self.columns = [Column(self.name,
+        self.columns = []
+        self.addColumn(Column(self.name,
                                getter=lambda col,row: row,
-                               setter=lambda col,row,val: setitem(col.sheet.source, col.sheet.source.index(row), val))]
+                               setter=lambda col,row,val: setitem(col.sheet.source, col.sheet.source.index(row), val)))
 
         for c in PyobjColumns(self.rows[0]):
             self.addColumn(c)
@@ -161,14 +162,18 @@ class ListOfPyobjSheet(PythonSheet):
 class ListOfDictSheet(PythonSheet):
     rowtype = 'dicts'
     def reload(self):
-        self.columns = DictKeyColumns(self.source[0])
+        self.columns = []
+        for c in DictKeyColumns(self.source[0]):
+            self.addColumn(c)
         self.rows = self.source
 
 # rowdef: namedtuple
 class ListOfNamedTupleSheet(PythonSheet):
     rowtype = 'namedtuples'
     def reload(self):
-        self.columns = [ColumnItem(k, i) for i, k in enumerate(self.source[0]._fields)]
+        self.columns = []
+        for i, k in enumerate(self.source[0]._fields):
+            self.addColumn(ColumnItem(k, i))
         self.rows = self.source
 
 
