@@ -203,12 +203,12 @@ def openSource(p, filetype=None):
         filetype = options.filetype
     if isinstance(p, str):
         if '://' in p:
-            return openSource(UrlPath(p), filetype)  # convert to Path and recurse
+            return openSource(Path(p), filetype=filetype)  # convert to Path and recurse
         elif p == '-':
-            return openSource(PathFd('-', vd._stdin), filetype)
+            return openSource(Path('-', fp=vd._stdin), filetype=filetype)
         else:
-            return openSource(Path(p), filetype)  # convert to Path and recurse
-    elif hasattr(p, 'scheme'): # isinstance(p, UrlPath):
+            return openSource(Path(p), filetype=filetype)  # convert to Path and recurse
+    elif p.scheme and not p.fp: # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
         return getGlobals()[openfunc](p, filetype=filetype)
     elif isinstance(p, Path):

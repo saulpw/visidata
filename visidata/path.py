@@ -2,6 +2,7 @@ import os
 import os.path
 import sys
 import pathlib
+from urllib.parse import urlparse, urlunparse
 
 from visidata import *
 
@@ -29,9 +30,12 @@ def modtime(path):
 
 class Path(os.PathLike):
     'File and path-handling class, modeled on `pathlib.Path`.'
-    def __init__(self, given):
+    def __init__(self, given, fp=None, lines=None, filesize=0):
         # Resolve pathname shell variables and ~userdir
         self.given = os.path.expandvars(os.path.expanduser(given))
+        self.fp = fp
+        self.lines = lines or []  # shared among all RepeatFile instances
+        self.filesize = filesize
 
     @property
     def given(self):
@@ -60,12 +64,14 @@ class Path(os.PathLike):
         else:
             self.compression = None
 
-        self._stat = None
-
     def __getattr__(self, k):
         if hasattr(self.__dict__, k):
-            return getattr(self.__dict__, k)
-        return getattr(self._path, k)
+            r = getattr(self.__dict__, k)
+        else:
+            r = getattr(self._path, k)
+        if isinstance(r, pathlib.Path):
+            return Path(r)
+        return r
 
     def __fspath__(self):
         return self._path.__fspath__()
@@ -77,6 +83,9 @@ class Path(os.PathLike):
         return Path(self._path.__truediv__(a))
 
     def open_text(self, mode='rt'):
+        if self.fp:
+            return RepeatFile(fp=self.fp)
+
         if 't' not in mode:
             mode += 't'
 
@@ -91,6 +100,14 @@ class Path(os.PathLike):
                 return sys.stderr
 
         return self.open(mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+
+    def read_text(self, *args):
+        if self.lines:
+            return RepeatFile(iter_lines=self.lines).read()
+        elif self.fp:
+            return self.fp.read()
+        else:
+            return self._path.read_text(*args)
 
     def open(self, *args, **kwargs):
         fn = self
@@ -124,54 +141,47 @@ class Path(os.PathLike):
         with self.open(mode='rb') as fp:
             return fp.read()
 
+    def is_url(self):
+        return '://' in self.given
+
     def __str__(self):
+        if self.is_url():
+            return self.given
         return str(self._path)
 
-
-class UrlPath(Path):
-    def __init__(self, url):
-        from urllib.parse import urlparse
-        self.url = url
-        self.obj = urlparse(url)
-        super().__init__(self.obj.path)
-
-    def __str__(self):
-        return self.url
-
-    def __getattr__(self, k):
-        if hasattr(self.obj, k):
-            return getattr(self.obj, k)
-        return super().__getattr__(k)
+    @functools.lru_cache()
+    def stat(self, force=False):
+        try:
+            if not self.is_url():
+                return self._path.stat()
+        except Exception as e:
+            return None
 
     def exists(self):
-        return True
+        if self.is_url():
+            return True
+        return self._path.exists()
 
-    def __str__(self):
-        return self.given
+    @property
+    def scheme(self):
+        if self.is_url():
+            return urlparse(self.given).scheme
 
-
-
-class PathFd(Path):
-    'minimal Path interface to satisfy a tsv loader'
-    def __init__(self, pathname, fp, filesize=0):
-        super().__init__(pathname)
-        self.fp = fp
-        self.alreadyRead = []  # shared among all RepeatFile instances
-        self.filesize = filesize
-
-    def read_text(self):
-        return self.fp.read()
-
-    def open_text(self):
-        return RepeatFile(self)
-
-    def exists(self):
-        return True
+    def with_name(self, name):
+        if self.is_url():
+            urlparts = list(urlparse(self.given))
+            urlparts[2] = str(Path(urlparts[2]).with_name(name))
+            return Path(urlunparse(urlparts))
+        else:
+            return self._path.with_name(name)
 
 
 class RepeatFile:
-    def __init__(self, pathfd):
-        self.pathfd = pathfd
+    def __init__(self, *, fp=None, iter_lines=None):
+        'Provide either fp or iter_lines, and lines will be filled from it.'
+        self.fp = fp
+        self.iter_lines = iter_lines
+        self.lines = []
         self.iter = RepeatFileIter(self)
 
     def __enter__(self):
@@ -217,11 +227,14 @@ class RepeatFileIter:
         return RepeatFileIter(self.rf)
 
     def __next__(self):
-        if self.nextIndex < len(self.rf.pathfd.alreadyRead):
-            r = self.rf.pathfd.alreadyRead[self.nextIndex]
+        if self.nextIndex < len(self.rf.lines):
+            r = self.rf.lines[self.nextIndex]
         else:
-            r = next(self.rf.pathfd.fp)
-            self.rf.pathfd.alreadyRead.append(r)
+            if self.rf.iter_lines:
+                r = next(self.rf.iter_lines)
+            elif self.rf.fp:
+                r = next(self.rf.fp)
+            self.rf.lines.append(r)
 
         self.nextIndex += 1
         return r

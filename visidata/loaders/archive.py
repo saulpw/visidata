@@ -54,14 +54,14 @@ class ArchiveSheet(Sheet):
             decodedfp = codecs.iterdecode(zfp.open(fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
-            return openSource(PathFd(fi.filename, decodedfp, fi.file_size))
+            return openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size))
 
         if self.archive_type == 'tar':
             tfp = tarfile.open(name=str(self.source))
             decodedfp = codecs.iterdecode(tfp.extractfile(fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
-            return openSource(PathFd(fi.name, decodedfp, fi.size))
+            return openSource(Path(fi.name, fp=decodedfp, filesize=fi.size))
 
 ArchiveSheet.addCommand(ENTER, 'dive-row', 'vd.push(open_archive_file(cursorRow))')
 ArchiveSheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(open_archive_file(r))')
