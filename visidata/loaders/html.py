@@ -6,17 +6,14 @@ def open_html(p):
     return HtmlTablesSheet(p.name, source=p)
 open_htm = open_html
 
-class HtmlTablesSheet(Sheet):
+
+class HtmlTablesSheet(IndexSheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
-    columns = [
-        ColumnAttr('name'),
-        Column('tag', getter=lambda col,row: row.html.tag),
+    columns = IndexSheet.columns + [
+        Column('tag', width=0, getter=lambda col,row: row.html.tag),
         Column('id', getter=lambda col,row: row.html.attrib.get('id')),
-        Column('nrows', type=int, getter=lambda col,row: len(row.rows)),
-        Column('ncols', type=int, getter=lambda col,row: len(row.columns)),
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
     ]
-    nKeys = 1
     @asyncthread
     def reload(self):
         import lxml.html
@@ -25,6 +22,10 @@ class HtmlTablesSheet(Sheet):
         with self.source.open_text() as fp:
             html = lxml.html.etree.parse(fp, parser=utf8_parser)
         self.rows = []
+        self.column('name').keycol = True
+        self.column('keys').hide()
+        self.column('source').hide()
+
         for i, e in enumerate(html.iter('table')):
             if e.tag == 'table':
                 vs = HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e)
