@@ -18,9 +18,9 @@ def vstat(path, force=False):
         return None
 
 def filesize(path):
-    if hasattr(path, 'filesize'):
+    if hasattr(path, 'filesize') and path.filesize is not None:
         return path.filesize
-    st = vstat(path)
+    st = path.stat() # vstat(path)
     return st and st.st_size
 
 def modtime(path):
@@ -30,12 +30,16 @@ def modtime(path):
 
 class Path(os.PathLike):
     'File and path-handling class, modeled on `pathlib.Path`.'
-    def __init__(self, given, fp=None, lines=None, filesize=0):
+    def __init__(self, given, fp=None, lines=None, filesize=None):
         # Resolve pathname shell variables and ~userdir
         self.given = os.path.expandvars(os.path.expanduser(given))
         self.fp = fp
         self.lines = lines or []  # shared among all RepeatFile instances
         self.filesize = filesize
+
+    @functools.lru_cache()
+    def stat(self, force=False):
+        return self._path.stat()
 
     @property
     def given(self):

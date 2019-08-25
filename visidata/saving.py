@@ -88,7 +88,7 @@ def deleteRows(self, rows):
     for row in rows:
         self._deferredDels[self.rowid(row)] = row
 
-    if self.sheet.defer:
+    if self.defer:
         return
 
     self.deleteBy(lambda r,self=self,dels=self._deferredDels: self.rowid(r) in dels)
