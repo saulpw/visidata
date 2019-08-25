@@ -122,13 +122,13 @@ class DirSheet(Sheet):
 
         row.rename(newpath)
         row.given = newpath  # modify visidata.Path
-        self.restat(row)
+        self.restat()
 
     def renameFile(self, row, val):
         newpath = row.with_name(val)
         row.rename(newpath)
         row.given = newpath
-        self.restat(row)
+        self.restat()
 
     def removeFile(self, path):
         if path.is_dir():
@@ -137,8 +137,8 @@ class DirSheet(Sheet):
             path.unlink()
 
     @asyncthread
-    def commit(self, path, adds, changes, deletes):
-        oldrows = self.rows
+    def commit(self, path, adds, mods, deletes):
+        oldrows = list(self.rows)
         self.rows.clear()
         for r in oldrows:
             try:
@@ -150,18 +150,15 @@ class DirSheet(Sheet):
                 exceptionCaught(e)
 
         modrows = {}  # rowid(row) -> row
-        for col, row, val in changes.values():
-            try:
-                col.putValue(row, val)
-                modrows[self.rowid(row)] = row
-            except Exception as e:
-                exceptionCaught(e)
+        for row, editdict in mods.values():
+            for col, val, in editdict.items():
+                try:
+                    col.putValue(row, val)
+                    modrows[self.rowid(row)] = row
+                except Exception as e:
+                    exceptionCaught(e)
 
-        for row in adds.values():
-            self.restat(row)
-
-        for row in modrows.values():
-            self.restat(row)
+        self.restat()
 
         self.resetDeferredChanges()
 
@@ -187,8 +184,8 @@ class DirSheet(Sheet):
         # sort by modtime initially
         self.rows.sort(key=modtime, reverse=True)
 
-    def restat(self, row):
-        vstat.cache_clear()
+    def restat(self):
+        Path.stat.cache_clear()
 
 DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))')
