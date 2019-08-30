@@ -8,10 +8,12 @@ try:
 except ImportError:
     pass # pwd,grp modules not available on Windows
 
-from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught
-from visidata import Path, ENTER, date, asyncthread, confirm, fail, error, FileExistsError
+from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught, options, option
+from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError
 from visidata import CellColorizer, RowColorizer, undoAddCols, undoBlocked, modtime, filesize
 
+option('dir_recurse', False, 'walk source path recursively on DirSheet')
+option('dir_hidden', False, 'load hidden files on DirSheet')
 
 Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)', undo=undoAddCols)
 
@@ -64,130 +66,58 @@ class ColumnShell(Column):
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
-    savesToSource = True
     columns = [
-        Column('directory',
-            getter=lambda col,row: row.parent.relative_to(col.sheet.source),
-            setter=lambda col,row,val: col.sheet.moveFile(row, val)),
-        Column('filename',
-            getter=lambda col,row: row.name + row.suffix,
-            setter=lambda col,row,val: col.sheet.renameFile(row, val)),
-        Column('abspath', width=0,
-            getter=lambda col,row: row,
-            setter=lambda col,row,val: os.rename(row, val)),
+        Column('directory', getter=lambda col,row: row.parent.relative_to(col.sheet.source)),
+        Column('filename', getter=lambda col,row: row.name + row.suffix),
+        Column('abspath', width=0, type=str),
         Column('ext', getter=lambda col,row: row.is_dir() and '/' or row.ext),
-        Column('size', type=int,
-            getter=lambda col,row: filesize(row),
-            setter=lambda col,row,val: os.truncate(row, int(val))),
-        Column('modtime', type=date,
-            getter=lambda col,row: modtime(row),
-            setter=lambda col,row,val: os.utime(row, times=((row.stat().st_atime, float(val))))),
-        Column('owner', width=0,
-            getter=lambda col,row: pwd.getpwuid(row.stat().st_uid).pw_name,
-            setter=lambda col,row,val: os.chown(row, pwd.getpwnam(val).pw_uid, -1)),
-        Column('group', width=0,
-            getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name,
-            setter=lambda col,row,val: os.chown(row, -1, grp.getgrnam(val).pw_gid)),
-        Column('mode', width=0,
-            getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
-            setter=lambda col,row,val: os.chmod(row, int(val, 8))),
+        Column('size', type=int, getter=lambda col,row: filesize(row)),
+        Column('modtime', type=date, getter=lambda col,row: modtime(row)),
+        Column('owner', width=0, getter=lambda col,row: pwd.getpwuid(row.stat().st_uid).pw_name),
+        Column('group', width=0, getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name),
+        Column('mode', width=0, getter=lambda col,row: '{:o}'.format(row.stat().st_mode)),
         Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
-#        CellColorizer(4, None, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
     nKeys = 2
-
-    @staticmethod
-    def colorOwner(sheet, col, row, val):
-        ret = ''
-        if col.name == 'group':
-            mode = row.stat().st_mode
-            if mode & stat.S_IXGRP: ret = 'bold '
-            if mode & stat.S_IWGRP: return ret + 'green'
-            if mode & stat.S_IRGRP: return ret + 'yellow'
-        elif col.name == 'owner':
-            mode = row.stat().st_mode
-            if mode & stat.S_IXUSR: ret = 'bold '
-            if mode & stat.S_IWUSR: return ret + 'green'
-            if mode & stat.S_IRUSR: return ret + 'yellow'
-
-    def moveFile(self, row, newparent):
-        parent = Path(newparent)
-        newpath = Path(parent/(row.name + row.suffix))
-        if parent.exists():
-            if not parent.is_dir():
-                error('destination %s not a directory' % parent)
-        else:
-            with contextlib.suppress(FileExistsError):
-                os.makedirs(parent)
-
-        row.rename(newpath)
-        row.given = newpath  # modify visidata.Path
-        self.restat()
-
-    def renameFile(self, row, val):
-        newpath = row.with_name(val)
-        row.rename(newpath)
-        row.given = newpath
-        self.restat()
-
-    def removeFile(self, path):
-        if path.is_dir():
-            os.rmdir(path)
-        else:
-            path.unlink()
-
-    @asyncthread
-    def commit(self, path, adds, mods, deletes):
-        oldrows = list(self.rows)
-        self.rows.clear()
-        for r in oldrows:
-            try:
-                if self.rowid(r) in deletes:
-                    self.removeFile(r)
-                else:
-                    self.rows.append(r)
-            except Exception as e:
-                exceptionCaught(e)
-
-        modrows = {}  # rowid(row) -> row
-        for row, editdict in mods.values():
-            for col, val, in editdict.items():
-                try:
-                    col.putValue(row, val)
-                    modrows[self.rowid(row)] = row
-                except Exception as e:
-                    exceptionCaught(e)
-
-        self.restat()
-
-        self.resetDeferredChanges()
 
     @asyncthread
     def reload(self):
+        def _walkfiles(p):
+            basepath = str(p)
+            for folder, subdirs, files in os.walk(basepath):
+                subfolder = folder[len(basepath)+1:]
+                if subfolder in ['.', '..']: continue
+
+                fpath = Path(folder)
+                yield fpath
+
+                for fn in files:
+                    yield fpath/fn
+
+        def _listfiles(p):
+            basepath = str(p)
+            for fn in os.listdir(basepath):
+                yield Path(fn)
+
         self.reset()  # reset deferred caches
         self.rows = []
         basepath = str(self.source)
 
         folders = set()
-        for folder, subdirs, files in os.walk(basepath):
-            subfolder = folder[len(basepath)+1:]
-            if subfolder in ['.', '..']: continue
+        f = _walkfiles if options.dir_recurse else _listfiles
 
-            fpath = Path(folder)
-            if fpath not in folders:
-                self.addRow(fpath)
+        hidden_files = options.dir_hidden
+        for p in f(self.source):
+            if hidden_files and p.name.startswith('.'):
+                continue
 
-            for fn in files:
-#                if fn.startswith('.'): continue
-                self.addRow(fpath/fn)
+            self.addRow(p)
 
         # sort by modtime initially
         self.rows.sort(key=modtime, reverse=True)
 
-    def restat(self):
-        Path.stat.cache_clear()
 
-DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow))')
+DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no row")))')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)')

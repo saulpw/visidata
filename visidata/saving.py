@@ -1,4 +1,9 @@
-from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer, asyncthread, options, saveSheets, inputPath, getDefaultSaveName, warning, status, Path, copy, Progress
+from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer, asyncthread, options, saveSheets, inputPath, getDefaultSaveName, warning, status, Path, copy, Progress, option
+
+
+option('color_add_pending', 'green', 'color for rows pending add')
+option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
+option('color_delete_pending', 'red', 'color for rows pending delete')
 
 
 # deferred cached
@@ -57,59 +62,113 @@ def undoMod(self, row):
 @Sheet.api
 def deleteBy(self, func):
     'Delete rows for which func(row) is true.  Returns number of deleted rows.'
-    oldrows = copy(self.rows)
-    oldidx = self.cursorRowIndex
+    for i, r in enumerate(Progress(self.rows, 'deleting')):
+        if not func(r):
+            self.markDeleted(r)
+
+    if not self.defer:
+        self.commitDeletes()
+
+
+@Sheet.api
+def deleteRows(self, rows):
+    for r in rows:
+        self.markDeleted(r)
+
+    if not self.defer:
+        self.commitDeletes()
+
+
+@Sheet.api
+def addSourceRow(self, row):
+    'Add given row to source. row has already been added to .rows'
+    pass
+
+
+@Sheet.api
+def deleteSourceRow(self, row):
+    'Delete given row from source. row has already been removed from .rows'
+    pass
+
+
+@Sheet.api
+def commitAdds(self):
+    nadded = 0
+    for row in self._deferredAdds.values():
+        try:
+            self.addSourceRow(row)
+            nadded += 1
+        except Exception as e:
+            exceptionCaught(e)
+
+    if nadded:
+        status('added %s %s' % (nadded, self.rowtype))
+
+    self._deferredAdds.clear()
+    return nadded
+
+
+@Sheet.api
+def commitMods(self):
+    nmods = 0
+    for row, rowmods in self._deferredMods.values():
+        for col, val in rowmods.items():
+            try:
+                col.putValue(row, val)
+                nmods += 1
+            except Exception as e:
+                exceptionCaught(e)
+
+    self._deferredMods.clear()
+    return nmods
+
+
+@Sheet.api
+def isDeleted(self, r):
+    return self.rowid(r) in self._deferredDels
+
+
+@Sheet.api
+def commitDeletes(self):
     ndeleted = 0
 
-    row = None   # row to re-place cursor after
-    while oldidx < len(oldrows):
-        if not func(oldrows[oldidx]):
-            row = self.rows[oldidx]
+    dest_row = None   # row to re-place cursor after
+    oldidx = self.cursorRowIndex
+    while oldidx < len(self.rows):
+        if not self.isDeleted(self.rows[oldidx]):
+            dest_row = self.rows[oldidx]
             break
         oldidx += 1
 
-    self.rows.clear()
-    for r in Progress(oldrows, 'deleting'):
-        if not func(r):
-            self.rows.append(r)  # NOT addRow
-            if r is row:
-                self.cursorRowIndex = len(self.rows)-1
+    newidx = 0
+    for r in Progress(self.rows, gerund='deleting'):
+        if self.isDeleted(self.rows[oldidx]):
+            try:
+                self.deleteSourceRow(rows.pop(newidx))
+                ndeleted += 1
+            except Exception as e:
+                exceptionCaught(e)
         else:
-            self.deleteRows([r])
-            ndeleted += 1
+            if r is dest_row:
+                self.cursorRowIndex = newidx
+            newidx += 1
 
-    status('deleted %s %s' % (ndeleted, self.rowtype))
+    self._deferredDels.clear()
+    if ndeleted:
+        status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted
 
 
-@Sheet.api
-@asyncthread
-def deleteRows(self, rows):
-    for row in rows:
-        self._deferredDels[self.rowid(row)] = row
-
-    if self.defer:
-        return
-
-    self.deleteBy(lambda r,self=self,dels=self._deferredDels: self.rowid(r) in dels)
-
-
 @asyncthread
 @Sheet.api
-def commit(sheet, path, adds, changes, deletes):
-    saveSheets(path, sheet, confirm_overwrite=options.confirm_overwrite)
-    for row, rowmods in sheet._deferredMods.values():
-        for col, val in rowmods.items():
-            col.putValue(row, val)
-
-    sheet.resetDeferredChanges()
-
-
-@Sheet.api
-def resetDeferredChanges(self):
-    self._deferredMods.clear()
-    self._deferredDels.clear()
-    self._deferredAdds.clear()
+def commit(self, path, adds, changes, deletes):
+    'Commit changes to path.  adds/changes/deletes are a diffset to apply to the last load from or commit to path.  By default this overwrites completely, saving as filetype to path, with filetype from path ext.'
+    if not self.savesToSource:
+        saveSheets(path, self, confirm_overwrite=options.confirm_overwrite)
+    else:
+        self.commitAdds()
+        self.commitMods()
+        self.commitDeletes()
 
 
 @Sheet.api
@@ -157,8 +216,9 @@ def save(sheet, *rows):
     cstr = sheet.changestr(adds, mods, deletes)
     savingToSource = sheet.savesToSource
     confirm_overwrite = options.confirm_overwrite
-    if not cstr:
-        warning('no diffs')
+    if not cstr and savingToSource:
+        fail('no diffs')
+
     if savingToSource:
         if isinstance(sheet.source, Path):
             path = sheet.source
@@ -179,7 +239,6 @@ def save(sheet, *rows):
 
 
 Sheet.addCommand('^S', 'save-sheet', 'save()')
-Sheet.addCommand('z^S', 'save-row', 'save(cursorRow)')
 Sheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')
 Sheet.addCommand('gz^R', 'reload-rows', 'for r in self.selectedRows: undoMod(r)')
 

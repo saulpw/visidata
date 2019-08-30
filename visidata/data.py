@@ -11,9 +11,6 @@ option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 option('header', 1, 'parse first N rows of certain formats as column names', replay=True)
 option('filetype', '', 'specify file type', replay=True)
 
-option('color_add_pending', 'green', 'color for rows pending add')
-option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
-option('color_delete_pending', 'red', 'color for rows pending delete')
 
 Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=random.sample(rows, nrows or nRows); vd.push(vs)')
 

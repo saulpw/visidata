@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+
+__version__ = '0.1-dev'
+__version_info__ = 'saul.pw/vls v' + __version__
+
+import os
+import io
+import sys
+import locale
+import stat
+
+from visidata import vd, option, options, status, run, UNLOADED, error, exceptionCaught
+from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand, asyncthread
+from visidata import Path, openSource, saveSheets, setDiffSheet, domotd, Sheet, Column
+from visidata import date, modtime, filesize
+from visidata.main import eval_vd, duptty
+
+
+option('config', '~/.vlsrc', 'config file to exec in Python')
+option('recursive', False, 'list files in subdirectories recursively')
+
+
+def open_dir(p):
+    return SuperDirSheet(p.name, source=p)
+
+
+def main():
+    'Open the given sources using the VisiData interface.'
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('inputs', nargs='*', help='initial sources')
+    parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
+    parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
+    parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output at the end of replay')
+    parser.add_argument('-w', dest='replay_wait', default=0, help='time to wait between replayed commands, in seconds')
+    parser.add_argument('-v', '--version', action='version', version=__version_info__)
+
+    args = vd.parseArgs(parser)
+
+    # fetch motd after options parsing/setting
+    domotd()
+
+    locale.setlocale(locale.LC_ALL, '')
+
+    flPipedInput = not sys.stdin.isatty()
+    flPipedOutput = not sys.stdout.isatty()
+
+    vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
+
+    stdinSource = Path('-', fp=vd._stdin)
+
+    # parse args
+    fmtargs = []
+    fmtkwargs = {}
+    inputs = []
+    for arg in args.inputs:
+
+        if args.play and '=' in arg:
+            # parse 'key=value' pairs for formatting cmdlog template in replay mode
+            k, v = arg.split('=')
+            fmtkwargs[k] = v
+        elif arg == '-':
+            inputs.append(stdinSource)
+        else:
+            inputs.append(arg)
+            fmtargs.append(arg)
+
+    if args.batch:
+        options.undo = False
+        vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
+        vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
+
+    if not args.play:
+        if flPipedInput and not inputs:  # '|vd' without explicit '-'
+            inputs.append(stdinSource)
+
+        if not inputs:
+            inputs = ['.']
+
+        sources = []
+        for src in inputs:
+            vs = openSource(src, filetype='dir')
+            vd.cmdlog.openHook(vs, src)
+            sources.append(vs)
+
+        vd.sheets.extend(sources)
+        if args.batch:
+            vd.push(sources[0])
+
+        if not args.batch:
+            run(vd.sheets[0])
+    else:
+        if args.play == '-':
+            vdfile = stdinSource
+            vdfile.name = 'stdin.vd'
+        else:
+            vdfile = Path(args.play)
+
+        vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
+        if args.batch:
+            if vs.replay_sync():  # error
+                return 1
+        else:
+            vs.replay()
+            run()
+
+    if vd.sheets and (flPipedOutput or args.output):
+        outpath = Path(args.output or '-')
+        saveSheets(outpath, vd.sheets[0], confirm_overwrite=False)
+        vd.sync()
+
+    vd._stdout.flush()
+
+    return 0  # end main()
+
+
+class SuperDirSheet(Sheet):
+    'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
+    rowtype = 'files' # rowdef: Path
+    defer = True
+    savesToSource = True
+    columns = [
+        Column('directory',
+            getter=lambda col,row: row.parent.relative_to(col.sheet.source),
+            setter=lambda col,row,val: col.sheet.moveFile(row, val)),
+        Column('filename',
+            getter=lambda col,row: row.name + row.suffix,
+            setter=lambda col,row,val: col.sheet.renameFile(row, val)),
+        Column('abspath', width=0,
+            getter=lambda col,row: row,
+            setter=lambda col,row,val: os.rename(row, val)),
+        Column('ext', getter=lambda col,row: row.is_dir() and '/' or row.ext),
+        Column('size', type=int,
+            getter=lambda col,row: filesize(row),
+            setter=lambda col,row,val: os.truncate(row, int(val))),
+        Column('modtime', type=date,
+            getter=lambda col,row: modtime(row),
+            setter=lambda col,row,val: os.utime(row, times=((row.stat().st_atime, float(val))))),
+        Column('owner', width=0,
+            getter=lambda col,row: pwd.getpwuid(row.stat().st_uid).pw_name,
+            setter=lambda col,row,val: os.chown(row, pwd.getpwnam(val).pw_uid, -1)),
+        Column('group', width=0,
+            getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name,
+            setter=lambda col,row,val: os.chown(row, -1, grp.getgrnam(val).pw_gid)),
+        Column('mode', width=0,
+            getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
+            setter=lambda col,row,val: os.chmod(row, int(val, 8))),
+        Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
+    ]
+#        CellColorizer(4, None, lambda s,c,r,v: s.colorOwner(s,c,r,v)),
+    nKeys = 2
+
+    @staticmethod
+    def colorOwner(sheet, col, row, val):
+        ret = ''
+        if col.name == 'group':
+            mode = row.stat().st_mode
+            if mode & stat.S_IXGRP: ret = 'bold '
+            if mode & stat.S_IWGRP: return ret + 'green'
+            if mode & stat.S_IRGRP: return ret + 'yellow'
+        elif col.name == 'owner':
+            mode = row.stat().st_mode
+            if mode & stat.S_IXUSR: ret = 'bold '
+            if mode & stat.S_IWUSR: return ret + 'green'
+            if mode & stat.S_IRUSR: return ret + 'yellow'
+
+    def moveFile(self, row, newparent):
+        parent = Path(newparent)
+        newpath = Path(parent/(row.name + row.suffix))
+        if parent.exists():
+            if not parent.is_dir():
+                error('destination %s not a directory' % parent)
+        else:
+            with contextlib.suppress(FileExistsError):
+                os.makedirs(parent)
+
+        row.rename(newpath)
+        row.given = newpath  # modify visidata.Path
+        self.restat()
+
+    def renameFile(self, row, val):
+        newpath = row.with_name(val)
+        row.rename(newpath)
+        row.given = newpath
+        self.restat()
+
+    def removeFile(self, path):
+        if path.is_dir():
+            os.rmdir(path)
+        else:
+            path.unlink()
+
+    def deleteSourceRow(self, r):
+        self.removeFile(r)
+
+    @asyncthread
+    def reload(self):
+        self.reset()  # reset deferred caches
+        self.rows = []
+        basepath = str(self.source)
+
+        folders = set()
+        for folder, subdirs, files in os.walk(basepath):
+            subfolder = folder[len(basepath)+1:]
+            if subfolder in ['.', '..']: continue
+
+            fpath = Path(folder)
+            if fpath not in folders:
+                self.addRow(fpath)
+
+            for fn in files:
+#                if fn.startswith('.'): continue
+                self.addRow(fpath/fn)
+
+        # sort by modtime initially
+        self.rows.sort(key=modtime, reverse=True)
+
+    def reset(self):
+        super().reset()
+        Path.stat.cache_clear()
+
+# end DirSheet
+
+def vls_cli():
+    status(__version_info__)
+    rc = main()
+    sys.stderr.flush()
+    sys.stdout.flush()
+    os._exit(rc)  # cleanup can be expensive with large datasets
+
+
+addGlobals(globals())
+
+vls_cli()
