@@ -240,4 +240,4 @@ BaseSheet.bindkey('gk', 'go-top'),
 BaseSheet.bindkey('gh', 'go-leftmost'),
 BaseSheet.bindkey('gl', 'go-rightmost')
 
-BaseSheet.addCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.sheets[0], vd.sheets[1] = vd.sheets[1], vd.sheets[0]')
+BaseSheet.addCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.push(vd.sheets[1])')
