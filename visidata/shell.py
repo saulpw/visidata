@@ -97,7 +97,7 @@ class DirSheet(Sheet):
         def _listfiles(p):
             basepath = str(p)
             for fn in os.listdir(basepath):
-                yield Path(fn)
+                yield p/fn
 
         self.reset()  # reset deferred caches
         self.rows = []
