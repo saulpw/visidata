@@ -33,6 +33,7 @@ class SettingsMgr(collections.OrderedDict):
         return self.allobjs.get(objname)
 
     def unset(self, k, obj='global'):
+        'Remove setting for given key in the given context.'
         objstr = self.objname(obj)
         if objstr in self[k]:
             del self[k][objstr]
@@ -178,6 +179,10 @@ class OptionsObject:
 
         return self._set(k, v, obj)
 
+    def unset(self, k, obj='override'):
+        'Remove setting value for given context.'
+        self._opts.unset(k, obj)
+
     def setdefault(self, k, v, helpstr):
         return self._set(k, v, 'global', helpstr=helpstr)
 
@@ -253,12 +258,16 @@ def getCommand(self, keystrokes_or_longname):
 
 def loadConfigFile(fnrc, _globals=None):
     p = visidata.Path(fnrc)
+    if _globals is None:
+        _globals = globals()
     if p.exists():
         try:
             code = compile(open(p).read(), str(p), 'exec')
-            exec(code, _globals or globals())
+            exec(code, _globals)
         except Exception as e:
             vd.exceptionCaught(e)
+
+    addGlobals(_globals)
 
 
 @VisiData.api
@@ -276,7 +285,6 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
 
     # user customisations in config file in standard location
     loadConfigFile(visidata.Path(options.config), getGlobals())
-    addGlobals(getGlobals())
 
     # apply command-line overrides after .visidatarc
     for optname, optval in vars(args).items():

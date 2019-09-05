@@ -11,7 +11,6 @@ import sys
 import locale
 
 from visidata import vd, option, options, status, run, UNLOADED
-from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand
 from visidata import Path, openSource, saveSheets, setDiffSheet, domotd
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
