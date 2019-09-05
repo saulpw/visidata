@@ -4,7 +4,7 @@ import os.path
 import sys
 import subprocess
 from visidata import Sheet, Column, ColumnAttr, run, status, Command, Path, ENTER, asyncthread
-from visidata import option, getGlobals, loadConfigFile, options
+from visidata import option, loadConfigFile, options
 from visidata import domotd, TextSheet
 
 import vgit
@@ -18,7 +18,7 @@ options.motd_url = 'https://visidata.org/vgit/motd-' + __version__
 option('vgit_pager', False, 'fallback to pager instead of passthrough')
 
 
-def somegit(args):
+def somegit(args=None):
     cwd = Path('.')
 
     if cwd.joinpath('.git').is_dir() or vgit.getRepoPath(cwd):
@@ -43,16 +43,16 @@ def somegit(args):
 
 
 def main():
-    loadConfigFile(options.config, getGlobals())
+    loadConfigFile(options.config)
 
     args = sys.argv[1:]
 
     vs = somegit(args)
-    if sys.argv[0] == 'vgit':
-        cmdstr = ' '.join(args)
-        return TextSheet(cmdstr, somegit().git_lines(*args))
 
-    if not vs:
+    if not vs and options.vgit_pager:
+        cmdstr = ' '.join(args)
+        vs = TextSheet(cmdstr, somegit().git_lines(*args))
+    else:
         return subprocess.run(['git', *args]).returncode
 
     domotd()
