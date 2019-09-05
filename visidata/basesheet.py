@@ -3,7 +3,7 @@ from visidata import Extensible, VisiData, getGlobals, vd, EscapeException
 from unittest import mock
 
 
-UNLOADED = object()  # sentinel for a sheet not yet loaded for the first time
+UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
 
 
 class LazyMap:

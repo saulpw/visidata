@@ -4,7 +4,7 @@ import curses
 import threading
 import time
 
-from visidata import vd, VisiData, colors, bindkeys
+from visidata import vd, VisiData, colors, bindkeys, UNLOADED
 
 curses_timeout = 100 # curses timeout in ms
 timeouts_before_idle = 10
@@ -43,6 +43,11 @@ def run(self, scr):
 
         sheet = self.sheets[0]
         threading.current_thread().sheet = sheet
+
+        if sheet.rows is UNLOADED:
+            sheet.rows = []  # prevent auto-reload from running twice
+            sheet.reload()
+            sheet.recalc()  # set up Columns
 
         self.draw(scr, sheet)
 

@@ -772,11 +772,6 @@ def push(vd, vs, sheets=None):
 
         sheets.insert(0, vs)
 
-        if vs.rows is UNLOADED:
-            vs.rows = []  # prevent auto-reload from running twice
-            vs.reload()
-            vs.recalc()  # set up Columns
-
         if vs.precious and vs not in vd.allSheets:
             vd.allSheets.append(vs)
             vs.shortcut = len(vd.allSheets)
