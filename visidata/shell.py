@@ -67,7 +67,7 @@ class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
     columns = [
-        Column('directory', getter=lambda col,row: row.parent.relative_to(col.sheet.source)),
+        Column('directory', getter=lambda col,row: row.parent if str(row.parent) == '.' else str(row.parent) + '/'),
         Column('filename', getter=lambda col,row: row.name + row.suffix),
         Column('abspath', width=0, type=str),
         Column('ext', getter=lambda col,row: row.is_dir() and '/' or row.ext),
