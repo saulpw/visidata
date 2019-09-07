@@ -58,7 +58,7 @@ class Column(Extensible):
         self.setter = lambda col, row, value: vd.fail(col.name+' column cannot be changed')
         self.width = None     # == 0 if hidden, None if auto-compute next time
         self.height = 1       # max height, None/0 to auto-compute for each row
-        self.keycol = False   # is a key column
+        self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
 
         self.setCache(cache)
@@ -69,7 +69,7 @@ class Column(Extensible):
         cls = self.__class__
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
-        ret.keycol = False   # column copies lose their key status
+        ret.keycol = 0   # column copies lose their key status
         if self._cachedValues is not None:
             ret._cachedValues = collections.OrderedDict()  # an unrelated cache for copied columns
         return ret

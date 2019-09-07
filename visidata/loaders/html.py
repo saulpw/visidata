@@ -22,7 +22,7 @@ class HtmlTablesSheet(IndexSheet):
         with self.source.open_text() as fp:
             html = lxml.html.etree.parse(fp, parser=utf8_parser)
         self.rows = []
-        self.column('name').keycol = True
+        self.setKeys([self.column('name')])
         self.column('keys').hide()
         self.column('source').hide()
 

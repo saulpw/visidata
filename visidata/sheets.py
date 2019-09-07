@@ -291,7 +291,7 @@ class Sheet(BaseSheet):
     @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
     def keyCols(self):
         'Cached list of visible key columns (Columns with .key=True)'
-        return [c for c in self.columns if c.keycol and not c.hidden]
+        return sorted([c for c in self.columns if c.keycol and not c.hidden], key=lambda c:c.keycol)
 
     @property
     def cursorColIndex(self):
@@ -375,15 +375,23 @@ class Sheet(BaseSheet):
 
     def setKeys(self, cols):
         for col in cols:
-            col.keycol = True
+            lastkeycol = 0
+
+            if self.keyCols:
+                lastkeycol = max(c.keycol for c in self.keyCols)
+
+            col.keycol = lastkeycol+1
 
     def unsetKeys(self, cols):
         for col in cols:
-            col.keycol = False
+            col.keycol = 0
 
     def toggleKeys(self, cols):
         for col in cols:
-            col.keycol = not col.keycol
+            if col.keycol:
+                self.unsetKeys([col])
+            else:
+                self.setKeys([col])
 
     def rowkey(self, row):
         'returns a tuple of the key for the given row'
