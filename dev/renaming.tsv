@@ -1,0 +1,9 @@
+oldname	newname	signature
+option	vd.option()	same
+globalCommand	vd.command()	same
+bindkey	vd.bindkey()	same
+Sheet	TableSheet	same
+Sheet.rowLayout	TableSheet._rowLayout	same
+RowColorizer	TableSheet.addRowColorizer	same
+options.set('optname', val, Sheet)	TableSheet.options.optname = val	diff
+Sheet.addCommand(...)	TableSheet.command(...)	
