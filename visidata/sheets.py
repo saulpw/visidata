@@ -422,8 +422,10 @@ class Sheet(BaseSheet):
             if self.topRowIndex < self.cursorRowIndex-self.nScreenRows+1:
                 self.topRowIndex = self.cursorRowIndex-self.nScreenRows+1
             elif self.rowLayout: # only check this if topRowIndex has not been set (which clears rowLayout)
-                if self.cursorRowIndex > self.bottomRowIndex:
-                    self._topRowIndex += self.bottomRowIndex-self.cursorRowIndex+2
+                bottomRowIndex = self.bottomRowIndex
+                y, h = self.rowLayout[bottomRowIndex]
+                if self.cursorRowIndex > bottomRowIndex and y+h > self.nScreenRows:
+                    self._topRowIndex += bottomRowIndex-self.cursorRowIndex+2
 
         if self.leftVisibleColIndex >= self.cursorVisibleColIndex:
             self.leftVisibleColIndex = self.cursorVisibleColIndex
