@@ -90,14 +90,15 @@ class TsvSheet(Sheet):
             self.recalc()
             self.rows = []
 
+            ncols = len(self._rowtype())    # current number of cols
             with Progress(total=filesize(self.source)) as prog:
                 for L in itertools.chain(lines, getlines(rdr, delim=rowdelim)):
                     row = L.split(delim)
-                    ncols = self._rowtype.length()  # current number of cols
                     if len(row) > ncols:
                         # add unnamed columns to the type not found in the header
                         newcols = [ColumnItem('', len(row)+i, width=8) for i in range(len(row)-ncols)]
                         self._rowtype = namedlist(self._rowtype.__name__, list(self._rowtype._fields) + ['_' for c in newcols])
+                        ncols += len(newcols)
                         for c in newcols:
                             self.addColumn(c)
                     elif len(row) < ncols:
