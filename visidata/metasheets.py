@@ -1,8 +1,8 @@
-from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, bindkeys
+from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, bindkeys, IndexSheet
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, commands, Option
-from visidata import undoAttr, undoAddCols, VisiData, vlen
+from visidata import undoAttr, undoAddCols, VisiData, vlen, UNLOADED
 
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
 
@@ -149,26 +149,37 @@ class OptionsSheet(Sheet):
         self.columns[1].name = 'global_value' if self.source == 'override' else 'sheet_value'
 
 
-class VisiDataSheet(Sheet):
+class VisiDataSheet(IndexSheet):
     rowtype = 'metasheets'
+    precious = False
     columns = [
-        ColumnItem('shortcut', 3, width=10),
-        ColumnItem('name', 1),
-        ColumnItem('command', 2, width=0),
-        ColumnItem('description', 4),
+        ColumnAttr('name'),
+        ColumnAttr('shortcut', 'shortcut_en', width=10),
+        ColumnAttr('command', 'longname', width=0),
+        ColumnAttr('description'),
+        ColumnAttr('items', 'nRows', type=int),
     ]
+    nKeys = 1
 
     def reload(self):
-        self.rows = [
-            (vd.sheetsSheet, 'sheets', 'open-sheets', 'z Shift S', 'current sheet stack'),
-            (vd.allSheets, 'sheets_all', 'open-sheets-all', 'Shift S', 'all sheets ever opened'),
-            (vd.cmdlog, 'cmdlog', 'open-cmdlog', 'Shift D', 'log of commands this session'),
-            (vd.globalOptionsSheet, 'options_global', 'open-options', 'Shift O', 'default option values applying to every sheet'),
-            (vd.lastErrors, 'errors', 'open-errors', 'Ctrl E', 'stacktrace of most recent error'),
-            (vd.statusHistory, 'statuses', 'open-statuses', 'Ctrl P', 'status messages from current session'),
-            (vd.threadsSheet, 'threads', 'open-threads', 'Ctrl T', 'threads and profiling'),
-            (vd.pluginsSheet, 'plugins', 'open-plugins', '', 'plugins repository'),
-        ]
+        self.rows = []
+        for vdattr, sheetname, longname, shortcut, desc in [
+            ('sheetsSheet', 'sheets', 'open-sheets', 'z Shift S', 'current sheet stack'),
+            ('allSheetsSheet', 'sheets_all', 'open-sheets-all', 'Shift S', 'all sheets ever opened'),
+            ('cmdlog', 'cmdlog', 'open-cmdlog', 'Shift D', 'log of commands this session'),
+            ('globalOptionsSheet', 'options_global', 'open-options', 'Shift O', 'default option values applying to every sheet'),
+            ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl E', 'stacktrace of most recent error'),
+            ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl P', 'status messages from current session'),
+            ('threadsSheet', 'threads', 'open-threads', 'Ctrl T', 'threads and profiling'),
+            ('pluginsSheet', 'plugins', 'open-plugins', '', 'plugins repository'),
+            ]:
+            vs = getattr(vd, vdattr)
+            vs.description = desc
+            vs.shortcut_en = shortcut
+            vs.longname = longname
+            if vs.rows is UNLOADED:
+                vs.reload()
+            self.addRow(vs)
 
 
 @VisiData.cached_property
@@ -178,7 +189,6 @@ def vdmenu(self):
     return vs
 
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)')
-VisiDataSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow[0])')
 
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lambda source=source,opt=cursorRow,val=options.get(cursorRow.name,source): options.set(opt.name, val, source)')
 
