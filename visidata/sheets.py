@@ -790,8 +790,12 @@ def push(vd, vs, sheets=None):
 
 
 @VisiData.cached_property
-def sheetsSheet(vd):
+def allSheetsSheet(vd):
     return SheetsSheet("sheets_all", source=vd.allSheets)
+
+@VisiData.cached_property
+def sheetsSheet(vd):
+    return SheetsSheet("sheets", source=vd.sheets)
 
 
 @VisiData.api
@@ -803,8 +807,8 @@ def quit(self):
 
 undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
 
-globalCommand('S', 'sheets-stack', 'vd.push(SheetsSheet("sheets", source=vd.sheets))')
-globalCommand('gS', 'sheets-all', 'vd.push(vd.sheetsSheet)')
+globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)')
+globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)')
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
@@ -832,6 +836,7 @@ Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', undo=undoColType),
 
 IndexSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
+# when diving into a sheet, remove the index unless it is precious
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
 SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
 SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
