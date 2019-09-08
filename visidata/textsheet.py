@@ -1,7 +1,7 @@
 import textwrap
 
 from visidata import vd, option, options, Sheet, ColumnItem, asyncthread
-from visidata import globalCommand, error, stacktrace
+from visidata import globalCommand, error, stacktrace, VisiData
 
 __all__ = ['TextSheet', 'ErrorSheet']
 
@@ -42,11 +42,20 @@ class ErrorSheet(TextSheet):
     pass
 
 
-globalCommand('^E', 'error-recent', 'vd.lastErrors and vd.push(ErrorSheet("last_error", vd.lastErrors[-1])) or status("no error")')
-globalCommand('g^E', 'errors-all', 'vd.push(ErrorSheet("last_errors", sum(vd.lastErrors[-10:], [])))')
+@VisiData.property
+def allErrorsSheet(self):
+    return ErrorSheet("errors_all", source=sum(vd.lastErrors, []))
+
+@VisiData.property
+def recentErrorsSheet(self):
+    return ErrorSheet("errors_recent", source=sum(vd.lastErrors[-1:], []))
+
+
+globalCommand('^E', 'error-recent', 'vd.lastErrors and vd.push(recentErrorsSheet) or status("no error")')
+globalCommand('g^E', 'errors-all', 'vd.push(vd.allErrorsSheet)')
 
 Sheet.addCommand(None, 'view-cell', 'vd.push(TextSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), cursorDisplay.splitlines()))'),
-Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet("cell_error", getattr(cursorCell, "error", None) or fail("no error this cell")))')
+Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet("cell_error", source=getattr(cursorCell, "error", None) or fail("no error this cell")))')
 
 TextSheet.addCommand('v', 'visibility', 'options.set("wrap", not options.wrap, sheet); reload(); status("text%s wrapped" % ("" if options.wrap else " NOT")); ')
 
