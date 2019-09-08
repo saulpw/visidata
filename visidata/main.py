@@ -177,6 +177,7 @@ def main():
             vdfile = Path(args.play)
 
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
+        vd.sync(vs.reload())
         if args.batch:
             if vs.replay_sync():  # error
                 return 1
