@@ -190,9 +190,13 @@ class CommandLog(TsvSheet):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
         comment = CommandLog.currentReplayRow.comment if CommandLog.currentReplayRow else cmd.helpstr
-        self.currentActiveRow = self.newRow(sheet=sheetname, col=colname, row=rowname,
-                                              keystrokes=keystrokes, input=args,
-                                              longname=cmd.longname, comment=comment)
+        self.currentActiveRow = self.newRow(sheet=sheetname,
+                                            col=str(colname),
+                                            row=str(rowname),
+                                            keystrokes=keystrokes,
+                                            input=args,
+                                            longname=cmd.longname,
+                                            comment=comment)
 
         if options.undo and cmd.undo:
             self.checkpoint(cmd, sheet, self.currentActiveRow)
