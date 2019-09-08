@@ -1,15 +1,18 @@
-from visidata import vd, asyncthread
+from visidata import vd, asyncthread, IndexSheet
+
+'Requires visidata/deps/pyxlsb fork'
 
 def open_xlsb(p):
-    push_xlsb(p)
-    return vd.push(vd.sheetsSheet)
+    return XlsbIndex(p.name, source=p)
 
-@asyncthread
-def push_xlsb(path):
-    import pyxlsb
 
-    wb = pyxlsb.open_workbook(str(path))
-    for name in wb.sheets:
-        vs = wb.get_sheet(name, True)
-        vs.reload()
-        vd.sheets.append(vs)
+class XlsbIndex(IndexSheet):
+    @asyncthread
+    def reload(self):
+        from pyxlsb import open_workbook
+
+        wb = open_workbook(str(self.source))
+        for name in wb.sheets:
+            vs = wb.get_sheet(name, True)
+            vs.reload()
+            self.addRow(vs)

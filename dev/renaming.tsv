@@ -7,3 +7,4 @@ Sheet.rowLayout	TableSheet._rowLayout	same
 RowColorizer	TableSheet.addRowColorizer	same
 options.set('optname', val, Sheet)	TableSheet.options.optname = val	diff
 Sheet.addCommand(...)	TableSheet.command(...)	
+vd.sheetsSheet	vd.sheets	vd.remove, .push, .replace, etc all on sheets
