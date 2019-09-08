@@ -799,10 +799,11 @@ def sheetsSheet(vd):
 
 
 @VisiData.api
-def quit(self):
-    if len(vd.sheets) == 1 and options.quitguard:
+def quit(vd, *sheets):
+    if len(vd.sheets) == len(sheets) and options.quitguard:
         vd.confirm("quit last sheet? ")
-    return vd.remove(vd.sheets[0])
+    for vs in sheets:
+        vd.remove(vs)
 
 
 undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
@@ -845,8 +846,8 @@ SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("descri
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
 
-globalCommand('q', 'quit-sheet',  'vd.quit()')
-globalCommand('gq', 'quit-all', 'vd.sheets.clear()')
+BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)')
+globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)')
 
 globalCommand('^L', 'redraw', 'sheet.refresh()')
 
