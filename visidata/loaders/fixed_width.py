@@ -23,9 +23,8 @@ class FixedWidthColumn(Column):
 def columnize(rows):
     'Generate (i,j) indexes for fixed-width columns found in rows'
 
-    ## find all character columns that are not spaces
+    ## find all character columns that are not spaces ever
     allNonspaces = set()
-    allNonspaces.add(max(len(r) for r in rows)+1)
     for r in rows:
         for i, ch in enumerate(r):
             if not ch.isspace():
@@ -37,12 +36,15 @@ def columnize(rows):
     # collapse fields
     for i in allNonspaces:
         if i > prev+1:
-            yield colstart, prev+1
+            yield colstart, i
             colstart = i
         prev = i
 
+    yield colstart, None   # final column gets rest of line
+
+
 class FixedWidthColumnsSheet(Sheet):
-    rowtype = 'lines'
+    rowtype = 'lines'  # rowdef: [line] (wrapping in list makes it unique and modifiable)
     columns = [ColumnItem('line', 0)]
     @asyncthread
     def reload(self):
