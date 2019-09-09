@@ -82,6 +82,7 @@ Inspired by [Daniele Procida](https://www.divio.com/blog/documentation/), the do
     * How to configure commands
 * [Plugins - extending VisiData functionality](/docs/plugins)
 * [Developing a loader](/docs/loaders)
+* [STDOUT pipe/redirect](/docs/pipes)
 
 # For developers
 
