@@ -17,7 +17,7 @@ option('color_delete_pending', 'red', 'color for rows pending delete')
 
 Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=random.sample(rows, nrows or nRows); vd.push(vs)')
 
-Sheet.addCommand('a', 'add-row', 'rows.insert(cursorRowIndex+1, newRow()); cursorDown(1)', undo=undoSheetRows)
+Sheet.addCommand('a', 'add-row', 'addRow(newRow(), index=cursorRowIndex+1); cursorDown(1)', undo=undoSheetRows)
 Sheet.addCommand('ga', 'add-rows', 'addRows(sheet, int(input("add rows: ")), cursorRowIndex+1)', undo=undoSheetRows)
 Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)
 Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)

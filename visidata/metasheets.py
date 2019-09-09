@@ -4,7 +4,8 @@ from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, commands, Option
 from visidata import undoAttr, undoAddCols, VisiData, vlen, UNLOADED
 
-globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
+# copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
+globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=list(vd.sheets)))')
 
 BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)')
@@ -69,8 +70,8 @@ class ColumnsSheet(Sheet):
         c.recalc(self.source[0])
         return c
 
-ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)')
-ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or fail("no columns selected to concatenate")))', undo=undoAddCols)
+ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(c.sheet.visibleRows)')
+ColumnsSheet.addCommand('&', 'join-cols', 'c=combineColumns(selectedRows or fail("no columns selected to concatenate")); addRow(c, cursorRowIndex); c.recalc(selectedRows[0].sheet)', undo=undoAddCols)
 
 
 class HelpSheet(Sheet):
