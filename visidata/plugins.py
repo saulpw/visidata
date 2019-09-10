@@ -75,10 +75,10 @@ class PluginsSheet(TsvSheet):
 
     def removePlugin(self, plugin):
         vdrc = Path(options.config)
-        oldvdrc = vdrc+'.bak'
+        oldvdrc = vdrc.with_suffix('.bak')
         try:
             shutil.copyfile(vdrc, oldvdrc)
-            vdrc_contents = Path(oldvdrc).read_text().replace('\n'+_plugin_import(plugin), '')
+            vdrc_contents = oldvdrc.read_text().replace(_plugin_import(plugin)+'\n', '')
 
             with Path(options.config).open_text(mode='w') as fprc:  # replace without import line
                 fprc.write(vdrc_contents)
