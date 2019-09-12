@@ -40,7 +40,6 @@ class BaseSheet(Extensible):
     _coltype = None      # callable (no parms) that returns new settable view into that item
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
-    defer = False         # True for when mods need commitment with save-sheet
     savesToSource = False # True for when commiting to source is mandatory
 
     def __init__(self, name, **kwargs):

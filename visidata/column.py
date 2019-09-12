@@ -158,12 +158,6 @@ class Column(Extensible):
     def getValue(self, row):
         'Memoize calcValue with key sheet.rowid(row)'
 
-        try:
-            row, rowmods = self.sheet._deferredMods[self.sheet.rowid(row)]
-            return rowmods[self]
-        except KeyError:
-            pass
-
         if self._cachedValues is None:
             return self.calcValue(row)
 
@@ -251,20 +245,8 @@ class Column(Extensible):
         return self.setter(self, row, value)
 
     def setValue(self, row, val):
-        if self.sheet.defer:
-            if self.getValue(row) != val:
-                rowid = self.sheet.rowid(row)
-                if rowid not in self.sheet._deferredMods:
-                    rowmods = {}
-                    self.sheet._deferredMods[rowid] = (row, rowmods)
-                else:
-                    _, rowmods = self.sheet._deferredMods[rowid]
-                rowmods[self] = val
-        else:
-            self.putValue(row, val)
-
-    def getSavedValue(self, row):
-        return Column.calcValue(self, row)
+        'For defer columns, override to provide a caching layer above putValue'
+        self.putValue(row, val)
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions'

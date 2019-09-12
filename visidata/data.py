@@ -36,7 +36,7 @@ BaseSheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
 
 class SettableColumn(Column):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, defer=True, **kwargs)
+        super().__init__(*args, **kwargs)
         self.cache = {}
 
     def putValue(self, row, value):
@@ -90,6 +90,9 @@ Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedR
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', undo=undoAttr('[sheet]', 'name'))
 
 globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))')
+Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
+globalCommand('g^S', 'save-all', 'saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
+Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = copy(rows); saveSheets(inputPath("save to: ", value=getDefaultSaveName(vs)), vs.confirm_overwrite=options.confirm_overwrite)')
 
 Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 

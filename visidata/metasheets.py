@@ -30,7 +30,6 @@ class ColumnsSheet(Sheet):
     _rowtype = Column
     _coltype = ColumnAttr
     precious = False
-    defer = False
     class ValueColumn(Column):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
@@ -114,13 +113,12 @@ class OptionsSheet(Sheet):
     _rowtype = Option  # rowdef: Option
     rowtype = 'options'
     precious = False
-    defer = False
     columns = (
         ColumnAttr('option', 'name'),
         Column('value',
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
-            defer=False),
+            ),
         Column('default', getter=lambda col,row: options.get(row.name, 'global')),
         Column('description', width=40, getter=lambda col,row: options._get(row.name, 'global').helpstr),
         ColumnAttr('replayable'),

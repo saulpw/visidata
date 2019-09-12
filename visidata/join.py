@@ -89,7 +89,6 @@ class JoinKeyColumn(Column):
 #   if a sheet does not have this key, sheet#_row is None
 class JoinSheet(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
-    defer = False
 
     @asyncthread
     def reload(self):
