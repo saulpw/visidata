@@ -268,7 +268,7 @@ class Game:
             raise HTTPException(403, 'Unauthorized')
 
         pl.turn_sent = True
-        if len(self.players) > 1 and all(pl.turn_sent for pl in self.players.values()):
+        if all(pl.turn_sent for pl in self.players.values()):
             self.start_game()
             return 'game started'
 
