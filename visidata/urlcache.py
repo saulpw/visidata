@@ -1,10 +1,10 @@
 import os
 import os.path
 import time
-import urllib.request
+from urllib.request import Request, urlopen
 import urllib.parse
 
-from visidata import __version_info__, Path, options, asyncthread, modtime
+from visidata import Path, options, modtime
 
 
 def urlcache(url, days=1, text=True):
@@ -18,10 +18,7 @@ def urlcache(url, days=1, text=True):
     if not p.parent.exists():
         os.makedirs(p.parent, exist_ok=True)
 
-    assert p.parent.is_dir(), p.parent
-
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req) as fp:
+    with urlopen(Request(url)) as fp:
         ret = fp.read()
         if text:
             ret = ret.decode('utf-8').strip()
