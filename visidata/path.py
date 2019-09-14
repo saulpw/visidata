@@ -38,6 +38,7 @@ class Path(os.PathLike):
         self.fp = fp
         self.lines = lines or []  # shared among all RepeatFile instances
         self.filesize = filesize
+        self.rfile = None
 
     @functools.lru_cache()
     def stat(self, force=False):
@@ -89,8 +90,14 @@ class Path(os.PathLike):
         return Path(self._path.__truediv__(a))
 
     def open_text(self, mode='rt'):
+        # rfile makes a single-access fp reusable
+
+        if self.rfile:
+            return self.rfile
+
         if self.fp:
-            return RepeatFile(fp=self.fp)
+            self.rfile = RepeatFile(fp=self.fp)
+            return self.rfile
 
         if 't' not in mode:
             mode += 't'
@@ -235,13 +242,23 @@ class RepeatFileIter:
     def __next__(self):
         if self.nextIndex < len(self.rf.lines):
             r = self.rf.lines[self.nextIndex]
-        else:
-            if self.rf.iter_lines:
+        elif self.rf.iter_lines:
+            try:
                 r = next(self.rf.iter_lines)
-            elif self.rf.fp:
+                self.rf.lines.append(r)
+            except StopIteration:
+                self.rf.iter_lines = None
+                raise
+        elif self.rf.fp:
+            try:
                 r = next(self.rf.fp)
-            self.rf.lines.append(r)
+                self.rf.lines.append(r)
+            except StopIteration:
+                self.rf.fp = None
+                raise
+        else:
+            raise StopIteration()
+
 
         self.nextIndex += 1
         return r
-

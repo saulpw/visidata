@@ -114,6 +114,7 @@ def main():
     if args.diff:
         vs = openSource(args.diff)
         vd.push(vs)
+        vs.reload()
         setDiffSheet(vs)
 
     if args.batch:
@@ -137,6 +138,7 @@ def main():
         vd.sheets.extend(sources)
         if args.batch:
             vd.push(sources[0])
+            sources[0].reload()
 
         for startsheets, startrow, startcol in start_positions:
             sheets = []  # sheets to apply startrow:startcol to
