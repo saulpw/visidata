@@ -20,7 +20,7 @@ def vstat(path, force=False):
 def filesize(path):
     if hasattr(path, 'filesize') and path.filesize is not None:
         return path.filesize
-    if path.is_url():
+    if path.fp or path.is_url():
         return 0
     st = path.stat() # vstat(path)
     return st and st.st_size
@@ -164,7 +164,7 @@ class Path(os.PathLike):
             return None
 
     def exists(self):
-        if self.is_url():
+        if self.fp or self.is_url():
             return True
         return self._path.exists()
 

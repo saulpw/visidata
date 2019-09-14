@@ -40,7 +40,13 @@ def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
 class Progress:
     def __init__(self, iterable=None, gerund="", total=None, sheet=None):
         self.iterable = iterable
-        self.total = total if total is not None else len(iterable)
+        if total is None:
+            if iterable:
+                self.total = len(iterable)
+            else:
+                self.total = 0
+        else:
+            self.total = total
         self.sheet = sheet if sheet else getattr(threading.current_thread(), 'sheet', None)
         self.gerund = gerund
         self.made = 0
