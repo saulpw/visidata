@@ -707,7 +707,6 @@ class Sheet(BaseSheet):
 class IndexSheet(Sheet):
     rowtype = 'sheets'
     precious = False
-    defer = False
 
     columns = [
         ColumnAttr('name'),
