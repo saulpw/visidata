@@ -155,7 +155,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     filetype = givenpath.ext or options.save_filetype
 
     if len(vsheets) > 1:
-        if givenpath.exists():
+        if givenpath.exists() and confirm_overwrite:
             confirm("overwrite multiple? ")
 
         if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
@@ -187,6 +187,9 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             else:
                 warning('no function to save %s as type %s' % (vs, filetype))
     else:
+        if givenpath.exists() and confirm_overwrite:
+            confirm("%s already exists. overwrite? " % givenpath.given)
+
         # get save function to call
         savefunc = getattr(vsheets[0], 'save_'+filetype, None)
         if not savefunc:
