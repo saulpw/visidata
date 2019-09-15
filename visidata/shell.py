@@ -99,7 +99,7 @@ class DirSheet(Sheet):
             for fn in os.listdir(basepath):
                 yield p/fn
 
-        self.reset()  # reset deferred caches
+
         self.rows = []
         basepath = str(self.source)
 

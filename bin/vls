@@ -15,6 +15,8 @@ from visidata import Path, openSource, saveSheets, setDiffSheet, domotd, Sheet, 
 from visidata import date, modtime, filesize
 from visidata.main import eval_vd, duptty
 
+from visidata.defermods import *
+
 
 option('config', '~/.vlsrc', 'config file to exec in Python')
 option('recursive', False, 'list files in subdirectories recursively')
@@ -118,7 +120,7 @@ def main():
 class SuperDirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
-    defer = True
+    defermods = True
     savesToSource = True
     columns = [
         Column('directory',
@@ -196,7 +198,6 @@ class SuperDirSheet(Sheet):
 
     @asyncthread
     def reload(self):
-        self.reset()  # reset deferred caches
         self.rows = []
         basepath = str(self.source)
 
@@ -216,9 +217,12 @@ class SuperDirSheet(Sheet):
         # sort by modtime initially
         self.rows.sort(key=modtime, reverse=True)
 
-    def reset(self):
-        super().reset()
+    def _dm_reset(self):
+        super()._dm_reset()
         Path.stat.cache_clear()
+
+    def restat(self):
+        vstat.cache_clear()
 
 # end DirSheet
 

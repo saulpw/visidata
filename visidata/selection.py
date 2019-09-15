@@ -105,7 +105,7 @@ def deleteSelected(self):
     nselected = self.nSelected
     self.clearSelected()
     if ndeleted != nselected:
-        error('expected %s' % nselected)
+        vd.error('expected %s' % nselected)
 
 undoSheetSelection = undoAttrCopy('[sheet]', '_selectedRows')
 

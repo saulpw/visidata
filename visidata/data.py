@@ -277,3 +277,30 @@ def loadInternalSheet(klass, p, **kwargs):
         vs.reload.__wrapped__(vs)
         vd.sheets.pop(0)
     return vs
+
+@Sheet.api
+def deleteBy(self, func):
+    'Delete rows for which func(row) is true.  Returns number of deleted rows.'
+    oldrows = copy(self.rows)
+    oldidx = self.cursorRowIndex
+    ndeleted = 0
+
+    row = None   # row to re-place cursor after
+    while oldidx < len(oldrows):
+        if not func(oldrows[oldidx]):
+            row = self.rows[oldidx]
+            break
+        oldidx += 1
+
+    self.rows.clear()
+    for r in Progress(oldrows, 'deleting'):
+        if not func(r):
+            self.rows.append(r)
+            if r is row:
+                self.cursorRowIndex = len(self.rows)-1
+        else:
+            ndeleted += 1
+
+    status('deleted %s %s' % (ndeleted, self.rowtype))
+    return ndeleted
+

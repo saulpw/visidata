@@ -12,6 +12,7 @@ open_db = open_sqlite3 = open_sqlite
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     savesToSource = True
+    defermods = True
 
     def resolve(self):
         'Resolve all the way back to the original source Path.'
@@ -34,7 +35,6 @@ class SqliteSheet(Sheet):
         self.reload_sync()
 
     def reload_sync(self, _conn=None):
-        self.reset()
         with (_conn or self.conn()) as conn:
             tblname = self.tableName
             self.columns = self.getColumns(tblname, conn)
@@ -46,7 +46,7 @@ class SqliteSheet(Sheet):
                 self.addRow(row)
 
     @asyncthread
-    def commit(self, path, adds, mods, dels):
+    def putChanges(self, path, adds, mods, dels):
         options_safe_error = options.safe_error
         def value(row, col):
             v = col.getTypedValue(row)
@@ -86,7 +86,7 @@ class SqliteSheet(Sheet):
             conn.commit()
 
         self.reload()
-        self.resetDeferredChanges()
+        self._dm_reset()
 
     def getColumns(self, tableName, conn):
         cols = []

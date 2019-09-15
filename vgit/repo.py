@@ -134,7 +134,7 @@ class GitLogSheet(GitSheet):
     # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
     rowtype = 'commits'
-    defer = True
+    defermods = True
     savesToSource = True
     columns = [
             ColumnItem('commitid', 0, width=8),
