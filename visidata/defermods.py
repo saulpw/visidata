@@ -295,4 +295,4 @@ IndexSheet.trackmods = False
 MeltedSheet.trackmods = False
 TransposeSheet.trackmods = False
 
-Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, deleteRows([cursorRow]))]; cursorDown(1)', undo='lambda s=sheet,r=cursorRow,ridx=cursorRowIndex: s.rows.insert(ridx, s.markDeleted(r, False))')
+Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, deleteRows([cursorRow]))]; not sheet.defermods or cursorDown(1)', undo='lambda s=sheet,r=cursorRow,ridx=cursorRowIndex: s.rows.insert(ridx, s.markDeleted(r, False))')
