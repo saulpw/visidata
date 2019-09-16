@@ -771,7 +771,7 @@ def push(vd, vs, sheets=None):
         sheets = vd.sheets
 
     if not isinstance(vs, BaseSheet):
-        return  # return instead of raise, some commands
+        return  # return instead of raise, some commands need this
     else:
         vs.vd = vd
         if vs in sheets:
