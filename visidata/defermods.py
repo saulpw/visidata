@@ -86,16 +86,13 @@ def undoMod(self, row):
 @Sheet.api
 def deleteBy(self, func):
     'Delete rows for which func(row) is true.  Returns number of deleted rows.'
-    if self.defermods:
-        for i, r in enumerate(Progress(self.rows, 'deleting')):
-            if func(r):
-                if self.defermods:
-                    self.markDeleted(r)
-                else:
-                    self.delete(r)
-
-    if not self.defermods:
-        self.commitDeletes()
+    # loops twice over all rows; once to check for func(r) and once to delete within deleteRows()
+    toDelete = []
+    for i, r in enumerate(Progress(self.rows, 'deleting')):
+        if func(r):
+            toDelete.append(r)
+    self.deleteRows(toDelete)
+    return len(toDelete)
 
 
 @Sheet.api
