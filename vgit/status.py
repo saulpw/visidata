@@ -186,7 +186,6 @@ GitStatus.addCommand(None, 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").
 
 GitStatus.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
 GitStatus.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
-GitStatus.addCommand(None, 'git-blame', 'vd.push(GitBlame(cursorRow))', 'push blame for this file'),
 
 
 @GitStatus.api

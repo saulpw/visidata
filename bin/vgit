@@ -17,6 +17,17 @@ option('config', '~/.vgitrc', 'config file to exec in Python')
 options.motd_url = 'https://visidata.org/vgit/motd-' + __version__
 option('vgit_pager', False, 'fallback to pager instead of passthrough')
 
+def git_log(args, topsheet):
+    return vgit.GitLogSheet(topsheet.branch+"_log", ref=topsheet.branch, source=topsheet)
+
+def git_status(args, topsheet):
+    return vgit.GitStatus(topsheet.source)
+
+def git_blame(args, topsheet):
+    return GitBlame(args[0], source=topsheet)
+
+def git_grep(args, topsheet):
+    return vgit.GitGrep(args[0], regex=args[0], source=topsheet)
 
 def somegit(args=None):
     cwd = Path('.')
@@ -31,15 +42,13 @@ def somegit(args=None):
 
     cmd = args[0]
 
-    if cmd == 'grep':
-        return vgit.GitGrep(args[1], regex=args[1], source=vgit.GitStatus(cwd))
-
-    if cmd == 'status':
-        return vgit.GitStatus(cwd)
-
-    if cmd == 'log':
-        return vgit.GitLogSheet(top.branch+"_log", ref=top.branch, source=top)
-
+    funcname = 'git_'+args[0]
+    func = getattr(vgit, funcname, None)
+    if func:
+        print(func)
+        return func(args[1:], top)
+    else:
+        print(f"no {funcname}")
 
 
 def main():
@@ -48,12 +57,14 @@ def main():
     args = sys.argv[1:]
 
     vs = somegit(args)
+    print(vs)
 
-    if not vs and options.vgit_pager:
-        cmdstr = ' '.join(args)
-        vs = TextSheet(cmdstr, somegit().git_lines(*args))
-    else:
-        return subprocess.run(['git', *args]).returncode
+    if vs is None:
+        if options.vgit_pager:
+            cmdstr = ' '.join(args)
+            vs = TextSheet(cmdstr, somegit().git_lines(*args))
+        else:
+            return subprocess.run(['git', *args]).returncode
 
     domotd()
     run(vs)
