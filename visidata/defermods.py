@@ -178,7 +178,6 @@ def commitDeletes(self):
                 self.cursorRowIndex = newidx
             newidx += 1
 
-    self._deferredDels.clear()
     if ndeleted:
         status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted
@@ -192,6 +191,10 @@ def putChanges(sheet, path, adds, changes, deletes):
     sheet.commitMods()
     sheet.commitDeletes()
     saveSheets(path, sheet, confirm_overwrite=False)
+
+    # clear after save, to ensure cstr (in commit()) is aware of deletes
+    # specifically, for the case where deletes are committed automatically (defermods = False)
+    sheet._deferredDels.clear()
 
 
 @Sheet.api
