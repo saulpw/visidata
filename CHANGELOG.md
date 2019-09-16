@@ -1,6 +1,56 @@
 # VisiData version history
 
-# v2.-1 (TBD)
+# 2.-2 (2019-09-x)
+
+## Features
+    - index into sub-sheets from command line (thanks aborruso for feature request #214)
+        - currently works for html and hdf5 loaders
+        - `+:subsheet:col:row` in cli 
+            - `subsheet` the topsheet upon load, with cursor located in cell at `row` and `col`
+        - `+:subsheet::` to ignore row/col
+        - can name toplevel source index if more than one: `+toplevel:subsheet::`
+    - add basic frictionless loader (thanks aborruso for feature request #237)
+        - `-f frictionless` with .json either http[s] or local file
+        - .zip may not work yet
+    - VisiData's DirSheet is now readonly; write DirSheet moved to `vls`
+    - move trackmod and defermod out of VisiData core and into module defermods.py
+        - defermods defers saving to source until commit-sheet
+            - deleted rows are colored red and visible until commit
+        - trackmods tracks changes in source sheet until save-sheet
+            - deletes are removed upon delete-row(s)
+        - defermods and trackmods are not on by default, `import visidata.defermods` must be added to visidatarc
+        - plugin/loader authors: by default, all sheets that inherit from BaseSheet have .defermods=False and .trackmods set to True when defermods is imported
+
+## Bugfixes
+    - [DirSheet] commit/restat/filesize interactions (thanks Mikee-3000 for bug report #340)
+    - [fixed] various improvements to fixed-width sheet loader (thanks frosencrantz for thorough bughunting #331)
+    - [join] joining columns in the ColumnSheet resulted in exception (thanks frosencrantz for bug report #336)
+    - [options] no error on unset if option not already set
+    - [path] filesize of url is 0
+    - [path] fix piping bug (vd failed to read stdin) (thanks ajkerrigan for bug report #354)
+    - [prev-sheet] would stack trace if more than one sheet loaded and no other sheet visited (thanks frosencrantz for bug report #342)
+    - [sheets] keycols now keep order they are keyed
+    - [tsv] column name "length" prevented loading (thanks  suhrig for bug report #344)
+    - [undo] redo with cmd on first row did not move cursor (thanks Mikee-3000 for bug report #339)
+        - now row/col context are set as strings, even when they are numeric indices
+
+## Plugins
+    - add vdtabulate by jsvine (thanks frosencrantz for suggestion #341)
+    - update viewtsv example (thanks suhrig for --skip improvement suggestions #347)
+
+## Infrastructure / API
+    - [IndexSheet] refactor SheetsSheet parent to IndexSheet
+        - HtmlTablesSheet now inherits from IndexSheet
+        - excel index changed to standard IndexSheet model
+        - VisiDataSheet changed into IndexSheet
+        - move join-sheets to IndexSheet
+    - [options] add unset() to unset options (thanks khughitt for feature request #343)
+    - [path] consolidate PathFd, UrlPath, and HttpPath into Path
+    - [sheets] vd.sheetsSheet is sheetstack, vd.allSheetsSheet is sheetpile
+    - [vd] add sheet properties for errors and statuses
+    - [vd] vd.quit() now takes `*sheets`
+
+# v2.-1 (2019-08-18)
 
 ## Major changes
 
