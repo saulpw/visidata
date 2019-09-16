@@ -10,7 +10,7 @@ Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))')
 PivotGroupRow = collections.namedtuple('PivotGroupRow', 'discrete_keys numeric_key sourcerows pivotrows'.split())
 
 def Pivot(source, groupByCols, pivotCols):
-    return SheetPivot(source.name+'_pivot_'+''.join(c.name for c in pivotCols),
+    return PivotSheet(source.name+'_pivot_'+''.join(c.name for c in pivotCols),
             groupByCols,
             pivotCols,
             source=source)
@@ -36,7 +36,7 @@ class RangeColumn(Column):
             return None
         return formatRange(self.origcol, typedval)
 
-class SheetPivot(Sheet):
+class PivotSheet(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     rowtype = 'grouped rows'  # rowdef: PivotGroupRow
     def __init__(self, name, groupByCols, pivotCols, **kwargs):
@@ -234,5 +234,5 @@ class SheetPivot(Sheet):
             c.setCache(True)
 
 
-SheetPivot.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow.pivotrows.get(cursorCol.aggvalue, []); vd.push(vs)')
-SheetPivot.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow.discrete_keys); vs.rows=sum(cursorRow.pivotrows.values(), []); vd.push(vs)')
+PivotSheet.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow.pivotrows.get(cursorCol.aggvalue, []); vd.push(vs)')
+PivotSheet.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow.discrete_keys); vs.rows=sum(cursorRow.pivotrows.values(), []); vd.push(vs)')

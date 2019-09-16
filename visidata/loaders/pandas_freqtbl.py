@@ -3,8 +3,8 @@ import collections
 
 from visidata import *
 
-PandasSheet.addCommand('F', 'freq-col', 'vd.push(PandasSheetFreqTable(sheet, cursorCol))')
-PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasSheetFreqTable(sheet, *keyCols))')
+PandasSheet.addCommand('F', 'freq-col', 'vd.push(PandasFreqTableSheet(sheet, cursorCol))')
+PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasFreqTableSheet(sheet, *keyCols))')
 
 class DataFrameRowSliceAdapter:
     """Tracks original dataframe and a boolean row mask
@@ -60,7 +60,7 @@ class DataFrameRowSliceIter:
         self.index += 1
         return row
 
-class PandasSheetFreqTable(SheetPivot):
+class PandasFreqTableSheet(PivotSheet):
     'Generate frequency-table sheet on currently selected column.'
     rowtype = 'bins'  # rowdef FreqRow(keys, sourcerows)
 
@@ -160,9 +160,9 @@ class PandasSheetFreqTable(SheetPivot):
                 {}
             ))
 
-PandasSheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
-PandasSheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
-PandasSheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
+PandasFreqTableSheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
+PandasFreqTableSheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
+PandasFreqTableSheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
 
 def expand_source_rows(source, vd, cursorRow):
     """Support for expanding a row of frequency table to underlying rows"""
@@ -173,5 +173,5 @@ def expand_source_rows(source, vd, cursorRow):
     vs.rows = cursorRow.sourcerows
     vd.push(vs)
 
-PandasSheetFreqTable.addCommand(ENTER, 'dup-row', 'expand_source_rows(source, vd, cursorRow)')
-options.set('numeric_binning', False, PandasSheetFreqTable)
+PandasFreqTableSheet.addCommand(ENTER, 'dup-row', 'expand_source_rows(source, vd, cursorRow)')
+options.set('numeric_binning', False, PandasFreqTableSheet)

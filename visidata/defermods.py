@@ -290,7 +290,7 @@ Sheet.addCommand('gz^R', 'reload-rows', 'for r in selectedRows: undoMod(r)')
 JoinSheet.trackmods = False
 ColumnsSheet.trackmods = False
 OptionsSheet.trackmods = False
-SheetPivot.trackmods = False
+PivotSheet.trackmods = False
 IndexSheet.trackmods = False
 MeltedSheet.trackmods = False
 TransposeSheet.trackmods = False

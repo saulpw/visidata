@@ -54,16 +54,16 @@ SheetsSheet	join-sheets		&	&	y	y	n	y		sheet-join	merge the selected sheets with 
 SheetsSheet	open-row		Enter	Enter	y	n	n	y		sheet-open-row	open sheet referenced in current row
 SheetsSheet	open-rows	g	Enter	gEnter	y	use	n	y		sheet-open-rows	push selected sheets to top of sheets stack
 SheetsSheet	reload-all	g	^R	g^R	n	n	unmodifies	y		reload-all	reload all selected sheets
-SheetPivot	dive-cell	z	Enter	zEnter	y	n	n	y		open-source-cell	open sheet of source rows aggregated in current cell
-SheetPivot	dive-row		Enter	Enter	y	n	n	y		open-source-row	open sheet of source rows aggregated in current row
+PivotSheet	dive-cell	z	Enter	zEnter	y	n	n	y		open-source-cell	open sheet of source rows aggregated in current cell
+PivotSheet	dive-row		Enter	Enter	y	n	n	y		open-source-row	open sheet of source rows aggregated in current row
 SheetNamedTuple	dive-row		Enter	Enter	y	n	n	y			dive further into Python object
 SheetH5Obj	dive-metadata		A	A	y	n	n	y			open metadata sheet for this object
 SheetH5Obj	dive-row		Enter	Enter	y	n	n	y			load table referenced in current row into memory
-SheetFreqTable	dive-row		Enter	Enter	y	n	n	y		open-cell-source	open copy of source sheet with rows grouped in current cell
-SheetFreqTable	dive-rows	g	Enter	gEnter	y	use	n	y			open copy of source sheet with rows grouped in selected rows
-SheetFreqTable	select-row		s	s	n	change	n	y		filter-source-select-bin	select these entries in source sheet
-SheetFreqTable	stoggle-row		t	t	n	change	n	y		filter-source-toggle-bin	toggle these entries in source sheet
-SheetFreqTable	unselect-row		u	u	n	change	n	y		filter-source-unselect-bin	unselect these entries in source sheet
+FreqTableSheet	dive-row		Enter	Enter	y	n	n	y		open-cell-source	open copy of source sheet with rows grouped in current cell
+FreqTableSheet	dive-rows	g	Enter	gEnter	y	use	n	y			open copy of source sheet with rows grouped in selected rows
+FreqTableSheet	select-row		s	s	n	change	n	y		filter-source-select-bin	select these entries in source sheet
+FreqTableSheet	stoggle-row		t	t	n	change	n	y		filter-source-toggle-bin	toggle these entries in source sheet
+FreqTableSheet	unselect-row		u	u	n	change	n	y		filter-source-unselect-bin	unselect these entries in source sheet
 SheetDict	dive-row		Enter	Enter	y	n	n	y		python-dive-row	dive further into Python object
 SheetDict	edit-cell		e		n	n	y	y		modify-edit-cell	edit contents of current cell
 Sheet	add-row		a	a	n	n	y	y	3	modify-add-row-blank	insert a blank row

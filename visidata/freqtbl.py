@@ -3,16 +3,16 @@ import collections
 
 from visidata import *
 
-Sheet.addCommand('F', 'freq-col', 'vd.push(SheetFreqTable(sheet, cursorCol))')
-Sheet.addCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
-Sheet.addCommand('zF', 'freq-summary', 'vd.push(SheetFreqTableSummary(sheet, Column("Total", getter=lambda col, row: "Total")))')
+Sheet.addCommand('F', 'freq-col', 'vd.push(FreqTableSheet(sheet, cursorCol))')
+Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))')
+Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", getter=lambda col, row: "Total")))')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
 option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
 
-ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(source[0], cursorRow))')
+ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))')
 
 def valueNames(discrete_vals, numeric_vals):
     ret = [ '+'.join(str(x) for x in discrete_vals) ]
@@ -22,7 +22,7 @@ def valueNames(discrete_vals, numeric_vals):
     return '+'.join(ret)
 
 
-class SheetFreqTable(SheetPivot):
+class FreqTableSheet(PivotSheet):
     'Generate frequency-table sheet on currently selected column.'
     rowtype = 'bins'  # rowdef FreqRow(keys, sourcerows)
 
@@ -67,15 +67,15 @@ class SheetFreqTable(SheetPivot):
             self.orderBy(self.column('count'), reverse=True)
 
 
-class SheetFreqTableSummary(SheetFreqTable):
+class FreqTableSheetSummary(FreqTableSheet):
     'Append a PivotGroupRow to FreqTable with only selectedRows.'
     @asyncthread
     def reload(self):
-        SheetFreqTable.reload.__wrapped__(self)
+        FreqTableSheet.reload.__wrapped__(self)
         self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
 
 
-SheetFreqTable.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', undo=undoSheetSelection)
+FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', undo=undoSheetSelection)
 
-SheetFreqTable.addCommand(ENTER, 'dive-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)')
-SheetFreqTable.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)')
+FreqTableSheet.addCommand(ENTER, 'dive-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)')
+FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)')

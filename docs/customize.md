@@ -7,7 +7,7 @@ In VisiData, there is a distinction between global configurations (options/comma
 
 Examples of **SheetType**s include (but are not limited to):
 
-* **SheetFreqTable** (the command is executable on every [frequency table](/docs/group#frequency));
+* **FreqTableSheet** (the command is executable on every [frequency table](/docs/group#frequency));
 * **TsvSheet** (option is applied to every loaded .tsv file);
 * **ColumnsSheet** (typing selected referenced columns with `g#` can only be done on the **Columns sheet**).
 
