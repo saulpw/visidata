@@ -1,20 +1,33 @@
 from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer, asyncthread, options, saveSheets, inputPath, getDefaultSaveName, warning, status, Path, copy, Progress, option
 from visidata import *
 
-BaseSheet.defermods = False
-BaseSheet.trackmods = True
+'''
+Activating this plugin adds two modes to VisiData: Deferred mods and Tracking mods
 
-option('color_add_pending', 'green', 'color for rows pending add')
-option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
-option('color_delete_pending', 'red', 'color for rows pending delete')
+Defermods enables modification for sheets that are deferred (e.g. sqlite and dirsheet).
+Saving to source is deferred until `commit-sheet` (`Ctrl+S`). Deleted rows and modified cells are colored as pending changes until committed. To save to a different file (not source), use `save-sheet` (`g Ctrl+S`).
 
+Trackmods tracks changes in sheets whose source has a path. Modifications are colored yellow until changes are committed with `commit-sheet` (`Ctrl+S`) or saved with `save-sheet` (`g Ctrl+S`).
+
+defermods and trackmods are not on by default, `import visidata.defermods` must be added to visidatarc, and sheets must set .defermods and/or .trackmods. By default BaseSheet has .defermods=False and .trackmods set to True when defermods is imported.
+
+defermods is not on by default because:
+    1) deletes with defermods enabled take longer; especially delete-selected
+    2) it is easier for users to consciously opt-in to a novel VisiData experience than to opt-out
+
+'''
+
+BaseSheet.defermods = False     # True when modifications + deletes are deferred
+BaseSheet.trackmods = True      # True when modifications are tracked
 
 # deferred cached
 Sheet.init('_deferredAdds', dict) # [s.rowid(row)] -> row
 Sheet.init('_deferredMods', dict) # [s.rowid(row)] -> (row, { [col] -> val })
 Sheet.init('_deferredDels', dict) # [s.rowid(row)] -> row
 
-BaseSheet.savesToSource = False  # True for when commiting to source is mandatory
+theme('color_add_pending', 'green', 'color for rows pending add')
+theme('color_change_pending', 'reverse yellow', 'color for cells pending modification')
+theme('color_delete_pending', 'red', 'color for rows pending delete')
 
 Sheet.colorizers += [
         CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.changed(c, r)),
@@ -181,12 +194,8 @@ def putChanges(sheet, path, adds, changes, deletes):
     sheet.commitAdds()
     sheet.commitMods()
     sheet.commitDeletes()
-    if not sheet.savesToSource:
-        saveSheets(path, sheet, confirm_overwrite=options.confirm_overwrite)
+    saveSheets(path, sheet, confirm_overwrite=False)
 
-#@Sheet.api
-#def putChanges(sheet, path, adds, changes, deletes):
-#    saveSheets(path, sheet, confirm_overwrite=options.confirm_overwrite)
 
 @Sheet.api
 def getDeferredChanges(self):
