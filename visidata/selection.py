@@ -105,7 +105,8 @@ def deleteSelected(self):
     nselected = self.nSelected
     self.clearSelected()
     if ndeleted != nselected:
-        vd.error('expected %s' % nselected)
+        vd.warning(f'deleted {ndeleted}, expected {nselected}')
+
 
 undoSheetSelection = undoAttrCopy('[sheet]', '_selectedRows')
 
@@ -128,10 +129,10 @@ Sheet.addCommand('gzt', 'stoggle-after', 'toggle(rows[cursorRowIndex:])', undo=u
 Sheet.addCommand('gzs', 'select-after', 'select(rows[cursorRowIndex:])', undo=undoSheetSelection),
 Sheet.addCommand('gzu', 'unselect-after', 'unselect(rows[cursorRowIndex:])', undo=undoSheetSelection),
 
-Sheet.addCommand('|', 'select-col-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("|", type="regex", defaultLast=True), columns="cursorCol"))', undo=undoSheetSelection),
-Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("\\\\", type="regex", defaultLast=True), columns="cursorCol"))', undo=undoSheetSelection),
-Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("g|", type="regex", defaultLast=True), columns="visibleCols"))', undo=undoSheetSelection),
-Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("g\\\\", type="regex", defaultLast=True), columns="visibleCols"))', undo=undoSheetSelection),
+Sheet.addCommand('|', 'select-col-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="cursorCol"))', undo=undoSheetSelection),
+Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="cursorCol"))', undo=undoSheetSelection),
+Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="visibleCols"))', undo=undoSheetSelection),
+Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="visibleCols"))', undo=undoSheetSelection),
 
 Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', undo=undoSheetSelection),
 Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', undo=undoSheetSelection),
