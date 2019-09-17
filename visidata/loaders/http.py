@@ -20,6 +20,6 @@ def openurl_http(path, filetype=None):
     fp = RepeatFile(iter_lines=response.iter_lines(decode_unicode=True))
 
     # call open_<filetype> with a usable Path
-    return openSource(Path(path.given, fp=fp, filetype=filetype))
+    return openSource(Path(path.given, fp=fp), filetype=filetype)
 
 openurl_https = openurl_http
