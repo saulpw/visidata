@@ -1,11 +1,13 @@
-oldname	newname	signature
-option	vd.option()	same
-globalCommand	vd.command()	same
-bindkey	vd.bindkey()	same
-Sheet	TableSheet	same
-Sheet.rowLayout	TableSheet._rowLayout	same
-RowColorizer	TableSheet.addRowColorizer	same
-options.set('optname', val, Sheet)	TableSheet.options.optname = val	diff
-Sheet.addCommand(...)	TableSheet.command(...)	
-vd.sheetsSheet	vd.sheets	vd.remove, .push, .replace, etc all on sheets
-next-search	search-next	deprecated aliases can persist
+oldname	newname	signature	done
+option	vd.option()	same	
+globalCommand	vd.command()	same	
+bindkey	vd.bindkey()	same	
+Sheet	TableSheet	same	
+Sheet.rowLayout	TableSheet._rowLayout	same	
+RowColorizer	TableSheet.addRowColorizer	same	
+options.set('optname', val, Sheet)	TableSheet.options.optname = val	diff	
+Sheet.addCommand(...)	TableSheet.command(...)		
+vd.sheetsSheet	vd.sheets	vd.remove, .push, .replace, etc all on sheets	
+next-search	search-next	deprecated aliases can persist	
+rotate_range	rotateRange	helper functions should be camelCase	y
+exceptionCaught	vd.exception()	same; to fit the fail/warning/error/status theme	

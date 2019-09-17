@@ -1,4 +1,4 @@
-from visidata import Sheet, rotate_range
+from visidata import Sheet, rotateRange
 
 
 def evalmatcher(sheet, expr):
@@ -7,7 +7,7 @@ def evalmatcher(sheet, expr):
     return matcher
 
 def search_func(sheet, rows, func, reverse=False):
-    for i in rotate_range(len(sheet.rows), sheet.cursorRowIndex, reverse=reverse):
+    for i in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=reverse):
         try:
             if func(sheet.rows[i]):
                 return i

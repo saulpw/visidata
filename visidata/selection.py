@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, undoAttrCopy, Progress, option, asyncthread, options, rotate_range
+from visidata import vd, Sheet, undoAttrCopy, Progress, option, asyncthread, options, rotateRange
 
 __all__ = ['undoSheetSelection', 'undoSelection']
 
@@ -75,9 +75,9 @@ def unselectByIdx(self, rowIdxs):
     self.unselect((self.rows[i] for i in rowIdxs), progress=False)
 
 @Sheet.api
-def gatherBy(self, func):
+def gatherBy(self, func, gerund='gathering'):
     'Generate only rows for which the given func returns True.'
-    for i in rotate_range(len(self.rows), self.cursorRowIndex):
+    for i in Progress(rotateRange(self.nRows, self.cursorRowIndex), total=self.nRows, gerund=gerund):
         try:
             r = self.rows[i]
             if func(r):

@@ -3,11 +3,12 @@ import re
 
 from visidata import vd, VisiData, error, status, BaseSheet, Sheet, Column, fail, Progress, globalCommand, ESC
 
-__all__ = ['rotate_range']
+__all__ = ['rotateRange']
 
 VisiData.init('searchContext', dict) # [(regex, columns, backward)] -> kwargs from previous search
 
-def rotate_range(n, idx, reverse=False):
+def rotateRange(n, idx, reverse=False):
+    'Wraps an iter starting from idx. Yields indices from idx to n and then 0 to idx.'
     if reverse:
         rng = range(idx-1, -1, -1)
         rng2 = range(n-1, idx-1, -1)
@@ -128,7 +129,7 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
             searchBackward = not searchBackward
 
         matchingRowIndexes = 0
-        for r in rotate_range(len(sheet.rows), sheet.cursorRowIndex, reverse=searchBackward):
+        for r in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=searchBackward):
             c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
             if c:
                 if moveCursor:
