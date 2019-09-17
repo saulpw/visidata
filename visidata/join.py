@@ -5,9 +5,9 @@ from copy import copy
 
 from visidata import asyncthread, Progress, status, fail, error
 from visidata import ColumnItem, ColumnExpr, SubColumnItem, Sheet, Column, getitemdef
-from visidata import SheetsSheet
+from visidata import IndexSheet
 
-SheetsSheet.addCommand('&', 'join-sheets', 'vd.replace(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
+IndexSheet.addCommand('&', 'join-sheets', 'vd.push(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
 Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))')
 Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))')
 
