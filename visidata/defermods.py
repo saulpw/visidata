@@ -87,10 +87,7 @@ def undoMod(self, row):
 def deleteBy(self, func):
     'Delete rows for which func(row) is true.  Returns number of deleted rows.'
     # loops twice over all rows; once to check for func(r) and once to delete within deleteRows()
-    toDelete = []
-    for i, r in enumerate(Progress(self.rows, 'deleting')):
-        if func(r):
-            toDelete.append(r)
+    toDelete = [r for r in self.gatherBy(func, 'deleting')]
     self.deleteRows(toDelete)
     return len(toDelete)
 
