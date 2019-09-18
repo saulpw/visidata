@@ -12,3 +12,4 @@ next-search	search-next	deprecated aliases can persist
 rotate_range	rotateRange	helper functions should be camelCase	y
 exceptionCaught	vd.exception()	same; to fit the fail/warning/error/status theme	
 vd.push	vd.addSheet		
+Canvas.reset			
