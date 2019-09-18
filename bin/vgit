@@ -24,7 +24,7 @@ def git_status(args, topsheet):
     return vgit.GitStatus(topsheet.source)
 
 def git_blame(args, topsheet):
-    return GitBlame(args[0], source=topsheet)
+    return GitBlame(GitFile(args[0]), source=topsheet)
 
 def git_grep(args, topsheet):
     return vgit.GitGrep(args[0], regex=args[0], source=topsheet)
