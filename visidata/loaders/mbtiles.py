@@ -23,6 +23,9 @@ def getFeatures(tile_data):
             yield layername, feat
 
 
+def tilename(row):
+    return ",".join(str(x) for x in row)
+
 
 class MbtilesSheet(Sheet):
     columns = [
@@ -30,9 +33,6 @@ class MbtilesSheet(Sheet):
         ColumnItem('tile_column', 1),
         ColumnItem('tile_row', 2),
     ]
-
-    def tilename(self, row):
-        return ",".join(str(x) for x in row)
 
     def getTile(self, zoom_level, tile_col, tile_row):
         import mapbox_vector_tile
@@ -56,10 +56,21 @@ class MbtilesSheet(Sheet):
         for r in Progress(tiles.fetchall()):
             self.addRow(r)
 
+    def getPlot(self, *rows):
+        if len(rows) == 1:
+            name = self.name+'_'+tilename(rows[0])
+        else:
+            name = self.name+'_selected'
 
-MbtilesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PbfSheet(tilename(cursorRow), source=sheet, sourceRow=cursorRow))')
-MbtilesSheet.addCommand('.', 'plot-row', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn, sourceRows=list(getFeatures(getTile(*cursorRow))))))')
-#MbtilesSheet.addCommand('g.', '', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn), sourceRows=sum((list(getFeatures(getTile(*r))) for r in rows), [])))', 'plot selected tiles'),
+        sourceRows = sum((list(getFeatures(self.getTile(*r))) for r in rows), [])
+        return PbfCanvas(name+"_map", source=PbfSheet(name, source=self), sourceRows=sourceRows)
+
+    def getPlotSheet(self, row):
+        return PbfSheet(tilename(row), source=self, sourceRow=row)
+
+MbtilesSheet.addCommand(ENTER, 'dive-row', 'vd.push(getPlotSheet(cursorRow))')
+MbtilesSheet.addCommand('.', 'plot-row', 'vd.push(getPlot(cursorRow))')
+MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles'),
 
 
 class PbfSheet(Sheet):
@@ -70,6 +81,7 @@ class PbfSheet(Sheet):
         Column('geometry_coords_depth', getter=lambda col,row: getListDepth(row[1]['geometry']['coordinates']), width=0),
     ]
     nKeys = 1  # layer
+
     @asyncthread
     def reload(self):
         props = set()  # property names
