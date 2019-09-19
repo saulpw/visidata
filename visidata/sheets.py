@@ -181,6 +181,9 @@ class Sheet(BaseSheet):
             self.rows.insert(index, row)
         return row
 
+    def newRow(self):
+        return type(self)._rowtype()
+
     @property
     @functools.lru_cache()
     def colsByName(self):

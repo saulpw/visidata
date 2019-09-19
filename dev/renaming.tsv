@@ -13,3 +13,4 @@ rotate_range	rotateRange	helper functions should be camelCase	y
 exceptionCaught	vd.exception()	same; to fit the fail/warning/error/status theme	
 vd.push	vd.addSheet		
 Canvas.reset			
+_rowtype()		idea: rowmaker	
