@@ -10,7 +10,7 @@ import io
 import sys
 import locale
 
-from visidata import vd, option, options, status, run, UNLOADED
+from visidata import vd, option, options, status, run
 from visidata import Path, openSource, saveSheets, setDiffSheet, domotd
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
@@ -146,8 +146,7 @@ def main():
                 sheets = sources  # apply row/col to all sheets
             else:
                 vs = vd.getSheet(startsheets[0]) or sources[-1]
-                if vs.rows is UNLOADED:
-                    vd.sync(vs.reload())
+                vd.sync(vs.ensureLoaded())
                 for startsheet in startsheets[1:]:
                     rowidx = vs.getRowIndexFromStr(startsheet)
                     if rowidx is None:

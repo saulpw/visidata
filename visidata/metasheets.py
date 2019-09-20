@@ -2,7 +2,7 @@ from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENT
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, commands, Option
-from visidata import undoAttr, undoAddCols, VisiData, vlen, UNLOADED
+from visidata import undoAttr, undoAddCols, VisiData, vlen
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=list(vd.sheets)))')
@@ -176,8 +176,7 @@ class VisiDataSheet(IndexSheet):
             vs.description = desc
             vs.shortcut_en = shortcut
             vs.longname = longname
-            if vs.rows is UNLOADED:
-                vs.reload()
+            vs.ensureLoaded()
             self.addRow(vs)
 
 

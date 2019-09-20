@@ -325,6 +325,7 @@ class CommandLog(TsvSheet):
                 self.cursorRowIndex += 1
                 prog.addProgress(1)
 
+                vd.sheets[0].ensureLoaded()
                 vd.sync()
                 while not self.delay():
                     pass

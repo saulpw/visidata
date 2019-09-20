@@ -150,6 +150,11 @@ class BaseSheet(Extensible):
         self._scr.clear()
         self._scr.refresh()
 
+    def ensureLoaded(self):
+        if self.rows is UNLOADED:
+            self.rows = []  # prevent auto-reload from running twice
+            return self.reload()   # likely launches new thread
+
     def reload(self):
         vd.error('no reload')
 

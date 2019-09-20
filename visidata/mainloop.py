@@ -4,7 +4,7 @@ import curses
 import threading
 import time
 
-from visidata import vd, VisiData, colors, bindkeys, UNLOADED
+from visidata import vd, VisiData, colors, bindkeys
 
 curses_timeout = 100 # curses timeout in ms
 timeouts_before_idle = 10
@@ -44,11 +44,7 @@ def run(self, scr):
         sheet = self.sheets[0]
         threading.current_thread().sheet = sheet
 
-        if sheet.rows is UNLOADED:
-            sheet.rows = []  # prevent auto-reload from running twice
-            sheet.reload()
-            sheet.recalc()  # set up Columns
-
+        sheet.ensureLoaded()
         self.draw(scr, sheet)
 
         keystroke = self.getkeystroke(scr, sheet)
@@ -157,7 +153,7 @@ def cursesMain(_scr, sheetlist):
     colors.setup()
 
     for vs in sheetlist:
-        vd.push(vs)  # first push does a reload
+        vd.push(vs)
 
     vd.status('Ctrl+H opens help')
     return vd.run(_scr)

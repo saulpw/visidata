@@ -790,6 +790,8 @@ def push(vd, vs, sheets=None):
         elif hasattr(vs, 'creatingCommand') and vs.creatingCommand:
             vs.shortcut = vs.shortcut or vs.creatingCommand.keystrokes
 
+        vs.ensureLoaded()
+
 
 @VisiData.cached_property
 def allSheetsSheet(vd):
