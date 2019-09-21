@@ -258,6 +258,13 @@ def commit(sheet, *rows):
 
     sheet.putChanges(path, adds, mods, deletes)
 
+VisiData._dm_newSheet = VisiData.newSheet
+@VisiData.api
+def newSheet(vd, ncols, name='', **kwargs):
+    newsheet = VisiData._dm_newSheet(vd, ncols, name, **kwargs)
+    newsheet.trackmods = False
+    return newsheet
+
 
 Column._dm_getValue = Column.getValue
 @Column.api
