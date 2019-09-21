@@ -390,9 +390,9 @@ CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
 CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
 options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
-def initCmdlog():
+
+@VisiData.cached_property
+def cmdlog(vd):
     vs = CommandLog('cmdlog')
     vs.rows = []
     return vs
-
-VisiData.init('cmdlog', initCmdlog)
