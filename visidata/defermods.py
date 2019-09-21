@@ -21,9 +21,17 @@ BaseSheet.defermods = False     # True when modifications + deletes are deferred
 BaseSheet.trackmods = True      # True when modifications are tracked
 
 # deferred cached
-Sheet.init('_deferredAdds', dict) # [s.rowid(row)] -> row
-Sheet.init('_deferredMods', dict) # [s.rowid(row)] -> (row, { [col] -> val })
-Sheet.init('_deferredDels', dict) # [s.rowid(row)] -> row
+@Sheet.cached_property
+def _deferredAdds(sheet):
+    return dict() # [s.rowid(row)] -> row
+
+@Sheet.cached_property
+def _deferredMods(sheet):
+    return dict() # [s.rowid(row)] -> (row, { [col] -> val })
+
+@Sheet.cached_property
+def _deferredDels(sheet):
+    return dict() # [s.rowid(row)] -> row
 
 theme('color_add_pending', 'green', 'color for rows pending add')
 theme('color_change_pending', 'reverse yellow', 'color for cells pending modification')
@@ -239,10 +247,10 @@ def commit(sheet, *rows):
     cstr = sheet.changestr(adds, mods, deletes)
     confirm_overwrite = options.confirm_overwrite
     path = sheet.source
-    if not cstr:
+    if not cstr and sheet.trackmods:
         fail('no diffs')
 
-    if confirm_overwrite:
+    if confirm_overwrite and sheet.trackmods:
         confirm('really %s? ' % cstr)
 
     sheet.putChanges(path, adds, mods, deletes)
@@ -285,6 +293,7 @@ Sheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')
 Sheet.addCommand('gz^R', 'reload-rows', 'for r in selectedRows: undoMod(r)')
 
 JoinSheet.trackmods = False
+vd.cmdlog.trackmods = False
 ColumnsSheet.trackmods = False
 OptionsSheet.trackmods = False
 PivotSheet.trackmods = False
