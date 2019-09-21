@@ -117,7 +117,7 @@ def main():
     return 0  # end main()
 
 
-class SuperDirSheet(Sheet):
+class SuperDirSheet(DirSheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
     defermods = True
