@@ -195,7 +195,10 @@ def putChanges(sheet, path, adds, changes, deletes):
     sheet.commitAdds()
     sheet.commitMods()
     sheet.commitDeletes()
-    saveSheets(path, sheet, confirm_overwrite=False)
+    if sheet.trackmods:
+        saveSheets(path, sheet, confirm_overwrite=False)
+    else:
+        saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)
 
     # clear after save, to ensure cstr (in commit()) is aware of deletes
     # specifically, for the case where deletes are committed automatically (defermods = False)
