@@ -2,14 +2,14 @@ from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, Row
 from visidata import *
 
 '''
-Activating this plugin adds two modes to VisiData: Deferred mods and Tracking mods
+Activating this plugin adds two modes to VisiData: Defermods and Trackmods.
 
 Defermods enables modification for sheets that are deferred (e.g. sqlite and dirsheet).
 Saving to source is deferred until `commit-sheet` (`Ctrl+S`). Deleted rows and modified cells are colored as pending changes until committed. To save to a different file (not source), use `save-sheet` (`g Ctrl+S`).
 
 Trackmods tracks changes in sheets whose source has a path. Modifications are colored yellow until changes are committed with `commit-sheet` (`Ctrl+S`) or saved with `save-sheet` (`g Ctrl+S`).
 
-defermods and trackmods are not on by default, `import visidata.defermods` must be added to visidatarc, and sheets must set .defermods and/or .trackmods. By default BaseSheet has .defermods=False and .trackmods set to True when defermods is imported.
+defermods and trackmods are not on by default, `from plugins.defermods import *` must be added to visidatarc, and sheets must set .defermods and/or .trackmods. By default BaseSheet has .defermods=False and .trackmods set to True when defermods is imported.
 
 defermods is not on by default because:
     1) deletes with defermods enabled take longer; especially delete-selected

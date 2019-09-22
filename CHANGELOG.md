@@ -25,6 +25,9 @@
     - [DirSheet] commit/restat/filesize interactions (thanks Mikee-3000 for bug report #340)
     - [fixed] various improvements to fixed-width sheet loader (thanks frosencrantz for thorough bughunting #331)
     - [join] joining columns in the ColumnSheet resulted in exception (thanks frosencrantz for bug report #336)
+    - [load] fix replay sync bug (required wait prevously)
+        - however, look out for `vd *` with lots of big datasets, they will now all load simultaneously
+    - [mbtiles] now works again
     - [options] no error on unset if option not already set
     - [path] filesize of url is 0
     - [path] fix piping bug (vd failed to read stdin) (thanks ajkerrigan for bug report #354)
@@ -37,8 +40,12 @@
 ## Plugins
     - add vdtabulate by jsvine (thanks frosencrantz for suggestion #341)
     - update viewtsv example (thanks suhrig for --skip improvement suggestions #347)
+    - add vmailcap with `^V` to view by mimetype (thanks cwarden for suggestion)
 
 ## Infrastructure / API
+    - [add-row] create a default newRow for Sheet (thanks for-coursera for bug report #363)
+    - [cached_property] newSheet and cmdlog are now cached_property
+        - this enables the overwriting and extending of them by plugins
     - [IndexSheet] refactor SheetsSheet parent to IndexSheet
         - HtmlTablesSheet now inherits from IndexSheet
         - excel index changed to standard IndexSheet model

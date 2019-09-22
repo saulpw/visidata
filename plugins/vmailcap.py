@@ -12,6 +12,7 @@ Usage:
 
 __name__ = 'vmailcap'
 __author__ = 'Saul Pwanson <vd@saul.pw>'
+__version__ = 0.9
 
 import os
 from visidata import DirSheet, option, options, SuspendCurses, fail

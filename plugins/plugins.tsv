@@ -7,3 +7,5 @@ livesearch	https://raw.githubusercontent.com/saulpw/visidata/develop/plugins/liv
 sparkline	https://raw.githubusercontent.com/saulpw/visidata/develop/plugins/sparkline.py	0.1	2019-07-02	Lucas Messenger @layertwo	2.-1	add a sparkline column to visualise trends of numeric cells in a row	
 rownum	https://raw.githubusercontent.com/saulpw/visidata/develop/plugins/rownum.py	0.9	2019-04-30	Saul Pwanson <vd@saul.pw>	2.-1	add column of original row ordering	
 vdtabulate	https://raw.githubusercontent.com/jsvine/visidata-plugins/master/plugins/vdtabulate.py	0.0.0	2019-04-28	Jeremy Singer-Vine @jsvine	1.5.2	save sheet as text-tables	tabulate
+vmailcap	https://raw.githubusercontent.com/saulpw/visidata/develop/plugins/vmailcap.py	0.9	2019-09-20	Saul Pwanson <vd@saul.pw>	2.-2	add mailcap-view(-selected) commands to DirSheet	
+defermods	https://raw.githubusercontent.com/saulpw/visidata/develop/plugins/defermods.py	0.1	2019-09-20	Saul Pwanson <vd@saul.pw>; anjakefala <anja.kefala@gmail.com>	2.-2	add two modes to VisiData: deferred mods and track changes	

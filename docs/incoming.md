@@ -4,7 +4,7 @@
 
 ### Annoucement
 
-Curious users likely noticed that when no data source was provided, VisiData presented the [DirSheet](/docs/assets/DirSheet.png) as the opening sheet. Similar to vim, this interface permits the interactive loading of files, by moving the cursor to the row which references it and pressing `Enter`.
+When no data source was provided, VisiData presented the [DirSheet](/docs/assets/DirSheet.png) as the opening sheet. Similar to vim, this interface permits the interactive loading of files, by moving the cursor to the row which references it and pressing `Enter`.
 
 From v1.2 to v1.5.2, the DirSheet became more [powerful](https://www.youtube.com/watch?v=prdyXM6-FSc). Files became first-class data citizens and users could use classic vd data manipulation commands to (bulk) rename and delete files. Once made, changes were deferred until commited to with `Ctrl+S`. They were then reflected in the filesystem itself.
 
