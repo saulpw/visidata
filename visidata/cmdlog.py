@@ -158,21 +158,6 @@ class CommandLog(TsvSheet):
     def newRow(self, **fields):
         return self._rowtype(**fields)
 
-    def removeSheet(self, vs):
-        'Remove all traces of sheets named vs.name from the cmdlog if no other sheet on the cmdlog exists and refers to it.'
-        newrows = []  # without vs.name
-        for cmdlogrow in self.rows:
-            if cmdlogrow.sheet != vs.name:
-                if getattr(vs, 'creatingCommand', None) == cmdlogrow:
-                    continue
-                newrows.append(cmdlogrow)
-                cmdsheet = vd.getSheet(cmdlogrow.sheet)
-                if cmdsheet and vs in cmdsheet:
-                    return  # a sheet still on the cmdlog sources from it
-
-        self.rows = newrows
-        debug('removed "%s" from cmdlog' % vs.name)
-
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
         if not isLoggableSheet(sheet):
             return  # don't record editlog commands
