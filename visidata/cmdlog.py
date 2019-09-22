@@ -17,7 +17,7 @@ BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 nonLogged = '''forget exec-longname undo redo quit
 error status errors statuses options threads cmdlog
 replay stop pause cancel advance save-cmdlog
-go- search scroll prev next page go start end zoom resize
+go- search scroll prev next page start end zoom resize visibility
 suspend redraw no-op help syscopy syspaste sysopen profile toggle'''.split()
 
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
