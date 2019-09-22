@@ -11,24 +11,6 @@ theme('color_status_replay', 'green', 'color of replay status indicator')
 option('replay_movement', False, 'insert movements during replay')
 option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
-globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
-globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
-globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
-globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save to: ", value=fnSuffix(name)), vd.cmdlog)')
-globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
-globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
-globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
-
-globalCommand(None, 'status', 'status(input("status: "))')
-globalCommand('^V', 'show-version', 'status(__version_info__);')
-globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))')
-
-globalCommand('U', 'undo-last', 'vd.cmdlog.undo(sheet)')
-globalCommand('R', 'redo-last', 'vd.cmdlog.redo(sheet)')
-
-globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
-
-
 BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
 # prefixes which should not be logged
@@ -395,12 +377,30 @@ def shortcut(self):
         return self.cmdlog_sheet.rows[0].keystrokes
 
 
-CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
-CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
-CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
-options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
-
-
 @VisiData.cached_property
 def cmdlog(vd):
     return CommandLog('cmdlog', rows=[])
+
+
+options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
+
+globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
+globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
+globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
+globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save to: ", value=fnSuffix(name)), vd.cmdlog)')
+globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
+globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
+globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
+
+globalCommand(None, 'status', 'status(input("status: "))')
+globalCommand('^V', 'show-version', 'status(__version_info__);')
+globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))')
+
+globalCommand('U', 'undo-last', 'vd.cmdlog.undo(sheet)')
+globalCommand('R', 'redo-last', 'vd.cmdlog.redo(sheet)')
+
+globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
+
+CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
+CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
+CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
