@@ -89,7 +89,11 @@ def run(self, scr):
                 except Exception as e:
                     exceptionCaught(e)
 
-            self.keystrokes += keystroke
+            if keystroke in self.keystrokes[:-1]:
+                vd.warning('duplicate prefix')
+                self.keystrokes = ''
+            else:
+                self.keystrokes += keystroke
 
         self.drawRightStatus(scr, sheet)  # visible for commands that wait for input
 
