@@ -1,0 +1,5 @@
+product	max rows	max cols
+Microsoft Excel	1048576	16384
+Apple Numbers	65535	255 (silently truncates)
+Tableau		
+Libre Office	1048576	16384
