@@ -184,7 +184,7 @@ Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnu
 Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
 
 for i in range(1, 11):
-    globalCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), 'vd.allSheets[%s:] or fail("no sheet"); vd.push(vd.allSheets[%s])' % (i-1, i-1))
+    globalCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), 'vd.push(*(list(s for s in allSheets if s.shortcut=="%s") or fail("no sheet")))' % (i))
 
 BaseSheet.bindkey('KEY_LEFT', 'go-left')
 BaseSheet.bindkey('KEY_DOWN', 'go-down')

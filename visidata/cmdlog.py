@@ -387,6 +387,14 @@ def cmdlog_sheet(sheet):
     return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=[])
 
 
+@BaseSheet.property
+def shortcut(self):
+    try:
+        return str(vd.allSheets.index(self)+1)
+    except:
+        return self.cmdlog_sheet.rows[0].keystrokes
+
+
 CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
 CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
 CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')

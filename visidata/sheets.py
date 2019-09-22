@@ -779,16 +779,11 @@ def push(vd, vs, sheets=None):
         vs.vd = vd
         if vs in sheets:
             sheets.remove(vs)
-        else:
-            vs.creatingCommand = vd.cmdlog and vd.cmdlog.currentActiveRow
 
         sheets.insert(0, vs)
 
         if vs.precious and vs not in vd.allSheets:
             vd.allSheets.append(vs)
-            vs.shortcut = len(vd.allSheets)
-        elif hasattr(vs, 'creatingCommand') and vs.creatingCommand:
-            vs.shortcut = vs.shortcut or vs.creatingCommand.keystrokes
 
         vs.ensureLoaded()
 

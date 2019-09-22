@@ -45,7 +45,6 @@ class BaseSheet(Extensible):
         self.name = name
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
-        self.shortcut = ''
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
 
         self.__dict__.update(kwargs)
