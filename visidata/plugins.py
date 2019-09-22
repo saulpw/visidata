@@ -15,6 +15,9 @@ def pluginsSheet(p):
 def _plugin_path(plugin):
     return Path(os.path.join(options.visidata_dir, "plugins", plugin.name+".py"))
 
+def _plugin_init():
+    return Path(os.path.join(options.visidata_dir, "plugins", "__init__.py"))
+
 def _plugin_import(plugin):
     return "import " + _plugin_import_name(plugin)
 
@@ -46,6 +49,11 @@ class PluginsSheet(TsvSheet):
 
     def installPlugin(self, plugin):
         # pip3 install requirements
+        initpath = _plugin_init()
+        if not initpath.exists():
+            with initpath.open_text(mode='w') as initfp:
+                initfp.write()
+
         outpath = _plugin_path(plugin)
         if outpath.exists():
             confirm("plugin path already exists, overwrite? ")
@@ -65,7 +73,7 @@ class PluginsSheet(TsvSheet):
             p = subprocess.Popen(['pip3', 'install']+plugin.requirements.split())
             status(tuple(p.communicate()))
 
-        with Path(options.config).open_text(mode='a') as fprc:
+        with Path(_plugin_init()).open_text(mode='a') as fprc:
             print(_plugin_import(plugin), file=fprc)
 
         warning("restart visidata to use new plugin")
@@ -74,17 +82,17 @@ class PluginsSheet(TsvSheet):
         self.removePlugin(plugin)
 
     def removePlugin(self, plugin):
-        vdrc = Path(options.config)
-        oldvdrc = vdrc+'.bak'
+        initpath = Path(_plugin_init())
+        oldinitpath = initpath.with_suffix(initpath.suffix + '.bak')
         try:
-            shutil.copyfile(vdrc, oldvdrc)
-            vdrc_contents = Path(oldvdrc).read_text().replace('\n'+_plugin_import(plugin), '')
+            shutil.copyfile(initpath, oldinitpath)
+            init_contents = Path(oldinitpath).read_text().replace('\n'+_plugin_import(plugin), '')
 
-            with Path(options.config).open_text(mode='w') as fprc:  # replace without import line
-                fprc.write(vdrc_contents)
+            with Path(_plugin_init()).open_text(mode='w') as fprc:  # replace without import line
+                fprc.write(init_contents)
             warning('plugin {0} will not be imported in the future'.format(plugin[0]))
         except FileNotFoundError:
-            warning("no visidatarc file")
+            warning("no plugins/__init__.py found")
 
 globalCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)')
 
