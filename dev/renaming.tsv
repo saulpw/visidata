@@ -17,3 +17,4 @@ _rowtype()		idea: rowmaker
 exec_keystrokes			
 exec_command			
 CommandLog.currentActiveRow			
+ESC	ALT		
