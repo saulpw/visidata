@@ -1,0 +1,10 @@
+sheet	col	row	longname	input	keystrokes	comment	undo
+git/visidata			git-log		L	push log of current branch	
+develop_log	author_date		aggregate-col	max	+		
+develop_log	author_date		aggregate-col	min	+		
+develop_log	author		freq-col		F		
+develop_log_author_freq	author		capture-col	(.*) <(.*)>	;		
+develop_log_author_freq	author		hide-col		-		
+develop_log_author_freq	percent		hide-col		-		
+develop_log_author_freq	histogram		hide-col		-		
+develop_log_author_freq			save-sheet	../www/visidata.org/contributors.tsv	^S		

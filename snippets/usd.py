@@ -1,5 +1,7 @@
-# provides USD() function to convert string like '£300' or '205 AUD' to equivalent US$ as float
-# uses data from fixer.io
+'''Provide USD(s) function to convert string like '£300' or '205 AUD' to equivalent US$ as float.
+Uses data from fixer.io
+'''
+
 from visidata import urlcache
 import functools
 import json
