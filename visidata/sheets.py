@@ -768,24 +768,21 @@ def remove(vd, vs):
 
 
 @VisiData.global_api
-def push(vd, vs, sheets=None):
+def push(vd, vs):
     'Move given sheet `vs` to index 0 of list `sheets`.'
-    if sheets is None:
-        sheets = vd.sheets
-
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
-    else:
-        vs.vd = vd
-        if vs in sheets:
-            sheets.remove(vs)
 
-        sheets.insert(0, vs)
+    vs.vd = vd
+    if vs in vd.sheets:
+        vd.sheets.remove(vs)
 
-        if vs.precious and vs not in vd.allSheets:
-            vd.allSheets.append(vs)
+    vd.sheets.insert(0, vs)
 
-        vs.ensureLoaded()
+    if vs.precious and vs not in vd.allSheets:
+        vd.allSheets.append(vs)
+
+    vs.ensureLoaded()
 
 
 @VisiData.cached_property
