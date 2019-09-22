@@ -11,8 +11,9 @@ theme('color_status_replay', 'green', 'color of replay status indicator')
 option('replay_movement', False, 'insert movements during replay')
 option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
-globalCommand('gD', 'visidata-dir', 'p=Path(options.visidata_dir); vd.push(DirSheet(str(p), source=p))')
-globalCommand('D', 'cmdlog', 'vd.push(vd.cmdlog)')
+globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
+globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
+globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
 globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save to: ", value=fnSuffix(name)), vd.cmdlog)')
 globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
 globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
@@ -31,7 +32,7 @@ globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
 BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
 # prefixes which should not be logged
-nonLogged = '''forget exec-longname undo redo
+nonLogged = '''forget exec-longname undo redo quit
 error status errors statuses options threads cmdlog
 replay stop pause cancel advance save-cmdlog
 go- search scroll prev next page go start end zoom resize
@@ -221,6 +222,7 @@ class CommandLog(TsvSheet):
             # remove user-aborted commands and simple movements
             if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes, self.currentActiveRow.longname):
                 self.addRow(self.currentActiveRow)
+                sheet.cmdlog.addRow(self.currentActiveRow)
                 if options.cmdlog_histfile:
                     if not getattr(vd, 'sessionlog', None):
                         vd.sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
@@ -229,7 +231,9 @@ class CommandLog(TsvSheet):
         self.currentActiveRow = None
 
     def openHook(self, vs, src):
-        self.addRow(self.newRow(keystrokes='o', input=src, longname='open-file'))
+        r = self.newRow(keystrokes='o', input=src, longname='open-file')
+        vs.cmdlog.addRow(r)
+        self.addRow(r)
 
     @classmethod
     def togglePause(self):
@@ -385,6 +389,19 @@ class CommandLog(TsvSheet):
         status("%s redone" % cmdlogrow.longname)
 
 
+@BaseSheet.cached_property
+def cmdlog(sheet):
+    rows = sheet.cmdlog_sheet.rows
+    if isinstance(sheet.source, BaseSheet):
+        rows = sheet.source.cmdlog.rows + rows
+    return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=rows)
+
+
+@BaseSheet.cached_property
+def cmdlog_sheet(sheet):
+    return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=[])
+
+
 CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
 CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
 CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
@@ -393,6 +410,4 @@ options.set('header', 1, CommandLog)  # .vd files always have a header row, rega
 
 @VisiData.cached_property
 def cmdlog(vd):
-    vs = CommandLog('cmdlog')
-    vs.rows = []
-    return vs
+    return CommandLog('cmdlog', rows=[])
