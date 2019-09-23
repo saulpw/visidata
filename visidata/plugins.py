@@ -50,9 +50,9 @@ class PluginsSheet(TsvSheet):
     def installPlugin(self, plugin):
         # pip3 install requirements
         initpath = _plugin_init()
+        os.makedirs(initpath.parent, exist_ok=True)
         if not initpath.exists():
-            with initpath.open_text(mode='w') as initfp:
-                initfp.write()
+            initpath.touch()
 
         outpath = _plugin_path(plugin)
         if outpath.exists():
@@ -63,7 +63,6 @@ class PluginsSheet(TsvSheet):
     @asyncthread
     def _install(self, plugin):
         outpath = _plugin_path(plugin)
-        os.makedirs(outpath.parent, exist_ok=True)
 
         with urlcache(plugin.url, 0).open_text() as pyfp:
             with outpath.open_text(mode='w') as outfp:
