@@ -70,7 +70,7 @@ class PluginsSheet(TsvSheet):
                 outfp.write(pyfp.read())
 
         if plugin.requirements:
-            p = subprocess.Popen(['pip3', 'install']+plugin.requirements.split())
+            p = subprocess.Popen([sys.executable, '-m', 'pip', 'install']+plugin.requirements.split())
             status(tuple(p.communicate()))
 
         with Path(_plugin_init()).open_text(mode='a') as fprc:
