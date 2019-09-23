@@ -1,4 +1,5 @@
 import os
+import re
 import zipfile
 
 from visidata import *
@@ -82,13 +83,19 @@ class PluginsSheet(TsvSheet):
 
     def removePlugin(self, plugin):
         initpath = Path(_plugin_init())
-        oldinitpath = initpath.with_suffix(initpath.suffix + '.bak')
+        oldinitpath = Path(initpath.with_suffix(initpath.suffix + '.bak'))
         try:
             shutil.copyfile(initpath, oldinitpath)
-            init_contents = Path(oldinitpath).read_text().replace('\n'+_plugin_import(plugin), '')
 
-            with Path(_plugin_init()).open_text(mode='w') as fprc:  # replace without import line
-                fprc.write(init_contents)
+            # Copy lines from the backup init file into its replacement,
+            # skipping lines that import the removed plugin.
+            #
+            # By matching from the start of a line through a word boundary,
+            # we avoid removing commented lines or inadvertently removing
+            # plugins with similar names.
+            with oldinitpath.open_text() as old, initpath.open_text(mode='w') as new:
+                r = re.compile(r'^{}\W'.format(_plugin_import(plugin)))
+                new.writelines(line for line in old.readlines() if not r.match(line))
             warning('plugin {0} will not be imported in the future'.format(plugin[0]))
         except FileNotFoundError:
             warning("no plugins/__init__.py found")
