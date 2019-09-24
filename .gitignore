@@ -9,3 +9,4 @@ visidata.egg-info/
 *.swo
 *dist
 *_build
+tags
