@@ -373,8 +373,15 @@ def cmdlog_sheet(sheet):
 def shortcut(self):
     try:
         return str(vd.allSheets.index(self)+1)
-    except:
+    except ValueError:
+        pass
+
+    try:
         return self.cmdlog_sheet.rows[0].keystrokes
+    except Exception:
+        pass
+
+    return ''
 
 
 @VisiData.cached_property
