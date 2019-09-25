@@ -197,7 +197,13 @@ def main():
 
 def vd_cli():
     status(__version_info__)
-    rc = main()
+    rc = -1
+    try:
+        rc = main()
+    except FileNotFoundError as e:
+        print(e)
+        if options.debug:
+            raise
     sys.stderr.flush()
     sys.stdout.flush()
     os._exit(rc)  # cleanup can be expensive with large datasets
