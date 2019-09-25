@@ -15,7 +15,7 @@ from visidata import Path, openSource, saveSheets, setDiffSheet, domotd, Sheet, 
 from visidata import date, modtime, filesize
 from visidata.main import eval_vd, duptty
 
-from visidata.defermods import *
+from plugins.defermods import *
 
 
 option('config', '~/.vlsrc', 'config file to exec in Python')
