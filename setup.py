@@ -14,7 +14,7 @@ setup(name='visidata',
       author_email='visidata@saul.pw',
       url='https://visidata.org',
       download_url='https://github.com/saulpw/visidata/tarball/' + __version__,
-      scripts=['bin/vd', 'bin/vls'],
+      scripts=['bin/vd'],
       entry_points={'console_scripts': [
           'visidata=visidata.main:vd_cli'
         ],
