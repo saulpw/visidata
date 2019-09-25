@@ -76,6 +76,7 @@ from .transpose import *
 from .diff import *
 from .shell import *
 from .layout import *
+from .main import *
 import visidata.sort
 
 from .loaders.csv import *
