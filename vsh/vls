@@ -18,7 +18,6 @@ from visidata.main import eval_vd, duptty
 from plugins.defermods import *
 
 
-option('config', '~/.vlsrc', 'config file to exec in Python')
 option('recursive', False, 'list files in subdirectories recursively')
 
 
@@ -226,7 +225,7 @@ class SuperDirSheet(DirSheet):
 
 # end DirSheet
 
-def vls_cli():
+def main_vls():
     status(__version_info__)
     rc = main()
     sys.stderr.flush()
@@ -236,4 +235,4 @@ def vls_cli():
 
 addGlobals(globals())
 
-vls_cli()
+main_vls()
