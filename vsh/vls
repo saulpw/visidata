@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__ = '0.1-dev'
+__version__ = '0.2-dev'
 __version_info__ = 'saul.pw/vls v' + __version__
 
 import os

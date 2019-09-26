@@ -2,6 +2,8 @@
 
 'ping/traceroute on VisiData'
 
+__version__ = '0.2-dev'
+
 import sys
 from statistics import mean
 
