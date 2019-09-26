@@ -47,7 +47,7 @@ def duptty():
     return stdin, stdout
 
 
-def main():
+def main_vd():
     'Open the given sources using the VisiData interface.'
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
@@ -199,7 +199,7 @@ def vd_cli():
     status(__version_info__)
     rc = -1
     try:
-        rc = main()
+        rc = main_vd()
     except FileNotFoundError as e:
         print(e)
         if options.debug:
