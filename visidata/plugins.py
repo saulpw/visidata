@@ -63,20 +63,29 @@ class PluginsSheet(TsvSheet):
 
     @asyncthread
     def _install(self, plugin):
-        outpath = _plugin_path(plugin)
+        exists = False
+        with Path(_plugin_init()).open_text(mode='r') as fprc:
+            r = re.compile(r'^{}\W'.format(_plugin_import(plugin)))
+            for line in fprc.readlines():
+                if r.match(line):
+                    exists = True
+                    warning("plugin already loaded")
 
-        with urlcache(plugin.url, 0).open_text() as pyfp:
-            with outpath.open_text(mode='w') as outfp:
-                outfp.write(pyfp.read())
+        if not exists:
+            outpath = _plugin_path(plugin)
 
-        if plugin.requirements:
-            p = subprocess.Popen([sys.executable, '-m', 'pip', 'install']+plugin.requirements.split())
-            status(tuple(p.communicate()))
+            with urlcache(plugin.url, 0).open_text() as pyfp:
+                with outpath.open_text(mode='w') as outfp:
+                    outfp.write(pyfp.read())
 
-        with Path(_plugin_init()).open_text(mode='a') as fprc:
-            print(_plugin_import(plugin), file=fprc)
+            if plugin.requirements:
+                p = subprocess.Popen([sys.executable, '-m', 'pip', 'install']+plugin.requirements.split())
+                status(tuple(p.communicate()))
 
-        warning("restart visidata to use new plugin")
+            with Path(_plugin_init()).open_text(mode='a') as fprc:
+                print(_plugin_import(plugin), file=fprc)
+                warning("restart visidata to use new plugin")
+
 
     def removePluginIfExists(self, plugin):
         self.removePlugin(plugin)
@@ -87,11 +96,9 @@ class PluginsSheet(TsvSheet):
         try:
             shutil.copyfile(initpath, oldinitpath)
 
-            # Copy lines from the backup init file into its replacement,
-            # skipping lines that import the removed plugin.
+            # Copy lines from the backup init file into its replacement, skipping lines that import the removed plugin.
             #
-            # By matching from the start of a line through a word boundary,
-            # we avoid removing commented lines or inadvertently removing
+            # By matching from the start of a line through a word boundary, we avoid removing commented lines or inadvertently removing
             # plugins with similar names.
             with oldinitpath.open_text() as old, initpath.open_text(mode='w') as new:
                 r = re.compile(r'^{}\W'.format(_plugin_import(plugin)))
