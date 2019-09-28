@@ -243,13 +243,16 @@ class HunksSheet(GitSheet):
 
 
 class HunkViewer(GitSheet):
+    colorizers = [
+            RowColorizer(4, None, HunkViewer.colorDiffRow),
+    ]
+
     def __init__(self, hunks, **kwargs):
         super().__init__('hunk', hunks=hunks, **kwargs)
         self.columns = [
             ColumnItem('1', 1, width=self.windowWidth//2-1),
             ColumnItem('2', 2, width=self.windowWidth//2-1),
         ]
-        self.addColorizer(RowColorizer(4, None, HunkViewer.colorDiffRow))
 
     def reload(self):
         if not self.hunks:

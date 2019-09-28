@@ -79,10 +79,12 @@ class GitMerge(GitSheet):
             Column('3/index', getter=lambda r: r[2][1]),
             Column('4/working', getter=lambda r: r[3][1]),
     ]
+    colorizers = [
+            Colorizer('cell', 5, self.colorDiffCell),
+    ]
 
     def __init__(self, gf):
         super().__init__(str(gf)+'_merge', gf)
-        self.addColorizer(Colorizer('cell', 5, self.colorDiffCell))
 #        Colorizer('col', 4, lambda s,c,r,v: 'green' if c is s.columns[2] else None)
 
     @staticmethod
