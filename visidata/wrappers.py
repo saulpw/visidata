@@ -18,7 +18,7 @@ class TypedWrapper:
     def __init__(self, func, *args):
         self.type = func
         self.args = args
-        self.val = args[0] if args else None
+        self.val = args[0] if args else ''
 
     def __bool__(self):
         return False
@@ -79,17 +79,18 @@ def wrmap(func, iterable, *args):
 
 def wrapply(func, *args, **kwargs):
     'Like apply(), but which wraps Exceptions and passes through Wrappers (if first arg)'
-    val = args[0]
-    if val is None:
-        return TypedWrapper(func, None)
-    elif isinstance(val, TypedExceptionWrapper):
-        tew = copy.copy(val)
-        tew.forwarded = True
-        return tew
-    elif isinstance(val, TypedWrapper):
-        return val
-    elif isinstance(val, Exception):
-        return TypedWrapper(func, *args)
+    if args:
+        val = args[0]
+        if val is None:
+            return TypedWrapper(func, None)
+        elif isinstance(val, TypedExceptionWrapper):
+            tew = copy.copy(val)
+            tew.forwarded = True
+            return tew
+        elif isinstance(val, TypedWrapper):
+            return val
+        elif isinstance(val, Exception):
+            return TypedWrapper(func, *args)
 
     try:
         return func(*args, **kwargs)

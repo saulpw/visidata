@@ -11,6 +11,13 @@ from visidata import asyncthread, exceptionCaught, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, LazyMap, AttrDict
 
+class InProgress(Exception):
+    @property
+    def stacktrace(self):
+        return  ['calculation in progress']
+
+INPROGRESS = TypedExceptionWrapper(None, exception=InProgress())  # sentinel
+
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
 option('force_valid_colnames', False, 'clean column names to be valid Python identifiers', replay=True)
 
@@ -146,7 +153,7 @@ class Column(Extensible):
 
     @asyncthread
     def _calcIntoCacheAsync(self, row):
-        self._cachedValues[self.sheet.rowid(row)] = None
+        self._cachedValues[self.sheet.rowid(row)] = INPROGRESS
         self._calcIntoCache(row)
 
     def _calcIntoCache(self, row):
