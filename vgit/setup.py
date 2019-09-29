@@ -2,20 +2,21 @@
 
 from setuptools import setup
 
-__version__ = '0.2'
+__version__ = '0.2-dev'
 
 setup(name='vgit',
       version=__version__,
-      install_requires=['sh'],
       description='a sleek terminal user interface for git',
+      long_description=open('README.md').read(),
+      install_requires=['visidata @ git+git://github.com/saulpw/visidata@develop', 'sh @ git+git://github.com/saulpw/sh@master'],
 #      long_description=open('README.md').read(),
       author='Saul Pwanson',
       author_email='vgit@saul.pw',
-      url='http://github.com/saulpw/vgit',
-      download_url='https://github.com/saulpw/vgit/tarball/' + __version__,
-      scripts=['vgit'],
-      py_modules = ['vdtui', 'merge', 'blame', 'git', 'Path'],
-      license='GPLv2',
+      url='https://github.com/saulpw/visidata/vgit',
+      scripts=['../bin/vgit'],
+      py_modules = ['amend', 'blame', 'diff', 'git', 'grep', 'overview', 'repo', 'status'],
+      license='GPLv3',
+      python_requires='>=3.6',
       classifiers=[
           'Development Status :: 2 - Pre-Alpha',
           'Environment :: Console',
@@ -31,5 +32,4 @@ setup(name='vgit',
           'Topic :: Terminals'
       ],
       keywords=('console textpunk git version-control curses visidata tui terminal'),
-      packages=['vgit'],
       )
