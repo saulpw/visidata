@@ -1,6 +1,6 @@
 # mandatory for functionality
 
-- set global sheets on vd via `@VisiData.cached_property`
+- set global sheets on vd via `@VisiData.lazy_property`
    - otherwise they will not have full Sheet functionality from extensions
 - set other global vars on vd directly at module-level
 - add functions to vd with @VisiData.api or @VisiData.property

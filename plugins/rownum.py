@@ -6,7 +6,7 @@ __version__ = '0.9'
 Sheet.addCommand(None, 'addcol-rownum', 'addColumn(Column("rownum", type=int, getter=sheet.rowNumber), cursorColIndex)', undo=undoAddCols, helpstr='add column with original row ordering')
 
 
-@Sheet.cached_property
+@Sheet.lazy_property
 def rowNumbers(sheet):
     'original row numbers for rows added with addRow'
     return {}     # [rowid(row)] -> rowidx

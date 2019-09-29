@@ -167,7 +167,7 @@ def _annotate_thread(t, endTime=None):
 # all long-running threads, including main and finished
 VisiData.init('threads', lambda: [_annotate_thread(threading.current_thread(), 0)])
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def threadsSheet(self):
     return ThreadsSheet('threads')
 

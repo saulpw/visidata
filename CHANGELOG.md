@@ -44,7 +44,7 @@
 
 ## Infrastructure / API
     - [add-row] create a default newRow for Sheet (thanks for-coursera for bug report #363)
-    - [cached_property] newSheet and cmdlog are now cached_property
+    - [lazy_property] newSheet and cmdlog are now lazy_property
         - this enables the overwriting and extending of them by plugins
     - [IndexSheet] refactor SheetsSheet parent to IndexSheet
         - HtmlTablesSheet now inherits from IndexSheet
@@ -203,7 +203,7 @@
 ## API
 - VisiData, BaseSheet, Column inherit from Extensible base class
   - internal modules and plugins can be self-contained
-  - `@X.property @X.cached_property`, `X.init()`, `@X.api`
+  - `@X.property @X.lazy_property`, `X.init()`, `@X.api`
 - remove Sheet.vd; 'vd' attrs now available in execstr
 - remove hooks
 - add @deprecated(ver) decorator; put deprecations in deprecated.py

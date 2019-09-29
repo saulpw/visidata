@@ -18,3 +18,4 @@ exec_keystrokes
 exec_command			
 CommandLog.currentActiveRow			
 ESC	ALT		
+cached_property	lazy_property	same	

@@ -21,15 +21,15 @@ BaseSheet.defermods = False     # True when modifications + deletes are deferred
 BaseSheet.trackmods = True      # True when modifications are tracked
 
 # deferred cached
-@Sheet.cached_property
+@Sheet.lazy_property
 def _deferredAdds(sheet):
     return dict() # [s.rowid(row)] -> row
 
-@Sheet.cached_property
+@Sheet.lazy_property
 def _deferredMods(sheet):
     return dict() # [s.rowid(row)] -> (row, { [col] -> val })
 
-@Sheet.cached_property
+@Sheet.lazy_property
 def _deferredDels(sheet):
     return dict() # [s.rowid(row)] -> row
 

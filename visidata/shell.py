@@ -8,7 +8,7 @@ try:
 except ImportError:
     pass # pwd,grp modules not available on Windows
 
-from visidata import Column, Sheet, LazyMapRow, asynccache, exceptionCaught, options, option
+from visidata import Column, Sheet, LazyComputeRow, asynccache, exceptionCaught, options, option
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError
 from visidata import CellColorizer, RowColorizer, undoAddCols, undoBlocked, modtime, filesize
 
@@ -50,10 +50,10 @@ class ColumnShell(Column):
         try:
             import shlex
             args = []
-            lmr = LazyMapRow(self.source, row)
+            context = LazyComputeRow(self.source, row)
             for arg in shlex.split(self.expr):
                 if arg.startswith('$'):
-                    args.append(str(lmr[arg[1:]]))
+                    args.append(str(context[arg[1:]]))
                 else:
                     args.append(arg)
 

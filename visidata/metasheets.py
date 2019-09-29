@@ -16,11 +16,11 @@ option('visibility', 0, 'visibility level (0=low, 1=high)')
 
 vd_system_sep = '\t'
 
-@BaseSheet.cached_property
+@BaseSheet.lazy_property
 def optionsSheet(sheet):
     return OptionsSheet(sheet.name+"_options", source=sheet)
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def globalOptionsSheet(vd):
     return OptionsSheet('global_options', source='override')
 
@@ -180,7 +180,7 @@ class VisiDataSheet(IndexSheet):
             self.addRow(vs)
 
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def vdmenu(self):
     vs = VisiDataSheet('VisiData Main Menu', source=vd)
     vs.reload()

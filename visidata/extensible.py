@@ -1,9 +1,11 @@
-from functools import wraps
+from functools import wraps, lru_cache
 
 
-__all__ = ['Extensible']
+__all__ = ['Extensible', 'cache']
 
 class Extensible:
+    _cache_clearers = []  # list of func() to call in clear_caches()
+
     @classmethod
     def init(cls, membername, initfunc, copy=False):
         'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T[, copy=True])'
@@ -46,7 +48,8 @@ class Extensible:
         return dofunc
 
     @classmethod
-    def cached_property(cls, func):
+    def lazy_property(cls, func):
+        'Return func() on first access and cache result; return cached result thereafter.'
         @property
         @wraps(func)
         def get_if_not(self):
@@ -56,3 +59,30 @@ class Extensible:
             return getattr(self, name)
         setattr(cls, func.__name__, get_if_not)
         return get_if_not
+
+    @classmethod
+    def cached_property(cls, func):
+        'Return func() on first access, and cache result; return cached result until clear_caches().'
+        @property
+        @wraps(func)
+        @lru_cache(maxsize=None)
+        def get_if_not(self):
+            return func(self)
+        setattr(cls, func.__name__, get_if_not)
+        Extensible._cache_clearers.append(get_if_not.fget.cache_clear)
+        return get_if_not
+
+    @classmethod
+    def clear_all_caches(cls):
+        for func in Extensible._cache_clearers:
+            func()
+
+
+def cache(func):
+    'Return func(...) on first access, and cache result; return cached result until clear_caches().'
+    @wraps(func)
+    @lru_cache(maxsize=None)
+    def call_if_not(self, *args, **kwargs):
+        return func(self, *args, **kwargs)
+    Extensible._cache_clearers.append(call_if_not.cache_clear)
+    return call_if_not

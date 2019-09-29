@@ -1,7 +1,7 @@
 from visidata import *
 
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def macrosheet(vd):
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
     macrosheet = loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or error('error loading macros')

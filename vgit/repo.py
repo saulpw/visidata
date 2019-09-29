@@ -182,19 +182,19 @@ GitLogSheet.addCommand(None, 'delete-row', 'error("delete is not supported")')
 GitLogSheet.addCommand(None, 'add-row', 'error("commits cannot be added")')
 
 
-@GitStatus.cached_property
+@GitStatus.lazy_property
 def gitBranchesSheet(self):
     return GitBranches('branches', source=self)
 
-@GitStatus.cached_property
+@GitStatus.lazy_property
 def gitOptionsSheet(self):
     return GitOptions('git-options', source=self)
 
-@GitStatus.cached_property
+@GitStatus.lazy_property
 def gitStashesSheet(self):
     return GitStashes('stashes', source=self)
 
-@GitStatus.cached_property
+@GitStatus.lazy_property
 def gitRemotesSheet(self):
     return GitRemotes('remotes', source=self)
 

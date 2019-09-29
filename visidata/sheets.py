@@ -6,13 +6,13 @@ from unittest import mock
 from copy import copy
 import textwrap
 
-from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, LazyMap
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
-TypedExceptionWrapper, getGlobals, LazyMapRow, BaseSheet, UNLOADED,
+TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoEditCell, undoEditCells, undoAttr, undoBlocked)
 
 
-__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet']
+__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow']
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
@@ -94,6 +94,43 @@ CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt fun
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
 
+class RecursiveExprException(Exception):
+    pass
+
+class LazyComputeRow:
+    'Calculate column values as needed.'
+    def __init__(self, sheet, row):
+        self.row = row
+        self.sheet = sheet
+        if not hasattr(self.sheet, '_lcm'):
+            self.sheet._lcm = LazyChainMap(sheet)
+        else:
+            self.sheet._lcm.clear()  # reset locals on lcm
+
+        self._usedcols = set()
+        self._keys = [c.name for c in self.sheet.columns]
+
+    def keys(self):
+        return self._keys + self.sheet._lcm.keys()
+
+    def __getitem__(self, colid):
+        try:
+            i = self._keys.index(colid)
+            c = self.sheet.columns[i]
+
+            if c in self._usedcols:
+                raise RecursiveExprException()
+            self._usedcols.add(c)
+            ret = c.getTypedValue(self.row)
+            self._usedcols.remove(c)
+            return ret
+        except ValueError:
+            try:
+                return self.sheet._lcm[colid]
+            except (KeyError, AttributeError):
+                if colid in ['row', 'sheet']:
+                    return getattr(self, colid)   # finally, handle 'row' and 'sheet' fake columns
+                raise KeyError(colid)
 
 class Sheet(BaseSheet):
     'Base class for all tabular sheets.'
@@ -148,8 +185,8 @@ class Sheet(BaseSheet):
     def addColorizer(self, c):
         self.colorizers.append(c)
 
-    @functools.lru_cache()
-    def _getColorizers(self):
+    @drawcache_property
+    def allColorizers(self):
         # all colorizers must be in the same bucket
         # otherwise, precedence does not get applied properly
         _colorizers = set()
@@ -167,7 +204,7 @@ class Sheet(BaseSheet):
         'Returns ColorAttr for the given colorizers/col/row/value'
 
         colorstack = []
-        for colorizer in self._getColorizers():
+        for colorizer in self.allColorizers:
             r = colorizer.func(self, col, row, value)
             if r:
                 colorstack.append(colorizer.coloropt if colorizer.coloropt else r)
@@ -184,8 +221,7 @@ class Sheet(BaseSheet):
     def newRow(self):
         return type(self)._rowtype()
 
-    @property
-    @functools.lru_cache()
+    @drawcache_property
     def colsByName(self):
         'Return dict of colname:col'
         # dict comprehension in reverse order so first column with the name is used
@@ -236,7 +272,12 @@ class Sheet(BaseSheet):
         return self.name
 
     def evalexpr(self, expr, row=None):
-        return eval(expr, getGlobals(), LazyMapRow(self, row) if row is not None else None)
+        if row:
+            contexts = vd._evalcontexts.setdefault((self, self.rowid(row)), LazyComputeRow(self, row))
+        else:
+            contexts = None
+
+        return eval(expr, getGlobals(), contexts)
 
     def rowid(self, row):
         'Return a fast, unique, and stable hash of the given row object.  Must be fast.  Overrideable.'
@@ -247,8 +288,7 @@ class Sheet(BaseSheet):
         'Number of visible rows at the current window height.'
         return self.windowHeight-self.nHeaderRows-self.nFooterRows
 
-    @property
-    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
+    @drawcache_property
     def nHeaderRows(self):
         vcols = self.visibleCols
         return max(len(col.name.split('\n')) for col in vcols) if vcols else 0
@@ -274,8 +314,7 @@ class Sheet(BaseSheet):
         'List of rows onscreen.'
         return self.rows[self.topRowIndex:self.topRowIndex+self.nScreenRows]
 
-    @property
-    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
+    @drawcache_property
     def visibleCols(self):  # non-hidden cols
         'List of `Column` which are not hidden.'
         return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
@@ -290,8 +329,7 @@ class Sheet(BaseSheet):
             if rowy <= y <= rowy+h-1:
                 return rowidx
 
-    @property
-    @functools.lru_cache()  # cache for perf reasons on wide sheets.  cleared in vd.clear_caches()
+    @drawcache_property
     def keyCols(self):
         'Cached list of visible key columns (Columns with .key=True)'
         return sorted([c for c in self.columns if c.keycol and not c.hidden], key=lambda c:c.keycol)
@@ -747,6 +785,11 @@ class SheetsSheet(IndexSheet):
     nKeys = 1
 
 
+@VisiData.property
+@drawcache
+def _evalcontexts(vd):
+    return {}
+
 ## VisiData sheet manipulation
 
 @VisiData.global_api
@@ -785,11 +828,11 @@ def push(vd, vs):
     vs.ensureLoaded()
 
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def allSheetsSheet(vd):
     return SheetsSheet("sheets_all", source=vd.allSheets)
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def sheetsSheet(vd):
     return SheetsSheet("sheets", source=vd.sheets)
 

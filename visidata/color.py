@@ -2,7 +2,7 @@ import curses
 import functools
 import copy
 
-from visidata import options
+from visidata import options, Extensible, drawcache, drawcache_property
 from collections import namedtuple
 
 __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker']
@@ -40,7 +40,10 @@ class ColorMaker:
     def __init__(self):
         self.attrs = {}
         self.color_attrs = {}
-        self.colorcache = {}
+
+    @drawcache_property
+    def colorcache(self):
+        return {}
 
     def setup(self):
         if options.use_default_colors:
@@ -75,7 +78,7 @@ class ColorMaker:
         'colors.color_foo returns colors[options.color_foo]'
         return self.get_color(optname).attr
 
-    @functools.lru_cache()  # cleared in vd.clear_caches()
+    @drawcache
     def resolve_colors(self, colorstack):
         'Returns the ColorAttr for the colorstack, a list of color option names sorted highest-precedence color first.'
         cattr = ColorAttr(0,0,0,0)

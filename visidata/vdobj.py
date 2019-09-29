@@ -4,7 +4,7 @@ import curses
 
 import visidata
 
-__all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData']
+__all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData', 'drawcache', 'drawcache_property']
 
 
 ENTER='^J'
@@ -19,6 +19,12 @@ def asyncthread(func):
     def _execAsync(*args, **kwargs):
         return visidata.vd.execAsync(func, *args, **kwargs)
     return _execAsync
+
+# @drawcache is vd alias for @cache, since vd clears it every frame
+drawcache = visidata.cache
+
+def drawcache_property(func):
+    return property(drawcache(func))
 
 
 class VisiData(visidata.Extensible):
@@ -38,8 +44,11 @@ class VisiData(visidata.Extensible):
         self.lastErrors = []
         self.keystrokes = ''
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
-        self.mousereg = []
         self.cmdlog = None
+
+    @drawcache_property
+    def mousereg(self):
+        return []
 
     def __copy__(self):
         'Dummy method for Extensible.init()'
@@ -61,13 +70,7 @@ class VisiData(visidata.Extensible):
 
     def clear_caches(self):
         'Invalidate internal caches between command inputs.'
-        visidata.Sheet.visibleCols.fget.cache_clear()
-        visidata.Sheet.keyCols.fget.cache_clear()
-        visidata.Sheet.nHeaderRows.fget.cache_clear()
-        visidata.Sheet.colsByName.fget.cache_clear()
-        visidata.colors.colorcache.clear()
-        visidata.ColorMaker.resolve_colors.cache_clear()
-        self.mousereg.clear()
+        visidata.Extensible.clear_all_caches()
 
     def getkeystroke(self, scr, vs=None):
         'Get keystroke and display it on status bar.'

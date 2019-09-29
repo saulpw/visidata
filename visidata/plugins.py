@@ -8,7 +8,7 @@ from visidata import *
 option('plugins_url', 'https://visidata.org/plugins/plugins.tsv', 'source of plugins sheet')
 
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def pluginsSheet(p):
     'Support the "plugins" phony filetype as PluginsSheet'
     return PluginsSheet('plugins', source=urlcache(options.plugins_url, days=0))

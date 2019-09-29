@@ -9,7 +9,7 @@ from visidata import option, options, anytype, stacktrace, vd
 from visidata import getType, typemap, isNumeric, isNullFunc
 from visidata import asyncthread, exceptionCaught, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
-from visidata import Extensible, LazyMap, AttrDict
+from visidata import Extensible, AttrDict
 
 class InProgress(Exception):
     @property
@@ -34,7 +34,6 @@ __all__ = [
     'SubColumnItem',
     'SubColumnAttr',
     'ColumnEnum',
-    'LazyMapRow',
     'ColumnExpr',
     'DisplayWrapper',
 ]
@@ -385,32 +384,6 @@ class ColumnEnum(Column):
             value = self.mapping.get(value, value)
         setattr(row, self.name, value or self.default)
 
-
-class LazyMapRow:
-    'Calculate column values as needed.'
-    def __init__(self, sheet, row):
-        self.row = row
-        self.sheet = sheet
-        if not hasattr(self.sheet, 'lazymap'):
-            self.sheet.lazymap = LazyMap(sheet)
-        else:
-            self.sheet.lazymap.clear()  # reset locals on lazymap
-        self._keys = [c.name for c in self.sheet.columns]
-
-    def keys(self):
-        return self._keys + self.sheet.lazymap.keys()
-
-    def __getitem__(self, colid):
-        try:
-            i = self._keys.index(colid)
-            return self.sheet.columns[i].getTypedValue(self.row)
-        except ValueError:
-            try:
-                return self.sheet.lazymap[colid]
-            except (KeyError, AttributeError):
-                if colid in ['row', 'sheet']:
-                    return getattr(self, colid)   # finally, handle 'row' and 'sheet' fake columns
-                raise KeyError(colid)
 
 class ColumnExpr(Column):
     def __init__(self, name, cache=True, expr=None, **kwargs):

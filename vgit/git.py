@@ -26,7 +26,7 @@ class GitCmdLog(Sheet):
 GitCmdLog.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], cursorRow[1]))', 'view output of this command'),
 
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def gitcmdlog(vd):
     return GitCmdLog('gitcmdlog')
 

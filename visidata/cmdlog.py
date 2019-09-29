@@ -171,7 +171,7 @@ class CommandLog(TsvSheet):
 
     @asyncthread
     def checkpoint(self, cmd, sheet, cmdlogrow):
-        cmdlogrow.undofuncs = [eval(cmd.undo, getGlobals(), LazyMap(sheet))]
+        cmdlogrow.undofuncs = [eval(cmd.undo, getGlobals(), LazyChainMap(sheet))]
 
     def onUndo(self, undofunc):
         'On undo of latest command, call undofunc()'
@@ -356,7 +356,7 @@ class CommandLog(TsvSheet):
         status("%s redone" % cmdlogrow.longname)
 
 
-@BaseSheet.cached_property
+@BaseSheet.lazy_property
 def cmdlog(sheet):
     rows = sheet.cmdlog_sheet.rows
     if isinstance(sheet.source, BaseSheet):
@@ -364,7 +364,7 @@ def cmdlog(sheet):
     return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=rows)
 
 
-@BaseSheet.cached_property
+@BaseSheet.lazy_property
 def cmdlog_sheet(sheet):
     return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=[])
 
@@ -384,7 +384,7 @@ def shortcut(self):
     return ''
 
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def cmdlog(vd):
     return CommandLog('cmdlog', rows=[])
 

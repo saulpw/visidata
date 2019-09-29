@@ -6,7 +6,7 @@ from unittest import mock
 UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
 
 
-class LazyMap:
+class LazyChainMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
     def __init__(self, *objs):
         self.locals = {}
@@ -108,7 +108,7 @@ class BaseSheet(Extensible):
                 vd.cmdlog.beforeExecHook(self, cmd, '', keystrokes)
             code = compile(cmd.execstr, cmd.longname, 'exec')
             vd.debug(cmd.longname)
-            exec(code, vdglobals, LazyMap(vd, self))
+            exec(code, vdglobals, LazyChainMap(vd, self))
         except EscapeException as e:  # user aborted
             vd.warning('aborted')
             escaped = True
