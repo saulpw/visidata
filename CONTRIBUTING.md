@@ -1,75 +1,70 @@
-## Contributing to VisiData
+# Contributing
 
-### Reporting bugs
+*Adapted from [ziglang's CONTRIBUTING.md](https://github.com/ziglang/zig/blob/master/CONTRIBUTING.md)*
 
-If you encounter any bugs or have any problems, please [create an issue on Github](https://github.com/saulpw/visidata/issues).
+## Start a Project Using VisiData
 
-If you get an unexpected error, please include the full stack trace from `Ctrl+E` (you can save the trace with `Ctrl+S`).
+One of the best ways you can contribute to VisiData is to start building loaders or plugins. Here are some great examples:
 
-Attach the commandlog (saved with `Ctrl+D`) to show the steps that led to the issue.  Please include a small subset of the source data that elicits the problem.
+    - [jsvine's custom visidata plugins](https://github.com/jsvine/visidata-plugins)
+    - [layertwo's pcap loader](https://github.com/saulpw/visidata/blob/develop/visidata/loaders/pcap.py)
+    - [vls](https://github.com/saulpw/visidata/blob/develop/vsh/vls)
 
-### Submitting code
+Without fail, these projects lead to discovering bugs and help flesh out the API, which result in design improvements in VisiData. Importantly, each issue found this way comes with real world motivations, so it is easy to explain your reasoning behind proposals and core feature requests.
 
-VisiData has two main branches:
+## Feature Requests
 
-- [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (what is in pypi/brew/apt).
-- [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable). All pull requests should be submitted against `develop`.
+VisiData is designed to be extensible, and most feature requests can be implemented as a small plugin.
+If this would require changes to the VisiData core, and a reasonable design is approved, then the issue can stay open until the core changes have been made.
+Otherwise, in the spirit of Marie Kondo, the issue will be closed without prejudice.
 
-To set up a VisiData development environment:
+Feature requests with some amount of working Python code are more likely to get attention.
+Design proposals with concrete use cases are very welcome.
 
-* [git clone](https://git-scm.com/docs/git-clone) the [repository](https://github.com/saulpw/visidata.git).
-* [git checkout](https://git-scm.com/docs/git-checkout) the `develop` branch.
-* Set the [PYTHONPATH](https://docs.python.org/2/using/cmdline.html#envvar-PYTHONPATH) environment variable to the toplevel visidata directory (`export PYTHONPATH=.` if running visidata from directory itself). This ensures that you are executing the code in the current checkout, instead of the global install (without needing to uninstall VisiData).
+## Spread the Word
 
-### Contributing money
+Another way to contribute is to write about VisiData, host a workshop, or speak about VisiData at a conference. Here are some examples:
+
+    - [jsvine's Introduction to VisiData](https://jsvine.github.io/intro-to-visidata/index.html)
+    - [aborruso tweeted](https://twitter.com/aborruso/status/1152161585835728896)
+    - [VisiData Workshop hosted in London]()
+    - [saulpw gave a lightning talk](https://www.youtube.com/watch?v=N1CBDTgGtOU)
+
+VisiData is an ambitious, niche project, with no advertising budget. Word of mouth is the only way people find out about it, and the more people hear about it, the more people will use it, and the more the ecosystem will develop.
+
+## Writing a well constructed bug report
+
+If you encounter any bugs or have any problems, please [create an issue on GitHub](https://github.com/saulpw/visidata/issues).
+
+A great bug report will include:
+    - a stacktrace, if there is an unexpected error; the most recent full stack traces can be viewed with `Ctrl+E` (then saved with `Ctrl+S`)
+    - a [.vd](http://visidata.org/docs/save-restore/) and sample dataset that reproduces the issue
+    - a .png/.gif (esp. for user interface changes)
+
+Some examples of great bug reports:
+    - [#350 by @chocolateboy](https://github.com/saulpw/visidata/issues/350)
+    - [#340 by @Mikee-3000](https://github.com/saulpw/visidata/issues/340)
+
+## Money
 
 If VisiData has saved you time and effort, please contribute to [my Patreon](https://www.patreon.com/saulpw).
 
-### Talk about VisiData
+## Editing source code
 
-The biggest thing you can do to help VisiData is to spread the word.
-Write blogposts, post tweets, mention it on podcasts.
-Be specific about how you use it and what you love about it.
+Code in /plugins or visidata/loaders is welcome, as long as it is useful to someone and safe for everyone.
+Major updates or additions to the core code should be proposed via an Issue before submitting a PR.
 
-# Credits
+VisiData has two main branches:
 
-## Maintainers
+    - [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (what is in pypi/brew/apt).
+    - [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
 
-- [Saul Pwanson](http://saul.pw) ([@saulpw](https://github.com/saulpw)) conceived and developed VisiData
-- [Anja Kefala](http://kefala.info) ([@anjakefala](https://github.com/anjakefala)) maintains the documentation and packages for all platforms.
+All pull requests should be submitted against `develop`.
 
-## Patrons
-
-Thanks to the following people who have contributed financial support via [Patreon](https://www.patreon.com/saulpw).
-
-- Mike E
-
-## Contributors
-
-Many thanks also to the following people for their contributions to VisiData:
-
-- [azag0](https://github.com/azag0)
-- [brannerchinese](https://github.com/brannerchinese)
-- [chocolateboy](https://github.com/chocolateboy)
-- [deinspanjer](https://github.com/@deinspanjer)
-- [eliasdorneles](https://github.com/eliasdorneles)
-- [jamesroutley](https://github.com/jamesroutley)
-- [khughitt](https://github.com/khughitt)
-- [jkiely](https://github.com/jkiely)
-- [jpgrayson](https://github.com/jpgrayson)
-- [jsvine](https://github.com/jsvine)
-- [layertwo](https://github.com/layertwo)
-- [repjarms](https://github.com/repjarms)
-- [robcarrington](https://github.com/robcarrington)
-- [scl17](https://github.com/scl17)
-- [ssiegel](https://github.com/ssiegel)
-- [trentgill](https://github.com/trentgill)
-- [vbrown608](https://github.com/vbrown608)
-- [wavexx](https://github.com/wavexx)
-- [zormit](https://github.com/zormit)
-
-## Open Source License
-
+## Open Source License and Copyright
 VisiData is an open-source tool that can be installed and used for free (under the terms of the [GPL3](https://www.gnu.org/licenses/gpl-3.0.en.html)).
 
 The core VisiData utility and rendering library will always be both free and libre.
+
+Plugins (and loaders and apps) retain the copyright of the contributing authors, as maintained in the `__author__` metadata. All plugins must have the licensing terms compatible with GPL3.
+The copyright for all other code in VisiData is assigned to [Saul Pwanson <vd@saul.pw>](mailto:vd@saul.pw).
