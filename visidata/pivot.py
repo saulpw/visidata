@@ -186,7 +186,6 @@ class PivotSheet(Sheet):
                 numericGroupRows = {formatRange(numericCols[0], numRange): PivotGroupRow(discreteKeys, numRange, [], {}) for numRange in numericBins}
                 groups[formattedDiscreteKeys] = (numericGroupRows, None)
                 for r in numericGroupRows.values():
-                    # raise ValueError(str(r))
                     self.addRow(r)
 
             # find the grouprow this sourcerow belongs in, by numericbin
@@ -211,7 +210,6 @@ class PivotSheet(Sheet):
                 nankey = makeErrorKey(numericCols[0]) if numericCols else 0
                 groupRow = PivotGroupRow(discreteKeys, (nankey, nankey), [], {})
                 groups[formattedDiscreteKeys] = (numericGroupRows, groupRow)
-                # raise ValueError(str(groupRow))
                 self.addRow(groupRow)
 
             # add the sourcerow to its all bin
@@ -227,7 +225,6 @@ class PivotSheet(Sheet):
 
             if rowfunc:
                 rowfunc(groupRow)
-            # raise ValueError(str(groupRow))
 
         # automatically add cache to all columns now that everything is binned
         for c in self.nonKeyVisibleCols:
