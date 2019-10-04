@@ -152,6 +152,7 @@ class Column(Extensible):
 
     @asyncthread
     def _calcIntoCacheAsync(self, row):
+        # causes isues when moved into _calcIntoCache gen case
         self._cachedValues[self.sheet.rowid(row)] = INPROGRESS
         self._calcIntoCache(row)
 

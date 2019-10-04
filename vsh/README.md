@@ -13,7 +13,7 @@ Includes:
     - use like regular `ping`
     - resulting output will dynamically loaded into a vd TUI
 - vtop
-    - use like regulat `top`
+    - use like regular `top`
     - resulting output will be dynamically loaded into a vd TUI
     - explore and perform analyses with classic vd commands
 
