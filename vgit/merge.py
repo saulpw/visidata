@@ -71,6 +71,8 @@ def parseDiff(left, right, lines):
         else:
             status(line)
 
+theme('color_git_staged_add', 'green', 'color for will be committed')
+theme('color_git_staged_del', 'red', 'color for is changed and not in index')
 
 class GitMerge(GitSheet):
     columns = [
@@ -80,7 +82,8 @@ class GitMerge(GitSheet):
             Column('4/working', getter=lambda r: r[3][1]),
     ]
     colorizers = [
-            Colorizer('cell', 5, self.colorDiffCell),
+            CellColorizer(5, 'color_git_diff_commit', lambda s,c,r,v: s.colorDiffCell(c,r,v) == 'green'),
+            CellColorizer(5, 'color_git_diff_delete', lambda s,c,r,v: s.colorDiffCell(c,r,v) == 'red'),
     ]
 
     def __init__(self, gf):

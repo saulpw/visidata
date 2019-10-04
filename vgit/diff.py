@@ -242,9 +242,15 @@ class HunksSheet(GitSheet):
                 self.rows[-1][-1].append(line)
 
 
+theme('color_git_hunk_add', 'green', 'color for added hunk lines')
+theme('color_git_hunk_del', 'red', 'color for deleted hunk lines')
+theme('color_git_hunk_diff', 'yellow', 'color for hunk diffs')
+
 class HunkViewer(GitSheet):
     colorizers = [
-            RowColorizer(4, None, HunkViewer.colorDiffRow),
+            RowColorizer(4, 'color_git_hunk_add', lambda s,c,r,v: s.colorDiffRow(c, r, v) == 'green'),
+            RowColorizer(4, 'color_git_hunk_del', lambda s,c,r,v: s.colorDiffRow(c, r, v) == 'red'),
+            RowColorizer(4, 'color_git_hunk_diff', lambda s,c,r,v: s.colorDiffRow(c, r, v) == 'yellow'),
     ]
 
     def __init__(self, hunks, **kwargs):
