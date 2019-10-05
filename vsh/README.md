@@ -11,7 +11,7 @@ Includes:
     - Press `Enter` on data sources to load them in vd
 - vping
     - use like regular `ping`
-    - resulting output will dynamically loaded into a vd TUI
+    - resulting output will be dynamically loaded into a vd TUI
 - vtop
     - use like regular `top`
     - resulting output will be dynamically loaded into a vd TUI
