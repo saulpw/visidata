@@ -23,7 +23,7 @@ class SqliteSheet(DeferredSaveSheet):
     def execute(self, conn, sql, where={}, parms=None):
         parms = parms or []
         if where:
-            sql += ' WHERE %s' % " AND ".join("%s=?" % k for k in where)
+            sql += ' WHERE %s' % ' AND '.join('"%s"=?' % k for k in where)
         status(sql)
         parms += list(where.values())
         return conn.execute(sql, parms)
@@ -38,10 +38,10 @@ class SqliteSheet(DeferredSaveSheet):
             tblname = self.tableName
             self.columns = self.getColumns(tblname, conn)
             self.recalc()
-            r = self.execute(conn, 'SELECT COUNT(*) FROM %s' % tblname).fetchall()
+            r = self.execute(conn, 'SELECT COUNT(*) FROM "%s"' % tblname).fetchall()
             rowcount = r[0][0]
             self.rows = []
-            for row in Progress(self.execute(conn, "SELECT * FROM %s" % tblname), total=rowcount-1):
+            for row in Progress(self.execute(conn, 'SELECT * FROM "%s"' % tblname), total=rowcount-1):
                 self.addRow(row)
 
     def commit(self, adds, changes, deletes):
@@ -65,20 +65,20 @@ class SqliteSheet(DeferredSaveSheet):
             wherecols = self.keyCols or self.visibleCols
             for r in adds:
                 cols = self.visibleCols
-                sql = 'INSERT INTO %s ' % self.tableName
-                sql += '(%s)' % ','.join(c.name for c in cols)
+                sql = 'INSERT INTO "%s" ' % self.tableName
+                sql += '("%s")' % ','.join(c.name for c in cols)
                 sql += 'VALUES (%s)' % ','.join('?' for c in cols)
                 self.execute(conn, sql, parms=values(r, cols))
 
             for r, changedcols in changes:
-                sql = 'UPDATE %s SET ' % self.tableName
-                sql += ', '.join('%s=?' % c.name for c in changedcols)
+                sql = 'UPDATE "%s" SET ' % self.tableName
+                sql += ', '.join('"%s"=?' % c.name for c in changedcols)
                 self.execute(conn, sql,
                             where={c.name: c.getSavedValue(r) for c in wherecols},
                             parms=values(r, changedcols))
 
             for r in deletes:
-                self.execute(conn, 'DELETE FROM %s ' % self.tableName,
+                self.execute(conn, 'DELETE FROM "%s" ' % self.tableName,
                               where={c.name: c.getTypedValue(r) for c in wherecols})
 
             conn.commit()
@@ -87,7 +87,7 @@ class SqliteSheet(DeferredSaveSheet):
 
     def getColumns(self, tableName, conn):
         cols = []
-        for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO(%s)' % tableName)):
+        for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO("%s")' % tableName)):
             c = DeferredSetColumn(r[1],
                     getter=lambda col,row,idx=i: row[idx],
                     setter=lambda col,row,val: col.sheet.commit())
@@ -127,15 +127,15 @@ def multisave_sqlite(p, *vsheets):
         tblname = clean_to_id(vs.name)
         sqlcols = []
         for col in vs.visibleCols:
-            sqlcols.append('%s %s' % (col.name, sqlite_type(col.type)))
-        sql = 'CREATE TABLE IF NOT EXISTS %s (%s)' % (tblname, ', '.join(sqlcols))
+            sqlcols.append('"%s" %s' % (col.name, sqlite_type(col.type)))
+        sql = 'CREATE TABLE IF NOT EXISTS "%s" (%s)' % (tblname, ', '.join(sqlcols))
         c.execute(sql)
 
         for r in Progress(vs.rows, 'saving'):
             sqlvals = []
             for col in vs.visibleCols:
                 sqlvals.append(col.getTypedValue(r))
-            sql = 'INSERT INTO %s VALUES (%s)' % (tblname, ','.join(['?']*len(sqlvals)))
+            sql = 'INSERT INTO "%s" VALUES (%s)' % (tblname, ','.join(['?']*len(sqlvals)))
             c.execute(sql, sqlvals)
 
     conn.commit()
