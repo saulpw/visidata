@@ -14,7 +14,7 @@ except ImportError:
     pass
 
 
-# _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
+# VisiDataType .typetype are e.g. int, float, str, and used internally in these ways:
 #
 #    o = typetype(val)   # for interpreting raw value
 #    o = typetype(str)   # for conversion from string (when setting)
@@ -26,28 +26,36 @@ except ImportError:
 # .formatter(fmtstr, typedvalue) returns a string of the formatted typedvalue according to fmtstr.
 # .fmtstr is the default fmtstr passed to .formatter.
 
-_vdtype = collections.namedtuple('type', 'typetype icon fmtstr formatter')
-
 def anytype(r=None):
     'minimalist "any" passthrough type'
     return r
 anytype.__name__ = ''
+
 
 def _defaultFormatter(fmtstr, typedval):
     if fmtstr:
         return locale.format_string(fmtstr, typedval)
     return str(typedval)
 
-def vdtype(typetype, icon='', fmtstr='', formatter=_defaultFormatter):
-    t = _vdtype(typetype, icon, fmtstr, formatter)
-    typemap[typetype] = t
-    return t
 
-# typemap [typetype] -> _vdtype
+class VisiDataType:
+    def __init__(self, typetype=anytype, icon=None, fmtstr='', formatter=_defaultFormatter, key='', name=None):
+        self.typetype = typetype  # int or float or other constructor
+        self.name = name or getattr(typetype, '__name__', str(typetype))
+        self.icon = icon      # show in rightmost char of column
+        self.fmtstr = fmtstr
+        self.formatter = formatter
+        self.key = key
+
+        typemap[typetype] = self
+
+vdtype = VisiDataType
+
+# typemap [vtype] -> VisiDataType
 typemap = {}
 
 def getType(typetype):
-    return typemap.get(typetype) or _vdtype(anytype, None, '', _defaultFormatter)
+    return typemap.get(typetype) or VisiDataType(anytype)
 
 vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
