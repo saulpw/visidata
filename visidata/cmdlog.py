@@ -23,6 +23,7 @@ suspend redraw no-op help syscopy syspaste sysopen profile toggle'''.split()
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
 option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 
+vd.activeCommand = None
 
 def checkVersion(desired_version):
     if desired_version != visidata.__version_info__:
@@ -135,7 +136,6 @@ class CommandLog(TsvSheet):
         super().__init__(name, source=source, **kwargs)
         options.set('delimiter', '\t', self)  # enforce standard delimiter for internal tsv
         options.set('row_delimiter', '\n', self)
-        self.currentActiveRow = None
 
     def newRow(self, **fields):
         return self._rowtype(**fields)
@@ -143,7 +143,7 @@ class CommandLog(TsvSheet):
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
         if not isLoggableSheet(sheet):
             return  # don't record editlog commands
-        if self.currentActiveRow:
+        if vd.activeCommand:
             self.afterExecSheet(sheet, False, '')
 
         sheetname, colname, rowname = '', '', ''
@@ -158,7 +158,7 @@ class CommandLog(TsvSheet):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
         comment = CommandLog.currentReplayRow.comment if CommandLog.currentReplayRow else cmd.helpstr
-        self.currentActiveRow = self.newRow(sheet=sheetname,
+        vd.activeCommand = self.newRow(sheet=sheetname,
                                             col=str(colname),
                                             row=str(rowname),
                                             keystrokes=keystrokes,
@@ -167,7 +167,7 @@ class CommandLog(TsvSheet):
                                             comment=comment)
 
         if options.undo and cmd.undo:
-            self.checkpoint(cmd, sheet, self.currentActiveRow)
+            self.checkpoint(cmd, sheet, vd.activeCommand)
 
     @asyncthread
     def checkpoint(self, cmd, sheet, cmdlogrow):
@@ -175,27 +175,27 @@ class CommandLog(TsvSheet):
 
     def onUndo(self, undofunc):
         'On undo of latest command, call undofunc()'
-        self.currentActiveRow.undofuncs.append(undofunc)
+        vd.activeCommand.undofuncs.append(undofunc)
 
     def afterExecSheet(self, sheet, escaped, err):
-        'Records currentActiveRow'
-        if not self.currentActiveRow:  # nothing to record
+        'Records vd.activeCommand'
+        if not vd.activeCommand:  # nothing to record
             return
 
         if err:
-            self.currentActiveRow[-1] += ' [%s]' % err
+            vd.activeCommand[-1] += ' [%s]' % err
 
         if isLoggableSheet(sheet):  # don't record jumps to cmdlog or other internal sheets
             # remove user-aborted commands and simple movements
-            if not escaped and isLoggableCommand(self.currentActiveRow.keystrokes, self.currentActiveRow.longname):
-                self.addRow(self.currentActiveRow)
-                sheet.cmdlog.addRow(self.currentActiveRow)
+            if not escaped and isLoggableCommand(vd.activeCommand.keystrokes, vd.activeCommand.longname):
+                self.addRow(vd.activeCommand)
+                sheet.cmdlog.addRow(vd.activeCommand)
                 if options.cmdlog_histfile:
                     if not getattr(vd, 'sessionlog', None):
                         vd.sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
-                    append_tsv_row(vd.sessionlog, self.currentActiveRow)
+                    append_tsv_row(vd.sessionlog, vd.activeCommand)
 
-        self.currentActiveRow = None
+        vd.activeCommand = None
 
     def openHook(self, vs, src):
         r = self.newRow(keystrokes='o', input=src, longname='open-file')
@@ -318,9 +318,9 @@ class CommandLog(TsvSheet):
     def setLastArgs(self, args):
         'Set user input on last command, if not already set.'
         # only set if not already set (second input usually confirmation)
-        if self.currentActiveRow is not None:
-            if not self.currentActiveRow.input:
-                self.currentActiveRow.input = args
+        if vd.activeCommand is not None:
+            if not vd.activeCommand.input:
+                vd.activeCommand.input = args
 
     @property
     def replayStatus(self):

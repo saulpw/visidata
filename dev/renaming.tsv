@@ -16,6 +16,6 @@ Canvas.reset
 _rowtype()		idea: rowmaker	
 exec_keystrokes			
 exec_command			
-CommandLog.currentActiveRow			
+CommandLog.currentActiveRow	vd.activeCommand		y
 ESC	ALT		
-cached_property	lazy_property	same	
+cached_property	lazy_property	same	y
