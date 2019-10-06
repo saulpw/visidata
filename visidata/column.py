@@ -9,7 +9,7 @@ from visidata import option, options, anytype, stacktrace, vd
 from visidata import getType, typemap, isNumeric, isNullFunc
 from visidata import asyncthread, exceptionCaught, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
-from visidata import Extensible, AttrDict
+from visidata import Extensible, AttrDict, undoAttrFunc
 
 class InProgress(Exception):
     @property
@@ -126,6 +126,7 @@ class Column(Extensible):
         return getType(self.type).formatter(self.fmtstr, typedval)
 
     def hide(self, hide=True):
+        self.sheet.addUndo(undoAttrFunc([self], 'width'))
         if hide:
             self.width = 0
         else:

@@ -9,7 +9,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
-vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoEditCell, undoEditCells, undoAttr, undoBlocked)
+vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoEditCell, undoEditCells, undoAttr, undoBlocked, undoAttrFunc)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow']
@@ -415,6 +415,7 @@ class Sheet(BaseSheet):
             c.name = '\n'.join(str(c.getDisplayValue(r)) for r in rows)
 
     def setKeys(self, cols):
+        self.addUndo(undoAttrFunc(cols, 'keycol'))
         for col in cols:
             lastkeycol = 0
 
@@ -424,6 +425,7 @@ class Sheet(BaseSheet):
             col.keycol = lastkeycol+1
 
     def unsetKeys(self, cols):
+        self.addUndo(undoAttrFunc(cols, 'keycol'))
         for col in cols:
             col.keycol = 0
 

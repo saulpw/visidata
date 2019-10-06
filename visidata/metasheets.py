@@ -2,7 +2,7 @@ from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENT
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, commands, Option
-from visidata import undoAttr, undoAddCols, VisiData, vlen
+from visidata import undoAttr, undoAttrFunc, undoAddCols, VisiData, vlen
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=list(vd.sheets)))')
@@ -198,15 +198,34 @@ def combineColumns(cols):
     return Column("+".join(c.name for c in cols),
                   getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
 
+@ColumnsSheet.api
+def setColsAttr(sheet, cols, attrname, val):
+    if not cols:
+        vd.warning('no columns selected')
+        return
+    sheet.addUndo(undoAttrFunc(cols, attrname))
+    for c in cols:
+        setattr(c, attrname, val)
+
+@ColumnsSheet.api
+def applyCols(sheet, cols, funcname, *args, **kwargs):
+    if not cols:
+        warning('no columns selected')
+        return
+    for c in cols:
+        getattr(c, funcname)(*args, **kwargs)
+
+
 # used ColumnsSheet, affecting the 'row' (source column)
-undoColTypes = undoAttr('selectedRows or [cursorRow]', 'type')
-ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(selectedRows or [cursorRow])', undo=undoAttr('selectedRows or [cursorRow]', 'keycol'))
-ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(selectedRows or [cursorRow])', undo=undoAttr('selectedRows or [cursorRow]', 'keycol'))
-ColumnsSheet.addCommand('g-', 'hide-selected', 'for c in selectedRows or [cursorRow]: c.hide()', undo=undoAttr('selectedRows or [cursorRow]', 'width'))
-ColumnsSheet.addCommand('g%', 'type-float-selected', 'for c in selectedRows or [cursorRow]: c.type = float', undo=undoColTypes)
-ColumnsSheet.addCommand('g#', 'type-int-selected', 'for c in selectedRows or [cursorRow]: c.type = int', undo=undoColTypes)
-ColumnsSheet.addCommand('gz#', 'type-len-selected', 'for c in selectedRows or [cursorRow]: c.type = vlen', undo=undoColTypes)
-ColumnsSheet.addCommand('g@', 'type-date-selected', 'for c in selectedRows or [cursorRow]: c.type = date', undo=undoColTypes)
-ColumnsSheet.addCommand('g$', 'type-currency-selected', 'for c in selectedRows or [cursorRow]: c.type = currency', undo=undoColTypes)
-ColumnsSheet.addCommand('g~', 'type-string-selected', 'for c in selectedRows or [cursorRow]: c.type = str', undo=undoColTypes)
-ColumnsSheet.addCommand('gz~', 'type-any-selected', 'for c in selectedRows or [cursorRow]: c.type = anytype', undo=undoColTypes)
+ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(selectedRows or [cursorRow])')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)')
+
+ColumnsSheet.addCommand('g-', 'hide-selected', 'applyCols(selectedRows, "hide")')
+
+ColumnsSheet.addCommand('g%', 'type-float-selected', 'setColsAttr(selectedRows, "type", float)', 'set type of selected columns to float')
+ColumnsSheet.addCommand('g#', 'type-int-selected', 'setColsAttr(selectedRows, "type", int)', 'set type of selected columns to int')
+ColumnsSheet.addCommand('gz#', 'type-len-selected', 'setColsAttr(selectedRows, "type", vlen)', 'set type of selected columns to len')
+ColumnsSheet.addCommand('g@', 'type-date-selected', 'setColsAttr(selectedRows, "type", date)', 'set type of selected columns to date')
+ColumnsSheet.addCommand('g$', 'type-currency-selected', 'setColsAttr(selectedRows, "type", currency)', 'set type of selected columns to currency')
+ColumnsSheet.addCommand('g~', 'type-string-selected', 'setColsAttr(selectedRows, "type", str)', 'set type of selected columns to str')
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'setColsAttr(selectedRows, "type", anytype)', 'set type of selected columns to any')

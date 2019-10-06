@@ -7,6 +7,14 @@ def undoAttr(objs, attrname):
     'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value as reference.'
     return '''lambda oldvals=[(o, getattr(o, "{attrname}")) for o in {objs}] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)
 
+def undoAttrFunc(objs, attrname):
+    'Return closure that sets attrname on each obj to its former value.'
+    oldvals = [(o, getattr(o, attrname)) for o in objs]
+    def _undofunc():
+        for o, v in oldvals:
+            setattr(o, attrname, v)
+    return _undofunc
+
 def undoAttrCopy(objs, attrname):
     'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value which is copied.'
     return '''lambda oldvals=[ (o, copy(getattr(o, "{attrname}"))) for o in {objs} ] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)
