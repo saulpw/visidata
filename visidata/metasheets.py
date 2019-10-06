@@ -92,16 +92,19 @@ class HelpSheet(Sheet):
         from pkg_resources import resource_filename
         cmdlist = TsvSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
         options.set('delimiter', vd_system_sep, cmdlist)
-        cmdlist.reload_sync()
 
+        self.cmddict = {}
         self.rows = []
         for (k, o), v in commands.iter(self.source):
             self.addRow(v)
             v.sheet = o
+            self.cmddict[(v.sheet, v.longname)] = v
 
-        self.cmddict = {}
+        cmdlist.reload_sync()
         for cmdrow in cmdlist.rows:
-            self.cmddict[(cmdrow.sheet, cmdrow.longname)] = cmdrow
+            k = (cmdrow.sheet, cmdrow.longname)
+            if k in self.cmddict:
+                self.cmddict[k].helpstr = cmdrow.helpstr
 
         self.revbinds = {}  # [longname] -> keystrokes
         for (keystrokes, _), longname in bindkeys.iter(self.source):
