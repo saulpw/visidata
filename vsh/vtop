@@ -71,9 +71,6 @@ class UsefulProcessesSheet(Sheet):
 
 
 class ProcessesSheet(Sheet):
-    commands = [
-        Command('^K', 'os.kill(cursorRow.pid, int(chooseOne(range(16))))', 'kill(2) send a signal to a process')
-    ]
     columns = [
                 Column('pid', type=int, getter=lambda c,r: r.pid),
                 Column('name', getter=lambda c,r: r.name()),
@@ -166,9 +163,9 @@ vd.cpuStats = CPUStatsSheet('cpustats')
 vd.memStats = MemStatsSheet('mem_stats')
 vd.processes = ProcessesSheet('processes')
 
-globalCommand('^[c', 'vd.push(vd.cpuStats)', 'CPU stats')
-globalCommand('^[m', 'vd.push(vd.memStats)', 'Memory stats')
-globalCommand('^[p', 'vd.push(vd.processes)', 'Process stats')
+globalCommand('^[c', 'open-cpu', 'vd.push(vd.cpuStats)', 'CPU stats')
+globalCommand('^[m', 'open-memory', 'vd.push(vd.memStats)', 'Memory stats')
+globalCommand('^[p', 'open-processes', 'vd.push(vd.processes)', 'Process stats')
 
 def main_vtop():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -178,5 +175,7 @@ def main_vtop():
     domotd()
 
     run(vd.processes)
+
+ProcessesSheet.addCommand('^K', 'kill-process', 'os.kill(cursorRow.pid, int(chooseOne(range(16))))', 'kill(2) send a signal to a process')
 
 main_vtop()
