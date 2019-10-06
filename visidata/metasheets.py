@@ -84,9 +84,9 @@ class HelpSheet(Sheet):
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname)),
         Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
-        ColumnAttr('logged', 'replayable', width=0),
     ]
     nKeys = 2
+
     @asyncthread
     def reload(self):
         from pkg_resources import resource_filename

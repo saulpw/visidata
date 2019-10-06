@@ -54,11 +54,13 @@ def keystr(k):
 def isLoggableSheet(sheet):
     return sheet is not vd.cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
 
-def isLoggableCommand(keystrokes, longname):
+def isLoggableCommand(longname):
     for n in nonLogged:
         if longname.startswith(n):
             return False
     return True
+
+HelpSheet.columns.append(Column('logged', width=0, getter=lambda col,row: isLoggableCommand(row.longname)))
 
 def open_vd(p):
     return CommandLog(p.name, source=p)
@@ -187,7 +189,7 @@ class CommandLog(TsvSheet):
 
         if isLoggableSheet(sheet):  # don't record jumps to cmdlog or other internal sheets
             # remove user-aborted commands and simple movements
-            if not escaped and isLoggableCommand(vd.activeCommand.keystrokes, vd.activeCommand.longname):
+            if not escaped and isLoggableCommand(vd.activeCommand.longname):
                 self.addRow(vd.activeCommand)
                 sheet.cmdlog.addRow(vd.activeCommand)
                 if options.cmdlog_histfile:
