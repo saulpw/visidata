@@ -201,34 +201,16 @@ def combineColumns(cols):
     return Column("+".join(c.name for c in cols),
                   getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
 
-@ColumnsSheet.api
-def setColsAttr(sheet, cols, attrname, val):
-    if not cols:
-        vd.warning('no columns selected')
-        return
-    sheet.addUndo(undoAttrFunc(cols, attrname))
-    for c in cols:
-        setattr(c, attrname, val)
-
-@ColumnsSheet.api
-def applyCols(sheet, cols, funcname, *args, **kwargs):
-    if not cols:
-        warning('no columns selected')
-        return
-    for c in cols:
-        getattr(c, funcname)(*args, **kwargs)
-
-
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(selectedRows or [cursorRow])')
+ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(someSelectedRows)')
 ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)')
 
-ColumnsSheet.addCommand('g-', 'hide-selected', 'applyCols(selectedRows, "hide")')
+ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()')
 
-ColumnsSheet.addCommand('g%', 'type-float-selected', 'setColsAttr(selectedRows, "type", float)', 'set type of selected columns to float')
-ColumnsSheet.addCommand('g#', 'type-int-selected', 'setColsAttr(selectedRows, "type", int)', 'set type of selected columns to int')
-ColumnsSheet.addCommand('gz#', 'type-len-selected', 'setColsAttr(selectedRows, "type", vlen)', 'set type of selected columns to len')
-ColumnsSheet.addCommand('g@', 'type-date-selected', 'setColsAttr(selectedRows, "type", date)', 'set type of selected columns to date')
-ColumnsSheet.addCommand('g$', 'type-currency-selected', 'setColsAttr(selectedRows, "type", currency)', 'set type of selected columns to currency')
-ColumnsSheet.addCommand('g~', 'type-string-selected', 'setColsAttr(selectedRows, "type", str)', 'set type of selected columns to str')
-ColumnsSheet.addCommand('gz~', 'type-any-selected', 'setColsAttr(selectedRows, "type", anytype)', 'set type of selected columns to any')
+ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
+ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')
+ColumnsSheet.addCommand('gz#', 'type-len-selected', 'someSelectedRows.type=vlen', 'set type of selected columns to len')
+ColumnsSheet.addCommand('g@', 'type-date-selected', 'someSelectedRows.type=date', 'set type of selected columns to date')
+ColumnsSheet.addCommand('g$', 'type-currency-selected', 'someSelectedRows.type=currency', 'set type of selected columns to currency')
+ColumnsSheet.addCommand('g~', 'type-string-selected', 'someSelectedRows.type=str', 'set type of selected columns to str')
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anytype', 'set type of selected columns to any')

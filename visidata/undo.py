@@ -15,6 +15,24 @@ def undoAttrFunc(objs, attrname):
             setattr(o, attrname, v)
     return _undofunc
 
+
+class Fanout(list):
+    def __init__(self, sheet, objs):
+        self.__dict__['_sheet'] = sheet
+        super().__init__(objs)
+
+    def __getattr__(self, k):
+        return Fanout(self._sheet, [getattr(o, k) for o in self])
+
+    def __setattr__(self, k, v):
+        self._sheet.addUndo(undoAttrFunc(self, k))
+        for o in self:
+            setattr(o, k, v)
+
+    def __call__(self, *args, **kwargs):
+        return Fanout(self._sheet, [o(*args, **kwargs) for o in self])
+
+
 def undoAttrCopy(objs, attrname):
     'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value which is copied.'
     return '''lambda oldvals=[ (o, copy(getattr(o, "{attrname}"))) for o in {objs} ] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)

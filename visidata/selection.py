@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, undoAttrCopy, Progress, option, asyncthread, options, rotateRange
+from visidata import vd, Sheet, undoAttrCopy, Progress, option, asyncthread, options, rotateRange, Fanout
 
 __all__ = ['undoSheetSelection', 'undoSelection']
 
@@ -89,8 +89,14 @@ def gatherBy(self, func, gerund='gathering'):
 def selectedRows(self):
     'List of selected rows in sheet order. [O(nRows*log(nSelected))]'
     if self.nSelected <= 1:
-        return list(self._selectedRows.values())
-    return [r for r in self.rows if self.rowid(r) in self._selectedRows]
+        return Fanout(self, self._selectedRows.values())
+    return Fanout(self, (r for r in self.rows if self.rowid(r) in self._selectedRows))
+
+@Sheet.property
+def someSelectedRows(self):
+    if self.nSelected == 0:
+        vd.fail('no rows selected')
+    return self.selectedRows
 
 @Sheet.property
 def nSelected(self):
