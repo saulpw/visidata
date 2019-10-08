@@ -1,4 +1,5 @@
 import itertools
+from copy import copy
 
 from visidata import VisiData
 
@@ -36,6 +37,15 @@ class Fanout(list):
 def undoAttrCopy(objs, attrname):
     'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value which is copied.'
     return '''lambda oldvals=[ (o, copy(getattr(o, "{attrname}"))) for o in {objs} ] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)
+
+def undoAttrCopyFunc(objs, attrname):
+    'Return closure that sets attrname on each obj to its former value.'
+    oldvals = [(o, copy(getattr(o, attrname))) for o in objs]
+    def _undofunc():
+        for o, v in oldvals:
+            setattr(o, attrname, v)
+    return _undofunc
+
 
 @VisiData.api
 def addUndoSetValues(vd, rows, cols):

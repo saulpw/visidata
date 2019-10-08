@@ -140,11 +140,13 @@ class PandasSheet(Sheet):
     # Vectorized implementation of multi-row selections
     @asyncthread
     def select(self, rows, status=True, progress=True):
+        self.addUndoSelection()
         for row in (Progress(rows, 'selecting') if progress else rows):
             self.selectRow(row)
 
     @asyncthread
     def unselect(self, rows, status=True, progress=True):
+        self.addUndoSelection()
         for row in (Progress(rows, 'unselecting') if progress else rows):
             select.unselectRow(row)
 
@@ -161,11 +163,15 @@ class PandasSheet(Sheet):
 
     def toggleByIndex(self, start=None, end=None):
         self._checkSelectedIndex()
+        self.addUndoSelection()
         self._selectedMask.iloc[start:end] = ~self._selectedMask.iloc[start:end]
 
     def _selectByILoc(self, mask, selected=True):
         self._checkSelectedIndex()
         self._selectedMask.iloc[mask] = selected
+
+    def addUndoSelection(self):
+        self.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
 
 def view_pandas(df):
     run(PandasSheet('', source=df))
@@ -179,17 +185,15 @@ def open_dta(p):
 
 open_stata = open_pandas
 
-undoSheetSelection = undoAttrCopy('[sheet]', '_selectedMask')
-
 # Override with vectorized implementations
-PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', undo=undoSheetSelection),
-PandasSheet.addCommand(None, 'select-rows', 'selectByIndex()', undo=undoSheetSelection),
-PandasSheet.addCommand(None, 'unselect-rows', 'unselectByIndex()', undo=undoSheetSelection),
+PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()')
+PandasSheet.addCommand(None, 'select-rows', 'selectByIndex()')
+PandasSheet.addCommand(None, 'unselect-rows', 'unselectByIndex()')
 
-PandasSheet.addCommand(None, 'stoggle-before', 'toggleByIndex(end=cursorRowIndex)', undo=undoSheetSelection),
-PandasSheet.addCommand(None, 'select-before', 'selectByIndex(end=cursorRowIndex)', undo=undoSheetSelection),
-PandasSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursorRowIndex)', undo=undoSheetSelection),
-PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)', undo=undoSheetSelection),
-PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', undo=undoSheetSelection),
-PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', undo=undoSheetSelection),
+PandasSheet.addCommand(None, 'stoggle-before', 'toggleByIndex(end=cursorRowIndex)')
+PandasSheet.addCommand(None, 'select-before', 'selectByIndex(end=cursorRowIndex)')
+PandasSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursorRowIndex)')
+PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)')
+PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)')
+PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)')
 PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)'),
