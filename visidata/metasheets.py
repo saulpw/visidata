@@ -4,14 +4,6 @@ from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, commands, Option
 from visidata import undoAttr, undoAttrFunc, undoAddCols, VisiData, vlen
 
-# copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
-globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=list(vd.sheets)))')
-
-BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
-globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)')
-Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
-BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
-
 option('visibility', 0, 'visibility level (0=low, 1=high)')
 
 vd_system_sep = '\t'
@@ -68,10 +60,6 @@ class ColumnsSheet(Sheet):
         c = type(self.source[0])._coltype()
         c.recalc(self.source[0])
         return c
-
-ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(c.sheet.visibleRows)')
-ColumnsSheet.addCommand('&', 'join-cols', 'c=combineColumns(selectedRows or fail("no columns selected to concatenate")); addRow(c, cursorRowIndex); c.recalc(selectedRows[0].sheet)', undo=undoAddCols)
-
 
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
@@ -189,23 +177,29 @@ def vdmenu(self):
     vs.reload()
     return vs
 
-BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)')
-
-OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lambda source=source,opt=cursorRow,val=options.get(cursorRow.name,source): options.set(opt.name, val, source)')
-
-OptionsSheet.bindkey('e', 'edit-option')
-OptionsSheet.bindkey(ENTER, 'edit-option')
-
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
     return Column("+".join(c.name for c in cols),
                   getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
+
+
+# copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
+globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=list(vd.sheets)))')
+globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)')
+
+BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)')
+BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
+BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+
+Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
 
 # used ColumnsSheet, affecting the 'row' (source column)
 ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(someSelectedRows)')
 ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)')
 
 ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()')
+ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(c.sheet.visibleRows)')
+ColumnsSheet.addCommand('&', 'join-cols', 'c=combineColumns(selectedRows or fail("no columns selected to concatenate")); addRow(c, cursorRowIndex); c.recalc(selectedRows[0].sheet)', undo=undoAddCols)
 
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
 ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')
@@ -214,3 +208,7 @@ ColumnsSheet.addCommand('g@', 'type-date-selected', 'someSelectedRows.type=date'
 ColumnsSheet.addCommand('g$', 'type-currency-selected', 'someSelectedRows.type=currency', 'set type of selected columns to currency')
 ColumnsSheet.addCommand('g~', 'type-string-selected', 'someSelectedRows.type=str', 'set type of selected columns to str')
 ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anytype', 'set type of selected columns to any')
+
+OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lambda source=source,opt=cursorRow,val=options.get(cursorRow.name,source): options.set(opt.name, val, source)')
+OptionsSheet.bindkey('e', 'edit-option')
+OptionsSheet.bindkey(ENTER, 'edit-option')
