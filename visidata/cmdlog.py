@@ -337,8 +337,8 @@ class CommandLog(TsvSheet):
 
         for cmdlogrow in self.rows[::-1]:
             if cmdlogrow.undofuncs and str(cmdlogrow.sheet) == sheet.name:
-                for undofunc in cmdlogrow.undofuncs:
-                    undofunc()
+                for undofunc, args, kwargs, in cmdlogrow.undofuncs:
+                    undofunc(*args, **kwargs)
                 sheet.undone.append(cmdlogrow)
                 self.rows.remove(cmdlogrow)
                 vd.clear_caches()
@@ -368,14 +368,14 @@ def cmdlog_sheet(sheet):
 
 
 @BaseSheet.api
-def addUndo(sheet, undofunc):
+def addUndo(sheet, undofunc, *args, **kwargs):
     if options.undo:
         r = vd.activeCommand
         if not r:
             return
         if r.undofuncs is None:
             r.undofuncs = []
-        r.undofuncs.append(undofunc)
+        r.undofuncs.append((undofunc, args, kwargs))
 
 @asyncthread
 @BaseSheet.api
