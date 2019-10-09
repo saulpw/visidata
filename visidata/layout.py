@@ -1,5 +1,12 @@
 from visidata import Column, Sheet, options, undoAttr
 
+@Column.api
+def setWidth(self, w):
+    if self.width != w:
+        if self.width == 0 or w == 0:  # hide/unhide
+            self.sheet.addUndo(setattr, self, 'width', self.width)
+    self.width = w
+
 
 @Column.api
 def toggleWidth(self, width):
@@ -17,14 +24,19 @@ def toggleVisibility(self):
     else:
         self.height = 1
 
+def unhide_cols(cols, rows):
+    'sets appropriate width if column was either hidden (0) or unseen (None)'
+    for c in cols:
+        c.setWidth(abs(c.width or 0) or c.getMaxWidth(rows))
+
 
 Sheet.addCommand('_', 'resize-col-max', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
-Sheet.addCommand('z_', 'resize-col', 'cursorCol.width = int(input("set width= ", value=cursorCol.width))'),
-Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.width = c.getMaxWidth(visibleRows)'),
+Sheet.addCommand('z_', 'resize-col', 'cursorCol.setWidth(int(input("set width= ", value=cursorCol.width)))'),
+Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.setWidth(c.getMaxWidth(visibleRows))'),
 
-Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()', undo=undoAttr('[cursorCol]', 'width'))
-Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.width = cursorCol.width//2'),
+Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()')
+Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)'),
 
-Sheet.addCommand('gv', 'unhide-cols', 'for c in columns: c.width = abs(c.width or 0) or c.getMaxWidth(visibleRows)', undo=undoAttr('columns', 'width'))
+Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)')
 Sheet.addCommand('v', 'visibility-sheet', 'for c in visibleCols: c.toggleVisibility()')
 Sheet.addCommand('zv', 'visibility-col', 'cursorCol.toggleVisibility()')

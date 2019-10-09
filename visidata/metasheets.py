@@ -198,7 +198,7 @@ ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(someSelectedRows)')
 ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)')
 
 ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()')
-ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(c.sheet.visibleRows)')
+ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))')
 ColumnsSheet.addCommand('&', 'join-cols', 'c=combineColumns(selectedRows or fail("no columns selected to concatenate")); addRow(c, cursorRowIndex); c.recalc(selectedRows[0].sheet)', undo=undoAddCols)
 
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')

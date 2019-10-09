@@ -126,11 +126,10 @@ class Column(Extensible):
         return getType(self.type).formatter(self.fmtstr, typedval)
 
     def hide(self, hide=True):
-        self.sheet.addUndo(undoAttrFunc([self], 'width'))
         if hide:
-            self.width = 0
+            self.setWidth(0)
         else:
-            self.width = abs(self.width or self.getMaxWidth(self.sheet.visibleRows))
+            self.setWidth(abs(self.width or self.getMaxWidth(self.sheet.visibleRows)))
 
     @property
     def hidden(self):
