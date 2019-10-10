@@ -51,11 +51,26 @@ def syscopyCells(sheet, col, rows):
     clipboard().copy("\n".join(col.getDisplayValue(r) for r in rows))
     status('copied %s from %d %s to system clipboard' % (col.name, len(rows), sheet.rowtype))
 
+@Sheet.api
+def delete_row(sheet, rowidx):
+    oldrow = sheet.rows.pop(rowidx)
+    sheet.addUndo(sheet.rows.insert, rowidx, oldrow)
+    vd.cliprows = [(sheet, rowidx, oldrow)]
+
+@Sheet.api
+def paste_after(sheet, rowidx):
+    sheet.addUndo(s.rows.pop, rowidx+1)
+    sheet.rows[rowidx+1:rowidx+1] = list(deepcopy(r) for s,i,r in vd.cliprows)
+
+@Sheet.api
+def paste_after(sheet, rowidx):
+    sheet.rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)
+    sheet.addUndo(sheet.rows.pop, rowidx)
 
 Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])')
-Sheet.addCommand('d', 'delete-row', 'vd.cliprows = [(sheet, cursorRowIndex, rows.pop(cursorRowIndex))]', undo='lambda s=sheet,r=cursorRow,ridx=cursorRowIndex: s.rows.insert(ridx, r)')
-Sheet.addCommand('p', 'paste-after', 'rows[cursorRowIndex+1:cursorRowIndex+1] = list(deepcopy(r) for s,i,r in vd.cliprows)', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.pop(ridx+1)')
-Sheet.addCommand('P', 'paste-before', 'rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)', undo='lambda s=sheet,ridx=cursorRowIndex: s.rows.pop(ridx)')
+Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex)')
+Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)')
+Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)')
 
 Sheet.addCommand('gd', 'delete-selected', 'copyRows(selectedRows); deleteSelected()', undo=undoSheetRows)
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(selectedRows)')
