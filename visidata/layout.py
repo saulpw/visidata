@@ -4,7 +4,7 @@ from visidata import Column, Sheet, options, undoAttr
 def setWidth(self, w):
     if self.width != w:
         if self.width == 0 or w == 0:  # hide/unhide
-            self.sheet.addUndo(setattr, self, 'width', self.width)
+            vd.addUndo(setattr, self, 'width', self.width)
     self.width = w
 
 

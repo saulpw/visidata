@@ -75,7 +75,7 @@ class JoinKeyColumn(Column):
     def putValue(self, row, value):
         for i, c in enumerate(self.keycols):
             if row[i] is not None:
-                c.setValue(row[i], value)
+                c.setValues([row[i]], value)
 
     def recalc(self, sheet=None):
         Column.recalc(self, sheet)

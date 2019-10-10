@@ -17,6 +17,7 @@ def setValuesFromFaker(col, faketype, rows):
     fakeMap[None] = None
     fakeMap[options.null_value] = options.null_value
 
+    vd.addUndoSetValues([col], rows)
     for r in Progress(rows):
         v = col.getValue(r)
         if v in fakeMap:

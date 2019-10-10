@@ -37,7 +37,7 @@ def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
     return _decorator
 
 
-class Progress:
+class _Progress:
     def __init__(self, iterable=None, gerund="", total=None, sheet=None):
         self.iterable = iterable
         if total is None:
@@ -70,6 +70,9 @@ class Progress:
                 yield item
                 self.made += 1
 
+@VisiData.global_api
+def Progress(vd, *args, **kwargs):
+    return _Progress(*args, **kwargs)
 
 @asyncthread
 def _async_deepcopy(vs, newlist, oldlist):

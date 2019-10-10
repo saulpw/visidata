@@ -168,13 +168,6 @@ class CommandLog(TsvSheet):
                                             longname=cmd.longname,
                                             comment=comment)
 
-        if cmd.undo:
-            sheet.addEvalUndoStr(cmd.undo, vd.activeCommand)
-
-    def onUndo(self, undofunc):
-        'On undo of latest command, call undofunc()'
-        vd.activeCommand.undofuncs.append(undofunc)
-
     def afterExecSheet(self, sheet, escaped, err):
         'Records vd.activeCommand'
         if not vd.activeCommand:  # nothing to record
@@ -365,23 +358,6 @@ def cmdlog(sheet):
 @BaseSheet.lazy_property
 def cmdlog_sheet(sheet):
     return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=[])
-
-
-@BaseSheet.api
-def addUndo(sheet, undofunc, *args, **kwargs):
-    if options.undo:
-        r = vd.activeCommand
-        if not r:
-            return
-        if r.undofuncs is None:
-            r.undofuncs = []
-        r.undofuncs.append((undofunc, args, kwargs))
-
-@asyncthread
-@BaseSheet.api
-def addEvalUndoStr(sheet, undostr, cmdlogrow):
-    if options.undo:
-        sheet.addUndo(eval(undostr, getGlobals(), LazyChainMap(sheet)))
 
 
 @BaseSheet.property

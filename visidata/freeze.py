@@ -20,6 +20,7 @@ def StaticColumn(sheet, col, pos):
 
     @asyncthread
     def calcRows_async(frozencol, rows, col):
+        # no need to undo, addColumn undo is enough
         for r in Progress(rows, 'calculating'):
             try:
                 frozencol.setValue(r, col.getTypedValue(r))

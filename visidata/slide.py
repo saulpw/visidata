@@ -3,39 +3,28 @@
 from visidata import Sheet, moveListItem, globalCommand, vd
 
 @Sheet.api
-def slide_col(sheet, colidx, n):
-    sheet.addUndo(moveVisibleCol, sheet, colidx+n, colidx)
-    return moveVisibleCol(sheet, colidx, colidx+n)
+def slide_col(sheet, colidx, newcolidx):
+    vd.addUndo(moveVisibleCol, sheet, newcolidx, colidx)
+    return moveVisibleCol(sheet, colidx, newcolidx)
 
 @Sheet.api
-def slide_row(sheet, rowidx, n):
-    sheet.addUndo(moveListItem, sheet.rows, rowidx+n, rowidx)
-    return moveListItem(sheet.rows, rowidx, rowidx+n)
-
-@Sheet.api
-def slide_bottom(sheet, rowidx, n):
-    oldrow = sheet.rows.pop(rowidx)
-    sheet.addUndo(s.rows.insert, rowidx, oldrow)
-    sheet.rows.append(oldrow)
-
-@Sheet.api
-def slide_top(sheet, rowidx, n):
-    sheet.addUndo(sheet.rows.insert, rowidx, sheet.rows.pop(0))
-    rows.insert(0, sheet.rows.pop(rowidx))
+def slide_row(sheet, rowidx, newcolidx):
+    vd.addUndo(moveListItem, sheet.rows, newcolidx, rowidx)
+    return moveListItem(sheet.rows, rowidx, newcolidx)
 
 
-Sheet.addCommand('H', 'slide-left', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, -1)')
-Sheet.addCommand('L', 'slide-right', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, +1)')
-Sheet.addCommand('J', 'slide-down', 'sheet.cursorRowIndex = slide_row(cursorRowIndex, +1)')
-Sheet.addCommand('K', 'slide-up', 'sheet.cursorRowIndex = slide_row(cursorRowIndex, -1)')
-Sheet.addCommand('gH', 'slide-leftmost', 'addColumn(columns.pop(cursorColIndex), 0)')
-Sheet.addCommand('gL', 'slide-rightmost', 'addColumn(columns.pop(cursorColIndex))')
-Sheet.addCommand('gJ', 'slide-bottom', 'slide_bottom(cursorRowIndex)')
-Sheet.addCommand('gK', 'slide-top', 'slide_top(cursorRowIndex)')
-Sheet.addCommand('zH', 'slide-left-n', 'slide_col(cursorVisibleColIndex, -int(input("slide col left n=", value=1))')
-Sheet.addCommand('zL', 'slide-right-n', 'slide_col(cursorVisibleColIndex, int(input("slide col left n=", value=1))')
-Sheet.addCommand('zJ', 'slide-down-n', 'slide_row(cursorRowIndex, int(input("slide row down n=", value=1))')
-Sheet.addCommand('zK', 'slide-up-n', 'slide_row(cursorRowIndex, -int(input("slide row up n=", value=1))')
+Sheet.addCommand('H', 'slide-left', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex-1)')
+Sheet.addCommand('L', 'slide-right', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex+1)')
+Sheet.addCommand('J', 'slide-down', 'sheet.cursorRowIndex = slide_row(cursorRowIndex, cursorRowIndex+1)')
+Sheet.addCommand('K', 'slide-up', 'sheet.cursorRowIndex = slide_row(cursorRowIndex, cursorRowIndex-1)')
+Sheet.addCommand('gH', 'slide-leftmost', 'slide_col(cursorColIndex, 0)')
+Sheet.addCommand('gL', 'slide-rightmost', 'slide_col(cursorColIndex, nCols-1)')
+Sheet.addCommand('gJ', 'slide-bottom', 'slide_row(cursorRowIndex, nRows)')
+Sheet.addCommand('gK', 'slide-top', 'slide_row(cursorRowIndex, 0)')
+Sheet.addCommand('zH', 'slide-left-n', 'slide_col(cursorVisibleColIndex, cursorVisibleColIndex-int(input("slide col left n=", value=1)))')
+Sheet.addCommand('zL', 'slide-right-n', 'slide_col(cursorVisibleColIndex, cursorVisibleColIndex+int(input("slide col left n=", value=1)))')
+Sheet.addCommand('zJ', 'slide-down-n', 'slide_row(cursorRowIndex, cursorRowIndex+int(input("slide row down n=", value=1)))')
+Sheet.addCommand('zK', 'slide-up-n', 'slide_row(cursorRowIndex, cursorRowIndex-int(input("slide row up n=", value=1)))')
 
 Sheet.addCommand('BUTTON1_RELEASED','release-mouse','onRelease(cursorVisibleColIndex, cursorRowIndex, mouseX, mouseY)')
 

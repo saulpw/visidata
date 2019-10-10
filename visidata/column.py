@@ -264,6 +264,7 @@ class Column(Extensible):
 
     def setValues(self, rows, *values):
         'Set our column value for given list of rows to `value`.'
+        vd.addUndoSetValues([self], rows)
         for r, v in zip(rows, itertools.cycle(values)):
             self.setValueSafe(r, v)
         self.recalc()
@@ -271,9 +272,12 @@ class Column(Extensible):
 
     def setValuesTyped(self, rows, *values):
         'Set values on this column for rows, coerced to the column type.  will stop on first exception in type().'
+        vd.addUndoSetValues([self], rows)
         for r, v in zip(rows, itertools.cycle(self.type(val) for val in values)):
             self.setValueSafe(r, v)
+
         self.recalc()
+
         return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
     def getMaxWidth(self, rows):

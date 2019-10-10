@@ -19,7 +19,7 @@ Sheet.addCommand('ga', 'add-rows', 'addRows(sheet, int(input("add rows: ")), cur
 Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)
 Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)
 
-Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows)', undo=undoEditCells)
+Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows)')
 
 BaseSheet.bindkey('KEY_SLEFT', 'slide-left')
 BaseSheet.bindkey('KEY_SR', 'slide-left')
@@ -56,6 +56,7 @@ def addRows(sheet, n, idx):
 def fillNullValues(col, rows):
     'Fill null cells in col with the previous non-null value'
     lastval = None
+    oldvals = [] # for undo
     nullfunc = isNullFunc()
     n = 0
     rowsToFill = list(rows)
@@ -67,10 +68,16 @@ def fillNullValues(col, rows):
 
         if nullfunc(val) and r in rowsToFill:
             if lastval:
+                oldvals.append((c,r,val))
                 col.setValue(r, lastval)
                 n += 1
         else:
             lastval = val
+
+    def _undo():
+        for c, r, v in oldvals:
+            c.setValue(r, v)
+    vd.addUndo(_undo)
 
     col.recalc()
     status("filled %d values" % n)
@@ -96,7 +103,7 @@ Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol];
 
 Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 
-Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', undo=undoEditCells)
+Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))')
 
 globalCommand('A', 'add-sheet', 'vd.push(vd.newSheet(int(input("num columns for new sheet: ")), name="unnamed"))')
 
@@ -301,6 +308,8 @@ def deleteBy(self, func):
                 self.cursorRowIndex = len(self.rows)-1
         else:
             ndeleted += 1
+
+    self.addUndo(setattr, self, 'rows', oldrows)
 
     status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted

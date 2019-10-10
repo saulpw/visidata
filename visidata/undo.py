@@ -1,7 +1,19 @@
 import itertools
 from copy import copy
 
-from visidata import VisiData
+from visidata import vd, VisiData, options
+
+@VisiData.api
+def addUndo(vd, undofunc, *args, **kwargs):
+    'On undo of latest command, call undofunc()'
+    if options.undo:
+        r = vd.activeCommand
+        if not r:
+            return
+        if r.undofuncs is None:
+            r.undofuncs = []
+        r.undofuncs.append((undofunc, args, kwargs))
+
 
 # undoers
 def undoAttr(objs, attrname):
@@ -26,7 +38,7 @@ class Fanout(list):
         return Fanout(self._sheet, [getattr(o, k) for o in self])
 
     def __setattr__(self, k, v):
-        self._sheet.addUndo(undoAttrFunc(self, k))
+        vd.addUndo(undoAttrFunc(self, k))
         for o in self:
             setattr(o, k, v)
 
@@ -48,15 +60,13 @@ def undoAttrCopyFunc(objs, attrname):
 
 
 @VisiData.api
-def addUndoSetValues(vd, rows, cols):
-    oldvals = [(c, r, c.getValue(r)) for c,r in itertools.product(cols, rows)]
+def addUndoSetValues(vd, cols, rows):
+    oldvals = [(c, r, c.getValue(r)) for c,r in itertools.product(cols, vd.Progress(rows, gerund='doing'))]
     def _undo():
         for c, r, v in oldvals:
             c.setValue(r, v)
-    vd.cmdlog.onUndo(_undo)
+    vd.addUndo(_undo)
 
-def undoSetValues(rowstr='[cursorRow]', colstr='[cursorCol]'):
-    return 'lambda oldvals=[(c, r, c.getValue(r)) for c,r in itertools.product({colstr}, {rowstr})]: list(c.setValue(r, v) for c, r, v in oldvals)'.format(rowstr=rowstr, colstr=colstr)
 
 def undoRows(sheetstr):
     return undoAttrCopy('[%s]'%sheetstr, 'rows')
@@ -65,5 +75,3 @@ undoBlocked = 'lambda: error("cannot undo")'
 undoSheetRows = undoRows('sheet')
 undoSheetCols = 'lambda sheet=sheet,oldcols=[copy(c) for c in columns]: setattr(sheet, "columns", oldcols)'
 undoAddCols = undoAttrCopy('[sheet]', 'columns')
-undoEditCell = undoSetValues('[cursorRow]', '[cursorCol]')
-undoEditCells = undoSetValues('selectedRows', '[cursorCol]')

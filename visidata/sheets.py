@@ -9,7 +9,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
-vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoEditCell, undoEditCells, undoAttr, undoBlocked, undoAttrFunc)
+vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoAttr, undoAttrFunc)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow']
@@ -403,6 +403,7 @@ class Sheet(BaseSheet):
     def addColumn(self, col, index=None):
         'Insert column at given index or after all columns.'
         if col:
+            vd.addUndo(setattr, self, 'columns', copy(self.columns))
             if index is None:
                 index = len(self.columns)
             col.recalc(self)
@@ -415,7 +416,7 @@ class Sheet(BaseSheet):
             c.name = '\n'.join(str(c.getDisplayValue(r)) for r in rows)
 
     def setKeys(self, cols):
-        self.addUndo(undoAttrFunc(cols, 'keycol'))
+        vd.addUndo(undoAttrFunc(cols, 'keycol'))
         for col in cols:
             lastkeycol = 0
 
@@ -425,7 +426,7 @@ class Sheet(BaseSheet):
             col.keycol = lastkeycol+1
 
     def unsetKeys(self, cols):
-        self.addUndo(undoAttrFunc(cols, 'keycol'))
+        vd.addUndo(undoAttrFunc(cols, 'keycol'))
         for col in cols:
             col.keycol = 0
 
@@ -855,11 +856,11 @@ globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)')
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 
-Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', undo=undoRestoreKey),
-Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', undo=undoRestoreKey),
+Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])')
+Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])')
 
-Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', undo=undoEditCell)
-Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', undo=undoEditCells),
+Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)')
+Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))')
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)'),
 Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)'),

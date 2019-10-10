@@ -1,4 +1,4 @@
-from visidata import Progress, status, Sheet, Column, asyncthread, vd, undoAddCols, undoEditCells, ColumnExpr, undoEditCell
+from visidata import Progress, status, Sheet, Column, asyncthread, vd, undoAddCols, ColumnExpr
 
 
 class CompleteExpr:
@@ -29,6 +29,7 @@ class CompleteExpr:
 @asyncthread
 def setValuesFromExpr(self, rows, expr):
     compiledExpr = compile(expr, '<expr>', 'eval')
+    vd.addUndoSetValues([self], rows)
     for row in Progress(rows, 'setting'):
         self.setValueSafe(row, self.sheet.evalexpr(compiledExpr, row))
     self.recalc()
@@ -41,5 +42,5 @@ def inputExpr(self, prompt, *args, **kwargs):
 
 
 Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', undo=undoAddCols)
-Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows, inputExpr("set selected="))', undo=undoEditCells)
-Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalexpr(inputExpr("set expr="), cursorRow))', undo=undoEditCell)
+Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows, inputExpr("set selected="))')
+Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalexpr(inputExpr("set expr="), cursorRow))')

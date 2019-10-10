@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, undoAttrCopy, Progress, option, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc
+from visidata import vd, Sheet, undoAttrCopy, Progress, option, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy
 option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
 
 Sheet.init('_selectedRows', dict)  # rowid(row) -> row
@@ -117,7 +117,7 @@ def deleteSelected(self):
 
 @Sheet.api
 def addUndoSelection(sheet):
-    sheet.addUndo(undoAttrCopyFunc([sheet], '_selectedRows'))
+    vd.addUndo(undoAttrCopyFunc([sheet], '_selectedRows'))
 
 
 Sheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
