@@ -1,9 +1,9 @@
-from visidata import Sheet, undoAddCols
+from visidata import Sheet
 
 __version__ = '0.9'
 
 
-Sheet.addCommand(None, 'addcol-rownum', 'addColumn(Column("rownum", type=int, getter=sheet.rowNumber), cursorColIndex)', undo=undoAddCols, helpstr='add column with original row ordering')
+Sheet.addCommand(None, 'addcol-rownum', 'addColumn(Column("rownum", type=int, getter=sheet.rowNumber), cursorColIndex)', helpstr='add column with original row ordering')
 
 
 @Sheet.lazy_property

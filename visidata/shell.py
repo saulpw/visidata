@@ -10,12 +10,12 @@ except ImportError:
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, exceptionCaught, options, option
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError
-from visidata import CellColorizer, RowColorizer, undoAddCols, undoBlocked, modtime, filesize
+from visidata import CellColorizer, RowColorizer, undoBlocked, modtime, filesize
 
 option('dir_recurse', False, 'walk source path recursively on DirSheet')
 option('dir_hidden', False, 'load hidden files on DirSheet')
 
-Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)', undo=undoAddCols)
+Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)')
 
 
 @asyncthread

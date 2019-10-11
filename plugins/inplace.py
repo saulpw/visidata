@@ -1,4 +1,4 @@
-from visidata import Column, vd, VisiData, options, ColumnExpr, CompleteExpr, fail, EscapeException, Sheet, undoAddCols
+from visidata import Column, vd, VisiData, options, ColumnExpr, CompleteExpr, fail, EscapeException, Sheet
 
 
 @Column.api
@@ -41,5 +41,5 @@ def addcol_expr(vd, sheet, colidx):
         raise
 
 
-Sheet.addCommand(None, 'addcol-expr', 'addcol_expr(sheet, cursorColIndex+1)', undo=undoAddCols)
-Sheet.addCommand(None, 'addcol-new', 'c=addColumn(SettableColumn("", width=options.default_width), cursorColIndex+1); draw(vd.scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None', undo=undoAddCols)
+Sheet.addCommand(None, 'addcol-expr', 'addcol_expr(sheet, cursorColIndex+1)')
+Sheet.addCommand(None, 'addcol-new', 'c=addColumn(SettableColumn("", width=options.default_width), cursorColIndex+1); draw(vd.scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None')

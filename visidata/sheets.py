@@ -403,7 +403,7 @@ class Sheet(BaseSheet):
     def addColumn(self, col, index=None):
         'Insert column at given index or after all columns.'
         if col:
-            vd.addUndo(setattr, self, 'columns', copy(self.columns))
+            vd.addUndo(self.columns.remove, col)
             if index is None:
                 index = len(self.columns)
             col.recalc(self)

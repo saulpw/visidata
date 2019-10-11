@@ -65,4 +65,3 @@ def addUndoSetValues(vd, cols, rows):
 
 undoBlocked = 'lambda: error("cannot undo")'
 undoSheetCols = 'lambda sheet=sheet,oldcols=[copy(c) for c in columns]: setattr(sheet, "columns", oldcols)'
-undoAddCols = undoAttrCopy('[sheet]', 'columns')

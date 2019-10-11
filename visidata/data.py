@@ -16,8 +16,8 @@ Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select:
 
 Sheet.addCommand('a', 'add-row', 'addRows(1, cursorRowIndex); cursorDown(1)')
 Sheet.addCommand('ga', 'add-rows', 'addRows(int(input("add rows: ", value=1)), cursorRowIndex)')
-Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)
-Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', undo=undoAddCols)
+Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)')
+Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)')
 
 Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows)')
 

@@ -2,7 +2,7 @@ from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENT
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, commands, Option
-from visidata import undoAttr, undoAttrFunc, undoAddCols, VisiData, vlen
+from visidata import undoAttr, undoAttrFunc, VisiData, vlen
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
 
@@ -199,7 +199,7 @@ ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)'
 
 ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()')
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))')
-ColumnsSheet.addCommand('&', 'join-cols', 'c=combineColumns(selectedRows or fail("no columns selected to concatenate")); addRow(c, cursorRowIndex); c.recalc(selectedRows[0].sheet)', undo=undoAddCols)
+ColumnsSheet.addCommand('&', 'join-cols', 'source.addColumn(combineColumns(someSelectedRows), cursorRowIndex)')
 
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
 ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')

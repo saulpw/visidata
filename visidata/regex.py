@@ -3,11 +3,10 @@ import random
 
 from visidata import asyncthread, warning, option, options, vd
 from visidata import BaseSheet, Sheet, Column, Progress
-from visidata import undoAddCols
 
-Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, input("split regex: ", type="regex-split"))', undo=undoAddCols)
-Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, input("match regex: ", type="regex-capture"))', undo=undoAddCols)
-Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)', undo=undoAddCols)
+Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, input("split regex: ", type="regex-split"))')
+Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, input("match regex: ", type="regex-capture"))')
+Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)')
 Sheet.addCommand('g*', 'setcol-subst', 'setSubst([cursorCol], selectedRows)')
 Sheet.addCommand('gz*', 'setcol-subst-all', 'setSubst(visibleCols, selectedRows)')
 
