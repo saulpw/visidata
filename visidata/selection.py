@@ -90,8 +90,8 @@ def gatherBy(self, func, gerund='gathering'):
 def selectedRows(self):
     'List of selected rows in sheet order. [O(nRows*log(nSelected))]'
     if self.nSelected <= 1:
-        return Fanout(self, self._selectedRows.values())
-    return Fanout(self, (r for r in self.rows if self.rowid(r) in self._selectedRows))
+        return Fanout(self._selectedRows.values())
+    return Fanout((r for r in self.rows if self.rowid(r) in self._selectedRows))
 
 @Sheet.property
 def someSelectedRows(self):

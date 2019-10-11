@@ -222,6 +222,9 @@ def option(name, default, helpstr, replay=False):
 
 theme = option
 
+@VisiData.api
+def addCommand(vd, keystrokes, longname, execstr, helpstr='', **kwargs):
+    globalCommand(keystrokes, longname, execstr, helpstr=helpstr, **kwargs)
 
 @BaseSheet.class_api
 @classmethod

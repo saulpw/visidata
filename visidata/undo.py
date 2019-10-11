@@ -1,7 +1,7 @@
 import itertools
 from copy import copy
 
-from visidata import vd, VisiData, options
+from visidata import vd, options, VisiData
 
 @VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
@@ -10,10 +10,34 @@ def addUndo(vd, undofunc, *args, **kwargs):
         r = vd.activeCommand
         if not r:
             return
-        if r.undofuncs is None:
-            r.undofuncs = []
         r.undofuncs.append((undofunc, args, kwargs))
 
+
+@VisiData.api
+def undo(vd, sheet):
+    if not options.undo:
+        vd.fail("options.undo not enabled")
+
+    # don't allow undo of first command on a sheet, which is always the command that created the sheet.
+    for cmdlogrow in sheet.cmdlog_sheet.rows[1::-1]:
+        if cmdlogrow.undofuncs:
+            for undofunc, args, kwargs, in cmdlogrow.undofuncs:
+                undofunc(*args, **kwargs)
+            sheet.undone.append(cmdlogrow)
+            sheet.cmdlog_sheet.rows.remove(cmdlogrow)
+            vd.clear_caches()
+            vd.status("%s undone" % cmdlogrow.longname)
+            return
+
+    vd.fail("nothing to undo on current sheet")
+
+
+@VisiData.api
+def redo(vd, sheet):
+    sheet.undone or vd.fail("nothing to redo")
+    cmdlogrow = sheet.undone.pop()
+    vd.cmdlog.replayOne(cmdlogrow)
+    vd.status("%s redone" % cmdlogrow.longname)
 
 # undoers
 def undoAttrFunc(objs, attrname):
@@ -54,3 +78,7 @@ def addUndoSetValues(vd, cols, rows):
         for c, r, v in oldvals:
             c.setValue(r, v)
     vd.addUndo(_undo)
+
+
+vd.addCommand('U', 'undo-last', 'vd.undo(sheet)')
+vd.addCommand('R', 'redo-last', 'vd.redo(sheet)')

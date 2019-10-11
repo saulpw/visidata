@@ -69,7 +69,7 @@ def fillNullValues(col, rows):
 
         if nullfunc(val) and r in rowsToFill:
             if lastval:
-                oldvals.append((c,r,val))
+                oldvals.append((col,r,val))
                 col.setValue(r, lastval)
                 n += 1
         else:

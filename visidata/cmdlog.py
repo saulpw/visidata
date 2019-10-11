@@ -166,7 +166,8 @@ class CommandLog(TsvSheet):
                                             keystrokes=keystrokes,
                                             input=args,
                                             longname=cmd.longname,
-                                            comment=comment)
+                                            comment=comment,
+                                            undofuncs=[])
 
     def afterExecSheet(self, sheet, escaped, err):
         'Records vd.activeCommand'
@@ -180,7 +181,7 @@ class CommandLog(TsvSheet):
             # remove user-aborted commands and simple movements
             if not escaped and isLoggableCommand(vd.activeCommand.longname):
                 self.addRow(vd.activeCommand)
-                sheet.cmdlog.addRow(vd.activeCommand)
+                sheet.cmdlog_sheet.addRow(vd.activeCommand)
                 if options.cmdlog_histfile:
                     if not getattr(vd, 'sessionlog', None):
                         vd.sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
@@ -324,30 +325,8 @@ class CommandLog(TsvSheet):
                     keystrokes='', input=str(optval),
                     longname='set-option'))
 
-    def undo(self, sheet):
-        if not options.undo:
-            fail("options.undo not enabled")
 
-        for cmdlogrow in sheet.cmdlog.rows[::-1]:
-            if cmdlogrow.undofuncs:
-                for undofunc, args, kwargs, in cmdlogrow.undofuncs:
-                    undofunc(*args, **kwargs)
-                sheet.undone.append(cmdlogrow)
-                sheet.cmdlog.rows.remove(cmdlogrow)
-                vd.clear_caches()
-                status("%s undone" % cmdlogrow.longname)
-                return
-
-        fail("nothing to undo on current sheet")
-
-    def redo(self, sheet):
-        sheet.undone or fail("nothing to redo")
-        cmdlogrow = sheet.undone.pop()
-        self.replayOne(cmdlogrow)
-        status("%s redone" % cmdlogrow.longname)
-
-
-@BaseSheet.lazy_property
+@BaseSheet.property
 def cmdlog(sheet):
     rows = sheet.cmdlog_sheet.rows
     if isinstance(sheet.source, BaseSheet):
@@ -393,9 +372,6 @@ globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay
 globalCommand(None, 'status', 'status(input("status: "))')
 globalCommand('^V', 'show-version', 'status(__version_info__);')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))')
-
-globalCommand('U', 'undo-last', 'vd.cmdlog.undo(sheet)')
-globalCommand('R', 'redo-last', 'vd.cmdlog.redo(sheet)')
 
 globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
 
