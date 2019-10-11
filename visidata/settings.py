@@ -91,11 +91,10 @@ class SettingsMgr(collections.OrderedDict):
 
 
 class Command:
-    def __init__(self, longname, execstr, helpstr='', undo=''):
+    def __init__(self, longname, execstr, helpstr=''):
         self.longname = longname
         self.execstr = execstr
         self.helpstr = helpstr
-        self.undo = undo
 
 def globalCommand(keystrokes, longname, execstr, helpstr='', **kwargs):
     commands.setdefault(longname, Command(longname, execstr, helpstr=helpstr, **kwargs))
