@@ -10,12 +10,12 @@ Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); push_pyobj("%s[%s]
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)')
 globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)')
 
-Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)', undo=undoSheetCols)
-Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)', undo=undoSheetCols)
-Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))', undo=undoSheetCols)
-Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))', undo=undoSheetCols)
+Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)')
+Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)')
+Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))')
+Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))')
 
-Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol.origCol)', undo=undoSheetCols)
+Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol.origCol)')
 
 class PythonSheet(Sheet):
     pass
@@ -70,6 +70,7 @@ class ExpandedColumn(Column):
 
 
 def closeColumn(sheet, origCol):
+    vd.addUndo(setattr, sheet, 'columns', sheet.columns)
     origCol.width = options.default_width
     cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not origCol]
     sheet.columns = cols

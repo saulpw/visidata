@@ -93,7 +93,7 @@ Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColI
 Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(sheet, selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)')
 Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols)')
 Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)')
-BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', undo=undoAttr('[sheet]', 'name'))
+BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)')
 
 globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))')
 Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
