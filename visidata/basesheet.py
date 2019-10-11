@@ -42,6 +42,7 @@ class BaseSheet(Extensible):
     precious = True      # False for a few discardable metasheets
 
     def __init__(self, name, **kwargs):
+        self._name = None
         self.name = name
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
@@ -136,6 +137,7 @@ class BaseSheet(Extensible):
     @name.setter
     def name(self, name):
         'Set name without spaces.'
+        vd.addUndo(setattr, self, '_name', self._name)
         self._name = name.strip().replace(' ', '_')
 
     def recalc(self):

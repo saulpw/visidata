@@ -328,12 +328,12 @@ class CommandLog(TsvSheet):
         if not options.undo:
             fail("options.undo not enabled")
 
-        for cmdlogrow in self.rows[::-1]:
-            if cmdlogrow.undofuncs and str(cmdlogrow.sheet) == sheet.name:
+        for cmdlogrow in sheet.cmdlog.rows[::-1]:
+            if cmdlogrow.undofuncs:
                 for undofunc, args, kwargs, in cmdlogrow.undofuncs:
                     undofunc(*args, **kwargs)
                 sheet.undone.append(cmdlogrow)
-                self.rows.remove(cmdlogrow)
+                sheet.cmdlog.rows.remove(cmdlogrow)
                 vd.clear_caches()
                 status("%s undone" % cmdlogrow.longname)
                 return

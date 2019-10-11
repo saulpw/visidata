@@ -7,8 +7,14 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
 
 
-VisiData.init('statuses', collections.OrderedDict)  # (priority, statusmsg) -> num_repeats; shown until next action
-VisiData.init('statusHistory', list)  # list of [priority, statusmsg, repeats] for all status messages ever
+@VisiData.lazy_property
+def statuses(vd):
+    return collections.OrderedDict()  # (priority, statusmsg) -> num_repeats; shown until next action
+
+
+@VisiData.lazy_property
+def statusHistory(vd):
+    return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
 
 @VisiData.global_api
