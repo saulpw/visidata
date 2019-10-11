@@ -16,10 +16,6 @@ def addUndo(vd, undofunc, *args, **kwargs):
 
 
 # undoers
-def undoAttr(objs, attrname):
-    'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value as reference.'
-    return '''lambda oldvals=[(o, getattr(o, "{attrname}")) for o in {objs}] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)
-
 def undoAttrFunc(objs, attrname):
     'Return closure that sets attrname on each obj to its former value.'
     oldvals = [(o, getattr(o, attrname)) for o in objs]
@@ -42,10 +38,6 @@ class Fanout(list):
         return Fanout([o(*args, **kwargs) for o in self])
 
 
-def undoAttrCopy(objs, attrname):
-    'Returns a string that on eval() returns a closure that will set attrname on each obj to its former value which is copied.'
-    return '''lambda oldvals=[ (o, copy(getattr(o, "{attrname}"))) for o in {objs} ] : list(setattr(o, "{attrname}", v) for o, v in oldvals)'''.format(attrname=attrname, objs=objs)
-
 def undoAttrCopyFunc(objs, attrname):
     'Return closure that sets attrname on each obj to its former value.'
     oldvals = [(o, copy(getattr(o, attrname))) for o in objs]
@@ -62,6 +54,3 @@ def addUndoSetValues(vd, cols, rows):
         for c, r, v in oldvals:
             c.setValue(r, v)
     vd.addUndo(_undo)
-
-undoBlocked = 'lambda: error("cannot undo")'
-undoSheetCols = 'lambda sheet=sheet,oldcols=[copy(c) for c in columns]: setattr(sheet, "columns", oldcols)'

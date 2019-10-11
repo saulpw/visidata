@@ -9,7 +9,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
-vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoAttr, undoAttrFunc)
+vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow']
@@ -847,8 +847,6 @@ def quit(vd, *sheets):
     for vs in sheets:
         vd.remove(vs)
 
-
-undoRestoreKey = undoAttr('[cursorCol]', 'keycol')
 
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)')

@@ -2,7 +2,7 @@ from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENT
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import getGlobals, TsvSheet, Path, commands, Option
-from visidata import undoAttr, undoAttrFunc, VisiData, vlen
+from visidata import undoAttrFunc, VisiData, vlen
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
 

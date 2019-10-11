@@ -1,4 +1,4 @@
-from visidata import vd, Column, Sheet, options, undoAttr
+from visidata import vd, Column, Sheet, options
 
 @Column.api
 def setWidth(self, w):
