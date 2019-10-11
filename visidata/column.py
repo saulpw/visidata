@@ -59,7 +59,7 @@ class Column(Extensible):
         self.sheet = None     # owning Sheet, set in .recalc() via Sheet.addColumn
         self.name = name      # display visible name
         self.fmtstr = ''      # by default, use str()
-        self.type = type      # anytype/str/int/float/date/func
+        self._type = type     # anytype/str/int/float/date/func
         self.getter = lambda col, row: row
         self.setter = lambda col, row, value: vd.fail(col.name+' column cannot be changed')
         self.width = None     # == 0 if hidden, None if auto-compute next time
@@ -102,6 +102,16 @@ class Column(Extensible):
         if options.force_valid_colnames:
             name = clean_to_id(name)
         self._name = name
+
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, t):
+        if self._type != t:
+            vd.addUndo(setattr, self, 'type', self._type)
+        self._type = t
 
     @property
     def fmtstr(self):

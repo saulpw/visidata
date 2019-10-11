@@ -1,6 +1,6 @@
 # to anonymize a column in vd: do "setcol-fake" with e.g. 'name' 'isbn10' or any of the functions on Faker()
 
-from visidata import vd, Column, Sheet, option, options, asyncthread, Progress, undoEditCells
+from visidata import vd, Column, Sheet, option, options, asyncthread, Progress
 
 __version__ = '0.9'
 
@@ -28,4 +28,4 @@ def setValuesFromFaker(col, faketype, rows):
         col.setValue(r, newv)
 
 
-Sheet.addCommand(None, 'setcol-fake', 'cursorCol.setValuesFromFaker(input("faketype: ", type="faketype"), selectedRows)', undo=undoEditCells)
+Sheet.addCommand(None, 'setcol-fake', 'cursorCol.setValuesFromFaker(input("faketype: ", type="faketype"), selectedRows)')

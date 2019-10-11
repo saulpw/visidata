@@ -30,12 +30,8 @@ def undoAttrFunc(objs, attrname):
 
 
 class Fanout(list):
-    def __init__(self, sheet, objs):
-        self.__dict__['_sheet'] = sheet
-        super().__init__(objs)
-
     def __getattr__(self, k):
-        return Fanout(self._sheet, [getattr(o, k) for o in self])
+        return Fanout([getattr(o, k) for o in self])
 
     def __setattr__(self, k, v):
         vd.addUndo(undoAttrFunc(self, k))
@@ -43,7 +39,7 @@ class Fanout(list):
             setattr(o, k, v)
 
     def __call__(self, *args, **kwargs):
-        return Fanout(self._sheet, [o(*args, **kwargs) for o in self])
+        return Fanout([o(*args, **kwargs) for o in self])
 
 
 def undoAttrCopy(objs, attrname):
@@ -67,11 +63,6 @@ def addUndoSetValues(vd, cols, rows):
             c.setValue(r, v)
     vd.addUndo(_undo)
 
-
-def undoRows(sheetstr):
-    return undoAttrCopy('[%s]'%sheetstr, 'rows')
-
 undoBlocked = 'lambda: error("cannot undo")'
-undoSheetRows = undoRows('sheet')
 undoSheetCols = 'lambda sheet=sheet,oldcols=[copy(c) for c in columns]: setattr(sheet, "columns", oldcols)'
 undoAddCols = undoAttrCopy('[sheet]', 'columns')

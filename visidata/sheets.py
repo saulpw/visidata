@@ -867,15 +867,13 @@ Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=li
 Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")'),
 Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")'),
 
-undoColType = undoAttr('[cursorCol]', 'type')
-
-Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', undo=undoColType),
-Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', undo=undoColType),
-Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', undo=undoColType),
-Sheet.addCommand('#', 'type-int', 'cursorCol.type = int', undo=undoColType),
-Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', undo=undoColType),
-Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', undo=undoColType),
-Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', undo=undoColType),
+Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype')
+Sheet.addCommand('~', 'type-string', 'cursorCol.type = str')
+Sheet.addCommand('@', 'type-date', 'cursorCol.type = date')
+Sheet.addCommand('#', 'type-int', 'cursorCol.type = int')
+Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen')
+Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency')
+Sheet.addCommand('%', 'type-float', 'cursorCol.type = float')
 
 IndexSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
