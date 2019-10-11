@@ -1,18 +1,7 @@
 from visidata import vd, copy, asyncthread, Progress, exceptionCaught, status, Sheet, options
 
-# replace existing sort criteria
-Sheet.addCommand('[', 'sort-asc', 'orderBy(None, cursorCol)')
-Sheet.addCommand(']', 'sort-desc', 'orderBy(None, cursorCol, reverse=True)')
-Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(None, *keyCols)')
-Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(None, *keyCols, reverse=True)')
-
-# add to existing sort criteria
-Sheet.addCommand('z[', 'sort-asc-add', 'orderBy(cursorCol)')
-Sheet.addCommand('z]', 'sort-desc-add', 'orderBy(cursorCol, reverse=True)')
-Sheet.addCommand('gz[', 'sort-keys-asc-add', 'orderBy(*keyCols)')
-Sheet.addCommand('gz]', 'sort-keys-desc-add', 'orderBy(*keyCols, reverse=True)')
-
 Sheet.init('_ordering', list, copy=True)  # (cols, reverse:bool)
+
 
 @Sheet.api
 def orderBy(sheet, *cols, reverse=False):
@@ -37,6 +26,7 @@ def orderBy(sheet, *cols, reverse=False):
     if do_sort:
         sheet.sort()
 
+
 @Sheet.api
 @asyncthread
 def sort(self):
@@ -53,3 +43,16 @@ def sort(self):
     except TypeError as e:
         status('sort incomplete due to TypeError; change column type')
         exceptionCaught(e, status=False)
+
+
+# replace existing sort criteria
+Sheet.addCommand('[', 'sort-asc', 'orderBy(None, cursorCol)')
+Sheet.addCommand(']', 'sort-desc', 'orderBy(None, cursorCol, reverse=True)')
+Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(None, *keyCols)')
+Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(None, *keyCols, reverse=True)')
+
+# add to existing sort criteria
+Sheet.addCommand('z[', 'sort-asc-add', 'orderBy(cursorCol)')
+Sheet.addCommand('z]', 'sort-desc-add', 'orderBy(cursorCol, reverse=True)')
+Sheet.addCommand('gz[', 'sort-keys-asc-add', 'orderBy(*keyCols)')
+Sheet.addCommand('gz]', 'sort-keys-desc-add', 'orderBy(*keyCols, reverse=True)')
