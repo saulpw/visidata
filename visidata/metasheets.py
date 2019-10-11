@@ -126,6 +126,7 @@ class OptionsSheet(Sheet):
 
     def editOption(self, row):
         currentValue = options.get(row.name, self.source)
+        vd.addUndo(options.set, row.name, currentValue, self.source)
         if isinstance(row.value, bool):
             options.set(row.name, not currentValue, self.source)
         else:
@@ -209,6 +210,6 @@ ColumnsSheet.addCommand('g$', 'type-currency-selected', 'someSelectedRows.type=c
 ColumnsSheet.addCommand('g~', 'type-string-selected', 'someSelectedRows.type=str', 'set type of selected columns to str')
 ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anytype', 'set type of selected columns to any')
 
-OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', undo='lambda source=source,opt=cursorRow,val=options.get(cursorRow.name,source): options.set(opt.name, val, source)')
+OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
 OptionsSheet.bindkey('e', 'edit-option')
 OptionsSheet.bindkey(ENTER, 'edit-option')
