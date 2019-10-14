@@ -1,7 +1,11 @@
 import itertools
 from copy import copy
 
-from visidata import vd, options, VisiData
+from visidata import vd, options, VisiData, BaseSheet, option
+
+BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
+
+option('undo', True, 'enable undo/redo')
 
 @VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
