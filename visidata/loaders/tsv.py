@@ -63,11 +63,15 @@ class TsvSheet(Sheet):
         self.reload_sync()
 
     def reload_sync(self):
+        self.rows = []
+        for r in self.iterload():
+            self.addRow(r)
+
+    def iterload(self):
         'Perform synchronous loading of TSV file, discarding header lines.'
         header_lines = options.get('header', self)
         delim = options.get('delimiter', self)
         rowdelim = options.get('row_delimiter', self)
-
 
         with self.source.open_text() as fp:
             rdr = splitter(fp, rowdelim)
@@ -88,7 +92,6 @@ class TsvSheet(Sheet):
             self._rowtype = namedlist('tsvobj', [c.name for c in self.columns])
 
             self.recalc()
-            self.rows = []
 
             ncols = len(self._rowtype())    # current number of cols
             with Progress(total=filesize(self.source)) as prog:
@@ -105,7 +108,7 @@ class TsvSheet(Sheet):
                         # extend rows that are missing entries
                         row.extend([None]*(ncols-len(row)))
 
-                    self.addRow(self._rowtype(row))
+                    yield self._rowtype(row)
                     prog.addProgress(len(L))
 
     def newRow(self):
@@ -130,6 +133,11 @@ def save_tsv_header(p, vs):
         colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
         if colhdr.strip():  # is anything but whitespace
             fp.write(colhdr)
+
+
+def load_tsv(fn):
+    vs = open_tsv(Path(fn))
+    yield from vs.iterload()
 
 
 def genAllValues(rows, cols, trdict={}, format=True):
