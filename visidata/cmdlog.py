@@ -12,7 +12,7 @@ option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
-error status errors statuses options threads cmdlog
+error status errors statuses options threads cmdlog jump
 replay stop pause cancel advance save-cmdlog
 go- search scroll prev next page start end zoom resize visibility
 suspend redraw no-op help syscopy syspaste sysopen profile toggle'''.split()
