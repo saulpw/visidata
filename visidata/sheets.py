@@ -1,12 +1,8 @@
 import collections
-import functools
-import threading
-import re
-from unittest import mock
 from copy import copy
 import textwrap
 
-from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
@@ -236,6 +232,7 @@ class Sheet(BaseSheet):
         for c in self.columns:
             c.recalc(self)
 
+    @asyncthread
     def reload(self):
         'Loads rows and/or columns.  Override in subclass.'
         self.rows = []

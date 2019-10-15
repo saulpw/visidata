@@ -23,14 +23,10 @@ class ZipSheet(Sheet):
                                           errors=options.encoding_errors)
             return openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size))
 
-
-    @asyncthread
-    def reload(self):
-        contents = zipfile.ZipFile(str(self.source), 'r').infolist()
-
-        self.rows = []
-        for row in Progress(contents):
-            self.addRow(row)
+    def iterload(self):
+        with zipfile.ZipFile(str(self.source), 'r') as zf:
+            for zi in Progress(zf.infolist()):
+                yield zi
 
 
 class TarSheet(Sheet):
@@ -53,13 +49,10 @@ class TarSheet(Sheet):
                                           errors=options.encoding_errors)
             return openSource(Path(fi.name, fp=decodedfp, filesize=fi.size))
 
-    @asyncthread
-    def reload(self):
-        contents = tarfile.open(name=str(self.source)).getmembers()
-
-        self.rows = []
-        for row in Progress(contents):
-            self.addRow(row)
+    def iterload(self):
+        with tarfile.open(name=str(self.source)) as tf:
+            for ti in Progress(tf.getmembers()):
+                yield ti
 
 
 ZipSheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))')
