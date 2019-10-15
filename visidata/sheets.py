@@ -478,6 +478,8 @@ class Sheet(BaseSheet):
                 if self.leftVisibleColIndex == self.cursorVisibleColIndex:  # not much more we can do
                     break
                 self.calcColLayout()
+                if not self.visibleColLayout:
+                    break
                 mincolidx, maxcolidx = min(self.visibleColLayout.keys()), max(self.visibleColLayout.keys())
                 if self.cursorVisibleColIndex < mincolidx:
                     self.leftVisibleColIndex -= max((self.cursorVisibleColIndex - mincolid)//2, 1)
