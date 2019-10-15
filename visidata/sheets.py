@@ -2,7 +2,7 @@ import collections
 from copy import copy
 import textwrap
 
-from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
 from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
@@ -108,6 +108,9 @@ class LazyComputeRow:
 
     def keys(self):
         return self._keys + self.sheet._lcm.keys()
+
+    def __getattr__(self, k):
+        return self.__getitem__(k)
 
     def __getitem__(self, colid):
         try:
@@ -243,9 +246,23 @@ class Sheet(BaseSheet):
             self.addRow(r)
 
     def iterload(self):
-        'Override this generator for loading, if columns can be predefined.'
-        for row in []:
-            yield row
+        'Override this generator for loading.'
+        yield vd.fail('no iterload for this loader yet')
+
+    def iterrows(self):
+        if self.rows is UNLOADED:
+            try:
+                self.rows = []
+                for row in self.iterload():
+                    self.addRow(row)
+                    yield LazyComputeRow(self, row)
+                return
+            except ExpectedException:
+                vd.sync(self.reload())
+
+        for row in vd.Progress(self.rows):
+            yield LazyComputeRow(self, row)
+
 
     def __copy__(self):
         'copy sheet design (no rows).  deepcopy columns so their attributes (width, type, name) may be adjusted independently.'
