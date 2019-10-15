@@ -217,6 +217,9 @@ class Sheet(BaseSheet):
     def newRow(self):
         return type(self)._rowtype()
 
+    def openRow(self, row):
+        vd.fail(f'cannot open {self.rowtype} on this sheet')
+
     @drawcache_property
     def colsByName(self):
         'Return dict of colname:col'
@@ -766,6 +769,9 @@ class IndexSheet(Sheet):
     def reload(self):
         self.rows = self.source
 
+    def openRow(self, row):
+        return row  # rowdef is Sheet
+
     def getSheet(self, k):
         for vs in self.rows:
             if vs.name == k:
@@ -872,7 +878,9 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen')
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float')
 
-IndexSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
+Sheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))')
+Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))')
+
 
 # when diving into a sheet, remove the index unless it is precious
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')

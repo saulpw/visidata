@@ -55,11 +55,6 @@ class TarSheet(Sheet):
                 yield ti
 
 
-ZipSheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))')
-ZipSheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))')
-TarSheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))')
-TarSheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))')
-
 vd.filetype('zip', ZipSheet)
 vd.filetype('tar', TarSheet)
 vd.filetype('tgz', TarSheet)
