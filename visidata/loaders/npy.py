@@ -43,7 +43,7 @@ class NpySheet(NumpySheet):
 
 
 
-class NpzSheet(ArchiveSheet):
+class NpzSheet(ZipSheet):
     # rowdef = (tablename, table)
     columns = [
         ColumnItem('name', 0),
