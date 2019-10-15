@@ -34,6 +34,9 @@ BaseSheet.bindkey('gkUP', 'slide-top')
 BaseSheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
 
 
+vd.filetypes = {}
+
+
 class SettableColumn(Column):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -207,47 +210,65 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         vd.execAsync(savefunc, givenpath)
 
 
-def openSource(p, filetype=None):
-    'calls open_ext(Path) or openurl_scheme(UrlPath, filetype)'
-    if not filetype:
-        filetype = options.filetype
-    if isinstance(p, str):
-        if '://' in p:
-            return openSource(Path(p), filetype=filetype)  # convert to Path and recurse
-        elif p == '-':
-            return openSource(Path('-', fp=vd._stdin), filetype=filetype)
-        else:
-            return openSource(Path(p), filetype=filetype)  # convert to Path and recurse
-    elif p.scheme and not p.fp: # isinstance(p, UrlPath):
+@VisiData.api
+def filetype(vd, ext, constructor):
+    'Add constructor to handle the given file type/extension.'
+    vd.filetypes[ext] = constructor
+
+
+@VisiData.api
+def openPath(vd, p, filetype=None):
+    'Call vd.filetypes[ext](path.name, source=path) or open_ext(Path) or openurl_scheme(Path, filetype).  Return constructed but unloaded sheet of appropriate type.'
+    if p.scheme and not p.fp: # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
         return getGlobals()[openfunc](p, filetype=filetype)
-    elif isinstance(p, Path):
-        if not filetype:
-            filetype = p.ext or 'txt'
 
-        if p.is_dir():
-            filetype = 'dir'
+    if p.is_dir():
+        filetype = 'dir'
 
-        openfunc = 'open_' + filetype.lower()
-        if openfunc not in getGlobals():
-            warning('no %s function' % openfunc)
-            filetype = 'txt'
-            openfunc = 'open_txt'
+    if not filetype:
+        filetype = p.ext or 'txt'
 
-        if p.exists():
-            vs = getGlobals()[openfunc](p)
+    if not p.exists():
+        warning('%s does not exist, creating new sheet' % p)
+        return vd.newSheet(1, name=p.name, source=p)
+
+    filetype = filetype.lower()
+
+    openfunc = vd.filetypes.get(filetype.lower())
+    if openfunc:
+        return openfunc(p.name, source=p)
+
+    openfunc = getGlobals().get('open_' + filetype)
+    if openfunc:
+        return openfunc(p)
+
+    warning('unknown "%s" filetype' % openfunc)
+    filetype = 'txt'
+    openfunc = getGlobals().get('open_txt')
+    return openfunc(p)
+
+
+@VisiData.global_api
+def openSource(vd, p, filetype=None):
+    if not filetype:
+        filetype = options.filetype
+
+    if isinstance(p, str):
+        if '://' in p:
+            return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+        elif p == '-':
+            return vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
         else:
-            warning('%s does not exist, creating new sheet' % p)
-            vs = vd.newSheet(1, name=p.name, source=p)
+            return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
 
-    else:  # some other object
-        status('unknown object type %s' % type(p))
-        vs = None
-
+    vs = vd.openPath(p, filetype=filetype)
     if vs:
         status('opening %s as %s' % (p.given, filetype))
-
+    else:
+        status('unknown object type %s' % type(p))
     return vs
+
 
 #### enable external addons
 def open_vd(p):

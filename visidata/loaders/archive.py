@@ -67,13 +67,8 @@ ZipSheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(
 TarSheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))')
 TarSheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))')
 
-def open_zip(p):
-    return ZipSheet(p.name, source=p)
-
-
-def open_tar(p):
-    return TarSheet(p.name, source=p)
-
-open_tgz = open_tar
-open_txz = open_tar
-open_tbz2 = open_tar
+vd.filetype('zip', ZipSheet)
+vd.filetype('tar', TarSheet)
+vd.filetype('tgz', TarSheet)
+vd.filetype('txz', TarSheet)
+vd.filetype('tbz2', TarSheet)
