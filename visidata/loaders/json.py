@@ -1,6 +1,6 @@
 import json
 
-from visidata import options, option, status, date, deduceType
+from visidata import vd, options, option, status, date, deduceType
 from visidata import Sheet, PythonSheet, ColumnItem, stacktrace, asyncthread, Progress
 from visidata import wrapply, TypedExceptionWrapper, TypedWrapper
 
