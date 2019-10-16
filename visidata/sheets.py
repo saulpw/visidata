@@ -783,9 +783,6 @@ class IndexSheet(Sheet):
     def newRow(self):
         return Sheet('', columns=[ColumnItem('', 0)], rows=[])
 
-    def reload(self):
-        self.rows = self.source
-
     def openRow(self, row):
         return row  # rowdef is Sheet
 
@@ -793,6 +790,7 @@ class IndexSheet(Sheet):
         for vs in self.rows:
             if vs.name == k:
                 return vs
+
 
 class SheetsSheet(IndexSheet):
     columns = [
@@ -808,6 +806,8 @@ class SheetsSheet(IndexSheet):
 #        ColumnAttr('threads', 'currentThreads', type=vlen),
     ]
     nKeys = 1
+    def reload(self):
+        self.rows = self.source
 
 
 @VisiData.property
