@@ -4,11 +4,6 @@ import json
 import gzip
 import sqlite3
 
-def open_pbf(p):
-    return PbfSheet(p.name, tile_data=p.read_bytes())
-
-def open_mbtiles(p):
-    return MbtilesSheet(p.name, source=p)
 
 def getListDepth(L):
     if not isinstance(L, list):
@@ -46,15 +41,13 @@ class MbtilesSheet(Sheet):
 
         return mapbox_vector_tile.decode(gzip.decompress(tile_data))
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         con = sqlite3.connect(str(self.source))
 
         self.metadata = dict(con.execute('SELECT name, value FROM metadata').fetchall())
 
         tiles = con.execute('SELECT zoom_level, tile_column, tile_row FROM tiles')
-        for r in Progress(tiles.fetchall()):
-            self.addRow(r)
+        yield from Progress(tiles.fetchall())
 
     def getPlot(self, *rows):
         if len(rows) == 1:
@@ -68,9 +61,6 @@ class MbtilesSheet(Sheet):
     def getPlotSheet(self, row):
         return PbfSheet(tilename(row), source=self, sourceRow=row)
 
-MbtilesSheet.addCommand(ENTER, 'dive-row', 'vd.push(getPlotSheet(cursorRow))')
-MbtilesSheet.addCommand('.', 'plot-row', 'vd.push(getPlot(cursorRow))')
-MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles'),
 
 
 class PbfSheet(Sheet):
@@ -82,12 +72,10 @@ class PbfSheet(Sheet):
     ]
     nKeys = 1  # layer
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         props = set()  # property names
-        self.rows = []
         for r in getFeatures(self.source.getTile(*self.sourceRow)):
-            self.addRow(r)
+            yield r
             props.update(r[1]['properties'].keys())
 
         for key in props:
@@ -140,3 +128,9 @@ class PbfCanvas(InvertedCanvas):
 
 PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))')
 PbfSheet.addCommand('g.', 'plot-rows', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))')
+MbtilesSheet.addCommand(ENTER, 'dive-row', 'vd.push(getPlotSheet(cursorRow))')
+MbtilesSheet.addCommand('.', 'plot-row', 'vd.push(getPlot(cursorRow))')
+MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles'),
+
+vd.filetype('pbf', PbfSheet)
+vd.filetype('mbtiles', MbtilesSheet)
