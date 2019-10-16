@@ -2,11 +2,6 @@ import html
 from visidata import *
 
 
-def open_html(p):
-    return HtmlTablesSheet(p.name, source=p)
-open_htm = open_html
-
-
 class HtmlTablesSheet(IndexSheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
     columns = IndexSheet.columns + [
@@ -14,14 +9,12 @@ class HtmlTablesSheet(IndexSheet):
         Column('id', getter=lambda col,row: row.html.attrib.get('id')),
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
     ]
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import lxml.html
         from lxml import etree
         utf8_parser = etree.HTMLParser(encoding='utf-8')
         with self.source.open_text() as fp:
             html = lxml.html.etree.parse(fp, parser=utf8_parser)
-        self.rows = []
         self.setKeys([self.column('name')])
         self.column('keys').hide()
         self.column('source').hide()
@@ -31,9 +24,8 @@ class HtmlTablesSheet(IndexSheet):
                 vs = HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e)
                 vs.reload()
                 vs.html = e
-                self.addRow(vs)
+                yield vs
 
-HtmlTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
 def is_header(elem):
     scope = elem.attrib.get('scope', '')
@@ -45,12 +37,10 @@ def is_header(elem):
     return False
 
 class HtmlTableSheet(Sheet):
-    rowtype = 'rows'
+    rowtype = 'rows'  #  list of strings
     columns = []
 
-    @asyncthread
-    def reload(self):
-        self.rows = []
+    def iterload(self):
         headers = []
 
         maxlinks = {}  # [colnum] -> nlinks:int
@@ -91,7 +81,7 @@ class HtmlTableSheet(Sheet):
                 colnum += colspan
 
             if any(row):
-                self.addRow(row)
+                yield row
 
         self.columns = []
         if headers:
@@ -138,3 +128,7 @@ def save_html(p, *vsheets):
 
 
 save_htm = multisave_htm = multisave_html = save_html
+
+
+vd.filetype('html', HtmlTablesSheet)
+vd.filetype('htm', HtmlTablesSheet)
