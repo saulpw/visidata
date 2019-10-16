@@ -259,11 +259,10 @@ class IPSheet(Sheet):
         ColumnAttr('ip_ver', 'ip.v', type=int, width=10, helpstr="IPv4 Version"),
     ]
 
-    def reload(self):
-        self.rows = []
+    def iterload(self):
         for pkt in Progress(self.source.rows):
             if getattr(pkt, 'ip', None):
-                self.addRow(pkt)
+                yield pkt
 
 
 class TCPSheet(IPSheet):
@@ -274,11 +273,10 @@ class TCPSheet(IPSheet):
         ColumnAttr('tcp_flags', 'ip.tcp.flags', type=FlagGetter('tcp'), helpstr="TCP Flags"),
     ]
 
-    def reload(self):
-        self.rows = []
+    def iterload(self):
         for pkt in Progress(self.source.rows):
             if getattrdeep(pkt, 'ip.tcp', None):
-                self.addRow(pkt)
+                yield pkt
 
 class UDPSheet(IPSheet):
     columns = IPSheet.columns + [
@@ -288,11 +286,10 @@ class UDPSheet(IPSheet):
         ColumnAttr('ip.udp.ulen', type=int, width=0),
     ]
 
-    def reload(self):
-        self.rows = []
+    def iterload(self):
         for pkt in Progress(self.source.rows):
             if getattrdeep(pkt, 'ip.udp', None):
-                self.addRow(pkt)
+                yield pkt
 
 
 class PcapSheet(Sheet):
@@ -317,8 +314,7 @@ class PcapSheet(Sheet):
         ColumnAttr('dns', type=str, width=4),
     ]
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         init_pcap()
 
         self.pcap = read_pcap(self.source)
@@ -326,7 +322,7 @@ class PcapSheet(Sheet):
         with Progress(total=filesize(self.source)) as prog:
             for ts, buf in self.pcap:
                 eth = dpkt.ethernet.Ethernet(buf)
-                self.addRow(eth)
+                yield eth
                 prog.addProgress(len(buf))
 
                 eth.timestamp = ts
@@ -341,9 +337,6 @@ class PcapSheet(Sheet):
                 eth.dsthost = Host.get_host(eth, 'dst')
 
 
-PcapSheet.addCommand('W', 'flows', 'vd.push(PcapFlowsSheet(sheet.name+"_flows", source=sheet))')
-PcapSheet.addCommand('2', 'l2-packet', 'vd.push(IPSheet("L2packets", source=sheet))')
-PcapSheet.addCommand('3', 'l3-packet', 'vd.push(TCPSheet("L3packets", source=sheet))')
 
 
 flowtype = collections.namedtuple('flow', 'packets transport src sport dst dport'.split())
@@ -363,9 +356,7 @@ class PcapFlowsSheet(Sheet):
         Column('connect_latency_ms', type=float, getter=lambda col,row: col.sheet.latency[getTuple(row.packets[0])]),
     ]
 
-    @asyncthread
-    def reload(self):
-        self.rows = []
+    def iterload(self):
         self.flows = {}
         self.latency = {}  # [flowtuple] -> float ms of latency
         self.syntimes = {}  # [flowtuple] -> timestamp of SYN
@@ -376,7 +367,7 @@ class PcapFlowsSheet(Sheet):
                 flowpkts = self.flows.get(tup)
                 if flowpkts is None:
                     flowpkts = self.flows[tup] = []
-                    self.addRow(flowtype(flowpkts, *tup))
+                    yield flowtype(flowpkts, *tup)
                 flowpkts.append(pkt)
 
                 if not getattr(pkt.ip, 'tcp', None):
@@ -390,7 +381,6 @@ class PcapFlowsSheet(Sheet):
                     else:
                         self.syntimes[tup] = pkt.timestamp
 
-PcapFlowsSheet.addCommand(ENTER, 'dive-row', 'vd.push(PcapSheet("%s_packets"%flowname(cursorRow), rows=cursorRow.packets))')
 
 def flowname(flow):
     return '%s_%s:%s-%s:%s' % (flow.transport, flow.src, flow.sport, flow.dst, flow.dport)
@@ -402,10 +392,14 @@ def try_apply(func, *args, **kwargs):
         pass
 
 
-def open_pcap(p):
-    return PcapSheet(p.name, source=p)
+PcapSheet.addCommand('W', 'flows', 'vd.push(PcapFlowsSheet(sheet.name+"_flows", source=sheet))')
+PcapSheet.addCommand('2', 'l2-packet', 'vd.push(IPSheet("L2packets", source=sheet))')
+PcapSheet.addCommand('3', 'l3-packet', 'vd.push(TCPSheet("L3packets", source=sheet))')
+
+PcapFlowsSheet.addCommand(ENTER, 'dive-row', 'vd.push(PcapSheet("%s_packets"%flowname(cursorRow), rows=cursorRow.packets))')
 
 
-open_cap = open_pcap
-open_pcapng = open_pcap
-open_ntar = open_pcap
+vd.filetype('pcap', PcapSheet)
+vd.filetype('cap', PcapSheet)
+vd.filetype('pcapng', PcapSheet)
+vd.filetype('ntar', PcapSheet)
