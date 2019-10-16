@@ -9,56 +9,25 @@ option('json_indent', None, 'indent to use when saving json')
 option('json_sort_keys', True, 'sort object keys when saving to json')
 
 
-def open_json(p):
-    return JSONSheet(p.name, source=p, jsonlines=False)
-
-def open_jsonl(p):
-    return JSONSheet(p.name, source=p, jsonlines=True)
-
-open_ndjson = open_jsonl
-open_ldjson = open_jsonl
-
-
-class JSONSheet(PythonSheet):
-    @asyncthread
-    def reload(self):
+class JsonSheet(PythonSheet):
+    def iterload(self):
         self.colnames = {}  # [colname] -> Column
-        self.columns.clear()
+        self.columns = []
 
-        if not self.jsonlines:
-            try:
-                self.reload_json()
-            except ValueError as e:
-                status('trying jsonl')
-                self.jsonlines = True
+        try:
+            with self.source.open_text() as fp:
+                ret = json.load(fp)
 
-        if self.jsonlines:
-            self.reload_jsonl()
+            if isinstance(ret, dict):
+                yield ret
+                for k in ret:
+                    self.addColumn(ColumnItem(k, type=deduceType(self.rows[0][k])))
+            else:
+                yield from Progress(ret)
 
-    def reload_json(self):
-        self.rows = []
-        with self.source.open_text() as fp:
-            ret = json.load(fp)
-
-        if isinstance(ret, dict):
-            self.rows = [ret]
-            self.columns = []
-            for k in self.rows[0]:
-                self.addColumn(ColumnItem(k, type=deduceType(self.rows[0][k])))
-        else:
-            self.rows = []
-            for row in Progress(ret):
-                self.addRow(row)
-
-    def reload_jsonl(self):
-        with self.source.open_text() as fp:
-            self.rows = []
-            for L in fp:
-                try:
-                    self.addRow(json.loads(L))
-                except Exception as e:
-                    e.stacktrace = stacktrace()
-                    self.addRow(TypedExceptionWrapper(json.loads, L, exception=e))
+        except ValueError as e:
+            status('trying jsonl')
+            yield from JsonLinesSheet.iterload(self)
 
     def addRow(self, row, index=None):
         super().addRow(row, index=index)
@@ -72,6 +41,17 @@ class JSONSheet(PythonSheet):
 
     def newRow(self):
         return {}
+
+
+class JsonLinesSheet(JsonSheet):
+    def iterload(self):
+        with self.source.open_text() as fp:
+            for L in fp:
+                try:
+                    yield json.loads(L)
+                except Exception as e:
+                    e.stacktrace = stacktrace()
+                    yield TypedExceptionWrapper(json.loads, L, exception=e)
 
 
 ## saving json and jsonl
@@ -121,3 +101,8 @@ def save_jsonl(vs, p):
 
 Sheet.save_ndjson = Sheet.save_jsonl
 Sheet.save_ldjson = Sheet.save_jsonl
+
+vd.filetype('json', JsonSheet)
+vd.filetype('jsonl', JsonLinesSheet)
+vd.filetype('ndjson', JsonLinesSheet)
+vd.filetype('ldjson', JsonLinesSheet)
