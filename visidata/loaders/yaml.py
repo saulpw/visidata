@@ -1,19 +1,22 @@
 from visidata import *
 
-def open_yaml(p):
-    return YamlSheet(p.name, source=p)
-
-open_yml = open_yaml
 
 class YamlSheet(Sheet):
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import yaml
         with self.source.open_text() as fp:
-            self.rows = yaml.load(fp, Loader=yaml.FullLoader)
-        if not isinstance(self.rows, list):
-            self.rows = [self.rows]
+            rows = yaml.load(fp, Loader=yaml.FullLoader)
+        if not isinstance(rows, list):
+            yield rows
+        else:
+            yield from rows
+
+        row = self.rows[0]
         self.columns = []
-        for k in self.rows[0]:
-            c = ColumnItem(k, type=deduceType(self.rows[0][k]))
+        for k in row:
+            c = ColumnItem(k, type=deduceType(row[k]))
             self.addColumn(c)
+
+
+vd.filetype('yml', YamlSheet)
+vd.filetype('yaml', YamlSheet)
