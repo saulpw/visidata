@@ -1,21 +1,13 @@
 from visidata import *
 
+'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 
-def open_npy(p):
-    return NpySheet(p.name, source=p)
-
-
-def open_npz(p):
-    return NpzSheet(p)
-
-
-class NumpySheet(Sheet):
-    def reload(self):
+class NpySheet(Sheet):
+    def iterload(self):
+        import numpy
+        self.npy = numpy.load(str(self.source), encoding='bytes')
         self.reloadCols()
-
-        self.rows = []
-        for row in Progress(self.npy):
-            self.addRow(row)
+        yield from Progress(self.npy, total=len(self.npy))
 
     def reloadCols(self):
         self.columns = []
@@ -34,36 +26,26 @@ class NumpySheet(Sheet):
             self.addColumn(ColumnItem(name, i, type=t))
 
 
-class NpySheet(NumpySheet):
-    @asyncthread
-    def reload(self):
-        import numpy
-        self.npy = numpy.load(str(self.source), encoding='bytes')
-        super().reload()
-
-
-
 class NpzSheet(ZipSheet):
-    # rowdef = (tablename, table)
+    # rowdef: tuple(tablename, table)
     columns = [
         ColumnItem('name', 0),
         ColumnItem('length', 1, type=vlen),
     ]
-    @asyncthread
-    def reload(self):
+
+    def iterload(self):
         import numpy
         self.npz = numpy.load(str(self.source), encoding='bytes')
-        self.rows = []
-        for r in Progress(self.npz.items()):
-            self.addRow(r)
+        yield from Progress(self.npz.items())
 
-    def getInnerSheet(self, row):
+    def openRow(self, row):
         import numpy
         tablename, tbl = row
         if isinstance(tbl, numpy.ndarray):
             return NumpySheet(tablename, npy=tbl)
 
         return load_pyobj(tablename, tbl)
+
 
 @Sheet.api
 def save_npy(sheet, p):
@@ -104,4 +86,5 @@ def save_npy(sheet, p):
         np.save(outf, arr, allow_pickle=False)
 
 
-NpzSheet.addCommand(None, 'dive-row', 'vd.push(getInnerSheet(cursorRow))')
+vd.filetype('npy', NpySheet)
+vd.filetype('npz', NpzSheet)
