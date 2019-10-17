@@ -81,15 +81,15 @@ def wrapply(func, *args, **kwargs):
     'Like apply(), but which wraps Exceptions and passes through Wrappers (if first arg)'
     if args:
         val = args[0]
-        if val is None:
+        if val is None:  # None values propagate to TypedWrappers
             return TypedWrapper(func, None)
-        elif isinstance(val, TypedExceptionWrapper):
+        elif isinstance(val, TypedExceptionWrapper):  # previous Exceptions propagate, marked 'forwarded'
             tew = copy.copy(val)
             tew.forwarded = True
             return tew
-        elif isinstance(val, TypedWrapper):
+        elif isinstance(val, TypedWrapper):  # TypedWrappers (likely None, from above) propagate
             return val
-        elif isinstance(val, Exception):
+        elif isinstance(val, Exception):  # Exception values become TypedWrappers
             return TypedWrapper(func, *args)
 
     try:
