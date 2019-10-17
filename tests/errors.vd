@@ -1,0 +1,4 @@
+sheet	col	row	longname	input	keystrokes	comment
+	override	encoding_errors	set-option	replace		
+	override	skip	set-option	1		
+			open-file	sample_data/errors.csv	o	
