@@ -1,11 +1,7 @@
 from visidata import *
 
+# requires pyshp
 
-def open_shp(p):
-    return ShapeSheet(p.name, source=p)
-
-# pyshp doesn't care about file extensions
-open_dbf = open_shp
 
 shptypes = {
   'C': str,
@@ -28,16 +24,20 @@ class ShapeSheet(Sheet):
     columns = [
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import shapefile
-        sf = shapefile.Reader(str(self.source))
-        self.columns = copy(ShapeSheet.columns)
-        for i, (fname, ftype, fieldlen, declen) in enumerate(sf.fields[1:]):  # skip DeletionFlag
+        self.sf = shapefile.Reader(str(self.source))
+        self.reloadCols()
+        for shaperec in Progress(self.sf.iterShapeRecords(), total=self.sf.numRecords):
+            yield shaperec
+
+    def reloadCols(self):
+        self.columns = []
+        for c in ShapeSheet.columns:
+            self.addColumn(copy(c))
+
+        for i, (fname, ftype, fieldlen, declen) in enumerate(self.sf.fields[1:]):  # skip DeletionFlag
             self.addColumn(Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen)))
-        self.rows = []
-        for shaperec in Progress(sf.iterShapeRecords(), total=sf.numRecords):
-            self.addRow(shaperec)
 
 class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
@@ -93,3 +93,7 @@ def save_geojson(vs, p):
     with p.open_text(mode='w') as fp:
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)
+
+
+vd.filetype('shp', ShapeSheet)
+vd.filetype('dbf', ShapeSheet)
