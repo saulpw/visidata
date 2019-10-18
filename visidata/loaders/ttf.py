@@ -1,12 +1,6 @@
 from visidata import *
 
 
-def open_ttf(p):
-    return TTFTablesSheet(p.name, source=p)
-
-open_otf = open_ttf
-
-
 class TTFTablesSheet(Sheet):
     rowtype = 'font tables'
     columns = [
@@ -20,14 +14,15 @@ class TTFTablesSheet(Sheet):
         Column('isUnicode', getter=lambda col,row: row.isUnicode()),
     ]
 
-    @asyncthread
-    def reload(self):
+    def openRow(self, row):
+        return TTFGlyphsSheet(self.name+'_glyphs', source=self, sourceRows=[row], ttf=self.ttf)
+
+    def iterload(self):
         import fontTools.ttLib
 
         self.ttf = fontTools.ttLib.TTFont(str(self.source), 0, allowVID=0, ignoreDecompileErrors=True, fontNumber=-1)
-        self.rows = []
         for cmap in self.ttf["cmap"].tables:
-            self.addRow(cmap)
+            yield cmap
 
 
 class TTFGlyphsSheet(Sheet):
@@ -41,17 +36,14 @@ class TTFGlyphsSheet(Sheet):
         SubColumnItem(2, ColumnAttr('tsb')),
     ]
 
-    @asyncthread
-    def reload(self):
-        self.rows = []
+    def openRow(self, row):
+        return makePen(self.name+"_"+row[1], source=row[2], glyphSet=self.ttf.getGlyphSet())
+
+    def iterload(self):
         glyphs = self.ttf.getGlyphSet()
         for cmap in self.sourceRows:
             for codepoint, glyphid in Progress(cmap.cmap.items(), total=len(cmap.cmap)):
-                self.addRow((codepoint, glyphid, glyphs[glyphid]))
-
-
-TTFTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(TTFGlyphsSheet(name+str(cursorRowIndex), source=sheet, sourceRows=[cursorRow], ttf=ttf))')
-TTFGlyphsSheet.addCommand('.', 'plot-row', 'vd.push(makePen(name+"_"+cursorRow[1], source=cursorRow[2], glyphSet=ttf.getGlyphSet()))')
+                yield (codepoint, glyphid, glyphs[glyphid])
 
 
 def makePen(*args, **kwargs):
@@ -89,3 +81,9 @@ def makePen(*args, **kwargs):
             self.refresh()
 
     return GlyphPen(*args, **kwargs)
+
+
+#TTFGlyphsSheet.bindkey('.', 'open-row')
+
+vd.filetype('ttf', TTFTablesSheet)
+vd.filetype('otf', TTFTablesSheet)
