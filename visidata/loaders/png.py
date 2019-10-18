@@ -11,10 +11,6 @@ def rgb_to_attr(r,g,b,a):
     return 0
 
 
-def open_png(p):
-    return PNGSheet(p.name, source=p)
-
-
 class PNGSheet(Sheet):
     rowtype = 'pixels'  # rowdef: tuple(x, y, r, g, b, a)
     columns = [ColumnItem(name, i, type=int) for i, name in enumerate('x y R G B A'.split())] + [
@@ -24,16 +20,15 @@ class PNGSheet(Sheet):
     def newRow(self):
         return list((None, None, 0, 0, 0, 0))
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import png
         r = png.Reader(bytes=self.source.read_bytes())
         self.width, self.height, pixels, md = r.asRGBA()
-        self.rows = []
         for y, row in enumerate(pixels):
             for i in range(0, len(row)-1, 4):
                 r,g,b,a = row[i:i+4]
-                self.addRow([i//4, y, r, g, b, a])
+                yield [i//4, y, r, g, b, a]
+
 
 class PNGDrawing(Canvas):
     aspectRatio = 1.0
@@ -95,3 +90,6 @@ def save_png(vs, p):
         w.write(fp, pixels)
 
     status('saved')
+
+
+vd.filetype('png', PNGSheet)
