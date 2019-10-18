@@ -1,14 +1,9 @@
 from visidata import *
 
-def open_xml(p):
-    from lxml import etree, objectify
-    root = etree.parse(p.open_text())
-    objectify.deannotate(root, cleanup_namespaces=True)
-    return XmlSheet(p.name, source=root)
-open_svg = open_xml
 
 
 def unns(k):
+    'de-namespace key k'
     if '}' in k:
         return k[k.find('}')+1:]
     return k
@@ -19,6 +14,7 @@ def AttribColumn(name, k, **kwargs):
                         setter=lambda c,r,v,k=k: setitem(r.attrib, k, v), **kwargs)
 
 
+# source is Path or xml.Element; root is xml.Element
 class XmlSheet(Sheet):
     rowtype = 'elements'   # rowdef: lxml.xml.Element
 
@@ -42,17 +38,26 @@ class XmlSheet(Sheet):
             if nstag:
                 c.hide(nstag not in row.attrib)
 
-    def reload(self):
+    def iterload(self):
+        if isinstance(self.source, Path):
+            from lxml import etree, objectify
+            self.root = etree.parse(self.source.open_text())
+            objectify.deannotate(self.root, cleanup_namespaces=True)
+        else: #        elif isinstance(self.source, XmlElement):
+            self.root = self.source
+
         self.attribcols = {}
         self.columns = copy(XmlSheet.columns)
-        self.rows = []
 
-        if getattr(self.source, 'iterancestors', None):
-            for elem in list(self.source.iterancestors())[::-1]:
-                self.addRow(elem)
+        if getattr(self.root, 'iterancestors', None):
+            for elem in Progress(list(self.root.iterancestors())[::-1]):
+                yield elem
 
-        for elem in self.source.iter():
-            self.addRow(elem)
+        for elem in self.root.iter():
+            yield elem
+
+    def openRow(self, row):
+        return XmlSheet("%s_%s" % (unns(row.tag), row.attrib.get("id")), source=row)
 
     def addRow(self, elem):
         super().addRow(elem)
@@ -64,10 +69,14 @@ class XmlSheet(Sheet):
                 c.nstag = k
 
     def save_xml(self, p):
-        self.source.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
+        self.root.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
 
     save_svg = save_xml
 
+
 XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)')
 XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)')
-XmlSheet.addCommand(ENTER, 'dive-row', 'r=cursorRow; vd.push(XmlSheet("%s_%s" % (unns(r.tag), r.attrib.get("id")), source=r))')
+
+
+vd.filetype('xml', XmlSheet)
+vd.filetype('svg', XmlSheet)
