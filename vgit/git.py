@@ -142,11 +142,11 @@ def getRootSheet(sheet):
 
 def getRepoPath(p):
     'Return path at p or above which has .git subdir'
-    if p.joinpath('.git').is_dir():
+    if p.joinpath('.git').exists():
         return p
     if getattr(p, 'given', None) in ['/','']:
         return None
-    return getRepoPath(p.parent)
+    return getRepoPath(p.resolve().parent)
 
 
 class GitContext:

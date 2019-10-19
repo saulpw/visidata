@@ -24,7 +24,7 @@ def git_status(args, topsheet):
     return vgit.GitStatus(topsheet.source)
 
 def git_blame(args, topsheet):
-    return GitBlame(GitFile(args[0]), source=topsheet)
+    return vgit.GitBlame(GitFile(args[0]), source=topsheet)
 
 def git_grep(args, topsheet):
     return vgit.GitGrep(args[0], regex=args[0], source=topsheet)
@@ -32,7 +32,7 @@ def git_grep(args, topsheet):
 def somegit(args=None):
     cwd = Path('.')
 
-    if cwd.joinpath('.git').is_dir() or vgit.getRepoPath(cwd):
+    if cwd.joinpath('.git').exists() or vgit.getRepoPath(cwd):
         top = vgit.GitStatus(cwd)
     else:
         top = vgit.GitOverview('gitrepos', source=cwd)

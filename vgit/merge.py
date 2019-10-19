@@ -90,8 +90,7 @@ class GitMerge(GitSheet):
         super().__init__(str(gf)+'_merge', gf)
 #        Colorizer('col', 4, lambda s,c,r,v: 'green' if c is s.columns[2] else None)
 
-    @staticmethod
-    def colorDiffCell(sheet, col, row, val):
+    def colorDiffCell(self, col, row, val):
         if val != row[1][1]:       # diff from HEAD
             if val == row[2][1]:   # but same as index
                 return 'green'  #   will be committed
