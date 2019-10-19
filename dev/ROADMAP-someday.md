@@ -9,6 +9,8 @@ These are tasks that are not on the immediate developer roadmap, and are looking
 - [loader] RSS reader: [issue](https://github.com/saulpw/visidata/issues/157)
 - [loader] Frictionless Data Packages: [issue](https://github.com/saulpw/visidata/issues/237)
 - [diff] expand --diff into a vdiff plugin: [issue](https://github.com/saulpw/visidata/issues/303)
+- [expr] percentage columns `=x*100/sum(col('x'))`: [@agguser on issue #197](https://github.com/saulpw/visidata/issues/197#issuecomment-447923028):
+- [plugin] auto-join [common data lookups](https://github.com/wireservice/lookup)
 
 - [ColumnsSheet] show subcolumns and their parent column (for expand/contract)
 
@@ -28,7 +30,10 @@ These are tasks that are not on the immediate developer roadmap, and are looking
 - [vdgalcon](http://github.com/saulpw/vdgalcon)
 - vscrape: point at a website and collect datasets, tables, textual data
 - vapi: convenient interface to REST and other APIs
+   - http://json-schema.org/specification.html
+   - https://brandur.org/elegant-apis
 - vstats
    - save commandlog as ipynb, markdown, or html
 - vaws
 - `vd --server` pops up a local web server, for a visidata-like web interface to local files
+
