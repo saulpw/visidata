@@ -41,7 +41,7 @@ class _Progress:
     def __init__(self, iterable=None, gerund="", total=None, sheet=None):
         self.iterable = iterable
         if total is None:
-            if iterable:
+            if iterable is not None:
                 self.total = len(iterable)
             else:
                 self.total = 0
