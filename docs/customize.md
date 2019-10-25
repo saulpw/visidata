@@ -1,5 +1,5 @@
-- Updated: 2018-12-12
-- Version: VisiData 1.5.1
+- Updated: 2019-10-24
+- Version: VisiData 1.5.2
 
 # Customizing VisiData
 
@@ -98,16 +98,24 @@ globalCommand(default_keybinding, longname, execstr)
 For example, to define a new global command:
 
 ~~~
-globalCommand('^D', 'scroll-halfpage-down', ''sheet.topRowIndex += nVisibleRows//2')
+globalCommand('^D', 'scroll-halfpage-down', 'cursorDown(nVisibleRows//2); sheet.topRowIndex += nVisibleRows//2')
 ~~~
 
 For a sheet-specific command:
 
 ~~~
-<Sheet>.addCommand('^D', 'scroll-halfpage-down', ''sheet.topRowIndex += nVisibleRows//2')
+<Sheet>.addCommand('^D', 'scroll-halfpage-down', 'cursorDown(nVisibleRows//2); sheet.topRowIndex += nVisibleRows//2')
 ~~~
 
 where `<Sheet>` is a particular **Sheet Type**.
+
+Note that sheet-specific commands trump globally set commands for keybindings.
+
+`globalCommand` is primarily for commands which don't need a sheet at all. In most cases, commands should be on `Sheet` or a further specialised **Sheet Type**.
+
+~~~
+Sheet.addCommand('^D', 'scroll-halfpage-down', 'cursorDown(nVisibleRows//2); sheet.topRowIndex += nVisibleRows//2')
+~~~
 
 `execstr` is resolved recursively, so it can be an existing keystroke or `longname` for those that have one.  The last in the chain is `exec()`ed.
 
