@@ -329,7 +329,7 @@ def deleteBy(self, func):
         else:
             ndeleted += 1
 
-    self.addUndo(setattr, self, 'rows', oldrows)
+    vd.addUndo(setattr, self, 'rows', oldrows)
 
     status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted
