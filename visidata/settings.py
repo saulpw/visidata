@@ -251,10 +251,10 @@ def getCommand(self, keystrokes_or_longname):
     longname = bindkeys._get(keystrokes_or_longname)
     try:
         if longname:
-            return commands._get(longname) or fail('no command "%s"' % longname)
+            return commands._get(longname) or vd.fail('no command "%s"' % longname)
         else:
-            return commands._get(keystrokes_or_longname) or fail('no binding for %s' % keystrokes_or_longname)
-    except Exception:
+            return commands._get(keystrokes_or_longname) or vd.fail('no binding for %s' % keystrokes_or_longname)
+    except Exception as exc:
         return None
 
 
