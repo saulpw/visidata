@@ -361,7 +361,7 @@ options.set('header', 1, CommandLog)  # .vd files always have a header row, rega
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
 globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
-globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save to: ", value=fnSuffix(name)), vd.cmdlog)')
+globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)')
 globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
 globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
 globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
