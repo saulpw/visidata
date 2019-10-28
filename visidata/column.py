@@ -168,7 +168,7 @@ class Column(Extensible):
 
     def _calcIntoCache(self, row):
         ret = wrapply(self.calcValue, row)
-        if not isinstance(ret, TypedExceptionWrapper):
+        if not isinstance(ret, TypedExceptionWrapper) or ret.value is not INPROGRESS:
             self._cachedValues[self.sheet.rowid(row)] = ret
         return ret
 
