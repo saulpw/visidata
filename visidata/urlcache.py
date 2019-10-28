@@ -7,7 +7,7 @@ import urllib.parse
 from visidata import Path, options, modtime
 
 
-def urlcache(url, days=1, text=True):
+def urlcache(url, days=1, text=True, headers={}):
     'Return Path object to local cache of url contents.'
     p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
     if p.exists():
@@ -18,7 +18,11 @@ def urlcache(url, days=1, text=True):
     if not p.parent.exists():
         os.makedirs(p.parent, exist_ok=True)
 
-    with urlopen(Request(url)) as fp:
+    req = Request(url)
+    for k, v in headers.items():
+        req.add_header(k, v)
+
+    with urlopen(req) as fp:
         ret = fp.read()
         if text:
             ret = ret.decode('utf-8').strip()
