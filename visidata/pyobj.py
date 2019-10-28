@@ -97,9 +97,9 @@ def load_pyobj(name, pyobj):
     elif isinstance(pyobj, dict):
         return SheetDict(name, source=pyobj)
     elif isinstance(pyobj, str):
-        return TextSheet(name, pyobj.splitlines())
+        return TextSheet(name, source=pyobj.splitlines())
     elif isinstance(pyobj, bytes):
-        return TextSheet(name, pyobj.decode(options.encoding).splitlines())
+        return TextSheet(name, source=pyobj.decode(options.encoding).splitlines())
     elif isinstance(pyobj, object):
         return PyobjSheet(name, source=pyobj)
     else:

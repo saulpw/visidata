@@ -296,4 +296,4 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
     return args
 
 
-BaseSheet.addCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, Path(fn)))')
+BaseSheet.addCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))')

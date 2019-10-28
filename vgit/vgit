@@ -62,7 +62,7 @@ def main():
     if vs is None:
         if options.vgit_pager:
             cmdstr = ' '.join(args)
-            vs = TextSheet(cmdstr, somegit().git_lines(*args))
+            vs = TextSheet(cmdstr, source=somegit().git_lines(*args))
         else:
             return subprocess.run(['git', *args]).returncode
 

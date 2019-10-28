@@ -23,7 +23,7 @@ class GitCmdLog(Sheet):
         super().__init__(name, **kwargs)
         self.rows = []
 
-GitCmdLog.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], cursorRow[1]))', 'view output of this command'),
+GitCmdLog.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], source=cursorRow[1]))', 'view output of this command'),
 
 
 @VisiData.lazy_property
@@ -79,7 +79,7 @@ def git_lines(*args, git=loggit, **kwargs):
         for line in errlines:
             status('stderr: '+line)
     else:
-        vd.push(TextSheet('git ' + ' '.join(args), errlines))
+        vd.push(TextSheet('git ' + ' '.join(args), source=errlines))
 
 
 def git_iter(*args, git=loggit, sep='\0', **kwargs):
@@ -106,7 +106,7 @@ def git_iter(*args, git=loggit, sep='\0', **kwargs):
             for line in errlines:
                 status(line)
         else:
-            vd.push(TextSheet('git ' + ' '.join(args), errlines))
+            vd.push(TextSheet('git ' + ' '.join(args), source=errlines))
 
         error('git '+' '.join(args)+'error=%s' % e.exit_code)
 
@@ -119,7 +119,7 @@ def git_iter(*args, git=loggit, sep='\0', **kwargs):
         for line in errlines:
             status(line)
     else:
-        vd.push(TextSheet('git ' + ' '.join(args), errlines))
+        vd.push(TextSheet('git ' + ' '.join(args), source=errlines))
 
 
 class GitUndo:
@@ -209,7 +209,7 @@ class GitContext:
 
 class GitSheet(GitContext, Sheet):
     def git_exec(self, cmdstr):
-        vd.push(TextSheet(cmdstr, sheet.git_lines(*cmdstr.split())))
+        vd.push(TextSheet(cmdstr, source=sheet.git_lines(*cmdstr.split())))
 
 
 GitSheet.addCommand('f', 'git-force', 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')

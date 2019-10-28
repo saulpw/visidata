@@ -282,7 +282,7 @@ def open_txt(p):
     with p.open_text() as fp:
         if options.delimiter in next(fp):    # peek at the first line
             return open_tsv(p)  # TSV often have .txt extension
-        return TextSheet(p.name, p)
+        return TextSheet(p.name, source=p)
 
 def save_txt(p, *vsheets):
     with p.open_text(mode='w') as fp:

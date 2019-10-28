@@ -179,7 +179,7 @@ GitStatus.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.filename)',
 GitStatus.addCommand('ga', 'git-add-selected', 'git("add", *[r.filename for r in selectedRows])', 'add all selected files to staging'),
 GitStatus.addCommand('gd', 'git-rm-selected', 'git("rm", *[r.filename for r in selectedRows])', 'delete all selected files'),
 GitStatus.addCommand(None, 'git-commit', 'git("commit", "-m", input("commit message: "))', 'commit changes'),
-GitStatus.addCommand('V', 'open-file', 'vd.push(TextSheet(cursorRow.filename, Path(cursorRow.filename)))', 'open file'),
+GitStatus.addCommand('V', 'open-file', 'vd.push(TextSheet(cursorRow.filename, source=Path(cursorRow.filename)))', 'open file'),
 GitStatus.addCommand(None, 'ignore-file', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
 GitStatus.addCommand(None, 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
 

@@ -308,7 +308,7 @@ HunkViewer.addCommand('d', 'delete-line', 'source[7].pop(cursorRow[3]); reload()
 
 HunksSheet.addCommand(ENTER, 'dive-row', 'vd.push(HunkViewer([cursorRow], source=sheet))', 'view the diff for this hunks'),
 HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(selectedRows or rows, source=sheet))', 'view the diffs for the selected hunks (or all hunks)'),
-HunksSheet.addCommand('V', 'git-view-patch', 'vd.push(TextSheet("diff", "\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
+HunksSheet.addCommand('V', 'git-view-patch', 'vd.push(TextSheet("diff", source="\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
 #HunksSheet.addCommand('gV', 'git-view-patch-selected', '', 'view the raw patch for selected/all hunks'),
 HunksSheet.addCommand('a', 'git-apply-hunk', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index'),
 #HunksSheet.addCommand('r', 'git-reverse-hunk', 'git_apply(cursorRow, "--reverse")', 'undo this hunk'),

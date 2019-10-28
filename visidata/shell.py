@@ -24,7 +24,7 @@ def exec_shell(*args):
     out, err = p.communicate()
     if err or out:
         lines = err.decode('utf8').splitlines() + out.decode('utf8').splitlines()
-        vd.push(TextSheet(' '.join(args), lines))
+        vd.push(TextSheet(' '.join(args), source=lines))
 
 
 def open_dir(p):
