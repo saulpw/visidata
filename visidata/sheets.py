@@ -247,7 +247,8 @@ class Sheet(BaseSheet):
 
     def iterload(self):
         'Override this generator for loading.'
-        yield vd.fail('no iterload for this loader yet')
+        if False:
+            yield vd.fail('no iterload for this loader yet')
 
     def iterrows(self):
         if self.rows is UNLOADED:
