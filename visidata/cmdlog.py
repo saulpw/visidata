@@ -48,9 +48,6 @@ def indexMatch(L, func):
 def keystr(k):
     return options.rowkey_prefix + ','.join(map(str, k))
 
-def isLoggableSheet(sheet):
-    return sheet is not vd.cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
-
 def isLoggableCommand(longname):
     for n in nonLogged:
         if longname.startswith(n):
@@ -140,8 +137,6 @@ class CommandLog(TsvSheet):
         return self._rowtype(**fields)
 
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
-        if not isLoggableSheet(sheet):
-            return  # don't record editlog commands
         if vd.activeCommand:
             self.afterExecSheet(sheet, False, '')
 
@@ -174,9 +169,8 @@ class CommandLog(TsvSheet):
         if err:
             vd.activeCommand[-1] += ' [%s]' % err
 
-        if isLoggableSheet(sheet):  # don't record jumps to cmdlog or other internal sheets
-            # remove user-aborted commands and simple movements
-            if not escaped and isLoggableCommand(vd.activeCommand.longname):
+        # remove user-aborted commands and simple movements
+        if not escaped and isLoggableCommand(vd.activeCommand.longname):
                 self.addRow(vd.activeCommand)
                 sheet.cmdlog_sheet.addRow(vd.activeCommand)
                 if options.cmdlog_histfile:
