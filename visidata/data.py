@@ -240,12 +240,12 @@ def openPath(vd, p, filetype=None):
         return openfunc(p.name, source=p)
 
     openfunc = getGlobals().get('open_' + filetype)
-    if openfunc:
-        return openfunc(p)
+    if not openfunc:
+        warning('unknown "%s" filetype' % openfunc)
+        filetype = 'txt'
+        openfunc = getGlobals().get('open_txt')
 
-    warning('unknown "%s" filetype' % openfunc)
-    filetype = 'txt'
-    openfunc = getGlobals().get('open_txt')
+    vd.status('opening %s as %s' % (p.given, filetype))
     return openfunc(p)
 
 
@@ -263,10 +263,6 @@ def openSource(vd, p, filetype=None):
             return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
 
     vs = vd.openPath(p, filetype=filetype)
-    if vs:
-        status('opening %s as %s' % (p.given, filetype))
-    else:
-        status('unknown object type %s' % type(p))
     return vs
 
 
