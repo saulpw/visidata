@@ -28,7 +28,11 @@ def makeRegexSplitter(regex, origcol):
     return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=maxsplit)
 
 def makeRegexMatcher(regex, origcol):
-    return lambda row, regex=regex, origcol=origcol: regex.search(origcol.getDisplayValue(row)).groups()
+    def _regexMatcher(row):
+        m = regex.search(origcol.getDisplayValue(row))
+        if m:
+            return m.groups()
+    return _regexMatcher
 
 @asyncthread
 def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
@@ -44,7 +48,14 @@ def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
 
     ncols = 0  # number of new columns added already
     for r in Progress(exampleRows + [vs.cursorRow]):
-        for _ in range(len(func(r))-ncols):
+        try:
+            m = func(r)
+            if not m:
+                continue
+        except Exception as e:
+            vd.exceptionCaught(e)
+
+        for _ in range(len(m)-ncols):
             c = Column(origcol.name+'_re'+str(ncols),
                             getter=lambda col,row,i=ncols,func=func: func(row)[i],
                             origCol=origcol)
