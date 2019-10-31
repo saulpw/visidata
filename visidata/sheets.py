@@ -178,9 +178,6 @@ class Sheet(BaseSheet):
         self._topRowIndex = v
         self.rowLayout.clear()
 
-    def __len__(self):
-        return self.nRows
-
     def addColorizer(self, c):
         self.colorizers.append(c)
 

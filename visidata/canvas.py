@@ -142,7 +142,8 @@ class Plotter(BaseSheet):
         self.needsRefresh = False
         self.resetCanvasDimensions(self.windowHeight, self.windowWidth)
 
-    def __len__(self):
+    @property
+    def nRows(self):
         return (self.plotwidth* self.plotheight)
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):
@@ -325,7 +326,8 @@ class Canvas(Plotter):
         self.plotAttrs = {}   # key: attr  (all keys, for speed)
         self.reset()
 
-    def __len__(self):
+    @property
+    def nRows(self):
         return len(self.polylines)
 
     def reset(self):
