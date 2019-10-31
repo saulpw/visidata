@@ -211,7 +211,7 @@ class CommandLog(TsvSheet):
             return None
 
         if r.row:
-            vs.moveToRow(r.row) or error('no "%s" row' % rowstr)
+            vs.moveToRow(r.row) or error('no "%s" row' % r.row)
 
         if r.col:
             vs.moveToCol(r.col) or error('no "%s" column' % r.col)
