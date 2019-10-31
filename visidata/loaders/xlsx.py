@@ -1,11 +1,7 @@
-
 from visidata import *
 
-def open_xlsx(p):
-    return xlsxContents(p)
 
-
-class xlsxContents(Sheet):
+class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'
     rowtype = 'sheets'  # rowdef: xlsxSheet
     columns = [
@@ -16,27 +12,18 @@ class xlsxContents(Sheet):
     ]
     nKeys = 1
 
-    def __init__(self, path):
-        super().__init__(path.name, source=path)
-        self.workbook = None
-
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import openpyxl
         self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
-        self.rows = []
         for sheetname in self.workbook.sheetnames:
-            vs = xlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook[sheetname])
+            vs = XlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook[sheetname])
             vs.reload()
-            self.addRow(vs)
+            yield vs
 
-xlsxContents.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
-class xlsxSheet(Sheet):
-    @asyncthread
-    def reload(self):
+class XlsxSheet(Sheet):
+    def iterload(self):
         self.columns = []
-        self.rows = []
 
         iterrows = self.iterload()
 
@@ -58,7 +45,7 @@ class xlsxSheet(Sheet):
             yield row
 
 
-class open_xls(Sheet):
+class XlsIndexSheet(IndexSheet):
     'Load XLS file (in Excel format).'
     rowtype = 'sheets'  # rowdef: xlsSheet
     columns = [
@@ -68,25 +55,17 @@ class open_xls(Sheet):
         ColumnAttr('nCols', type=int),
     ]
     nKeys = 1
-    def __init__(self, path):
-        super().__init__(path.name, source=path)
-        self.workbook = None
-
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import xlrd
         self.workbook = xlrd.open_workbook(str(self.source))
-        self.rows = []
         for sheetname in self.workbook.sheet_names():
-            vs = xlsSheet(joinSheetnames(self.name, sheetname), source=self.workbook.sheet_by_name(sheetname))
+            vs = XlsSheet(joinSheetnames(self.name, sheetname), source=self.workbook.sheet_by_name(sheetname))
             vs.reload()
-            self.addRow(vs)
+            yield vs
 
-open_xls.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
-class xlsSheet(Sheet):
-    @asyncthread
-    def reload(self):
+class XlsSheet(Sheet):
+    def iterload(self):
         worksheet = self.source
         self.columns = []
         if options.header:
@@ -99,6 +78,9 @@ class xlsSheet(Sheet):
         for i, colname in enumerate(colnames):
             self.addColumn(ColumnItem(colname, i))
 
-        self.rows = []
         for rownum in Progress(range(options.header, worksheet.nrows)):
-            self.addRow(list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)))
+            yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
+
+
+vd.filetype('xlsx', XlsxIndexSheet)
+vd.filetype('xls', XlsIndexSheet)
