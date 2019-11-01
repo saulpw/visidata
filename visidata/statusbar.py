@@ -11,6 +11,10 @@ theme('disp_status_fmt', '{sheet.shortcut}〉{sheet.name}| ', 'status line prefi
 theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
 
+theme('color_status', 'bold', 'status line color')
+theme('color_error', 'red', 'error message color')
+theme('color_warning', 'yellow', 'warning message color')
+
 
 @VisiData.lazy_property
 def statuses(vd):

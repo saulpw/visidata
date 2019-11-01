@@ -29,9 +29,6 @@ theme('disp_error_val', '', 'displayed contents for computation exception')
 theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
 
 theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
-theme('color_status', 'bold', 'status line color')
-theme('color_error', 'red', 'error message color')
-theme('color_warning', 'yellow', 'warning message color')
 
 theme('disp_pending', '', 'string to display in pending cells')
 theme('note_pending', '⌛', 'note to display for pending cells')
