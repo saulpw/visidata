@@ -41,15 +41,10 @@ def launchExternalEditorPath(path, linenum=0):
 
         with open(path, 'r') as fp:
             try:
-                r = fp.read()
-                if r[:-1] == '\n':  # trim inevitable trailing newline
-                    r = r[:-1]
-                return r
+                return fp.read().rstrip('\n')  # trim inevitable trailing newlines
             except Exception as e:
                 visidata.exceptionCaught(e)
                 return ''
-
-        launchExternalEditor(visidata.Path(temp.name))
 
 
 def suspend():
