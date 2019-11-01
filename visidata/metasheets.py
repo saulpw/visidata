@@ -65,7 +65,10 @@ class VisiDataMetaSheet(TsvSheet):
     pass
 
 options.set('delimiter', vd_system_sep, VisiDataMetaSheet)
-
+options.set('header', 1, VisiDataMetaSheet)
+options.set('skip', 0, VisiDataMetaSheet)
+options.set('row_delimiter', '\n', VisiDataMetaSheet)
+options.set('encoding', 'utf-8', VisiDataMetaSheet)
 
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
