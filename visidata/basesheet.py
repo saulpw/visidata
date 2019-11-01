@@ -1,3 +1,5 @@
+import os
+
 import visidata
 from visidata import Extensible, VisiData, getGlobals, vd, EscapeException
 from unittest import mock
@@ -85,12 +87,12 @@ class BaseSheet(Extensible):
     @property
     def windowHeight(self):
         'Height of the current sheet, in terminal lines'
-        return self._scr.getmaxyx()[0] if self._scr else 25
+        return int(os.environ.get('LINES', self._scr.getmaxyx()[0] if self._scr else 25))
 
     @property
     def windowWidth(self):
         'Width of the current sheet, in single-width characters'
-        return self._scr.getmaxyx()[1] if self._scr else 80
+        return int(os.environ.get('COLUMNS', self._scr.getmaxyx()[1] if self._scr else 80))
 
     def exec_keystrokes(self, keystrokes, vdglobals=None):
         return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
