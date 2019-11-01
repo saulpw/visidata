@@ -61,6 +61,12 @@ class ColumnsSheet(Sheet):
         c.recalc(self.source[0])
         return c
 
+class VisiDataMetaSheet(TsvSheet):
+    pass
+
+options.set('delimiter', vd_system_sep, VisiDataMetaSheet)
+
+
 class HelpSheet(Sheet):
     'Show all commands available to the source sheet.'
     rowtype = 'commands'
@@ -78,8 +84,7 @@ class HelpSheet(Sheet):
     @asyncthread
     def reload(self):
         from pkg_resources import resource_filename
-        cmdlist = TsvSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
-        options.set('delimiter', vd_system_sep, cmdlist)
+        cmdlist = VisiDataMetaSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
 
         self.cmddict = {}
         self.rows = []

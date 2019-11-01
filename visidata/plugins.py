@@ -37,7 +37,7 @@ def _loadedVersion(plugin):
     return getattr(mod, '__version__', 'unknown version installed')
 
 
-class PluginsSheet(TsvSheet):
+class PluginsSheet(VisiDataMetaSheet):
     rowtype = "plugins"
 
     @asyncthread
