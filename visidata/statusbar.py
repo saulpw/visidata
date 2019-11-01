@@ -1,10 +1,12 @@
 import collections
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, option
 
 
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
+
+theme('disp_rstatus_fmt', '{sheet.nRows:9d} {sheet.rowtype} ', 'right-side status format string')
 
 
 @VisiData.lazy_property
@@ -119,12 +121,7 @@ def drawLeftStatus(vd, scr, vs):
 @VisiData.api
 def rightStatus(vd, sheet):
     'Compose right side of status bar.'
-    gerund = sheet.processing
-    if gerund:
-        status = '%9d  %2d%%%s' % (len(sheet), sheet.progressPct, gerund)
-    else:
-        status = '%9d %s' % (len(sheet), sheet.rowtype)
-    return status, 'color_status'
+    return options.disp_rstatus_fmt.format(sheet=sheet, vd=vd)
 
 
 @VisiData.api
@@ -135,9 +132,16 @@ def drawRightStatus(vd, scr, vs):
     ret = 0
     statcolors = [
         vd.checkMemoryUsage(),
-        vd.rightStatus(vs),
+        (vd.rightStatus(vs), 'color_status'),
         (vd.keystrokes, 'color_keystrokes'),
     ]
+
+    if vs.currentThreads:
+        if vs.progresses:
+            gerund = vs.progresses[0].gerund
+        else:
+            gerund = 'processing'
+        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_status'))
 
     if vd.cmdlog and vd.cmdlog.currentReplay:
         statcolors.insert(0, (vd.cmdlog.currentReplay.replayStatus, 'color_status_replay'))

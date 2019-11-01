@@ -143,18 +143,12 @@ def progressMade(self):
 def progressTotal(self):
     return sum(prog.total for prog in self.progresses)
 
-@BaseSheet.property
-def progressPct(self):
-    'Percent complete as indicated by async actions.'
-    if self.progressTotal != 0:
-        return int(self.progressMade*100/self.progressTotal)
-    return 0
 
 @BaseSheet.property
-def processing(self):
-    'String of current activity in gerund form for display.'
-    if self.currentThreads:
-        return ' '+(self.progresses[0].gerund if self.progresses else 'processing')
+def progressPct(sheet):
+    'Percent complete string as indicated by async actions.'
+    if sheet.progresses and sheet.progressTotal > 0:
+        return '%2d%%' % int(sheet.progressMade*100//sheet.progressTotal)
     return ''
 
 ## threads
