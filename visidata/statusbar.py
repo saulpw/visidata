@@ -1,7 +1,7 @@
 import collections
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, option
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme
 
 
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
