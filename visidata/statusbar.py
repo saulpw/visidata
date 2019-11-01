@@ -130,7 +130,7 @@ def rightStatus(vd, sheet):
 @VisiData.api
 def drawRightStatus(vd, scr, vs):
     'Draw right side of status bar.  Return length displayed.'
-    rightx = vd.windowWidth-1
+    rightx = vd.windowWidth
 
     ret = 0
     statcolors = [
