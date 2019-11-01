@@ -104,15 +104,6 @@ def globalCommand(keystrokes, longname, execstr, helpstr='', **kwargs):
         bindkeys.setdefault(keystrokes, longname)
 
 
-def bindkey(keystrokes, longname):
-    bindkeys.setdefault(keystrokes, longname)
-
-def bindkey_override(keystrokes, longname):
-    bindkeys.set(keystrokes, longname)
-
-def unbindkey(keystrokes):
-    bindkeys.unset(keystrokes)
-
 class Option:
     def __init__(self, name, value, helpstr=''):
         self.name = name
@@ -294,6 +285,16 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
             options[optname] = optval
 
     return args
+
+
+def bindkey(keystrokes, longname):
+    bindkeys.setdefault(keystrokes, longname)
+
+def bindkey_override(keystrokes, longname):
+    bindkeys.set(keystrokes, longname)
+
+def unbindkey(keystrokes):
+    bindkeys.unset(keystrokes)
 
 
 BaseSheet.addCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))')
