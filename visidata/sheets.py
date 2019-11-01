@@ -236,7 +236,7 @@ class Sheet(BaseSheet):
     def reload(self):
         'Loads rows and/or columns.  Override in subclass.'
         self.rows = []
-        for r in self.iterload():
+        for r in vd.Progress(self.iterload(), gerund='loading', total=0):
             self.addRow(r)
 
     def iterload(self):
