@@ -39,15 +39,16 @@ def _defaultFormatter(fmtstr, typedval):
 
 
 class VisiDataType:
-    def __init__(self, typetype=anytype, icon=None, fmtstr='', formatter=_defaultFormatter, key='', name=None):
-        self.typetype = typetype  # int or float or other constructor
+    def __init__(self, typetype=None, icon=None, fmtstr='', formatter=_defaultFormatter, key='', name=None):
+        self.typetype = typetype or anytype # int or float or other constructor
         self.name = name or getattr(typetype, '__name__', str(typetype))
         self.icon = icon      # show in rightmost char of column
         self.fmtstr = fmtstr
         self.formatter = formatter
         self.key = key
 
-        typemap[typetype] = self
+        if typetype:
+            typemap[typetype] = self
 
 vdtype = VisiDataType
 
@@ -55,7 +56,7 @@ vdtype = VisiDataType
 typemap = {}
 
 def getType(typetype):
-    return typemap.get(typetype) or VisiDataType(anytype)
+    return typemap.get(typetype) or VisiDataType()
 
 vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
