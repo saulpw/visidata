@@ -45,7 +45,7 @@ def _loadedVersion(plugin):
 
 def _checkHash(data, sha):
     import hashlib
-    return hashlib.sha256(data.encode('utf-8')).hexdigest()
+    return hashlib.sha256(data.encode('utf-8')).hexdigest() == sha
 
 
 class PluginsSheet(VisiDataMetaSheet):
@@ -82,13 +82,18 @@ class PluginsSheet(VisiDataMetaSheet):
             with urlcache(plugin.url, 0).open_text() as pyfp:
                 contents = pyfp.read()
                 if not _checkHash(contents, plugin.sha256):
-                    fail('SHA256 hash does not match')
+                    error('%s plugin SHA256 does not match!' % plugin.name)
                 with outpath.open_text(mode='w') as outfp:
                     outfp.write(contents)
 
             if plugin.pydeps:
-                p = subprocess.Popen([sys.executable, '-m', 'pip', 'install']+plugin.pydeps.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                status(tuple(p.communicate()))
+                p = subprocess.Popen([sys.executable, '-m', 'pip', 'install']+plugin.pydeps.split(),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+                out, err = p.communicate()
+                vd.status(out)
+                if err:
+                    vd.warning(err)
 
             with Path(_plugin_init()).open_text(mode='a') as fprc:
                 print(_plugin_import(plugin), file=fprc)
