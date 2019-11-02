@@ -1,6 +1,6 @@
 # uses API from nettoolkit.com
 
-'''Set options.ntk_key='<api-key>', then use command "geocode-col" on a column
+'''Set options.ntk_key='<api-key>', then use command "addcol-geocode" on a column
 with placename, to add a "geocodes" column with a list of potential geocoded
 places, and lat/long columns with the actual coords of the first of those.'''
 
@@ -35,4 +35,4 @@ def geocode_col(sheet, vcolidx):
         sheet.addColumn(c, index=vcolidx+1)
 
 
-Sheet.addCommand('', 'geocode-col', 'sheet.geocode_col(cursorVisibleColIndex)')
+Sheet.addCommand('', 'addcol-geocode', 'sheet.geocode_col(cursorVisibleColIndex)')
