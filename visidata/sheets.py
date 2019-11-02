@@ -569,7 +569,7 @@ class Sheet(BaseSheet):
             if C and x+colwidth+len(C) < self.windowWidth:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
-        clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrcattr.attr, len(T))
+        clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrcattr.attr)
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
@@ -708,7 +708,7 @@ class Sheet(BaseSheet):
                     note = getattr(cellval, 'note', None)
                     if note:
                         notecattr = update_attr(cattr, colors.get_color(cellval.notecolor), 10)
-                        clipdraw(scr, ybase, x+colwidth-len(note), note, notecattr.attr, len(note))
+                        clipdraw(scr, ybase, x+colwidth-len(note), note, notecattr.attr)
 
                     if len(lines) > height:
                         firstn = sum(len(i)+1 for i in lines[:height-1])
@@ -751,7 +751,7 @@ class Sheet(BaseSheet):
                                 else:
                                     sepchars = midsep
 
-                        clipdraw(scr, y, x, disp_column_fill+line, cattr.attr, colwidth-(1 if note else 0))
+                        clipdraw(scr, y, x, disp_column_fill+line, cattr.attr, w=colwidth-(1 if note else 0))
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:

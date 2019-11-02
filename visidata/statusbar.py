@@ -97,7 +97,7 @@ def drawLeftStatus(vd, scr, vs):
         if maxwidth > 0:
             lstatus = middleTruncate(lstatus, maxwidth//2)
 
-        x = clipdraw(scr, y, 0, lstatus, attr)
+        x = clipdraw(scr, y, 0, lstatus, attr, w=vs.windowWidth-1)
 
         vd.onMouse(scr, y, 0, 1, x,
                         BUTTON1_PRESSED='sheets',
@@ -112,7 +112,7 @@ def drawLeftStatus(vd, scr, vs):
             if x > vd.windowWidth:
                 break
             if one:  # any messages already:
-                x += clipdraw(scr, y, x, sep, attr, vd.windowWidth)
+                x += clipdraw(scr, y, x, sep, attr, w=vs.windowWidth-x)
             one = True
             msg = composeStatus(msgparts, n)
 
@@ -120,7 +120,7 @@ def drawLeftStatus(vd, scr, vs):
             elif pri == 2: msgattr = warn_attr
             elif pri == 1: msgattr = warn_attr
             else: msgattr = attr
-            x += clipdraw(scr, y, x, msg, msgattr, vd.windowWidth)
+            x += clipdraw(scr, y, x, msg, msgattr, w=vs.windowWidth-x)
         except Exception as e:
             vd.exceptionCaught(e)
 
@@ -134,7 +134,7 @@ def rightStatus(vd, sheet):
 @VisiData.api
 def drawRightStatus(vd, scr, vs):
     'Draw right side of status bar.  Return length displayed.'
-    rightx = vd.windowWidth
+    rightx = vs.windowWidth
 
     ret = 0
     statcolors = [
@@ -159,7 +159,7 @@ def drawRightStatus(vd, scr, vs):
                 rstatus, coloropt = rstatcolor
                 rstatus = ' '+rstatus
                 attr = colors.get_color(coloropt).attr
-                statuslen = clipdraw(scr, vd.windowHeight-1, rightx, rstatus, attr, rtl=True)
+                statuslen = clipdraw(scr, vd.windowHeight-1, rightx, rstatus, attr, w=vs.windowWidth-1, rtl=True)
                 rightx -= statuslen
                 ret += statuslen
             except Exception as e:

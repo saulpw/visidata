@@ -58,7 +58,7 @@ def clipdraw(scr, y, x, s, attr, w=None, rtl=False):
     dispw = 0
     try:
         if w is None:
-            w = windowWidth-1
+            w = len(s)
         w = min(w, (x-1) if rtl else (windowWidth-x-1))
         if w <= 0:  # no room anyway
             return 0
