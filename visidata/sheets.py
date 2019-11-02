@@ -758,7 +758,7 @@ class Sheet(BaseSheet):
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
-                            scr.addstr(y, x+colwidth, sepchars, sepcattr.attr)
+                            scr.addstr(y, x+colwidth, sepchars, basecellcattr.attr)
 
             if self.isSelected(row):
                 clipdraw(scr, ybase, 0, selectednote, basecellcattr.attr)
