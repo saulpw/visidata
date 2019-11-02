@@ -5,6 +5,7 @@ with placename, to add a "geocodes" column with a list of potential geocoded
 places, and lat/long columns with the actual coords of the first of those.'''
 
 __author__='Saul Pwanson <vd+geocode@saul.pw>'
+__version__='0.1'
 
 import urllib.parse
 import json

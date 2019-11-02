@@ -1,3 +1,5 @@
+__version__ = '0.9'
+
 from copy import copy
 
 from visidata import Sheet, vd, asyncsingle, cancelThread

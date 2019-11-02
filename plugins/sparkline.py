@@ -1,5 +1,7 @@
 from visidata import Column, ColumnsSheet, Sheet, option, options, BaseException
 
+__author__ = 'Lucas Messenger @layertwo'
+
 
 option('disp_sparkline', '▁▂▃▄▅▆▇', 'characters to display sparkline')
 

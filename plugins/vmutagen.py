@@ -1,5 +1,9 @@
 # requirements: mutagen
 
+__name__ = 'vmutagen'
+__author__ = 'Saul Pwanson <vd@saul.pw>'
+__version__ = '0.1'
+
 import functools
 
 from visidata import *
