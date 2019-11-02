@@ -51,6 +51,7 @@ theme('disp_keybot_sep', '║', '') # ╽╿┃╜‖
 theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
 theme('disp_endmid_sep', '║', '') # ╽╿┃
 theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
+theme('disp_selected_note', '•', '') #
 
 theme('color_default', 'normal', 'the default color')
 theme('color_default_hdr', 'bold', 'color of the column headers')
@@ -607,6 +608,7 @@ class Sheet(BaseSheet):
 
             'colsep': options.disp_column_sep,
             'keysep': options.disp_keycol_sep,
+            'selectednote': options.disp_selected_note,
         }
 
         self.rowLayout = {}  # [rowidx] -> (y, height)
@@ -650,7 +652,8 @@ class Sheet(BaseSheet):
             endmidsep='',
             endbotsep='',
             colsep='',
-            keysep=''
+            keysep='',
+            selectednote=''
        ):
 
             # sepattr is the attr between cell/columns
@@ -756,6 +759,9 @@ class Sheet(BaseSheet):
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
                             scr.addstr(y, x+colwidth, sepchars, sepcattr.attr)
+
+            if self.isSelected(row):
+                clipdraw(scr, ybase, 0, selectednote, basecellcattr.attr)
 
             return height
 
