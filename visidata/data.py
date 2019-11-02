@@ -53,8 +53,17 @@ Sheet._coltype = SettableColumn
 @asyncthread
 @Sheet.api
 def addRows(sheet, n, idx):
+    addedRows = {}
     for i in Progress(range(n), 'adding'):
-        sheet.addRow(sheet.newRow(), idx+1)
+        row = sheet.newRow()
+        addedRows[sheet.rowid(row)] = row
+        sheet.addRow(row, idx+1)
+
+    @asyncthread
+    def _removeRows():
+        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows)
+
+    vd.addUndo(_removeRows)
 
 @asyncthread
 def fillNullValues(col, rows):
