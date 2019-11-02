@@ -33,7 +33,7 @@ def _plugin_in_import_list(plugin):
             if r.match(line):
                 return True
 
-def _installedStatus(plugin):
+def _installedStatus(col, plugin):
     return '*' if importlib.util.find_spec(_plugin_import_name(plugin)) else ''
 
 def _loadedVersion(plugin):
@@ -54,9 +54,9 @@ class PluginsSheet(VisiDataMetaSheet):
     @asyncthread
     def reload(self):
         super().reload_sync()
-
-        self.addColumn(Column('installed', getter=lambda c,r: _installedStatus(r)), index=1)
-        self.addColumn(Column('loaded', getter=lambda c,r: _loadedVersion(r)), index=2)
+        self.addColumn(Column('available', width=0, getter=_installedStatus), index=1)
+        self.addColumn(Column('installed', width=8, getter=lambda c,r: _loadedVersion(r)), index=2)
+        self.column('description').width = 40
         self.setKeys([self.column("name")])
 
     def installPlugin(self, plugin):
