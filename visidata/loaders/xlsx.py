@@ -22,16 +22,18 @@ class XlsxIndexSheet(IndexSheet):
 
 
 class XlsxSheet(Sheet):
-    def iterload(self):
+    @asyncthread
+    def reload(self):
+        self.rows = []
         self.columns = []
 
-        iterrows = self.iterload()
+        it = self.iterload()
 
-        self.setColNames([next(iterrows) for i in range(options.header)])
+        self.setColNames([next(it) for i in range(options.header)])
 
         try:
             while True:
-                self.addRow(next(iterrows))
+                self.addRow(next(it))
         except StopIteration:
             pass
 
