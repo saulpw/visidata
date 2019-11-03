@@ -1,6 +1,6 @@
 from visidata import vd, copy, asyncthread, Progress, exceptionCaught, status, Sheet, options
 
-Sheet.init('_ordering', list, copy=True)  # (cols, reverse:bool)
+Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
 
 @Sheet.api
@@ -19,30 +19,45 @@ def orderBy(sheet, *cols, reverse=False):
         cols = cols[1:]
         do_sort = True
 
-    if cols:
-        sheet._ordering.append((cols, reverse))
+    for c in cols:
+        sheet._ordering.append((c, reverse))
         do_sort = True
 
     if do_sort:
         sheet.sort()
 
+class Reversor:
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __eq__(self, other):
+        return other.obj == self.obj
+
+    def __lt__(self, other):
+        return other.obj < self.obj
 
 @Sheet.api
 @asyncthread
 def sort(self):
     'Sort rows according to the current self._ordering.'
     try:
-        with Progress(gerund='sorting', total=len(self.rows)*len(self._ordering)) as prog:
-            for cols, reverse in self._ordering[::-1]:
-                def sortkey(r):
-                    prog.addProgress(1)
-                    return tuple(c.getTypedValue(r) for c in cols)
+        with Progress(gerund='sorting', total=self.nRows) as prog:
+            def sortkey(r):
+                ret = []
+                for col, reverse in self._ordering:
+                    if isinstance(col, str):
+                        col = self.column(col)
+                    val = col.getTypedValue(r)
+                    ret.append(Reversor(val) if reverse else val)
 
-                # must not reassign self.rows: use .sort() instead of sorted()
-                self.rows.sort(key=sortkey, reverse=reverse)
+                prog.addProgress(1)
+                return ret
+
+            # must not reassign self.rows: use .sort() instead of sorted()
+            self.rows.sort(key=sortkey)
     except TypeError as e:
-        status('sort incomplete due to TypeError; change column type')
-        exceptionCaught(e, status=False)
+        vd.warning('sort incomplete due to TypeError; change column type')
+        vd.exception(e, status=False)
 
 
 # replace existing sort criteria

@@ -82,9 +82,9 @@ class DirSheet(Sheet):
         Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     nKeys = 2
+    _ordering = [('modtime', True)]  # sort by reverse modtime initially
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         def _walkfiles(p):
             basepath = str(p)
             for folder, subdirs, files in os.walk(basepath):
@@ -103,7 +103,6 @@ class DirSheet(Sheet):
                 yield p/fn
 
 
-        self.rows = []
         basepath = str(self.source)
 
         folders = set()
@@ -114,18 +113,14 @@ class DirSheet(Sheet):
             if hidden_files and p.name.startswith('.'):
                 continue
 
-            self.addRow(p)
+            yield p
 
-        # sort by modtime initially
-        self.rows.sort(key=modtime, reverse=True)
 
 class FileListSheet(DirSheet):
-    @asyncthread
-    def reload(self):
-        self.rows = []
-        for p in open(self.source, 'r').readlines():
-            p = Path(p.rstrip())
-            self.addRow(p)
+    _ordering = []
+    def iterload(self):
+        for fn in self.source.open_text():
+            yield Path(fn.rstrip())
 
 
 DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no row"), filetype=cursorRow.ext))')

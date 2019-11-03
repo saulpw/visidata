@@ -237,6 +237,9 @@ class Sheet(BaseSheet):
         for r in vd.Progress(self.iterload(), gerund='loading', total=0):
             self.addRow(r)
 
+        if self._ordering:
+            self.sort()
+
     def iterload(self):
         'Override this generator for loading.'
         if False:
