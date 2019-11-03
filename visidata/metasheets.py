@@ -194,11 +194,11 @@ def combineColumns(cols):
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=list(vd.sheets)))')
-globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)')
+globalCommand('gO', 'options-global', 'vd.push(vd.globalOptionsSheet)')
 
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)')
-BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+BaseSheet.addCommand('O', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
 
