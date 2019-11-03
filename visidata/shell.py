@@ -117,7 +117,7 @@ class DirSheet(Sheet):
         self.rows.sort(key=modtime, reverse=True)
 
 
-DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no row")))')
+DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no row"), filetype=cursorRow.ext))')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)')

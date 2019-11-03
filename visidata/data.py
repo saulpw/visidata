@@ -250,7 +250,7 @@ def openPath(vd, p, filetype=None):
 
     openfunc = getGlobals().get('open_' + filetype)
     if not openfunc:
-        warning('unknown "%s" filetype' % openfunc)
+        warning('unknown "%s" filetype' % filetype)
         filetype = 'txt'
         openfunc = getGlobals().get('open_txt')
 
