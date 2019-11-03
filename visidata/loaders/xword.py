@@ -76,7 +76,7 @@ class CrosswordSheet(Sheet):
 
     def reload(self):
         import xdfile
-        self.xd = xdfile.Crossword(self.source.read_text())
+        self.xd = xdfile.xdfile(xd_contents=self.source.read_text(), filename=self.source)
         self.rows = self.xd.clues
 
 
