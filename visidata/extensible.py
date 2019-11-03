@@ -12,7 +12,8 @@ class Extensible:
         oldinit = cls.__init__
         def newinit(self, *args, **kwargs):
             oldinit(self, *args, **kwargs)
-            setattr(self, membername, initfunc())
+            if not hasattr(self, membername):  # can be overridden by a subclass
+                setattr(self, membername, initfunc())
         cls.__init__ = newinit
 
         oldcopy = cls.__copy__
