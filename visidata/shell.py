@@ -30,6 +30,9 @@ def exec_shell(*args):
 def open_dir(p):
     return DirSheet(p.name, source=p)
 
+def open_fdir(p):
+    return FileListSheet(p.name, source=p)
+
 def addShellColumns(cmd, sheet):
     shellcol = ColumnShell(cmd, source=sheet, width=0)
     for i, c in enumerate([
@@ -115,6 +118,14 @@ class DirSheet(Sheet):
 
         # sort by modtime initially
         self.rows.sort(key=modtime, reverse=True)
+
+class FileListSheet(DirSheet):
+    @asyncthread
+    def reload(self):
+        self.rows = []
+        for p in open(self.source, 'r').readlines():
+            p = Path(p.rstrip())
+            self.addRow(p)
 
 
 DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no row"), filetype=cursorRow.ext))')
