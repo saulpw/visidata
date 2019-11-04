@@ -106,7 +106,7 @@ def moveToCol(vs, colstr):
     return True
 
 # rowdef: namedlist (like TsvSheet)
-class CommandLog(TsvSheet):
+class CommandLog(VisiDataMetaSheet):
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
@@ -127,11 +127,6 @@ class CommandLog(TsvSheet):
     currentReplayRow = None  # must be global, to allow replay
     semaphore = threading.Semaphore(0)
     filetype = 'vd'
-
-    def __init__(self, name, source=None, **kwargs):
-        super().__init__(name, source=source, **kwargs)
-        options.set('delimiter', '\t', self)  # enforce standard delimiter for internal tsv
-        options.set('row_delimiter', '\n', self)
 
     def newRow(self, **fields):
         return self._rowtype(**fields)
@@ -349,8 +344,6 @@ def shortcut(self):
 def cmdlog(vd):
     return CommandLog('cmdlog', rows=[])
 
-
-options.set('header', 1, CommandLog)  # .vd files always have a header row, regardless of options
 
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
