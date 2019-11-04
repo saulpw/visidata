@@ -60,14 +60,12 @@ class SettingsMgr(collections.OrderedDict):
         4. objname(obj): the specific sheet instance
             a. can override at runtime, replace value for sheet instance
         '''
+        mappings = ['override']
         if obj:
-            mappings = [self.objname(obj)]
-            mro = [self.objname(cls) for cls in inspect.getmro(type(obj))]
-            mappings.extend(mro)
-        else:
-            mappings = []
+            mappings += [self.objname(obj)]
+            mappings += [self.objname(cls) for cls in inspect.getmro(type(obj))]
 
-        mappings += ['override', 'global']
+        mappings += ['global']
         return mappings
 
     def _get(self, key, obj=None):
