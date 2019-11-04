@@ -15,104 +15,61 @@ option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to t
 def splitter(fp, delim='\n'):
     'Generates one line/row/record at a time from fp, separated by delim'
 
-    remainder = ''
+    buf = ''
     while True:
         nextbuf = fp.read(512)
         if not nextbuf:
-            if remainder:
-                yield remainder
             break
-        buf = remainder + nextbuf
-        rows = buf.split(delim)
-        if buf[-1] != delim:
-            remainder = rows[-1]
-            yield from rows[:-1]
-        else:
-            remainder = ''
-            yield from rows
+        buf += nextbuf
 
+        *rows, buf = buf.split(delim)
+        yield from rows
 
-def getlines(iter, maxlines=None, delim='\n'):
-    i = 0
-
-    while True:
-        if maxlines is not None and i >= maxlines:
-            break
-
-        try:
-            L = next(iter)
-        except StopIteration:
-            break
-
-        L = L.rstrip(delim)
-        if L:
-            yield L
-        i += 1
+    yield from buf.rstrip(delim).split()
 
 
 def open_tsv(p):
     return TsvSheet(p.name, source=p)
 
 
-# rowdef: namedlist
+# rowdef: list
 class TsvSheet(Sheet):
-    _rowtype = None
-
-    @asyncthread
-    def reload(self):
-        self.reload_sync()
-
-    def reload_sync(self):
-        self.rows = []
-        for r in self.iterload():
-            self.addRow(r)
-
     def iterload(self):
         'Perform synchronous loading of TSV file, discarding header lines.'
-        header_lines = options.get('header', self)
+
+        options.set('header', 1, TsvSheet)
+
         delim = options.get('delimiter', self)
         rowdelim = options.get('row_delimiter', self)
 
         with self.source.open_text() as fp:
-            rdr = splitter(fp, rowdelim)
-
-            # get one line anyway to determine number of columns
-            lines = list(getlines(rdr, int(header_lines) or 1, rowdelim))
-            headers = [L.split(delim) for L in lines]
-
-            if header_lines <= 0:
-                self.columns = [ColumnItem('', i) for i in range(len(headers[0]))]
-            else:
-                self.columns = [
-                    ColumnItem('\\n'.join(x), i)
-                        for i, x in enumerate(zip(*headers[:header_lines]))
-                    ]
-
-            lines = lines[header_lines:]  # in case of header_lines == 0
-            self._rowtype = namedlist('tsvobj', [c.name for c in self.columns])
-
-            self.recalc()
-
-            ncols = len(self._rowtype())    # current number of cols
             with Progress(total=filesize(self.source)) as prog:
-                for L in itertools.chain(lines, getlines(rdr, delim=rowdelim)):
-                    row = L.split(delim)
-                    if len(row) > ncols:
-                        # add unnamed columns to the type not found in the header
-                        newcols = [ColumnItem('', len(row)+i, width=8) for i in range(len(row)-ncols)]
-                        self._rowtype = namedlist(self._rowtype.__name__, list(self._rowtype._fields) + ['_' for c in newcols])
-                        ncols += len(newcols)
-                        for c in newcols:
-                            self.addColumn(c)
-                    elif len(row) < ncols:
+                for line in splitter(fp, rowdelim):
+                    if not line:
+                        continue
+
+                    prog.addProgress(len(line))
+                    row = list(line.split(delim))
+
+                    if len(row) < self.nCols:
                         # extend rows that are missing entries
-                        row.extend([None]*(ncols-len(row)))
+                        row.extend([None]*(self.nCols-len(row)))
 
-                    yield self._rowtype(row)
-                    prog.addProgress(len(L))
+                    yield row
 
-    def newRow(self):
-        return self._rowtype()
+    def setCols(self, headerrows):
+        self.columns = []
+        for i in range(len(headerrows[0])):
+            self.addColumn(ColumnItem('', i))
+        self.setColNames(headerrows)
+
+    def addRow(self, row):
+        super().addRow(row)
+        for i in range(len(row)-self.nCols):
+            # add unnamed columns to the type not found in the header
+            self.addColumn(ColumnItem('', self.nCols))
+            self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
+
 
 def tsv_trdict(vs):
     'returns string.translate dictionary for replacing tabs and newlines'
