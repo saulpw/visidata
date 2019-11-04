@@ -11,6 +11,9 @@ option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 option('header', 1, 'parse first N rows of certain formats as column names', replay=True)
 option('filetype', '', 'specify file type', replay=True)
 
+options.set('header', 0, IndexSheet)
+options.set('header', 1, SequenceSheet)
+
 
 Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=random.sample(rows, nrows or nRows); vd.push(vs)')
 

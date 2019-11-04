@@ -239,12 +239,12 @@ class Sheet(BaseSheet):
         itsource = self.iterload()
 
         # skip the first options.skip rows
-        for i in range(options.skip):
+        for i in range(options.get('skip', self)):
             next(itsource)  # do nothing with skipped rows
 
         # use the next options.header rows as the column names
         headers = []
-        for i in range(options.header):
+        for i in range(options.get('header', self)):
             r = next(itsource)
             headers.append(r)
 
