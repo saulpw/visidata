@@ -45,22 +45,32 @@ def columnize(rows):
 
 class FixedWidthColumnsSheet(Sheet):
     rowtype = 'lines'  # rowdef: [line] (wrapping in list makes it unique and modifiable)
-    columns = [ColumnItem('line', 0)]
-    @asyncthread
-    def reload(self):
-        self.rows = []
-        maxcols = options.fixed_maxcols
-        for line in self.source:
-            self.addRow([line])
 
+    def iterload(self):
+        itsource = iter(self.source)
+
+        # compute fixed width columns from first fixed_rows lines
+        firstRows = []
+        for i in range(options.fixed_rows):
+            try:
+                r = [next(itsource)]
+                firstRows.append(r)
+                yield r
+            except StopIteration:
+                break
+
+        maxcols = options.fixed_maxcols
         self.columns = []
-        # compute fixed width columns
-        for i, j in columnize(list(r[0] for r in self.rows[:options.fixed_rows])):
+        for i, j in columnize(list(r[0] for r in firstRows)):
             if maxcols and self.nCols >= maxcols-1:
                 self.addColumn(FixedWidthColumn('', i, None))
                 break
             else:
                 self.addColumn(FixedWidthColumn('', i, j))
 
-        self.setColNames(self.rows[:options.header])
-        self.rows = self.rows[options.header:]
+        self.setColNames(self.headerlines)
+
+        yield from ([line] for line in itsource)
+
+    def setCols(self, headerlines):
+        self.headerlines = headerlines
