@@ -35,10 +35,6 @@ def open_tsv(p):
 # rowdef: list
 class TsvSheet(SequenceSheet):
     def iterload(self):
-        'Perform synchronous loading of TSV file, discarding header lines.'
-
-        options.set('header', 1, TsvSheet)
-
         delim = options.get('delimiter', self)
         rowdelim = options.get('row_delimiter', self)
 
