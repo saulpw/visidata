@@ -53,13 +53,6 @@ class TsvSheet(SequenceSheet):
 
                     yield row
 
-    def addRow(self, row, index=None):
-        super().addRow(row, index=index)
-        for i in range(len(self.columns), len(row)):  # no-op if already done
-            # add unnamed columns to the type not found in the header
-            self.addColumn(ColumnItem('', i))
-            self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
-
 
 def tsv_trdict(vs):
     'returns string.translate dictionary for replacing tabs and newlines'

@@ -4,7 +4,7 @@ from copy import copy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option,
+from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option, namedlist,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
@@ -796,12 +796,15 @@ class SequenceSheet(Sheet):
         self.columns = []
         for i, _ in enumerate(itertools.zip_longest(*headerrows)):
             self.addColumn(ColumnItem('', i))
+
         self.setColNames(headerrows)
+        self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
 
     def addRow(self, row, index=None):
-        super().addRow(row, index=index)
         for i in range(len(self.columns), len(row)):  # no-op if already done
             self.addColumn(ColumnItem('', i))
+            self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
+        super().addRow(self._rowtype(row), index=index)
 
 
 class IndexSheet(Sheet):
