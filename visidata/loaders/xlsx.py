@@ -24,9 +24,9 @@ class XlsxIndexSheet(IndexSheet):
 class XlsxSheet(SequenceSheet):
     def iterload(self):
         worksheet = self.source
-        rows = worksheet.iter_rows()
-        for r in Progress(rows, total=worksheet.max_row or 0):
-            yield list(wrapply(getattr, cell, 'value') for cell in r)
+        for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
+            yield list(wrapply(getattr, cell, 'value') for cell in row)
+
 
 class XlsIndexSheet(IndexSheet):
     'Load XLS file (in Excel format).'
@@ -47,21 +47,10 @@ class XlsIndexSheet(IndexSheet):
             yield vs
 
 
-class XlsSheet(Sheet):
+class XlsSheet(SequenceSheet):
     def iterload(self):
         worksheet = self.source
-        self.columns = []
-        if options.header:
-            hdrs = [list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
-                        for rownum in range(options.header)]
-            colnames = ['\\n'.join(str(hdr[i]) for i in range(len(hdr))) for hdr in zip(*hdrs)]
-        else:
-            colnames = ['']*worksheet.ncols
-
-        for i, colname in enumerate(colnames):
-            self.addColumn(ColumnItem(colname, i))
-
-        for rownum in Progress(range(options.header, worksheet.nrows)):
+        for rownum in Progress(range(worksheet.nrows)):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
 
