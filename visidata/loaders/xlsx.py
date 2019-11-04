@@ -21,31 +21,12 @@ class XlsxIndexSheet(IndexSheet):
             yield vs
 
 
-class XlsxSheet(Sheet):
-    @asyncthread
-    def reload(self):
-        self.rows = []
-        self.columns = []
-
-        it = self.iterload()
-
-        self.setColNames([next(it) for i in range(options.header)])
-
-        try:
-            while True:
-                self.addRow(next(it))
-        except StopIteration:
-            pass
-
+class XlsxSheet(SequenceSheet):
     def iterload(self):
         worksheet = self.source
         rows = worksheet.iter_rows()
         for r in Progress(rows, total=worksheet.max_row or 0):
-            row = list(wrapply(getattr, cell, 'value') for cell in r)
-            for i in range(len(self.columns), len(row)):  # no-op if already done
-                self.addColumn(ColumnItem(None, i, width=8))
-            yield row
-
+            yield list(wrapply(getattr, cell, 'value') for cell in r)
 
 class XlsIndexSheet(IndexSheet):
     'Load XLS file (in Excel format).'

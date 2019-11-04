@@ -23,7 +23,8 @@ def removeNulls(fp):
     for line in fp:
         yield line.replace('\0', '')
 
-class CsvSheet(Sheet):
+
+class CsvSheet(SequenceSheet):
     _rowtype = list  # rowdef: list of values
 
     def newRow(self):
@@ -39,17 +40,6 @@ class CsvSheet(Sheet):
 
             yield from rdr
 
-    def setCols(self, headers):
-        self.columns = []
-        if headers:
-            # columns ideally reflect the max number of fields over all rows
-            for i, colname in enumerate('\\n'.join(x) for x in zip(*headers)):
-                self.addColumn(ColumnItem(colname, i))
-
-    def addRow(self, row):
-        super().addRow(row)
-        for i in range(len(row)-self.nCols):
-            self.addColumn(ColumnItem('', self.nCols))
 
 @Sheet.api
 def save_csv(sheet, p):

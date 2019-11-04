@@ -3,7 +3,7 @@ import contextlib
 import itertools
 import collections
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught, option
+from visidata import asyncthread, options, Progress, status, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, exceptionCaught, option
 from visidata import namedlist, filesize
 
 option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
@@ -33,7 +33,7 @@ def open_tsv(p):
 
 
 # rowdef: list
-class TsvSheet(Sheet):
+class TsvSheet(SequenceSheet):
     def iterload(self):
         'Perform synchronous loading of TSV file, discarding header lines.'
 
@@ -57,17 +57,11 @@ class TsvSheet(Sheet):
 
                     yield row
 
-    def setCols(self, headerrows):
-        self.columns = []
-        for i in range(len(headerrows[0])):
-            self.addColumn(ColumnItem('', i))
-        self.setColNames(headerrows)
-
-    def addRow(self, row):
-        super().addRow(row)
-        for i in range(len(row)-self.nCols):
+    def addRow(self, row, index=None):
+        super().addRow(row, index=index)
+        for i in range(len(self.columns), len(row)):  # no-op if already done
             # add unnamed columns to the type not found in the header
-            self.addColumn(ColumnItem('', self.nCols))
+            self.addColumn(ColumnItem('', i))
             self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
 
 

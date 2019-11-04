@@ -1,4 +1,5 @@
 import collections
+import itertools
 from copy import copy
 import textwrap
 
@@ -8,7 +9,7 @@ TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, exceptionCaught, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
 
-__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow']
+__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
@@ -787,6 +788,21 @@ class Sheet(BaseSheet):
                 clipdraw(scr, ybase, 0, selectednote, basecellcattr.attr)
 
             return height
+
+
+class SequenceSheet(Sheet):
+    'For sheets which use ColumnItem on rows that are Python sequences (list, namedtuple, etc).'
+    def setCols(self, headerrows):
+        self.columns = []
+        for i, _ in enumerate(itertools.zip_longest(*headerrows)):
+            self.addColumn(ColumnItem('', i))
+        self.setColNames(headerrows)
+
+    def addRow(self, row, index=None):
+        super().addRow(row, index=index)
+        for i in range(len(self.columns), len(row)):  # no-op if already done
+            self.addColumn(ColumnItem('', i))
+
 
 class IndexSheet(Sheet):
     rowtype = 'sheets'

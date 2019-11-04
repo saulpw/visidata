@@ -338,4 +338,3 @@ def deleteBy(self, func):
 
     status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted
-
