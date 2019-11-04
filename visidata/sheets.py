@@ -234,11 +234,31 @@ class Sheet(BaseSheet):
     def reload(self):
         'Loads rows and/or columns.  Override in subclass.'
         self.rows = []
-        for r in vd.Progress(self.iterload(), gerund='loading', total=0):
+
+        itsource = self.iterload()
+
+        # skip the first options.skip rows
+        for i in range(options.skip):
+            next(itsource)  # do nothing with skipped rows
+
+        # use the next options.header rows as the column names
+        headers = []
+        for i in range(options.header):
+            r = next(itsource)
+            headers.append(r)
+
+        self.setCols(headers)
+
+        # add the rest of the rows
+        for r in vd.Progress(itsource, gerund='loading', total=0):
             self.addRow(r)
 
+        # if an ordering has been specified, sort the sheet
         if self._ordering:
-            self.sort()
+            vd.sync(self.sort())
+
+    def setCols(self, headers):
+        pass
 
     def iterload(self):
         'Override this generator for loading.'
