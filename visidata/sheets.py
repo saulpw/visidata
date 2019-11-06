@@ -87,6 +87,24 @@ RowColorizer = collections.namedtuple('RowColorizer', 'precedence coloropt func'
 CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt func')
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
+def wrapiter(it):
+    'Like iter(it) but wraps so Exceptions do not abort iteration.'
+    while True:
+        try:
+            yield next(it)
+        except StopIteration:
+            return
+        except Exception as e:
+            pass #  yield str(e)
+
+def wrapnext(it, default=''):
+    'Return next(it) or default if no more elements.  Also catches Exception'
+    try:
+        return next(it)
+    except Exception as e:
+        return str(e)
+    except StopIteration:
+        return default
 
 class RecursiveExprException(Exception):
     pass
@@ -242,18 +260,18 @@ class Sheet(BaseSheet):
 
         # skip the first options.skip rows
         for i in range(options.get('skip', self)):
-            next(itsource)  # do nothing with skipped rows
+            wrapnext(itsource)  # do nothing with skipped rows
 
         # use the next options.header rows as the column names
         headers = []
         for i in range(options.get('header', self)):
-            r = next(itsource)
+            r = wrapnext(itsource)
             headers.append(r)
 
         self.setCols(headers)
 
         # add the rest of the rows
-        for r in vd.Progress(itsource, gerund='loading', total=0):
+        for r in vd.Progress(wrapiter(itsource), gerund='loading', total=0):
             self.addRow(r)
 
         # if an ordering has been specified, sort the sheet
