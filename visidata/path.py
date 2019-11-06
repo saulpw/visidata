@@ -8,7 +8,6 @@ from visidata import *
 
 option('encoding', 'utf-8', 'encoding passed to codecs.open', replay=True)
 option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
-option('skip', 0, 'skip first N lines of text input', replay=True)
 
 @functools.lru_cache()
 def vstat(path, force=False):
@@ -137,12 +136,9 @@ class Path(os.PathLike):
             return self._path.open(*args, **kwargs)
 
     def __iter__(self):
-        skip = options.skip
         with Progress(total=filesize(self)) as prog:
             for i, line in enumerate(self.open_text()):
                 prog.addProgress(len(line))
-                if i < skip:
-                    continue
                 yield line[:-1]
 
     def open_bytes(self, mode='rb'):

@@ -18,6 +18,8 @@ option('textwrap_cells', True, 'wordwrap text for multiline rows')
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
 option('quitguard', False, 'confirm before quitting last sheet')
 option('debug', False, 'exit on error and display stacktrace')
+option('skip', 0, 'skip N rows before header', replay=True)
+option('header', 1, 'parse first N rows as column names', replay=True)
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 theme('use_default_colors', False, 'curses use default terminal colors')
 
