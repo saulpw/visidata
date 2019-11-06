@@ -7,7 +7,7 @@ def evalmatcher(sheet, expr):
     return matcher
 
 def search_func(sheet, rows, func, reverse=False):
-    for i in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=reverse):
+    for i in rotateRange(len(sheet.rows), sheet.cursorRowIndex+1, reverse=reverse):
         try:
             if func(sheet.rows[i]):
                 return i

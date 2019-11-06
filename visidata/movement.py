@@ -13,8 +13,8 @@ def rotateRange(n, idx, reverse=False):
         rng = range(idx-1, -1, -1)
         rng2 = range(n-1, idx-1, -1)
     else:
-        rng = range(idx+1, n)
-        rng2 = range(0, idx+1)
+        rng = range(idx, n)
+        rng2 = range(0, idx)
 
     wrapped = False
     with Progress(total=n) as prog:
@@ -129,7 +129,7 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
             searchBackward = not searchBackward
 
         matchingRowIndexes = 0
-        for r in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=searchBackward):
+        for r in rotateRange(len(sheet.rows), sheet.cursorRowIndex+1, reverse=searchBackward):
             c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
             if c:
                 if moveCursor:
