@@ -5,7 +5,8 @@ from visidata import *
 class NpySheet(Sheet):
     def iterload(self):
         import numpy
-        self.npy = numpy.load(str(self.source), encoding='bytes')
+        if not hasattr(self, 'npy'):
+            self.npy = numpy.load(str(self.source), encoding='bytes')
         self.reloadCols()
         yield from Progress(self.npy, total=len(self.npy))
 
@@ -42,7 +43,7 @@ class NpzSheet(ZipSheet):
         import numpy
         tablename, tbl = row
         if isinstance(tbl, numpy.ndarray):
-            return NumpySheet(tablename, npy=tbl)
+            return NpySheet(tablename, npy=tbl)
 
         return load_pyobj(tablename, tbl)
 
