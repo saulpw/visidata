@@ -62,7 +62,9 @@ def namedlist(objname, fieldnames):
 
         def __init__(self, L=None, **kwargs):
             if L is None:
-                L = [None]*len(fieldnames)
+                L = [None]*self.length()
+            elif len(L) < self.length():
+                L.extend([None]*(self.length() - len(L)))
             super().__init__(L)
             for k, v in kwargs.items():
                 setattr(self, k, v)
