@@ -827,6 +827,8 @@ class SequenceSheet(Sheet):
         for i in range(len(self.columns), len(row)):  # no-op if already done
             self.addColumn(ColumnItem('', i))
             self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
+        if type(row) is not self._rowtype:
+            row = self._rowtype(row)
         super().addRow(row, index=index)
 
 
