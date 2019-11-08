@@ -53,7 +53,7 @@ class PluginsSheet(VisiDataMetaSheet):
 
     @asyncthread
     def reload(self):
-        super().reload_sync()
+        super().reload.__wrapped__(self)
         self.addColumn(Column('available', width=0, getter=_installedStatus), index=1)
         self.addColumn(Column('installed', width=8, getter=lambda c,r: _loadedVersion(r)), index=2)
         self.column('description').width = 40

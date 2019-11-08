@@ -96,7 +96,7 @@ class HelpSheet(Sheet):
             v.sheet = o
             self.cmddict[(v.sheet, v.longname)] = v
 
-        cmdlist.reload_sync()
+        cmdlist.reload.__wrapped__(cmdlist)
         for cmdrow in cmdlist.rows:
             k = (cmdrow.sheet, cmdrow.longname)
             if k in self.cmddict:
