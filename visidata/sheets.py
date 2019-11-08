@@ -820,11 +820,14 @@ class SequenceSheet(Sheet):
         self.setColNames(headerrows)
         self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
 
+    def newRow(self):
+        return self._rowtype()
+
     def addRow(self, row, index=None):
         for i in range(len(self.columns), len(row)):  # no-op if already done
             self.addColumn(ColumnItem('', i))
             self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
-        super().addRow(self._rowtype(row), index=index)
+        super().addRow(row, index=index)
 
 
 class IndexSheet(Sheet):
