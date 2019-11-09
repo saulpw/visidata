@@ -25,7 +25,7 @@ def splitter(fp, delim='\n'):
         *rows, buf = buf.split(delim)
         yield from rows
 
-    yield from buf.rstrip(delim).split()
+    yield from buf.rstrip(delim).split(delim)
 
 
 def open_tsv(p):
