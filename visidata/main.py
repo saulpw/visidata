@@ -10,10 +10,11 @@ import io
 import sys
 import locale
 
-from visidata import vd, option, options, status, run
+from visidata import vd, option, options, status, run, Sheet
 from visidata import Path, openSource, saveSheets, setDiffSheet, domotd
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
+option('preplay', '', 'longnames to preplay before replay')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -56,6 +57,7 @@ def main_vd():
     parser.add_argument('-f', dest='filetype', default='', help='uses loader for filetype instead of file extension')
     parser.add_argument('-y', dest='confirm_overwrite', default=None, action='store_false', help='overwrites existing files without confirmation')
     parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
+    parser.add_argument('-P', dest='preplay', action='append', default=[], help='VisiData command to preplay before cmdlog replay')
     parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
     parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output at the end of replay')
     parser.add_argument('-w', dest='replay_wait', default=0, help='time to wait between replayed commands, in seconds')
@@ -121,6 +123,9 @@ def main_vd():
         options.undo = False
         vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
         vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
+
+    for cmd in args.preplay:
+        Sheet('').exec_keystrokes(cmd)
 
     if not args.play:
         if flPipedInput and not inputs:  # '|vd' without explicit '-'
