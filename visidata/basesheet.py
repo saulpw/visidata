@@ -43,7 +43,7 @@ class BaseSheet(Extensible):
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name='', **kwargs):
         self._name = None
         self.name = name
         self.source = None

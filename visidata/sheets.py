@@ -163,8 +163,8 @@ class Sheet(BaseSheet):
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
-    def __init__(self, name, **kwargs):
-        super().__init__(name, **kwargs)
+    def __init__(self, name='', **kwargs):
+        super().__init__(name=name, **kwargs)
         self.rows = UNLOADED      # list of opaque row objects (UNLOADED before first reload)
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
