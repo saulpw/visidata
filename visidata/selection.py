@@ -78,7 +78,7 @@ def unselectByIdx(self, rowIdxs):
 @Sheet.api
 def gatherBy(self, func, gerund='gathering'):
     'Generate only rows for which the given func returns True.'
-    for i in Progress(rotateRange(self.nRows, self.cursorRowIndex), total=self.nRows, gerund=gerund):
+    for i in Progress(rotateRange(self.nRows, self.cursorRowIndex-1), total=self.nRows, gerund=gerund):
         try:
             r = self.rows[i]
             if func(r):
