@@ -266,7 +266,7 @@ class QueuedDeploymentsSheet(GalconSheet):
     ]
 
     def colorIncomplete(self, col, row, value):
-        if col.name == 'ndeployed':
+        if row and col.name == 'ndeployed':
             if row.result and row.nships_deployed != row.nships_requested:
                 return 'red bold'
 
@@ -336,7 +336,6 @@ class MapSheet(GalconSheet):
         for i in range(self.map_w):
             self.columns[i].name = value[i:i+1]
 
-    @staticmethod
     def colorSpace(sheet,col,row,value):
         if row and col and row[col.x] is None:
             if row is not sheet.cursorRow:
