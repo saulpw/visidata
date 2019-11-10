@@ -109,7 +109,7 @@ class WSIClient:
                 fmtstr = ' %s'
             rstatus += fmtstr % name
 
-        return rstatus, 'color_status'
+        return rstatus
 
     def login(self):  # before curses init
         self.username = builtins.input('player name: ')
