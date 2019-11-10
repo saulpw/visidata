@@ -15,7 +15,6 @@ from visidata import *
 
 option('refresh_rate_s', 2.0, 'time to sleep between refreshes')
 option('disp_turn_done', '*', 'symbol to indicate player turn taken')
-option('galcon_url', 'http://localhost:8008', 'URL to connect to')
 
 theme('disp_title', 'Galactic Conquest', 'title on map sheet')
 theme('color_incomplete_deploy', 'red bold', 'color of unresolved deployments')
@@ -400,7 +399,11 @@ GameOptionsSheet.addCommand('e', 'edit-option', 'status(g_client.get("/set_optio
 def main_vgalcon():
     global g_client
 
-    g_client = WSIClient(options.galcon_url)
+    if not sys.argv[1:]:
+        print('Usage: %s <url>' % sys.argv[0])
+        return 1
+
+    g_client = WSIClient(sys.argv[1])
 
     vd._status = ["'N' to generate new 'M'ap; Ctrl+S when ready to start"]
     addGlobals({'g_client': g_client})
