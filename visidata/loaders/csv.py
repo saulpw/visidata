@@ -7,6 +7,7 @@ option('csv_delimiter', ',', 'delimiter passed to csv.reader', replay=True)
 option('csv_quotechar', '"', 'quotechar passed to csv.reader', replay=True)
 option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader', replay=True)
 option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True)
+option('csv_lineterminator', '\r\n', 'lineterminator passed to csv.writer', replay=True)
 option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
 
 csv.field_size_limit(2**31-1) # Windows has max 32-bit
