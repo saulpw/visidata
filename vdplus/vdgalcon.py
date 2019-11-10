@@ -131,14 +131,14 @@ class WSIClient:
 
     def get(self, path, **kwargs):
         if not self.sessionid:
-            error('not logged in')
+            fail('not logged in')
 
         kwargs['session'] = self.sessionid
 
         r = requests.get(self.server_url + path, params=kwargs)
 
         if r.status_code != 200:
-            error('[HTTP error %s] %s' % (r.status_code, r.text))
+            fail(r.text)
 
         return r
 

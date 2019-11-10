@@ -502,7 +502,7 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
                 self.send_response(e.errcode)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(str(traceback.format_exc()).encode('utf-8')) #
+                self.wfile.write(str(e).encode('utf-8')) #
             except Exception as e:
                 print(traceback.format_exc())
                 self.send_response(404)
