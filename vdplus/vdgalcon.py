@@ -56,7 +56,7 @@ class WSIClient:
 
         self.Players = PlayersSheet('players')
         self.Planets = PlanetsSheet('planets')
-        self.QueuedDeployments = QueuedDeploymentsSheet('queued_deployments')
+        self.QueuedDeployments = QueuedDeploymentsSheet('queued_deployments', rows=[])
         self.Events = EventsSheet('events')
         self.Map = MapSheet('map')
         self.HistoricalDeployments = HistoricalDeploymentsSheet('deployments')
@@ -245,7 +245,7 @@ class PlanetsSheet(GalconSheet):
                 self.addRow(AttrDict(planetobj))
         self.rows.sort(key=lambda row: row.name)
 
-PlanetsSheet.addCommand(ENTER, 'dive-planet', 'vd.push(g_client.Map).cursorRowIndex = cursorRow.y; g_client.Map.cursorColIndex = cursorRow.x', 'go to this planet on the map')
+PlanetsSheet.addCommand(ENTER, 'dive-planet', 'vd.push(g_client.Map); g_client.Map.cursorRowIndex = cursorRow.y; g_client.Map.cursorColIndex = cursorRow.x', 'go to this planet on the map')
 PlanetsSheet.addCommand('m', 'mark-planet', 'sheet.marked_planet = cursorRow', 'mark current planet as destination')
 PlanetsSheet.addCommand('f', 'deploy-planet', 'g_client.add_deployment([cursorRow], marked_planet, int(input("# ships: ", value=cursorRow.nships)))', 'deploy N ships from current planet to marked planet')
 PlanetsSheet.addCommand('gf', 'deploy-planets-selected', 'g_client.add_deployment(selectedRows, marked_planet, int(input("# ships: ")))', 'deploy N ships from each selected planet to marked planet')
