@@ -171,6 +171,7 @@ class VisiDataSheet(IndexSheet):
             ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl P', 'status messages from current session'),
             ('threadsSheet', 'threads', 'open-threads', 'Ctrl T', 'threads and profiling'),
             ('pluginsSheet', 'plugins', 'open-plugins', '', 'plugins repository'),
+            ('currentDirSheet', '.', 'open-dir-current', '', 'DirSheet for the current directory')
             ]:
             vs = getattr(vd, vdattr)
             vs.description = desc

@@ -8,15 +8,19 @@ try:
 except ImportError:
     pass # pwd,grp modules not available on Windows
 
-from visidata import Column, Sheet, LazyComputeRow, asynccache, exceptionCaught, options, option
-from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError
+from visidata import Column, Sheet, LazyComputeRow, asynccache, exceptionCaught, options, option, globalCommand
+from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError, VisiData
 from visidata import CellColorizer, RowColorizer, modtime, filesize
+
 
 option('dir_recurse', False, 'walk source path recursively on DirSheet')
 option('dir_hidden', False, 'load hidden files on DirSheet')
 
-Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)')
 
+@VisiData.lazy_property
+def currentDirSheet(p):
+    'Support opening the current DirSheet from the vdmenu'
+    return DirSheet('.', source=Path('.'))
 
 @asyncthread
 def exec_shell(*args):
@@ -122,6 +126,9 @@ class FileListSheet(DirSheet):
         for fn in self.source.open_text():
             yield Path(fn.rstrip())
 
+globalCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)')
+
+Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)')
 
 DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no row"), filetype=cursorRow.ext))')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))')
