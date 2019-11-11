@@ -89,19 +89,25 @@ ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt
 
 def wrapiter(it):
     'Like iter(it) but wraps so Exceptions do not abort iteration.'
+    fldebug = options.debug
+
     while True:
         try:
             yield next(it)
         except StopIteration:
             return
         except Exception as e:
-            pass #  yield str(e)
+            if fldebug:
+                vd.exceptionCaught(e)
+            pass # yield str(e)
 
 def wrapnext(it, default=''):
     'Return next(it) or default if no more elements.  Also catches Exception'
     try:
         return next(it)
     except Exception as e:
+        if options.debug:
+            vd.exceptionCaught(e)
         return str(e)
     except StopIteration:
         return default
