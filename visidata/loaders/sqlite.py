@@ -1,12 +1,4 @@
-from visidata import ENTER, Sheet, Column, anytype, status, clean_to_id, Progress, asyncthread, currency, Path, CellColorizer, RowColorizer, vd, options
-from visidata import TypedWrapper, TypedExceptionWrapper
-
-
-def open_sqlite(path):
-    vs = SqliteSheet(path.name + '_tables', source=path, tableName='sqlite_master')
-    vs.addCommand(ENTER, 'dive-row', 'vd.push(SqliteSheet(joinSheetnames(source.name, cursorRow[1]), source=sheet, tableName=cursorRow[1]))')
-    return vs
-open_db = open_sqlite3 = open_sqlite
+from visidata import *
 
 
 class SqliteSheet(Sheet):
@@ -30,20 +22,29 @@ class SqliteSheet(Sheet):
         parms += list(where.values())
         return conn.execute(sql, parms)
 
-    @asyncthread
-    def reload(self):
-        self.reload_sync()
+    def iterload(self):
+        sqltypes = {
+            'INTEGER': int,
+            'TEXT': anytype,
+            'BLOB': str,
+            'REAL': float
+        }
 
-    def reload_sync(self, _conn=None):
-        with (_conn or self.conn()) as conn:
+        with self.conn() as conn:
             tblname = self.tableName
-            self.columns = self.getColumns(tblname, conn)
-            self.recalc()
+            if not isinstance(self, SqliteIndexSheet):
+                self.columns = []
+                for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO("%s")' % tblname)):
+                    c = ColumnItem(r[1], i, type=sqltypes.get(r[2].upper(), anytype))
+                    self.addColumn(c)
+
+                    if r[-1]:
+                        self.setKeys([c])
+
             r = self.execute(conn, 'SELECT COUNT(*) FROM "%s"' % tblname).fetchall()
             rowcount = r[0][0]
-            self.rows = []
             for row in Progress(self.execute(conn, 'SELECT * FROM "%s"' % tblname), total=rowcount-1):
-                self.addRow(row)
+                yield row
 
     @asyncthread
     def putChanges(self, path, adds, mods, dels):
@@ -88,34 +89,14 @@ class SqliteSheet(Sheet):
         self.reload()
         self._dm_reset()
 
-    def getColumns(self, tableName, conn):
-        cols = []
-        for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO("%s")' % tableName)):
-            c = Column(r[1], getter=lambda col,row,idx=i: row[idx])
-            t = r[2].lower()
-            if t == 'integer':
-                c.type = int
-            elif t == 'text':
-                c.type = anytype
-            elif t == 'blob':
-                c.type = str
-            elif t == 'real':
-                c.type = float
-            else:
-                status('unknown sqlite type "%s"' % t)
 
-            cols.append(c)
-            if r[-1]:
-                self.setKeys([c])
-
-        return cols
-
-SqliteSheet.addCommand(ENTER, 'dive-row', 'error("sqlite dbs are readonly")')
-
-def sqlite_type(t):
-    if t is int: return 'INTEGER'
-    if t in [float, currency]: return 'REAL'
-    return 'TEXT'
+class SqliteIndexSheet(SqliteSheet, IndexSheet):
+    tableName = 'sqlite_master'
+    def iterload(self):
+        for row in SqliteSheet.iterload(self):
+            if row[0] != 'index':
+                tblname = row[1]
+                yield SqliteSheet(tblname, source=self, tableName=tblname, row=row)
 
 
 @asyncthread
@@ -124,11 +105,17 @@ def multisave_sqlite(p, *vsheets):
     conn = sqlite3.connect(str(p))
     c = conn.cursor()
 
+    sqltypes = {
+        int: 'INTEGER',
+        float: 'REAL',
+        currency: 'REAL'
+    }
+
     for vs in vsheets:
         tblname = clean_to_id(vs.name)
         sqlcols = []
         for col in vs.visibleCols:
-            sqlcols.append('"%s" %s' % (col.name, sqlite_type(col.type)))
+            sqlcols.append('"%s" %s' % (col.name, sqltypes.get(col.type, 'TEXT')))
         sql = 'CREATE TABLE IF NOT EXISTS "%s" (%s)' % (tblname, ', '.join(sqlcols))
         c.execute(sql)
 
@@ -143,4 +130,10 @@ def multisave_sqlite(p, *vsheets):
 
     status("%s save finished" % p)
 
+
+options.set('header', 0, SqliteSheet)
 save_db = save_sqlite = multisave_db = multisave_sqlite
+
+vd.filetype('sqlite', SqliteIndexSheet)
+vd.filetype('sqlite3', SqliteIndexSheet)
+vd.filetype('db', SqliteIndexSheet)
