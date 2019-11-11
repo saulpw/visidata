@@ -131,16 +131,18 @@ def main_vd():
         if flPipedInput and not inputs:  # '|vd' without explicit '-'
             inputs.append(stdinSource)
 
-        if not inputs:
-            inputs = ['.']
+    sources = []
+    for src in inputs:
+        vs = openSource(src)
+        vd.cmdlog.openHook(vs, src)
+        sources.append(vs)
 
-        sources = []
-        for src in inputs:
-            vs = openSource(src)
-            vd.cmdlog.openHook(vs, src)
-            sources.append(vs)
+    vd.sheets.extend(sources)  # purposefully do not load everything
 
-        vd.sheets.extend(sources)
+    if not vd.sheets:
+        vd.push(vd.vdmenu)
+
+    if not args.play:
         if args.batch:
             vd.push(sources[0])
             sources[0].reload()
