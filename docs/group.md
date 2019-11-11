@@ -110,3 +110,29 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 `Enter`/`zEnter` can both be used in the **Pivot table** to open a sheet of the source rows which are aggregated in the current pivot row/cell.
 
 ---
+
+## How to combine cells in one for column for matching rows in another
+
+This tutorial shows you how to go from this dataset:
+
+field           value
+------          -----
+A               1
+A               2
+B               3
+C               4
+C               5
+
+to
+
+field           value
+------          -----
+A               1;2
+B               3
+C               4;5
+
+in VisiData.
+
+1. On the **value** column, type `+` followed by `list` to add to it a list aggregator.
+2. Press `F` on the **field** column to open the **Frequency table**.
+3. Type `=` followed by `';'.join(value_list)` to add an expression column with the joined values.
