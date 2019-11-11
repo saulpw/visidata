@@ -15,7 +15,7 @@ Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, curs
 Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))')
 Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))')
 
-Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol.origCol)')
+Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)')
 
 class PythonSheet(Sheet):
     pass
@@ -69,7 +69,11 @@ class ExpandedColumn(Column):
         self.origCol.getValue(row)[self.key] = value
 
 
-def closeColumn(sheet, origCol):
+def closeColumn(sheet, col):
+    if hasattr(col, 'origCol'):
+        origCol = col.origCol
+    else:
+        fail('column has not been expanded')
     vd.addUndo(setattr, sheet, 'columns', sheet.columns)
     origCol.width = options.default_width
     cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not origCol]

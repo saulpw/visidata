@@ -36,6 +36,8 @@ def makeRegexMatcher(regex, origcol):
 
 @asyncthread
 def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
+    regexstr or vd.fail('regex required')
+
     regex = re.compile(regexstr, vs.regex_flags())
 
     func = regexMaker(regex, origcol)

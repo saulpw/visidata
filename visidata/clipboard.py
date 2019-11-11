@@ -1,4 +1,4 @@
-from copy import copy
+from copy import copy, deepcopy
 import shutil
 import subprocess
 import sys
@@ -62,8 +62,8 @@ def paste_after(sheet, rowidx):
     sheet.rows[rowidx+1:rowidx+1] = list(deepcopy(r) for s,i,r in vd.cliprows)
 
 @Sheet.api
-def paste_after(sheet, rowidx):
-    sheet.rows[cursorRowIndex:cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)
+def paste_before(sheet, rowidx):
+    sheet.rows[sheet.cursorRowIndex:sheet.cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)
     vd.addUndo(sheet.rows.pop, rowidx)
 
 Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])')

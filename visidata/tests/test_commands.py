@@ -7,30 +7,37 @@ import itertools
 import visidata
 
 # test separately as needed
-expectedErrors = [ '^R', '^^', 'e', 'ge', '^J', '^S', 'o', 'KEY_BACKSPACE', '^Z', 'p']
 
-inputLines = { '^S': 'tests/jetsam.csv',  # save to some tmp file
-                 'o': 'tests/jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
-                '^X': '2+2',            # open the python object for '4'
-                 '/': 'foo',
-                 '?': 'bar',
-                 '|': '.',
-                 '\\': '.',
+inputLines = { 'save-sheet': 'tests/jetsam.csv',  # save to some tmp file
+                 'open-file': 'tests/jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
+                 'save-col': 'tests/flotsam.csv',
+                'pyobj-expr': '2+2',            # open the python object for '4'
+                 'search-col': 'foo',
+                 'searchr-col': 'bar',
+                 'select-col-regex': '.',
+                 'select-cols-regex': '.',
+                 'unselect-col-regex': '.',
+                 'unselect-cols-regex': '.',
 #                 'e': '',               # no change should not error
-                 'c': 'value',          # column name in PyobjSheet
-                 'r': '5',              # go to row 5
-                 '=': 'value',          # just copy the column
-                 ':': '_',
-                 ';': '(.)(.*)',
-                 '*': r'value/(\w)/\1', # the first character
-                 'g/': 'foo',
-                 'g?': 'bar',
-                 'g|': '.',
-                 'g\\': '.',
-                 'P': '50',
+                 'go-col-regex': 'Unit',          # column name in sample
+                 'go-col-number': '2',
+                 'go-row-number': '5',              # go to row 5
+                 'addcol-bulk': '1',
+                 'addcol-expr': 'Unit',          # just copy the column
+                 'split-col': '-',
+                 'show-expr': 'OrderDate',
+                 'setcol-expr': 'OrderDate',
+                 'setcell-expr': 'OrderDate',
+                 'setcol-range': 'range(100)',
+                 'capture-col': '(.)(.*)',
+                 'addcol-subst': r'Unit/(\w)/\1', # the first character
+                 'search-cols': 'foo',
+                 'searchr-cols': 'bar',
+                 'select-cols-regex': '.',
+                 'unselect-cols-regex': '.',
+                 'random-rows': '3',
               }
 
-@unittest.skip('VisiData singleton not resettable due to addons')
 class CommandsTestCase(unittest.TestCase):
     def setUp(self):
         self.scr = Mock()
@@ -39,35 +46,51 @@ class CommandsTestCase(unittest.TestCase):
         self.scr.getmaxyx = lambda: (25, 80)
         import curses
         curses.curs_set = lambda v: None
+        visidata.options.confirm_overwrite = False
 
     def test_baseCommands(self):
         'exec each global command at least once'
 
-        cmdlist = visidata.baseCommands
+        cmdlist = visidata.commands
 
-        vs = visidata.PyobjSheet('test_commands', self)
+        vs = visidata.Sheet('test_commands')
         vs.reload()
-        for keystrokes in cmdlist.keys():
-            testname = keystrokes
-            if testname in expectedErrors:
+        vd = visidata.vd
+        nerrs = 0
+        ntotal = 0
+        for longname in cmdlist.keys():
+            if longname in expectedErrors or 'Sheet' not in cmdlist[longname]:
                 continue
-#            print(testname)
+            ntotal += 1
+            print(longname)
+            self.runOneTest(longname)
+            vd.sync()
+            if vd.lastErrors:
+                # longname, execstr, and vd.lastErrors
+                print("{0} FAILED: {1}\n\n\n {2}".format(longname, cmdlist[longname]['Sheet'].execstr, '\n'.join('\n'.join(x) for x in vd.lastErrors)))
+                nerrs += 1
+                break
+            vs.checkCursor()
+        print('%s/%s commands had errors' % (nerrs, ntotal))
 
-#            visidata.vd.cache_clear()  # so vd returns a new VisiData object for each command
+    def runOneTest(self, longname):
+            visidata.vd.clear_caches()  # we want vd to return a new VisiData object for each command
             vd = visidata.vd
             vd.scr = self.scr
 
-            if testname in inputLines:
-                line = [ch for ch in inputLines[testname]] + ['^J']
+            if longname in inputLines:
+                line = [ch for ch in inputLines[longname]] + ['^J']
                 vd.getkeystroke = Mock(side_effect=line)
             else:
                 vd.getkeystroke = Mock(side_effect=['^J'])
 
-            vs = visidata.PyobjSheet('test_commands', 'some object')
+            vs = visidata.TsvSheet('test_commands', source=visidata.Path('/home/anjakefala/git/visidata/sample_data/sample.tsv'))
+            vs.reload.__wrapped__(vs)
             vs.vd = vd
-            vs.reload()
             vd.sheets = [vs]
+            vs.mouseX, vs.mouseY = (4, 4)
             vs.draw(self.scr)
-            vs.exec_command(cmdlist[keystrokes], vdglobals=vars(visidata))
-            self.assertFalse(vd.lastErrors and (keystrokes, cmdlist[keystrokes][2], vd.lastErrors))
-            vs.checkCursor()
+            vs.exec_command(vs.getCommand((longname)), vdglobals=vars(visidata))
+
+if __name__ == '__main__':
+    unittest.main()

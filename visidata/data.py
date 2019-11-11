@@ -111,7 +111,7 @@ BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to:
 globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))')
 Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
 globalCommand('g^S', 'save-all', 'saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
-Sheet.addCommand('z^S', 'save-col', 'vs = copy(sheet); vs.columns = [cursorCol]; vs.rows = copy(rows); saveSheets(inputPath("save to: ", value=getDefaultSaveName(vs)), vs.confirm_overwrite=options.confirm_overwrite)')
+Sheet.addCommand('z^S', 'save-col', 'save_col(cursorCol)')
 
 Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 
@@ -130,6 +130,14 @@ def openManPage():
     from pkg_resources import resource_filename
     with SuspendCurses():
         os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
+
+@VisiData.api
+def save_col(vd, col):
+    vs = copy(col.sheet)
+    vs.columns = [col]
+    vs.rows = copy(col.sheet.rows)
+    path = inputPath("save to: ", value=getDefaultSaveName(vs))
+    vd.saveSheets(path, vs, confirm_overwrite=options.confirm_overwrite)
 
 @VisiData.api
 def newSheet(vd, ncols, name='', **kwargs):

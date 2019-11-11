@@ -10,6 +10,7 @@ class EditTextTestCase(unittest.TestCase):
         self.scr = Mock()
         self.scr.addstr = Mock()
         self.scr.move = Mock()
+        self.scr.getmaxyx = lambda: (25, 80)
         self.chars = []
         visidata.vd.getkeystroke = Mock(side_effect=self.chars)
 
@@ -62,3 +63,6 @@ class EditTextTestCase(unittest.TestCase):
         #self.t('^T ^J', result='')
         self.t('a b KEY_LEFT ^U ^J', result='b')
         self.t('a b ^U c ^J', result='c')
+
+if __name__ == '__main__':
+    unittest.main()
