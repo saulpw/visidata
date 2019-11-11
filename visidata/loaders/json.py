@@ -45,6 +45,8 @@ class JsonSheet(PythonSheet):
 
 class JsonLinesSheet(JsonSheet):
     def iterload(self):
+        self.colnames = {}  # [colname] -> Column
+        self.columns = []
         with self.source.open_text() as fp:
             for L in fp:
                 try:
