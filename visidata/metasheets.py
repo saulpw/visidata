@@ -61,6 +61,9 @@ class ColumnsSheet(Sheet):
         c.recalc(self.source[0])
         return c
 
+class MetaSheet(Sheet):
+    pass
+
 class VisiDataMetaSheet(TsvSheet):
     pass
 
@@ -70,10 +73,11 @@ options.set('skip', 0, VisiDataMetaSheet)
 options.set('row_delimiter', '\n', VisiDataMetaSheet)
 options.set('encoding', 'utf-8', VisiDataMetaSheet)
 
-class HelpSheet(Sheet):
+class HelpSheet(MetaSheet):
     'Show all commands available to the source sheet.'
     rowtype = 'commands'
     precious = False
+    _ordering = [('sheet', False), ('longname', False)]
 
     columns = [
         ColumnAttr('sheet'),
@@ -84,15 +88,14 @@ class HelpSheet(Sheet):
     ]
     nKeys = 2
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         from pkg_resources import resource_filename
         cmdlist = VisiDataMetaSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
 
         self.cmddict = {}
-        self.rows = []
-        for (k, o), v in commands.iter(self.source):
-            self.addRow(v)
+        itcmds = commands.iter(self.source) if self.source else commands.iterall()
+        for (k, o), v in itcmds:
+            yield v
             v.sheet = o
             self.cmddict[(v.sheet, v.longname)] = v
 
@@ -103,7 +106,8 @@ class HelpSheet(Sheet):
                 self.cmddict[k].helpstr = cmdrow.helpstr
 
         self.revbinds = {}  # [longname] -> keystrokes
-        for (keystrokes, _), longname in bindkeys.iter(self.source):
+        itbindings = bindkeys.iter(self.source) if self.source else bindkeys.iterall()
+        for (keystrokes, _), longname in itbindings:
             if keystrokes not in self.revbinds:
                 self.revbinds[longname] = keystrokes
 
@@ -199,6 +203,7 @@ globalCommand('gO', 'options-global', 'vd.push(vd.globalOptionsSheet)')
 
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)')
 BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet(name + "_commands", source=None, revbinds={}))')
 BaseSheet.addCommand('O', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
@@ -222,3 +227,4 @@ ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anyty
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
 OptionsSheet.bindkey('e', 'edit-option')
 OptionsSheet.bindkey(ENTER, 'edit-option')
+options.set('header', 0, MetaSheet)

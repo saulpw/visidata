@@ -87,6 +87,12 @@ class SettingsMgr(collections.OrderedDict):
                     if o == o2:
                         yield (k, o), self[k][o2]
 
+    def iterall(self):
+        for k in self.keys():
+            for o in self[k]:
+                yield (k, o), self[k][o]
+
+
 
 class Command:
     def __init__(self, longname, execstr, helpstr=''):
