@@ -24,3 +24,4 @@ dive-row	open-row
 addRows	addNewRows		
 statuses (longname)	open-statuses		
 status (longname)	show-status		
+vd.clear_caches	vd.clearCaches()		
