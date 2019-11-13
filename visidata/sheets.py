@@ -834,10 +834,10 @@ class SequenceSheet(Sheet):
         itsource = self.iterload()
 
         # skip the first options.skip rows
-        list(self.optlines(it, 'skip'))
+        list(self.optlines(itsource, 'skip'))
 
         # use the next options.header rows as columns
-        self.setCols(list(self.optlines(it, 'header')))
+        self.setCols(list(self.optlines(itsource, 'header')))
 
         self.rows = []
         # add the rest of the rows
