@@ -819,6 +819,14 @@ class SequenceSheet(Sheet):
             row = self._rowtype(row)
         super().addRow(row, index=index)
 
+    def optlines(self, it, optname):
+        'Generate next options.<optname> elements from iterator with exceptions wrapped.'
+        for i in range(options.get(optname, self)):
+            try:
+                yield next(it)
+            except StopIteration:
+                break
+
     @asyncthread
     def reload(self):
         'Skip first options.skip rows; set columns from next options.header rows.'
@@ -826,16 +834,10 @@ class SequenceSheet(Sheet):
         itsource = self.iterload()
 
         # skip the first options.skip rows
-        for i in range(options.get('skip', self)):
-            wrapnext(itsource)  # do nothing with skipped rows
+        list(self.optlines(it, 'skip'))
 
-        # use the next options.header rows as the column names
-        headers = []
-        for i in range(options.get('header', self)):
-            r = wrapnext(itsource)
-            headers.append(r)
-
-        self.setCols(headers)
+        # use the next options.header rows as columns
+        self.setCols(list(self.optlines(it, 'header')))
 
         self.rows = []
         # add the rest of the rows

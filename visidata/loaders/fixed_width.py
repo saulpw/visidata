@@ -43,30 +43,26 @@ def columnize(rows):
     yield colstart, None   # final column gets rest of line
 
 
-class FixedWidthColumnsSheet(Sheet):
+class FixedWidthColumnsSheet(SequenceSheet):
     rowtype = 'lines'  # rowdef: [line] (wrapping in list makes it unique and modifiable)
+    def addRow(self, row, index=None):
+        Sheet.addRow(self, row, index=index)
 
     def iterload(self):
         itsource = iter(self.source)
 
         # compute fixed width columns from first fixed_rows lines
-        firstRows = []
-        for i in range(options.fixed_rows):
-            try:
-                r = [next(itsource)]
-                firstRows.append(r)
-                yield r
-            except StopIteration:
-                break
-
-        maxcols = options.fixed_maxcols
+        maxcols = options.get('fixed_maxcols', self)
         self.columns = []
-        for i, j in columnize(list(r[0] for r in firstRows)):
+        fixedRows = list([x] for x in self.optlines(itsource, 'fixed_rows'))
+        for i, j in columnize(list(r[0] for r in fixedRows)):
             if maxcols and self.nCols >= maxcols-1:
                 self.addColumn(FixedWidthColumn('', i, None))
                 break
             else:
                 self.addColumn(FixedWidthColumn('', i, j))
+
+        yield from fixedRows
 
         self.setColNames(self.headerlines)
 
