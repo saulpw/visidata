@@ -179,10 +179,10 @@ class Path(os.PathLike):
     def with_name(self, name):
         if self.is_url():
             urlparts = list(urlparse(self.given))
-            urlparts[2] = str(Path(urlparts[2]).with_name(name))
+            urlparts[2] = '/'.join(Path(urlparts[2])._parts[1:-1] + [name])
             return Path(urlunparse(urlparts))
         else:
-            return self._path.with_name(name)
+            return Path(self._from_parsed_parts(self._drv, self._root, self._parts[:-1] + [name]))
 
 
 class RepeatFile:
