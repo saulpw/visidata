@@ -259,33 +259,15 @@ class Sheet(BaseSheet):
 
     @asyncthread
     def reload(self):
-        'Loads rows and/or columns.  Override in subclass.'
+        'Load rows and/or columns.  Override in subclass.'
         self.rows = []
-
-        itsource = self.iterload()
-
-        # skip the first options.skip rows
-        for i in range(options.get('skip', self)):
-            wrapnext(itsource)  # do nothing with skipped rows
-
-        # use the next options.header rows as the column names
-        headers = []
-        for i in range(options.get('header', self)):
-            r = wrapnext(itsource)
-            headers.append(r)
-
-        self.setCols(headers)
-
-        # add the rest of the rows
-        for r in vd.Progress(wrapiter(itsource), gerund='loading', total=0):
-            self.addRow(r)
+        with vd.Progress(gerund='loading', total=0):
+            for r in wrapiter(self.iterload()):
+                self.addRow(r)
 
         # if an ordering has been specified, sort the sheet
         if self._ordering:
             vd.sync(self.sort())
-
-    def setCols(self, headers):
-        pass
 
     def iterload(self):
         'Override this generator for loading.'
@@ -836,6 +818,33 @@ class SequenceSheet(Sheet):
         if type(row) is not self._rowtype:
             row = self._rowtype(row)
         super().addRow(row, index=index)
+
+    @asyncthread
+    def reload(self):
+        'Skip first options.skip rows; set columns from next options.header rows.'
+
+        itsource = self.iterload()
+
+        # skip the first options.skip rows
+        for i in range(options.get('skip', self)):
+            wrapnext(itsource)  # do nothing with skipped rows
+
+        # use the next options.header rows as the column names
+        headers = []
+        for i in range(options.get('header', self)):
+            r = wrapnext(itsource)
+            headers.append(r)
+
+        self.setCols(headers)
+
+        self.rows = []
+        # add the rest of the rows
+        for r in vd.Progress(wrapiter(itsource), gerund='loading', total=0):
+            self.addRow(r)
+
+        # if an ordering has been specified, sort the sheet
+        if self._ordering:
+            vd.sync(self.sort())
 
 
 class IndexSheet(Sheet):
