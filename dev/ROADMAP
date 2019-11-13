@@ -39,6 +39,11 @@ Deliverables:
 - [ipybnb] Sheet.save_ipynb
 - [sql] Sheet.save_sql
 
+# Features
+
+- Memory sheet; can give things names and use in expressions.
+   - 'show' commands are copied there by default.
+
 # Polish Wishlist
 
 - [options] allow list or dict of enum values
