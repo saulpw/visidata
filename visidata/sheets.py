@@ -280,12 +280,16 @@ class Sheet(BaseSheet):
                 self.rows = []
                 for row in self.iterload():
                     self.addRow(row)
-                    yield LazyComputeRow(self, row)
+                    yield row
                 return
             except ExpectedException:
                 vd.sync(self.reload())
 
         for row in vd.Progress(self.rows):
+            yield row
+
+    def __iter__(self):
+        for row in self.iterrows():
             yield LazyComputeRow(self, row)
 
 

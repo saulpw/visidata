@@ -14,6 +14,8 @@ These are tasks that are not on the immediate developer roadmap, and are looking
 
 - [ColumnsSheet] show subcolumns and their parent column (for expand/contract)
 
+- [FreqSheet] --follow option to continue grouping as new rows are loaded on the source sheet #366
+
 - [sheets] start/drop datetimes
    - [sheets] number of derivative sheets (two columns, for immediate children and to any depth)
    - [sheets] number of commands executed on that sheet (as a list so they can be viewed separately)
