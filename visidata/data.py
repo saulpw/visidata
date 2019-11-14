@@ -119,17 +119,6 @@ Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list
 
 globalCommand('A', 'add-sheet', 'vd.push(vd.newSheet(int(input("num columns for new sheet: ")), name="unnamed"))')
 
-# in VisiData, ^H refers to the man page
-globalCommand('^H', 'sysopen-help', 'openManPage()')
-BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
-BaseSheet.bindkey('KEY_BACKSPACE', 'sysopen-help')
-BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
-BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
-
-def openManPage():
-    from pkg_resources import resource_filename
-    with SuspendCurses():
-        os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
 
 @VisiData.api
 def save_col(vd, col):

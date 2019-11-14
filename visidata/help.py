@@ -1,6 +1,46 @@
 from visidata import *
 
 
+class HelpSheet(MetaSheet):
+    'Show all commands available to the source sheet.'
+    rowtype = 'commands'
+    precious = False
+    _ordering = [('sheet', False), ('longname', False)]
+
+    columns = [
+        ColumnAttr('sheet'),
+        ColumnAttr('longname'),
+        Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname)),
+        Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
+        ColumnAttr('execstr', width=0),
+        Column('logged', width=0, getter=lambda col,row: isLoggableCommand(row.longname)),
+    ]
+    nKeys = 2
+
+    def iterload(self):
+        from pkg_resources import resource_filename
+        cmdlist = VisiDataMetaSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
+
+        self.cmddict = {}
+        itcmds = commands.iter(self.source) if self.source else commands.iterall()
+        for (k, o), v in itcmds:
+            yield v
+            v.sheet = o
+            self.cmddict[(v.sheet, v.longname)] = v
+
+        cmdlist.reload.__wrapped__(cmdlist)
+        for cmdrow in cmdlist.rows:
+            k = (cmdrow.sheet, cmdrow.longname)
+            if k in self.cmddict:
+                self.cmddict[k].helpstr = cmdrow.helpstr
+
+        self.revbinds = {}  # [longname] -> keystrokes
+        itbindings = bindkeys.iter(self.source) if self.source else bindkeys.iterall()
+        for (keystrokes, _), longname in itbindings:
+            if keystrokes not in self.revbinds:
+                self.revbinds[longname] = keystrokes
+
+
 @asyncthread
 @VisiData.api
 def help_search(vd, sheet, regex):
@@ -19,4 +59,20 @@ def help_search(vd, sheet, regex):
         vs.addRow(allrows[rowidx])
 
 
+def openManPage():
+    from pkg_resources import resource_filename
+    import os
+    with SuspendCurses():
+        os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
+
+
+# in VisiData, ^H refers to the man page
+globalCommand('^H', 'sysopen-help', 'openManPage()')
+BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet(name + "_commands", source=None, revbinds={}))')
 globalCommand(None, 'help-search', 'help_search(sheet, input("help: "))')
+
+BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
+BaseSheet.bindkey('KEY_BACKSPACE', 'sysopen-help')
+BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
+BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')

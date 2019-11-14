@@ -67,49 +67,12 @@ class MetaSheet(Sheet):
 class VisiDataMetaSheet(TsvSheet):
     pass
 
+# commandline must not override these for internal sheets
 options.set('delimiter', vd_system_sep, VisiDataMetaSheet)
 options.set('header', 1, VisiDataMetaSheet)
 options.set('skip', 0, VisiDataMetaSheet)
 options.set('row_delimiter', '\n', VisiDataMetaSheet)
 options.set('encoding', 'utf-8', VisiDataMetaSheet)
-
-class HelpSheet(MetaSheet):
-    'Show all commands available to the source sheet.'
-    rowtype = 'commands'
-    precious = False
-    _ordering = [('sheet', False), ('longname', False)]
-
-    columns = [
-        ColumnAttr('sheet'),
-        ColumnAttr('longname'),
-        Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname)),
-        Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
-        ColumnAttr('execstr', width=0),
-    ]
-    nKeys = 2
-
-    def iterload(self):
-        from pkg_resources import resource_filename
-        cmdlist = VisiDataMetaSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
-
-        self.cmddict = {}
-        itcmds = commands.iter(self.source) if self.source else commands.iterall()
-        for (k, o), v in itcmds:
-            yield v
-            v.sheet = o
-            self.cmddict[(v.sheet, v.longname)] = v
-
-        cmdlist.reload.__wrapped__(cmdlist)
-        for cmdrow in cmdlist.rows:
-            k = (cmdrow.sheet, cmdrow.longname)
-            if k in self.cmddict:
-                self.cmddict[k].helpstr = cmdrow.helpstr
-
-        self.revbinds = {}  # [longname] -> keystrokes
-        itbindings = bindkeys.iter(self.source) if self.source else bindkeys.iterall()
-        for (keystrokes, _), longname in itbindings:
-            if keystrokes not in self.revbinds:
-                self.revbinds[longname] = keystrokes
 
 
 class OptionsSheet(Sheet):
@@ -202,8 +165,6 @@ globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=l
 globalCommand('gO', 'options-global', 'vd.push(vd.globalOptionsSheet)')
 
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)')
-BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
-BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet(name + "_commands", source=None, revbinds={}))')
 BaseSheet.addCommand('O', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')

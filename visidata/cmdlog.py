@@ -54,7 +54,6 @@ def isLoggableCommand(longname):
             return False
     return True
 
-HelpSheet.columns.append(Column('logged', width=0, getter=lambda col,row: isLoggableCommand(row.longname)))
 
 def open_vd(p):
     return CommandLog(p.name, source=p)
