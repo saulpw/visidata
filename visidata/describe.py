@@ -21,6 +21,9 @@ class DescribeColumn(Column):
     def __init__(self, name, **kwargs):
         super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.expr, ''), expr=name, **kwargs)
 
+option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet')
+
+
 # rowdef: Column from source sheet
 class DescribeSheet(ColumnsSheet):
 #    rowtype = 'columns'
@@ -34,10 +37,8 @@ class DescribeSheet(ColumnsSheet):
             DescribeColumn('mode',   type=str),
             DescribeColumn('min',    type=str),
             DescribeColumn('max',    type=str),
+            DescribeColumn('sum'),
             DescribeColumn('median', type=str),
-            DescribeColumn('mean',   type=float),
-            DescribeColumn('stdev',  type=float),
-            DescribeColumn('sum')
     ]
     colorizers = [
         RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r in r.sheet.keyCols),
@@ -48,6 +49,13 @@ class DescribeSheet(ColumnsSheet):
         super().reload()
         self.rows = [c for c in self.rows if not c.hidden]
         self.describeData = { col: {} for col in self.rows }
+
+        self.columns = []
+        for c in type(self).columns:
+            self.addColumn(c)
+
+        for aggrname in options.describe_aggrs.split():
+            self.addColumn(DescribeColumn(aggrname, type=float))
 
         for srccol in Progress(self.rows, 'categorizing'):
             if not srccol.hidden:
@@ -76,7 +84,10 @@ class DescribeSheet(ColumnsSheet):
 
             d['mode'] = self.calcStatistic(d, mode, vals)
             if isNumeric(srccol):
-                for func in [min, max, median, mean, stdev, sum]:
+                for func in [min, max, sum, median]:  # use type
+                    d[func.__name__] = self.calcStatistic(d, func, vals)
+                for aggrname in options.describe_aggrs.split():
+                    func = globals()[aggrname]
                     d[func.__name__] = self.calcStatistic(d, func, vals)
 
     def calcStatistic(self, d, func, *args, **kwargs):
