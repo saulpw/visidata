@@ -129,16 +129,16 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
             searchBackward = not searchBackward
 
         matchingRowIndexes = 0
-        for r in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=searchBackward):
-            c = findMatchingColumn(sheet, sheet.rows[r], columns, regex.search)
+        for rowidx in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=searchBackward):
+            c = findMatchingColumn(sheet, sheet.rows[rowidx], columns, regex.search)
             if c:
                 if moveCursor:
-                    sheet.cursorRowIndex = r
+                    sheet.cursorRowIndex = rowidx
                     sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
                     return
                 else:
                     matchingRowIndexes += 1
-                    yield r
+                    yield rowidx
 
         status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
