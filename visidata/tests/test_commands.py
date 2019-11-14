@@ -59,7 +59,7 @@ class CommandsTestCase(unittest.TestCase):
         nerrs = 0
         ntotal = 0
         for longname in cmdlist.keys():
-            if longname in expectedErrors or 'Sheet' not in cmdlist[longname]:
+            if 'Sheet' not in cmdlist[longname]:
                 continue
             ntotal += 1
             print(longname)
