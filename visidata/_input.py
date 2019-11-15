@@ -303,7 +303,7 @@ def chooseMany(choices):
         prompt = '/'.join(choices.keys())
         chosen = []
         for c in vd.input(prompt+': ', completer=CompleteKey(choices)).split():
-            poss = [choices[p] for p in choices if p.startswith(c)]
+            poss = [choices[p] for p in choices if str(p).startswith(c)]
             if not poss:
                 warning('invalid choice "%s"' % c)
             else:
@@ -312,7 +312,7 @@ def chooseMany(choices):
         prompt = '/'.join(str(x) for x in choices)
         chosen = []
         for c in vd.input(prompt+': ', completer=CompleteKey(choices)).split():
-            poss = [p for p in choices if p.startswith(c)]
+            poss = [p for p in choices if str(p).startswith(c)]
             if not poss:
                 warning('invalid choice "%s"' % c)
             else:
