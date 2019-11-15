@@ -4,10 +4,7 @@
 
 The primary goal of 2.0 is a stable, documented Python API that can be used to create an broad ecosystem of loaders, plugins, and apps.
 
-Deliverables:
-
-- api.tsv
-- proper sandbox for exec (for some plugin safety)
+The Book of VisiData will describe the api and all functions and objects available to plugins and command execstrs.
 
 ## Split panes
 
@@ -15,44 +12,18 @@ Deliverables:
 - one pane can be dependent on the other; e.g. move cursor in one, see preview update in other
 - use for choosing aggregators, command help, other choose()
 
-## Installers
+- DirSheet file preview #309
 
-- .pkg for macos
-- .exe for windows
-- snap for linux
-
-## Minor features
+## Minor features, refactors, cleanup
 
 - 'modified' indicator on status bar, also enables quitguard
-
-## Refactor and Cleanup
-
-- numeric binning for pivot table
 - remove all asserts; replace with error() on case-by-case basis
 
-## Loaders and Savers
-
-- [google sheets] loader with savesToSource
-- [sqlite] index sheet, include rows/cols; allow to be cutnpasted
-- [canvas] Canvas.save_svg
-- [hdf5] multisave_hdf5
-- [ipybnb] Sheet.save_ipynb
-- [sql] Sheet.save_sql
+- [options] allow list or dict of enum values for default
 
 # Features
 
 - Memory sheet; can give things names and use in expressions.
    - 'show' commands are copied there by default.
 
-# Polish Wishlist
-
-- [options] allow list or dict of enum values
-- [datetime] handle timezone
-- [currency] track currency kind/symbol
-- SI display format (1210000000 -> 1.21G)
 - [columns] add helpstr for all specialized-sheet columns
-- [columns] add "transforms list" to column (type is last transform)
-- [status] use multiple lines on overflow
-- [dirsheet] archive/extract (zip/unzip and relatives)
-- [regex] add "/flags" to regex commands for per-instance regex flags
-- [select starting sheet in html/xls/sqlite from command-line](https://github.com/saulpw/visidata/issues/214)
