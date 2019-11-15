@@ -29,8 +29,9 @@ class DescribeSheet(ColumnsSheet):
 #    rowtype = 'columns'
     precious = True
     columns = [
-            ColumnAttr('sheet', 'sheet'),
+            ColumnAttr('sheet', 'sheet', width=0),
             ColumnAttr('column', 'name'),
+            ColumnEnum('type', getGlobals(), width=0, default=anytype),
             DescribeColumn('errors', type=vlen),
             DescribeColumn('nulls',  type=vlen),
             DescribeColumn('distinct',type=vlen),
@@ -43,6 +44,7 @@ class DescribeSheet(ColumnsSheet):
     colorizers = [
         RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r in r.sheet.keyCols),
     ]
+    nKeys = 2
 
     @asyncthread
     def reload(self):
@@ -53,6 +55,8 @@ class DescribeSheet(ColumnsSheet):
         self.columns = []
         for c in type(self).columns:
             self.addColumn(c)
+
+        self.setKeys(self.columns[:self.nKeys])
 
         for aggrname in options.describe_aggrs.split():
             self.addColumn(DescribeColumn(aggrname, type=float))

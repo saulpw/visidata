@@ -385,8 +385,8 @@ def SubColumnItem(idx, c, **kwargs):
 
 class ColumnEnum(Column):
     'types and aggregators. row.<name> should be kept to the values in the mapping m, and can be set by the a string key into the mapping.'
-    def __init__(self, name, m, default=None):
-        super().__init__(name)
+    def __init__(self, name, m, default=None, **kwargs):
+        super().__init__(name, **kwargs)
         self.mapping = m
         self.default = default
 
