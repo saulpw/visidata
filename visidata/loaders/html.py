@@ -115,16 +115,17 @@ def save_html(p, *vsheets):
             fp.write('</tr>\n')
 
             # rows
-            for r in Progress(sheet.rows, 'saving'):
-                fp.write('<tr>')
-                for col in sheet.visibleCols:
-                    fp.write('<td>')
-                    fp.write(html.escape(col.getDisplayValue(r)))
-                    fp.write('</td>')
-                fp.write('</tr>\n')
+            with Progress(gerund='saving'):
+                for row in sheet.itervalues():
+                    fp.write('<tr>')
+                    for col, val in row.items():
+                        fp.write('<td>')
+                        fp.write(html.escape(val))
+                        fp.write('</td>')
+                    fp.write('</tr>\n')
 
             fp.write('</table>')
-            status('%s save finished' % p)
+            vd.status('%s save finished' % p)
 
 
 save_htm = multisave_htm = multisave_html = save_html

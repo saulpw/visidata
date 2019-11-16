@@ -68,9 +68,9 @@ def save_npy(sheet, p):
         dtype.append((col.name, dt))
 
     data = []
-    for row in Progress(sheet.rows):
+    for row in sheet.itervalues():
         nprow = []
-        for col in sheet.visibleCols:
+        for col, val in row:
             val = col.getTypedValue(row)
             if isinstance(val, TypedWrapper):
                 if col.type is anytype:

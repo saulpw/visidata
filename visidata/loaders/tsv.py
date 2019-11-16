@@ -54,27 +54,6 @@ class TsvSheet(SequenceSheet):
                     yield row
 
 
-def tsv_trdict(vs):
-    'returns string.translate dictionary for replacing tabs and newlines'
-    if options.safety_first:
-        delim = options.get('delimiter', vs)
-        return {ord(delim): options.get('tsv_safe_tab', vs), # \t
-            10: options.get('tsv_safe_newline', vs),  # \n
-            13: options.get('tsv_safe_newline', vs),  # \r
-            }
-    return {}
-
-def save_tsv_header(p, vs):
-    'Write tsv header for Sheet `vs` to Path `p`.'
-    trdict = tsv_trdict(vs)
-    unitsep = options.delimiter
-
-    with p.open_text(mode='w') as fp:
-        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
-        if colhdr.strip():  # is anything but whitespace
-            fp.write(colhdr)
-
-
 def load_tsv(fn):
     vs = open_tsv(Path(fn))
     yield from vs.iterload()
@@ -85,13 +64,14 @@ def save_tsv(vs, p):
     'Write sheet to file `fn` as TSV.'
     unitsep = options.get('delimiter', vs)
     rowsep = options.get('row_delimiter', vs)
-    trdict = tsv_trdict(vs)
+    trdict = vs.safe_trdict()
 
-    save_tsv_header(p, vs)
+    with p.open_text(mode='w') as fp:
+        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
+        fp.write(colhdr)
 
-    with p.open_text(mode='a') as fp:
-        for dispvals in vs.itervalues(*vs.visibleCols, trdict=trdict, format=True):
-            fp.write(unitsep.join(dispvals))
+        for dispvals in vs.itervalues(format=True):
+            fp.write(unitsep.join(dispvals.values()))
             fp.write(rowsep)
 
     status('%s save finished' % p)
@@ -105,7 +85,14 @@ def append_tsv_row(vs, row):
             if parentdir:
                 os.makedirs(parentdir)
 
-        save_tsv_header(vs.source, vs)
+        # Write tsv header for Sheet `vs` to Path `p`
+        trdict = vs.safe_trdict()
+        unitsep = options.delimiter
+
+        with p.open_text(mode='w') as fp:
+            colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
+            if colhdr.strip():  # is anything but whitespace
+                fp.write(colhdr)
 
     with vs.source.open_text(mode='a') as fp:
         fp.write('\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')

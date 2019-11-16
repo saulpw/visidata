@@ -35,11 +35,16 @@ def write_md(p, *vsheets, md_style='orgmode'):
             if md_style == 'orgmode':
                 fp.write('|' + '|'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
 
-            for row in Progress(vs.rows, 'saving'):
-                fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.getDisplayValue(row), md_style)) for col in vs.visibleCols) + '|\n')
+            with Progress(gerund='saving'):
+                for row in vs.itervalues():
+                    s = '|'
+                    for col, val in row.items():
+                        s += '%-*s|' % (col.width or options.default_width, markdown_escape(val, md_style))
+                    s += '\n'
+                    fp.write(s)
             fp.write('\n')
 
-    status('%s save finished' % p)
+    vd.status('%s save finished' % p)
 
 
 def save_md(p, vsheets):

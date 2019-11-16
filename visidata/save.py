@@ -4,10 +4,26 @@ from visidata import *
 option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 
+@Sheet.api
+def safe_trdict(vs):
+    'returns string.translate dictionary for replacing tabs and newlines'
+    if options.safety_first:
+        delim = options.get('delimiter', vs)
+        return {
+             0: '', #  strip NUL completely
+    ord(delim): options.get('tsv_safe_tab', vs), # \t
+            10: options.get('tsv_safe_newline', vs),  # \n
+            13: options.get('tsv_safe_newline', vs),  # \r
+        }
+    return {}
+
 
 @Sheet.api
-def itervalues(sheet, *cols, trdict={}, format=False):
+def itervalues(sheet, *cols, format=False):
     'For each row in sheet, yield list of values for given cols.  Values are typed if format=False, or a formatted display string if format=True.'
+    if not cols:
+        cols = sheet.visibleCols
+
     transformers = collections.OrderedDict()  # list of transformers for each column in order
     for col in cols:
         transformers[col] = [ col.type ]
@@ -16,12 +32,13 @@ def itervalues(sheet, *cols, trdict={}, format=False):
                 # optimization: only lookup fmtstr once (it may have to get an option value)
                 lambda v,fmtfunc=getType(col.type).formatter,fmtstr=col.fmtstr: fmtfunc(fmtstr, '' if v is None else v)
             )
+        trdict = sheet.safe_trdict()
         if trdict:
             transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
 
     options_safe_error = options.safe_error
     for r in Progress(sheet.rows):
-        dispvals = []
+        dispvals = collections.OrderedDict()  # [col] -> value
         for col, transforms in transformers.items():
             try:
                 dispval = col.getValue(r)
@@ -38,7 +55,7 @@ def itervalues(sheet, *cols, trdict={}, format=False):
             except Exception as e:
                 dispval = str(dispval)
 
-            dispvals.append(dispval)
+            dispvals[col] = dispval
 
         yield dispvals
 
@@ -116,9 +133,9 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 def save_txt(p, *vsheets):
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
-            col = [vs.visibleCols[0]]
-            for dispvals in vs.itervalues(vs.visibleCols[0], format=True):
-                fp.write(dispvals[0] or '')
+            col = vs.visibleCols[0]
+            for dispvals in vs.itervalues(col, format=True):
+                fp.write(dispvals[col] or '')
                 fp.write('\n')
     status('%s save finished' % p)
 

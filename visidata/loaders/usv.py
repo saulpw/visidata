@@ -1,11 +1,7 @@
 import copy
 
-from visidata import Sheet, TsvSheet, options
+from visidata import Sheet, TsvSheet, options, vd
 
-__all__ = ['open_usv', 'UsvSheet']
-
-def open_usv(p):
-    return UsvSheet(p.name, source=p)
 
 class UsvSheet(TsvSheet):
     pass
@@ -22,3 +18,5 @@ def save_usv(vs, p):
 
 options.set('delimiter', '\u241e', UsvSheet)  # UsvSheet.options.delimiter='\u241e'
 options.set('row_delimiter', '\u241f', UsvSheet)
+
+vd.filetype('usv', UsvSheet)

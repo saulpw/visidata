@@ -1,8 +1,6 @@
 import json
 
-from visidata import vd, options, option, status, date, deduceType
-from visidata import Sheet, PythonSheet, ColumnItem, stacktrace, asyncthread, Progress
-from visidata import wrapply, TypedExceptionWrapper, TypedWrapper
+from visidata import *
 
 
 option('json_indent', None, 'indent to use when saving json')
@@ -88,8 +86,9 @@ def save_json(vs, p):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder(indent=options.json_indent)
-        for chunk in jsonenc.iterencode([_rowdict(vcols, r) for r in Progress(vs.rows, 'saving')]):
-            fp.write(chunk)
+        with Progress(gerund='saving'):
+            for chunk in jsonenc.iterencode([_rowdict(vcols, row) for row in vs.iterrows()]):
+                fp.write(chunk)
 
 
 @Sheet.api
@@ -97,9 +96,10 @@ def save_jsonl(vs, p):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
-        for r in Progress(vs.rows, 'saving'):
-            rowdict = _rowdict(vcols, r)
-            fp.write(jsonenc.encode(rowdict) + '\n')
+        with Progress(gerund='saving'):
+            for row in vs.iterrows():
+                rowdict = _rowdict(vcols, row)
+                fp.write(jsonenc.encode(rowdict) + '\n')
 
 Sheet.save_ndjson = Sheet.save_jsonl
 Sheet.save_ldjson = Sheet.save_jsonl

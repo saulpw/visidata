@@ -50,7 +50,9 @@ def save_csv(sheet, p):
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):
             cw.writerow(colnames)
-        for r in Progress(sheet.rows, 'saving'):
-            cw.writerow([col.getDisplayValue(r) for col in sheet.visibleCols])
+
+        with Progress(gerund='saving'):
+            for row in sheet.itervalues(format=True):
+                cw.writerow(row)
 
 vd.filetype('csv', CsvSheet)
