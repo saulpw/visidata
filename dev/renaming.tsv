@@ -25,3 +25,4 @@ addRows	addNewRows
 statuses (longname)	open-statuses		
 status (longname)	show-status		
 vd.clear_caches	vd.clearCaches()		
+getDefaultSaveName	Sheet.getDefaultSaveName	same	

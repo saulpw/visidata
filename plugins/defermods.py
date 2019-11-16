@@ -1,4 +1,4 @@
-from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer, asyncthread, options, saveSheets, inputPath, getDefaultSaveName, warning, status, Path, copy, Progress, option
+from visidata import BaseSheet, Sheet, Column, fail, confirm, CellColorizer, RowColorizer, asyncthread, options, saveSheets, inputPath, warning, status, Path, copy, Progress, option
 from visidata import *
 
 '''
@@ -203,7 +203,7 @@ def putChanges(sheet, path, adds, changes, deletes):
     if sheet.trackmods:
         saveSheets(path, sheet, confirm_overwrite=False)
     else:
-        saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)
+        saveSheets(inputPath("save to: ", value=sheet.getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)
 
     # clear after save, to ensure cstr (in commit()) is aware of deletes
     # specifically, for the case where deletes are committed automatically (defermods = False)

@@ -53,6 +53,7 @@ from .urlcache import *
 from .selection import *
 from .loaders.tsv import *
 from .data import *
+from .save import *
 from .clipboard import *
 from .slide import *
 from .search import *

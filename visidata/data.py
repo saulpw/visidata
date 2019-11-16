@@ -6,8 +6,6 @@ from visidata import Sheet, Column, asyncthread, Progress, status, error
 from visidata import *
 
 
-option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
-option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 option('filetype', '', 'specify file type', replay=True)
 
 options.set('header', 0, IndexSheet)
@@ -109,24 +107,12 @@ Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedR
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)')
 
 globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))')
-Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)')
-globalCommand('g^S', 'save-all', 'saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
-Sheet.addCommand('z^S', 'save-col', 'save_col(cursorCol)')
-
 Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))')
 
 Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))')
 
 globalCommand('A', 'add-sheet', 'vd.push(vd.newSheet(int(input("num columns for new sheet: ")), name="unnamed"))')
 
-
-@VisiData.api
-def save_col(vd, col):
-    vs = copy(col.sheet)
-    vs.columns = [col]
-    vs.rows = copy(col.sheet.rows)
-    path = inputPath("save to: ", value=getDefaultSaveName(vs))
-    vd.saveSheets(path, vs, confirm_overwrite=options.confirm_overwrite)
 
 @VisiData.api
 def newSheet(vd, ncols, name='', **kwargs):
@@ -157,65 +143,6 @@ def completeFilename(val, state):
 
     files.sort()
     return files[state%len(files)]
-
-def getDefaultSaveName(sheet):
-    src = getattr(sheet, 'source', None)
-    if isinstance(src, Path):
-        return str(src)
-    else:
-        return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype)
-
-@VisiData.global_api
-def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
-    'Save all vsheets to givenpath'
-
-    filetype = givenpath.ext or options.save_filetype
-
-    if len(vsheets) > 1:
-        if givenpath.exists() and confirm_overwrite:
-            confirm("overwrite multiple? ")
-
-        if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
-            savefunc = getGlobals().get('multisave_' + filetype, None)
-            if savefunc:
-                # use specific multisave function
-                vd.execAsync(savefunc, givenpath, *vsheets)
-
-        # more than one sheet; either no specific multisave for save filetype, or path ends with /
-
-        # save as individual files in the givenpath directory
-        try:
-            os.makedirs(givenpath, exist_ok=True)
-        except FileExistsError:
-            pass
-
-        assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
-
-        globalsavefunc = getGlobals().get('save_' + filetype)
-
-        # get save function to call
-        status('saving %s sheets to %s' % (len(vsheets), givenpath.given))
-        for vs in vsheets:
-            savefunc = getattr(vs, 'save_'+filetype, None)
-            if not savefunc:
-                savefunc = lambda p,vs=vs,f=globalsavefunc: f(p, vs)
-            if savefunc:
-                vd.execAsync(savefunc, givenpath.with_suffix('.'+filetype))
-            else:
-                warning('no function to save %s as type %s' % (vs, filetype))
-    else:
-        if givenpath.exists() and confirm_overwrite:
-            confirm("%s already exists. overwrite? " % givenpath.given)
-
-        # get save function to call
-        savefunc = getattr(vsheets[0], 'save_'+filetype, None)
-        if not savefunc:
-            f = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
-            savefunc = lambda p,vs=vsheets[0],f=f: f(p, vs)
-
-        status('saving to %s as %s' % (givenpath.given, filetype))
-        vd.execAsync(savefunc, givenpath)
-
 
 @VisiData.api
 def filetype(vd, ext, constructor):
@@ -286,18 +213,6 @@ def open_txt(p):
         if options.delimiter in next(fp):    # peek at the first line
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, source=p)
-
-def save_txt(p, *vsheets):
-    with p.open_text(mode='w') as fp:
-        for vs in vsheets:
-            col = [vs.visibleCols[0]]
-            for dispvals in vs.itervalues(vs.visibleCols[0], format=True):
-                fp.write(dispvals[0] or '')
-                fp.write('\n')
-    status('%s save finished' % p)
-
-multisave_txt = save_txt
-
 
 def loadInternalSheet(klass, p, **kwargs):
     'Load internal sheet of given klass.  Internal sheets are always tsv.'

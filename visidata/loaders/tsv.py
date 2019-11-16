@@ -81,44 +81,6 @@ def load_tsv(fn):
 
 
 @Sheet.api
-def itervalues(sheet, *cols, trdict={}, format=False):
-    'For each row in sheet, yield list of values for given cols.  Values are typed if format=False, or a formatted display string if format=True.'
-    transformers = collections.OrderedDict()  # list of transformers for each column in order
-    for col in cols:
-        transformers[col] = [ col.type ]
-        if format:
-            transformers[col].append(
-                # optimization: only lookup fmtstr once (it may have to get an option value)
-                lambda v,fmtfunc=getType(col.type).formatter,fmtstr=col.fmtstr: fmtfunc(fmtstr, '' if v is None else v)
-            )
-        if trdict:
-            transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
-
-    options_safe_error = options.safe_error
-    for r in Progress(sheet.rows):
-        dispvals = []
-        for col, transforms in transformers.items():
-            try:
-                dispval = col.getValue(r)
-            except Exception as e:
-                exceptionCaught(e)
-                dispval = options_safe_error or str(e)
-
-            try:
-                for t in transforms:
-                    if dispval is None:
-                        dispval = ''
-                        break
-                    dispval = t(dispval)
-            except Exception as e:
-                dispval = str(dispval)
-
-            dispvals.append(dispval)
-
-        yield dispvals
-
-
-@Sheet.api
 def save_tsv(vs, p):
     'Write sheet to file `fn` as TSV.'
     unitsep = options.get('delimiter', vs)
