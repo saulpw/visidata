@@ -291,7 +291,7 @@ def save_txt(p, *vsheets):
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
             col = [vs.visibleCols[0]]
-            for dispvals in genAllValues(vs.rows, [vs.visibleCols[0]]):
+            for dispvals in vs.itervalues(vs.visibleCols[0], format=True):
                 fp.write(dispvals[0] or '')
                 fp.write('\n')
     status('%s save finished' % p)
