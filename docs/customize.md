@@ -56,6 +56,43 @@ The maximum option name length should be 20.
 
 `theme()` should be used instead of `option()` if the option has no effect on the operation of the program, and can be overrided without affecting existing scripts.  The interfaces are identical.  (The implementation is also identical currently, but that may change in the future.)
 
+This Python script can be used to generate a sample `~/.visidatarc`, with all of the option defaults:
+
+~~~
+from visidata import options
+
+for optname, val in sorted(options().items()):
+    val = repr(val)
+    helpstr = options._get(optname, 'global').helpstr
+    print(f'options.{optname:25s} = {val:10s}  # {helpstr}')
+~~~
+
+::::: {.announce}
+
+---
+#### Extra Python aid
+
+To run the above code, place it in a file named vdrc.py. Then run it by typing
+
+```
+python3 vdrc.py
+```
+
+in the terminal.
+
+#### Extra terminal aid
+
+You can stdout redirection to place the output in a file:
+
+```
+python3 vdrc.py > ~/.visidatarc-template
+```
+
+Careful, `>` will overwrite files they are directing to. `>>` will append to the file.
+
+---
+
+:::::
 
 ---
 
