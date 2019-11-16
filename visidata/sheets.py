@@ -131,6 +131,12 @@ class LazyComputeRow:
     def keys(self):
         return self._keys + self.sheet._lcm.keys()
 
+    def __str__(self):
+        return str(self.as_dict())
+
+    def as_dict(self):
+        return {c.name:self[c.name] for c in self.sheet.visibleCols}
+
     def __getattr__(self, k):
         return self.__getitem__(k)
 
