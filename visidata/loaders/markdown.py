@@ -6,7 +6,7 @@ def markdown_escape(s, style='orgmode'):
 
     ret = ''
     for ch in s:
-        if ch in '\`*_{}[]()>#+-.!':
+        if ch in '\\`*_{}[]()>#+-.!':
             ret += '\\'+ch
         else:
             ret += ch
