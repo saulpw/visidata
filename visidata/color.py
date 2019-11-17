@@ -1,6 +1,6 @@
 import curses
 import functools
-import copy
+from copy import copy
 
 from visidata import options, Extensible, drawcache, drawcache_property
 from collections import namedtuple

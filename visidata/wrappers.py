@@ -1,6 +1,6 @@
 'value wrappers for nulls and errors'
 
-import copy
+from copy import copy
 import functools
 
 from visidata import options, stacktrace, option
@@ -84,7 +84,7 @@ def wrapply(func, *args, **kwargs):
         if val is None:  # None values propagate to TypedWrappers
             return TypedWrapper(func, None)
         elif isinstance(val, TypedExceptionWrapper):  # previous Exceptions propagate, marked 'forwarded'
-            tew = copy.copy(val)
+            tew = copy(val)
             tew.forwarded = True
             return tew
         elif isinstance(val, TypedWrapper):  # TypedWrappers (likely None, from above) propagate

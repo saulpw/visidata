@@ -1,4 +1,4 @@
-import copy
+from copy import copy
 
 from visidata import Sheet, TsvSheet, options, vd
 
@@ -9,7 +9,7 @@ class UsvSheet(TsvSheet):
 
 @Sheet.api
 def save_usv(vs, p):
-    usvs = copy.copy(vs)
+    usvs = copy(vs)
     usvs.rows = vs.rows
     options.set('delimiter', '\u241e', usvs)
     options.set('row_delimiter', '\u241f', usvs)
