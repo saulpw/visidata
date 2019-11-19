@@ -52,7 +52,7 @@ def save_csv(sheet, p):
             cw.writerow(colnames)
 
         with Progress(gerund='saving'):
-            for row in sheet.itervalues(format=True):
-                cw.writerow(row)
+            for dispvals in sheet.iterdispvals(format=True):
+                cw.writerow(dispvals.values())
 
 vd.filetype('csv', CsvSheet)

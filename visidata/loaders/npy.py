@@ -68,15 +68,14 @@ def save_npy(sheet, p):
         dtype.append((col.name, dt))
 
     data = []
-    for row in sheet.itervalues():
+    for typedvals in sheet.iterdispvals(format=False):
         nprow = []
-        for col, val in row:
-            val = col.getTypedValue(row)
+        for col, val in typedvals.items():
             if isinstance(val, TypedWrapper):
                 if col.type is anytype:
                     val = ''
                 else:
-                    val = col.type()
+                    val = options.safe_error
             elif col.type is date:
                 val = np.datetime64(val.isoformat())
             nprow.append(val)

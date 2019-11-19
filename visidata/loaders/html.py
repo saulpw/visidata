@@ -116,9 +116,9 @@ def save_html(p, *vsheets):
 
             # rows
             with Progress(gerund='saving'):
-                for row in sheet.itervalues():
+                for typedvals in sheet.iterdispvals(format=False):
                     fp.write('<tr>')
-                    for col, val in row.items():
+                    for col, val in typedvals.items():
                         fp.write('<td>')
                         fp.write(html.escape(val))
                         fp.write('</td>')

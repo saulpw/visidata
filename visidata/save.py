@@ -19,8 +19,8 @@ def safe_trdict(vs):
 
 
 @Sheet.api
-def itervalues(sheet, *cols, format=False):
-    'For each row in sheet, yield list of values for given cols.  Values are typed if format=False, or a formatted display string if format=True.'
+def iterdispvals(sheet, *cols, format=False):
+    'For each row in sheet, yield OrderedDict of values for given cols.  Values are typed if format=False, or a formatted display string if format=True.'
     if not cols:
         cols = sheet.visibleCols
 
@@ -134,7 +134,7 @@ def save_txt(p, *vsheets):
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
             col = vs.visibleCols[0]
-            for dispvals in vs.itervalues(col, format=True):
+            for dispvals in vs.iterdispvals(col, format=True):
                 fp.write(dispvals[col] or '')
                 fp.write('\n')
     status('%s save finished' % p)

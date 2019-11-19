@@ -70,7 +70,7 @@ def save_tsv(vs, p):
         colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
         fp.write(colhdr)
 
-        for dispvals in vs.itervalues(format=True):
+        for dispvals in vs.iterdispvals(format=True):
             fp.write(unitsep.join(dispvals.values()))
             fp.write(rowsep)
 
