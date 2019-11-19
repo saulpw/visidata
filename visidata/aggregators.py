@@ -26,9 +26,21 @@ def getValues(self, rows):
 
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
-Sheet.addCommand('z+', 'show-aggregate', 'agg=chooseOne(aggregators); status(cursorCol.format(wrapply(agg.type or cursorCol.type, agg(cursorCol, selectedRows or rows))))')
+Sheet.addCommand('z+', 'show-aggregate', 'cursorCol.show_aggregate(chooseOne(aggregators), selectedRows or rows)')
 
-aggregators = collections.OrderedDict()
+@asyncthread
+@Column.api
+def show_aggregate(col, aggs, rows):
+    if not isinstance(aggs, list):
+        aggs = [aggs]
+
+    for agg in aggs:
+        aggval = agg(col, rows)
+        typedval = wrapply(agg.type or col.type, aggval)
+        dispval = col.format(typedval)
+        vd.status(dispval)
+
+aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
 def _defaggr(name, type, func):
     'Define aggregator `name` that calls func(col, rows)'
