@@ -47,9 +47,9 @@ class TsvSheet(SequenceSheet):
                     prog.addProgress(len(line))
                     row = list(line.split(delim))
 
-                    if len(row) < self.nCols:
+                    if len(row) < self.nVisibleCols:
                         # extend rows that are missing entries
-                        row.extend([None]*(self.nCols-len(row)))
+                        row.extend([None]*(self.nVisibleCols-len(row)))
 
                     yield row
 
