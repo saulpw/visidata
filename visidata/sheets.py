@@ -87,31 +87,6 @@ RowColorizer = collections.namedtuple('RowColorizer', 'precedence coloropt func'
 CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt func')
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
 
-def wrapiter(it):
-    'Like iter(it) but wraps so Exceptions do not abort iteration.'
-    fldebug = options.debug
-
-    while True:
-        try:
-            yield next(it)
-        except StopIteration:
-            return
-        except Exception as e:
-            if fldebug:
-                vd.exceptionCaught(e)
-            pass # yield str(e)
-
-def wrapnext(it, default=''):
-    'Return next(it) or default if no more elements.  Also catches Exception'
-    try:
-        return next(it)
-    except Exception as e:
-        if options.debug:
-            vd.exceptionCaught(e)
-        return str(e)
-    except StopIteration:
-        return default
-
 class RecursiveExprException(Exception):
     pass
 
@@ -268,7 +243,7 @@ class Sheet(BaseSheet):
         'Load rows and/or columns.  Override in subclass.'
         self.rows = []
         with vd.Progress(gerund='loading', total=0):
-            for r in wrapiter(self.iterload()):
+            for r in self.iterload():
                 self.addRow(r)
 
         # if an ordering has been specified, sort the sheet
@@ -851,7 +826,7 @@ class SequenceSheet(Sheet):
 
         self.rows = []
         # add the rest of the rows
-        for r in vd.Progress(wrapiter(itsource), gerund='loading', total=0):
+        for r in vd.Progress(itsource, gerund='loading', total=0):
             self.addRow(r)
 
         # if an ordering has been specified, sort the sheet
