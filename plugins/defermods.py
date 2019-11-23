@@ -200,7 +200,7 @@ def putChanges(sheet, path, adds, changes, deletes):
     sheet.commitAdds()
     sheet.commitMods()
     sheet.commitDeletes()
-    if sheet.trackmods:
+    if sheet.defermods:
         saveSheets(path, sheet, confirm_overwrite=False)
     else:
         saveSheets(inputPath("save to: ", value=sheet.getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)
@@ -255,10 +255,10 @@ def commit(sheet, *rows):
     cstr = sheet.changestr(adds, mods, deletes)
     confirm_overwrite = options.confirm_overwrite
     path = sheet.source
-    if not cstr and sheet.trackmods:
+    if not cstr and sheet.defermods:
         fail('no diffs')
 
-    if confirm_overwrite and sheet.trackmods:
+    if confirm_overwrite and sheet.defermods:
         confirm('really %s? ' % cstr)
 
     sheet.putChanges(path, adds, mods, deletes)
