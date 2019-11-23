@@ -11,3 +11,4 @@ vmailcap		add mailcap-view(-selected) commands to DirSheet	Saul Pwanson <vd@saul
 defermods		add two modes to VisiData: deferred mods and track changes	anjakefala <anja.kefala@gmail.com>	2019-09-20	https://raw.githubusercontent.com/saulpw/visidata/develop/plugins/defermods.py	0.1	2.-2			7ea1113ecfa8bae7ecc6bf512785f6260a3fa8966eacd0dd155337961a8d5cd4
 geocoding		add addcol-geocode command to add lat/long columns from location/address column	Saul Pwanson <vd@saul.pw>			0.1	2.-2			
 vmutagen		add mp3 metadata columns to DirSheet	Saul Pwanson <vd@saul.pw>			0.1	2.-2	mutagen		
+vtask		TaskWarrior vd interface	Saul Pwanson <vd@saul.pw>					tasklib==1.2.1		
