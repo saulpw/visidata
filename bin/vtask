@@ -6,6 +6,7 @@ import tasklib
 from visidata import *
 
 options.disp_date_fmt = '%Y-%m-%d %H:%M'
+options.disp_float_ndigits = 2
 theme('color_task_changed', 'reverse yellow', 'color when vtask is changed')
 
 

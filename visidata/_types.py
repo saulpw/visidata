@@ -13,6 +13,7 @@ try:
 except ImportError:
     pass
 
+theme('disp_float_ndigits', 2, 'default number of digits to display for float column')
 
 # _vdtype .typetype are e.g. int, float, str, and used internally in these ways:
 #
@@ -53,7 +54,7 @@ vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
 vdtype(str, '~', formatter=lambda _,v: v)
 vdtype(int, '#', '%.0f')
-vdtype(float, '%', '%.02f')
+vdtype(float, "%", "%.0{}f".format(options.disp_float_ndigits))
 vdtype(dict, '')
 vdtype(list, '')
 
