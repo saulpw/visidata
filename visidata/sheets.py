@@ -204,9 +204,12 @@ class Sheet(BaseSheet):
 
         colorstack = []
         for colorizer in self.allColorizers:
-            r = colorizer.func(self, col, row, value)
-            if r:
-                colorstack.append(colorizer.coloropt if colorizer.coloropt else r)
+            try:
+                r = colorizer.func(self, col, row, value)
+                if r:
+                    colorstack.append(colorizer.coloropt if colorizer.coloropt else r)
+            except Exception as e:
+                vd.exceptionCaught(e)
 
         return colors.resolve_colors(tuple(colorstack))
 
