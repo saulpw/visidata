@@ -25,21 +25,6 @@ def getValues(self, rows):
         yield v
 
 
-Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
-Sheet.addCommand('z+', 'show-aggregate', 'cursorCol.show_aggregate(chooseOne(aggregators), selectedRows or rows)')
-
-@asyncthread
-@Column.api
-def show_aggregate(col, aggs, rows):
-    if not isinstance(aggs, list):
-        aggs = [aggs]
-
-    for agg in aggs:
-        aggval = agg(col, rows)
-        typedval = wrapply(agg.type or col.type, aggval)
-        dispval = col.format(typedval)
-        vd.status(dispval)
-
 aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
 def _defaggr(name, type, func):
@@ -119,7 +104,6 @@ aggregators['q10'] = quantiles(10)
 # returns keys of the row with the max value
 aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
 
-ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))')
 
 ColumnsSheet.columns += [
         Column('aggregators',
@@ -140,4 +124,23 @@ def addAggregators(cols, aggrnames):
                     c.aggregators += [aggr]
 
 
+
+@asyncthread
+@Column.api
+def show_aggregate(col, aggs, rows):
+    if not isinstance(aggs, list):
+        aggs = [aggs]
+
+    for agg in aggs:
+        aggval = agg(col, rows)
+        typedval = wrapply(agg.type or col.type, aggval)
+        dispval = col.format(typedval)
+        vd.status(dispval)
+
+
 addGlobals(globals())
+
+
+Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
+Sheet.addCommand('z+', 'show-aggregate', 'cursorCol.show_aggregate(chooseOne(aggregators), selectedRows or rows)')
+ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))')
