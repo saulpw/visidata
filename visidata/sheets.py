@@ -610,7 +610,7 @@ class Sheet(BaseSheet):
         vd.clear_caches()
 
         if not self.columns:
-            return
+            self.addColumn(Column())
 
         drawparams = {
             'isNull': isNullFunc(),
