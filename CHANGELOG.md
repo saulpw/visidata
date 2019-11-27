@@ -1,53 +1,63 @@
 # VisiData version history
 
-# 2.-2 (2019-09-x)
+# 2.-2 (2019-11-x)
 
-## Features
-    - every sheet now has its own cmdlg
+## Major changes
+    - [cmdlog] every sheet now has its own cmdlog
         - change `Shift+D` to `cmdlog-sheet`, with commands from source sheets recursively
-        - `gShift+D` now cmdlog
+        - `gShift+D` now `cmdlog-all`
         - `zShift+D` `cmdlog-sheet-only`
-    - index into sub-sheets from command line (thanks @aborruso for feature request #214)
+    - [dirsheet] VisiData's DirSheet is readonly; move write-mode for DirSheet to `vls` (see plugins)
+    - [options] `options-global` bound to `gO`and `options-sheet` to `O`
+        - `open-config` is now unbound (previously `gO`)
+
+## Major Features
+    - [IndexSheet] index into sub-sheets from command line (thanks @aborruso for suggestion #214)
         - currently works for html and hdf5 loaders
         - `+:subsheet:col:row` in cli 
             - `subsheet` the topsheet upon load, with cursor located in cell at `row` and `col`
         - `+:subsheet::` to ignore row/col
         - can name toplevel source index if more than one: `+toplevel:subsheet::`
-    - PluginsSheet now loads plugins in `~/.visidata/plugins/__init__.py` instead of in `~/.visidatarc`
+
+## Additions and improvements
+    - [add-rows] now undo-able
+    - [aggregators] show-aggregate with quantiles (thanks @wesleyac for feature request #395)
+    - [cli] `-P <longname>` on commandline executes command <longname> on startup 
+    - [cmdlog] jump commands are not logged
+    - [config] set VisiData height/width via LINES/COLUMNS envvars (thanks @halloleo for suggestion #372)
+    - [csv] add `csv_lineterminator` option (default: '\r\n') (thanks @dbandstra for bug report #387)
+        - retain csv writer default DOS line endings
+    - [describe] add `options.describe_aggrs` (thanks @unhammer for suggestion #273)
+        - space-separated list of statistics to calculate for numeric columns
+        - default to existing 'mean stdev'
+        - add this to .visidatarc for e.g. a harmonic mean to be added automatically to the describe sheet:
+            ```
+            from statistics import harmonic_mean
+            options.describe_aggrs += ' harmonic_mean' # note the leading space
+            ```
+    - [describe] add hiden "type" col (thanks aborruso for suggestion #356)
+    - [dirsheet] add `open-dir-current` command to open the DirSheet for the current directory
+    - [help] add `help-commands-all` on `gz^H` (thanks @frosencrantz for suggestion #393)
+    - [help] add `help-search` command (thanks @paulklemm for suggetion #247)
+        - opens a commands sheet filtered by the input regex.
+    - [loaders] add --header and --skip universal handling to all sheets that inherit from `SequenceSheet`
+    - [menu] if no arguments, open VisiData Main Menu instead of DirSheet
+    - [plugins] update PluginsSheet to add sha256 and vdpluginsdeps 
+    - [plugins] PluginsSheet now loads plugins in `~/.visidata/plugins/__init__.py` instead of in `~/.visidatarc`
         - to use this feature, add `from plugins import *` to `~/.visidatarc`
-
-## Changes
-    - VisiData's DirSheet is now readonly; write-mode for DirSheet moved to `vls`
-    - for security reasons, `.py` loader moved out of VisiData core and into snippets
+    - [pyobj] for security reasons, `.py` loader moved out of VisiData core and into snippets
         - PyObj loader auto-imports `.py` files on open
-
-## Bugfixes
-    - [DirSheet] commit/restat/filesize interactions (thanks @Mikee-3000 for bug report #340)
-    - [expr] catch recursive expression columns (columns that calculate their cells using themselves) (thanks @chocolateboy for bug report #350)
-    - [fixed] various improvements to fixed-width sheet loader (thanks @frosencrantz for thorough bughunting #331)
-    - [join] joining columns in the ColumnSheet resulted in exception (thanks @frosencrantz for bug report #336)
-    - [load] fix replay sync bug (required wait prevously)
-        - however, look out for `vd *` with lots of big datasets, they will now all load simultaneously
-    - [mbtiles] now works again
-    - [options] no error on unset if option not already set
-    - [path] filesize of url is 0
-    - [path] fix piping bug (vd failed to read stdin) (thanks @ajkerrigan for bug report #354)
-    - [plugins] ensure consisten Python exe for plugin installs (thanks @ajkerrigan for fix)
-    - [plugins] make plugin removal more predictable (thanks @ajkerrigan for fix)
-    - [prev-sheet] would stack trace if more than one sheet loaded and no other sheet visited (thanks @frosencrantz for bug report #342)
-    - [sheets] keycols now keep order they are keyed
-    - [tsv] column name "length" prevented loading (thanks  @suhrig for bug report #344)
-    - [undo] redo with cmd on first row did not move cursor (thanks @Mikee-3000 for bug report #339)
-        - now row/col context are set as strings, even when they are numeric indices
+    - [ttf] use `Enter` to plot instead of `.`
 
 ## Plugins
     - add hello world minimal plugin
     - add vdtabulate by jsvine (thanks @frosencrantz for suggestion #341)
     - update viewtsv example (thanks @suhrig for --skip improvement suggestions #347)
     - add vmailcap with `^V` to view by mimetype (thanks @cwarden for suggestion)
-    - add basic frictionless loader (thanks @aborruso for feature request #237)
+    - add basic frictionless loader (thanks @aborruso for suggestion #237)
         - `-f frictionless` with .json either http[s] or local file
         - .zip may not work yet
+    - add fdir filetype; opens a DirSheet for a .txt with a list of paths
     - move trackmod and defermod out of VisiData core and into module defermods.py
         - defermods defers saving to source until commit-sheet
             - deleted rows are colored red and visible until commit
@@ -59,24 +69,85 @@
         - `vls` contains write-mode for DirSheet
     - add vmutagen for audio tags on DirSheet
         - `Alt+m` to add the mutagen columns on the DirSheet
+    - add geocoding using nettoolkit.com API
+        - add `addcol-geocode` command to add lat/long columns from location/address column
+    - new commands in rownum plugin
+        - `addcol-rownum` adds column with original row ordering
+        - `addcol-delta` adds column with delta of current column
+    - vtask is now a discrete plugin
+
+## Bugfixes
+    - [bindkey] move global bindkey after BaseSheet bindkey (thanks @sfranky for bug report #379)
+    - [cmdlog] now will check for `confirm-overwrite`
+    - [dirsheet] commit/restat/filesize interactions (thanks @Mikee-3000 for bug report #340)
+    - [dirsheet] pass filetype to openSource
+        - if filetype is not passed, options.filetype would overload file ext
+    - [expr] catch recursive expression columns (columns that calculate their cells using themselves) (thanks @chocolateboy for bug report #350)
+    - [fixed] various improvements to fixed-width sheet loader (thanks @frosencrantz for thorough bughunting #331)
+    - [http] use options.encoding when no encoding is provided by responses headers (thanks @tsibley for the PR #370)
+    - [join] joining columns in the ColumnSheet resulted in exception (thanks @frosencrantz for bug report #336)
+    - [load] fix replay sync bug (required wait prevously)
+        - however, look out for `vd *` with lots of big datasets, they will now all load simultaneously
+    - [longname] fix getCommand() error reporting
+    - [mbtiles] now works again
+    - [metasheets] created VisiDataMetaSheet which sets system TsvSheet options
+        - now changes in tsv options for source files will not affect HelpSheet, CmdLog or PluginsSheet
+        - thanks frosencrantz for bug report #323
+    - [options] no error on unset if option not already set
+    - [path] filesize of url is 0
+    - [path] fix piping bug (vd failed to read stdin) (thanks @ajkerrigan for bug report #354)
+    - [plugins] ensure consisten Python exe for plugin installs (thanks @ajkerrigan for fix)
+    - [plugins] make plugin removal more predictable (thanks @ajkerrigan for fix)
+    - [prev-sheet] would stack trace if more than one sheet loaded and no other sheet visited (thanks @frosencrantz for bug report #342)
+    - [regex] will not silently fail if some example rows are not matches
+    - [save] convert savers to use itervalues
+        - itervalues(format=False) now yields OrderedDict of col -> value
+            - value is typed value if format=False, display string if True
+        - options.safety_first will convert newlines and tabs to options.tsv_safe_newline and options.tsv_safe_tab (thanks @mesibov for bug report #76)
+    - [sheets] colorizer exceptions are now caught
+    - [sheets] keycols now keep order they are keyed
+    - [sysedit] trim all trailing newlines from external edits (thanks @sfranky for bug report #378)
+    - [tsv] column name "length" prevented loading (thanks  @suhrig for bug report #344)
+    - [undo] redo with cmd on first row did not move cursor (thanks @Mikee-3000 for bug report #339)
+        - now row/col context are set as strings, even when they are numeric indices
 
 ## Infrastructure / API
     - [add-row] create a default newRow for Sheet (thanks @for-coursera for bug report #363)
     - [calc] add INPROGRESS sentinel
         - sentinel that looks like an exception for calcs that have not completed yet
     - [extensible] add new cached_property, which caches until clear_all_caches, which clears all cached_property
+    - [Fanout] add Fanout
+        - fan out attribute changes to every element in a list; tracks undo for list
     - [lazy_property] newSheet and cmdlog are now lazy_property
         - this enables the overwriting and extending of them by plugins
+    - [loaders] add sheet.iterload()
+        - will use sheet.source to populate and then yield each row
+    - [loaders] vd.filetype(ext, ExtSheet) to register a constructor
+    - [loaders] add Sheet.iterrows() to yield row objects 
+        - grouping use iterrows() for streaming input
+        - __iter__() yields LazyComputeRows
+            ```
+            for row in vd.openSource('foo.csv'):
+                print(row.date, row.name)
+            ```
     - [IndexSheet] refactor SheetsSheet parent to IndexSheet
         - HtmlTablesSheet now inherits from IndexSheet
         - excel index changed to standard IndexSheet model
         - VisiDataSheet changed into IndexSheet
         - move join-sheets to IndexSheet
-    - [options] add unset() to unset options (thanks @khughitt for feature request #343)
+    - [options] add unset() to unset options (thanks @khughitt for suggestion #343)
     - [path] consolidate PathFd, UrlPath, and HttpPath into Path
+    - [SequenceSheet] refactor tsv, csv, xls(x), fixed_width to inherit from SequenceSheet
     - [sheets] vd.sheetsSheet is sheetstack, vd.allSheetsSheet is sheetpile
     - [sheets] rename LazyMap to LazyChainMap and LazyMapRow to LazyComputeRow
     - [shortcut] BaseSheet.shortcut now property
+    - [status] make right status more configurable (thanks @layertwo #375 and khugitt #343 for filing issues)
+        - BaseSheet.progressPct now returns string instead of int
+        - BaseSheet.rightStatus() now returns string only (not color)
+        - by default uses `options.disp_rstatus_fmt`, configured like `disp_status_fmt`
+        - progress indicator (% and gerund) moved out of rightStatus and into drawRightStatus
+    - [undo] use undofuncs to associate command with its undo
+    - [undo/redo] moved to undo.py
     - [vd] add sheet properties for errors and statuses
     - [vd] vd.quit() now takes `*sheets`
     - [vd] rename main() to main_vd()

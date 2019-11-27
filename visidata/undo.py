@@ -54,6 +54,7 @@ def undoAttrFunc(objs, attrname):
 
 
 class Fanout(list):
+    'Fan out attribute changes to every element in a list.'
     def __getattr__(self, k):
         return Fanout([getattr(o, k) for o in self])
 
