@@ -2,6 +2,10 @@
 
 1. Merge `stable` to `develop` (if necessary)
 
+2. Verify that VisiData is up-to-date:
+    * vdmenu
+    * plugins.tsv
+
 2. Verify that documentation/docstrings are up-to-date on features and functionality
 
     a. manpage;
