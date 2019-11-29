@@ -10,6 +10,7 @@
     - [dirsheet] VisiData's DirSheet is readonly; move write-mode for DirSheet to `vls` (see plugins)
     - [options] `options-global` bound to `gO`and `options-sheet` to `O`
         - `open-config` is now unbound (previously `gO`)
+    - [defermods] has been moved to an opt-in plugin
 
 ## Major Features
     - [IndexSheet] index into sub-sheets from command line (thanks @aborruso for suggestion #214)
