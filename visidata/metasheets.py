@@ -130,10 +130,10 @@ class VisiDataSheet(IndexSheet):
     def reload(self):
         self.rows = []
         for vdattr, sheetname, longname, shortcut, desc in [
-            ('sheetsSheet', 'sheets', 'open-sheets', 'z Shift S', 'current sheet stack'),
-            ('allSheetsSheet', 'sheets_all', 'open-sheets-all', 'Shift S', 'all sheets ever opened'),
-            ('cmdlog', 'cmdlog', 'open-cmdlog', 'Shift D', 'log of commands this session'),
-            ('globalOptionsSheet', 'options_global', 'open-options', 'Shift O', 'default option values applying to every sheet'),
+            ('sheetsSheet', 'sheets', 'sheets-stack', 'Shift S', 'current sheet stack'),
+            ('allSheetsSheet', 'sheets_all', 'sheets-all', 'g Shift S', 'all sheets ever opened'),
+            ('cmdlog', 'cmdlog', 'cmdlog-all', 'g Shift D', 'log of all commands this session'),
+            ('globalOptionsSheet', 'options_global', 'open-global', 'g Shift O', 'default option values applying to every sheet'),
             ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl E', 'stacktrace of most recent error'),
             ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl P', 'status messages from current session'),
             ('threadsSheet', 'threads', 'open-threads', 'Ctrl T', 'threads and profiling'),
