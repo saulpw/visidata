@@ -11,6 +11,8 @@
     - [options] `options-global` bound to `gO`and `options-sheet` to `O`
         - `open-config` is now unbound (previously `gO`)
     - [defermods] has been moved to an opt-in plugin
+    - [vdmenu] launching `vd` without a source file, opens menu of core sheets
+        - press `Enter` to open sheet described in current row
 
 ## Major Features
     - [IndexSheet] index into sub-sheets from command line (thanks @aborruso for suggestion #214)
@@ -36,23 +38,22 @@
             from statistics import harmonic_mean
             options.describe_aggrs += ' harmonic_mean' # note the leading space
             ```
-    - [describe] add hiden "type" col (thanks aborruso for suggestion #356)
+    - [describe] add hidden "type" col (thanks aborruso for suggestion #356)
     - [dirsheet] add `open-dir-current` command to open the DirSheet for the current directory
     - [help] add `help-commands-all` on `gz^H` (thanks @frosencrantz for suggestion #393)
-    - [help] add `help-search` command (thanks @paulklemm for suggetion #247)
+    - [help] add `help-search` command (thanks @paulklemm for suggestion #247)
         - opens a commands sheet filtered by the input regex.
-    - [loaders] add --header and --skip universal handling to all sheets that inherit from `SequenceSheet`
+    - [loaders] add --header and --skip universal handling to all sheets that inherit from `SequenceSheet` (currently tsv/csv/fixed/xlsx/xls)
     - [menu] if no arguments, open VisiData Main Menu instead of DirSheet
     - [plugins] update PluginsSheet to add sha256 and vdpluginsdeps 
     - [plugins] PluginsSheet now loads plugins in `~/.visidata/plugins/__init__.py` instead of in `~/.visidatarc`
         - to use this feature, add `from plugins import *` to `~/.visidatarc`
     - [pyobj] for security reasons, `.py` loader moved out of VisiData core and into snippets
-        - PyObj loader auto-imports `.py` files on open
+        - Note that the PyObj loader auto-imports `.py` modules upon loading them
     - [ttf] use `Enter` to plot instead of `.`
 
 ## Plugins
     - add hello world minimal plugin
-    - add vdtabulate by jsvine (thanks @frosencrantz for suggestion #341)
     - update viewtsv example (thanks @suhrig for --skip improvement suggestions #347)
     - add vmailcap with `^V` to view by mimetype (thanks @cwarden for suggestion)
     - add basic frictionless loader (thanks @aborruso for suggestion #237)
