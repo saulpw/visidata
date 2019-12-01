@@ -167,7 +167,7 @@ class CommandLog(VisiDataMetaSheet):
             vd.activeCommand[-1] += ' [%s]' % err
 
         # remove user-aborted commands and simple movements
-        if not escaped and isLoggableCommand(vd.activeCommand.longname):
+        if not escaped and isLoggableCommand(vd.activeCommand.longname) and self is not sheet:
                 self.addRow(vd.activeCommand)
                 sheet.cmdlog_sheet.addRow(vd.activeCommand)
                 if options.cmdlog_histfile:
