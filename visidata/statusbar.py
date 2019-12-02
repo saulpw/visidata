@@ -7,7 +7,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
 
 theme('disp_rstatus_fmt', '{sheet.nRows:9d} {sheet.rowtype} ', 'right-side status format string')
-theme('disp_status_fmt', '{sheet.shortcut}〉{sheet.name}| ', 'status line prefix')
+theme('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
 theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
 
