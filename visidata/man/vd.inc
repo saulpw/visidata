@@ -27,7 +27,12 @@
 .Op Cm -w Ar waitsecs
 .Op Cm --batch
 .Op Cm -o Ar output
-.Op Ar field Ns Cm = Ns Ar value No ...
+.Op Ar field Ns Cm = Ns Ar value
+.
+.Nm vd
+.Op Ar options
+.Op Ar input No ...
+.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .
 .Sh DESCRIPTION
 .Nm VisiData No is an easy-to-use multipurpose tool to explore, clean, edit, and restructure data.
@@ -66,12 +71,8 @@ cancel current replay
 .Ss GLOBAL COMMANDS
 .No All keystrokes are case sensitive. The Sy ^ No prefix is shorthand for Sy Ctrl Ns .
 .Pp
-.Ss Keystrokes for the Cautious
+.Ss Keystrokes to start off with
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " ^H"
-view this man page
-.It Ic "z^H"
-view sheet of commands and keybindings
 .It Ic " ^Q"
 abort program immediately
 .It Ic " ^C"
@@ -80,6 +81,14 @@ cancel user input or abort all async threads on current sheet
 quit current sheet
 .It Ic " gq"
 quit all sheets (clean exit)
+.Pp
+.It Ic " ^H"
+view this man page
+.It Ic "z^H"
+view sheet of command longnames and keybindings
+.It Ic "Space" Ar longname
+.No execute command by its Ar longname
+.Pp
 .It Ic "  U"
 .No undoes the most recent modification ( requires enabling of Sy options.undo Ns )
 .It Ic "  R"
@@ -325,7 +334,6 @@ open
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "T"
-open new sheet with rows and columns transposed
 .Pp
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
@@ -385,11 +393,7 @@ scroll canvas
 .No quit current sheet and remove it from the Sy CommandLog
 .It Ic "v"
 toggle sheet-specific visibility (multi-row on Sheet, legends/axes on Graph)
-.It Ic "Shift+V"
-open menu of core sheets
 .Pp
-.It Ic "Space" Ar longname
-.No execute command by its Ar longname
 .Pp
 .It Ic " ^E"
 view traceback for most recent error
@@ -429,7 +433,11 @@ open current row/cell/sheet as Python object
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
 .It Sy " \&."
-.Sy Directory Sheet No "            browse and modify properties of files in a directory"
+.Sy VisiDataMenu No (Shift+V) "     browse list of core sheets"
+.It Sy " \&."
+.Sy Directory Sheet No "            browse properties of files in a directory"
+.It Sy " \&."
+.Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -456,27 +464,59 @@ open current row/cell/sheet as Python object
 .Sy Pivot Table No (Shift+W) "      group rows by key and summarize current column"
 .It Sy " \&."
 .Sy Melted Sheet No (Shift+M) "     unpivot non-key columns into variable/value columns"
+.It Sy " \&."
+.Sy Transposed Sheet No (Shift+T) "  open new sheet with rows and columns transposed"
 .El
 .
 .Ss INTERNAL SHEETS
-.Ss Directory Sheet
+.Ss VisiDataMenu (Shift+V)
 .Bl -inset -compact
 .It (sheet-specific commands)
-.It Modifying any cell changes the in-memory value. Changes are only applied to the filesystem with Ic ^S
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Enter
+.No load sheet in current row
+.El
+.Ss Directory Sheet
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Space Ar open-dir-current
+.No open the Sy Directory Sheet No for the current directory
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  gEnter"
 open current/selected file(s) as new sheet(s)
 .It Ic " ^O  g^O"
 open current/selected file(s) in external $EDITOR
-.It Ic " d   gd"
-schedule current/selected file(s) for deletion
 .It Ic " ^R  z^R  gz^R"
-reload information for all/current/selected file(s), undoing any pending changes
-.It Ic "z^S   ^S"
-apply all deferred changes to current/all file(s)
+reload information for all/current/selected file(s)
 .El
 .
+.Ss Plugins Sheet
+.Bl -inset -compact
+.It Browse through a list of available plugins. VisiData needs to be restarted before plugin activation takes effect. Installation may require internet access.
+.El
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Space Ar open-plugins
+.No open the Sy Plugins Sheet
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "a"
+install and activate current plugin
+.It Ic "d"
+deactivate current plugin
+.El
 .Ss METASHEETS
 .Ss Columns Sheet (Shift+C)
 .Bl -inset -compact
@@ -557,11 +597,9 @@ abort async threads for current/selected sheets(s)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Shift+O
-.No edit global options (apply to Sy all sheets Ns )
-.It Ic zO
 .No edit sheet options (apply to Sy this sheet No only)
 .It Ic gO
-.No open Sy ~/.visidatarc
+.No edit global options (apply to Sy all sheets Ns )
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -576,8 +614,12 @@ edit option at current row
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic  D
+.No open current sheet's Sy CommandLog No with all other loose ends removed; includes commands from parent sheets
 .It Ic gD
-.No open Sy Directory Sheet No for Sy options.visidata_dir No (default: Sy ~/.visidata/ Ns ), which contains saved commandlogs and macros
+.No open global Sy CommandLog No for all commands executed in the current session
+.It Ic zD
+.No open current sheet's Sy CommandLog No with the parent sheets commands' removed
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -676,7 +718,13 @@ show/hide methods and hidden properties
 .
 .Sh COMMANDLINE OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.
+.It Cm -P Ns = Ns Ar longname
+.No preplay Ar longname No before replay or regular launch
+.It Cm --diff Ns = Ns Ar base
+.No add colorizer for all sheets against Ar base
+.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
+.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
+.Pp
 .Lo f filetype filetype
 .No "tsv               "
 set loader to use for
@@ -687,9 +735,6 @@ instead of file extension
 .No "True              "
 overwrite existing files without confirmation
 .
-.It Cm --diff Ns = Ns Ar base
-.No "None              "
-.No add colorizer for all sheets against Ar base
 .
 .El
 .so vd-cli.inc
@@ -725,6 +770,11 @@ overwrite existing files without confirmation
 .Dl Ic vd newfile.tsv
 .No open a blank sheet named Ar newfile No if file does not exist
 .Pp
+.Dl Ic vd sample.xlsx +:sheet1:2:3
+.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3 No
+.Pp
+.Dl Ic vd -P open-plugins
+.No preplay longname Sy open-plugins No before starting the session
 .Sh FILES
 At the start of every session,
 .Sy VisiData No looks for Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents if it exists.

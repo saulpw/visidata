@@ -27,7 +27,12 @@
 .Op Cm -w Ar waitsecs
 .Op Cm --batch
 .Op Cm -o Ar output
-.Op Ar field Ns Cm = Ns Ar value No ...
+.Op Ar field Ns Cm = Ns Ar value
+.
+.Nm vd
+.Op Ar options
+.Op Ar input No ...
+.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .
 .Sh DESCRIPTION
 .Nm VisiData No is an easy-to-use multipurpose tool to explore, clean, edit, and restructure data.
@@ -66,12 +71,8 @@ cancel current replay
 .Ss GLOBAL COMMANDS
 .No All keystrokes are case sensitive. The Sy ^ No prefix is shorthand for Sy Ctrl Ns .
 .Pp
-.Ss Keystrokes for the Cautious
+.Ss Keystrokes to start off with
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " ^H"
-view this man page
-.It Ic "z^H"
-view sheet of commands and keybindings
 .It Ic " ^Q"
 abort program immediately
 .It Ic " ^C"
@@ -80,6 +81,14 @@ cancel user input or abort all async threads on current sheet
 quit current sheet
 .It Ic " gq"
 quit all sheets (clean exit)
+.Pp
+.It Ic " ^H"
+view this man page
+.It Ic "z^H"
+view sheet of command longnames and keybindings
+.It Ic "Space" Ar longname
+.No execute command by its Ar longname
+.Pp
 .It Ic "  U"
 .No undoes the most recent modification ( requires enabling of Sy options.undo Ns )
 .It Ic "  R"
@@ -325,7 +334,6 @@ open
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "T"
-open new sheet with rows and columns transposed
 .Pp
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
@@ -383,13 +391,9 @@ scroll canvas
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "Q"
 .No quit current sheet and remove it from the Sy CommandLog
-.It Ic "V"
-view contents of current cell in a new TextSheet
-.It Ic "  v"
-toggle sheet-specific visibility (text wrap on TextSheet, legends/axes on Graph)
+.It Ic "v"
+toggle sheet-specific visibility (multi-row on Sheet, legends/axes on Graph)
 .Pp
-.It Ic "Space" Ar longname
-.No execute command by its Ar longname
 .Pp
 .It Ic " ^E"
 view traceback for most recent error
@@ -429,7 +433,11 @@ open current row/cell/sheet as Python object
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
 .It Sy " \&."
-.Sy Directory Sheet No "            browse and modify properties of files in a directory"
+.Sy VisiDataMenu No (Shift+V) "     browse list of core sheets"
+.It Sy " \&."
+.Sy Directory Sheet No "            browse properties of files in a directory"
+.It Sy " \&."
+.Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -456,27 +464,59 @@ open current row/cell/sheet as Python object
 .Sy Pivot Table No (Shift+W) "      group rows by key and summarize current column"
 .It Sy " \&."
 .Sy Melted Sheet No (Shift+M) "     unpivot non-key columns into variable/value columns"
+.It Sy " \&."
+.Sy Transposed Sheet No (Shift+T) "  open new sheet with rows and columns transposed"
 .El
 .
 .Ss INTERNAL SHEETS
-.Ss Directory Sheet
+.Ss VisiDataMenu (Shift+V)
 .Bl -inset -compact
 .It (sheet-specific commands)
-.It Modifying any cell changes the in-memory value. Changes are only applied to the filesystem with Ic ^S
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Enter
+.No load sheet in current row
+.El
+.Ss Directory Sheet
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Space Ar open-dir-current
+.No open the Sy Directory Sheet No for the current directory
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  gEnter"
 open current/selected file(s) as new sheet(s)
 .It Ic " ^O  g^O"
 open current/selected file(s) in external $EDITOR
-.It Ic " d   gd"
-schedule current/selected file(s) for deletion
 .It Ic " ^R  z^R  gz^R"
-reload information for all/current/selected file(s), undoing any pending changes
-.It Ic "z^S   ^S"
-apply all deferred changes to current/all file(s)
+reload information for all/current/selected file(s)
 .El
 .
+.Ss Plugins Sheet
+.Bl -inset -compact
+.It Browse through a list of available plugins. VisiData needs to be restarted before plugin activation takes effect. Installation may require internet access.
+.El
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Space Ar open-plugins
+.No open the Sy Plugins Sheet
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "a"
+install and activate current plugin
+.It Ic "d"
+deactivate current plugin
+.El
 .Ss METASHEETS
 .Ss Columns Sheet (Shift+C)
 .Bl -inset -compact
@@ -557,11 +597,9 @@ abort async threads for current/selected sheets(s)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Shift+O
-.No edit global options (apply to Sy all sheets Ns )
-.It Ic zO
 .No edit sheet options (apply to Sy this sheet No only)
 .It Ic gO
-.No open Sy ~/.visidatarc
+.No edit global options (apply to Sy all sheets Ns )
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -576,8 +614,12 @@ edit option at current row
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic  D
+.No open current sheet's Sy CommandLog No with all other loose ends removed; includes commands from parent sheets
 .It Ic gD
-.No open Sy Directory Sheet No for Sy options.visidata_dir No (default: Sy ~/.visidata/ Ns ), which contains saved commandlogs and macros
+.No open global Sy CommandLog No for all commands executed in the current session
+.It Ic zD
+.No open current sheet's Sy CommandLog No with the parent sheets commands' removed
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -676,7 +718,13 @@ show/hide methods and hidden properties
 .
 .Sh COMMANDLINE OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.
+.It Cm -P Ns = Ns Ar longname
+.No preplay Ar longname No before replay or regular launch
+.It Cm --diff Ns = Ns Ar base
+.No add colorizer for all sheets against Ar base
+.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
+.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
+.Pp
 .Lo f filetype filetype
 .No "tsv               "
 set loader to use for
@@ -687,14 +735,13 @@ instead of file extension
 .No "True              "
 overwrite existing files without confirmation
 .
-.It Cm --diff Ns = Ns Ar base
-.No "None              "
-.No add colorizer for all sheets against Ar base
 .
 .El
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy --null-value Ns = Ns Ar "NoneType       " No "None"
 a value to be counted as null
+.It Sy --undo Ns = Ns Ar "bool                 " No "True"
+enable undo/redo
 .It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
 max number of cache entries in each cached column
 .It Sy --force-valid-colnames No "      False"
@@ -709,6 +756,10 @@ command longname to execute after successful edit
 confirm before quitting last sheet
 .It Sy --debug No "                     False"
 exit on error and display stacktrace
+.It Sy --skip Ns = Ns Ar "int                  " No "0"
+skip N rows before header
+.It Sy --header Ns = Ns Ar "int                " No "1"
+parse first N rows as column names
 .It Sy --force-256-colors No "          False"
 use 256 colors even if curses reports fewer
 .It Sy --use-default-colors No "        False"
@@ -735,8 +786,6 @@ minimum memory to continue loading and async processing
 encoding passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
 encoding_errors passed to codecs.open
-.It Sy --skip Ns = Ns Ar "int                  " No "0"
-skip first N lines of text input
 .It Sy --bulk-select-clear No "         False"
 clear selected rows before new bulk selections
 .It Sy --delimiter Ns = Ns Ar "str             " No "	"
@@ -748,26 +797,24 @@ row delimiter to use for tsv/usv filetype
 replacement for newline character when saving to tsv
 .It Sy --tsv-safe-tab Ns = Ns Ar "str          " No ""
 replacement for tab character when saving to tsv
+.It Sy --filetype Ns = Ns Ar "str              " No ""
+specify file type
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
 whether to prompt for overwrite confirmation on save
 .It Sy --safe-error Ns = Ns Ar "str            " No "#ERR"
 error string to use while saving
-.It Sy --header Ns = Ns Ar "int                " No "1"
-parse first N rows of certain formats as column names
-.It Sy --filetype Ns = Ns Ar "str              " No ""
-specify file type
 .It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No ""
 command to copy stdin to system clipboard
 .It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No ""
 command to get contents of system clipboard
 .It Sy --visibility Ns = Ns Ar "int            " No "0"
 visibility level (0=low, 1=high)
+.It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
+numeric aggregators to calculate on Describe sheet
 .It Sy --histogram-bins Ns = Ns Ar "int        " No "0"
 number of bins for histogram of numeric columns
 .It Sy --numeric-binning No "           False"
 bin numeric columns into ranges
-.It Sy --undo Ns = Ns Ar "bool                 " No "True"
-enable undo/redo
 .It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
 time to wait between replayed commands, in seconds
 .It Sy --replay-movement No "           False"
@@ -792,6 +839,14 @@ list of distinct colors to use for plotting distinct objects
 amount to multiply current zoomlevel when zooming
 .It Sy --motd-url Ns = Ns Ar "str              " No ""
 source of randomized startup messages
+.It Sy --dir-recurse No "               False"
+walk source path recursively on DirSheet
+.It Sy --dir-hidden No "                False"
+load hidden files on DirSheet
+.It Sy --config Ns = Ns Ar "str                " No "~/.visidatarc"
+config file to exec in Python
+.It Sy --preplay Ns = Ns Ar "str               " No ""
+longnames to preplay before replay
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
@@ -802,6 +857,9 @@ quotechar passed to csv.reader
 skipinitialspace passed to csv.reader
 .It Sy --csv-escapechar Ns = Ns Ar "NoneType   " No "None"
 escapechar passed to csv.reader
+.It Sy --csv-lineterminator Ns = Ns Ar "str    " No "
+"
+lineterminator passed to csv.writer
 .It Sy --safety-first No "              False"
 sanitize input/output to handle edge cases, with a performance cost
 .It Sy --json-indent Ns = Ns Ar "NoneType      " No "None"
@@ -833,12 +891,6 @@ visible contents of a cell whose value is None
 indicator that the contents are only partially visible
 .It Sy "disp_oddspace      " No "\[u00B7]"
 displayable character for odd whitespace
-.It Sy "disp_status_fmt    " No "{sheet.shortcut}\[u3009]{sheet.name}| "
-status line prefix
-.It Sy "disp_lstatus_max   " No "0"
-maximum length of left status line
-.It Sy "disp_status_sep    " No " | "
-separator between statuses
 .It Sy "disp_more_left     " No "<"
 header note indicating more columns to the left
 .It Sy "disp_more_right    " No ">"
@@ -849,12 +901,6 @@ displayed contents for computation exception
 width to use for unicode chars marked ambiguous
 .It Sy "color_keystrokes   " No "white"
 color of input keystrokes on status line
-.It Sy "color_status       " No "bold"
-status line color
-.It Sy "color_error        " No "red"
-error message color
-.It Sy "color_warning      " No "yellow"
-warning message color
 .It Sy "disp_pending       " No ""
 string to display in pending cells
 .It Sy "color_note_pending " No "bold magenta"
@@ -885,6 +931,8 @@ separator between key columns and rest of columns
 
 .It Sy "disp_endbot_sep    " No "\[u2551]"
 
+.It Sy "disp_selected_note " No "\[u2022]"
+
 .It Sy "color_default      " No "normal"
 the default color
 .It Sy "color_default_hdr  " No "bold"
@@ -905,6 +953,20 @@ color of key columns
 color of hidden columns on metasheets
 .It Sy "color_selected_row " No "215 yellow"
 color of selected rows
+.It Sy "disp_rstatus_fmt   " No "{sheet.nRows:9d} {sheet.rowtype} "
+right-side status format string
+.It Sy "disp_status_fmt    " No "{sheet.shortcut}\[u3009]{sheet.name}| "
+status line prefix
+.It Sy "disp_lstatus_max   " No "0"
+maximum length of left status line
+.It Sy "disp_status_sep    " No " | "
+separator between statuses
+.It Sy "color_status       " No "bold"
+status line color
+.It Sy "color_error        " No "red"
+error message color
+.It Sy "color_warning      " No "yellow"
+warning message color
 .It Sy "color_working      " No "green"
 color of system running smoothly
 .It Sy "color_edit_cell    " No "normal"
@@ -913,12 +975,6 @@ cell color to use when editing cell
 edit field fill character
 .It Sy "disp_unprintable   " No "\[u00B7]"
 substitute character for unprintables
-.It Sy "color_add_pending  " No "green"
-color for rows pending add
-.It Sy "color_change_pending" No "reverse yellow"
-color for cells pending modification
-.It Sy "color_delete_pending" No "red"
-color for rows pending delete
 .It Sy "disp_histogram     " No "*"
 histogram element character
 .It Sy "disp_histolen      " No "50"
@@ -964,6 +1020,17 @@ color of active clue
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
 .No parse the output of ls -l into usable data
 .Pp
+.Dl Ic ls | vd | lpr
+.No interactively select a list of filenames to send to the printer
+.Pp
+.Dl Ic vd newfile.tsv
+.No open a blank sheet named Ar newfile No if file does not exist
+.Pp
+.Dl Ic vd sample.xlsx +:sheet1:2:3
+.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3 No
+.Pp
+.Dl Ic vd -P open-plugins
+.No preplay longname Sy open-plugins No before starting the session
 .Sh FILES
 At the start of every session,
 .Sy VisiData No looks for Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents if it exists.
