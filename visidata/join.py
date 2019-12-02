@@ -3,9 +3,7 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import asyncthread, Progress, status, fail, error
-from visidata import ColumnItem, ColumnExpr, SubColumnItem, Sheet, Column, getitemdef
-from visidata import IndexSheet
+from visidata import *
 
 IndexSheet.addCommand('&', 'join-sheets', 'vd.push(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))')
 Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))')
@@ -31,7 +29,7 @@ def createJoinedSheet(sheets, jointype=''):
     else:
         return JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
 
-jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append", "extend"]}
+jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append", "extend", "merge"]}
 
 def joinkey(sheet, row):
     return tuple(c.getDisplayValue(row) for c in sheet.keyCols)
@@ -83,6 +81,18 @@ class JoinKeyColumn(Column):
             c.recalc()
 
 
+class MergeColumn(Column):
+    def calcValue(self, row):
+        for i, c in enumerate(self.cols):
+            if c:
+                v = c.getTypedValue(row[i])
+                if not isinstance(v, TypedWrapper):
+                    return v
+
+    def putValue(self, row, value):
+        self.cols[-1].setValue(row[len(self.cols)-1], value)
+
+
 
 #### slicing and dicing
 # rowdef: [sheet1_row, sheet2_row, ...]
@@ -107,11 +117,19 @@ class JoinSheet(Sheet):
             self.addColumn(JoinKeyColumn(name=cols[0].name, keycols=cols)) # ColumnItem(c.name, i, sheet=sheets[0], type=c.type, width=c.width)))
         self.setKeys(self.columns)
 
+        allcols = collections.defaultdict(lambda n=len(sheets): [None]*n)
         for sheetnum, vs in enumerate(sheets):
-            # subsequent elements are the rows from each source, in order of the source sheets
-            ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
             for c in vs.nonKeyVisibleCols:
-                newname = c.name if ctr[c.name] == 1 else '%s_%s' % (vs.name, c.name)
+                allcols[c.name][sheetnum] = c
+
+        if self.jointype == 'merge':
+            for colname, cols in allcols.items():
+                self.addColumn(MergeColumn(colname, cols=cols))
+        else:
+          for sheetnum, vs in enumerate(sheets):
+            # subsequent elements are the rows from each source, in order of the source sheets
+            for c in vs.nonKeyVisibleCols:
+                newname = c.name if len(allcols[c.name]) == 1 else '%s_%s' % (vs.name, c.name)
                 self.addColumn(SubColumnItem(sheetnum, c, name=newname))
 
         rowsBySheetKey = {}
@@ -129,7 +147,7 @@ class JoinSheet(Sheet):
                     for combinedRow in combinedRows:
                         self.addRow(combinedRow)
 
-                elif self.jointype == 'inner':  # only rows with matching key on all sheets
+                elif self.jointype in ['inner', 'merge']:  # only rows with matching key on all sheets
                     for combinedRow in combinedRows:
                         if all(combinedRow):
                             self.addRow(combinedRow)
