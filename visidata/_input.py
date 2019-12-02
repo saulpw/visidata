@@ -293,7 +293,7 @@ def choose(choices, n=None):
     'Return one of `choices` elements (if list) or values (if dict).'
     ret = chooseMany(choices) or fail('no choice made')
     if n and len(ret) > n:
-        error('can only choose %s' % n)
+        fail('can only choose %s' % n)
     return ret[0] if n==1 else ret
 
 
