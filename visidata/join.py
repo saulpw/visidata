@@ -86,7 +86,7 @@ class MergeColumn(Column):
         for i, c in enumerate(self.cols):
             if c:
                 v = c.getTypedValue(row[i])
-                if not isinstance(v, TypedWrapper):
+                if v and not isinstance(v, TypedWrapper):
                     return v
 
     def putValue(self, row, value):
