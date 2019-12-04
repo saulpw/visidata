@@ -1,6 +1,6 @@
 # VisiData version history
 
-# 2.-2 (2019-12-03)
+# v2.-2 (2019-12-03)
 
 ## Major changes
     - [cmdlog] every sheet now has its own cmdlog
