@@ -5,8 +5,6 @@
 2. Verify that VisiData is up-to-date:
     * vdmenu
     * plugins.tsv
-    * patrons.tsv
-    * contributors.tsv
 
 2. Verify that documentation/docstrings are up-to-date on features and functionality
 
@@ -15,6 +13,10 @@
     b. visidata.org;
 
     c. CHANGELOG;
+
+    d. patrons.tsv;
+
+    e. contributors.tsv
 
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 
