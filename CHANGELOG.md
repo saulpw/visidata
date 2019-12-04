@@ -1,5 +1,7 @@
 # VisiData version history
 
+# v2.-3 (####-##-##)
+
 # v2.-2 (2019-12-03)
 
 ## Major changes

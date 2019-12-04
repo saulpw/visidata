@@ -1,4 +1,4 @@
-# VisiData v2-2 [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/develop.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/develop)
+# VisiData v2-3dev [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/develop.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/develop)
 
 A terminal interface for exploring and arranging tabular data.
 
