@@ -89,7 +89,7 @@ def append_tsv_row(vs, row):
         trdict = vs.safe_trdict()
         unitsep = options.delimiter
 
-        with p.open_text(mode='w') as fp:
+        with vs.source.open_text(mode='w') as fp:
             colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
             if colhdr.strip():  # is anything but whitespace
                 fp.write(colhdr)
