@@ -4,16 +4,16 @@ import collections
 import functools
 import datetime
 import locale
-from visidata import options, theme, TypedWrapper
+from visidata import option, options, theme, TypedWrapper, undoAttr
 
 #__all__ = ['anytype', 'vdtype', 'typemap', 'getType', 'typemap']
+
+option('disp_float_fmt', '%.02f', 'default fmtstr to format for float values', replay=True)
 
 try:
     import dateutil.parser
 except ImportError:
     pass
-
-theme('disp_float_ndigits', 2, 'default number of digits to display for float column')
 
 # VisiDataType .typetype are e.g. int, float, str, and used internally in these ways:
 #
@@ -63,7 +63,7 @@ vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
 vdtype(str, '~', formatter=lambda _,v: v)
 vdtype(int, '#', '%.0f')
-vdtype(float, "%", "%.0{}f".format(options.disp_float_ndigits))
+vdtype(float, '%', formatter=lambda _,v: options.disp_float_fmt % v)
 vdtype(dict, '')
 vdtype(list, '')
 
