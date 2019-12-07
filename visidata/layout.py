@@ -1,4 +1,4 @@
-from visidata import vd, Column, Sheet, options
+from visidata import vd, Column, Sheet, options, Fanout
 
 @Column.api
 def setWidth(self, w):
@@ -31,8 +31,9 @@ def unhide_cols(cols, rows):
 
 
 Sheet.addCommand('_', 'resize-col-max', 'cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))'),
-Sheet.addCommand('z_', 'resize-col', 'cursorCol.setWidth(int(input("set width= ", value=cursorCol.width)))'),
+Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", value=cursorCol.width)); cursorCol.setWidth(width)')
 Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.setWidth(c.getMaxWidth(visibleRows))'),
+Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", value=cursorCol.width)); Fanout(visibleCols).setWidth(width)')
 
 Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()')
 Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)'),
