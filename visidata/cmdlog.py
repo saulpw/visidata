@@ -46,7 +46,7 @@ def indexMatch(L, func):
             return i
 
 def keystr(k):
-    return  ','.join(map(str, k))
+    return  options.rowkey_prefix+','.join(map(str, k))
 
 def isLoggableCommand(longname):
     for n in nonLogged:
@@ -143,7 +143,7 @@ class CommandLog(VisiDataMetaSheet):
             sheetname = sheet.name
             if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
                 k = sheet.rowkey(sheet.cursorRow)
-                rowname = (options.rowkey_prefix+keystr(k)) if k else sheet.cursorRowIndex
+                rowname = keystr(k) if k else sheet.cursorRowIndex
 
             if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
