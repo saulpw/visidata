@@ -45,7 +45,7 @@ def _loadedVersion(plugin):
 
 def _checkHash(data, sha):
     import hashlib
-    return hashlib.sha256(data.encode('utf-8')).hexdigest() == sha
+    return hashlib.sha256(data.strip().encode('utf-8')).hexdigest() == sha
 
 
 class PluginsSheet(VisiDataMetaSheet):
