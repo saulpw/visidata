@@ -1,0 +1,4 @@
+k8s/secrets.tf
+
+.terraform/
+*terraform.tfstate*
