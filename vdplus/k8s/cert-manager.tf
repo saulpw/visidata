@@ -3,7 +3,7 @@
 # ---
 
 variable "cert_manager_version" {
-  default = "0.10"
+  default = "0.12"
 }
 
 data "local_file" "cert_manager_setup" {
@@ -38,7 +38,7 @@ resource "null_resource" "cert-manager-crd" {
     command = <<EOC
 echo "Applying CRDs for Cert Manager"
 
-kubectl apply -f - | curl -L https://raw.githubusercontent.com/jetstack/cert-manager/release-${var.cert_manager_version}/deploy/manifests/00-crds.yaml
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-${var.cert_manager_version}/deploy/manifests/00-crds.yaml
 
 echo "CRDs applied"
 EOC
@@ -56,9 +56,7 @@ resource "null_resource" "cert-manager-setup" {
     command = <<EOC
 echo "Applying custom YAML for Cert Manager "
 
-kubectl apply -f -<<EOF
-${data.local_file.cert_manager_setup.content}
-EOF
+kubectl apply -f ${data.local_file.cert_manager_setup.filename}
 
 echo "Custom Cert Manager YAML applied"
 EOC
