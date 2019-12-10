@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/join-merge-1.jsonl	o	
+			open-file	tests/join-merge-2.jsonl	o	
+join-merge-2	colA		key-col		!	
+join-merge-1	colA		key-col		!	
+join-merge-2			join-sheets-top2	merge	&	

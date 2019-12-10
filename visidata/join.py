@@ -90,8 +90,9 @@ class MergeColumn(Column):
                     return v
 
     def putValue(self, row, value):
-        self.cols[-1].setValue(row[len(self.cols)-1], value)
-
+        for r, c in zip(row, self.cols[::-1]):
+            if c:
+                c.setValue(r, value)
 
 
 #### slicing and dicing
@@ -99,6 +100,9 @@ class MergeColumn(Column):
 #   if a sheet does not have this key, sheet#_row is None
 class JoinSheet(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
+    colorizers = [
+        CellColorizer(0, 'color_diff', lambda s,c,r,v: c and r and isinstance(c, MergeColumn) and c.cols[0] and v.value != c.cols[0].getValue(r[0]))
+    ]
 
     @asyncthread
     def reload(self):
@@ -143,11 +147,11 @@ class JoinSheet(Sheet):
             for k, combinedRows in rowsByKey.items():
                 prog.addProgress(1)
 
-                if self.jointype == 'full':  # keep all rows from all sheets
+                if self.jointype in ['full', 'merge']:  # keep all rows from all sheets
                     for combinedRow in combinedRows:
                         self.addRow(combinedRow)
 
-                elif self.jointype in ['inner', 'merge']:  # only rows with matching key on all sheets
+                elif self.jointype == 'inner':  # only rows with matching key on all sheets
                     for combinedRow in combinedRows:
                         if all(combinedRow):
                             self.addRow(combinedRow)
