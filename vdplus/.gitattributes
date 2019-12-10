@@ -1,0 +1,1 @@
+k8s/secrets.tf filter=git-crypt diff=git-crypt
