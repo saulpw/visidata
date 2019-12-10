@@ -64,7 +64,7 @@ resource "kubernetes_ingress" "vdwww-ingress" {
       service_port = 80
     }
     rule {
-      host = "vdwww.tombh.co.uk"
+      host = "demo.visidata.org"
       http {
         path {
           path = "/*"
