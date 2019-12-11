@@ -127,7 +127,7 @@ def addAggregators(cols, aggrnames):
 @Column.api
 def aggname(col, agg):
     'Consistent formatting of the name of given aggregator for this column.  e.g. "col1_sum"'
-    return '%s_%s' % (col.name, agg.name)
+    return '%s_%s' % (col.name, agg.__name__)
 
 @asyncthread
 @Column.api
@@ -136,7 +136,7 @@ def show_aggregate(col, agg, rows):
     aggval = agg(col, rows)
     typedval = wrapply(agg.type or col.type, aggval)
     dispval = col.format(typedval)
-    vd.status(col.aggname(agg), dispval)
+    vd.status(dispval)
 
 
 addGlobals(globals())
