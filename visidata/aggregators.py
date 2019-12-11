@@ -131,21 +131,17 @@ def aggname(col, agg):
 
 @asyncthread
 @Column.api
-def show_aggregate(col, aggs, rows):
+def show_aggregate(col, agg, rows):
     'Show aggregated value in status, and add to memory.'
-    if not isinstance(aggs, list):
-        aggs = [aggs]
-
-    for agg in aggs:
-        aggval = agg(col, rows)
-        typedval = wrapply(agg.type or col.type, aggval)
-        dispval = col.format(typedval)
-        vd.status(dispval)
+    aggval = agg(col, rows)
+    typedval = wrapply(agg.type or col.type, aggval)
+    dispval = col.format(typedval)
+    vd.status(col.aggname(agg), dispval)
 
 
 addGlobals(globals())
 
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
-Sheet.addCommand('z+', 'show-aggregate', 'cursorCol.show_aggregate(chooseMany(aggregators), selectedRows or rows)')
+Sheet.addCommand('z+', 'show-aggregate', 'for agg in chooseMany(aggregators): cursorCol.show_aggregate(agg,  selectedRows or rows)')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))')
