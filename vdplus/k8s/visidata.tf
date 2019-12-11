@@ -8,6 +8,14 @@ resource "kubernetes_deployment" "visidata" {
         app = "visidata"
       }
     }
+    replicas = 1
+    strategy {
+      type = "RollingUpdate"
+      rolling_update {
+        max_unavailable = 0
+        max_surge = 1
+      }
+    }
     template {
       metadata {
         labels = {
@@ -24,6 +32,22 @@ resource "kubernetes_deployment" "visidata" {
           name  = "app"
           image = "docker.pkg.github.com/saulpw/vdwww/vdwww:latest"
           image_pull_policy = "Always"
+
+          # These settings dictate the status of the container for deciding whether the
+          # service is ready to replace the old version during deployment.
+          readiness_probe {
+            http_get {
+              path   = "/"
+              port   = "9000"
+              scheme = "HTTP"
+            }
+            initial_delay_seconds = 1
+            timeout_seconds   = 5
+            period_seconds    = 5
+            success_threshold = 1
+            failure_threshold = 3
+          }
+
           port {
             container_port = 9000
           }

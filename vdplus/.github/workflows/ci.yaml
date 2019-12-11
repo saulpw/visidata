@@ -1,3 +1,7 @@
+# Note that Github's web editor has linting for these files
+# And also there is a JSON schema for validating in your local editor:
+# http://json.schemastore.org/github-workflow
+
 name: CI
 on: [push]
 jobs:
@@ -5,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Publish to Github Docker Registry
+    - name: Build, test, publish and deploy
       env:
-        GITCRYPT_KEY: {{ secrets.GITCRYPT_KEY }}
-      run: .github/workflows/build_and_push.sh
+        GITCRYPT_KEY: ${{ secrets.GITCRYPT_KEY }}
+      run: .github/workflows/build_test_push_deploy.sh
