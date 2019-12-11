@@ -16,7 +16,6 @@ RUN cd /app/bin && curl -L https://github.com/yudai/gotty/releases/download/v2.0
 RUN cd /app/data && \
   curl -LO https://jsvine.github.io/intro-to-visidata/_downloads/83e70cf67e909f3ac177575439e5f3c5/faa-wildlife-strikes.csv && \
   wget --no-parent -A'*.csv' -nd -r https://people.sc.fsu.edu/~jburkardt/data/csv/
-
 RUN rm /app/data/robots.txt.tmp
 
 CMD /app/bin/gotty -w -p 9000 vd /app/data
