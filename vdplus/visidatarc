@@ -1,0 +1,2 @@
+options.motd_url='https://demo.visidata.org/motd'
+options.quitguard=True

@@ -4,6 +4,7 @@ ENV TERM=xterm-256color
 
 RUN mkdir -p /app/data
 RUN mkdir -p /app/bin
+
 WORKDIR /app/data
 
 RUN pip install visidata
@@ -17,5 +18,7 @@ RUN cd /app/data && \
   curl -LO https://jsvine.github.io/intro-to-visidata/_downloads/83e70cf67e909f3ac177575439e5f3c5/faa-wildlife-strikes.csv && \
   wget --no-parent -A'*.csv' -nd -r https://people.sc.fsu.edu/~jburkardt/data/csv/
 RUN rm /app/data/robots.txt.tmp
+
+ADD visidatarc /root/.visidatarc
 
 CMD /app/bin/gotty -w -p 9000 vd /app/data
