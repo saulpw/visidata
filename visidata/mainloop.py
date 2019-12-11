@@ -43,6 +43,7 @@ def run(self, scr):
 
         sheet = self.sheets[0]
         threading.current_thread().sheet = sheet
+        vd.drawThread = threading.current_thread()
 
         sheet.ensureLoaded()
         self.draw(scr, sheet)

@@ -237,17 +237,25 @@ def checkForFinishedThreads(self):
 
 @VisiData.api
 def sync(self, *joiningThreads):
-    'Wait for joiningThreads to finish. If no joiningThreads specified, wait for all but current thread to finish.'
-    joiningThreads = list(joiningThreads) or (set(self.unfinishedThreads)-set([threading.current_thread()]))
-    while any(t in self.unfinishedThreads for t in joiningThreads):
-        for t in joiningThreads:
+    'Wait for joiningThreads to finish. If no joiningThreads specified, wait for all but current thread and interface thread to finish.'
+    joiningThreads = set(joiningThreads)
+    while True:
+        deads = set()  # dead threads
+        threads = joiningThreads or set(self.unfinishedThreads)
+        threads -= set([threading.current_thread(), getattr(vd, 'drawThread', None)])
+        threads -= deads
+        for t in threads:
             try:
                 if not t.is_alive():
-                    joiningThreads.remove(t)
-                    break
-                t.join()
-            except RuntimeError:  # maybe thread hasn't started yet or has already joined
+                    deads.add(t)
+                else:
+                    t.join()
+            except RuntimeError as e:  # maybe thread hasn't started yet or has already joined
+                vd.exceptionCaught(e)
                 pass
+
+        if len(threads - deads) == 0:
+            break
 
 
 ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile)) or warning("no profile")')
