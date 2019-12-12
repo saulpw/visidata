@@ -8,29 +8,19 @@ All of these should be installable through your OS's standard package manager.
   * [Terraform](https://learn.hashicorp.com/terraform/getting-started/install.html): Infrastructure As Code. Talking to the k8s API.
   * [Helm](https://v3.helm.sh/docs/intro/install/): Kubernetes package manager.
 
-## Add `secrets.tf`
-
-Terraform uses certain secret values such as API credentials and so on. These should not
-be kept in Git's history. Once you have your own copy from a trusted source place it at
-`k8s/secrets.tf`.
-
 ## Authenticate with Digital Ocean
 
-You will need to provide the DO Access Token to both `doctl`'s config file and Terraform.
-
-  * For `doctl` run `doctl auth init`
-  * For Terraform ensure there is a 'do_vd_key' setting in `secrets.tf`
-
-The DO token is not accessible from the DO website. The only copies should be in a secret
-store or in the config of other developers working on VisiData's Kubernetes cluster. Usually
-kept in `$HOME/.config/doctl/config.yaml`.
+The DO Access Token is present at `k8s/secrets.tf` as the variable named `do_vd_key`.
+Setup the DO admin CLI tool with `doctl auth init` and paste the DO token when prompted.
 
 ## Creating/updating the cluster
+
+All `terraform` commands need to be run within the `k8s/` folder.
 
 When running `terraform` for the first time on a new machine (whether the live cluster exists
 or not) run `terraform init` to download the necessary third-party Terraform plugins.
 
-To then either create a new cluster or update the existing one change path to the `k8s/` folder and run `terraform apply`.
+To then either create a new cluster or update the existing one run `terraform apply`.
 
 When creating a cluster for the first time `terraform apply` may need to be run twice if
 certain services didn't come up in the right order.
@@ -41,8 +31,8 @@ Finally save the cluster's config with `doctl kubernetes cluster kubeconfig save
 ## Creating the cluster for the first time
 
 ### Helm permission error
-NB. December 2019, with a fresh install of all dependencies seems to also need this to get Helm
-to work:
+NB. December 2019, with a fresh install of all dependencies Helm seems to also need this to make
+it happy:
 
 ```
 kubectl patch deploy tiller-deploy \
@@ -58,4 +48,11 @@ doesn't currently seem possible to associate a specific IP address. So you will 
 at the DO UI under Networking->Load Balancers to find the new IP address and assign it as an
 A record to the appropriate domain.
 
+## Monitoring
+The Grafana UI for the Prometheus monitoring stack can be accessed by forwarding the Grafana
+web service to your local machine. The command is:
 
+`kubectl port-forward -n monitoring svc/prometheus-operator-grafana 10080:80`
+
+You can then visit localhost:10080 in your browser and login with the default credentials of
+'admin' and 'letmein'.
