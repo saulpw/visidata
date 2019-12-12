@@ -4,8 +4,15 @@ VisiData on the web: [demo.visidata.org](https://demo.visidata.org/)
 ## Encrypted Credentials
 To access the secure credentials in this repo, you will need to decrypt them.
 
-Install [git-crypt](https://github.com/AGWA/git-crypt) and run `git-crypt unlock` after
-cloning. Ask your nearest friendly VisiData dev for the decryption key.
+  * Install [git-crypt](https://github.com/AGWA/git-crypt).
+  * Ask your nearest friendly VisiData dev for the decryption key. It will likely be
+base64 encoded for ease of communication. If the key ends with a "==" this means you can
+run `base6f -d [long string of random character==]` to get the raw key.
+  * Copy the raw key to a file, eg `/tmp/master/key`
+  * Within the path of the repo run `git-crypt unlock /tmp/master/key`
+  * You can now just use `git` as normal, all the encryption/decryption happens
+automatically with hooks and filters.
+
 
 ## Cluster management
 
