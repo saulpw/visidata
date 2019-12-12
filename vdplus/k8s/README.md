@@ -25,8 +25,9 @@ To then either create a new cluster or update the existing one run `terraform ap
 When creating a cluster for the first time `terraform apply` may need to be run twice if
 certain services didn't come up in the right order.
 
-Finally save the cluster's config with `doctl kubernetes cluster kubeconfig save vdwww` so that
-`kubectl` knows how to access the Kubernetes API.
+### Connecting `kubectl` to the cluster
+Once the cluster exists save the cluster's config with
+`doctl kubernetes cluster kubeconfig save vdwww` so that `kubectl` knows how to access the Kubernetes API.
 
 ## Creating the cluster for the first time
 
@@ -59,4 +60,4 @@ You can then visit localhost:10080 in your browser and login with the default cr
 
 ### App logs
 
-A basic dashboard for the 'vdwww' app logs is availabale at http://localhost:10080/d/Ousb_eaZk/real-user-logs?orgId=1
+A basic dashboard for the 'vdwww' app logs is availabale at http://localhost:10080/d/Ousb_eaZk/visidata-www-logs?orgId=1&refresh=5s
