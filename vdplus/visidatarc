@@ -1,2 +1,3 @@
 options.motd_url='https://demo.visidata.org/motd'
 options.quitguard=True
+options.cmdlog_histfile='/var/log/visidata_commands.log'

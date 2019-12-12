@@ -20,5 +20,6 @@ RUN cd /app/data && \
 RUN rm /app/data/robots.txt.tmp
 
 ADD visidatarc /root/.visidatarc
+ADD run.sh /app/bin
 
-CMD /app/bin/gotty -w -p 9000 vd /app/data
+CMD /app/bin/run.sh
