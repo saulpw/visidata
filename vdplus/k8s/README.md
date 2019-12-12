@@ -56,3 +56,7 @@ web service to your local machine. The command is:
 
 You can then visit localhost:10080 in your browser and login with the default credentials of
 'admin' and 'letmein'.
+
+### App logs
+
+A basic dashboard for the 'vdwww' app logs is availabale at http://localhost:10080/d/Ousb_eaZk/real-user-logs?orgId=1
