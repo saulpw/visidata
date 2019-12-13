@@ -12,8 +12,6 @@ prometheus:
 
 # Define persistent storage for Grafana (PVC)
 grafana:
-  # Set password for Grafana admin user
-  adminPassword: letmein
   persistence:
     enabled: true
     storageClassName: do-block-storage

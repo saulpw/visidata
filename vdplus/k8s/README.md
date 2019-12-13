@@ -55,8 +55,8 @@ web service to your local machine. The command is:
 
 `kubectl port-forward -n monitoring svc/prometheus-operator-grafana 10080:80`
 
-You can then visit localhost:10080 in your browser and login with the default credentials of
-'admin' and 'letmein'.
+You can then visit localhost:10080 in your browser and login with the username 'admin' and the
+password defined for 'grafana_password' in `secrets.tf`.
 
 ### App logs
 

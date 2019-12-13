@@ -50,4 +50,63 @@ resource "helm_release" "prometheus-operator" {
     name = "prometheusOperator.createCustomResource"
     value = false
   }
+
+  set {
+    name = "grafana.adminPassword"
+    value = var.grafana_password
+  }
+}
+
+resource "kubernetes_service" "grafana" {
+  metadata {
+    name = "grafana"
+  }
+
+  spec {
+    selector = {
+      app = "visidata"
+    }
+
+    port {
+      name = "grafana"
+      port = 443
+      target_port = 80
+    }
+  }
+}
+
+resource "kubernetes_ingress" "grafana-ingress" {
+  metadata {
+    name = "grafana-ingress"
+    namespace = "monitoring"
+    annotations = {
+      "kubernetes.io/ingress.class" = "nginx"
+      "cert-manager.io/cluster-issuer": "letsencrypt-prod"
+      "cert-manager.io/acme-challenge-type": "http01"
+    }
+  }
+  spec {
+    tls {
+      hosts = [
+        "grafana.k8s.visidata.org",
+      ]
+      secret_name = "grafana-tls"
+    }
+    backend {
+      service_name = "prometheus-operator-grafana"
+      service_port = 80
+    }
+    rule {
+      host = "grafana.k8s.visidata.org"
+      http {
+        path {
+          path = "/*"
+          backend {
+            service_name = "prometheus-operator-grafana"
+            service_port = 80
+          }
+        }
+      }
+    }
+  }
 }
