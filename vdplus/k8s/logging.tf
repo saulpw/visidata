@@ -45,3 +45,57 @@ echo "Custom logging operator YAML applied"
 EOC
   }
 }
+
+resource "kubernetes_service" "loki" {
+  metadata {
+    name = "loki"
+  }
+
+  spec {
+    selector = {
+      app = "visidata"
+    }
+
+    port {
+      name = "loki"
+      port = 443
+      target_port = 3100
+    }
+  }
+}
+
+resource "kubernetes_ingress" "loki-ingress" {
+  metadata {
+    name = "loki-ingress"
+    namespace = "logging"
+    annotations = {
+      "kubernetes.io/ingress.class" = "nginx"
+      "cert-manager.io/cluster-issuer": "letsencrypt-prod"
+      "cert-manager.io/acme-challenge-type": "http01"
+    }
+  }
+  spec {
+    tls {
+      hosts = [
+        "loki.k8s.visidata.org",
+      ]
+      secret_name = "loki-tls"
+    }
+    backend {
+      service_name = "loki"
+      service_port = 3100
+    }
+    rule {
+      host = "loki.k8s.visidata.org"
+      http {
+        path {
+          path = "/*"
+          backend {
+            service_name = "loki"
+            service_port = 3100
+          }
+        }
+      }
+    }
+  }
+}
