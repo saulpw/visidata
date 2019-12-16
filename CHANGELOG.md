@@ -1,5 +1,10 @@
 # VisiData version history
 
+# v2.-2.1 (2019-12-15)
+
+## Build
+- use https protocol for git submodules (thanks @tombh for PR)
+
 # v2.-2 (2019-12-03)
 
 ## Major changes
