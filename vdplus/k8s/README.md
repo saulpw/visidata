@@ -6,7 +6,7 @@ All of these should be installable through your OS's standard package manager.
 
   * [`doctl`](https://github.com/digitalocean/doctl): Talking to the Digital Ocean API. 
   * [Terraform](https://learn.hashicorp.com/terraform/getting-started/install.html): Infrastructure As Code. Talking to the k8s API.
-  * [Helm](https://v3.helm.sh/docs/intro/install/): Kubernetes package manager.
+  * [Helm](https://v3.helm.sh/docs/intro/install/) (v2.5.1): Kubernetes package manager.
 
 ## Authenticate with Digital Ocean
 
@@ -41,7 +41,7 @@ kubectl patch deploy tiller-deploy \
   -n kube-system
 ```
 
-It could be because of Helm v3.0.1, but I can't be certain.
+It could be because I used Helm v3.0.1, instead of v2.5.1, but I can't be certain.
 
 ### Load Balancer IP
 A platform-specific load balancer will be created outside the Kubernetes cluster. On DO it
