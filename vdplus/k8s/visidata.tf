@@ -33,6 +33,11 @@ resource "kubernetes_deployment" "visidata" {
           image = "docker.pkg.github.com/saulpw/vdwww/vdwww:latest"
           image_pull_policy = "Always"
 
+          volume_mount {
+            name = "data"
+            mount_path = "/app/data"
+          }
+
           # These settings dictate the status of the container for deciding whether the
           # service is ready to replace the old version during deployment.
           readiness_probe {
@@ -50,6 +55,12 @@ resource "kubernetes_deployment" "visidata" {
 
           port {
             container_port = 9000
+          }
+        }
+        volume {
+          name = "data"
+          persistent_volume_claim {
+            claim_name = "do-spaces-vdata"
           }
         }
       }
