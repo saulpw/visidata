@@ -6,6 +6,8 @@ from visidata import urlcache
 import functools
 import json
 
+option('fixer_key', '', 'API Key for fixer.io')
+
 currency_symbols = {
     '$': 'USD',
     '£': 'GBP',
@@ -17,20 +19,22 @@ currency_symbols = {
     '₫': 'VND',
 }
 
-def currency_rates_json(base='USD', date='latest'):
-    url = 'https://api.fixer.io/%s?base=USD' % date
+def currency_rates_json(date='latest'):
+    url = 'http://data.fixer.io/api/%s?access_key=%s' % (date, options.fixer_key)
     return urlcache(url).read_text()
 
 @functools.lru_cache()
-def currency_rates(base='USD'):
-    return json.loads(currency_rates_json(base))['rates']
+def currency_rates():
+    return json.loads(currency_rates_json())['rates']
 
 @functools.lru_cache()
 def currency_multiplier(src_currency, dest_currency):
     'returns equivalent value in USD for an amt of currency_code'
     if src_currency == 'USD':
         return 1.0
-    usd_mult = currency_rates()[src_currency]
+    eur_usd_mult = currency_rates()['USD']
+    eur_src_mult = currency_rates()[src_currency]
+    usd_mult = eur_usd_mult/eur_src_mult
     if dest_currency == 'USD':
         return usd_mult
     return usd_mult/currency_rates()[dest_currency]
