@@ -2,7 +2,7 @@
 Uses data from fixer.io
 '''
 
-from visidata import option, urlcache, addGlobals
+from visidata import option, options, urlcache, addGlobals
 import functools
 import json
 

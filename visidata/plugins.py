@@ -67,12 +67,12 @@ class PluginsSheet(VisiDataMetaSheet):
             initpath.touch()
 
         outpath = _plugin_path(plugin)
+        overwrite = True
         if outpath.exists():
-            overwrite = False
             try:
                 confirm("plugin path already exists, overwrite? ")
-                overwrite = True
             except ExpectedException:
+                overwrite = False
                 if _plugin_in_import_list(plugin):
                     fail("plugin already loaded")
                 else:
