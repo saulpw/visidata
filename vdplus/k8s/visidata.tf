@@ -30,7 +30,7 @@ resource "kubernetes_deployment" "visidata" {
         }
         container {
           name  = "app"
-          image = "docker.pkg.github.com/saulpw/vdwww/vdwww:latest"
+          image = "localhost:31500/vdwww/vdwww:latest"
           image_pull_policy = "Always"
 
           volume_mount {
