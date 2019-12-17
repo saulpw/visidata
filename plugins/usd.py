@@ -2,7 +2,7 @@
 Uses data from fixer.io
 '''
 
-from visidata import urlcache
+from visidata import urlcache, addGlobals
 import functools
 import json
 
@@ -47,3 +47,5 @@ def USD(s):
 
     amtstr, currcode = s.split(' ')
     return float(amtstr) * currency_multiplier(currcode, 'USD')
+
+addGlobals(globals())
