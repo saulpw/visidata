@@ -36,6 +36,7 @@ resource "kubernetes_deployment" "visidata" {
           volume_mount {
             name = "data"
             mount_path = "/app/data"
+            read_only = true
           }
 
           # These settings dictate the status of the container for deciding whether the
