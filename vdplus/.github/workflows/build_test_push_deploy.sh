@@ -24,6 +24,8 @@ json=$(
 registry_user=$(echo $json | jq ".auths[\"$DOCKER_REGISTRY\"].username" | sed 's/"//g')
 registry_password=$(echo $json | jq ".auths[\"$DOCKER_REGISTRY\"].password" | sed 's/"//g')
 
+pushd vd
+
 # Build the Docker image
 docker build -t vdwww .
 
