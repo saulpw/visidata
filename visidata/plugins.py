@@ -68,37 +68,48 @@ class PluginsSheet(VisiDataMetaSheet):
 
         outpath = _plugin_path(plugin)
         if outpath.exists():
-            confirm("plugin path already exists, overwrite? ")
+            try:
+                confirm("plugin path already exists, overwrite? ")
+            except ExpectedException:
+                if _plugin_in_import_list(plugin):
+                    fail("plugin already loaded")
+                else:
+                    self._loadPlugin(plugin)
 
         self._install(plugin)
 
     @asyncthread
     def _install(self, plugin):
+        outpath = _plugin_path(plugin)
+
+        with urlcache(plugin.url, 0).open_text() as pyfp:
+            contents = pyfp.read()
+            if not _checkHash(contents, plugin.sha256):
+                error('%s plugin SHA256 does not match!' % plugin.name)
+            with outpath.open_text(mode='w') as outfp:
+                outfp.write(contents)
+
+        if plugin.pydeps:
+            p = subprocess.Popen([sys.executable, '-m', 'pip', 'install']+plugin.pydeps.split(),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            vd.status(out)
+            if err:
+                vd.warning(err)
+        status('%s plugin installed' % plugin.name)
+
         if _plugin_in_import_list(plugin):
-            fail("plugin already loaded")
+            warning("plugin already loaded")
         else:
-            outpath = _plugin_path(plugin)
+            self._loadPlugin(plugin)
 
-            with urlcache(plugin.url, 0).open_text() as pyfp:
-                contents = pyfp.read()
-                if not _checkHash(contents, plugin.sha256):
-                    error('%s plugin SHA256 does not match!' % plugin.name)
-                with outpath.open_text(mode='w') as outfp:
-                    outfp.write(contents)
 
-            if plugin.pydeps:
-                p = subprocess.Popen([sys.executable, '-m', 'pip', 'install']+plugin.pydeps.split(),
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
-                out, err = p.communicate()
-                vd.status(out)
-                if err:
-                    vd.warning(err)
-
-            with Path(_plugin_init()).open_text(mode='a') as fprc:
-                print(_plugin_import(plugin), file=fprc)
-                importlib.import_module(_plugin_import_name(plugin))
-                status('%s plugin installed' % plugin.name)
+    def _loadPlugin(self, plugin):
+        with Path(_plugin_init()).open_text(mode='a') as fprc:
+            print(_plugin_import(plugin), file=fprc)
+            importlib.import_module(_plugin_import_name(plugin))
+            status('%s plugin loaded' % plugin.name)
 
 
     def removePluginIfExists(self, plugin):
