@@ -22,8 +22,13 @@ or not) run `terraform init` to download the necessary third-party Terraform plu
 
 To then either create a new cluster or update the existing one run `terraform apply`.
 
-When creating a cluster for the first time `terraform apply` may need to be run twice if
-certain services didn't come up in the right order.
+When creating a cluster for the first time `terraform apply` will need to be run at least twice. Partly because some services don't come up in the right order, but also because some services
+rely on the internal Docker registry. So after the first run the following images will need to
+be pushed:
+
+  * `docker push docker.k8s.visidata.org/vdwww/nfs-server:latest`. See `k8s/nfs-server`
+  * `docker push docker.k8s.visidata.org/vdwww/vdwww:latest`. See `/Dockerfile`
+  * TODO: Terraform/k8s can actually automate this.
 
 ### Connecting `kubectl` to the cluster
 Once the cluster exists save the cluster's config with
@@ -41,7 +46,8 @@ kubectl patch deploy tiller-deploy \
   -n kube-system
 ```
 
-It could be because I used Helm v3.0.1, instead of v2.5.1, but I can't be certain.
+It could be because I used Helm v3.0.1, instead of v2.5.1, but we can't be certain until someone
+rebuilds the cluster themselves from scratch.
 
 ### Load Balancer IP
 A platform-specific load balancer will be created outside the Kubernetes cluster. On DO it
@@ -50,14 +56,16 @@ at the DO UI under Networking->Load Balancers to find the new IP address and ass
 A record to the appropriate domain.
 
 ## Monitoring
-The Grafana UI for the Prometheus monitoring stack can be accessed by forwarding the Grafana
-web service to your local machine. The command is:
+The Grafana UI for the Prometheus monitoring stack can be accessed at: https://grafana.k8s.visidata.org
 
-`kubectl port-forward -n monitoring svc/prometheus-operator-grafana 10080:80`
-
-You can then visit localhost:10080 in your browser and login with the username 'admin' and the
-password defined for 'grafana_password' in `secrets.tf`.
+Username 'admin' and the password is in `secrets.tf` under 'grafana_password'.
 
 ### App logs
 
-A basic dashboard for the 'vdwww' app logs is availabale at http://localhost:10080/d/Ousb_eaZk/visidata-www-logs?orgId=1&refresh=5s
+A basic dashboard for the 'vdwww' app logs is availabale at https://grafana.k8s.visidata.org/d/Ousb_eaZk/visidata-www-logs?orgId=1&refresh=5s
+
+## Private Docker Registry
+The cluster includes a private Docker registry at: https://docker.k8s.visidata.org
+
+Auth can be found in `secrets.tf` and the avaiable disk space can be increased at `k8s/docker-registry.tf`. Note that resizing the volume may not guarantee the data is retained.
+
