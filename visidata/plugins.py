@@ -68,15 +68,17 @@ class PluginsSheet(VisiDataMetaSheet):
 
         outpath = _plugin_path(plugin)
         if outpath.exists():
+            overwrite = False
             try:
                 confirm("plugin path already exists, overwrite? ")
+                overwrite = True
             except ExpectedException:
                 if _plugin_in_import_list(plugin):
                     fail("plugin already loaded")
                 else:
                     self._loadPlugin(plugin)
-
-        self._install(plugin)
+        if overwrite:
+            self._install(plugin)
 
     @asyncthread
     def _install(self, plugin):
