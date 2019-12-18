@@ -25,9 +25,6 @@ resource "kubernetes_deployment" "visidata" {
       spec {
         // A service account token allows the containers to access the central k8s API
         automount_service_account_token = true
-        image_pull_secrets {
-          name = "github-registry-creds"
-        }
         container {
           name  = "app"
           image = "localhost:31500/vdwww/vdwww:latest"

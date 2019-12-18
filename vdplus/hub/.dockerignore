@@ -1,0 +1,4 @@
+Dockerfile
+spa/node_modules/*
+spa/dist/*
+*.log

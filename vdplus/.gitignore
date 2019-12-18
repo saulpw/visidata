@@ -1,2 +1,8 @@
 .terraform/
 *terraform.tfstate*
+
+hub/spa/dist
+hub/spa/node_modules
+yarn-error.log
+.pytest_cache
+__pycache__

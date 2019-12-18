@@ -32,16 +32,3 @@ provider "kubernetes" {
   token = digitalocean_kubernetes_cluster.vd.kube_config[0].token
 }
 
-# Credentials to access Docker images from the Github Registry
-resource "kubernetes_secret" "github_registry_creds" {
-  metadata {
-    name = "github-registry-creds"
-  }
-
-  data = {
-    ".dockerconfigjson" = var.github_registry_login_json
-  }
-
-  type = "kubernetes.io/dockerconfigjson"
-}
-

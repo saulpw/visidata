@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "vdhub"
+version = "0.0.0"
+description = "Flask app to manage VisiData on a Kubernetes cluster"
+authors = ["The VisiData team"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flask = "^1.1.1"
+flask-cors = "^3.0.8"
+gunicorn = "^20.0.4"
+eventlet = "^0.25.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.8"
+
