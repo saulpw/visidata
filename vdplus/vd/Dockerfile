@@ -10,7 +10,7 @@ RUN mkdir -p /app/data /app/bin /app/src
 ARG VD_SRC=/app/src/visidata
 
 # Install VisiData
-RUN git clone --depth 1 --branch v2.-2 https://github.com/saulpw/visidata.git $VD_SRC
+RUN git clone --depth 1 --branch v2.-2.1 https://github.com/saulpw/visidata.git $VD_SRC
 RUN pip3 install $VD_SRC
 ADD requirements.txt $VD_SRC
 RUN pip install -r $VD_SRC/requirements.txt
