@@ -3,6 +3,8 @@
     "baseUrl": "./src",
     "outDir": "./dist/",
     "sourceMap": true,
+    "jsx": "preserve",
+    "jsxFactory": "m",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

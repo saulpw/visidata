@@ -95,8 +95,8 @@ module.exports = {
             loader: "sass-loader",
             options: {
               sourceMap: is_prod,
+              prependData: '@import "src/assets/base_theme";',
               sassOptions: {
-                prependData: '@import "src/assets/base_theme";',
                 includePaths: [path.join(__dirname, "node_modules")]
               }
             }
@@ -107,7 +107,7 @@ module.exports = {
   },
   resolve: {
     modules: [path.resolve(__dirname, "src"), "node_modules"],
-    extensions: [".ts", ".tsx", ".js", ".scss"]
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".scss"]
   }
 };
 

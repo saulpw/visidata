@@ -35,8 +35,7 @@ export default class {
       (httpsEnabled ? "wss://" : "ws://") +
       window.location.hostname +
       port +
-      window.location.pathname +
-      "ws";
+      "/ws";
     return url;
   }
 

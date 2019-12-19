@@ -5,6 +5,7 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-proposal-numeric-separator": "^7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
+    "@babel/plugin-transform-react-jsx": "^7.7.7",
     "@babel/preset-env": "^7.7.6",
     "@babel/preset-typescript": "^7.7.4",
     "@types/mithril": "^2.0.2",
@@ -28,6 +29,8 @@
   },
   "dependencies": {
     "core-js": "3",
+    "material-components-web": "^4.0.0",
+    "material-design-icons-svg": "^3.0.0",
     "mithril": "2.0.4",
     "regenerator-runtime": "0.13.3",
     "xterm": "4.3.0",

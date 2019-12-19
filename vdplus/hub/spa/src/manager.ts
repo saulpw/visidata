@@ -1,53 +1,113 @@
 import Connection from "websocket";
-import { Terminal } from "xterm";
+import { Terminal, IDisposable } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import UTF8Decoder from "lib/utf8_decode";
 
-export default class {
-  elem: HTMLElement;
-  term: Terminal;
-  resizeListener: () => void;
-  decoder: UTF8Decoder;
+import m from "mithril";
+import api from "api";
+import user from "user";
 
-  message: HTMLElement;
-  messageTimeout: number;
+export default class {
+  PROMPT: string;
+  elem!: HTMLElement;
+  term!: Terminal;
+  fitAddon!: FitAddon;
+  decoder: UTF8Decoder;
+  connection!: Connection;
+  message!: HTMLElement;
+  messageTimeout!: number;
   messageTimer!: number;
+  naiveInteractionListener!: IDisposable;
 
   constructor() {
+    this.PROMPT = "$ ";
     this.decoder = new UTF8Decoder();
-    const elem = document.getElementById("terminal");
-    const connection = new Connection(this);
+    this.elem = document.getElementById("terminal")!;
+    this.setupMessenger();
+    this.startTerminal();
+    this.startListeners();
+  }
 
-    window.addEventListener("unload", () => {
-      connection.close();
-      this.close();
-    });
-
-    this.elem = elem!;
+  startTerminal() {
     this.term = new Terminal();
-    const fitAddon = new FitAddon();
-    this.term.loadAddon(fitAddon);
-
-    this.message = elem!.ownerDocument!.createElement("div");
-    this.message.className = "xterm-overlay";
-    this.messageTimeout = 2000;
-
-    this.resizeListener = () => {
-      fitAddon.fit();
-      this.term.scrollToBottom();
-      this.showMessage(
-        String(this.term.cols) + "x" + String(this.term.rows),
-        this.messageTimeout
-      );
-    };
-
-    this.term.open(elem!);
+    this.fitAddon = new FitAddon();
+    this.term.loadAddon(this.fitAddon);
+    this.term.open(this.elem!);
     this.term.setOption("fontSize", "18");
     this.term.focus();
-    this.resizeListener();
+    this.resizeHandler();
+    this.welcomeMessage();
+  }
+
+  welcomeMessage() {
+    this.term.writeln("Welcome to VisiData online");
+    this.term.writeln(
+      "Please enter an email address to login or 'guest' for a guest account"
+    );
+    this.term.write(this.PROMPT);
+    this.naiveInteractionListener = this.term.onKey(
+      this.naiveInteraction.bind(this)
+    );
+  }
+
+  // This is only for simple tasks like logging in. For normal TTY interaction
+  // all input is piped over a websocket for the backend to handle.
+  naiveInteraction(e: { key: string; domEvent: KeyboardEvent }) {
+    const ev = e.domEvent;
+    const printable = !ev.altKey && !ev.ctrlKey && !ev.metaKey;
+    if (ev.keyCode === 13) {
+      this.term.writeln("");
+      this.term.writeln("Loading...");
+      const line = this.term.buffer.getLine(2)!.translateToString();
+      const user = line.replace(this.PROMPT, "");
+      this.login(user);
+    } else if (ev.keyCode === 8) {
+      // Do not delete the prompt
+      if (this.term.buffer.cursorX > this.PROMPT.length) {
+        this.term.write("\b \b");
+      }
+    } else if (printable) {
+      this.term.write(e.key);
+    }
+  }
+
+  async login(username: string) {
+    const response = await api.request("auth?username=" + username);
+    if (response.status == 200) {
+      user.login(response.body.token, response.body.username);
+      this.naiveInteractionListener.dispose();
+      this.term.clear();
+      this.connect();
+    }
+  }
+
+  setupMessenger() {
+    this.message = this.elem!.ownerDocument!.createElement("div");
+    this.message.className = "xterm-overlay";
+    this.messageTimeout = 2000;
+  }
+
+  resizeHandler() {
+    this.fitAddon.fit();
+    this.term.scrollToBottom();
+    this.showMessage(
+      String(this.term.cols) + "x" + String(this.term.rows),
+      this.messageTimeout
+    );
+  }
+
+  startListeners() {
     window.addEventListener("resize", () => {
-      this.resizeListener();
+      this.resizeHandler();
     });
+    window.addEventListener("unload", () => {
+      this.connection.close();
+      this.close();
+    });
+  }
+
+  connect() {
+    this.connection = new Connection(this);
   }
 
   info(): { columns: number; rows: number } {
@@ -79,7 +139,7 @@ export default class {
   }
 
   setWindowTitle(title: string) {
-    document.title = title;
+    // Noop for now
   }
 
   onInput(callback: (input: string) => void) {
@@ -109,7 +169,7 @@ export default class {
   }
 
   close(): void {
-    window.removeEventListener("resize", this.resizeListener);
+    window.removeEventListener("resize", this.resizeHandler);
     this.term.dispose();
   }
 }
