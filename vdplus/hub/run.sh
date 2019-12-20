@@ -1,10 +1,11 @@
 #!/bin/sh
 
-. $HOME/.poetry/env
+/app/bin/gotty -w -p 8181 vd /app/data &
 
+. $HOME/.poetry/env
 poetry run \
   gunicorn \
-  --worker-class eventlet \
-  -w 1 \
+  --worker-class aiohttp.GunicornWebWorker \
+  -w ${GUNICORN_WORKERS:-4} \
   --bind 0.0.0.0 \
-  app:app
+  app:create_app

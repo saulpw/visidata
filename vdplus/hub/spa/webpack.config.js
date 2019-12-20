@@ -7,12 +7,12 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
 const autoprefixer = require("autoprefixer");
 
-const is_prod = process.env.FLASK_ENV === "prod";
+const is_prod = process.env.VD_ENV === "production";
 
 if (is_prod) {
   mode = "production";
 } else {
-  if (process.env.FLASK_ENV === "test") {
+  if (process.env.VD_ENV === "test") {
     mode = "test";
   } else {
     mode = "development";
@@ -33,7 +33,7 @@ module.exports = {
   },
   entry: "./src/main.ts",
   output: {
-    publicPath: "/",
+    publicPath: "/assets/",
     path: __dirname + "/dist",
     filename: "bundle.js"
   },

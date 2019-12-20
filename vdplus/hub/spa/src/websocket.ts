@@ -23,19 +23,15 @@ export default class {
 
   constructor(manager: Manager) {
     this.manager = manager;
-    this.socket = new WebSocket(this.url(), ["webtty"]);
+    this.socket = new WebSocket(this.url());
     this.reconnect = -1;
     this.setup();
   }
 
   url() {
     const httpsEnabled = window.location.protocol == "https:";
-    const port = ENV.mode == "production" ? "" : ":8081";
     const url =
-      (httpsEnabled ? "wss://" : "ws://") +
-      window.location.hostname +
-      port +
-      "/ws";
+      (httpsEnabled ? "wss://" : "ws://") + window.location.host + "/ws";
     return url;
   }
 

@@ -12,10 +12,10 @@ class API {
         this.base = "/";
         break;
       case "development":
-        this.base = "http://localhost:5000/";
+        this.base = "http://localhost:8000/";
         break;
       case "test":
-        this.base = "http://localhost:5002/";
+        this.base = "http://localhost:8002/";
         break;
       default:
         this.base = "/";
