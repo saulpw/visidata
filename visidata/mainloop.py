@@ -4,7 +4,7 @@ import curses
 import threading
 import time
 
-from visidata import vd, VisiData, colors, bindkeys
+from visidata import vd, VisiData, colors, bindkeys, ESC
 
 curses_timeout = 100 # curses timeout in ms
 timeouts_before_idle = 10
@@ -49,6 +49,9 @@ def run(self, scr):
         self.draw(scr, sheet)
 
         keystroke = self.getkeystroke(scr, sheet)
+
+        if not keystroke and ESC in self.keystrokes:  # timeout ESC
+            self.keystroke = ''
 
         if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
             numTimeouts = 0
