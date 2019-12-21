@@ -53,7 +53,7 @@ def moveVisibleCol(sheet, fromVisColIdx, toVisColIdx):
     if 0 <= toVisColIdx < sheet.nVisibleCols:
         fromVisColIdx = min(max(fromVisColIdx, 0), sheet.nVisibleCols-1)
         fromColIdx = sheet.columns.index(sheet.visibleCols[fromVisColIdx])
-        toColIdx = sheet.columns.index(sheet.visibleCols[toVisColIdx])
+        toColIdx = sheet.columns.index(sheet.nonKeyVisibleCols[toVisColIdx])
         moveListItem(sheet.columns, fromColIdx, toColIdx)
         return toVisColIdx
     else:
