@@ -50,8 +50,8 @@ def run(self, scr):
 
         keystroke = self.getkeystroke(scr, sheet)
 
-        if not keystroke and ESC in self.keystrokes:  # timeout ESC
-            self.keystroke = ''
+        if not keystroke and prefixWaiting and ESC in self.keystrokes:  # timeout ESC
+            self.keystrokes = ''
 
         if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
             numTimeouts = 0
