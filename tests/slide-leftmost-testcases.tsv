@@ -1,0 +1,6 @@
+Num	Case	Expected	Passing
+1	no keys	column moves to leftmost	+
+2	1 key; gH on non-key	column moves to the right of key	+
+3	2 keys; gH on non-key	column moves to the right of rightmost key	+
+4	1 key; gH on key	nuffin changes	+
+5	1 key; gH on non-key 1, gH on non-key 2	key, 2, 1	+

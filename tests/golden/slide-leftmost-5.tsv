@@ -1,0 +1,50 @@
+Date	SKU	Item	Customer	Quantity	Unit	Paid
+7/3/2018 1:47p	FOOD213	BFF Oh My Gravy! Beef & Salmon 2.8oz	Robert Armstrong	4	$12.95	$51.8
+7/3/2018 3:32p	FOOD121	Food, Adult Cat - 3.5 oz	Kyle Kennedy	1	$4.22	$4.22
+7/5/2018 4:15p	FOOD121	Food, Adult Cat 3.5 oz	Douglas "Dougie" Powers	1	$4.22	$4.22
+7/6/2018 12:15p	FOOD122	Food, Senior Wet Cat - 3 oz	桜 高橋 (Sakura Takahashi)	12	$1.29	157¥
+7/10/2018 10:28a	NSCT201	Food, Salamander	David Attenborough	30	$.05	$1.5
+7/10/2018 5:23p	CAT060	Cat, Korat (Felis catus)	Susan Ashworth	1	$720.42	$720.42
+7/10/2018 5:23p	FOOD130	Food, Kitten 3kg	Susan Ashworth	1	$14.94	$14.94
+7/13/2018 10:26a	NSCT523	Monster, Rust (Monstrus gygaxus)	Wil Wheaton	1	$39.95	$39.95
+7/13/2018 3:49p	FOOD216	BFF Oh My Gravy! Chicken & Shrimp 2.8oz	Robert Armstrong	4	$12.95	$51.8
+7/17/2018 9:01a	FOOD217	BFF Oh My Gravy! Duck & Tuna 2.8oz	Robert Armstrong	4	$12.95	$51.8
+7/17/2018 11:30a	LAGO342	Rabbit (Oryctolagus cuniculus)	Helen Halestorm	2	$32.94	$65.88
+7/18/2018 12:16p	FOOD122	Food, Senior Wet Cat - 3 oz	桜 高橋 (Sakura Takahashi)	6	$1.29	157¥
+7/19/2018 10:28a	FOOD170	Food, Dog - 5kg	Rubeus Hagrid	5	$44.95	$224.75
+7/20/2018 2:13p	FOOD167	Food, Premium Wet Cat - 3.5 oz	Jon Arbuckle	50	$3.95	$197.5
+7/23/2018 1:41p	FOOD215	BFF Oh My Gravy! Lamb & Tuna 2.8oz	Robert Armstrong	4	$12.95	$51.8
+7/23/2018 4:23p	TOY235	Laser Pointer	Douglas "Dougie" Powers	1	$16.12	$16.12
+7/24/2018 12:16p	FOOD122	Food, Senior Wet Cat - 3 oz	桜 高橋 (Sakura Takahashi)	3	$1.29	157¥
+7/26/2018 4:39p	FOOD420	Food, Shark - 10 kg	Douglas "Dougie" Powers	1	$15.70	$15.7
+7/27/2018 12:16p	FOOD122	Food, Senior Wet Cat - 3 oz	桜 高橋 (Sakura Takahashi)	3	$1.29	157¥
+7/30/2018 12:17p	RETURN	Food, Senior Wet Cat - 3 oz	桜 高橋 (Sakura Takahashi)	1	$1.29	157¥
+7/31/2018 5:42p	CAT060	Food, Dragon - 50kg	Rubeus Hagrid	5	$720.42	$3602.1
+8/1/2018 2:44p	FOOD360	Food, Rhinocerous - 50kg	David Attenborough	4	$5.72	$22.88
+8/2/2018 5:12p	CAT110	Cat, Maine Coon (Felix catus)	Susan Ashworth	1	$1,309.68	$1309.68
+8/2/2018 5:12p	FOOD130	Food, Kitten 3kg	Susan Ashworth	3	$14.94	$44.82
+8/6/2018 10:21a	FOOD212	BFF Oh My Gravy! Beef & Chicken 2.8oz	Robert Armstrong	4	$12.95	$51.8
+8/7/2018 4:12p	REPT082	Kingsnake, California (Lampropeltis getula)	Juan Johnson	1	$89.95	$89.95
+8/7/2018 4:12p	RDNT443	Mouse, Pinky (Mus musculus)	Juan Johnson	1	$1.49	$1.49
+8/10/2018 4:31p	FOOD211	BFF Oh My Gravy! Chicken & Turkey 2.8oz	Robert Armstrong	4	$12.95	$51.8
+8/13/2018 2:07p	RDNT443	Mouse, Pinky (Mus musculus)	Monica Johnson	1	$1.49	$1.49
+8/13/2018 2:08p	FOOD146	Forti Diet Prohealth Mouse/Rat 3lbs	María Fernández	2	$2.00	$4.0
+8/15/2018 11:57a	RETURN	Parrot, Norwegian Blue (Mopsitta tanta)	Mr. Praline	1	$2300.00	-$2300.0
+8/15/2018 3:48p	FOOD121	Food, Adult Cat - 3.5 oz	Kyle Kennedy	2	$4.22	$8.44
+8/16/2018 11:50a	RETURN	Rabbit (Oryctolagus cuniculus)	Helen Halestorm	6	$0	$0.0
+8/16/2018 4:00p	DOG010	Dog, Golden Retriever (Canis lupus familiaris)	Kyle Kennedy	1	$2,495.99	$2495.99
+8/16/2018 5:15p	BIRD160	Parakeet, Blue (Melopsittacus undulatus)	Michael Smith	1	29.95	$31.85
+8/17/2018 9:26a	NSCT201	Food, Spider	Rubeus Hagrid	5	$.05	$0.25
+8/20/2018 9:36a	RETURN	Dog, Golden Retriever (Canis lupus familiaris)	Kyle Kennedy	1	$1,247.99	-$1247.99
+8/20/2018 3:31p	NSCT201	Crickets, Adult Live (Gryllus assimilis)	Monica Johnson	30	$.05	$1.5
+8/20/2018 5:12p	NSCT084	Food, Pangolin	David Attenborough	30	$.17	$5.10
+8/21/2018 12:13p	FOOD214	BFF Oh My Gravy! Duck & Salmon 2.8oz	Robert Armstrong	4	$12.95	$51.8
+8/22/2018 9:38a	BIRD160	Food, Quoll	David Attenborough	1	29.95	$29.95
+8/22/2018 2:13p	FOOD170	Food, Adult Dog - 5kg	Jon Arbuckle	1	$44.95	$44.95
+8/24/2018 11:42a	FOOD218	BFF Oh My Gravy! Chicken & Salmon 2.8oz	Robert Armstrong	4	$12.95	$51.8
+8/27/2018 3:05p	NSCT443	Mealworms, Large (Tenebrio molitor) 100ct	Monica Johnson	1	$1.99	$1.99
+8/28/2018 5:32p	CAT020	Cat, Scottish Fold (Felis catus)	Susan Ashworth	1	$1,964.53	$1964.53
+8/28/2018 5:32p	FOOD130	Food, Kitten 3kg	Susan Ashworth	2	$14.94	$29.88
+8/29/2018 10:07a	FOOD219	BFF Oh My Gravy! Chicken & Pumpkin 2.8oz	Robert Armstrong	4	$12.95	$51.8
+8/31/2018 12:00a	FOOD219	BFF Oh My Gravy! Chicken & Pumpkin 2.8oz	Robert Armstrong	144	$12.95	$1864.8
+8/31/2018 5:57p	REPT217	Lizard, Spinytail (Uromastyx ornatus)	Juan Johnson	1	$99.95	$99.95

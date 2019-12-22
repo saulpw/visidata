@@ -1,0 +1,8 @@
+sheet	col	row	longname	input	keystrokes	comment
+	SqliteSheet	header	set-option	0		
+	UsvSheet	delimiter	set-option	␞		
+	UsvSheet	row_delimiter	set-option	␟		
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Paid		slide-leftmost		gH	
+benchmark			commit-sheet	tests/gH/golden/case1.tsv	^S	
+benchmark_cmdlog		2	delete-row		d	
