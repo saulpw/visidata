@@ -122,7 +122,13 @@ def checkMemoryUsage(vd):
     ret = ''
     attr = 'color_working'
     if min_mem:
-        tot_m, used_m, free_m = map(int, os.popen('free --total --mega').readlines()[-1].split()[1:])
+        try:
+            freestats = subprocess.run('free --total --mega'.split(), check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.strip().splitlines()
+        except FileNotFoundError as e:
+            if options.debug:
+                vd.exceptionCaught(e)
+            return '', attr
+        tot_m, used_m, free_m = map(int, freestats[-1].split()[1:])
         ret = '[%dMB] ' % free_m + ret
         if free_m < min_mem:
             attr = 'color_warning'
