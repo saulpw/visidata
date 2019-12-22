@@ -127,6 +127,8 @@ def checkMemoryUsage(vd):
         except FileNotFoundError as e:
             if options.debug:
                 vd.exceptionCaught(e)
+            options.min_memory_mb = 0
+            warning('disabling min_memory_mb: "free" not installed')
             return '', attr
         tot_m, used_m, free_m = map(int, freestats[-1].split()[1:])
         ret = '[%dMB] ' % free_m + ret
