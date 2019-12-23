@@ -70,11 +70,16 @@ def getDefaultSaveName(sheet):
 
 
 @VisiData.api
-def save_col(vd, col):
-    vs = copy(col.sheet)
-    vs.columns = [col]
-    vs.rows = copy(col.sheet.rows)
-    path = inputPath("save to: ", value=vs.getDefaultSaveName())
+def save_cols(vd, cols):
+    sheet = cols[0].sheet
+    vs = copy(sheet)
+    vs.columns = list(cols)
+    vs.rows = sheet.rows
+    if len(cols) == 1:
+        savedcoltxt = cols[0].name + ' column'
+    else:
+        savedcoltxt = '%s columns' % len(cols)
+    path = inputPath('save %s to: ' % savedcoltxt, value=vs.getDefaultSaveName())
     vd.saveSheets(path, vs, confirm_overwrite=options.confirm_overwrite)
 
 
@@ -144,4 +149,5 @@ multisave_txt = save_txt
 
 Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)')
 globalCommand('g^S', 'save-all', 'saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
-Sheet.addCommand('z^S', 'save-col', 'save_col(cursorCol)')
+Sheet.addCommand('z^S', 'save-col', 'save_cols([cursorCol])')
+Sheet.addCommand('', 'save-col-keys', 'save_cols(keyCols + [cursorCol])')
