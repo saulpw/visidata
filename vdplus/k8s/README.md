@@ -2,18 +2,24 @@
 
 ## Prerequisties
 
-All of these should be installable through your OS's standard package manager.
+All of these should be installable through your OS's standard package manager (Snaps, PPAs).
+However, most of these also have oneliner `curl` commands to install simple static binaries.
 
   * [`doctl`](https://github.com/digitalocean/doctl): Talking to the Digital Ocean API. 
+  * [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/): Talking to the Kubernetes API. 
   * [Terraform](https://learn.hashicorp.com/terraform/getting-started/install.html): Infrastructure As Code. Talking to the k8s API.
   * [Helm](https://v3.helm.sh/docs/intro/install/) (v2.5.1): Kubernetes package manager.
 
 ## Authenticate with Digital Ocean
 
-The DO Access Token is present at `k8s/secrets.tf` as the variable named `do_vd_key`.
+The VisiData DO Access Token is present at `k8s/secrets.tf` as the variable named `do_vd_key`.
 Setup the DO admin CLI tool with `doctl auth init` and paste the DO token when prompted.
 
+If the cluster is already created you can skip to 'Connecting `kubectl` to the cluster'.
+
 ## Creating/updating the cluster
+
+Terraform provides what's known as [Infrastructure as Code](https://en.wikipedia.org/wiki/Infrastructure_as_code). This is the practice of maintaining the exact and reproducible state of the compute resources and cluster in source code. It is possible to manually issue `doctl` (to create VMs) and `kubectl` (to create k8s apps) commands, but that quickly becomes unweildly. Instead it is possible to create a suite of `.tf` files that declaritvely define the infrastructure and then a `terraform apply` should always be able ensure that the state of the locally described infrastructure in code matches the state of the real resources in the wild.
 
 All `terraform` commands need to be run within the `k8s/` folder.
 
@@ -23,15 +29,15 @@ or not) run `terraform init` to download the necessary third-party Terraform plu
 To then either create a new cluster or update the existing one run `terraform apply`.
 
 When creating a cluster for the first time `terraform apply` will need to be run at least twice. Partly because some services don't come up in the right order, but also because some services
-rely on the internal Docker registry. So after the first run the following images will need to
-be pushed:
+rely on the cluster-internal Docker registry. So after the first run the following images will need to be pushed:
 
   * `docker push docker.k8s.visidata.org/vdwww/nfs-server:latest`. See `k8s/nfs-server`
-  * `docker push docker.k8s.visidata.org/vdwww/vdwww:latest`. See `/Dockerfile`
+  * `docker push docker.k8s.visidata.org/vdwww/vdwww:latest`. See `vd/Dockerfile`
+  * `docker push docker.k8s.visidata.org/vdhub/vdwww:latest`. See `hub/Dockerfile`
   * TODO: Terraform/k8s can actually automate this.
 
 ### Connecting `kubectl` to the cluster
-Once the cluster exists save the cluster's config with
+Once the cluster exists, save the cluster's config with
 `doctl kubernetes cluster kubeconfig save vdwww` so that `kubectl` knows how to access the Kubernetes API.
 
 ## Creating the cluster for the first time

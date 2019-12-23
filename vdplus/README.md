@@ -7,7 +7,7 @@ To access the secure credentials in this repo, you will need to decrypt them.
   * Install [git-crypt](https://github.com/AGWA/git-crypt).
   * Ask your nearest friendly VisiData dev for the decryption key. It will likely be
 base64 encoded for ease of communication. If the key ends with a "==" this means you can
-run `base6f -d [long string of random character==]` to get the raw key.
+run `base64 -d [long string of random character==]` to get the raw key.
   * Copy the raw key to a file, eg `/tmp/master/key`
   * Within the path of the repo run `git-crypt unlock /tmp/master/key`
   * You can now just use `git` as normal, all the encryption/decryption happens
