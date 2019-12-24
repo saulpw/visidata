@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export TERM=xterm
 /app/bin/gotty -w -p 8181 vd /app/data &
 
 . $HOME/.poetry/env

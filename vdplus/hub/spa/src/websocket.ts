@@ -32,7 +32,7 @@ export default class {
     let domain: string;
     const httpsEnabled = window.location.protocol == "https:";
     if (ENV.API_SERVER == "/") {
-      domain = window.location.hostname;
+      domain = window.location.host;
     } else {
       domain = ENV.API_SERVER;
     }

@@ -3,7 +3,8 @@ import crypto from "crypto";
 
 export default class {
   static DOMAIN() {
-    return "http://localhost:8000";
+    const port = process.env.VD_PORT || "8000";
+    return "http://localhost:" + port;
   }
 
   static uuid() {

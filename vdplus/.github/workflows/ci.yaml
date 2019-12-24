@@ -7,14 +7,17 @@ on: [push]
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      VD_ENV: "test"
+      GITCRYPT_KEY: ${{ secrets.GITCRYPT_KEY }}
     steps:
     - uses: actions/checkout@master
     - name: Build
       run: .github/workflows/build.sh
     - name: Run tests
       run: .github/workflows/test.sh
+    - name: Upload screenshots
+      run: .github/workflows/on_failure.sh
+      if: failure()
     - name: Deploy
-      env:
-        GITCRYPT_KEY: ${{ secrets.GITCRYPT_KEY }}
-        VD_ENV: "test"
       run: .github/workflows/deploy.sh

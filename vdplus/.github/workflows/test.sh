@@ -23,9 +23,7 @@ clean_up() {
 }
 trap clean_up EXIT
 
-apt-get install chrome
-
-docker run --name $CONTAINER_NAME --rm -d -p $PORT:$PORT vdhub
+docker run --name $CONTAINER_NAME -v $(pwd)/hub/spa:/app/data --rm -d -p $PORT:$PORT vdhub
 
 if timeout --preserve-status 10 bash -c wait_until_ready; then
   hub/test/testcafe.sh

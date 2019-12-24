@@ -4,7 +4,18 @@ set -e
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 
 pushd $PROJECT_ROOT/hub
-./spa/node_modules/.bin/testcafe \
+
+version=$(
+  cat spa/package.json \
+    | rg 'testcafe"' \
+    | cut -d ":" -f2 \
+    | sed 's/"//g' | sed 's/\^//g' | sed 's/,//g' \
+    | xargs
+  )
+
+yarn add testcafe@$version
+
+node_modules/.bin/testcafe \
   chrome:headless \
   --screenshots $PROJECT_ROOT/hub/test/screenshots \
   --screenshots-on-fails \
