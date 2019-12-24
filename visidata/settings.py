@@ -281,7 +281,7 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
     sys.path.append(str(visidata.Path(args.visidata_dir or options.visidata_dir)))
 
     # user customisations in config file in standard location
-    loadConfigFile(visidata.Path(options.config), getGlobals())
+    loadConfigFile(visidata.Path(args.config or options.config), getGlobals())
 
     # apply command-line overrides after .visidatarc
     for optname, optval in vars(args).items():
