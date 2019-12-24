@@ -1,7 +1,8 @@
-options.motd_url='https://demo.visidata.org/motd'
+options.motd_url='https://visidata.org/motd-vdwww'
 options.cmdlog_histfile='/var/log/visidata_commands.log'
 
 #options.quitguard=True
+options.min_memory_mb=100
 
+Canvas.bindkey('2097152', 'zoomin-mouse')
 bindkey('2097152', 'scroll-down')
-Canvas.bindkey('2097152', 'zoomout-mouse')
