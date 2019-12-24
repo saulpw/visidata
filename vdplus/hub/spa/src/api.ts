@@ -7,21 +7,7 @@ class API {
   token!: string | null;
 
   constructor() {
-    switch (ENV.mode) {
-      case "production":
-        this.base = "/";
-        break;
-      case "development":
-        this.base = "http://localhost:8000/";
-        break;
-      case "test":
-        this.base = "http://localhost:8002/";
-        break;
-      default:
-        this.base = "/";
-        break;
-    }
-    this.base += "api/";
+    this.base = "/api/";
     this.api_stack = 0;
     this.is_active = false;
   }

@@ -1,15 +1,20 @@
-# Note that Github's web editor has linting for these files
+# Note that Github's web editor has linting for Github Action YAML
 # And also there is a JSON schema for validating in your local editor:
 # http://json.schemastore.org/github-workflow
 
 name: CI
 on: [push]
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Build, test, publish and deploy
+    - name: Build
+      run: .github/workflows/build.sh
+    - name: Run tests
+      run: .github/workflows/test.sh
+    - name: Deploy
       env:
         GITCRYPT_KEY: ${{ secrets.GITCRYPT_KEY }}
-      run: .github/workflows/build_test_push_deploy.sh
+        VD_ENV: "test"
+      run: .github/workflows/deploy.sh

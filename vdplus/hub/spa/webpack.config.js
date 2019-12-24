@@ -19,6 +19,14 @@ if (is_prod) {
   }
 }
 
+if (mode == "test" || mode == "development") {
+  API_SERVER = "localhost:8000";
+} else {
+  API_SERVER = "/";
+}
+
+const isDevServer = process.env.WEBPACK_DEV_SERVER;
+
 module.exports = {
   mode: mode,
   optimization: {
@@ -29,11 +37,18 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     overlay: true,
-    hot: true
+    hot: true,
+    proxy: {
+      "/api/*": {
+        target: "http://" + API_SERVER,
+        secure: false,
+        changeOrigin: true
+      }
+    }
   },
   entry: "./src/main.ts",
   output: {
-    publicPath: "/assets/",
+    publicPath: isDevServer ? "/" : "/assets/",
     path: __dirname + "/dist",
     filename: "bundle.js"
   },
@@ -48,7 +63,10 @@ module.exports = {
       filename: is_prod ? "[name].[hash].css" : "[name].css",
       chunkFilename: is_prod ? "[id].[hash].css" : "[id].css"
     }),
-    new webpack.DefinePlugin({ "ENV.mode": JSON.stringify(mode) }),
+    new webpack.DefinePlugin({
+      "ENV.mode": JSON.stringify(mode),
+      "ENV.API_SERVER": JSON.stringify(API_SERVER)
+    }),
     new CopyWebpackPlugin([{ from: "robots.txt" }, { from: "favicon.ico" }])
   ],
   module: {

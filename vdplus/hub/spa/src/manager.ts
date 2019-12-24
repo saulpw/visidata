@@ -3,7 +3,7 @@ import { Terminal, IDisposable } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import UTF8Decoder from "lib/utf8_decode";
 
-import m from "mithril";
+import Utils from "Utils";
 import api from "api";
 import user from "user";
 
@@ -101,7 +101,9 @@ export default class {
       this.resizeHandler();
     });
     window.addEventListener("unload", () => {
-      this.connection.close();
+      if (this.connection) {
+        this.connection.close();
+      }
       this.close();
     });
   }
@@ -116,6 +118,17 @@ export default class {
 
   output(data: string) {
     this.term.write(this.decoder.decode(data));
+    if (Utils.isTesting()) {
+      this.dumpBuffer();
+    }
+  }
+
+  dumpBuffer() {
+    let buffer = "";
+    for (let i = 0; i < this.term.rows; i++) {
+      buffer += this.term.buffer.getLine(i)!.translateToString() + "\n";
+    }
+    document.getElementById("dev-terminal-text")!.innerHTML = buffer;
   }
 
   showMessage(message: string, timeout: number) {
@@ -138,7 +151,7 @@ export default class {
     }
   }
 
-  setWindowTitle(title: string) {
+  setWindowTitle(_title: string) {
     // Noop for now
   }
 

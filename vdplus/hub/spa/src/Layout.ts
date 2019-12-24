@@ -5,6 +5,7 @@ import { MDCLinearProgress } from "@material/linear-progress";
 import { MDCSnackbar } from "@material/snackbar";
 import star from "material-design-icons-svg/paths/star.json";
 
+import Utils from "Utils";
 import bust from "material-design-icons-svg/paths/account.json";
 import info from "material-design-icons-svg/paths/information.json";
 import Icon from "partials/Icon";
@@ -32,7 +33,8 @@ export default class {
       this.accountMenu(),
       m(".layout", { className: this.classes }, [vnode.children]),
       this.notification(),
-      this.footer()
+      this.footer(),
+      this.terminalTextMirror()
     ];
   }
 
@@ -180,5 +182,13 @@ export default class {
       m(m.route.Link, { href: "/about" }, "about"),
       " page"
     ]);
+  }
+
+  // A placeholder to mirror the contents of the terminal so that tests can string match
+  // on the contents of the terminal.
+  private terminalTextMirror() {
+    if (Utils.isTesting()) {
+      return m("#dev-terminal-text.hidden");
+    }
   }
 }

@@ -29,9 +29,14 @@ export default class {
   }
 
   url() {
+    let domain: string;
     const httpsEnabled = window.location.protocol == "https:";
-    const url =
-      (httpsEnabled ? "wss://" : "ws://") + window.location.host + "/ws";
+    if (ENV.API_SERVER == "/") {
+      domain = window.location.hostname;
+    } else {
+      domain = ENV.API_SERVER;
+    }
+    const url = (httpsEnabled ? "wss://" : "ws://") + domain + "/ws";
     return url;
   }
 

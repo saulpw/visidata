@@ -1,5 +1,3 @@
-import user from "user";
-
 export default class {
   /**
    * limits your function to be called at most every W milliseconds, where W is wait.
@@ -38,5 +36,11 @@ export default class {
     if (rest.length == 1 && obj.hasOwnProperty(level)) return obj[level];
     rest.shift();
     return this.deeplyGet(obj[level], ...rest);
+  }
+
+  // In CI the production webpack build is used, so we need to extend the defintion of
+  // testing to include another indicator for the testing environment.
+  static isTesting() {
+    return ENV.mode == "test" || window.location.host.includes("localhost");
   }
 }

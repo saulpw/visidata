@@ -1,4 +1,10 @@
 {
+  "private": true,
+  "scripts": {
+    "test": "../test/testcafe.sh",
+    "build": "webpack --optimize-minimize --build",
+    "server": "webpack-dev-server --mode development"
+  },
   "devDependencies": {
     "@babel/cli": "^7.7.5",
     "@babel/core": "^7.7.5",

@@ -7,6 +7,7 @@ declare module "*.png";
 
 declare const ENV: {
   mode: string;
+  API_SERVER: string;
 };
 
 interface InputAttrs {
