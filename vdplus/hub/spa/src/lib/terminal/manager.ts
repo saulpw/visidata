@@ -1,4 +1,4 @@
-import Connection from "websocket";
+import Connection from "lib/terminal/websocket";
 import { Terminal, IDisposable } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import UTF8Decoder from "lib/utf8_decode";

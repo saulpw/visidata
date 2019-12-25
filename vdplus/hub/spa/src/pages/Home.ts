@@ -1,6 +1,6 @@
 import m from "mithril";
 
-import Manager from "manager";
+import Terminal from "lib/terminal/manager";
 
 export default class implements m.ClassComponent {
   constructor() {}
@@ -10,6 +10,6 @@ export default class implements m.ClassComponent {
   }
 
   oncreate() {
-    new Manager();
+    new Terminal();
   }
 }
