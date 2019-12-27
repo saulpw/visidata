@@ -1,16 +1,8 @@
-import unittest
-from unittest.mock import Mock
+import pytest
 
 import visidata
 
-class VisiDataPathTestCase(unittest.TestCase):
-    def setUp(self):
-        self.scr = Mock()
-        self.scr.addstr = Mock()
-        self.scr.move = Mock()
-        self.scr.getmaxyx = lambda: (25, 80)
-        import curses
-        curses.curs_set = lambda v: None
+class TestVisidataPath:
 
     def test_withName(self):
         'tests for visidata.Path().with_name'
@@ -23,6 +15,3 @@ class VisiDataPathTestCase(unittest.TestCase):
 
         assert "https://visidata.org/hello/b.tsv" == str(url_path.with_name('b.tsv')), '{} should be https://visidata.org/hello/b.tsv'.format(url_path.with_name('b.tsv'))
         assert "https://visidata.org/hello/a/b.tsv" == str(url_path.with_name('a/b.tsv')), '{} should be https://visidata.org/hello/a/b.tsv'.format(url_path.with_name('a/b.tsv'))
-
-if __name__ == '__main__':
-    unittest.main()
