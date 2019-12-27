@@ -1,3 +1,4 @@
 markdown
+pytest
 pyyaml
 tox

@@ -1,6 +1,5 @@
 import pkg_resources
-import unittest
-from unittest import skip
+import pytest
 from unittest.mock import Mock
 
 import itertools
@@ -38,17 +37,10 @@ inputLines = { 'save-sheet': 'tests/jetsam.csv',  # save to some tmp file
                  'random-rows': '3',
               }
 
-class CommandsTestCase(unittest.TestCase):
-    def setUp(self):
-        self.scr = Mock()
-        self.scr.addstr = Mock()
-        self.scr.move = Mock()
-        self.scr.getmaxyx = lambda: (25, 80)
-        import curses
-        curses.curs_set = lambda v: None
-        visidata.options.confirm_overwrite = False
+@pytest.mark.usefixtures('curses_setup')
+class TestCommands:
 
-    def test_baseCommands(self):
+    def test_baseCommands(self, mock_screen):
         'exec each global command at least once'
 
         cmdlist = visidata.commands
@@ -63,7 +55,7 @@ class CommandsTestCase(unittest.TestCase):
                 continue
             ntotal += 1
             print(longname)
-            self.runOneTest(longname)
+            self.runOneTest(mock_screen, longname)
             vd.sync()
             if vd.lastErrors:
                 # longname, execstr, and vd.lastErrors
@@ -73,10 +65,10 @@ class CommandsTestCase(unittest.TestCase):
             vs.checkCursor()
         print('%s/%s commands had errors' % (nerrs, ntotal))
 
-    def runOneTest(self, longname):
+    def runOneTest(self, mock_screen, longname):
             visidata.vd.clear_caches()  # we want vd to return a new VisiData object for each command
             vd = visidata.vd
-            vd.scr = self.scr
+            vd.scr = mock_screen
 
             if longname in inputLines:
                 line = [ch for ch in inputLines[longname]] + ['^J']
@@ -90,8 +82,5 @@ class CommandsTestCase(unittest.TestCase):
             vs.vd = vd
             vd.sheets = [vs]
             vs.mouseX, vs.mouseY = (4, 4)
-            vs.draw(self.scr)
+            vs.draw(mock_screen)
             vs.exec_command(vs.getCommand((longname)), vdglobals=vars(visidata))
-
-if __name__ == '__main__':
-    unittest.main()
