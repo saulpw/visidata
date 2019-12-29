@@ -7,7 +7,7 @@ pushd $PROJECT_ROOT/hub
 
 version=$(
   cat spa/package.json \
-    | rg 'testcafe"' \
+    | grep 'testcafe"' \
     | cut -d ":" -f2 \
     | sed 's/"//g' | sed 's/\^//g' | sed 's/,//g' \
     | xargs

@@ -23,7 +23,24 @@ clean_up() {
 }
 trap clean_up EXIT
 
-docker run --name $CONTAINER_NAME -v $(pwd)/hub/spa:/app/data --rm -d -p $PORT:$PORT vdhub
+docker run --rm \
+  -e CI='true' \
+  -e POSTGRES_HOST='localhost' \
+  -e POSTGRES_PASSWORD='postgres' \
+  -e POSTGRES_USER='postgres' \
+  --net host \
+  vdhub \
+  bash -c 'source $HOME/.poetry/env && cd /app/api && poetry run pw_migrate migrate'
+
+docker run \
+  --name $CONTAINER_NAME \
+  -v $(pwd)/hub/spa:/app/data \
+  -e CI='true' \
+  -e POSTGRES_HOST='localhost' \
+  -e POSTGRES_PASSWORD='postgres' \
+  -e POSTGRES_USER='postgres' \
+  --net host \
+  vdhub > vdhub.logs 2>&1 &
 
 if timeout --preserve-status 10 bash -c wait_until_ready; then
   hub/test/testcafe.sh

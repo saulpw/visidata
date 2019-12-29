@@ -10,6 +10,15 @@ jobs:
     env:
       VD_ENV: "test"
       GITCRYPT_KEY: ${{ secrets.GITCRYPT_KEY }}
+    services:
+      postgres:
+        image: postgres:11.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 'postgres'
+          POSTGRES_DB: vdwww
+        ports:
+        - 5432:5432
     steps:
     - uses: actions/checkout@master
     - name: Build

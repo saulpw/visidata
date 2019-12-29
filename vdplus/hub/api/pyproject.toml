@@ -11,6 +11,8 @@ gunicorn = "^20.0.4"
 peewee = "^3.13.1"
 peewee_migrate = "^1.1.6"
 psycopg2 = "^2.8.4"
+python-dotenv = "^0.10.3"
+requests = "^2.22.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.8"

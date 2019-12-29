@@ -25,6 +25,29 @@ resource "kubernetes_deployment" "hub" {
       spec {
         // A service account token allows the containers to access the central k8s API
         automount_service_account_token = true
+        init_container {
+          name = "db-setup"
+          image = "localhost:31500/vdwww/vdhub:latest"
+          command = [
+            "sh",
+            "-c",
+            ". $HOME/.poetry/env && cd /app/api && poetry run pw_migrate migrate"
+          ]
+          env {
+            name = "POSTGRES_HOST"
+            value = "postgres-postgresql.postgres"
+          }
+
+          env {
+            name = "POSTGRES_USER"
+            value = "postgres"
+          }
+
+          env {
+            name = "POSTGRES_PASSWORD"
+            value = var.postgres_password
+          }
+        }
         container {
           name  = "app"
           image = "localhost:31500/vdwww/vdhub:latest"
@@ -40,6 +63,16 @@ resource "kubernetes_deployment" "hub" {
           env {
             name = "TERM"
             value = "xterm"
+          }
+
+          env {
+            name = "POSTGRES_PASSWORD"
+            value = var.postgres_password
+          }
+
+          env {
+            name = "MAILGUN_API_KEY"
+            value = var.mailgun_api_key
           }
 
           # These settings dictate the status of the container for deciding whether the

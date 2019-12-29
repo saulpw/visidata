@@ -1,6 +1,8 @@
 import aiohttp
 import asyncio
+import logging
 from aiohttp import web
+from dotenv import load_dotenv
 
 from tty_websocket import tty_websocket_handler
 from models.user import User
@@ -55,7 +57,9 @@ async def root_handler(request):
     return aiohttp.web.FileResponse(SPA_BASE + 'index.html')
 
 async def create_app():
+    load_dotenv()
     app = web.Application()
+    logging.basicConfig(level=logging.DEBUG)
     app.add_routes([web.get('/ws', tty_websocket_handler)])
     app.router.add_static('/assets/', SPA_BASE)
     app.add_routes(routes)

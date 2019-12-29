@@ -1,6 +1,6 @@
 # The Hub
 
-The app that sits in front of all the individual VisiData container. But sits
+The app that sits in front of all the individual VisiData containers. But sits
 behind the main cluster's load balancer. The Hub accepts HTTP requests and
 authenticates users against a DB. It can talk to the Kubernetes API and spin
 up individual containers, it can then forward websockets into those created containers.
@@ -12,7 +12,7 @@ that `vd` processes themselves can run in individual containers, thus providing 
 You will need https://python-poetry.org and https://yarnpkg.com Both are very
 likely available through your OS's package manager.
 
-In the `hub/` path `poetry install`    
+In the `hub/api` path `poetry install`    
 In the `hub/spa` path `yarn install`    
 
 ## Developing
@@ -20,7 +20,10 @@ In the `hub/spa` path `yarn install`
 ### Python API server
 The API server is written using the [aiohttp](https://github.com/aio-libs/aiohttp) async framework. It is a webserver geared specifically towards handling async processes such as those required to support websockets. To run the  API server there is a convenience tool called `adev` (automatically installed with the `poetry install` command above). It does many things, but most importantly it watches for file changes and reloads the server when necessary.
 
-In the `hub/` path run `poetry run adev runserver app.py`
+First copy the `.env.sample` to `.env` and add the secrets you'll need (you might not need
+them all depending on what you're developing).
+
+In the `hub/api` path run `poetry run adev runserver app.py`
 
 ### GoTTY service (optional)
 If you need to hack on interaction with in-browser `vd` instances you will also need a running `gotty` service. Installation instructions are [here](https://github.com/yudai/gotty#installation). Then you can run `gotty -p 8181 --ws-origin '.*' -w vd`.
