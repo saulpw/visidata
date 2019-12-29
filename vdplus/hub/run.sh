@@ -3,6 +3,7 @@
 export TERM=xterm
 /app/bin/gotty -w -p 8181 vd /app/data &
 
+cd api
 . $HOME/.poetry/env
 poetry run \
   gunicorn \

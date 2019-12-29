@@ -1,20 +1,8 @@
-import aiohttp
 import asyncio
+import aiohttp
 from aiohttp import web
 
-routes = web.RouteTableDef()
-
-@routes.get('/api/auth')
-async def auth(request):
-    return web.json_response({
-        "response": {
-            "username": request.query["username"],
-            "token": "abc123"
-        },
-        "meta": {}
-    })
-
-async def websocket_handler(request):
+async def tty_websocket_handler(request):
     queue = asyncio.Queue()
 
     # Inbound from the browser
@@ -62,17 +50,3 @@ async def outbound_socket(outbound, queue):
             break
         elif msg.type == aiohttp.WSMsgType.ERROR:
             break
-
-@routes.get('/{path:.*}')
-async def root_handler(request):
-    return aiohttp.web.FileResponse('./spa/dist/index.html')
-
-async def create_app():
-    app = web.Application()
-    app.add_routes([web.get('/ws', websocket_handler)])
-    app.router.add_static('/assets/', './spa/dist/')
-    app.add_routes(routes)
-    return app
-
-if __name__ == '__main__':
-    web.run_app(create_app())

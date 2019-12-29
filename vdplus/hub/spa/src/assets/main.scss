@@ -7,7 +7,8 @@
 
 $progress_thickness: 3px;
 
-html, body {
+html,
+body {
   background-color: white;
   margin: 0;
   padding: 0;
@@ -56,13 +57,7 @@ header.mdc-top-app-bar {
 
   #account-button.account-page-is-active,
   .about-page-is-active {
-    svg {
-      path {
-        fill: $mdc-theme-primary;
-      }
-    }
-
-    border-bottom: 2px solid $mdc-theme-primary;
+    border-bottom: 3px solid $mdc-theme-secondary;
   }
 }
 
@@ -73,11 +68,11 @@ header.mdc-top-app-bar {
 }
 
 #terminal {
+  display: none;
   background: black;
-  height: 100%;
-  width: 100%;
   padding: 0;
   margin: 0;
+  min-height: 90vh;
 }
 
 .terminal {
@@ -85,7 +80,6 @@ header.mdc-top-app-bar {
 }
 
 .xterm-overlay {
-  font-family: "DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols";
   border-radius: 15px;
   font-size: xx-large;
   color: black;
@@ -98,6 +92,15 @@ header.mdc-top-app-bar {
   transform: translate(-50%, -50%);
   user-select: none;
   transition: opacity 180ms ease-in;
+}
+
+.mdc-snackbar__surface {
+  background-color: $mdc-theme-primary;
+
+  .mdc-snackbar__label {
+    color: $mdc-theme-secondary;
+    text-align: center;
+  }
 }
 
 footer {

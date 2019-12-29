@@ -8,6 +8,9 @@ authors = ["The VisiData team"]
 python = "^3.8"
 aiohttp = {extras = ["speedups"], version = "^3.6.2"}
 gunicorn = "^20.0.4"
+peewee = "^3.13.1"
+peewee_migrate = "^1.1.6"
+psycopg2 = "^2.8.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.8"

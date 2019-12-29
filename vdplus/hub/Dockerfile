@@ -8,7 +8,7 @@ WORKDIR /app
 ENV VD_ENV=production
 
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-RUN . $HOME/.poetry/env && poetry install
+RUN cd api && . $HOME/.poetry/env && poetry install
 
 RUN apt-get install -y nodejs
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash

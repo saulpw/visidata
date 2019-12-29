@@ -3,7 +3,6 @@ import m from "mithril";
 import { MDCTopAppBar } from "@material/top-app-bar";
 import { MDCLinearProgress } from "@material/linear-progress";
 import { MDCSnackbar } from "@material/snackbar";
-import star from "material-design-icons-svg/paths/star.json";
 
 import Utils from "Utils";
 import bust from "material-design-icons-svg/paths/account.json";
@@ -31,7 +30,10 @@ export default class {
       this.progressBar(),
       this.topBar(),
       this.accountMenu(),
-      m(".layout", { className: this.classes }, [vnode.children]),
+      m(".layout", { className: this.classes }, [
+        this.terminal(),
+        vnode.children
+      ]),
       this.notification(),
       this.footer(),
       this.terminalTextMirror()
@@ -43,7 +45,6 @@ export default class {
     this.progress_bar = new MDCLinearProgress(
       document.querySelector(".mdc-linear-progress")!
     );
-
     new MDCTopAppBar(topAppBarElement);
     user.snackbar = new MDCSnackbar(document.querySelector(".mdc-snackbar")!);
   }
@@ -96,7 +97,7 @@ export default class {
         m(
           m.route.Link,
           {
-            selector: "button",
+            selector: "a",
             id: "account-button",
             className:
               "material-icons mdc-top-app-bar__action-item mdc-icon-button " +
@@ -108,7 +109,7 @@ export default class {
         m(
           m.route.Link,
           {
-            selector: "button",
+            selector: "a",
             id: "about-page-button",
             className:
               "material-icons mdc-top-app-bar__action-item mdc-icon-button " +
@@ -182,6 +183,10 @@ export default class {
       m(m.route.Link, { href: "/about" }, "about"),
       " page"
     ]);
+  }
+
+  private terminal() {
+    return [m("#terminal")];
   }
 
   // A placeholder to mirror the contents of the terminal so that tests can string match

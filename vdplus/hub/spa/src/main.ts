@@ -29,6 +29,8 @@ import "xterm/css/xterm.css";
 import Layout from "Layout";
 import Home from "pages/Home";
 import About from "pages/About";
+import Account from "pages/Account";
+import MagicLink from "pages/MagicLink";
 
 function layout(component: any, classes = "") {
   return {
@@ -41,5 +43,7 @@ function layout(component: any, classes = "") {
 m.route.prefix = ""; // Prevents the use of hashbangs
 m.route(document.body, "/", {
   "/": layout(Home),
-  "/about": layout(About)
+  "/about": layout(About),
+  "/account": layout(Account),
+  "/magic/:token": MagicLink
 });

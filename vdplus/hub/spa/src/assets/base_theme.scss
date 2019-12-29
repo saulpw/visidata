@@ -9,6 +9,8 @@ $mdc-theme-accent: #000000 !default;
 $mdc-theme-secondary: $mdc-theme-accent !default;
 $mdc-theme-on-secondary: if(mdc-theme-contrast-tone($mdc-theme-secondary) == "dark", #000, #000) !default;
 
+$mdc-theme-sharp-blue: #5fd7ff;
+
 $mdc-theme-background: #fff !default;
 
 $mdc-theme-surface: #fff !default;

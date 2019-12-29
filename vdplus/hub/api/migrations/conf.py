@@ -1,0 +1,1 @@
+DATABASE = 'postgres://localhost/vdwww'

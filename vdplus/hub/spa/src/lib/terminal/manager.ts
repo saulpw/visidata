@@ -7,28 +7,27 @@ import Utils from "Utils";
 import api from "api";
 import user from "user";
 
-export default class {
-  PROMPT: string;
-  elem!: HTMLElement;
+class Manager {
   term!: Terminal;
-  fitAddon!: FitAddon;
-  decoder: UTF8Decoder;
-  connection!: Connection;
-  message!: HTMLElement;
-  messageTimeout!: number;
-  messageTimer!: number;
-  naiveInteractionListener!: IDisposable;
+  is_logged_in: boolean;
+  private message!: HTMLElement;
+  private PROMPT: string;
+  private elem!: HTMLElement;
+  private fitAddon!: FitAddon;
+  private decoder: UTF8Decoder;
+  private connection!: Connection;
+  private messageTimeout!: number;
+  private messageTimer!: number;
 
   constructor() {
     this.PROMPT = "$ ";
     this.decoder = new UTF8Decoder();
-    this.elem = document.getElementById("terminal")!;
-    this.setupMessenger();
-    this.startTerminal();
-    this.startListeners();
+    this.is_logged_in = false;
   }
 
-  startTerminal() {
+  start() {
+    this.getElementRoot();
+    this.setupMessenger();
     this.term = new Terminal();
     this.fitAddon = new FitAddon();
     this.term.loadAddon(this.fitAddon);
@@ -37,9 +36,17 @@ export default class {
     this.term.focus();
     this.resizeHandler();
     this.welcomeMessage();
+    this.startListeners();
   }
 
-  welcomeMessage() {
+  private getElementRoot() {
+    this.elem = document.getElementById("terminal")!;
+  }
+
+  private welcomeMessage() {
+    if (window.location.pathname.includes("magic/") || user.is_logged_in) {
+      return;
+    }
     this.term.writeln("Welcome to VisiData online");
     this.term.writeln(
       "Please enter an email address to login or 'guest' for a guest account"
@@ -52,15 +59,15 @@ export default class {
 
   // This is only for simple tasks like logging in. For normal TTY interaction
   // all input is piped over a websocket for the backend to handle.
-  naiveInteraction(e: { key: string; domEvent: KeyboardEvent }) {
+  private naiveInteraction(e: { key: string; domEvent: KeyboardEvent }) {
     const ev = e.domEvent;
     const printable = !ev.altKey && !ev.ctrlKey && !ev.metaKey;
     if (ev.keyCode === 13) {
       this.term.writeln("");
       this.term.writeln("Loading...");
       const line = this.term.buffer.getLine(2)!.translateToString();
-      const user = line.replace(this.PROMPT, "");
-      this.login(user);
+      const email = line.replace(this.PROMPT, "");
+      this.sendMagicLink(email);
     } else if (ev.keyCode === 8) {
       // Do not delete the prompt
       if (this.term.buffer.cursorX > this.PROMPT.length) {
@@ -71,23 +78,45 @@ export default class {
     }
   }
 
-  async login(username: string) {
-    const response = await api.request("auth?username=" + username);
+  private async sendMagicLink(email: string) {
+    const response = await api.request("auth?email=" + email);
     if (response.status == 200) {
-      user.login(response.body.token, response.body.username);
-      this.naiveInteractionListener.dispose();
-      this.term.clear();
-      this.connect();
+      this.term.writeln(
+        "A Magic Login Link has been sent to your email address."
+      );
+    }
+    if (window.location.host.includes("localhost")) {
+      this.term.writeln("");
+      this.term.writeln(
+        "'localhost' detected. Auto refirecting to Magic Link..."
+      );
+      this.term.writeln(response.body.magic_link);
+      this.redirectToMagicLink(response.body.magic_link);
     }
   }
 
-  setupMessenger() {
+  private redirectToMagicLink(magic_link: string) {
+    const link = new URL(magic_link);
+    const delay = ENV.mode == "development" ? 3000 : 0;
+    setTimeout(() => {
+      window.location.href = link.pathname;
+    }, delay);
+  }
+
+  login() {
+    this.term.clear();
+    this.connect();
+    // TODO: Better detection of having logged in
+    this.is_logged_in = true;
+  }
+
+  private setupMessenger() {
     this.message = this.elem!.ownerDocument!.createElement("div");
     this.message.className = "xterm-overlay";
     this.messageTimeout = 2000;
   }
 
-  resizeHandler() {
+  private resizeHandler() {
     this.fitAddon.fit();
     this.term.scrollToBottom();
     this.showMessage(
@@ -96,7 +125,7 @@ export default class {
     );
   }
 
-  startListeners() {
+  private startListeners() {
     window.addEventListener("resize", () => {
       this.resizeHandler();
     });
@@ -123,7 +152,7 @@ export default class {
     }
   }
 
-  dumpBuffer() {
+  private dumpBuffer() {
     let buffer = "";
     for (let i = 0; i < this.term.rows; i++) {
       buffer += this.term.buffer.getLine(i)!.translateToString() + "\n";
@@ -145,7 +174,7 @@ export default class {
     }
   }
 
-  removeMessage(): void {
+  removeMessage() {
     if (this.message.parentNode == this.elem) {
       this.elem.removeChild(this.message);
     }
@@ -171,18 +200,35 @@ export default class {
     this.term.setOption(option.key, option.value);
   }
 
-  deactivate(): void {
+  deactivate() {
     // TODO: Stop listening to resize and data?
     this.term.blur();
   }
 
-  reset(): void {
+  reset() {
     this.removeMessage();
     this.term.clear();
   }
 
-  close(): void {
+  close() {
     window.removeEventListener("resize", this.resizeHandler);
     this.term.dispose();
+    this.is_logged_in = false;
+  }
+
+  hide() {
+    if (!this.elem) {
+      this.getElementRoot();
+    }
+    this.elem.style.display = "none";
+  }
+
+  show() {
+    if (!this.elem) {
+      this.getElementRoot();
+    }
+    this.elem.style.display = "block";
   }
 }
+
+export default new Manager();
