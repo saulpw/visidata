@@ -6,7 +6,8 @@ pushd vd
 docker build -t vdwww .
 popd
 
-# Build the Hub Docker image
+# Build the VisiData Hub Docker image
 pushd hub
 docker build -t vdhub .
 popd
+

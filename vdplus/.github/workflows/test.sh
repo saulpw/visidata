@@ -24,6 +24,13 @@ clean_up() {
 trap clean_up EXIT
 
 docker run --rm \
+  -e GOTTY_PORT=8181 \
+  -d \
+  --net host \
+  vdwww
+
+# Run Hub DB migrations
+docker run --rm \
   -e CI='true' \
   -e POSTGRES_HOST='localhost' \
   -e POSTGRES_PASSWORD='postgres' \
@@ -32,6 +39,7 @@ docker run --rm \
   vdhub \
   bash -c 'source $HOME/.poetry/env && cd /app/api && poetry run pw_migrate migrate'
 
+# Run the Hub
 docker run \
   --name $CONTAINER_NAME \
   -v $(pwd)/hub/spa:/app/data \
@@ -46,6 +54,7 @@ if timeout --preserve-status 10 bash -c wait_until_ready; then
   hub/test/testcafe.sh
 else
   echo "Timed out waiting for $CONTAINER_NAME container to start"
+  exit 1
 fi
 
 

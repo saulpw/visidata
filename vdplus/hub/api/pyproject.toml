@@ -7,12 +7,13 @@ authors = ["The VisiData team"]
 [tool.poetry.dependencies]
 python = "^3.8"
 aiohttp = {extras = ["speedups"], version = "^3.6.2"}
-gunicorn = "^20.0.4"
 peewee = "^3.13.1"
 peewee_migrate = "^1.1.6"
 psycopg2 = "^2.8.4"
 python-dotenv = "^0.10.3"
 requests = "^2.22.0"
+kubernetes = "^10.0.1"
+pyyaml = "^5.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.8"

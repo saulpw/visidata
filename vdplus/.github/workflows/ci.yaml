@@ -25,7 +25,7 @@ jobs:
       run: .github/workflows/build.sh
     - name: Run tests
       run: .github/workflows/test.sh
-    - name: Upload screenshots
+    - name: 'On fail: Output container logs and upload screenshots'
       run: .github/workflows/on_failure.sh
       if: failure()
     - name: Deploy

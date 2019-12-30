@@ -18,9 +18,5 @@ RUN cd spa && ./node_modules/.bin/webpack --optimize-minimize --build
 RUN apt-get remove --purge -y build-essential
 RUN apt autoremove -y && rm -rf /var/lib/apt/lists/*
 
-# Just temporary for testing
-RUN mkdir /app/bin && cd /app/bin && curl -L https://github.com/yudai/gotty/releases/download/v2.0.0-alpha.3/gotty_2.0.0-alpha.3_linux_amd64.tar.gz | tar -xvzf -
-RUN pip install visidata
-
 CMD ["/app/run.sh"]
 

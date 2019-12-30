@@ -1,9 +1,10 @@
 #!/bin/sh
 
 CMD_LOG=/var/log/visidata_commands.log
+GOTTY_PORT=${GOTTY_PORT:-9000}
 
 # Start an HTTP server that exposes VisiData's TTY in the browser
-/app/bin/gotty -w -p 9000 vd /app/data &
+/app/bin/gotty -w -p $GOTTY_PORT vd /app/data &
 
 # The odd location of this line is because for some strange reason `touch`ing the
 # the $CMD_LOG file causes VisiData to log blank lines??

@@ -25,6 +25,7 @@ resource "kubernetes_deployment" "hub" {
       spec {
         // A service account token allows the containers to access the central k8s API
         automount_service_account_token = true
+        service_account_name = "hub"
         init_container {
           name = "db-setup"
           image = "localhost:31500/vdwww/vdhub:latest"
@@ -59,10 +60,14 @@ resource "kubernetes_deployment" "hub" {
             read_only = true
           }
 
-          # Temp whilst testing bundled vd
           env {
-            name = "TERM"
-            value = "xterm"
+            name = "POSTGRES_HOST"
+            value = "postgres-postgresql.postgres"
+          }
+
+          env {
+            name = "POSTGRES_USER"
+            value = "postgres"
           }
 
           env {
@@ -156,5 +161,42 @@ resource "kubernetes_ingress" "hub-ingress" {
       }
     }
   }
+}
+
+resource "kubernetes_service_account" "hub" {
+  metadata {
+    name = "hub"
+  }
+}
+
+resource "kubernetes_role" "hub_user_role" {
+  metadata {
+    name = "hub_role"
+  }
+
+  rule {
+    verbs      = ["get", "list", "create", "watch", "delete"]
+    api_groups = [""]
+    resources  = ["pods"]
+  }
+
+}
+resource "kubernetes_role_binding" "hub_user_binding" {
+  metadata {
+    name = "hub_role_binding"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = "hub_role"
+  }
+
+  subject {
+    api_group = ""
+    kind = "ServiceAccount"
+    name = "hub"
+  }
+
 }
 
