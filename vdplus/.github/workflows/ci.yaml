@@ -30,3 +30,4 @@ jobs:
       if: failure()
     - name: Deploy
       run: .github/workflows/deploy.sh
+      if: github.ref == 'refs/heads/master'
