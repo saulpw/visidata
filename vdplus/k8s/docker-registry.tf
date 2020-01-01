@@ -100,3 +100,42 @@ resource "kubernetes_ingress" "docker-registry-ingress" {
   }
 }
 
+# Role permissions for Docker Registry management
+resource "kubernetes_role" "docker_registry_role" {
+  metadata {
+    name = "docker_registry_role"
+    namespace = "docker-registry"
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["pods/exec"]
+    verbs      = ["create"]
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["get", "list"]
+  }
+}
+
+resource "kubernetes_role_binding" "docker_registry_binding" {
+  metadata {
+    name = "docker_registry_binding"
+    namespace = "docker-registry"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = "docker_registry_role"
+  }
+
+  subject {
+    api_group = ""
+    kind = "ServiceAccount"
+    name = "ci"
+  }
+
+}

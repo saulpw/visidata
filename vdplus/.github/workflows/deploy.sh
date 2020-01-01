@@ -32,7 +32,17 @@ docker push $VDWWW_IMAGE
 docker tag vdhub $VDHUB_IMAGE
 docker push $VDHUB_IMAGE
 
-# Deploy
 config="--kubeconfig k8s/ci_user.k8s_config --context ci"
+
+# Clean up all image revisions. We only want currently tagged images in the registry in
+# order to save space.
+pod=$(kubectl $config get pods -n docker-registry -o custom-columns=:metadata.name | xargs)
+gc="registry garbage-collect --delete-untagged=true /etc/docker/registry/config.yml"
+echo $gc | kubectl $config \
+  exec -it \
+  $pod -n docker-registry \
+  sh
+
+# Deploy
 kubectl $config rollout restart deployment/visidata
 kubectl $config rollout restart deployment/hub
