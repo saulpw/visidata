@@ -137,5 +137,4 @@ resource "kubernetes_role_binding" "docker_registry_binding" {
     kind = "ServiceAccount"
     name = "ci"
   }
-
 }
