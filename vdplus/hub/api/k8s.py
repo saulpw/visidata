@@ -11,6 +11,7 @@ from models.user import User
 NAMESPACE = 'default'
 TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
 CERT_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+ACCOUNTS_SUB_PATH = "accounts"
 
 if os.getenv("VD_ENV") == "dev":
     # Dear developers:
@@ -44,18 +45,36 @@ def k8s_api_request(func):
 @k8s_api_request
 def create_pod(user: User):
     name = str(user.get().id)
+    user_id = str(user.get().id)
     logging.debug("Creating dedicated VD pod for user: " + name)
-    with open('pod.yaml') as file:
-        pod = yaml.safe_load(file)
-    pod['metadata']['name'] = name
-
-    response = api.create_namespaced_pod(NAMESPACE, pod)
+    pod_yaml = generate_pod_yaml(name, user_id)
+    response = api.create_namespaced_pod(NAMESPACE, pod_yaml)
     ip = None
     while ip == None:
         response = api.read_namespaced_pod(name, NAMESPACE)
         ip = response.status.pod_ip
         time.sleep(0.1)
     return ip
+
+def generate_pod_yaml(name, user_id):
+    with open('pod.yaml') as file:
+        pod = yaml.safe_load(file)
+    pod['metadata']['name'] = name
+    pod['spec']['containers'][1]['env'] = [
+        {
+            'name': 'DO_SPACES_API_ID',
+            'value': os.getenv('DO_SPACES_API_ID'),
+        },
+        {
+            'name': 'DO_SPACES_API_SECRET',
+            'value': os.getenv('DO_SPACES_API_SECRET')
+        },
+        {
+            'name': 'USER_ID',
+            'value': user_id
+        }
+    ]
+    return pod
 
 @k8s_api_request
 def delete_pod(name: str):

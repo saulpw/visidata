@@ -19,5 +19,10 @@ ADD visidatarc /root/.visidatarc
 # Install GoTTY to expose STDIN/STDOUT over a websocket
 RUN cd /app/bin && curl -L https://github.com/yudai/gotty/releases/download/v2.0.0-alpha.3/gotty_2.0.0-alpha.3_linux_amd64.tar.gz | tar -xvzf -
 
+# Install s3cmd to sync user account filesystems
+RUN pip3 install s3cmd
+ADD s3cfg /root/.s3cfg
+ADD account-fs-sync.sh /app/bin
+
 ADD run.sh /app/bin
 CMD /app/bin/run.sh

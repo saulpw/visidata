@@ -44,5 +44,4 @@ echo $gc | kubectl $config \
   sh
 
 # Deploy
-kubectl $config rollout restart deployment/visidata
 kubectl $config rollout restart deployment/hub

@@ -4,6 +4,7 @@ metadata:
   labels:
     app: visidata
   namespace: default
+  name: "XXXXXX"
 spec:
   containers:
   - image: localhost:31500/vdwww/vdwww:latest
@@ -23,11 +24,22 @@ spec:
       successThreshold: 1
       timeoutSeconds: 5
     volumeMounts:
-    - mountPath: /app/data
-      mountPropagation: None
-      name: data
-      readOnly: true
+    - mountPath: /app/data/samples
+      name: data-samples
+      subPath: public
+    - mountPath: /app/data/account
+      name: pod-share-for-account
+  - image: localhost:31500/vdwww/vdwww:latest
+    imagePullPolicy: Always
+    name: account-folder-sync
+    command: ["/app/bin/account-fs-sync.sh"]
+    volumeMounts:
+    - mountPath: /app/account
+      name: pod-share-for-account
+    env: "XXXXXX"
   volumes:
-  - name: data
+  - name: data-samples
     persistentVolumeClaim:
       claimName: do-spaces-vdata
+  - name: pod-share-for-account
+    emptyDir: {}
