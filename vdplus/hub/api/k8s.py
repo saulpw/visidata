@@ -47,7 +47,7 @@ def create_pod(user: User):
     name = str(user.get().id)
     user_id = str(user.get().id)
     logging.debug("Creating dedicated VD pod for user: " + name)
-    pod_yaml = generate_pod_yaml(name, user_id)
+    pod_yaml = generate_pod_yaml(name, user_id, user.get().is_guest)
     response = api.create_namespaced_pod(NAMESPACE, pod_yaml)
     ip = None
     while ip == None:
@@ -56,10 +56,25 @@ def create_pod(user: User):
         time.sleep(0.1)
     return ip
 
-def generate_pod_yaml(name, user_id):
+def generate_pod_yaml(name, user_id, is_guest):
     with open('pod.yaml') as file:
         pod = yaml.safe_load(file)
     pod['metadata']['name'] = name
+    if is_guest:
+        pod = guest_pod(pod)
+    else:
+        pod = account_pod(pod, user_id)
+    return pod
+
+def guest_pod(pod):
+    pod['spec']['containers'][0]['volumeMounts'][0]['mountPath'] = '/app/data'
+    del pod['spec']['containers'][0]['volumeMounts'][1]
+    del pod['spec']['containers'][1]
+    del pod['spec']['volumes'][1]
+    return pod
+
+def account_pod(pod, user_id):
+    pod['spec']['containers'][0]['volumeMounts'][0]['mountPath'] = '/app/data/samples'
     pod['spec']['containers'][1]['env'] = [
         {
             'name': 'DO_SPACES_API_ID',

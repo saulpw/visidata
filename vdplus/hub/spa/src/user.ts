@@ -66,7 +66,7 @@ class User {
     }
     if (response.status == 200) {
       const is_just_logged_in = !this.username;
-      this.username = response.body.email;
+      this.username = response.body.username;
       if (is_just_logged_in) {
         this.postLogin();
       }

@@ -1,5 +1,5 @@
 import Connection from "lib/terminal/websocket";
-import { Terminal, IDisposable } from "xterm";
+import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import UTF8Decoder from "lib/utf8_decode";
 
@@ -52,9 +52,7 @@ class Manager {
       "Please enter an email address to login or 'guest' for a guest account"
     );
     this.term.write(this.PROMPT);
-    this.naiveInteractionListener = this.term.onKey(
-      this.naiveInteraction.bind(this)
-    );
+    this.term.onKey(this.naiveInteraction.bind(this));
   }
 
   // This is only for simple tasks like logging in. For normal TTY interaction
@@ -66,7 +64,7 @@ class Manager {
       this.term.writeln("");
       this.term.writeln("Loading...");
       const line = this.term.buffer.getLine(2)!.translateToString();
-      const email = line.replace(this.PROMPT, "");
+      const email = line.replace(this.PROMPT, "").trim();
       this.sendMagicLink(email);
     } else if (ev.keyCode === 8) {
       // Do not delete the prompt
@@ -79,19 +77,24 @@ class Manager {
   }
 
   private async sendMagicLink(email: string) {
+    email = email.trim();
     const response = await api.request("auth?email=" + email);
     if (response.status == 200) {
-      this.term.writeln(
-        "A Magic Login Link has been sent to your email address."
-      );
+      if (email == "guest") {
+        window.location.href = "/magic/" + response.body.token;
+      } else {
+        this.term.writeln(
+          "A Magic Login Link has been sent to your email address."
+        );
+      }
     }
     if (window.location.host.includes("localhost")) {
       this.term.writeln("");
       this.term.writeln(
-        "'localhost' detected. Auto refirecting to Magic Link..."
+        "'localhost' detected. Auto redirecting to Magic Link..."
       );
-      this.term.writeln(response.body.magic_link);
-      this.redirectToMagicLink(response.body.magic_link);
+      this.term.writeln(response.body.token);
+      this.redirectToMagicLink(response.body.token);
     }
   }
 
@@ -138,7 +141,7 @@ class Manager {
   }
 
   connect() {
-    this.connection = new Connection(this);
+    this.connection = new Connection();
   }
 
   info(): { columns: number; rows: number } {

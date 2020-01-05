@@ -2,9 +2,12 @@ import secrets
 import os
 import requests
 import logging
+import datetime
 
 import peewee as pw
 from database import db
+
+GUEST = 'guest'
 
 MAILGUN_DOMAIN = 'mg.tombh.co.uk'
 
@@ -13,23 +16,49 @@ class BaseModel(pw.Model):
     class Meta:
         database = db
 
+# Note about some of the `null=True` args: the auto migration tool seemed to need them
+# when also using `default=...`
 class User(BaseModel):
+    created = pw.DateTimeField(null=True, default=datetime.datetime.now)
+    modified = pw.DateTimeField(null=True, default=datetime.datetime.now)
     email = pw.CharField(unique=True)
     token = pw.CharField()
 
+    # TODO: regularly delete guest records older than the longest a guest could
+    # reasonably keep a session open for.
+    is_guest = pw.BooleanField(null=True, default=False)
+
+    def save(self, *args, **kwargs):
+        self.modified = datetime.datetime.now()
+        return super(User, self).save(*args, **kwargs)
+
     @staticmethod
     def auth(request, email):
-        user = User.select().where(User.email == email)
+        user = User.get_user(email)
+        if email == GUEST:
+            token = user.token
+        else:
+            magic_link = User.magic_link(request, user.token)
+            User.send_magic_link_email(email, magic_link)
+            token = magic_link
+        return token
 
-        if user.exists():
-            user = user.get()
+    @staticmethod
+    def get_user(email):
+        if email != GUEST:
+            user = User.select().where(User.email == email)
+            if user.exists():
+                return user.get()
+        return User.new_user(email)
+
+    @staticmethod
+    def new_user(email):
+        if email == GUEST:
+            user = User.create(email=secrets.token_urlsafe(32), is_guest=True)
         else:
             user = User.create(email=email)
-
-        token = user.generate_token()
-        magic_link = User.magic_link(request, token)
-        User.send_magic_link_email(email, magic_link)
-        return magic_link
+        user.generate_token()
+        return user
 
     @staticmethod
     def magic_link(request, token):

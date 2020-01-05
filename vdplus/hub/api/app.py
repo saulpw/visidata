@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import os
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -36,22 +37,37 @@ def authenticate(func):
 @routes.get('/api/account')
 @authenticate
 async def user(request):
+    if request['user'].is_guest:
+        username = 'guest'
+    else:
+        username = request['user'].email
+
     return web.json_response({
         'response': {
-            'email': request['user'].email
+            'username': username
         },
         'meta': {}
     })
 
 @routes.get('/api/auth')
 async def auth(request):
-    email = request.query["email"]
+    email = request.query["email"].strip()
+    token = User.auth(request, email)
+
+    if is_auto_login(email):
+        response = {
+            'token': token
+        }
+    else:
+        response = {}
+
     return web.json_response({
-        'response': {
-            'magic_link': User.auth(request, email)
-        },
+        'response': response,
         'meta': {}
     })
+
+def is_auto_login(email):
+    return email == 'guest' or os.getenv('VD_ENV') != 'production' or os.getenv('CI') == 'true'
 
 # Catch-all route to support the SPA routing all non-API requests into index.html
 # This enables the standard browser history API that navigates between URLs without page loads.
@@ -65,8 +81,8 @@ def create_app():
     app.add_routes([web.get('/ws', tty_websocket_handler)])
     app.router.add_static('/assets/', SPA_BASE)
     app.add_routes(routes)
-    web.run_app(app, port=8000)
     return app
 
 if __name__ == '__main__':
-    create_app()
+    app = create_app()
+    web.run_app(app, port=8000)

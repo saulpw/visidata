@@ -24,9 +24,10 @@ spec:
       successThreshold: 1
       timeoutSeconds: 5
     volumeMounts:
-    - mountPath: /app/data/samples
+    - mountPath: "XXXXX"
       name: data-samples
       subPath: public
+      readOnly: true
     - mountPath: /app/data/account
       name: pod-share-for-account
   - image: localhost:31500/vdwww/vdwww:latest

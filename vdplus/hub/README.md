@@ -23,7 +23,11 @@ The API server is written using the [aiohttp](https://github.com/aio-libs/aiohtt
 First copy the `.env.sample` to `.env` and add the secrets you'll need (you might not need
 them all depending on what you're developing).
 
-In the `hub/api` path run `poetry run adev runserver app.py`
+Then setup the Postgres database: `createdb vdwww`. And run the migrations:
+`poetry run pw_migrate migrate`. If you are modifying the database you can auto generate
+migrations with: `poetry run pw_migrate create some_descriptive_name --auto --auto-source models`
+
+In the `hub/api` path run `poetry run adev runserver app`
 
 ### GoTTY service (optional)
 If you need to hack on interaction with in-browser `vd` instances you will also need a running `gotty` service. Installation instructions are [here](https://github.com/yudai/gotty#installation). Then you can run `gotty -p 8181 --ws-origin '.*' -w vd`.
