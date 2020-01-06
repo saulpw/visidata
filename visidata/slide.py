@@ -53,7 +53,11 @@ def moveVisibleCol(sheet, fromVisColIdx, toVisColIdx):
     if 0 <= toVisColIdx < sheet.nVisibleCols:
         fromVisColIdx = min(max(fromVisColIdx, 0), sheet.nVisibleCols-1)
         fromColIdx = sheet.columns.index(sheet.visibleCols[fromVisColIdx])
-        toColIdx = sheet.columns.index(sheet.nonKeyVisibleCols[toVisColIdx])
+        # a regular column cannot move to the left of keycols
+        if toVisColIdx <= 0:
+            toColIdx = sheet.columns.index(sheet.nonKeyVisibleCols[toVisColIdx])
+        else:
+            toColIdx = sheet.columns.index(sheet.visibleCols[toVisColIdx])
         moveListItem(sheet.columns, fromColIdx, toColIdx)
         return toVisColIdx
     else:
