@@ -21,8 +21,16 @@ RUN cd /app/bin && curl -L https://github.com/yudai/gotty/releases/download/v2.0
 
 # Install s3cmd to sync user account filesystems
 RUN pip3 install s3cmd
-ADD s3cfg /root/.s3cfg
+ADD s3cfg /app/.s3cfg
 ADD account-fs-sync.sh /app/bin
+
+RUN apt-get -y install tmux
+ADD tmux.conf /app/.tmux.conf
+
+RUN useradd -m -d /app vd
+ADD vd.sh /app/bin
+
+RUN mkdir /app/log
 
 ADD run.sh /app/bin
 CMD /app/bin/run.sh

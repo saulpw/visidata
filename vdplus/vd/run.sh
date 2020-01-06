@@ -1,10 +1,14 @@
 #!/bin/sh
 
-CMD_LOG=/var/log/visidata_commands.log
+CMD_LOG=/app/log/visidata_commands.log
 GOTTY_PORT=${GOTTY_PORT:-9000}
 
+# Tmux makes it simple to support reconnections
+tmux new-session -d -s VisiData -n window1
+tmux send-keys -t VisiData:window1 "/app/bin/vd.sh" Enter
+
 # Start an HTTP server that exposes VisiData's TTY in the browser
-/app/bin/gotty -w -p $GOTTY_PORT vd /app/data &
+/app/bin/gotty -w -p $GOTTY_PORT tmux attach -t VisiData:window1 &
 
 # The odd location of this line is because for some strange reason `touch`ing the
 # the $CMD_LOG file causes VisiData to log blank lines??

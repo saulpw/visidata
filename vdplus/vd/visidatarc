@@ -1,5 +1,5 @@
 options.motd_url='https://visidata.org/motd-vdwww'
-options.cmdlog_histfile='/var/log/visidata_commands.log'
+options.cmdlog_histfile='/app/log/visidata_commands.log'
 
 #options.quitguard=True
 options.min_memory_mb=100
