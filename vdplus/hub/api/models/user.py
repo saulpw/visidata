@@ -8,8 +8,9 @@ import peewee as pw
 from database import db
 
 GUEST = 'guest'
-
 MAILGUN_DOMAIN = 'mg.tombh.co.uk'
+DEFAULT_IDLE_TIMEOUT_GUEST = 5 * 60
+DEFAULT_IDLE_TIMEOUT_ACCOUNT = 100 * 60
 
 class BaseModel(pw.Model):
     """A base model that will use our Postgresql database"""
@@ -23,6 +24,9 @@ class User(BaseModel):
     modified = pw.DateTimeField(null=True, default=datetime.datetime.now)
     email = pw.CharField(unique=True)
     token = pw.CharField()
+    current_pod_ip = pw.CharField(null=True)
+    last_input = pw.DateTimeField(null=True)
+    idle_timeout = pw.IntegerField(default=DEFAULT_IDLE_TIMEOUT_GUEST)
 
     # TODO: regularly delete guest records older than the longest a guest could
     # reasonably keep a session open for.
@@ -56,7 +60,7 @@ class User(BaseModel):
         if email == GUEST:
             user = User.create(email=secrets.token_urlsafe(32), is_guest=True)
         else:
-            user = User.create(email=email)
+            user = User.create(email=email, idle_timeout=DEFAULT_IDLE_TIMEOUT_ACCOUNT)
         user.generate_token()
         return user
 

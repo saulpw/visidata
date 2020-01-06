@@ -1,11 +1,14 @@
 import m from "mithril";
 import { MDCSnackbar } from "@material/snackbar";
+import terminal from "lib/terminal/manager";
 
 import api from "api";
 
 class User {
   is_logged_in: boolean;
   username!: string;
+  idle_timeout!: number;
+  time_remaining!: number;
   notification!: string;
   snackbar!: MDCSnackbar;
 
@@ -17,12 +20,11 @@ class User {
     }
   }
 
-  login(token: string, username: string) {
+  login(token: string) {
     m.route.set("/");
     this.setToken(token);
-    this.username = username;
     this.is_logged_in = true;
-    this.postLogin();
+    this.getUser();
   }
 
   logout = (redirect = "/") => {
@@ -54,8 +56,27 @@ class User {
     }
   }
 
-  postLogin() {
+  private postLogin() {
     this.notify("Logged in as " + this.username);
+    this.startIdleTimer();
+  }
+
+  private startIdleTimer() {
+    this.time_remaining = this.idle_timeout;
+    setInterval(() => {
+      m.redraw();
+      if (this.idle_timeout != 0) {
+        this.time_remaining -= 1;
+      }
+      if (this.time_remaining == 0) {
+        terminal.logout();
+        this.idle_timeout = 0;
+      }
+    }, 1000);
+  }
+
+  resetTimer() {
+    this.time_remaining = this.idle_timeout + 1;
   }
 
   async getUser() {
@@ -67,6 +88,7 @@ class User {
     if (response.status == 200) {
       const is_just_logged_in = !this.username;
       this.username = response.body.username;
+      this.idle_timeout = response.body.idle_timeout;
       if (is_just_logged_in) {
         this.postLogin();
       }

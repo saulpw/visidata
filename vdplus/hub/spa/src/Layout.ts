@@ -181,7 +181,7 @@ export default class {
     return m("footer", [
       "Find out more on the ",
       m(m.route.Link, { href: "/about" }, "about"),
-      " page"
+      " page | Idle timeout: " + (user.time_remaining || "?:??")
     ]);
   }
 

@@ -113,6 +113,14 @@ class Manager {
     this.is_logged_in = true;
   }
 
+  logout() {
+    this.connection.close();
+    this.term.clear();
+    this.is_logged_in = false;
+    this.term.writeln("Your VisiData session has ended due to inactivity.");
+    this.term.writeln("Please reload the page to start a new session.");
+  }
+
   private setupMessenger() {
     this.message = this.elem!.ownerDocument!.createElement("div");
     this.message.className = "xterm-overlay";
@@ -151,7 +159,9 @@ class Manager {
   output(data: string) {
     this.term.write(this.decoder.decode(data));
     if (Utils.isTesting()) {
-      this.dumpBuffer();
+      setTimeout(() => {
+        this.dumpBuffer();
+      }, 100);
     }
   }
 
@@ -189,6 +199,7 @@ class Manager {
 
   onInput(callback: (input: string) => void) {
     this.term.onKey(data => {
+      user.resetTimer();
       callback(data.key);
     });
   }

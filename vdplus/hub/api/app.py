@@ -44,7 +44,8 @@ async def user(request):
 
     return web.json_response({
         'response': {
-            'username': username
+            'username': username,
+            'idle_timeout': request['user'].idle_timeout
         },
         'meta': {}
     })

@@ -44,10 +44,10 @@ def k8s_api_request(func):
 
 @k8s_api_request
 def create_pod(user: User):
-    name = str(user.get().id)
-    user_id = str(user.get().id)
+    name = str(user.id)
+    user_id = str(user.id)
     logging.debug("Creating dedicated VD pod for user: " + name)
-    pod_yaml = generate_pod_yaml(name, user_id, user.get().is_guest)
+    pod_yaml = generate_pod_yaml(name, user_id, user.is_guest)
     response = api.create_namespaced_pod(NAMESPACE, pod_yaml)
     ip = None
     while ip == None:

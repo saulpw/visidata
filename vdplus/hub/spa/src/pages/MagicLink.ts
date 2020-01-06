@@ -12,9 +12,7 @@ class MagicLink implements m.ClassComponent {
 
   async login() {
     const token = m.route.param("token");
-    api.token = token;
-    const response = await api.request("account");
-    user.login(token, response.body.username);
+    user.login(token);
   }
 }
 
