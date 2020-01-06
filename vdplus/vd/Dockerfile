@@ -4,7 +4,7 @@ ENV TERM=xterm-256color
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl libgeos-dev git man procps
+RUN apt-get update && apt-get install -y curl libgeos-dev git man procps parallel
 
 RUN mkdir -p /app/data /app/bin /app/src
 ARG VD_SRC=/app/src/visidata
