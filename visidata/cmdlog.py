@@ -140,7 +140,7 @@ class CommandLog(VisiDataMetaSheet):
         sheetname, colname, rowname = '', '', ''
         if sheet and cmd.longname != 'open-file':
             contains = lambda s, *substrs: any((a in s) for a in substrs)
-            sheetname = sheet.name
+            sheetname = sheet.name or cmd.longname
             if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
                 k = sheet.rowkey(sheet.cursorRow)
                 rowname = keystr(k) if k else sheet.cursorRowIndex
