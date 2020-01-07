@@ -70,24 +70,28 @@ async def manage_connection(queue, inbound, user):
     else:
         last_recorded_input = time.time()
 
+    idle_check_task = asyncio.create_task(idle_check(queue))
+
     # This loop is paramount in providing low latency UI feedback.
     # Anything that happens in here should be low on IO blocking and CPU work.
     while True:
         source, data = await queue.get()
         if source == 'inbound':
-            last_recorded_input = await idle_watcher(last_recorded_input, data, user)
+            last_recorded_input = await idle_timer(last_recorded_input, data, user)
             await outbound.send_str(data)
         if source == 'outbound':
             if data == 'CLOSE':
                 inbound_close(inbound)
                 break
-            idle_killer(data, last_recorded_input, user)
             await inbound.send_str(data)
+        if source == 'idle_check':
+            idle_killer(last_recorded_input, user)
 
+    idle_check_task.cancel()
     inbound_task.cancel()
     outbound_task.cancel()
 
-async def idle_watcher(last_recorded_input, data, user):
+async def idle_timer(last_recorded_input, data, user):
     if not data.startswith(PROTOCOL_FOR_TTY_INPUT):
         return last_recorded_input
 
@@ -108,9 +112,12 @@ def save_input_timestamp(user):
     user.last_input = datetime.datetime.now()
     user.save()
 
-def idle_killer(data, last_recorded_input, user):
-    if not data.startswith(PROTOCOL_FOR_TTY_PING):
-        return
+async def idle_check(queue):
+    while True:
+        await asyncio.sleep(1)
+        queue.put_nowait(['idle_check', ''])
+
+def idle_killer(last_recorded_input, user):
     if time.time() - last_recorded_input > user.idle_timeout:
         message = f"Idle timeout ({user.idle_timeout}), deleting pod for user: {user.id}"
         logging.info(message)
