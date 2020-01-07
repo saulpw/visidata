@@ -38,6 +38,8 @@ spec:
     - mountPath: /app/account
       name: pod-share-for-account
     env: "XXXXXX"
+  securityContext:
+    fsGroup: 1000
   volumes:
   - name: data-samples
     persistentVolumeClaim:

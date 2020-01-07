@@ -16,7 +16,7 @@ RUN pip3 install $VD_SRC
 ADD requirements.txt $VD_SRC
 RUN pip install -r $VD_SRC/requirements.txt
 ADD visidatarc /app/.visidatarc
-RUN chown vd:vd /app/log
+RUN chown vd:vd /app/log /app/.visidatarc
 
 # Install GoTTY to expose STDIN/STDOUT over a websocket
 RUN cd /app/bin && curl -L https://github.com/yudai/gotty/releases/download/v2.0.0-alpha.3/gotty_2.0.0-alpha.3_linux_amd64.tar.gz | tar -xvzf -

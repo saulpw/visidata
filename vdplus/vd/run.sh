@@ -3,9 +3,13 @@
 CMD_LOG=/app/log/visidata_commands.log
 GOTTY_PORT=${GOTTY_PORT:-9000}
 VD_CMD=${VD_CMD:-'vd /app/data'}
+ACCOUNT_PATH=/app/data/account
 
 # Tmux makes it simple to support reconnections
 tmux new-session -d -s VisiData -n window1
+if [ ! -d $ACCOUNT_PATH ]; then
+  tmux send-keys -t VisiData:window1 "cd $ACCOUNT_PATH" Enter
+fi
 tmux send-keys -t VisiData:window1 "$VD_CMD" Enter
 
 (

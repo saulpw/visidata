@@ -25,6 +25,17 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+default_vdrc=/app/.visidatarc
+user_vdrc=/app/data/account/.visidatarc
+
+# Allow users to customise their vd config
+if [ ! -f $user_vdrc ]; then
+  cp -a $default_vdrc $user_vdrc
+fi
+
+# Prevent default vdrc conflicting with user's
+rm $default_vdrc
+
 # Continuously sync forever
 echo "Starting account folder sync daemon for user account ($USER_ID)..."
 while :; do
