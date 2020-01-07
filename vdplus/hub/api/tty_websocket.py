@@ -65,10 +65,7 @@ async def manage_connection(queue, inbound, user):
     outbound = await session.ws_connect(vd_container_address + "/ws")
     outbound_task = asyncio.create_task(outbound_socket(outbound, queue, user))
 
-    if user.last_input:
-        last_recorded_input = user.last_input.timestamp()
-    else:
-        last_recorded_input = time.time()
+    last_recorded_input = time.time()
 
     idle_check_task = asyncio.create_task(idle_check(queue))
 
