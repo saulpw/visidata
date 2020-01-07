@@ -8,6 +8,7 @@ RUN useradd -m -d /app vd
 RUN apt-get update && apt-get install -y curl libgeos-dev git man procps parallel
 
 RUN mkdir -p /app/data /app/bin /app/src /app/log
+RUN chown vd:vd -R /app
 ARG VD_SRC=/app/src/visidata
 
 # Install VisiData
@@ -16,7 +17,7 @@ RUN pip3 install $VD_SRC
 ADD requirements.txt $VD_SRC
 RUN pip install -r $VD_SRC/requirements.txt
 ADD visidatarc /app/.visidatarc
-RUN chown vd:vd /app/log /app/.visidatarc
+RUN chown vd:vd /app/.visidatarc
 
 # Install GoTTY to expose STDIN/STDOUT over a websocket
 RUN cd /app/bin && curl -L https://github.com/yudai/gotty/releases/download/v2.0.0-alpha.3/gotty_2.0.0-alpha.3_linux_amd64.tar.gz | tar -xvzf -

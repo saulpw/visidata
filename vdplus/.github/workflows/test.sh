@@ -25,11 +25,10 @@ trap clean_up EXIT
 
 docker run --rm \
   -e GOTTY_PORT=8181 \
-  -d \
   -v $(pwd):/app/data \
   --user 1000:1000 \
   --net host \
-  vdwww
+  vdwww > vdwww.logs 2>&1 &
 
 # Run Hub DB migrations
 docker run --rm \

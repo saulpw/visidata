@@ -5,6 +5,12 @@ GOTTY_PORT=${GOTTY_PORT:-9000}
 VD_CMD=${VD_CMD:-'vd /app/data'}
 ACCOUNT_PATH=/app/data/account
 
+if [ -d $ACCOUNT_PATH ]; then
+  while [ ! -f $ACCOUNT_PATH/.visidatarc ]; do sleep 0.05; done
+  # Prevent default visidatarc conflicting with user's visidatarc
+  rm /app/.visidatarc
+fi
+
 # Tmux makes it simple to support reconnections
 tmux new-session -d -s VisiData -n window1
 if [ -d $ACCOUNT_PATH ]; then

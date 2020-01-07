@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 cat vdhub.logs
+cat vdwww.logs
 
 screenshot=$(find hub/test/screenshots -name '*.png' -print -quit | xargs)
 curl \

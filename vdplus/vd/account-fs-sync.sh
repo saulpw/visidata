@@ -3,6 +3,7 @@
 BASE_ACCOUNT_PATH=${BASE_ACCOUNT_PATH:-/app/account/}
 export SOURCE=$BASE_ACCOUNT_PATH
 export USER_ACCOUNT="s3://vdata/accounts/$USER_ID/"
+FAIL_FILE=$SOURCE"downloading_user_account_failed!"
 
 function s3() {
   s3cmd \
@@ -18,23 +19,25 @@ export -f s3
 echo "Attempting to download user account ($USER_ID) from DO Spaces..."
 s3 sync $USER_ACCOUNT $SOURCE
 
+
 # It's very important that we exit here, because if we start syncing an empty
 # or half-downloaded folder then files will get deleted on DO!
 if [ $? -ne 0 ]; then
-  touch $SOURCE"downloading_user_account_failed!"
+  touch $FAIL_FILE
   exit 1
 fi
 
+if [ -f $FAIL_FILE ]; then
+  rm $FAIL_FILE
+fi
+
 default_vdrc=/app/.visidatarc
-user_vdrc=/app/data/account/.visidatarc
+user_vdrc=$BASE_ACCOUNT_PATH.visidatarc
 
 # Allow users to customise their vd config
 if [ ! -f $user_vdrc ]; then
   cp -a $default_vdrc $user_vdrc
 fi
-
-# Prevent default vdrc conflicting with user's
-rm $default_vdrc
 
 # Continuously sync forever
 echo "Starting account folder sync daemon for user account ($USER_ID)..."
