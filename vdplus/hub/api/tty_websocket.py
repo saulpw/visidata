@@ -78,6 +78,9 @@ async def manage_connection(queue, inbound, user):
             last_recorded_input = await idle_watcher(last_recorded_input, data, user)
             await outbound.send_str(data)
         if source == 'outbound':
+            if data == 'CLOSE':
+                inbound_close(inbound)
+                break
             idle_killer(data, last_recorded_input, user)
             await inbound.send_str(data)
 
@@ -150,15 +153,15 @@ async def inbound_socket(inbound, queue, user: User):
     async for msg in inbound:
         if msg.type == aiohttp.WSMsgType.TEXT:
             if msg.data == 'close':
-                await inbound_close(inbound, user)
+                await inbound_close(inbound)
             else:
                 queue.put_nowait(['inbound', msg.data])
         elif msg.type == aiohttp.WSMsgType.ERROR:
-            await inbound_close(inbound, user)
+            await inbound_close(inbound)
             logging.error('Inbound websocket closed with exception %s' % inbound.exception())
-    await inbound_close(inbound, user)
+    await inbound_close(inbound)
 
-async def inbound_close(inbound, user):
+async def inbound_close(inbound):
     await inbound.close()
 
 async def outbound_socket(outbound, queue, user: User):
@@ -167,17 +170,18 @@ async def outbound_socket(outbound, queue, user: User):
 
         if msg.type == aiohttp.WSMsgType.TEXT:
             if msg.data == 'close':
-                await outbound_close(outbound, user)
+                await outbound_close(outbound, user, queue)
                 break
             else:
                 queue.put_nowait(['outbound', msg.data])
         elif msg.type == aiohttp.WSMsgType.CLOSED:
-            await outbound_close(outbound, user)
+            await outbound_close(outbound, user, queue)
             break
         elif msg.type == aiohttp.WSMsgType.ERROR:
-            await outbound_close(outbound, user)
+            await outbound_close(outbound, user, queue)
             break
 
-async def outbound_close(outbound, user):
+async def outbound_close(outbound, user, queue):
+    queue.put_nowait(['outbound', 'CLOSE'])
     delete_vd_container(user)
     await outbound.close()

@@ -14,19 +14,16 @@ const msgOutput = "1";
 const msgPong = "2";
 const msgSetWindowTitle = "3";
 const msgSetPreferences = "4";
-const msgSetReconnect = "5";
+//const msgSetReconnect = "5";
 // This is specific to VisiData authentication
 const msgAuth = "6";
 
 export default class {
   socket: WebSocket;
-  reconnect: number;
   ping_timer!: number;
-  reconnect_timeout!: number;
 
   constructor() {
     this.socket = new WebSocket(this.url());
-    this.reconnect = -1;
     this.setup();
   }
 
@@ -49,7 +46,6 @@ export default class {
   }
 
   close() {
-    clearTimeout(this.reconnect_timeout);
     this.socket.close();
   }
 
@@ -114,11 +110,6 @@ export default class {
           const preferences = JSON.parse(payload);
           terminal.setPreferences(preferences);
           break;
-        case msgSetReconnect:
-          const autoReconnect = JSON.parse(payload);
-          console.log("Enabling reconnect: " + autoReconnect + " seconds");
-          this.reconnect = autoReconnect;
-          break;
         case msgAuth:
           if (payload == "auth FAIL") {
             user.notify("Couldn't authenticate to VisiData backend instance");
@@ -132,14 +123,9 @@ export default class {
   private onClose() {
     this.socket.onclose = _event => {
       clearInterval(this.ping_timer);
+      user.idle_timeout = 0;
       terminal.deactivate();
-      terminal.showMessage("Connection Closed", 0);
-      if (this.reconnect > 0) {
-        this.reconnect_timeout = window.setTimeout(() => {
-          terminal.reset();
-          this.setup();
-        }, this.reconnect * 1000);
-      }
+      terminal.showMessage("Connection closed, please reload page", 0);
     };
   }
 }

@@ -16,7 +16,6 @@ RUN pip3 install $VD_SRC
 ADD requirements.txt $VD_SRC
 RUN pip install -r $VD_SRC/requirements.txt
 ADD visidatarc /app/.visidatarc
-ADD vd.sh /app/bin
 RUN chown vd:vd /app/log
 
 # Install GoTTY to expose STDIN/STDOUT over a websocket
