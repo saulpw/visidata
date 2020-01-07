@@ -82,6 +82,7 @@ async def manage_connection(queue, inbound, user):
         if source == 'outbound':
             if data == 'CLOSE':
                 inbound_close(inbound)
+                delete_vd_container(user)
                 break
             await inbound.send_str(data)
         if source == 'idle_check':
