@@ -30,6 +30,8 @@ docker run --rm \
   --net host \
   vdwww > vdwww.logs 2>&1 &
 
+sleep 5
+
 # Run Hub DB migrations
 docker run --rm \
   -e CI='true' \
@@ -57,6 +59,4 @@ else
   echo "Timed out waiting for $CONTAINER_NAME container to start"
   exit 1
 fi
-
-
 

@@ -76,7 +76,7 @@ class User(BaseModel):
         response = requests.post(
             "https://api.mailgun.net/v3/" + MAILGUN_DOMAIN + "/messages",
             auth=("api", os.getenv("MAILGUN_API_KEY")),
-            data={"from": "VisiData <noreply@visidata.org>",
+            data={"from": "VisiData <noreply@mg.visidata.org>",
                   "to": [email, email],
                   "subject": "Hello",
                   "text": magic_link})

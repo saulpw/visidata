@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
+echo "VD Hub logs..."
 cat vdhub.logs
+
+echo "\n"
+echo "VD container logs..."
 cat vdwww.logs
 
+echo "Uploading screenshots"
 screenshot=$(find hub/test/screenshots -name '*.png' -print -quit | xargs)
 curl \
   --location \
