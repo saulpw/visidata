@@ -5,21 +5,37 @@ from visidata import vd, Column, Sheet, option, options, asyncthread, Progress
 __version__ = '0.9'
 
 option('locale', 'en_US', 'default locale to use for Faker', replay=True)
+option('vfake_extra_providers', None, 'list of additional Provider classes to load via add_provider()', replay=True)
 
-# See also: https://faker.readthedocs.io/en/master/communityproviders.html
-option('vfake_extra_providers', [], 'list of additional Provider classes to load via add_provider()', replay=True)
+def addFakerProviders(fake, providers):
+    '''
+    Add custom providers to Faker. Provider classes typically derive from
+    faker.providers.BaseProvider, so check for that here. This helps to
+    highlight likely misconfigurations instead of hiding them.
+
+    See also: https://faker.readthedocs.io/en/master/communityproviders.html
+
+    fake: Faker object
+    providers: List of provider classes to add
+    '''
+    import faker
+    invalid_provider_warning = 'vfake: "{}" does not look like a Faker Provider class, skipping add'
+    if not isinstance(providers, list):
+        vd.error('options.vfake_extra_providers must be a list')
+        return
+    for provider in providers:
+        if not issubclass(provider, faker.providers.BaseProvider):
+            vd.warning(invalid_provider_warning.format(provider.__name__))
+            continue
+        fake.add_provider(provider)
 
 @Column.api
 @asyncthread
 def setValuesFromFaker(col, faketype, rows):
     import faker
     fake = faker.Faker(options.locale)
-    invalid_provider_warning = 'Custom vfake provider "{}" is not a valid Faker Provider class, skipping add'
-    for provider in options.vfake_extra_providers:
-        if not issubclass(provider, faker.providers.BaseProvider):
-            vd.warning(invalid_provider_warning.format(provider.__name__))
-            continue
-        fake.add_provider(provider)
+    if options.vfake_extra_providers:
+        addFakerProviders(fake, options.vfake_extra_providers)
     fakefunc = getattr(fake, faketype, None) or vd.error('no such faker function')
 
     fakeMap = {}
