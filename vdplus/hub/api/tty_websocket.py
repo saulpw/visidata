@@ -49,7 +49,8 @@ def delete_vd_container(user):
         return
     user.current_pod_ip = ''
     user.save()
-    delete_pod(str(user.id))
+    # TODO: Temporary fix for buggy reconnection/idling code
+    # delete_pod(str(user.id))
 
 async def manage_connection(queue, inbound, user):
     logging.debug("Handling incoming websocket for user ID: " + str(user.id))
