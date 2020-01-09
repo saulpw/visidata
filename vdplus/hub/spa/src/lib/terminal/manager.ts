@@ -108,6 +108,7 @@ class Manager {
 
   login() {
     this.term.clear();
+    this.term.writeln("Starting VisiData, please wait...");
     this.connect();
     // TODO: Better detection of having logged in
     this.is_logged_in = true;
