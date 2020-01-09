@@ -139,6 +139,8 @@ resource "kubernetes_ingress" "hub-ingress" {
     tls {
       hosts = [
         "demo.visidata.org",
+        "embed.visidata.org",
+        "static.visidata.org",
       ]
       secret_name = "hub-tls"
     }
@@ -147,7 +149,7 @@ resource "kubernetes_ingress" "hub-ingress" {
       service_port = 80
     }
     rule {
-      host = "demo.visidata.org"
+      host = "*.visidata.org"
       http {
         path {
           path = "/*"

@@ -20,32 +20,29 @@ interface Attrs {
 export default class {
   progress_bar!: MDCLinearProgress;
   classes: string;
+  is_embeded: boolean;
 
   constructor({ attrs }: m.CVnode<Attrs>) {
     this.classes = attrs.classes;
+    this.is_embeded = !!window.location.hostname.match("embed|static");
   }
 
   view(vnode: m.CVnode<Attrs>) {
     return [
       this.progressBar(),
-      this.topBar(),
-      this.accountMenu(),
-      m(".layout", { className: this.classes }, [
-        this.terminal(),
-        vnode.children
-      ]),
-      this.notification(),
-      this.footer(),
+      this.is_embeded ? this.embededLayout(vnode) : this.normalLayout(vnode),
       this.terminalTextMirror()
     ];
   }
 
   oncreate() {
-    const topAppBarElement = document.querySelector(".mdc-top-app-bar")!;
+    if (!this.is_embeded) {
+      const topAppBarElement = document.querySelector(".mdc-top-app-bar")!;
+      new MDCTopAppBar(topAppBarElement);
+    }
     this.progress_bar = new MDCLinearProgress(
       document.querySelector(".mdc-linear-progress")!
     );
-    new MDCTopAppBar(topAppBarElement);
     user.snackbar = new MDCSnackbar(document.querySelector(".mdc-snackbar")!);
   }
 
@@ -54,6 +51,27 @@ export default class {
       this.classes = vnode.attrs.classes;
       m.redraw();
     }
+  }
+
+  private normalLayout(vnode: m.CVnode<Attrs>) {
+    return [
+      this.topBar(),
+      this.accountMenu(),
+      m(".layout", { className: this.classes }, [
+        this.terminal(),
+        vnode.children
+      ]),
+      this.notification(),
+      this.footer()
+    ];
+  }
+
+  private embededLayout(vnode: m.CVnode<Attrs>) {
+    return m(".embeded", [
+      this.terminal(),
+      vnode.children,
+      this.notification()
+    ]);
   }
 
   private topBar() {

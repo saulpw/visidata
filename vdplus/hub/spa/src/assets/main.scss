@@ -72,7 +72,18 @@ header.mdc-top-app-bar {
   background: black;
   padding: 0;
   margin: 0;
-  min-height: 90vh;
+}
+
+.layout {
+  #terminal {
+    min-height: 90vh;
+  }
+}
+
+.embeded {
+  #terminal {
+    min-height: 100vh;
+  }
 }
 
 .terminal {

@@ -38,6 +38,7 @@ module.exports = {
     historyApiFallback: true,
     overlay: true,
     hot: true,
+    disableHostCheck: true,
     proxy: {
       "/api/*": {
         target: "http://" + API_SERVER,
