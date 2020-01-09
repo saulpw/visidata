@@ -39,3 +39,21 @@ spec:
     app: visidata
   outputRefs:
     - loki-output
+
+---
+
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Flow
+metadata:
+  name: loki-flow-hub
+spec:
+  filters:
+    - parser:
+        remove_key_name_field: true
+        reserve_data: true
+        parsers:
+          - type: none
+  selectors:
+    app: hub
+  outputRefs:
+    - loki-output
