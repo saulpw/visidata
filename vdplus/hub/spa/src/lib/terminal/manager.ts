@@ -76,7 +76,7 @@ class Manager {
     }
   }
 
-  private async sendMagicLink(email: string) {
+  async sendMagicLink(email: string) {
     email = email.trim();
     const response = await api.request("auth?email=" + email);
     if (response.status == 200) {
