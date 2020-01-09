@@ -5,7 +5,13 @@ ENV TERM=xterm-256color
 WORKDIR /app
 RUN useradd -m -d /app vd
 
-RUN apt-get update && apt-get install -y curl libgeos-dev git man procps parallel
+RUN apt-get update && apt-get install -y \
+      curl libgeos-dev git man procps parallel tmux
+RUN sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker
+RUN sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker
+RUN apt-get install groff-base --reinstall
+
+ADD tmux.conf /app/.tmux.conf
 
 RUN mkdir -p /app/data /app/bin /app/src /app/log
 RUN chown vd:vd -R /app
@@ -26,9 +32,6 @@ RUN cd /app/bin && curl -L https://github.com/yudai/gotty/releases/download/v2.0
 RUN pip3 install s3cmd
 ADD s3cfg /app/.s3cfg
 ADD account-fs-sync.sh /app/bin
-
-RUN apt-get -y install tmux
-ADD tmux.conf /app/.tmux.conf
 
 USER vd
 
