@@ -30,7 +30,7 @@ migrations with: `poetry run pw_migrate create some_descriptive_name --auto --au
 In the `hub/api` path run `poetry run adev runserver app`
 
 ### GoTTY service (optional)
-If you need to hack on interaction with in-browser `vd` instances you will also need a running `gotty` service. Installation instructions are [here](https://github.com/yudai/gotty#installation). Then you can run `gotty -p 8181 --ws-origin '.*' -w vd`.
+If you need to hack on interaction with in-browser `vd` instances you will also need a running `gotty` service. Installation instructions are [here](https://github.com/yudai/gotty#installation). Then you can run `gotty -p 9000 --ws-origin '.*' -w vd`.
 
 ### Frontend
 The frontend is a Single Page Application (SPA) using https://mithril.js.org/

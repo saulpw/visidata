@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-export PORT=8000
+export HUB_PORT=8000
+export GOTTY_PORT=9000
 export CONTAINER_NAME=vdhub-test
 
 is_http_up() {
-  [ $(curl -LI localhost:$PORT -o /dev/null -w '%{http_code}\n' -s) == "200" ]
+  [ $(curl -LI localhost:$HUB_PORT -o /dev/null -w '%{http_code}\n' -s) == "200" ]
 }
 export -f is_http_up
 
@@ -24,10 +25,11 @@ clean_up() {
 trap clean_up EXIT
 
 docker run --rm \
-  -e GOTTY_PORT=8181 \
+  -e GOTTY_PORT=$GOTTY_PORT \
   -v $(pwd):/app/data \
   --user 1000:1000 \
   --net host \
+  -t \
   vdwww > vdwww.logs 2>&1 &
 
 sleep 5
@@ -50,6 +52,7 @@ docker run \
   -e POSTGRES_HOST='localhost' \
   -e POSTGRES_PASSWORD='postgres' \
   -e POSTGRES_USER='postgres' \
+  -e GOTTY_PORT=$GOTTY_PORT \
   --net host \
   vdhub > vdhub.logs 2>&1 &
 

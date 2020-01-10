@@ -5,12 +5,14 @@ import os
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+import concurrent.futures
 import aiohttp
 import asyncio
 from aiohttp import web
 
 from tty_websocket import tty_websocket_handler
 from models.user import User
+from pod_manager import PodMan
 
 SPA_BASE = '../spa/dist/'
 
@@ -77,13 +79,22 @@ def is_auto_login(email):
 async def root_handler(request):
     return aiohttp.web.FileResponse(SPA_BASE + 'index.html')
 
-def create_app():
+async def pod_idle_killer():
+    loop = asyncio.get_running_loop()
+    with concurrent.futures.ThreadPoolExecutor() as pool:
+        await loop.run_in_executor(pool, PodMan.idle_killer_daemon)
+
+async def main():
     app = web.Application()
     app.add_routes([web.get('/ws', tty_websocket_handler)])
     app.router.add_static('/assets/', SPA_BASE)
     app.add_routes(routes)
-    return app
+    await asyncio.gather(
+        web._run_app(app, port=8000),
+        PodMan.idle_killer_daemon()
+    )
+
+asyncio.run(main())
 
 if __name__ == '__main__':
-    app = create_app()
-    web.run_app(app, port=8000)
+    asyncio.run(main())

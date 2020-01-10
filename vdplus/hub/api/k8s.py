@@ -43,7 +43,7 @@ def k8s_api_request(func):
     return wrapper
 
 @k8s_api_request
-def create_pod(user: User):
+def k8s_create_pod(user: User):
     name = str(user.id)
     user_id = str(user.id)
     logging.debug("Creating dedicated VD pod for user: " + name)
@@ -92,6 +92,7 @@ def account_pod(pod, user_id):
     return pod
 
 @k8s_api_request
-def delete_pod(name: str):
+def k8s_delete_pod(user: User):
+    name = str(user.id)
     logging.debug("Attempting to delete container: " + name)
     api.delete_namespaced_pod(name, NAMESPACE)
