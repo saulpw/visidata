@@ -25,6 +25,7 @@ class User(BaseModel):
     email = pw.CharField(unique=True)
     token = pw.CharField()
     current_pod_ip = pw.CharField(null=True)
+    current_pod_name = pw.CharField(null=True)
     last_input = pw.DateTimeField(null=True)
     idle_timeout = pw.IntegerField(default=DEFAULT_IDLE_TIMEOUT_GUEST)
 

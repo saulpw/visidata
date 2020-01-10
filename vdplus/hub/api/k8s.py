@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+import secrets
 
 import yaml
 from kubernetes import client, config
@@ -44,7 +45,9 @@ def k8s_api_request(func):
 
 @k8s_api_request
 def k8s_create_pod(user: User):
-    name = str(user.id)
+    name = f"{user.id}-{secrets.url_safe(5)}"
+    user.current_pod_name = name
+    user.save()
     user_id = str(user.id)
     logging.debug("Creating dedicated VD pod for user: " + name)
     pod_yaml = generate_pod_yaml(name, user_id, user.is_guest)
@@ -93,6 +96,8 @@ def account_pod(pod, user_id):
 
 @k8s_api_request
 def k8s_delete_pod(user: User):
-    name = str(user.id)
+    name = str(user.current_pod_name)
     logging.debug("Attempting to delete container: " + name)
     api.delete_namespaced_pod(name, NAMESPACE)
+    user.current_pod_name = ''
+    user.save()
