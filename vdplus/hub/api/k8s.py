@@ -45,7 +45,7 @@ def k8s_api_request(func):
 
 @k8s_api_request
 def k8s_create_pod(user: User):
-    name = f"{user.id}-{secrets.url_safe(5)}"
+    name = f"{user.id}-{secrets.token_urlsafe(5)}".lower()
     user.current_pod_name = name
     user.save()
     user_id = str(user.id)

@@ -27,6 +27,7 @@ async def tty_websocket_handler(request):
     try:
         await manage_connection(queue, inbound, podman)
     except Exception as e:
+        logging.error(f"The following errror should be raised after deleting the pod: {e}")
         podman.delete()
         raise e
 
