@@ -63,7 +63,7 @@ vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
 vdtype(str, '~', formatter=lambda _,v: v)
 vdtype(int, '#', '%.0f')
-vdtype(float, '%', formatter=lambda _,v: options.disp_float_fmt % v)
+vdtype(float, '%', formatter=lambda fmtstr,val: (fmtstr or options.disp_float_fmt) % val)
 vdtype(dict, '')
 vdtype(list, '')
 
