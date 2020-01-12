@@ -4,7 +4,7 @@ import collections
 import functools
 import datetime
 import locale
-from visidata import option, options, theme, TypedWrapper, undoAttr
+from visidata import option, options, theme, TypedWrapper
 
 #__all__ = ['anytype', 'vdtype', 'typemap', 'getType', 'typemap']
 
