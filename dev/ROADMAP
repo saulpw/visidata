@@ -14,12 +14,20 @@ The Book of VisiData will describe the api and all functions and objects availab
 
 - DirSheet file preview #309
 
+## VisiData system datasets will be migrated to jsonl
+
+- the encoder should save the fields in column order for jsonl
+- migrate .vd to be jsonl format
+- migrate plugins.tsv to be jsonl format
+
 ## Minor features, refactors, cleanup
 
 - 'modified' indicator on status bar, also enables quitguard
 - remove all asserts; replace with error() on case-by-case basis
 
 - [options] allow list or dict of enum values for default
+- [options] for options that have been renamed, add aliases for compatibility
+    - e.g. `tsv_delimiter` and `tsv_row_delimiter` become 'proper' options with 'delimiter', 'delim', and 'd' becoming aliases
 
 # Features
 

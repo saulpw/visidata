@@ -45,6 +45,7 @@ These should all be implementable via the plugin framework.
 - [ipybnb] Sheet.save_ipynb
 - [sql] Sheet.save_sql
 
+### extension for fmtstr that allows for {} type fmtstrs
 
 ### sniff filetype from the data itself ([#130](https://github.com/saulpw/visidata/issues/130))
     - ([#200](https://github.com/saulpw/visidata/issues/200)) detect utf16 byte-order-marker and set options.encoding
@@ -54,6 +55,8 @@ These should all be implementable via the plugin framework.
 ### auto-join [common data lookups](https://github.com/wireservice/lookup)
 
 ### expand --diff into a vdiff plugin ([issue](https://github.com/saulpw/visidata/issues/303))
+
+### make macros a proper plugin ([issue](https://github.com/saulpw/visidata/issues/431#issuecomment-573265659))
 
 ### [vsh](https://github.com/saulpw/visidata/tree/develop/vsh) (unreleased)
    - vtop (top/kill/killall/ps)
