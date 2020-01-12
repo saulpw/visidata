@@ -1,6 +1,10 @@
 # VisiData version history
 
-# v2.-1 (TBD)
+# v2.-1.1 (2020-01-11)
+## Interface changes
+- `disp_float_fmt` now use %-style formatting (instead of {}-style) (thanks @khugitt for PR #410)
+
+# v2.-1.0 (2019-08-18)
 
 ## Major changes
 
