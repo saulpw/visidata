@@ -9,6 +9,7 @@ from visidata import option, options, theme, TypedWrapper
 #__all__ = ['anytype', 'vdtype', 'typemap', 'getType', 'typemap']
 
 option('disp_float_fmt', '%.02f', 'default fmtstr to format for float values', replay=True)
+theme('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values')
 
 try:
     import dateutil.parser
@@ -71,8 +72,6 @@ def isNumeric(col):
     return col.type in (int,vlen,float,currency,date)
 
 ##
-
-theme('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values')
 
 floatchars='+-0123456789.'
 def currency(s=''):
