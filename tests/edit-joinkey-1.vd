@@ -1,22 +1,18 @@
 sheet	col	row	longname	input	keystrokes	comment
-	UsvSheet	delimiter	set-option	␞		
-	UsvSheet	row_delimiter	set-option	␟		
-			open-file	tests/data1.tsv	o	
 			open-file	tests/data2.tsv	o	
-data1			sheets-stack		S	
-sheets		キdata2	open-row		^J	
+			open-file	tests/data1.tsv	o	
 data2			sheets-stack		S	
+sheets			reload-selected		g^R	
 sheets		キdata2	select-row		s	
 sheets		キdata1	select-row		s	
 sheets			columns-selected		gC	
 all_columns		キdata2,Key	select-row		s	
-all_columns			key-selected		g!	
 all_columns		キdata1,Key	select-row		s	
 all_columns			key-selected		g!	
-sheets			join-sheets	full	join-sheets	
-data2+data1	A		key-col		!	
+all_columns			sheets-stack		S	
+sheets			join-sheets	full	&	
+data2+data1	data1_A		key-col		!	
 data2+data1			sort-keys-asc		g[	
-data2+data1	A		key-col		!	
+data2+data1	data1_A		key-col		!	
 data2+data1	Key	キ2	edit-cell	4	e	
 data2+data1			reload-sheet		^R	
-cmdlog			save-sheet	tests/edit-joinkey-1.vd	^S	
