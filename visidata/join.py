@@ -130,10 +130,11 @@ class JoinSheet(Sheet):
             for colname, cols in allcols.items():
                 self.addColumn(MergeColumn(colname, cols=cols))
         else:
+          ctr = collections.Counter(c.name for vs in sheets for c in vs.nonKeyVisibleCols)
           for sheetnum, vs in enumerate(sheets):
             # subsequent elements are the rows from each source, in order of the source sheets
             for c in vs.nonKeyVisibleCols:
-                newname = c.name if len(allcols[c.name]) == 1 else '%s_%s' % (vs.name, c.name)
+                newname = c.name if ctr[c.name] == 1 else '%s_%s' % (vs.name, c.name)
                 self.addColumn(SubColumnItem(sheetnum, c, name=newname))
 
         rowsBySheetKey = {}
