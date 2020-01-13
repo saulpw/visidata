@@ -11,8 +11,8 @@ all_columns		キdata1,Key	select-row		s
 all_columns			key-selected		g!	
 all_columns			sheets-stack		S	
 sheets			join-sheets	full	&	
-data2+data1	data1_A		key-col		!	
+data2+data1	A		key-col		!	
 data2+data1			sort-keys-asc		g[	
-data2+data1	data1_A		key-col		!	
+data2+data1	A		key-col		!	
 data2+data1	Key	キ2	edit-cell	4	e	
 data2+data1			reload-sheet		^R	

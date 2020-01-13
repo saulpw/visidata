@@ -8,6 +8,6 @@ sheets		キdata2	select-row		s
 sheets		キdata1	select-row		s	
 sheets		キdata2	slide-down		J	
 sheets			join-sheets	outer	&	
-data1+data2	data1_A		key-col		!	
+data1+data2	A		key-col		!	
 data1+data2			sort-keys-asc		g[	
-data1+data2	data1_A		key-col		!	
+data1+data2	A		key-col		!	

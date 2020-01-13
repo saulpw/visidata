@@ -7,6 +7,6 @@ data2			sheets-stack		S
 sheets		キdata2	select-row		s	
 sheets		キdata1	select-row		s	
 sheets			join-sheets	inner	&	
-data2+data1	data1_A		key-col		!	
+data2+data1	A		key-col		!	
 data2+data1			sort-keys-asc		g[	
-data2+data1	data1_A		key-col		!	
+data2+data1	A		key-col		!	
