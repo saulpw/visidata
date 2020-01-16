@@ -20,5 +20,6 @@ dpkt                # pcap
 dnslib              # pcap
 namestand           # graphviz
 datapackage         # frictionless .json
+boto3               # s3
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb

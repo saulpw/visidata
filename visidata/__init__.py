@@ -98,6 +98,7 @@ from .loaders.markdown import *
 from .loaders.pcap import *
 from .loaders.png import *
 from .loaders.ttf import *
+from .loaders.s3 import *
 from .loaders.sas import *
 from .loaders.spss import *
 from .loaders.xml import *
