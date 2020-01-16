@@ -19,11 +19,10 @@ const msgSetPreferences = "4";
 const msgAuth = "6";
 
 export default class {
-  socket: WebSocket;
+  socket!: WebSocket;
   ping_timer!: number;
 
   constructor() {
-    this.socket = new WebSocket(this.url());
     this.setup();
   }
 
@@ -40,6 +39,7 @@ export default class {
   }
 
   setup() {
+    this.socket = new WebSocket(this.url());
     this.onOpen();
     this.onReceive();
     this.onClose();
@@ -58,6 +58,8 @@ export default class {
 
   private onOpen() {
     this.socket.onopen = _event => {
+      terminal.removeMessage()
+
       const termInfo = terminal.info();
 
       this.socket.send(api.token || "");
@@ -122,10 +124,29 @@ export default class {
 
   private onClose() {
     this.socket.onclose = _event => {
-      clearInterval(this.ping_timer);
-      user.idle_timeout = 0;
-      terminal.deactivate();
-      terminal.showMessage("Connection closed, please reload page", 0);
+      if (user.is_logged_in && user.time_remaining > 0) {
+        this.autoReconnect();
+      }
+      else {
+        this.realClose();
+      }
     };
+  }
+
+  autoReconnect(retry_time = 1000) {
+    terminal.showMessage("Reconnecting...", 0);
+    this.setup();
+    setTimeout(() => {
+      if (!this.isOpen()) {
+        this.autoReconnect(retry_time);
+      }
+    }, retry_time)
+  }
+
+  realClose () {
+    clearInterval(this.ping_timer);
+    user.idle_timeout = 0;
+    terminal.deactivate();
+    terminal.showMessage("Connection closed, please reload page", 0);
   }
 }
