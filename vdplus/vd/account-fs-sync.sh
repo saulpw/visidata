@@ -3,7 +3,7 @@
 BASE_ACCOUNT_PATH=${BASE_ACCOUNT_PATH:-/app/account/}
 export SOURCE=$BASE_ACCOUNT_PATH
 export USER_ACCOUNT="s3://vdata/accounts/$USER_ID/"
-FAIL_FILE=$SOURCE"downloading_user_account_failed!"
+FAIL_FILE=$SOURCE"downloading_user_account_failed"
 
 function s3() {
   s3cmd \

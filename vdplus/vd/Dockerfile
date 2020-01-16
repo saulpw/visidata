@@ -3,7 +3,7 @@ FROM python:3.8.0-slim-buster
 ENV TERM=xterm-256color
 
 WORKDIR /app
-RUN useradd -m -d /app vd
+RUN useradd -m --home-dir /app/data/account vd
 
 RUN apt-get update && apt-get install -y \
       curl libgeos-dev git man procps parallel tmux
@@ -35,5 +35,6 @@ ADD account-fs-sync.sh /app/bin
 
 USER vd
 
+WORKDIR /app/data/account
 ADD run.sh /app/bin
 CMD /app/bin/run.sh
