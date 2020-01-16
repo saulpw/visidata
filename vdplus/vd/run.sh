@@ -2,8 +2,8 @@
 
 CMD_LOG=/app/log/visidata_commands.log
 GOTTY_PORT=${GOTTY_PORT:-9000}
-VD_CMD=${VD_CMD:-'vd /app/data/account'}
-ACCOUNT_PATH=/app/data/account
+VD_CMD=${VD_CMD:-'vd'}
+ACCOUNT_PATH=/app/data
 
 if [ -d $ACCOUNT_PATH ]; then
   while [ ! -f $ACCOUNT_PATH/.visidatarc ]; do sleep 0.05; done
