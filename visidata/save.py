@@ -138,10 +138,11 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 def save_txt(p, *vsheets):
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
-            col = vs.visibleCols[0]
-            for dispvals in vs.iterdispvals(col, format=True):
-                fp.write(dispvals[col] or '')
-                fp.write('\n')
+            unitsep = options.get('delimiter', vs)
+            rowsep = options.get('row_delimiter', vs)
+            for dispvals in vs.iterdispvals(*vs.visibleCols, format=True):
+                fp.write(unitsep.join(dispvals.values()))
+                fp.write(rowsep)
     status('%s save finished' % p)
 
 
