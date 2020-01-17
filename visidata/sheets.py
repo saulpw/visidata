@@ -605,8 +605,6 @@ class Sheet(BaseSheet):
 
     def draw(self, scr):
         'Draw entire screen onto the `scr` curses object.'
-        scr.erase()  # clear screen before every re-draw
-
         vd.clear_caches()
 
         if not self.columns:

@@ -46,6 +46,8 @@ def run(self, scr):
         vd.drawThread = threading.current_thread()
 
         sheet.ensureLoaded()
+
+        scr.erase()  # clear screen before every re-draw
         self.draw(scr, sheet)
 
         keystroke = self.getkeystroke(scr, sheet)
