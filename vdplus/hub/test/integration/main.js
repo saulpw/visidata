@@ -17,5 +17,5 @@ test("VisiData starts up", async t => {
   await t
     .wait(1000)
     .expect(Selector("#dev-terminal-text").textContent)
-    .contains("saul.pw/VisiData");
+    .contains("VisiData");
 });
