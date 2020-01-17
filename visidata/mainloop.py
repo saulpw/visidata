@@ -13,6 +13,9 @@ timeouts_before_idle = 10
 @VisiData.api
 def draw(self, scr, *sheets):
     'Redraw full screen.'
+    self.drawLeftStatus(scr, sheets[0])
+    self.drawRightStatus(scr, sheets[0])  # visible during this getkeystroke
+
     for sheet in sheets:
         sheet._scr = scr
         try:
@@ -20,8 +23,6 @@ def draw(self, scr, *sheets):
         except Exception as e:
             self.exceptionCaught(e)
 
-    self.drawLeftStatus(scr, sheets[0])
-    self.drawRightStatus(scr, sheets[0])  # visible during this getkeystroke
 
 
 @VisiData.api
