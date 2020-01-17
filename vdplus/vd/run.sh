@@ -2,7 +2,7 @@
 
 CMD_LOG=/app/log/visidata_commands.log
 GOTTY_PORT=${GOTTY_PORT:-9000}
-VD_CMD=${VD_CMD:-'vd'}
+VD_CMD=${VD_CMD:-'vd .'}
 ACCOUNT_PATH=/app/data
 
 if [ -d $ACCOUNT_PATH ]; then
