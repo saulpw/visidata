@@ -29,8 +29,6 @@ docker run --rm \
   -v $(pwd):/app/data \
   --user 1000:1000 \
   --net host \
-  -t \
-  vdwww &
   vdwww > vdwww.logs 2>&1 &
 
 sleep 5

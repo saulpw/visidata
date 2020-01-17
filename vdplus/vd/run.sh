@@ -5,7 +5,16 @@ GOTTY_PORT=${GOTTY_PORT:-9000}
 VD_CMD=${VD_CMD:-'vd .'}
 ACCOUNT_PATH=/app/data
 
-if [ -d $ACCOUNT_PATH ]; then
+is_user_account() {
+  if [ ! -z ${USER_ID+x} ]; then
+    true
+  else
+    false
+  fi
+}
+
+if is_user_account; then
+  echo "Waiting for user $USER_ID's $ACCOUNT_PATH/.visidatarc to sync..."
   while [ ! -f $ACCOUNT_PATH/.visidatarc ]; do sleep 0.05; done
   # Prevent default visidatarc conflicting with user's visidatarc
   rm /app/.visidatarc
@@ -13,7 +22,7 @@ fi
 
 # Tmux makes it simple to support reconnections
 tmux new-session -d -s VisiData -n window1
-if [ -d $ACCOUNT_PATH ]; then
+if is_user_account; then
   tmux send-keys -t VisiData:window1 "cd $ACCOUNT_PATH" Enter
 fi
 tmux send-keys -t VisiData:window1 "$VD_CMD" Enter
