@@ -18,8 +18,6 @@ class JsonSheet(PythonSheet):
 
             if isinstance(ret, dict):
                 yield ret
-                for k in ret:
-                    self.addColumn(ColumnItem(k, type=deduceType(self.rows[0][k])))
             else:
                 yield from Progress(ret)
 
