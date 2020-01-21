@@ -267,21 +267,31 @@ def loadConfigFile(fnrc, _globals=None):
     addGlobals(_globals)
 
 
-@VisiData.api
-def parseArgs(vd, parser:argparse.ArgumentParser):
+def addOptions(parser):
     for optname in options.keys('global'):
         if optname.startswith('color_') or optname.startswith('disp_'):
             continue
         action = 'store_true' if options[optname] is False else 'store'
-        parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=options._opts._get(optname).helpstr)
+        try:
+            parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=options._opts._get(optname).helpstr)
+        except argparse.ArgumentError:
+            pass
 
-    args = parser.parse_args()
+
+@VisiData.api
+def parseArgs(vd, parser:argparse.ArgumentParser):
+    addOptions(parser)
+    args, remaining = parser.parse_known_args()
 
     # add visidata_dir to path before loading config file (can only be set from cli)
     sys.path.append(str(visidata.Path(args.visidata_dir or options.visidata_dir)))
 
     # user customisations in config file in standard location
     loadConfigFile(visidata.Path(args.config or options.config), getGlobals())
+
+    # add plugin options and reparse
+    addOptions(parser)
+    args, remaining = parser.parse_known_args()
 
     # apply command-line overrides after .visidatarc
     for optname, optval in vars(args).items():
