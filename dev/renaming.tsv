@@ -20,6 +20,7 @@ CommandLog.currentActiveRow	vd.activeCommand		y
 ESC	ALT		
 cached_property	lazy_property	same	y
 openSource	vd.open	same	
+vd.filetype('ext', ExtSheet)	open_ext		
 dive-row	open-row		
 addRows	addNewRows		
 statuses (longname)	open-statuses		
