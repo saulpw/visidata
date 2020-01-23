@@ -5,7 +5,7 @@ option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
 option('fixed_maxcols', 0, 'max number of fixed-width columns to create (0 is no max)')
 
 def open_fixed(p):
-    return FixedWidthColumnsSheet(p.name, source=p)
+    return FixedWidthColumnsSheet(p.name, source=p, headerlines=[])
 
 class FixedWidthColumn(Column):
     def __init__(self, name, i, j, **kwargs):
