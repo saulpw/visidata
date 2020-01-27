@@ -139,7 +139,11 @@ class BaseSheet(Extensible):
 
     @property
     def name(self):
-        return self._name or self.source.name + '_'+self.rowtype if self.source else ''
+        if self._name:
+            return self._name
+        if not self.source:
+            return ''
+        return self.source.name + '_'+self.rowtype
 
     @name.setter
     def name(self, name):
