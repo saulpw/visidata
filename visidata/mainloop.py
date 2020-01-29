@@ -154,7 +154,10 @@ def run(*sheetlist):
     # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     os.putenv('ESCDELAY', '25')
 
+    curses.use_env(True)
+
     ret = wrapper(cursesMain, sheetlist)
+
     if ret:
         print(ret)
 

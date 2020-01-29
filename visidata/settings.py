@@ -54,7 +54,7 @@ class SettingsMgr(collections.OrderedDict):
         1. "global": default specified in option() definition
         2. "override": in order of program execution:
             a. .visidatarc
-            b. command-line options, applied on top of the overrides in .visidatarc)
+            b. command-line options, applied on top of the overrides in .visidatarc
             c. at runtime via 'O'ptions meta-sheet
         3. objname(type(obj)): current sheet class and parents, recursively
         4. objname(obj): the specific sheet instance
