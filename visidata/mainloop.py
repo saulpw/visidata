@@ -11,18 +11,21 @@ timeouts_before_idle = 10
 
 
 @VisiData.api
-def draw(self, scr, *sheets):
+def draw(self, scr, sheet):
     'Redraw full screen.'
-    self.drawLeftStatus(scr, sheets[0])
-    self.drawRightStatus(scr, sheets[0])  # visible during this getkeystroke
 
-    for sheet in sheets:
-        sheet._scr = scr
-        try:
-            sheet.draw(scr)
-        except Exception as e:
-            self.exceptionCaught(e)
+    scr.erase()  # clear screen before every re-draw
 
+    sheet._scr = scr
+    vd.scr = scr
+
+    self.drawLeftStatus(scr, sheet)
+    self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
+
+    try:
+        sheet.draw(scr)
+    except Exception as e:
+        self.exceptionCaught(e)
 
 
 @VisiData.api
@@ -102,7 +105,7 @@ def run(self, scr):
             else:
                 self.keystrokes += keystroke
 
-        self.drawRightStatus(scr, sheet)  # visible for commands that wait for input
+        self.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input
 
         if not keystroke:  # timeout instead of keypress
             pass

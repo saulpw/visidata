@@ -110,7 +110,7 @@ def drawLeftStatus(vd, scr, vs):
     one = False
     for (pri, msgparts), n in sorted(vd.statuses.items(), key=lambda k: -k[0][0]):
         try:
-            if x > vd.windowWidth:
+            if x > vs.windowWidth:
                 break
             if one:  # any messages already:
                 x += clipdraw(scr, y, x, sep, attr, w=vs.windowWidth-x)
@@ -160,7 +160,7 @@ def drawRightStatus(vd, scr, vs):
                 rstatus, coloropt = rstatcolor
                 rstatus = ' '+rstatus
                 attr = colors.get_color(coloropt).attr
-                statuslen = clipdraw(scr, vd.windowHeight-1, rightx, rstatus, attr, w=vs.windowWidth-1, rtl=True)
+                statuslen = clipdraw(scr, vs.windowHeight-1, rightx, rstatus, attr, w=vs.windowWidth-1, rtl=True)
                 rightx -= statuslen
                 ret += statuslen
             except Exception as e:

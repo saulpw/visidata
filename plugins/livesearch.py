@@ -22,8 +22,8 @@ def dup_search(sheet, cols='cursorCol'):
                 vs.addRow(vs.source.rows[i])
 
     def live_search(val):
-        vs.draw(vd._scr)
-        vd.drawRightStatus(vd._scr, vs)
+        vs.draw(vs._scr)
+        vd.drawRightStatus(vs._scr, vs)
         val = val.rstrip('\n')
         if val == vs.search:
             return
