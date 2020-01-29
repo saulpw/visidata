@@ -22,10 +22,12 @@ class MeltedSheet(Sheet):
 
     @asyncthread
     def reload(self):
+        self.columns = []
         isNull = isNullFunc()
 
         sheet = self.source
-        self.columns = [SubColumnItem(0, c) for c in sheet.keyCols]
+        for c in sheet.keyCols:
+            self.addColumn(SubColumnItem(0, c))
         self.setKeys(self.columns)
 
         colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]
@@ -55,13 +57,13 @@ class MeltedSheet(Sheet):
                 othercols.add(cname)
 
         if ncats == 1:
-            self.columns.append(ColumnItem(melt_var_colname, 1))
+            self.addColumn(ColumnItem(melt_var_colname, 1))
         else:
             for i in range(ncats):
-                self.columns.append(ColumnItem('%s%d' % (melt_var_colname, i+1), i+1))
+                self.addColumn(ColumnItem('%s%d' % (melt_var_colname, i+1), i+1))
 
         for cname in othercols:
-            self.columns.append(Column(cname,
+            self.addColumn(Column(cname,
                 getter=lambda col,row,cname=cname: row[cname].getValue(row[0]),
                 setter=lambda col,row,val,cname=cname: row[cname].setValues([row[0]], val),
                 aggregators=[aggregators['max']]))
