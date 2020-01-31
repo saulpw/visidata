@@ -4,3 +4,5 @@ sheet	col	row	longname	input	keystrokes	comment
 join-merge-2	colA		key-col		!	
 join-merge-1	colA		key-col		!	
 join-merge-2			join-sheets-top2	merge	&	
+join-merge-2+join-merge-1	colA		type-int		#	
+join-merge-2+join-merge-1	colA		sort-asc		[	
