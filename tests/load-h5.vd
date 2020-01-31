@@ -1,5 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/sensors.h5	o	open file
 sensors		0	dive-row		^J	open this group or dataset
-sensors_/hchoi-20160128pk		0	dive-row		^J	open this group or dataset
-sensors_/hchoi-20160128pk_/hchoi-20160128pk/bonjour-BP_L		0	dive-row		^J	open this group or dataset
+sensors_hchoi-20160128pk		0	dive-row		^J	open this group or dataset
+sensors_hchoi-20160128pk_bonjour-BP_L		0	dive-row		^J	open this group or dataset
