@@ -101,10 +101,10 @@ Notes:
 
 The VisiData singleton (accessible via `vd` or `sheet.vd`) maintains:
 
-- `scr`: the curses screen object
+- `scrFull`: the curses screen object
 - `sheets`: a list; `sheets[0]` is the actively displayed sheet
 
-`vd.windowWidth` and `vd.windowHeight` are the dimensions of the current terminal window.  (`sheet.windowWidth` and `sheet.windowHeight` are the dimensions of the current sheet window).
+`vd.screenWidth` and `vd.screenHeight` are the dimensions of the current terminal screen.  (`sheet.windowWidth` and `sheet.windowHeight` are the dimensions of that sheet's specific window, including status line).
 
 ## run()
 

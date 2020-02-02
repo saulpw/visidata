@@ -294,8 +294,6 @@ class Plotter(BaseSheet):
                         char_x, char_y, txt, attr, row = o
                         clipdraw(scr, char_y, char_x, txt, attr, len(txt))
 
-Plotter.addCommand('^L', 'redraw', 'vd._scr.clear(); refresh()')
-Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels')
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
 class Canvas(Plotter):
@@ -627,6 +625,9 @@ class Canvas(Plotter):
 
         for x, y, text, attr, row in Progress(self.gridlabels, 'labeling'):
             self.plotlabel(self.scaleX(x), self.scaleY(y), text, attr, row)
+
+
+Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels')
 
 Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w')
 Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w')

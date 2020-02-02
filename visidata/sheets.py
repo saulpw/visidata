@@ -980,6 +980,11 @@ SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThr
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)')
 
-globalCommand('^L', 'redraw', 'sheet.refresh()')
+BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = 50')
+BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0')
+BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]); options.disp_splitwin_pct = -options.disp_splitwin_pct')
+BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)')
+
+BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')

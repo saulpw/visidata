@@ -43,7 +43,7 @@ class VisiData(visidata.Extensible):
         self.allSheets = []  # list of all non-precious sheets ever pushed
         self.lastErrors = []
         self.keystrokes = ''
-        self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
+        self.scrFull = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
         self.cmdlog = None
 
     @drawcache_property
@@ -98,9 +98,9 @@ class VisiData(visidata.Extensible):
                 return kwargs[button]
 
     @property
-    def windowHeight(self):
-        return self._scr.getmaxyx()[0] if self._scr else 25
+    def screenHeight(self):
+        return self.scrFull.getmaxyx()[0] if self.scrFull else 25
 
     @property
-    def windowWidth(self):
-        return self._scr.getmaxyx()[1] if self._scr else 80
+    def screenWidth(self):
+        return self.scrFull.getmaxyx()[1] if self.scrFull else 80

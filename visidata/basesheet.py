@@ -182,6 +182,15 @@ class BaseSheet(Extensible):
             vd.exceptionCaught(e)
 
 
+@VisiData.api
+def redraw(vd):
+    'Clear the curses screen and let the next draw cycle recreate the windows and redraw everything'
+    vd.scrFull.clear()
+    vd.win1.clear()
+    vd.win2.clear()
+    vd.setWindows(vd.scrFull)
+
+
 @VisiData.property
 def sheet(self):
     'the top sheet on the stack'

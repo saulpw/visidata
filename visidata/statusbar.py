@@ -15,6 +15,9 @@ theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
 theme('color_status', 'bold', 'status line color')
 theme('color_error', 'red', 'error message color')
 theme('color_warning', 'yellow', 'warning message color')
+theme('color_top_status', 'underline', 'top window status bar color')
+theme('color_active_status', 'bold', ' active window status bar color')
+theme('color_inactive_status', '8', 'inactive window status bar color')
 
 
 @VisiData.lazy_property
@@ -85,6 +88,15 @@ def leftStatus(sheet):
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
     cattr = colors.get_color('color_status')
+    active = vs is vd.sheets[0]  # active sheet
+    if active:
+        cattr = update_attr(cattr, colors.color_active_status, 0)
+    else:
+        cattr = update_attr(cattr, colors.color_inactive_status, 0)
+
+    if scr is vd.winTop:
+        cattr = update_attr(cattr, colors.color_top_status, 1)
+
     attr = cattr.attr
     error_attr = update_attr(cattr, colors.color_error, 1).attr
     warn_attr = update_attr(cattr, colors.color_warning, 2).attr
@@ -106,6 +118,9 @@ def drawLeftStatus(vd, scr, vs):
                         BUTTON3_CLICKED='rename-sheet')
     except Exception as e:
         vd.exceptionCaught(e)
+
+    if not active:
+        return
 
     one = False
     for (pri, msgparts), n in sorted(vd.statuses.items(), key=lambda k: -k[0][0]):
@@ -139,19 +154,23 @@ def drawRightStatus(vd, scr, vs):
 
     ret = 0
     statcolors = [
-        vd.checkMemoryUsage(),
         (vd.rightStatus(vs), 'color_status'),
-        (vd.keystrokes, 'color_keystrokes'),
     ]
 
+    active = vs is vd.sheets[0]  # active sheet
+
+    if active:
+        statcolors.append((vd.keystrokes, 'color_keystrokes'))
+
     if vs.currentThreads:
+        statcolors.insert(0, vd.checkMemoryUsage())
         if vs.progresses:
             gerund = vs.progresses[0].gerund
         else:
             gerund = 'processing'
         statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_status'))
 
-    if vd.cmdlog and vd.cmdlog.currentReplay:
+    if active and vd.cmdlog and vd.cmdlog.currentReplay:
         statcolors.insert(0, (vd.cmdlog.currentReplay.replayStatus, 'color_status_replay'))
 
     for rstatcolor in statcolors:
@@ -159,8 +178,14 @@ def drawRightStatus(vd, scr, vs):
             try:
                 rstatus, coloropt = rstatcolor
                 rstatus = ' '+rstatus
-                attr = colors.get_color(coloropt).attr
-                statuslen = clipdraw(scr, vs.windowHeight-1, rightx, rstatus, attr, w=vs.windowWidth-1, rtl=True)
+                cattr = colors.get_color(coloropt)
+                if scr is vd.winTop:
+                    cattr = update_attr(cattr, colors.color_top_status, 0)
+                if active:
+                    cattr = update_attr(cattr, colors.color_active_status, 0)
+                else:
+                    cattr = update_attr(cattr, colors.color_inactive_status, 0)
+                statuslen = clipdraw(scr, vs.windowHeight-1, rightx, rstatus, cattr.attr, w=vs.windowWidth-1, rtl=True)
                 rightx -= statuslen
                 ret += statuslen
             except Exception as e:

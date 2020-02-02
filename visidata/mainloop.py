@@ -3,12 +3,14 @@ import os
 import curses
 import threading
 import time
+from unittest import mock
 
-from visidata import vd, VisiData, colors, bindkeys, ESC
+from visidata import vd, VisiData, colors, bindkeys, ESC, options, option
 
 curses_timeout = 100 # curses timeout in ms
 timeouts_before_idle = 10
 
+option('disp_splitwin_pct', 0, 'height of second sheet on screen')
 
 @VisiData.api
 def draw(self, scr, sheet):
@@ -17,7 +19,6 @@ def draw(self, scr, sheet):
     scr.erase()  # clear screen before every re-draw
 
     sheet._scr = scr
-    vd.scr = scr
 
     self.drawLeftStatus(scr, sheet)
     self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
@@ -27,6 +28,39 @@ def draw(self, scr, sheet):
     except Exception as e:
         self.exceptionCaught(e)
 
+    scr.refresh()
+
+
+vd.windowConfig = None
+
+@VisiData.api
+def setWindows(vd, scr):
+    'Assign winTop, winBottom, win1 and win2 according to options.disp_splitwin_pct.'
+    pct = options.disp_splitwin_pct   # percent of window for secondary sheet (negative means bottom)
+    h, w = scr.getmaxyx()
+    n = abs(pct)*h//100
+    # on 100 line screen, pct = 25 means second window on lines 75-100.  pct -25 -> lines 0-25
+
+    desiredConfig = dict(pct=pct, n=n, h=h, w=w)
+
+    if vd.scrFull is not scr or vd.windowConfig != desiredConfig:
+        vd.winTop = curses.newwin(n, w, 0, 0)
+        vd.winBottom = curses.newwin(h-n, w, n, 0)
+        if pct == 0 or pct >= 100:  # no second window
+            vd.win1 = vd.winBottom
+            # drawing to 0-line window causes problems
+            vd.win2 = mock.MagicMock(__bool__=mock.Mock(return_value=False))
+        elif pct > 0: # second window line n to bottom
+            vd.win1 = vd.winTop
+            vd.win2 = vd.winBottom
+        elif pct < 0: # second window line 0 to n
+            vd.win1 = vd.winBottom
+            vd.win2 = vd.winTop
+
+        vd.windowConfig = desiredConfig
+        vd.scrFull = scr
+        return True
+
 
 @VisiData.api
 def run(self, scr):
@@ -35,9 +69,9 @@ def run(self, scr):
     with contextlib.suppress(curses.error):
         curses.curs_set(0)
 
-    self._scr = scr
     numTimeouts = 0
     prefixWaiting = False
+    vd.scrFull = scr
 
     self.keystrokes = ''
     while True:
@@ -51,8 +85,14 @@ def run(self, scr):
 
         sheet.ensureLoaded()
 
-        scr.erase()  # clear screen before every re-draw
-        self.draw(scr, sheet)
+        vd.setWindows(scr)
+
+        self.draw(vd.win1, self.sheets[0])
+        if vd.win2 and len(self.sheets) > 1:
+            self.draw(vd.win2, self.sheets[1])
+        else:
+            vd.win2.erase()
+            vd.win2.refresh()
 
         keystroke = self.getkeystroke(scr, sheet)
 
