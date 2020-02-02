@@ -220,8 +220,6 @@ class Plotter(BaseSheet):
         if self.needsRefresh:
             self.render(windowHeight, windowWidth)
 
-        scr.erase()
-
         if self.pixels:
             cursorBBox = self.plotterCursorBox
             getPixelAttr = self.getPixelAttrRandom if options.disp_pixel_random else self.getPixelAttrMost
