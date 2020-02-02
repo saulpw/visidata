@@ -100,8 +100,8 @@ def read_pcap(f):
 
 @asyncthread
 def load_oui(url):
-    vsoui = open_tsv(urlcache(url, days=30))
-    vsoui.reload_sync()
+    vsoui = TsvSheet('vsoui', source=urlcache(url, days=30))
+    vsoui.reload.__wrapped__(vsoui)
     for r in vsoui.rows:
         if r.prefix.endswith('/36'): prefix = r.prefix[:13]
         elif r.prefix.endswith('/28'): prefix = r.prefix[:10]
@@ -114,8 +114,8 @@ def load_oui(url):
 
 @asyncthread
 def load_iana(url):
-    ports_tsv = open_tsv(urlcache(url, days=30))
-    ports_tsv.reload_sync()
+    ports_tsv = TsvSheet('ports_tsv', source=urlcache(url, days=30))
+    ports_tsv.reload.__wrapped__(ports_tsv)
     for r in ports_tsv.rows:
         try:
             services[(r.transport, int(r.port))] = r.service
