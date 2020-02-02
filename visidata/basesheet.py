@@ -159,6 +159,7 @@ class BaseSheet(Extensible):
         vd.error('no draw')
 
     def refresh(self):
+        'Clear the curses screen and let the next draw cycle redraw everything'
         self._scr.clear()
         self._scr.refresh()
 

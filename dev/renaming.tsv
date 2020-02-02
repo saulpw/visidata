@@ -28,3 +28,4 @@ status (longname)	show-status
 vd.clear_caches	vd.clearCaches()		
 getDefaultSaveName	Sheet.getDefaultSaveName	same	
 theme	option	deprecate theme() and rely on disp_, color_, and replay= to differentiate cosmetic options	
+prev-sheet	jump-prev		

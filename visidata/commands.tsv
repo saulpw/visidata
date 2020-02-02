@@ -10,7 +10,6 @@ global	error-recent		^E	^E	meta	n	n	n		errors-recent	view traceback for most rec
 global	errors-all	g	^E	g^E	meta	n	n	n		info-errors-all	view traceback for most recent errors
 global	exec-longname		Space	Space				n		meta-exec-cmd	execute command by name
 global	exec-python	g	^X	g^X	n	n	n	y		python-exec	execute Python statement in the global scope
-global	forget-sheet		Q	Q	quit	n	n	n		sheet-quit-remove	quit current sheet and remove it from the cmdlog
 global	freq-summary	z	F	zF	y	n	n	y		data-aggregate-summary	open summary for all rows and selected rows
 global	jump-sheet-	Alt	[1-9]	Alt+[1-9]	y			y			jump to sheet of provided number
 global	no-op		KEY_RESIZE	KEY_RESIZE	n	n	n	n			no operation
