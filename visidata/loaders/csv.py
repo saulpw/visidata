@@ -39,7 +39,8 @@ class CsvSheet(SequenceSheet):
             else:
                 rdr = csv.reader(fp, **options('csv_'))
 
-            yield from rdr
+            while True:
+                yield wrappedNext(rdr)
 
 
 @Sheet.api
