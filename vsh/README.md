@@ -22,7 +22,7 @@ Includes:
 vsh is located as a module within the [VisiData repo](https://github.com/saulpw/visidata/vsh). It has its own setup.py. Note that installing vsh will also install VisiData.
 
 ```
-pip3 install git+git://github.com/saulpw/visidata/vsh@develop
+pip3 install -e "git+https://github.com/saulpw/visidata.git@develop#egg=vsh&subdirectory=vsh"
 ```
 
 ### Dependencies
