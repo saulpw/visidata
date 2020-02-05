@@ -45,7 +45,9 @@ def setWindows(vd, scr):
 
     if vd.scrFull is not scr or vd.windowConfig != desiredConfig:
         vd.winTop = curses.newwin(n, w, 0, 0)
+        vd.winTop.keypad(1)
         vd.winBottom = curses.newwin(h-n, w, n, 0)
+        vd.winBottom.keypad(1)
         if pct == 0 or pct >= 100:  # no second window
             vd.win1 = vd.winBottom
             # drawing to 0-line window causes problems
