@@ -118,7 +118,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             if not savefunc:
                 savefunc = lambda p,vs=vs,f=globalsavefunc: f(p, vs)
             if savefunc:
-                vd.execAsync(savefunc, givenpath.with_suffix('.'+filetype))
+                vd.execAsync(savefunc, Path((givenpath / vs.name).with_suffix('.'+filetype)))
             else:
                 warning('no function to save %s as type %s' % (vs, filetype))
     else:
