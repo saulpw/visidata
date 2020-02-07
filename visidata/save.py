@@ -116,7 +116,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         for vs in vsheets:
             savefunc = getattr(vs, 'save_'+filetype, None)
             if not savefunc:
-                savefunc = lambda p,vs=vs,f=globalsavefunc: f(p, vs)
+                savefunc = lambda p,vs=vs,f=globalsavefunc: f(vs, p)
             if savefunc:
                 vd.execAsync(savefunc, Path((givenpath / vs.name).with_suffix('.'+filetype)))
             else:
@@ -129,7 +129,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         savefunc = getattr(vsheets[0], 'save_'+filetype, None)
         if not savefunc:
             f = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
-            savefunc = lambda p,vs=vsheets[0],f=f: f(p, vs)
+            savefunc = lambda p,vs=vsheets[0],f=f: f(vs, p)
 
         status('saving to %s as %s' % (givenpath.given, filetype))
         vd.execAsync(savefunc, givenpath)
