@@ -12,7 +12,7 @@ option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
-show error errors statuses options threads cmdlog jump
+show error errors statuses options threads jump
 replay stop pause cancel advance save-cmdlog
 go- search scroll prev next page start end zoom resize visibility
 suspend redraw no-op help syscopy syspaste sysopen profile toggle'''.split()
@@ -167,9 +167,9 @@ class CommandLog(VisiDataMetaSheet):
             vd.activeCommand[-1] += ' [%s]' % err
 
         # remove user-aborted commands and simple movements
-        if not escaped and isLoggableCommand(vd.activeCommand.longname) and self is not sheet:
-                self.addRow(vd.activeCommand)
-                sheet.cmdlog_sheet.addRow(vd.activeCommand)
+        if not escaped and isLoggableCommand(vd.activeCommand.longname):
+                self.addRow(vd.activeCommand)  # add to global cmdlog
+                sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
                 if options.cmdlog_histfile:
                     if not getattr(vd, 'sessionlog', None):
                         vd.sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
