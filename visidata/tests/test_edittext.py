@@ -48,7 +48,7 @@ class TestEditText:
         exception = kwargs.pop('exception', None)
         if exception:
             with pytest.raises(exception):
-                visidata.editline(mock_screen, 0, 0, 0, **kwargs)
+                visidata.vd.editline(mock_screen, 0, 0, 0, **kwargs)
         else:
             r = visidata.editline(mock_screen, 0, 0, 0, **kwargs)
             assert r == result

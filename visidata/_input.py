@@ -6,7 +6,7 @@ from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiDa
 from visidata import vd, status, error, warning, fail, options, theme, colors, commands
 from visidata import launchExternalEditor, suspend
 
-__all__ = ['confirm', 'editline', 'choose', 'chooseOne', 'chooseMany', 'CompleteKey']
+__all__ = ['confirm', 'choose', 'chooseOne', 'chooseMany', 'CompleteKey']
 
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
@@ -117,7 +117,8 @@ class HistoryState:
 
 
 # history: earliest entry first
-def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None):
+@VisiData.api
+def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None):
   'A better curses line editing widget.'
   with EnableCursor():
     ESC='^['
@@ -216,19 +217,19 @@ def editline(scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', tr
 
 
 @VisiData.api
-def editText(self, y, x, w, record=True, display=True, **kwargs):
+def editText(vd, y, x, w, record=True, display=True, **kwargs):
     'Wrap editline; if record=True, get input from the cmdlog in batch mode, save input to the cmdlog if display=True.'
     v = None
-    if record and self.cmdlog:
-        v = self.cmdlog.getLastArgs()
+    if record and vd.cmdlog:
+        v = vd.cmdlog.getLastArgs()
 
     if v is None:
-        v = editline(self.sheets[0]._scr, y, x, w, display=display, **kwargs)
+        v = vd.editline(vd.sheets[0]._scr, y, x, w, display=display, **kwargs)
 
     if display:
         status('"%s"' % v)
-        if record and self.cmdlog:
-            self.cmdlog.setLastArgs(v)
+        if record and vd.cmdlog:
+            vd.cmdlog.setLastArgs(v)
     return v
 
 
