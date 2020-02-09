@@ -66,7 +66,7 @@ def setWindows(vd, scr):
 
 
 @VisiData.api
-def run(self, scr):
+def mainloop(self, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
     scr.timeout(curses_timeout)
     with contextlib.suppress(curses.error):
@@ -216,4 +216,4 @@ def cursesMain(_scr, sheetlist):
         vd.push(vs)
 
     vd.status('Ctrl+H opens help')
-    return vd.run(_scr)
+    return vd.mainloop(_scr)

@@ -106,15 +106,13 @@ The VisiData singleton (accessible via `vd` or `sheet.vd`) maintains:
 
 `vd.screenWidth` and `vd.screenHeight` are the dimensions of the current terminal screen.  (`sheet.windowWidth` and `sheet.windowHeight` are the dimensions of that sheet's specific window, including status line).
 
-## run()
+## visidata.run() and vd.mainloop()
 
-`VisiData.run(scr)` is the main display loop.  It calls `draw()` on the top sheet, left and right statuses, and handles commands, until there are no more sheets.
+`VisiData.mainloop(scr)` is the main display loop.  It calls `draw()` on the top sheet, left and right statuses, and handles commands, until there are no more sheets.
 
 VisiData exits when this function returns.
 
-This function must be called with the curses screen object.  Applications should instead call the module-level `run(*sheets)` with the sheets they want pushed initially, and VisiData will initialize curses to its liking.
-
-[should the two run() functions have different names?]
+This function must be called with the curses screen object.  Applications should call the module-level `run(*sheets)` with the sheets they want pushed initially, and VisiData will initialize curses to its liking.
 
 ## Sheet.draw(scr)
 
