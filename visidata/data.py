@@ -18,7 +18,7 @@ Sheet.addCommand('ga', 'add-rows', 'addRows(int(input("add rows: ", value=1)), c
 Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)')
 Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)')
 
-Sheet.addCommand('f', 'fill-nulls', 'fillNullValues(cursorCol, selectedRows)')
+Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, selectedRows)')
 
 BaseSheet.bindkey('KEY_SLEFT', 'slide-left')
 BaseSheet.bindkey('KEY_SR', 'slide-left')
