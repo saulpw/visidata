@@ -40,7 +40,7 @@ def undo(vd, sheet):
 def redo(vd, sheet):
     sheet.undone or vd.fail("nothing to redo")
     cmdlogrow = sheet.undone.pop()
-    vd.cmdlog.replayOne(cmdlogrow)
+    vd.replayOne(cmdlogrow)
     vd.status("%s redone" % cmdlogrow.longname)
 
 # undoers

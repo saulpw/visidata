@@ -69,7 +69,7 @@ def moveToRow(vs, rowstr):
     if options.replay_movement:
         while vs.cursorRowIndex != rowidx:
             vs.cursorRowIndex += 1 if (rowidx - vs.cursorRowIndex) > 0 else -1
-            while not self.delay(0.5):
+            while not vd.delay(0.5):
                 pass
     else:
         vs.cursorRowIndex = rowidx
@@ -100,7 +100,7 @@ def moveToCol(vs, colstr):
     if options.replay_movement:
         while vs.cursorVisibleColIndex != vcolidx:
             vs.cursorVisibleColIndex += 1 if (vcolidx - vs.cursorVisibleColIndex) > 0 else -1
-            while not self.delay(0.5):
+            while not vd.delay(0.5):
                 pass
     else:
         vs.cursorVisibleColIndex = vcolidx
@@ -124,10 +124,6 @@ class CommandLog(VisiDataMetaSheet):
         ColumnAttr('undo', 'undofuncs', type=vlen, width=0)
     ]
 
-    paused = False
-    currentReplay = None     # CommandLog replaying currently
-    currentReplayRow = None  # must be global, to allow replay
-    semaphore = threading.Semaphore(0)
     filetype = 'vd'
 
     def newRow(self, **fields):
@@ -148,7 +144,7 @@ class CommandLog(VisiDataMetaSheet):
             if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
-        comment = CommandLog.currentReplayRow.comment if CommandLog.currentReplayRow else cmd.helpstr
+        comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
         vd.activeCommand = self.newRow(sheet=sheetname,
                                             col=str(colname),
                                             row=str(rowname),
@@ -182,25 +178,42 @@ class CommandLog(VisiDataMetaSheet):
         vs.cmdlog.addRow(r)
         self.addRow(r)
 
-    @classmethod
-    def togglePause(self):
-        if not CommandLog.currentReplay:
-            status('no replay to pause')
+
+### replay
+
+vd.paused = False
+vd.currentReplay = None     # CommandLog replaying currently
+vd.currentReplayRow = None  # must be global, to allow replay
+vd.semaphore = threading.Semaphore(0)
+
+
+@VisiData.api
+def replay_pause(vd):
+        if not vd.currentReplay:
+            fail('no replay to pause')
         else:
-            if self.paused:
-                CommandLog.currentReplay.advance()
-            self.paused = not self.paused
-            status('paused' if self.paused else 'resumed')
+            if vd.paused:
+                vd.replay_advance()
+            vd.paused = not vd.paused
+            status('paused' if vd.paused else 'resumed')
 
-    def advance(self):
-        CommandLog.semaphore.release()
 
-    def cancel(self):
-        CommandLog.currentReplayRow = None
-        CommandLog.currentReplay = None
-        self.advance()
+@VisiData.api
+def replay_advance(vd):
+        vd.currentReplay or fail("no replay to advance")
+        vd.semaphore.release()
 
-    def moveToReplayContext(self, r):
+
+@VisiData.api
+def replay_cancel(vd):
+        vd.currentReplay or fail("no replay to cancel")
+        vd.currentReplayRow = None
+        vd.currentReplay = None
+        vd.semaphore.release()
+
+
+@VisiData.api
+def moveToReplayContext(vd, r):
         'set the sheet/row/col to the values in the replay row.  return sheet'
         if r.sheet:
             vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
@@ -215,14 +228,18 @@ class CommandLog(VisiDataMetaSheet):
 
         return vs
 
-    def delay(self, factor=1):
-        'returns True if delay satisfied'
-        acquired = CommandLog.semaphore.acquire(timeout=options.replay_wait*factor if not self.paused else None)
-        return acquired or not self.paused
 
-    def replayOne(self, r):
+@VisiData.api
+def delay(vd, factor=1):
+        'returns True if delay satisfied'
+        acquired = vd.semaphore.acquire(timeout=options.replay_wait*factor if not vd.paused else None)
+        return acquired or not vd.paused
+
+
+@VisiData.api
+def replayOne(vd, r):
         'Replay the command in one given row.'
-        CommandLog.currentReplayRow = r
+        vd.currentReplayRow = r
 
         longname = getattr(r, 'longname', None)
         if longname == 'set-option':
@@ -233,7 +250,7 @@ class CommandLog(VisiDataMetaSheet):
                 exceptionCaught(e)
                 escaped = True
         else:
-            vs = self.moveToReplayContext(r)
+            vs = vd.moveToReplayContext(r)
             if vs:
                 vd.push(vs)
             else:
@@ -246,70 +263,81 @@ class CommandLog(VisiDataMetaSheet):
             # <=v1.2 used keystrokes in longname column; getCommand fetches both
             escaped = vs.exec_command(vs.getCommand(longname if longname else r.keystrokes), keystrokes=r.keystrokes)
 
-        CommandLog.currentReplayRow = None
+        vd.currentReplayRow = None
 
         if escaped:  # escape during replay aborts replay
             warning('replay aborted during %s' % (longname or r.keystrokes))
         return escaped
 
-    def replay_sync(self, live=False):
+
+@VisiData.api
+def replay_sync(vd, cmdlog, live=False):
         'Replay all commands in log.'
-        self.cursorRowIndex = 0
-        CommandLog.currentReplay = self
-        with Progress(total=len(self.rows)) as prog:
-            while self.cursorRowIndex < len(self.rows):
-                if CommandLog.currentReplay is None:
+        cmdlog.cursorRowIndex = 0
+        vd.currentReplay = cmdlog
+        with Progress(total=len(cmdlog.rows)) as prog:
+            while cmdlog.cursorRowIndex < len(cmdlog.rows):
+                if vd.currentReplay is None:
                     status('replay canceled')
                     return
 
                 vd.statuses.clear()
                 try:
-                    if self.replayOne(self.cursorRow):
-                        self.cancel()
+                    if vd.replayOne(cmdlog.cursorRow):
+                        vd.replay_cancel()
                         return True
                 except Exception as e:
-                    self.cancel()
+                    vd.replay_cancel()
                     exceptionCaught(e)
                     status('replay canceled')
                     return True
 
-                self.cursorRowIndex += 1
+                cmdlog.cursorRowIndex += 1
                 prog.addProgress(1)
 
                 vd.sheets[0].ensureLoaded()
                 vd.sync()
-                while not self.delay():
+                while not vd.delay():
                     pass
 
         status('replay complete')
-        CommandLog.currentReplay = None
+        vd.currentReplay = None
 
-    @asyncthread
-    def replay(self):
+
+@VisiData.api
+@asyncthread
+def replay(vd, cmdlog):
         'Inject commands into live execution with interface.'
-        self.replay_sync(live=True)
+        vd.replay_sync(cmdlog, live=True)
 
-    def getLastArgs(self):
+
+@VisiData.api
+def getLastArgs(vd):
         'Get user input for the currently playing command.'
-        if CommandLog.currentReplayRow:
-            return CommandLog.currentReplayRow.input
+        if vd.currentReplayRow:
+            return vd.currentReplayRow.input
         return None
 
-    def setLastArgs(self, args):
+
+@VisiData.api
+def setLastArgs(vd, args):
         'Set user input on last command, if not already set.'
         # only set if not already set (second input usually confirmation)
         if vd.activeCommand is not None:
             if not vd.activeCommand.input:
                 vd.activeCommand.input = args
 
-    @property
-    def replayStatus(self):
-        x = options.disp_replay_pause if self.paused else options.disp_replay_play
-        return ' │ %s %s/%s' % (x, self.cursorRowIndex, len(self.rows))
 
-    def set_option(self, optname, optval, obj=None):
+@VisiData.property
+def replayStatus(vd):
+        x = options.disp_replay_pause if vd.paused else options.disp_replay_play
+        return ' │ %s %s/%s' % (x, vd.currentReplay.cursorRowIndex, len(vd.currentReplay.rows))
+
+
+@VisiData.api
+def set_option(vd, cmdlog, optname, optval, obj=None):
         objname = options._opts.objname(obj)
-        self.addRow(self.newRow(col=objname, row=optname,
+        cmdlog.addRow(cmdlog.newRow(col=objname, row=optname,
                     keystrokes='', input=str(optval),
                     longname='set-option'))
 
@@ -351,9 +379,9 @@ globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
 globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
 globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)')
-globalCommand('^U', 'replay-pause', 'CommandLog.togglePause()')
-globalCommand('^I', 'replay-advance', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
-globalCommand('^K', 'replay-stop', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
+globalCommand('^U', 'replay-pause', 'vd.replay_pause()')
+globalCommand('^I', 'replay-advance', ' vd.replay_advance()')
+globalCommand('^K', 'replay-stop', ' vd.replay_cancel()')
 
 globalCommand(None, 'status', 'status(input("status: "))')
 globalCommand('^V', 'show-version', 'status(__version_info__);')
@@ -361,9 +389,9 @@ globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", v
 
 globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
 
-CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
-CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
+CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")')
+CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)')
 CommandLog.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows')
 
 BaseSheet.addCommand('', 'repeat-last', 'exec_keystrokes(cmdlog_sheet.rows[-1].longname)')
-BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.cmdlog.replayOne(r)')
+BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)')

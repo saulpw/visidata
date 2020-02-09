@@ -191,10 +191,10 @@ def main_vd():
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
         vd.sync(vs.reload())
         if args.batch:
-            if vs.replay_sync():  # error
+            if vd.replay_sync(vs):  # error
                 return 1
         else:
-            vs.replay()
+            vd.replay(vs)
             run()
 
     if vd.sheets and (flPipedOutput or args.output):

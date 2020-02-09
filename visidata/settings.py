@@ -166,7 +166,7 @@ class OptionsObject:
 
             if curval != v and self._get(k, 'global').replayable:
                 if vd.cmdlog:  # options set on init aren't recorded
-                    vd.cmdlog.set_option(k, v, obj)
+                    vd.set_option(vd.cmdlog, k, v, obj)
         else:
             curval = None
             vd.warning('setting unknown option %s' % k)

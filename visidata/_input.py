@@ -221,7 +221,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
     'Wrap editline; if record=True, get input from the cmdlog in batch mode, save input to the cmdlog if display=True.'
     v = None
     if record and vd.cmdlog:
-        v = vd.cmdlog.getLastArgs()
+        v = vd.getLastArgs()
 
     if v is None:
         v = vd.editline(vd.sheets[0]._scr, y, x, w, display=display, **kwargs)
@@ -229,7 +229,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
     if display:
         status('"%s"' % v)
         if record and vd.cmdlog:
-            vd.cmdlog.setLastArgs(v)
+            vd.setLastArgs(v)
     return v
 
 

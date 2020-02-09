@@ -170,8 +170,8 @@ def drawRightStatus(vd, scr, vs):
             gerund = 'processing'
         statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_status'))
 
-    if active and vd.cmdlog and vd.cmdlog.currentReplay:
-        statcolors.insert(0, (vd.cmdlog.currentReplay.replayStatus, 'color_status_replay'))
+    if active and vd.currentReplay:
+        statcolors.insert(0, (vd.replayStatus, 'color_status_replay'))
 
     for rstatcolor in statcolors:
         if rstatcolor:
