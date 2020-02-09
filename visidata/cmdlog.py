@@ -237,7 +237,7 @@ class CommandLog(VisiDataMetaSheet):
             if vs:
                 vd.push(vs)
             else:
-                vs = self  # any old sheet should do, row/column don't matter
+                vs = vd.sheets[0]  # use top sheet by default
 
             if r.comment:
                 status(r.comment)
