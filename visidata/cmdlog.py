@@ -13,7 +13,7 @@ option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
-replay stop pause cancel advance save-cmdlog
+replay cancel save-cmdlog
 go- search scroll prev next page start end zoom resize visibility
 suspend redraw no-op help syscopy syspaste sysopen profile toggle'''.split()
 
@@ -351,9 +351,9 @@ globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
 globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
 globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)')
-globalCommand('^U', 'pause-replay', 'CommandLog.togglePause()')
-globalCommand('^I', 'advance-replay', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
-globalCommand('^K', 'stop-replay', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
+globalCommand('^U', 'replay-pause', 'CommandLog.togglePause()')
+globalCommand('^I', 'replay-advance', '(CommandLog.currentReplay or fail("no replay to advance")).advance()')
+globalCommand('^K', 'replay-stop', '(CommandLog.currentReplay or fail("no replay to cancel")).cancel()')
 
 globalCommand(None, 'status', 'status(input("status: "))')
 globalCommand('^V', 'show-version', 'status(__version_info__);')
@@ -363,7 +363,7 @@ globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
 
 CommandLog.addCommand('x', 'replay-row', 'sheet.replayOne(cursorRow); status("replayed one row")')
 CommandLog.addCommand('gx', 'replay-all', 'sheet.replay()')
-CommandLog.addCommand('^C', 'stop-replay', 'sheet.cursorRowIndex = sheet.nRows')
+CommandLog.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows')
 
 BaseSheet.addCommand('', 'repeat-last', 'exec_keystrokes(cmdlog_sheet.rows[-1].longname)')
 BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.cmdlog.replayOne(r)')

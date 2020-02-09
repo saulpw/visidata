@@ -30,3 +30,4 @@ getDefaultSaveName	Sheet.getDefaultSaveName	same
 theme	option	deprecate theme() and rely on disp_, color_, and replay= to differentiate cosmetic options	
 prev-sheet	jump-prev		
 editline()	vd.editline()	same	y
+*-replay	replay-*	longname	y
