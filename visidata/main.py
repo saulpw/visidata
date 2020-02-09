@@ -140,7 +140,7 @@ def main_vd():
 
     vd.sheets.extend(sources)  # purposefully do not load everything
 
-    if not vd.sheets:
+    if not vd.sheets and not args.play and not args.batch:
         vd.push(vd.vdmenu)
 
     if not args.play:
