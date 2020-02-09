@@ -175,7 +175,7 @@ class CommandLog(VisiDataMetaSheet):
 
     def openHook(self, vs, src):
         r = self.newRow(keystrokes='o', input=src, longname='open-file')
-        vs.cmdlog.addRow(r)
+        vs.cmdlog_sheet.addRow(r)
         self.addRow(r)
 
 
