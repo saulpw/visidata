@@ -268,12 +268,13 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
 
 
 @VisiData.global_api
-def confirm(vd, prompt, exc=ExpectedException):
+def confirm(vd, prompt, exc=EscapeException):
     yn = vd.input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
+        msg = 'disconfirmed: ' + prompt
         if exc:
-            raise exc('disconfirmed')
-        warning('disconfirmed')
+            raise exc(msg)
+        warning(msg)
         return False
     return True
 

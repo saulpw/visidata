@@ -118,7 +118,7 @@ class BaseSheet(Extensible):
             vd.debug(cmd.longname)
             exec(code, vdglobals, LazyChainMap(vd, self))
         except EscapeException as e:  # user aborted
-            vd.warning('aborted')
+            vd.warning(str(e))
             escaped = True
         except Exception as e:
             vd.debug(cmd.execstr)
