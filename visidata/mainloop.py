@@ -32,6 +32,7 @@ def draw(self, scr, sheet):
 
 
 vd.windowConfig = None
+vd.winTop = mock.MagicMock(__bool__=mock.Mock(return_value=False))
 
 @VisiData.api
 def setWindows(vd, scr):
