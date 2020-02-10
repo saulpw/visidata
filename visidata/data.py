@@ -49,8 +49,8 @@ class SettableColumn(Column):
 
 Sheet._coltype = SettableColumn
 
-@asyncthread
 @Sheet.api
+@asyncthread
 def addRows(sheet, n, idx):
     addedRows = {}
     for i in Progress(range(n), 'adding'):

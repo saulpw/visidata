@@ -129,8 +129,8 @@ def aggname(col, agg):
     'Consistent formatting of the name of given aggregator for this column.  e.g. "col1_sum"'
     return '%s_%s' % (col.name, agg.__name__)
 
-@asyncthread
 @Column.api
+@asyncthread
 def show_aggregate(col, agg, rows):
     'Show aggregated value in status, and add to memory.'
     aggval = agg(col, rows)

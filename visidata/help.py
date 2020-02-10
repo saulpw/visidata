@@ -41,8 +41,8 @@ class HelpSheet(MetaSheet):
                 self.revbinds[longname] = keystrokes
 
 
-@asyncthread
 @VisiData.api
+@asyncthread
 def help_search(vd, sheet, regex):
     vs = HelpSheet(source=None)
     vs.rows = []  # do not trigger push reload
