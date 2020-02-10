@@ -195,6 +195,9 @@ BaseSheet.bindkey('KEY_END', 'go-rightmost')
 BaseSheet.bindkey('KEY_NPAGE', 'go-pagedown')
 BaseSheet.bindkey('KEY_PPAGE', 'go-pageup')
 
+BaseSheet.bindkey('kHOM5', 'go-top')  # Ctrl+Home
+BaseSheet.bindkey('KEY_EOL', 'go-bottom')  # Ctrl+End
+
 BaseSheet.bindkey('gKEY_LEFT', 'go-leftmost'),
 BaseSheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
 BaseSheet.bindkey('gKEY_UP', 'go-top'),
