@@ -523,7 +523,7 @@ class Sheet(BaseSheet):
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
-        minColWidth = len(options.disp_more_left)+len(options.disp_more_right)
+        minColWidth = len(options.disp_more_left)+len(options.disp_more_right)+2
         sepColWidth = len(options.disp_column_sep)
         winWidth = self.windowWidth
         self.visibleColLayout = {}
@@ -533,7 +533,7 @@ class Sheet(BaseSheet):
             col = self.visibleCols[vcolidx]
             if col.width is None and len(self.visibleRows) > 0:
                 # handle delayed column width-finding
-                col.width = col.getMaxWidth(self.visibleRows)+minColWidth
+                col.width = max(col.getMaxWidth(self.visibleRows), minColWidth)
                 if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, options.default_width)
             width = col.width if col.width is not None else options.default_width
