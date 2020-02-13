@@ -119,26 +119,26 @@ class VisiDataSheet(IndexSheet):
     rowtype = 'metasheets'
     precious = False
     columns = [
-        ColumnAttr('name'),
-        ColumnAttr('shortcut', 'shortcut_en', width=10),
-        ColumnAttr('command', 'longname', width=0),
-        ColumnAttr('description'),
         ColumnAttr('items', 'nRows', type=int),
+        ColumnAttr('name', width=0),
+        ColumnAttr('description', width=50),
+        ColumnAttr('command', 'longname', width=0),
+        ColumnAttr('shortcut', 'shortcut_en', width=11),
     ]
-    nKeys = 1
+    nKeys = 0
 
     def reload(self):
         self.rows = []
         for vdattr, sheetname, longname, shortcut, desc in [
-            ('sheetsSheet', 'sheets', 'sheets-stack', 'Shift S', 'current sheet stack'),
-            ('allSheetsSheet', 'sheets_all', 'sheets-all', 'g Shift S', 'all sheets ever opened'),
-            ('cmdlog', 'cmdlog', 'cmdlog-all', 'g Shift D', 'log of all commands this session'),
-            ('globalOptionsSheet', 'options_global', 'open-global', 'g Shift O', 'default option values applying to every sheet'),
-            ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl E', 'stacktrace of most recent error'),
-            ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl P', 'status messages from current session'),
-            ('threadsSheet', 'threads', 'open-threads', 'Ctrl T', 'threads and profiling'),
+            ('currentDirSheet', '.', 'open-dir-current', '', 'DirSheet for the current directory'),
+            ('sheetsSheet', 'sheets', 'sheets-stack', 'Shift+S', 'current sheet stack'),
+            ('allSheetsSheet', 'sheets_all', 'sheets-all', 'g Shift+S', 'all sheets ever opened'),
+            ('cmdlog', 'cmdlog', 'cmdlog-all', 'g Shift+D', 'log of all commands this session'),
+            ('globalOptionsSheet', 'options_global', 'open-global', 'g Shift+O', 'default option values applying to every sheet'),
+            ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl+E', 'stacktrace of most recent error'),
+            ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl+P', 'status messages from current session'),
+            ('threadsSheet', 'threads', 'open-threads', 'Ctrl+T', 'threads and profiling'),
             ('pluginsSheet', 'plugins', 'open-plugins', '', 'plugins repository'),
-            ('currentDirSheet', '.', 'open-dir-current', '', 'DirSheet for the current directory')
             ]:
             vs = getattr(vd, vdattr)
             vs.description = desc
