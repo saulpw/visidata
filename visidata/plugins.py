@@ -12,7 +12,7 @@ option('plugins_url', 'https://visidata.org/plugins/plugins.tsv', 'source of plu
 @VisiData.lazy_property
 def pluginsSheet(p):
     'Support the "plugins" phony filetype as PluginsSheet'
-    return PluginsSheet('plugin_store', source=urlcache(options.plugins_url, days=0))
+    return PluginsSheet('plugin_store')
 
 def _plugin_path(plugin):
     return Path(os.path.join(options.visidata_dir, "plugins", plugin.name+".py"))
@@ -53,6 +53,7 @@ class PluginsSheet(VisiDataMetaSheet):
 
     @asyncthread
     def reload(self):
+        self.source = urlcache(options.plugins_url, days=0)  # for VisiDataMetaSheet.reload()
         super().reload.__wrapped__(self)
         self.addColumn(Column('available', width=0, getter=_installedStatus), index=1)
         self.addColumn(Column('installed', width=8, getter=lambda c,r: _loadedVersion(r)), index=2)
