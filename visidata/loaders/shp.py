@@ -70,8 +70,9 @@ ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sou
 ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))')
 
 
-@Canvas.api
-def save_geojson(vs, p):
+@VisiData.api
+def save_geojson(vd, p, vs):
+    isinstance(vs, Canvas) or fail("must save geojson from canvas sheet")
     features = []
     for coords, attr, row in Progress(vs.polylines, 'saving'):
         feat = {

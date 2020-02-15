@@ -3,7 +3,7 @@ import contextlib
 import itertools
 import collections
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, exceptionCaught, option
+from visidata import asyncthread, options, Progress, status, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, exceptionCaught, option, VisiData
 from visidata import namedlist, filesize
 
 option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
@@ -59,8 +59,8 @@ def load_tsv(fn):
     yield from vs.iterload()
 
 
-@Sheet.api
-def save_tsv(vs, p):
+@VisiData.api
+def save_tsv(vd, p, vs):
     'Write sheet to file `fn` as TSV.'
     unitsep = options.get('delimiter', vs)
     rowsep = options.get('row_delimiter', vs)

@@ -43,8 +43,8 @@ class CsvSheet(SequenceSheet):
                 yield wrappedNext(rdr)
 
 
-@Sheet.api
-def save_csv(sheet, p):
+@VisiData.api
+def save_csv(vd, p, sheet):
     'Save as single CSV file, handling column names as first line.'
     with p.open_text(mode='w') as fp:
         cw = csv.writer(fp, **options('csv_'))

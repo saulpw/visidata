@@ -40,7 +40,7 @@ These should all be implementable via the plugin framework.
 
 - [loader] RSS reader: [#157](https://github.com/saulpw/visidata/issues/157)
 - [google sheets] loader with savesToSource
-- [hdf5] multisave_hdf5
+- [hdf5] save multiple sheets
 - [canvas] Canvas.save_svg
 - [ipybnb] Sheet.save_ipynb
 - [sql] Sheet.save_sql

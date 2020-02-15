@@ -47,12 +47,11 @@ def write_md(p, *vsheets, md_style='orgmode'):
     vd.status('%s save finished' % p)
 
 
-def save_md(p, vsheets):
-    write_md(p, vsheets, md_style='orgmode')
+@VisiData.api
+def save_md(vd, p, *sheets):
+    write_md(p, *sheets, md_style='orgmode')
 
 
-def save_jira(p, vsheets):
-    write_md(p, vsheets, md_style='jira')
-
-
-multisave_md = save_md
+@VisiData.api
+def save_jira(vd, p, *sheets):
+    write_md(p, *sheets, md_style='jira')

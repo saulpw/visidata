@@ -79,8 +79,8 @@ def _rowdict(cols, row):
     return {c.name: Cell(c, row) for c in cols}
 
 
-@Sheet.api
-def save_json(vs, p):
+@VisiData.api
+def save_json(vd, p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder(indent=options.json_indent)
@@ -89,8 +89,8 @@ def save_json(vs, p):
                 fp.write(chunk)
 
 
-@Sheet.api
-def save_jsonl(vs, p):
+@VisiData.api
+def save_jsonl(vd, p, vs):
     with p.open_text(mode='w') as fp:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
@@ -99,8 +99,8 @@ def save_jsonl(vs, p):
                 rowdict = _rowdict(vcols, row)
                 fp.write(jsonenc.encode(rowdict) + '\n')
 
-Sheet.save_ndjson = Sheet.save_jsonl
-Sheet.save_ldjson = Sheet.save_jsonl
+VisiData.save_ndjson = VisiData.save_jsonl
+VisiData.save_ldjson = VisiData.save_jsonl
 
 vd.filetype('json', JsonSheet)
 vd.filetype('jsonl', JsonLinesSheet)

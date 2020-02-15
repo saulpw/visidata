@@ -88,8 +88,8 @@ class PuzSheet(CrosswordSheet):
         self.rows = self.xd.clues
 
 
-@CrosswordSheet.api
-def save_xd(vs, p):
+@VisiData.api
+def save_xd(vd, p, vs):
     with p.open_text(mode='w') as fp:
         fp.write(vs.xd.to_unicode())
 

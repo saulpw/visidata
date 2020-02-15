@@ -68,10 +68,13 @@ class XmlSheet(Sheet):
                 self.attribcols[k] = c
                 c.nstag = k
 
-    def save_xml(self, p):
-        self.root.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
 
-    save_svg = save_xml
+@VisiData.api
+def save_xml(vd, p, vs):
+    isinstance(XmlSheet) or fail('must save xml from XmlSheet')
+    vs.root.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
+
+VisiData.save_svg = VisiData.save_xml
 
 
 XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)')

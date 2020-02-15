@@ -48,8 +48,8 @@ class NpzSheet(ZipSheet):
         return load_pyobj(tablename, tbl)
 
 
-@Sheet.api
-def save_npy(sheet, p):
+@VisiData.api
+def save_npy(vd, p, sheet):
     import numpy as np
 
     dtype = []

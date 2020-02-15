@@ -97,7 +97,8 @@ class HtmlTableSheet(Sheet):
                 self.addColumn(Column(name+'_link'+str(linknum), width=20, getter=lambda c,r,i=colnum,j=linknum: r[i][1][j]))
 
 
-def save_html(p, *vsheets):
+@VisiData.api
+def save_html(vd, p, *vsheets):
     'Save vsheets as HTML tables in a single file'
 
     with open(p, 'w', encoding='ascii', errors='xmlcharrefreplace') as fp:
@@ -128,7 +129,7 @@ def save_html(p, *vsheets):
             vd.status('%s save finished' % p)
 
 
-save_htm = multisave_htm = multisave_html = save_html
+VisiData.save_htm = VisiData.save_html
 
 
 vd.filetype('html', HtmlTablesSheet)

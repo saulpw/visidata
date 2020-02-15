@@ -976,6 +976,7 @@ SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_colu
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected, *selectedRows, confirm_overwrite=options.confirm_overwrite)')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)')

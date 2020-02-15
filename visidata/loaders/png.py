@@ -63,13 +63,11 @@ PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=
 PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)')
 
 
-@PNGDrawing.api
-def save_png(vs, p):
-    return vs.source.save_png(p)
+@VisiData.api
+def save_png(vd, p, vs):
+    if isinstance(vs, Canvas):
+        return save_png(p, vs.source)
 
-
-@PNGSheet.api
-def save_png(vs, p):
     palette = collections.OrderedDict()
     palette[(0,0,0,0)] = 0   # invisible black is 0
 

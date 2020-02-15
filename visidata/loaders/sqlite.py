@@ -99,8 +99,8 @@ class SqliteIndexSheet(SqliteSheet, IndexSheet):
                 yield SqliteSheet(tblname, source=self, tableName=tblname, row=row)
 
 
-@asyncthread
-def multisave_sqlite(p, *vsheets):
+@VisiData.api
+def save_sqlite(vd, p, *vsheets):
     import sqlite3
     conn = sqlite3.connect(str(p))
     c = conn.cursor()
@@ -132,7 +132,7 @@ def multisave_sqlite(p, *vsheets):
 
 
 options.set('header', 0, SqliteSheet)
-save_db = save_sqlite = multisave_db = multisave_sqlite
+VisiData.save_db = VisiData.save_sqlite
 
 vd.filetype('sqlite', SqliteIndexSheet)
 vd.filetype('sqlite3', SqliteIndexSheet)

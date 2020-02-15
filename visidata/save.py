@@ -89,53 +89,33 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
     filetype = givenpath.ext or options.save_filetype
 
-    if len(vsheets) > 1:
-        if givenpath.exists() and confirm_overwrite:
-            confirm("overwrite multiple? ")
+    savefunc = getattr(vd, 'save_' + filetype, None) or fail('no function to save as type %s' % filetype)
 
-        if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
-            savefunc = getGlobals().get('multisave_' + filetype, None)
-            if savefunc:
-                # use specific multisave function
-                vd.execAsync(savefunc, givenpath, *vsheets)
+    if givenpath.exists() and confirm_overwrite:
+        confirm("%s already exists. overwrite? " % givenpath.given)
 
-        # more than one sheet; either no specific multisave for save filetype, or path ends with /
+    status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
 
-        # save as individual files in the givenpath directory
-        try:
-            os.makedirs(givenpath, exist_ok=True)
-        except FileExistsError:
-            pass
+    if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
+        return vd.execAsync(savefunc, givenpath, *vsheets)
 
-        assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
+    # more than one sheet; either no specific multisave for save filetype, or path ends with /
 
-        globalsavefunc = getGlobals().get('save_' + filetype)
+    # save as individual files in the givenpath directory
+    try:
+        os.makedirs(givenpath, exist_ok=True)
+    except FileExistsError:
+        pass
 
-        # get save function to call
-        status('saving %s sheets to %s' % (len(vsheets), givenpath.given))
-        for vs in vsheets:
-            savefunc = getattr(vs, 'save_'+filetype, None)
-            if not savefunc:
-                savefunc = lambda p,vs=vs,f=globalsavefunc: f(p, vs)
-            if savefunc:
-                vd.execAsync(savefunc, Path((givenpath / vs.name).with_suffix('.'+filetype)))
-            else:
-                warning('no function to save %s as type %s' % (vs, filetype))
-    else:
-        if givenpath.exists() and confirm_overwrite:
-            confirm("%s already exists. overwrite? " % givenpath.given)
+    assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
 
-        # get save function to call
-        savefunc = getattr(vsheets[0], 'save_'+filetype, None)
-        if not savefunc:
-            f = getGlobals().get('save_' + filetype) or fail('no function save_'+filetype)
-            savefunc = lambda p,vs=vsheets[0],f=f: f(p, vs)
-
-        status('saving to %s as %s' % (givenpath.given, filetype))
-        vd.execAsync(savefunc, givenpath)
+    # get save function to call
+    p = Path((givenpath / vs.name).with_suffix('.'+filetype))
+    return vd.execAsync(savefunc, p, *vsheets)
 
 
-def save_txt(p, *vsheets):
+@VisiData.api
+def save_txt(vd, p, *vsheets):
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
             unitsep = options.get('delimiter', vs)
@@ -146,9 +126,7 @@ def save_txt(p, *vsheets):
     status('%s save finished' % p)
 
 
-multisave_txt = save_txt
-
-Sheet.addCommand('^S', 'save-sheet', 'saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)')
-globalCommand('g^S', 'save-all', 'saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
+Sheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)')
+BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
 Sheet.addCommand('z^S', 'save-col', 'save_cols([cursorCol])')
 Sheet.addCommand('', 'save-col-keys', 'save_cols(keyCols + [cursorCol])')

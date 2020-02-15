@@ -22,6 +22,12 @@ option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 
 vd.activeCommand = None
 
+def open_vd(p):
+    return CommandLog(p.name, source=p)
+
+VisiData.save_vd = VisiData.save_tsv
+
+
 def checkVersion(desired_version):
     if desired_version != visidata.__version_info__:
         fail("version %s required" % desired_version)
@@ -54,11 +60,6 @@ def isLoggableCommand(longname):
             return False
     return True
 
-
-def open_vd(p):
-    return CommandLog(p.name, source=p)
-
-Sheet.save_vd = Sheet.save_tsv
 
 @Sheet.api
 def moveToRow(vs, rowstr):

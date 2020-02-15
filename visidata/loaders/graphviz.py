@@ -1,5 +1,5 @@
 from visidata import options, option, exceptionCaught, TypedWrapper, asyncthread, Progress
-from visidata import wrapply, clean_to_id, isNumeric
+from visidata import wrapply, clean_to_id, isNumeric, VisiData
 
 option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz diagrams')
 
@@ -28,7 +28,8 @@ def is_valid(v):
     return True
 
 
-def save_dot(p, vs):
+@VisiData.api
+def save_dot(vd, p, vs):
     unusedColors = 'orange green purple cyan red blue black'.split()
     assignedColors = {}
 

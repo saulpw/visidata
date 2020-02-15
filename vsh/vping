@@ -15,7 +15,7 @@ option('ping_count', 3, 'send this many pings to each host')
 option('ping_interval', 0.1, 'wait between ping rounds, in seconds')
 
 globalCommand('^C', 'for s in topSheets: s.stop = True; status("user stopped")', 'stop pinging')
-globalCommand('^S', 'save_tsv(sheet, input("save tsv to: ", value=name+".tsv"))', 'save this sheet as tsv')
+globalCommand('^S', 'vd.save_tsv(sheet, input("save tsv to: ", value=name+".tsv"))', 'save this sheet as tsv')
 
 options.null_value = False
 
