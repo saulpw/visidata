@@ -626,6 +626,13 @@ class Canvas(Plotter):
         for x, y, text, attr, row in Progress(self.gridlabels, 'labeling'):
             self.plotlabel(self.scaleX(x), self.scaleY(y), text, attr, row)
 
+    @asyncthread
+    def deleteSourceRows(self, rows):
+        rows = list(rows)
+        self.source.copyRows(rows)
+        self.source.deleteBy(lambda r,rows=rows: r in rows)
+        self.reload()
+
 
 Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels')
 
@@ -676,10 +683,10 @@ Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCu
 Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))')
 Canvas.addCommand('u', 'unselect-cursor', 'source.unselect(list(rowsWithin(plotterCursorBox)))')
 Canvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)')
-Canvas.addCommand('d', 'delete-cursor', 'source.delete(list(rowsWithin(plotterCursorBox))); reload()')
+Canvas.addCommand('d', 'delete-cursor', 'deleteSourceRows(rowsWithin(plotterCursorBox))')
 
 Canvas.addCommand('gs', 'select-visible', 'source.select(list(rowsWithin(plotterVisibleBox)))')
 Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotterVisibleBox)))')
 Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))')
 Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)')
-Canvas.addCommand('gd', 'delete-visible', 'source.delete(list(rowsWithin(plotterVisibleBox))); reload()')
+Canvas.addCommand('gd', 'delete-visible', 'deleteSourceRows(rowsWithin(plotterVisibleBox))')
