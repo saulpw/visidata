@@ -676,10 +676,10 @@ Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCu
 Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))')
 Canvas.addCommand('u', 'unselect-cursor', 'source.unselect(list(rowsWithin(plotterCursorBox)))')
 Canvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)')
-Canvas.addCommand('d', 'delete-cursor', 'source.delete(list(rowsWithin(plotterCursorBox))); reload()')
+Canvas.addCommand('d', 'delete-cursor', 'toDelete=list(rowsWithin(plotterCursorBox)); source.copyRows(toDelete); source.deleteBy(lambda r,toDelete=toDelete: r in toDelete); reload()')
 
 Canvas.addCommand('gs', 'select-visible', 'source.select(list(rowsWithin(plotterVisibleBox)))')
 Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotterVisibleBox)))')
 Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))')
 Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)')
-Canvas.addCommand('gd', 'delete-visible', 'source.delete(list(rowsWithin(plotterVisibleBox))); reload()')
+Canvas.addCommand('gd', 'delete-visible', 'toDelete=list(rowsWithin(plotterVisibleBox)); source.copyRows(toDelete); source.deleteBy(lambda r,toDelete=toDelete: r in toDelete); reload()')
