@@ -40,11 +40,11 @@ theme('note_type_exc', '!', 'cell note for an exception during type conversion')
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
 theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
 theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
-theme('disp_column_sep', '╵', 'separator between columns')
+theme('disp_column_sep', '|', 'separator between columns')
 theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
-theme('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
-theme('disp_rowmid_sep', '│', '') # ┃┊│█
-theme('disp_rowbot_sep', '╵', '') # ┊┴╿⌞█⍿╵⎢┴⌊
+theme('disp_rowtop_sep', '|', '') # ╷│┬╽⌜⌐▇
+theme('disp_rowmid_sep', '⁝', '') # ┃┊│█
+theme('disp_rowbot_sep', '⁝', '') # ┊┴╿⌞█⍿╵⎢┴⌊  ⋮⁝
 theme('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
 theme('disp_keytop_sep', '║', '') # ╽╿┃╖╟
 theme('disp_keymid_sep', '║', '') # ╽╿┃
