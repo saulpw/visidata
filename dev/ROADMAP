@@ -14,10 +14,8 @@ The Book of VisiData will describe the api and all functions and objects availab
 
 - DirSheet file preview #309
 
-## VisiData system datasets will be migrated to jsonl
-
-- the encoder should save the fields in column order for jsonl
-- migrate .vd to be jsonl format
+## add jsonl as more robust system format
+- add .vdj format (visidata cmdlog as jsonl)
 - migrate plugins.tsv to be jsonl format
 
 ## Minor features, refactors, cleanup

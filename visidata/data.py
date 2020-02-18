@@ -201,12 +201,6 @@ def openSource(vd, p, filetype=None):
 
 
 #### enable external addons
-def open_vd(p):
-    'Opens a .vd file as a .tsv file'
-    vs = open_tsv(p)
-    vs.reload()
-    return vs
-
 def open_txt(p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     with p.open_text() as fp:

@@ -52,6 +52,8 @@ from .path import *
 from .urlcache import *
 from .selection import *
 from .loaders.tsv import *
+from .pyobj import *
+from .loaders.json import *
 from .data import *
 from .save import *
 from .clipboard import *
@@ -59,7 +61,6 @@ from .slide import *
 from .search import *
 from .expr import *
 
-from .pyobj import *
 from .metasheets import *
 from .join import *
 from .aggregators import *
@@ -82,7 +83,6 @@ from .help import *
 import visidata.sort
 
 from .loaders.csv import *
-from .loaders.json import *
 from .loaders.archive import *
 from .loaders.xlsx import *
 from .loaders.xlsb import *

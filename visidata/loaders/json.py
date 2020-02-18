@@ -7,6 +7,15 @@ option('json_indent', None, 'indent to use when saving json')
 option('json_sort_keys', True, 'sort object keys when saving to json')
 
 
+def open_json(p):
+    return JsonSheet(p.name, source=p)
+
+def open_jsonl(p):
+    return JsonLinesSheet(p.name, source=p)
+
+open_ndjson = open_ldjson = open_jsonl
+
+
 class JsonSheet(PythonSheet):
     def iterload(self):
         self.colnames = {}  # [colname] -> Column
@@ -99,10 +108,7 @@ def save_jsonl(vd, p, vs):
                 rowdict = _rowdict(vcols, row)
                 fp.write(jsonenc.encode(rowdict) + '\n')
 
+
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl
 
-vd.filetype('json', JsonSheet)
-vd.filetype('jsonl', JsonLinesSheet)
-vd.filetype('ndjson', JsonLinesSheet)
-vd.filetype('ldjson', JsonLinesSheet)
