@@ -24,7 +24,7 @@ def eval_vd(logpath, *args, **kwargs):
         log = log.format(*args, **kwargs)
 
     src = Path(logpath.given, fp=io.StringIO(log), filesize=len(log))
-    vs = openSource(src, filetype='vd')
+    vs = openSource(src, filetype=src.ext)
     vs.name += '_vd'
     vd.push(vs)
     vs.vd = vd

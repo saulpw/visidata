@@ -25,7 +25,11 @@ vd.activeCommand = None
 def open_vd(p):
     return CommandLog(p.name, source=p)
 
+def open_vdj(p):
+    return CommandLogJsonl(p.name, source=p)
+
 VisiData.save_vd = VisiData.save_tsv
+VisiData.save_vdj = VisiData.save_jsonl
 
 
 def checkVersion(desired_version):
@@ -109,7 +113,7 @@ def moveToCol(vs, colstr):
     return True
 
 # rowdef: namedlist (like TsvSheet)
-class CommandLog(VisiDataMetaSheet):
+class _CommandLog:
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
@@ -178,6 +182,14 @@ class CommandLog(VisiDataMetaSheet):
         r = self.newRow(keystrokes='o', input=src, longname='open-file')
         vs.cmdlog_sheet.addRow(r)
         self.addRow(r)
+
+class CommandLog(_CommandLog, VisiDataMetaSheet):
+    pass
+
+class CommandLogJsonl(_CommandLog, JsonLinesSheet):
+    def iterload(self):
+        for r in JsonLinesSheet.iterload(self):
+            yield AttrDict(r)
 
 
 ### replay
