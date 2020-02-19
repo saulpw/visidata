@@ -138,7 +138,7 @@ class VisiDataSheet(IndexSheet):
             ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl+E', 'stacktrace of most recent error'),
             ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl+P', 'status messages from current session'),
             ('threadsSheet', 'threads', 'open-threads', 'Ctrl+T', 'threads and profiling'),
-            ('pluginsSheet', 'plugins', 'open-plugins', '', 'plugins repository'),
+            ('pluginsSheet', 'plugins', 'open-plugins', '', 'plugins bazaar'),
             ]:
             vs = getattr(vd, vdattr)
             vs.description = desc

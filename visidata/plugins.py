@@ -6,13 +6,12 @@ import importlib
 from visidata import *
 
 
-option('plugins_url', 'https://visidata.org/plugins/plugins.tsv', 'source of plugins sheet')
+option('plugins_url', 'https://visidata.org/plugins/bazaar.jsonl', 'source of plugins sheet')
 
 
 @VisiData.lazy_property
 def pluginsSheet(p):
-    'Support the "plugins" phony filetype as PluginsSheet'
-    return PluginsSheet('plugin_store')
+    return PluginsSheet('plugins_bazaar')
 
 def _plugin_path(plugin):
     return Path(os.path.join(options.visidata_dir, "plugins", plugin.name+".py"))
@@ -48,8 +47,15 @@ def _checkHash(data, sha):
     return hashlib.sha256(data.strip().encode('utf-8')).hexdigest() == sha
 
 
-class PluginsSheet(VisiDataMetaSheet):
+class PluginsSheet(JsonLinesSheet):
     rowtype = "plugins"
+    columns = [
+        ColumnItem(name) for name in 'name price description maintainer latest_release url latest_ver visidata_ver pydeps vdplugindeps sha256'.split()
+    ]
+
+    def iterload(self):
+        for r in JsonLinesSheet.iterload(self):
+            yield AttrDict(r)
 
     @asyncthread
     def reload(self):
