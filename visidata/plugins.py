@@ -49,9 +49,6 @@ def _checkHash(data, sha):
 
 class PluginsSheet(JsonLinesSheet):
     rowtype = "plugins"
-    columns = [
-        ColumnItem(name) for name in 'name price description maintainer latest_release url latest_ver visidata_ver pydeps vdplugindeps sha256'.split()
-    ]
 
     def iterload(self):
         for r in JsonLinesSheet.iterload(self):
@@ -61,7 +58,6 @@ class PluginsSheet(JsonLinesSheet):
     def reload(self):
         self.source = urlcache(options.plugins_url, days=0)  # for VisiDataMetaSheet.reload()
         super().reload.__wrapped__(self)
-        self.columns = copy(PluginsSheet.columns)
         self.addColumn(Column('available', width=0, getter=_installedStatus), index=1)
         self.addColumn(Column('installed', width=8, getter=lambda c,r: _loadedVersion(r)), index=2)
         self.column('description').width = 40
