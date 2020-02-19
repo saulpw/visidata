@@ -61,6 +61,7 @@ class PluginsSheet(JsonLinesSheet):
     def reload(self):
         self.source = urlcache(options.plugins_url, days=0)  # for VisiDataMetaSheet.reload()
         super().reload.__wrapped__(self)
+        self.columns = copy(PluginsSheet.columns)
         self.addColumn(Column('available', width=0, getter=_installedStatus), index=1)
         self.addColumn(Column('installed', width=8, getter=lambda c,r: _loadedVersion(r)), index=2)
         self.column('description').width = 40
