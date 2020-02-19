@@ -1,10 +1,11 @@
 import json
+from collections import OrderedDict
 
 from visidata import *
 
 
 option('json_indent', None, 'indent to use when saving json')
-option('json_sort_keys', True, 'sort object keys when saving to json')
+option('json_sort_keys', False, 'sort object keys when saving to json')
 
 
 def open_json(p):
@@ -23,7 +24,7 @@ class JsonSheet(PythonSheet):
 
         try:
             with self.source.open_text() as fp:
-                ret = json.load(fp)
+                ret = json.load(fp, object_pairs_hook=OrderedDict)
 
             if isinstance(ret, dict):
                 yield ret
@@ -55,7 +56,7 @@ class JsonLinesSheet(JsonSheet):
         with self.source.open_text() as fp:
             for L in fp:
                 try:
-                    yield json.loads(L)
+                    yield json.loads(L, object_pairs_hook=OrderedDict)
                 except Exception as e:
                     e.stacktrace = stacktrace()
                     yield TypedExceptionWrapper(json.loads, L, exception=e)
@@ -111,4 +112,3 @@ def save_jsonl(vd, p, vs):
 
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl
-

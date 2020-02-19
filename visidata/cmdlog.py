@@ -189,7 +189,10 @@ class CommandLog(_CommandLog, VisiDataMetaSheet):
 class CommandLogJsonl(_CommandLog, JsonLinesSheet):
     def iterload(self):
         for r in JsonLinesSheet.iterload(self):
-            yield AttrDict(r)
+            if isinstance(r, TypedWrapper):
+                yield r
+            else:
+                yield AttrDict(r)
 
 
 ### replay
@@ -408,3 +411,5 @@ CommandLog.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows')
 
 BaseSheet.addCommand('', 'repeat-last', 'exec_keystrokes(cmdlog_sheet.rows[-1].longname)')
 BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)')
+
+options.set('json_sort_keys', False, _CommandLog)
