@@ -396,7 +396,7 @@ globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
 globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
 globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)')
 globalCommand('^U', 'replay-pause', 'vd.replay_pause()')
-globalCommand('^I', 'replay-advance', 'vd.replay_advance()')
+globalCommand('^N', 'replay-advance', 'vd.replay_advance()')
 globalCommand('^K', 'replay-stop', 'vd.replay_cancel()')
 
 globalCommand(None, 'status', 'status(input("status: "))')

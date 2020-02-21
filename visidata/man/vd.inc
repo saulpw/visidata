@@ -62,7 +62,7 @@ replay in batch mode (with no interface)
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pause/resume replay
-.It Sy Tab
+.It Sy ^N
 execute next row in replaying sheet
 .It Sy ^K
 cancel current replay
