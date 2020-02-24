@@ -409,6 +409,10 @@ CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("repla
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)')
 CommandLog.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows')
 
+CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")')
+CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)')
+CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows')
+
 BaseSheet.addCommand('', 'repeat-last', 'exec_keystrokes(cmdlog_sheet.rows[-1].longname)')
 BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)')
 
