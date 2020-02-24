@@ -5,7 +5,7 @@ from visidata import *
 max_threads = 2
 
 Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))')
-globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))')
+globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))', 'open Describe Sheet with all visible columns from all sheets')
 
 def isError(col, row):
     try:

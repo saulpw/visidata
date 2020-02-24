@@ -77,8 +77,8 @@ def save_xml(vd, p, vs):
 VisiData.save_svg = VisiData.save_xml
 
 
-XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)')
-XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)')
+XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)', 'add column for xml attribute')
+XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)', 'show only columns in current row attributes')
 
 
 vd.filetype('xml', XmlSheet)

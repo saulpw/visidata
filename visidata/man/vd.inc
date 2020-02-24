@@ -77,6 +77,8 @@ cancel current replay
 abort program immediately
 .It Ic " ^C"
 cancel user input or abort all async threads on current sheet
+.It Ic "g^C"
+abort all secondary threads
 .It Ic "  q"
 quit current sheet
 .It Ic " gq"
@@ -90,22 +92,22 @@ view sheet of command longnames and keybindings
 .No execute command by its Ar longname
 .Pp
 .It Ic "  U"
-.No undoes the most recent modification ( requires enabling of Sy options.undo Ns )
+.No undo the most recent modification ( requires enabled Sy options.undo Ns )
 .It Ic "  R"
-.No redoes the most recent undo ( requires enabling of Sy options.undo Ns )
+.No redo the most recent undo ( requires enabled Sy options.undo Ns )
 .El
 .Ss "Cursor Movement"
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic "Arrow PgUp Home"
-move as expected
+go as expected
 .It Ic " h   j   k   l"
-move left/down/up/right
+go left/down/up/right
 .It Ic "gh  gj  gk  gl"
-move all the way to the left/bottom/top/right of sheet
+go all the way to the left/bottom/top/right of sheet
 .It Ic "     G  gg"
-move all the way to the bottom/top of sheet
+go all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
 .Pp
@@ -119,25 +121,25 @@ jump to previous sheet (swaps with current sheet)
 .It Ic  "z/  z?" Ar expr
 .No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
-move to next/previous match from last search
+go to next/previous match from last search
 .Pp
 .It Ic  " <   >"
-move up/down to next value in current column
+go up/down to next value in current column
 .It Ic  "z<  z>"
-move up/down to next null in current column
+go up/down to next null in current column
 .It Ic " {   }"
-move up/down to next selected row
+go up/down to next selected row
 .
 .El
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .Pp
 .It Ic " c" Ar regex
-.No move to next column with name matching Ar regex
+.No go to next column with name matching Ar regex
 .It Ic " r" Ar regex
-.No move to next row with key matching Ar regex
+.No go to next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No move to column/row Ar number No (0-based)
+.No go to column/row Ar number No (0-based)
 .Pp
 .It Ic " H   J   K   L"
 slide current row/column left/down/up/right
@@ -298,9 +300,9 @@ open external $EDITOR to edit contents
 .It Ic ^R
 reload initial value
 .It Ic "^A  ^E"
-move to beginning/end of line
+go to beginning/end of line
 .It Ic "^B  ^F"
-move back/forward one character
+go back/forward one character
 .It Ic "^H  ^D"
 delete previous/current character
 .It Ic ^T
@@ -395,10 +397,8 @@ scroll canvas
 toggle sheet-specific visibility (multi-row on Sheet, legends/axes on Graph)
 .Pp
 .Pp
-.It Ic " ^E"
-view traceback for most recent error
-.It Ic "g^E"
-view traceback for most recent errors
+.It Ic " ^E  g^E"
+view traceback for most recent error(s)
 .It Ic "z^E"
 view traceback for error in current cell
 .Pp
@@ -425,7 +425,7 @@ open current row/cell/sheet as Python object
 .It Ic " ^X" Ar expr
 .No evaluate Python Ar expr No and opens result as Python object
 .It Ic "z^X" Ar expr
-.No evaluate Python Ar expr No on current row and shows result on status line
+.No evaluate Python Ar expr Ns , in context of current row, and open result as Python object
 .It Ic "g^X" Ar stmt
 .No execute Python Ar stmt No in the global scope
 .El
@@ -527,7 +527,7 @@ deactivate current plugin
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gC
-.No open Sy Columns Sheet No for all visible columns on all sheets
+.No open Sy Columns Sheet No with all visible columns from all sheets
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -549,13 +549,14 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .
 .Ss Sheets Sheet (Shift+S)
 .Bl -inset -compact
+.It open Sy Sheets Stack Ns , which contains only the active sheets on the current stack
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic zS
-.No open Sy Sheets Stack No which shows only the active sheets on the stack
+.It Ic gS
+.No open Sy Sheets Sheet Ns , which contains all sheets from current session, active and inactive
 .It Ic "Alt" Ar number
-.No jump to Ar number Ns th sheet
+.No jump to sheet Ar number Ns
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -565,10 +566,8 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 jump to sheet referenced in current row
 .It Ic " a"
 add row to reference a new blank sheet
-.It Ic "gC"
-.No open Sy Columns Sheet No with all columns from selected sheets
-.It Ic "gI"
-.No open Sy Describe Sheet No with all columns from selected sheets
+.It Ic "gC  gI"
+.No open Sy Columns Sheet Ns / Ns Sy Describe Sheet No with all visible columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
 .It Ic "z^C  gz^C"
@@ -647,7 +646,7 @@ abort replay
 .It Ic gF
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-open summary of all rows and selected rows
+open summary for all rows and selected rows
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -782,7 +781,7 @@ For example:
 .Bd -literal
    options.min_memory_mb=100  # stop processing without 100MB free
 
-   bindkey('0', 'go-leftmost')   # alias '0' to move to first column, like vim
+   bindkey('0', 'go-leftmost')   # alias '0' to go to first column, like vim
 
    def median(values):
        L = sorted(values)
@@ -871,7 +870,7 @@ The following URL schemes are supported:
 .It Sy " v"
 show only columns in current row attributes
 .It Sy za
-add column for xml attributes
+add column for xml attribute
 .El
 .It Sy xpt No (SAS; requires Sy xport Ns )
 .It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )

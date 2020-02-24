@@ -184,7 +184,7 @@ Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnu
 Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")'),
 
 for i in range(1, 11):
-    globalCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), 'vd.push(*(list(s for s in allSheets if s.shortcut=="%s") or fail("no sheet")))' % (i))
+    globalCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), 'vd.push(*(list(s for s in allSheets if s.shortcut=="%s") or fail("no sheet")))' % {i}, f'jump to sheet {i}')
 
 BaseSheet.bindkey('KEY_LEFT', 'go-left')
 BaseSheet.bindkey('KEY_DOWN', 'go-down')
@@ -244,4 +244,4 @@ BaseSheet.bindkey('gk', 'go-top'),
 BaseSheet.bindkey('gh', 'go-leftmost'),
 BaseSheet.bindkey('gl', 'go-rightmost')
 
-BaseSheet.addCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.push(vd.sheets[1])')
+BaseSheet.addCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.push(vd.sheets[1])', 'jump to previous sheet (swap with current sheet)')

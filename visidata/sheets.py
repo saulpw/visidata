@@ -939,8 +939,8 @@ def quit(vd, *sheets):
         vd.remove(vs)
 
 
-globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)')
-globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)')
+globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack, which contains only the active sheets on the current stack')
+globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet, which contains all sheets from current session')
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
@@ -969,23 +969,23 @@ Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(ope
 
 
 # when diving into a sheet, remove the index unless it is precious
-SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
+SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)', 'jump to sheet referenced in current row')
 SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
-SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
-SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))')
-SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))')
-SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)')
-SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)')
+SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
+SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
+SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
+SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
+SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
 IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected, *selectedRows, confirm_overwrite=options.confirm_overwrite)')
 
-BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)')
-globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)')
+BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
+globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
 BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = 50')
 BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0')
 BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]); options.disp_splitwin_pct = -options.disp_splitwin_pct')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)')
 
-BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()')
+BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')

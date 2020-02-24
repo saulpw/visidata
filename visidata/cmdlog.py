@@ -392,18 +392,18 @@ def cmdlog(vd):
 
 
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
-globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)')
+globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)', 'open CommandLog')
 globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
-globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)')
-globalCommand('^U', 'replay-pause', 'vd.replay_pause()')
-globalCommand('^N', 'replay-advance', 'vd.replay_advance()')
-globalCommand('^K', 'replay-stop', 'vd.replay_cancel()')
+globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)', 'save CommandLog to filename.vd file')
+globalCommand('^U', 'replay-pause', 'vd.replay_pause()', 'pause/resume replay')
+globalCommand('^N', 'replay-advance', 'vd.replay_advance()', 'execute next row in replaying sheet')
+globalCommand('^K', 'replay-stop', 'vd.replay_cancel()', 'cancel current replay')
 
-globalCommand(None, 'status', 'status(input("status: "))')
-globalCommand('^V', 'show-version', 'status(__version_info__);')
-globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))')
+globalCommand(None, 'status', 'status(input("status: "))', 'show given message on status line')
+globalCommand('^V', 'show-version', 'status(__version_info__);', 'show version and copyright information on status line')
+globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
 
-globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))')
+globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))', 'execute command by its longname')
 
 CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")')
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)')

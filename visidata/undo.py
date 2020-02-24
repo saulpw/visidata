@@ -86,5 +86,5 @@ def addUndoSetValues(vd, cols, rows):
     vd.addUndo(_undo)
 
 
-vd.addCommand('U', 'undo-last', 'vd.undo(sheet)')
-vd.addCommand('R', 'redo-last', 'vd.redo(sheet)')
+vd.addCommand('U', 'undo-last', 'vd.undo(sheet)', 'undo the most recent modification (requires enabled options.undo)')
+vd.addCommand('R', 'redo-last', 'vd.redo(sheet)', 'redo the most recent undo (requires enabled options.undo)')

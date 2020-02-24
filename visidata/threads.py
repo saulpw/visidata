@@ -107,7 +107,7 @@ class ThreadsSheet(Sheet):
     def reload(self):
         self.rows = vd.threads
 
-ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)')
+ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
 
 def elapsed_s(t):
     return (t.endTime or time.process_time())-t.startTime
@@ -266,7 +266,7 @@ def sync(self, *joiningThreads):
             break
 
 
-ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile)) or warning("no profile")')
+ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile)) or warning("no profile")', 'push profile sheet for this action')
 
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
@@ -356,8 +356,8 @@ ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save pr
 ProfileSheet.addCommand(ENTER, 'dive-row', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_calls", source=cursorRow.calls or fail("no calls")))')
 ProfileSheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_"+cursorCol.name, source=cursorValue or fail("no callers")))')
 ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)')
-globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())')
+globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
 
 BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))')
-globalCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))')
-globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)')
+globalCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all secondary threads')
+globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')

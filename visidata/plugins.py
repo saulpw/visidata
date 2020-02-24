@@ -145,7 +145,7 @@ class PluginsSheet(JsonLinesSheet):
         except FileNotFoundError:
             warning("no plugins/__init__.py found")
 
-globalCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)')
+globalCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'open Plugins Sheet')
 
 PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)')
 PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)')

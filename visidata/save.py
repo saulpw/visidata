@@ -127,6 +127,6 @@ def save_txt(vd, p, *vsheets):
 
 
 Sheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)')
-BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)')
+BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)')
 Sheet.addCommand('z^S', 'save-col', 'save_cols([cursorCol])')
 Sheet.addCommand('', 'save-col-keys', 'save_cols(keyCols + [cursorCol])')

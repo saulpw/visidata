@@ -217,4 +217,4 @@ class StatusSheet(Sheet):
 def statusHistorySheet(vd):
     return StatusSheet("status_history", source=vd.statusHistory[::-1])  # in reverse order
 
-BaseSheet.addCommand('^P', 'statuses', 'vd.push(vd.statusHistorySheet)')
+BaseSheet.addCommand('^P', 'statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')

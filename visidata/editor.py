@@ -53,4 +53,4 @@ def suspend():
         os.kill(os.getpid(), signal.SIGSTOP)
 
 
-visidata.globalCommand('^Z', 'suspend', 'suspend()')
+visidata.globalCommand('^Z', 'suspend', 'suspend()', 'suspend VisiData process')
