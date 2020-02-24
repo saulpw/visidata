@@ -69,12 +69,8 @@ class Cell:
         self.col = col
         self.row = row
 
-class _vjsonEncoder(json.JSONEncoder):
-    def __init__(self, **kwargs):
-        super().__init__(sort_keys=options.json_sort_keys, **kwargs)
-        self.safe_error = options.safe_error
-
-    def default(self, cell):
+    @property
+    def value(cell):
         o = wrapply(cell.col.getTypedValue, cell.row)
         if isinstance(o, TypedExceptionWrapper):
             return self.safe_error or str(o.exception)
@@ -85,8 +81,22 @@ class _vjsonEncoder(json.JSONEncoder):
         return o
 
 
+class _vjsonEncoder(json.JSONEncoder):
+    def __init__(self, **kwargs):
+        super().__init__(sort_keys=options.json_sort_keys, **kwargs)
+        self.safe_error = options.safe_error
+
+    def default(self, cell):
+        return cell.value
+
+
 def _rowdict(cols, row):
-    return {c.name: Cell(c, row) for c in cols}
+    ret = {}
+    for c in cols:
+        cell = Cell(c, row)
+        if cell.value is not None:
+            ret[c.name] = cell
+    return ret
 
 
 @VisiData.api

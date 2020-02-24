@@ -12,6 +12,7 @@ import locale
 
 from visidata import vd, option, options, status, run, Sheet
 from visidata import Path, openSource, saveSheets, setDiffSheet, domotd
+import visidata
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
 option('preplay', '', 'longnames to preplay before replay')
@@ -68,6 +69,11 @@ def main_vd():
     args = vd.parseArgs(parser)
 
     # fetch motd after options parsing/setting
+    if options.plugins_url:
+        p = visidata.urlcache(options.motd_url, days=1)
+        vs = visidata.PluginsSheet(source=p)
+        vs.reload.__wrapped__(vs)
+
     domotd()
 
     locale.setlocale(locale.LC_ALL, '')
@@ -211,6 +217,8 @@ def vd_cli():
     rc = -1
     try:
         rc = main_vd()
+    except visidata.ExpectedException as e:
+        print('fail: ' + str(e))
     except FileNotFoundError as e:
         print(e)
         if options.debug:

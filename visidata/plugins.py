@@ -63,6 +63,13 @@ class PluginsSheet(JsonLinesSheet):
         self.column('description').width = 40
         self.setKeys([self.column("name")])
 
+        for r in Progress(self.rows):
+            for funcname in (r.provides or '').split():
+                func = lambda *args, **kwargs: vd.fail('this requires the %s plugin' % r.name)
+                addGlobals({funcname: func})
+                setattr(vd, funcname, func)
+
+
     def installPlugin(self, plugin):
         # pip3 install requirements
         initpath = _plugin_init()
