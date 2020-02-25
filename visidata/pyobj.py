@@ -10,12 +10,12 @@ Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); push_pyobj("%s[%s]
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)')
 globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object')
 
-Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)')
-Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)')
-Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))')
-Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))')
+Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=0)', 'expand current column of containers fully')
+Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=0)', 'expand all visible columns of containers fully')
+Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], cursorRow, depth=int(input("expand depth=", value=1)))', 'expand current column of containers to given depth (0=fully)')
+Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, cursorRow, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)')
 
-Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)')
+Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
 class PythonSheet(Sheet):
     pass
@@ -191,7 +191,7 @@ class SheetNamedTuple(PythonSheet):
     def dive(self):
         push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
 
-SheetNamedTuple.addCommand(ENTER, 'dive-row', 'dive()')
+SheetNamedTuple.addCommand(ENTER, 'dive-row', 'dive()', 'dive further into Python object')
 
 # source is dict
 class SheetDict(PythonSheet):
@@ -205,7 +205,7 @@ class SheetDict(PythonSheet):
     def reload(self):
         self.rows = list(self.source.keys())
 
-SheetDict.addCommand(ENTER, 'dive-row', 'push_pyobj(joinSheetnames(name, cursorRow), source[cursorRow])')
+SheetDict.addCommand(ENTER, 'dive-row', 'push_pyobj(joinSheetnames(name, cursorRow), source[cursorRow])', 'dive further into Python object')
 
 class ColumnSourceAttr(Column):
     'Use row as attribute name on sheet source'

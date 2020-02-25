@@ -128,7 +128,7 @@ class FileListSheet(DirSheet):
 
 globalCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)')
 
-Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)')
+Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
 
 DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no row"), filetype=cursorRow.ext))')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))')

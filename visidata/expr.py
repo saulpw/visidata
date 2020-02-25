@@ -41,6 +41,6 @@ def inputExpr(self, prompt, *args, **kwargs):
     return vd.input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
 
 
-Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)')
+Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables')
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows, inputExpr("set selected="))')
 Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalexpr(inputExpr("set expr="), cursorRow))')

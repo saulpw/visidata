@@ -54,7 +54,7 @@ globalCommand('^E', 'error-recent', 'vd.lastErrors and vd.push(recentErrorsSheet
 globalCommand('g^E', 'errors-all', 'vd.push(vd.allErrorsSheet)', 'view traceback for most recent errors')
 
 Sheet.addCommand(None, 'view-cell', 'vd.push(ErrorSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), source=sheet, lines=cursorDisplay.splitlines()))'),
-Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet(sheet.name+"_cell_error", source=sheet, lines=getattr(cursorCell, "error", None) or fail("no error this cell")))')
+Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet(sheet.name+"_cell_error", source=sheet, lines=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
 
 TextSheet.addCommand('v', 'visibility', 'options.set("wrap", not options.wrap, sheet); reload(); status("text%s wrapped" % ("" if options.wrap else " NOT")); ')
 

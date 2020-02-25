@@ -77,5 +77,5 @@ class FreqTableSheetSummary(FreqTableSheet):
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)')
 
-FreqTableSheet.addCommand(ENTER, 'dive-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)')
-FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)')
+FreqTableSheet.addCommand(ENTER, 'dive-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)', 'open copy of source sheet with rows that are grouped in current cell')
+FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)', 'open copy of source sheet with rows that are grouped in selected rows')

@@ -231,5 +231,5 @@ class PivotSheet(Sheet):
             c.setCache(True)
 
 
-PivotSheet.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow.pivotrows.get(cursorCol.aggvalue, []); vd.push(vs)')
-PivotSheet.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow.discrete_keys); vs.rows=sum(cursorRow.pivotrows.values(), []); vd.push(vs)')
+PivotSheet.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow.pivotrows.get(cursorCol.aggvalue, []); vd.push(vs)', 'open sheet of source rows aggregated in current pivot cell')
+PivotSheet.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow.discrete_keys); vs.rows=sum(cursorRow.pivotrows.values(), []); vd.push(vs)', 'open sheet of source rows aggregated in current pivot row')

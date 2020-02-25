@@ -66,24 +66,24 @@ def paste_before(sheet, rowidx):
     sheet.rows[sheet.cursorRowIndex:sheet.cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)
     vd.addUndo(sheet.rows.pop, rowidx)
 
-Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])')
-Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex)')
+Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])', 'yank (copy) current row to clipboard')
+Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex)', 'delete (cut) current row and move it to clipboard')
 Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)')
 Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)')
 
-Sheet.addCommand('gd', 'delete-selected', 'copyRows(selectedRows); deleteSelected()')
-Sheet.addCommand('gy', 'copy-selected', 'copyRows(selectedRows)')
+Sheet.addCommand('gd', 'delete-selected', 'copyRows(selectedRows); deleteSelected()', 'delete (cut) selected rows and move them to clipboard')
+Sheet.addCommand('gy', 'copy-selected', 'copyRows(selectedRows)', 'yank (copy) selected rows to clipboard')
 
-Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow])')
+Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to clipboard')
 Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])')
-Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)')
-Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)')
+Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
+Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
 
 Sheet.bindkey('BUTTON2_PRESSED', 'go-mouse')
 Sheet.addCommand('BUTTON2_RELEASED', 'syspaste-cells', 'pasteFromClipboard(visibleCols[cursorVisibleColIndex:], rows[cursorRowIndex:])')
 Sheet.bindkey('BUTTON2_CLICKED', 'go-mouse')
 
-Sheet.addCommand('gzy', 'copy-cells', 'copyCells(cursorCol, selectedRows)')
+Sheet.addCommand('gzy', 'copy-cells', 'copyCells(cursorCol, selectedRows)', 'yank (copy) contents of current column for selected rows to clipboard')
 Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(selectedRows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)')
 
 Sheet.addCommand('Y', 'syscopy-row', 'syscopyRows([cursorRow])')

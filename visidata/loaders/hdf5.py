@@ -41,7 +41,7 @@ class Hdf5ObjSheet(Sheet):
             return H5ObjSheet(row)
 
 
-Hdf5ObjSheet.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", source=cursorRow.attrs))')
+Hdf5ObjSheet.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", source=cursorRow.attrs))', 'open metadata sheet for object referenced in current row')
 
 
 vd.filetype('h5', Hdf5ObjSheet)

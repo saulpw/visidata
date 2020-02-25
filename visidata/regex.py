@@ -5,8 +5,8 @@ from visidata import asyncthread, warning, option, options, vd
 from visidata import BaseSheet, Sheet, Column, Progress
 
 Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, input("split regex: ", type="regex-split"))')
-Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, input("match regex: ", type="regex-capture"))')
-Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)')
+Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, input("match regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row')
+Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)')
 Sheet.addCommand('g*', 'setcol-subst', 'setSubst([cursorCol], selectedRows)')
 Sheet.addCommand('gz*', 'setcol-subst-all', 'setSubst(visibleCols, selectedRows)')
 

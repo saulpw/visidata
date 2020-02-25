@@ -167,7 +167,7 @@ globalCommand('gO', 'options-global', 'vd.push(vd.globalOptionsSheet)')
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)')
 BaseSheet.addCommand('O', 'options-sheet', 'vd.push(sheet.optionsSheet)')
 
-Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
+Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet')
 
 # used ColumnsSheet, affecting the 'row' (source column)
 ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(someSelectedRows)')

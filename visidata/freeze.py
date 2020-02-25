@@ -1,10 +1,10 @@
 from visidata import *
 from copy import deepcopy
 
-Sheet.addCommand("'", 'freeze-col', 'StaticColumn(cursorCol, cursorColIndex+1)')
+Sheet.addCommand("'", 'freeze-col', 'StaticColumn(cursorCol, cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated')
 Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)')
-Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()')
-Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()')
+Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()', 'add/reset cache for current column')
+Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()', 'add/reset cache for all visible columns')
 
 def resetCache(self):
     self._cachedValues = collections.OrderedDict()

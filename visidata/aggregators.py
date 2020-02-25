@@ -142,6 +142,6 @@ def show_aggregate(col, agg, rows):
 addGlobals(globals())
 
 
-Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))')
+Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))', 'add aggregator to current column')
 Sheet.addCommand('z+', 'show-aggregate', 'for agg in chooseMany(aggregators): cursorCol.show_aggregate(agg,  selectedRows or rows)')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))')

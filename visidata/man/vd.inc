@@ -196,14 +196,14 @@ add a frozen copy of current column with all cells evaluated
 .It Ic "g'"
 open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
-reset cache for current/all visible column(s)
+add/reset cache for current/all visible column(s)
 .Pp
 .It Ic " \&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic " \&;" Ar regex
 .No add new columns from capture groups of Ar regex No (also requires example row)
 .It Ic "z" Ns Ic "\&;" Ar expr
-.No add new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
+.No create new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
 .It Ic " *" Ar regex Ns Sy / Ns Ar subst
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .It Ic "g*  gz*" Ar regex Ns Sy / Ns Ar subst
@@ -564,6 +564,8 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
 jump to sheet referenced in current row
+.It Ic "gEnter"
+push selected sheets to top of sheet stack
 .It Ic " a"
 add row to reference a new blank sheet
 .It Ic "gC  gI"
@@ -655,11 +657,12 @@ open summary for all rows and selected rows
 .It Ic " s   t   u"
 select/toggle/unselect these entries in source sheet
 .It Ic " Enter  gEnter"
-open sheet of source rows that are grouped in current cell / selected rows
+open copy of source sheet with rows that are grouped in current cell / selected rows
 .El
 .
 .Ss Describe Sheet (Shift+I)
 .Bl -inset -compact
+.It A Sy Describe Sheet No contains descriptive statistics for all visible columns.
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
