@@ -3,9 +3,9 @@ import collections
 
 from visidata import *
 
-Sheet.addCommand('F', 'freq-col', 'vd.push(FreqTableSheet(sheet, cursorCol))')
-Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))')
-Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", getter=lambda col, row: "Total")))', 'open summary for all rows and selected rows')
+Sheet.addCommand('F', 'freq-col', 'vd.push(FreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
+Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
+Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')

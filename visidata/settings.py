@@ -311,4 +311,4 @@ def unbindkey(keystrokes):
     bindkeys.unset(keystrokes)
 
 
-BaseSheet.addCommand(None, 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))')
+BaseSheet.addCommand(None, 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))', 'open ~/.visidatarc as Text Sheet')

@@ -35,7 +35,7 @@ Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", val
 Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.setWidth(c.getMaxWidth(visibleRows))'),
 Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", value=cursorCol.width)); Fanout(visibleCols).setWidth(width)')
 
-Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()')
+Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()', 'hide current column')
 Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)'),
 
 Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)')

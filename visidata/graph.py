@@ -2,8 +2,8 @@ from visidata import *
 
 option('color_graph_axis', 'bold', 'color for graph axis labels')
 
-Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, [cursorCol]))')
-Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, numericCols(nonKeyVisibleCols)))')
+Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, [cursorCol]))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
+Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
 
 
 def numericCols(cols):

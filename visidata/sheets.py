@@ -945,8 +945,8 @@ globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets She
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 
-Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])')
-Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])')
+Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
+Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', 'edit contents of current cell')
 Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))')

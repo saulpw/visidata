@@ -1,7 +1,7 @@
 import collections
 from visidata import *
 
-Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))')
+Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
 
 # discrete_keys = tuple of formatted discrete keys that group the row
 # numeric_key is a range

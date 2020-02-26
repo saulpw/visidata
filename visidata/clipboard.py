@@ -68,14 +68,14 @@ def paste_before(sheet, rowidx):
 
 Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])', 'yank (copy) current row to clipboard')
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex)', 'delete (cut) current row and move it to clipboard')
-Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)')
-Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)')
+Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)', 'paste clipboard rows after current row')
+Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)', 'paste clipboard rows before current row')
 
 Sheet.addCommand('gd', 'delete-selected', 'copyRows(selectedRows); deleteSelected()', 'delete (cut) selected rows and move them to clipboard')
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(selectedRows)', 'yank (copy) selected rows to clipboard')
 
 Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to clipboard')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])', 'set contents of current cell to last clipboard value')
 Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
 Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
 
@@ -84,7 +84,7 @@ Sheet.addCommand('BUTTON2_RELEASED', 'syspaste-cells', 'pasteFromClipboard(visib
 Sheet.bindkey('BUTTON2_CLICKED', 'go-mouse')
 
 Sheet.addCommand('gzy', 'copy-cells', 'copyCells(cursorCol, selectedRows)', 'yank (copy) contents of current column for selected rows to clipboard')
-Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(selectedRows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)')
+Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(selectedRows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)', 'set cells of current column for selected rows to last clipboard value')
 
 Sheet.addCommand('Y', 'syscopy-row', 'syscopyRows([cursorRow])')
 

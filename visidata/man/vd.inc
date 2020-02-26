@@ -121,14 +121,14 @@ jump to previous sheet (swaps with current sheet)
 .It Ic  "z/  z?" Ar expr
 .No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
-go to next/previous match from last search
+go to next/previous match from last regex search
 .Pp
 .It Ic  " <   >"
-go up/down to next value in current column
+go up/down current column to next value
 .It Ic  "z<  z>"
-go up/down to next null in current column
+go up/down current column to next null value
 .It Ic " {   }"
-go up/down to next selected row
+go up/down current column to next selected row
 .
 .El
 .Pp
@@ -342,9 +342,9 @@ open
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column
 .It Ic " &"
-.No concatenate top two sheets in the sheets-stack
+.No concatenate top two sheets in Sy Sheets Stack No
 .It Ic "g&"
-.No concatenate all sheets in the sheets-stack
+.No concatenate all sheets in Sy Sheets Stack No
 .Pp
 .El
 .Ss Data Visualization
@@ -598,7 +598,7 @@ abort async threads for current/selected sheets(s)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Shift+O
-.No edit sheet options (apply to Sy this sheet No only)
+.No edit sheet options (apply to Sy current sheet No only)
 .It Ic gO
 .No edit global options (apply to Sy all sheets Ns )
 .El
@@ -648,7 +648,7 @@ abort replay
 .It Ic gF
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-open summary for all rows and selected rows
+open one-line summary for all rows and selected rows
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -696,12 +696,12 @@ open sheet of source rows aggregated in current pivot cell
 .El
 .Ss Melted Sheet (Shift+M)
 .Bl -inset -compact
-.It Open melted sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows.
+.It Open Melted Sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows.
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "gM" Ar regex
-.No open melted sheet (unpivot), with key columns retained and Ar regex No capture groups determining how the non-key columns will be reduced to Variable-Value rows.
+.No open Melted Sheet (unpivot), with key columns retained and Ar regex No capture groups determining how the non-key columns will be reduced to Variable-Value rows.
 .El
 .Ss Python Object Sheet (^X ^Y g^Y z^Y)
 .Bl -inset -compact
