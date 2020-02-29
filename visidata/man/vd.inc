@@ -110,6 +110,8 @@ go all the way to the left/bottom/top/right of sheet
 go all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
+.It Ic "zz"
+scroll current row to center of screen
 .Pp
 .It Ic "^^" No (Ctrl+^)
 jump to previous sheet (swaps with current sheet)
@@ -155,9 +157,9 @@ scroll one left/down/up/right
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic " _" Ns " (underscore)"
-adjust width of current column
+toggle width of current column between full and default width
 .It Ic "g_"
-adjust width of all visible columns
+toggle widths of all visible columns between full and default width
 .It Ic "z_" Ar number
 .No adjust width of current column to Ar number
 .Pp
@@ -225,9 +227,9 @@ select/toggle/unselect current row
 .It Ic " gs  gt  gu"
 select/toggle/unselect all rows
 .It Ic " zs  zt  zu"
-select/toggle/unselect rows from top to cursor
+select/toggle/unselect all rows from top to cursor
 .It Ic "gzs gzt gzu"
-select/toggle/unselect rows from cursor to bottom
+select/toggle/unselect all rows from cursor to bottom
 .It Ic " |   \e\ " Ns Ar regex
 .No select/unselect rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
@@ -275,7 +277,7 @@ delete (cut) contents of current column for current/selected row(s) and move to 
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
-set contents of current column for current/selected row(s) to last clipboard value
+set cells of current column for current/selected row(s) to last clipboard value
 .It Ic "  Y   gY"
 .No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic " zY  gzY"
@@ -330,7 +332,7 @@ open
 .It ""
 .No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
 .It Ic "z^S" Ar filename
-.No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
+.No save current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save Sy CommandLog No to Ar filename.vd No file
 .It Ic "A" Ar number

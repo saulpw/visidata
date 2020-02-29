@@ -196,4 +196,4 @@ PandasSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursorRowIn
 PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)')
 PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)')
 PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)')
-PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)'),
+PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),

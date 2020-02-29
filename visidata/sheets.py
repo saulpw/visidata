@@ -942,14 +942,14 @@ def quit(vd, *sheets):
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack, which contains only the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet, which contains all sheets from current session')
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")'),
+BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")', 'reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.exec_keystrokes(options.cmd_after_edit)', 'edit contents of current cell')
-Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))')
+Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', 'set contents of current column for selected rows to same input')
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open duplicate sheet with only selected rows'),
 Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with all rows'),
