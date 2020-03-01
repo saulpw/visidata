@@ -21,7 +21,7 @@ class PythonSheet(Sheet):
     pass
 
 # used as ENTER in several pyobj sheets
-PythonSheet.addCommand(None, 'dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow)')
+PythonSheet.addCommand(None, 'dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow)', 'dive further into Python object')
 BaseSheet.bindkey(ENTER, 'dive-row')
 
 def expand_cols_deep(sheet, cols, row, depth=0):  # depth == 0 means drill all the way

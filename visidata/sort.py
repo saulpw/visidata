@@ -61,10 +61,10 @@ def sort(self):
 
 
 # replace existing sort criteria
-Sheet.addCommand('[', 'sort-asc', 'orderBy(None, cursorCol)')
-Sheet.addCommand(']', 'sort-desc', 'orderBy(None, cursorCol, reverse=True)')
-Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(None, *keyCols)')
-Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(None, *keyCols, reverse=True)')
+Sheet.addCommand('[', 'sort-asc', 'orderBy(None, cursorCol)', 'sort ascending by current column')
+Sheet.addCommand(']', 'sort-desc', 'orderBy(None, cursorCol, reverse=True)', 'sort descending by current column')
+Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(None, *keyCols)', 'sort ascending by all key columns')
+Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(None, *keyCols, reverse=True)', 'sort descending by all key columns')
 
 # add to existing sort criteria
 Sheet.addCommand('z[', 'sort-asc-add', 'orderBy(cursorCol)')

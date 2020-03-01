@@ -147,6 +147,8 @@ go up/down current column to next selected row
 slide current row/column left/down/up/right
 .It Ic "gH  gJ  gK  gL"
 slide current row/column all the way to the left/bottom/top/right of sheet
+.It Ic "zH  zJ  zK  zK" Ar number
+.No slide current row/column Ar number No positions to the left/down/up/right
 .Pp
 .It Ic "zh  zj  zk  zl"
 scroll one left/down/up/right

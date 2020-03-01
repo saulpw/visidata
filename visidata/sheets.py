@@ -943,7 +943,7 @@ globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet, which contains all sheets from current session')
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")', 'reload current sheet'),
-Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)'),
+Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
@@ -956,13 +956,13 @@ Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=li
 Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows'),
 Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows'),
 
-Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype')
-Sheet.addCommand('~', 'type-string', 'cursorCol.type = str')
-Sheet.addCommand('@', 'type-date', 'cursorCol.type = date')
-Sheet.addCommand('#', 'type-int', 'cursorCol.type = int')
-Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen')
-Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency')
-Sheet.addCommand('%', 'type-float', 'cursorCol.type = float')
+Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', 'set type of current column to anytype')
+Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', 'set type of current column to str')
+Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', 'set type of current column to date')
+Sheet.addCommand('#', 'type-int', 'cursorCol.type = int', 'set type of current column to int')
+Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current column to len')
+Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
+Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 
 Sheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))')

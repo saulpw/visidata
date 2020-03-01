@@ -38,6 +38,6 @@ Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", v
 Sheet.addCommand('-', 'hide-col', 'cursorCol.hide()', 'hide current column')
 Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)', 'reduce width of current column by half'),
 
-Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)')
+Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'unhide all columns')
 Sheet.addCommand('v', 'visibility-sheet', 'for c in visibleCols: c.toggleVisibility()')
 Sheet.addCommand('zv', 'visibility-col', 'cursorCol.toggleVisibility()')
