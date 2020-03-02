@@ -68,7 +68,7 @@ class VisiData(visidata.Extensible):
         cls.finalInit = newinit
         super().init(membername, lambda: None, **kwargs)
 
-    def clear_caches(self):
+    def clearCaches(self):
         'Invalidate internal caches between command inputs.'
         visidata.Extensible.clear_all_caches()
 

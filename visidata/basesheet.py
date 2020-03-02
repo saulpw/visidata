@@ -134,7 +134,7 @@ class BaseSheet(Extensible):
 
         self.checkCursorNoExceptions()
 
-        vd.clear_caches()
+        vd.clearCaches()
         return escaped
 
     @property

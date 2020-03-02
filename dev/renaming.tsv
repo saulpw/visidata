@@ -26,7 +26,7 @@ dive-row	open-row
 addRows	addNewRows		
 statuses (longname)	open-statuses		
 status (longname)	show-status		
-vd.clear_caches	vd.clearCaches()		
+vd.clear_caches	vd.clearCaches()		y
 getDefaultSaveName	Sheet.getDefaultSaveName	same	
 theme	option	deprecate theme() and rely on disp_, color_, and replay= to differentiate cosmetic options	
 prev-sheet	jump-prev		y

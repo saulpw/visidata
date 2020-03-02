@@ -66,7 +66,7 @@ class TestCommands:
         print('%s/%s commands had errors' % (nerrs, ntotal))
 
     def runOneTest(self, mock_screen, longname):
-            visidata.vd.clear_caches()  # we want vd to return a new VisiData object for each command
+            visidata.vd.clearCaches()  # we want vd to return a new VisiData object for each command
             vd = visidata.vd
             vd.scr = mock_screen
 

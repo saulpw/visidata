@@ -30,7 +30,7 @@ def undo(vd, sheet):
             sheet.undone.append(cmdlogrow)
             sheet.cmdlog_sheet.rows.remove(cmdlogrow)
             vd.moveToReplayContext(cmdlogrow)
-            vd.clear_caches()
+            vd.clearCaches()
             vd.status("%s undone" % cmdlogrow.longname)
             return
 

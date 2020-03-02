@@ -161,7 +161,7 @@ def main_vd():
             else:
                 vs = vd.getSheet(startsheets[0]) or sources[-1]
                 vd.sync(vs.ensureLoaded())
-                vd.clear_caches()
+                vd.clearCaches()
                 for startsheet in startsheets[1:]:
                     rowidx = vs.getRowIndexFromStr(startsheet)
                     if rowidx is None:
@@ -170,7 +170,7 @@ def main_vd():
                         break
                     vs = vs.rows[rowidx]
                     vd.sync(vs.ensureLoaded())
-                    vd.clear_caches()
+                    vd.clearCaches()
                 if vs:
                     vd.push(vs)
                     sheets = [vs]

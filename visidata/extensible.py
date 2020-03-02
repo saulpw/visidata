@@ -4,7 +4,7 @@ from functools import wraps, lru_cache
 __all__ = ['Extensible', 'cache']
 
 class Extensible:
-    _cache_clearers = []  # list of func() to call in clear_caches()
+    _cache_clearers = []  # list of func() to call in clearCaches()
 
     @classmethod
     def init(cls, membername, initfunc, copy=False):
@@ -63,7 +63,7 @@ class Extensible:
 
     @classmethod
     def cached_property(cls, func):
-        'Return func() on first access, and cache result; return cached result until clear_caches().'
+        'Return func() on first access, and cache result; return cached result until clearCaches().'
         @property
         @wraps(func)
         @lru_cache(maxsize=None)
@@ -80,7 +80,7 @@ class Extensible:
 
 
 def cache(func):
-    'Return func(...) on first access, and cache result; return cached result until clear_caches().'
+    'Return func(...) on first access, and cache result; return cached result until clearCaches().'
     @wraps(func)
     @lru_cache(maxsize=None)
     def call_if_not(self, *args, **kwargs):
