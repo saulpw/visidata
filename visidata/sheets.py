@@ -865,7 +865,8 @@ class IndexSheet(Sheet):
 
 class SheetsSheet(IndexSheet):
     columns = [
-        ColumnAttr('name', width=30),
+        ColumnAttr('name'),
+        ColumnAttr('type', '__class__.__name__'),
         ColumnAttr('shortcut'),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
