@@ -399,7 +399,7 @@ globalCommand('^U', 'replay-pause', 'vd.replay_pause()', 'pause/resume replay')
 globalCommand('^N', 'replay-advance', 'vd.replay_advance()', 'execute next row in replaying sheet')
 globalCommand('^K', 'replay-stop', 'vd.replay_cancel()', 'cancel current replay')
 
-globalCommand(None, 'status', 'status(input("status: "))', 'show given message on status line')
+globalCommand(None, 'show-status', 'status(input("status: "))', 'show given message on status line')
 globalCommand('^V', 'show-version', 'status(__version_info__);', 'show version and copyright information on status line')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
 

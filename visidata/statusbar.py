@@ -213,8 +213,10 @@ class StatusSheet(Sheet):
     def reload(self):
         self.rows = self.source
 
+
 @VisiData.property
 def statusHistorySheet(vd):
     return StatusSheet("status_history", source=vd.statusHistory[::-1])  # in reverse order
 
-BaseSheet.addCommand('^P', 'statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
+
+BaseSheet.addCommand('^P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')

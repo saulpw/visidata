@@ -24,10 +24,10 @@ openSource	vd.open	same
 vd.filetype('ext', ExtSheet)	open_ext		
 dive-row	open-row		
 addRows	addNewRows		
-statuses (longname)	open-statuses		
-status (longname)	show-status		
+statuses (longname)	open-statuses		y
+status (longname)	show-status		y
 vd.clear_caches	vd.clearCaches()		y
-getDefaultSaveName	Sheet.getDefaultSaveName	same	
+getDefaultSaveName	Sheet.getDefaultSaveName	same	y
 theme	option	deprecate theme() and rely on disp_, color_, and replay= to differentiate cosmetic options	
 prev-sheet	jump-prev		y
 editline()	vd.editline()	same	y
