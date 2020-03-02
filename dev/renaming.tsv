@@ -2,7 +2,7 @@ oldname	newname	signature	done
 option	vd.option()	same	
 globalCommand	vd.command()	same	
 bindkey	vd.bindkey()	same	
-Sheet	TableSheet	same	
+Sheet	TableSheet	same	y
 Sheet.rowLayout	TableSheet._rowLayout	same	y
 Sheet.visibleColLayout	TableSheet._visibleColLayout	same	y
 RowColorizer	TableSheet.addRowColorizer	same	

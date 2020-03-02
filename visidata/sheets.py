@@ -132,7 +132,7 @@ class LazyComputeRow:
                     return getattr(self, colid)   # finally, handle 'row' and 'sheet' fake columns
                 raise KeyError(colid)
 
-class Sheet(BaseSheet):
+class TableSheet(BaseSheet):
     'Base class for all tabular sheets.'
     _rowtype = lambda: collections.defaultdict(lambda: None)
     rowtype = 'rows'
@@ -783,6 +783,8 @@ class Sheet(BaseSheet):
                 clipdraw(scr, ybase, 0, selectednote, basecellcattr.attr)
 
             return height
+
+Sheet = TableSheet  # deprecated in 2.0 but still widely used internally
 
 
 class SequenceSheet(Sheet):
