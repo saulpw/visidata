@@ -13,8 +13,8 @@ options.set('skip', 0, IndexSheet)
 
 Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=random.sample(rows, nrows or nRows); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows')
 
-Sheet.addCommand('a', 'add-row', 'addRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
-Sheet.addCommand('ga', 'add-rows', 'addRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
+Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
+Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
 Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', 'append an empty column')
 Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', 'append N empty columns')
 
@@ -51,7 +51,7 @@ Sheet._coltype = SettableColumn
 
 @Sheet.api
 @asyncthread
-def addRows(sheet, n, idx):
+def addNewRows(sheet, n, idx):
     addedRows = {}
     for i in Progress(range(n), 'adding'):
         row = sheet.newRow()

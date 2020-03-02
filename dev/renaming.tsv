@@ -12,7 +12,6 @@ vd.sheetsSheet	vd.sheets	vd.remove, .push, .replace, etc all on sheets
 next-search	search-next	deprecated aliases can persist	y
 rotate_range	rotateRange	helper functions should be camelCase	y
 exceptionCaught	vd.exceptionCaught()		y
-vd.push	vd.addSheet		
 Canvas.reset			
 _rowtype()		idea: rowmaker	
 exec_keystrokes			
@@ -23,7 +22,7 @@ cached_property	lazy_property	same	y
 openSource	vd.open	same	
 vd.filetype('ext', ExtSheet)	open_ext		
 dive-row	open-row		
-addRows	addNewRows		
+addRows	addNewRows		y
 statuses (longname)	open-statuses		y
 status (longname)	show-status		y
 vd.clear_caches	vd.clearCaches()		y
