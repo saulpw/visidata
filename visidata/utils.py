@@ -6,9 +6,12 @@ __all__ = ['AttrDict', 'joinSheetnames', 'moveListItem', 'namedlist']
 
 
 class AttrDict(dict):
-    'Augment a dict with more convenient .attr syntax.'
+    'Augment a dict with more convenient .attr syntax.  not-present keys return None.'
     def __getattr__(self, k):
-        return self[k]
+        try:
+            return self[k]
+        except KeyError:
+            return None
 
     def __setattr__(self, k, v):
         self[k] = v
