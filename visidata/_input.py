@@ -329,7 +329,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
 
     if vcolidx is None:
         vcolidx = self.cursorVisibleColIndex
-    x, w = self.visibleColLayout.get(vcolidx, (0, 0))
+    x, w = self._visibleColLayout.get(vcolidx, (0, 0))
 
     col = self.visibleCols[vcolidx]
     if rowidx is None:
@@ -339,7 +339,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         y = 0
         value = value or col.name
     else:
-        y, h = self.rowLayout.get(rowidx, (0, 0))
+        y, h = self._rowLayout.get(rowidx, (0, 0))
         value = value or col.getDisplayValue(self.rows[self.cursorRowIndex])
 
     editargs = dict(value=value,

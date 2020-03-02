@@ -122,12 +122,12 @@ Handles drawing everything on the screen but the status bars.
    - `Sheet.leftVisibleColIndex`: leftmost visible non-key column
 
 and computes:
-   - `Sheet.visibleColLayout` (dict of vcolidx to (onscreen x, w)); only for onscreen columns
+   - `Sheet._visibleColLayout` (dict of vcolidx to (onscreen x, w)); only for onscreen columns
    - `Sheet.rightVisibleColIndex` (the rightmost visible column)
    - any None Column.width (sets to max width of values in onscreen rows)
 
-For symmetry, there is also `Sheet.rowLayout` (dict of rowidx to onscreen y), computed during draw().
-[allow variable height rows]
+For symmetry, there is also `Sheet._rowLayout` (dict of rowidx to onscreen y), computed during draw().
+This allows for multi-line rows.
 
 `Sheet.calcColLayout` should be called at least whenever a Column is added, deleted, or its width is changed.
 In practice, it is called at the beginning of every draw cycle anyway.

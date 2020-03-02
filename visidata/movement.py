@@ -51,7 +51,7 @@ def pageLeft(self):
         # try to move further left while right column is still full width
         while self.leftVisibleColIndex > 0:
             rightcol = self.visibleCols[self.rightVisibleColIndex]
-            if (rightcol.width or 0) > self.visibleColLayout[self.rightVisibleColIndex][1]:
+            if (rightcol.width or 0) > self._visibleColLayout[self.rightVisibleColIndex][1]:
                 # went too far
                 self.cursorVisibleColIndex += 1
                 self.leftVisibleColIndex += 1

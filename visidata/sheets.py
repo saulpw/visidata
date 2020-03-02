@@ -159,8 +159,8 @@ class Sheet(BaseSheet):
         self.rightVisibleColIndex = 0
 
         # as computed during draw()
-        self.rowLayout = {}      # [rowidx] -> (y, w)
-        self.visibleColLayout = {}      # [vcolidx] -> (x, w)
+        self._rowLayout = {}      # [rowidx] -> (y, w)
+        self._visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # list of all columns in display order
         self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('')]
@@ -177,7 +177,7 @@ class Sheet(BaseSheet):
     @topRowIndex.setter
     def topRowIndex(self, v):
         self._topRowIndex = v
-        self.rowLayout.clear()
+        self._rowLayout.clear()
 
     def addColorizer(self, c):
         self.colorizers.append(c)
@@ -288,7 +288,7 @@ class Sheet(BaseSheet):
 
     @property
     def bottomRowIndex(self):
-        return max(self.rowLayout.keys())
+        return max(self._rowLayout.keys())
 
     def __deepcopy__(self, memo):
         'same as __copy__'
@@ -348,12 +348,12 @@ class Sheet(BaseSheet):
         return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
 
     def visibleColAtX(self, x):
-        for vcolidx, (colx, w) in self.visibleColLayout.items():
+        for vcolidx, (colx, w) in self._visibleColLayout.items():
             if colx <= x <= colx+w:
                 return vcolidx
 
     def visibleRowAtY(self, y):
-        for rowidx, (rowy, h) in self.rowLayout.items():
+        for rowidx, (rowy, h) in self._rowLayout.items():
             if rowy <= y <= rowy+h-1:
                 return rowidx
 
@@ -493,9 +493,9 @@ class Sheet(BaseSheet):
         else:
             if self.topRowIndex < self.cursorRowIndex-self.nScreenRows+1:
                 self.topRowIndex = self.cursorRowIndex-self.nScreenRows+1
-            elif self.rowLayout: # only check this if topRowIndex has not been set (which clears rowLayout)
+            elif self._rowLayout: # only check this if topRowIndex has not been set (which clears _rowLayout)
                 bottomRowIndex = self.bottomRowIndex
-                y, h = self.rowLayout[bottomRowIndex]
+                y, h = self._rowLayout[bottomRowIndex]
                 if self.cursorRowIndex > bottomRowIndex and y+h > self.nScreenRows:
                     self._topRowIndex += bottomRowIndex-self.cursorRowIndex+2
 
@@ -506,9 +506,9 @@ class Sheet(BaseSheet):
                 if self.leftVisibleColIndex == self.cursorVisibleColIndex:  # not much more we can do
                     break
                 self.calcColLayout()
-                if not self.visibleColLayout:
+                if not self._visibleColLayout:
                     break
-                mincolidx, maxcolidx = min(self.visibleColLayout.keys()), max(self.visibleColLayout.keys())
+                mincolidx, maxcolidx = min(self._visibleColLayout.keys()), max(self._visibleColLayout.keys())
                 if self.cursorVisibleColIndex < mincolidx:
                     self.leftVisibleColIndex -= max((self.cursorVisibleColIndex - mincolid)//2, 1)
                     continue
@@ -516,7 +516,7 @@ class Sheet(BaseSheet):
                     self.leftVisibleColIndex += max((maxcolidx - self.cursorVisibleColIndex)//2, 1)
                     continue
 
-                cur_x, cur_w = self.visibleColLayout[self.cursorVisibleColIndex]
+                cur_x, cur_w = self._visibleColLayout[self.cursorVisibleColIndex]
                 if cur_x+cur_w < self.windowWidth:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
@@ -526,7 +526,7 @@ class Sheet(BaseSheet):
         minColWidth = len(options.disp_more_left)+len(options.disp_more_right)+2
         sepColWidth = len(options.disp_column_sep)
         winWidth = self.windowWidth
-        self.visibleColLayout = {}
+        self._visibleColLayout = {}
         x = 0
         vcolidx = 0
         for vcolidx in range(0, self.nVisibleCols):
@@ -540,7 +540,7 @@ class Sheet(BaseSheet):
             if col in self.keyCols:
                 width = max(width, 1)  # keycols must all be visible
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self.visibleColLayout[vcolidx] = [x, min(width, winWidth-x)]
+                self._visibleColLayout[vcolidx] = [x, min(width, winWidth-x)]
                 x += width+sepColWidth
             if x > winWidth-1:
                 break
@@ -563,7 +563,7 @@ class Sheet(BaseSheet):
         if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
             C = options.disp_keycol_sep
 
-        x, colwidth = self.visibleColLayout[vcolidx]
+        x, colwidth = self._visibleColLayout[vcolidx]
 
         # AnameTC
         T = getType(col.type).icon
@@ -630,14 +630,14 @@ class Sheet(BaseSheet):
             'selectednote': options.disp_selected_note,
         }
 
-        self.rowLayout = {}  # [rowidx] -> (y, height)
+        self._rowLayout = {}  # [rowidx] -> (y, height)
         self.calcColLayout()
 
         numHeaderRows = self.nHeaderRows
         vcolidx = 0
 
         headerRow = 0
-        for vcolidx, colinfo in sorted(self.visibleColLayout.items()):
+        for vcolidx, colinfo in sorted(self._visibleColLayout.items()):
             self.drawColHeader(scr, headerRow, numHeaderRows, vcolidx)
 
         y = headerRow + numHeaderRows
@@ -687,7 +687,7 @@ class Sheet(BaseSheet):
 
             displines = {}  # [vcolidx] -> list of lines in that cell
 
-            for vcolidx, (x, colwidth) in sorted(self.visibleColLayout.items()):
+            for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
                 if x < self.windowWidth:  # only draw inside window
                     vcols = self.visibleCols
                     if vcolidx >= len(vcols):
@@ -717,12 +717,12 @@ class Sheet(BaseSheet):
 
             height = min(max(heights), maxheight) or 1  # display even empty rows
 
-            self.rowLayout[rowidx] = (ybase, height)
+            self._rowLayout[rowidx] = (ybase, height)
 
             for vcolidx, (col, cellval, lines) in displines.items():
-                    if vcolidx not in self.visibleColLayout:
+                    if vcolidx not in self._visibleColLayout:
                         continue
-                    x, colwidth = self.visibleColLayout[vcolidx]
+                    x, colwidth = self._visibleColLayout[vcolidx]
 
                     cattr = self._colorize(col, row, cellval)
                     cattr = update_attr(cattr, basecellcattr)
