@@ -8,8 +8,8 @@ from visidata import *
 
 option('filetype', '', 'specify file type', replay=True)
 
-options.set('header', 0, IndexSheet)
-options.set('skip', 0, IndexSheet)
+IndexSheet.options.header = 0
+IndexSheet.options.skip = 0
 
 Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=random.sample(rows, nrows or nRows); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows')
 

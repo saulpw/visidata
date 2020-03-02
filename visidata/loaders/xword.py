@@ -97,4 +97,4 @@ def save_xd(vd, p, vs):
 CrosswordsSheet.addCommand(ENTER, 'open-clues', 'vd.push(CrosswordSheet("clues_"+cursorRow.title, source=cursorRow))')
 CrosswordSheet.addCommand(ENTER, 'open-grid', 'vd.push(GridSheet("grid", source=sheet, pos=cursorRow[0]))')
 
-options.set('disp_column_sep', '', GridSheet)
+GridSheet.options.disp_column_sep = ''

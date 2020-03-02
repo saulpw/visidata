@@ -68,11 +68,11 @@ class VisiDataMetaSheet(TsvSheet):
     pass
 
 # commandline must not override these for internal sheets
-options.set('delimiter', vd_system_sep, VisiDataMetaSheet)
-options.set('header', 1, VisiDataMetaSheet)
-options.set('skip', 0, VisiDataMetaSheet)
-options.set('row_delimiter', '\n', VisiDataMetaSheet)
-options.set('encoding', 'utf-8', VisiDataMetaSheet)
+VisiDataMetaSheet.options.delimiter = vd_system_sep
+VisiDataMetaSheet.options.header = 1
+VisiDataMetaSheet.options.skip = 0
+VisiDataMetaSheet.options.row_delimiter = '\n'
+VisiDataMetaSheet.options.encoding = 'utf-8'
 
 
 class OptionsSheet(Sheet):
@@ -188,4 +188,4 @@ ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anyty
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
 OptionsSheet.bindkey('e', 'edit-option')
 OptionsSheet.bindkey(ENTER, 'edit-option')
-options.set('header', 0, MetaSheet)
+MetaSheet.options.header = 0

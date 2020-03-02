@@ -71,7 +71,7 @@ def moveToRow(vs, rowstr):
     if rowidx is None:
         return False
 
-    if options.replay_movement:
+    if vs.options.replay_movement:
         while vs.cursorRowIndex != rowidx:
             vs.cursorRowIndex += 1 if (rowidx - vs.cursorRowIndex) > 0 else -1
             while not vd.delay(0.5):
@@ -102,7 +102,7 @@ def moveToCol(vs, colstr):
     if vcolidx is None:
         return False
 
-    if options.replay_movement:
+    if vs.options.replay_movement:
         while vs.cursorVisibleColIndex != vcolidx:
             vs.cursorVisibleColIndex += 1 if (vcolidx - vs.cursorVisibleColIndex) > 0 else -1
             while not vd.delay(0.5):
@@ -416,4 +416,5 @@ CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nR
 BaseSheet.addCommand('', 'repeat-last', 'exec_keystrokes(cmdlog_sheet.rows[-1].longname)')
 BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)')
 
-options.set('json_sort_keys', False, _CommandLog)
+CommandLog.options.json_sort_keys = False
+CommandLogJsonl.options.json_sort_keys = False

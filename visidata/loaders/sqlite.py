@@ -131,7 +131,7 @@ def save_sqlite(vd, p, *vsheets):
     status("%s save finished" % p)
 
 
-options.set('header', 0, SqliteSheet)
+SqliteSheet.options.header = 0
 VisiData.save_db = VisiData.save_sqlite
 
 vd.filetype('sqlite', SqliteIndexSheet)

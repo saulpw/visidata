@@ -11,12 +11,12 @@ class UsvSheet(TsvSheet):
 def save_usv(vd, p, vs):
     usvs = copy(vs)
     usvs.rows = vs.rows
-    options.set('delimiter', '\u241e', usvs)
-    options.set('row_delimiter', '\u241f', usvs)
+    usvs.options.delimiter = '\u241e'
+    usvs.options.row_delimiter = '\u241f'
     vd.save_tsv(p, usvs)
 
 
-options.set('delimiter', '\u241e', UsvSheet)  # UsvSheet.options.delimiter='\u241e'
-options.set('row_delimiter', '\u241f', UsvSheet)
+UsvSheet.options.delimiter = '\u241e'
+UsvSheet.options.row_delimiter = '\u241f'
 
 vd.filetype('usv', UsvSheet)
