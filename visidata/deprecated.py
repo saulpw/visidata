@@ -38,9 +38,22 @@ def DeferredSetColumn(*args, **kwargs):
     return Column(*args, defer=True, **kwargs)
 
 
-alias('edit-cells', 'setcol-input')  # 1.6
-alias('fill-nulls', 'setcol-fill')  # 1.6
-alias('paste-cells', 'setcol-clipboard')  # 1.6
-alias('frequency-rows', 'frequency-summary')  # 1.6
-alias('dup-cell', 'dive-cell')  # 1.6
-alias('dup-row', 'dive-row')  # 1.6
+# The longnames on the left are deprecated for 2.0
+
+alias('edit-cells', 'setcol-input')
+alias('fill-nulls', 'setcol-fill')
+alias('paste-cells', 'setcol-clipboard')
+alias('frequency-rows', 'frequency-summary')
+alias('dup-cell', 'dive-cell')
+alias('dup-row', 'dive-row')
+alias('next-search', 'search-next')
+alias('prev-search', 'search-prev')
+alias('prev-sheet', 'jump-prev')
+alias('prev-value', 'go-prev-value')
+alias('next-value', 'go-next-value')
+alias('prev-selected', 'go-prev-selected')
+alias('next-selected', 'go-next-selected')
+alias('prev-null', 'go-prev-null')
+alias('next-null', 'go-next-null')
+alias('page-right', 'go-right-page')
+alias('page-left', 'go-left-page')

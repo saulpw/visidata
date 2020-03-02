@@ -170,18 +170,18 @@ Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move 
 Sheet.addCommand('/', 'search-col', 'vd.moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)', 'search for regex forwards in current column'),
 Sheet.addCommand('?', 'searchr-col', 'vd.moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)', 'search for regex backwards in current column'),
 Sheet.addCommand('n', 'next-search', 'vd.moveRegex(sheet, reverse=False)', 'go to next match from last regex search'),
-Sheet.addCommand('N', 'prev-search', 'vd.moveRegex(sheet, reverse=True)', 'go to previous match from last regex search'),
+Sheet.addCommand('N', 'search-prev', 'vd.moveRegex(sheet, reverse=True)', 'go to previous match from last regex search'),
 
 Sheet.addCommand('g/', 'search-cols', 'vd.moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns'),
 Sheet.addCommand('g?', 'searchr-cols', 'vd.moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns'),
 
-Sheet.addCommand('<', 'prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True) or status("no different value up this column")', 'go up current column to next value'),
-Sheet.addCommand('>', 'next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val) or status("no different value down this column")', 'move down current column to next value'),
-Sheet.addCommand('{', 'prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'go up current column to previous selected row'),
-Sheet.addCommand('}', 'next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'go down current column to next selected row'),
+Sheet.addCommand('<', 'go-prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True) or status("no different value up this column")', 'go up current column to next value'),
+Sheet.addCommand('>', 'go-next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val) or status("no different value down this column")', 'move down current column to next value'),
+Sheet.addCommand('{', 'go-prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'go up current column to previous selected row'),
+Sheet.addCommand('}', 'go-next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'go down current column to next selected row'),
 
-Sheet.addCommand('z<', 'prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")', 'go up current column to next null value'),
-Sheet.addCommand('z>', 'next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")', 'go down current column to next null value'),
+Sheet.addCommand('z<', 'go-prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")', 'go up current column to next null value'),
+Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")', 'go down current column to next null value'),
 
 for i in range(1, 11):
     globalCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), 'vd.push(*(list(s for s in allSheets if s.shortcut=="%s") or fail("no sheet")))' % {i}, f'jump to sheet {i}')
@@ -209,8 +209,8 @@ Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 # vim-style scrolling with the 'z' prefix
 Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nScreenRows/2)', 'scroll current row to center of screen')
 
-Sheet.addCommand(None, 'page-right', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right')
-Sheet.addCommand(None, 'page-left', 'pageLeft()', 'scroll cursor one page left')
+Sheet.addCommand(None, 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right')
+Sheet.addCommand(None, 'go-left-page', 'pageLeft()', 'scroll cursor one page left')
 Sheet.addCommand('zh', 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
 Sheet.addCommand('zl', 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')
@@ -244,4 +244,4 @@ BaseSheet.bindkey('gk', 'go-top'),
 BaseSheet.bindkey('gh', 'go-leftmost'),
 BaseSheet.bindkey('gl', 'go-rightmost')
 
-BaseSheet.addCommand('^^', 'prev-sheet', 'vd.sheets[1:] or fail("no previous sheet"); vd.push(vd.sheets[1])', 'jump to previous sheet (swap with current sheet)')
+BaseSheet.addCommand('^^', 'jump-prev', 'vd.sheets[1:] or fail("no previous sheet"); vd.push(vd.sheets[1])', 'jump to previous sheet (swap with current sheet)')

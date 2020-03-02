@@ -9,7 +9,7 @@ RowColorizer	TableSheet.addRowColorizer	same
 options.set('optname', val, Sheet)	TableSheet.options.optname = val	diff	
 Sheet.addCommand(...)	TableSheet.command(...)		
 vd.sheetsSheet	vd.sheets	vd.remove, .push, .replace, etc all on sheets	
-next-search	search-next	deprecated aliases can persist	
+next-search	search-next	deprecated aliases can persist	y
 rotate_range	rotateRange	helper functions should be camelCase	y
 exceptionCaught	vd.exception()	same; to fit the fail/warning/error/status theme	
 vd.push	vd.addSheet		
@@ -29,6 +29,6 @@ status (longname)	show-status
 vd.clear_caches	vd.clearCaches()		
 getDefaultSaveName	Sheet.getDefaultSaveName	same	
 theme	option	deprecate theme() and rely on disp_, color_, and replay= to differentiate cosmetic options	
-prev-sheet	jump-prev		
+prev-sheet	jump-prev		y
 editline()	vd.editline()	same	y
 *-replay	replay-*	longname	y
