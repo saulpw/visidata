@@ -35,8 +35,8 @@ def open_tsv(p):
 # rowdef: list
 class TsvSheet(SequenceSheet):
     def iterload(self):
-        delim = options.get('delimiter', self)
-        rowdelim = options.get('row_delimiter', self)
+        delim = self.options.delimiter
+        rowdelim = self.options.row_delimiter
 
         with self.source.open_text() as fp:
             with Progress(total=filesize(self.source)) as prog:
@@ -62,8 +62,8 @@ def load_tsv(fn):
 @VisiData.api
 def save_tsv(vd, p, vs):
     'Write sheet to file `fn` as TSV.'
-    unitsep = options.get('delimiter', vs)
-    rowsep = options.get('row_delimiter', vs)
+    unitsep = vs.options.delimiter
+    rowsep = vs.options.row_delimiter
     trdict = vs.safe_trdict()
 
     with p.open_text(mode='w') as fp:

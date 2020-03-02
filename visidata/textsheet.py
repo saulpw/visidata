@@ -58,4 +58,4 @@ Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet(sheet.name+"_cell_erro
 
 TextSheet.addCommand('v', 'visibility', 'sheet.options.wrap = not sheet.options.wrap; reload(); status("text%s wrapped" % ("" if sheet.options.wrap else " NOT")); ')
 
-options.set('save_filetype', 'txt', TextSheet)
+TextSheet.options.save_filetype = 'txt'

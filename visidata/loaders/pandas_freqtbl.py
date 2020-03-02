@@ -174,4 +174,4 @@ def expand_source_rows(source, vd, cursorRow):
     vd.push(vs)
 
 PandasFreqTableSheet.addCommand(ENTER, 'dup-row', 'expand_source_rows(source, vd, cursorRow)')
-options.set('numeric_binning', False, PandasFreqTableSheet)
+PandasFreqTableSheet.options.numeric_binning = False

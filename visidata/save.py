@@ -8,12 +8,12 @@ option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 def safe_trdict(vs):
     'returns string.translate dictionary for replacing tabs and newlines'
     if options.safety_first:
-        delim = options.get('delimiter', vs)
+        delim = vs.options.delimiter
         return {
              0: '', #  strip NUL completely
-    ord(delim): options.get('tsv_safe_tab', vs), # \t
-            10: options.get('tsv_safe_newline', vs),  # \n
-            13: options.get('tsv_safe_newline', vs),  # \r
+    ord(delim): vs.options.tsv_safe_tab, # \t
+            10: vs.options.tsv_safe_newline,  # \n
+            13: vs.options.tsv_safe_newline,  # \r
         }
     return {}
 
@@ -118,8 +118,8 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 def save_txt(vd, p, *vsheets):
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
-            unitsep = options.get('delimiter', vs)
-            rowsep = options.get('row_delimiter', vs)
+            unitsep = vs.options.delimiter
+            rowsep = vs.options.row_delimiter
             for dispvals in vs.iterdispvals(*vs.visibleCols, format=True):
                 fp.write(unitsep.join(dispvals.values()))
                 fp.write(rowsep)

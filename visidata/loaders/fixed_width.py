@@ -52,7 +52,7 @@ class FixedWidthColumnsSheet(SequenceSheet):
         itsource = iter(self.source)
 
         # compute fixed width columns from first fixed_rows lines
-        maxcols = options.get('fixed_maxcols', self)
+        maxcols = self.options.fixed_maxcols
         self.columns = []
         fixedRows = list([x] for x in self.optlines(itsource, 'fixed_rows'))
         for i, j in columnize(list(r[0] for r in fixedRows)):
