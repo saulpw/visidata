@@ -43,6 +43,10 @@ class BaseSheet(Extensible):
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
 
+    @visidata.classproperty
+    def options(cls):
+        return vd.OptionsObject(vd._options, obj=cls)
+
     def __init__(self, name='', **kwargs):
         self._name = None
         self.name = name

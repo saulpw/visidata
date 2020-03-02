@@ -119,11 +119,13 @@ class Option:
         return str(self.value)
 
 
+@VisiData.api
 class OptionsObject:
     'minimalist options framework'
-    def __init__(self, mgr):
+    def __init__(self, mgr, obj=None):
         object.__setattr__(self, '_opts', mgr)
         object.__setattr__(self, '_cache', {})
+        object.__setattr__(self, '_obj', obj)
 
     def keys(self, obj=None):
         for k, d in self._opts.items():
@@ -190,13 +192,13 @@ class OptionsObject:
         self.__setitem__(k, v)
 
     def __getitem__(self, k):      # options[k]
-        opt = self._get(k)
+        opt = self._get(k, obj=self._obj)
         if not opt:
             vd.error('no option "%s"' % k)
         return opt.value
 
     def __setitem__(self, k, v):   # options[k] = v
-        self.set(k, v)
+        self.set(k, v, obj=self._obj)
 
     def __call__(self, prefix=''):
         return { optname[len(prefix):] : options[optname]
@@ -206,8 +208,8 @@ class OptionsObject:
 
 commands = SettingsMgr()
 bindkeys = SettingsMgr()
-_options = SettingsMgr()
-options = OptionsObject(_options)
+vd._options = SettingsMgr()
+options = vd.OptionsObject(vd._options)
 
 
 def option(name, default, helpstr, replay=False):

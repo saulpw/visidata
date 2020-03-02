@@ -23,6 +23,8 @@ def getGlobals():
 from builtins import *
 from copy import copy, deepcopy
 
+from .utils import *
+
 from .extensible import *
 from .vdobj import *
 
@@ -32,7 +34,6 @@ from .basesheet import *
 from .settings import *
 from .errors import *
 from .editor import *
-from .utils import *
 from .cliptext import *
 from .color import *
 from .mainloop import *

@@ -2,7 +2,7 @@ import operator
 
 'Various helper classes and functions.'
 
-__all__ = ['AttrDict', 'joinSheetnames', 'moveListItem', 'namedlist']
+__all__ = ['AttrDict', 'joinSheetnames', 'moveListItem', 'namedlist', 'classproperty']
 
 
 class AttrDict(dict):
@@ -18,6 +18,11 @@ class AttrDict(dict):
 
     def __dir__(self):
         return self.keys()
+
+
+class classproperty(property):
+    def __get__(self, cls, obj):
+        return classmethod(self.fget).__get__(None, obj or cls)()
 
 
 def joinSheetnames(*sheetnames):
