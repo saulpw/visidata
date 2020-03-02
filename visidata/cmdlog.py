@@ -263,7 +263,7 @@ def replayOne(vd, r):
                 options.set(r.row, r.input, options._opts.getobj(r.col))
                 escaped = False
             except Exception as e:
-                exceptionCaught(e)
+                vd.exceptionCaught(e)
                 escaped = True
         else:
             vs = vd.moveToReplayContext(r)
@@ -304,7 +304,7 @@ def replay_sync(vd, cmdlog, live=False):
                         return True
                 except Exception as e:
                     vd.replay_cancel()
-                    exceptionCaught(e)
+                    vd.exceptionCaught(e)
                     status('replay canceled')
                     return True
 

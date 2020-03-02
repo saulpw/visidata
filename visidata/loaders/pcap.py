@@ -109,7 +109,7 @@ def load_oui(url):
         try:
             oui[prefix.lower()] = r.shortname
         except Exception as e:
-            exceptionCaught(e)
+            vd.exceptionCaught(e)
 
 
 @asyncthread
@@ -120,7 +120,7 @@ def load_iana(url):
         try:
             services[(r.transport, int(r.port))] = r.service
         except Exception as e:
-            exceptionCaught(e)
+            vd.exceptionCaught(e)
 
 
 class Host:

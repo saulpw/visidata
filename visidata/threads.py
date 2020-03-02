@@ -207,7 +207,7 @@ def _toplevelTryFunc(func, *args, status=status, **kwargs):
     except Exception as e:
         t.exception = e
         t.status = 'exception'
-        exceptionCaught(e)
+        vd.exceptionCaught(e)
 
     if t.sheet:
         t.sheet.currentThreads.remove(t)

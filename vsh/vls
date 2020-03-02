@@ -9,7 +9,7 @@ import sys
 import locale
 import stat
 
-from visidata import vd, option, options, status, run, UNLOADED, error, exceptionCaught
+from visidata import vd, option, options, status, run, UNLOADED, error
 from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand, asyncthread
 from visidata import Path, openSource, saveSheets, setDiffSheet, domotd, Sheet, Column
 from visidata import date, modtime, filesize

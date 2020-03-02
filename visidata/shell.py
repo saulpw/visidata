@@ -8,7 +8,7 @@ try:
 except ImportError:
     pass # pwd,grp modules not available on Windows
 
-from visidata import Column, Sheet, LazyComputeRow, asynccache, exceptionCaught, options, option, globalCommand
+from visidata import Column, Sheet, LazyComputeRow, asynccache, options, option, globalCommand
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError, VisiData
 from visidata import CellColorizer, RowColorizer, modtime, filesize
 
@@ -67,7 +67,7 @@ class ColumnShell(Column):
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
-            exceptionCaught(e)
+            vd.exceptionCaught(e)
 
 
 class DirSheet(Sheet):

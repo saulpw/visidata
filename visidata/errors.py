@@ -2,7 +2,7 @@ import traceback
 
 from visidata import vd, VisiData, options
 
-__all__ = ['stacktrace', 'exceptionCaught', 'ExpectedException']
+__all__ = ['stacktrace', 'ExpectedException']
 
 
 class ExpectedException(Exception):

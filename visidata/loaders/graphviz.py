@@ -1,4 +1,4 @@
-from visidata import options, option, exceptionCaught, TypedWrapper, asyncthread, Progress
+from visidata import vd, options, option, TypedWrapper, asyncthread, Progress
 from visidata import wrapply, clean_to_id, isNumeric, VisiData
 
 option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz diagrams')
@@ -16,7 +16,7 @@ def SI(n):
             level += 1
         return '%0.1f%s' % (n, si_levels[level])
     except Exception as e:
-        exceptionCaught(e)
+        vd.exceptionCaught(e)
         return orig_n
 
 

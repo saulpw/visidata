@@ -43,7 +43,7 @@ def launchExternalEditorPath(path, linenum=0):
             try:
                 return fp.read().rstrip('\n')  # trim inevitable trailing newlines
             except Exception as e:
-                visidata.exceptionCaught(e)
+                visidata.vd.exceptionCaught(e)
                 return ''
 
 

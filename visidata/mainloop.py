@@ -140,7 +140,7 @@ def mainloop(self, scr):
                 except curses.error:
                     pass
                 except Exception as e:
-                    exceptionCaught(e)
+                    self.exceptionCaught(e)
 
             if keystroke in self.keystrokes[:-1]:
                 vd.warning('duplicate prefix')

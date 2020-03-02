@@ -1,4 +1,5 @@
-from visidata import vd, copy, asyncthread, Progress, exceptionCaught, status, Sheet, options
+from copy import copy
+from visidata import vd, asyncthread, Progress, Sheet, options
 
 Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
@@ -57,7 +58,7 @@ def sort(self):
             self.rows.sort(key=sortkey)
     except TypeError as e:
         vd.warning('sort incomplete due to TypeError; change column type')
-        vd.exception(e, status=False)
+        vd.exceptionCaught(e, status=False)
 
 
 # replace existing sort criteria

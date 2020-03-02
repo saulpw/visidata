@@ -7,7 +7,7 @@ import time
 
 from visidata import option, options, anytype, stacktrace, vd
 from visidata import getType, typemap, isNumeric, isNullFunc
-from visidata import asyncthread, exceptionCaught, dispwidth
+from visidata import asyncthread, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc
 
@@ -270,7 +270,7 @@ class Column(Extensible):
         try:
             return self.setValue(row, value)
         except Exception as e:
-            exceptionCaught(e)
+            vd.exceptionCaught(e)
 
     def setValues(self, rows, *values):
         'Set our column value for given list of rows to `value`.'

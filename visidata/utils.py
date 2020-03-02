@@ -48,7 +48,7 @@ class OnExit:
         try:
             self.func(*self.args, **self.kwargs)
         except Exception as e:
-            exceptionCaught(e)
+            vd.exceptionCaught(e)
 
 
 def itemsetter(i):

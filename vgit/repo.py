@@ -173,7 +173,7 @@ class GitLogSheet(GitSheet):
                 try:
                     col.putValue(row, val)
                 except Exception as e:
-                    exceptionCaught(e)
+                    vd.exceptionCaught(e)
 
         self.reload()
         self.resetDeferredCommit()

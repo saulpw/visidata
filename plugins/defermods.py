@@ -134,7 +134,7 @@ def commitAdds(self):
             self.addSourceRow(row)
             nadded += 1
         except Exception as e:
-            exceptionCaught(e)
+            vd.exceptionCaught(e)
 
     if nadded:
         status('added %s %s' % (nadded, self.rowtype))
@@ -152,7 +152,7 @@ def commitMods(self):
                 col.putValue(row, val)
                 nmods += 1
             except Exception as e:
-                exceptionCaught(e)
+                vd.exceptionCaught(e)
 
     self._deferredMods.clear()
     return nmods
@@ -182,7 +182,7 @@ def commitDeletes(self):
                 self.deleteSourceRow(self.rows.pop(newidx))
                 ndeleted += 1
             except Exception as e:
-                exceptionCaught(e)
+                vd.exceptionCaught(e)
         else:
             if r is dest_row:
                 self.cursorRowIndex = newidx
