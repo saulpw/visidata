@@ -59,7 +59,7 @@ class PNGDrawing(Canvas):
             self.point(x, y, rgb_to_attr(r,g,b,a), row)
         self.refresh()
 
-PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))')
+PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')
 PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)')
 
 

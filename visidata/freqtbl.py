@@ -12,7 +12,7 @@ option('disp_histolen', 50, 'width of histogram column')
 option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
 
-ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))')
+ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
 
 def valueNames(discrete_vals, numeric_vals):
     ret = [ '+'.join(str(x) for x in discrete_vals) ]

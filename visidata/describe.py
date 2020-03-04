@@ -100,6 +100,6 @@ class DescribeSheet(ColumnsSheet):
         return r
 
 
-DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)')
-DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)')
-DescribeSheet.addCommand('z'+ENTER, 'dive-cell', 'isinstance(cursorValue, list) or error(cursorValue); vs=copy(cursorRow.sheet); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)')
+DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)', 'select rows on source sheet which are being described in current cell')
+DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell')
+DescribeSheet.addCommand('z'+ENTER, 'dive-cell', 'isinstance(cursorValue, list) or error(cursorValue); vs=copy(cursorRow.sheet); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell')

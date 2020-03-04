@@ -352,12 +352,12 @@ def codestr(code):
     return code.co_name
 
 
-ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))')
-ProfileSheet.addCommand(ENTER, 'dive-row', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_calls", source=cursorRow.calls or fail("no calls")))')
-ProfileSheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_"+cursorCol.name, source=cursorValue or fail("no callers")))')
-ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)')
+ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile')
+ProfileSheet.addCommand(ENTER, 'dive-row', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_calls", source=cursorRow.calls or fail("no calls")))', 'open ProfileSheet for calls referenced in current row')
+ProfileSheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_"+cursorCol.name, source=cursorValue or fail("no callers")))', 'open ProfileSheet for caller referenced in current cell')
+ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
 globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
 
-BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))')
+BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))', 'abort all threads on current sheet')
 globalCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all secondary threads')
 globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')

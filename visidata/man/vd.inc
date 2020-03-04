@@ -367,6 +367,8 @@ open
 increase/decrease zoom level, centered on cursor
 .It Ic " _" No (underscore)
 zoom to fit full extent
+.It Ic "z_" No (underscore)
+set aspect ratio
 .It Ic " s   t   u"
 select/toggle/unselect rows on source sheet contained within canvas cursor
 .It Ic "gs  gt  gu"
@@ -636,7 +638,7 @@ replay command in current row
 replay contents of entire CommandLog
 .It Ic " ^C"
 abort replay
-.It Ic "z^S" Ar keystroke
+.It Ic "z^D" Ar keystroke
 .No save selected rows to macro mapped to Ar keystroke
 .It ""
 .No Macros are saved to Sy .visidata/macro/command-longname.vd Ns . The list of macros is saved at Sy .visidata/macros.vd No (keystroke, filename).
@@ -714,8 +716,6 @@ open sheet of source rows aggregated in current pivot cell
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
 dive further into Python object
-.It Ic " e"
-edit contents of current cell
 .It Ic " v"
 toggle show/hide for methods and hidden properties
 .It Ic "gv  zv"

@@ -170,12 +170,12 @@ BaseSheet.addCommand('O', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet')
 
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(someSelectedRows)')
-ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)')
+ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(someSelectedRows)', 'toggle selected rows as key columns on source sheet')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)', 'unset selected rows as key columns on source sheet')
 
-ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()')
-ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))')
-ColumnsSheet.addCommand('&', 'join-cols', 'source.addColumn(combineColumns(someSelectedRows), cursorRowIndex)')
+ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()', 'hide selected columns on source sheet')
+ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
+ColumnsSheet.addCommand('&', 'join-cols', 'source.addColumn(combineColumns(someSelectedRows), cursorRowIndex)', 'add column from concatenating selected source columns')
 
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
 ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')
@@ -183,7 +183,7 @@ ColumnsSheet.addCommand('gz#', 'type-len-selected', 'someSelectedRows.type=vlen'
 ColumnsSheet.addCommand('g@', 'type-date-selected', 'someSelectedRows.type=date', 'set type of selected columns to date')
 ColumnsSheet.addCommand('g$', 'type-currency-selected', 'someSelectedRows.type=currency', 'set type of selected columns to currency')
 ColumnsSheet.addCommand('g~', 'type-string-selected', 'someSelectedRows.type=str', 'set type of selected columns to str')
-ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anytype', 'set type of selected columns to any')
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anytype', 'set type of selected columns to anytype')
 
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
 OptionsSheet.bindkey('e', 'edit-option')

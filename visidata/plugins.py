@@ -154,5 +154,5 @@ class PluginsSheet(JsonLinesSheet):
 
 globalCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'open Plugins Sheet')
 
-PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)')
-PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)')
+PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)', 'install and activate current plugin')
+PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)', 'deactivate current plugin')

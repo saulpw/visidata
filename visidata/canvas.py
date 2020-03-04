@@ -634,7 +634,7 @@ class Canvas(Plotter):
         self.reload()
 
 
-Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels')
+Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels option')
 
 Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w')
 Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w')
@@ -662,31 +662,31 @@ Canvas.addCommand('H', 'resize-cursor-thinner', 'sheet.cursorBox.w -= canvasChar
 Canvas.addCommand('L', 'resize-cursor-wider', 'sheet.cursorBox.w += canvasCharWidth')
 Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight')
 Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight')
-Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)')
+Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)', 'set visible bounds to cursor')
 
-Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)')
-Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.center, tmp)')
-Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()')
-Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()')
+Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
+Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
+Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()', 'zoom to fit full extent')
+Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio')
 
 # set cursor box with left click
-Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'sheet.cursorBox = Box(*canvasMouse.xy)')
-Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)')
+Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'sheet.cursorBox = Box(*canvasMouse.xy)', 'start cursor box with left mouse button press')
+Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)', 'end cursor box with left mouse button release')
 
-Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse')
-Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint)')
+Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move')
+Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint)', 'mark canvas anchor point')
 
-Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)')
-Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)')
+Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel')
+Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel')
 
-Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))')
-Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))')
-Canvas.addCommand('u', 'unselect-cursor', 'source.unselect(list(rowsWithin(plotterCursorBox)))')
-Canvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)')
-Canvas.addCommand('d', 'delete-cursor', 'deleteSourceRows(rowsWithin(plotterCursorBox))')
+Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')
+Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor')
+Canvas.addCommand('u', 'unselect-cursor', 'source.unselect(list(rowsWithin(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor')
+Canvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)', 'open sheet of source rows contained within canvas cursor')
+Canvas.addCommand('d', 'delete-cursor', 'deleteSourceRows(rowsWithin(plotterCursorBox))', 'delete rows on source sheet contained within canvas cursor')
 
-Canvas.addCommand('gs', 'select-visible', 'source.select(list(rowsWithin(plotterVisibleBox)))')
-Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotterVisibleBox)))')
-Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))')
-Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)')
-Canvas.addCommand('gd', 'delete-visible', 'deleteSourceRows(rowsWithin(plotterVisibleBox))')
+Canvas.addCommand('gs', 'select-visible', 'source.select(list(rowsWithin(plotterVisibleBox)))', 'select rows on source sheet visible on screen')
+Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotterVisibleBox)))', 'toggle selection of rows on source sheet visible on screen')
+Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect rows on source sheet visible on screen')
+Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen')
+Canvas.addCommand('gd', 'delete-visible', 'deleteSourceRows(rowsWithin(plotterVisibleBox))', 'delete rows on source sheet visible on screen')

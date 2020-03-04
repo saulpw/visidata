@@ -144,4 +144,4 @@ addGlobals(globals())
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))', 'add aggregator to current column')
 Sheet.addCommand('z+', 'show-aggregate', 'for agg in chooseMany(aggregators): cursorCol.show_aggregate(agg,  selectedRows or rows)', 'display result of aggregator over values in selected rows for current column')
-ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))')
+ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))', 'add aggregators to selected source columns')

@@ -8,7 +8,7 @@ theme('disp_replay_play', '▶', 'status indicator for active replay')
 theme('disp_replay_pause', '‖', 'status indicator for paused replay')
 theme('color_status_replay', 'green', 'color of replay status indicator')
 option('replay_movement', False, 'insert movements during replay')
-option('visidata_dir', '~/.visidata/', 'directory to load and store macros')
+option('visidata_dir', '~/.visidata/', 'directory to load and store additional files')
 
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
@@ -405,13 +405,13 @@ globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", v
 
 globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))', 'execute command by its longname')
 
-CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")')
-CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)')
-CommandLog.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows')
+CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
+CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
+CommandLog.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
-CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")')
-CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)')
-CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows')
+CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
+CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
+CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
 BaseSheet.addCommand('', 'repeat-last', 'exec_keystrokes(cmdlog_sheet.rows[-1].longname)')
 BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)')
