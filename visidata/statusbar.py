@@ -33,6 +33,9 @@ def statusHistory(vd):
 @VisiData.global_api
 def status(self, *args, priority=0):
     'Add status message to be shown until next action.'
+    if not args:
+        return True
+
     k = (priority, args)
     self.statuses[k] = self.statuses.get(k, 0) + 1
 
@@ -46,19 +49,19 @@ def status(self, *args, priority=0):
     return True
 
 @VisiData.global_api
-def error(vd, s):
+def error(vd, *args):
     'Log an error and raise an exception.'
-    vd.status(s, priority=3)
-    raise ExpectedException(s)
+    vd.status(*args, priority=3)
+    raise ExpectedException(args[0] if args else '')
 
 @VisiData.global_api
-def fail(vd, s):
-    vd.status(s, priority=2)
-    raise ExpectedException(s)
+def fail(vd, *args):
+    vd.status(*args, priority=2)
+    raise ExpectedException(args[0] if args else '')
 
 @VisiData.global_api
-def warning(vd, s):
-    vd.status(s, priority=1)
+def warning(vd, *args):
+    vd.status(*args, priority=1)
 
 @VisiData.global_api
 def debug(vd, *args, **kwargs):
