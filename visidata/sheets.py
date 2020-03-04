@@ -400,8 +400,8 @@ class TableSheet(BaseSheet):
     @property
     def statusLine(self):
         'String of row and column stats.'
-        rowinfo = 'row %d/%d (%d selected)' % (self.cursorRowIndex, self.nRows, self.nSelected)
-        colinfo = 'col %d/%d (%d visible)' % (self.cursorColIndex, self.nCols, len(self.visibleCols))
+        rowinfo = 'row %d (%d selected)' % (self.cursorRowIndex, self.nSelected)
+        colinfo = 'col %d (%d visible)' % (self.cursorColIndex, len(self.visibleCols))
         return '%s  %s' % (rowinfo, colinfo)
 
     @property
