@@ -68,12 +68,8 @@ def main_vd():
 
     args = vd.parseArgs(parser)
 
-    # fetch motd after options parsing/setting
-    if options.plugins_url:
-        p = visidata.urlcache(options.motd_url, days=1)
-        vs = visidata.PluginsSheet(source=p)
-        vs.reload.__wrapped__(vs)
-
+    # fetch motd and plugins *after* options parsing/setting
+    visidata.PluginsSheet().reload()
     domotd()
 
     locale.setlocale(locale.LC_ALL, '')
