@@ -230,6 +230,15 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     if keystrokes:
         bindkeys.set(keystrokes, longname, cls)
 
+def _command(cls, binding, longname, helpstr, **kwargs):
+    def decorator(func):
+        funcname = longname.replace('-', '_')
+        setattr(vd, funcname, func)
+        cls.addCommand(binding, longname, f'vd.{funcname}(sheet)', helpstr, **kwargs)
+    return decorator
+
+BaseSheet.command = classmethod(_command)
+
 @BaseSheet.class_api
 @classmethod
 def bindkey(cls, keystrokes, longname):
