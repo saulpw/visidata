@@ -100,13 +100,6 @@ class Command:
         self.execstr = execstr
         self.helpstr = helpstr
 
-def globalCommand(keystrokes, longname, execstr, helpstr='', **kwargs):
-    commands.setdefault(longname, Command(longname, execstr, helpstr=helpstr, **kwargs))
-
-    if keystrokes:
-        assert not bindkeys._get(keystrokes), keystrokes
-        bindkeys.setdefault(keystrokes, longname)
-
 
 class Option:
     def __init__(self, name, value, helpstr=''):
@@ -219,10 +212,6 @@ def option(name, default, helpstr, replay=False):
 
 theme = option
 
-@VisiData.api
-def addCommand(vd, keystrokes, longname, execstr, helpstr='', **kwargs):
-    globalCommand(keystrokes, longname, execstr, helpstr=helpstr, **kwargs)
-
 @BaseSheet.class_api
 @classmethod
 def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
@@ -238,6 +227,7 @@ def _command(cls, binding, longname, helpstr, **kwargs):
     return decorator
 
 BaseSheet.command = classmethod(_command)
+globalCommand = BaseSheet.addCommand
 
 @BaseSheet.class_api
 @classmethod
