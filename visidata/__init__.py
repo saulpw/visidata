@@ -68,7 +68,7 @@ from .aggregators import *
 from .describe import *
 from .pivot import *
 from .freqtbl import *
-from .tidydata import *
+from .melt import *
 from .cmdlog import *
 from .freeze import *
 from .regex import *
