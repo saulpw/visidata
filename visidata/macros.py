@@ -13,8 +13,8 @@ def macrosheet(vd):
     return macrosheet
 
 def setMacro(ks, vs):
-    bindkeys.set(ks, vs.name, 'override')
-    commands.set(vs.name, vs, 'override')
+    vd.bindkeys.set(ks, vs.name, 'override')
+    vd.commands.set(vs.name, vs, 'override')
 
 
 @CommandLog.api

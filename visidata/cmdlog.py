@@ -46,7 +46,7 @@ def fnSuffix(prefix):
     return fn
 
 def inputLongname(sheet):
-    longnames = set(k for (k, obj), v in commands.iter(sheet))
+    longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname')
 
 def indexMatch(L, func):

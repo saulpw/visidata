@@ -4,7 +4,7 @@ from copy import copy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (Command, bindkeys, commands, options, theme, isNullFunc, isNumeric, Column, option, namedlist,
+from visidata import (options, theme, isNullFunc, isNumeric, Column, option, namedlist,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 

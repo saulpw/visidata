@@ -3,7 +3,7 @@ import collections
 import curses
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
-from visidata import vd, status, error, warning, fail, options, theme, colors, commands
+from visidata import vd, status, error, warning, fail, options, theme, colors
 from visidata import launchExternalEditor, suspend
 
 __all__ = ['confirm', 'choose', 'chooseOne', 'chooseMany', 'CompleteKey']

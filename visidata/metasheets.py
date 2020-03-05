@@ -1,7 +1,7 @@
-from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, bindkeys, IndexSheet
+from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
-from visidata import getGlobals, TsvSheet, Path, commands, Option
+from visidata import getGlobals, TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')

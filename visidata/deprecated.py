@@ -37,6 +37,12 @@ def SubrowColumn(*args, **kwargs):
 def DeferredSetColumn(*args, **kwargs):
     return Column(*args, defer=True, **kwargs)
 
+@deprecated('2.0')
+def bindkey_override(keystrokes, longname):
+    vd.bindkeys.set(keystrokes, longname)
+
+bindkey = visidata.BaseSheet.bindkey
+unbindkey = visidata.BaseSheet.unbindkey
 
 # The longnames on the left are deprecated for 2.0
 

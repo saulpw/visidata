@@ -1,5 +1,6 @@
 oldname	newname	signature	done
-option	vd.option()	same	
+option	vd.option()	same	y
+theme	option	same	declared
 globalCommand	BaseSheet.addCommand()	same	y
 bindkey	BaseSheet.bindkey()	same	y
 Sheet	TableSheet	same	y

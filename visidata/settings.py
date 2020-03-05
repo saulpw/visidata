@@ -199,13 +199,16 @@ class OptionsObject:
                         if optname.startswith(prefix) }
 
 
-commands = SettingsMgr()
-bindkeys = SettingsMgr()
+vd.commands = SettingsMgr()
+vd.bindkeys = SettingsMgr()
 vd._options = SettingsMgr()
-options = vd.OptionsObject(vd._options)
+
+vd.options = vd.OptionsObject(vd._options)  # global option settings
+options = vd.options  # legacy
 
 
-def option(name, default, helpstr, replay=False):
+@VisiData.global_api
+def option(vd, name, default, helpstr, replay=False):
     opt = options.setdefault(name, default, helpstr)
     opt.replayable = replay
     return opt
@@ -214,9 +217,9 @@ def option(name, default, helpstr, replay=False):
 @BaseSheet.class_api
 @classmethod
 def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
-    commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
+    vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
     if keystrokes:
-        bindkeys.set(keystrokes, longname, cls)
+        vd.bindkeys.set(keystrokes, longname, cls)
 
 def _command(cls, binding, longname, helpstr, **kwargs):
     def decorator(func):
@@ -231,24 +234,24 @@ globalCommand = BaseSheet.addCommand
 @BaseSheet.class_api
 @classmethod
 def bindkey(cls, keystrokes, longname):
-    oldlongname = bindkeys._get(keystrokes, cls)
+    oldlongname = vd.bindkeys._get(keystrokes, cls)
     if oldlongname:
         vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))
-    bindkeys.set(keystrokes, longname, cls)
+    vd.bindkeys.set(keystrokes, longname, cls)
 
 @BaseSheet.class_api
 @classmethod
 def unbindkey(cls, keystrokes):
-    bindkeys.unset(keystrokes, cls)
+    vd.bindkeys.unset(keystrokes, cls)
 
 @BaseSheet.api
 def getCommand(self, keystrokes_or_longname):
-    longname = bindkeys._get(keystrokes_or_longname)
+    longname = vd.bindkeys._get(keystrokes_or_longname)
     try:
         if longname:
-            return commands._get(longname) or vd.fail('no command "%s"' % longname)
+            return vd.commands._get(longname) or vd.fail('no command "%s"' % longname)
         else:
-            return commands._get(keystrokes_or_longname) or vd.fail('no binding for %s' % keystrokes_or_longname)
+            return vd.commands._get(keystrokes_or_longname) or vd.fail('no binding for %s' % keystrokes_or_longname)
     except Exception as exc:
         return None
 
@@ -299,16 +302,6 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
             options[optname] = optval
 
     return args
-
-
-def bindkey(keystrokes, longname):
-    bindkeys.setdefault(keystrokes, longname)
-
-def bindkey_override(keystrokes, longname):
-    bindkeys.set(keystrokes, longname)
-
-def unbindkey(keystrokes):
-    bindkeys.unset(keystrokes)
 
 
 BaseSheet.addCommand(None, 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))', 'open ~/.visidatarc as Text Sheet')

@@ -301,7 +301,7 @@ def setValue(col, row, val):
         col._dm_setValue(row, val)
 
 Sheet.addCommand('^S', 'commit-sheet', 'commit()')
-unbindkey('g^S')
+BaseSheet.unbindkey('g^S')
 Sheet.bindkey('g^S', 'save-sheet')
 BaseSheet.addCommand('^R', 'reload-sheet', '_dm_reload(); recalc(); status("reloaded")'),
 Sheet.addCommand('z^R', 'reload-row', 'undoMod(cursorRow)')

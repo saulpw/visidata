@@ -5,7 +5,7 @@ import threading
 import time
 from unittest import mock
 
-from visidata import vd, VisiData, colors, bindkeys, ESC, options, option
+from visidata import vd, VisiData, colors, ESC, options, option
 
 curses_timeout = 100 # curses timeout in ms
 timeouts_before_idle = 10
@@ -154,7 +154,7 @@ def mainloop(self, scr):
             pass
         elif keystroke == '^Q':
             return self.lastErrors and '\n'.join(self.lastErrors[-1])
-        elif bindkeys._get(self.keystrokes):
+        elif vd.bindkeys._get(self.keystrokes):
             sheet.exec_keystrokes(self.keystrokes)
             prefixWaiting = False
         elif keystroke in self.allPrefixes:
