@@ -14,10 +14,6 @@ class MeltedSheet(Sheet):
 
     rowtype = 'melted values'
 
-    def __init__(self, sheet, regex='(.*)', **kwargs):
-        super().__init__(sheet.name + '_melted', source=sheet, **kwargs)
-        self.regex = regex
-
     @asyncthread
     def reload(self):
         self.columns = []
@@ -86,10 +82,13 @@ class MeltedSheet(Sheet):
                     self.addRow(meltedrow)
 
 
-Sheet.addCommand('M', 'melt', 'vd.push(MeltedSheet(sheet))', 'open Melted Sheet (unpivot), with key colmns retained and all non-key columns reduced to Variable-Value rows')
+@Sheet.command('M', 'melt', 'open Melted Sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows')
+def melt(sheet):
+    vs = MeltedSheet(sheet.name + '_melted', source=sheet, regex='(.*)')
+    vd.push(vs)
 
 @Sheet.command('gM', 'melt-regex', 'open Melted Sheet (unpivot), with key columns retained and regex capture groups determining how the non-key columns will be reduced to Variable-Value rows')
 def melt_regex(sheet):
     regex = vd.input("regex to split colname: ", value="(.*)_(.*)", type="regex-capture")
-    vs = MeltedSheet(sheet, regex=regex)
+    vs = MeltedSheet(sheet.name + '_melted', source=sheet, regex=regex)
     vd.push(vs)
