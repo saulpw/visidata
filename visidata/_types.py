@@ -4,12 +4,12 @@ import collections
 import functools
 import datetime
 import locale
-from visidata import option, options, theme, TypedWrapper
+from visidata import option, options, TypedWrapper
 
 #__all__ = ['anytype', 'vdtype', 'typemap', 'getType', 'typemap']
 
 option('disp_float_fmt', '%.02f', 'default fmtstr to format for float values', replay=True)
-theme('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values')
+option('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values', replay=True)
 
 try:
     import dateutil.parser

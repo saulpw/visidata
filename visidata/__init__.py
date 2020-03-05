@@ -42,6 +42,9 @@ from .undo import *
 
 from ._types import *
 from .column import *
+
+theme = option  # convert theme(...) to option(...) and move this down, eventually into deprecated.py
+
 from .sheets import *
 from .statusbar import *
 
