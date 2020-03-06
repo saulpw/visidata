@@ -183,6 +183,9 @@ class TableSheet(BaseSheet):
     def addColorizer(self, c):
         self._colorizers.append(c)
 
+    def removeColorizer(self, c):
+        self._colorizers.remove(c)
+
     @drawcache_property
     def allColorizers(self):
         # all colorizers must be in the same bucket
