@@ -164,6 +164,7 @@ class TableSheet(BaseSheet):
 
         # list of all columns in display order
         self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('')]
+        self._colorizers = []
         self.recalc()  # set .sheet on columns and start caches
 
         self.setKeys(self.columns[:self.nKeys])  # initial list of key columns
@@ -180,7 +181,7 @@ class TableSheet(BaseSheet):
         self._rowLayout.clear()
 
     def addColorizer(self, c):
-        self.colorizers.append(c)
+        self._colorizers.append(c)
 
     @drawcache_property
     def allColorizers(self):
@@ -195,6 +196,8 @@ class TableSheet(BaseSheet):
         for b in [self] + list(allParents(self.__class__)):
             for c in getattr(b, 'colorizers', []):
                 _colorizers.add(c)
+
+        _colorizers |= set(self._colorizers)
         return sorted(_colorizers, key=lambda x: x.precedence, reverse=True)
 
     def _colorize(self, col, row, value=None) -> ColorAttr:
