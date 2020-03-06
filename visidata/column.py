@@ -50,6 +50,10 @@ class DisplayWrapper:
     def __bool__(self):
         return self.value
 
+    def __eq__(self, other):
+        return self.value == other
+
+
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s))
 
