@@ -6,7 +6,6 @@ bindkey	BaseSheet.bindkey()	same	y
 Sheet	TableSheet	same	y
 Sheet.rowLayout	TableSheet._rowLayout	same	y
 Sheet.visibleColLayout	TableSheet._visibleColLayout	same	y
-RowColorizer	TableSheet.addRowColorizer	same	
 options.set('optname', val, Sheet)	TableSheet.options.optname = val	diff	y
 vd.sheetsSheet	vd.sheets	vd.remove, .push, .replace, etc all on sheets	
 next-search	search-next	deprecated aliases can persist	y
@@ -14,8 +13,8 @@ rotate_range	rotateRange	helper functions should be camelCase	y
 exceptionCaught	vd.exceptionCaught()		y
 Canvas.reset			
 _rowtype()		idea: rowmaker	
-exec_keystrokes			
-exec_command			
+exec_keystrokes	-		y
+exec_command	execCommand		y
 CommandLog.currentActiveRow	vd.activeCommand		y
 ESC	ALT		y
 cached_property	lazy_property	same	y

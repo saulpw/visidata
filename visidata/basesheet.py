@@ -98,13 +98,13 @@ class BaseSheet(Extensible):
         'Width of the current sheet, in single-width characters'
         return self._scr.getmaxyx()[1] if self._scr else 80
 
-    def exec_keystrokes(self, keystrokes, vdglobals=None):
-        return self.exec_command(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
-
-    def exec_command(self, cmd, args='', vdglobals=None, keystrokes=None):
+    def execCommand(self, cmd, args='', vdglobals=None, keystrokes=None):
         "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
+        cmd = self.getCommand(cmd or keystrokes)
+
         if not cmd:
-            vd.debug('no command "%s"' % keystrokes)
+            if keystrokes:
+                vd.debug('no command "%s"' % keystrokes)
             return True
 
         escaped = False

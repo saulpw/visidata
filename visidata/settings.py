@@ -246,6 +246,9 @@ def unbindkey(cls, keystrokes):
 
 @BaseSheet.api
 def getCommand(self, keystrokes_or_longname):
+    if isinstance(keystrokes_or_longname, Command):
+        return keystrokes_or_longname
+
     longname = vd.bindkeys._get(keystrokes_or_longname)
     try:
         if longname:

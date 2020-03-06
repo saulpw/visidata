@@ -277,7 +277,7 @@ def replayOne(vd, r):
 
             vd.keystrokes = r.keystrokes
             # <=v1.2 used keystrokes in longname column; getCommand fetches both
-            escaped = vs.exec_command(vs.getCommand(longname if longname else r.keystrokes), keystrokes=r.keystrokes)
+            escaped = vs.execCommand(longname if longname else r.keystrokes, keystrokes=r.keystrokes)
 
         vd.currentReplayRow = None
 
@@ -403,7 +403,7 @@ globalCommand(None, 'show-status', 'status(input("status: "))', 'show given mess
 globalCommand('^V', 'show-version', 'status(__version_info__);', 'show version and copyright information on status line')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
 
-globalCommand(' ', 'exec-longname', 'exec_keystrokes(inputLongname(sheet))', 'execute command by its longname')
+globalCommand(' ', 'exec-longname', 'execCommand(inputLongname(sheet))', 'execute command by its longname')
 
 CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
@@ -413,7 +413,7 @@ CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("
 CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
 CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
-BaseSheet.addCommand('', 'repeat-last', 'exec_keystrokes(cmdlog_sheet.rows[-1].longname)')
+BaseSheet.addCommand('', 'repeat-last', 'execCommand(cmdlog_sheet.rows[-1].longname)')
 BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)')
 
 CommandLog.options.json_sort_keys = False

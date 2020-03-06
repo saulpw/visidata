@@ -44,6 +44,13 @@ def bindkey_override(keystrokes, longname):
 bindkey = visidata.BaseSheet.bindkey
 unbindkey = visidata.BaseSheet.unbindkey
 
+@deprecated('2.0')
+@visidata.Sheet.api
+def exec_keystrokes(self, keystrokes, vdglobals=None):
+    return self.execCommand(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
+
+visidata.Sheet.exec_command = deprecated('2.0')(visidata.Sheet.execCommand)
+
 # The longnames on the left are deprecated for 2.0
 
 alias('edit-cells', 'setcol-input')

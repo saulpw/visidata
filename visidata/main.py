@@ -128,7 +128,7 @@ def main_vd():
         vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
     for cmd in args.preplay:
-        Sheet('').exec_keystrokes(cmd)
+        Sheet('').execCommand(cmd)
 
     if not args.play:
         if flPipedInput and not inputs:  # '|vd' without explicit '-'
