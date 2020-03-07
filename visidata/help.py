@@ -19,23 +19,22 @@ class HelpSheet(MetaSheet):
 
     def iterload(self):
         from pkg_resources import resource_filename
-        cmdlist = VisiDataMetaSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
+        cmdlist = VisiDataMetaSheet('cmdlist', source=None)
 
         self.cmddict = {}
-        itcmds = vd.commands.iter(self.source) if self.source else vd.commands.iterall()
+        itcmds = vd.commands.iterall()
         for (k, o), v in itcmds:
             yield v
             v.sheet = o
             self.cmddict[(v.sheet, v.longname)] = v
 
-        cmdlist.reload.__wrapped__(cmdlist)
         for cmdrow in cmdlist.rows:
             k = (cmdrow.sheet, cmdrow.longname)
             if k in self.cmddict:
                 self.cmddict[k].helpstr = cmdrow.helpstr
 
         self.revbinds = {}  # [longname] -> keystrokes
-        itbindings = bindkeys.iter(self.source) if self.source else bindkeys.iterall()
+        itbindings = vd.bindkeys.iterall()
         for (keystrokes, _), longname in itbindings:
             if keystrokes not in self.revbinds:
                 self.revbinds[longname] = keystrokes
