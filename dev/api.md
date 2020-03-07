@@ -19,14 +19,15 @@ d) `statuses` and its docstring will be shown on the Shift+V VisiData menu
 
 
 ## declarations
-    globalCommand('^P', 'open-statuses', 'vd.push(vd.statusesSheet)')
-    BaseSheet.Binding('^L', 'redraw')
-    option('skip', 0, 'number of lines to skip in text files')
-    theme('color_app_optname', 'default_color', 'when color applies')
+    BaseSheet.addCommand('^P', 'open-statuses', 'vd.push(vd.statusesSheet)')
+    BaseSheet.bindkey('^L', 'redraw')
+    option('skip', 0, 'number of lines to skip in text files', replay=True)
+    option('color_app_optname', 'default_color', 'when color applies')
 
 ## overrides
-    SomeSheet.option('skip', 2)
-    SomeSheet.theme('color_app_optname', 'overridden_color')
+    options.skip = 2           # globally
+    FooSheet.options.skip = 3  # all instances of FooSheet
+    vs.options.color_app_optname = 'reverse'   # specific sheet only
 
 --
 
