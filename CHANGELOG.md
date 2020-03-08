@@ -2,6 +2,133 @@
 
 # v2.-3 (####-##-##)
 
+## Major changes
+    - [cosmetic] change default column separators
+    - [json] make json load/save key order same as column order (ensures round-trip #429)
+    - [commands.tsv] remove commands.tsv; move helpstr into code
+
+## Major features
+    - add Split Window
+        - options.disp_splitwin_pct (default: 0) controls height of second sheet on screen
+    - add .vdj for cmdlog in jsonl format
+    - add plugins/bazaar.jsonl for PluginsSheet in jsonl format
+
+### new commands
+    - `splitwin-half` (`Shift+Z`)    -- split screen, show sheet under top sheet
+    - `splitwin-close` (`g Shift+Z`) -- closes split screen, current sheet full screens
+    - `splitwin-swap` (`TAB`)        -- swap to other pane
+    - `splitwin-input` (`z Shift+Z`) -- queries for height of split window
+    - `repeat-last`  (unbound)       -- run the previous cmd longname with any previous input (thanks #visidata for feature request! #441)
+    - `repeat-input` (unbound)       -- run the last command longname with empty, queried input (thanks #visidata for feature request! #441)
+    - `resize-cols-input` (`gz_`)    -- resize all visible columns to given input width
+        - thanks @sfranky for feature request #414
+    - `save-col-keys` (unbound)      -- save current column and key columns
+        - fixes #415; thanks @sfranky for feature request
+
+### new options
+    - options.disp_float_fmt; default fmtstr to format for float values (default: %0.2f)
+        - thanks khughitt for PR! #410
+
+## Additions and Improvements
+    - add merge jointype (thanks @sfranky for feature request #405)
+        - like "outer" join, except combines columns by name and each cell returns the first non-null/non-error value
+        - use color_diff to merge join diffs
+        - on edit, set values on *all* sheets which have the given row
+    - adjust `save-cmdlog` input message for clarity
+    - all sheets have a name (thanks @ajkerrigan for helping iron out the kinks with PR #472)
+    - add args re-parsing to handle plugin options (helps with #443; thanks tkossak for bug report)
+    - vdmenu should only get pushed outside of replay and batch mode
+    - move cursor to row/col of undone command (thanks @jsvine for request)
+    - move urlcache into async reload (affects PluginsSheet and motd)
+    - add 'type' column to `SheetsSheet`
+
+### Command changes
+
+- `HOME`/`END` now bound to `go-leftmost`/`go-rightmost`
+    - thanks [@gerard_sanroma](https://twitter.com/gerard_sanroma/status/1222128370567327746) for request
+- `z Ctrl+HOME`/`z Ctrl+END` now bound to `go-top`/`go-bottom`
+- `Ctrl+N` now bound to `replay-advance`
+
+### longname renamings
+- `search-next` (was `next-search`)
+- `search-prev` (was `prev-search`)
+- `jump-prev` (was `prev-sheet`)
+- `go-prev-value` (was `prev-value`)
+- `go-next-value` (was `next-value`)
+- `go-prev-selected` (was `prev-selected`)
+- `go-next-selected` (was `next-selected`)
+- `go-prev-null` (was `prev-null`)
+- `go-next-null` (was `next-null`)
+- `go-right-page` (was `page-right`)
+- `go-left-page` (was `page-left`)
+
+## Plugins
+    - add usd plugin
+        - provide USD(s) function to convert strings with currencies to equivalent US$ as float
+        - uses data from fixer.io
+    - add vds3 by @ajkerrigan
+        - initial support for browsing S3 paths and read-only access to object
+    - add "provides" column for plugins (helps with #449; thanks @tsibley for feature request)
+    - standardize author in bazaar.jsonl
+        - "Firstname Lastname @githbhandle"
+
+## Bugfixes
+    - [cmdlog] fix issue with `append_tsv_row`, that occurred with `options.cmdlog_histfile` set
+    - [replay] fix replaying of rowkeys
+    - [replay] fix race condition which required the `--replay-wait` workaround
+    - [plugins] ensure that `options.confirm_overwrite` applies to plugin installation
+    - [slide] fix slide-leftmost
+        - had inconsistent behaviour when a sheet had key columns
+    - [slide] use visibleCol variants, such that slide works as expected with hidden cols
+    - [options min_memory_mb] disable (set to 0) if "free" command not available
+    - [core] auto-add raw default column only if options.debug (fixes #424; thanks @frosencrantz for bug report)
+    - [cli] fix --config (thanks @osunderdog for bug report! #427)
+    - [draw] fix status flickering that occurred with certain terminals (thanks @vapniks for bug report #412)
+    - [txt save] save all visibleCols instead of only first one
+    - [json] avoid adding columns twice when loading JSON dicts (thanks @ajkerrigan for bug report (#444) and PR (#447)
+    - [fixed] fixed error that occurs when there are no headerlines (thanks @frosencrantz for bug report #439)
+    - [pcap] update loader with modern api
+    - [csv] catch rows with csv.Errors and yield error msg
+    - [curses] keypad(1) needs to be set on all newwin (fixes #458)
+    - [save-sheets] address two bugs with `g Ctrl+S`
+    - [batch api] override editline() in batch mode (addresses #464; thanks @Geoffrey42 for bug report)
+    - [replay] better handling of failed confirm (addresses #464; thanks @Geoffrey42 for bug report)
+    - [asyncthread] with changed decorators, asyncthread should be the closest decorator to the function
+        - if it is not, the act of decorating becomes spawned off, instead of calls to the function being decorated
+    - [canvas] update Canvas delete- commands with current API (fixes #334)
+
+## Infrastructure / API
+    - rename `Sheet` to `TableSheet`
+        - deprecate `Sheet` but keep it around as a synonym probably forever
+    - use HTTPS protocol for git submodules (thanks @tombh for PR #419)
+        - this allows installation of VisiData in automated environments such as
+        Dockerfiles where the git user is not logged into Github
+    - unit tests have been migrated to pytest
+    - use counter to keep track of frequency of column names
+        - for joins, we want un-ambiguous sheets of origin when more than one sheet has a c.name
+    - all sheets use addColumn api instead of manually appending columns
+    - set terminal height/width via LINES/COLUMNS via curses.use_env (thanks halloleo for feature request #372)
+    - update pip command to pull development branch of vsh (thanks @khughitt for PR #457)
+    - change longnames *-replay to replay-*
+    - rename vd.run() to vd.mainloop()
+    - `vd.save_foo(p, *sheets)` throughout
+    - standardize on vd.exceptionCaught
+    - Sheet.addRows renamed to Sheet.addNewRows
+    - option overrides can be done with SubSheet.options
+    - options set with Sheet.options
+    - extend status() varargs to error/fail/warning
+    - add @BaseSheet.command decorator
+    - rename tidydata.py to melt.py
+    - deprecate globalCommand; use BaseSheet.addCommand
+    - remove vd.addCommand
+    - deprecate theme(); use option() instead
+    - deprecate global bindkey/unbindkey
+    - move commands, bindkeys, `_options` globals to vd object
+    - DisplayWrapper compares with its value
+        - this allows sensible colorizers like `lambda s,c,r,v: v==3`
+    - Sheet.addColorizer now apply to single sheet itself (fixes #433; thanks @frosencrantz for bug report)
+    - add Sheet.removeColorizer (thanks @frosencrantz for feature request #434)
+
 # v2.-2 (2019-12-03)
 
 ## Major changes
