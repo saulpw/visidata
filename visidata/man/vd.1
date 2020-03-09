@@ -1,4 +1,4 @@
-.Dd Dec 3, 2019
+.Dd Mar 7, 2020
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -62,7 +62,7 @@ replay in batch mode (with no interface)
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pause/resume replay
-.It Sy Tab
+.It Sy ^N
 execute next row in replaying sheet
 .It Sy ^K
 cancel current replay
@@ -77,6 +77,8 @@ cancel current replay
 abort program immediately
 .It Ic " ^C"
 cancel user input or abort all async threads on current sheet
+.It Ic "g^C"
+abort all secondary threads
 .It Ic "  q"
 quit current sheet
 .It Ic " gq"
@@ -90,24 +92,26 @@ view sheet of command longnames and keybindings
 .No execute command by its Ar longname
 .Pp
 .It Ic "  U"
-.No undoes the most recent modification ( requires enabling of Sy options.undo Ns )
+.No undo the most recent modification ( requires enabled Sy options.undo Ns )
 .It Ic "  R"
-.No redoes the most recent undo ( requires enabling of Sy options.undo Ns )
+.No redo the most recent undo ( requires enabled Sy options.undo Ns )
 .El
 .Ss "Cursor Movement"
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic "Arrow PgUp Home"
-move as expected
+go as expected
 .It Ic " h   j   k   l"
-move left/down/up/right
+go left/down/up/right
 .It Ic "gh  gj  gk  gl"
-move all the way to the left/bottom/top/right of sheet
+go all the way to the left/bottom/top/right of sheet
 .It Ic "     G  gg"
-move all the way to the bottom/top of sheet
+go all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
+.It Ic "zz"
+scroll current row to center of screen
 .Pp
 .It Ic "^^" No (Ctrl+^)
 jump to previous sheet (swaps with current sheet)
@@ -119,30 +123,32 @@ jump to previous sheet (swaps with current sheet)
 .It Ic  "z/  z?" Ar expr
 .No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
-move to next/previous match from last search
+go to next/previous match from last regex search
 .Pp
 .It Ic  " <   >"
-move up/down to next value in current column
+go up/down current column to next value
 .It Ic  "z<  z>"
-move up/down to next null in current column
+go up/down current column to next null value
 .It Ic " {   }"
-move up/down to next selected row
+go up/down current column to next selected row
 .
 .El
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .Pp
 .It Ic " c" Ar regex
-.No move to next column with name matching Ar regex
+.No go to next column with name matching Ar regex
 .It Ic " r" Ar regex
-.No move to next row with key matching Ar regex
+.No go to next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No move to column/row Ar number No (0-based)
+.No go to column/row Ar number No (0-based)
 .Pp
 .It Ic " H   J   K   L"
 slide current row/column left/down/up/right
 .It Ic "gH  gJ  gK  gL"
 slide current row/column all the way to the left/bottom/top/right of sheet
+.It Ic "zH  zJ  zK  zK" Ar number
+.No slide current row/column Ar number No positions to the left/down/up/right
 .Pp
 .It Ic "zh  zj  zk  zl"
 scroll one left/down/up/right
@@ -152,12 +158,14 @@ scroll one left/down/up/right
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " _" Ns " (underscore)"
-adjust width of current column
-.It Ic "g_"
-adjust width of all visible columns
-.It Ic "z_" Ar number
+.It Ic "  _" Ns " (underscore)"
+toggle width of current column between full and default width
+.It Ic " g_"
+toggle widths of all visible columns between full and default width
+.It Ic " z_" Ar number
 .No adjust width of current column to Ar number
+.It Ic "gz_" Ar number
+adjust widths of all visible columns to Ar number
 .Pp
 .It Ic " -" Ns " (hyphen)"
 hide current column
@@ -194,14 +202,14 @@ add a frozen copy of current column with all cells evaluated
 .It Ic "g'"
 open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
-reset cache for current/all visible column(s)
+add/reset cache for current/all visible column(s)
 .Pp
 .It Ic " \&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic " \&;" Ar regex
 .No add new columns from capture groups of Ar regex No (also requires example row)
 .It Ic "z" Ns Ic "\&;" Ar expr
-.No add new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
+.No create new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
 .It Ic " *" Ar regex Ns Sy / Ns Ar subst
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .It Ic "g*  gz*" Ar regex Ns Sy / Ns Ar subst
@@ -223,9 +231,9 @@ select/toggle/unselect current row
 .It Ic " gs  gt  gu"
 select/toggle/unselect all rows
 .It Ic " zs  zt  zu"
-select/toggle/unselect rows from top to cursor
+select/toggle/unselect all rows from top to cursor
 .It Ic "gzs gzt gzu"
-select/toggle/unselect rows from cursor to bottom
+select/toggle/unselect all rows from cursor to bottom
 .It Ic " |   \e\ " Ns Ar regex
 .No select/unselect rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
@@ -273,7 +281,7 @@ delete (cut) contents of current column for current/selected row(s) and move to 
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
-set contents of current column for current/selected row(s) to last clipboard value
+set cells of current column for current/selected row(s) to last clipboard value
 .It Ic "  Y   gY"
 .No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic " zY  gzY"
@@ -298,9 +306,9 @@ open external $EDITOR to edit contents
 .It Ic ^R
 reload initial value
 .It Ic "^A  ^E"
-move to beginning/end of line
+go to beginning/end of line
 .It Ic "^B  ^F"
-move back/forward one character
+go back/forward one character
 .It Ic "^H  ^D"
 delete previous/current character
 .It Ic ^T
@@ -328,21 +336,22 @@ open
 .It ""
 .No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
 .It Ic "z^S" Ar filename
-.No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
+.No save current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save Sy CommandLog No to Ar filename.vd No file
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "T"
+.No open new sheet that has rows and columns of current sheet transposed
 .Pp
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column
 .It Ic " &"
-.No concatenate top two sheets in the sheets-stack
+.No concatenate top two sheets in Sy Sheets Stack No
 .It Ic "g&"
-.No concatenate all sheets in the sheets-stack
+.No concatenate all sheets in Sy Sheets Stack No
 .Pp
 .El
 .Ss Data Visualization
@@ -361,6 +370,8 @@ open
 increase/decrease zoom level, centered on cursor
 .It Ic " _" No (underscore)
 zoom to fit full extent
+.It Ic "z_" No (underscore)
+set aspect ratio
 .It Ic " s   t   u"
 select/toggle/unselect rows on source sheet contained within canvas cursor
 .It Ic "gs  gt  gu"
@@ -386,6 +397,23 @@ set canvas cursor
 .It Ic "right click-drag"
 scroll canvas
 .El
+.Ss Split Window
+.Bl -tag -width XXXXXXXXXXXXX -compact
+.It Ic " Z"
+.No split screen, panes contain the top 2 sheets on stack
+.It Ic "zZ"
+.No split screen, queries for height of split window
+.El
+.Ss "  Split Window specific Commands"
+.Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "gZ"
+.No closes an already split screen, current pane full screens
+.It Ic "Tab"
+.No jump to other pane
+.It Ic "^^" No (Ctrl+^)
+.No swap which sheet is in current pane
+.Pp
+.El
 .Ss Other Commands
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -395,10 +423,8 @@ scroll canvas
 toggle sheet-specific visibility (multi-row on Sheet, legends/axes on Graph)
 .Pp
 .Pp
-.It Ic " ^E"
-view traceback for most recent error
-.It Ic "g^E"
-view traceback for most recent errors
+.It Ic " ^E  g^E"
+view traceback for most recent error(s)
 .It Ic "z^E"
 view traceback for error in current cell
 .Pp
@@ -425,7 +451,7 @@ open current row/cell/sheet as Python object
 .It Ic " ^X" Ar expr
 .No evaluate Python Ar expr No and opens result as Python object
 .It Ic "z^X" Ar expr
-.No evaluate Python Ar expr No on current row and shows result on status line
+.No evaluate Python Ar expr Ns , in context of current row, and open result as Python object
 .It Ic "g^X" Ar stmt
 .No execute Python Ar stmt No in the global scope
 .El
@@ -449,11 +475,11 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Commandlog No (Shift+D) "       modify and save commands for replay"
 .It Sy " \&."
-.Sy Error Sheet No (^E) "           view last error"
+.Sy Error Sheet No (Ctrl+E) "           view last error"
 .It Sy " \&."
-.Sy Status History No (^P) "        view history of status messages"
+.Sy Status History No (Ctrl+P) "        view history of status messages"
 .It Sy " \&."
-.Sy Threads Sheet No (^T) "         view, cancel, and profile asynchronous threads"
+.Sy Threads Sheet No (Ctrl+T) "         view, cancel, and profile asynchronous threads"
 .Pp
 .It Sy Derived Sheets
 .It Sy " \&."
@@ -527,7 +553,7 @@ deactivate current plugin
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gC
-.No open Sy Columns Sheet No for all visible columns on all sheets
+.No open Sy Columns Sheet No with all visible columns from all sheets
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -549,13 +575,14 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .
 .Ss Sheets Sheet (Shift+S)
 .Bl -inset -compact
+.It open Sy Sheets Stack Ns , which contains only the active sheets on the current stack
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic zS
-.No open Sy Sheets Stack No which shows only the active sheets on the stack
+.It Ic gS
+.No open Sy Sheets Sheet Ns , which contains all sheets from current session, active and inactive
 .It Ic "Alt" Ar number
-.No jump to Ar number Ns th sheet
+.No jump to sheet Ar number Ns
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -563,12 +590,12 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
 jump to sheet referenced in current row
+.It Ic "gEnter"
+push selected sheets to top of sheet stack
 .It Ic " a"
 add row to reference a new blank sheet
-.It Ic "gC"
-.No open Sy Columns Sheet No with all columns from selected sheets
-.It Ic "gI"
-.No open Sy Describe Sheet No with all columns from selected sheets
+.It Ic "gC  gI"
+.No open Sy Columns Sheet Ns / Ns Sy Describe Sheet No with all visible columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
 .It Ic "z^C  gz^C"
@@ -580,7 +607,7 @@ abort async threads for current/selected sheets(s)
 .It Sy "\&."
 .Sy inner No " keep only rows which match keys on all sheets"
 .It Sy "\&."
-.Sy outer No "  keep all rows from first selected sheet"
+.Sy outer No " keep all rows from first selected sheet"
 .It Sy "\&."
 .Sy full No "  keep all rows from all sheets (union)"
 .It Sy "\&."
@@ -589,6 +616,8 @@ abort async threads for current/selected sheets(s)
 .Sy append No "keep all rows from all sheets (concatenation)"
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
+.It Sy "\&."
+.Sy merge No " mostly keep all rows from first selected sheet, except prioritise cells with non-null/non-error values"
 .El
 .
 .Ss Options Sheet (Shift+O)
@@ -597,7 +626,7 @@ abort async threads for current/selected sheets(s)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Shift+O
-.No edit sheet options (apply to Sy this sheet No only)
+.No edit sheet options (apply to Sy current sheet No only)
 .It Ic gO
 .No edit global options (apply to Sy all sheets Ns )
 .El
@@ -631,7 +660,7 @@ replay command in current row
 replay contents of entire CommandLog
 .It Ic " ^C"
 abort replay
-.It Ic "z^S" Ar keystroke
+.It Ic "z^D" Ar keystroke
 .No save selected rows to macro mapped to Ar keystroke
 .It ""
 .No Macros are saved to Sy .visidata/macro/command-longname.vd Ns . The list of macros is saved at Sy .visidata/macros.vd No (keystroke, filename).
@@ -647,7 +676,7 @@ abort replay
 .It Ic gF
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-open summary of all rows and selected rows
+open one-line summary for all rows and selected rows
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -656,11 +685,12 @@ open summary of all rows and selected rows
 .It Ic " s   t   u"
 select/toggle/unselect these entries in source sheet
 .It Ic " Enter  gEnter"
-open sheet of source rows that are grouped in current cell / selected rows
+open copy of source sheet with rows that are grouped in current cell / selected rows
 .El
 .
 .Ss Describe Sheet (Shift+I)
 .Bl -inset -compact
+.It A Sy Describe Sheet No contains descriptive statistics for all visible columns.
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -694,12 +724,12 @@ open sheet of source rows aggregated in current pivot cell
 .El
 .Ss Melted Sheet (Shift+M)
 .Bl -inset -compact
-.It Open melted sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows.
+.It Open Melted Sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows.
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "gM" Ar regex
-.No open melted sheet (unpivot), with key columns retained and Ar regex No capture groups determining how the non-key columns will be reduced to Variable-Value rows.
+.No open Melted Sheet (unpivot), with key columns retained and Ar regex No capture groups determining how the non-key columns will be reduced to Variable-Value rows.
 .El
 .Ss Python Object Sheet (^X ^Y g^Y z^Y)
 .Bl -inset -compact
@@ -708,8 +738,6 @@ open sheet of source rows aggregated in current pivot cell
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
 dive further into Python object
-.It Ic " e"
-edit contents of current cell
 .It Ic " v"
 toggle show/hide for methods and hidden properties
 .It Ic "gv  zv"
@@ -797,6 +825,12 @@ row delimiter to use for tsv/usv filetype
 replacement for newline character when saving to tsv
 .It Sy --tsv-safe-tab Ns = Ns Ar "str          " No ""
 replacement for tab character when saving to tsv
+.It Sy --visibility Ns = Ns Ar "int            " No "0"
+visibility level (0=low, 1=high)
+.It Sy --json-indent Ns = Ns Ar "NoneType      " No "None"
+indent to use when saving json
+.It Sy --json-sort-keys No "            False"
+sort object keys when saving to json
 .It Sy --filetype Ns = Ns Ar "str              " No ""
 specify file type
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
@@ -807,8 +841,6 @@ error string to use while saving
 command to copy stdin to system clipboard
 .It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No ""
 command to get contents of system clipboard
-.It Sy --visibility Ns = Ns Ar "int            " No "0"
-visibility level (0=low, 1=high)
 .It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
 numeric aggregators to calculate on Describe sheet
 .It Sy --histogram-bins Ns = Ns Ar "int        " No "0"
@@ -820,7 +852,7 @@ time to wait between replayed commands, in seconds
 .It Sy --replay-movement No "           False"
 insert movements during replay
 .It Sy --visidata-dir Ns = Ns Ar "str          " No "~/.visidata/"
-directory to load and store macros
+directory to load and store additional files
 .It Sy --rowkey-prefix Ns = Ns Ar "str         " No "\[u30AD]"
 string prefix for rowkey in the cmdlog
 .It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
@@ -862,10 +894,6 @@ escapechar passed to csv.reader
 lineterminator passed to csv.writer
 .It Sy --safety-first No "              False"
 sanitize input/output to handle edge cases, with a performance cost
-.It Sy --json-indent Ns = Ns Ar "NoneType      " No "None"
-indent to use when saving json
-.It Sy --json-sort-keys Ns = Ns Ar "bool       " No "True"
-sort object keys when saving to json
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .It Sy --fixed-maxcols Ns = Ns Ar "int         " No "0"
@@ -874,7 +902,7 @@ max number of fixed-width columns to create (0 is no max)
 (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
 .It Sy --graphviz-edge-labels Ns = Ns Ar "bool " No "True"
 whether to include edge labels on graphviz diagrams
-.It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/plugins.tsv"
+.It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/bazaar.jsonl"
 source of plugins sheet
 .El
 .
@@ -883,10 +911,12 @@ source of plugins sheet
 .Pp
 .
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.It Sy "disp_date_fmt      " No "%Y-%m-%d"
-default fmtstr to strftime for date values
+.It Sy "disp_splitwin_pct  " No "0"
+height of second sheet on screen
 .It Sy "disp_float_fmt     " No "%.02f"
 default fmtstr to format for float values
+.It Sy "disp_date_fmt      " No "%Y-%m-%d"
+default fmtstr to strftime for date values
 .It Sy "disp_note_none     " No "\[u2300]"
 visible contents of a cell whose value is None
 .It Sy "disp_truncator     " No "\[u2026]"
@@ -901,23 +931,21 @@ header note indicating more columns to the right
 displayed contents for computation exception
 .It Sy "disp_ambig_width   " No "1"
 width to use for unicode chars marked ambiguous
-.It Sy "color_keystrokes   " No "white"
-color of input keystrokes on status line
 .It Sy "disp_pending       " No ""
 string to display in pending cells
 .It Sy "color_note_pending " No "bold magenta"
 color of note in pending cells
 .It Sy "color_note_type    " No "226 yellow"
 cell note for numeric types in anytype columns
-.It Sy "disp_column_sep    " No "\[u2575]"
+.It Sy "disp_column_sep    " No "|"
 separator between columns
 .It Sy "disp_keycol_sep    " No "\[u2551]"
 separator between key columns and rest of columns
-.It Sy "disp_rowtop_sep    " No "\[u2502]"
+.It Sy "disp_rowtop_sep    " No "|"
 
-.It Sy "disp_rowmid_sep    " No "\[u2502]"
+.It Sy "disp_rowmid_sep    " No "\[u205D]"
 
-.It Sy "disp_rowbot_sep    " No "\[u2575]"
+.It Sy "disp_rowbot_sep    " No "\[u205D]"
 
 .It Sy "disp_rowend_sep    " No "\[u2551]"
 
@@ -957,18 +985,26 @@ color of hidden columns on metasheets
 color of selected rows
 .It Sy "disp_rstatus_fmt   " No "{sheet.nRows:9d} {sheet.rowtype} "
 right-side status format string
-.It Sy "disp_status_fmt    " No "{sheet.shortcut}\[u3009]{sheet.name}| "
+.It Sy "disp_status_fmt    " No "{sheet.shortcut}\[u203A] {sheet.name}| "
 status line prefix
 .It Sy "disp_lstatus_max   " No "0"
 maximum length of left status line
 .It Sy "disp_status_sep    " No " | "
 separator between statuses
+.It Sy "color_keystrokes   " No "white"
+color of input keystrokes on status line
 .It Sy "color_status       " No "bold"
 status line color
 .It Sy "color_error        " No "red"
 error message color
 .It Sy "color_warning      " No "yellow"
 warning message color
+.It Sy "color_top_status   " No "underline"
+top window status bar color
+.It Sy "color_active_status" No "bold"
+ active window status bar color
+.It Sy "color_inactive_status" No "8"
+inactive window status bar color
 .It Sy "color_working      " No "green"
 color of system running smoothly
 .It Sy "color_edit_cell    " No "normal"
@@ -1040,7 +1076,7 @@ For example:
 .Bd -literal
    options.min_memory_mb=100  # stop processing without 100MB free
 
-   bindkey('0', 'go-leftmost')   # alias '0' to move to first column, like vim
+   bindkey('0', 'go-leftmost')   # alias '0' to go to first column, like vim
 
    def median(values):
        L = sorted(values)
@@ -1129,7 +1165,7 @@ The following URL schemes are supported:
 .It Sy " v"
 show only columns in current row attributes
 .It Sy za
-add column for xml attributes
+add column for xml attribute
 .El
 .It Sy xpt No (SAS; requires Sy xport Ns )
 .It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
