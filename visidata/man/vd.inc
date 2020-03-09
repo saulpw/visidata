@@ -1,4 +1,4 @@
-.Dd Dec 3, 2019
+.Dd Mar 7, 2020
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -158,12 +158,14 @@ scroll one left/down/up/right
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " _" Ns " (underscore)"
+.It Ic "  _" Ns " (underscore)"
 toggle width of current column between full and default width
-.It Ic "g_"
+.It Ic " g_"
 toggle widths of all visible columns between full and default width
-.It Ic "z_" Ar number
+.It Ic " z_" Ar number
 .No adjust width of current column to Ar number
+.It Ic "gz_" Ar number
+adjust widths of all visible columns to Ar number
 .Pp
 .It Ic " -" Ns " (hyphen)"
 hide current column
@@ -340,6 +342,7 @@ open
 .It Ic "A" Ar number
 .No open new blank sheet with Ar number No columns
 .It Ic "T"
+.No open new sheet that has rows and columns of current sheet transposed
 .Pp
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
@@ -393,6 +396,23 @@ zoom in/out of canvas
 set canvas cursor
 .It Ic "right click-drag"
 scroll canvas
+.El
+.Ss Split Window
+.Bl -tag -width XXXXXXXXXXXXX -compact
+.It Ic " Z"
+.No split screen, panes contain the top 2 sheets on stack
+.It Ic "zZ"
+.No split screen, queries for height of split window
+.El
+.Ss "  Split Window specific Commands"
+.Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "gZ"
+.No closes an already split screen, current pane full screens
+.It Ic "Tab"
+.No jump to other pane
+.It Ic "^^" No (Ctrl+^)
+.No swap which sheet is in current pane
+.Pp
 .El
 .Ss Other Commands
 .
@@ -455,11 +475,11 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Commandlog No (Shift+D) "       modify and save commands for replay"
 .It Sy " \&."
-.Sy Error Sheet No (^E) "           view last error"
+.Sy Error Sheet No (Ctrl+E) "           view last error"
 .It Sy " \&."
-.Sy Status History No (^P) "        view history of status messages"
+.Sy Status History No (Ctrl+P) "        view history of status messages"
 .It Sy " \&."
-.Sy Threads Sheet No (^T) "         view, cancel, and profile asynchronous threads"
+.Sy Threads Sheet No (Ctrl+T) "         view, cancel, and profile asynchronous threads"
 .Pp
 .It Sy Derived Sheets
 .It Sy " \&."
@@ -587,7 +607,7 @@ abort async threads for current/selected sheets(s)
 .It Sy "\&."
 .Sy inner No " keep only rows which match keys on all sheets"
 .It Sy "\&."
-.Sy outer No "  keep all rows from first selected sheet"
+.Sy outer No " keep all rows from first selected sheet"
 .It Sy "\&."
 .Sy full No "  keep all rows from all sheets (union)"
 .It Sy "\&."
@@ -596,6 +616,8 @@ abort async threads for current/selected sheets(s)
 .Sy append No "keep all rows from all sheets (concatenation)"
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
+.It Sy "\&."
+.Sy merge No " mostly keep all rows from first selected sheet, except prioritise cells with non-null/non-error values"
 .El
 .
 .Ss Options Sheet (Shift+O)
