@@ -16,19 +16,19 @@ class ZipSheet(Sheet):
         ColumnAttr('compress_size', type=int)
     ]
 
-    def open_zipfile(self, fp, *args, **kwargs):
+    def openZipFile(self, fp, *args, **kwargs):
         '''Use VisiData input to handle password-protected zip files.'''
         try:
             return fp.open(*args, **kwargs)
         except RuntimeError as err:
             if 'password required' in err.args[0]:
                 pwd = vd.input(f'{args[0].filename} is encrypted, enter password: ', display=False)
-                return fp.open(*args, **kwargs, pwd=pwd.encode())
+                return fp.open(*args, **kwargs, pwd=pwd.encode('utf-8'))
             vd.error(err)
 
     def openRow(self, fi):
             zfp = zipfile.ZipFile(str(self.source), 'r')
-            decodedfp = codecs.iterdecode(self.open_zipfile(zfp, fi),
+            decodedfp = codecs.iterdecode(self.openZipFile(zfp, fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
             return openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size))
