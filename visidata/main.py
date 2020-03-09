@@ -202,7 +202,11 @@ def main_vd():
     if vd.sheets and (flPipedOutput or args.output):
         outpath = Path(args.output or '-')
         saveSheets(outpath, vd.sheets[0], confirm_overwrite=False)
-        vd.sync()
+
+    saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
+    if saver_threads:
+        print('finishing %d savers' % len(saver_threads))
+        vd.sync(*saver_threads)
 
     vd._stdout.flush()
 
