@@ -2,7 +2,24 @@ import codecs
 import tarfile
 import zipfile
 
+from functools import wraps
 from visidata import *
+
+
+def openzip_wrapper(f):
+    '''Use VisiData input to handle password-protected zip files.'''
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except RuntimeError as err:
+            if 'password required' in err.args[0]:
+                pwd = vd.input(f'{args[0].filename} is encrypted, enter password: ', display=False)
+                return f(*args, **kwargs, pwd=pwd.encode())
+            vd.error(err)
+    return wrapper
+
+zipfile.ZipFile.open = openzip_wrapper(zipfile.ZipFile.open)
 
 
 class ZipSheet(Sheet):
