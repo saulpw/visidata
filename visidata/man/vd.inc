@@ -397,17 +397,17 @@ set canvas cursor
 .It Ic "right click-drag"
 scroll canvas
 .El
-.Ss Split Window
+.Ss Split Screen
 .Bl -tag -width XXXXXXXXXXXXX -compact
 .It Ic " Z"
-.No split screen, panes contain the top 2 sheets on stack
+.No split screen in half, so that second sheet on the stack is visible in a second pane
 .It Ic "zZ"
-.No split screen, queries for height of split window
+.No split screen, and queries for height of second pane
 .El
 .Ss "  Split Window specific Commands"
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "gZ"
-.No closes an already split screen, current pane full screens
+.No close an already split screen, current pane full screens
 .It Ic "Tab"
 .No jump to other pane
 .It Ic "^^" No (Ctrl+^)
