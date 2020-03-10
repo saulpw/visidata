@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.-3 (####-##-##)
+# v2.-3 (2020-03-09)
 
 ## Major changes
     - [cosmetic] change default column separators
