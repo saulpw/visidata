@@ -245,16 +245,17 @@ def unbindkey(cls, keystrokes):
     vd.bindkeys.unset(keystrokes, cls)
 
 @BaseSheet.api
-def getCommand(self, keystrokes_or_longname):
-    if isinstance(keystrokes_or_longname, Command):
-        return keystrokes_or_longname
+def getCommand(sheet, cmd):
+    'Return the Command for the given arg, which may be keystrokes, longname, or a Command itself, within the context of `sheet`.'
+    if isinstance(cmd, Command):
+        return cmd
 
-    longname = vd.bindkeys._get(keystrokes_or_longname)
+    longname = vd.bindkeys._get(cmd, obj=sheet)
     try:
         if longname:
-            return vd.commands._get(longname) or vd.fail('no command "%s"' % longname)
+            return vd.commands._get(longname, obj=sheet) or vd.fail('no command "%s"' % longname)
         else:
-            return vd.commands._get(keystrokes_or_longname) or vd.fail('no binding for %s' % keystrokes_or_longname)
+            return vd.commands._get(cmd, obj=sheet) or vd.fail('no binding for %s' % cmd)
     except Exception as exc:
         return None
 

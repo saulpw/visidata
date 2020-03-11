@@ -10,7 +10,7 @@ import io
 import sys
 import locale
 
-from visidata import vd, option, options, status, run, Sheet
+from visidata import vd, option, options, status, run, BaseSheet
 from visidata import Path, openSource, saveSheets, setDiffSheet, domotd
 import visidata
 
@@ -128,7 +128,7 @@ def main_vd():
         vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
     for cmd in args.preplay:
-        Sheet('').execCommand(cmd)
+        BaseSheet('').execCommand(cmd)
 
     if not args.play:
         if flPipedInput and not inputs:  # '|vd' without explicit '-'
