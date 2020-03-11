@@ -139,7 +139,7 @@ class _CommandLog:
             self.afterExecSheet(sheet, False, '')
 
         sheetname, colname, rowname = '', '', ''
-        if sheet and cmd.longname != 'open-file':
+        if sheet and not cmd.longname.startswith('open-'):
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             sheetname = sheet.name or cmd.longname
             if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
