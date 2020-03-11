@@ -155,7 +155,7 @@ def mainloop(self, scr):
         elif keystroke == '^Q':
             return self.lastErrors and '\n'.join(self.lastErrors[-1])
         elif vd.bindkeys._get(self.keystrokes):
-            sheet.execCommand(self.keystrokes)
+            sheet.execCommand(self.keystrokes, keystrokes=self.keystrokes)
             prefixWaiting = False
         elif keystroke in self.allPrefixes:
             prefixWaiting = True
