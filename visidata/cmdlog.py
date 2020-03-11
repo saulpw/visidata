@@ -23,10 +23,10 @@ option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
 vd.activeCommand = None
 
 def open_vd(p):
-    return CommandLog(p.name, source=p)
+    return CommandLog(p.name, source=p, precious=True)
 
 def open_vdj(p):
-    return CommandLogJsonl(p.name, source=p)
+    return CommandLogJsonl(p.name, source=p, precious=True)
 
 VisiData.save_vd = VisiData.save_tsv
 VisiData.save_vdj = VisiData.save_jsonl
