@@ -29,8 +29,10 @@ def undo(vd, sheet):
                 undofunc(*args, **kwargs)
             sheet.undone.append(cmdlogrow)
             sheet.cmdlog_sheet.rows.remove(cmdlogrow)
+
+            vd.clearCaches()  # undofunc can invalidate the drawcache
+
             vd.moveToReplayContext(cmdlogrow)
-            vd.clearCaches()
             vd.status("%s undone" % cmdlogrow.longname)
             return
 
