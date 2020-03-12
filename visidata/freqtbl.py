@@ -3,16 +3,12 @@ import collections
 
 from visidata import *
 
-Sheet.addCommand('F', 'freq-col', 'vd.push(FreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
-Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
-Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
 option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
 
-ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
 
 def valueNames(discrete_vals, numeric_vals):
     ret = [ '+'.join(str(x) for x in discrete_vals) ]
@@ -74,6 +70,11 @@ class FreqTableSheetSummary(FreqTableSheet):
         FreqTableSheet.reload.__wrapped__(self)
         self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
 
+Sheet.addCommand('F', 'freq-col', 'vd.push(FreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
+Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
+Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
+
+ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
 

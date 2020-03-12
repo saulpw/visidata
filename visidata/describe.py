@@ -2,10 +2,10 @@ from statistics import mode, median, mean, stdev
 
 from visidata import *
 
+option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet')
+
 max_threads = 2
 
-Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
-globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
 
 def isError(col, row):
     try:
@@ -20,8 +20,6 @@ def isError(col, row):
 class DescribeColumn(Column):
     def __init__(self, name, **kwargs):
         super().__init__(name, getter=lambda col,srccol: col.sheet.describeData[srccol].get(col.expr, ''), expr=name, **kwargs)
-
-option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet')
 
 
 # rowdef: Column from source sheet
@@ -99,6 +97,9 @@ class DescribeSheet(ColumnsSheet):
         d[func.__name__] = r
         return r
 
+
+Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
+globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
 
 DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)', 'select rows on source sheet which are being described in current cell')
 DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell')

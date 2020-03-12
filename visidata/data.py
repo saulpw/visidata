@@ -8,30 +8,6 @@ from visidata import *
 
 option('filetype', '', 'specify file type', replay=True)
 
-IndexSheet.options.header = 0
-IndexSheet.options.skip = 0
-
-Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=random.sample(rows, nrows or nRows); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows')
-
-Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
-Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
-Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', 'append an empty column')
-Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', 'append N empty columns')
-
-Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, selectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')
-
-BaseSheet.bindkey('KEY_SLEFT', 'slide-left')
-BaseSheet.bindkey('KEY_SR', 'slide-left')
-BaseSheet.bindkey('kDN', 'slide-down')
-BaseSheet.bindkey('kUP', 'slide-up')
-BaseSheet.bindkey('KEY_SRIGHT', 'slide-right')
-BaseSheet.bindkey('KEY_SF', 'slide-right')
-
-BaseSheet.bindkey('gKEY_SLEFT', 'slide-leftmost')
-BaseSheet.bindkey('gkDN', 'slide-bottom')
-BaseSheet.bindkey('gkUP', 'slide-top')
-BaseSheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
-
 
 vd.filetypes = {}
 
@@ -99,19 +75,6 @@ def updateColNames(sheet, rows, cols, overwrite=False):
     for c in cols:
         if not c._name or overwrite:
             c.name = "\n".join(c.getDisplayValue(r) for r in rows)
-
-Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column')
-Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(sheet, selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'set name of current column to combined contents of current cell in selected rows (or current row)')
-Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols)', 'set names of all unnamed visible columns to contents of selected rows (or current row)')
-Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'set names of all visible columns to combined contents of selected rows (or current row)')
-BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'rename current sheet to input')
-
-globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
-Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
-
-Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
-
-globalCommand('A', 'add-sheet', 'vd.push(vd.newSheet(int(input("num columns for new sheet: ")), name="unnamed"))', 'open new blank sheet with N columns')
 
 
 @VisiData.api
@@ -245,3 +208,41 @@ def deleteBy(self, func):
 
     status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted
+
+
+IndexSheet.options.header = 0
+IndexSheet.options.skip = 0
+
+Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=random.sample(rows, nrows or nRows); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows')
+
+Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
+Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
+Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', 'append an empty column')
+Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', 'append N empty columns')
+
+Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, selectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')
+
+BaseSheet.bindkey('KEY_SLEFT', 'slide-left')
+BaseSheet.bindkey('KEY_SR', 'slide-left')
+BaseSheet.bindkey('kDN', 'slide-down')
+BaseSheet.bindkey('kUP', 'slide-up')
+BaseSheet.bindkey('KEY_SRIGHT', 'slide-right')
+BaseSheet.bindkey('KEY_SF', 'slide-right')
+
+BaseSheet.bindkey('gKEY_SLEFT', 'slide-leftmost')
+BaseSheet.bindkey('gkDN', 'slide-bottom')
+BaseSheet.bindkey('gkUP', 'slide-top')
+BaseSheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
+
+Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column')
+Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(sheet, selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'set name of current column to combined contents of current cell in selected rows (or current row)')
+Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols)', 'set names of all unnamed visible columns to contents of selected rows (or current row)')
+Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'set names of all visible columns to combined contents of selected rows (or current row)')
+BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'rename current sheet to input')
+
+globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
+Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
+
+Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
+
+globalCommand('A', 'add-sheet', 'vd.push(vd.newSheet(int(input("num columns for new sheet: ")), name="unnamed"))', 'open new blank sheet with N columns')

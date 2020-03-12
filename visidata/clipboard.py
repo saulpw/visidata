@@ -8,6 +8,9 @@ import functools
 from visidata import VisiData, vd, asyncthread, status, fail, option, options, warning
 from visidata import Sheet, saveSheets, Path, Column
 
+option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
+option('clipboard_paste_cmd', '', 'command to get contents of system clipboard')
+
 VisiData.init('cliprows', list) # list of (source_sheet, source_row_idx, source_row)
 VisiData.init('clipcells', list) # list of strings
 
@@ -24,7 +27,6 @@ def copyRows(sheet, rows):
     else:
         status('copied %d %s to clipboard' % (len(rows), sheet.rowtype))
 
-
 @Sheet.api
 def copyCells(sheet, col, rows):
     vd.clipcells = [col.getDisplayValue(r) for r in rows]
@@ -33,7 +35,6 @@ def copyCells(sheet, col, rows):
         return
     status('copied %d %s.%s to clipboard' % (len(rows), sheet.rowtype, col.name))
 
-
 @Sheet.api
 def syscopyRows(sheet, rows):
     if not rows:
@@ -41,7 +42,6 @@ def syscopyRows(sheet, rows):
     filetype = vd.input("copy %d %s to system clipboard as filetype: " % (len(rows), sheet.rowtype), value=options.save_filetype)
     saveToClipboard(sheet, rows, filetype)
     status('copied %d %s to system clipboard' % (len(rows), sheet.rowtype))
-
 
 @Sheet.api
 def syscopyCells(sheet, col, rows):
@@ -66,38 +66,6 @@ def paste_before(sheet, rowidx):
     sheet.rows[sheet.cursorRowIndex:sheet.cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.cliprows)
     vd.addUndo(sheet.rows.pop, rowidx)
 
-Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])', 'yank (copy) current row to clipboard')
-Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex)', 'delete (cut) current row and move it to clipboard')
-Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)', 'paste clipboard rows after current row')
-Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)', 'paste clipboard rows before current row')
-
-Sheet.addCommand('gd', 'delete-selected', 'copyRows(selectedRows); deleteSelected()', 'delete (cut) selected rows and move them to clipboard')
-Sheet.addCommand('gy', 'copy-selected', 'copyRows(selectedRows)', 'yank (copy) selected rows to clipboard')
-
-Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to clipboard')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])', 'set contents of current cell to last clipboard value')
-Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
-Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
-
-Sheet.bindkey('BUTTON2_PRESSED', 'go-mouse')
-Sheet.addCommand('BUTTON2_RELEASED', 'syspaste-cells', 'pasteFromClipboard(visibleCols[cursorVisibleColIndex:], rows[cursorRowIndex:])', 'paste into VisiData from system clipboard')
-Sheet.bindkey('BUTTON2_CLICKED', 'go-mouse')
-
-Sheet.addCommand('gzy', 'copy-cells', 'copyCells(cursorCol, selectedRows)', 'yank (copy) contents of current column for selected rows to clipboard')
-Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(selectedRows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)', 'set cells of current column for selected rows to last clipboard value')
-
-Sheet.addCommand('Y', 'syscopy-row', 'syscopyRows([cursorRow])', 'yank (copy) current row to system clipboard (using options.clipboard_copy_cmd)')
-
-Sheet.addCommand('gY', 'syscopy-selected', 'syscopyRows(selectedRows)', 'yank (copy) selected rows to system clipboard (using options.clipboard_copy_cmd)')
-Sheet.addCommand('zY', 'syscopy-cell', 'syscopyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to system clipboard (using options.clipboard_copy_cmd)')
-Sheet.addCommand('gzY', 'syscopy-cells', 'syscopyCells(cursorCol, selectedRows)', 'yank (copy) contents of current column from selected rows to system clipboard (using options.clipboard_copy_cmd')
-
-Sheet.bindkey('KEY_DC', 'delete-cell'),
-Sheet.bindkey('gKEY_DC', 'delete-cells'),
-
-
-option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
-option('clipboard_paste_cmd', '', 'command to get contents of system clipboard')
 
 # mapping of OS to list of possible (command name, command args) for copy and
 # paste commands
@@ -200,3 +168,33 @@ def saveToClipboard(sheet, rows, filetype=None):
     vs.rows = rows
     status('copying rows to clipboard')
     clipboard().save(vs, filetype)
+
+
+Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])', 'yank (copy) current row to clipboard')
+Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex)', 'delete (cut) current row and move it to clipboard')
+Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)', 'paste clipboard rows after current row')
+Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)', 'paste clipboard rows before current row')
+
+Sheet.addCommand('gd', 'delete-selected', 'copyRows(selectedRows); deleteSelected()', 'delete (cut) selected rows and move them to clipboard')
+Sheet.addCommand('gy', 'copy-selected', 'copyRows(selectedRows)', 'yank (copy) selected rows to clipboard')
+
+Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to clipboard')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])', 'set contents of current cell to last clipboard value')
+Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
+Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
+
+Sheet.bindkey('BUTTON2_PRESSED', 'go-mouse')
+Sheet.addCommand('BUTTON2_RELEASED', 'syspaste-cells', 'pasteFromClipboard(visibleCols[cursorVisibleColIndex:], rows[cursorRowIndex:])', 'paste into VisiData from system clipboard')
+Sheet.bindkey('BUTTON2_CLICKED', 'go-mouse')
+
+Sheet.addCommand('gzy', 'copy-cells', 'copyCells(cursorCol, selectedRows)', 'yank (copy) contents of current column for selected rows to clipboard')
+Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(selectedRows, itertools.cycle(vd.clipcells)): cursorCol.setValuesTyped([r], v)', 'set cells of current column for selected rows to last clipboard value')
+
+Sheet.addCommand('Y', 'syscopy-row', 'syscopyRows([cursorRow])', 'yank (copy) current row to system clipboard (using options.clipboard_copy_cmd)')
+
+Sheet.addCommand('gY', 'syscopy-selected', 'syscopyRows(selectedRows)', 'yank (copy) selected rows to system clipboard (using options.clipboard_copy_cmd)')
+Sheet.addCommand('zY', 'syscopy-cell', 'syscopyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to system clipboard (using options.clipboard_copy_cmd)')
+Sheet.addCommand('gzY', 'syscopy-cells', 'syscopyCells(cursorCol, selectedRows)', 'yank (copy) contents of current column from selected rows to system clipboard (using options.clipboard_copy_cmd')
+
+Sheet.bindkey('KEY_DC', 'delete-cell'),
+Sheet.bindkey('gKEY_DC', 'delete-cells'),

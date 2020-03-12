@@ -2,8 +2,6 @@ from visidata import *
 
 option('color_graph_axis', 'bold', 'color for graph axis labels')
 
-Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, [cursorCol]))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
-Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
 
 
 def numericCols(cols):
@@ -33,20 +31,6 @@ class InvertedCanvas(Canvas):
         p = super().canvasMouse
         p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouse.y)/self.yScaler
         return p
-
-# swap directions of up/down
-InvertedCanvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up by its height')
-InvertedCanvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down by its height')
-InvertedCanvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymax', 'move cursor to top edge of visible canvas')
-InvertedCanvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymin', 'move cursor to bottom edge of visible canvas')
-InvertedCanvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; sheet.refresh()', 'move cursor down to next visible page')
-InvertedCanvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; sheet.refresh()', 'move cursor up to previous visible page')
-
-InvertedCanvas.addCommand(None, 'go-down-small', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor down one character')
-InvertedCanvas.addCommand(None, 'go-up-small', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor up one character')
-
-InvertedCanvas.addCommand(None, 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height by one character')
-InvertedCanvas.addCommand(None, 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height by one character')
 
 
 # provides axis labels, legend
@@ -139,3 +123,21 @@ class GraphSheet(InvertedCanvas):
         xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
         xname, _ = clipstr(xname, self.leftMarginPixels//2-2)
         self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', colors.color_graph_axis)
+
+
+Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, [cursorCol]))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
+Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
+
+# swap directions of up/down
+InvertedCanvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up by its height')
+InvertedCanvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down by its height')
+InvertedCanvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymax', 'move cursor to top edge of visible canvas')
+InvertedCanvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymin', 'move cursor to bottom edge of visible canvas')
+InvertedCanvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; sheet.refresh()', 'move cursor down to next visible page')
+InvertedCanvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; sheet.refresh()', 'move cursor up to previous visible page')
+
+InvertedCanvas.addCommand(None, 'go-down-small', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor down one character')
+InvertedCanvas.addCommand(None, 'go-up-small', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor up one character')
+
+InvertedCanvas.addCommand(None, 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height by one character')
+InvertedCanvas.addCommand(None, 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height by one character')

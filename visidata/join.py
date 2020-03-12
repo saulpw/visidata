@@ -5,9 +5,6 @@ from copy import copy
 
 from visidata import *
 
-IndexSheet.addCommand('&', 'join-sheets', 'vd.push(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
-Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
-Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
 
 def createJoinedSheet(sheets, jointype=''):
     sheets[1:] or fail("join requires more than 1 sheet")
@@ -261,3 +258,8 @@ class ConcatSheet(Sheet):
         for sheet in sourceSheets:
             for r in Progress(sheet.rows):
                 self.addRow((sheet, r))
+
+
+IndexSheet.addCommand('&', 'join-sheets', 'vd.push(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
+Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')

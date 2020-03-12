@@ -1,10 +1,6 @@
 from visidata import *
 from copy import deepcopy
 
-Sheet.addCommand("'", 'freeze-col', 'StaticColumn(cursorCol, cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated')
-Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated')
-Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()', 'add/reset cache for current column')
-Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()', 'add/reset cache for all visible columns')
 
 def resetCache(self):
     self._cachedValues = collections.OrderedDict()
@@ -54,3 +50,9 @@ class StaticSheet(Sheet):
                     row.append(col.getTypedValue(r))
                 except Exception as e:
                     row.append(None)
+
+
+Sheet.addCommand("'", 'freeze-col', 'StaticColumn(cursorCol, cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated')
+Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated')
+Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()', 'add/reset cache for current column')
+Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()', 'add/reset cache for all visible columns')

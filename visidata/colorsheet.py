@@ -17,4 +17,5 @@ class ColorSheet(Sheet):
     def reload(self):
         self.rows = sorted(colors.keys(), key=lambda n: wrapply(int, n))
 
+
 globalCommand(None, 'colors', 'vd.push(ColorSheet("vdcolors"))', 'open Color Sheet with an overview of curses colors and codes')

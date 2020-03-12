@@ -3,8 +3,6 @@ from visidata import theme, globalCommand, Sheet, CellColorizer
 theme('color_diff', 'red', 'color of values different from --diff source')
 theme('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
 
-globalCommand(None, 'setdiff-sheet', 'setDiffSheet(sheet)', 'set this sheet as diff sheet for all new sheets')
-
 
 def makeDiffColorizer(othersheet):
     def colorizeDiffs(sheet, col, row, cellval):
@@ -23,3 +21,6 @@ def makeDiffColorizer(othersheet):
 
 def setDiffSheet(vs):
     Sheet.colorizers.append(CellColorizer(8, None, makeDiffColorizer(vs)))
+
+
+globalCommand(None, 'setdiff-sheet', 'setDiffSheet(sheet)', 'set this sheet as diff sheet for all new sheets')
