@@ -660,10 +660,6 @@ replay command in current row
 replay contents of entire CommandLog
 .It Ic " ^C"
 abort replay
-.It Ic "z^D" Ar keystroke
-.No save selected rows to macro mapped to Ar keystroke
-.It ""
-.No Macros are saved to Sy .visidata/macro/command-longname.vd Ns . The list of macros is saved at Sy .visidata/macros.vd No (keystroke, filename).
 .El
 .
 .Ss DERIVED SHEETS

@@ -2,9 +2,6 @@ import curses
 from visidata import globalCommand, colors, Sheet, Column, RowColorizer, wrapply
 
 
-globalCommand(None, 'colors', 'vd.push(ColorSheet("vdcolors"))')
-
-
 class ColorSheet(Sheet):
     rowtype = 'colors'  # rowdef: color number as assigned in the colors object
     columns = [
@@ -19,3 +16,5 @@ class ColorSheet(Sheet):
 
     def reload(self):
         self.rows = sorted(colors.keys(), key=lambda n: wrapply(int, n))
+
+globalCommand(None, 'colors', 'vd.push(ColorSheet("vdcolors"))', 'open Color Sheet with an overview of curses colors and codes')

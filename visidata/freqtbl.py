@@ -75,7 +75,7 @@ class FreqTableSheetSummary(FreqTableSheet):
         self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
 
 
-FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)')
+FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
 
-FreqTableSheet.addCommand(ENTER, 'dive-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)', 'open copy of source sheet with rows that are grouped in current cell')
+FreqTableSheet.addCommand(ENTER, 'dive-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)', 'open copy of source sheet with rows that are grouped in current row')
 FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)', 'open copy of source sheet with rows that are grouped in selected rows')

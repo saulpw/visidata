@@ -391,9 +391,9 @@ def cmdlog(vd):
     return CommandLog('cmdlog', rows=[])
 
 
-globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)')
-globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)', 'open CommandLog')
-globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)')
+globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog for all commands executed in current session')
+globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)', "open current sheet's CommandLog with all other loose ends removed; includes commands from parent sheets")
+globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)', 'open current sheet\'s CommandLog with parent sheets commands\' removed')
 globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)', 'save CommandLog to filename.vd file')
 globalCommand('^U', 'replay-pause', 'vd.replay_pause()', 'pause/resume replay')
 globalCommand('^N', 'replay-advance', 'vd.replay_advance()', 'execute next row in replaying sheet')
@@ -413,8 +413,8 @@ CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("
 CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
 CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
-BaseSheet.addCommand('', 'repeat-last', 'execCommand(cmdlog_sheet.rows[-1].longname)')
-BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)')
+BaseSheet.addCommand('', 'repeat-last', 'execCommand(cmdlog_sheet.rows[-1].longname)', 'run most recent command with an empty, queried input')
+BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)', 'run previous command, along with any previous input to that command')
 
 CommandLog.options.json_sort_keys = False
 CommandLogJsonl.options.json_sort_keys = False

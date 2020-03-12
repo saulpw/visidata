@@ -527,7 +527,7 @@ class Canvas(Plotter):
     def plotlegends(self):
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
-            self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr)) #, 'toggle display of "%s"' % legend)
+            self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr), 'toggle display of "%s"' % legend)
             if attr in self.hiddenAttrs:
                 attr = colors.color_graph_hidden
             self.plotlegend(i, '%s:%s'%(i+1,legend), attr, width=self.legendwidth+4)
@@ -636,32 +636,32 @@ class Canvas(Plotter):
 
 Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels option')
 
-Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w')
-Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w')
-Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin -= cursorBox.h')
-Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin += cursorBox.h')
-Canvas.addCommand(None, 'go-leftmost', 'sheet.cursorBox.xmin = visibleBox.xmin')
-Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w')
-Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymin')
-Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymax')
+Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w', 'move cursor left by its width')
+Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w', 'move cursor right by its width' )
+Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor up by its height')
+Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor down by its height')
+Canvas.addCommand(None, 'go-leftmost', 'sheet.cursorBox.xmin = visibleBox.xmin', 'move cursor to left edge of visible canvas')
+Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w', 'move cursor to right edge of visible canvas')
+Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymin', 'move cursor to top edge of visible canvas')
+Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymax', 'move cursor to bottom edge of visible canvas')
 
-Canvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()')
-Canvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()')
+Canvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()', 'move cursor down to next visible page')
+Canvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()', 'move cursor up to previous visible page')
 
-Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth')
-Canvas.addCommand('zl', 'go-right-small', 'sheet.cursorBox.xmin += canvasCharWidth')
-Canvas.addCommand('zj', 'go-down-small', 'sheet.cursorBox.ymin += canvasCharHeight')
-Canvas.addCommand('zk', 'go-up-small', 'sheet.cursorBox.ymin -= canvasCharHeight')
+Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth', 'move cursor left one character')
+Canvas.addCommand('zl', 'go-right-small', 'sheet.cursorBox.xmin += canvasCharWidth', 'move cursor right one character')
+Canvas.addCommand('zj', 'go-down-small', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor down one character')
+Canvas.addCommand('zk', 'go-up-small', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor up one character')
 
-Canvas.addCommand('gH', 'resize-cursor-halfwide', 'sheet.cursorBox.w /= 2')
-Canvas.addCommand('gL', 'resize-cursor-doublewide', 'sheet.cursorBox.w *= 2')
-Canvas.addCommand('gJ','resize-cursor-halfheight', 'sheet.cursorBox.h /= 2')
-Canvas.addCommand('gK', 'resize-cursor-doubleheight', 'sheet.cursorBox.h *= 2')
+Canvas.addCommand('gH', 'resize-cursor-halfwide', 'sheet.cursorBox.w /= 2', 'halve cursor width')
+Canvas.addCommand('gL', 'resize-cursor-doublewide', 'sheet.cursorBox.w *= 2', 'double cursor width')
+Canvas.addCommand('gJ','resize-cursor-halfheight', 'sheet.cursorBox.h /= 2', 'halve cursor height')
+Canvas.addCommand('gK', 'resize-cursor-doubleheight', 'sheet.cursorBox.h *= 2', 'double cursor height')
 
-Canvas.addCommand('H', 'resize-cursor-thinner', 'sheet.cursorBox.w -= canvasCharWidth')
-Canvas.addCommand('L', 'resize-cursor-wider', 'sheet.cursorBox.w += canvasCharWidth')
-Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight')
-Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight')
+Canvas.addCommand('H', 'resize-cursor-thinner', 'sheet.cursorBox.w -= canvasCharWidth', 'decrease cursor width by one character')
+Canvas.addCommand('L', 'resize-cursor-wider', 'sheet.cursorBox.w += canvasCharWidth', 'increase cursor width by one character')
+Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height by one character')
+Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height by one character')
 Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)', 'set visible bounds to cursor')
 
 Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
