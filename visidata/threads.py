@@ -107,7 +107,6 @@ class ThreadsSheet(Sheet):
     def reload(self):
         self.rows = vd.threads
 
-ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
 
 def elapsed_s(t):
     return (t.endTime or time.process_time())-t.startTime
@@ -266,8 +265,6 @@ def sync(self, *joiningThreads):
             break
 
 
-ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile)) or warning("no profile")', 'push profile sheet for this action')
-
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
 def open_pyprof(p):
@@ -351,6 +348,9 @@ def codestr(code):
         return code
     return code.co_name
 
+ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
+
+ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile)) or warning("no profile")', 'push profile sheet for this action')
 
 ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile')
 ProfileSheet.addCommand(ENTER, 'dive-row', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_calls", source=cursorRow.calls or fail("no calls")))', 'open ProfileSheet for calls referenced in current row')

@@ -66,10 +66,6 @@ class ShapeMap(InvertedCanvas):
 
         self.refresh()
 
-ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))')
-ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))')
-
-
 @VisiData.api
 def save_geojson(vd, p, vs):
     isinstance(vs, Canvas) or fail("must save geojson from canvas sheet")
@@ -94,6 +90,9 @@ def save_geojson(vd, p, vs):
     with p.open_text(mode='w') as fp:
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)
+
+ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))')
+ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))')
 
 
 vd.filetype('shp', ShapeSheet)

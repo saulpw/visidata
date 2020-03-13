@@ -1,7 +1,6 @@
 import collections
 from visidata import *
 
-Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
 
 # discrete_keys = tuple of formatted discrete keys that group the row
 # numeric_key is a range
@@ -230,6 +229,8 @@ class PivotSheet(Sheet):
         for c in self.nonKeyVisibleCols:
             c.setCache(True)
 
+
+Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
 
 PivotSheet.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow.pivotrows.get(cursorCol.aggvalue, []); vd.push(vs)', 'open sheet of source rows aggregated in current pivot cell')
 PivotSheet.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow.discrete_keys); vs.rows=sum(cursorRow.pivotrows.values(), []); vd.push(vs)', 'open sheet of source rows aggregated in current pivot row')

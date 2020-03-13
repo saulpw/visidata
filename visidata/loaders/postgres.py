@@ -89,8 +89,6 @@ class PgTablesSheet(Sheet):
 
         return self.nrowsPerTable[tablename]
 
-PgTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))')
-
 # rowdef: tuple of values as returned by fetchone()
 class PgTable(Sheet):
     @asyncthread
@@ -103,3 +101,5 @@ class PgTable(Sheet):
             self.columns = cursorToColumns(cur)
             for r in cur:
                 self.addRow(r)
+
+PgTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))')

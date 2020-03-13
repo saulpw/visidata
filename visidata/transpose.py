@@ -1,9 +1,5 @@
 from visidata import *
 
-
-Sheet.addCommand('T', 'transpose', 'vd.push(TransposeSheet(name+"_T", source=sheet))', 'open new sheet with rows and columns transposed')
-
-
 # rowdef: Column
 class TransposeSheet(Sheet):
     @asyncthread
@@ -22,3 +18,5 @@ class TransposeSheet(Sheet):
 
         # columns become rows
         self.rows = list(self.source.nonKeyVisibleCols)
+
+Sheet.addCommand('T', 'transpose', 'vd.push(TransposeSheet(name+"_T", source=sheet))', 'open new sheet with rows and columns transposed')

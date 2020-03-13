@@ -10,7 +10,6 @@ def rgb_to_attr(r,g,b,a):
     if a == 255: return colors['white']
     return 0
 
-
 class PNGSheet(Sheet):
     rowtype = 'pixels'  # rowdef: tuple(x, y, r, g, b, a)
     columns = [ColumnItem(name, i, type=int) for i, name in enumerate('x y R G B A'.split())] + [
@@ -59,9 +58,6 @@ class PNGDrawing(Canvas):
             self.point(x, y, rgb_to_attr(r,g,b,a), row)
         self.refresh()
 
-PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')
-PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)')
-
 
 @VisiData.api
 def save_png(vd, p, vs):
@@ -89,5 +85,7 @@ def save_png(vd, p, vs):
 
     status('saved')
 
+PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')
+PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)')
 
 vd.filetype('png', PNGSheet)
