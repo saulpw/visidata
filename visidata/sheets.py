@@ -948,8 +948,8 @@ def quit(vd, *sheets):
         vd.remove(vs)
 
 
-globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack, which contains only the active sheets on the current stack')
-globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet, which contains all sheets from current session')
+globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
+globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); recalc(); status("reloaded")', 'reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
@@ -985,15 +985,15 @@ SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_colu
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected, *selectedRows, confirm_overwrite=options.confirm_overwrite)')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected, *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
-BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = 50')
-BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0')
-BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]); options.disp_splitwin_pct = -options.disp_splitwin_pct')
-BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)')
+BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = 50', 'split screen in half, so that second sheet on stack is visible in a second pane')
+BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0', 'close an already split screen, current pane full screens')
+BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]); options.disp_splitwin_pct = -options.disp_splitwin_pct', 'jump to other pane')
+BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
 

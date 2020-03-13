@@ -27,4 +27,4 @@ def saveMacro(self, rows, ks):
         append_tsv_row(vd.macrosheet, (ks, macropath))
 
 
-CommandLog.addCommand('z^D', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))')
+CommandLog.addCommand('z^D', 'save-macro', 'sheet.saveMacro(selectedRows or fail("no rows selected"), input("save macro for keystroke: "))', 'save selected rows to macro mapped to keystroke')

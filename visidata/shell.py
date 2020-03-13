@@ -126,7 +126,7 @@ class FileListSheet(DirSheet):
         for fn in self.source.open_text():
             yield Path(fn.rstrip())
 
-globalCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)')
+globalCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
 Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
 

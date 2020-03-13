@@ -243,7 +243,7 @@ class PyobjSheet(PythonSheet):
                 pass
 
 
-PyobjSheet.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(name + "." + str(cursorRow), v() if callable(v) else v)')
+PyobjSheet.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(name + "." + str(cursorRow), v() if callable(v) else v)', 'dive further into Python object')
 PyobjSheet.addCommand('v', 'visibility', 'sheet.options.visibility = 0 if sheet.options.visibility else 2; reload()', 'toggle show/hide for methods and hidden properties')
 PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload()', 'show methods and hidden properties')
 PyobjSheet.addCommand('zv', 'hide-hidden', 'sheet.options.visibility -= 1; reload()', 'hide methods and hidden properties')
