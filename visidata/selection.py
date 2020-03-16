@@ -125,7 +125,7 @@ Sheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)', 'selec
 Sheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', 'unselect current row')
 
 Sheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)', 'toggle selection of all rows')
-Sheet.addCommand('gs', 'select-rows', 'select(rows)', 'select all rows from top to cursor')
+Sheet.addCommand('gs', 'select-rows', 'select(rows)', 'select all rows')
 Sheet.addCommand('gu', 'unselect-rows', 'clearSelected()', 'unselect all rows')
 
 Sheet.addCommand('zt', 'stoggle-before', 'toggle(rows[:cursorRowIndex])', 'toggle selection of rows from top to cursor')

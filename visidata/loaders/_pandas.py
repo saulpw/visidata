@@ -186,14 +186,14 @@ def open_dta(p):
 open_stata = open_pandas
 
 # Override with vectorized implementations
-PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()')
-PandasSheet.addCommand(None, 'select-rows', 'selectByIndex()')
-PandasSheet.addCommand(None, 'unselect-rows', 'unselectByIndex()')
+PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')
+PandasSheet.addCommand(None, 'select-rows', 'selectByIndex()', 'select all rows')
+PandasSheet.addCommand(None, 'unselect-rows', 'unselectByIndex()', 'unselect all rows')
 
-PandasSheet.addCommand(None, 'stoggle-before', 'toggleByIndex(end=cursorRowIndex)')
-PandasSheet.addCommand(None, 'select-before', 'selectByIndex(end=cursorRowIndex)')
-PandasSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursorRowIndex)')
-PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)')
-PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)')
-PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)')
+PandasSheet.addCommand(None, 'stoggle-before', 'toggleByIndex(end=cursorRowIndex)', 'toggle selection of rows from top to cursor')
+PandasSheet.addCommand(None, 'select-before', 'selectByIndex(end=cursorRowIndex)', 'select all rows from top to cursor')
+PandasSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursorRowIndex)', 'unselect all rows from top to cursor')
+PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)', 'toggle selection of rows from cursor to bottom')
+PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', 'select all rows from cursor to bottom')
+PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),

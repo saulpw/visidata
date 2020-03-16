@@ -252,10 +252,14 @@ select rows matching current row in all visible columns
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " [   ]"
-sort ascending/descending by current column
-.It Ic "g[  g]"
-sort ascending/descending by all key columns
+.It Ic "  [    ]"
+sort ascending/descending by current column; replace any existing sort criteria
+.It Ic " g[   g]"
+sort ascending/descending by all key columns; replace any existing sort criteria
+.It Ic " z[   z]"
+sort ascending/descending by current column; add to existing sort criteria
+.It Ic "gz[  gz]"
+sort ascending/descending by all key columns; add to existing sort criteria
 .It Ic " \&""
 open duplicate sheet with only selected rows
 .It Ic "g\&""

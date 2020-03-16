@@ -166,12 +166,12 @@ def expand_source_rows(source, vd, cursorRow):
     vs.rows = cursorRow.sourcerows
     vd.push(vs)
 
-PandasSheet.addCommand('F', 'freq-col', 'vd.push(PandasFreqTableSheet(sheet, cursorCol))')
-PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasFreqTableSheet(sheet, *keyCols))')
+PandasSheet.addCommand('F', 'freq-col', 'vd.push(PandasFreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
+PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasFreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
 
-PandasFreqTableSheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
-PandasFreqTableSheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
-PandasFreqTableSheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
-PandasFreqTableSheet.addCommand(ENTER, 'dup-row', 'expand_source_rows(source, vd, cursorRow)')
+PandasFreqTableSheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)', 'toggle selection of rows grouped in current row in source sheet')
+PandasFreqTableSheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)', 'select rows grouped in current row in source sheet')
+PandasFreqTableSheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', 'unselect rows grouped in current row in source sheet')
+PandasFreqTableSheet.addCommand(ENTER, 'dup-row', 'expand_source_rows(source, vd, cursorRow)', 'open copy of source sheet with rows that are grouped in current row')
 
 PandasFreqTableSheet.options.numeric_binning = False
