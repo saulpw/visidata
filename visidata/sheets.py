@@ -973,7 +973,7 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 
-Sheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))'. 'open sheet with copies of rows referenced in current row')
+Sheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
 
 
