@@ -157,7 +157,7 @@ Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleC
 
 Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse', 'sheet.cursorRowIndex=visibleRowAtY(mouseY) or sheet.cursorRowIndex; sheet.cursorVisibleColIndex=visibleColAtX(mouseX) or sheet.cursorVisibleColIndex', 'go to cell where mouse was click'),
 
-Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1'),
+Sheet.addCommand('BUTTON1_RELEASED', 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1', 'scroll to mouse cursor location'),
 
 Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll one row up'),
 Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll one row down'),
