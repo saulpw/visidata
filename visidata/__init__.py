@@ -79,7 +79,6 @@ from .canvas import *
 from .graph import *
 from .motd import *
 from .transpose import *
-from .diff import *
 from .shell import *
 from .layout import *
 from .main import *

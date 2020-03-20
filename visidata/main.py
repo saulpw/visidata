@@ -11,7 +11,7 @@ import sys
 import locale
 
 from visidata import vd, option, options, status, run, BaseSheet
-from visidata import Path, openSource, saveSheets, setDiffSheet, domotd
+from visidata import Path, openSource, saveSheets, domotd
 import visidata
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
@@ -114,12 +114,6 @@ def main_vd():
         else:
             inputs.append(arg)
             fmtargs.append(arg)
-
-    if args.diff:
-        vs = openSource(args.diff)
-        vd.push(vs)
-        vs.reload()
-        setDiffSheet(vs)
 
     if args.batch:
         options.undo = False
