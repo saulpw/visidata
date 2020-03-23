@@ -212,7 +212,9 @@ def _toplevelTryFunc(func, *args, status=status, **kwargs):
         t.sheet.currentThreads.remove(t)
 
 def asyncsingle(func):
-    'Decorator for an @asyncthread singleton.  Calls `func(...)` in a separate thread, canceling any previous thread for this function.'
+    '''Decorator for an @asyncthread singleton.  Calls `func(...)` in a separate thread, canceling any previous thread for this function.
+    Upon sync(), an unfinished `func(...)` will not block current thread progression.
+    '''
     @functools.wraps(func)
     def _execAsync(*args, **kwargs):
         def _func(*args, **kwargs):
@@ -224,7 +226,10 @@ def asyncsingle(func):
         if _execAsync.searchThread:
             cancelThread(_execAsync.searchThread)
 
+        _func.__name__ = func.__name__ # otherwise, the the thread's name is '_func'
+
         _execAsync.searchThread = vd.execAsync(_func, *args, **kwargs)
+        _execAsync.searchThread.noblock = True
     _execAsync.searchThread = None
     return _execAsync
 
@@ -253,7 +258,7 @@ def sync(self, *joiningThreads):
         threads -= deads
         for t in threads:
             try:
-                if not t.is_alive():
+                if not t.is_alive() or getattr(t, 'noblock', False) is True:
                     deads.add(t)
                 else:
                     t.join()

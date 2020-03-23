@@ -54,7 +54,7 @@ class PluginsSheet(JsonLinesSheet):
         for r in JsonLinesSheet.iterload(self):
             yield AttrDict(r)
 
-    @asyncthread
+    @asyncsingle
     def reload(self):
         self.source = urlcache(options.plugins_url or vd.fail(), days=0)  # for VisiDataMetaSheet.reload()
         super().reload.__wrapped__(self)
