@@ -1,12 +1,14 @@
 sheet	col	row	longname	input	keystrokes	comment
-			open-file	tests/data1.tsv	o	
 			open-file	tests/data2.tsv	o	
-data2			jump-sheet-1		^[1	
-data1	Key		key-col		!	
+			open-file	tests/data1.tsv	o	
 data1			jump-sheet-2		^[2	
 data2	Key		key-col		!	
 data2			jump-sheet-1		^[1	
-data1			join-sheets-top2	extend	&	
+data1	Key		key-col		!	
+			sheets-stack		S	
+sheets		キdata2	select-row		s	
+sheets		キdata1	select-row		s	
+sheets			join-sheets	extend	&	
 data1+data2	A		freq-col		F	
 data1+data2_A_freq			jump-sheet-1		^[1	
 data1			dup-rows		g"	
