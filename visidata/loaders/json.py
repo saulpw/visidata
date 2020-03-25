@@ -73,7 +73,7 @@ class Cell:
     def value(cell):
         o = wrapply(cell.col.getTypedValue, cell.row)
         if isinstance(o, TypedExceptionWrapper):
-            return self.safe_error or str(o.exception)
+            return options.safe_error or str(o.exception)
         elif isinstance(o, TypedWrapper):
             return o.val
         elif isinstance(o, date):
