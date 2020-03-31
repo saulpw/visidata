@@ -18,13 +18,17 @@ def codeToType(type_code, colname):
 def openurl_postgres(url, filetype=None):
     import psycopg2
 
-    dbname = url.path[1:]
+    url = urlparse(url.given)
+
+    if url.scheme != 'postgres':
+        error('postgres loader requires a postgres url scheme')
+
     conn = psycopg2.connect(
-                user=url.username,
-                dbname=dbname,
-                host=url.hostname,
-                port=url.port,
-                password=url.password)
+                user=url.netloc.split(':')[0],
+                dbname=url.path[1:],
+                host=url.netloc.split(':')[1].split('@')[1],
+                port=url.netloc.split(':')[-1],
+                password=url.netloc.split(':')[1].split('@')[0])
 
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
