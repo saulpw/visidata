@@ -17,6 +17,9 @@ class DataFrameAdapter:
         return self.df.iloc[k]
 
     def __getattr__(self, k):
+        # This check helps avoid infinite recursion trouble
+        if k == 'df':
+            raise AttributeError
         return getattr(self.df, k)
 
 
@@ -90,9 +93,9 @@ class PandasSheet(Sheet):
         'Sort rows according to the current self._ordering.'
         by_cols = []
         ascending = []
-        for cols, reverse in self._ordering[::-1]:
-            by_cols += [col.name for col in cols]
-            ascending += [not reverse] * len(cols)
+        for col, reverse in self._ordering[::-1]:
+            by_cols.append(col.name)
+            ascending.append(not reverse)
         self.rows.sort_values(by=by_cols, ascending=ascending, inplace=True)
 
     def _checkSelectedIndex(self):
