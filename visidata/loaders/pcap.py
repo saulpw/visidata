@@ -10,8 +10,8 @@ protocols = collections.defaultdict(dict)  # ['ethernet'] = {[6] -> 'IP'}
 _flags = collections.defaultdict(dict)  # ['tcp'] = {[4] -> 'FIN'}
 
 
-url_oui = 'https://visidata.org/wireshark-oui.tsv'
-url_iana = 'https://visidata.org/iana-ports.tsv'
+url_oui = 'https://visidata.org/plugins/pcap/wireshark-oui.tsv'
+url_iana = 'https://visidata.org/plugins/pcap/iana-ports.tsv'
 
 oui = {}  # [macprefix (like '01:02:dd:0')] -> 'manufacturer'
 services = {}  # [('tcp', 25)] -> 'smtp'
