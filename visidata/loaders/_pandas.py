@@ -6,22 +6,30 @@ class DataFrameAdapter:
     def __init__(self, df):
         import pandas as pd
         assert isinstance(df, pd.DataFrame)
-        self.df = df
+        self._df = df
 
     def __len__(self):
-        return len(self.df)
+        return len(self._df)
 
     def __getitem__(self, k):
         if isinstance(k, slice):
-            return DataFrameAdapter(self.df.iloc[k])
-        return self.df.iloc[k]
+            return DataFrameAdapter(self._df.iloc[k])
+        return self._df.iloc[k]
 
     def __getattr__(self, k):
-        # This check helps avoid infinite recursion trouble
-        if k == 'df':
-            raise AttributeError
-        return getattr(self.df, k)
+        return getattr(self._df, k)
 
+    def __setattr__(self, k, val):
+        if k.startswith('_'):
+            super().__setattr__(k, val)
+        else:
+            setattr(self._df, k, val)
+
+    def __getstate__(self):
+        return self._df
+
+    def __setstate__(self, df):
+        self.__init__(df)
 
 # source=DataFrame
 class PandasSheet(Sheet):
