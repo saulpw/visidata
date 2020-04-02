@@ -17,8 +17,9 @@ class DataFrameAdapter:
         return self.df.iloc[k]
 
     def __getattr__(self, k):
+        if 'df' not in self.__dict__:
+            raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{k}'")
         return getattr(self.df, k)
-
 
 # source=DataFrame
 class PandasSheet(Sheet):
@@ -67,7 +68,9 @@ class PandasSheet(Sheet):
             self.df = readfunc(str(self.source), **options('pandas_'+filetype+'_'))
 
         # reset the index here
-        if type(self.df.index) is not pd.RangeIndex:
+        if type(self.df.index) is pd.Int64Index:
+            self.df.index = pd.RangeIndex(len(self.df.index))
+        elif type(self.df.index) is not pd.RangeIndex:
             self.df = self.df.reset_index()
 
         self.columns = [
@@ -90,9 +93,9 @@ class PandasSheet(Sheet):
         'Sort rows according to the current self._ordering.'
         by_cols = []
         ascending = []
-        for cols, reverse in self._ordering[::-1]:
-            by_cols += [col.name for col in cols]
-            ascending += [not reverse] * len(cols)
+        for col, reverse in self._ordering[::-1]:
+            by_cols.append(col.name)
+            ascending.append(not reverse)
         self.rows.sort_values(by=by_cols, ascending=ascending, inplace=True)
 
     def _checkSelectedIndex(self):
