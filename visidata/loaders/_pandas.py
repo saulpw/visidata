@@ -6,30 +6,20 @@ class DataFrameAdapter:
     def __init__(self, df):
         import pandas as pd
         assert isinstance(df, pd.DataFrame)
-        self._df = df
+        self.df = df
 
     def __len__(self):
-        return len(self._df)
+        return len(self.df)
 
     def __getitem__(self, k):
         if isinstance(k, slice):
-            return DataFrameAdapter(self._df.iloc[k])
-        return self._df.iloc[k]
+            return DataFrameAdapter(self.df.iloc[k])
+        return self.df.iloc[k]
 
     def __getattr__(self, k):
-        return getattr(self._df, k)
-
-    def __setattr__(self, k, val):
-        if k.startswith('_'):
-            super().__setattr__(k, val)
-        else:
-            setattr(self._df, k, val)
-
-    def __getstate__(self):
-        return self._df
-
-    def __setstate__(self, df):
-        self.__init__(df)
+        if 'df' not in self.__dict__:
+            raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{k}'")
+        return getattr(self.df, k)
 
 # source=DataFrame
 class PandasSheet(Sheet):
