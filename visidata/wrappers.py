@@ -13,7 +13,7 @@ def isNullFunc():
     nullv = options.null_value
     if nullv is None:
         return lambda v: v is None or isinstance(v, TypedWrapper)
-    return lambda v: v is None or v == nullv or isinstance(v, TypedWrapper)
+    return lambda v, nullv=nullv: v is None or v == nullv or isinstance(v, TypedWrapper)
 
 
 @functools.total_ordering
