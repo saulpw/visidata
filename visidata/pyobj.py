@@ -54,8 +54,8 @@ def _(sampleValue, col, vals):
     longestSeq = max(vals, key=len)
     colTypes = [deduceType(v) for v in longestSeq]
     return [
-        ExpandedColumn('%s[%s]' % (col.name, k), type=colTypes[k], origCol=col, key=k)
-            for k in range(len(longestSeq))
+        ExpandedColumn('%s[%s]' % (col.name, k), type=colType, origCol=col, key=k)
+            for k, colType in enumerate(colTypes)
     ]
 
 def _addExpandedColumns(col, rows, idx):
