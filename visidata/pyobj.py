@@ -3,11 +3,6 @@ from functools import singledispatch
 from visidata import *
 
 option('visibility', 0, 'visibility level')
-isNull = lambda v: any((
-    v is None,
-    v is options.null_value,
-    isinstance(v, TypedWrapper)
-))
 
 
 class PythonSheet(Sheet):
@@ -64,6 +59,7 @@ def _(sampleValue, col, vals):
     ]
 
 def _addExpandedColumns(col, rows, idx):
+    isNull = isNullFunc()
     nonNulls = [
         col.getTypedValue(row)
         for row in rows
