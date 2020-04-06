@@ -72,6 +72,7 @@ def fillNullValues(col, rows):
 
 
 def updateColNames(sheet, rows, cols, overwrite=False):
+    vd.addUndoColNames(cols)
     for c in cols:
         if not c._name or overwrite:
             c.name = "\n".join(c.getDisplayValue(r) for r in rows)
@@ -234,7 +235,7 @@ BaseSheet.bindkey('gkDN', 'slide-bottom')
 BaseSheet.bindkey('gkUP', 'slide-top')
 BaseSheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
 
-Sheet.addCommand('^', 'rename-col', 'cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column')
+Sheet.addCommand('^', 'rename-col', 'vd.addUndoColNames([cursorCol]); cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column')
 Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(sheet, selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'set name of current column to combined contents of current cell in selected rows (or current row)')
 Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols)', 'set names of all unnamed visible columns to contents of selected rows (or current row)')
 Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'set names of all visible columns to combined contents of selected rows (or current row)')
