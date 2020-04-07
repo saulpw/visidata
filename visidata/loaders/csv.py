@@ -14,12 +14,6 @@ csv.field_size_limit(2**31-1) # Windows has max 32-bit
 
 options_num_first_rows = 10
 
-def wrappedNext(rdr):
-    try:
-        return next(rdr)
-    except csv.Error as e:
-        return ['[csv.Error: %s]' % e]
-
 def removeNulls(fp):
     for line in fp:
         yield line.replace('\0', '')
@@ -40,7 +34,12 @@ class CsvSheet(SequenceSheet):
                 rdr = csv.reader(fp, **options('csv_'))
 
             while True:
-                yield wrappedNext(rdr)
+                try:
+                    yield next(rdr)
+                except csv.Error as e:
+                    yield ['[csv.Error: %s]' % e]
+                except StopIteration:
+                    return
 
 
 @VisiData.api
