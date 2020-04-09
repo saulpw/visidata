@@ -110,6 +110,7 @@ from .loaders.graphviz import *
 from .loaders.npy import *
 from .loaders.usv import *
 from .loaders.frictionless import *
+from .loaders.imap import *
 
 from .loaders.pandas_freqtbl import *
 from .loaders.xword import *
