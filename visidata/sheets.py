@@ -9,7 +9,7 @@ TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
 
-__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
+__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
