@@ -1,10 +1,15 @@
-1. In the visidata repo under `plugins/`, create a `.py` file for the new plugin.
-2. In that file add in all the code. For a plugin to be installable via `open-plugins`, they must be composed of a single file with additional dependencies installable via pip.
-3. Ensure that the plugin has a `__version__`.
-4. Add a row for the plugin, with all associated necessary informations, to `plugins/plugins.tsv`.
-    - url: link to where the plugin file is hosted.
-    - latest_ver: the current version of the plugin.
-    - latest_release: the date the current version of the plugin was shipped.
-    - author: your beautiful self.
-    - visidata_ver: the latest version of visidata this plugin was tested on.
-    - requirements (optional): For pip-installable dependencies. Separate each one by a space.
+# Creating an external plugin
+
+1. Put all of the Python code in a single .py file in your repo (or in `saulpw/visidata/plugins` for builtin optional plugins).
+    - Ensure that the plugin has a `__version__`.
+
+2. In a `plugins.jsonl` file in your repo, add a row for each plugin with all necessary informations:
+    - `url`: link to where the plugin file is hosted.
+    - `description`: link to where the plugin file is hosted.
+    - `latest_ver`: the current version of the plugin.
+    - `latest_release`: the date the current version of the plugin was shipped.
+    - `maintainer`: your contact information.
+    - `visidata_ver`: the latest version of visidata this plugin was tested on.
+    - `pydeps` (optional): Space-separated list of pip-installable python modules required for the plugin.
+    - `vdplugindeps` (optional): Space-separated list of vd plugin dependencies.
+    - `sha256`: SHA256 hash of the contents of the plugin .py file for the `latest_release`.
