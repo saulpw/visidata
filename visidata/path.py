@@ -142,7 +142,7 @@ class Path(os.PathLike):
         with Progress(total=filesize(self)) as prog:
             for i, line in enumerate(self.open_text()):
                 prog.addProgress(len(line))
-                yield line[:-1]
+                yield line.rstrip('\n')
 
     def open_bytes(self, mode='rb'):
         if 'b' not in mode:
