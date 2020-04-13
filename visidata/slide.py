@@ -23,11 +23,11 @@ def onRelease(sheet, vcolidx, rowidx, destx, desty):
     newrowidx = sheet.visibleRowAtY(desty)
 
     if newvcolidx is not None and newvcolidx != vcolidx:
-        sheet.cursorVisibleColIndex = moveVisibleCol(sheet, vcolidx, newvcolidx)
+        sheet.cursorVisibleColIndex = sheet.slide_col(vcolidx, newvcolidx)
 
     # else: only move row if within same column (if column not moved above)
     elif newrowidx is not None and newrowidx != rowidx:
-        sheet.cursorRowIndex = moveListItem(sheet.rows, rowidx, newrowidx)
+        sheet.cursorRowIndex = sheet.slide_row(rowidx, newrowidx)
 
     else:
         sheet.onClick(vcolidx, rowidx)
