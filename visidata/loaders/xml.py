@@ -22,7 +22,7 @@ class XmlSheet(Sheet):
         ColumnAttr('sourceline', type=int, width=0),
         ColumnAttr('prefix', width=0),
         ColumnAttr('nstag', 'tag', width=0),
-        Column('path', width=0, getter=lambda c,r: c.sheet.source.getpath(r)),
+        Column('path', width=0, getter=lambda c,r: c.sheet.root.getpath(r)),
         Column('tag', getter=lambda c,r: unns(r.tag)),
         Column('children', type=vlen, getter=lambda c,r: r.getchildren()),
         ColumnAttr('text'),
@@ -47,7 +47,9 @@ class XmlSheet(Sheet):
             self.root = self.source
 
         self.attribcols = {}
-        self.columns = copy(XmlSheet.columns)
+        self.columns = []
+        for c in XmlSheet.columns:
+            self.addColumn(copy(c))
 
         if getattr(self.root, 'iterancestors', None):
             for elem in Progress(list(self.root.iterancestors())[::-1]):
