@@ -18,6 +18,7 @@ def codeToType(type_code, colname):
 def openurl_postgres(url, filetype=None):
     import psycopg2
 
+    url = urlparse(url.given)
     dbname = url.path[1:]
     conn = psycopg2.connect(
                 user=url.username,
@@ -34,6 +35,7 @@ class SQL:
         self.conn = conn
 
     def cur(self, qstr):
+        import string
         randomname = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
         cur = self.conn.cursor(randomname)
         cur.execute(qstr)
