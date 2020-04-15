@@ -6,7 +6,7 @@ import importlib
 from visidata import *
 
 
-option('plugins_url', 'https://visidata.org/plugins/bazaar.jsonl', 'source of plugins sheet')
+option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
 
 
 @VisiData.lazy_property

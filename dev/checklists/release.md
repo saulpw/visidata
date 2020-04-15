@@ -4,7 +4,7 @@
 
 2. Verify that VisiData is up-to-date:
     * vdmenu
-    * bazaar.jsonl
+    * plugins.jsonl
 
 2. Verify that documentation/docstrings are up-to-date on features and functionality
 
