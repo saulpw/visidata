@@ -121,7 +121,7 @@ def save_html(vd, p, *vsheets):
                     fp.write('<tr>')
                     for col, val in typedvals.items():
                         fp.write('<td>')
-                        fp.write(html.escape(val))
+                        fp.write(html.escape(str(val)))
                         fp.write('</td>')
                     fp.write('</tr>\n')
 
