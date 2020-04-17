@@ -1,9 +1,9 @@
 # Creating an external plugin
 
-1. Put all of the Python code in a single .py file in your repo (or in `saulpw:visidata/plugins` for builtin optional plugins).
+1. Put all of the Python code in a single .py file in your repo
     - Ensure that the plugin has a `__version__`.
 
-2. In the plugins.jsonl` file in the VisiData repo, add a row for each plugin with all necessary informations:
+2. In the `visidata/plugins/plugins.jsonl` file in the VisiData repo, add a row for each plugin with all necessary informations:
     - `url`: link to where the plugin file is hosted.
     - `description`: link to where the plugin file is hosted.
     - `latest_ver`: the current version of the plugin.
