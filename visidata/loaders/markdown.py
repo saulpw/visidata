@@ -36,9 +36,9 @@ def write_md(p, *vsheets, md_style='orgmode'):
                 fp.write('|' + '|'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
 
             with Progress(gerund='saving'):
-                for typedvals in vs.iterdispvals(format=False):
+                for dispvals in vs.iterdispvals(format=True):
                     s = '|'
-                    for col, val in typedvals.items():
+                    for col, val in dispvals.items():
                         s += '%-*s|' % (col.width or options.default_width, markdown_escape(val, md_style))
                     s += '\n'
                     fp.write(s)
