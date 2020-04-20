@@ -1,0 +1,5 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		type-date		@	set type of current column to date
+benchmark	Quantity		type-int		#	set type of current column to int
+benchmark	Unit		type-currency		$	set type of current column to currency
