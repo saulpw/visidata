@@ -110,4 +110,22 @@ Command(s)         Operation
 1. Press `!` on those columns to designate them as key columns.
 2. Press `g[` or `g]` to sort.
 
+###### How to increase row height
+
+Press `v` on any **TableSheet** to toggle multi-line rows. This dynamically widens rows so that the full content of the column is visible.
+
+This feature still has some kinks, and may not always be appropriate. Here are some bonus alternatives for accessing the full content of a cell.
+
+* Press `e` on a cell to enter Editing mode. Then scroll left and right to explore its contents.
+* Press `Ctrl+O` while in editing mode, to open the contents of the current cell in an external *$EDITOR*.
+
+**TextSheet-specific options**
+**TextSheet**s are used for loading `.txt` files in VisiData. They are also the default loaders used for un-identified sources. They are notable for having a single column which has the name "text".
+
+**TextSheet**s have a bonus option `wrap` which will wrap the text into multiple rows, so that it fits the window width.
+
+* On **TextSheet**, press `Shift+O` to open its **OptionsSheet**. Press `Enter` on the `wrap` option, to set it to *True*. Press `q` to return to your **TextSheet**. Reload it with `Ctrl+R`. Note that **reload** undoes an previous modifications you may have made to the **TextSheet**.
+* On the commandline, the option `--wrap` will set the `wrap` option to *True* for all **TextSheet**s in that session.
+* In your `~.visidatarc`, `options.wrap = True` will set the `wrap` option to *True* for all **TextSheet**s in every session.
+
 ---
