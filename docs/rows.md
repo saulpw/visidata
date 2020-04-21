@@ -112,9 +112,9 @@ Command(s)         Operation
 
 ###### How to increase row height
 
-Press `v` on any **TableSheet** to toggle multi-line rows. This dynamically widens rows so that the full content of the column is visible.
+Press `v` on any **TableSheet** to toggle multi-line rows. This dynamically lengthens rows so that the full content of the column is visible.
 
-This feature still has some kinks, and may not always be appropriate. Here are some bonus alternatives for accessing the full content of a cell.
+Multi-line rows have some limitations; they can't be paged, for instance.  The full contents of a cell can be viewed or edited in an external program like `emacs` or `less`:
 
 * Press `e` on a cell to enter Editing mode. Then scroll left and right to explore its contents.
 * Press `Ctrl+O` while in editing mode, to open the contents of the current cell in an external *$EDITOR*.
