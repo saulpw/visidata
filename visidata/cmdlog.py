@@ -64,6 +64,9 @@ def isLoggableCommand(longname):
             return False
     return True
 
+def isLoggableSheet(sheet):
+    return sheet is not vd.cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
+
 
 @Sheet.api
 def moveToRow(vs, rowstr):
@@ -169,12 +172,13 @@ class _CommandLog:
 
         # remove user-aborted commands and simple movements
         if not escaped and isLoggableCommand(vd.activeCommand.longname):
-                self.addRow(vd.activeCommand)  # add to global cmdlog
-                sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
-                if options.cmdlog_histfile:
-                    if not getattr(vd, 'sessionlog', None):
-                        vd.sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
-                    append_tsv_row(vd.sessionlog, vd.activeCommand)
+            if isLoggableSheet(sheet):      # don't record actions on global cmdlog or other internal sheets
+                    self.addRow(vd.activeCommand)  # add to global cmdlog
+            sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
+            if options.cmdlog_histfile:
+                if not getattr(vd, 'sessionlog', None):
+                    vd.sessionlog = loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
+                append_tsv_row(vd.sessionlog, vd.activeCommand)
 
         vd.activeCommand = None
 
