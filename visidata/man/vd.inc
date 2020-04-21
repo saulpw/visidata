@@ -424,7 +424,7 @@ scroll canvas
 .It Ic "Q"
 .No quit current sheet and remove it from the Sy CommandLog
 .It Ic "v"
-toggle sheet-specific visibility (multi-row on Sheet, legends/axes on Graph)
+toggle sheet-specific visibility (multi-line rows on Sheet, legends/axes on Graph)
 .Pp
 .Pp
 .It Ic " ^E  g^E"
