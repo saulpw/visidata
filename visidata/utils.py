@@ -70,16 +70,12 @@ def namedlist(objname, fieldnames):
 
         def __init__(self, L=None, **kwargs):
             if L is None:
-                L = [None]*self.length()
-            elif len(L) < self.length():
-                L.extend([None]*(self.length() - len(L)))
+                L = [None]*len(self._fields)
+            elif len(L) < len(self._fields):
+                L.extend([None]*(len(self._fields) - len(L)))
             super().__init__(L)
             for k, v in kwargs.items():
                 setattr(self, k, v)
-
-        @classmethod
-        def length(cls):
-            return len(cls._fields)
 
         def __getattr__(self, k):
             'to enable .fieldname'
