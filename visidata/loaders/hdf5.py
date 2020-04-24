@@ -11,7 +11,7 @@ class Hdf5ObjSheet(Sheet):
         if isinstance(source, h5py.Group):
             self.rowtype = 'sheets'
             self.columns = [
-                Column(source.name, type=str, getter=lambda col,row: row.source.name.split('/')[-1]),
+                Column(source.name, type=str, getter=lambda col,row: row.source.name.split('/')[-1], keycol=1),
                 Column('type', type=str, getter=lambda col,row: type(row.source).__name__),
                 Column('nItems', type=int, getter=lambda col,row: len(row.source)),
             ]
