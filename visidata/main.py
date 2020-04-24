@@ -153,7 +153,7 @@ def main_vd():
                 vd.sync(vs.ensureLoaded())
                 vd.clearCaches()
                 for startsheet in startsheets[1:]:
-                    rowidx = vs.getRowIndexFromStr(startsheet)
+                    rowidx = vs.getRowIndexFromStr(options.rowkey_prefix + startsheet)
                     if rowidx is None:
                         vs = None
                         vd.warning(f'no sheet "{startsheet}"')
