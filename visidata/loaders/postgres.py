@@ -15,6 +15,25 @@ def codeToType(type_code, colname):
     return anytype
 
 
+def openurl_rds(url, filetype=None):
+    import boto3
+    import psycopg2
+
+    rds = boto3.client('rds')
+
+    _, region, dbname = url.path.split('/')
+    token = rds.generate_db_auth_token(url.hostname, url.port, url.username, region)
+
+    conn = psycopg2.connect(
+                user=url.username,
+                dbname=dbname,
+                host=url.hostname,
+                port=url.port,
+                password=token)
+
+    return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
+
+
 def openurl_postgres(url, filetype=None):
     import psycopg2
 
