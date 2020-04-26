@@ -1,6 +1,6 @@
 from visidata import *
 
-__all__ = ['openurl_postgres', 'PgTable', 'PgTablesSheet']
+__all__ = ['openurl_postgres', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
 def codeToType(type_code, colname):
     import psycopg2
