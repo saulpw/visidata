@@ -1,21 +1,19 @@
 from visidata import *
 
 
-class YamlSheet(Sheet):
+class YamlSheet(JsonSheet):
     def iterload(self):
         import yaml
         with self.source.open_text() as fp:
-            rows = yaml.load(fp, Loader=yaml.FullLoader)
-        if not isinstance(rows, list):
-            yield rows
-        else:
-            yield from rows
+            data = yaml.load(fp, Loader=yaml.FullLoader)
 
-        row = self.rows[0]
         self.columns = []
-        for k in row:
-            c = ColumnItem(k, type=deduceType(row[k]))
-            self.addColumn(c)
+        self.colnames = {}
+
+        if not isinstance(data, list):
+            yield data
+        else:
+            yield from Progress(data)
 
 
 vd.filetype('yml', YamlSheet)
