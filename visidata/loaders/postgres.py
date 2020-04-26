@@ -20,6 +20,7 @@ def openurl_rds(url, filetype=None):
     import psycopg2
 
     rds = boto3.client('rds')
+    url = urlparse(url.given)
 
     _, region, dbname = url.path.split('/')
     token = rds.generate_db_auth_token(url.hostname, url.port, url.username, region)
