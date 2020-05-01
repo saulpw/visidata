@@ -6,6 +6,7 @@ from visidata import *
 
 option('json_indent', None, 'indent to use when saving json')
 option('json_sort_keys', False, 'sort object keys when saving to json')
+option('json_default_colname', '', 'column name to use for non-dict rows')
 
 
 def open_json(p):
@@ -21,29 +22,36 @@ class JsonSheet(PythonSheet):
     def iterload(self):
         self.colnames = {}  # [colname] -> Column
         self.columns = []
+        self.defaultColName = options.json_default_colname
 
         try:
             with self.source.open_text() as fp:
                 ret = json.load(fp, object_pairs_hook=OrderedDict)
 
-            if isinstance(ret, dict):
-                yield ret
-            else:
+            if isinstance(ret, list):
                 yield from Progress(ret)
+            else:
+                yield ret
 
         except ValueError as e:
             status('trying jsonl')
             yield from JsonLinesSheet.iterload(self)
 
     def addRow(self, row, index=None):
+        # Wrap non-dict rows in a dummy object with a predictable key name.
+        # This allows for more consistent handling of rows containing scalars
+        # or lists.
+        if not isinstance(row, dict):
+            row = {self.defaultColName: row}
+
         super().addRow(row, index=index)
-        if isinstance(row, dict):
-            for k in row:
-                if k not in self.colnames:
-                    c = ColumnItem(k, type=deduceType(row[k]))
-                    self.colnames[k] = c
-                    self.addColumn(c)
-            return row
+
+        for k in row:
+            if k not in self.colnames:
+                c = ColumnItem(k, type=deduceType(row[k]))
+                self.colnames[k] = c
+                self.addColumn(c)
+        return row
 
     def newRow(self):
         return {}
