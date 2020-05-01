@@ -10,3 +10,4 @@ visidata.egg-info/
 *dist
 *_build
 tags
+/tests/log/
