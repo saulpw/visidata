@@ -505,7 +505,7 @@ class TableSheet(BaseSheet):
                 if self.cursorRowIndex > bottomRowIndex and y+h > self.nScreenRows:
                     self._topRowIndex += bottomRowIndex-self.cursorRowIndex+2
 
-        if self.cursorCol.keycol:
+        if self.cursorCol and self.cursorCol.keycol:
             return
 
         if self.leftVisibleColIndex >= self.cursorVisibleColIndex:
