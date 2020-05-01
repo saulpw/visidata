@@ -157,3 +157,37 @@ Sheet.addCommand('^D', 'scroll-halfpage-down', 'cursorDown(nScreenRows//2); shee
 `execstr` is resolved recursively, so it can be an existing keystroke or `longname` for those that have one.  The last in the chain is `exec()`ed.
 
 ---
+
+### Adding custom aggregators
+
+Aggregators allow you to gather the rows within a single column, and interpret them using descriptive statistics. VisiData comes pre-loaded with a default set like mean, stdev, and sum.
+
+To add your own custom aggregator `name`, add the following to your `.visidatarc`.
+
+aggregator('name', func, type=float)
+
+Where `func` is a function of the form:
+
+```
+def func(list):
+    return value
+```
+
+The `type` parameter is optional. It allows you to define the default type of the aggregated column.
+
+Here is an example, that adds an aggregator for [numpy's internal rate of return](https://numpy.org/devdocs/reference/generated/numpy.irr.html) module.
+
+```
+import numpy as np
+aggregator('irr', np.irr, type=float)
+```
+
+**Bonus: How to choose which aggregators are columns within the DescribeSheet?**
+
+Any numeric aggregator can be added!
+
+Supply a space-separated list of aggreagator names to `options.describe_aggr` in your .visidatarc.
+
+```
+options.describe_aggrs = 'mean stdev irr'
+```
