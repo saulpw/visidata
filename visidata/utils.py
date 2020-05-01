@@ -91,8 +91,4 @@ def namedlist(objname, fieldnames):
             except ValueError:
                 super().__setattr__(k, v)
 
-    for i, attrname in enumerate(fieldnames):
-        # create property getter/setter for each field
-        setattr(NamedListTemplate, attrname, property(operator.itemgetter(i), itemsetter(i)))
-
     return NamedListTemplate
