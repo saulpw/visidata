@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# usage: ./dev/test-individually.sh [<tests/name.vd> […]]
+# usage: ./dev/run-tests-individually.sh [<tests/name.vd> […]]
 #
 # Runs tests/*.vd or the given test files individually and summarize failures
 # at the end.
