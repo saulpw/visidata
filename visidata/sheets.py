@@ -782,7 +782,7 @@ class TableSheet(BaseSheet):
                                 else:
                                     sepchars = midsep
 
-                        clipdraw(scr, y, x, disp_column_fill+line, cattr.attr, w=colwidth-(1 if note else 0))
+                        clipdraw(scr, y, x, (disp_column_fill if colwidth > 2 else '')+line, cattr.attr, w=colwidth-(1 if note else 0))
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
