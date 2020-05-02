@@ -945,9 +945,12 @@ def sheetsSheet(vd):
 
 @VisiData.api
 def quit(vd, *sheets):
-    if len(vd.sheets) == len(sheets) and options.quitguard:
+    if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'override', False):
         vd.confirm("quit last sheet? ")
     for vs in sheets:
+        if options.getonly('quitguard', vs, False):
+            vd.drawall()
+            vd.confirm(f'quit guarded sheet "{vs.name}?" ')
         vd.remove(vs)
 
 
@@ -999,5 +1002,6 @@ BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]); options.disp
 BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
+BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'guard current sheet from accidental quitting')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')
