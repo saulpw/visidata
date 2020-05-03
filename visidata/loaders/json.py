@@ -6,7 +6,7 @@ from visidata import *
 
 option('json_indent', None, 'indent to use when saving json')
 option('json_sort_keys', False, 'sort object keys when saving to json')
-option('json_default_colname', '', 'column name to use for non-dict rows')
+option('default_colname', '', 'column name to use for non-dict rows')
 
 
 def open_json(p):
@@ -22,7 +22,7 @@ class JsonSheet(PythonSheet):
     def iterload(self):
         self.colnames = {}  # [colname] -> Column
         self.columns = []
-        self.defaultColName = options.json_default_colname
+        self.defaultColName = options.default_colname
 
         try:
             with self.source.open_text() as fp:
