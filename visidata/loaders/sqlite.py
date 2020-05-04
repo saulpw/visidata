@@ -96,7 +96,21 @@ class SqliteIndexSheet(SqliteSheet, IndexSheet):
         for row in SqliteSheet.iterload(self):
             if row[0] != 'index':
                 tblname = row[1]
-                yield SqliteSheet(tblname, source=self, tableName=tblname, row=row)
+                yield SqliteSheet(self.name+'.'+tblname, source=self, tableName=tblname, row=row)
+
+
+class SqliteQuerySheet(SqliteSheet):
+    def iterload(self):
+        with self.conn() as conn:
+            self.columns = []
+
+            self.result = self.execute(conn, self.query, parms=getattr(self, 'parms', []))
+            for i, desc in enumerate(self.result.description):
+                self.addColumn(ColumnItem(desc[0], i))
+
+            for row in self.result:
+                yield row
+
 
 
 @VisiData.api
