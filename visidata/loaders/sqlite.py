@@ -4,7 +4,7 @@ from visidata import *
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     savesToSource = True
-    defermods = True
+    defer = True
 
     def resolve(self):
         'Resolve all the way back to the original source Path.'
