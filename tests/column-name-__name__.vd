@@ -1,2 +1,2 @@
 sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/column-name-__name__.csv	o	
+			open-file	tests/column-name-__name__.csv	o	
