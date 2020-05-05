@@ -54,7 +54,7 @@ def syscopyCells(sheet, col, rows):
 def delete_row(sheet, rowidx):
     oldrow = sheet.rows[rowidx]
 
-    if not sheet.defer:
+    if not getattr(sheet, 'defer', False):
         sheet.rows.pop(rowidx)
     else:
         sheet.rowDeleted(oldrow)

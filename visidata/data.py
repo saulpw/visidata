@@ -190,7 +190,7 @@ def deleteBy(self, func):
     ndeleted = 0
 
     row = None   # row to re-place cursor after
-    if not self.defer:
+    if not getattr(self, 'defer', False):
         while oldidx < len(oldrows):
             if not func(oldrows[oldidx]):
                 row = self.rows[oldidx]
