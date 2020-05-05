@@ -44,7 +44,7 @@ class SqliteSheet(Sheet):
             r = self.execute(conn, 'SELECT COUNT(*) FROM "%s"' % tblname).fetchall()
             rowcount = r[0][0]
             for row in Progress(self.execute(conn, 'SELECT * FROM "%s"' % tblname), total=rowcount-1):
-                yield row
+                yield list(row)
 
     @asyncthread
     def putChanges(self, path, adds, mods, dels):

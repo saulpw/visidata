@@ -179,6 +179,13 @@ class Column(Extensible):
     def getValue(self, row):
         'Memoize calcValue with key sheet.rowid(row)'
 
+        if getattr(self.sheet, 'defer', False):
+            try:
+                row, rowmods = self.sheet._deferredMods[self.sheet.rowid(row)]
+                return rowmods[self]
+            except KeyError:
+                pass
+
         if self._cachedValues is None:
             return self.calcValue(row)
 
@@ -267,7 +274,10 @@ class Column(Extensible):
 
     def setValue(self, row, val):
         'For defer columns, override to provide a caching layer above putValue'
-        self.putValue(row, val)
+        if getattr(self.sheet, 'defer', False):
+            self.cellChanged(row, val)
+        else:
+            self.putValue(row, val)
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions'
