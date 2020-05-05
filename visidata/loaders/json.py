@@ -22,7 +22,6 @@ class JsonSheet(PythonSheet):
     def iterload(self):
         self.colnames = {}  # [colname] -> Column
         self.columns = []
-        self.defaultColName = options.default_colname
 
         try:
             with self.source.open_text() as fp:
@@ -42,7 +41,7 @@ class JsonSheet(PythonSheet):
         # This allows for more consistent handling of rows containing scalars
         # or lists.
         if not isinstance(row, dict):
-            row = {self.defaultColName: row}
+            row = {options.default_colname: row}
 
         super().addRow(row, index=index)
 
