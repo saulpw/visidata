@@ -14,12 +14,9 @@ class SqliteSheet(Sheet):
         import sqlite3
         return sqlite3.connect(str(self.resolve()))
 
-    def execute(self, conn, sql, where={}, parms=None):
+    def execute(self, conn, sql, parms=None):
         parms = parms or []
-        if where:
-            sql += ' WHERE %s' % ' AND '.join('"%s"=?' % k for k in where)
         status(sql)
-        parms += list(where.values())
         return conn.execute(sql, parms)
 
     def iterload(self):
@@ -76,13 +73,14 @@ class SqliteSheet(Sheet):
             for row, rowmods in mods.values():
                 sql = 'UPDATE "%s" SET ' % self.tableName
                 sql += ', '.join('%s=?' % c.name for c, _ in rowmods.items())
+                sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
                 self.execute(conn, sql,
-                            where={c.name: c.getSavedValue(row) for c in wherecols},
-                            parms=values(row, [c for c, _ in rowmods.items()]))
+                            parms=values(row, [c for c, _ in rowmods.items()]) + list(c.getSavedValue(row) for c in wherecols))
 
             for r in dels.values():
-                self.execute(conn, 'DELETE FROM "%s" ' % self.tableName,
-                              where={c.name: c.getTypedValue(r) for c in wherecols})
+                sql = 'DELETE FROM "%s" ' % self.tableName
+                sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
+                self.execute(conn, sql, parms=list(c.getTypedValue(row) for c in wherecols))
 
             conn.commit()
 
