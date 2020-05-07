@@ -1,0 +1,2 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/column-name-__name__.csv	o	
