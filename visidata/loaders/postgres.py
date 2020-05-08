@@ -82,7 +82,13 @@ class PgTablesSheet(Sheet):
     rowtype = 'tables'
 
     def reload(self):
-        qstr = "SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.columns WHERE table_schema = 'public' GROUP BY table_name"
+        qstr = '''
+            SELECT relname table_name, column_count.ncols, reltuples::bigint est_nrows
+                FROM pg_class, pg_namespace, (
+                    SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.COLUMNS WHERE table_schema = 'public' GROUP BY table_name
+                    ) AS column_count
+                WHERE  pg_class.relnamespace = pg_namespace.oid AND pg_namespace.nspname = 'public' AND column_count.table_name = relname;
+        '''
 
         with self.sql.cur(qstr) as cur:
             self.nrowsPerTable = {}
@@ -94,22 +100,9 @@ class PgTablesSheet(Sheet):
                 self.addRow(r)
             self.columns = cursorToColumns(cur)
             self.setKeys(self.columns[0:1])  # table_name is the key
-            self.addColumn(Column('nrows', type=int, getter=lambda col,row: col.sheet.getRowCount(row[0])))
 
             for r in cur:
                 self.addRow(r)
-
-    def setRowCount(self, cur):
-        result = cur.fetchall()
-        tablename = result[0][0]
-        self.nrowsPerTable[tablename] = result[0][1]
-
-    def getRowCount(self, tablename):
-        if tablename not in self.nrowsPerTable:
-            thread = self.sql.query_async("SELECT '%s', COUNT(*) FROM %s" % (tablename, tablename), callback=self.setRowCount)
-            self.nrowsPerTable[tablename] = thread
-
-        return self.nrowsPerTable[tablename]
 
 # rowdef: tuple of values as returned by fetchone()
 class PgTable(Sheet):
