@@ -156,8 +156,15 @@ def vdmenu(self):
 
 def combineColumns(cols):
     'Return Column object formed by joining fields in given columns.'
-    return Column("+".join(c.name for c in cols),
-                  getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
+    sheets = set()
+    for col in cols:
+        sheets.add(col.sheet)
+    if len(sheets) > 1:
+        vd.fail('joined columns must come from the same source sheet')
+
+    return Column("+".join(c.name for c in cols), getter=lambda
+            col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in
+                cols))
 
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
@@ -175,7 +182,7 @@ ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)'
 
 ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()', 'hide selected columns on source sheet')
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
-ColumnsSheet.addCommand('&', 'join-cols', 'source.addColumn(combineColumns(someSelectedRows), cursorRowIndex)', 'add column from concatenating selected source columns')
+ColumnsSheet.addCommand('&', 'join-cols', 'destSheet=someSelectedRows[0].sheet; destSheet.addColumn(combineColumns(someSelectedRows), cursorRowIndex); status(f"joined column added to sheet: {destSheet}")', 'add column from concatenating selected source columns')
 
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
 ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')
