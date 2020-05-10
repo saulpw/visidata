@@ -52,10 +52,14 @@ def undoMod(self, row):
 @Sheet.api
 def rowAdded(self, row):
     self._deferredAdds[self.rowid(row)] = row
+    def _undoRowAdded(sheet, row):
+        del sheet._deferredAdds[sheet.rowid(row)]
+    vd.addUndo(_undoRowAdded, self, row)
 
 @Column.api
 def cellChanged(col, row, val):
-    if col.getValue(row) != val:
+    oldval = col.getValue(row)
+    if oldval != val:
         rowid = col.sheet.rowid(row)
         if rowid not in col.sheet._deferredMods:
             rowmods = {}
@@ -64,9 +68,21 @@ def cellChanged(col, row, val):
             _, rowmods = col.sheet._deferredMods[rowid]
         rowmods[col] = val
 
+        def _undoCellChanged(col, row, oldval):
+            if oldval == col.calcValue(row):
+                del col.sheet._deferredMods[col.sheet.rowid(row)]
+            else:
+                _, rowmods = col.sheet._deferredMods[rowid]
+                rowmods[col] = oldval
+
+        vd.addUndo(_undoCellChanged, col, row, oldval)
+
 @Sheet.api
 def rowDeleted(self, row):
     self._deferredDels[self.rowid(row)] = row
+    def _undoRowDeleted(sheet, row):
+        del sheet._deferredDels[sheet.rowid(row)]
+    vd.addUndo(_undoRowDeleted, self, row)
 
 
 @Sheet.api
