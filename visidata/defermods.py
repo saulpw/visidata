@@ -35,21 +35,6 @@ def _dm_reload(sheet):
     sheet.reload()
 
 @Sheet.api
-def undoMod(self, row):
-    # saul: we should integrate this with an undo function
-    rowid = self.rowid(row)
-
-    if rowid in self._deferredAds:
-        # saul: oes it need to be removed from self.rowid as well?
-        del self._deferredAdds[rowid]
-
-    if rowid in self._deferredMods:
-        del col._deferredMods[rowid]
-
-    if rowid in self._deferredDels:
-        del sel._deferredDels[rowid]
-
-@Sheet.api
 def rowAdded(self, row):
     self._deferredAdds[self.rowid(row)] = row
     def _undoRowAdded(sheet, row):

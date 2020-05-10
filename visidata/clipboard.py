@@ -56,10 +56,10 @@ def delete_row(sheet, rowidx):
 
     if not getattr(sheet, 'defer', False):
         sheet.rows.pop(rowidx)
+        vd.addUndo(sheet.rows.insert, rowidx, oldrow)
     else:
         sheet.rowDeleted(oldrow)
 
-    vd.addUndo(sheet.rows.insert, rowidx, oldrow)
     vd.cliprows = [(sheet, rowidx, oldrow)]
 
 @Sheet.api
