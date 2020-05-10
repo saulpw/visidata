@@ -68,10 +68,10 @@ class SQL:
             cur.close()
 
 
-def cursorToColumns(cur):
+def cursorToColumns(cur, sheet):
     cols = []
     for i, coldesc in enumerate(cur.description):
-        c = ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name))
+        c = ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name), sheet=sheet)
         cols.append(c)
     return cols
 
@@ -98,7 +98,7 @@ class PgTablesSheet(Sheet):
             r = cur.fetchone()
             if r:
                 self.addRow(r)
-            self.columns = cursorToColumns(cur)
+            self.columns = cursorToColumns(cur, self)
             self.setKeys(self.columns[0:1])  # table_name is the key
 
             for r in cur:
@@ -113,7 +113,7 @@ class PgTable(Sheet):
             r = cur.fetchone()
             if r:
                 self.addRow(r)
-            self.columns = cursorToColumns(cur)
+            self.columns = cursorToColumns(cur, self)
             for r in cur:
                 self.addRow(r)
 
