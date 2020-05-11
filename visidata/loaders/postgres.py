@@ -113,5 +113,6 @@ class PgTable(Sheet):
             cursorToColumns(cur, self)
             for r in cur:
                 self.addRow(r)
-
+    
 PgTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))', 'open postgres table in current row')
+PgTable.addCommand(ENTER, 'dive-row', 'push_pyobj(name + "." + str(cursorRow), cursorCol.getValue(cursorRow))', 'dive into postgres data')
