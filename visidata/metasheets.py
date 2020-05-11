@@ -5,8 +5,16 @@ from visidata import getGlobals, TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
+option('name_joiner', '_', 'string to join sheet or column names')
+option('value_joiner', ' ', 'string to join display values')
 
 vd_system_sep = '\t'
+
+
+def joinSheetnames(*sheetnames):
+    'Concatenate sheet names in a standard way'
+    return options.name_joiner.join(str(x) for x in sheetnames)
+
 
 @BaseSheet.lazy_property
 def optionsSheet(sheet):
@@ -154,17 +162,19 @@ def vdmenu(self):
     vs.reload()
     return vs
 
-def combineColumns(cols):
-    'Return Column object formed by joining fields in given columns.'
-    sheets = set()
-    for col in cols:
-        sheets.add(col.sheet)
-    if len(sheets) > 1:
+@ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')
+def join_cols(sheet):
+    cols = sheet.someSelectedRows
+    destSheet = cols[0].sheet
+
+    if len(set(c.sheet for c in cols)) > 1:
         vd.fail('joined columns must come from the same source sheet')
 
-    return Column("+".join(c.name for c in cols), getter=lambda
-            col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in
-                cols))
+    c = Column(options.name_joiner.join(c.name for c in cols),
+                getter=lambda col,row,cols=cols,ch=options.value_joiner: ch.join(c.getDisplayValue(row) for c in cols))
+
+    vd.status(f"added {c.name} to {destSheet}")
+    destSheet.addColumn(c, index=sheet.cursorRowIndex)
 
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
@@ -182,7 +192,6 @@ ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)'
 
 ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()', 'hide selected columns on source sheet')
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
-ColumnsSheet.addCommand('&', 'join-cols', 'destSheet=someSelectedRows[0].sheet; destSheet.addColumn(combineColumns(someSelectedRows), cursorRowIndex); status(f"joined column added to sheet: {destSheet}")', 'add column from concatenating selected source columns')
 
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
 ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')
