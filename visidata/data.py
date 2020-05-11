@@ -34,11 +34,14 @@ def addNewRows(sheet, n, idx):
         addedRows[sheet.rowid(row)] = row
         sheet.addRow(row, idx+1)
 
-    @asyncthread
-    def _removeRows():
-        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows)
+        @asyncthread
+        def _removeRows():
+            sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
 
-    vd.addUndo(_removeRows)
+        vd.addUndo(_removeRows)
+
+        if getattr(sheet, 'defer', False):
+            sheet.rowAdded(row)
 
 @asyncthread
 def fillNullValues(col, rows):
@@ -183,14 +186,14 @@ def loadInternalSheet(klass, p, **kwargs):
     return vs
 
 @Sheet.api
-def deleteBy(self, func):
+def deleteBy(self, func, commit=False):
     'Delete rows for which func(row) is true.  Returns number of deleted rows.'
     oldrows = copy(self.rows)
     oldidx = self.cursorRowIndex
     ndeleted = 0
 
     row = None   # row to re-place cursor after
-    if not getattr(self, 'defer', False):
+    if not getattr(self, 'defer', False) or commit:
         while oldidx < len(oldrows):
             if not func(oldrows[oldidx]):
                 row = self.rows[oldidx]

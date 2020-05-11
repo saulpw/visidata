@@ -225,12 +225,7 @@ class TableSheet(BaseSheet):
         return row
 
     def newRow(self):
-        row = type(self)._rowtype()
-
-        if getattr(self, 'defer', False):
-            self.rowAdded(row)
-
-        return row
+        return type(self)._rowtype()
 
     def openRow(self, row):
         vd.fail(f'cannot open {self.rowtype} on this sheet')
@@ -812,12 +807,7 @@ class SequenceSheet(Sheet):
         self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
 
     def newRow(self):
-        row = self._rowtype()
-
-        if getattr(self, 'defer', False):
-            self.rowAdded(row)
-
-        return row
+        return self._rowtype()
 
     def addRow(self, row, index=None):
         for i in range(len(self.columns), len(row)):  # no-op if already done
@@ -871,12 +861,7 @@ class IndexSheet(Sheet):
     nKeys = 1
 
     def newRow(self):
-        row = Sheet('', columns=[ColumnItem('', 0)], rows=[])
-
-        if getattr(self, 'defer', False):
-            self.rowAdded(row)
-
-        return row
+        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
 
     def openRow(self, row):
         return row  # rowdef is Sheet
