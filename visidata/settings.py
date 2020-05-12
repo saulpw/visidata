@@ -317,4 +317,4 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
     return args
 
 
-BaseSheet.addCommand(None, 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))', 'open ~/.visidatarc as Text Sheet')
+BaseSheet.addCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))', 'open ~/.visidatarc as Text Sheet')
