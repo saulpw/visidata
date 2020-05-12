@@ -111,7 +111,7 @@ def deleteRows(self, rows):
         def _undoMarkDeleted(sheet, rows):
             for r in rows:
                 sheet.markDeleted(r, False)
-        vd.addUndo(undoMarkDeleted, self, rows)
+        vd.addUndo(_undoMarkDeleted, self, rows)
 
 
 @Sheet.api
