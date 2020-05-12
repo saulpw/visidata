@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, error, status, BaseSheet, Sheet, Column, fail, Progress, globalCommand, ALT
+from visidata import vd, VisiData, error, status, BaseSheet, Sheet, Column, fail, Progress, globalCommand, ALT, asyncthread
 
 __all__ = ['rotateRange']
 
@@ -91,6 +91,7 @@ def nextColRegex(sheet, colregex):
 
 
 @VisiData.api
+@asyncthread
 def moveRegex(vd, sheet, *args, **kwargs):
     list(vd.searchRegex(sheet, *args, moveCursor=True, **kwargs))
 
