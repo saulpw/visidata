@@ -76,6 +76,9 @@ class BaseSheet(Extensible):
     def __len__(self):
         return self.nRows
 
+    def __str__(self):
+        return self.name
+
     @property
     def nRows(self):
         'Number of rows on this sheet.'
