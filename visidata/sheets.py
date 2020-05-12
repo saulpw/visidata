@@ -38,7 +38,8 @@ theme('note_getter_exc', '!', 'cell note for an exception during computation')
 theme('note_type_exc', '!', 'cell note for an exception during type conversion')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
-theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
+theme('color_note_type', '226 yellow', 'color of cell note for non-str types in anytype columns')
+theme('color_note_row', '220 yellow', 'color of row note on left edge')
 theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 theme('disp_column_sep', '|', 'separator between columns')
 theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
@@ -788,10 +789,17 @@ class TableSheet(BaseSheet):
                         if x+colwidth+len(sepchars) <= self.windowWidth:
                             scr.addstr(y, x+colwidth, sepchars, basecellcattr.attr)
 
-            if self.isSelected(row):
-                clipdraw(scr, ybase, 0, selectednote, basecellcattr.attr)
+            for notefunc in vd.rowNoters:
+                ch = notefunc(self, row)
+                if ch:
+                    clipdraw(scr, ybase, 0, ch, colors.color_note_row)
+                    break
 
             return height
+
+vd.rowNoters = [
+        lambda sheet, row: sheet.isSelected(row) and options.disp_selected_note,
+]
 
 Sheet = TableSheet  # deprecated in 2.0 but still widely used internally
 

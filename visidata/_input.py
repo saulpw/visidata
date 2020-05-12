@@ -234,6 +234,32 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
 
 
 @VisiData.api
+def inputsingle(vd, prompt, record=True):
+    'Display prompt and return single character of user input.'
+    sheet = vd.sheets[0]
+    rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
+
+    v = None
+    if record and vd.cmdlog:
+        v = vd.getLastArgs()
+
+    if v is not None:
+        return v
+
+    y = sheet.windowHeight-1
+    w = sheet.windowWidth
+    rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
+    promptlen = clipdraw(sheet._scr, y, 0, prompt, 0, w=w-rstatuslen-1)
+    sheet._scr.move(y, w-promptlen-rstatuslen-2)
+    v = vd.getkeystroke(sheet._scr)
+
+    if record and vd.cmdlog:
+        vd.setLastArgs(v)
+
+    return v
+
+
+@VisiData.api
 def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     '''Display prompt and return line of user input.
 
