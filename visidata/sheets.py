@@ -542,8 +542,9 @@ class TableSheet(BaseSheet):
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None and len(self.visibleRows) > 0:
+                vrows = self.visibleRows if self.nRows > 1000 else self.rows
                 # handle delayed column width-finding
-                col.width = max(col.getMaxWidth(self.visibleRows), minColWidth)
+                col.width = max(col.getMaxWidth(vrows), minColWidth)
                 if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, options.default_width)
             width = col.width if col.width is not None else options.default_width
