@@ -2,11 +2,13 @@ from contextlib import suppress
 import collections
 import curses
 
+import visidata
+
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
 from visidata import vd, status, error, warning, fail, options, theme, colors
-from visidata import launchExternalEditor, suspend
+from visidata import launchExternalEditor, suspend, ColumnItem, ENTER
 
-__all__ = ['confirm', 'choose', 'chooseOne', 'chooseMany', 'CompleteKey']
+__all__ = ['confirm', 'CompleteKey']
 
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
@@ -312,41 +314,6 @@ class CompleteKey:
     def __call__(self, val, state):
         opts = [x for x in self.items if x.startswith(val)]
         return opts[state%len(opts)] if opts else val
-
-
-def chooseOne(L):
-    return choose(L, 1)
-
-
-def choose(choices, n=None):
-    'Return one of `choices` elements (if list) or values (if dict).'
-    ret = chooseMany(choices) or fail('no choice made')
-    if n and len(ret) > n:
-        fail('can only choose %s' % n)
-    return ret[0] if n==1 else ret
-
-
-def chooseMany(choices):
-    'Return list of `choices` elements (if list) or values (if dict).'
-    if isinstance(choices, dict):
-        prompt = '/'.join(choices.keys())
-        chosen = []
-        for c in vd.input(prompt+': ', completer=CompleteKey(choices)).split():
-            poss = [choices[p] for p in choices if str(p).startswith(c)]
-            if not poss:
-                warning('invalid choice "%s"' % c)
-            else:
-                chosen.extend(poss)
-    else:
-        prompt = '/'.join(str(x) for x in choices)
-        chosen = []
-        for c in vd.input(prompt+': ', completer=CompleteKey(choices)).split():
-            poss = [p for p in choices if str(p).startswith(c)]
-            if not poss:
-                warning('invalid choice "%s"' % c)
-            else:
-                chosen.extend(poss)
-    return chosen
 
 
 @Sheet.api

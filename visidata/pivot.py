@@ -95,7 +95,7 @@ class PivotSheet(Sheet):
         if not self.pivotCols:
             for aggcol, aggregatorlist in aggcols.items():
                 for aggregator in aggregatorlist:
-                    aggname = '%s_%s' % (aggcol.name, aggregator.__name__)
+                    aggname = '%s_%s' % (aggcol.name, aggregator.name)
 
                     c = Column(aggname,
                                 type=aggregator.type or aggcol.type,
@@ -118,9 +118,9 @@ class PivotSheet(Sheet):
                 for aggcol, aggregatorlist in aggcols.items():
                     for aggregator in aggregatorlist:
                         if len(aggcols) > 1: #  if more than one aggregated column, include that column name in the new column name
-                            aggname = '%s_%s' % (aggcol.name, aggregator.__name__)
+                            aggname = '%s_%s' % (aggcol.name, aggregator.name)
                         else:
-                            aggname = aggregator.__name__
+                            aggname = aggregator.name
 
 
                         if len(aggregatorlist) > 1 or len(aggcols) > 1:
@@ -134,7 +134,7 @@ class PivotSheet(Sheet):
                                     getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.pivotrows.get(col.aggvalue, [])))
                         self.addColumn(c)
 
-#                    if aggregator.__name__ != 'count':  # already have count above
+#                    if aggregator.name != 'count':  # already have count above
 #                        c = Column('Total_' + aggcol.name,
 #                                    type=aggregator.type or aggcol.type,
 #                                    getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.sourcerows))

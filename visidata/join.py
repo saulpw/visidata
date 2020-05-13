@@ -26,7 +26,15 @@ def createJoinedSheet(sheets, jointype=''):
     else:
         return JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
 
-jointypes = {k:k for k in ["inner", "outer", "full", "diff", "append", "extend", "merge"]}
+jointypes = [{'key': k, 'desc': v} for k, v in {
+    'inner': 'only rows which match keys on all sheets',
+    'outer': 'all rows from first selected sheet',
+    'full': 'all rows from all sheets (union)',
+    'diff': 'only rows NOT in all sheets',
+    'append': 'only columns from first sheet; extend with rows from all sheets',
+    'extend': 'only rows from first sheet; extend with columns from all sheets',
+    'merge': 'merge differences from other sheets into first sheet',
+}.items()]
 
 def joinkey(sheet, row):
     return tuple(c.getDisplayValue(row) for c in sheet.keyCols)
