@@ -20,7 +20,7 @@ def _deferredDels(sheet):
 Sheet.colorizers += [
         RowColorizer(9, 'color_add_pending', lambda s,c,r,v: s.rowid(r) in s._deferredAdds),
         CellColorizer(8, 'color_change_pending', lambda s,c,r,v: s.isChanged(c, r)),
-        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: s.rowid(r) in s._deferredDels),
+        RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: s.isDeleted(r)),
         ]
 
 @Sheet.api
@@ -28,11 +28,6 @@ def _dm_reset(sheet, *rows):
     sheet._deferredAdds.clear()
     sheet._deferredMods.clear()
     sheet._deferredDels.clear()
-
-@BaseSheet.api
-def _dm_reload(sheet):
-    sheet._dm_reset()
-    sheet.reload()
 
 @Sheet.api
 def rowAdded(self, row):
@@ -54,9 +49,11 @@ def cellChanged(col, row, val):
         rowmods[col] = val
 
         def _undoCellChanged(col, row, oldval):
-            if oldval == col.calcValue(row):
+            if oldval == col.getSavedValue(row):
+                # if we have reached the original value, remove from defermods
                 del col.sheet._deferredMods[col.sheet.rowid(row)]
             else:
+                # otherwise, update deferredMods with older value
                 _, rowmods = col.sheet._deferredMods[rowid]
                 rowmods[col] = oldval
 
@@ -71,18 +68,6 @@ def rowDeleted(self, row):
 
 
 @Sheet.api
-def addSourceRow(self, row):
-    # saul: unsure about this. what use does this have?
-    'Add given row to source. row has already been added to .rows'
-    pass
-
-@Sheet.api
-def deleteSourceRows(self, row):
-    'Delete given row from source. row has already been removed from .rows'
-    # saul: unsure about this. what use does this have?
-    pass
-
-@Sheet.api
 def isDeleted(self, r):
     return self.rowid(r) in self._deferredDels
 
@@ -91,27 +76,23 @@ def isChanged(self, col, row):
     try:
         row, rowmods = self._deferredMods[self.rowid(row)]
         newval = rowmods[col]
-        curval = col.calcValue(row)
+        curval = col.getSavedValue(row)
         return col.type(newval) != col.type(curval)
     except KeyError:
         return False
     except Exception:
         return False
 
+@Column.api
+def getSavedValue(col, row):
+    return Column.calcValue(col, row)
+
+
 @Sheet.api
 def commitAdds(self):
-    nadded = 0
-    for row in self._deferredAdds.values():
-        try:
-            # saul: unsure about this. what use does this have?
-            self.addSourceRow(row)
-            nadded += 1
-        except Exception as e:
-            vd.exceptionCaught(e)
-
+    nadded = len(self._deferredAdds.values())
     if nadded:
         status('added %s %s' % (nadded, self.rowtype))
-
     self._deferredAdds.clear()
     return nadded
 
@@ -144,11 +125,7 @@ def commitDeletes(self):
     newidx = 0
     for r in Progress(self.rows, gerund='deleting'):
         if self.isDeleted(self.rows[newidx]):
-            try:
-                self.deleteSourceRow(self.rows.pop(newidx))
-                ndeleted += 1
-            except Exception as e:
-                vd.exceptionCaught(e)
+            ndeleted += 1
         else:
             if r is dest_row:
                 self.cursorRowIndex = newidx
@@ -202,8 +179,8 @@ def changestr(self, adds, mods, deletes):
 
 @Sheet.api
 def commit(sheet, *rows):
-    if not sheet.defer:
-        fail('deferred save is not enabled for this sheet type')
+    if not getattr(sheet, 'defer', False):
+        fail('commit-sheet is not enabled for this sheet type')
 
     adds, mods, deletes = sheet.getDeferredChanges()
     cstr = sheet.changestr(adds, mods, deletes)
@@ -216,10 +193,6 @@ def commit(sheet, *rows):
         confirm('really %s? ' % cstr)
 
     sheet.putChanges(path, adds, mods, deletes)
-
-@Column.api
-def getSavedValue(col, row):
-    return Column.calcValue(col, row)
 
 Sheet.addCommand('z^S', 'commit-sheet', 'commit()')
 # saul: reload-sheet needs _dm_reload()

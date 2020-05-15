@@ -193,6 +193,7 @@ def deleteBy(self, func, commit=False):
     ndeleted = 0
 
     row = None   # row to re-place cursor after
+    # if commit is True, commit to delete, even if defer is True
     if not getattr(self, 'defer', False) or commit:
         while oldidx < len(oldrows):
             if not func(oldrows[oldidx]):

@@ -274,10 +274,10 @@ class Column(Extensible):
 
     def setValue(self, row, val):
         'For defer columns, override to provide a caching layer above putValue'
-        if getattr(self.sheet, 'defer', False):
-            self.cellChanged(row, val)
-        else:
+        if not getattr(self.sheet, 'defer', False):
             self.putValue(row, val)
+        else:
+            self.cellChanged(row, val)
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions'
