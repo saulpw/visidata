@@ -82,6 +82,9 @@ class MarksSheet(TableSheet):
     def inputmark(self):
         return vd.inputsingle('mark: ') or self.marknotes.pop()
 
+    def openRow(self, row):
+        return row[2]
+
 
 @VisiData.api
 @asyncthread
@@ -112,4 +115,3 @@ TableSheet.addCommand('zt', 'toggle-marks', 'toggle(gatherBy(lambda r,mark=vd.ma
 TableSheet.addCommand('zu', 'unselect-marks', 'unselect(gatherBy(lambda r,mark=vd.marks.inputmark(): vd.marks.isMarked(r, mark)))', '')
 
 TableSheet.addCommand('', 'open-marks', 'vd.push(vd.marks)', '')
-MarksSheet.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow[2])', '')

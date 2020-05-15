@@ -17,9 +17,15 @@ class GitGrep(vgit.GitSheet):
             self.addRow(line.split('\0'))
         self.topRowIndex, self.cursorRowIndex = tmp
 
+    def openRow(self, row):
+        'open this match'
+        vs=GitFileSheet(row[0])
+        vs.cursorRowIndex=int(row[1])-1
+        vs.reload()
+        return vs
+
 
 Sheet.unbindkey('g/')
 globalCommand('g/', 'git-grep', 'rex=input("git grep: "); vd.push(GitGrep(rex, regex=rex, source=sheet))', 'find in all files in this repo'),
 
-GitGrep.addCommand(ENTER, 'dive-row', 'vs=GitFileSheet(cursorRow[0]); vs.cursorRowIndex=int(cursorRow[1])-1; vs.reload(); vd.push(vs)', 'go to this match')
 GitGrep.addCommand('^O', 'sysopen-row', 'launchExternalEditorPath(Path(cursorRow[0]), linenum=cursorRow[1]); reload()', 'open this file in $EDITOR')
