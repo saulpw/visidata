@@ -86,6 +86,5 @@ def save_png(vd, p, vs):
     status('saved')
 
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')
-PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)', 'jump to the source table for this png')
 
 vd.filetype('png', PNGSheet)

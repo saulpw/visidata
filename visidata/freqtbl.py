@@ -62,6 +62,18 @@ class FreqTableSheet(PivotSheet):
         if not [c for c in self.groupByCols if isNumeric(c)]:
             self.orderBy(self.column('count'), reverse=True)
 
+    def openRow(self, row):
+        'open copy of source sheet with rows that are grouped in current row'
+        if row.sourcerows:
+            vs = copy(self.source)
+            vs.name += "_"+valueNames(row.discrete_keys, row.numeric_key)
+            vs.rows=copy(row.sourcerows)
+            return vs
+        warning("no source rows")
+
+    def openCell(self, col, row):
+        return Sheet.openCell(self, col, row)
+
 
 class FreqTableSheetSummary(FreqTableSheet):
     'Append a PivotGroupRow to FreqTable with only selectedRows.'
@@ -77,6 +89,4 @@ Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Col
 ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
-
-FreqTableSheet.addCommand(ENTER, 'dive-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow.discrete_keys, cursorRow.numeric_key); vs.rows=copy(cursorRow.sourcerows or error("no source rows")); vd.push(vs)', 'open copy of source sheet with rows that are grouped in current row')
 FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)', 'open copy of source sheet with rows that are grouped in selected rows')

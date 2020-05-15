@@ -237,8 +237,13 @@ class TableSheet(BaseSheet):
 
     def openRow(self, row):
         k = self.rowkey(row) or [self.cursorRowIndex]
-        name = self.name+'.'+','.join(map(str, k))
-        return vd.load_pyobj(name, row)
+        name = f'{self.name}[{self.keystr(row)}]'
+        return vd.load_pyobj(tuple(c.getTypedValue(row) for c in self.visibleCols))
+
+    def openCell(self, col, row):
+        k = self.keystr(row) or [str(self.cursorRowIndex)]
+        name = f'{self.name}.{col.name}[{self.keystr(row)}]'
+        return vd.load_pyobj(name, col.getTypedValue(row))
 
     @drawcache_property
     def colsByName(self):
@@ -484,6 +489,9 @@ class TableSheet(BaseSheet):
     def rowkey(self, row):
         'returns a tuple of the key for the given row'
         return tuple(c.getTypedValue(row) for c in self.keyCols)
+
+    def keystr(self, row):
+        return ','.join(map(str, self.rowkey(row)))
 
     def checkCursor(self):
         'Keep cursor in bounds of data and screen.'
@@ -998,12 +1006,12 @@ Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 
 Sheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
+Sheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current row')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
+Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
 
 
 # when diving into a sheet, remove the index unless it is precious
-SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)', 'jump to sheet referenced in current row')
-SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)', 'push selected sheets to top of sheets stack')
 SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
@@ -1021,5 +1029,6 @@ BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input(
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'guard current sheet from accidental quitting')
+BaseSheet.addCommand(None, 'open-source', 'vd.push(source)', 'jump to the source of this sheet')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')

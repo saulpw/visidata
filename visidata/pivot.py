@@ -68,6 +68,20 @@ class PivotSheet(Sheet):
 
         self.setKeys(self.columns)
 
+    def openRow(self, row):
+        'open sheet of source rows aggregated in current pivot row'
+        vs = copy(self.source)
+        vs.name += "_%s"%"+".join(row.discrete_keys)
+        vs.rows = sum(row.pivotrows.values(), [])
+        return vs
+
+    def openCell(self, col, row):
+        'open sheet of source rows aggregated in current pivot cell'
+        vs = copy(self.source)
+        vs.name += "_%s"%col.aggvalue
+        vs.rows = row.pivotrows.get(col.aggvalue, [])
+        return vs
+
     def reload(self):
         self.initCols()
 
@@ -231,6 +245,3 @@ class PivotSheet(Sheet):
 
 
 Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
-
-PivotSheet.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow.pivotrows.get(cursorCol.aggvalue, []); vd.push(vs)', 'open sheet of source rows aggregated in current pivot cell')
-PivotSheet.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow.discrete_keys); vs.rows=sum(cursorRow.pivotrows.values(), []); vd.push(vs)', 'open sheet of source rows aggregated in current pivot row')

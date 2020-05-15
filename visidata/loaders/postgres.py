@@ -101,6 +101,10 @@ class PgTablesSheet(Sheet):
             for r in cur:
                 self.addRow(r)
 
+    def openRow(self, row):
+        return PgTable(self.name+"."+row[0], source=row[0], sql=self.sql)
+
+
 # rowdef: tuple of values as returned by fetchone()
 class PgTable(Sheet):
     @asyncthread
@@ -113,5 +117,3 @@ class PgTable(Sheet):
             cursorToColumns(cur, self)
             for r in cur:
                 self.addRow(r)
-
-PgTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))', 'open postgres table in current row')

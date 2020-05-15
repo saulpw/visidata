@@ -1,7 +1,7 @@
 import textwrap
 
 from visidata import vd, option, options, Sheet, ColumnItem, asyncthread
-from visidata import Column, ColumnItem, vlen, ENTER
+from visidata import Column, ColumnItem, vlen
 from visidata import globalCommand, error, stacktrace, VisiData
 
 __all__ = ['TextSheet', 'ErrorSheet']
@@ -47,7 +47,8 @@ class ErrorsSheet(Sheet):
     def reload(self):
         self.rows = self.source
 
-ErrorsSheet.addCommand(ENTER, 'dive-row', 'vd.push(ErrorSheet(source=cursorRow))')
+    def openRow(self, row):
+        return ErrorSheet(source=cursorRow)
 
 @VisiData.property
 def allErrorsSheet(self):
