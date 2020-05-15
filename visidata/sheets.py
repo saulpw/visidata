@@ -236,7 +236,9 @@ class TableSheet(BaseSheet):
         return type(self)._rowtype()
 
     def openRow(self, row):
-        vd.fail(f'cannot open {self.rowtype} on this sheet')
+        k = self.rowkey(row) or [self.cursorRowIndex]
+        name = self.name+'.'+','.join(map(str, k))
+        return vd.load_pyobj(name, row)
 
     @drawcache_property
     def colsByName(self):

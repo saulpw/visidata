@@ -117,7 +117,8 @@ def push_pyobj(name, pyobj):
 def view(obj):
     run(load_pyobj(getattr(obj, '__name__', ''), obj))
 
-def load_pyobj(name, pyobj):
+@VisiData.global_api
+def load_pyobj(vd, name, pyobj):
     'Return Sheet object of appropriate type for given sources in `args`.'
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
         if getattr(pyobj, '_fields', None):  # list of namedtuple
