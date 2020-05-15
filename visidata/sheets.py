@@ -9,7 +9,7 @@ TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
 
-__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
+__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet', 'joinSheetnames']
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
@@ -65,6 +65,13 @@ theme('color_column_sep', '246 blue', 'color of column separators')
 theme('color_key_col', '81 cyan', 'color of key columns')
 theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
+option('name_joiner', '_', 'string to join sheet or column names')
+option('value_joiner', ' ', 'string to join display values')
+
+
+def joinSheetnames(*sheetnames):
+    'Concatenate sheet names in a standard way'
+    return options.name_joiner.join(str(x) for x in sheetnames)
 
 
 def splitcell(s, width=0):

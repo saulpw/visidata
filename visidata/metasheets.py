@@ -5,15 +5,8 @@ from visidata import getGlobals, TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
-option('name_joiner', '_', 'string to join sheet or column names')
-option('value_joiner', ' ', 'string to join display values')
 
 vd_system_sep = '\t'
-
-
-def joinSheetnames(*sheetnames):
-    'Concatenate sheet names in a standard way'
-    return options.name_joiner.join(str(x) for x in sheetnames)
 
 
 @BaseSheet.lazy_property
