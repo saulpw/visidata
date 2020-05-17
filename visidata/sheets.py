@@ -238,7 +238,7 @@ class TableSheet(BaseSheet):
     def openRow(self, row):
         k = self.rowkey(row) or [self.cursorRowIndex]
         name = f'{self.name}[{self.keystr(row)}]'
-        return vd.load_pyobj(tuple(c.getTypedValue(row) for c in self.visibleCols))
+        return vd.load_pyobj(name, tuple(c.getTypedValue(row) for c in self.visibleCols))
 
     def openCell(self, col, row):
         k = self.keystr(row) or [str(self.cursorRowIndex)]
