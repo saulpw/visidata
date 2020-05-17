@@ -1,3 +1,5 @@
+from functools import partial
+
 from visidata import *
 
 
@@ -63,6 +65,8 @@ class PandasSheet(Sheet):
             filetype = getattr(self, 'filetype', self.source.ext)
             if filetype == 'tsv':
                 readfunc = self.read_tsv
+            elif filetype == 'jsonl':
+                readfunc = partial(pd.read_json, lines=True)
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or error('no pandas.read_'+filetype)
             self.df = readfunc(str(self.source), **options('pandas_'+filetype+'_'))
