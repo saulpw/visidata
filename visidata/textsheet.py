@@ -56,7 +56,9 @@ def allErrorsSheet(self):
 
 @VisiData.property
 def recentErrorsSheet(self):
-    return ErrorSheet("errors_recent", source=vd.lastErrors[-1])
+    error = vd.lastErrors[-1] if vd.lastErrors else ''
+    return ErrorSheet("errors_recent", source=error)
+
 
 
 globalCommand('^E', 'error-recent', 'vd.lastErrors and vd.push(recentErrorsSheet) or status("no error")', 'view traceback for most recent error')
