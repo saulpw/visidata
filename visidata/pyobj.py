@@ -230,7 +230,7 @@ class SheetDict(PythonSheet):
         self.rows = list(self.source.keys())
 
     def openRow(self, row):
-        return load_pyobj(joinSheetnames(name, row), source[row])
+        return load_pyobj(joinSheetnames(self.name, row), self.source[row])
 
 
 class ColumnSourceAttr(Column):
