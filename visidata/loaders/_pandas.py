@@ -77,11 +77,9 @@ class PandasSheet(Sheet):
         elif type(self.df.index) is not pd.RangeIndex:
             self.df = self.df.reset_index()
 
-        self.columns = [
-            ColumnItem(col, type=self.dtype_to_type(self.df[col]))
-            for col in self.df.columns
-            if not col.startswith("__vd_")  # reserved for internal usage
-        ]
+        self.columns = []
+        for col in (c for c in self.df.columns if not c.startswith("__vd_")):
+            self.addColumn(ColumnItem(col, type=self.dtype_to_type(self.df[col])))
 
         if self.columns[0].name == 'index': # if the df contains an index column
             self.column('index').hide()
@@ -178,7 +176,7 @@ class PandasSheet(Sheet):
         self._selectedMask.iloc[mask] = selected
 
     def addUndoSelection(self):
-        self.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
+        vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
 
 def view_pandas(df):
     run(PandasSheet('', source=df))
