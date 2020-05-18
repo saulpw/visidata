@@ -180,6 +180,39 @@ class PandasSheet(Sheet):
     def addUndoSelection(self):
         vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
 
+    def insert_row(self, idx, row):
+        import pandas as pd
+        self.df = pd.concat((self.df.iloc[0:idx], row, self.df.iloc[idx+1:]))
+        self.df.index = pd.RangeIndex(len(self.df.index))
+        vd.addUndo(partial(self.df.drop, inplace=True), idx)
+        self._checkSelectedIndex()
+
+    def delete_row(self, rowidx):
+        import pandas as pd
+        oldrow = self.df.iloc[rowidx:rowidx+1]
+        vd.addUndo(self.insert_row, rowidx, oldrow)
+        self.df.drop(rowidx, inplace=True)
+        self.df.index = pd.RangeIndex(len(self.df.index))
+        self._checkSelectedIndex()
+        vd.cliprows = [(self, rowidx, oldrow)]
+
+    def deleteBy(self, func):
+        'Delete rows for which func(row) is true.  Returns number of deleted rows.'
+        import pandas as pd
+        oldidx = self.cursorRowIndex
+        ndeleted = self.nSelected
+        vd.addUndo(setattr, self, 'df', self.df)
+        self.df.drop([i for i, v in enumerate(self._selectedMask) if v], inplace=True)
+        self.df.index = pd.RangeIndex(len(self.df.index))
+        self._checkSelectedIndex()
+
+        status('deleted %s %s' % (ndeleted, self.rowtype))
+        return ndeleted
+
+    def deleteSelected(self):
+        'Delete all selected rows.'
+        ndeleted = self.deleteBy(self.isSelected)
+
 def view_pandas(df):
     run(PandasSheet('', source=df))
 
