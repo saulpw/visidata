@@ -237,12 +237,12 @@ class TableSheet(BaseSheet):
 
     def openRow(self, row):
         k = self.rowkey(row) or [self.cursorRowIndex]
-        name = f'{self.name}[{self.keystr(row)}]'
+        name = f'{self.name}[{k}]'
         return vd.load_pyobj(name, tuple(c.getTypedValue(row) for c in self.visibleCols))
 
     def openCell(self, col, row):
         k = self.keystr(row) or [str(self.cursorRowIndex)]
-        name = f'{self.name}.{col.name}[{self.keystr(row)}]'
+        name = f'{self.name}.{col.name}[{k}]'
         return vd.load_pyobj(name, col.getTypedValue(row))
 
     @drawcache_property

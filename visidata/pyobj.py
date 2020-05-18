@@ -7,7 +7,7 @@ option('visibility', 0, 'visibility level')
 
 class PythonSheet(Sheet):
     def openRow(self, row):
-        return load_pyobj("%s[%s]" % (name, rowIndex), row)
+        return load_pyobj("%s[%s]" % (self.name, self.keystr(row)), row)
 
 
 def expand_cols_deep(sheet, cols, rows, depth=0):  # depth == 0 means drill all the way
