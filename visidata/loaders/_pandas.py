@@ -11,6 +11,8 @@ class DataFrameAdapter:
         self.df = df
 
     def __len__(self):
+        if 'df' not in self.__dict__:
+            return 0
         return len(self.df)
 
     def __getitem__(self, k):
@@ -84,7 +86,6 @@ class PandasSheet(Sheet):
         if self.columns[0].name == 'index': # if the df contains an index column
             self.column('index').hide()
 
-
         self.rows = DataFrameAdapter(self.df)
         self._selectedMask = pd.Series(False, index=self.df.index)
         if self.df.index.nunique() != self.df.shape[0]:
@@ -153,9 +154,10 @@ class PandasSheet(Sheet):
     def unselect(self, rows, status=True, progress=True):
         self.addUndoSelection()
         for row in (Progress(rows, 'unselecting') if progress else rows):
-            select.unselectRow(row)
+            self.unselectRow(row)
 
     def clearSelected(self):
+        import pandas as pd
         self._selectedMask = pd.Series(False, index=self.df.index)
 
     def selectByIndex(self, start=None, end=None):
