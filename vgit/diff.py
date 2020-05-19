@@ -241,6 +241,10 @@ class HunksSheet(GitSheet):
             elif line[0] in ' +-':
                 self.rows[-1][-1].append(line)
 
+    def openRow(self, row):
+        'open the diff for this hunk'
+        return HunkViewer([row], source=self)
+
 
 theme('color_git_hunk_add', 'green', 'color for added hunk lines')
 theme('color_git_hunk_del', 'red', 'color for deleted hunk lines')
@@ -306,7 +310,6 @@ HunkViewer.addCommand('2', 'git-apply-hunk', 'source.git_apply(hunks.pop(0), "--
 HunkViewer.addCommand(ENTER, 'git-skip-hunk', 'hunks.pop(0); reload()', 'move to the next hunk without applying this hunk'),
 HunkViewer.addCommand('d', 'delete-line', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch'),
 
-HunksSheet.addCommand(ENTER, 'dive-row', 'vd.push(HunkViewer([cursorRow], source=sheet))', 'view the diff for this hunks'),
 HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(selectedRows or rows, source=sheet))', 'view the diffs for the selected hunks (or all hunks)'),
 HunksSheet.addCommand('V', 'git-view-patch', 'vd.push(TextSheet("diff", source="\\n".join(cursorRow[7])))', 'view the raw patch for this hunk'),
 #HunksSheet.addCommand('gV', 'git-view-patch-selected', '', 'view the raw patch for selected/all hunks'),

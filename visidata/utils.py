@@ -2,7 +2,7 @@ import operator
 
 'Various helper classes and functions.'
 
-__all__ = ['AttrDict', 'joinSheetnames', 'moveListItem', 'namedlist', 'classproperty']
+__all__ = ['AttrDict', 'moveListItem', 'namedlist', 'classproperty']
 
 
 class AttrDict(dict):
@@ -23,11 +23,6 @@ class AttrDict(dict):
 class classproperty(property):
     def __get__(self, cls, obj):
         return classmethod(self.fget).__get__(None, obj or cls)()
-
-
-def joinSheetnames(*sheetnames):
-    'Concatenate sheet names in a standard way'
-    return '_'.join(str(x) for x in sheetnames)
 
 
 def moveListItem(L, fromidx, toidx):
@@ -70,16 +65,12 @@ def namedlist(objname, fieldnames):
 
         def __init__(self, L=None, **kwargs):
             if L is None:
-                L = [None]*self.length()
-            elif len(L) < self.length():
-                L.extend([None]*(self.length() - len(L)))
+                L = [None]*len(self._fields)
+            elif len(L) < len(self._fields):
+                L.extend([None]*(len(self._fields) - len(L)))
             super().__init__(L)
             for k, v in kwargs.items():
                 setattr(self, k, v)
-
-        @classmethod
-        def length(cls):
-            return len(cls._fields)
 
         def __getattr__(self, k):
             'to enable .fieldname'
@@ -94,9 +85,5 @@ def namedlist(objname, fieldnames):
                 self[self._fields.index(k)] = v
             except ValueError:
                 super().__setattr__(k, v)
-
-    for i, attrname in enumerate(fieldnames):
-        # create property getter/setter for each field
-        setattr(NamedListTemplate, attrname, property(operator.itemgetter(i), itemsetter(i)))
 
     return NamedListTemplate

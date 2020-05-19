@@ -47,6 +47,9 @@ class GitOverview(Sheet):
                 path = Path(fn).parent.parent
             self.addRow(GitRepo([path]))
 
+    def openRow(self, row):
+        return open_git(row.path)
 
-GitOverview.addCommand(ENTER, 'dive-row', 'vd.push(open_git(cursorRow.path))')
-GitOverview.addCommand('z'+ENTER, 'dive-cell', 'view(cursorValue)')
+    def openCell(self, col, row):
+        val = col.getValue(row)
+        return load_pyobj(getattr(val, '__name__', ''), val)

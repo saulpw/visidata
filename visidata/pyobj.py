@@ -6,11 +6,9 @@ option('visibility', 0, 'visibility level')
 
 
 class PythonSheet(Sheet):
-    pass
+    def openRow(self, row):
+        return load_pyobj("%s[%s]" % (self.name, self.keystr(row)), row)
 
-# used as ENTER in several pyobj sheets
-PythonSheet.addCommand(None, 'dive-row', 'push_pyobj("%s[%s]" % (name, cursorRowIndex), cursorRow)', 'dive further into Python object')
-BaseSheet.bindkey(ENTER, 'dive-row')
 
 def expand_cols_deep(sheet, cols, rows, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'
@@ -117,7 +115,8 @@ def push_pyobj(name, pyobj):
 def view(obj):
     run(load_pyobj(getattr(obj, '__name__', ''), obj))
 
-def load_pyobj(name, pyobj):
+@VisiData.global_api
+def load_pyobj(vd, name, pyobj):
     'Return Sheet object of appropriate type for given sources in `args`.'
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
         if getattr(pyobj, '_fields', None):  # list of namedtuple
@@ -214,10 +213,9 @@ class SheetNamedTuple(PythonSheet):
     def reload(self):
         self.rows = list(zip(self.source._fields, self.source))
 
-    def dive(self):
-        push_pyobj(joinSheetnames(self.name, self.cursorRow[0]), self.cursorRow[1])
+    def openRow(self, row):
+        return load_pyobj(joinSheetnames(self.name, row[0]), row[1])
 
-SheetNamedTuple.addCommand(ENTER, 'dive-row', 'dive()', 'dive further into Python object')
 
 # source is dict
 class SheetDict(PythonSheet):
@@ -231,7 +229,9 @@ class SheetDict(PythonSheet):
     def reload(self):
         self.rows = list(self.source.keys())
 
-SheetDict.addCommand(ENTER, 'dive-row', 'push_pyobj(joinSheetnames(name, cursorRow), source[cursorRow])', 'dive further into Python object')
+    def openRow(self, row):
+        return load_pyobj(joinSheetnames(self.name, row), self.source[row])
+
 
 class ColumnSourceAttr(Column):
     'Use row as attribute name on sheet source'
@@ -268,6 +268,11 @@ class PyobjSheet(PythonSheet):
             except Exception:
                 pass
 
+    def openRow(self, row):
+        'dive further into Python object'
+        v = getattr(self.source, row)
+        return load_pyobj(self.name + "." + str(row), v() if callable(v) else v)
+
 
 globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, None))', 'evaluate Python expression and open result as Python object')
 globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope')
@@ -284,7 +289,6 @@ Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCol
 
 Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
-PyobjSheet.addCommand(ENTER, 'dive-row', 'v = getattr(source, cursorRow); push_pyobj(name + "." + str(cursorRow), v() if callable(v) else v)', 'dive further into Python object')
 PyobjSheet.addCommand('v', 'visibility', 'sheet.options.visibility = 0 if sheet.options.visibility else 2; reload()', 'toggle show/hide for methods and hidden properties')
 PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload()', 'show methods and hidden properties')
 PyobjSheet.addCommand('zv', 'hide-hidden', 'sheet.options.visibility -= 1; reload()', 'hide methods and hidden properties')

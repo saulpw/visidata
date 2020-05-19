@@ -77,6 +77,9 @@ class BaseSheet(Extensible):
     def __len__(self):
         return self.nRows
 
+    def __str__(self):
+        return self.name
+
     @property
     def nRows(self):
         'Number of rows on this sheet.'
@@ -212,7 +215,7 @@ def getSheet(vd, sheetname):
     try:
         sheetidx = int(sheetname)
         return vd.sheets[sheetidx]
-    except ValueError:
+    except TypeError:
         pass
 
     if sheetname == 'options':

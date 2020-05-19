@@ -23,7 +23,10 @@ class GitCmdLog(Sheet):
         super().__init__(name, **kwargs)
         self.rows = []
 
-GitCmdLog.addCommand(ENTER, 'dive-row', 'vd.push(TextSheet(cursorRow[0], source=cursorRow[1]))', 'view output of this command'),
+
+    def openRow(self, row):
+        'open output of this command'
+        return TextSheet(row[0], source=row[1])
 
 
 @VisiData.lazy_property

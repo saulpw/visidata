@@ -68,6 +68,20 @@ class PivotSheet(Sheet):
 
         self.setKeys(self.columns)
 
+    def openRow(self, row):
+        'open sheet of source rows aggregated in current pivot row'
+        vs = copy(self.source)
+        vs.name += "_%s"%"+".join(row.discrete_keys)
+        vs.rows = sum(row.pivotrows.values(), [])
+        return vs
+
+    def openCell(self, col, row):
+        'open sheet of source rows aggregated in current pivot cell'
+        vs = copy(self.source)
+        vs.name += "_%s"%col.aggvalue
+        vs.rows = row.pivotrows.get(col.aggvalue, [])
+        return vs
+
     def reload(self):
         self.initCols()
 
@@ -95,7 +109,7 @@ class PivotSheet(Sheet):
         if not self.pivotCols:
             for aggcol, aggregatorlist in aggcols.items():
                 for aggregator in aggregatorlist:
-                    aggname = '%s_%s' % (aggcol.name, aggregator.__name__)
+                    aggname = '%s_%s' % (aggcol.name, aggregator.name)
 
                     c = Column(aggname,
                                 type=aggregator.type or aggcol.type,
@@ -118,9 +132,9 @@ class PivotSheet(Sheet):
                 for aggcol, aggregatorlist in aggcols.items():
                     for aggregator in aggregatorlist:
                         if len(aggcols) > 1: #  if more than one aggregated column, include that column name in the new column name
-                            aggname = '%s_%s' % (aggcol.name, aggregator.__name__)
+                            aggname = '%s_%s' % (aggcol.name, aggregator.name)
                         else:
-                            aggname = aggregator.__name__
+                            aggname = aggregator.name
 
 
                         if len(aggregatorlist) > 1 or len(aggcols) > 1:
@@ -134,7 +148,7 @@ class PivotSheet(Sheet):
                                     getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.pivotrows.get(col.aggvalue, [])))
                         self.addColumn(c)
 
-#                    if aggregator.__name__ != 'count':  # already have count above
+#                    if aggregator.name != 'count':  # already have count above
 #                        c = Column('Total_' + aggcol.name,
 #                                    type=aggregator.type or aggcol.type,
 #                                    getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.sourcerows))
@@ -231,6 +245,3 @@ class PivotSheet(Sheet):
 
 
 Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
-
-PivotSheet.addCommand('z'+ENTER, 'dive-cell', 'vs=copy(source); vs.name+="_%s"%cursorCol.aggvalue; vs.rows=cursorRow.pivotrows.get(cursorCol.aggvalue, []); vd.push(vs)', 'open sheet of source rows aggregated in current pivot cell')
-PivotSheet.addCommand(ENTER, 'dive-row', 'vs=copy(source); vs.name+="_%s"%"+".join(cursorRow.discrete_keys); vs.rows=sum(cursorRow.pivotrows.values(), []); vd.push(vs)', 'open sheet of source rows aggregated in current pivot row')

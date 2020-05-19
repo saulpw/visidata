@@ -381,6 +381,9 @@ class PcapFlowsSheet(Sheet):
                     else:
                         self.syntimes[tup] = pkt.timestamp
 
+    def openRow(self, row):
+        return PcapSheet("%s_packets"%flowname(row), rows=row.packets)
+
 
 def flowname(flow):
     return '%s_%s:%s-%s:%s' % (flow.transport, flow.src, flow.sport, flow.dst, flow.dport)
@@ -395,8 +398,6 @@ def try_apply(func, *args, **kwargs):
 PcapSheet.addCommand('W', 'flows', 'vd.push(PcapFlowsSheet(sheet.name+"_flows", source=sheet))')
 PcapSheet.addCommand('2', 'l2-packet', 'vd.push(IPSheet("L2packets", source=sheet))')
 PcapSheet.addCommand('3', 'l3-packet', 'vd.push(TCPSheet("L3packets", source=sheet))')
-
-PcapFlowsSheet.addCommand(ENTER, 'dive-row', 'vd.push(PcapSheet("%s_packets"%flowname(cursorRow), rows=cursorRow.packets))')
 
 
 vd.filetype('pcap', PcapSheet)

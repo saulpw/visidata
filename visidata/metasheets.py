@@ -8,6 +8,7 @@ option('visibility', 0, 'visibility level (0=low, 1=high)')
 
 vd_system_sep = '\t'
 
+
 @BaseSheet.lazy_property
 def optionsSheet(sheet):
     return OptionsSheet(sheet.name+"_options", source=sheet)
@@ -154,18 +155,27 @@ def vdmenu(self):
     vs.reload()
     return vs
 
-def combineColumns(cols):
-    'Return Column object formed by joining fields in given columns.'
-    return Column("+".join(c.name for c in cols),
-                  getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
+@ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')
+def join_cols(sheet):
+    cols = sheet.someSelectedRows
+    destSheet = cols[0].sheet
+
+    if len(set(c.sheet for c in cols)) > 1:
+        vd.fail('joined columns must come from the same source sheet')
+
+    c = Column(options.name_joiner.join(c.name for c in cols),
+                getter=lambda col,row,cols=cols,ch=options.value_joiner: ch.join(c.getDisplayValue(row) for c in cols))
+
+    vd.status(f"added {c.name} to {destSheet}")
+    destSheet.addColumn(c, index=sheet.cursorRowIndex)
 
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
 globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=list(vd.sheets)))', 'open Columns Sheet: edit column properties for all visible columns from all sheets')
-globalCommand('gO', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')
+globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')
 
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)', 'open VisiData menu: browse list of core sheets')
-BaseSheet.addCommand('O', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open Options Sheet: edit sheet options (apply to current sheet only)')
+BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open Options Sheet: edit sheet options (apply to current sheet only)')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
@@ -175,7 +185,6 @@ ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)'
 
 ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()', 'hide selected columns on source sheet')
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
-ColumnsSheet.addCommand('&', 'join-cols', 'source.addColumn(combineColumns(someSelectedRows), cursorRowIndex)', 'add column from concatenating selected source columns')
 
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
 ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')

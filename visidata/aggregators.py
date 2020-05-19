@@ -27,13 +27,20 @@ def getValues(self, rows):
 
 aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
-def _defaggr(name, type, func):
-    'Define aggregator `name` that calls func(col, rows)'
-    func.type=type
-    func.__name__ = name
-    return func
+class Aggregator:
+    def __init__(self, name, type, func, helpstr='foo'):
+        'Define aggregator `name` that calls func(col, rows)'
+        self.type = type
+        self.func = func
+        self.helpstr = helpstr
+        self.name = name
 
-def aggregator(name, func, *args, type=None):
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, **kwargs)
+
+_defaggr = Aggregator
+
+def aggregator(name, func, helpstr, *args, type=None):
     'Define simple aggregator `name` that calls func(values)'
     def _func(col, rows):  # wrap builtins so they can have a .type
         vals = list(col.getValues(rows))
@@ -44,7 +51,7 @@ def aggregator(name, func, *args, type=None):
                 return None
             return e
 
-    aggregators[name] = _defaggr(name, type, _func)
+    aggregators[name] = _defaggr(name, type, _func, helpstr)
 
 ## specific aggregator implementations
 
@@ -80,34 +87,34 @@ def _percentile(N, percent, key=lambda x:x):
     return d0+d1
 
 @functools.lru_cache(100)
-def percentile(pct):
-    return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100))
+def percentile(pct, helpstr):
+    return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100), helpstr)
 
-def quantiles(q):
-    return [percentile(round(100*i/q)) for i in range(1, q)]
+def quantiles(q, helpstr):
+    return [percentile(round(100*i/q), helpstr) for i in range(1, q)]
 
-aggregator('min', min)
-aggregator('max', max)
-aggregator('avg', mean, type=float)
-aggregator('mean', mean, type=float)
-aggregator('median', median)
-aggregator('sum', sum)
-aggregator('distinct', set, type=vlen)
-aggregator('count', lambda values: sum(1 for v in values), type=int)
-aggregator('list', list)
+aggregator('min', min, 'minimum value')
+aggregator('max', max, 'minimum value')
+aggregator('avg', mean, 'arithmetic mean of values', type=float)
+aggregator('mean', mean, 'arithmetic mean of values', type=float)
+aggregator('median', median, 'median of values')
+aggregator('sum', sum, 'sum of values')
+aggregator('distinct', set, 'distinct values', type=vlen)
+aggregator('count', lambda values: sum(1 for v in values), 'number of values', type=int)
+aggregator('list', list, 'list of values')
 
-aggregators['q3'] = quantiles(3)
-aggregators['q4'] = quantiles(4)
-aggregators['q5'] = quantiles(5)
-aggregators['q10'] = quantiles(10)
+aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
+aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
+aggregators['q5'] = quantiles(5, 'quintiles (20/40/60/80th pctiles)')
+aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/80th pctiles)')
 
 # returns keys of the row with the max value
-aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]))
+aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
 
 
 ColumnsSheet.columns += [
         Column('aggregators',
-               getter=lambda col,row: ' '.join(x.__name__ for x in getattr(row, 'aggregators', [])),
+               getter=lambda col,row: ' '.join(x.name for x in getattr(row, 'aggregators', [])),
                setter=lambda col,row,val: setattr(row, 'aggregators', list(aggregators[k] for k in (val or '').split())))
 ]
 
@@ -127,7 +134,7 @@ def addAggregators(cols, aggrnames):
 @Column.api
 def aggname(col, agg):
     'Consistent formatting of the name of given aggregator for this column.  e.g. "col1_sum"'
-    return '%s_%s' % (col.name, agg.__name__)
+    return '%s_%s' % (col.name, agg.name)
 
 @Column.api
 @asyncthread
@@ -139,9 +146,13 @@ def show_aggregate(col, agg, rows):
     vd.status(dispval)
 
 
+aggregator_choices = [
+    {'key': agg, 'desc': v[0].helpstr if isinstance(v, list) else v.helpstr} for agg, v in aggregators.items()
+]
+
 addGlobals(globals())
 
 
-Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregators.keys()))', 'add aggregator to current column')
-Sheet.addCommand('z+', 'show-aggregate', 'for agg in chooseMany(aggregators): cursorCol.show_aggregate(agg,  selectedRows or rows)', 'display result of aggregator over values in selected rows for current column')
-ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregators.keys()))', 'add aggregators to selected source columns')
+Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'add aggregator to current column')
+Sheet.addCommand('z+', 'show-aggregate', 'for agg in chooseMany(aggregators_choices): cursorCol.show_aggregate(agg["key"],  selectedRows or rows)', 'display result of aggregator over values in selected rows for current column')
+ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')

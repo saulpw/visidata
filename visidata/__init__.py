@@ -65,6 +65,7 @@ from .slide import *
 from .search import *
 from .expr import *
 
+from .choose import *
 from .metasheets import *
 from .join import *
 from .aggregators import *

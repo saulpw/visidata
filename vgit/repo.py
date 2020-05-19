@@ -63,6 +63,9 @@ class GitBranches(GitSheet):
             row.last_commit = self.git_all("show", "--no-patch", '--pretty=%ai', row.localbranch).strip()
             row.last_author = self.git_all("show", "--no-patch", '--pretty=%an', row.localbranch).strip()
 
+    def openRow(self, row):
+        return GitLogSheet(row.localbranch+"_log", source=self, ref=row.localbranch)
+
 
 class GitOptions(GitSheet):
     CONFIG_CONTEXTS = ('local', 'local', 'global', 'system')
@@ -128,6 +131,10 @@ class GitStashes(GitSheet):
             sha1, msg = rest.split(' ', 1)
             self.addRow([stashid, starting_branch, sha1, msg])
 
+    def openRow(self, row):
+        'open this stashed change'
+        return HunksSheet(row[0]+"_diffs", "stash", "show", "--no-color", "--patch", row[0], source=self)
+
 
 # rowdef: (commit_hash, refnames, author, author_date, body, notes)
 class GitLogSheet(GitSheet):
@@ -161,6 +168,10 @@ class GitLogSheet(GitSheet):
         lines = self.git_iter('log', '--no-color', '-z', '--pretty=format:%s' % '%x1f'.join(self.GIT_LOG_FORMAT), self.ref)
         for record in Progress(tuple(lines)):
             self.addRow(record.split('\x1f'))
+
+    def openRow(self, row):
+        'open this commit'
+        return getCommitSheet(row[0][:7], self, row[0])
 
     @asyncthread
     def commit(self, path, adds, mods, dels):
@@ -213,13 +224,11 @@ GitBranches.addCommand('d', 'git-branch-delete', 'git("branch", "--delete", curs
 GitBranches.addCommand('e', 'git-branch-rename', 'git("branch", "-v", "--move", cursorRow.localbranch, editCell(0))', 'rename this branch'),
 GitBranches.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.localbranch)', 'checkout this branch'),
 GitBranches.addCommand('m', 'git-branch-merge', 'git("merge", cursorRow.localbranch)', 'merge this branch into the current branch'),
-GitBranches.addCommand(ENTER, 'dive-row', 'vd.push(GitLogSheet(cursorRow.localbranch+"_log", source=sheet, ref=cursorRow.localbranch))', 'push log of this branch'),
 
 GitStashes.addCommand('a', 'git-stash-apply', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing'),
 GitStashes.addCommand('', 'git-stash-pop-row', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),
 GitStashes.addCommand('d', 'git-stash-drop-row', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change'),
 GitStashes.addCommand('b', 'git-stash-branch', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash'),
-GitStashes.addCommand(ENTER, 'dive-row', 'vd.push(HunksSheet(cursorRow[0]+"_diffs", "stash", "show", "--no-color", "--patch", cursorRow[0], source=sheet))', 'show this stashed change'),
 
 GitOptions.addCommand('d', 'git-config-unset', 'git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], cursorRow[0])', 'unset this config value'),
 GitOptions.addCommand('gd', 'git-config-unset-selected', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset selected config values'),
@@ -230,7 +239,6 @@ GitOptions.addCommand('a', 'git-config-add', 'git("config", "--add", "--"+CONFIG
 GitRemotes.addCommand('d', 'git-remote-delete', 'git("remote", "rm", cursorRow[0])', 'delete remote'),
 GitRemotes.addCommand('a', 'git-remote-add', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
 
-GitLogSheet.addCommand(ENTER, 'dive-row', 'vd.push(getCommitSheet(cursorRow[0][:7], sheet, cursorRow[0]))', 'show this commit'),
 #GitLogSheet.addCommand('', 'git-squash-selected', '', 'squash selected commits'),
 GitLogSheet.addCommand('x', 'git-pick', 'git("cherry-pick", cursorRow[0])', 'cherry-pick this commit onto current branch'),
 GitLogSheet.addCommand('gx', 'git-pick-selected', '', 'cherry-pick selected commits onto current branch'),

@@ -11,11 +11,12 @@ import stat
 
 from visidata import vd, option, options, status, run, UNLOADED, error
 from visidata import loadConfigFile, addGlobals, getGlobals, globalCommand, asyncthread
-from visidata import Path, openSource, saveSheets, setDiffSheet, domotd, Sheet, Column
+from visidata import Path, openSource, saveSheets, domotd, Sheet, Column
 from visidata import date, modtime, filesize
 from visidata.main import eval_vd, duptty
 
 from plugins.defermods import *
+from plugins.diff import setDiffSheet
 
 
 option('recursive', False, 'list files in subdirectories recursively')

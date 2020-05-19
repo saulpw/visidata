@@ -12,6 +12,12 @@ timeouts_before_idle = 10
 
 option('disp_splitwin_pct', 0, 'height of second sheet on screen')
 
+class ReturnValue(BaseException):
+    'raise ReturnValue(ret) to exit from an inner runresult() with its result.'
+    pass
+
+
+
 @VisiData.api
 def draw(self, scr, sheet):
     'Redraw full screen.'
@@ -64,6 +70,24 @@ def setWindows(vd, scr):
         vd.scrFull = scr
         return True
 
+@VisiData.api
+def drawall(vd):
+    vd.draw(vd.win1, vd.sheets[0])
+    if vd.win2 and len(vd.sheets) > 1:
+        vd.draw(vd.win2, vd.sheets[1])
+    else:
+        vd.win2.erase()
+        vd.win2.refresh()
+
+@VisiData.api
+def runresult(vd):
+    try:
+        err = vd.mainloop(vd.scrFull)
+        if err:
+            raise Exception(err)
+    except ReturnValue as e:
+        return e.args[0]
+
 
 @VisiData.api
 def mainloop(self, scr):
@@ -87,15 +111,9 @@ def mainloop(self, scr):
         vd.drawThread = threading.current_thread()
 
         sheet.ensureLoaded()
-
         vd.setWindows(scr)
 
-        self.draw(vd.win1, self.sheets[0])
-        if vd.win2 and len(self.sheets) > 1:
-            self.draw(vd.win2, self.sheets[1])
-        else:
-            vd.win2.erase()
-            vd.win2.refresh()
+        self.drawall()
 
         keystroke = self.getkeystroke(scr, sheet)
 
