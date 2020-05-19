@@ -24,11 +24,11 @@ Sheet.colorizers += [
         ]
 
 @Sheet.api
-def preload(sheet):
+def preloadHook(sheet):
     sheet._deferredAdds.clear()
     sheet._deferredMods.clear()
     sheet._deferredDels.clear()
-    # how to call the previous preload? Sheet.preload(sheet)
+    # how to call the previous preloadHook? Sheet.preloadHook(sheet)
 
 @Sheet.api
 def rowAdded(self, row):

@@ -88,8 +88,8 @@ class SqliteSheet(Sheet):
 
             conn.commit()
 
+        self.preloadHook()
         self.reload()
-        self.preload()
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):
