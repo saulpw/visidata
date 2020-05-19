@@ -1,10 +1,11 @@
 from visidata import *
 
 
+# rowdef: list of values
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     savesToSource = True
-    defermods = True
+    defer = True
 
     def resolve(self):
         'Resolve all the way back to the original source Path.'
@@ -41,10 +42,11 @@ class SqliteSheet(Sheet):
             r = self.execute(conn, 'SELECT COUNT(*) FROM "%s"' % tblname).fetchall()
             rowcount = r[0][0]
             for row in Progress(self.execute(conn, 'SELECT * FROM "%s"' % tblname), total=rowcount-1):
-                yield row
+                yield list(row)
 
     @asyncthread
-    def putChanges(self, path, adds, mods, dels):
+    def putChanges(self):
+        adds, mods, dels = self.getDeferredChanges()
         options_safe_error = options.safe_error
         def value(row, col):
             v = col.getTypedValue(row)
@@ -84,8 +86,8 @@ class SqliteSheet(Sheet):
 
             conn.commit()
 
+        self.preloadHook()
         self.reload()
-        self._dm_reset()
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):
