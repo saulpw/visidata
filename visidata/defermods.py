@@ -24,10 +24,11 @@ Sheet.colorizers += [
         ]
 
 @Sheet.api
-def _dm_reset(sheet, *rows):
+def preload(sheet):
     sheet._deferredAdds.clear()
     sheet._deferredMods.clear()
     sheet._deferredDels.clear()
+    # how to call the previous preload? Sheet.preload(sheet)
 
 @Sheet.api
 def rowAdded(self, row):
@@ -50,10 +51,10 @@ def cellChanged(col, row, val):
 
         def _undoCellChanged(col, row, oldval):
             if oldval == col.getSavedValue(row):
-                # if we have reached the original value, remove from defermods
+                # if we have reached the original value, remove from defermods entirely
                 del col.sheet._deferredMods[col.sheet.rowid(row)]
             else:
-                # otherwise, update deferredMods with older value
+                # otherwise, update deferredMods with previous value
                 _, rowmods = col.sheet._deferredMods[rowid]
                 rowmods[col] = oldval
 
@@ -92,7 +93,7 @@ def getSavedValue(col, row):
 def commitAdds(self):
     nadded = len(self._deferredAdds.values())
     if nadded:
-        status('added %s %s' % (nadded, self.rowtype))
+        vd.status('added %s %s' % (nadded, self.rowtype))
     self._deferredAdds.clear()
     return nadded
 
@@ -137,7 +138,7 @@ def commitDeletes(self):
 
 @asyncthread
 @Sheet.api
-def putChanges(sheet, path, adds, deletes):
+def putChanges(sheet):
     'Commit changes to path. adds are a diffset to apply to the last load from or commit to path. By default this overwrites completely, saving as filetype to path, with filetype from path ext.'
     sheet.commitAdds()
     sheet.commitMods()
@@ -179,7 +180,7 @@ def changestr(self, adds, mods, deletes):
 
 @Sheet.api
 def commit(sheet, *rows):
-    if not getattr(sheet, 'defer', False):
+    if not sheet.defer:
         fail('commit-sheet is not enabled for this sheet type')
 
     adds, mods, deletes = sheet.getDeferredChanges()
@@ -192,7 +193,6 @@ def commit(sheet, *rows):
     if options.confirm_overwrite:
         confirm('really %s? ' % cstr)
 
-    sheet.putChanges(path, adds, mods, deletes)
+    sheet.putChanges()
 
 Sheet.addCommand('z^S', 'commit-sheet', 'commit()')
-# saul: reload-sheet needs _dm_reload()

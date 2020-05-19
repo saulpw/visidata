@@ -1,6 +1,7 @@
 from visidata import *
 
 
+# rowdef: list of values
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     savesToSource = True
@@ -47,7 +48,8 @@ class SqliteSheet(Sheet):
                 yield list(row)
 
     @asyncthread
-    def putChanges(self, path, adds, mods, dels):
+    def putChanges(self):
+        adds, mods, dels = self.getDeferredChanges()
         options_safe_error = options.safe_error
         def value(row, col):
             v = col.getTypedValue(row)
@@ -87,7 +89,7 @@ class SqliteSheet(Sheet):
             conn.commit()
 
         self.reload()
-        self._dm_reset()
+        self.preload()
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):

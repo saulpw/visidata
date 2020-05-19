@@ -951,10 +951,15 @@ def quit(vd, *sheets):
         vd.remove(vs)
 
 
+@Sheet.api
+def preload(sheet):
+    'Override to setup for reload()'
+    pass
+
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'reload(); _dm_reset(); recalc(); status("reloaded")', 'reload current sheet'),
+BaseSheet.addCommand('^R', 'reload-sheet', 'preload(); reload(); recalc(); status("reloaded")', 'reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')

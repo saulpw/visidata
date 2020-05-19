@@ -42,6 +42,7 @@ class BaseSheet(Extensible):
     _coltype = None      # callable (no parms) that returns new settable view into that item
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
+    defer = False        # False for not deferring changes until save
 
     @visidata.classproperty
     def options(cls):

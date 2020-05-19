@@ -34,14 +34,15 @@ def addNewRows(sheet, n, idx):
         addedRows[sheet.rowid(row)] = row
         sheet.addRow(row, idx+1)
 
-        @asyncthread
-        def _removeRows():
-            sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
-
-        vd.addUndo(_removeRows)
-
-        if getattr(sheet, 'defer', False):
+        if sheet.defer:
             sheet.rowAdded(row)
+
+    @asyncthread
+    def _removeRows():
+        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
+
+    vd.addUndo(_removeRows)
+
 
 @asyncthread
 def fillNullValues(col, rows):
@@ -194,31 +195,31 @@ def deleteBy(self, func, commit=False):
 
     row = None   # row to re-place cursor after
     # if commit is True, commit to delete, even if defer is True
-    if not getattr(self, 'defer', False) or commit:
-        while oldidx < len(oldrows):
-            if not func(oldrows[oldidx]):
-                row = self.rows[oldidx]
-                break
-            oldidx += 1
-
-        self.rows.clear()
-        for r in Progress(oldrows, 'deleting'):
-            if not func(r):
-                self.rows.append(r)
-                if r is row:
-                    self.cursorRowIndex = len(self.rows)-1
-            else:
-                ndeleted += 1
-
-        vd.addUndo(setattr, self, 'rows', oldrows)
-
-        status('deleted %s %s' % (ndeleted, self.rowtype))
-
-    else:
+    if self.defer and not commit:
         ndeleted = 0
         for r in self.gatherBy(func, 'deleting'):
             self.rowDeleted(r)
             ndeleted += 1
+        return ndeleted
+
+    while oldidx < len(oldrows):
+        if not func(oldrows[oldidx]):
+            row = self.rows[oldidx]
+            break
+        oldidx += 1
+
+    self.rows.clear() # must delete from the existing rows object
+    for r in Progress(oldrows, 'deleting'):
+        if not func(r):
+            self.rows.append(r)
+            if r is row:
+                self.cursorRowIndex = len(self.rows)-1
+        else:
+            ndeleted += 1
+
+    vd.addUndo(setattr, self, 'rows', oldrows)
+
+    status('deleted %s %s' % (ndeleted, self.rowtype))
 
     return ndeleted
 
