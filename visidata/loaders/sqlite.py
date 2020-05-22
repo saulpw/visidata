@@ -82,7 +82,7 @@ class SqliteSheet(Sheet):
             for r in dels.values():
                 sql = 'DELETE FROM "%s" ' % self.tableName
                 sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
-                self.execute(conn, sql, parms=list(c.getTypedValue(row) for c in wherecols))
+                self.execute(conn, sql, parms=list(c.getTypedValue(r) for c in wherecols))
 
             conn.commit()
 
