@@ -1,5 +1,8 @@
 import os
+import io
+import sys
 import stat
+import locale
 import subprocess
 import contextlib
 try:
@@ -73,20 +76,81 @@ class ColumnShell(Column):
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
     rowtype = 'files' # rowdef: Path
+    defer = True
     columns = [
-        Column('directory', getter=lambda col,row: row.parent if str(row.parent) == '.' else str(row.parent) + '/'),
-        Column('filename', getter=lambda col,row: row.name + row.suffix),
-        Column('abspath', width=0, type=str),
+        Column('directory',
+            getter=lambda col,row: row.parent if str(row.parent) == '.' else str(row.parent) + '/',
+            setter=lambda col,row,val: col.sheet.moveFile(row, val)),
+        Column('filename',
+            getter=lambda col,row: row.name + row.suffix,
+            setter=lambda col,row,val: col.sheet.renameFile(row, val)),
+        Column('abspath', width=0, type=str,
+            getter=lambda col,row: row,
+            setter=lambda col,row,val: os.rename(row, val)),
         Column('ext', getter=lambda col,row: row.is_dir() and '/' or row.ext),
-        Column('size', type=int, getter=lambda col,row: filesize(row)),
-        Column('modtime', type=date, getter=lambda col,row: modtime(row)),
-        Column('owner', width=0, getter=lambda col,row: pwd.getpwuid(row.stat().st_uid).pw_name),
-        Column('group', width=0, getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name),
-        Column('mode', width=0, getter=lambda col,row: '{:o}'.format(row.stat().st_mode)),
+        Column('size', type=int,
+            getter=lambda col,row: filesize(row),
+            setter=lambda col,row,val: os.truncate(row, int(val))),
+        Column('modtime', type=date,
+            getter=lambda col,row: modtime(row),
+            setter=lambda col,row,val: os.utime(row, times=((row.stat().st_atime, float(val))))),
+        Column('owner', width=0,
+            getter=lambda col,row: pwd.getpwuid(row.stat().st_uid).pw_name,
+            setter=lambda col,row,val: os.chown(row, pwd.getpwnam(val).pw_uid, -1)),
+        Column('group', width=0,
+            getter=lambda col,row: grp.getgrgid(row.stat().st_gid).gr_name,
+            setter=lambda col,row,val: os.chown(row, -1, grp.getgrnam(val).pw_gid)),
+        Column('mode', width=0,
+            getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
+            setter=lambda col,row,val: os.chmod(row, int(val, 8))),
         Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     nKeys = 2
     _ordering = [('modtime', True)]  # sort by reverse modtime initially
+
+    @staticmethod
+    def colorOwner(sheet, col, row, val):
+        ret = ''
+        if col.name == 'group':
+            mode = row.stat().st_mode
+            if mode & stat.S_IXGRP: ret = 'bold '
+            if mode & stat.S_IWGRP: return ret + 'green'
+            if mode & stat.S_IRGRP: return ret + 'yellow'
+        elif col.name == 'owner':
+            mode = row.stat().st_mode
+            if mode & stat.S_IXUSR: ret = 'bold '
+            if mode & stat.S_IWUSR: return ret + 'green'
+            if mode & stat.S_IRUSR: return ret + 'yellow'
+
+    def moveFile(self, row, newparent):
+        parent = Path(newparent)
+        newpath = Path(parent/(row.name + row.suffix))
+        if parent.exists():
+            if not parent.is_dir():
+                vd.error('destination %s not a directory' % parent)
+        else:
+            with contextlib.suppress(FileExistsError):
+                os.makedirs(parent)
+
+        row.rename(newpath)
+        row.given = newpath # modify visidata.Path
+        self.restat()
+
+    def renameFile(self, row, val):
+        newpath = row.with_name(val)
+        row.rename(newpath)
+        row.given = newpath
+        self.restat()
+
+    def removeFile(self, path):
+        if path.is_dir():
+            os.rmdir(path)
+        else:
+            path.unlink()
+
+    def deleteSourceRow(self, rowidx):
+        self.removeFile(self.rows[rowidx])
+        self.rows.pop(rowidx)
 
     def iterload(self):
         def _walkfiles(p):
@@ -118,6 +182,21 @@ class DirSheet(Sheet):
                 continue
 
             yield p
+
+    def preloadHook(self):
+        super().preloadHook()
+        Path.stat.cache_clear()
+
+    def restat(self):
+        vstat.cache_clear()
+
+    @asyncthread
+    def putChanges(self):
+        self.commitAdds()
+        self.commitMods()
+        self.commitDeletes()
+
+        self._deferredDels.clear()
 
 
 class FileListSheet(DirSheet):
