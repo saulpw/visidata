@@ -42,6 +42,8 @@ class PandasSheet(Sheet):
 
     def dtype_to_type(self, dtype):
         import numpy as np
+        # Find the underlying numpy dtype for any pandas extension dtypes
+        dtype = getattr(dtype, 'numpy_dtype', dtype)
         try:
             if np.issubdtype(dtype, np.integer):
                 return int
@@ -59,10 +61,33 @@ class PandasSheet(Sheet):
         import pandas as pd
         return pd.read_csv(path, sep='\t', **kwargs)
 
+    @property
+    def df(self):
+        if isinstance(getattr(self, 'rows', None), DataFrameAdapter):
+            return self.rows.df
+
+    @df.setter
+    def df(self, val):
+        if isinstance(getattr(self, 'rows', None), DataFrameAdapter):
+            self.rows.df = val
+        else:
+            self.rows = DataFrameAdapter(val)
+
+    def getValue(self, col, row):
+        return col.sheet.df.loc[row.name, col.name]
+
+    def setValue(self, col, row, val):
+        try:
+            col.sheet.df.loc[row.name, col.name] = val
+        except ValueError as err:
+            vd.warning(f'Type of {val} does not match column {col.name}. Changing type.')
+            col.type = anytype
+            col.sheet.df.loc[row.name, col.name] = val
+
     def reload(self):
         import pandas as pd
         if isinstance(self.source, pd.DataFrame):
-            self.df = self.source
+            df = self.source
         elif isinstance(self.source, Path):
             filetype = getattr(self, 'filetype', self.source.ext)
             if filetype == 'tsv':
@@ -71,24 +96,29 @@ class PandasSheet(Sheet):
                 readfunc = partial(pd.read_json, lines=True)
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or error('no pandas.read_'+filetype)
-            self.df = readfunc(str(self.source), **options('pandas_'+filetype+'_'))
+            df = readfunc(str(self.source), **options('pandas_'+filetype+'_'))
 
         # reset the index here
-        if type(self.df.index) is pd.Int64Index:
-            self.df.index = pd.RangeIndex(len(self.df.index))
-        elif type(self.df.index) is not pd.RangeIndex:
-            self.df = self.df.reset_index()
+        if type(df.index) is pd.Int64Index:
+            df.index = pd.RangeIndex(len(df.index))
+        elif type(df.index) is not pd.RangeIndex:
+            df = df.reset_index()
 
         self.columns = []
-        for col in (c for c in self.df.columns if not c.startswith("__vd_")):
-            self.addColumn(ColumnItem(col, type=self.dtype_to_type(self.df[col])))
+        for col in (c for c in df.columns if not c.startswith("__vd_")):
+            self.addColumn(Column(
+                col,
+                type=self.dtype_to_type(df[col]),
+                getter=self.getValue,
+                setter=self.setValue
+            ))
 
         if self.columns[0].name == 'index': # if the df contains an index column
             self.column('index').hide()
 
-        self.rows = DataFrameAdapter(self.df)
-        self._selectedMask = pd.Series(False, index=self.df.index)
-        if self.df.index.nunique() != self.df.shape[0]:
+        self.rows = DataFrameAdapter(df)
+        self._selectedMask = pd.Series(False, index=df.index)
+        if df.index.nunique() != df.shape[0]:
             warning("Non-unique index, row selection API may not work or may be incorrect")
 
     @asyncthread
@@ -104,13 +134,13 @@ class PandasSheet(Sheet):
     def _checkSelectedIndex(self):
         import pandas as pd
         if self._selectedMask.index is not self.df.index:
-            # self.df was modified inplace, so the selection is no longer valid
+            # DataFrame was modified inplace, so the selection is no longer valid
             vd.status('pd.DataFrame.index updated, clearing {} selected rows'
                       .format(self._selectedMask.sum()))
             self._selectedMask = pd.Series(False, index=self.df.index)
 
     def rowid(self, row):
-        return row.name
+        return getattr(row, 'name', None) or ''
 
     # Base selection API. Refer to GH #266: using id() will not identify
     # pandas rows since iterating on rows / selecting rows will return
@@ -180,17 +210,38 @@ class PandasSheet(Sheet):
     def addUndoSelection(self):
         vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
 
-    def insert_row(self, idx, row):
+    def newRows(self, n):
+        '''Return a row of missing data. Let pandas decide on the most
+        appropriate missing value (NaN, NA, etc) based on the existing
+        DataFrame's dtypes.'''
+
         import pandas as pd
-        self.df = pd.concat((self.df.iloc[0:idx], row, self.df.iloc[idx+1:]))
-        self.df.index = pd.RangeIndex(len(self.df.index))
+        return pd.DataFrame({
+            col: [None] * n for col in self.df.columns
+        }).astype(self.df.dtypes.to_dict(), errors='ignore')
+
+    @property
+    def nRows(self):
+        return len(self.df)
+
+    def addNewRows(self, n, idx):
+        self.addRow(self.newRows(n), idx)
+
+    def addRow(self, row, idx=None):
+        import pandas as pd
+        if idx is None:
+            self.df = self.df.append(row)
+        else:
+            self.df = pd.concat((self.df.iloc[0:idx], row, self.df.iloc[idx:]))
         vd.addUndo(partial(self.df.drop, inplace=True), idx)
+        self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
+        return row
 
     def delete_row(self, rowidx):
         import pandas as pd
         oldrow = self.df.iloc[rowidx:rowidx+1]
-        vd.addUndo(self.insert_row, rowidx, oldrow)
+        vd.addUndo(self.addRow, oldrow, rowidx)
         self.df.drop(rowidx, inplace=True)
         self.df.index = pd.RangeIndex(len(self.df.index))
         self._checkSelectedIndex()
@@ -212,6 +263,14 @@ class PandasSheet(Sheet):
     def deleteSelected(self):
         'Delete all selected rows.'
         ndeleted = self.deleteBy(self.isSelected)
+
+    def selectByRegex(regex, cols):
+        masks = []
+        for col in cols:
+            masks.append(
+                self.df[col].astype(str).str.contains(pat=regex, regex=True)
+            )
+        self._selectedMask = pd.Series(False, index=self.df.index)
 
 def view_pandas(df):
     run(PandasSheet('', source=df))
@@ -237,3 +296,7 @@ PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowInde
 PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', 'select all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
+PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns="cursorCol"))', 'select rows matching regex in current column')
+# PandasSheet.addCommand('\\', 'unselect-col-regex', 'unselectBy(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="cursorCol"))', 'unselect rows matching regex in current column')
+# PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'select rows matching regex in any visible column')
+# PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'unselect rows matching regex in any visible column')
