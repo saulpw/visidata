@@ -13,7 +13,7 @@ except ImportError:
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, options, option, globalCommand
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError, VisiData
-from visidata import CellColorizer, RowColorizer, modtime, filesize
+from visidata import CellColorizer, RowColorizer, modtime, filesize, vstat
 
 
 option('dir_recurse', False, 'walk source path recursively on DirSheet')
