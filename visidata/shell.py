@@ -197,6 +197,7 @@ class DirSheet(Sheet):
         self.commitDeletes()
 
         self._deferredDels.clear()
+        self.reload()
 
 
 class FileListSheet(DirSheet):
