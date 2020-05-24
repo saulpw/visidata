@@ -1,0 +1,7 @@
+sheet	col	row	longname	input	keystrokes	comment
+	override	filetype	set-option	pandas		
+			open-file	sample_data/StatusPR.csv	o	
+StatusPR			select-cols-regex	sep	g|	select rows matching regex in any visible column
+StatusPR			delete-selected		gd	delete (cut) selected rows and move them to clipboard
+StatusPR		0	delete-row		d	delete (cut) current row and move it to clipboard
+StatusPR		0	delete-row		d	delete (cut) current row and move it to clipboard
