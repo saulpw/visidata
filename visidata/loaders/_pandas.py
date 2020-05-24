@@ -74,9 +74,17 @@ class PandasSheet(Sheet):
             self.rows = DataFrameAdapter(val)
 
     def getValue(self, col, row):
+        '''Look up column values in the underlying DataFrame.'''
         return col.sheet.df.loc[row.name, col.name]
 
     def setValue(self, col, row, val):
+        '''
+        Update a column's value in the underlying DataFrame, loosening the
+        column's type as needed. Take care to avoid assigning to a view or
+        a copy as noted here:
+
+        https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#why-does-assignment-fail-when-using-chained-indexing
+        '''
         try:
             col.sheet.df.loc[row.name, col.name] = val
         except ValueError as err:
@@ -123,7 +131,7 @@ class PandasSheet(Sheet):
 
     @asyncthread
     def sort(self):
-        'Sort rows according to the current self._ordering.'
+        '''Sort rows according to the current self._ordering.'''
         by_cols = []
         ascending = []
         for col, reverse in self._ordering[::-1]:
@@ -207,68 +215,13 @@ class PandasSheet(Sheet):
         self._checkSelectedIndex()
         self._selectedMask.iloc[mask] = selected
 
-    def addUndoSelection(self):
-        vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
-
-    def newRows(self, n):
-        '''Return a row of missing data. Let pandas decide on the most
-        appropriate missing value (NaN, NA, etc) based on the existing
-        DataFrame's dtypes.'''
-
-        import pandas as pd
-        return pd.DataFrame({
-            col: [None] * n for col in self.df.columns
-        }).astype(self.df.dtypes.to_dict(), errors='ignore')
-
-    @property
-    def nRows(self):
-        return len(self.df)
-
-    def addNewRows(self, n, idx):
-        self.addRow(self.newRows(n), idx)
-
-    def addRow(self, row, idx=None):
-        import pandas as pd
-        if idx is None:
-            self.df = self.df.append(row)
-        else:
-            self.df = pd.concat((self.df.iloc[0:idx], row, self.df.iloc[idx:]))
-        vd.addUndo(partial(self.df.drop, inplace=True), idx)
-        self.df.index = pd.RangeIndex(self.nRows)
-        self._checkSelectedIndex()
-        return row
-
-    def delete_row(self, rowidx):
-        import pandas as pd
-        oldrow = self.df.iloc[rowidx:rowidx+1]
-        vd.addUndo(self.addRow, oldrow, rowidx)
-        self.df.drop(rowidx, inplace=True)
-        self.df.index = pd.RangeIndex(len(self.df.index))
-        self._checkSelectedIndex()
-        vd.cliprows = [(self, rowidx, oldrow)]
-
-    def deleteBy(self, func):
-        'Delete rows for which func(row) is true.  Returns number of deleted rows.'
-        import pandas as pd
-        oldidx = self.cursorRowIndex
-        ndeleted = self.nSelected
-        vd.addUndo(setattr, self, 'df', self.df)
-        self.df.drop([i for i, v in enumerate(self._selectedMask) if v], inplace=True)
-        self.df.index = pd.RangeIndex(len(self.df.index))
-        self._checkSelectedIndex()
-
-        status('deleted %s %s' % (ndeleted, self.rowtype))
-        return ndeleted
-
-    def deleteSelected(self):
-        'Delete all selected rows.'
-        ndeleted = self.deleteBy(self.isSelected)
-
     @asyncthread
     def selectByRegex(self, regex, columns, unselect=False):
-        '''Find rows matching regex in the provided columns. By default, add
+        '''
+        Find rows matching regex in the provided columns. By default, add
         matching rows to the selection. If unselect is True, remove from the
-        active selection instead.'''
+        active selection instead.
+        '''
         import pandas as pd
         masks = pd.DataFrame([
             self.df[col.name].astype(str).str.contains(pat=regex, case=False, regex=True)
@@ -279,10 +232,82 @@ class PandasSheet(Sheet):
         else:
             self._selectedMask = self._selectedMask | masks.any()
 
+    def addUndoSelection(self):
+        vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
+
+    @property
+    def nRows(self):
+        return len(self.df)
+
+    def newRows(self, n):
+        '''
+        Return n rows of empty data. Let pandas decide on the most
+        appropriate missing value (NaN, NA, etc) based on the underlying
+        DataFrame's dtypes.
+        '''
+
+        import pandas as pd
+        return pd.DataFrame({
+            col: [None] * n for col in self.df.columns
+        }).astype(self.df.dtypes.to_dict(), errors='ignore')
+
+    def _addRows(self, rows, idx):
+        import pandas as pd
+        if idx is None:
+            self.df = self.df.append(pd.DataFrame(rows))
+        else:
+            self.df = pd.concat((self.df.iloc[0:idx], pd.DataFrame(rows), self.df.iloc[idx:]))
+        self.df.index = pd.RangeIndex(self.nRows)
+        self._checkSelectedIndex()
+
+    def _deleteRows(self, which):
+        vd.warning(f'Deleting {which}')
+        import pandas as pd
+        self.df.drop(which, inplace=True)
+        self.df.index = pd.RangeIndex(self.nRows)
+        self._checkSelectedIndex()
+
+    def addNewRows(self, n, idx=None):
+        self._addRows(self.newRows(n), idx)
+        idx = idx or self.nRows - 1
+        vd.addUndo(self._deleteRows, range(idx, idx + n))
+
+    def addRow(self, row, idx=None):
+        self._addRows([row], idx)
+        vd.addUndo(self._deleteRows, idx or self.nRows - 1)
+
+    def delete_row(self, rowidx):
+        import pandas as pd
+        oldrow = self.df.iloc[rowidx:rowidx+1]
+
+        # Use to_dict() here to work around an edge case when applying undos.
+        # As an action is undone, its entry gets removed from the cmdlog sheet.
+        # If we use `oldrow` directly, we get errors comparing DataFrame objects
+        # when there are multiple deletion commands for the same row index.
+        # There may be a better way to handle that case.
+        vd.addUndo(self._addRows, oldrow.to_dict(), rowidx)
+        self._deleteRows(rowidx)
+        vd.cliprows = [(self, rowidx, oldrow)]
+
+    def deleteBy(self, by):
+        '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''
+        import pandas as pd
+        oldidx = self.cursorRowIndex
+        nRows = self.nRows
+        vd.addUndo(setattr, self, 'df', self.df.copy())
+        self.df = self.df[~by]
+        self.df.index = pd.RangeIndex(self.nRows)
+        ndeleted = nRows - self.nRows
+
+        status('deleted %s %s' % (ndeleted, self.rowtype))
+        return ndeleted
+
+    def deleteSelected(self):
+        '''Delete all selected rows.'''
+        self.deleteBy(self._selectedMask)
 
 def view_pandas(df):
     run(PandasSheet('', source=df))
-
 
 def open_pandas(p):
     return PandasSheet(p.name, source=p)
@@ -304,6 +329,7 @@ PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowInde
 PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', 'select all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
+
 PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol])', 'select rows matching regex in current column')
 PandasSheet.addCommand('\\', 'unselect-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol], unselect=True)', 'unselect rows matching regex in current column')
 PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols)', 'select rows matching regex in any visible column')
