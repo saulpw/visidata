@@ -237,6 +237,8 @@ class PandasSheet(Sheet):
 
     @property
     def nRows(self):
+        if self.df is None:
+            return 0
         return len(self.df)
 
     def newRows(self, n):
@@ -261,7 +263,6 @@ class PandasSheet(Sheet):
         self._checkSelectedIndex()
 
     def _deleteRows(self, which):
-        vd.warning(f'Deleting {which}')
         import pandas as pd
         self.df.drop(which, inplace=True)
         self.df.index = pd.RangeIndex(self.nRows)
