@@ -264,13 +264,21 @@ class PandasSheet(Sheet):
         'Delete all selected rows.'
         ndeleted = self.deleteBy(self.isSelected)
 
-    def selectByRegex(regex, cols):
-        masks = []
-        for col in cols:
-            masks.append(
-                self.df[col].astype(str).str.contains(pat=regex, regex=True)
-            )
-        self._selectedMask = pd.Series(False, index=self.df.index)
+    @asyncthread
+    def selectByRegex(self, regex, columns, unselect=False):
+        '''Find rows matching regex in the provided columns. By default, add
+        matching rows to the selection. If unselect is True, remove from the
+        active selection instead.'''
+        import pandas as pd
+        masks = pd.DataFrame([
+            self.df[col.name].astype(str).str.contains(pat=regex, case=False, regex=True)
+            for col in columns
+        ])
+        if unselect:
+            self._selectedMask = self._selectedMask & ~masks.any()
+        else:
+            self._selectedMask = self._selectedMask | masks.any()
+
 
 def view_pandas(df):
     run(PandasSheet('', source=df))
@@ -296,7 +304,7 @@ PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowInde
 PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', 'select all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
-PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns="cursorCol"))', 'select rows matching regex in current column')
-# PandasSheet.addCommand('\\', 'unselect-col-regex', 'unselectBy(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="cursorCol"))', 'unselect rows matching regex in current column')
-# PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'select rows matching regex in any visible column')
-# PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'unselect rows matching regex in any visible column')
+PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol])', 'select rows matching regex in current column')
+PandasSheet.addCommand('\\', 'unselect-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol], unselect=True)', 'unselect rows matching regex in current column')
+PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols)', 'select rows matching regex in any visible column')
+PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
