@@ -1,5 +1,4 @@
 markdown
-pip-tools
 pytest
 pyyaml
 tox
