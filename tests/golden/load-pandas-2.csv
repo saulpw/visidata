@@ -1,4 +1,13 @@
 Month,Day,Resource,Location,Value,Unit,Source
+,,,,nan,,
+,,,,nan,,
+,,,,nan,,
+,,,,nan,,
+,,,,nan,,
+,,,,nan,,
+Sep,29,Hospitals,Puerto Rico,34.00,number,ASES
+Oct,1,Electricity,Puerto Rico,5.00,percent,AEE
+Oct,1,Cell antennas,Puerto Rico,300.00,number,FCC
 Oct,2,Telecomunications,Puerto Rico,40.00,percent,JRTC
 Oct,2,Cell towers,Puerto Rico,270.00,number,JRTC
 Oct,2,People in shelters,Puerto Rico,8867.00,number,Vivienda
