@@ -223,8 +223,9 @@ class PandasSheet(Sheet):
         active selection instead.
         '''
         import pandas as pd
+        case_sensitive = 'I' not in vd.options.regex_flags
         masks = pd.DataFrame([
-            self.df[col.name].astype(str).str.contains(pat=regex, case=False, regex=True)
+            self.df[col.name].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
             for col in columns
         ])
         if unselect:
