@@ -1022,7 +1022,7 @@ SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_colu
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected, *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
