@@ -87,7 +87,7 @@ def _percentile(N, percent, key=lambda x:x):
     return d0+d1
 
 @functools.lru_cache(100)
-def percentile(pct, helpstr):
+def percentile(pct, helpstr=''):
     return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100), helpstr)
 
 def quantiles(q, helpstr):
