@@ -233,15 +233,9 @@ def replay_cancel(vd):
 
 @VisiData.api
 def moveToReplayContext(vd, r):
-        '''set the sheet/row/col to the values in the replay row.  return sheet'''
-
-        # r.sheet can be a sheet name (e.g. during replays) or a Sheet object (e.g. during undos)
-        # Try to end up with a Sheet instance in either case
+        'set the sheet/row/col to the values in the replay row.  return sheet'
         if r.sheet:
-            if isinstance(r.sheet, Sheet):
-                vs = r.sheet
-            else:
-                vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
+            vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
         else:
             return None
 

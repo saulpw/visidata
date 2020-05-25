@@ -206,6 +206,8 @@ def sheet(self):
 
 @VisiData.api
 def getSheet(vd, sheetname):
+    if isinstance(sheetname, BaseSheet):
+        return sheetname
     matchingSheets = [x for x in vd.sheets if x.name == sheetname]
     if matchingSheets:
         if len(matchingSheets) > 1:
