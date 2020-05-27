@@ -1,7 +1,7 @@
 import html
 from visidata import *
 
-option(name='include_html_title', default=True, helpstr='include sheet name as the table header when saving as HTML')
+option('include_html_title', True, 'include sheet name as the table header when saving as HTML')
 
 class HtmlTablesSheet(IndexSheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
