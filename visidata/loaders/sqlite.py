@@ -136,7 +136,13 @@ def save_sqlite(vd, p, *vsheets):
         for r in Progress(vs.rows, 'saving'):
             sqlvals = []
             for col in vs.visibleCols:
-                sqlvals.append(col.getTypedValue(r))
+                v = col.getTypedValue(r)
+                if isinstance(v, TypedWrapper):
+                    if isinstance(v, TypedExceptionWrapper):
+                        v = options_safe_error
+                    else:
+                        v = None
+                sqlvals.append(v)
             sql = 'INSERT INTO "%s" VALUES (%s)' % (tblname, ','.join('?' for v in sqlvals))
             c.execute(sql, sqlvals)
 
