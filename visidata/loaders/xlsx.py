@@ -55,7 +55,7 @@ class XlsSheet(SequenceSheet):
 
             
 @VisiData.api
-def save_xlsx(vd, p, vs, *vsheets):
+def save_xlsx(vd, p, *sheets):
     import openpyxl
 
     wb = openpyxl.Workbook()
@@ -85,7 +85,7 @@ def save_xlsx(vd, p, vs, *vsheets):
 
 
 @VisiData.api
-def save_xls(vd, p, vs, *vsheets):
+def save_xls(vd, p, *sheets):
     import xlwt
 
     wb = xlwt.Workbook()
