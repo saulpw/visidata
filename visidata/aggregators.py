@@ -40,7 +40,7 @@ class Aggregator:
 
 _defaggr = Aggregator
 
-def aggregator(name, func, helpstr, *args, type=None):
+def aggregator(name, func, helpstr='', *args, type=None):
     'Define simple aggregator `name` that calls func(values)'
     def _func(col, rows):  # wrap builtins so they can have a .type
         vals = list(col.getValues(rows))
