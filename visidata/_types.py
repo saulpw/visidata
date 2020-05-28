@@ -4,11 +4,13 @@ import collections
 import functools
 import datetime
 import locale
-from visidata import option, options, TypedWrapper
+from visidata import option, options, TypedWrapper, vd
 
 #__all__ = ['anytype', 'vdtype', 'typemap', 'getType', 'typemap']
 
-option('disp_float_fmt', '%.02f', 'default fmtstr to format for float values', replay=True)
+option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency values', replay=True)
+option('disp_float_fmt', '{:.02f}', 'default fmtstr to format for float values', replay=True)
+option('disp_int_fmt', '{:.0f}', 'default fmtstr to format for int values', replay=True)
 option('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values', replay=True)
 
 try:
@@ -34,14 +36,18 @@ def anytype(r=None):
 anytype.__name__ = ''
 
 
-def _defaultFormatter(fmtstr, typedval):
+def numericFormatter(fmtstr, typedval):
+    fmtstr = fmtstr or options['disp_'+type(typedval).__name__+'_fmt']
     if fmtstr:
-        return locale.format_string(fmtstr, typedval)
+        if fmtstr[0] == '%':
+            return locale.format_string(fmtstr, typedval, grouping=True)
+        else:
+            return fmtstr.format(typedval)
     return str(typedval)
 
 
 class VisiDataType:
-    def __init__(self, typetype=None, icon=None, fmtstr='', formatter=_defaultFormatter, key='', name=None):
+    def __init__(self, typetype=None, icon=None, fmtstr='', formatter=numericFormatter, key='', name=None):
         self.typetype = typetype or anytype # int or float or other constructor
         self.name = name or getattr(typetype, '__name__', str(typetype))
         self.icon = icon      # show in rightmost char of column
@@ -63,8 +69,8 @@ def getType(typetype):
 vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
 vdtype(str, '~', formatter=lambda _,v: v)
-vdtype(int, '#', '%.0f')
-vdtype(float, '%', formatter=lambda fmtstr,val: (fmtstr or options.disp_float_fmt) % val)
+vdtype(int, '#')
+vdtype(float, '%')
 vdtype(dict, '')
 vdtype(list, '')
 
@@ -74,11 +80,12 @@ def isNumeric(col):
 ##
 
 floatchars='+-0123456789.'
-def currency(s=''):
-    'dirty float (strip non-numeric characters)'
-    if isinstance(s, str):
-        s = ''.join(ch for ch in s if ch in floatchars)
-    return float(s) if s not in ['', None] else TypedWrapper(float, None)
+class currency(float):
+    def __init__(self, s=''):
+        'dirty float (strip non-numeric characters)'
+        if isinstance(s, str):
+            s = ''.join(ch for ch in s if ch in floatchars)
+        float.__init__(s)
 
 
 class vlen(int):
@@ -143,7 +150,7 @@ class datedelta(datetime.timedelta):
 
 vdtype(vlen, '♯', '%.0f')
 vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
-vdtype(currency, '$', formatter=lambda fmtstr,val: locale.currency(val, symbol=False))
+vdtype(currency, '$')
 
 # simple constants, for expressions like 'timestamp+15*minutes'
 years=365.25
