@@ -61,7 +61,7 @@ def save_xlsx(vd, p, *sheets):
     wb = openpyxl.Workbook()
     wb.remove_sheet(wb['Sheet'])
 
-    for vs in vsheets or [vs]:
+    for vs in sheets:
         ws = wb.create_sheet(title=vs.name)
 
         headers = [col.name for col in vs.visibleCols]
@@ -90,7 +90,7 @@ def save_xls(vd, p, *sheets):
 
     wb = xlwt.Workbook()
 
-    for vs in vsheets or [vs]:
+    for vs in sheets:
 
         ws1 = wb.add_sheet(vs.name[:32]) # sheet name can not be longer than 32 characters
 
