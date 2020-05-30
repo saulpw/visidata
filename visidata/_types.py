@@ -81,11 +81,11 @@ def isNumeric(col):
 
 floatchars='+-0123456789.'
 class currency(float):
-    def __init__(self, s=''):
+    def __new__(self, s=''):
         'dirty float (strip non-numeric characters)'
         if isinstance(s, str):
             s = ''.join(ch for ch in s if ch in floatchars)
-        float.__init__(s)
+        return float.__new__(self, s)
 
 
 class vlen(int):
