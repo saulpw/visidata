@@ -55,6 +55,8 @@ class SqliteSheet(Sheet):
                     return options_safe_error
                 else:
                     return None
+            elif not isinstance(v, (int, float, str)):
+                v = col.getDisplayValue(r)
             return v
 
         def values(row, cols):
@@ -139,9 +141,11 @@ def save_sqlite(vd, p, *vsheets):
                 v = col.getTypedValue(r)
                 if isinstance(v, TypedWrapper):
                     if isinstance(v, TypedExceptionWrapper):
-                        v = options_safe_error
+                        v = options.safe_error
                     else:
                         v = None
+                elif not isinstance(v, (int, float, str)):
+                    v = col.getDisplayValue(r)
                 sqlvals.append(v)
             sql = 'INSERT INTO "%s" VALUES (%s)' % (tblname, ','.join('?' for v in sqlvals))
             c.execute(sql, sqlvals)
