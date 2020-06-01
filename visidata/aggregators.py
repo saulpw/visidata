@@ -40,7 +40,7 @@ class Aggregator:
 
 _defaggr = Aggregator
 
-def aggregator(name, func, helpstr, *args, type=None):
+def aggregator(name, func, helpstr='', *args, type=None):
     'Define simple aggregator `name` that calls func(values)'
     def _func(col, rows):  # wrap builtins so they can have a .type
         vals = list(col.getValues(rows))
@@ -87,7 +87,7 @@ def _percentile(N, percent, key=lambda x:x):
     return d0+d1
 
 @functools.lru_cache(100)
-def percentile(pct, helpstr):
+def percentile(pct, helpstr=''):
     return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100), helpstr)
 
 def quantiles(q, helpstr):

@@ -1,7 +1,7 @@
 python-dateutil     # date type
 
 # optional requirements
-pandas==0.25.1      # dta (Stata)
+pandas==1.0.3       # dta (Stata)
 requests            # http
 lxml                # html/xml
 openpyxl            # xlsx

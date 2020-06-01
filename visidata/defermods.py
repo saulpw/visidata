@@ -126,6 +126,7 @@ def commitDeletes(self):
     newidx = 0
     for r in Progress(self.rows, gerund='deleting'):
         if self.isDeleted(self.rows[newidx]):
+            self.deleteSourceRow(newidx)
             ndeleted += 1
         else:
             if r is dest_row:
@@ -135,6 +136,10 @@ def commitDeletes(self):
     if ndeleted:
         status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted
+
+@Sheet.api
+def deleteSourceRow(sheet, row):
+    pass
 
 @asyncthread
 @Sheet.api

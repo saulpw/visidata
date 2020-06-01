@@ -110,8 +110,10 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
 
     # get save function to call
-    p = Path((givenpath / vs.name).with_suffix('.'+filetype))
-    return vd.execAsync(savefunc, p, *vsheets)
+    for vs in vsheets:
+        p = Path((givenpath / vs.name).with_suffix('.'+filetype))
+        vd.execAsync(savefunc, p, vs)
+    return
 
 
 @VisiData.api

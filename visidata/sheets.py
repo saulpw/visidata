@@ -236,7 +236,7 @@ class TableSheet(BaseSheet):
         return type(self)._rowtype()
 
     def openRow(self, row):
-        k = self.rowkey(row) or [self.cursorRowIndex]
+        k = self.keystr(row) or [self.cursorRowIndex]
         name = f'{self.name}[{k}]'
         return vd.load_pyobj(name, tuple(c.getTypedValue(row) for c in self.visibleCols))
 
@@ -1010,7 +1010,7 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 
-Sheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
+Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
 Sheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current row')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
 Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
@@ -1022,7 +1022,7 @@ SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_colu
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected, *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
