@@ -5,11 +5,13 @@ class TransposeSheet(Sheet):
     @asyncthread
     def reload(self):
         # key rows become column names
-        self.columns = [
-            Column('_'.join(c.name for c in self.source.keyCols),
-                   getter=lambda c,origcol: origcol.name)
-        ]
+        col = Column('_'.join(c.name for c in self.source.keyCols),
+                getter=lambda c,origcol: origcol.name)
+        # associate column with sheet
+        col.recalc(self)
+        self.columns = [col]
         self.setKeys(self.columns)
+
 
         # rows become columns
         for row in Progress(self.source.rows, 'transposing'):
