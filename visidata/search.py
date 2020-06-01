@@ -1,18 +1,17 @@
-from visidata import Sheet, rotateRange
+from visidata import vd, Sheet, rotateRange, asyncthread
 
-
-def evalmatcher(sheet, expr):
-    def matcher(r):
-        return sheet.evalexpr(expr, r)
-    return matcher
-
-def search_func(sheet, rows, func, reverse=False):
+@Sheet.api
+@asyncthread
+def search_expr(sheet, expr, reverse=False):
     for i in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=reverse):
         try:
-            if func(sheet.rows[i]):
-                return i
-        except Exception:
-            pass
+            if sheet.evalexpr(expr, sheet.rows[i]):
+                sheet.cursorRowIndex=i
+                return
+        except Exception as e:
+            vd.exceptionCaught(e)
 
-Sheet.addCommand('z/', 'search-expr', 'sheet.cursorRowIndex=search_func(sheet, rows, evalmatcher(sheet, inputExpr("search by expr: "))) or status("no match")', 'search by Python expression forwards in current column (with column names as variables)')
-Sheet.addCommand('z?', 'searchr-expr', 'sheet.cursorRowIndex=search_func(sheet, rows, evalmatcher(sheet, inputExpr("search by expr: ")), reverse=True) or status("no match")', 'search by Python expression backwards in current column (with column names as variables)')
+    vd.fail(f'no {sheet.rowtype} where {expr}')
+
+Sheet.addCommand('z/', 'search-expr', 'search_expr(inputExpr("search by expr: ") or fail("no expr"))', 'search by Python expression forwards in current column (with column names as variables)')
+Sheet.addCommand('z?', 'searchr-expr', 'search_expr(inputExpr("searchr by expr: ") or fail("no expr"), reverse=True)', 'search by Python expression backwards in current column (with column names as variables)')
