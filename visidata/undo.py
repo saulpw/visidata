@@ -98,7 +98,7 @@ def addUndoColNames(vd, cols):
 @VisiData.api
 def addUndoReload(vd, rows, cols):
     oldrows = rows
-    oldcolumns = [copy(c) for c in cols]
+    oldcolumns = cols
     def _undo():
         sheet = oldcolumns[0].sheet
         sheet.rows = oldrows
