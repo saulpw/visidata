@@ -7,7 +7,7 @@ import threading
 import collections
 
 from visidata import VisiData, vd, option, options, status, globalCommand, Sheet, EscapeException
-from visidata import ColumnAttr, Column, ENTER
+from visidata import ColumnAttr, Column
 from visidata import *
 
 __all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet', 'codestr', 'asyncsingle']
@@ -106,6 +106,12 @@ class ThreadsSheet(Sheet):
     ]
     def reload(self):
         self.rows = vd.threads
+
+    def openRow(self, row):
+        'push profile sheet for this action'
+        if row.profile:
+            return ProfileSheet(row.name+"_profile", source=row.profile)
+        vd.warning("no profile")
 
 
 def elapsed_s(t):
@@ -347,6 +353,18 @@ class ProfileSheet(Sheet):
                 for callee in calls:
                     self.callers[callee.code].append(r)
 
+    def openRow(self, row):
+        'open ProfileSheet for calls referenced in current row'
+        if row.calls:
+            return ProfileSheet(codestr(row.code)+"_calls", source=row.calls)
+        warning("no calls")
+
+    def openCell(self, col, row):
+        'open ProfileSheet for caller referenced in current cell'
+        val = col.getValue(row)
+        if val:
+            return ProfileSheet(codestr(row.code)+"_"+col.name, source=val)
+        warning("no callers")
 
 def codestr(code):
     if isinstance(code, str):
@@ -355,11 +373,8 @@ def codestr(code):
 
 ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
 
-ThreadsSheet.addCommand(ENTER, 'profile-row', 'cursorRow.profile and vd.push(ProfileSheet(cursorRow.name+"_profile", source=cursorRow.profile)) or warning("no profile")', 'push profile sheet for this action')
 
 ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile')
-ProfileSheet.addCommand(ENTER, 'dive-row', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_calls", source=cursorRow.calls or fail("no calls")))', 'open ProfileSheet for calls referenced in current row')
-ProfileSheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(ProfileSheet(codestr(cursorRow.code)+"_"+cursorCol.name, source=cursorValue or fail("no callers")))', 'open ProfileSheet for caller referenced in current cell')
 ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
 globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
 

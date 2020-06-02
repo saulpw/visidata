@@ -1,6 +1,7 @@
 import html
 from visidata import *
 
+option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
 class HtmlTablesSheet(IndexSheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
@@ -104,7 +105,8 @@ def save_html(vd, p, *vsheets):
     with open(p, 'w', encoding='ascii', errors='xmlcharrefreplace') as fp:
         for sheet in vsheets:
 
-            fp.write('<h2 class="sheetname">%s</h2>\n'.format(sheetname=html.escape(sheet.name)))
+            if options.html_title:
+                fp.write(options.html_title.format(sheet=sheet, vd=vd))
 
             fp.write('<table id="{sheetname}">\n'.format(sheetname=html.escape(sheet.name)))
 

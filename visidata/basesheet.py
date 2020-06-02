@@ -42,6 +42,7 @@ class BaseSheet(Extensible):
     _coltype = None      # callable (no parms) that returns new settable view into that item
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
+    defer = False        # False for not deferring changes until save
 
     @visidata.classproperty
     def options(cls):
@@ -75,6 +76,9 @@ class BaseSheet(Extensible):
 
     def __len__(self):
         return self.nRows
+
+    def __str__(self):
+        return self.name
 
     @property
     def nRows(self):
@@ -202,6 +206,8 @@ def sheet(self):
 
 @VisiData.api
 def getSheet(vd, sheetname):
+    if isinstance(sheetname, BaseSheet):
+        return sheetname
     matchingSheets = [x for x in vd.sheets if x.name == sheetname]
     if matchingSheets:
         if len(matchingSheets) > 1:
@@ -211,7 +217,7 @@ def getSheet(vd, sheetname):
     try:
         sheetidx = int(sheetname)
         return vd.sheets[sheetidx]
-    except ValueError:
+    except TypeError:
         pass
 
     if sheetname == 'options':

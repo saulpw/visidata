@@ -1,10 +1,11 @@
 from visidata import *
 
 
+# rowdef: list of values
 class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     savesToSource = True
-    defermods = True
+    defer = True
 
     def resolve(self):
         'Resolve all the way back to the original source Path.'
@@ -14,12 +15,9 @@ class SqliteSheet(Sheet):
         import sqlite3
         return sqlite3.connect(str(self.resolve()))
 
-    def execute(self, conn, sql, where={}, parms=None):
+    def execute(self, conn, sql, parms=None):
         parms = parms or []
-        if where:
-            sql += ' WHERE %s' % ' AND '.join('"%s"=?' % k for k in where)
         status(sql)
-        parms += list(where.values())
         return conn.execute(sql, parms)
 
     def iterload(self):
@@ -44,10 +42,11 @@ class SqliteSheet(Sheet):
             r = self.execute(conn, 'SELECT COUNT(*) FROM "%s"' % tblname).fetchall()
             rowcount = r[0][0]
             for row in Progress(self.execute(conn, 'SELECT * FROM "%s"' % tblname), total=rowcount-1):
-                yield row
+                yield list(row)
 
     @asyncthread
-    def putChanges(self, path, adds, mods, dels):
+    def putChanges(self):
+        adds, mods, dels = self.getDeferredChanges()
         options_safe_error = options.safe_error
         def value(row, col):
             v = col.getTypedValue(row)
@@ -56,6 +55,8 @@ class SqliteSheet(Sheet):
                     return options_safe_error
                 else:
                     return None
+            elif not isinstance(v, (int, float, str)):
+                v = col.getDisplayValue(r)
             return v
 
         def values(row, cols):
@@ -76,18 +77,19 @@ class SqliteSheet(Sheet):
             for row, rowmods in mods.values():
                 sql = 'UPDATE "%s" SET ' % self.tableName
                 sql += ', '.join('%s=?' % c.name for c, _ in rowmods.items())
+                sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
                 self.execute(conn, sql,
-                            where={c.name: c.getSavedValue(row) for c in wherecols},
-                            parms=values(row, [c for c, _ in rowmods.items()]))
+                            parms=values(row, [c for c, _ in rowmods.items()]) + list(c.getSavedValue(row) for c in wherecols))
 
             for r in dels.values():
-                self.execute(conn, 'DELETE FROM "%s" ' % self.tableName,
-                              where={c.name: c.getTypedValue(r) for c in wherecols})
+                sql = 'DELETE FROM "%s" ' % self.tableName
+                sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
+                self.execute(conn, sql, parms=list(c.getTypedValue(r) for c in wherecols))
 
             conn.commit()
 
+        self.preloadHook()
         self.reload()
-        self._dm_reset()
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):
@@ -96,7 +98,21 @@ class SqliteIndexSheet(SqliteSheet, IndexSheet):
         for row in SqliteSheet.iterload(self):
             if row[0] != 'index':
                 tblname = row[1]
-                yield SqliteSheet(tblname, source=self, tableName=tblname, row=row)
+                yield SqliteSheet(self.name+'.'+tblname, source=self, tableName=tblname, row=row)
+
+
+class SqliteQuerySheet(SqliteSheet):
+    def iterload(self):
+        with self.conn() as conn:
+            self.columns = []
+
+            self.result = self.execute(conn, self.query, parms=getattr(self, 'parms', []))
+            for i, desc in enumerate(self.result.description):
+                self.addColumn(ColumnItem(desc[0], i))
+
+            for row in self.result:
+                yield row
+
 
 
 @VisiData.api
@@ -122,7 +138,15 @@ def save_sqlite(vd, p, *vsheets):
         for r in Progress(vs.rows, 'saving'):
             sqlvals = []
             for col in vs.visibleCols:
-                sqlvals.append(col.getTypedValue(r))
+                v = col.getTypedValue(r)
+                if isinstance(v, TypedWrapper):
+                    if isinstance(v, TypedExceptionWrapper):
+                        v = options.safe_error
+                    else:
+                        v = None
+                elif not isinstance(v, (int, float, str)):
+                    v = col.getDisplayValue(r)
+                sqlvals.append(v)
             sql = 'INSERT INTO "%s" VALUES (%s)' % (tblname, ','.join('?' for v in sqlvals))
             c.execute(sql, sqlvals)
 

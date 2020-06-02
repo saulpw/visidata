@@ -9,7 +9,7 @@ TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
 
-__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
+__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet', 'joinSheetnames']
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
@@ -38,7 +38,8 @@ theme('note_getter_exc', '!', 'cell note for an exception during computation')
 theme('note_type_exc', '!', 'cell note for an exception during type conversion')
 
 theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
-theme('color_note_type', '226 yellow', 'cell note for numeric types in anytype columns')
+theme('color_note_type', '226 yellow', 'color of cell note for non-str types in anytype columns')
+theme('color_note_row', '220 yellow', 'color of row note on left edge')
 theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
 theme('disp_column_sep', '|', 'separator between columns')
 theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
@@ -64,6 +65,13 @@ theme('color_column_sep', '246 blue', 'color of column separators')
 theme('color_key_col', '81 cyan', 'color of key columns')
 theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
+option('name_joiner', '_', 'string to join sheet or column names')
+option('value_joiner', ' ', 'string to join display values')
+
+
+def joinSheetnames(*sheetnames):
+    'Concatenate sheet names in a standard way'
+    return options.name_joiner.join(str(x) for x in sheetnames)
 
 
 def splitcell(s, width=0):
@@ -228,7 +236,14 @@ class TableSheet(BaseSheet):
         return type(self)._rowtype()
 
     def openRow(self, row):
-        vd.fail(f'cannot open {self.rowtype} on this sheet')
+        k = self.keystr(row) or [self.cursorRowIndex]
+        name = f'{self.name}[{k}]'
+        return vd.load_pyobj(name, tuple(c.getTypedValue(row) for c in self.visibleCols))
+
+    def openCell(self, col, row):
+        k = self.keystr(row) or [str(self.cursorRowIndex)]
+        name = f'{self.name}.{col.name}[{k}]'
+        return vd.load_pyobj(name, col.getTypedValue(row))
 
     @drawcache_property
     def colsByName(self):
@@ -475,6 +490,9 @@ class TableSheet(BaseSheet):
         'returns a tuple of the key for the given row'
         return tuple(c.getTypedValue(row) for c in self.keyCols)
 
+    def keystr(self, row):
+        return ','.join(map(str, self.rowkey(row)))
+
     def checkCursor(self):
         'Keep cursor in bounds of data and screen.'
         # keep cursor within actual available rowset
@@ -505,7 +523,7 @@ class TableSheet(BaseSheet):
                 if self.cursorRowIndex > bottomRowIndex and y+h > self.nScreenRows:
                     self._topRowIndex += bottomRowIndex-self.cursorRowIndex+2
 
-        if self.cursorCol.keycol:
+        if self.cursorCol and self.cursorCol.keycol:
             return
 
         if self.leftVisibleColIndex >= self.cursorVisibleColIndex:
@@ -541,8 +559,9 @@ class TableSheet(BaseSheet):
         for vcolidx in range(0, self.nVisibleCols):
             col = self.visibleCols[vcolidx]
             if col.width is None and len(self.visibleRows) > 0:
+                vrows = self.visibleRows if self.nRows > 1000 else self.rows
                 # handle delayed column width-finding
-                col.width = max(col.getMaxWidth(self.visibleRows), minColWidth)
+                col.width = max(col.getMaxWidth(vrows), minColWidth)
                 if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, options.default_width)
             width = col.width if col.width is not None else options.default_width
@@ -782,16 +801,23 @@ class TableSheet(BaseSheet):
                                 else:
                                     sepchars = midsep
 
-                        clipdraw(scr, y, x, disp_column_fill+line, cattr.attr, w=colwidth-(1 if note else 0))
+                        clipdraw(scr, y, x, (disp_column_fill if colwidth > 2 else '')+line, cattr.attr, w=colwidth-(1 if note else 0))
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
                             scr.addstr(y, x+colwidth, sepchars, basecellcattr.attr)
 
-            if self.isSelected(row):
-                clipdraw(scr, ybase, 0, selectednote, basecellcattr.attr)
+            for notefunc in vd.rowNoters:
+                ch = notefunc(self, row)
+                if ch:
+                    clipdraw(scr, ybase, 0, ch, colors.color_note_row)
+                    break
 
             return height
+
+vd.rowNoters = [
+        lambda sheet, row: sheet.isSelected(row) and options.disp_selected_note,
+]
 
 Sheet = TableSheet  # deprecated in 2.0 but still widely used internally
 
@@ -945,16 +971,24 @@ def sheetsSheet(vd):
 
 @VisiData.api
 def quit(vd, *sheets):
-    if len(vd.sheets) == len(sheets) and options.quitguard:
+    if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'override', False):
         vd.confirm("quit last sheet? ")
     for vs in sheets:
+        if options.getonly('quitguard', vs, False):
+            vd.drawall()
+            vd.confirm(f'quit guarded sheet "{vs.name}?" ')
         vd.remove(vs)
 
+
+@Sheet.api
+def preloadHook(sheet):
+    'Override to setup for reload()'
+    pass
 
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'vd.addUndoReload(rows, columns); reload(); recalc()', 'reload current sheet'),
+BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); vd.addUndoReload(rows, columns); reload(); recalc()', 'reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
@@ -976,19 +1010,19 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 
-Sheet.addCommand(ENTER, 'dive-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
+Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
+Sheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current row')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
+Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
 
 
 # when diving into a sheet, remove the index unless it is precious
-SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)', 'jump to sheet referenced in current row')
-SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)', 'push selected sheets to top of sheets stack')
 SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected, *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelected), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
@@ -999,5 +1033,7 @@ BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]); options.disp
 BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
+BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'guard current sheet from accidental quitting')
+BaseSheet.addCommand(None, 'open-source', 'vd.push(source)', 'jump to the source of this sheet')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')

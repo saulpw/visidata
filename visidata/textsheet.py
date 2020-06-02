@@ -1,6 +1,7 @@
 import textwrap
 
 from visidata import vd, option, options, Sheet, ColumnItem, asyncthread
+from visidata import Column, ColumnItem, vlen
 from visidata import globalCommand, error, stacktrace, VisiData
 
 __all__ = ['TextSheet', 'ErrorSheet']
@@ -32,28 +33,38 @@ class TextSheet(Sheet):
                 yield [startingLine+1, text]
 
 
-# .source is Sheet error came from
-# .lines is list of source text lines to 'load'
+# .source is list of source text lines to 'load'
+# .sourceSheet is Sheet error came from
 class ErrorSheet(TextSheet):
     precious = False
-    def iterload(self):
-        'Uses .lines; .source is sheet causing the error.'
-        for i, line in enumerate(self.lines):
-            yield [i, line]
+
+
+class ErrorsSheet(Sheet):
+    columns = [
+        Column('nlines', type=vlen),
+        ColumnItem('lastline', -1)
+    ]
+    def reload(self):
+        self.rows = self.source
+
+    def openRow(self, row):
+        return ErrorSheet(source=cursorRow)
 
 @VisiData.property
 def allErrorsSheet(self):
-    return ErrorSheet("errors_all", lines=sum(vd.lastErrors, []))
+    return ErrorsSheet("errors_all", source=vd.lastErrors)
 
 @VisiData.property
 def recentErrorsSheet(self):
-    return ErrorSheet("errors_recent", lines=sum(vd.lastErrors[-1:], []))
+    error = vd.lastErrors[-1] if vd.lastErrors else ''
+    return ErrorSheet("errors_recent", source=error)
+
 
 
 globalCommand('^E', 'error-recent', 'vd.lastErrors and vd.push(recentErrorsSheet) or status("no error")', 'view traceback for most recent error')
 globalCommand('g^E', 'errors-all', 'vd.push(vd.allErrorsSheet)', 'view traceback for most recent errors')
 
-Sheet.addCommand(None, 'view-cell', 'vd.push(ErrorSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), source=sheet, lines=cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet'),
-Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet(sheet.name+"_cell_error", source=sheet, lines=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
+Sheet.addCommand(None, 'view-cell', 'vd.push(ErrorSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), sourceSheet=sheet, source=cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet'),
+Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet(sheet.name+"_cell_error", sourceSheet=sheet, source=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
 
 TextSheet.options.save_filetype = 'txt'

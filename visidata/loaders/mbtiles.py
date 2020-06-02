@@ -58,9 +58,9 @@ class MbtilesSheet(Sheet):
         sourceRows = sum((list(getFeatures(self.getTile(*r))) for r in rows), [])
         return PbfCanvas(name+"_map", source=PbfSheet(name, source=self), sourceRows=sourceRows)
 
-    def getPlotSheet(self, row):
+    def openRow(self, row):
+        'load table referenced in current row into memory'
         return PbfSheet(tilename(row), source=self, sourceRow=row)
-
 
 
 class PbfSheet(Sheet):
@@ -128,7 +128,6 @@ class PbfCanvas(InvertedCanvas):
 
 PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot blocks in current row')
 PbfSheet.addCommand('g.', 'plot-rows', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot selected blocks')
-MbtilesSheet.addCommand(ENTER, 'dive-row', 'vd.push(getPlotSheet(cursorRow))', 'load table referenced in current row into memory')
 MbtilesSheet.addCommand('.', 'plot-row', 'vd.push(getPlot(cursorRow))', 'plot tiles in current row')
 MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles'),
 

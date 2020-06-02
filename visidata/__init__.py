@@ -65,6 +65,7 @@ from .slide import *
 from .search import *
 from .expr import *
 
+from .choose import *
 from .metasheets import *
 from .join import *
 from .aggregators import *
@@ -83,6 +84,7 @@ from .shell import *
 from .layout import *
 from .main import *
 from .help import *
+from .defermods import *
 import visidata.sort
 
 from .loaders.csv import *

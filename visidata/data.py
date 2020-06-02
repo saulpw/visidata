@@ -34,11 +34,15 @@ def addNewRows(sheet, n, idx):
         addedRows[sheet.rowid(row)] = row
         sheet.addRow(row, idx+1)
 
+        if sheet.defer:
+            sheet.rowAdded(row)
+
     @asyncthread
     def _removeRows():
-        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows)
+        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
 
     vd.addUndo(_removeRows)
+
 
 @asyncthread
 def fillNullValues(col, rows):
@@ -183,20 +187,28 @@ def loadInternalSheet(klass, p, **kwargs):
     return vs
 
 @Sheet.api
-def deleteBy(self, func):
+def deleteBy(self, func, commit=False):
     'Delete rows for which func(row) is true.  Returns number of deleted rows.'
     oldrows = copy(self.rows)
     oldidx = self.cursorRowIndex
     ndeleted = 0
 
     row = None   # row to re-place cursor after
+    # if commit is True, commit to delete, even if defer is True
+    if self.defer and not commit:
+        ndeleted = 0
+        for r in self.gatherBy(func, 'deleting'):
+            self.rowDeleted(r)
+            ndeleted += 1
+        return ndeleted
+
     while oldidx < len(oldrows):
         if not func(oldrows[oldidx]):
             row = self.rows[oldidx]
             break
         oldidx += 1
 
-    self.rows.clear()
+    self.rows.clear() # must delete from the existing rows object
     for r in Progress(oldrows, 'deleting'):
         if not func(r):
             self.rows.append(r)
@@ -208,6 +220,7 @@ def deleteBy(self, func):
     vd.addUndo(setattr, self, 'rows', oldrows)
 
     status('deleted %s %s' % (ndeleted, self.rowtype))
+
     return ndeleted
 
 

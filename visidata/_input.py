@@ -2,11 +2,13 @@ from contextlib import suppress
 import collections
 import curses
 
+import visidata
+
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
 from visidata import vd, status, error, warning, fail, options, theme, colors
-from visidata import launchExternalEditor, suspend
+from visidata import launchExternalEditor, suspend, ColumnItem, ENTER
 
-__all__ = ['confirm', 'choose', 'chooseOne', 'chooseMany', 'CompleteKey']
+__all__ = ['confirm', 'CompleteKey']
 
 theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
@@ -234,6 +236,32 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
 
 
 @VisiData.api
+def inputsingle(vd, prompt, record=True):
+    'Display prompt and return single character of user input.'
+    sheet = vd.sheets[0]
+    rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
+
+    v = None
+    if record and vd.cmdlog:
+        v = vd.getLastArgs()
+
+    if v is not None:
+        return v
+
+    y = sheet.windowHeight-1
+    w = sheet.windowWidth
+    rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
+    promptlen = clipdraw(sheet._scr, y, 0, prompt, 0, w=w-rstatuslen-1)
+    sheet._scr.move(y, w-promptlen-rstatuslen-2)
+    v = vd.getkeystroke(sheet._scr)
+
+    if record and vd.cmdlog:
+        vd.setLastArgs(v)
+
+    return v
+
+
+@VisiData.api
 def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     '''Display prompt and return line of user input.
 
@@ -286,41 +314,6 @@ class CompleteKey:
     def __call__(self, val, state):
         opts = [x for x in self.items if x.startswith(val)]
         return opts[state%len(opts)] if opts else val
-
-
-def chooseOne(L):
-    return choose(L, 1)
-
-
-def choose(choices, n=None):
-    'Return one of `choices` elements (if list) or values (if dict).'
-    ret = chooseMany(choices) or fail('no choice made')
-    if n and len(ret) > n:
-        fail('can only choose %s' % n)
-    return ret[0] if n==1 else ret
-
-
-def chooseMany(choices):
-    'Return list of `choices` elements (if list) or values (if dict).'
-    if isinstance(choices, dict):
-        prompt = '/'.join(choices.keys())
-        chosen = []
-        for c in vd.input(prompt+': ', completer=CompleteKey(choices)).split():
-            poss = [choices[p] for p in choices if str(p).startswith(c)]
-            if not poss:
-                warning('invalid choice "%s"' % c)
-            else:
-                chosen.extend(poss)
-    else:
-        prompt = '/'.join(str(x) for x in choices)
-        chosen = []
-        for c in vd.input(prompt+': ', completer=CompleteKey(choices)).split():
-            poss = [p for p in choices if str(p).startswith(c)]
-            if not poss:
-                warning('invalid choice "%s"' % c)
-            else:
-                chosen.extend(poss)
-    return chosen
 
 
 @Sheet.api

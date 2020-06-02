@@ -747,7 +747,7 @@ show/hide methods and hidden properties
 .Sh COMMANDLINE OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Cm -P Ns = Ns Ar longname
-.No preplay Ar longname No before replay or regular launch
+.No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
 .It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
 .Pp

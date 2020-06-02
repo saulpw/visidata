@@ -141,10 +141,9 @@ class _CommandLog:
         if vd.activeCommand:
             self.afterExecSheet(sheet, False, '')
 
-        sheetname, colname, rowname = '', '', ''
+        colname, rowname = '', ''
         if sheet and not cmd.longname.startswith('open-'):
             contains = lambda s, *substrs: any((a in s) for a in substrs)
-            sheetname = sheet.name or cmd.longname
             if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
                 k = sheet.rowkey(sheet.cursorRow)
                 rowname = keystr(k) if k else sheet.cursorRowIndex
@@ -153,7 +152,7 @@ class _CommandLog:
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
-        vd.activeCommand = self.newRow(sheet=sheetname,
+        vd.activeCommand = self.newRow(sheet=sheet,
                                             col=str(colname),
                                             row=str(rowname),
                                             keystrokes=keystrokes,

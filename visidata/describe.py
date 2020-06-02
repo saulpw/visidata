@@ -97,10 +97,19 @@ class DescribeSheet(ColumnsSheet):
         d[func.__name__] = r
         return r
 
+    def openCell(self, col, row):
+        'open copy of source sheet with rows described in current cell'
+        val = col.getValue(row)
+        if isinstance(val, list):
+            vs=copy(row.sheet)
+            vs.rows=val
+            vs.name+="_%s_%s"%(row.name,col.name)
+            return vs
+        warning(val)
+
 
 Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
 globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.sheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
 
 DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)', 'select rows on source sheet which are being described in current cell')
 DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell')
-DescribeSheet.addCommand('z'+ENTER, 'dive-cell', 'isinstance(cursorValue, list) or error(cursorValue); vs=copy(cursorRow.sheet); vs.rows=cursorValue; vs.name+="_%s_%s"%(cursorRow.name,cursorCol.name); vd.push(vs)', 'open copy of source sheet with rows described in current cell')

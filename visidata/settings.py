@@ -143,6 +143,15 @@ class OptionsObject:
     def getdefault(self, k):
         return self._get(k, 'global').value
 
+    def getonly(self, k, obj, default):
+        'Return value of option k as set on obj, or default if not set specifically on obj'
+        d = self._opts.get(k, None)
+        if d:
+            opt = d.get(self._opts.objname(obj), None)
+            if opt:
+                return opt.value
+        return default
+
     def set(self, k, v, obj='override'):
         opt = self._get(k)
         if opt:
@@ -308,4 +317,4 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
     return args
 
 
-BaseSheet.addCommand(None, 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))', 'open ~/.visidatarc as Text Sheet')
+BaseSheet.addCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))', 'open ~/.visidatarc as Text Sheet')

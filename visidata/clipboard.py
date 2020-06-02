@@ -52,8 +52,13 @@ def syscopyCells(sheet, col, rows):
 
 @Sheet.api
 def delete_row(sheet, rowidx):
-    oldrow = sheet.rows.pop(rowidx)
-    vd.addUndo(sheet.rows.insert, rowidx, oldrow)
+    if not sheet.defer:
+        oldrow = sheet.rows.pop(rowidx)
+        vd.addUndo(sheet.rows.insert, rowidx, oldrow)
+    else:
+        oldrow = sheet.rows[rowidx]
+        sheet.rowDeleted(oldrow)
+
     vd.cliprows = [(sheet, rowidx, oldrow)]
 
 @Sheet.api

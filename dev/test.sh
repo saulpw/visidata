@@ -3,6 +3,7 @@
 # Usage: test.sh [testname]
 
 set -e
+shopt -s failglob
 
 trap "echo aborted; exit;" SIGINT SIGTERM
 
