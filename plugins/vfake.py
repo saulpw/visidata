@@ -1,11 +1,14 @@
 # to anonymize a column in vd: do "setcol-fake" with e.g. 'name' 'isbn10' or any of the functions on Faker()
 
+import json
+
 from visidata import vd, Column, Sheet, option, options, asyncthread, Progress
 
-__version__ = '0.9'
+__version__ = '1.0'
 
 option('locale', 'en_US', 'default locale to use for Faker', replay=True)
 option('vfake_extra_providers', None, 'list of additional Provider classes to load via add_provider()', replay=True)
+option('vfake_salt', '', 'Use a non-empty string to enable deterministic fakes')
 
 def addFakerProviders(fake, providers):
     '''
@@ -43,11 +46,17 @@ def setValuesFromFaker(col, faketype, rows):
     fakeMap[options.null_value] = options.null_value
 
     vd.addUndoSetValues([col], rows)
+    salt = options.vfake_salt
+
     for r in Progress(rows):
         v = col.getValue(r)
         if v in fakeMap:
             newv = fakeMap[v]
         else:
+            if salt:
+                # Reset the Faker seed for each value. For a given salt string,
+                # the same cell value will always generate the same fake value.
+                fake.seed_instance(json.dumps(v) + salt)
             newv = fakefunc()
             fakeMap[v] = newv
         col.setValue(r, newv)
