@@ -70,12 +70,13 @@ def save_xlsx(vd, p, *sheets):
         for dispvals in vs.iterdispvals(format=False):
 
             row = []
-            for v in dispvals.values():
-                if type(v) == date:
+            for col, v in dispvals.items():
+                if col.type == date:
                     v = datetime.datetime.fromtimestamp(int(v.timestamp()))
-                elif not type(v) in [int,float,str]:
+                elif not isNumeric(col):
                     v = str(v)
                 row.append(v)
+
             ws.append(row)
 
     wb.active = ws
@@ -97,13 +98,9 @@ def save_xls(vd, p, *sheets):
         for col_i, col in enumerate(vs.visibleCols):
             ws1.write(0, col_i, col.name)
 
-        for r_i, dispvals in enumerate(vs.iterdispvals(format=False)):
+        for r_i, dispvals in enumerate(vs.iterdispvals(format=True)):
             r_i += 1
             for c_i, v in enumerate(dispvals.values()):
-
-                if not type(v) in [int,float,str]:
-                    v = str(v)
-
                 ws1.write(r_i, c_i, v)
 
     wb.save(p)
