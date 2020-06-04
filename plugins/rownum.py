@@ -59,7 +59,7 @@ def addcol_delta(sheet, vcolidx):
                    expr="{0}-prev(row).{0}".format(col.name))
 
     sheet.addcol_rowindex(newcol, vcolidx)
-
+    return newcol
 
 @Sheet.api
 def addcol_rownum(sheet, vcolidx):
@@ -69,7 +69,7 @@ def addcol_rownum(sheet, vcolidx):
                getter=lambda col,row: col._rowindex.get(col.sheet.rowid(row)))
 
     sheet.addcol_rowindex(newcol, vcolidx)
-
+    return newcol
 
 Sheet.addCommand(None, 'addcol-rownum', 'addcol_rownum(cursorColIndex)', helpstr='add column with original row ordering')
 Sheet.addCommand(None, 'addcol-delta', 'addcol_delta(cursorColIndex)', helpstr='add column with delta of current column')
