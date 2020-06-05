@@ -1,6 +1,7 @@
 import os
 
 import visidata
+from collections.abc import MutableMapping
 from visidata import Extensible, VisiData, getGlobals, vd, EscapeException
 from unittest import mock
 
@@ -8,7 +9,7 @@ from unittest import mock
 UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
 
 
-class LazyChainMap:
+class LazyChainMap(MutableMapping):
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
     def __init__(self, *objs):
         self.locals = {}
@@ -24,6 +25,15 @@ class LazyChainMap:
     def clear(self):
         self.locals.clear()
 
+    def __len__(self):
+        return len(set().union(self.objs, self.locals))
+
+    def __contains__(self, key):
+        return key in self.objs or key in self.locals
+
+    def __iter__(self):
+        return iter(set().union(self.objs, self.locals))
+
     def __getitem__(self, k):
         obj = self.objs.get(k, None)
         if obj:
@@ -35,6 +45,9 @@ class LazyChainMap:
         if obj:
             return setattr(obj, k, v)
         self.locals[k] = v
+
+    def __delitem__(self, k):
+        del locals[k]
 
 
 class BaseSheet(Extensible):
