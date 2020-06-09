@@ -232,6 +232,13 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         status('"%s"' % v)
         if record and vd.cmdlog:
             vd.setLastArgs(v)
+
+    # clear keyboard buffer upon exit from input()
+    # input() stops when it reaches an ENTER, and we do not want the expressions
+    # that follow to register as keystrokes
+    # see issue#585
+    curses.flushinp()
+
     return v
 
 
