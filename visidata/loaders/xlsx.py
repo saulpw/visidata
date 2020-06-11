@@ -53,7 +53,7 @@ class XlsSheet(SequenceSheet):
         for rownum in Progress(range(worksheet.nrows)):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
-# Convert sheet names to 
+
 def excel_safename(name, used_names):
     'convert sheet names to comply with Excel standards'
 
