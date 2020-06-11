@@ -29,3 +29,4 @@ getDefaultSaveName	Sheet.getDefaultSaveName	same	y
 prev-sheet	jump-prev		y
 editline()	vd.editline()	same	y
 *-replay	replay-*	longname	y
+getSheet(sheetname)	getSheet('')	handle sheet-agnostic case	

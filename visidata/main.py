@@ -149,7 +149,8 @@ def main_vd():
             if not startsheets:
                 sheets = sources  # apply row/col to all sheets
             else:
-                vs = vd.getSheet(startsheets[0]) or sources[-1]
+                startsheet = startsheets[0] or sources[-1]
+                vs = vd.getSheet(startsheet)
                 vd.sync(vs.ensureLoaded())
                 vd.clearCaches()
                 for startsheet in startsheets[1:]:

@@ -187,8 +187,14 @@ class ListOfDictSheet(PythonSheet):
     rowtype = 'dicts'
     def reload(self):
         self.columns = []
-        for c in DictKeyColumns(self.source[0]):
-            self.addColumn(c)
+        addedCols = set()
+        for row in self.source:
+            newCols = {k: v for k, v in row.items() if k not in addedCols}
+            if not newCols:
+                continue
+            for c in DictKeyColumns(newCols):
+                self.addColumn(c)
+                addedCols.add(c.name)
         self.rows = self.source
 
 # rowdef: namedtuple

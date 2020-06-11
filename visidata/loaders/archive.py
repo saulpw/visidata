@@ -31,7 +31,7 @@ class ZipSheet(Sheet):
             decodedfp = codecs.iterdecode(self.openZipFile(zfp, fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
-            return openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size))
+            return openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size), filetype=options.filetype)
 
     def iterload(self):
         with zipfile.ZipFile(str(self.source), 'r') as zf:

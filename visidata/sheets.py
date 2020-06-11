@@ -988,7 +988,7 @@ def preloadHook(sheet):
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'reload current sheet'),
+BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); vd.addUndoReload(rows, columns); reload(); recalc(); status("reloaded")', 'reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
@@ -1011,7 +1011,7 @@ Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 
 Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
-Sheet.addCommand('z'+ENTER, 'dive-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current row')
+Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current row')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
 Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
 

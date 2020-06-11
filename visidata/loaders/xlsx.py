@@ -53,6 +53,58 @@ class XlsSheet(SequenceSheet):
         for rownum in Progress(range(worksheet.nrows)):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
+            
+@VisiData.api
+def save_xlsx(vd, p, *sheets):
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    wb.remove_sheet(wb['Sheet'])
+
+    for vs in sheets:
+        ws = wb.create_sheet(title=vs.name)
+
+        headers = [col.name for col in vs.visibleCols]
+        ws.append(headers)
+
+        for dispvals in vs.iterdispvals(format=False):
+
+            row = []
+            for col, v in dispvals.items():
+                if col.type == date:
+                    v = datetime.datetime.fromtimestamp(int(v.timestamp()))
+                elif not isNumeric(col):
+                    v = str(v)
+                row.append(v)
+
+            ws.append(row)
+
+    wb.active = ws
+
+    wb.save(filename=p)
+    status(f'{p} save finished')
+
+
+@VisiData.api
+def save_xls(vd, p, *sheets):
+    import xlwt
+
+    wb = xlwt.Workbook()
+
+    for vs in sheets:
+
+        ws1 = wb.add_sheet(vs.name[:32]) # sheet name can not be longer than 32 characters
+
+        for col_i, col in enumerate(vs.visibleCols):
+            ws1.write(0, col_i, col.name)
+
+        for r_i, dispvals in enumerate(vs.iterdispvals(format=True)):
+            r_i += 1
+            for c_i, v in enumerate(dispvals.values()):
+                ws1.write(r_i, c_i, v)
+
+    wb.save(p)
+    status(f'{p} save finished')
 
 vd.filetype('xlsx', XlsxIndexSheet)
 vd.filetype('xls', XlsIndexSheet)
