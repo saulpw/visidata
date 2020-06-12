@@ -1,0 +1,4 @@
+filetype	loader	saver	add-row
+tsv	builtin	as displayed	yes
+csv	builtin	as displayed	yes
+json	builtin	typed, nested	yes
