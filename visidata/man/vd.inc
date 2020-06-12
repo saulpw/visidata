@@ -271,7 +271,7 @@ open duplicate sheet with deepcopy of selected rows
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a   za"
-append a blank row/column
+append a blank row/column; appended columns cannot be copied to clipboard
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
