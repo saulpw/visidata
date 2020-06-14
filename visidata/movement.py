@@ -112,6 +112,7 @@ Sheet.addCommand(None, 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+
 
 Sheet.addCommand('BUTTON4_PRESSED', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll one row up'),
 Sheet.addCommand('REPORT_MOUSE_POSITION', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll one row down'),
+Sheet.bindkey('2097152', 'scroll-down')
 
 Sheet.addCommand('c', 'go-col-regex', 'sheet.cursorVisibleColIndex=nextColRegex(input("column name regex: ", type="regex-col", defaultLast=True))', 'go to next column with name matching regex')
 Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'go to given column number (0-based)')
@@ -164,6 +165,7 @@ Sheet.addCommand(None, 'go-home', 'sheet.topRowIndex = sheet.cursorRowIndex = 0;
 
 BaseSheet.bindkey('CTRL-BUTTON4_PRESSED', 'scroll-left')
 BaseSheet.bindkey('CTRL-REPORT_MOUSE_POSITION', 'scroll-right')
+BaseSheet.bindkey('CTRL-2097152', 'scroll-right')
 
 BaseSheet.bindkey('zk', 'scroll-up')
 BaseSheet.bindkey('zj', 'scroll-down')
