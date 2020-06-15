@@ -69,7 +69,7 @@ def excel_safename(name, used_names):
     name = ''.join([ '_' if c in '\\/?*[]' else c for c in name])
 
     # strip leading and trailing _
-    name.strip("_")
+    name = name.strip("_")
 
     return name, used_names
 
