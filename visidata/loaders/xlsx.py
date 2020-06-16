@@ -5,7 +5,7 @@ class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'
     rowtype = 'sheets'  # rowdef: xlsxSheet
     columns = [
-        Column('sheet', getter=lambda col,row: row.source.title or row.source.name),  # xlsx sheet title
+        Column('sheet', getter=lambda col,row: row.source.title),  # xlsx sheet title
         ColumnAttr('name', width=0),  # visidata Sheet name
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
