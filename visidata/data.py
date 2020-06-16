@@ -1,5 +1,6 @@
 import itertools
 import random
+import string
 
 from copy import copy
 from visidata import Sheet, Column, asyncthread, Progress, status, error
@@ -8,6 +9,15 @@ from visidata import *
 
 option('filetype', '', 'specify file type', replay=True)
 
+def _default_colnames():
+    'A B C .. Z AA AB .. ZZ AAA .. to infinity'
+    i=0
+    while True:
+        i += 1
+        for x in itertools.product(string.ascii_uppercase, repeat=i):
+            yield ''.join(x)
+
+vd.default_colnames = _default_colnames()
 
 vd.filetypes = {}
 
@@ -231,8 +241,8 @@ Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select:
 
 Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
 Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
-Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', 'append an empty column')
-Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', 'append N empty columns')
+Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(), cursorColIndex+1); cursorRight(1)', 'append an empty column')
+Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(), cursorColIndex+c+1)', 'append N empty columns')
 
 Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, selectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')
 

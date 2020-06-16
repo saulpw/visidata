@@ -171,7 +171,7 @@ class TableSheet(BaseSheet):
         self._visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # list of all columns in display order
-        self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('')]
+        self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('_')]
         self._colorizers = []
         self.recalc()  # set .sheet on columns and start caches
 
@@ -826,10 +826,9 @@ class SequenceSheet(Sheet):
     'For sheets which use ColumnItem on rows that are Python sequences (list, namedtuple, etc).'
     def setCols(self, headerrows):
         self.columns = []
-        for i, _ in enumerate(itertools.zip_longest(*headerrows)):
-            self.addColumn(ColumnItem('', i))
+        for i, colnamelines in enumerate(itertools.zip_longest(*headerrows)):
+            self.addColumn(ColumnItem(''.join(colnamelines), i))
 
-        self.setColNames(headerrows)
         self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
 
     def newRow(self):

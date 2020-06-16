@@ -133,7 +133,7 @@ def anySelected(vs, rows):
 #  - needs to refresh from source on resize
 class Plotter(BaseSheet):
     'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
-    columns=[Column('')]  # to eliminate errors outside of draw()
+    columns=[Column('_')]  # to eliminate errors outside of draw()
     rowtype='pixels'
     def __init__(self, name='plotter', **kwargs):
         super().__init__(name, **kwargs)
