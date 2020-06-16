@@ -290,6 +290,7 @@ class Column(Extensible):
         except Exception as e:
             vd.exceptionCaught(e)
 
+    @asyncthread
     def setValues(self, rows, *values):
         'Set our column value for given list of rows to `value`.'
         vd.addUndoSetValues([self], rows)
