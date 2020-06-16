@@ -93,8 +93,9 @@ def updateColNames(sheet, rows, cols, overwrite=False):
 
 
 @VisiData.api
-def newSheet(vd, ncols, name='', **kwargs):
-    return Sheet(name, columns=[ColumnItem('', i, width=8) for i in range(ncols)], **kwargs)
+def newSheet(vd, ncols, **kwargs):
+    return Sheet(columns=[SettableColumn() for i in range(ncols)], **kwargs)
+
 
 def inputFilename(prompt, *args, **kwargs):
     return vd.input(prompt, "filename", *args, completer=completeFilename, **kwargs)
@@ -269,4 +270,4 @@ Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cu
 
 Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
 
-globalCommand('A', 'add-sheet', 'vd.push(vd.newSheet(int(input("num columns for new sheet: ")), name="unnamed"))', 'open new blank sheet with N columns')
+globalCommand('A', 'open-new', 'vd.push(vd.newSheet(1, name="unnamed"))', 'open new blank sheet')
