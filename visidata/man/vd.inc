@@ -854,6 +854,8 @@ These are the supported sources:
 .Pp
 .Bl -inset -compact -offset xxx
 .It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
+.Bl -inset -compact -offset xxx
+.It Uses the safe YAML loader, which supports the most common uses of YAML.
 .El
 .Pp
 .Bl -inset -compact -offset xxx
