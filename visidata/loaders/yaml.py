@@ -5,7 +5,7 @@ class YamlSheet(JsonSheet):
     def iterload(self):
         import yaml
         with self.source.open_text() as fp:
-            data = yaml.load(fp, Loader=yaml.FullLoader)
+            data = yaml.safe_load(fp)
 
         self.columns = []
         self.colnames = {}
