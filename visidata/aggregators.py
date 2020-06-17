@@ -154,5 +154,5 @@ addGlobals(globals())
 
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'add aggregator to current column')
-Sheet.addCommand('z+', 'show-aggregate', 'for agg in chooseMany(aggregators_choices): cursorCol.show_aggregate(agg["key"],  selectedRows or rows)', 'display result of aggregator over values in selected rows for current column')
+Sheet.addCommand('z+', 'show-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.show_aggregate(agg["key"],  selectedRows or rows)', 'display result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')
