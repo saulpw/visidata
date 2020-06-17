@@ -9,7 +9,7 @@
             "args": [
                 "-f",
                 "pandas",
-                "sample_data/benchmark.csv"
+                "${workspaceFolder}/sample_data/benchmark.csv"
             ],
             "console": "integratedTerminal"
         },
