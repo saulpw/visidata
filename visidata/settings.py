@@ -275,7 +275,8 @@ def loadConfigFile(fnrc, _globals=None):
         _globals = globals()
     if p.exists():
         try:
-            code = compile(open(p).read(), str(p), 'exec')
+            with open(p) as fd:
+                code = compile(fd.read(), str(p), 'exec')
             exec(code, _globals)
         except Exception as e:
             vd.exceptionCaught(e)

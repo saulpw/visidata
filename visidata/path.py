@@ -140,9 +140,10 @@ class Path(os.PathLike):
 
     def __iter__(self):
         with Progress(total=filesize(self)) as prog:
-            for i, line in enumerate(self.open_text()):
-                prog.addProgress(len(line))
-                yield line.rstrip('\n')
+            with self.open_text() as fd:
+                for i, line in enumerate(fd):
+                    prog.addProgress(len(line))
+                    yield line.rstrip('\n')
 
     def open_bytes(self, mode='rb'):
         if 'b' not in mode:
