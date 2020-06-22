@@ -41,6 +41,10 @@ def duptty():
         stdout = open(os.dup(1))  # for dumping to stdout from interface
         os.dup2(fin.fileno(), 0)
         os.dup2(fout.fileno(), 1)
+
+        # close file descriptors for original stdin/stdout
+        fin.close()
+        fout.close()
     except Exception as e:
         print(e)
         stdin = sys.stdin
