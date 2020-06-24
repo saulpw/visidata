@@ -613,7 +613,7 @@ class TableSheet(BaseSheet):
             clipdraw(scr, y+i, x, name, hdrcattr.attr, colwidth)
             vd.onMouse(scr, y+i, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
 
-            if C and x+colwidth+len(C) < self.windowWidth:
+            if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowWidth:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
         clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrcattr.attr)
