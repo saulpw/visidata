@@ -111,6 +111,9 @@ class Option:
     def __str__(self):
         return str(self.value)
 
+    def __eq__(self, other):
+        return self.name == other.name
+
 
 @VisiData.api
 class OptionsObject:
@@ -169,7 +172,7 @@ class OptionsObject:
                 v = t(v)
 
             if curval != v and self._get(k, 'global').replayable:
-                if vd.cmdlog:  # options set on init aren't recorded
+                if vd.cmdlog and obj != 'global':  # options set on init aren't recorded
                     vd.set_option(vd.cmdlog, k, v, obj)
         else:
             curval = None
