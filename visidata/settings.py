@@ -2,6 +2,7 @@ import collections
 import sys
 import inspect
 import argparse
+import importlib
 
 import visidata
 from visidata import VisiData, BaseSheet, vd, getGlobals, addGlobals
@@ -305,6 +306,10 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
 
     # add visidata_dir to path before loading config file (can only be set from cli)
     sys.path.append(str(visidata.Path(args.visidata_dir or options.visidata_dir)))
+
+    # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
+    for modname in args.imports.split():
+        addGlobals(importlib.import_module(modname).__dict__)
 
     # user customisations in config file in standard location
     loadConfigFile(visidata.Path(args.config or options.config), getGlobals())

@@ -16,6 +16,7 @@ import visidata
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
 option('preplay', '', 'longnames to preplay before replay')
+option('imports', None, 'imports to preload before .visidatarc (command-line only)')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -68,6 +69,7 @@ def main_vd():
     parser.add_argument('-w', dest='replay_wait', default=0, help='time to wait between replayed commands, in seconds')
     parser.add_argument('-d', dest='delimiter', help='delimiter to use for tsv/usv filetype')
     parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
+    parser.add_argument('--imports', dest='imports', default='plugins', help='imports to preload before .visidatarc')
     parser.add_argument('-v', '--version', action='version', version=__version_info__)
 
     args = vd.parseArgs(parser)
