@@ -140,9 +140,15 @@ class LazyComputeRow:
                     return getattr(self, colid)   # finally, handle 'row' and 'sheet' fake columns
                 raise KeyError(colid)
 
+class BasicRow(collections.defaultdict):
+    def __init__(self):
+        super().__init__(lambda: None)
+    def __bool__(self):
+        return True
+
 class TableSheet(BaseSheet):
     'Base class for all tabular sheets.'
-    _rowtype = lambda: collections.defaultdict(lambda: None)
+    _rowtype = lambda: BasicRow
     rowtype = 'rows'
 
     columns = []  # list of Column
