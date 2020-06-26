@@ -10,11 +10,24 @@ class PythonSheet(Sheet):
     def openRow(self, row):
         return load_pyobj("%s[%s]" % (self.name, self.keystr(row)), row)
 
+def _getWraparoundSlice(seq, n, center):
+    '''Return a slice of length n from a sequence, centered around a given index'''
+    start = int(center - n / 2) % len(seq)
+    end = (start + n) % len(seq)
+    if start < end:
+        return seq[start:end]
+    return seq[start:] + seq[:end]
 
 def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'
     ret = []
-    rows = rows or sheet.rows[:options.expand_col_scanrows] or sheet.rows
+    if not rows:
+        scanrows = options.expand_col_scanrows
+        if scanrows == 0 or scanrows >= sheet.nRows:
+            rows = sheet.rows
+        else:
+            rows = _getWraparoundSlice(sheet.rows, scanrows, sheet.cursorRowIndex)
+
     for col in cols:
         newcols = _addExpandedColumns(col, rows, sheet.columns.index(col))
         if depth != 1:  # countdown not yet complete, or negative (indefinite)
