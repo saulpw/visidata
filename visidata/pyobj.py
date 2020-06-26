@@ -3,6 +3,7 @@ from functools import singledispatch
 from visidata import *
 
 option('visibility', 0, 'visibility level')
+option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
 
 
 class PythonSheet(Sheet):
@@ -10,9 +11,10 @@ class PythonSheet(Sheet):
         return load_pyobj("%s[%s]" % (self.name, self.keystr(row)), row)
 
 
-def expand_cols_deep(sheet, cols, rows, depth=0):  # depth == 0 means drill all the way
+def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'
     ret = []
+    rows = rows or sheet.rows[:options.expand_col_scanrows] or sheet.rows
     for col in cols:
         newcols = _addExpandedColumns(col, rows, sheet.columns.index(col))
         if depth != 1:  # countdown not yet complete, or negative (indefinite)
@@ -288,10 +290,10 @@ Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); push_pyobj("%s[%s]
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); push_pyobj("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), cursorValue)', 'open current cell as Python object')
 globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); push_pyobj(sheet.name+"_sheet", sheet)', 'open current sheet as Python object')
 
-Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], visibleRows, depth=0)', 'expand current column of containers fully')
-Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, visibleRows, depth=0)', 'expand all visible columns of containers fully')
-Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], visibleRows, depth=int(input("expand depth=", value=1)))', 'expand current column of containers to given depth (0=fully)')
-Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, visibleRows, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)')
+Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], depth=0)', 'expand current column of containers fully')
+Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, depth=0)', 'expand all visible columns of containers fully')
+Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], depth=int(input("expand depth=", value=1)))', 'expand current column of containers to given depth (0=fully)')
+Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)')
 
 Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
