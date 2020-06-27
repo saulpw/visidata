@@ -166,7 +166,7 @@ def drawRightStatus(vd, scr, vs):
     active = vs is vd.sheets[0]  # active sheet
 
     if active:
-        statcolors.append((vd.keystrokes, 'color_keystrokes'))
+        statcolors.append((vd.keystrokes or '', 'color_keystrokes'))
 
     if vs.currentThreads:
         statcolors.insert(0, vd.checkMemoryUsage())
