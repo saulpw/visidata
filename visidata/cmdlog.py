@@ -391,7 +391,9 @@ def shortcut(self):
 
 @VisiData.lazy_property
 def cmdlog(vd):
-    return CommandLog('cmdlog', rows=[])
+    vs = CommandLog('cmdlog', rows=[])
+    vd.beforeExecHooks.append(vs.beforeExecHook)
+    return vs
 
 
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog for all commands executed in current session')

@@ -7,6 +7,7 @@ from unittest import mock
 
 UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
 
+vd.beforeExecHooks = [] # func(sheet, cmd, args, keystrokes) called before the exec()
 
 class LazyChainMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
@@ -120,8 +121,8 @@ class BaseSheet(Extensible):
         self.sheet = self
 
         try:
-            if vd.cmdlog:
-                vd.cmdlog.beforeExecHook(self, cmd, '', keystrokes)
+            for hookfunc in vd.beforeExecHooks:
+                hookfunc(self, cmd, '', keystrokes)
             code = compile(cmd.execstr, cmd.longname, 'exec')
             vd.debug(cmd.longname)
             exec(code, vdglobals, LazyChainMap(vd, self))
