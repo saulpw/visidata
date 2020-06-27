@@ -138,6 +138,38 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 
 ---
 
+## [How to expand columns that contain nested data](#expand) {#expand}
+
+If a column includes container data such as JSON objects or arrays, the `(` family of commands can expand the child values into top-level columns:
+
+Command       Operation
+---------     --------
+`  (`         expand _current_ column
+` g(`         expand _all visible_ columns fully
+` z(`         expand _current_ column to a specific depth (prompt for input)
+`gz(`         expand _all visible_ columns to a specific depth (prompt for input)
+`  )`         contract (unexpand) the current column
+
+The following demo shows `(` commands applied to this data:
+
+~~~
+[
+    [ "short", "array" ],
+    [ "slightly", "longer", "array" ],
+    { "nested": "data" },
+    { "more": { "deeply": { "nested": "data" } } }
+]
+~~~
+
+<div class="asciicast">
+    <asciinema-player id="player" poster="npt:0:20" rows=13 src="../casts/expand-cols.cast"></asciinema-player>
+    <script type="text/javascript" src="/asciinema-player.js"></script>
+</div>
+
+Note that by default the expansion logic will look for nested columns in **up to 1,000 rows surrounding the cursor**. This behavior can be controlled by adjusting `expand_col_scanrows` in the **Options Sheet**, or setting `options.expand_col_scanrows` in the `~/.visidatarc` file.
+
+---
+
 ## [How to create derivative columns](#derived) {#derived}
 
 The `=` command takes a Python expression as input, evaluates the expression, and creates a new column from the result. Column names can be supplied as variables, in order to have the expression performed on the column cell-by-cell. VisiData supports `Tab` autocompletion of column names.
