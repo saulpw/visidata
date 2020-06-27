@@ -51,6 +51,7 @@ Inspired by [Daniele Procida](https://www.divio.com/blog/documentation/), the do
     * How to hide (remove) and unhide columns
     * How to specify column types
     * How to split a column
+    * How to expand columns that contain nested data
     * How to create derivative columns
     * How to configure multiple columns
 * [Editing contents](/docs/edit)
@@ -92,4 +93,3 @@ VisiData can interact with data from any source or in any format.
 * [viewtsv annotated](/docs/viewtsv)
 * [async](/docs/async)
 * [graphics reference](/docs/graphics)
-
