@@ -309,7 +309,10 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
 
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
     for modname in args.imports.split():
-        addGlobals(importlib.import_module(modname).__dict__)
+        try:
+            addGlobals(importlib.import_module(modname).__dict__)
+        except ModuleNotFoundError:
+            continue
 
     # user customisations in config file in standard location
     loadConfigFile(visidata.Path(args.config or options.config), getGlobals())
