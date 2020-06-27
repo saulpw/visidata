@@ -1,4 +1,47 @@
-filetype	loader	saver	add-row
-tsv	builtin	as displayed	yes
-csv	builtin	as displayed	yes
-json	builtin	typed, nested	yes
+filetype	req	aliases	saver	add-row
+csv			as displayed	yes
+dbf				
+dir				
+dot	no		from pcap	
+dta				
+fixed				
+frictionless				
+geojson				
+hdf5		h5		
+html		htm		
+json			typed, nested	yes
+jsonl		ndjson		
+mbtiles				
+md		jira		
+npy				
+npz				
+ntar				
+otf				
+pandas				
+pbf				
+pcap		cap pcapng		
+png				
+puz				
+sas7bdat				
+shp				
+spss				
+sqlite		db		
+svg				
+tar				
+tbz2				
+tgz				
+tsv			as displayed	yes
+ttf				
+txt				
+txz				
+usv				
+vd				
+vdj				
+xd				
+xls				
+xlsb				
+xlsx				
+xml				
+xpt				
+yaml		yml		
+zip				
