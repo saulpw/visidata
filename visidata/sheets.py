@@ -148,7 +148,7 @@ class BasicRow(collections.defaultdict):
 
 class TableSheet(BaseSheet):
     'Base class for all tabular sheets.'
-    _rowtype = lambda: BasicRow
+    _rowtype = lambda: BasicRow()
     rowtype = 'rows'
 
     columns = []  # list of Column
