@@ -47,9 +47,7 @@ def openurl_postgres(url, filetype=None):
                 dbname=dbname,
                 host=url.hostname,
                 port=url.port,
-                password=url.password,
-                # Not sure if this is necessary
-                options=f'--search_path={options.postgres_schema}')
+                password=url.password)
 
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
