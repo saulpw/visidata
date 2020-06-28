@@ -28,7 +28,7 @@ def openurl_mysql(url, filetype=None):
                 use_unicode=True,
                 charset='utf8')
 
-    return MyTablesSheet(dbname+"_tables", sql=SQL(conn))
+    return MyTablesSheet(dbname+"_tables", sql=SQL(conn), schema=dbname)
 
 
 class SQL:
@@ -61,10 +61,26 @@ class MyTablesSheet(Sheet):
     rowtype = 'tables'
 
     def reload(self):
-        # vd.status(dir(self.sql.conn))
-        schema = 'antville' # FIXME: set to database name
         qstr = f'''
-            select t.table_name, column_count.ncols, t.table_rows as est_nrows from information_schema.tables t, (select table_name, count(column_name) as ncols from information_schema.columns where table_schema = '{schema}' group by table_name) as column_count where t.table_name = column_count.table_name;
+            select 
+                t.table_name, 
+                column_count.ncols, 
+                t.table_rows as est_nrows 
+            from
+                information_schema.tables t, 
+                (
+                    select 
+                        table_name, 
+                        count(column_name) as ncols 
+                    from 
+                        information_schema.columns 
+                    where 
+                        table_schema = '{self.schema}' 
+                    group by 
+                        table_name
+                ) as column_count 
+            where 
+                t.table_name = column_count.table_name;
         '''
 
         with self.sql.cur(qstr) as cur:
