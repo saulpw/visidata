@@ -36,8 +36,7 @@ class SQL:
         self.conn = conn
 
     def cur(self, qstr):
-        #import string
-        #randomname = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+        # FIXME: The Posgres loader is using a named cursor but afaik MySQL does not know named cursors… problem?
         cur = self.conn.cursor()
         cur.execute(qstr)
         return cur
