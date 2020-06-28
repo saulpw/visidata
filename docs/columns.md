@@ -54,7 +54,7 @@ Columns usually begin as untyped. Odd results while working with numerical or da
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
 <div class="asciicast">
-    <asciinema-player id="player" poster="npt:0:20" rows=27 src="../casts/types.cast"></asciinema-player>
+    <asciinema-player id="player-types" poster="npt:0:20" rows=27 src="../casts/types.cast"></asciinema-player>
     <script type="text/javascript" src="/asciinema-player.js"></script>
 </div>
 
@@ -126,8 +126,7 @@ Python regular expressions provide more finetuned column splitting. The followin
 uses the commands for column splitting and transformation with [xd/puzzles.tsv](http://xd.saul.pw/xd-metadata.zip).
 
 <div class="asciicast">
-    <asciinema-player id="player" poster="npt:0:20" rows=27 src="../casts/split-regex.cast"></asciinema-player>
-    <script type="text/javascript" src="/asciinema-player.js"></script>
+    <asciinema-player id="player-split-regex" poster="npt:0:20" rows=27 src="../casts/split-regex.cast"></asciinema-player>
 </div>
 
 ###
@@ -162,8 +161,7 @@ The following demo shows `(` commands applied to this data:
 ~~~
 
 <div class="asciicast">
-    <asciinema-player id="player" poster="npt:0:20" rows=13 src="../casts/expand-cols.cast"></asciinema-player>
-    <script type="text/javascript" src="/asciinema-player.js"></script>
+    <asciinema-player id="player-expand-cols" poster="npt:0:20" rows=13 src="../casts/expand-cols.cast"></asciinema-player>
 </div>
 
 Note that by default the expansion logic will look for nested columns in **up to 1,000 rows surrounding the cursor**. This behavior can be controlled by adjusting `expand_col_scanrows` in the **Options Sheet**, or setting `options.expand_col_scanrows` in the `~/.visidatarc` file.
