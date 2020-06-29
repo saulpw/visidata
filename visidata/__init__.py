@@ -95,6 +95,7 @@ from .loaders.hdf5 import *
 from .loaders.sqlite import *
 from .loaders.fixed_width import *
 from .loaders.postgres import *
+from .loaders.mysql import *
 from .loaders.shp import *
 from .loaders.mbtiles import *
 from .loaders.http import *
