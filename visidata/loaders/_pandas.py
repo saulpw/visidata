@@ -317,7 +317,8 @@ def open_pandas(p):
 def open_dta(p):
     return PandasSheet(p.name, source=p, filetype='stata')
 
-open_stata = open_pandas
+for ft in 'feather gbq orc parquet pickle sas stata'.split():
+    globals().setdefault('open_'+ft, lambda p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
 
 # Override with vectorized implementations
 PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')
