@@ -21,7 +21,6 @@ def removeNulls(fp):
     for line in fp:
         yield line.replace('\0', '')
 
-
 class CsvSheet(SequenceSheet):
     _rowtype = list  # rowdef: list of values
 

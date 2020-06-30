@@ -9,8 +9,6 @@ from visidata import *
 option('filetype', '', 'specify file type', replay=True)
 
 
-vd.filetypes = {}
-
 def _default_colnames():
     'A B C .. Z AA AB .. ZZ AAA .. to infinity'
     i=0
@@ -130,15 +128,10 @@ def completeFilename(val, state):
     files.sort()
     return files[state%len(files)]
 
-@VisiData.api
-def filetype(vd, ext, constructor):
-    'Add constructor to handle the given file type/extension.'
-    vd.filetypes[ext] = constructor
-
 
 @VisiData.api
 def openPath(vd, p, filetype=None):
-    'Call vd.filetypes[ext](path.name, source=path) or open_ext(Path) or openurl_scheme(Path, filetype).  Return constructed but unloaded sheet of appropriate type.'
+    'Call open_ext(Path) or openurl_scheme(Path, filetype).  Return constructed but unloaded sheet of appropriate type.'
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
         return getGlobals()[openfunc](p, filetype=filetype)
@@ -154,10 +147,6 @@ def openPath(vd, p, filetype=None):
         return vd.newSheet(1, name=p.name, source=p)
 
     filetype = filetype.lower()
-
-    openfunc = vd.filetypes.get(filetype.lower())
-    if openfunc:
-        return openfunc(p.name, source=p)
 
     openfunc = getGlobals().get('open_' + filetype)
     if not openfunc:
