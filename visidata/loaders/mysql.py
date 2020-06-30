@@ -83,8 +83,6 @@ class MyTablesSheet(Sheet):
         '''
 
         with self.sql.cur(qstr) as cur:
-            self.nrowsPerTable = {}
-
             self.rows = []
             # try to get first row to make cur.description available
             r = cur.fetchone()
