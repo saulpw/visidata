@@ -1,6 +1,11 @@
 from visidata import *
 
 
+def open_ttf(p):
+    return TTFTablesSheet(p.name, source=p)
+
+open_otf = open_ttf
+
 class TTFTablesSheet(Sheet):
     rowtype = 'font tables'
     columns = [
@@ -84,6 +89,3 @@ def makePen(*args, **kwargs):
 
 
 #TTFGlyphsSheet.bindkey('.', 'open-row')
-
-vd.filetype('ttf', TTFTablesSheet)
-vd.filetype('otf', TTFTablesSheet)

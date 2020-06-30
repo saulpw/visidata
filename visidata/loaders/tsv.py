@@ -12,6 +12,9 @@ option('tsv_safe_newline', '\u001e', 'replacement for newline character when sav
 option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
 
+def open_tsv(p):
+    return TsvSheet(p.name, source=p)
+
 def splitter(fp, delim='\n'):
     'Generates one line/row/record at a time from fp, separated by delim'
 
@@ -26,10 +29,6 @@ def splitter(fp, delim='\n'):
         yield from rows
 
     yield from buf.rstrip(delim).split(delim)
-
-
-def open_tsv(p):
-    return TsvSheet(p.name, source=p)
 
 
 # rowdef: list

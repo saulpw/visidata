@@ -3,6 +3,11 @@ from visidata import *
 # requires pyshp
 
 
+def open_shp(p):
+    return ShapeSheet(p.name, source=p)
+
+open_dbf = open_shp
+
 shptypes = {
   'C': str,
   'N': float,
@@ -93,7 +98,3 @@ def save_geojson(vd, p, vs):
 
 ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
 ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')
-
-
-vd.filetype('shp', ShapeSheet)
-vd.filetype('dbf', ShapeSheet)

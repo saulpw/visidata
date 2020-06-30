@@ -6,6 +6,11 @@ SASTypes = {
     'number': float,
 }
 
+def open_xpt(p):
+    return XptSheet(p.name, source=p)
+
+def open_sas7bdat(p):
+    return SasSheet(p.name, source=p)
 
 class XptSheet(Sheet):
     def iterload(self):
@@ -30,7 +35,3 @@ class SasSheet(Sheet):
 
         with self.dat as fp:
             yield from Progress(fp, total=self.dat.properties.row_count)
-
-
-vd.filetype('xpt', XptSheet)
-vd.filetype('sas7bdat', SasSheet)

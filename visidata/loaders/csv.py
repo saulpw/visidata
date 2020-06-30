@@ -14,6 +14,9 @@ csv.field_size_limit(2**31-1) # Windows has max 32-bit
 
 options_num_first_rows = 10
 
+def open_csv(p):
+    return CsvSheet(p.name, source=p)
+
 def removeNulls(fp):
     for line in fp:
         yield line.replace('\0', '')
@@ -55,4 +58,3 @@ def save_csv(vd, p, sheet):
             for dispvals in sheet.iterdispvals(format=True):
                 cw.writerow(dispvals.values())
 
-vd.filetype('csv', CsvSheet)

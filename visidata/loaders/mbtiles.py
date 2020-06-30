@@ -4,6 +4,11 @@ import json
 import gzip
 import sqlite3
 
+def open_pbf(p):
+    return PbfSheet(p.name, source=p)
+
+def open_mbtiles(p):
+    return MbtilesSheet(p.name, source=p)
 
 def getListDepth(L):
     if not isinstance(L, list):
@@ -130,6 +135,3 @@ PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=shee
 PbfSheet.addCommand('g.', 'plot-rows', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot selected blocks')
 MbtilesSheet.addCommand('.', 'plot-row', 'vd.push(getPlot(cursorRow))', 'plot tiles in current row')
 MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles'),
-
-vd.filetype('pbf', PbfSheet)
-vd.filetype('mbtiles', MbtilesSheet)

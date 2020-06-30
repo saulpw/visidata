@@ -1,6 +1,11 @@
 from visidata import *
 
 
+def open_xlsx(p):
+    return XlsxIndexSheet(p.name, source=p)
+
+open_xls = open_xlsx
+
 class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'
     rowtype = 'sheets'  # rowdef: xlsxSheet
@@ -53,7 +58,7 @@ class XlsSheet(SequenceSheet):
         for rownum in Progress(range(worksheet.nrows)):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
-            
+
 @VisiData.api
 def save_xlsx(vd, p, *sheets):
     import openpyxl
@@ -105,6 +110,3 @@ def save_xls(vd, p, *sheets):
 
     wb.save(p)
     status(f'{p} save finished')
-
-vd.filetype('xlsx', XlsxIndexSheet)
-vd.filetype('xls', XlsIndexSheet)

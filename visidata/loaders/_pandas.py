@@ -2,6 +2,16 @@ from functools import partial
 
 from visidata import *
 
+def open_pandas(p):
+    return PandasSheet(p.name, source=p)
+
+def open_dta(p):
+    return PandasSheet(p.name, source=p, filetype='stata')
+
+open_stata = open_pandas
+
+for ft in 'feather gbq orc parquet pickle sas stata'.split():
+    globals().setdefault('open_'+ft, lambda p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
 
 class DataFrameAdapter:
 
@@ -311,14 +321,6 @@ class PandasSheet(Sheet):
 def view_pandas(df):
     run(PandasSheet('', source=df))
 
-def open_pandas(p):
-    return PandasSheet(p.name, source=p)
-
-def open_dta(p):
-    return PandasSheet(p.name, source=p, filetype='stata')
-
-for ft in 'feather gbq orc parquet pickle sas stata'.split():
-    globals().setdefault('open_'+ft, lambda p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
 
 # Override with vectorized implementations
 PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')

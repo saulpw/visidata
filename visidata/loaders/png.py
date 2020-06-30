@@ -1,5 +1,7 @@
 from visidata import *
 
+def open_png(p):
+    return PNGSheet(p.name, source=p)
 
 @functools.lru_cache(256)
 def rgb_to_attr(r,g,b,a):
@@ -86,5 +88,3 @@ def save_png(vd, p, vs):
     status('saved')
 
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')
-
-vd.filetype('png', PNGSheet)
