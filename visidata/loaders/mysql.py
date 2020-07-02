@@ -36,7 +36,6 @@ class SQL:
         self.conn = conn
 
     def cur(self, qstr):
-        # FIXME: The Postgres loader is using a named cursor but afaik MySQL does not know named cursors… problem?
         cur = self.conn.cursor()
         cur.execute(qstr)
         return cur
