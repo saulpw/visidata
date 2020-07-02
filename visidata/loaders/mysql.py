@@ -5,8 +5,13 @@ __all__ = ['openurl_mysql', 'MyTable', 'MyTablesSheet']
 def codeToType(type_code, colname):
     import MySQLdb as mysql
 
-    if type_code == mysql.NUMBER:
+    types = mysql.constants.FIELD_TYPE
+
+    if type_code in (types.TINY, types.SHORT, types.LONG, types.LONGLONG, types.INT24,):
         return int
+
+    if type_code in (types.FLOAT, types.DOUBLE, types.DECIMAL, types.NEWDECIMAL,):
+        return float
 
     if type_code == mysql.STRING:
         return str
