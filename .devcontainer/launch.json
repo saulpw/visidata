@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: vd launch",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/vd",
+            "args": [
+                "-f",
+                "pandas",
+                "${workspaceFolder}/sample_data/benchmark.csv"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: vd attach",
+            "type": "python",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}

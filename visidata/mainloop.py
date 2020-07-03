@@ -204,7 +204,7 @@ def setupcolors(stdscr, f, *args):
     curses.mouseEvents = {}
 
     for k in dir(curses):
-        if k.startswith('BUTTON') or k == 'REPORT_MOUSE_POSITION':
+        if k.startswith('BUTTON') or k in ('REPORT_MOUSE_POSITION', '2097152'):
             curses.mouseEvents[getattr(curses, k)] = k
 
     return f(stdscr, *args)

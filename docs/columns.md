@@ -1,5 +1,5 @@
-- Update: 2018-08-19
-- Version: VisiData 1.3.1
+- Update: 2020-06-17
+- Version: VisiData 2.0
 
 # Columns
 
@@ -54,7 +54,7 @@ Columns usually begin as untyped. Odd results while working with numerical or da
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
 <div class="asciicast">
-    <asciinema-player id="player" poster="npt:0:20" rows=27 src="../casts/types.cast"></asciinema-player>
+    <asciinema-player id="player-types" poster="npt:0:20" rows=27 src="../casts/types.cast"></asciinema-player>
     <script type="text/javascript" src="/asciinema-player.js"></script>
 </div>
 
@@ -66,14 +66,67 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
 
 ---
 
+## How to format columns
+
+**Note**: Un-typed file formats, like tsvs and csvs, will save as they are displayed.
+
+Some types have an option for their default display formatting.
+
+Type      Option            Default
+--------- ----------------  --------
+int       disp_int_fmt      {:.0f}
+float     disp_float_fmt    {:.02f}
+currency  disp_currency_fmt %0.2f
+date      disp_date_fmt     %Y-%m-%d
+
+Ways to adjust the display formatting:
+* The `fmtstr` column on the **Columns Sheet** allows you to specify the formatting for specific columns within that session, without affecting the default for the others.
+* The `disp_TYPE_fmt` option can be changed on the **Options Sheet** to set the formatting for all columns of type `TYPE` in that session.
+* The `--disp-TYPE-fmt` argument can be passed through the commandline to set the formatting for all columns of type `TYPE` in that session.
+* The `options.disp_TYPE_fmt` can be set in the `~/.visidatarc` to change the default formatting for all columns of type `TYPE` for all sessions.
+
+There are several formatting styles offered:
+* Formatting that starts with `'%'` (e.g. *%0.2f*) will use [locale.format_string()](https://docs.python.org/3.6/library/locale.html#locale.format_string).
+* Otherwise (e.g. *{:.02f}*), formatting will be passed to Python's [string.format()](https://docs.python.org/3/library/string.html#custom-string-formatting).
+* Date fmtstr are passed to [strftime](https://strftime.org/).
+
+The default for currency uses `locale.format_string()`. The default for int/float/date use `string.format()`.
+
+###### How to format a specific numeric columns to contain a thousands separator within a session?
+
+1. Set a column to a numeric type by pressing `#` (int), `%` (float), or `$` (currency).
+2. Press `C` to open the **Columns Sheet**.
+3. Move to the row referencing the column whose display you wish to format. Move the cursor to the fmtstr column.
+4. Type `e` followed by *{:,.0f}* for an `int` type and *{:,.02f}* for a floating point type.
+
+###### How to set all date columns to be **month/day/year**.
+
+The default can be set in a `~/.visidatarc`.
+
+~~~
+options.disp_date_fmt = '%m/%d/%Y'
+~~~
+
+or passed through the commandline
+
+~~~
+vd --disp-date-fmt='%m/%d/%Y'
+~~~
+
+or set in the **Options Sheet**.
+
+1. Press `O` to open the **Options Sheet**.
+2. Move the cursor down to the relevant *disp_date_fmt* option.
+3. Type `e` followed by *%m/%d/%Y*.
+---
+
 ## How to split a column
 
 Python regular expressions provide more finetuned column splitting. The following example
 uses the commands for column splitting and transformation with [xd/puzzles.tsv](http://xd.saul.pw/xd-metadata.zip).
 
 <div class="asciicast">
-    <asciinema-player id="player" poster="npt:0:20" rows=27 src="../casts/split-regex.cast"></asciinema-player>
-    <script type="text/javascript" src="/asciinema-player.js"></script>
+    <asciinema-player id="player-split-regex" poster="npt:0:20" rows=27 src="../casts/split-regex.cast"></asciinema-player>
 </div>
 
 ###
@@ -81,6 +134,37 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 - `:` adds new columns derived from splitting the current column at positions defined by a *regex pattern*. The current row will be used to infer the number of columns that will be created.
 - `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. This command also requires an example row.
 - `*` followed by *regex*`/`*substring* replaces the text which matches the capture groups in *regex* with the contents of *substring*. *substring* may include backreferences (*\1* etc).
+
+---
+
+## [How to expand columns that contain nested data](#expand) {#expand}
+
+If a column includes container data such as JSON objects or arrays, the `(` family of commands can expand the child values into top-level columns:
+
+Command       Operation
+---------     --------
+`  (`         expand _current_ column
+` g(`         expand _all visible_ columns fully
+` z(`         expand _current_ column to a specific depth (prompt for input)
+`gz(`         expand _all visible_ columns to a specific depth (prompt for input)
+`  )`         contract (unexpand) the current column
+
+The following demo shows `(` commands applied to this data:
+
+~~~
+[
+    [ "short", "array" ],
+    [ "slightly", "longer", "array" ],
+    { "nested": "data" },
+    { "more": { "deeply": { "nested": "data" } } }
+]
+~~~
+
+<div class="asciicast">
+    <asciinema-player id="player-expand-cols" poster="npt:0:20" rows=13 src="../casts/expand-cols.cast"></asciinema-player>
+</div>
+
+Note that by default the expansion logic will look for nested columns in **up to 1,000 rows surrounding the cursor**. This behavior can be controlled by adjusting `expand_col_scanrows` in the **Options Sheet**, or setting `options.expand_col_scanrows` in the `~/.visidatarc` file.
 
 ---
 

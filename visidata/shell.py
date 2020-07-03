@@ -103,7 +103,7 @@ class DirSheet(Sheet):
         Column('mode', width=0,
             getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
             setter=lambda col,row,val: os.chmod(row, int(val, 8))),
-        Column('filetype', width=0, cache=True, getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
+        Column('filetype', width=0, cache='async', getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     nKeys = 2
     _ordering = [('modtime', True)]  # sort by reverse modtime initially

@@ -2,6 +2,12 @@ from visidata import *
 
 'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 
+def open_npy(p):
+    return NpySheet(p.name, source=p)
+
+def open_npz(p):
+    return NpzSheet(p.name, source=p)
+
 class NpySheet(Sheet):
     def iterload(self):
         import numpy
@@ -84,7 +90,3 @@ def save_npy(vd, p, sheet):
     arr = np.array(data, dtype=dtype)
     with p.open_bytes(mode='w') as outf:
         np.save(outf, arr, allow_pickle=False)
-
-
-vd.filetype('npy', NpySheet)
-vd.filetype('npz', NpzSheet)

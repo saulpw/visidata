@@ -133,7 +133,7 @@ def anySelected(vs, rows):
 #  - needs to refresh from source on resize
 class Plotter(BaseSheet):
     'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
-    columns=[Column('')]  # to eliminate errors outside of draw()
+    columns=[Column('_')]  # to eliminate errors outside of draw()
     rowtype='pixels'
     def __init__(self, name='plotter', **kwargs):
         super().__init__(name, **kwargs)
@@ -678,6 +678,7 @@ Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchor
 
 Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel')
 Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel')
+Canvas.bindkey('2097152', 'zoomout-mouse')
 
 Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')
 Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor')

@@ -140,9 +140,15 @@ class LazyComputeRow:
                     return getattr(self, colid)   # finally, handle 'row' and 'sheet' fake columns
                 raise KeyError(colid)
 
+class BasicRow(collections.defaultdict):
+    def __init__(self):
+        super().__init__(lambda: None)
+    def __bool__(self):
+        return True
+
 class TableSheet(BaseSheet):
     'Base class for all tabular sheets.'
-    _rowtype = lambda: collections.defaultdict(lambda: None)
+    _rowtype = lambda: BasicRow()
     rowtype = 'rows'
 
     columns = []  # list of Column
@@ -171,7 +177,7 @@ class TableSheet(BaseSheet):
         self._visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # list of all columns in display order
-        self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('')]
+        self.columns = kwargs.get('columns') or [copy(c) for c in self.columns] or [Column('_')]
         self._colorizers = []
         self.recalc()  # set .sheet on columns and start caches
 
@@ -613,7 +619,7 @@ class TableSheet(BaseSheet):
             clipdraw(scr, y+i, x, name, hdrcattr.attr, colwidth)
             vd.onMouse(scr, y+i, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
 
-            if C and x+colwidth+len(C) < self.windowWidth:
+            if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowWidth:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
         clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrcattr.attr)
@@ -826,10 +832,9 @@ class SequenceSheet(Sheet):
     'For sheets which use ColumnItem on rows that are Python sequences (list, namedtuple, etc).'
     def setCols(self, headerrows):
         self.columns = []
-        for i, _ in enumerate(itertools.zip_longest(*headerrows)):
-            self.addColumn(ColumnItem('', i))
+        for i, colnamelines in enumerate(itertools.zip_longest(*headerrows)):
+            self.addColumn(ColumnItem(''.join(colnamelines), i))
 
-        self.setColNames(headerrows)
         self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
 
     def newRow(self):

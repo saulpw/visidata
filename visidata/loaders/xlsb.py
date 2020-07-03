@@ -3,6 +3,9 @@ from visidata import vd, IndexSheet
 'Requires visidata/deps/pyxlsb fork'
 
 
+def open_xlsb(p):
+    return XlsbIndex(p.name, source=p)
+
 class XlsbIndex(IndexSheet):
     def iterload(self):
         from pyxlsb import open_workbook
@@ -12,6 +15,3 @@ class XlsbIndex(IndexSheet):
             vs = wb.get_sheet(name, True)
             vs.reload()
             yield vs
-
-
-vd.filetype('xlsb', XlsbIndex)

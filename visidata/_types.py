@@ -37,13 +37,14 @@ anytype.__name__ = ''
 
 
 def numericFormatter(fmtstr, typedval):
-    fmtstr = fmtstr or options['disp_'+type(typedval).__name__+'_fmt']
-    if fmtstr:
+    try:
+        fmtstr = fmtstr or options['disp_'+type(typedval).__name__+'_fmt']
         if fmtstr[0] == '%':
-            return locale.format_string(fmtstr, typedval, grouping=True)
+            return locale.format_string(fmtstr, typedval, grouping=False)
         else:
             return fmtstr.format(typedval)
-    return str(typedval)
+    except ValueError:
+        return str(typedval)
 
 
 class VisiDataType:
@@ -80,12 +81,11 @@ def isNumeric(col):
 ##
 
 floatchars='+-0123456789.'
-class currency(float):
-    def __new__(self, s=''):
-        'dirty float (strip non-numeric characters)'
-        if isinstance(s, str):
-            s = ''.join(ch for ch in s if ch in floatchars)
-        return float.__new__(self, s)
+def currency(*args):
+    'dirty float (strip non-numeric characters)'
+    if args and isinstance(args[0], str):
+        args = [''.join(ch for ch in args[0] if ch in floatchars)]
+    return float(*args)
 
 
 class vlen(int):

@@ -5,17 +5,20 @@
 __version__ = '2.-4dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
+from copy import copy
 import os
 import io
 import sys
 import locale
 
-from visidata import vd, option, options, status, run, BaseSheet
+from visidata import vd, option, options, status, run, BaseSheet, AttrDict
 from visidata import Path, openSource, saveSheets, domotd
 import visidata
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
+option('play', '', '.vd file to replay')
 option('preplay', '', 'longnames to preplay before replay')
+option('imports', None, 'imports to preload before .visidatarc (command-line only)')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -41,6 +44,10 @@ def duptty():
         stdout = open(os.dup(1))  # for dumping to stdout from interface
         os.dup2(fin.fileno(), 0)
         os.dup2(fout.fileno(), 1)
+
+        # close file descriptors for original stdin/stdout
+        fin.close()
+        fout.close()
     except Exception as e:
         print(e)
         stdin = sys.stdin
@@ -48,30 +55,24 @@ def duptty():
 
     return stdin, stdout
 
+option_aliases = {}
+def optalias(abbr, name):
+    option_aliases[abbr] = name
+
+
+optalias('f', 'filetype')
+optalias('p', 'play')
+optalias('b', 'batch')
+optalias('P', 'preplay')
+optalias('y', 'confirm_overwrite')
+optalias('o', 'output')
+optalias('w', 'replay_wait')
+optalias('d', 'delimiter')
+optalias('c', 'config')
+
 
 def main_vd():
     'Open the given sources using the VisiData interface.'
-    import argparse
-    parser = argparse.ArgumentParser(description=__doc__)
-
-    parser.add_argument('inputs', nargs='*', help='initial sources')
-    parser.add_argument('-f', dest='filetype', default='', help='uses loader for filetype instead of file extension')
-    parser.add_argument('-y', dest='confirm_overwrite', default=None, action='store_false', help='overwrites existing files without confirmation')
-    parser.add_argument('-p', '--play', dest='play', default=None, help='replays a saved .vd file within the interface')
-    parser.add_argument('-P', dest='preplay', action='append', default=[], help='VisiData command to preplay before cmdlog replay')
-    parser.add_argument('-b', '--batch', dest='batch', action='store_true', default=False, help='replays in batch mode (with no interface and all status sent to stdout)')
-    parser.add_argument('-o', '--output', dest='output', default=None, help='saves the final visible sheet to output at the end of replay')
-    parser.add_argument('-w', dest='replay_wait', default=0, help='time to wait between replayed commands, in seconds')
-    parser.add_argument('-d', dest='delimiter', help='delimiter to use for tsv/usv filetype')
-    parser.add_argument('--diff', dest='diff', default=None, help='show diffs from all sheets against this source')
-    parser.add_argument('-v', '--version', action='version', version=__version_info__)
-
-    args = vd.parseArgs(parser)
-
-    # fetch motd and plugins *after* options parsing/setting
-    visidata.PluginsSheet().reload()
-    domotd()
-
     locale.setlocale(locale.LC_ALL, '')
 
     flPipedInput = not sys.stdin.isatty()
@@ -87,8 +88,46 @@ def main_vd():
     fmtargs = []
     fmtkwargs = {}
     inputs = []
-    for arg in args.inputs:
-        if arg.startswith('+'):  # position cursor at start
+
+    i=1
+    current_args = {}
+
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg == '-v':
+            print(__version_info__)
+            return 0
+        elif arg == '-':
+            inputs.append((stdinSource, copy(current_args)))
+        elif arg in ['-h', '--help']:
+            import curses
+            curses.wrapper(lambda scr: vd.openManPage())
+            return 0
+        elif arg[0] == '-':
+            optname = arg.lstrip('-')
+            optname = optname.replace('-', '_')
+            optval = None
+            try:
+                optname, optval = optname.split('=', maxsplit=1)
+                # convert to type
+            except Exception:
+                pass
+
+            optname = option_aliases.get(optname, optname)
+
+            if optval is None:
+                opt = options._get(optname)
+                if opt:
+                    if type(opt.value) is bool:
+                        optval = True
+                    else:
+                        optval = sys.argv[i+1]
+                        i += 1
+
+            current_args[optname] = optval
+            vd.status(str(current_args))
+
+        elif arg.startswith('+'):  # position cursor at start
             if ':' in arg:
                 pos = arg[1:].split(':')
                 if len(pos) == 1:
@@ -105,15 +144,24 @@ def main_vd():
             else:
                 start_positions.append((None, arg[1:], None))
 
-        elif args.play and '=' in arg:
+        elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
             k, v = arg.split('=')
             fmtkwargs[k] = v
-        elif arg == '-':
-            inputs.append(stdinSource)
         else:
-            inputs.append(arg)
+            inputs.append((arg, copy(current_args)))
             fmtargs.append(arg)
+
+        i += 1
+
+    args = AttrDict(current_args)
+
+    for k, v in current_args.items():
+        options.set(k, v, obj='override')
+
+    # fetch motd and plugins *after* options parsing/setting
+    visidata.PluginsSheet().reload()
+    domotd()
 
     if args.batch:
         options.undo = False
@@ -121,17 +169,17 @@ def main_vd():
         vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
-    for cmd in args.preplay:
+    for cmd in args.preplay or []:
         BaseSheet('').execCommand(cmd)
 
     if not args.play:
         if flPipedInput and not inputs:  # '|vd' without explicit '-'
-            inputs.append(stdinSource)
+            inputs.append((stdinSource, copy(current_args)))
 
     sources = []
-    for src in inputs:
-        vs = openSource(src)
-        vd.cmdlog.openHook(vs, src)
+    for p, opts in inputs:
+        vs = openSource(p, **opts)
+        vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
     vd.sheets.extend(sources)  # purposefully do not load everything

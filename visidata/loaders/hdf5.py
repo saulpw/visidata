@@ -1,5 +1,10 @@
 from visidata import *
 
+def open_h5(p):
+    return Hdf5ObjSheet(p.name, source=p)
+
+open_hdf5 = open_h5
+
 class Hdf5ObjSheet(Sheet):
     'Support sheets in HDF5 format.'
     def iterload(self):
@@ -42,7 +47,3 @@ class Hdf5ObjSheet(Sheet):
 
 
 Hdf5ObjSheet.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", source=cursorRow.attrs))', 'open metadata sheet for object referenced in current row')
-
-
-vd.filetype('h5', Hdf5ObjSheet)
-vd.filetype('hdf5', Hdf5ObjSheet)

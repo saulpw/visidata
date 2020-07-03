@@ -2,6 +2,7 @@ import collections
 import sys
 import inspect
 import argparse
+import importlib
 
 import visidata
 from visidata import VisiData, BaseSheet, vd, getGlobals, addGlobals
@@ -111,6 +112,9 @@ class Option:
     def __str__(self):
         return str(self.value)
 
+    def __eq__(self, other):
+        return self.name == other.name
+
 
 @VisiData.api
 class OptionsObject:
@@ -169,7 +173,7 @@ class OptionsObject:
                 v = t(v)
 
             if curval != v and self._get(k, 'global').replayable:
-                if vd.cmdlog:  # options set on init aren't recorded
+                if vd.cmdlog and obj != 'global':  # options set on init aren't recorded
                     vd.set_option(vd.cmdlog, k, v, obj)
         else:
             curval = None
@@ -196,7 +200,7 @@ class OptionsObject:
     def __getitem__(self, k):      # options[k]
         opt = self._get(k, obj=self._obj)
         if not opt:
-            vd.error('no option "%s"' % k)
+            raise ValueError('no option "%s"' % k)
         return opt.value
 
     def __setitem__(self, k, v):   # options[k] = v
@@ -275,7 +279,8 @@ def loadConfigFile(fnrc, _globals=None):
         _globals = globals()
     if p.exists():
         try:
-            code = compile(open(p).read(), str(p), 'exec')
+            with open(p) as fd:
+                code = compile(fd.read(), str(p), 'exec')
             exec(code, _globals)
         except Exception as e:
             vd.exceptionCaught(e)
@@ -301,6 +306,13 @@ def parseArgs(vd, parser:argparse.ArgumentParser):
 
     # add visidata_dir to path before loading config file (can only be set from cli)
     sys.path.append(str(visidata.Path(args.visidata_dir or options.visidata_dir)))
+
+    # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
+    for modname in args.imports.split():
+        try:
+            addGlobals(importlib.import_module(modname).__dict__)
+        except ModuleNotFoundError:
+            continue
 
     # user customisations in config file in standard location
     loadConfigFile(visidata.Path(args.config or options.config), getGlobals())

@@ -2,10 +2,11 @@ from copy import copy
 
 from visidata import Sheet, TsvSheet, options, vd, VisiData
 
-
-class UsvSheet(TsvSheet):
-    pass
-
+def open_usv(p):
+    vs = TsvSheet(p.name, source=p)
+    vs.options.delimiter = '\u241e'
+    vs.options.row_delimiter = '\u241f'
+    return vs
 
 @VisiData.api
 def save_usv(vd, p, vs):
@@ -14,9 +15,3 @@ def save_usv(vd, p, vs):
     usvs.options.delimiter = '\u241e'
     usvs.options.row_delimiter = '\u241f'
     vd.save_tsv(p, usvs)
-
-
-UsvSheet.options.delimiter = '\u241e'
-UsvSheet.options.row_delimiter = '\u241f'
-
-vd.filetype('usv', UsvSheet)

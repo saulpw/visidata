@@ -1,4 +1,4 @@
-.Dd Mar 7, 2020
+.Dd June 17, 2020
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -195,7 +195,17 @@ set name of all visible columns to combined contents of current column for selec
 .No set current column for selected rows to the items in result of Python sequence Ar expr
 .It Ic " z=" Ar expr
 .No evaluate Python expression on current row and set current cell with result of Python Ar expr
+.Pp
+.It "  i" (iota)
+.No add column with incremental values
+.It " gi"
+.No set current column for selected rows to incremental values
+.It " zi" Ar step
+.No add column with values at incremenet Ar step
+.It "gzi" Ar step
+.No set current column for selected rows at increment Ar step
 .El
+.Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " '" Ns " (tick)"
 add a frozen copy of current column with all cells evaluated
@@ -854,6 +864,8 @@ These are the supported sources:
 .Pp
 .Bl -inset -compact -offset xxx
 .It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
+.Bl -inset -compact -offset xxx
+.It Uses the safe YAML loader, which supports the most common uses of YAML.
 .El
 .Pp
 .Bl -inset -compact -offset xxx

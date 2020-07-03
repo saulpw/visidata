@@ -1,21 +1,36 @@
 import itertools
 import random
+import string
 
 from copy import copy
 from visidata import Sheet, Column, asyncthread, Progress, status, error
 from visidata import *
 
-
 option('filetype', '', 'specify file type', replay=True)
 
 
-vd.filetypes = {}
+def _default_colnames():
+    'A B C .. Z AA AB .. ZZ AAA .. to infinity'
+    i=0
+    while True:
+        i += 1
+        for x in itertools.product(string.ascii_uppercase, repeat=i):
+            yield ''.join(x)
 
+vd.default_colnames = _default_colnames()
+
+def frange(n, step):
+    yield from (x*step for x in range(n))
+
+def num(s):
+    try:
+        return int(s)
+    except Exception:
+        return float(s)
 
 class SettableColumn(Column):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cache = {}
+    def __init__(self, *args, cache=None, **kwargs):
+        super().__init__(*args, cache=cache or {}, **kwargs)
 
     def putValue(self, row, value):
         self.cache[self.sheet.rowid(row)] = value
@@ -83,8 +98,9 @@ def updateColNames(sheet, rows, cols, overwrite=False):
 
 
 @VisiData.api
-def newSheet(vd, ncols, name='', **kwargs):
-    return Sheet(name, columns=[ColumnItem('', i, width=8) for i in range(ncols)], **kwargs)
+def newSheet(vd, ncols, **kwargs):
+    return Sheet(columns=[SettableColumn() for i in range(ncols)], **kwargs)
+
 
 def inputFilename(prompt, *args, **kwargs):
     return vd.input(prompt, "filename", *args, completer=completeFilename, **kwargs)
@@ -112,34 +128,25 @@ def completeFilename(val, state):
     files.sort()
     return files[state%len(files)]
 
-@VisiData.api
-def filetype(vd, ext, constructor):
-    'Add constructor to handle the given file type/extension.'
-    vd.filetypes[ext] = constructor
-
 
 @VisiData.api
 def openPath(vd, p, filetype=None):
-    'Call vd.filetypes[ext](path.name, source=path) or open_ext(Path) or openurl_scheme(Path, filetype).  Return constructed but unloaded sheet of appropriate type.'
+    'Call open_ext(Path) or openurl_scheme(Path, filetype).  Return constructed but unloaded sheet of appropriate type.'
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
         return getGlobals()[openfunc](p, filetype=filetype)
 
-    if p.is_dir():
-        filetype = 'dir'
-
     if not filetype:
-        filetype = p.ext or 'txt'
+        if p.is_dir():
+            filetype = 'dir'
+        else:
+            filetype = p.ext or options.filetype or 'txt'
 
     if not p.exists():
         warning('%s does not exist, creating new sheet' % p)
         return vd.newSheet(1, name=p.name, source=p)
 
     filetype = filetype.lower()
-
-    openfunc = vd.filetypes.get(filetype.lower())
-    if openfunc:
-        return openfunc(p.name, source=p)
 
     openfunc = getGlobals().get('open_' + filetype)
     if not openfunc:
@@ -152,19 +159,21 @@ def openPath(vd, p, filetype=None):
 
 
 @VisiData.global_api
-def openSource(vd, p, filetype=None):
-    if not filetype:
-        filetype = options.filetype
-
+def openSource(vd, p, filetype=None, **kwargs):
+    vs = None
     if isinstance(p, str):
         if '://' in p:
-            return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
         elif p == '-':
-            return vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
+            vs = vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
         else:
-            return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+    else:
+        vs = vs or vd.openPath(p, filetype=filetype)
 
-    vs = vd.openPath(p, filetype=filetype)
+    for optname, optval in kwargs.items():
+        vs.options[optname] = optval
+
     return vs
 
 
@@ -231,8 +240,8 @@ Sheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select:
 
 Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
 Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
-Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(""), cursorColIndex+1)', 'append an empty column')
-Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(""), cursorColIndex+1)', 'append N empty columns')
+Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(), cursorColIndex+1); cursorRight(1)', 'append an empty column')
+Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(), cursorColIndex+c+1)', 'append N empty columns')
 
 Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, selectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')
 
@@ -257,6 +266,11 @@ BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to:
 globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
 Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
-Sheet.addCommand('gz=', 'setcol-range', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
+Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
 
-globalCommand('A', 'add-sheet', 'vd.push(vd.newSheet(int(input("num columns for new sheet: ")), name="unnamed"))', 'open new blank sheet with N columns')
+Sheet.addCommand('i', 'addcol-range', 'c=SettableColumn(type=int); addColumn(c, cursorColIndex+1); c.setValues(rows, *range(nRows))', 'add column with incremental values')
+Sheet.addCommand('gi', 'setcol-range', 'cursorCol.setValues(selectedRows, *range(sheet.nSelected))', 'set current column for selected rows to incremental values')
+Sheet.addCommand('zi', 'addcol-range-step', 'n=num(input("interval step: ")); c=SettableColumn(type=type(n)); addColumn(c, cursorColIndex+1); c.setValues(rows, *frange(nRows, n))', 'add column with incremental values times given step')
+Sheet.addCommand('gzi', 'setcol-range-step', 'n=num(input("interval step: ")); cursorCol.setValues(selectedRows, *frange(nSelected, n))', 'set current column for selected rows to incremental values times given step')
+
+globalCommand('A', 'open-new', 'vd.push(vd.newSheet(1, name="unnamed"))', 'open new blank sheet')

@@ -2,6 +2,8 @@ from visidata import *
 
 __all__ = ['openurl_postgres', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
+option('postgres_schema', 'public', 'The desired schema for the Postgres database')
+
 def codeToType(type_code, colname):
     import psycopg2
     try:
@@ -79,12 +81,13 @@ class PgTablesSheet(Sheet):
     rowtype = 'tables'
 
     def reload(self):
-        qstr = '''
+        schema = options.postgres_schema
+        qstr = f'''
             SELECT relname table_name, column_count.ncols, reltuples::bigint est_nrows
                 FROM pg_class, pg_namespace, (
-                    SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.COLUMNS WHERE table_schema = 'public' GROUP BY table_name
+                    SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.COLUMNS WHERE table_schema = '{schema}' GROUP BY table_name
                     ) AS column_count
-                WHERE  pg_class.relnamespace = pg_namespace.oid AND pg_namespace.nspname = 'public' AND column_count.table_name = relname;
+                WHERE  pg_class.relnamespace = pg_namespace.oid AND pg_namespace.nspname = '{schema}' AND column_count.table_name = relname;
         '''
 
         with self.sql.cur(qstr) as cur:

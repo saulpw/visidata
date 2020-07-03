@@ -1,6 +1,31 @@
 from visidata import *
 
 
+def open_xlsx(p):
+    return XlsxIndexSheet(p.name, source=p)
+
+open_xls = open_xlsx
+
+def excel_safename(name, used_names):
+    'convert sheet names to comply with Excel standards'
+
+    # name does not exceed 31 characters
+    excel_limit = 31
+    if len(name) > excel_limit:
+        short_name = name[:excel_limit]
+        used_names.append(short_name)
+        suffix = '_' + str(used_names.count(short_name))
+        name = short_name[:-len(suffix)] + suffix
+
+    # name does not contain any of the following characters:  :  \  /  ?  *  [  or  ]
+    name = ''.join([ '_' if c in '\\/?*[]' else c for c in name])
+
+    # strip leading and trailing _
+    name = name.strip("_")
+
+    return name, used_names
+
+
 class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'
     rowtype = 'sheets'  # rowdef: xlsxSheet
@@ -54,26 +79,7 @@ class XlsSheet(SequenceSheet):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
 
-def excel_safename(name, used_names):
-    'convert sheet names to comply with Excel standards'
-
-    # name does not exceed 31 characters
-    excel_limit = 31
-    if len(name) > excel_limit:
-        short_name = name[:excel_limit]
-        used_names.append(short_name)
-        suffix = '_' + str(used_names.count(short_name))
-        name = short_name[:-len(suffix)] + suffix
-
-    # name does not contain any of the following characters:  :  \  /  ?  *  [  or  ]
-    name = ''.join([ '_' if c in '\\/?*[]' else c for c in name])
-
-    # strip leading and trailing _
-    name = name.strip("_")
-
-    return name, used_names
-
-
+            
 @VisiData.api
 def save_xlsx(vd, p, *sheets):
     import openpyxl
@@ -135,6 +141,3 @@ def save_xls(vd, p, *sheets):
     if len(used_names) > 0:
         warning('long sheet names truncated during save')
 
-
-vd.filetype('xlsx', XlsxIndexSheet)
-vd.filetype('xls', XlsIndexSheet)

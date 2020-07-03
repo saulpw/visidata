@@ -4,6 +4,15 @@ import zipfile
 
 from visidata import *
 
+def open_zip(p):
+    return ZipSheet(p.name, source=p)
+
+def open_tar(p):
+    return TarSheet(p.name, source=p)
+
+open_tgz = open_tar
+open_txz = open_tar
+open_tbz2 = open_tar
 
 class ZipSheet(Sheet):
     'Wrapper for `zipfile` library.'
@@ -63,10 +72,3 @@ class TarSheet(Sheet):
         with tarfile.open(name=str(self.source)) as tf:
             for ti in Progress(tf.getmembers()):
                 yield ti
-
-
-vd.filetype('zip', ZipSheet)
-vd.filetype('tar', TarSheet)
-vd.filetype('tgz', TarSheet)
-vd.filetype('txz', TarSheet)
-vd.filetype('tbz2', TarSheet)
