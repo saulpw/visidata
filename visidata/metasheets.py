@@ -153,7 +153,7 @@ class VisiDataSheet(IndexSheet):
 
 
 @VisiData.lazy_property
-def vdmenu(self):
+def vdmenu(vd):
     return VisiDataSheet('visidata_menu', source=vd)
 
 @VisiData.property

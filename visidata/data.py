@@ -159,19 +159,24 @@ def openPath(vd, p, filetype=None):
 
 
 @VisiData.global_api
-def openSource(vd, p, filetype=None):
+def openSource(vd, p, filetype=None, **kwargs):
     if not filetype:
         filetype = options.filetype
 
+    vs = None
     if isinstance(p, str):
         if '://' in p:
-            return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
         elif p == '-':
-            return vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
+            vs = vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
         else:
-            return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+    else:
+        vs = vs or vd.openPath(p, filetype=filetype)
 
-    vs = vd.openPath(p, filetype=filetype)
+    for optname, optval in kwargs.items():
+        vs.options[optname] = optval
+
     return vs
 
 
