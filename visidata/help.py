@@ -58,7 +58,8 @@ def help_search(vd, sheet, regex):
         vs.addRow(allrows[rowidx])
 
 
-def openManPage():
+@VisiData.global_api
+def openManPage(vd):
     from pkg_resources import resource_filename
     import os
     with SuspendCurses():

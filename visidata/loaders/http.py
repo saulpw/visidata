@@ -13,7 +13,7 @@ def openurl_http(path, filetype=None):
     # if filetype not given, auto-detect with hacky mime-type parse
     if not filetype:
         ext = path.suffix[1:].lower()
-        openfunc = getGlobals().get(f'open_{ext}') or vd.filetypes.get(ext)
+        openfunc = getGlobals().get(f'open_{ext}')
 
         if openfunc:
             filetype = ext

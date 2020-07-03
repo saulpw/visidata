@@ -3,6 +3,11 @@ from visidata import *
 
 option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
+def open_html(p):
+    return HtmlTablesSheet(p.name, source=p)
+
+open_htm = open_html
+
 class HtmlTablesSheet(IndexSheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
     columns = IndexSheet.columns + [
@@ -132,7 +137,3 @@ def save_html(vd, p, *vsheets):
 
 
 VisiData.save_htm = VisiData.save_html
-
-
-vd.filetype('html', HtmlTablesSheet)
-vd.filetype('htm', HtmlTablesSheet)

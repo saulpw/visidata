@@ -1,5 +1,10 @@
 from visidata import *
 
+def open_sqlite(p):
+    return SqliteIndexSheet(p.name, source=p)
+
+open_sqlite3 = open_sqlite
+open_db = open_sqlite
 
 # rowdef: list of values
 class SqliteSheet(Sheet):
@@ -157,7 +162,3 @@ def save_sqlite(vd, p, *vsheets):
 
 SqliteSheet.options.header = 0
 VisiData.save_db = VisiData.save_sqlite
-
-vd.filetype('sqlite', SqliteIndexSheet)
-vd.filetype('sqlite3', SqliteIndexSheet)
-vd.filetype('db', SqliteIndexSheet)

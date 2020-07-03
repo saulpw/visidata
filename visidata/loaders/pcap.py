@@ -16,6 +16,12 @@ url_iana = 'https://visidata.org/plugins/pcap/iana-ports.tsv'
 oui = {}  # [macprefix (like '01:02:dd:0')] -> 'manufacturer'
 services = {}  # [('tcp', 25)] -> 'smtp'
 
+def open_pcap(p):
+    return PcapSheet(p.name, source=p)
+
+open_cap = open_pcap
+open_pcapng = open_pcap
+open_ntar = open_pcap
 
 def manuf(mac):
     return oui.get(mac[:13]) or oui.get(mac[:10]) or oui.get(mac[:8])
@@ -398,9 +404,3 @@ def try_apply(func, *args, **kwargs):
 PcapSheet.addCommand('W', 'flows', 'vd.push(PcapFlowsSheet(sheet.name+"_flows", source=sheet))')
 PcapSheet.addCommand('2', 'l2-packet', 'vd.push(IPSheet("L2packets", source=sheet))')
 PcapSheet.addCommand('3', 'l3-packet', 'vd.push(TCPSheet("L3packets", source=sheet))')
-
-
-vd.filetype('pcap', PcapSheet)
-vd.filetype('cap', PcapSheet)
-vd.filetype('pcapng', PcapSheet)
-vd.filetype('ntar', PcapSheet)

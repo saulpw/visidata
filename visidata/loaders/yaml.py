@@ -2,6 +2,11 @@ from visidata import *
 from itertools import chain
 
 
+def open_yml(p):
+    return YamlSheet(p.name, source=p)
+
+open_yaml = open_yml
+
 class YamlSheet(JsonSheet):
     def iterload(self):
         import yaml
@@ -34,7 +39,3 @@ class YamlSheet(JsonSheet):
             else:
                 # A file containing multiple YAML documents: yield one row per document.
                 yield from Progress(chain([first, second], documents), total=0)
-
-
-vd.filetype('yml', YamlSheet)
-vd.filetype('yaml', YamlSheet)

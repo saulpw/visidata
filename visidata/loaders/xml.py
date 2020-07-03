@@ -1,6 +1,10 @@
 from visidata import *
 
 
+def open_xml(p):
+    return XmlSheet(p.name, source=p)
+
+open_svg = open_xml
 
 def unns(k):
     'de-namespace key k'
@@ -81,7 +85,3 @@ VisiData.save_svg = VisiData.save_xml
 
 XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)', 'add column for xml attribute')
 XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)', 'show only columns in current row attributes')
-
-
-vd.filetype('xml', XmlSheet)
-vd.filetype('svg', XmlSheet)

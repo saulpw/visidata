@@ -9,8 +9,6 @@ from visidata import *
 option('filetype', '', 'specify file type', replay=True)
 
 
-vd.filetypes = {}
-
 def _default_colnames():
     'A B C .. Z AA AB .. ZZ AAA .. to infinity'
     i=0
@@ -130,34 +128,25 @@ def completeFilename(val, state):
     files.sort()
     return files[state%len(files)]
 
-@VisiData.api
-def filetype(vd, ext, constructor):
-    'Add constructor to handle the given file type/extension.'
-    vd.filetypes[ext] = constructor
-
 
 @VisiData.api
 def openPath(vd, p, filetype=None):
-    'Call vd.filetypes[ext](path.name, source=path) or open_ext(Path) or openurl_scheme(Path, filetype).  Return constructed but unloaded sheet of appropriate type.'
+    'Call open_ext(Path) or openurl_scheme(Path, filetype).  Return constructed but unloaded sheet of appropriate type.'
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
         return getGlobals()[openfunc](p, filetype=filetype)
 
-    if p.is_dir():
-        filetype = 'dir'
-
     if not filetype:
-        filetype = p.ext or 'txt'
+        if p.is_dir():
+            filetype = 'dir'
+        else:
+            filetype = p.ext or options.filetype or 'txt'
 
     if not p.exists():
         warning('%s does not exist, creating new sheet' % p)
         return vd.newSheet(1, name=p.name, source=p)
 
     filetype = filetype.lower()
-
-    openfunc = vd.filetypes.get(filetype.lower())
-    if openfunc:
-        return openfunc(p.name, source=p)
 
     openfunc = getGlobals().get('open_' + filetype)
     if not openfunc:
@@ -170,19 +159,21 @@ def openPath(vd, p, filetype=None):
 
 
 @VisiData.global_api
-def openSource(vd, p, filetype=None):
-    if not filetype:
-        filetype = options.filetype
-
+def openSource(vd, p, filetype=None, **kwargs):
+    vs = None
     if isinstance(p, str):
         if '://' in p:
-            return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
         elif p == '-':
-            return vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
+            vs = vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
         else:
-            return vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+    else:
+        vs = vs or vd.openPath(p, filetype=filetype)
 
-    vs = vd.openPath(p, filetype=filetype)
+    for optname, optval in kwargs.items():
+        vs.options[optname] = optval
+
     return vs
 
 
