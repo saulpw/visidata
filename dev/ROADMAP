@@ -8,15 +8,15 @@ The Book of VisiData will describe the api and all functions and objects availab
 
 ## Split panes
 
-- horizontal or vertical split
++ horizontal split
 - one pane can be dependent on the other; e.g. move cursor in one, see preview update in other
-- use for choosing aggregators, command help, other choose()
++ use for choosing aggregators, command help, other choose()
 
 - DirSheet file preview #309
 
 ## add jsonl as more robust system format
-- add .vdj format (visidata cmdlog as jsonl)
-- migrate plugins.tsv to be jsonl format
++ add .vdj format (visidata cmdlog as jsonl)
++ migrate plugins.tsv to be jsonl format
 
 ## Minor features, refactors, cleanup
 
