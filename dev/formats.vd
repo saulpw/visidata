@@ -1,0 +1,14 @@
+sheet	col	row	longname	input	keystrokes	comment
+	SqliteSheet	header	set-option	0		
+			open-file	dev/formats.jsonl	o	
+formats	aliases		hide-col		-	hide current column
+formats	requirements		rename-col	PyPI dependencies	^	edit name of current column
+formats	PyPI dependencies		slide-rightmost		gL	slide current column all the way to the right of sheet
+formats	VisiData loader	0	select-equal-cell		,	select rows matching current cell in current column
+formats	VisiData loader		setcol-expr	version_added	g=	set current column for selected rows to result of Python expression
+formats			unselect-rows		gu	unselect all rows
+formats	version_added		hide-col		-	hide current column
+formats	description		hide-col		-	hide current column
+formats	open format		hide-col		-	hide current column
+formats	nestable		hide-col		-	hide current column
+formats	plottable		hide-col		-	hide current column
