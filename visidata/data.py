@@ -136,11 +136,11 @@ def openPath(vd, p, filetype=None):
         openfunc = 'openurl_' + p.scheme
         return getGlobals()[openfunc](p, filetype=filetype)
 
-    if p.is_dir():
-        filetype = 'dir'
-
     if not filetype:
-        filetype = p.ext or 'txt'
+        if p.is_dir():
+            filetype = 'dir'
+        else:
+            filetype = p.ext or options.filetype or 'txt'
 
     if not p.exists():
         warning('%s does not exist, creating new sheet' % p)
@@ -160,9 +160,6 @@ def openPath(vd, p, filetype=None):
 
 @VisiData.global_api
 def openSource(vd, p, filetype=None, **kwargs):
-    if not filetype:
-        filetype = options.filetype
-
     vs = None
     if isinstance(p, str):
         if '://' in p:
