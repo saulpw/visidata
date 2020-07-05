@@ -3,6 +3,9 @@
     - logging of options
     - logging of rows and columns
     - pause, continue, abort
+    - test batch mode
+        - bin/vd -b -p tests/append.vd
+        - bin/vd -p tests/append.vd -b
 2. piping data into visidata
 4. longname-exec
 5. syscopy
@@ -30,3 +33,19 @@
         - gj always puts the cursor on the bottom row
      - test case 3
         - Shift+L for log, same tests
+12. Options
+    - local + global options should be set appropriately
+        - bin/vd -f tsv sample_data/sample.tsv -f csv sample_data/benchmark.csv
+        - bin/vd sample_data/y77d-th95.json.gz -f txt
+    - the order in which options should be applied is
+        - native_options -> cli_options for config/visidata_dir/imports -> plugin_imports -> visidatarc -> rest_of_cli
+        - check that cli overwrites visidatarc
+        - check that --config selects which visidatarc to load
+        - check that visidatarc can set plugin options
+13. Filetype
+    - visidata should be able to detect filetype from extension
+        - bin/vd sample_data/benchmark.csv
+    - -f should apply to inner file for zipped filetypes
+        - bin/vd -f txt sample_data/y77d-th95.json.gz
+14. Testing the starting position syntax
+15. Test loading url
