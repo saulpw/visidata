@@ -125,7 +125,6 @@ def main_vd():
                         i += 1
 
             current_args[optname] = optval
-            vd.status(str(current_args))
 
         elif arg.startswith('+'):  # position cursor at start
             if ':' in arg:
@@ -155,6 +154,8 @@ def main_vd():
         i += 1
 
     args = AttrDict(current_args)
+
+    vd.loadConfigAndPlugins(args)
 
     for k, v in current_args.items():
         options.set(k, v, obj='override')
