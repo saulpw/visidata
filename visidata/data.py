@@ -160,6 +160,9 @@ def openPath(vd, p, filetype=None):
 
 @VisiData.global_api
 def openSource(vd, p, filetype=None, **kwargs):
+    if not filetype:
+        filetype = options.filetype
+
     vs = None
     if isinstance(p, str):
         if '://' in p:
