@@ -17,6 +17,8 @@ import visidata
 
 option('config', '~/.visidatarc', 'config file to exec in Python')
 option('play', '', '.vd file to replay')
+option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
+option('output', None, 'save the final visible sheet to output at the end of replay')
 option('preplay', '', 'longnames to preplay before replay')
 option('imports', None, 'imports to preload before .visidatarc (command-line only)')
 
