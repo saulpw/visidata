@@ -18,19 +18,21 @@ class SuspendCurses:
         curses.doupdate()
 
 
-def launchEditor(*args):
+@visidata.VisiData.api
+def launchEditor(vd, *args):
     editor = os.environ.get('EDITOR') or fail('$EDITOR not set')
     args = [editor] + list(args)
     with SuspendCurses():
         return subprocess.call(args)
 
 
-def launchExternalEditor(v, linenum=0):
+@visidata.VisiData.api
+def launchExternalEditor(vd, v, linenum=0):
     import tempfile
     with tempfile.NamedTemporaryFile() as temp:
         with open(temp.name, 'w') as fp:
             fp.write(v)
-        return launchExternalEditorPath(visidata.Path(temp.name))
+        return launchExternalEditorPath(visidata.Path(temp.name), linenum)
 
 
 def launchExternalEditorPath(path, linenum=0):

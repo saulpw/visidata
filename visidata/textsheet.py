@@ -32,6 +32,31 @@ class TextSheet(Sheet):
             else:
                 yield [startingLine+1, text]
 
+    def sysopen(sheet, linenum=0):
+        @asyncthread
+        def writelines(sheet, fn):
+            with open(fn, 'w') as fp:
+                for row in sheet.rows:
+                    fp.write(row[1])
+                    fp.write('\n')
+
+        @asyncthread
+        def readlines(sheet, fn):
+            sheet.rows = []
+            with open(fn, 'r') as fp:
+                try:
+                    for i, line in enumerate(fp):
+                        sheet.addRow((i, line))
+                except Exception as e:
+                    vd.exceptionCaught(e)
+                    return ''
+
+        import tempfile
+        with tempfile.NamedTemporaryFile() as temp:
+            writelines(sheet, temp.name)
+            vd.launchEditor(temp.name, '+%s' % linenum)
+            readlines(sheet, temp.name)
+
 
 # .source is list of source text lines to 'load'
 # .sourceSheet is Sheet error came from
@@ -66,5 +91,8 @@ globalCommand('g^E', 'errors-all', 'vd.push(vd.allErrorsSheet)', 'view traceback
 
 Sheet.addCommand(None, 'view-cell', 'vd.push(ErrorSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), sourceSheet=sheet, source=cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet'),
 Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet(sheet.name+"_cell_error", sourceSheet=sheet, source=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
+
+TextSheet.addCommand('^O', 'sysopen-sheet', 'sheet.sysopen(sheet.cursorRowIndex)', 'open copy of text sheet in $EDITOR and reload on exit')
+
 
 TextSheet.options.save_filetype = 'txt'
