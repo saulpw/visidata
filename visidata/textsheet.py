@@ -73,7 +73,7 @@ class ErrorsSheet(Sheet):
         self.rows = self.source
 
     def openRow(self, row):
-        return ErrorSheet(source=cursorRow)
+        return ErrorSheet(source=self.cursorRow)
 
 @VisiData.property
 def allErrorsSheet(self):
