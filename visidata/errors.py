@@ -4,9 +4,6 @@ from visidata import vd, VisiData, options
 
 __all__ = ['stacktrace', 'ExpectedException']
 
-import warnings
-warnings.simplefilter('error')
-
 class ExpectedException(Exception):
     'an expected exception'
     pass

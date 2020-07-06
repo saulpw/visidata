@@ -10,6 +10,7 @@ import os
 import io
 import sys
 import locale
+import warnings
 
 from visidata import vd, option, options, status, run, BaseSheet, AttrDict
 from visidata import Path, openSource, saveSheets, domotd
@@ -76,6 +77,7 @@ optalias('c', 'config')
 def main_vd():
     'Open the given sources using the VisiData interface.'
     locale.setlocale(locale.LC_ALL, '')
+    warnings.showwarning = vd.warning
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
