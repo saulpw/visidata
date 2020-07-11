@@ -299,7 +299,6 @@ class Plotter(BaseSheet):
 class Canvas(Plotter):
     'zoomable/scrollable virtual canvas with (x,y) coordinates in arbitrary units'
     rowtype = 'plots'
-    aspectRatio = 0.0
     leftMarginPixels = 10*2
     rightMarginPixels = 4*2
     topMarginPixels = 0
@@ -312,7 +311,9 @@ class Canvas(Plotter):
         self.visibleBox = None  # bounding box of visible canvas, in canvas units
         self.cursorBox = None   # bounding box of cursor, in canvas units
 
-        self.zoomlevel = 1.0
+        self.aspectRatio = 0.0
+        self.xzoomlevel = 1.0
+        self.yzoomlevel = 1.0
         self.needsRefresh = False
 
         self.polylines = []   # list of ([(canvas_x, canvas_y), ...], attr, row)
@@ -492,16 +493,17 @@ class Canvas(Plotter):
     def zoomTo(self, bbox):
         'set visible area to bbox, maintaining aspectRatio if applicable'
         self.fixPoint(self.plotviewBox.xymin, bbox.xymin)
-        self.zoomlevel=max(bbox.w/self.canvasBox.w, bbox.h/self.canvasBox.h)
+        self.xzoomlevel=bbox.w/self.canvasBox.w
+        self.yzoomlevel=bbox.h/self.canvasBox.h
 
-    def setZoom(self, zoomlevel=None):
-        if zoomlevel:
-            self.zoomlevel = zoomlevel
+    def incrZoom(self, incr):
+        self.xzoomlevel *= incr
+        self.yzoomlevel *= incr
 
         self.resetBounds()
-        self.plotlegends()
 
     def resetBounds(self):
+        'create canvasBox and cursorBox if necessary, and set visibleBox w/h according to zoomlevels.  then redisplay labels.'
         if not self.canvasBox:
             xmin, ymin, xmax, ymax = None, None, None, None
             for vertexes, attr, row in self.polylines:
@@ -524,6 +526,8 @@ class Canvas(Plotter):
         if not self.cursorBox:
             self.cursorBox = Box(self.visibleBox.xmin, self.visibleBox.ymin, self.canvasCharWidth, self.canvasCharHeight)
 
+        self.plotlegends()
+
     def plotlegends(self):
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
@@ -544,18 +548,18 @@ class Canvas(Plotter):
 
     @property
     def xScaler(self):
-        xratio = self.plotviewBox.w/(self.canvasBox.w*self.zoomlevel)
+        xratio = self.plotviewBox.w/(self.canvasBox.w*self.xzoomlevel)
         if self.aspectRatio:
-            yratio = self.plotviewBox.h/(self.canvasBox.h*self.zoomlevel)
+            yratio = self.plotviewBox.h/(self.canvasBox.h*self.yzoomlevel)
             return self.aspectRatio*min(xratio, yratio)
         else:
             return xratio
 
     @property
     def yScaler(self):
-        yratio = self.plotviewBox.h/(self.canvasBox.h*self.zoomlevel)
+        yratio = self.plotviewBox.h/(self.canvasBox.h*self.yzoomlevel)
         if self.aspectRatio:
-            xratio = self.plotviewBox.w/(self.canvasBox.w*self.zoomlevel)
+            xratio = self.plotviewBox.w/(self.canvasBox.w*self.xzoomlevel)
             return min(xratio, yratio)
         else:
             return yratio
@@ -595,7 +599,8 @@ class Canvas(Plotter):
     def render_sync(self):
         'plots points and lines and text onto the Plotter'
 
-        self.setZoom()
+        self.resetBounds()
+
         bb = self.visibleBox
         xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax
         xfactor, yfactor = self.xScaler, self.yScaler
@@ -664,9 +669,9 @@ Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharH
 Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height by one character')
 Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)', 'set visible bounds to cursor')
 
-Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
-Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
-Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()', 'zoom to fit full extent')
+Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; incrZoom(options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
+Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; incrZoom(1.0/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
+Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; refresh()', 'zoom to fit full extent')
 Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio')
 
 # set cursor box with left click
@@ -676,8 +681,8 @@ Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)'
 Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move')
 Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint)', 'mark canvas anchor point')
 
-Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel')
-Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel')
+Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; incrZoom(1.0/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel')
+Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; incrZoom(options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel')
 Canvas.bindkey('2097152', 'zoomout-mouse')
 
 Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')

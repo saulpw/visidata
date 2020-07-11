@@ -71,11 +71,12 @@ class GraphSheet(InvertedCanvas):
 
         status('loaded %d points (%d errors)' % (nplotted, nerrors))
 
-        self.setZoom(1.0)
+        self.xzoomlevel=self.yzoomlevel=1.0
+        self.resetBounds()
         self.refresh()
 
-    def setZoom(self, zoomlevel=None):
-        super().setZoom(zoomlevel)
+    def resetBounds(self):
+        super().resetBounds()
         self.createLabels()
 
     def add_y_axis_label(self, frac):
