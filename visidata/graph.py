@@ -142,3 +142,19 @@ InvertedCanvas.addCommand(None, 'go-up-small', 'sheet.cursorBox.ymin += canvasCh
 
 InvertedCanvas.addCommand(None, 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height by one character')
 InvertedCanvas.addCommand(None, 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height by one character')
+
+
+@GraphSheet.api
+def set_y(sheet, s):
+    ymin, ymax = map(float, map(sheet.ycols[0].type, s.split()))
+    sheet.zoomTo(BoundingBox(sheet.visibleBox.xmin, ymin, sheet.visibleBox.xmax, ymax))
+    sheet.refresh()
+
+@GraphSheet.api
+def set_x(sheet, s):
+    xmin, xmax = map(float, map(sheet.xcols[0].type, s.split()))
+    sheet.zoomTo(BoundingBox(xmin, sheet.visibleBox.ymin, xmax, sheet.visibleBox.ymax))
+    sheet.refresh()
+
+Canvas.addCommand('y', 'resize-y-input', 'sheet.set_y(input("set ymin ymax="))')
+Canvas.addCommand('x', 'resize-x-input', 'sheet.set_x(input("set xmin xmax="))')
