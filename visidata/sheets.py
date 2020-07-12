@@ -985,7 +985,7 @@ def quit(vd, *sheets):
         vd.remove(vs)
 
 
-@Sheet.api
+@BaseSheet.api
 def preloadHook(sheet):
     'Override to setup for reload()'
     pass
