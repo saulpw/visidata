@@ -1,0 +1,11 @@
+sheet	col	row	longname	input	keystrokes	comment
+	SqliteSheet	header	set-option	0		
+	SqliteSheet	header	set-option	0		
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Customer	0	select-equal-cell		,	select rows matching current cell in current column
+benchmark			dup-selected		"	open duplicate sheet with only selected rows
+benchmark_selectedref	Quantity	0	select-equal-cell		,	select rows matching current cell in current column
+benchmark_selectedref			dup-selected		"	open duplicate sheet with only selected rows
+benchmark_selectedref_selectedref	SKU	0	select-equal-cell		,	select rows matching current cell in current column
+benchmark_selectedref_selectedref			dup-selected		"	open duplicate sheet with only selected rows
+benchmark_selectedref_selectedref_selectedref			save-all	tests/golden/long-title-xlsx.xlsx	g^S	save all sheets to given file or directory)
