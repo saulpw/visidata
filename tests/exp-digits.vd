@@ -1,9 +1,9 @@
 sheet	col	row	longname	input	keystrokes	comment
-exp-digits_vd			add-sheet	1	A	open new blank sheet with number columns
+exp-digits_vd			open-new	1	A	open new blank sheet with number columns
 unnamed	0		rename-col	x	^	edit name of current column
 unnamed			add-rows	100	ga	add N blank rows
 unnamed			select-rows		gs	
-unnamed	x		setcol-range	range(100)	gz=	set selected rows in this column to the values in the given Python sequence expression
+unnamed	x		setcol-range		gi	set selected rows in this column to the values in the given Python sequence expression
 unnamed			unselect-rows		gu	
 unnamed			exec-python	import math	g^X	execute Python statement in the global scope
 unnamed	x		type-int		#	set type of current column to int
@@ -11,7 +11,6 @@ unnamed	x		addcol-expr	math.e**x	=	create new column from Python expression, wit
 unnamed	math.e**x		type-int		#	set type of current column to int
 unnamed	math.e**x		rename-col	y	^	edit name of current column
 unnamed	y		addcol-expr	1	=	create new column from Python expression, with column names as variables
-unnamed	y		type-int		#	set type of current column to int
 unnamed			columns-sheet		C	open Columns Sheet
 unnamed_columns		キ1	copy-row		y	copy current row to clipboard
 unnamed_columns		キ1	paste-after		p	paste clipboard rows after current row
@@ -24,9 +23,9 @@ unnamed_columns		キ1	paste-after		p	paste clipboard rows after current row
 unnamed_columns		キ1	paste-after		p	paste clipboard rows after current row
 unnamed_columns		キ1	paste-after		p	paste clipboard rows after current row
 unnamed_columns	name	キ1	select-equal-cell		,	select rows matching current cell in current column
-unnamed_columns	name		setcol-range	('count_%s' % i for i in range(10))	gz=	set selected rows in this column to the values in the given Python sequence expression
-unnamed_columns	expr		setcol-range	('str(y).count("%s")' % i for i in range(10))	gz=	set selected rows in this column to the values in the given Python sequence expression
-unnamed_columns		キcount_0	type-int-selected		g#	set type of selected columns to int
+unnamed_columns	name		setcol-iter	('count_%s' % i for i in range(10))	gz=	set selected rows in this column to the values in the given Python sequence expression
+unnamed_columns	expr		setcol-iter	('str(y).count("%s")' % i for i in range(10))	gz=	set selected rows in this column to the values in the given Python sequence expression
+unnamed_columns			type-int-selected		g#	set type of selected columns to int
 unnamed_columns			quit-sheet		q	quit current sheet
 unnamed	x		key-col		!	pin current column on the left as a key column
 unnamed	y		key-col		!	pin current column on the left as a key column
