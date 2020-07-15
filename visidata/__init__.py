@@ -86,6 +86,7 @@ from .main import *
 from .help import *
 from .defermods import *
 import visidata.sort
+import visidata.unfurl
 
 from .loaders.csv import *
 from .loaders.archive import *
