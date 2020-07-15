@@ -55,7 +55,7 @@ class DisplayWrapper:
 
 
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
-    return re.sub(r'\W|^(?=\d)', '_', str(s))
+    return re.sub(r'\W|^(?=\d)', '_', str(s)).strip('_')
 
 
 class Column(Extensible):
