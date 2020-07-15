@@ -95,6 +95,7 @@ def main_vd():
 
     i=1
     current_args = {}
+    flGlobal = False
 
     while i < len(sys.argv):
         arg = sys.argv[i]
@@ -107,6 +108,8 @@ def main_vd():
             import curses
             curses.wrapper(lambda scr: vd.openManPage())
             return 0
+        elif arg in ['-g', '--global']:
+            flGlobal = not flGlobal  # can toggle within the same command
         elif arg[0] == '-':
             optname = arg.lstrip('-')
             optname = optname.replace('-', '_')
@@ -129,6 +132,8 @@ def main_vd():
                         i += 1
 
             current_args[optname] = optval
+            if flGlobal:
+                options.set(optname, optval, obj='override')
 
         elif arg.startswith('+'):  # position cursor at start
             if ':' in arg:
@@ -161,9 +166,6 @@ def main_vd():
 
     vd.loadConfigAndPlugins(args)
 
-    for k, v in current_args.items():
-        options.set(k, v, obj='override')
-
     # fetch motd and plugins *after* options parsing/setting
     visidata.PluginsSheet().reload()
     domotd()
@@ -184,6 +186,9 @@ def main_vd():
     sources = []
     for p, opts in inputs:
         vs = openSource(p, **opts)
+        for k, v in current_args.items():  # apply final set of args to sheets specifically #573
+            vs.options.set(k, v, obj='override')
+
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
