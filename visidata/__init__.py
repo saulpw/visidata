@@ -116,6 +116,7 @@ from .loaders.usv import *
 from .loaders.frictionless import *
 from .loaders.imap import *
 
+from .loaders.pdf import *
 from .loaders.pandas_freqtbl import *
 from .loaders.xword import *
 

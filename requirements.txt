@@ -20,5 +20,6 @@ dpkt                # pcap
 dnslib              # pcap
 namestand           # graphviz
 datapackage         # frictionless .json
+pdfminer.six        # pdf
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb
