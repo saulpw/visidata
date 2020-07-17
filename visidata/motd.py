@@ -13,7 +13,7 @@ import random
 from visidata import option, options, asyncsingle, urlcache, status
 from visidata import __version__
 
-option('motd_url', 'https://visidata.org/motd-'+__version__, 'source of randomized startup messages')
+option('motd_url', 'https://visidata.org/motd-'+__version__, 'source of randomized startup messages', sheettype=None)
 
 
 @asyncsingle

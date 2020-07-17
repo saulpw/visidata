@@ -221,9 +221,10 @@ options = vd.options  # legacy
 
 
 @VisiData.global_api
-def option(vd, name, default, helpstr, replay=False):
+def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
     opt = options.setdefault(name, default, helpstr)
     opt.replayable = replay
+    opt.sheettype=sheettype
     return opt
 
 

@@ -8,8 +8,8 @@ import functools
 from visidata import VisiData, vd, asyncthread, status, fail, option, options, warning
 from visidata import Sheet, saveSheets, Path, Column
 
-option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard')
-option('clipboard_paste_cmd', '', 'command to get contents of system clipboard')
+option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard', sheettype=None)
+option('clipboard_paste_cmd', '', 'command to get contents of system clipboard', sheettype=None)
 
 VisiData.init('cliprows', list) # list of (source_sheet, source_row_idx, source_row)
 VisiData.init('clipcells', list) # list of strings

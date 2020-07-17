@@ -16,7 +16,7 @@ from visidata import vd, option, options, status, run, BaseSheet, AttrDict
 from visidata import Path, openSource, saveSheets, domotd
 import visidata
 
-option('config', '~/.visidatarc', 'config file to exec in Python')
+option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
 option('play', '', '.vd file to replay')
 option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
 option('output', None, 'save the final visible sheet to output at the end of replay')
@@ -165,6 +165,11 @@ def main_vd():
     args = AttrDict(current_args)
 
     vd.loadConfigAndPlugins(args)
+
+    for k, v in current_args.items():
+        opt = options._get(optname)
+        if opt and opt.sheettype is None:
+            options.set(k, v, obj='override')
 
     # fetch motd and plugins *after* options parsing/setting
     visidata.PluginsSheet().reload()

@@ -3,12 +3,12 @@ import threading
 from visidata import *
 import visidata
 
-option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds')
+option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
 theme('disp_replay_play', '▶', 'status indicator for active replay')
 theme('disp_replay_pause', '‖', 'status indicator for paused replay')
 theme('color_status_replay', 'green', 'color of replay status indicator')
-option('replay_movement', False, 'insert movements during replay')
-option('visidata_dir', '~/.visidata/', 'directory to load and store additional files')
+option('replay_movement', False, 'insert movements during replay', sheettype=None)
+option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
 
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
@@ -17,8 +17,8 @@ replay cancel save-cmdlog
 go- search scroll prev next page start end zoom resize visibility
 suspend redraw no-op help syscopy syspaste sysopen profile toggle'''.split()
 
-option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog')
-option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to')
+option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
+option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 
 vd.activeCommand = None
 
