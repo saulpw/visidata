@@ -84,7 +84,7 @@ class FreqTableSheetSummary(FreqTableSheet):
 
 Sheet.addCommand('F', 'freq-col', 'vd.push(FreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
 Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
-Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
+Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", sheet=sheet, getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
 
 ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
 
