@@ -128,6 +128,9 @@ def main_vd():
                     if type(opt.value) is bool:
                         optval = True
                     else:
+                        if i >= len(sys.argv):
+                            vd.error(f'"-{optname}" missing argument')
+
                         optval = sys.argv[i+1]
                         i += 1
 
@@ -276,7 +279,7 @@ def vd_cli():
     try:
         rc = main_vd()
     except visidata.ExpectedException as e:
-        print('fail: ' + str(e))
+        print('Error: ' + str(e))
     except FileNotFoundError as e:
         print(e)
         if options.debug:
