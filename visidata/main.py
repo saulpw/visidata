@@ -279,7 +279,7 @@ def vd_cli():
     try:
         rc = main_vd()
     except visidata.ExpectedException as e:
-        print('fail: ' + str(e))
+        print('Error: ' + str(e))
     except FileNotFoundError as e:
         print(e)
         if options.debug:
