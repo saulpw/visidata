@@ -108,6 +108,7 @@ class Option:
         self.value = value
         self.helpstr = helpstr
         self.replayable = False
+        self.sheettype = BaseSheet
 
     def __str__(self):
         return str(self.value)
