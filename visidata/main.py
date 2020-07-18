@@ -193,6 +193,10 @@ def main_vd():
 
     sources = []
     for p, opts in inputs:
+        # filetype is a special option, bc it is needed to construct the specific sheet type
+        if ('filetype' in current_args) and ('filetype' not in opts):
+            opts['filetype'] = current_args['filetype']
+
         vs = openSource(p, **opts)
         for k, v in current_args.items():  # apply final set of args to sheets specifically #573
             vs.options.set(k, v, obj='override')
