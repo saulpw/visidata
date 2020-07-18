@@ -1,18 +1,17 @@
-- Update: 2018-08-19
-- Version: VisiData 1.3.1
+- Updated: 2020-07-18
+- Version: VisiData 2.0
 
 # Navigation
 
 ## How to rapidly scroll through a sheet
 
-Command(s)              Operation
---------------          ---------------
-` ← ` `↑`   ` →`   ` ↓` move as expected
-` h`  ` j`  ` k`  ` l`  move cursor **one cell** left/down/up/right (like in vim)
-`gh`  `gj`  `gk`  `gl`  move **all the way** to the left/bottom/top/right of sheet
-` <`  ` >`              move up/down the current column to the next **value which differs from current cell**
-` {`  ` }`              move up/down the current column to the next **[selected](/docs/rows#subset) row**
-
+Command(s)                    Operation
+--------------                ---------------
+` ← ↑ → ↓ PgUp PgDn Home End` move as expected
+` h`  ` j`  ` k`  ` l`        move cursor **one cell** left/down/up/right (like in vim)
+`gh`  `gj`  `gk`  `gl`        move **all the way** to the left/bottom/top/right of sheet
+` <`  ` >`                    move up/down the current column to the next **value which differs from current cell**
+` {`  ` }`                    move up/down the current column to the next **[selected](/docs/rows#subset) row**
 
 ---
 
@@ -22,20 +21,20 @@ Command(s)              Operation
 --------------          ---------------
 ` /`  ` ?` *regex*      search for *regex* matches up/down the **current** column
 `g/`  `g?` *regex*      search for *regex* matches up/down over **all visible** columns
-` n`  ` N`              move to next/previous *regex* match from last search
+` n`  `Shift+N`              move to next/previous *regex* match from last search
 `z/`  `z?` *expr*       search by Python *expr* up/down (with column names as variables)
 
 The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
 **Question** Has there been a day where we sold more than 95 **Item**s?
 
-1. Scroll to the **Units** column. Set the type of the **Units** column by pressing `#` (int).
+1. Set the type of the **Units** column to integer by moving to the **Units** column and pressing `#`.
 2. Type `z/` followed by `Units > 95`.
 
 **Question** What is the **longname** for `gk`?
 
-1. Press `z^H` to open the **Commands sheet**.
-2. Type `/` followed by `'gk' in keystrokes`.
+1. Press `z Ctrl+H` to open the **Commands sheet**.
+2. Move to the `keystrokes` column and press `/`, followed by `gk`.
 3. Press `c` followed by `longname` to move the cursor to the **longname** column.
 
 ---
@@ -48,7 +47,7 @@ The Sheets Stack (`z Shift+S`is the list of active sheets (most recently used at
 
 ###### Jumping to sheets
 
-1. Press `S` to open the **Sheets sheet**.
+1. Press `Shift+S` to open the **Sheets sheet**.
 2. Move the cursor to the row containing the desired sheet.
 3. Press `Enter` to jump to the sheet referenced in that current cursor row.
 
