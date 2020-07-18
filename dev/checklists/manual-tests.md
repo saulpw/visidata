@@ -42,6 +42,7 @@
         - check that cli overwrites visidatarc
         - check that --config selects which visidatarc to load
         - check that visidatarc can set plugin options
+    - -w and others should be set "globally" (work without -g option)
 13. Filetype
     - visidata should be able to detect filetype from extension
         - bin/vd sample_data/benchmark.csv
