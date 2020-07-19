@@ -95,6 +95,7 @@ def main_vd():
 
     i=1
     current_args = {}
+    global_args = {}
     flGlobal = False
 
     while i < len(sys.argv):
@@ -136,7 +137,7 @@ def main_vd():
 
             current_args[optname] = optval
             if flGlobal:
-                options.set(optname, optval, obj='override')
+                global_args[optname] = optval
 
         elif arg.startswith('+'):  # position cursor at start
             if ':' in arg:
@@ -168,6 +169,9 @@ def main_vd():
     args = AttrDict(current_args)
 
     vd.loadConfigAndPlugins(args)
+
+    for k, v in global_args.items():
+        options.set(k, v, obj='override')
 
     for k, v in current_args.items():
         opt = options._get(optname)
