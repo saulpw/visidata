@@ -308,8 +308,8 @@ def loadConfigAndPlugins(vd, args):
     options.visidata_dir = args.visidata_dir or os.getenv('VD_DIR', '') or options.visidata_dir
     options.config = args.config or os.getenv('VD_CONFIG', '') or options.config
 
-    sys.path.append(visidata.Path(options.visidata_dir))
-    sys.path.append(visidata.Path(options.visidata_dir)/"plugin-deps")
+    sys.path.append(str(visidata.Path(options.visidata_dir)))
+    sys.path.append(str(visidata.Path(options.visidata_dir)/"plugin-deps"))
 
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
     for modname in (args.imports or options.imports or '').split():
