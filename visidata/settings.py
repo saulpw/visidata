@@ -3,6 +3,7 @@ import sys
 import inspect
 import argparse
 import importlib
+import os
 
 import visidata
 from visidata import VisiData, BaseSheet, vd, getGlobals, addGlobals
@@ -303,9 +304,11 @@ def addOptions(parser):
 
 @VisiData.api
 def loadConfigAndPlugins(vd, args):
+    # set visidata_dir and config manually before loading config file, so visidata_dir can be set from cli or from $VD_DIR
+    options.visidata_dir = args.visidata_dir or os.getenv('VD_DIR', '') or options.visidata_dir
+    options.config = args.config or os.getenv('VD_CONFIG', '') or options.config
 
-    # add visidata_dir to path before loading config file (can only be set from cli)
-    sys.path.append(str(visidata.Path(args.visidata_dir or options.visidata_dir)))
+    sys.path.append(visidata.Path(options.visidata_dir))
 
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
     for modname in (args.imports or options.imports or '').split():
@@ -315,7 +318,7 @@ def loadConfigAndPlugins(vd, args):
             continue
 
     # user customisations in config file in standard location
-    loadConfigFile(visidata.Path(args.config or options.config), getGlobals())
+    loadConfigFile(options.config, getGlobals())
 
 
-BaseSheet.addCommand('gO', 'open-config', 'fn=options.config; vd.push(TextSheet(fn, source=Path(fn)))', 'open ~/.visidatarc as Text Sheet')
+BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(options.config))', 'open options.config as text sheet')
