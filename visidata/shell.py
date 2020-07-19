@@ -174,7 +174,7 @@ class DirSheet(Sheet):
         basepath = str(self.source)
 
         folders = set()
-        f = _walkfiles if options.dir_recurse else _listfiles
+        f = _walkfiles if self.options.dir_recurse else _listfiles
 
         hidden_files = options.dir_hidden
         for p in f(self.source):

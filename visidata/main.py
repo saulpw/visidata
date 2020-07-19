@@ -72,6 +72,7 @@ optalias('o', 'output')
 optalias('w', 'replay_wait')
 optalias('d', 'delimiter')
 optalias('c', 'config')
+optalias('r', 'dir_recurse')
 
 
 def main_vd():
