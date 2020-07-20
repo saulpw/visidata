@@ -40,7 +40,7 @@ class TestEditText:
         ('a b KEY_HOME ^T ^J', 'b', {}),
 
         ('a b KEY_LEFT ^U ^J', 'b', {}),
-        ('a b ^U c ^J', 'c', {}),        
+        ('a b ^U c ^J', 'c', {}),
     ])
     def test_keys(self, mock_screen, keys, result, kwargs):
         self.chars.extend(keys.split())
@@ -50,5 +50,5 @@ class TestEditText:
             with pytest.raises(exception):
                 visidata.vd.editline(mock_screen, 0, 0, 0, **kwargs)
         else:
-            r = visidata.editline(mock_screen, 0, 0, 0, **kwargs)
+            r = visidata.vd.editline(mock_screen, 0, 0, 0, **kwargs)
             assert r == result
