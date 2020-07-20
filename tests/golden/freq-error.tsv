@@ -4,4 +4,4 @@ key1	count	sum_qty	avg_qty*amt
 2017-12-25	1	16	4.80
 2016-01-01	2	3	6.00
 date(None)	2	36	139.20
-Expecting ':' delimiter: line 1 column 34 (char 33)	1	0	
+#ERR	1	0	

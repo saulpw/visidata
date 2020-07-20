@@ -1,7 +1,7 @@
 column	errors	nulls	distinct	mode	min	max	sum	median	mean	stdev
-Date	0	0	45	#ERR						
+Date	0	0	45	7/10/2018 5:23p						
 Customer	0	0	15	Robert Armstrong						
-SKU	0	0	32	#ERR						
+SKU	0	0	32	FOOD122						
 Item	0	0	38	Food, Senior Wet Cat - 3 oz						
 Quantity	0	0	10	1	1	144	401	2	8.18	21.97
 Unit	0	0	26	12.95	0.0	2495.99	11413.830000000005	12.95	232.94	596.19

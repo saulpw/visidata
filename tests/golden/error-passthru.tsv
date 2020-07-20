@@ -1,2 +1,2 @@
 Quantity.foo	count	percent	histogram
-'str' object has no attribute 'foo'	49	100.00	**************************************************
+#ERR	49	100.00	**************************************************
