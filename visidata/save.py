@@ -51,6 +51,9 @@ def iterdispvals(sheet, *cols, format=False):
                     if dispval is None:
                         dispval = ''
                         break
+                    elif isinstance(dispval, TypedExceptionWrapper):
+                        dispval = options_safe_error or str(dispval)
+                        break
                     dispval = t(dispval)
             except Exception as e:
                 dispval = str(dispval)
