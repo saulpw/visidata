@@ -41,7 +41,8 @@ class JsonSheet(PythonSheet):
         # This allows for more consistent handling of rows containing scalars
         # or lists.
         if not isinstance(row, dict):
-            row = {options.default_colname: row}
+            v = {options.default_colname: row}
+            row = visidata.AlwaysDict(row, **v)
 
         super().addRow(row, index=index)
 

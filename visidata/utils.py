@@ -2,8 +2,17 @@ import operator
 
 'Various helper classes and functions.'
 
-__all__ = ['AttrDict', 'moveListItem', 'namedlist', 'classproperty']
+__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty']
 
+
+class AlwaysDict(dict):
+    'return same val for all keys'
+    def __init__(self, val, **kwargs):
+        super().__init__(**kwargs)
+        self._val = val
+
+    def __getitem__(self, k):
+        return self._val
 
 class AttrDict(dict):
     'Augment a dict with more convenient .attr syntax.  not-present keys return None.'
