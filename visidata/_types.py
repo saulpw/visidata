@@ -102,11 +102,15 @@ class vlen(int):
 class date(datetime.datetime):
     'datetime wrapper, constructed from time_t or from str with dateutil.parse'
 
-    def __new__(cls, s=None):
+    def __new__(cls, *args, **kwargs):
         'datetime is immutable so needs __new__ instead of __init__'
-        if s is None:
-            r = datetime.datetime.now()
-        elif isinstance(s, int) or isinstance(s, float):
+        if not args:
+            return datetime.datetime.now()
+        elif len(args) > 1:
+            return super().__new__(cls, *args, **kwargs)
+
+        s = args[0]
+        if isinstance(s, int) or isinstance(s, float):
             r = datetime.datetime.fromtimestamp(s)
         elif isinstance(s, str):
             r = dateutil.parser.parse(s)
@@ -118,7 +122,7 @@ class date(datetime.datetime):
         t = r.timetuple()
         ms = getattr(r, 'microsecond', 0)
         tzinfo = getattr(r, 'tzinfo', None)
-        return super().__new__(cls, *t[:6], microsecond=ms, tzinfo=tzinfo)
+        return super().__new__(cls, *t[:6], microsecond=ms, tzinfo=tzinfo, **kwargs)
 
     def __str__(self):
         return self.strftime(options.disp_date_fmt)
