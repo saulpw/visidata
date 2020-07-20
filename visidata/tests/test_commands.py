@@ -43,7 +43,7 @@ class TestCommands:
     def test_baseCommands(self, mock_screen):
         'exec each global command at least once'
 
-        cmdlist = visidata.commands
+        cmdlist = visidata.vd.commands
 
         vs = visidata.Sheet('test_commands')
         vs.reload()
