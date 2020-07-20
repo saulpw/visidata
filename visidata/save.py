@@ -28,10 +28,7 @@ def iterdispvals(sheet, *cols, format=False):
     for col in cols:
         transformers[col] = [ col.type ]
         if format:
-            transformers[col].append(
-                # optimization: only lookup fmtstr once (it may have to get an option value)
-                lambda v,fmtfunc=getType(col.type).formatter,fmtstr=col.fmtstr: fmtfunc(fmtstr, '' if v is None else v)
-            )
+            transformers[col].append(col.format)
         trdict = sheet.safe_trdict()
         if trdict:
             transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
