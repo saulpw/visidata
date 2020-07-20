@@ -1,5 +1,6 @@
 column	errors	nulls	distinct	mode	min	max	sum	median	mean	stdev
+	0	10	2	#ERR						
 amt	0	3	7	0.01	0.01	43.2	58.919999999999995	3.0	8.42	15.67
-key1	0	3	8	no unique mode; found 7 equally common values	2016-01-01	2018-10-20	invalid type for date NotImplementedType	2018-07-27	invalid type for date NotImplementedType	can't convert type 'date' to numerator/denominator
+key1	0	3	8	#ERR	2016-01-01	2018-10-20	#ERR	2018-07-27	#ERR	#ERR
 key2	0	3	4	baz						
-qty	1	2	8	no unique mode; found 7 equally common values	1	256	375	16	53.57	92.05
+qty	1	2	8	#ERR	1	256	375	16	53.57	92.05
