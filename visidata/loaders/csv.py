@@ -39,7 +39,8 @@ class CsvSheet(SequenceSheet):
                 try:
                     yield next(rdr)
                 except csv.Error as e:
-                    yield ['[csv.Error: %s]' % e]
+                    e.stacktrace=stacktrace()
+                    yield [TypedExceptionWrapper(None, exception=e)]
                 except StopIteration:
                     return
 
