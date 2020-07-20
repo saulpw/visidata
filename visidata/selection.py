@@ -145,3 +145,6 @@ Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=curs
 
 Sheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'select rows matching Python expression in any visible column')
 Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalexpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
+
+Sheet.addCommand(None, 'select-error-col', 'select(gatherBy(lambda r,c=cursorCol: isError(c, r)), progress=False)', 'select rows with errors in current column')
+Sheet.addCommand(None, 'select-error', 'select(gatherBy(lambda r,vcols=visibleCols: isinstance(r, TypedExceptionWrapper) or any([isError(c, r) for c in vcols])), progress=False)', 'select rows with errors in any column')
