@@ -32,7 +32,7 @@ def undo(vd, sheet):
 
             vd.clearCaches()  # undofunc can invalidate the drawcache
 
-            vd.moveToReplayContext(cmdlogrow)
+            vd.moveToReplayContext(cmdlogrow, sheet)
             vd.status("%s undone" % cmdlogrow.longname)
             return
 

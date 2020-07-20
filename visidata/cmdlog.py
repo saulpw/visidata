@@ -234,20 +234,13 @@ def replay_cancel(vd):
 
 
 @VisiData.api
-def moveToReplayContext(vd, r):
+def moveToReplayContext(vd, r, vs):
         'set the sheet/row/col to the values in the replay row.  return sheet'
-        if r.sheet:
-            vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
-        else:
-            return None
-
         if r.row:
             vs.moveToRow(r.row) or error('no "%s" row' % r.row)
 
         if r.col:
             vs.moveToCol(r.col) or error('no "%s" column' % r.col)
-
-        return vs
 
 
 @VisiData.api
@@ -261,17 +254,25 @@ def delay(vd, factor=1):
 def replayOne(vd, r):
         'Replay the command in one given row.'
         vd.currentReplayRow = r
+        if r.sheet:
+            vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
+        else:
+            vs = None
 
         longname = getattr(r, 'longname', None)
         if longname == 'set-option':
             try:
-                options.set(r.row, r.input, options._opts.getobj(r.col))
+                if vs:
+                    vs.options[r.row] = r.input
+                else:
+                    options[r.row] = r.input
+
                 escaped = False
             except Exception as e:
                 vd.exceptionCaught(e)
                 escaped = True
         else:
-            vs = vd.moveToReplayContext(r)
+            vd.moveToReplayContext(r, vs)
             if vs:
                 vd.push(vs)
             else:
