@@ -218,7 +218,7 @@ def getSheet(vd, sheetname):
     try:
         sheetidx = int(sheetname)
         return vd.sheets[sheetidx]
-    except TypeError:
+    except ValueError:
         pass
 
     if sheetname == 'options':
