@@ -11,6 +11,7 @@ test_columns		キamt	select-row		s
 test_columns			aggregate-cols	min	g+	
 test_columns			aggregate-cols	max	g+	
 test_columns			quit-sheet		q	
+test		numeric_binning	set-option	True		
 test	key2		pivot		W	
 test_pivot_key2			columns-sheet		C	
 test_pivot_key2_columns	name		sort-asc		[	

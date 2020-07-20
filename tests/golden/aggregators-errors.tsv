@@ -1,5 +1,5 @@
 key1	amt_max_bar	amt_max_baz	amt_max_foo	amt_min_bar	amt_min_baz	amt_min_foo	qty_max_bar	qty_max_baz	qty_max_foo	qty_min_bar	qty_min_baz	qty_min_foo	qty_sum_bar	qty_sum_baz	qty_sum_foo
+#ERR		43.20			3.30			32			4		0	36	0
 2016-01-01 - 2016-12-07									1			1	0	0	1
 2016-12-07 - 2017-11-13													0	0	0
 2017-11-13 - 2018-10-20	0.30	0.01	0.01	0.30	0.01	0.01	16	256		16	256		16	256	0
-#ERR		43.20			3.30			32			4		0	36	0
