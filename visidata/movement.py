@@ -190,3 +190,6 @@ BaseSheet.bindkey('gh', 'go-leftmost'),
 BaseSheet.bindkey('gl', 'go-rightmost')
 
 BaseSheet.addCommand('^^', 'jump-prev', 'vd.sheets[1:] or fail("no previous sheet"); vd.push(vd.sheets[1])', 'jump to previous sheet (swap with current sheet)')
+
+BaseSheet.addCommand(None, 'mouse-enable', 'mm, _ = curses.mousemask(-1); status("mouse "+("ON" if mm else "OFF"))', 'enable mouse events')
+BaseSheet.addCommand(None, 'mouse-disable', 'mm, _ = curses.mousemask(0); status("mouse "+("ON" if mm else "OFF"))', 'disable mouse events')
