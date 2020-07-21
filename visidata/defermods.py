@@ -124,7 +124,7 @@ def commitDeletes(self):
         oldidx += 1
 
     newidx = 0
-    for r in Progress(self.rows, gerund='deleting'):
+    for r in Progress(list(self.rows), gerund='deleting'):
         if self.isDeleted(self.rows[newidx]):
             self.deleteSourceRow(newidx)
             ndeleted += 1
