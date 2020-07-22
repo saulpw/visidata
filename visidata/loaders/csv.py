@@ -24,9 +24,6 @@ def removeNulls(fp):
 class CsvSheet(SequenceSheet):
     _rowtype = list  # rowdef: list of values
 
-    def newRow(self):
-        return [None]*len(self.columns)
-
     def iterload(self):
         'Convert from CSV, first handling header row specially.'
         with self.source.open_text() as fp:
