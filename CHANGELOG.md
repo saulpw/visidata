@@ -1,5 +1,134 @@
 # VisiData version history
 
+# v2.-4 (XXXX-XX-XX)
+
+at f536c71242d1a5e54b49579b14d2e4b9ca341de8
+
+## Additions and Improvements
+    - [cosmetic] minor display improvement (#512)
+    - [defer] move defermods back into vdcore
+        - configure sqlite and DirSheet to use it
+    - [errors] ErrorsSheet on `g Ctrl+E` lists errors, instead of concatenating
+    - [expand-cols] account for all visible rows when expanding a column (#497 thanks @ajkerrigan!)
+    - [loaders hdf5] make column with object name a key column
+        - fixes command line indexing for hdf5
+    - [loaders imap] add loader for imap://
+    - [loaders json] handle non-dict rows in json data (thanks @ajkerrigan!)
+        - wrap non-dict values in a dict with a consistent key name, so they can be subsequently treated the same as dict rows
+    - [loaders json] use `options.default_colname` for each addRow
+    - [loaders pcap] update url for url_oui and url_iana (Addresses #494)
+        - update to /plugins/pcap/
+    - [loaders postgres] add support for connecting directly to rds (Thanks Daniel Brodie!)
+        - the url has the following format: `rds://db_user@hostname:port/region/dbname`
+        - it assumes that the AWS IAM for the user is configured properly
+    - [loaders sqlite] add SqliteQuerySheet; change names of SqliteSheet to include db
+    - [loaders yaml] have the yaml loader derive from json (thanks @ajkerrigan!)
+        - have YamlSheet derive from JsonSheet rather than the base Sheet class.
+        - this keeps consistency between the two loaders, which makes sense as YAML is a superset of JSON
+        - since they both derive from PythonSheet, it also allows diving into YAML rows
+    - [quitguard] if set on specific sheet, only confirm quit on that sheet (#538)
+        - add unbound guard-sheet command to set quitguard on current sheet
+    - [undo] add undo for rename-col-x family
+    - [undo] add undo to mouse slide
+    - [vls] move vls back into DirSheet
+
+## Command changes
+    - [config] bind `g Shift+O` back to open-config (#553)
+    - [dive] convert many dive- commands to open- (#557)
+        - add open-row bound to `ENTER` on Sheet itself
+        - add `open-source` unbound on BaseSheet
+        - deprecate `dive-*` longname
+    - [options] options-global now `Shift+O`; options-sheet now `z Shift+O`
+    - [multi-line] have visibility toggle Multi-Line Row on TextSheets (Closes #513)
+        - used to toggle `wrap`
+
+## Options
+    - [chooser] experimental `options.fancy_chooser`
+        - when fancy_chooser enabled, aggregators and jointype are chosen with a ChoiceSheet.
+        - press `ENTER` on any row to choose a single option, or select some rows, and press `ENTER` to choose the selectedrows
+        - warning: the mechanism to do this effectively launches another instance of visidata, and so it is possible to get into an embedded state (if you jump around sheets, for example, instead of selecting). 'gq' should still work (thought `CTRL+Q` may need to be pressed several times).
+    - [join-cols] add `options.value_joiner` to combine cell values for join-col (#550)
+    - [join-cols] add `options.name_joiner` to combine column names for join-col, and sheet names for dive-row (#550)
+        - sheet names for join-sheets are still joined with '+' or '&' for the time being
+
+## Plugins
+    - [diff] diff is now a plugin
+        - `--diff` is not available as a cmdline argument anymore
+    - [genericSQL] add plugin entry for genericSQL (thanks Andrew Swanson!)
+    - [marks] add plugin for marking selected rows with a keystrokes, selecting marked rows, and viewing lists of marks, and their rows
+    - [plugins.jsonl] rename bazaar.jsonl to plugins.jsonl
+
+## Bugfixes
+    - [cmdlog] do not record sheet for all 'open-' commands
+        - Fix for case where Shift+D CommandLogs for, e.g. open-plugins, would not be replayable
+    - [cmdlog] record keystrokes for command
+        - Fixes bug where commands with bindings did not have their keystroke recorded
+    - [cmdlog] do not log in gD the global cmdlog or internal sheets (Closes #510)
+        - global cmdlog behaviour should be consistent with VisiData v1.5.2 cmdlog
+    - [index] getRowIndexFromStr requires a rowstr (Closes #521)
+    - [layout] do not adjust column layout if cursor is on a key column (#508)
+    - [join-cols] fix (Fixes #547)
+    - [loaders csv] PEP 479 fix for csv loader (thanks @ajkerrigan!)
+        - Catch StopIteration explicitly when iterating over rows in the CSV reader.
+        - This avoids the following error when opening CSV files in Python 3.8: `RuntimeError: generator raised StopIteration`, but maintains the behaviour of gracefully handling malformed CSV files.
+        - References:
+            - https://www.python.org/dev/peps/pep-0479/#examples-of-breakage
+            - https://github.com/python/cpython/pull/6381/files
+    - [loaders html] cast to str before writing (Fixes #501)
+        - html.escape expects arguments of type `<str>`
+        - fixes bug where typed columns resulted in a stacktrace
+    - [loaders html md] preserve formatting of display values when saving
+    - [loaders pandas] bugfixes for sort and modify (#496; thanks @ajkerrigan!)
+        - Update sort() to handle column/reverse pairs in `self._ordering`.
+        - Convert a dataframe's index from Int64Index to RangeIndex during a reload. Since RangeIndex is a special case subset of Int64Index, this guarantees a RangeIndex without requiring a full reset_index().
+    - [loaders postgres] use urlparse on Path first
+    - [loaders postgres] load an estimate of row numbers for improved performance (thanks Daniel Brodie for PR)
+    - [loaders postgres] fix expand column to work on a json column in postgres (thanks Daniel Brodie for PR!)
+    - [loaders postgres] add columns in postgres tables using addColumns (thanks Daniel Brodie for PR!)
+        - see http://wiki.postgresql.org/wiki/Slow_Counting
+    - [loaders xml] correctly copy columns; fix path (#504)
+    - [mouse] fix go-mouse to go to row 0 (#492)
+    - [path] avoid infinite recursion when `_path` does not have attr (Fixes #489)
+        - previously assumed that every time vdPath does not have the attr, `_path` (pathlib.Path) would
+        - when `_path` lacked the attr, AttributeError was not being raised
+        - instead VisiData would look for that attr in an additional layer of `_path`, and look for `_path` forever until Python put it out of its misery
+    - [path] iter rstrip() newlines (#502)
+    - [preplay] use sheet as context obj to getCommand
+        - longnames were not being found
+    - [search] make moveRegex asynchronous
+    - [sheets_all] make opened .vd/.vdj precious
+        - CommandLogs generated by Shift+D are not precious, but loaded data should be.
+    - [undo] clear drawcache before moving to pre-undo context
+        - if drawcaches are not cleared, VisiData could fail to find that pre-undo context
+    - [undo] fix undo with duplicate-named sheets (#527)
+        - undo relies on cmdlog to track its actions
+        - cmdlog finds the operative sheet by the 'sheet' column by name
+            - (even though the undo always happens on that particular sheet anyway, perhaps there is a deeper fix)
+        - for sheets with the same name, this can screw up their undos
+        - so put the sheet itself in the 'sheet' column
+        - BaseSheet.__str__ return the sheet name
+        - and now the saver will work and the sheet will be unique
+    - [utils] Fix namedlist bug with column named after attrs (thanks @tsibley!)
+        - [utils] Fix namedlist bug with column named "length"
+            - Columns become attributes on the namedlist instance and a "length" column overwrote the namedlist.length() method. 
+            - This then broke namedlist.__init__() which calls .length().  Remove .length() and use the len() builtin instead directly on namedlist._fields.
+            - This re-fixes issue #344 for all SequenceSheets (tsv, csv, xls(x), fixed_width) and tests/column-name-length.vd now passes.
+            - The more general issue of column names conflicting with the namedlist implementation remains, and I'll try to address it in the next commit.
+        - [utils] Resolve namedlist implementation attrs over column name attrs
+            - Removes explicitly created @propertys for each column. 
+            - Instead, column name attributes will go through the class' __getattr__ and __setattr__ since they don't otherwise exist directly on the instance or class.
+            - These special methods are only called if the attribute doesn't exist, so implementation-required attributes like _fields and __name__ cannot be used as column name attributes.  This prevents crashes of vd when such column names exist in, for example, a csv file. 
+            - Columns can still bear those internal names, however, and be looked up by index on the
+    namedlist.
+            - The removed chunk of code appears to be from the original namedlist() implementation introduced 2½ years ago in "Restructure commandlog to remove movements" (8fb9e6a5). 
+            - About a year ago, the __get/setattr__ methods were added in "[vgit] many fixes in status and branches sheets" (8fc69a61).  I'm not sure why both ways of handling column name attributes were used, but I believe only one is necessary.
+            - An alternate solution could be to not use namedlist for user-provided data and remove its use in SequenceSheet.  It could still be used for hardcoded, vd-provided sheets.  This seemed liked a bigger change to the internals to me, so I didn't do it, but it is perhaps less fraught with peril in the long run.
+ 
+
+## Infrastructure / API
+    - [asyncsingle] ensure that unfinished threads decorated with @asyncsingle do not block upon sync()
+        - used so that domotd() and PluginsSheet().reload() do not block replay progression
+
 # v2.-3 (2020-03-09)
 
 ## Major changes
