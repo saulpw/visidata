@@ -7,7 +7,7 @@ class Extensible:
     _cache_clearers = []  # list of func() to call in clearCaches()
 
     @classmethod
-    def init(cls, membername, initfunc, copy=False):
+    def init(cls, membername, initfunc=lambda: None, copy=False):
         'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T[, copy=True])'
         oldinit = cls.__init__
         def newinit(self, *args, **kwargs):
