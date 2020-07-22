@@ -139,15 +139,23 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
 
     left_truncchar = right_truncchar = truncchar
 
-    def rfind_nonword(s, a, b):
-        if not s:
-            return 0
+    def find_nonword(s, a, b, incr):
+        if not s: return 0
+        a = min(max(a, 0), len(s)-1)
+        b = min(max(b, 0), len(s)-1)
 
-        while not s[b].isalnum() and b >= a:  # first skip non-word chars
-            b -= 1
-        while s[b].isalnum() and b >= a:
-            b -= 1
-        return b
+        if incr < 0:
+            while not s[b].isalnum() and b >= a:  # first skip non-word chars
+                b += incr
+            while s[b].isalnum() and b >= a:
+                b += incr
+            return min(max(b, 0), len(s))
+        else:
+            while not s[a].isalnum() and a < b:  # first skip non-word chars
+                a += incr
+            while s[a].isalnum() and a < b:
+                a += incr
+            return min(max(a, 0), len(s))
 
     while True:
         updater(v)
@@ -195,8 +203,13 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
-        elif ch == '^W':                           j = rfind_nonword(v, 0, i-1); v = v[:j+1] + v[i:]; i = j+1  # erase word
+        elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
         elif ch == '^Z':                           suspend()
+        # CTRL+arrow
+        elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
+        elif ch == 'kRIT5':                        i = find_nonword(v, i+1, len(v)-1, +1)+1; # word right
+        elif ch == 'kUP5':                         pass
+        elif ch == 'kDN5':                         pass
         elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
         elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
         elif ch.startswith('KEY_'):                pass
