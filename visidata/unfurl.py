@@ -28,7 +28,7 @@ class UnfurledSheet(Sheet):
         for row in Progress(self.source.rows):
             val = self.source_col.getValue(row)
 
-            if not isinstance(val, Iterable):
+            if not isinstance(val, Iterable) or isinstance(val, str):
                 val = [ val ]
 
             if isinstance(val, Mapping):
