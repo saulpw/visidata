@@ -213,7 +213,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == 'kDN5':                         pass
         elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
         elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
-        elif ch.startswith('KEY_'):                pass
+        elif len(ch) > 1:                          pass
         else:
             if first_action:
                 v = ''
