@@ -203,8 +203,9 @@ def main_vd():
             opts['filetype'] = current_args['filetype']
 
         vs = openSource(p, **opts)
-        for k, v in current_args.items():  # apply final set of args to sheets specifically #573
-            vs.options[k] = v
+        for k, v in current_args.items():  # apply final set of args to sheets specifically if not already set #573
+            if not vs.options.is_set(k):
+                vs.options[k] = v
 
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
