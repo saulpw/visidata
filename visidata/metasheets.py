@@ -96,9 +96,7 @@ class OptionsSheet(Sheet):
     nKeys = 1
 
     def diffOption(self, optname):
-        val = options.get(optname, self.source)
-        default = options.get(optname, 'global')
-        return val if val != default else ''
+        return options.getonly(optname, self.source, '')
 
     def editOption(self, row):
         currentValue = options.get(row.name, self.source)
