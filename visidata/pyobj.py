@@ -18,6 +18,7 @@ def _getWraparoundSlice(seq, n, center):
         return seq[start:end]
     return seq[start:] + seq[:end]
 
+@asyncthread
 def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'
     ret = []
@@ -31,7 +32,7 @@ def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill
     for col in cols:
         newcols = _addExpandedColumns(col, rows, sheet.columns.index(col))
         if depth != 1:  # countdown not yet complete, or negative (indefinite)
-            ret.extend(expand_cols_deep(sheet, newcols, rows, depth-1))
+            ret.extend(expand_cols_deep.__wrapped__(sheet, newcols, rows, depth-1))
     return ret
 
 @singledispatch
