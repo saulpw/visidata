@@ -204,7 +204,7 @@ def main_vd():
 
         vs = openSource(p, **opts)
         for k, v in current_args.items():  # apply final set of args to sheets specifically #573
-            vs.options.set(k, v, obj='override')
+            vs.options[k] = v
 
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
