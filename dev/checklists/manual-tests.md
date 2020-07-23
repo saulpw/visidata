@@ -43,6 +43,12 @@
         - check that --config selects which visidatarc to load
         - check that visidatarc can set plugin options
     - -w and others should be set "globally" (work without -g option)
+    - bin/vd -f xlsx sample_data/sample-sales-reps.xlsx -f json sample_data/y77d-th95.json.gz
+        - the xlsx sheet should have filetype 'xlsx'
+    - bin/vd sample_data/sample-sales-reps.xlsx -f xlsx
+        - `o` another file
+        - check that it loads
+        - check that it does not show 'xlsx' on its sheet-specific options
 13. Filetype
     - visidata should be able to detect filetype from extension
         - bin/vd sample_data/benchmark.csv
