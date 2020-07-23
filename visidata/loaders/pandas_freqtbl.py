@@ -174,4 +174,4 @@ PandasFreqTableSheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorD
 PandasFreqTableSheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', 'unselect rows grouped in current row in source sheet')
 PandasFreqTableSheet.addCommand(ENTER, 'dup-row', 'expand_source_rows(source, vd, cursorRow)', 'open copy of source sheet with rows that are grouped in current row')
 
-PandasFreqTableSheet.options.numeric_binning = False
+PandasFreqTableSheet.class_options.numeric_binning = False

@@ -95,4 +95,4 @@ Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet(sheet.name+"_cell_erro
 TextSheet.addCommand('^O', 'sysopen-sheet', 'sheet.sysopen(sheet.cursorRowIndex)', 'open copy of text sheet in $EDITOR and reload on exit')
 
 
-TextSheet.options.save_filetype = 'txt'
+TextSheet.class_options.save_filetype = 'txt'

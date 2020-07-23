@@ -160,5 +160,5 @@ def save_sqlite(vd, p, *vsheets):
     status("%s save finished" % p)
 
 
-SqliteSheet.options.header = 0
+SqliteSheet.class_options.header = 0
 VisiData.save_db = VisiData.save_sqlite
