@@ -2,70 +2,152 @@
 
 # v2.-4 (XXXX-XX-XX)
 
-at f536c71242d1a5e54b49579b14d2e4b9ca341de8
-
 ## Additions and Improvements
+    - [cmdlog] allow sheet-specific set-option for replay
+    - [columns] add default uppercase names for created columns
+        - these names are global; no default name is ever reused
     - [cosmetic] minor display improvement (#512)
     - [defer] move defermods back into vdcore
         - configure sqlite and DirSheet to use it
+    - [dir] allow explicit filetype for directories (Closes #546)
+    - [input] Ctrl+Left/Right move cursor to prev/next word
     - [errors] ErrorsSheet on `g Ctrl+E` lists errors, instead of concatenating
     - [expand-cols] account for all visible rows when expanding a column (#497 thanks @ajkerrigan!)
+    - [loaders csv] use `safe_error` for cell exceptions on save
     - [loaders hdf5] make column with object name a key column
         - fixes command line indexing for hdf5
+    - [loaders http] use file format in path if loader available (Thanks @jsvine for PR! #576)
+        - if not, fail back to MIME type (prev behaviour)
+        - Closes issue #531
     - [loaders imap] add loader for imap://
     - [loaders json] handle non-dict rows in json data (thanks @ajkerrigan!)
         - wrap non-dict values in a dict with a consistent key name, so they can be subsequently treated the same as dict rows
     - [loaders json] use `options.default_colname` for each addRow
+    - [loaders jsonl] show parse errors in every column
+    - [loaders MySQL] add support for MySQL loader (thanks Tobi Schafer for PR!)
+    - [loaders pandas] upgrade pandas to 1.0.3 (thanks @ajkerrigan)
+    - [loaders pandas] add .jsonl support (thanks @ajkerrigan)
+    - [loaders pandas] add auto-loaders for supported formats (Closes #460)
+        - feather gbq orc parquet pickle sas stata
     - [loaders pcap] update url for url_oui and url_iana (Addresses #494)
         - update to /plugins/pcap/
+    - [loaders pdf] add simple pdf loader
     - [loaders postgres] add support for connecting directly to rds (Thanks Daniel Brodie!)
         - the url has the following format: `rds://db_user@hostname:port/region/dbname`
         - it assumes that the AWS IAM for the user is configured properly
     - [loaders sqlite] add SqliteQuerySheet; change names of SqliteSheet to include db
+    - [loaders xls/xlsx] add save_xls and save_xlsx (thanks molley!)
     - [loaders yaml] have the yaml loader derive from json (thanks @ajkerrigan!)
         - have YamlSheet derive from JsonSheet rather than the base Sheet class.
         - this keeps consistency between the two loaders, which makes sense as YAML is a superset of JSON
         - since they both derive from PythonSheet, it also allows diving into YAML rows
+    - [loaders yaml] use the default safe YAML loader (thanks @tsibley for the PR!)
+        - the full loader is unsafe because serialized files can be constructed which run arbitrary code during their deserialization
+        - the safe loader supports a very large subset of YAML and supports the most common uses of YAML
+    - [loaders yaml] support files containing multiple documents (thanks @tsibley for PR!)
+        - the loader previously threw an exception when given a YAML file with multiple documents
+        - now it successfully loads the file, with each document presented as a row
+        - all other existing behaviour remains the same
+    - [options] set visidata_dir and config from `$VD_DIR` and `$VD_CONFIG` (as mentioned in #448)
+    - [settings] now raise Exception when requested option dne
+        - vd.error writes to status, even within try/except blocks. This makes it hard to efficiently check for the existence of an option which might not exist (see disp_x_fmt in _types.py)
+        - instead, support the standard behaviour for a __getitem__ which is to raise ValueError
+    - [type fmtstr] thousands separator (Closes #575)
+        - default for int/float is string.format for roundtripping accurately in data text files like csv
+        - if fmtstr starts with '%', use locale.format_string (with grouping)
+        - otherwise, use python string.format
+        - currency uses locale, and is grouped.
     - [quitguard] if set on specific sheet, only confirm quit on that sheet (#538)
         - add unbound guard-sheet command to set quitguard on current sheet
     - [undo] add undo for rename-col-x family
     - [undo] add undo to mouse slide
+    - [undo] add undo for reload-sheet (Closes #528)
     - [vls] move vls back into DirSheet
 
-## Command changes
+## Command changes and additions
+    - [add-column] now cursor moves to new column
+    - [add-columns] columns are now added in proper order
+    - [add-sheet] renamed to open-new; always 1 column
+    - [canvas] add resize-x/y-input commands to set x/y axis dimensions (Closes #403)
     - [config] bind `g Shift+O` back to open-config (#553)
     - [dive] convert many dive- commands to open- (#557)
         - add open-row bound to `ENTER` on Sheet itself
         - add `open-source` unbound on BaseSheet
         - deprecate `dive-*` longname
+    - [errors] add select-error-col and select-error (#402)
+    - [input] `Ctrl+Y` paste from cell clipboard
+    - [iota] add `i` family of commands (iota/increment)
+        - (former) setcol-range (`gz=`) renamed to `setcol-iter`
+        - `addcol-range-step` (`i`): add column with incremental value
+        - `secol-range` (`gi`): set current column for selected rows to incremental values
+        - `addcol-range-step` (`zi`): add column with incremenetal values times given step
+        - `setcol-range` (`gzi`): set current column for selected rows to incremental values times given step
     - [options] options-global now `Shift+O`; options-sheet now `z Shift+O`
+    - [mouse] add unbound `mouse-enable` and `mouse-disable` commands
     - [multi-line] have visibility toggle Multi-Line Row on TextSheets (Closes #513)
         - used to toggle `wrap`
+    - [unfurl-col] add command, which does row-wise expansion of iterables in a column (Closes #623)
+        - thanks @jsvine for name and initial implementation
 
 ## Options
+    - [cli] custom cli option parsing (Closes #573)
+        - `--options` apply as sheet-specific option overrides to the sources following them
+        - the last setting for a given option is the cli-given override setting (applies to all cli sources, unless they have the option already set)
+        - this allows both
+            - `vd -f csv foo.txt`
+            - `vd foo.txt -f csv`
+        - `--help` opens the manpage
+        - `-g` prefix sets globally for all sheets
+    - [cli] add --imports (default "plugins") (Closes #448)
+        - space-separated list of modules to import into globals before loading .visidatarc
+        - effectively does "from <module> import *" for each module
+        - default allows plugins to be installed by VisiData without modifying .visidatarc
     - [chooser] experimental `options.fancy_chooser`
         - when fancy_chooser enabled, aggregators and jointype are chosen with a ChoiceSheet.
         - press `ENTER` on any row to choose a single option, or select some rows, and press `ENTER` to choose the selectedrows
         - warning: the mechanism to do this effectively launches another instance of visidata, and so it is possible to get into an embedded state (if you jump around sheets, for example, instead of selecting). 'gq' should still work (thought `CTRL+Q` may need to be pressed several times).
+    - [dir] add `-r` alias for `--dir-recurse`
     - [join-cols] add `options.value_joiner` to combine cell values for join-col (#550)
     - [join-cols] add `options.name_joiner` to combine column names for join-col, and sheet names for dive-row (#550)
         - sheet names for join-sheets are still joined with '+' or '&' for the time being
+    - [loaders html] add `options.html_title` to exclude the sheetname when saving sheet as html table
+    - [loaders postgres] add support for custom postgres schema (Thanks Tobi Schafer for PR!)
+        - schema defaults to `public` but can be overriden using the `--postgres-schema` flag:
+        - `vd --postgres-schema=foo postgres://user:pw@localhost/foobar`
+    - [loaders zip] -f filetype now applies to inner files (Closes #523)
+    - [pyobj] add `options.expand_col_scanrows` to set the number of rows to check when expanding columns (0 = all)
+    - [type fmtstr] add fmtstr options for numerical types
+        - add options.disp_currency_fmt
+        - add options.disp_int_fmt
+        - add options.disp_date_fmt
 
 ## Plugins
+    - [dependencies] install plugin dependencies into vd dir (#448)
     - [diff] diff is now a plugin
         - `--diff` is not available as a cmdline argument anymore
     - [genericSQL] add plugin entry for genericSQL (thanks Andrew Swanson!)
     - [marks] add plugin for marking selected rows with a keystrokes, selecting marked rows, and viewing lists of marks, and their rows
     - [plugins.jsonl] rename bazaar.jsonl to plugins.jsonl
+    - [vfake 1.0] support optional deterministic fakes (thanks @ajkerrigan!)
+        - Use a per-value seed with customizable salt to support reproducible fake values
+    - [vds3 0.4] update for 2.0 compatibility
 
 ## Bugfixes
+    - [aggregators] fix error-raising typo in `z+` (thanks @jsvine for the PR!)
     - [cmdlog] do not record sheet for all 'open-' commands
         - Fix for case where Shift+D CommandLogs for, e.g. open-plugins, would not be replayable
     - [cmdlog] record keystrokes for command
         - Fixes bug where commands with bindings did not have their keystroke recorded
     - [cmdlog] do not log in gD the global cmdlog or internal sheets (Closes #510)
         - global cmdlog behaviour should be consistent with VisiData v1.5.2 cmdlog
+    - [draw] avoid errors drawing colhdr indicators on overlong column names
+    - [dirsheet] check if directory before grabbing filetype from ext (Closes #629)
+        - handles case where `.` in directory name
+    - [edit] TextSheet sysopen-sheet to open in `$EDITOR` (Closes #622)
+    - [helpsheet] do not include deprecated longnames (Closes #621)
     - [index] getRowIndexFromStr requires a rowstr (Closes #521)
+    - [index] startsheets can be blank to default to initial sheet (Closes #521)
+    - [input] flush input buffer upon consumption of editText() (Closes #585)
     - [layout] do not adjust column layout if cursor is on a key column (#508)
     - [join-cols] fix (Fixes #547)
     - [loaders csv] PEP 479 fix for csv loader (thanks @ajkerrigan!)
@@ -78,16 +160,23 @@ at f536c71242d1a5e54b49579b14d2e4b9ca341de8
         - html.escape expects arguments of type `<str>`
         - fixes bug where typed columns resulted in a stacktrace
     - [loaders html md] preserve formatting of display values when saving
+    - [loaders html] fix string formatting issue for the html table name when saving (thanks molley #566)
     - [loaders pandas] bugfixes for sort and modify (#496; thanks @ajkerrigan!)
         - Update sort() to handle column/reverse pairs in `self._ordering`.
         - Convert a dataframe's index from Int64Index to RangeIndex during a reload. Since RangeIndex is a special case subset of Int64Index, this guarantees a RangeIndex without requiring a full reset_index().
+    - [loaders pandas] fix row deletion + its undo (thanks @ajkerrigan!)
+    - [loaders pandas] improve regex select/unselect logic (thanks @ajkerrigan!)
+    - [loaders pandas] fix row selection/deselection (thanks @ajkerrigan!)
     - [loaders postgres] use urlparse on Path first
     - [loaders postgres] load an estimate of row numbers for improved performance (thanks Daniel Brodie for PR)
     - [loaders postgres] fix expand column to work on a json column in postgres (thanks Daniel Brodie for PR!)
     - [loaders postgres] add columns in postgres tables using addColumns (thanks Daniel Brodie for PR!)
         - see http://wiki.postgresql.org/wiki/Slow_Counting
+    - [loaders sqlite] handle TypedWrapper and Exceptions before committing to sql (Closes #570)
+    - [loaders sqlite] save display value if not supported sqlite type (Closes #570)
     - [loaders xml] correctly copy columns; fix path (#504)
     - [mouse] fix go-mouse to go to row 0 (#492)
+    - [numeric-binning] fix numeric-binning bug with currency type column
     - [path] avoid infinite recursion when `_path` does not have attr (Fixes #489)
         - previously assumed that every time vdPath does not have the attr, `_path` (pathlib.Path) would
         - when `_path` lacked the attr, AttributeError was not being raised
@@ -95,9 +184,14 @@ at f536c71242d1a5e54b49579b14d2e4b9ca341de8
     - [path] iter rstrip() newlines (#502)
     - [preplay] use sheet as context obj to getCommand
         - longnames were not being found
-    - [search] make moveRegex asynchronous
+    - [rstatus] fix for when error writing rstat when repeating a command with no keystrokes (Thanks @ajkerrigan for report #577)
+    - [save-sheets] fix saving multi-sheets as individual files to directory
+    - [settings] remove internal option defaults from cmdlog (Closes #426)
+        - sheet-specific defaults can be set (as in `SqliteSheet.options.header = 0`) without appearing as cmdlog
+        - loader-specific options can be forced in open_ and save_
     - [sheets_all] make opened .vd/.vdj precious
         - CommandLogs generated by Shift+D are not precious, but loaded data should be.
+    - [transpose] handle case where columns are numeric (Closes #631)
     - [undo] clear drawcache before moving to pre-undo context
         - if drawcaches are not cleared, VisiData could fail to find that pre-undo context
     - [undo] fix undo with duplicate-named sheets (#527)
@@ -128,6 +222,11 @@ at f536c71242d1a5e54b49579b14d2e4b9ca341de8
 ## Infrastructure / API
     - [asyncsingle] ensure that unfinished threads decorated with @asyncsingle do not block upon sync()
         - used so that domotd() and PluginsSheet().reload() do not block replay progression
+    - [currency] handle default currency() case
+        - calling int() and float() returns a default value; currency() should do so similar
+        - in the process, simplify currency() to be a function that returns a new float, instead of sub-classing float
+    - [open-] switch from vd.filetype to open_ext; deprecate vd.filetype
+    - [warnings] output Python warnings to status
 
 # v2.-3 (2020-03-09)
 
