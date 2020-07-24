@@ -1,4 +1,0 @@
-sheet	col	row	longname	input	keystrokes	comment
-			open-file	tests/issue350.json	o	
-issue350	season		addcol-expr	'%02dx%02d' % (season, episode)	=	
-issue350	'%02dx%02d' % (season, episode)		rename-col	episode	^	

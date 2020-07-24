@@ -1,6 +1,7 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	tests/issue350.json	o	
-issue350	season		addcol-expr	'%02dx%02d' % (season, episode)	=	
-issue350	'%02dx%02d' % (season, episode)		rename-col	episode	^	
-issue350	episode		addcol-expr	(rating, votes)	=	
-issue350	(rating, votes)		sort-desc		]	
+issue350	season		addcol-expr	episode	=	
+issue350	episode		rename-col	episode	^	
+issue350	1		slide-right		L	slide current column right
+issue350	2		cache-col		z'	add/reset cache for current column
+issue350	2		type-int		#	set type of current column to int

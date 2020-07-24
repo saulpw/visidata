@@ -1,4 +1,0 @@
-sheet	col	row	longname	input	keystrokes	comment
-			open-file	tests/issue350.json	o	
-issue350	season		addcol-expr	episode	=	
-issue350	episode		rename-col	episode	^	
