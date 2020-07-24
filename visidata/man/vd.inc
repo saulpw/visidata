@@ -231,6 +231,8 @@ add/reset cache for current/all visible column(s)
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic " )"
 unexpand current column; restore original column and remove other columns at this level
+.It Ic "zM"
+.No row-wise expand current column of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) within that column
 .El
 .Ss Row Selection
 .
@@ -323,12 +325,16 @@ reload initial value
 go to beginning/end of line
 .It Ic "^B  ^F"
 go back/forward one character
+.It Ic "^←  ^→" No (arrow)
+go back/forward one word
 .It Ic "^H  ^D"
 delete previous/current character
 .It Ic ^T
 transpose previous and current characters
 .It Ic "^U  ^K"
 clear from cursor to beginning/end of line
+.It Ic "^Y"
+paste from cell clipboard
 .It Ic "Backspace  Del"
 delete previous/current character
 .It Ic Insert
@@ -353,8 +359,8 @@ open
 .No save current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save Sy CommandLog No to Ar filename.vd No file
-.It Ic "A" Ar number
-.No open new blank sheet with Ar number No columns
+.It Ic "A"
+.No open new blank sheet with one column
 .It Ic "T"
 .No open new sheet that has rows and columns of current sheet transposed
 .Pp
@@ -386,6 +392,10 @@ increase/decrease zoom level, centered on cursor
 zoom to fit full extent
 .It Ic "z_" No (underscore)
 set aspect ratio
+.It Ic " x" Ar xmin xmax
+.No set Ar xmin Ns / Ns Ar xmax No on graph
+.It Ic " y" Ar ymin ymax
+.No set Ar ymin Ns / Ns Ar ymax No on graph
 .It Ic " s   t   u"
 select/toggle/unselect rows on source sheet contained within canvas cursor
 .It Ic "gs  gt  gu"
@@ -640,9 +650,11 @@ abort async threads for current/selected sheets(s)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Shift+O
+.No edit global options (apply to Sy all sheets Ns )
+.It Ic zO
 .No edit sheet options (apply to Sy current sheet No only)
 .It Ic gO
-.No edit global options (apply to Sy all sheets Ns )
+.No open Sy options.config No as Sy TextSheet No
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)

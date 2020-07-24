@@ -48,4 +48,4 @@ def unfurl_col(sheet, col, col_index):
     return vs
 
 
-Sheet.addCommand(None, "unfurl-col", "vd.push(unfurl_col(cursorCol, cursorColIndex))")
+Sheet.addCommand("zM", "unfurl-col", "vd.push(unfurl_col(cursorCol, cursorColIndex))", "row-wise expand current column of lists (e.g. [2]) or dicts (e.g. {3}) within that column")

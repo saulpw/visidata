@@ -156,5 +156,5 @@ def set_x(sheet, s):
     sheet.zoomTo(BoundingBox(xmin, sheet.visibleBox.ymin, xmax, sheet.visibleBox.ymax))
     sheet.refresh()
 
-Canvas.addCommand('y', 'resize-y-input', 'sheet.set_y(input("set ymin ymax="))')
-Canvas.addCommand('x', 'resize-x-input', 'sheet.set_x(input("set xmin xmax="))')
+Canvas.addCommand('y', 'resize-y-input', 'sheet.set_y(input("set ymin ymax="))', 'set ymin/ymax on graph axes')
+Canvas.addCommand('x', 'resize-x-input', 'sheet.set_x(input("set xmin xmax="))', 'set xmin/xmax on graph axes')
