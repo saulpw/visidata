@@ -79,18 +79,40 @@ class GraphSheet(InvertedCanvas):
         super().resetBounds()
         self.createLabels()
 
-    def add_y_axis_label(self, frac):
-        amt = self.visibleBox.ymin + frac*self.visibleBox.h
+    def moveToRow(self, rowstr):
+        ymin, ymax = map(float, map(self.parseY, rowstr.split()))
+        self.cursorBox.ymin = ymin
+        self.cursorBox.h = ymax-ymin
+        return True
+
+    def moveToCol(self, colstr):
+        xmin, xmax = map(float, map(self.parseX, colstr.split()))
+        self.cursorBox.xmin = xmin
+        self.cursorBox.w = xmax-xmin
+        return True
+
+    def formatX(self, amt):
+        return ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
+
+    def formatY(self, amt):
         srccol = self.ycols[0]
-        txt = srccol.format(srccol.type(amt))
+        return srccol.format(srccol.type(amt))
+
+    def parseX(self, txt):
+        return self.xcols[0].type(txt)
+
+    def parseY(self, txt):
+        return self.ycols[0].type(txt)
+
+    def add_y_axis_label(self, frac):
+        txt = self.formatY(self.visibleBox.ymin + frac*self.visibleBox.h)
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors.color_graph_axis
         self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
 
     def add_x_axis_label(self, frac):
-        amt = self.visibleBox.xmin + frac*self.visibleBox.w
-        txt = ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
+        txt = self.formatX(self.visibleBox.xmin + frac*self.visibleBox.w)
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors.color_graph_axis
@@ -146,13 +168,13 @@ InvertedCanvas.addCommand(None, 'resize-cursor-taller', 'sheet.cursorBox.h += ca
 
 @GraphSheet.api
 def set_y(sheet, s):
-    ymin, ymax = map(float, map(sheet.ycols[0].type, s.split()))
+    ymin, ymax = map(float, map(sheet.parseY, s.split()))
     sheet.zoomTo(BoundingBox(sheet.visibleBox.xmin, ymin, sheet.visibleBox.xmax, ymax))
     sheet.refresh()
 
 @GraphSheet.api
 def set_x(sheet, s):
-    xmin, xmax = map(float, map(sheet.xcols[0].type, s.split()))
+    xmin, xmax = map(float, map(sheet.parseX, s.split()))
     sheet.zoomTo(BoundingBox(xmin, sheet.visibleBox.ymin, xmax, sheet.visibleBox.ymax))
     sheet.refresh()
 

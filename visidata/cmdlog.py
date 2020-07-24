@@ -153,6 +153,18 @@ class _CommandLog:
             if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
+            if contains(cmd.execstr, 'plotterCursorBox'):
+                assert not colname and not rowname
+                bb = sheet.cursorBox
+                colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
+                rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
+            elif contains(cmd.execstr, 'plotterVisibleBox'):
+                assert not colname and not rowname
+                bb = sheet.visibleBox
+                colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
+                rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
+
+
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
         vd.activeCommand = self.newRow(sheet=sheetname,
                                             col=str(colname),
