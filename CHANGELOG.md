@@ -92,6 +92,8 @@
         - schema defaults to `public` but can be overriden using the `--postgres-schema` flag:
         - `vd --postgres-schema=foo postgres://user:pw@localhost/foobar`
     - [loaders zip] -f filetype now applies to inner files
+    - [mouse] add options.mouse_interval to control the max time between press/release for click (ms)
+        - set to 0 to disable completely
     - [pyobj] add `options.expand_col_scanrows` to set the number of rows to check when expanding columns (0 = all)
     - [type fmtstr] add fmtstr options for numerical types
         - add options.disp_currency_fmt

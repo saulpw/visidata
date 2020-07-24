@@ -10,7 +10,7 @@
 
     a. manpage;
 
-    b. visidata.org;
+    b. visidata.org; (formats?)
 
     c. CHANGELOG;
 

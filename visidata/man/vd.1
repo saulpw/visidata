@@ -1,4 +1,4 @@
-.Dd Mar 7, 2020
+.Dd July 23, 2020
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -195,7 +195,17 @@ set name of all visible columns to combined contents of current column for selec
 .No set current column for selected rows to the items in result of Python sequence Ar expr
 .It Ic " z=" Ar expr
 .No evaluate Python expression on current row and set current cell with result of Python Ar expr
+.Pp
+.It "  i" (iota)
+.No add column with incremental values
+.It " gi"
+.No set current column for selected rows to incremental values
+.It " zi" Ar step
+.No add column with values at incremenet Ar step
+.It "gzi" Ar step
+.No set current column for selected rows at increment Ar step
 .El
+.Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " '" Ns " (tick)"
 add a frozen copy of current column with all cells evaluated
@@ -221,6 +231,8 @@ add/reset cache for current/all visible column(s)
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic " )"
 unexpand current column; restore original column and remove other columns at this level
+.It Ic "zM"
+.No row-wise expand current column of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) within that column
 .El
 .Ss Row Selection
 .
@@ -252,10 +264,14 @@ select rows matching current row in all visible columns
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " [   ]"
-sort ascending/descending by current column
-.It Ic "g[  g]"
-sort ascending/descending by all key columns
+.It Ic "  [    ]"
+sort ascending/descending by current column; replace any existing sort criteria
+.It Ic " g[   g]"
+sort ascending/descending by all key columns; replace any existing sort criteria
+.It Ic " z[   z]"
+sort ascending/descending by current column; add to existing sort criteria
+.It Ic "gz[  gz]"
+sort ascending/descending by all key columns; add to existing sort criteria
 .It Ic " \&""
 open duplicate sheet with only selected rows
 .It Ic "g\&""
@@ -267,7 +283,7 @@ open duplicate sheet with deepcopy of selected rows
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a   za"
-append a blank row/column
+append a blank row/column; appended columns cannot be copied to clipboard
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
@@ -309,12 +325,16 @@ reload initial value
 go to beginning/end of line
 .It Ic "^B  ^F"
 go back/forward one character
+.It Ic "^\[u2190]  ^\[u2192]" No (arrow)
+go back/forward one word
 .It Ic "^H  ^D"
 delete previous/current character
 .It Ic ^T
 transpose previous and current characters
 .It Ic "^U  ^K"
 clear from cursor to beginning/end of line
+.It Ic "^Y"
+paste from cell clipboard
 .It Ic "Backspace  Del"
 delete previous/current character
 .It Ic Insert
@@ -339,8 +359,8 @@ open
 .No save current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save Sy CommandLog No to Ar filename.vd No file
-.It Ic "A" Ar number
-.No open new blank sheet with Ar number No columns
+.It Ic "A"
+.No open new blank sheet with one column
 .It Ic "T"
 .No open new sheet that has rows and columns of current sheet transposed
 .Pp
@@ -372,6 +392,10 @@ increase/decrease zoom level, centered on cursor
 zoom to fit full extent
 .It Ic "z_" No (underscore)
 set aspect ratio
+.It Ic " x" Ar xmin xmax
+.No set Ar xmin Ns / Ns Ar xmax No on graph
+.It Ic " y" Ar ymin ymax
+.No set Ar ymin Ns / Ns Ar ymax No on graph
 .It Ic " s   t   u"
 select/toggle/unselect rows on source sheet contained within canvas cursor
 .It Ic "gs  gt  gu"
@@ -420,7 +444,7 @@ scroll canvas
 .It Ic "Q"
 .No quit current sheet and remove it from the Sy CommandLog
 .It Ic "v"
-toggle sheet-specific visibility (multi-row on Sheet, legends/axes on Graph)
+toggle sheet-specific visibility (multi-line rows on Sheet, legends/axes on Graph)
 .Pp
 .Pp
 .It Ic " ^E  g^E"
@@ -626,9 +650,11 @@ abort async threads for current/selected sheets(s)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic Shift+O
+.No edit global options (apply to Sy all sheets Ns )
+.It Ic zO
 .No edit sheet options (apply to Sy current sheet No only)
 .It Ic gO
-.No edit global options (apply to Sy all sheets Ns )
+.No open Sy options.config No as Sy TextSheet No
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -660,10 +686,6 @@ replay command in current row
 replay contents of entire CommandLog
 .It Ic " ^C"
 abort replay
-.It Ic "z^D" Ar keystroke
-.No save selected rows to macro mapped to Ar keystroke
-.It ""
-.No Macros are saved to Sy .visidata/macro/command-longname.vd Ns . The list of macros is saved at Sy .visidata/macros.vd No (keystroke, filename).
 .El
 .
 .Ss DERIVED SHEETS
@@ -747,9 +769,7 @@ show/hide methods and hidden properties
 .Sh COMMANDLINE OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Cm -P Ns = Ns Ar longname
-.No preplay Ar longname No before replay or regular launch
-.It Cm --diff Ns = Ns Ar base
-.No add colorizer for all sheets against Ar base
+.No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
 .It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
 .Pp
@@ -766,6 +786,8 @@ overwrite existing files without confirmation
 .
 .El
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.It Sy --mouse-interval Ns = Ns Ar "int        " No "1"
+max time between press/release for click (ms)
 .It Sy --null-value Ns = Ns Ar "NoneType       " No "None"
 a value to be counted as null
 .It Sy --undo Ns = Ns Ar "bool                 " No "True"
@@ -802,6 +824,10 @@ cell note for an exception during computation
 cell note for an exception during type conversion
 .It Sy --scroll-incr Ns = Ns Ar "int           " No "3"
 amount to scroll with scrollwheel
+.It Sy --name-joiner Ns = Ns Ar "str           " No "_"
+string to join sheet or column names
+.It Sy --value-joiner Ns = Ns Ar "str          " No " "
+string to join display values
 .It Sy --wrap No "                      False"
 wrap text to fit window width on TextSheet
 .It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
@@ -827,10 +853,14 @@ replacement for newline character when saving to tsv
 replacement for tab character when saving to tsv
 .It Sy --visibility Ns = Ns Ar "int            " No "0"
 visibility level (0=low, 1=high)
+.It Sy --expand-col-scanrows Ns = Ns Ar "int   " No "1000"
+number of rows to check when expanding columns (0 = all)
 .It Sy --json-indent Ns = Ns Ar "NoneType      " No "None"
 indent to use when saving json
 .It Sy --json-sort-keys No "            False"
 sort object keys when saving to json
+.It Sy --default-colname Ns = Ns Ar "str       " No ""
+column name to use for non-dict rows
 .It Sy --filetype Ns = Ns Ar "str              " No ""
 specify file type
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
@@ -841,6 +871,8 @@ error string to use while saving
 command to copy stdin to system clipboard
 .It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No ""
 command to get contents of system clipboard
+.It Sy --fancy-chooser No "             False"
+a nicer selection interface for aggregators and jointype
 .It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
 numeric aggregators to calculate on Describe sheet
 .It Sy --histogram-bins Ns = Ns Ar "int        " No "0"
@@ -877,8 +909,16 @@ walk source path recursively on DirSheet
 load hidden files on DirSheet
 .It Sy --config Ns = Ns Ar "str                " No "~/.visidatarc"
 config file to exec in Python
+.It Sy --play Ns = Ns Ar "str                  " No ""
+.vd file to replay
+.It Sy --batch No "                     False"
+replay in batch mode (with no interface and all status sent to stdout)
+.It Sy --output Ns = Ns Ar "NoneType           " No "None"
+save the final visible sheet to output at the end of replay
 .It Sy --preplay Ns = Ns Ar "str               " No ""
 longnames to preplay before replay
+.It Sy --imports Ns = Ns Ar "NoneType          " No "None"
+imports to preload before .visidatarc (command-line only)
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
@@ -898,11 +938,15 @@ sanitize input/output to handle edge cases, with a performance cost
 number of rows to check for fixed width columns
 .It Sy --fixed-maxcols Ns = Ns Ar "int         " No "0"
 max number of fixed-width columns to create (0 is no max)
+.It Sy --postgres-schema Ns = Ns Ar "str       " No "public"
+The desired schema for the Postgres database
+.It Sy --html-title Ns = Ns Ar "str            " No "<h2>{sheet.name}</h2>"
+table header when saving to html
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
 (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
 .It Sy --graphviz-edge-labels Ns = Ns Ar "bool " No "True"
 whether to include edge labels on graphviz diagrams
-.It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/bazaar.jsonl"
+.It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/plugins.jsonl"
 source of plugins sheet
 .El
 .
@@ -913,8 +957,12 @@ source of plugins sheet
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy "disp_splitwin_pct  " No "0"
 height of second sheet on screen
-.It Sy "disp_float_fmt     " No "%.02f"
+.It Sy "disp_currency_fmt  " No "%.02f"
+default fmtstr to format for currency values
+.It Sy "disp_float_fmt     " No "{:.02f}"
 default fmtstr to format for float values
+.It Sy "disp_int_fmt       " No "{:.0f}"
+default fmtstr to format for int values
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
 default fmtstr to strftime for date values
 .It Sy "disp_note_none     " No "\[u2300]"
@@ -936,7 +984,9 @@ string to display in pending cells
 .It Sy "color_note_pending " No "bold magenta"
 color of note in pending cells
 .It Sy "color_note_type    " No "226 yellow"
-cell note for numeric types in anytype columns
+color of cell note for non-str types in anytype columns
+.It Sy "color_note_row     " No "220 yellow"
+color of row note on left edge
 .It Sy "disp_column_sep    " No "|"
 separator between columns
 .It Sy "disp_keycol_sep    " No "\[u2551]"
@@ -983,7 +1033,7 @@ color of key columns
 color of hidden columns on metasheets
 .It Sy "color_selected_row " No "215 yellow"
 color of selected rows
-.It Sy "disp_rstatus_fmt   " No "{sheet.nRows:9d} {sheet.rowtype} "
+.It Sy "disp_rstatus_fmt   " No " {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} "
 right-side status format string
 .It Sy "disp_status_fmt    " No "{sheet.shortcut}\[u203A] {sheet.name}| "
 status line prefix
@@ -1031,10 +1081,12 @@ color of legend for hidden attribute
 color of selected graph points
 .It Sy "color_graph_axis   " No "bold"
 color for graph axis labels
-.It Sy "color_diff         " No "red"
-color of values different from --diff source
-.It Sy "color_diff_add     " No "yellow"
-color of rows/columns added to --diff source
+.It Sy "color_add_pending  " No "green"
+color for rows pending add
+.It Sy "color_change_pending" No "reverse yellow"
+color for cells pending modification
+.It Sy "color_delete_pending" No "red"
+color for rows pending delete
 .It Sy "color_xword_active " No "green"
 color of active clue
 .El
@@ -1122,6 +1174,8 @@ These are the supported sources:
 .Pp
 .Bl -inset -compact -offset xxx
 .It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
+.Bl -inset -compact -offset xxx
+.It Uses the safe YAML loader, which supports the most common uses of YAML.
 .El
 .Pp
 .Bl -inset -compact -offset xxx
