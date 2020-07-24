@@ -175,7 +175,7 @@ def main_vd():
         options.set(k, v, obj='override')
 
     for k, v in current_args.items():
-        opt = options._get(optname)
+        opt = options._get(k)
         if opt and opt.sheettype is None:
             options.set(k, v, obj='override')
 
@@ -189,7 +189,7 @@ def main_vd():
         vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
 
-    for cmd in args.preplay or []:
+    for cmd in (args.preplay or '').split():
         BaseSheet('').execCommand(cmd)
 
     if not args.play:
