@@ -274,8 +274,8 @@ def replayOne(vd, r):
         longname = getattr(r, 'longname', None)
         if longname == 'set-option':
             try:
-                if vs:
-                    vs.options[r.row] = r.input
+                if r.col:
+                    options.set(r.row, r.input, r.col)
                 else:
                     options[r.row] = r.input
 
