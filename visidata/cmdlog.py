@@ -142,7 +142,7 @@ class _CommandLog:
             self.afterExecSheet(sheet, False, '')
 
         colname, rowname, sheetname = '', '', None
-        if sheet and not cmd.longname.startswith('open-'):
+        if sheet and not (cmd.longname.startswith('open-') and cmd.longname != 'open-row'):
             sheetname = sheet
 
             contains = lambda s, *substrs: any((a in s) for a in substrs)
