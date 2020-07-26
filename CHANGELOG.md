@@ -60,7 +60,7 @@
         - (former) setcol-range (`gz=`) renamed to `setcol-iter`
         - `addcol-range-step` (`i`): add column with incremental value
         - `secol-range` (`gi`): set current column for selected rows to incremental values
-        - `addcol-range-step` (`zi`): add column with incremenetal values times given step
+        - `addcol-range-step` (`zi`): add column with incremental values times given step
         - `setcol-range` (`gzi`): set current column for selected rows to incremental values times given step
     - [mouse] add unbound `mouse-enable` and `mouse-disable` commands
     - [quitguard add unbound `guard-sheet` command to set quitguard on current sheet (thanks jsvine for feature request #538)
