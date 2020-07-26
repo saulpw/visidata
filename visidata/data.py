@@ -7,6 +7,7 @@ from visidata import Sheet, Column, asyncthread, Progress, status, error
 from visidata import *
 
 option('filetype', '', 'specify file type', replay=True)
+option('iota_base', 1, 'start value for incremental columns', replay=True)
 
 
 def _default_colnames():
@@ -19,8 +20,8 @@ def _default_colnames():
 
 vd.default_colnames = _default_colnames()
 
-def frange(n, step):
-    yield from (x*step for x in range(n))
+def frange(start, stop, step):
+    yield from (x*step for x in range(start, stop))
 
 def num(s):
     try:
@@ -271,9 +272,9 @@ Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cu
 
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
 
-Sheet.addCommand('i', 'addcol-range', 'c=SettableColumn(type=int); addColumn(c, cursorColIndex+1); c.setValues(rows, *range(nRows))', 'add column with incremental values')
-Sheet.addCommand('gi', 'setcol-range', 'cursorCol.setValues(selectedRows, *range(sheet.nSelected))', 'set current column for selected rows to incremental values')
-Sheet.addCommand('zi', 'addcol-range-step', 'n=num(input("interval step: ")); c=SettableColumn(type=type(n)); addColumn(c, cursorColIndex+1); c.setValues(rows, *frange(nRows, n))', 'add column with incremental values times given step')
-Sheet.addCommand('gzi', 'setcol-range-step', 'n=num(input("interval step: ")); cursorCol.setValues(selectedRows, *frange(nSelected, n))', 'set current column for selected rows to incremental values times given step')
+Sheet.addCommand('i', 'addcol-range', 'c=SettableColumn(type=int); addColumn(c, cursorColIndex+1); c.setValues(rows, *range(options.iota_base, nRows + options.iota_base))', 'add column with incremental values')
+Sheet.addCommand('gi', 'setcol-range', 'cursorCol.setValues(selectedRows, *range(options.iota_base, sheet.nSelected + options.iota_base))', 'set current column for selected rows to incremental values')
+Sheet.addCommand('zi', 'addcol-range-step', 'n=num(input("interval step: ")); c=SettableColumn(type=type(n)); addColumn(c, cursorColIndex+1); c.setValues(rows, *frange(options.iota_base, nRows + options.iota_base, n))', 'add column with incremental values times given step')
+Sheet.addCommand('gzi', 'setcol-range-step', 'n=num(input("interval step: ")); cursorCol.setValues(selectedRows, *frange(options.iota_base, nSelected + options.iota_base, n))', 'set current column for selected rows to incremental values times given step')
 
 globalCommand('A', 'open-new', 'vd.push(vd.newSheet(1, name="unnamed"))', 'open new blank sheet')
