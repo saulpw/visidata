@@ -144,7 +144,9 @@ class OptionsObject:
         return self._opts.set(k, Option(k, v, helpstr), obj)
 
     def is_set(self, k, obj=None):
-        return self._get(k, obj=obj or self._obj)
+        d = self._opts.get(k, None)
+        if d:
+            return d.get(self._opts.objname(obj), None)
 
     def get(self, k, obj=None):
         return self._get(k, obj).value
