@@ -201,7 +201,7 @@ set name of all visible columns to combined contents of current column for selec
 .It " gi"
 .No set current column for selected rows to incremental values
 .It " zi" Ar step
-.No add column with values at incremenet Ar step
+.No add column with values at increment Ar step
 .It "gzi" Ar step
 .No set current column for selected rows at increment Ar step
 .El
