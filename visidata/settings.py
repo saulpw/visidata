@@ -180,7 +180,7 @@ class OptionsObject:
                 v = t(v)
 
             if curval != v and self._get(k, 'global').replayable:
-                if vd.cmdlog and obj != 'global':  # options set on init aren't recorded
+                if vd.cmdlog and obj != 'global' and type(obj) is not type:  # options set on init aren't recorded
                     vd.set_option(vd.cmdlog, k, v, obj)
         else:
             curval = None
