@@ -104,6 +104,10 @@
     - [dependencies] install plugin dependencies into vd dir (thanks @tsibley for feature request #448)
     - [diff] diff is now a plugin
         - `--diff` is not available as a cmdline argument anymore
+    - [vds3] bumped to 0.4 (@ajkerrigan)
+    - [marks] initial release 0.1; marks selected rows with a keystroke; utils for selecting + viewing marked rows (@saulpw)
+    - [genericSQL] initial release (1.0); basic loader for MySQL (Oracle, MySQL) (@aswanson)
+    - [diff] is now a plugin (@saulpw)
 
 ## Bugfixes
     - [cmdlog] fix case where CommandLog `open-` entries would not be replayable
