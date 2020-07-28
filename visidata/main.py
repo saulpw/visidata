@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.-4'
+__version__ = '2.-5dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
