@@ -146,9 +146,11 @@ def show_aggregate(col, agg, rows):
     vd.status(dispval)
 
 
-aggregator_choices = [
-    {'key': agg, 'desc': v[0].helpstr if isinstance(v, list) else v.helpstr} for agg, v in aggregators.items()
-]
+@VisiData.property
+def aggregator_choices(vd):
+    return [
+       {'key': agg, 'desc': v[0].helpstr if isinstance(v, list) else v.helpstr} for agg, v in aggregators.items()
+    ]
 
 addGlobals(globals())
 
