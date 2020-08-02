@@ -13,6 +13,7 @@ class Hdf5ObjSheet(Sheet):
         if isinstance(self.source, Path):
             source = h5py.File(str(self.source), 'r')
 
+        self.columns = []
         if isinstance(source, h5py.Group):
             self.rowtype = 'sheets'
             self.columns = [
@@ -26,11 +27,13 @@ class Hdf5ObjSheet(Sheet):
                 yield Hdf5ObjSheet(subname, source=v)
         elif isinstance(source, h5py.Dataset):
             if len(source.shape) == 1:
-                self.columns = [ColumnItem(colname, colname) for colname in source.dtype.names or [0]]
+                for i, colname in enumerate(source.dtype.names or [0]):
+                    self.addColumn(ColumnItem(colname, colname), i)
                 yield from source  # copy
             elif len(source.shape) == 2:  # matrix
                 ncols = source.shape[1]
-                self.columns = [ColumnItem('', i, width=8) for i in range(ncols)]
+                for i in range(ncols):
+                    self.addColumns(ColumnItem('', i, width=8), i)
                 self.recalc()
                 yield from source  # copy
             else:
