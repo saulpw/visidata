@@ -59,7 +59,7 @@ Some examples of great bug reports:
 ## Submitting Source Code
 
 Code in `plugins/` or `visidata/loaders/` is welcome, as long as it is useful to someone and safe for everyone.
-Updates or additions to the core code should be proposed via an [Github Issue]() before submitting a PR.
+Updates or additions to the core code should be proposed via an [Github Issue](https://github.com/saulpw/visidata/issues/new/choose) before submitting a PR.
 
 VisiData has two main branches:
 
