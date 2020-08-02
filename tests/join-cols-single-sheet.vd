@@ -1,5 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
-	sample	header	set-option	0		
+		name_joiner	set-option	+		
 			open-file	sample_data/sample.tsv	o	
 sample			columns-sheet		C	open Columns Sheet: edit column properties for current sheet
 sample_columns		キRegion	select-row		s	select current row

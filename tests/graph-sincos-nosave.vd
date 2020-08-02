@@ -2,7 +2,7 @@ sheet	col	row	longname	input	keystrokes	comment
 graph-sincos-nosave_vd			add-sheet	1	A	open new blank sheet with number columns
 unnamed			add-rows	360	ga	add N blank rows
 unnamed			select-rows		gs	
-unnamed	0		setcol-range	range(360)	gz=	set selected rows in this column to the values in the given Python sequence expression
+unnamed	0		setcol-iter	range(360)	gz=	set selected rows in this column to the values in the given Python sequence expression
 unnamed			unselect-rows		gu	
 unnamed	0		rename-col	xdeg	^	edit name of current column
 unnamed	xdeg		type-int		#	set type of current column to int

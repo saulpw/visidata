@@ -1,2 +1,2 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/co3.dta	open file
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/co3.dta	o	open file

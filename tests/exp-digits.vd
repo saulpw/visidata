@@ -1,9 +1,10 @@
 sheet	col	row	longname	input	keystrokes	comment
+		incr_base	set-option	0		
 exp-digits_vd			open-new	1	A	open new blank sheet with number columns
 unnamed	0		rename-col	x	^	edit name of current column
 unnamed			add-rows	100	ga	add N blank rows
 unnamed			select-rows		gs	
-unnamed	x		setcol-range		gi	set selected rows in this column to the values in the given Python sequence expression
+unnamed	x		setcol-incr		gi	set selected rows in this column to the values in the given Python sequence expression
 unnamed			unselect-rows		gu	
 unnamed			exec-python	import math	g^X	execute Python statement in the global scope
 unnamed	x		type-int		#	set type of current column to int
