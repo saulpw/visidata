@@ -1,36 +1,46 @@
 # Contributing
 
-*Adapted from [ziglang's CONTRIBUTING.md](https://github.com/ziglang/zig/blob/master/CONTRIBUTING.md)*
+## Spread the Word
+
+The single best way you can contribute, is to share your enthusiasm about VisiData with other people.
+A vibrant community is essential to its sustainable development.
+
+However, direct and forceful promotion is probably not the most effective approach for a tool like VisiData.
+People generally need to be exposed several times and from several sources before they will try some terminal utility they've never heard of before.
+
+Some people are interested, but are daunted by the installation process or the interface; you can [help them get it installed](/install), and provide a few pointers to get started.
+Don't make it too complicated or overload them with too many features.
+Stick to the basics: arrow keys, quit, help, search, sort, freq table.
+
+We also need people to mention VisiData in their forums and communities that relate to data and terminal programs.
+Don't spam or do a drive-by promotion; these are largely ineffective and will often be received negatively.
+Endorsements have more weight from people who actively post about other relevant topics; we don't want to become the "VisiData Brigade".
+
+Finally, if you are on "Web 2.social", you can post a [tweet](https://twitter.com/visidata) or a [tutorial]() or a [demo](https://www.youtube.com/watch?v=N1CBDTgGtOU) or a [host a workshop](), or anything else you think might make people interested in exploring the wonderful world of VisiData.
+
+## Support on Patreon
+
+If VisiData saves you time on a regular basis, and especially if VisiData makes your paid work easier, please contribute to [my Patreon](https://www.patreon.com/saulpw).
 
 ## Start a Project Using VisiData
 
-One of the best ways you can contribute to VisiData is to start building loaders or plugins. Here are some great examples:
+If you know Python and want to augment it to suit your own workflow, you can create a loader or a plugin.  Here are some great examples:
 
     - [jsvine's custom visidata plugins](https://github.com/jsvine/visidata-plugins)
     - [layertwo's pcap loader](https://github.com/saulpw/visidata/blob/develop/visidata/loaders/pcap.py)
-    - [vls](https://github.com/saulpw/visidata/blob/develop/vsh/vls)
 
-Without fail, these projects lead to discovering bugs and help flesh out the API, which result in design improvements in VisiData. Importantly, each issue found this way comes with real world motivations, so it is easy to explain your reasoning behind proposals and core feature requests.
+Without fail, these projects lead to discovering bugs and help flesh out the API, which result in design improvements in VisiData.
+Importantly, each issue found this way comes with real world motivations, so it is easy to explain your reasoning behind proposals and core feature requests.
 
 ## Feature Requests
 
-VisiData is designed to be extensible, and most feature requests can be implemented as a small plugin.
+VisiData is designed to be extensible, and most feature requests can be implemented as a one line command, or a tiny snippet of code to include in a `.visidatarc`.
+
 If this would require changes to the VisiData core, and a reasonable design is approved, then the issue can stay open until the core changes have been made.
 Otherwise, in the spirit of Marie Kondo, the issue will be closed without prejudice.
 
 Feature requests with some amount of working Python code are more likely to get attention.
 Design proposals with concrete use cases are very welcome.
-
-## Spread the Word
-
-Another way to contribute is to write about VisiData, host a workshop, or speak about VisiData at a conference. Here are some examples:
-
-    - [jsvine's Introduction to VisiData](https://jsvine.github.io/intro-to-visidata/index.html)
-    - [aborruso tweeted](https://twitter.com/aborruso/status/1152161585835728896)
-    - [VisiData Workshop hosted in London]()
-    - [saulpw gave a lightning talk](https://www.youtube.com/watch?v=N1CBDTgGtOU)
-
-VisiData is an ambitious, niche project, with no advertising budget. Word of mouth is the only way people find out about it, and the more people hear about it, the more people will use it, and the more the ecosystem will develop.
 
 ## Writing a well constructed bug report
 
@@ -45,14 +55,11 @@ Some examples of great bug reports:
     - [#350 by @chocolateboy](https://github.com/saulpw/visidata/issues/350)
     - [#340 by @Mikee-3000](https://github.com/saulpw/visidata/issues/340)
 
-## Money
 
-If VisiData has saved you time and effort, please contribute to [my Patreon](https://www.patreon.com/saulpw).
+## Submitting Source Code
 
-## Editing source code
-
-Code in /plugins or visidata/loaders is welcome, as long as it is useful to someone and safe for everyone.
-Major updates or additions to the core code should be proposed via an Issue before submitting a PR.
+Code in `plugins/` or `visidata/loaders/` is welcome, as long as it is useful to someone and safe for everyone.
+Updates or additions to the core code should be proposed via an [Github Issue]() before submitting a PR.
 
 VisiData has two main branches:
 
@@ -61,10 +68,12 @@ VisiData has two main branches:
 
 All pull requests should be submitted against `develop`.
 
-## Open Source License and Copyright
-VisiData is an open-source tool that can be installed and used for free (under the terms of the [GPL3](https://www.gnu.org/licenses/gpl-3.0.en.html)).
+# Open Source License and Copyright
+
+VisiData is an open-source utility that can be installed and used for free (under the terms of the [GPL3](https://www.gnu.org/licenses/gpl-3.0.en.html)).
 
 The core VisiData utility and rendering library will always be both free and libre.
 
-Plugins (and loaders and apps) retain the copyright of the contributing authors, as maintained in the `__author__` metadata. All plugins must have the licensing terms compatible with GPL3.
-The copyright for all other code in VisiData is assigned to [Saul Pwanson <vd@saul.pw>](mailto:vd@saul.pw).
+As the copyright holder, Saul Pwanson has the authority to negotiate other license terms.
+
+**By submitting changes to this repository, you acknowledge that you assign copyright to the owner of the repository ([Saul Pwanson <vd@saul.pw>](mailto:vd@saul.pw)).**
