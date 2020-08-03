@@ -1,8 +1,8 @@
 ---
 name: Feature request
 about: Provide feedback on how you want VisiData to grow in the future.
-title: '[wishlist] '
-labels: feature request
+title: '[] '
+labels: wishlist
 assignees: ''
 
 ---
