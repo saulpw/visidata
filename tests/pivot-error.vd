@@ -6,4 +6,4 @@ test	amt		type-float		%
 test	qty		aggregate-col	sum	+	
 test	key1		key-col		!	
 test	key2		pivot		W	
-test_pivot_key2	key1		sort-desc		]	
+test_pivot_key2_sum	key1		sort-desc		]	
