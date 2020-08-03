@@ -110,7 +110,7 @@ class LazyComputeRow:
         self._keys = [c.name for c in self.sheet.columns]
 
     def keys(self):
-        return self._keys + self.sheet._lcm.keys()
+        return self._keys + self.sheet._lcm.keys() + ['row', 'sheet']
 
     def __str__(self):
         return str(self.as_dict())
@@ -136,8 +136,10 @@ class LazyComputeRow:
             try:
                 return self.sheet._lcm[colid]
             except (KeyError, AttributeError):
-                if colid in ['row', 'sheet']:
-                    return getattr(self, colid)   # finally, handle 'row' and 'sheet' fake columns
+                if colid == 'row':
+                    return self
+                elif colid == 'sheet':
+                    return self.sheet
                 raise KeyError(colid)
 
 class BasicRow(collections.defaultdict):
