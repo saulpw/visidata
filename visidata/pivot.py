@@ -9,7 +9,7 @@ from visidata import *
 PivotGroupRow = collections.namedtuple('PivotGroupRow', 'discrete_keys numeric_key sourcerows pivotrows'.split())
 
 def Pivot(source, groupByCols, pivotCols):
-    return PivotSheet(source.name+'_pivot_'+''.join(c.name for c in pivotCols),
+    return PivotSheet('',
             groupByCols,
             pivotCols,
             source=source)
@@ -139,8 +139,12 @@ class PivotSheet(Sheet):
 
                         if len(aggregatorlist) > 1 or len(aggcols) > 1:
                             colname = '%s_%s' % (aggname, valname)
+                            if not self.name:
+                                self.name = self.source.name+'_pivot_'+''.join(c.name for c in self.pivotCols)
                         else:
                             colname = valname
+                            if not self.name:
+                                self.name = self.source.name+'_pivot_'+''.join(c.name for c in self.pivotCols) + '_' + aggname
 
                         c = Column(colname,
                                     type=aggregator.type or aggcol.type,

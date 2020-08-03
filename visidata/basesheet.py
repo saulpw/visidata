@@ -153,7 +153,7 @@ class BaseSheet(Extensible):
     @property
     def name(self):
         try:
-            return self._name or '_'.join((self.source.name, self.rowtype))
+            return self._name
         except AttributeError:
             return self.rowtype
 
