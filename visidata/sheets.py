@@ -102,7 +102,7 @@ class LazyComputeRow:
         self.row = row
         self.sheet = sheet
         if not hasattr(self.sheet, '_lcm'):
-            self.sheet._lcm = LazyChainMap(sheet)
+            self.sheet._lcm = LazyChainMap(sheet, vd)
         else:
             self.sheet._lcm.clear()  # reset locals on lcm
 
