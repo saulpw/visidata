@@ -183,6 +183,11 @@ class BaseSheet(Extensible):
     def reload(self):
         vd.error('no reload')
 
+    @property
+    def cursorRow(self):
+        'The row object at the row cursor.  Overrideable.'
+        return None
+
     def checkCursor(self):
         'Check cursor and fix if out-of-bounds.  Overrideable.'
         pass
