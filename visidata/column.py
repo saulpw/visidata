@@ -19,10 +19,11 @@ class InProgress(Exception):
 INPROGRESS = TypedExceptionWrapper(None, exception=InProgress())  # sentinel
 
 option('col_cache_size', 0, 'max number of cache entries in each cached column')
-option('force_valid_colnames', False, 'clean column names to be valid Python identifiers', replay=True)
+option('clean_names', False, 'clean column/sheet names to be valid Python identifiers', replay=True)
 
 __all__ = [
     'clean_to_id',
+    'maybe_clean',
     'Column',
     'setitem',
     'getattrdeep',
@@ -52,6 +53,13 @@ class DisplayWrapper:
 
     def __eq__(self, other):
         return self.value == other
+
+
+def maybe_clean(s, vs):
+    if (vs or vd).options.clean_names:
+        s = re.sub(r'[^\w\d_]', '_', s)  # replace non-alphanum chars with _
+        s = re.sub(r'_+', '_', s)  # replace runs of _ with a single _
+    return s
 
 
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
@@ -107,9 +115,10 @@ class Column(Extensible):
             name = ''
         if isinstance(name, str):
             name = name.strip()
-        if options.force_valid_colnames:
-            name = clean_to_id(name)
-        self._name = str(name)
+        else:
+            name = str(name)
+
+        self._name = maybe_clean(name, self.sheet)
 
     @property
     def type(self):

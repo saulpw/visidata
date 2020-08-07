@@ -73,6 +73,7 @@ optalias('w', 'replay_wait')
 optalias('d', 'delimiter')
 optalias('c', 'config')
 optalias('r', 'dir_recurse')
+optalias('force_valid_colnames', 'clean_names')  # deprecated
 
 
 def main_vd():
