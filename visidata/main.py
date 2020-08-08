@@ -115,7 +115,6 @@ def main_vd():
             flGlobal = not flGlobal  # can toggle within the same command
         elif arg[0] == '-':
             optname = arg.lstrip('-')
-            optname = optname.replace('-', '_')
             optval = None
             try:
                 optname, optval = optname.split('=', maxsplit=1)
@@ -123,6 +122,7 @@ def main_vd():
             except Exception:
                 pass
 
+            optname = optname.replace('-', '_')
             optname = option_aliases.get(optname, optname)
 
             if optval is None:
