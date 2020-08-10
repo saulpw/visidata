@@ -1,5 +1,10 @@
 # VisiData version history
 
+# v2.-5 (XXXX-XX-XX)
+
+## deprecated
+- complete removal of `status` and `statuses` from deprecated
+
 # v2.-4 (XXXX-XX-XX)
 
 ## Additions and Improvements
