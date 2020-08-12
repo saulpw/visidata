@@ -9,11 +9,11 @@
 - e. User input (OptionsSheet) overrides currently at the 'override' layer.
 - f. These layers may apply to any of these settings.  This is the resolution order (the first applicable layer is used):
 
-   0. user sheet-specific override (with `O` in 1.3)
+   0. user sheet-specific override (with `Shift+O` in 1.3)
    1. current sheet instance
    2. current sheet type
    3. current sheet parent types
-   4. in session via meta-sheet (with `gO`)
+   4. in session via meta-sheet (with `g Shift+O`)
    5. command line (options only, applied on top of the overrides in .visidatarc)
    6. .visidatarc  (associated object is string 'override')
    7. global defaults  (associated object is string 'default')
@@ -25,9 +25,9 @@
 - b. `bindkey(keystrokes, longname)` creates global default keybinding (used when nothing else overrides it)
 - c. `<Sheet>.addCommand()` (which has identical interface to a) sets the command on the sheet type (Id5) if <Sheet> is a SheetType, or on the sheet instance (Id4) if <Sheet> is an instance.
 - d. `<Sheet>.bindkey()` does the same as (c) but for keybindings.
-- e. `gD` to get to macros sheet to edit macro keybindings.
-- f. `g^H` can add/edit keybindings for all commands on all sheets (Id1, not impl yet)
-- g. `z^H` for list of sheet-specific commands (not global or on Sheet)
+- e. `g Shift+D` to get to macros sheet to edit macro keybindings.
+- f. `g Ctrl+H` can add/edit keybindings for all commands on all sheets (Id1, not impl yet)
+- g. `z Ctrl+H` for list of sheet-specific commands (not global or on Sheet)
 - h. Commands are identified by longname, and have a default keybinding.  Use None for no default.
 - i. Command lists can be gotten by:
     - `commands`: dict of [Sheet] -> dict of [longname] -> Command for all commands for all sheets
@@ -37,11 +37,11 @@
 
 ## III. Options
 
-- a. `gO` (options-all) goes to sheet of all options at all layers for all sheet types (Id1)
-- b. `O` (options-sheet) goes to sheet of all options for the current sheet
+- a. `g Shift+O` (options-all) goes to sheet of all options at all layers for all sheet types (Id1)
+- b. `Shift+O` (options-sheet) goes to sheet of all options for the current sheet
     - set 'value' to have it apply to only the current sheet
     - set 'default' to have it apply to all sheets of this type
-- c. `zO` (options-specific) goes to sheet of options that are particular to this sheet (not global or on Sheet)
+- c. `z Shift+O` (options-specific) goes to sheet of options that are particular to this sheet (not global or on Sheet)
 - d. `option(optname, default, helpstr)` adds a global option
 - e. Option settings are rejected if they cannot be converted to the type of the default value.  None allows anytype.
 - f. cmdlog sets options with command=`option`, input='value', row='my_option'

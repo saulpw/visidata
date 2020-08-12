@@ -57,7 +57,7 @@ vd file.xlsx --header=0
 
 ###### How to rename headers using the Columns sheet
 
-1. Press `C` to open the **Columns sheet**.
+1. Press `Shift+C` to open the **Columns sheet**.
 2. Within the **name** column, move the cursor to the row which represents the source sheet.
 3. Type `e` and then input *the new column name*. Press `Enter`.
 4. Press `q` to return to the source sheet and see the renamed column.

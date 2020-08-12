@@ -15,8 +15,8 @@ Examples of **SheetType**s include (but are not limited to):
 
 Within the application itself:
 
-* Press `zO` to access the **Options sheet** for the current **SheetType**.
-* Press `O` to access the global **Options sheet**.
+* Press `z Shift+O` to access the **Options sheet** for the current **SheetType**.
+* Press `Shift+O` to access the global **Options sheet**.
 
 An option can be edited either by pressing `Enter` or by using [standard editing commands](/man#edit).
 
@@ -102,11 +102,11 @@ The **.visidatarc** in the user's home directory is plain Python code, and can c
 
 Longnames are names given to particular flavours of executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, this longname is bound to the keystroke `s`.
 
-From within VisiData, type `z^H` to open the **Commands Sheet**. This is a reference for all of the commands available on the current sheet. For a deeper exploration of commands, check out [the book of VisiData](https://github.com/saulpw/visidata-book/blob/master/commands.md).
+From within VisiData, type `z Ctrl+H` to open the **Commands Sheet**. This is a reference for all of the commands available on the current sheet. For a deeper exploration of commands, check out [the book of VisiData](https://github.com/saulpw/visidata-book/blob/master/commands.md).
 
 ### Setting/changing keybindings for existing commands
 
-1. Use `zCtrl+H` to open the **Commands Sheet** and discover the [longname]() for the functionality in question.
+1. Use `z Ctrl+H` to open the **Commands Sheet** and discover the [longname]() for the functionality in question.
 
 2. a) To create a global keybinding, add `bindkey(keystroke, longname)` to your **.visidatarc**.
 b) To set the binding for a particular sheet type, add `<Sheet>.bindkey(keystroke, longname)` to your **.visidatarc**, where `<Sheet>` is a **SheetType**.

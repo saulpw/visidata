@@ -61,7 +61,7 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
 
 ## How to filter a random subset of rows
 
-1. Type `R` followed by the *number* of rows you wish included in your random population sample.
+1. Type `Space` `random-rows` followed by the *number* of rows you wish included in your random population sample.
 
 ---
 
@@ -77,14 +77,14 @@ Command(s)         Operation
 
 1. Press `d`/`y` to delete/yank the row and move it to the clipboard.
 2. Move the cursor to the desired location.
-3. Press `p`/`P` to paste the row after/before current row.
+3. Press `p`/`Shift+P` to paste the row after/before current row.
 
 ###### How to cut/copy and paste multiple rows
 
 1. Press `s`/`t` on those rows to select them.
 2. Press `gd`/`gy` to cut/yank all selected rows to the clipboard.
 3. Move the cursor to the desired location.
-3. Press `p`/`P` to paste those rows after/before current row.
+3. Press `p`/`Shift+P` to paste those rows after/before current row.
 
 ---
 

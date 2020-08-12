@@ -21,7 +21,7 @@ Commands(s)     Operation
 
 **or**
 
-1. Press `C` on the source sheet to open its **Columns sheet**.
+1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
 3. Move the cursor down to the row which represents the column you wish to hide.
 4. Press `e` followed by `0` to set the width for that column to **0**.
@@ -29,7 +29,7 @@ Commands(s)     Operation
 
 ###### How to unhide columns
 
-1. Press `C` on the source sheet to open its **Columns sheet**.
+1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
 3. Move the cursor down to the row which represents the column you wish to unhide. Currently, that cell should contain the value **0**.
 4. Press `e` followed by a *positive number* to set the width.
@@ -60,7 +60,7 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
 
 ###### How to batch specify column types for more than one column
 
-1. Press `C` to open the **Columns sheet**.
+1. Press `Shift+C` to open the **Columns sheet**.
 2. Press `s` or `t` to select the rows referencing the columns you wish to type.
 3. Type `g` followed by the any of the above typing keystrokes to set the type for all selected columns on the source sheet.
 
@@ -95,7 +95,7 @@ The default for currency uses `locale.format_string()`. The default for int/floa
 ###### How to format a specific numeric columns to contain a thousands separator within a session?
 
 1. Set a column to a numeric type by pressing `#` (int), `%` (float), or `$` (currency).
-2. Press `C` to open the **Columns Sheet**.
+2. Press `Shift+C` to open the **Columns Sheet**.
 3. Move to the row referencing the column whose display you wish to format. Move the cursor to the fmtstr column.
 4. Type `e` followed by *{:,.0f}* for an `int` type and *{:,.02f}* for a floating point type.
 
@@ -115,7 +115,7 @@ vd --disp-date-fmt='%m/%d/%Y'
 
 or set in the **Options Sheet**.
 
-1. Press `O` to open the **Options Sheet**.
+1. Press `Shift+O` to open the **Options Sheet**.
 2. Move the cursor down to the relevant *disp_date_fmt* option.
 3. Type `e` followed by *%m/%d/%Y*.
 ---
@@ -192,7 +192,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 ## How to configure multiple columns
 
-Properties of columns on the source sheet can be changed by using [standard editing commands](/man#edit) on its **Columns sheet** (accessed with `C`). In particular, it facilitates the selection of multiple columns, followed by utilising one of the `g`-prefixed commands to modify all of them.
+Properties of columns on the source sheet can be changed by using [standard editing commands](/man#edit) on its **Columns sheet** (accessed with `Shift+C`). In particular, it facilitates the selection of multiple columns, followed by utilising one of the `g`-prefixed commands to modify all of them.
 
 For a full list of available commands, see the [man page](/man#columns). Some example workflows follow.
 
@@ -204,15 +204,15 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 1. Set the type of the **Units** column by pressing `#` (int).
 2. Set the type of the **Total** column by pressing `%` (float).
-3. Press `C` to open the **Columns sheet**.
+3. Press `Shift+C` to open the **Columns sheet**.
 4. Press `s` or `t` on the rows referencing the source sheet **Units** column and the **Total** column to select them.
 5. Type `g+` followed by `avg` to add a **avg** statistical aggregator to the selected rows.
 6. Press `q` to exit and return to the source sheet.
-7. Scroll to the **Item** column. Press `F` to open the **Frequency table**.
+7. Scroll to the **Item** column. Press `Shift+F` to open the **Frequency table**.
 
 **Question** What are the daily average and sum total number of **Units** sold for each **Item**?
 
-1. Press `C` to open the **Columns sheet**.
+1. Press `Shift+C` to open the **Columns sheet**.
 2. Move the cursor to the row referencing the source sheet **Units** column.
 
     a. Press `s` or `t` to select it.
@@ -221,6 +221,6 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
     d. Type `e` to enter edit mode, followed by *sum avg*.
 
 3. Press `q` to exit and return to the source sheet.
-4. Move the cursor to the **Item** column. Press `F` to open the **Frequency table**.
+4. Move the cursor to the **Item** column. Press `Shift+F` to open the **Frequency table**.
 
 ---

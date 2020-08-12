@@ -43,7 +43,7 @@ This example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw
 1. Press `!` on the independent variable to set it as a key column.
 2. Press `+` on a second column to add an *aggregrate*. This configures which column is to be composed in relation to others.
 3. Optional: Set the type for the column being aggregated by pressing `~` (string), `#` (int), `%` (float), `$` (currency), or `@` (date).
-4. Press `W` on the dependent categorical variable to pivot on it.
+4. Press `Shift+W` on the dependent categorical variable to pivot on it.
 
 ---
 
@@ -56,7 +56,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 **Question** How many of each **Item** were sold?
 
 1. Move the cursor to the **Item** column.
-2. Press `F` to open the **Frequency table**.
+2. Press `Shift+F` to open the **Frequency table**.
 
 ###### How to use the Frequency table to view the results of statistical aggregation
 
@@ -67,7 +67,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 3. On the **OrderDate_re0** column, type `^` followed by `OrderDate` to rename it.
 4. On the **Total** column, press `$` to set its type to currency.
 5. Type `+` followed by `sum` to add a statistical aggregator to **Total**.
-6. On the **OrderDate** column type `F` to open the **Frequency table**.
+6. On the **OrderDate** column type `Shift+F` to open the **Frequency table**.
 7. On the **OrderDate** column, press `[` to sort the table in chrononological order.
 8. On the **sum_Total** column, type `^` followed by `Revenue` to rename the column.
 
@@ -75,7 +75,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 ## How to calculate some descriptive statistics
 
-1. Press `I` to open the **Describe sheet**.
+1. Press `Shift+I` to open the **Describe sheet**.
 
 ---
 
@@ -83,26 +83,26 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 ###### How to filter for grouped rows
 
-1. Press `F` to open the **Frequency table**.
+1. Press `Shift+F` to open the **Frequency table**.
 2. Press `s` or `t` on the groups you are interested in to select those entries in the source sheet.
 3. Press `q` or `Ctrl+^` to return to the source sheet.
 4. Press `"` to open a duplicate sheet with selected rows.
 
 **or**
 
-1. Press `F` to open the **Frequency table**.
+1. Press `Shift+F` to open the **Frequency table**.
 2. Press `Enter` on the grouping you are interested in to open a sheet of the source rows that are part of that group.
 
 ###### How to filter for described rows
 
-1. Press `I` to open the **Describe sheet**.
+1. Press `Shift+I` to open the **Describe sheet**.
 2. Use `zs` to select rows on source sheet which are being described in the cells of interest.
 3. Press `q` or `Ctrl+^` to return to the source sheet.
 4. Press `"` to open a duplicate sheet with selected rows.
 
 **or**
 
-1. Press `I` to open the **Describe sheet**.
+1. Press `Shift+I` to open the **Describe sheet**.
 2. Press `zEnter` open copy of source sheet with rows being described in the current cell of interest.
 
 ###### How to filter for the rows aggregated in a pivot table
@@ -134,5 +134,5 @@ C               4;5
 in VisiData.
 
 1. On the **value** column, type `+` followed by `list` to add to it a list aggregator.
-2. Press `F` on the **field** column to open the **Frequency table**.
+2. Press `Shift+F` on the **field** column to open the **Frequency table**.
 3. Type `=` followed by `';'.join(value_list)` to add an expression column with the joined values.

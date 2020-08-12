@@ -91,7 +91,7 @@ To load files from within a VisiData session, press `o` and enter a filepath.
 
 ## Accessing other loaded or derived sheets
 
-1. Press `S` to open the **Sheets sheet**.
+1. Press `Shift+S` to open the **Sheets sheet**.
 2. Move the cursor to the row containing the desired sheet.
 3. Press `Enter` to jump to the sheet referenced in that current cursor row.
 
