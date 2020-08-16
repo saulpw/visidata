@@ -20,7 +20,7 @@ def toggleWidth(self, width):
 @Column.api
 def toggleVisibility(self):
     if self.height == 1:
-        self.height = 10
+        self.height = options.default_height
     else:
         self.height = 1
 

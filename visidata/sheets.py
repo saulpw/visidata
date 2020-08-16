@@ -13,6 +13,7 @@ __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSh
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
+option('default_height', 10, 'default column height')
 option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
 option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
