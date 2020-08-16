@@ -155,10 +155,20 @@ Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(
 
 Sheet.addCommand(None, 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right')
 Sheet.addCommand(None, 'go-left-page', 'pageLeft()', 'scroll cursor one page left')
-Sheet.addCommand('zh', 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
-Sheet.addCommand('zl', 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
+Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
+Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')
 Sheet.addCommand(None, 'scroll-rightmost', 'tmp = cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColIndex = tmp', 'scroll sheet to rightmost column')
+
+Sheet.addCommand('zl', 'scroll-cells-right', 'cursorCol.hoffset += cursorCol.width-2', 'scroll display of current column to the right')
+Sheet.addCommand('zh', 'scroll-cells-left', 'cursorCol.hoffset -= cursorCol.width-2', 'scroll display of current column to the left')
+Sheet.addCommand('gzl', 'scroll-cells-rightmost', 'cursorCol.hoffset = -cursorCol.width+1', 'scroll display of current column to the end')
+Sheet.addCommand('gzh', 'scroll-cells-leftmost', 'cursorCol.hoffset = 0', 'scroll display of current column to the beginning')
+
+Sheet.addCommand('zj', 'scroll-cells-down', 'cursorCol.voffset += 1', 'scroll display of current column down one line')
+Sheet.addCommand('zk', 'scroll-cells-up', 'cursorCol.voffset -= 1', 'scroll display of current column up one line')
+Sheet.addCommand('gzj', 'scroll-cells-bottom', 'cursorCol.voffset = -1', 'scroll display of current column to the bottom')
+Sheet.addCommand('gzk', 'scroll-cells-top', 'cursorCol.voffset = 0', 'scroll display of current column to the top')
 
 Sheet.addCommand(None, 'go-end',  'sheet.cursorRowIndex = len(rows)-1; sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to last row and last column')
 Sheet.addCommand(None, 'go-home', 'sheet.topRowIndex = sheet.cursorRowIndex = 0; sheet.leftVisibleColIndex = sheet.cursorVisibleColIndex = 0', 'go to first row and first column')
@@ -167,8 +177,6 @@ BaseSheet.bindkey('CTRL-BUTTON4_PRESSED', 'scroll-left')
 BaseSheet.bindkey('CTRL-REPORT_MOUSE_POSITION', 'scroll-right')
 BaseSheet.bindkey('CTRL-2097152', 'scroll-right')
 
-BaseSheet.bindkey('zk', 'scroll-up')
-BaseSheet.bindkey('zj', 'scroll-down')
 BaseSheet.bindkey('zKEY_UP', 'scroll-up')
 BaseSheet.bindkey('zKEY_DOWN', 'scroll-down')
 BaseSheet.bindkey('zKEY_LEFT', 'scroll-left')

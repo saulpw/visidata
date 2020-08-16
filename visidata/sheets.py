@@ -740,7 +740,7 @@ class TableSheet(BaseSheet):
                     except (TypeError, ValueError):
                         pass
 
-                    if col.height > 1:
+                    if col.voffset or col.height > 1:
                         lines = splitcell(cellval.display, width=colwidth-2)
                     else:
                         lines = [cellval.display]
@@ -759,6 +759,8 @@ class TableSheet(BaseSheet):
                     if vcolidx not in self._visibleColLayout:
                         continue
                     x, colwidth = self._visibleColLayout[vcolidx]
+                    hoffset = col.hoffset
+                    voffset = col.voffset
 
                     cattr = self._colorize(col, row, cellval)
                     cattr = update_attr(cattr, basecellcattr)
@@ -768,10 +770,17 @@ class TableSheet(BaseSheet):
                         notecattr = update_attr(cattr, colors.get_color(cellval.notecolor), 10)
                         clipdraw(scr, ybase, x+colwidth-len(note), note, notecattr.attr)
 
+                    if voffset >= 0:
+                        if len(lines)-voffset > height:
+                            # last line should always include as much as possible
+                            firstn = sum(len(i)+1 for i in lines[:voffset+height-1])
+                            lines = lines[:voffset+height]
+                            lines[-1] = cellval.display[firstn:][:col.width]
+
+                    lines = lines[voffset:]
+
                     if len(lines) > height:
-                        firstn = sum(len(i)+1 for i in lines[:height-1])
-                        lines[height-1] = cellval.display[firstn:]
-                        del lines[height:]
+                        lines = lines[:height]
                     elif len(lines) < height:
                         lines.extend(['']*(height-len(lines)))
 
@@ -809,7 +818,7 @@ class TableSheet(BaseSheet):
                                 else:
                                     sepchars = midsep
 
-                        clipdraw(scr, y, x, (disp_column_fill if colwidth > 2 else '')+line, cattr.attr, w=colwidth-(1 if note else 0))
+                        clipdraw(scr, y, x, (disp_column_fill if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-(1 if note else 0))
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:

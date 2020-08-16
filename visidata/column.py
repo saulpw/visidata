@@ -81,6 +81,8 @@ class Column(Extensible):
         self.getter = lambda col, row: row
         self.setter = lambda col, row, value: vd.fail(col.name+' column cannot be changed')
         self.width = None     # == 0 if hidden, None if auto-compute next time
+        self.hoffset = 0      # starting horizontal (char) offset of displayed column value
+        self.voffset = 0      # starting vertical (line) offset of displayed column value
         self.height = 1       # max height, None/0 to auto-compute for each row
         self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
