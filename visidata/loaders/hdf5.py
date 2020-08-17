@@ -23,8 +23,7 @@ class Hdf5ObjSheet(Sheet):
             ]
             self.recalc()
             for k, v in source.items():
-                subname = joinSheetnames(self.name, k)
-                yield Hdf5ObjSheet(subname, source=v)
+                yield Hdf5ObjSheet(self.name, k, source=v)
         elif isinstance(source, h5py.Dataset):
             if len(source.shape) == 1:
                 for i, colname in enumerate(source.dtype.names or [0]):

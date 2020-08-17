@@ -9,7 +9,7 @@ TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
 
-__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet', 'joinSheetnames']
+__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
 
 
 option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
@@ -68,11 +68,6 @@ theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
 theme('color_selected_row', '215 yellow', 'color of selected rows')
 option('name_joiner', '_', 'string to join sheet or column names')
 option('value_joiner', ' ', 'string to join display values')
-
-
-def joinSheetnames(*sheetnames):
-    'Concatenate sheet names in a standard way'
-    return options.name_joiner.join(str(x) for x in sheetnames)
 
 
 def splitcell(s, width=0):
@@ -165,8 +160,8 @@ class TableSheet(BaseSheet):
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
-    def __init__(self, name='', **kwargs):
-        super().__init__(name=name, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.rows = UNLOADED      # list of opaque row objects (UNLOADED before first reload)
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
@@ -247,12 +242,12 @@ class TableSheet(BaseSheet):
     def openRow(self, row):
         k = self.keystr(row) or [self.cursorRowIndex]
         name = f'{self.name}[{k}]'
-        return vd.load_pyobj(name, tuple(c.getTypedValue(row) for c in self.visibleCols))
+        return vd.load_pyobj(name, source=tuple(c.getTypedValue(row) for c in self.visibleCols))
 
     def openCell(self, col, row):
         k = self.keystr(row) or [str(self.cursorRowIndex)]
         name = f'{self.name}.{col.name}[{k}]'
-        return vd.load_pyobj(name, col.getTypedValue(row))
+        return vd.load_pyobj(name, source=col.getTypedValue(row))
 
     @drawcache_property
     def colsByName(self):

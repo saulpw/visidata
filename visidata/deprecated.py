@@ -57,6 +57,13 @@ def filetype(vd, ext, constructor):
     'Add constructor to handle the given file type/extension.'
     globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p,name, source=p, filetype=ext))
 
+@deprecated('2.0')
+@VisiData.global_api
+def joinSheetnames(vd, *sheetnames):
+    'Concatenate sheet names in a standard way'
+    return visidata.options.name_joiner.join(str(x) for x in sheetnames)
+
+
 # The longnames on the left are deprecated for 2.0
 
 alias('edit-cells', 'setcol-input')

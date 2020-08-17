@@ -21,7 +21,7 @@ class XlsxIndexSheet(IndexSheet):
         import openpyxl
         self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
         for sheetname in self.workbook.sheetnames:
-            vs = XlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook[sheetname])
+            vs = XlsxSheet(self.name, sheetname, source=self.workbook[sheetname])
             vs.reload()
             yield vs
 
@@ -47,7 +47,7 @@ class XlsIndexSheet(IndexSheet):
         import xlrd
         self.workbook = xlrd.open_workbook(str(self.source))
         for sheetname in self.workbook.sheet_names():
-            vs = XlsSheet(joinSheetnames(self.name, sheetname), source=self.workbook.sheet_by_name(sheetname))
+            vs = XlsSheet(self.name, sheetname, source=self.workbook.sheet_by_name(sheetname))
             vs.reload()
             yield vs
 

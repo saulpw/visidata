@@ -8,7 +8,7 @@ option('expand_col_scanrows', 1000, 'number of rows to check when expanding colu
 
 class PythonSheet(Sheet):
     def openRow(self, row):
-        return load_pyobj("%s[%s]" % (self.name, self.keystr(row)), row)
+        return load_pyobj("%s[%s]" % (self.name, self.keystr(row)), source=row)
 
 def _getWraparoundSlice(seq, n, center):
     '''Return a slice of length n from a sequence, centered around a given index'''
@@ -122,31 +122,32 @@ def closeColumn(sheet, col):
 
 #### generic list/dict/object browsing
 def push_pyobj(name, pyobj):
-    vs = load_pyobj(name, pyobj)
+    vs = load_pyobj(name, source=pyobj)
     if vs:
         return vd.push(vs)
     else:
         error("cannot push '%s' as pyobj" % type(pyobj).__name__)
 
 def view(obj):
-    run(load_pyobj(getattr(obj, '__name__', ''), obj))
+    run(load_pyobj(getattr(obj, '__name__', ''), source=obj))
 
 @VisiData.global_api
-def load_pyobj(vd, name, pyobj):
+def load_pyobj(vd, *names, **kwargs):
     'Return Sheet object of appropriate type for given sources in `args`.'
+    pyobj=kwargs['source']
     if isinstance(pyobj, list) or isinstance(pyobj, tuple):
         if getattr(pyobj, '_fields', None):  # list of namedtuple
-            return SheetNamedTuple(name, pyobj)
+            return SheetNamedTuple(*names, **kwargs)
         else:
-            return SheetList(name, pyobj)
+            return SheetList(*names, **kwargs)
     elif isinstance(pyobj, dict):
-        return SheetDict(name, source=pyobj)
+        return SheetDict(*names, **kwargs)
     elif isinstance(pyobj, str):
-        return TextSheet(name, source=pyobj.splitlines())
+        return TextSheet(*names, source=pyobj.splitlines())
     elif isinstance(pyobj, bytes):
-        return TextSheet(name, source=pyobj.decode(options.encoding).splitlines())
+        return TextSheet(*names, source=pyobj.decode(options.encoding).splitlines())
     elif isinstance(pyobj, object):
-        return PyobjSheet(name, source=pyobj)
+        return PyobjSheet(*names, **kwargs)
     else:
         error("cannot load '%s' as pyobj" % type(pyobj).__name__)
 
@@ -236,7 +237,7 @@ class SheetNamedTuple(PythonSheet):
         self.rows = list(zip(self.source._fields, self.source))
 
     def openRow(self, row):
-        return load_pyobj(joinSheetnames(self.name, row[0]), row[1])
+        return load_pyobj(self.name, row[0], source=row[1])
 
 
 # source is dict
@@ -252,7 +253,7 @@ class SheetDict(PythonSheet):
         self.rows = list(self.source.keys())
 
     def openRow(self, row):
-        return load_pyobj(joinSheetnames(self.name, row), self.source[row])
+        return load_pyobj(self.name, row, source=self.source[row])
 
 
 class ColumnSourceAttr(Column):
@@ -293,7 +294,7 @@ class PyobjSheet(PythonSheet):
     def openRow(self, row):
         'dive further into Python object'
         v = getattr(self.source, row)
-        return load_pyobj(self.name + "." + str(row), v() if callable(v) else v)
+        return load_pyobj(self.name + "." + str(row), source=v() if callable(v) else v)
 
 
 globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, None))', 'evaluate Python expression and open result as Python object')

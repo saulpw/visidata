@@ -87,9 +87,7 @@ Here is an extremely simple sheet that shows a list of all global variables with
 
 
 Notes:
-- `Sheet.__init__(name, *sources, **kwargs)` sets the name and sources, as well as adding kwargs as extra attributes for convenience.
-- source = sources[0]
-   - having an internal concept of source/sources is maybe too complicated.  It does allow a dependency graph to be made, which might come in useful when we start doing code generation.
+- `Sheet.__init__(*names, **kwargs)` joins the names with `options.name_joiner`, and other kwargs besides `source` may be provided for convenience.
 - columns are set in reload, because they require the sheet's context, for the source dict, to be bound to the lambda.  [Future: setter=lambda col,row,val: col.sheet.source[row] ]
 - The structure of the row objects is so important that I have taken to including a 'rowdef' comment above every sheet, describing what kind of object each row is.
 - The getters are passed into the Column init kwargs directly.  The default getter is the identity function, so the 'key' getter is actually unnecessary.

@@ -53,9 +53,9 @@ class BaseSheet(Extensible):
     def options(self):
         return vd.OptionsObject(vd._options, obj=self)
 
-    def __init__(self, name='', **kwargs):
+    def __init__(self, *names, **kwargs):
         self._name = None
-        self.name = name
+        self.name = self.options.name_joiner.join(str(x) for x in names)
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
