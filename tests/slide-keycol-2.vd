@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	OrderDate		key-col		!	toggle current column as a key column
+sample	Region		key-col		!	toggle current column as a key column
+sample	Rep		key-col		!	toggle current column as a key column
+sample	OrderDate		slide-rightmost		gL	slide current column all the way to the right of sheet

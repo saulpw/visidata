@@ -1,0 +1,44 @@
+Region	OrderDate	Rep	Item	Units	Unit_Cost	Total
+East	2016-01-06	Jones	Pencil	95	1.99	189.05
+Central	2016-01-23	Kivell	Binder	50	19.99	999.50
+Central	2016-02-09	Jardine	Pencil	36	4.99	179.64
+Central	2016-02-26	Gill	Pen	27	19.99	539.73
+West	2016-03-15	Sorvino	Pencil	56	2.99	167.44
+East	2016-04-01	Jones	Binder	60	4.99	299.40
+Central	2016-04-18	Andrews	Pencil	75	1.99	149.25
+Central	2016-05-05	Jardine	Pencil	90	4.99	449.10
+West	2016-05-22	Thompson	Pencil	32	1.99	63.68
+East	2016-06-08	Jones	Binder	60	8.99	539.40
+Central	2016-06-25	Morgan	Pencil	90	4.99	449.10
+East	2016-07-12	Howard	Binder	29	1.99	57.71
+East	2016-07-29	Parent	Binder	81	19.99	1619.19
+East	2016-08-15	Jones	Pencil	35	4.99	174.65
+Central	2016-09-01	Smith	Desk	2	125.00	250.00
+East	2016-09-18	Jones	Pen Set	16	15.99	255.84
+Central	2016-10-05	Morgan	Binder	28	8.99	251.72
+East	2016-10-22	Jones	Pen	64	8.99	575.36
+East	2016-11-08	Parent	Pen	15	19.99	299.85
+Central	2016-11-25	Kivell	Pen Set	96	4.99	479.04
+Central	2016-12-12	Smith	Pencil	67	1.29	86.43
+East	2016-12-29	Parent	Pen Set	74	15.99	1183.26
+Central	2017-01-15	Gill	Binder	46	8.99	413.54
+Central	2017-02-01	Smith	Binder	87	15.00	1305.00
+East	2017-02-18	Jones	Binder	4	4.99	19.96
+West	2017-03-07	Sorvino	Binder	7	19.99	139.93
+Central	2017-03-24	Jardine	Pen Set	50	4.99	249.50
+Central	2017-04-10	Andrews	Pencil	66	1.99	131.34
+East	2017-04-27	Howard	Pen	96	4.99	479.04
+Central	2017-05-14	Gill	Pencil	53	1.29	68.37
+Central	2017-05-31	Gill	Binder	80	8.99	719.20
+Central	2017-06-17	Kivell	Desk	5	125.00	625.00
+East	2017-07-04	Jones	Pen Set	62	4.99	309.38
+Central	2017-07-21	Morgan	Pen Set	55	12.49	686.95
+Central	2017-08-07	Kivell	Pen Set	42	23.95	1005.90
+West	2017-08-24	Sorvino	Desk	3	275.00	825.00
+Central	2017-09-10	Gill	Pencil	7	1.29	9.03
+West	2017-09-27	Sorvino	Pen	76	1.99	151.24
+West	2017-10-14	Thompson	Binder	57	19.99	1139.43
+Central	2017-10-31	Andrews	Pencil	14	1.29	18.06
+Central	2017-11-17	Jardine	Binder	11	4.99	54.89
+Central	2017-12-04	Jardine	Binder	94	19.99	1879.06
+Central	2017-12-21	Andrews	Binder	28	4.99	139.72
