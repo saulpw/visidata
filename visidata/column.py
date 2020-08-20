@@ -6,7 +6,7 @@ import re
 import time
 
 from visidata import option, options, anytype, stacktrace, vd
-from visidata import getType, typemap, isNumeric, isNullFunc
+from visidata import isNumeric, isNullFunc
 from visidata import asyncthread, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc
@@ -138,7 +138,7 @@ class Column(Extensible):
 
     @property
     def fmtstr(self):
-        return self._fmtstr or getType(self.type).fmtstr
+        return self._fmtstr or vd.getType(self.type).fmtstr
 
     @fmtstr.setter
     def fmtstr(self, v):
@@ -156,7 +156,7 @@ class Column(Extensible):
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
-        return getType(self.type).formatter(self.fmtstr, typedval)
+        return vd.getType(self.type).formatter(self.fmtstr, typedval)
 
     def hide(self, hide=True):
         if hide:
@@ -267,7 +267,7 @@ class Column(Extensible):
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str:
-                typedesc = typemap.get(type(cellval), None)
+                typedesc = vd.typemap.get(type(cellval), None)
                 if typedesc:
                     dw.note = typedesc.icon
                     dw.notecolor = 'color_note_type'

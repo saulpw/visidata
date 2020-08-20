@@ -6,7 +6,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
 from visidata import (options, theme, isNullFunc, isNumeric, Column, option, namedlist,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
-vd, getType, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
+vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
@@ -598,7 +598,7 @@ class TableSheet(BaseSheet):
         x, colwidth = self._visibleColLayout[vcolidx]
 
         # AnameTC
-        T = getType(col.type).icon
+        T = vd.getType(col.type).icon
         if T is None:  # still allow icon to be explicitly non-displayed ''
             T = '?'
 

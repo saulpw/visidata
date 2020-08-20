@@ -4,9 +4,9 @@ import collections
 import functools
 import datetime
 import locale
-from visidata import option, options, TypedWrapper, vd
+from visidata import option, options, TypedWrapper, vd, VisiData
 
-#__all__ = ['anytype', 'vdtype', 'typemap', 'getType', 'typemap']
+#__all__ = ['anytype', 'vdtype', ]
 
 option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency values', replay=True)
 option('disp_float_fmt', '{:.02f}', 'default fmtstr to format for float values', replay=True)
@@ -57,15 +57,16 @@ class VisiDataType:
         self.key = key
 
         if typetype:
-            typemap[typetype] = self
+            vd.typemap[typetype] = self
 
 vdtype = VisiDataType
 
 # typemap [vtype] -> VisiDataType
-typemap = {}
+vd.typemap = {}
 
-def getType(typetype):
-    return typemap.get(typetype) or VisiDataType()
+@VisiData.api
+def getType(vd, typetype):
+    return vd.typemap.get(typetype) or VisiDataType()
 
 vdtype(None, '∅')
 vdtype(anytype, '', formatter=lambda _,v: str(v))

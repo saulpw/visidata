@@ -59,7 +59,7 @@ class PivotSheet(Sheet):
                 newcol = RangeColumn(c.name, origcol=c, width=c.width and c.width*2, getter=lambda c,r: r.numeric_key)
             else:
                 newcol = Column(c.name, width=c.width, fmtstr=c.fmtstr,
-                                  type=c.type if c.type in typemap else anytype,
+                                  type=c.type if c.type in vd.typemap else anytype,
                                   origcol=c,
                                   getter=lambda col,row,i=colnum: row.discrete_keys[i],
                                   setter=lambda col,row,val,i=colnum: setitem(row.discrete_keys, i, val) and col.origcol.setValues(row.sourcerows, val))
