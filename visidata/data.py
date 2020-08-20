@@ -100,8 +100,8 @@ def updateColNames(sheet, rows, cols, overwrite=False):
 
 
 @VisiData.api
-def newSheet(vd, ncols, **kwargs):
-    return Sheet(columns=[SettableColumn() for i in range(ncols)], **kwargs)
+def newSheet(vd, name, ncols, **kwargs):
+    return Sheet(name, columns=[SettableColumn() for i in range(ncols)], **kwargs)
 
 
 def inputFilename(prompt, *args, **kwargs):
@@ -146,7 +146,7 @@ def openPath(vd, p, filetype=None):
 
     if not p.exists():
         warning('%s does not exist, creating new sheet' % p)
-        return vd.newSheet(1, name=p.name, source=p)
+        return vd.newSheet(p.name, 1, source=p)
 
     filetype = filetype.lower()
 
@@ -278,4 +278,4 @@ Sheet.addCommand('gi', 'setcol-incr', 'cursorCol.setValues(selectedRows, *numran
 Sheet.addCommand('zi', 'addcol-incr-step', 'n=num(input("interval step: ")); c=SettableColumn(type=type(n)); addColumn(c, cursorColIndex+1); c.setValues(rows, *numrange(nRows, step=n))', 'add column with incremental values times given step')
 Sheet.addCommand('gzi', 'setcol-incr-step', 'n=num(input("interval step: ")); cursorCol.setValues(selectedRows, *numrange(nSelected, n))', 'set current column for selected rows to incremental values times given step')
 
-globalCommand('A', 'open-new', 'vd.push(vd.newSheet(1, name="unnamed"))', 'open new blank sheet')
+globalCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'open new blank sheet')
