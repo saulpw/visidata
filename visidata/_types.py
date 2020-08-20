@@ -47,6 +47,19 @@ def numericFormatter(fmtstr, typedval):
         return str(typedval)
 
 
+vd.si_prefixes='p n u m . k M G T P Q'.split()
+def SIFormatter(fmtstr, val):
+    level = 4
+    while abs(val) > 1000:
+        val /= 1000
+        level += 1
+    while abs(val) < 0.001:
+        val *= 1000
+        level -= 1
+
+    return numericFormatter(fmtstr, val) + (vd.si_prefixes[level] if level != 4 else '')
+
+
 class VisiDataType:
     def __init__(self, typetype=None, icon=None, fmtstr='', formatter=numericFormatter, key='', name=None):
         self.typetype = typetype or anytype # int or float or other constructor
@@ -77,9 +90,12 @@ vdtype(dict, '')
 vdtype(list, '')
 
 def isNumeric(col):
-    return col.type in (int,vlen,float,currency,date)
+    return col.type in (int,vlen,float,currency,date,floatsi)
 
 ##
+
+def floatsi(*args):
+    return float(*args)
 
 floatchars='+-0123456789.'
 def currency(*args):
@@ -152,10 +168,10 @@ class datedelta(datetime.timedelta):
     def __float__(self):
         return self.total_seconds()
 
-
 vdtype(vlen, '♯', '%.0f')
 vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
 vdtype(currency, '$')
+vdtype(floatsi, '‱', formatter=SIFormatter)
 
 # simple constants, for expressions like 'timestamp+15*minutes'
 years=365.25
