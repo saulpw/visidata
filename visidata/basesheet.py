@@ -198,6 +198,9 @@ class BaseSheet(Extensible):
         except Exception as e:
             vd.exceptionCaught(e)
 
+    def evalexpr(self, expr, row=None):
+        return eval(expr, getGlobals(), None)
+
 
 @VisiData.api
 def redraw(vd):
