@@ -168,21 +168,22 @@ def DictKeyColumns(d):
     'Return a list of Column objects from dictionary keys.'
     return [ColumnItem(k, k, type=deduceType(d[k])) for k in d.keys()]
 
-def SheetList(name, src, **kwargs):
+def SheetList(*names, **kwargs):
     'Creates a Sheet from a list of homogenous dicts or namedtuples.'
 
+    src = kwargs.get('source', None)
     if not src:
-        status('no content in ' + name)
+        status('no content in %s' % names)
         return
 
-    if isinstance(src[0], dict):
-        return ListOfDictSheet(name, source=src, **kwargs)
-    elif isinstance(src[0], tuple):
-        if getattr(src[0], '_fields', None):  # looks like a namedtuple
-            return ListOfNamedTupleSheet(name, source=src, **kwargs)
+    if isinstance(src, dict):
+        return ListOfDictSheet(*names, **kwargs)
+    elif isinstance(src, tuple):
+        if getattr(src, '_fields', None):  # looks like a namedtuple
+            return ListOfNamedTupleSheet(*names, **kwargs)
 
     # simple list
-    return ListOfPyobjSheet(name, source=src, **kwargs)
+    return ListOfPyobjSheet(*names, **kwargs)
 
 class ListOfPyobjSheet(PythonSheet):
     rowtype = 'python objects'
