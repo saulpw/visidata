@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
+
 # VisiData v2-5dev [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/develop.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/develop)
 
 A terminal interface for exploring and arranging tabular data.
