@@ -9,6 +9,8 @@ from visidata import *
 option('filetype', '', 'specify file type', replay=True)
 option('incr_base', 1.0, 'start value for column increments', replay=True)
 
+__all__ = ['SettableColumn', 'inputFilename', 'numrange', 'updateColNames', 'num', 'fillNullValues', 'inputPath', 'loadInternalSheet', 'open_txt']
+
 
 def _default_colnames():
     'A B C .. Z AA AB .. ZZ AAA .. to infinity'
