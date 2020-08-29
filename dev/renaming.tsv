@@ -18,9 +18,9 @@ exec_command	execCommand		y
 CommandLog.currentActiveRow	vd.activeCommand		y
 ESC	ALT		y
 cached_property	lazy_property	same	y
-openSource	vd.open	same	
-vd.filetype('ext', ExtSheet)	open_ext		
-dive-row	open-row		
+openSource	vd.openSource	same	y
+vd.filetype('ext', ExtSheet)	open_ext		y
+dive-row	open-row		y
 addRows	addNewRows		y
 statuses (longname)	open-statuses		y
 status (longname)	show-status		y
@@ -29,4 +29,3 @@ getDefaultSaveName	Sheet.getDefaultSaveName	same	y
 prev-sheet	jump-prev		y
 editline()	vd.editline()	same	y
 *-replay	replay-*	longname	y
-getSheet(sheetname)	getSheet('')	handle sheet-agnostic case	
