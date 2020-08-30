@@ -13,7 +13,7 @@ import locale
 import warnings
 
 from visidata import vd, option, options, status, run, BaseSheet, AttrDict
-from visidata import Path, openSource, saveSheets, domotd
+from visidata import Path, saveSheets, domotd
 import visidata
 
 option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
@@ -31,7 +31,7 @@ def eval_vd(logpath, *args, **kwargs):
         log = log.format(*args, **kwargs)
 
     src = Path(logpath.given, fp=io.StringIO(log), filesize=len(log))
-    vs = openSource(src, filetype=src.ext)
+    vs = vd.openSource(src, filetype=src.ext)
     vs.name += '_vd'
     vd.push(vs)
     vs.vd = vd
@@ -203,7 +203,7 @@ def main_vd():
         if ('filetype' in current_args) and ('filetype' not in opts):
             opts['filetype'] = current_args['filetype']
 
-        vs = openSource(p, **opts)
+        vs = vd.openSource(p, **opts)
         for k, v in current_args.items():  # apply final set of args to sheets specifically if not already set #573
             if not vs.options.is_set(k):
                 vs.options[k] = v
