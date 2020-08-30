@@ -40,7 +40,7 @@ class ZipSheet(Sheet):
             decodedfp = codecs.iterdecode(self.openZipFile(zfp, fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
-            return openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size), filetype=options.filetype)
+            return vd.openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size), filetype=options.filetype)
 
     def iterload(self):
         with zipfile.ZipFile(str(self.source), 'r') as zf:
@@ -66,7 +66,7 @@ class TarSheet(Sheet):
             decodedfp = codecs.iterdecode(tfp.extractfile(fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
-            return openSource(Path(fi.name, fp=decodedfp, filesize=fi.size))
+            return vd.openSource(Path(fi.name, fp=decodedfp, filesize=fi.size))
 
     def iterload(self):
         with tarfile.open(name=str(self.source)) as tf:
