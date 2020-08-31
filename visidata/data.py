@@ -3,13 +3,12 @@ import random
 import string
 
 from copy import copy
-from visidata import Sheet, Column, asyncthread, Progress, status, error
-from visidata import *
+from visidata import *  # Sheet, Column, asyncthread, Progress, option, vd, VisiData, IndexSheet
 
 option('filetype', '', 'specify file type', replay=True)
 option('incr_base', 1.0, 'start value for column increments', replay=True)
 
-__all__ = ['SettableColumn', 'inputFilename', 'numrange', 'updateColNames', 'num', 'fillNullValues', 'inputPath', 'loadInternalSheet', 'open_txt']
+__all__ = ['SettableColumn', 'open_txt']
 
 
 def _default_colnames():
@@ -22,17 +21,22 @@ def _default_colnames():
 
 vd.default_colnames = _default_colnames()
 
-def numrange(n, step=1):
+@VisiData.api
+def numrange(vd, n, step=1):
+    'Generate n values, starting from options.incr_base and increasing by step for each number.'
     base = type(step)(options.incr_base)
     yield from (base+x*step for x in range(n))
 
-def num(s):
+@VisiData.api
+def num(vd, *args):
+    'Return parsed string as number, preferring int to float.'
     try:
-        return int(s)
+        return int(*args)
     except Exception:
-        return float(s)
+        return float(*args)
 
 class SettableColumn(Column):
+    ''
     def __init__(self, *args, cache=None, **kwargs):
         super().__init__(*args, cache=cache or {}, **kwargs)
 
@@ -47,6 +51,7 @@ Sheet._coltype = SettableColumn
 @Sheet.api
 @asyncthread
 def addNewRows(sheet, n, idx):
+    ''
     addedRows = {}
     for i in Progress(range(n), 'adding'):
         row = sheet.newRow()
@@ -63,8 +68,9 @@ def addNewRows(sheet, n, idx):
     vd.addUndo(_removeRows)
 
 
+@VisiData.api
 @asyncthread
-def fillNullValues(col, rows):
+def fillNullValues(vd, col, rows):
     'Fill null cells in col with the previous non-null value'
     lastval = None
     oldvals = [] # for undo
@@ -91,9 +97,10 @@ def fillNullValues(col, rows):
     vd.addUndo(_undo)
 
     col.recalc()
-    status("filled %d values" % n)
+    vd.status("filled %d values" % n)
 
 
+@Sheet.api
 def updateColNames(sheet, rows, cols, overwrite=False):
     vd.addUndoColNames(cols)
     for c in cols:
@@ -106,13 +113,15 @@ def newSheet(vd, name, ncols, **kwargs):
     return Sheet(name, columns=[SettableColumn() for i in range(ncols)], **kwargs)
 
 
-def inputFilename(prompt, *args, **kwargs):
-    return vd.input(prompt, "filename", *args, completer=completeFilename, **kwargs)
+@VisiData.api
+def inputFilename(vd, prompt, *args, **kwargs):
+    return vd.input(prompt, "filename", *args, completer=_completeFilename, **kwargs)
 
-def inputPath(*args, **kwargs):
-    return Path(inputFilename(*args, **kwargs))
+@VisiData.api
+def inputPath(vd, *args, **kwargs):
+    return Path(vd.inputFilename(*args, **kwargs))
 
-def completeFilename(val, state):
+def _completeFilename(val, state):
     i = val.rfind('/')
     if i < 0:  # no /
         base = ''
@@ -192,9 +201,10 @@ def open_txt(p):
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, source=p)
 
-def loadInternalSheet(klass, p, **kwargs):
-    'Load internal sheet of given klass.  Internal sheets are always tsv.'
-    vs = klass(p.name, source=p, **kwargs)
+@VisiData.api
+def loadInternalSheet(vd, cls, p, **kwargs):
+    'Load internal sheet of given class.  Internal sheets are always tsv.'
+    vs = cls(p.name, source=p, **kwargs)
     options._set('encoding', 'utf8', vs)
     if p.exists():
         vd.sheets.insert(0, vs)
@@ -235,7 +245,7 @@ def deleteBy(self, func, commit=False):
 
     vd.addUndo(setattr, self, 'rows', oldrows)
 
-    status('deleted %s %s' % (ndeleted, self.rowtype))
+    vd.status('deleted %s %s' % (ndeleted, self.rowtype))
 
     return ndeleted
 
@@ -265,12 +275,12 @@ BaseSheet.bindkey('gkUP', 'slide-top')
 BaseSheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
 
 Sheet.addCommand('^', 'rename-col', 'vd.addUndoColNames([cursorCol]); cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column')
-Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(sheet, selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'set name of current column to combined contents of current cell in selected rows (or current row)')
-Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols)', 'set names of all unnamed visible columns to contents of selected rows (or current row)')
-Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(sheet, selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'set names of all visible columns to combined contents of selected rows (or current row)')
+Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'set name of current column to combined contents of current cell in selected rows (or current row)')
+Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols)', 'set names of all unnamed visible columns to contents of selected rows (or current row)')
+Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'set names of all visible columns to combined contents of selected rows (or current row)')
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'rename current sheet to input')
 
-globalCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
+BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
 Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
@@ -280,4 +290,4 @@ Sheet.addCommand('gi', 'setcol-incr', 'cursorCol.setValues(selectedRows, *numran
 Sheet.addCommand('zi', 'addcol-incr-step', 'n=num(input("interval step: ")); c=SettableColumn(type=type(n)); addColumn(c, cursorColIndex+1); c.setValues(rows, *numrange(nRows, step=n))', 'add column with incremental values times given step')
 Sheet.addCommand('gzi', 'setcol-incr-step', 'n=num(input("interval step: ")); cursorCol.setValues(selectedRows, *numrange(nSelected, n))', 'set current column for selected rows to incremental values times given step')
 
-globalCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'open new blank sheet')
+BaseSheet.addCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'open new blank sheet')
