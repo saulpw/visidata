@@ -59,6 +59,7 @@ from .loaders.tsv import *
 from .pyobj import *
 from .loaders.json import *
 from .data import *
+from .fill import *
 from .save import *
 from .clipboard import *
 from .slide import *
