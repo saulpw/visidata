@@ -6,7 +6,6 @@ from copy import copy
 from visidata import *  # Sheet, Column, asyncthread, Progress, option, vd, VisiData, IndexSheet
 
 option('filetype', '', 'specify file type', replay=True)
-option('incr_base', 1.0, 'start value for column increments', replay=True)
 
 __all__ = ['SettableColumn', 'open_txt']
 
@@ -20,20 +19,6 @@ def _default_colnames():
             yield ''.join(x)
 
 vd.default_colnames = _default_colnames()
-
-@VisiData.api
-def numrange(vd, n, step=1):
-    'Generate n values, starting from options.incr_base and increasing by step for each number.'
-    base = type(step)(options.incr_base)
-    yield from (base+x*step for x in range(n))
-
-@VisiData.api
-def num(vd, *args):
-    'Return parsed string as number, preferring int to float.'
-    try:
-        return int(*args)
-    except Exception:
-        return float(*args)
 
 class SettableColumn(Column):
     ''
@@ -250,10 +235,5 @@ BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: 
 Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
-
-Sheet.addCommand('i', 'addcol-incr', 'c=SettableColumn(type=int); addColumn(c, cursorColIndex+1); c.setValues(rows, *numrange(nRows))', 'add column with incremental values')
-Sheet.addCommand('gi', 'setcol-incr', 'cursorCol.setValues(selectedRows, *numrange(sheet.nSelected))', 'set current column for selected rows to incremental values')
-Sheet.addCommand('zi', 'addcol-incr-step', 'n=num(input("interval step: ")); c=SettableColumn(type=type(n)); addColumn(c, cursorColIndex+1); c.setValues(rows, *numrange(nRows, step=n))', 'add column with incremental values times given step')
-Sheet.addCommand('gzi', 'setcol-incr-step', 'n=num(input("interval step: ")); cursorCol.setValues(selectedRows, *numrange(nSelected, n))', 'set current column for selected rows to incremental values times given step')
 
 BaseSheet.addCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'open new blank sheet')
