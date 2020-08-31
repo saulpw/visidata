@@ -44,3 +44,6 @@ def inputExpr(self, prompt, *args, **kwargs):
 Sheet.addCommand('=', 'addcol-expr', 'addColumn(ColumnExpr(inputExpr("new column expr=")), index=cursorColIndex+1)', 'create new column from Python expression, with column names as variables')
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows, inputExpr("set selected="))', 'set current column for selected rows to result of Python expression')
 Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalexpr(inputExpr("set expr="), cursorRow))', 'evaluate Python expression on current row and set current cell with result of Python expression')
+Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
+
+Sheet.addCommand(None, 'show-expr', 'status(evalexpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')

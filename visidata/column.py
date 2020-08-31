@@ -1,5 +1,6 @@
 from copy import copy
 import collections
+import string
 import itertools
 import threading
 import re
@@ -32,6 +33,7 @@ __all__ = [
     'getitemdef',
     'ColumnAttr',
     'ColumnItem',
+    'SettableColumn',
     'SubColumnFunc',
     'SubColumnItem',
     'SubColumnAttr',
@@ -70,11 +72,22 @@ def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s)).strip('_')
 
 
+def _default_colnames():
+    'A B C .. Z AA AB .. ZZ AAA .. to infinity'
+    i=0
+    while True:
+        i += 1
+        for x in itertools.product(string.ascii_uppercase, repeat=i):
+            yield ''.join(x)
+
+default_colnames = _default_colnames()
+
+
 class Column(Extensible):
     def __init__(self, name=None, *, type=anytype, cache=False, **kwargs):
         self.sheet = None     # owning Sheet, set in .recalc() via Sheet.addColumn
         if name is None:
-            name = next(vd.default_colnames)
+            name = next(default_colnames)
         self.name = str(name) # display visible name
         self.fmtstr = ''      # by default, use str()
         self._type = type     # anytype/str/int/float/date/func
@@ -459,3 +472,15 @@ class ColumnExpr(Column):
     def expr(self, expr):
         self.compiledExpr = compile(expr, '<expr>', 'eval') if expr else None
         self._expr = expr
+
+
+class SettableColumn(Column):
+    ''
+    def __init__(self, *args, cache=None, **kwargs):
+        super().__init__(*args, cache=cache or {}, **kwargs)
+
+    def putValue(self, row, value):
+        self.cache[self.sheet.rowid(row)] = value
+
+    def calcValue(self, row):
+        return self.cache.get(self.sheet.rowid(row), None)

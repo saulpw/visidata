@@ -4,7 +4,7 @@ from copy import copy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (options, theme, isNullFunc, isNumeric, Column, option, namedlist,
+from visidata import (options, theme, isNullFunc, isNumeric, Column, option, namedlist, SettableColumn,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
@@ -147,6 +147,8 @@ class BasicRow(collections.defaultdict):
 class TableSheet(BaseSheet):
     'Base class for all tabular sheets.'
     _rowtype = lambda: BasicRow()
+    _coltype = SettableColumn
+
     rowtype = 'rows'
 
     columns = []  # list of Column
@@ -997,6 +999,24 @@ def preloadHook(sheet):
     'Override to setup for reload()'
     pass
 
+
+@VisiData.api
+def newSheet(vd, name, ncols, **kwargs):
+    return Sheet(name, columns=[SettableColumn() for i in range(ncols)], **kwargs)
+
+
+@Sheet.api
+def updateColNames(sheet, rows, cols, overwrite=False):
+    vd.addUndoColNames(cols)
+    for c in cols:
+        if not c._name or overwrite:
+            c.name = "\n".join(c.getDisplayValue(r) for r in rows)
+
+
+IndexSheet.class_options.header = 0
+IndexSheet.class_options.skip = 0
+
+
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
@@ -1051,3 +1071,11 @@ BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet)
 BaseSheet.addCommand(None, 'open-source', 'vd.push(source)', 'jump to the source of this sheet')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')
+
+BaseSheet.addCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'open new blank sheet')
+
+Sheet.addCommand('^', 'rename-col', 'vd.addUndoColNames([cursorCol]); cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column')
+Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'set name of current column to combined contents of current cell in selected rows (or current row)')
+Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols)', 'set names of all unnamed visible columns to contents of selected rows (or current row)')
+Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'set names of all visible columns to combined contents of selected rows (or current row)')
+BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'rename current sheet to input')

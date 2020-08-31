@@ -69,6 +69,64 @@ def rowDeleted(self, row):
 
 
 @Sheet.api
+@asyncthread
+def addNewRows(sheet, n, idx):
+    'Add n new rows after row at idx.'
+    addedRows = {}
+    for i in Progress(range(n), 'adding'):
+        row = sheet.newRow()
+        addedRows[sheet.rowid(row)] = row
+        sheet.addRow(row, idx+1)
+
+        if sheet.defer:
+            sheet.rowAdded(row)
+
+    @asyncthread
+    def _removeRows():
+        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
+
+    vd.addUndo(_removeRows)
+
+
+@Sheet.api
+def deleteBy(self, func, commit=False):
+    'Delete rows for which func(row) is true.  Returns number of deleted rows.'
+    oldrows = copy(self.rows)
+    oldidx = self.cursorRowIndex
+    ndeleted = 0
+
+    row = None   # row to re-place cursor after
+    # if commit is True, commit to delete, even if defer is True
+    if self.defer and not commit:
+        ndeleted = 0
+        for r in self.gatherBy(func, 'deleting'):
+            self.rowDeleted(r)
+            ndeleted += 1
+        return ndeleted
+
+    while oldidx < len(oldrows):
+        if not func(oldrows[oldidx]):
+            row = self.rows[oldidx]
+            break
+        oldidx += 1
+
+    self.rows.clear() # must delete from the existing rows object
+    for r in Progress(oldrows, 'deleting'):
+        if not func(r):
+            self.rows.append(r)
+            if r is row:
+                self.cursorRowIndex = len(self.rows)-1
+        else:
+            ndeleted += 1
+
+    vd.addUndo(setattr, self, 'rows', oldrows)
+
+    vd.status('deleted %s %s' % (ndeleted, self.rowtype))
+
+    return ndeleted
+
+
+@Sheet.api
 def isDeleted(self, r):
     return self.rowid(r) in self._deferredDels
 
@@ -199,5 +257,10 @@ def commit(sheet, *rows):
         confirm('really %s? ' % cstr)
 
     sheet.putChanges()
+
+Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
+Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
+Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(), cursorColIndex+1); cursorRight(1)', 'append an empty column')
+Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(), cursorColIndex+c+1)', 'append N empty columns')
 
 Sheet.addCommand('z^S', 'commit-sheet', 'commit()')
