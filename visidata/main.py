@@ -204,7 +204,7 @@ def main_vd():
             opts['filetype'] = current_args['filetype']
 
         vs = vd.openSource(p, **opts)
-        for k, v in current_args.items():  # apply final set of args to sheets specifically if not already set #573
+        for k, v in current_args.items():  # apply final set of args to sheets specifically on cli, if not set otherwise #573
             if not vs.options.is_set(k):
                 vs.options[k] = v
 
