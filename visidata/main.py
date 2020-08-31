@@ -102,7 +102,7 @@ def main_vd():
 
     while i < len(sys.argv):
         arg = sys.argv[i]
-        if arg == '-v':
+        if arg in ['-v', '--version']:
             print(__version_info__)
             return 0
         elif arg == '-':
