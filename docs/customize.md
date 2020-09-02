@@ -164,7 +164,7 @@ Aggregators allow you to gather the rows within a single column, and interpret t
 
 To add your own custom aggregator `name`, add the following to your `.visidatarc`.
 
-aggregator('name', func, type=float)
+vd.aggregator('name', func, type=float)
 
 Where `func` is a function of the form:
 
@@ -179,7 +179,7 @@ Here is an example, that adds an aggregator for [numpy's internal rate of return
 
 ```
 import numpy as np
-aggregator('irr', np.irr, type=float)
+vd.aggregator('irr', np.irr, type=float)
 ```
 
 **Bonus: How to choose which aggregators are columns within the DescribeSheet?**
