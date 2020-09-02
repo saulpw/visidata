@@ -218,7 +218,7 @@ class GitSheet(GitContext, Sheet):
 GitSheet.addCommand('f', 'git-force', 'extra_args.append("--force"); status("--force next git command")', 'add --force to next git command')
 GitSheet.addCommand('^A', 'git-abort', 'abortWhatever()', 'abort the current in-progress action')
 
-GitSheet.options.disp_note_none = ''
+GitSheet.class_options.disp_note_none = ''
 
 BaseSheet.addCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
 BaseSheet.addCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
