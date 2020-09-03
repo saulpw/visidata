@@ -7,6 +7,7 @@ option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Desc
 max_threads = 2
 
 
+@Column.api
 def isError(col, row):
     try:
         v = col.getValue(row)
