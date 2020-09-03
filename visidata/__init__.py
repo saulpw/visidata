@@ -83,7 +83,6 @@ from .transpose import *
 from .shell import *
 from .layout import *
 from .main import *
-from .menu import *
 from .help import *
 from .defermods import *
 import visidata.sort
