@@ -1,12 +1,10 @@
 from visidata import *
-from copy import deepcopy
 
 
-def resetCache(self):
-    self._cachedValues = collections.OrderedDict()
-    vd.status("reset cache for " + self.name)
-
-Column.resetCache = resetCache
+@Column.api
+def resetCache(col):
+    col._cachedValues = collections.OrderedDict()
+    vd.status("reset cache for " + col.name)
 
 
 @Sheet.api

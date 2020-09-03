@@ -369,9 +369,10 @@ def replayStatus(vd):
 
 
 @VisiData.api
-def set_option(vd, cmdlog, optname, optval, obj=None):
+def setOption(vd, optname, optval, obj=None):
+    if vd.cmdlog:
         objname = options._opts.objname(obj)
-        cmdlog.addRow(cmdlog.newRow(col=objname, row=optname,
+        vd.cmdlog.addRow(vd.cmdlog.newRow(col=objname, row=optname,
                     keystrokes='', input=str(optval),
                     longname='set-option'))
 

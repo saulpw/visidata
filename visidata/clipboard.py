@@ -155,7 +155,8 @@ class _Clipboard:
             p.communicate()
 
 
-def pasteFromClipboard(cols, rows):
+@VisiData.api
+def pasteFromClipboard(vd, cols, rows):
     text = clipboard().paste().strip() or vd.error('system clipboard is empty')
 
     vd.addUndoSetValues(cols, rows)
