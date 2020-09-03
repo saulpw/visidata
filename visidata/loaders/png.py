@@ -78,13 +78,13 @@ def save_png(vd, p, vs):
             colornum = palette[color] = len(palette)
         pixels[y][x] = colornum
 
-    status('saving %sx%sx%s' % (vs.width, vs.height, len(palette)))
+    vd.status('saving %sx%sx%s' % (vs.width, vs.height, len(palette)))
 
     import png
     with open(p, 'wb') as fp:
         w = png.Writer(vs.width, vs.height, palette=list(palette.keys()))
         w.write(fp, pixels)
 
-    status('saved')
+    vd.status('saved')
 
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')

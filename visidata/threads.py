@@ -6,7 +6,7 @@ import cProfile
 import threading
 import collections
 
-from visidata import VisiData, vd, option, options, status, globalCommand, Sheet, EscapeException
+from visidata import VisiData, vd, option, options, globalCommand, Sheet, EscapeException
 from visidata import ColumnAttr, Column
 from visidata import *
 
@@ -133,13 +133,13 @@ def checkMemoryUsage(vd):
             if options.debug:
                 vd.exceptionCaught(e)
             options.min_memory_mb = 0
-            warning('disabling min_memory_mb: "free" not installed')
+            vd.warning('disabling min_memory_mb: "free" not installed')
             return '', attr
         tot_m, used_m, free_m = map(int, freestats[-1].split()[1:])
         ret = '[%dMB] ' % free_m + ret
         if free_m < min_mem:
             attr = 'color_warning'
-            warning('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
+            vd.warning('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
             cancelThread(*vd.unfinishedThreads)
             curses.flash()
     return ret, attr
@@ -292,7 +292,7 @@ def toggleProfiling(vd, t):
         t.profile.disable()
         t.profile = None
         options.set('profile', '')
-    status('profiling ' + ('ON' if t.profile else 'OFF'))
+    vd.status('profiling ' + ('ON' if t.profile else 'OFF'))
 
 
 class ThreadProfiler:
@@ -357,14 +357,14 @@ class ProfileSheet(Sheet):
         'open ProfileSheet for calls referenced in current row'
         if row.calls:
             return ProfileSheet(codestr(row.code)+"_calls", source=row.calls)
-        warning("no calls")
+        vd.warning("no calls")
 
     def openCell(self, col, row):
         'open ProfileSheet for caller referenced in current cell'
         val = col.getValue(row)
         if val:
             return ProfileSheet(codestr(row.code)+"_"+col.name, source=val)
-        warning("no callers")
+        vd.warning("no callers")
 
 def codestr(code):
     if isinstance(code, str):

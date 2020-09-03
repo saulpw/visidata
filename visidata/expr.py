@@ -1,4 +1,4 @@
-from visidata import Progress, status, Sheet, Column, asyncthread, vd, ColumnExpr
+from visidata import Progress, Sheet, Column, asyncthread, vd, ColumnExpr
 
 
 class CompleteExpr:
@@ -33,7 +33,7 @@ def setValuesFromExpr(self, rows, expr):
     for row in Progress(rows, 'setting'):
         self.setValueSafe(row, self.sheet.evalexpr(compiledExpr, row))
     self.recalc()
-    status('set %d values = %s' % (len(rows), expr))
+    vd.status('set %d values = %s' % (len(rows), expr))
 
 
 @Sheet.api

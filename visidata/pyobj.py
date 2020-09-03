@@ -113,7 +113,7 @@ def closeColumn(sheet, col):
     if hasattr(col, 'origCol'):
         origCol = col.origCol
     else:
-        fail('column has not been expanded')
+        vd.fail('column has not been expanded')
     vd.addUndo(setattr, sheet, 'columns', sheet.columns)
     origCol.width = options.default_width
     cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not origCol]
@@ -126,7 +126,7 @@ def push_pyobj(name, pyobj):
     if vs:
         return vd.push(vs)
     else:
-        error("cannot push '%s' as pyobj" % type(pyobj).__name__)
+        vd.error("cannot push '%s' as pyobj" % type(pyobj).__name__)
 
 def view(obj):
     run(load_pyobj(getattr(obj, '__name__', ''), source=obj))
@@ -149,7 +149,7 @@ def load_pyobj(vd, *names, **kwargs):
     elif isinstance(pyobj, object):
         return PyobjSheet(*names, **kwargs)
     else:
-        error("cannot load '%s' as pyobj" % type(pyobj).__name__)
+        vd.error("cannot load '%s' as pyobj" % type(pyobj).__name__)
 
 
 def getPublicAttrs(obj):
@@ -173,7 +173,7 @@ def SheetList(*names, **kwargs):
 
     src = kwargs.get('source', None)
     if not src:
-        status('no content in %s' % names)
+        vd.status('no content in %s' % names)
         return
 
     if isinstance(src, dict):

@@ -13,7 +13,7 @@ def codeToType(type_code, colname):
         if 'STRING' in tname:
             return str
     except KeyError:
-        status('unknown postgres type_code %s for %s' % (type_code, colname))
+        vd.status('unknown postgres type_code %s for %s' % (type_code, colname))
     return anytype
 
 

@@ -39,7 +39,7 @@ class ImapSheet(TableSheet):
                 for num in data[0].split():
                     typ, msgbytes = m.fetch(num, '(RFC822)')
                     if typ != 'OK':
-                        warning(typ, msgbytes)
+                        vd.warning(typ, msgbytes)
                         continue
 
                     msg = email.message_from_bytes(msgbytes[0][1])

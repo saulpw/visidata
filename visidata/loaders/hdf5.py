@@ -36,9 +36,9 @@ class Hdf5ObjSheet(Sheet):
                 self.recalc()
                 yield from source  # copy
             else:
-                status('too many dimensions in shape %s' % str(source.shape))
+                vd.status('too many dimensions in shape %s' % str(source.shape))
         else:
-            status('unknown h5 object type %s' % type(source))
+            vd.status('unknown h5 object type %s' % type(source))
 
 
     def openRow(self, row):

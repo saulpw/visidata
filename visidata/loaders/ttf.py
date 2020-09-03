@@ -55,7 +55,7 @@ def makePen(*args, **kwargs):
     try:
         from fontTools.pens.basePen import BasePen
     except ImportError as e:
-        error('fonttools not installed')
+        vd.error('fonttools not installed')
 
     class GlyphPen(InvertedCanvas, BasePen):
         aspectRatio = 1.0
@@ -74,7 +74,7 @@ def makePen(*args, **kwargs):
             self._moveTo(xy)
 
         def _curveToOne(self, xy1, xy2, xy3):
-            error('NotImplemented')
+            vd.error('NotImplemented')
 
         def _qCurveToOne(self, xy1, xy2):
             self.qcurve([self.lastxy, xy1, xy2], self.attr)

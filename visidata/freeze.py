@@ -4,7 +4,7 @@ from copy import deepcopy
 
 def resetCache(self):
     self._cachedValues = collections.OrderedDict()
-    status("reset cache for " + self.name)
+    vd.status("reset cache for " + self.name)
 
 Column.resetCache = resetCache
 

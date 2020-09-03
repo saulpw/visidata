@@ -3,7 +3,7 @@ import contextlib
 import itertools
 import collections
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, option, VisiData
+from visidata import asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, option, VisiData
 from visidata import namedlist, filesize
 
 option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
@@ -73,7 +73,7 @@ def save_tsv(vd, p, vs):
             fp.write(unitsep.join(dispvals.values()))
             fp.write(rowsep)
 
-    status('%s save finished' % p)
+    vd.status('%s save finished' % p)
 
 
 def append_tsv_row(vs, row):

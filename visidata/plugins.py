@@ -85,7 +85,7 @@ class PluginsSheet(JsonLinesSheet):
             except ExpectedException:
                 overwrite = False
                 if _plugin_in_import_list(plugin):
-                    fail("plugin already loaded")
+                    vd.fail("plugin already loaded")
                 else:
                     self._loadPlugin(plugin)
         if overwrite:
@@ -98,7 +98,7 @@ class PluginsSheet(JsonLinesSheet):
         with urlcache(plugin.url, 0).open_text() as pyfp:
             contents = pyfp.read()
             if not _checkHash(contents, plugin.sha256):
-                error('%s plugin SHA256 does not match!' % plugin.name)
+                vd.error('%s plugin SHA256 does not match!' % plugin.name)
             with outpath.open_text(mode='w') as outfp:
                 outfp.write(contents)
 
@@ -112,10 +112,10 @@ class PluginsSheet(JsonLinesSheet):
             vd.status(out)
             if err:
                 vd.warning(err)
-        status('%s plugin installed' % plugin.name)
+        vd.status('%s plugin installed' % plugin.name)
 
         if _plugin_in_import_list(plugin):
-            warning("plugin already loaded")
+            vd.warning("plugin already loaded")
         else:
             self._loadPlugin(plugin)
 
@@ -124,7 +124,7 @@ class PluginsSheet(JsonLinesSheet):
         with Path(_plugin_init()).open_text(mode='a') as fprc:
             print(_plugin_import(plugin), file=fprc)
             importlib.import_module(_plugin_import_name(plugin))
-            status('%s plugin loaded' % plugin.name)
+            vd.status('%s plugin loaded' % plugin.name)
 
 
     def removePluginIfExists(self, plugin):
@@ -132,7 +132,7 @@ class PluginsSheet(JsonLinesSheet):
 
     def removePlugin(self, plugin):
         if not _plugin_in_import_list(plugin):
-            fail("plugin not in import list")
+            vd.fail("plugin not in import list")
 
         initpath = Path(_plugin_init())
         oldinitpath = Path(initpath.with_suffix(initpath.suffix + '.bak'))
@@ -150,9 +150,9 @@ class PluginsSheet(JsonLinesSheet):
             os.unlink(_plugin_path(plugin))
             sys.modules.pop(_plugin_import_name(plugin))
             importlib.invalidate_caches()
-            warning('{0} plugin uninstalled'.format(plugin[0]))
+            vd.warning('{0} plugin uninstalled'.format(plugin[0]))
         except FileNotFoundError:
-            warning("no plugins/__init__.py found")
+            vd.warning("no plugins/__init__.py found")
 
 globalCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'open Plugins Sheet: manage your session environment for a curated set of plugins')
 

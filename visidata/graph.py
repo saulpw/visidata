@@ -39,7 +39,7 @@ class GraphSheet(InvertedCanvas):
         super().__init__(name, sheet, sourceRows=rows, **kwargs)
 
         self.xcols = xcols
-        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or fail('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
+        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
 
     @asyncthread
     def reload(self):
@@ -48,7 +48,7 @@ class GraphSheet(InvertedCanvas):
 
         self.reset()
 
-        status('loading data points')
+        vd.status('loading data points')
         catcols = [c for c in self.xcols if not isNumeric(c)]
         numcols = numericCols(self.xcols)
         for ycol in self.ycols:
@@ -69,7 +69,7 @@ class GraphSheet(InvertedCanvas):
                         raise
 
 
-        status('loaded %d points (%d errors)' % (nplotted, nerrors))
+        vd.status('loaded %d points (%d errors)' % (nplotted, nerrors))
 
         self.xzoomlevel=self.yzoomlevel=1.0
         self.resetBounds()

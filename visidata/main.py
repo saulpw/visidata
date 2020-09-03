@@ -12,7 +12,7 @@ import sys
 import locale
 import warnings
 
-from visidata import vd, option, options, status, run, BaseSheet, AttrDict
+from visidata import vd, option, options, run, BaseSheet, AttrDict
 from visidata import Path, saveSheets, domotd
 import visidata
 
@@ -285,7 +285,7 @@ def main_vd():
     return 0
 
 def vd_cli():
-    status(__version_info__)
+    vd.status(__version_info__)
     rc = -1
     try:
         rc = main_vd()

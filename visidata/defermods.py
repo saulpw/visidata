@@ -192,7 +192,7 @@ def commitDeletes(self):
             newidx += 1
 
     if ndeleted:
-        status('deleted %s %s' % (ndeleted, self.rowtype))
+        vd.status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted
 
 @Sheet.api
@@ -244,14 +244,14 @@ def changestr(self, adds, mods, deletes):
 @Sheet.api
 def commit(sheet, *rows):
     if not sheet.defer:
-        fail('commit-sheet is not enabled for this sheet type')
+        vd.fail('commit-sheet is not enabled for this sheet type')
 
     adds, mods, deletes = sheet.getDeferredChanges()
     cstr = sheet.changestr(adds, mods, deletes)
     path = sheet.source
 
     if not cstr:
-        fail('no diffs')
+        vd.fail('no diffs')
 
     if options.confirm_overwrite:
         confirm('really %s? ' % cstr)

@@ -62,7 +62,7 @@ class ShapeMap(InvertedCanvas):
                 x, y = row.shape.points[0]
                 self.point(x, y, self.plotColor(k), row)
             else:
-                status('notimpl shapeType %s' % row.shape.shapeType)
+                vd.status('notimpl shapeType %s' % row.shape.shapeType)
 
             x1, y1, x2, y2 = row.shape.bbox
             textx, texty = (x1+x2)/2, (y1+y2)/2
@@ -73,7 +73,7 @@ class ShapeMap(InvertedCanvas):
 
 @VisiData.api
 def save_geojson(vd, p, vs):
-    isinstance(vs, Canvas) or fail("must save geojson from canvas sheet")
+    isinstance(vs, Canvas) or vd.fail("must save geojson from canvas sheet")
     features = []
     for coords, attr, row in Progress(vs.polylines, 'saving'):
         feat = {

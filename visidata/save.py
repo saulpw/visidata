@@ -89,12 +89,12 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
     filetype = givenpath.ext or options.save_filetype
 
-    savefunc = getattr(vd, 'save_' + filetype, None) or fail('no function to save as type %s' % filetype)
+    savefunc = getattr(vd, 'save_' + filetype, None) or vd.fail('no function to save as type %s' % filetype)
 
     if givenpath.exists() and confirm_overwrite:
         confirm("%s already exists. overwrite? " % givenpath.given)
 
-    status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
+    vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
 
     if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
         return vd.execAsync(savefunc, givenpath, *vsheets)
@@ -125,7 +125,7 @@ def save_txt(vd, p, *vsheets):
             for dispvals in vs.iterdispvals(*vs.visibleCols, format=True):
                 fp.write(unitsep.join(dispvals.values()))
                 fp.write(rowsep)
-    status('%s save finished' % p)
+    vd.status('%s save finished' % p)
 
 
 Sheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')

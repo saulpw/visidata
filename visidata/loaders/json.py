@@ -33,7 +33,7 @@ class JsonSheet(PythonSheet):
                 yield ret
 
         except ValueError as e:
-            status('trying jsonl')
+            vd.status('trying jsonl')
             yield from JsonLinesSheet.iterload(self)
 
     def addRow(self, row, index=None):

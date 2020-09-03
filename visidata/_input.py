@@ -5,7 +5,7 @@ import curses
 import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
-from visidata import vd, status, error, warning, fail, options, theme, colors
+from visidata import vd, options, theme, colors
 from visidata import launchExternalEditor, suspend, ColumnItem, ENTER
 
 __all__ = ['confirm', 'CompleteKey']
@@ -246,7 +246,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         curses.flushinp()
 
     if display:
-        status('"%s"' % v)
+        vd.status('"%s"' % v)
         if record and vd.cmdlog:
             vd.setLastArgs(v)
 
@@ -307,7 +307,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         if isinstance(type, str):
             self.lastInputs[type].append(ret)
     elif defaultLast:
-        history or fail("no previous input")
+        history or vd.fail("no previous input")
         ret = history[-1]
 
     return ret
@@ -320,7 +320,7 @@ def confirm(vd, prompt, exc=EscapeException):
         msg = 'disconfirmed: ' + prompt
         if exc:
             raise exc(msg)
-        warning(msg)
+        vd.warning(msg)
         return False
     return True
 

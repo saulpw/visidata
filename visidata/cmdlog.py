@@ -34,7 +34,7 @@ VisiData.save_vdj = VisiData.save_jsonl
 
 def checkVersion(desired_version):
     if desired_version != visidata.__version_info__:
-        fail("version %s required" % desired_version)
+        vd.fail("version %s required" % desired_version)
 
 def fnSuffix(prefix):
     i = 0
@@ -223,23 +223,23 @@ vd.semaphore = threading.Semaphore(0)
 @VisiData.api
 def replay_pause(vd):
         if not vd.currentReplay:
-            fail('no replay to pause')
+            vd.fail('no replay to pause')
         else:
             if vd.paused:
                 vd.replay_advance()
             vd.paused = not vd.paused
-            status('paused' if vd.paused else 'resumed')
+            vd.status('paused' if vd.paused else 'resumed')
 
 
 @VisiData.api
 def replay_advance(vd):
-        vd.currentReplay or fail("no replay to advance")
+        vd.currentReplay or vd.fail("no replay to advance")
         vd.semaphore.release()
 
 
 @VisiData.api
 def replay_cancel(vd):
-        vd.currentReplay or fail("no replay to cancel")
+        vd.currentReplay or vd.fail("no replay to cancel")
         vd.currentReplayRow = None
         vd.currentReplay = None
         vd.semaphore.release()
@@ -249,10 +249,10 @@ def replay_cancel(vd):
 def moveToReplayContext(vd, r, vs):
         'set the sheet/row/col to the values in the replay row.  return sheet'
         if r.row:
-            vs.moveToRow(r.row) or error('no "%s" row' % r.row)
+            vs.moveToRow(r.row) or vd.error('no "%s" row' % r.row)
 
         if r.col:
-            vs.moveToCol(r.col) or error('no "%s" column' % r.col)
+            vs.moveToCol(r.col) or vd.error('no "%s" column' % r.col)
 
 
 @VisiData.api
@@ -267,7 +267,7 @@ def replayOne(vd, r):
         'Replay the command in one given row.'
         vd.currentReplayRow = r
         if r.sheet:
-            vs = vd.getSheet(r.sheet) or error('no sheet named %s' % r.sheet)
+            vs = vd.getSheet(r.sheet) or vd.error('no sheet named %s' % r.sheet)
         else:
             vs = None
 
@@ -291,7 +291,7 @@ def replayOne(vd, r):
                 vs = vd.sheets[0]  # use top sheet by default
 
             if r.comment:
-                status(r.comment)
+                vd.status(r.comment)
 
             vd.keystrokes = r.keystrokes
             # <=v1.2 used keystrokes in longname column; getCommand fetches both
@@ -300,7 +300,7 @@ def replayOne(vd, r):
         vd.currentReplayRow = None
 
         if escaped:  # escape during replay aborts replay
-            warning('replay aborted during %s' % (longname or r.keystrokes))
+            vd.warning('replay aborted during %s' % (longname or r.keystrokes))
         return escaped
 
 
@@ -312,7 +312,7 @@ def replay_sync(vd, cmdlog, live=False):
         with Progress(total=len(cmdlog.rows)) as prog:
             while cmdlog.cursorRowIndex < len(cmdlog.rows):
                 if vd.currentReplay is None:
-                    status('replay canceled')
+                    vd.status('replay canceled')
                     return
 
                 vd.statuses.clear()
@@ -323,7 +323,7 @@ def replay_sync(vd, cmdlog, live=False):
                 except Exception as e:
                     vd.replay_cancel()
                     vd.exceptionCaught(e)
-                    status('replay canceled')
+                    vd.status('replay canceled')
                     return True
 
                 cmdlog.cursorRowIndex += 1
@@ -334,7 +334,7 @@ def replay_sync(vd, cmdlog, live=False):
                 while not vd.delay():
                     pass
 
-        status('replay complete')
+        vd.status('replay complete')
         vd.currentReplay = None
 
 
