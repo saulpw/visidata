@@ -7,7 +7,7 @@ from visidata import *
 
 
 def createJoinedSheet(sheets, jointype=''):
-    sheets[1:] or fail("join requires more than 1 sheet")
+    sheets[1:] or vd.fail("join requires more than 1 sheet")
 
     if jointype == 'append':
         keyedcols = collections.defaultdict(list, {col.name:[col] for col in sheets[0].visibleCols})
@@ -243,7 +243,7 @@ class ConcatColumn(Column):
         if srcCol:
             srcCol.setValue(srcRow, v)
         else:
-            fail('column not on source sheet')
+            vd.fail('column not on source sheet')
 
 
 # rowdef: (srcSheet, srcRow)

@@ -77,7 +77,7 @@ class XmlSheet(Sheet):
 
 @VisiData.api
 def save_xml(vd, p, vs):
-    isinstance(XmlSheet) or fail('must save xml from XmlSheet')
+    isinstance(XmlSheet) or vd.fail('must save xml from XmlSheet')
     vs.root.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
 
 VisiData.save_svg = VisiData.save_xml

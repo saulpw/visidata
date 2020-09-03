@@ -1,14 +1,14 @@
 import re
 import random
 
-from visidata import asyncthread, warning, option, options, vd
+from visidata import asyncthread, option, options, vd
 from visidata import BaseSheet, Sheet, Column, Progress
 
 
 @Sheet.api
 def setSubst(sheet, cols, rows):
     if not rows:
-        warning('no %s selected' % sheet.rowtype)
+        vd.warning('no %s selected' % sheet.rowtype)
         return
     modified = 'column' if len(cols) == 1 else 'columns'
     rex = vd.input("transform %s by regex: " % modified, type="regex-subst")

@@ -105,7 +105,7 @@ class DescribeSheet(ColumnsSheet):
             vs.rows=val
             vs.name+="_%s_%s"%(row.name,col.name)
             return vs
-        warning(val)
+        vd.warning(val)
 
 
 Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')

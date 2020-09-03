@@ -167,7 +167,7 @@ class PivotSheet(Sheet):
         numericCols = [c for c in self.groupByCols if self.isNumericRange(c)]
 
         if len(numericCols) > 1:
-            error('only one numeric column can be binned')
+            vd.error('only one numeric column can be binned')
 
         numericBins = []
         degenerateBinning = False

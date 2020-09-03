@@ -43,7 +43,7 @@ class MeltedSheet(Sheet):
                 valcols[cats].append((valcolname, c))
                 ncats = len(varvals)
             else:
-                status('"%s" column does not match regex, skipping' % c.name)
+                vd.status('"%s" column does not match regex, skipping' % c.name)
                 ncats = 0
 
         othercols = set()

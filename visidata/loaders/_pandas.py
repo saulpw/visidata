@@ -113,7 +113,7 @@ class PandasSheet(Sheet):
             elif filetype == 'jsonl':
                 readfunc = partial(pd.read_json, lines=True)
             else:
-                readfunc = getattr(pd, 'read_'+filetype) or error('no pandas.read_'+filetype)
+                readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
             df = readfunc(str(self.source), **options('pandas_'+filetype+'_'))
 
         # reset the index here
@@ -137,7 +137,7 @@ class PandasSheet(Sheet):
         self.rows = DataFrameAdapter(df)
         self._selectedMask = pd.Series(False, index=df.index)
         if df.index.nunique() != df.shape[0]:
-            warning("Non-unique index, row selection API may not work or may be incorrect")
+            vd.warning("Non-unique index, row selection API may not work or may be incorrect")
 
     @asyncthread
     def sort(self):
@@ -311,7 +311,7 @@ class PandasSheet(Sheet):
         self.df.index = pd.RangeIndex(self.nRows)
         ndeleted = nRows - self.nRows
 
-        status('deleted %s %s' % (ndeleted, self.rowtype))
+        vd.status('deleted %s %s' % (ndeleted, self.rowtype))
         return ndeleted
 
     def deleteSelected(self):

@@ -128,7 +128,7 @@ class PandasFreqTableSheet(PivotSheet):
             # value_counts = value_counts.stack(list(range(len(self.groupByCols) - 1)))
             # value_counts = value_counts.loc[value_counts > 0].sort_values(ascending=False)
         else:
-            fail("Unable to do FrequencyTable, no columns to group on provided")
+            vd.fail("Unable to do FrequencyTable, no columns to group on provided")
 
         # add default bonus columns
         for c in [
@@ -162,7 +162,7 @@ def expand_source_rows(source, vd, cursorRow):
     vs = copy(source)
     vs.name += "_" + valueNames(cursorRow.discrete_keys, cursorRow.numeric_key)
     if cursorRow.sourcerows is None:
-        error("no source rows")
+        vd.error("no source rows")
     vs.rows = cursorRow.sourcerows
     vd.push(vs)
 

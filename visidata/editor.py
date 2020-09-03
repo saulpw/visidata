@@ -20,7 +20,7 @@ class SuspendCurses:
 
 @visidata.VisiData.global_api
 def launchEditor(vd, *args):
-    editor = os.environ.get('EDITOR') or fail('$EDITOR not set')
+    editor = os.environ.get('EDITOR') or vd.fail('$EDITOR not set')
     args = [editor] + list(args)
     with SuspendCurses():
         return subprocess.call(args)

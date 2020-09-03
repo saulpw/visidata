@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, error, status, BaseSheet, Sheet, Column, fail, Progress, globalCommand, ALT
+from visidata import vd, VisiData, BaseSheet, Sheet, Column, Progress, globalCommand, ALT
 
 __all__ = ['rotateRange']
 
@@ -19,7 +19,7 @@ def rotateRange(n, idx, reverse=False):
         for r in itertools.chain(rng, rng2):
             prog.addProgress(1)
             if not wrapped and r in rng2:
-                status('search wrapped')
+                vd.status('search wrapped')
                 wrapped = True
             yield r
 
@@ -85,7 +85,7 @@ def nextColRegex(sheet, colregex):
         if re.search(colregex, c.name, sheet.regex_flags()):
             return i
 
-    fail('no column name matches /%s/' % colregex)
+    vd.fail('no column name matches /%s/' % colregex)
 
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left'),
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down'),

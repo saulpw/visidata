@@ -22,7 +22,7 @@ class SqliteSheet(Sheet):
 
     def execute(self, conn, sql, parms=None):
         parms = parms or []
-        status(sql)
+        vd.status(sql)
         return conn.execute(sql, parms)
 
     def iterload(self):
@@ -157,7 +157,7 @@ def save_sqlite(vd, p, *vsheets):
 
     conn.commit()
 
-    status("%s save finished" % p)
+    vd.status("%s save finished" % p)
 
 
 SqliteSheet.class_options.header = 0

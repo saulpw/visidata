@@ -5,7 +5,7 @@ import sys
 import tempfile
 import functools
 
-from visidata import VisiData, vd, asyncthread, status, fail, option, options, warning
+from visidata import VisiData, vd, asyncthread, option, options
 from visidata import Sheet, saveSheets, Path, Column
 
 option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard', sheettype=None)
@@ -23,32 +23,32 @@ def setslice(L, a, b, M):
 def copyRows(sheet, rows):
     vd.cliprows = list((sheet, i, r) for i, r in enumerate(rows))
     if not rows:
-        warning('no %s selected; clipboard emptied' % sheet.rowtype)
+        vd.warning('no %s selected; clipboard emptied' % sheet.rowtype)
     else:
-        status('copied %d %s to clipboard' % (len(rows), sheet.rowtype))
+        vd.status('copied %d %s to clipboard' % (len(rows), sheet.rowtype))
 
 @Sheet.api
 def copyCells(sheet, col, rows):
     vd.clipcells = [col.getDisplayValue(r) for r in rows]
     if not rows:
-        warning('no %s selected; clipboard emptied' % sheet.rowtype)
+        vd.warning('no %s selected; clipboard emptied' % sheet.rowtype)
         return
-    status('copied %d %s.%s to clipboard' % (len(rows), sheet.rowtype, col.name))
+    vd.status('copied %d %s.%s to clipboard' % (len(rows), sheet.rowtype, col.name))
 
 @Sheet.api
 def syscopyRows(sheet, rows):
     if not rows:
-        fail('no %s selected' % sheet.rowtype)
+        vd.fail('no %s selected' % sheet.rowtype)
     filetype = vd.input("copy %d %s to system clipboard as filetype: " % (len(rows), sheet.rowtype), value=options.save_filetype)
     saveToClipboard(sheet, rows, filetype)
-    status('copied %d %s to system clipboard' % (len(rows), sheet.rowtype))
+    vd.status('copied %d %s to system clipboard' % (len(rows), sheet.rowtype))
 
 @Sheet.api
 def syscopyCells(sheet, col, rows):
     if not rows:
-        fail('no %s selected' % sheet.rowtype)
+        vd.fail('no %s selected' % sheet.rowtype)
     clipboard().copy("\n".join(col.getDisplayValue(r) for r in rows))
-    status('copied %s from %d %s to system clipboard' % (col.name, len(rows), sheet.rowtype))
+    vd.status('copied %s from %d %s to system clipboard' % (col.name, len(rows), sheet.rowtype))
 
 @Sheet.api
 def delete_row(sheet, rowidx):
@@ -122,7 +122,7 @@ class _Clipboard:
         if name not in {'copy', 'paste'}:
             raise ValueError()
         name = 'clipboard_{}_cmd'.format(name)
-        cmd = getattr(options, name) or fail('options.{} not set'.format(name))
+        cmd = getattr(options, name) or vd.fail('options.{} not set'.format(name))
         return cmd.split()
 
     def paste(self):
@@ -156,7 +156,7 @@ class _Clipboard:
 
 
 def pasteFromClipboard(cols, rows):
-    text = clipboard().paste().strip() or error('system clipboard is empty')
+    text = clipboard().paste().strip() or vd.error('system clipboard is empty')
 
     vd.addUndoSetValues(cols, rows)
 
@@ -171,7 +171,7 @@ def saveToClipboard(sheet, rows, filetype=None):
     filetype = filetype or options.save_filetype
     vs = copy(sheet)
     vs.rows = rows
-    status('copying rows to clipboard')
+    vd.status('copying rows to clipboard')
     clipboard().save(vs, filetype)
 
 

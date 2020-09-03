@@ -69,7 +69,7 @@ class FreqTableSheet(PivotSheet):
             vs.name += "_"+valueNames(row.discrete_keys, row.numeric_key)
             vs.rows=copy(row.sourcerows)
             return vs
-        warning("no source rows")
+        vd.warning("no source rows")
 
     def openCell(self, col, row):
         return Sheet.openCell(self, col, row)
