@@ -135,8 +135,8 @@ class Plotter(BaseSheet):
     'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
     columns=[Column('_')]  # to eliminate errors outside of draw()
     rowtype='pixels'
-    def __init__(self, name='plotter', **kwargs):
-        super().__init__(name, **kwargs)
+    def __init__(self, *names, **kwargs):
+        super().__init__(*names, **kwargs)
         self.labels = []  # (x, y, text, attr, row)
         self.hiddenAttrs = set()
         self.needsRefresh = False
@@ -304,8 +304,8 @@ class Canvas(Plotter):
     topMarginPixels = 0
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
-    def __init__(self, name='canvas', source=None, **kwargs):
-        super().__init__(name, source=source, **kwargs)
+    def __init__(self, *names, **kwargs):
+        super().__init__(*names, **kwargs)
 
         self.canvasBox = None   # bounding box of entire canvas, in canvas units
         self.visibleBox = None  # bounding box of visible canvas, in canvas units
