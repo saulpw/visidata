@@ -1063,7 +1063,7 @@ globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean e
 
 BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = 50', 'split screen in half, so that second sheet on stack is visible in a second pane')
 BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0', 'close an already split screen, current pane full screens')
-BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]); options.disp_splitwin_pct = -options.disp_splitwin_pct', 'jump to other pane')
+BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]) if len(sheets) >=2 else fail("at least 2 sheets required for splitwin-swap"); options.disp_splitwin_pct = -options.disp_splitwin_pct', 'jump to other pane')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
