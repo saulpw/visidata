@@ -327,4 +327,4 @@ def loadConfigAndPlugins(vd, args):
     loadConfigFile(options.config, getGlobals())
 
 
-BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(options.config))', 'open options.config as text sheet')
+BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(Path(options.config)))', 'open options.config as text sheet')
