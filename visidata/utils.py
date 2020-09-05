@@ -35,7 +35,7 @@ class classproperty(property):
 
 
 def moveListItem(L, fromidx, toidx):
-    "Move element within list `Shift+L` and return element's new index."
+    "Move element within list `L` and return element's new index."
     toidx = min(max(toidx, 0), len(L)-1)
     fromidx = min(max(fromidx, 0), len(L)-1)
     r = L.pop(fromidx)

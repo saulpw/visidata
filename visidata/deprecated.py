@@ -3,17 +3,20 @@ import visidata
 
 alias = visidata.BaseSheet.bindkey
 
-def deprecated(ver):
+def deprecated(ver, instead=''):
     def decorator(func):
         def wrapper(*args, **kwargs):
             # ideally would include a stacktrace
-            visidata.warning(f'{func.__name__} deprecated since v{ver}')
+            msg = f'{func.__name__} deprecated since v{ver}'
+            if instead:
+                msg += f'; use {instead}'
+            visidata.warning(msg)
             return func(*args, **kwargs)
         return wrapper
     return decorator
 
 
-@deprecated('1.6')
+@deprecated('1.6', 'vd instead of vd()')
 @VisiData.api
 def __call__(vd):
     'Deprecated; use plain "vd"'
@@ -51,13 +54,13 @@ def exec_keystrokes(self, keystrokes, vdglobals=None):
 
 visidata.Sheet.exec_command = deprecated('2.0')(visidata.Sheet.execCommand)
 
-@deprecated('2.0')
+@deprecated('2.0', 'def open_<filetype> instead')
 @VisiData.api
 def filetype(vd, ext, constructor):
     'Add constructor to handle the given file type/extension.'
     globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p,name, source=p, filetype=ext))
 
-@deprecated('2.0')
+@deprecated('2.0', 'Sheet(namepart1, namepart2, ...)')
 @VisiData.global_api
 def joinSheetnames(vd, *sheetnames):
     'Concatenate sheet names in a standard way'
