@@ -52,4 +52,4 @@ class GitOverview(Sheet):
 
     def openCell(self, col, row):
         val = col.getValue(row)
-        return load_pyobj(getattr(val, '__name__', ''), val)
+        return PyobjSheet(getattr(val, '__name__', ''), source=val)

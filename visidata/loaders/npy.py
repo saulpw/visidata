@@ -51,7 +51,7 @@ class NpzSheet(ZipSheet):
         if isinstance(tbl, numpy.ndarray):
             return NpySheet(tablename, npy=tbl)
 
-        return load_pyobj(tablename, tbl)
+        return PyobjSheet(tablename, source=tbl)
 
 
 @VisiData.api

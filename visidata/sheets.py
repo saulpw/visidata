@@ -244,12 +244,12 @@ class TableSheet(BaseSheet):
     def openRow(self, row):
         k = self.keystr(row) or [self.cursorRowIndex]
         name = f'{self.name}[{k}]'
-        return vd.load_pyobj(name, source=tuple(c.getTypedValue(row) for c in self.visibleCols))
+        return vd.PyobjSheet(name, source=tuple(c.getTypedValue(row) for c in self.visibleCols))
 
     def openCell(self, col, row):
         k = self.keystr(row) or [str(self.cursorRowIndex)]
         name = f'{self.name}.{col.name}[{k}]'
-        return vd.load_pyobj(name, source=col.getTypedValue(row))
+        return vd.PyobjSheet(name, source=col.getTypedValue(row))
 
     @drawcache_property
     def colsByName(self):

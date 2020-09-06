@@ -66,6 +66,12 @@ def joinSheetnames(vd, *sheetnames):
     'Concatenate sheet names in a standard way'
     return visidata.options.name_joiner.join(str(x) for x in sheetnames)
 
+@deprecated('2.0', 'PyobjSheet')
+@VisiData.global_api
+def load_pyobj(*names, **kwargs):
+    return PyobjSheet(*names, **kwargs)
+
+visidata.addGlobals({'load_pyobj': load_pyobj})
 
 # The longnames on the left are deprecated for 2.0
 
