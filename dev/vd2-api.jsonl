@@ -1,51 +1,51 @@
 {"topic": "compute", "class": "Column", "func": "setValue"}
-{"topic": "", "class": "Sheet", "func": "addRow"}
-{"topic": "", "class": "Column", "func": "calcValue"}
-{"topic": "", "class": "Sheet", "func": "openRow"}
-{"topic": "", "class": "Sheet", "func": "newRow"}
-{"topic": "", "class": "BaseSheet", "func": "draw"}
-{"topic": "", "class": "vd", "func": "drawall", "api": "change to draw(), and vd.draw to draw_one?"}
-{"topic": "", "class": "Column", "func": "recalc", "api": "?"}
-{"topic": "", "class": "Sheet", "func": "recalc", "api": "?"}
+{"topic": "crud", "class": "Sheet", "func": "addRow"}
+{"topic": "compute", "class": "Column", "func": "calcValue"}
+{"topic": "sheets", "class": "Sheet", "func": "openRow"}
+{"topic": "sheet", "class": "Sheet", "func": "newRow"}
+{"topic": "terminal", "class": "BaseSheet", "func": "draw"}
+{"topic": "terminal", "class": "vd", "func": "drawall", "api": "change to draw(), and vd.draw to draw_one?"}
+{"topic": "compute", "class": "Column", "func": "recalc", "api": "?"}
+{"topic": "compute", "class": "Sheet", "func": "recalc", "api": "?"}
 {"topic": "sheets", "class": "vd", "func": "beforeExecHooks"}
-{"topic": "sheets", "func": "UNLOADED"}
+{"topic": "sheets", "class": "", "func": "UNLOADED"}
 {"topic": "defermods", "class": "", "func": "preloadHook"}
 {"topic": "defermods", "class": "", "func": "putChanges"}
-{"topic": "", "class": "vd", "func": "getSheet"}
-{"topic": "", "class": "Canvas", "func": "plotpixel"}
-{"topic": "", "class": "Sheet", "func": "keystr"}
-{"topic": "replay", "class": "Sheet", "func": "moveToRow"}
-{"topic": "replay", "class": "Sheet", "func": "moveToCol"}
-{"topic": "", "class": "vd", "func": "cmdlog"}
-{"topic": "", "class": "BaseSheet", "func": "cmdlog"}
-{"topic": "", "class": "Column", "func": "getValue"}
+{"topic": "sheets", "class": "vd", "func": "getSheet"}
+{"topic": "canvas", "class": "Canvas", "func": "plotpixel"}
+{"topic": "keys", "class": "Sheet", "func": "keystr"}
+{"topic": "cmdlog", "class": "Sheet", "func": "moveToRow"}
+{"topic": "cmdlog", "class": "Sheet", "func": "moveToCol"}
+{"topic": "cmdlog", "class": "vd", "func": "cmdlog"}
+{"topic": "cmdlog", "class": "BaseSheet", "func": "cmdlog"}
+{"topic": "compute", "class": "Column", "func": "getValue"}
 {"topic": "crud", "class": "Sheet", "func": "addNewRows", "api": "y"}
 {"topic": "defer", "class": "Sheet", "func": "deleteBy", "api": "y"}
 {"topic": "loading", "class": "Path", "func": "given"}
-{"topic": "", "class": "Options", "func": "unset"}
-{"topic": "", "class": "Options", "func": "set"}
-{"topic": "", "class": "Options", "func": "setdefault"}
-{"topic": "", "class": "Sheet", "func": "topRowIndex"}
-{"topic": "", "class": "BaseSheet", "func": "reload"}
-{"topic": "", "class": "TableSheet", "func": "iterload"}
-{"topic": "", "class": "Column", "func": "putValue"}
+{"topic": "settings", "class": "Options", "func": "unset"}
+{"topic": "settings", "class": "Options", "func": "set"}
+{"topic": "settings", "class": "Options", "func": "setdefault"}
+{"topic": "layout", "class": "Sheet", "func": "topRowIndex"}
+{"topic": "loading", "class": "BaseSheet", "func": "reload"}
+{"topic": "loading", "class": "TableSheet", "func": "iterload"}
+{"topic": "compute", "class": "Column", "func": "putValue"}
 {"topic": "sheets", "class": "BaseSheet", "func": "nRows"}
-{"topic": "", "class": "Sheet", "func": "openCell"}
+{"topic": "sheets", "class": "Sheet", "func": "openCell"}
 {"topic": "selection", "class": "Sheet", "func": "selectRow"}
 {"topic": "selection", "class": "Sheet", "func": "unselectRow"}
 {"topic": "cursor", "class": "BaseSheet", "func": "checkCursor"}
 {"topic": "curses", "class": "BaseSheet", "func": "refresh"}
 {"topic": "cursor", "class": "BaseSheet", "func": "cursorRow"}
-{"topic": "", "class": "BaseSheet", "func": "evalexpr"}
-{"class": "Canvas", "func": "cursorBox"}
-{"topic": "", "class": "Canvas", "func": "plotterCursorBox"}
-{"topic": "", "class": "BaseSheet", "func": "statusLine"}
-{"topic": "", "class": "Canvas", "func": "canvasMouse"}
-{"topic": "", "class": "Canvas", "func": "zoomTo"}
-{"topic": "", "class": "Canvas", "func": "resetBounds"}
-{"topic": "", "class": "Column", "func": "format"}
+{"topic": "expr", "class": "BaseSheet", "func": "evalexpr"}
+{"topic": "canvas", "class": "Canvas", "func": "cursorBox"}
+{"topic": "canvas", "class": "Canvas", "func": "plotterCursorBox"}
+{"topic": "status", "class": "BaseSheet", "func": "statusLine"}
+{"topic": "canvas", "class": "Canvas", "func": "canvasMouse"}
+{"topic": "canvas", "class": "Canvas", "func": "zoomTo"}
+{"topic": "canvas", "class": "Canvas", "func": "resetBounds"}
+{"topic": "compute", "class": "Column", "func": "format"}
 {"topic": "sorting", "class": "Sheet", "func": "sort"}
-{"topic": "", "class": "Sheet", "func": "rowid"}
+{"topic": "loading", "class": "Sheet", "func": "rowid"}
 {"topic": "selection", "class": "Sheet", "func": "isSelected"}
 {"topic": "selection", "class": "Sheet", "func": "nSelected"}
 {"topic": "selection", "class": "Sheet", "func": "selectedRows"}
@@ -57,13 +57,13 @@
 {"topic": "loading", "class": "Path", "func": "exists"}
 {"topic": "eval", "class": "", "func": "addGlobals"}
 {"topic": "eval", "class": "", "func": "getGlobals"}
-{"topic": "", "class": "vd", "func": "editline"}
-{"topic": "", "class": "vd", "func": "editText"}
-{"topic": "", "class": "vd", "func": "input"}
-{"topic": "", "class": "vd", "func": "confirm"}
-{"topic": "", "class": "Sheet", "func": "editCell"}
+{"topic": "edit", "class": "vd", "func": "editline"}
+{"topic": "edit", "class": "vd", "func": "editText"}
+{"topic": "edit", "class": "vd", "func": "input"}
+{"topic": "edit", "class": "vd", "func": "confirm"}
+{"topic": "edit", "class": "Sheet", "func": "editCell"}
 {"topic": "types", "class": "", "func": "anytype"}
-{"topic": "types", "func": "vdtype"}
+{"topic": "types", "class": "", "func": "vdtype"}
 {"topic": "types", "class": "", "func": "numericFormatter"}
 {"topic": "types", "class": "", "func": "isNumeric"}
 {"topic": "types", "class": "", "func": "floatsi"}
@@ -77,52 +77,52 @@
 {"topic": "options", "class": "BaseSheet", "func": "options"}
 {"topic": "sheets", "class": "BaseSheet", "func": "__copy__"}
 {"topic": "sheets", "class": "BaseSheet", "func": "__len__"}
-{"class": "BaseSheet", "func": "windowHeight"}
-{"class": "BaseSheet", "func": "windowWidth"}
-{"topic": "", "class": "BaseSheet", "func": "execCommand"}
-{"class": "BaseSheet", "func": "name"}
-{"topic": "", "class": "BaseSheet", "func": "ensureLoaded"}
-{"topic": "", "class": "vd", "func": "redraw"}
-{"topic": "", "class": "vd", "func": "sheet"}
+{"topic": "terminal", "class": "BaseSheet", "func": "windowHeight"}
+{"topic": "terminal", "class": "BaseSheet", "func": "windowWidth"}
+{"topic": "commands", "class": "BaseSheet", "func": "execCommand"}
+{"topic": "sheet", "class": "BaseSheet", "func": "name"}
+{"topic": "loader", "class": "BaseSheet", "func": "ensureLoaded"}
+{"topic": "terminal", "class": "vd", "func": "redraw"}
+{"topic": "sheets", "class": "vd", "func": "sheet"}
 {"topic": "canvas", "class": "", "func": "BoundingBox"}
-{"topic": "", "class": "Canvas", "func": "plotlabel", "api": "label?"}
-{"topic": "", "class": "Canvas", "func": "plotterMouse"}
-{"topic": "", "class": "Canvas", "func": "rowsWithin"}
-{"topic": "", "class": "Canvas", "func": "point"}
-{"topic": "", "class": "Canvas", "func": "line"}
-{"topic": "", "class": "Canvas", "func": "polyline"}
-{"topic": "", "class": "Canvas", "func": "polygon"}
-{"topic": "", "class": "Canvas", "func": "qcurve"}
-{"topic": "", "class": "Canvas", "func": "label"}
-{"topic": "", "class": "Canvas", "func": "fixPoint"}
-{"topic": "", "class": "vd", "func": "chooseOne"}
-{"topic": "", "class": "vd", "func": "choose"}
-{"topic": "", "class": "vd", "func": "chooseMany"}
-{"topic": "", "class": "vd", "func": "replayOne"}
-{"topic": "", "class": "vd", "func": "replay"}
-{"topic": "", "class": "vd", "func": "getLastArgs"}
-{"topic": "", "class": "vd", "func": "setLastArgs"}
-{"topic": "", "class": "vd", "func": "set_option"}
-{"topic": "", "class": "BaseSheet", "func": "cmdlog_sheet"}
+{"topic": "canvas", "class": "Canvas", "func": "plotlabel", "api": "label?"}
+{"topic": "canvas", "class": "Canvas", "func": "plotterMouse"}
+{"topic": "canvas", "class": "Canvas", "func": "rowsWithin"}
+{"topic": "canvas", "class": "Canvas", "func": "point"}
+{"topic": "canvas", "class": "Canvas", "func": "line"}
+{"topic": "canvas", "class": "Canvas", "func": "polyline"}
+{"topic": "canvas", "class": "Canvas", "func": "polygon"}
+{"topic": "canvas", "class": "Canvas", "func": "qcurve"}
+{"topic": "canvas", "class": "Canvas", "func": "label"}
+{"topic": "canvas", "class": "Canvas", "func": "fixPoint"}
+{"topic": "input", "class": "vd", "func": "chooseOne"}
+{"topic": "input", "class": "vd", "func": "choose"}
+{"topic": "input", "class": "vd", "func": "chooseMany"}
+{"topic": "cmdlog", "class": "vd", "func": "replayOne"}
+{"topic": "cmdlog", "class": "vd", "func": "replay"}
+{"topic": "cmdlog", "class": "vd", "func": "getLastArgs"}
+{"topic": "cmdlog", "class": "vd", "func": "setLastArgs"}
+{"topic": "settings", "class": "vd", "func": "set_option"}
+{"topic": "cmdlog", "class": "BaseSheet", "func": "cmdlog_sheet"}
 {"topic": "colors", "class": "ColorMaker", "func": "setup"}
 {"topic": "colors", "class": "ColorMaker", "func": "['color_foo']"}
 {"topic": "colors", "class": "ColorMaker", "func": ".color_foo"}
-{"topic": "terminal", "func": "SuspendCurses"}
-{"topic": "", "class": "Column", "func": "type"}
-{"topic": "", "class": "Column", "func": "fmtstr"}
-{"topic": "", "class": "Column", "func": "expr"}
-{"topic": "", "class": "Column", "func": "hide"}
-{"topic": "", "class": "Column", "func": "hidden"}
-{"topic": "", "class": "Column", "func": "getTypedValue"}
-{"topic": "", "class": "Column", "func": "setCache"}
-{"topic": "", "class": "Column", "func": "getCell"}
-{"topic": "", "class": "Column", "func": "getDisplayValue"}
-{"topic": "", "class": "Column", "func": "setValues"}
-{"topic": "", "class": "Column", "func": "setValuesTyped"}
-{"topic": "", "class": "class", "func": "ColumnAttr"}
-{"topic": "", "class": "class", "func": "ColumnItem"}
-{"topic": "", "class": "class", "func": "SubColumnAttr"}
-{"topic": "", "class": "class", "func": "SubColumnItem"}
+{"topic": "terminal", "class": "", "func": "SuspendCurses"}
+{"topic": "compute", "class": "Column", "func": "type"}
+{"topic": "compute", "class": "Column", "func": "fmtstr"}
+{"topic": "compute", "class": "Column", "func": "expr"}
+{"topic": "columns", "class": "Column", "func": "hide"}
+{"topic": "columns", "class": "Column", "func": "hidden"}
+{"topic": "compute", "class": "Column", "func": "getTypedValue"}
+{"topic": "compute", "class": "Column", "func": "setCache"}
+{"topic": "compute", "class": "Column", "func": "getCell"}
+{"topic": "compute", "class": "Column", "func": "getDisplayValue"}
+{"topic": "compute", "class": "Column", "func": "setValues"}
+{"topic": "compute", "class": "Column", "func": "setValuesTyped"}
+{"topic": "columns", "class": "class", "func": "ColumnAttr"}
+{"topic": "columns", "class": "class", "func": "ColumnItem"}
+{"topic": "columns", "class": "class", "func": "SubColumnAttr"}
+{"topic": "columns", "class": "class", "func": "SubColumnItem"}
 {"topic": "open", "class": "", "func": "inputFilename"}
 {"topic": "open", "class": "", "func": "inputPath"}
 {"topic": "loading", "class": "vd", "func": "openPath"}
@@ -144,7 +144,7 @@
 {"topic": "errors", "class": "Column", "func": "isError"}
 {"topic": "editing", "class": "vd", "func": "launchEditor"}
 {"topic": "errors", "class": "vd", "func": "exceptionCaught"}
-{"topic": "errors", "func": "ExpectedException"}
+{"topic": "errors", "class": "", "func": "ExpectedException"}
 {"topic": "expr", "class": "Column", "func": "setValuesFromExpr"}
 {"topic": "input", "class": "", "func": "inputExpr"}
 {"topic": "api", "class": "Extensible", "func": "api"}
@@ -154,20 +154,20 @@
 {"topic": "api", "class": "Extensible", "func": "cached_property"}
 {"topic": "api", "class": "Extensible", "func": "clear_all_caches", "api": "?"}
 {"topic": "api", "class": "Extensible", "func": "cache"}
-{"topic": "", "class": "GraphSheet", "func": "formatX"}
-{"topic": "", "class": "GraphSheet", "func": "formatY"}
-{"topic": "", "class": "GraphSheet", "func": "parseX"}
-{"topic": "", "class": "GraphSheet", "func": "parseY"}
-{"topic": "", "class": "Column", "func": "setWidth"}
+{"topic": "graph", "class": "GraphSheet", "func": "formatX"}
+{"topic": "graph", "class": "GraphSheet", "func": "formatY"}
+{"topic": "graph", "class": "GraphSheet", "func": "parseX"}
+{"topic": "graph", "class": "GraphSheet", "func": "parseY"}
+{"topic": "columns", "class": "Column", "func": "setWidth"}
 {"topic": "selection", "class": "Sheet", "func": "selectByIndex"}
 {"topic": "selection", "class": "Sheet", "func": "unselectByIndex"}
 {"topic": "selection", "class": "Sheet", "func": "toggleByIndex"}
-{"topic": "", "class": "", "func": "view_pandas", "api": "todo: bring into view()"}
-{"topic": "", "class": "(toplevel)", "func": "optalias"}
-{"topic": "", "class": "(toplevel)", "func": "run"}
-{"class": "class", "func": "VisiDataMetaSheet"}
+{"topic": "pandas", "class": "", "func": "view_pandas", "api": "todo: bring into view()"}
+{"topic": "settings", "class": "(toplevel)", "func": "optalias"}
+{"topic": "usage", "class": "(toplevel)", "func": "run"}
+{"topic": "meta", "class": "class", "func": "VisiDataMetaSheet"}
 {"topic": "helper", "class": "", "func": "rotateRange"}
-{"topic": "", "class": "Sheet", "func": "moveToNextRow"}
+{"topic": "cursor", "class": "Sheet", "func": "moveToNextRow"}
 {"topic": "loading", "class": "Path", "func": "open_text"}
 {"topic": "loading", "class": "Path", "func": "read_text"}
 {"topic": "loading", "class": "Path", "func": "open_bytes"}
@@ -176,42 +176,42 @@
 {"topic": "loading", "class": "Path", "func": "is_url"}
 {"topic": "loading", "class": "Path", "func": "scheme"}
 {"topic": "loading", "class": "Path", "func": "with_name"}
-{"topic": "", "class": "(toplevel)", "func": "view", "api": "vd?"}
-{"topic": "", "class": "", "func": "load_pyobj", "api": "PyobjSheet"}
+{"topic": "usage", "class": "(toplevel)", "func": "view", "api": "vd?"}
+{"topic": "sheets", "class": "(toplevel)", "func": "PyobjSheet"}
 {"topic": "saving", "class": "", "func": "saveSheets"}
 {"topic": "selection", "class": "", "func": "toggle", "api": "toggleSelect? toggleRows?"}
 {"topic": "selection", "class": "Sheet", "func": "selectByIdx"}
 {"topic": "selection", "class": "Sheet", "func": "unselectByIdx"}
 {"topic": "selection", "class": "Sheet", "func": "gatherBy"}
 {"topic": "selection", "class": "Sheet", "func": "someSelectedRows"}
-{"topic": "settings", "func": "option"}
+{"topic": "settings", "class": "", "func": "option"}
 {"topic": "commands", "class": "BaseSheet", "func": "addCommand"}
 {"topic": "settings", "class": "", "func": "bindkey"}
 {"topic": "settings", "class": "", "func": "unbindkey"}
 {"topic": "settings", "class": "", "func": "loadConfigFile", "api": "vd?"}
 {"topic": "color", "class": "Sheet", "func": "addColorizer"}
 {"topic": "color", "class": "Sheet", "func": "removeColorizer"}
-{"topic": "", "class": "Sheet", "func": "column"}
+{"topic": "columns", "class": "Sheet", "func": "column"}
 {"topic": "streaming", "class": "Sheet", "func": "iterrows"}
-{"topic": "", "class": "Sheet", "func": "cursorCol"}
-{"topic": "", "class": "Sheet", "func": "visibleRows"}
-{"topic": "", "class": "Sheet", "func": "visibleCols"}
-{"topic": "", "class": "Sheet", "func": "keyCols"}
-{"topic": "", "class": "Sheet", "func": "cursorColIndex"}
-{"topic": "", "class": "Sheet", "func": "nonKeyVisibleCols"}
-{"topic": "", "class": "Sheet", "func": "cursorCell"}
-{"topic": "", "class": "Sheet", "func": "cursorDisplay"}
-{"topic": "", "class": "Sheet", "func": "cursorTypedValue"}
-{"topic": "", "class": "Sheet", "func": "cursorValue"}
-{"topic": "", "class": "Sheet", "func": "nCols"}
-{"topic": "", "class": "Sheet", "func": "nVisibleCols"}
-{"topic": "", "class": "Sheet", "func": "cursorDown"}
-{"topic": "", "class": "Sheet", "func": "cursorRight"}
-{"topic": "", "class": "Sheet", "func": "addColumn"}
-{"topic": "", "class": "Sheet", "func": "setKeys"}
-{"topic": "", "class": "Sheet", "func": "unsetKeys"}
-{"topic": "", "class": "Sheet", "func": "rowkey"}
-{"topic": "", "class": "Sheet", "func": "calcColLayout", "api": "?"}
+{"topic": "cursor", "class": "Sheet", "func": "cursorCol"}
+{"topic": "layout", "class": "Sheet", "func": "visibleRows"}
+{"topic": "layout", "class": "Sheet", "func": "visibleCols"}
+{"topic": "keys", "class": "Sheet", "func": "keyCols"}
+{"topic": "cursor", "class": "Sheet", "func": "cursorColIndex"}
+{"topic": "layout", "class": "Sheet", "func": "nonKeyVisibleCols"}
+{"topic": "compute", "class": "Sheet", "func": "cursorCell"}
+{"topic": "compute", "class": "Sheet", "func": "cursorDisplay"}
+{"topic": "compute", "class": "Sheet", "func": "cursorTypedValue"}
+{"topic": "compute", "class": "Sheet", "func": "cursorValue"}
+{"topic": "sheet", "class": "Sheet", "func": "nCols"}
+{"topic": "layout", "class": "Sheet", "func": "nVisibleCols"}
+{"topic": "cursor", "class": "Sheet", "func": "cursorDown"}
+{"topic": "cursor", "class": "Sheet", "func": "cursorRight"}
+{"topic": "crud", "class": "Sheet", "func": "addColumn"}
+{"topic": "keys", "class": "Sheet", "func": "setKeys"}
+{"topic": "keys", "class": "Sheet", "func": "unsetKeys"}
+{"topic": "keys", "class": "Sheet", "func": "rowkey"}
+{"topic": "layout", "class": "Sheet", "func": "calcColLayout", "api": "?"}
 {"topic": "sheets", "class": "vd", "func": "replace"}
 {"topic": "sheets", "class": "vd", "func": "remove"}
 {"topic": "sheets", "class": "vd", "func": "push"}
@@ -224,7 +224,7 @@
 {"topic": "status", "class": "vd", "func": "debug"}
 {"topic": "status", "class": "BaseSheet", "func": "leftStatus"}
 {"topic": "status", "class": "vd", "func": "rightStatus"}
-{"topic": "", "class": "class", "func": "TextSheet"}
+{"topic": "sheets", "class": "class", "func": "TextSheet"}
 {"topic": "async", "class": "decorator", "func": "asynccache"}
 {"topic": "async", "class": "Progress", "func": "addProgress"}
 {"topic": "async", "class": "vd", "func": "Progress"}
