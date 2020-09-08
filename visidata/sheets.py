@@ -1052,6 +1052,7 @@ Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.p
 
 # when diving into a sheet, remove the index unless it is precious
 SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
+IndexSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
