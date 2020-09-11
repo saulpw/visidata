@@ -133,7 +133,7 @@ class OptionsObject:
 
     def _get(self, k, obj=None):
         'Return Option object for k in context of obj. Cache result until any set().'
-        opt = self._cache.get((k, obj), None)
+        opt = self._cache.get((k, obj or vd.sheet), None)
         if opt is None:
             opt = self._opts._get(k, obj)
             self._cache[(k, obj or vd.sheet)] = opt
