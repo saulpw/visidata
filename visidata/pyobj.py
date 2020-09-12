@@ -73,7 +73,7 @@ def _(sampleValue, col, vals):
     ]
 
 def _addExpandedColumns(col, rows, idx):
-    isNull = isNullFunc()
+    isNull = col.sheet.isNullFunc()
     nonNulls = [
         col.getTypedValue(row)
         for row in rows

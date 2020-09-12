@@ -4,7 +4,7 @@ from copy import copy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (options, theme, isNullFunc, isNumeric, Column, option, namedlist, SettableColumn,
+from visidata import (options, theme, isNumeric, Column, option, namedlist, SettableColumn,
 TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
 vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
@@ -646,7 +646,7 @@ class TableSheet(BaseSheet):
                 return
 
         drawparams = {
-            'isNull': isNullFunc(),
+            'isNull': self.isNullFunc(),
 
             'topsep': options.disp_rowtop_sep,
             'midsep': options.disp_rowmid_sep,

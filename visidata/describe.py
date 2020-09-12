@@ -66,7 +66,7 @@ class DescribeSheet(ColumnsSheet):
 
     def reloadColumn(self, srccol):
             d = self.describeData[srccol]
-            isNull = isNullFunc()
+            isNull = srccol.sheet.isNullFunc()
 
             vals = list()
             d['errors'] = list()

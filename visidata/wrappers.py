@@ -3,14 +3,15 @@
 from copy import copy
 import functools
 
-from visidata import options, stacktrace, option
+from visidata import options, stacktrace, option, BaseSheet
 
-__all__ = ['isNullFunc', 'forward', 'wrmap', 'wrapply', 'TypedWrapper', 'TypedExceptionWrapper']
+__all__ = ['forward', 'wrmap', 'wrapply', 'TypedWrapper', 'TypedExceptionWrapper']
 
 option('null_value', None, 'a value to be counted as null', replay=True)
 
-def isNullFunc():
-    nullv = options.null_value
+@BaseSheet.api
+def isNullFunc(sheet):
+    nullv = sheet.options.null_value
     if nullv is None:
         return lambda v: v is None or isinstance(v, TypedWrapper)
     return lambda v, nullv=nullv: v is None or v == nullv or isinstance(v, TypedWrapper)
