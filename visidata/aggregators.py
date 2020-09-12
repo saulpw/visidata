@@ -2,14 +2,14 @@ import math
 import functools
 import collections
 
-from visidata import Progress, isNullFunc, Column
+from visidata import Progress, Column
 from visidata import *
 
 
 @Column.api
 def getValueRows(self, rows):
     'Generate (val, row) for the given `rows` at this Column, excluding errors and nulls.'
-    f = isNullFunc()
+    f = self.sheet.isNullFunc()
 
     for r in Progress(rows, 'calculating'):
         try:

@@ -17,7 +17,7 @@ class MeltedSheet(Sheet):
     @asyncthread
     def reload(self):
         self.columns = []
-        isNull = isNullFunc()
+        isNull = self.isNullFunc()
 
         sheet = self.source
         for c in sheet.keyCols:

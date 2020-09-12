@@ -7,7 +7,7 @@ def fillNullValues(vd, col, rows):
     'Fill null cells in col with the previous non-null value'
     lastval = None
     oldvals = [] # for undo
-    isNull = isNullFunc()
+    isNull = col.sheet.isNullFunc()
     n = 0
     rowsToFill = list(rows)
     for r in Progress(col.sheet.rows, 'filling'):  # loop over all rows
