@@ -212,8 +212,8 @@ class SheetNamedTuple(PythonSheet):
     rowtype = 'values'
     columns = [ColumnItem('name', 0), ColumnItem('value', 1)]
 
-    def __init__(self, name, src, **kwargs):
-        super().__init__(name, source=src, **kwargs)
+    def __init__(self, *names, **kwargs):
+        super().__init__(*names, **kwargs)
 
     def reload(self):
         self.rows = list(zip(self.source._fields, self.source))
