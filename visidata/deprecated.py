@@ -71,6 +71,15 @@ def joinSheetnames(vd, *sheetnames):
 def load_pyobj(*names, **kwargs):
     return PyobjSheet(*names, **kwargs)
 
+@deprecated('2.0', 'PyobjSheet')
+@VisiData.global_api
+def push_pyobj(name, pyobj):
+    vs = PyobjSheet(name, source=pyobj)
+    if vs:
+        return vd.push(vs)
+    else:
+        vd.error("cannot push '%s' as pyobj" % type(pyobj).__name__)
+
 visidata.addGlobals({'load_pyobj': load_pyobj})
 
 # The longnames on the left are deprecated for 2.0
