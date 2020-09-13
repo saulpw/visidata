@@ -8,8 +8,6 @@ assignees: ''
 ---
 
 We want to hear your ideas about where VisiData can go and anything you think could be made smoother.
+We consider all ideas that are feasible, but please don't be offended if we close it--we generally limit our open issues to bugs and small concrete feature requests that are part of the planned roadmap.
 
-Please keep in mind that VisiData is not a commercial project and we work on it voluntarily in addition to our paid jobs.
-We generally limit our open issues to bugs and small concrete feature requests that are part of the v2.0 roadmap.
-
-If this feature means a lot to you, the reward for the 'True Believer' level on [patreon](https://www.patreon.com/saulpw/) is available to satisfy this sort of request.
+If you are a subscriber at the 'Workflow Optimist' level on [Patreon](https://www.patreon.com/saulpw/), you can designate this feature as one you would like to remain open, by adding an "[optimist]" tag in the summary line.
