@@ -2,6 +2,8 @@ from functools import singledispatch
 
 from visidata import *
 
+__all__ = ['PythonSheet', 'expand_cols_deep', 'deduceType', 'closeColumn', 'ListOfDictSheet', 'SheetDict', 'PyobjSheet']
+
 option('visibility', 0, 'visibility level')
 option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
 
@@ -298,6 +300,18 @@ class PyobjSheet(PythonSheet):
         v = getattr(self.source, row)
         return PyobjSheet(self.name + "." + str(row), source=v() if callable(v) else v)
 
+@TableSheet.api
+def openRow(sheet, row):
+    k = sheet.keystr(row) or [sheet.cursorRowIndex]
+    name = f'{sheet.name}[{k}]'
+    return PyobjSheet(name, source=tuple(c.getTypedValue(row) for c in sheet.visibleCols))
+
+@TableSheet.api
+def openCell(sheet, col, row):
+    k = sheet.keystr(row) or [str(sheet.cursorRowIndex)]
+    name = f'{sheet.name}.{col.name}[{k}]'
+    return PyobjSheet(name, source=col.getTypedValue(row))
+
 
 globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); push_pyobj(expr, evalexpr(expr, None))', 'evaluate Python expression and open result as Python object')
 globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope')
@@ -313,6 +327,11 @@ Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol],
 Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)')
 
 Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
+
+Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
+Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
+Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
+Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
 
 PyobjSheet.addCommand('v', 'visibility', 'sheet.options.visibility = 0 if sheet.options.visibility else 2; reload()', 'toggle show/hide for methods and hidden properties')
 PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload()', 'show methods and hidden properties')

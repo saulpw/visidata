@@ -241,16 +241,6 @@ class TableSheet(BaseSheet):
     def newRow(self):
         return type(self)._rowtype()
 
-    def openRow(self, row):
-        k = self.keystr(row) or [self.cursorRowIndex]
-        name = f'{self.name}[{k}]'
-        return vd.PyobjSheet(name, source=tuple(c.getTypedValue(row) for c in self.visibleCols))
-
-    def openCell(self, col, row):
-        k = self.keystr(row) or [str(self.cursorRowIndex)]
-        name = f'{self.name}.{col.name}[{k}]'
-        return vd.PyobjSheet(name, source=col.getTypedValue(row))
-
     @drawcache_property
     def colsByName(self):
         'Return dict of colname:col'
@@ -1043,12 +1033,6 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of current column to SI float')
-
-Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
-Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
-Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
-Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
-
 
 # when diving into a sheet, remove the index unless it is precious
 IndexSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
