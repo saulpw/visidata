@@ -120,6 +120,7 @@ Define a new option.
 
    - `optname`: name of option
         - All option names are in a global namespace.
+        - The maximum option name length should be 20.
         - Use '\_' for a word separator.
         - Theme option names should start with `disp\_` for a displayed string and `color\_` for a color option (see [Colors]()).
         - Otherwise, option names within a plugin should all start with the same short module abbreviation, like `mod\_`.
