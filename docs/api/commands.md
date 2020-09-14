@@ -35,6 +35,8 @@ This is because there are a lot of entries in this mapping, some of which are ex
 
 - Note that sheet-specific commands trump globally set commands for keybindings.
 
+Note: This means that using unqualified `options` in command execstr will use the sheet-specific options context for the current sheet.
+
 ### API
 
 - `<SheetType>.addCommand(binding, longname, execstr, helpstr)`
