@@ -13,12 +13,12 @@ Most features can be self-contained in their own .py file, so that the feature i
 
 ### Plugin file structure
 
-A plugin is usually a single .py file, installed in the `$HOME/.visidata/plugins/` directory on the local computer.
+A plugin is usually a single .py file, installed in the `$HOME/.visidata/plugins/` directory on the same computer as visidata.
 `import` statements for all enabled plugins go into `$HOME/.visidata/plugins/__init__.py`.
 Plugins can be installed and uninstalled in the [Plugins Sheet](), which maintains the entries in this `__init__.py` file.
 At startup, VisiData automatically imports this `plugins` package.
 
-Plugins often start as a small snippet in .visidatarc, and then migrate the code to a separate file to share with other people.
+Plugins often start as a small snippet in `.visidatarc`, and then migrate the code to a separate file to share with other people.
 The actual code in either case should be identical.
 
 ### Complete "Hello world" plugin example
@@ -134,13 +134,13 @@ For example, `csv.reader(fp, **sheet.options('csv_'))` will pass all csv options
 vd.option('mod_optname', 'default value', 'One line description of option effects', replay=True)
 
 # option set globally
-vd.options.color_current_row = 'red underline'
+vd.options.color_current_row = 'reverse green'
 
 # option set on sheet only
-sheet.options.color_current_row = 'red underline'
+sheet.options.color_current_row = 'bold blue'
 
 # option set for all DirSheets
-DirSheet.class_options.color_current_row = 'red underline'
+DirSheet.class_options.color_current_row = 'underline'
 
 # option without regard to a current sheet (global override only)
 vd.options.disp_hello = 'こんにちは世界'
