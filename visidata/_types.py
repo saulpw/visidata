@@ -106,7 +106,7 @@ def currency(*args):
 
 
 class vlen(int):
-    def __new__(cls, v):
+    def __new__(cls, v=0):
         if isinstance(v, (vlen, int, float)):
             return super(vlen, cls).__new__(cls, v)
         else:
