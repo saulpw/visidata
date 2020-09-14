@@ -13,7 +13,7 @@ Most features can be self-contained in their own .py file, so that the feature i
 
 ### Plugin file structure
 
-A plugin is usually a single .py files, installed in the `$HOME/.visidata/plugins/` directory on the local computer.
+A plugin is usually a single .py file, installed in the `$HOME/.visidata/plugins/` directory on the local computer.
 `import` statements for all enabled plugins go into `$HOME/.visidata/plugins/__init__.py`.
 Plugins can be installed and uninstalled in the [Plugins Sheet](), which maintains the entries in this `__init__.py` file.
 At startup, VisiData automatically imports this `plugins` package.
@@ -22,6 +22,8 @@ Plugins often start as a small snippet in .visidatarc, and then migrate the code
 The actual code in either case should be identical.
 
 ### Complete "Hello world" plugin example
+
+To follow-along, this code can be placed in `~/.visidatarc`:
 
 ~~~
 '''This plugin adds the `hello-world` command to all sheets, bound to '0' by default.
@@ -43,7 +45,7 @@ Notes:
 
 ### Installing plugins
 
-[User docs: Installing a Plugin]()
+[User docs: Installing a Plugin](/docs/plugins/)
 
 
 ## Options
@@ -120,9 +122,9 @@ For example, `csv.reader(fp, **sheet.options('csv_'))` will pass all csv options
         - A default value of None allows any type.
 
    - `helpstr`: short description of option
-        - shown in command list (`g Ctrl+H`)
+        - shown in **Options Sheet** (`Shift+O`)
 
-   - `replay` (keyword arg, bool, default False) indicates if changes to the option should be stored in the command log.
+   - `replay` (keyword arg, bool, default False) indicates if changes to the option should be stored in the **Command Log**.
         - If the option affects loading, transforming, or saving, then set `replay` to True.
         - In general, if an option affects the saved output, it should be replayed.
 
@@ -153,5 +155,5 @@ vd.status(sheet.options.disp_hello)
 
 ### See Also:
 
-- `options-global` (`Shift+O`) for options sheet with no context.
-- `options-sheet` (`z Shift+O`) for options sheet with this sheet's context.
+- `options-global` (`Shift+O`) for **Options Sheet** sheet with no context.
+- `options-sheet` (`z Shift+O`) for **Options Sheet** with this sheet's context.
