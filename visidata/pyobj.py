@@ -258,7 +258,7 @@ class PyobjSheet(PythonSheet):
 
     def __new__(cls, *names, **kwargs):
         'Return Sheet object of appropriate type for given sources in `args`.'
-        pyobj=kwargs['source']
+        pyobj=kwargs.get('source', object())
         if isinstance(pyobj, list) or isinstance(pyobj, tuple):
             if getattr(pyobj, '_fields', None):  # list of namedtuple
                 return SheetNamedTuple(*names, **kwargs)
