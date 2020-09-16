@@ -5,6 +5,9 @@
 ## deprecated
 - complete removal of `status` and `statuses` from deprecated
 
+## Additions and Improvements
+- .vcf (VCard) loader
+
 # v2.-4 (XXXX-XX-XX)
 
 ## Additions and Improvements

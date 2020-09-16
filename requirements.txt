@@ -21,5 +21,6 @@ dnslib              # pcap
 namestand           # graphviz
 datapackage         # frictionless .json
 pdfminer.six        # pdf
+vobject             # vcf
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb
