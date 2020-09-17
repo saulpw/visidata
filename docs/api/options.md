@@ -11,6 +11,8 @@ Modules should degrade or fail gracefully if they depend on another module which
 A VisiData plugin is just a small Python module that extends base VisiData's functionality.
 Most features can be self-contained in their own .py file, so that the feature is enabled or disabled by `import`ing that .py file or not.
 
+[User docs: Installing a Plugin](/docs/plugins/)
+
 ### Plugin file structure
 
 A plugin is usually a single .py file, installed in the `$HOME/.visidata/plugins/` directory on the same computer as visidata.
@@ -23,7 +25,7 @@ The actual code in either case should be identical.
 
 ### Complete "Hello world" plugin example
 
-To follow-along, this code can be placed in `~/.visidatarc`:
+This code can be placed in `~/.visidatarc`:
 
 ~~~
 '''This plugin adds the `hello-world` command to all sheets, bound to '0' by default.
@@ -42,11 +44,6 @@ Notes:
 
 - Always include at least the author and version metadata elements.
 - By convention most strings in vd are single-quoted; within an [execstr](), inner strings are double-quoted.  This style is preferred to backslash escaping quotes: `'foo("inner")'` vs `'foo(\'inner\')'`
-
-### Installing plugins
-
-[User docs: Installing a Plugin](/docs/plugins/)
-
 
 ## Options
 
@@ -89,7 +86,7 @@ In general, plugins should use `sheet.options` to get option values, and `FooShe
 
 #### Options API
 
-- `__getattr__` and `__setattr__` (`options.disp_hello` above)
+- `options.__getattr__` and `options.__setattr__` (used above as `options.disp_hello`)
 
 This is the preferred style for getting or setting single option values.
 

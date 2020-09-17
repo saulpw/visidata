@@ -2,14 +2,19 @@
 ## Commands
 
 VisiData is *command-driven*, which means that it only does something when you tell it to.
-It doesn't auto-save, or provide tool-tips on mouse-over, or show a paperclip asking if you need help after some amount of time.
-It just sits there waiting for your next command.
-You can leave it running for days, and it shouldn't consume any precious battery while idling in the background.
+Otherwise, it just sits there, waiting for your next command.
 
-Commands are discrete units of behavior.
-Given the same input, the same command should produce the same result (with a few obvious exceptions, like `random-rows`).
+Every command is a discrete unit of behavior that does a defined task and runs to completion.
+Functions that could take longer than a couple hundred milliseconds, execute via [@asyncthread](), and provide [Progress]() which is shown in the [righthand status]().
 
-All state changes happen with a command.  Any commands that will result in different data being saved, are appended to the command log.
+Every command should be **reproducible**: given the same sheet, cursor position, and possibly [input]() string, a command should yield identical output (with a few obvious exceptions, like `random-rows`).
+
+Any command which makes changes to the [saveable sheet]() is appended to its [command log]().
+Since all state changes must be initiated by a reproducible command, this command log can be [replayed]().
+
+This command log is also used for certain other features, like undo/redo.
+
+Adding new commands is a natural way to extend VisiData's functionality.
 
 ### Command Overview
 
@@ -22,46 +27,84 @@ There are no 'global' commands; however, since all Sheets ultimately inherit fro
 #### Command Context
 
 The "execstr" is a string of Python code to `exec()` when the command is run.
-`exec()` will look up symbols first in the current `sheet`, then the `vd` object, then finally the visidata module globals (see `addGlobals` and `getGlobals` below).
+
+`exec()` looks up symbols in this order:
+
+- the current `sheet`
+- the `vd` object
+- visidata module (see `addGlobals` and `getGlobals` below)
+
 The `vd` and `sheet` symbols are available to specify explicitly.
-So if a bare identifier (without either `vd.` or `sheet.`) is used in the execstr, first the sheet is checked, then `vd` is checked, then the globals dict is checked.
 
-- Note: attributes on vd and sheet can only be set if object is given explicitly; e.g., instead of `cursorColIndex=2`, it must be `sheet.cursorColIndex=2`
+Notes:
 
-#### LazyChainMap
-The locals argument is a `LazyChainMap`, which chains multiple mappings together (each mapping is a progressive 'fallback').
-The LazyChainMap can enumerate all of its keys, but does not compute any value unless the key is specifically fetched.
-This is because there are a lot of entries in this mapping, some of which are expensive to compute.
-
-- Note that sheet-specific commands trump globally set commands for keybindings.
-
-Note: This means that using unqualified `options` in command execstr will use the sheet-specific options context for the current sheet.
+- In an "execstr", setting attributes on vd and sheet requires an explicit object; e.g., instead of `cursorColIndex=2`, it must be `sheet.cursorColIndex=2`
+- Unqualified `options` in command execstr will use the sheet-specific options context for the current sheet.
 
 ### API
 
-- `<SheetType>.addCommand(binding, longname, execstr, helpstr)`
-  - binding
-     - ESC/ALT
-     - `^X` for Ctrl+X
-     - curses keycodes/symbols.
-     - to discover what to use for some unknown key, press that key in visidata and use the keystroke shown in the status bar.
-     - Use 0-9, KEY_F*, ALT+ for keybinding.  But actually should not provide default at all.  Let user bind plugin commands how they want.
-  - longname
+- `<SheetType>.addCommand(binding, longname, execstr, helpstr)`: add a new command.
+
+  - `binding`
+     - a string of keystrokes, including **prefixes**.
+        - `vd.allPrefixes` is list of "prefixes", or keystrokes that don't trigger keybinding lookups.
+        - combinations of prefixes are allowed, but only in the specified order: `g` must come before `z`, which must come before `ALT`.
+        - `ALT` is a "prefix", because it's actually `^[` or ESC; and Python curses represents Alt+X (Meta+X on some keyboards) as `^[x`.  So the binding is `ALT+'X'`
+     - Use `^X` for Ctrl+X.
+     - Many other keycodes will be returned from the curses library as ascii strings.
+     - To discover what to use for some unknown key, press that key in VisiData and use the keystroke shown in the status bar.
+     - Primarily, plugin authors and users should use 0-9, KEY_F*, ALT+ for custom keybindings; these are purposefully left available for user keybindings.
+     - Consider not providing a default at all, for infrequently used commands.  Instead give it a memorable name, and/or a unique helpstr which you can search for the [command list]() (`g Ctrl+H`) with `g/`.
+
+  - `longname`
      - use existing structure if possible:
         - 'addcol-' for commands that add a column;
         - 'open-' for commands that push a new sheet;
         - 'go-' for commands that move the cursor;
         - etc
-- `BaseSheet.execCommand()`
-- `vd.addGlobals()`
-Global functions and other symbols can be added to this dict using `addGlobals()`.
-- `vd.getGlobals()`
-- `vd.bindkey()`
-- `vd.unbindkey()`
 
+  - `execstr`
+     - a Python statement to be `exec()`'ed when the command is executed.
+
+  - `helpstr`
+    Shown in **Commands Sheet**.
+
+- `<SheetType>.bindkey(keystrokes, longname)`
+
+Bind `longname` as the command to run when `keystrokes` are pressed on the given `<SheetType>`.
+
+- `<SheetType>.unbindkey(keystrokes)`
+
+Unbind `keystrokes` on a `<SheetType>`.
+May be necessary to avoid a warning when overriding a binding on the same exact class.
+
+- `BaseSheet.execCommand(cmd)`
+
+Execute `cmd` in the context of the sheet.  `cmd` can be a longname, a keystroke, or a Command object.
+
+- `vd.addGlobals(g)`
+
+Update the visidata globals dict with items from `g`, which is a mapping of names to functions.
+
+- `vd.getGlobals()`
+
+Return the visidata globals dict.
 
 ### Examples
 
 ~~~
-BaseSheet.addCommand('^D', 'scroll-halfpage-down', 'cursorDown(nScreenRows//2); sheet.topRowIndex += nScreenRows//2', 'scroll half page down')
+def hello_world(sheet):
+    vd.status(sheet.options.disp_hello)
+
+# `sheet` members and `vd` members are available in the execstr scope
+BaseSheet.addCommand(None, 'hello-world', 'hello_world()', 'show a warm greeting')
+
+# bind Shift+H, Ctrl+H, and Alt+H to this command
+BaseSheet.bindkey('H', 'hello-world')
+BaseSheet.bindkey('^H', 'hello-world')
+BaseSheet.bindkey(ALT+'h', 'hello-world')
+
+# unbind keystrokes defined by subclasses, or else they will be overridden
+Sheet.unbindkey('H', 'hello-world')
+Sheet.unbindkey('^H', 'hello-world')
 ~~~
