@@ -103,7 +103,7 @@ class SqliteIndexSheet(SqliteSheet, IndexSheet):
         for row in SqliteSheet.iterload(self):
             if row[0] != 'index':
                 tblname = row[1]
-                yield SqliteSheet(self.name+'.'+tblname, source=self, tableName=tblname, row=row)
+                yield SqliteSheet(tblname, source=self, tableName=tblname, row=row)
 
 
 class SqliteQuerySheet(SqliteSheet):
