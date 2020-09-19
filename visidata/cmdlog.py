@@ -140,7 +140,6 @@ class _CommandLog:
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
         if vd.activeCommand:
             self.afterExecSheet(sheet, False, '')
-            vd.activeCommand = None
 
         colname, rowname, sheetname = '', '', None
         if sheet and not (cmd.longname.startswith('open-') and cmd.longname != 'open-row'):
@@ -194,6 +193,7 @@ class _CommandLog:
                     vd.sessionlog = vd.loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
                 append_tsv_row(vd.sessionlog, vd.activeCommand)
 
+        vd.activeCommand = None
 
     def openHook(self, vs, src):
         r = self.newRow(keystrokes='o', input=src, longname='open-file')
