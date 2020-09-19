@@ -52,4 +52,5 @@
 include options.md
 include commands.md
 include extensible.md
+include loaders.md
 

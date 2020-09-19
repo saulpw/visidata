@@ -35,7 +35,7 @@ When members are defined in other files, it is better to use a specific local ob
 
 - VisiData: `vd`
 - Sheet: `sheet`
-- Column: `col'
+- Column: `col`
 
 ~~~
     @VisiData.api
