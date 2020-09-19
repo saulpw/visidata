@@ -114,6 +114,8 @@ Further things to take into account:
  loader thread will not be cancelable with `Ctrl+C`.
 
 #### Progress and Exception example
+
+~~~
     class FooSheet(Sheet):
         ...
         def iterload(self):
@@ -123,6 +125,7 @@ Further things to take into account:
                 except Exception as e:
                     r = e
                 yield r
+~~~
 
 Test the loader with a large dataset to make sure that:
 
@@ -134,6 +137,7 @@ Test the loader with a large dataset to make sure that:
 
 Each sheet has a unique list of `columns`. Each `Column` provides a different view into the row.
 
+~~~
     class FooSheet(Sheet):
         rowtype = 'foobits'  # rowdef: foolib.Bar object
 
@@ -143,6 +147,7 @@ Each sheet has a unique list of `columns`. Each `Column` provides a different vi
                           setter=lambda col,row,val: row.set_bar(val)),
             Column('baz', type=int, getter=lambda col,row: row.inside[1]*100)
         ]
+~~~
 
 In general, set `columns` as a class member.  If the columns aren't known until the data is being loaded,
 **Sheet**'s `__init__()` will check if `self.columns` was set and add each column at the earliest opportunity.
@@ -172,13 +177,16 @@ See the [Columns section]() for a complete API.
 
 Loaders which use a Python library (internal or external) are encouraged to pass all options to it through the `options("foo_")`.  For modules like csv which expose them as kwargs to some function or constructor, this is very easy:
 
+~~~
     rdr = csv.reader(fp, **csvoptions())
+~~~
 
 ### Full Example
 
 This would be a completely functional read-only viewer for the fictional foolib.
 For a more realistic example, see the [annotated viewtsv](/docs/viewtsv) or any of the [included loaders](https://github.com/saulpw/visidata/tree/stable/visidata/loaders).
 
+~~~
     from visidata import *
 
     vd.option('foo_scale', 100, 'amount to scale baz')
