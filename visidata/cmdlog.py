@@ -138,6 +138,9 @@ class _CommandLog:
         return self._rowtype(**fields)
 
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
+        if not isLoggableCommand(cmd.longname):
+            return
+
         if vd.activeCommand:
             self.afterExecSheet(sheet, False, '')
 
@@ -410,6 +413,13 @@ def cmdlog(vd):
     vs = CommandLog('cmdlog', rows=[])
     vd.beforeExecHooks.append(vs.beforeExecHook)
     return vs
+
+@VisiData.property
+def modifyCommand(vd):
+    if vd.activeCommand is not None and isLoggableCommand(vd.activeCommand.longname):
+        return vd.activeCommand
+    return vd.cmdlog.rows[-1]
+
 
 
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog for all commands executed in current session')
