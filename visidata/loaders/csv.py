@@ -28,9 +28,9 @@ class CsvSheet(SequenceSheet):
         'Convert from CSV, first handling header row specially.'
         with self.source.open_text() as fp:
             if options.safety_first:
-                rdr = csv.reader(removeNulls(fp), **options('csv_'))
+                rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
             else:
-                rdr = csv.reader(fp, **options('csv_'))
+                rdr = csv.reader(fp, **options.getall('csv_'))
 
             while True:
                 try:
@@ -46,7 +46,7 @@ class CsvSheet(SequenceSheet):
 def save_csv(vd, p, sheet):
     'Save as single CSV file, handling column names as first line.'
     with p.open_text(mode='w') as fp:
-        cw = csv.writer(fp, **options('csv_'))
+        cw = csv.writer(fp, **options.getall('csv_'))
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):
             cw.writerow(colnames)

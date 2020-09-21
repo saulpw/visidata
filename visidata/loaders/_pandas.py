@@ -114,7 +114,7 @@ class PandasSheet(Sheet):
                 readfunc = partial(pd.read_json, lines=True)
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
-            df = readfunc(str(self.source), **options('pandas_'+filetype+'_'))
+            df = readfunc(str(self.source), **options.getall('pandas_'+filetype+'_'))
 
         # reset the index here
         if type(df.index) is pd.Int64Index:

@@ -195,8 +195,10 @@ class OptionsObject:
     def setdefault(self, k, v, helpstr):
         return self._set(k, v, 'global', helpstr=helpstr)
 
-    def getall(self, kmatch):
-        return {obj:opt for (k, obj), opt in self._opts.items() if k == kmatch}
+    def getall(self, prefix=''):
+        return { optname[len(prefix):] : options[optname]
+                    for optname in options.keys()
+                        if optname.startswith(prefix) }
 
     def __getattr__(self, k):      # options.foo
         return self.__getitem__(k)
@@ -212,11 +214,6 @@ class OptionsObject:
 
     def __setitem__(self, k, v):   # options[k] = v
         self.set(k, v, obj=self._obj)
-
-    def __call__(self, prefix=''):
-        return { optname[len(prefix):] : options[optname]
-                    for optname in options.keys()
-                        if optname.startswith(prefix) }
 
 
 vd.commands = SettingsMgr()
