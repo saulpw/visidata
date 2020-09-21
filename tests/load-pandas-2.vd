@@ -1,5 +1,4 @@
 sheet	col	row	longname	input	keystrokes	comment
-	override	undo	set-option	True		
 	override	filetype	set-option	pandas		
 			open-file	sample_data/StatusPR.csv	o	
 StatusPR	Month		select-col-regex	sep	|	select rows matching regex in current column
@@ -7,10 +6,8 @@ StatusPR	Location		unselect-col-regex	puerto	\	unselect rows matching regex in c
 StatusPR			delete-selected		gd	delete (cut) selected rows and move them to clipboard
 StatusPR		0	delete-row		d	delete (cut) current row and move it to clipboard
 StatusPR		0	delete-row		d	delete (cut) current row and move it to clipboard
-StatusPR		0	undo-last		U	undo the last action
 StatusPR		0	add-row		a	append a blank row
 StatusPR		1	add-row		a	append a blank row
-StatusPR		0	undo-last		U	undo the last action
 StatusPR		1	add-rows	5	ga	append a blank row
 StatusPR			select-cols-regex	sep	g|	select rows matching regex in any visible column
 StatusPR			unselect-cols-regex	ases	g\	unselect rows matching regex in any visible column

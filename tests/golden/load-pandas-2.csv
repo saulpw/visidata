@@ -5,6 +5,7 @@ Month,Day,Resource,Location,Value,Unit,Source
 ,,,,nan,,
 ,,,,nan,,
 ,,,,nan,,
+,,,,nan,,
 Sep,29,Hospitals,Puerto Rico,34.00,number,ASES
 Oct,1,Electricity,Puerto Rico,5.00,percent,AEE
 Oct,1,Cell antennas,Puerto Rico,300.00,number,FCC
