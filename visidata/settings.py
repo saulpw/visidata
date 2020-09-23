@@ -148,72 +148,87 @@ class OptionsObject:
         if d:
             return d.get(self._opts.objname(obj), None)
 
-    def get(self, k, obj=None):
-        return self._get(k, obj).value
+    def get(self, optname, default=None):
+        'Return the value of the given optname option in the options context. `default` is only returned if the option is not defined (instead of raising an Exception).'
+        d = self._get(optname, None)
+        if d:
+            return d.value
+        return default
 
-    def getdefault(self, k):
-        return self._get(k, 'global').value
+    def getobj(self, optname, obj=None):
+        'Return value of option optname as set on obj, or on option context if obj is None.'
+        return self._get(optname, obj).value
 
-    def getonly(self, k, obj, default):
-        'Return value of option k as set on obj, or default if not set specifically on obj'
-        d = self._opts.get(k, None)
+    def getdefault(self, optname):
+        return self._get(optname, 'global').value
+
+    def getonly(self, optname, obj, default):
+        'Return value of option optname as set on obj, or default if not set specifically on obj'
+        d = self._opts.get(optname, None)
         if d:
             opt = d.get(self._opts.objname(obj), None)
             if opt:
                 return opt.value
         return default
 
-    def set(self, k, v, obj='override'):
-        opt = self._get(k)
+    def set(self, optname, value, obj='override'):
+        "Override the value for the optname in the options context or in obj's context, if given."
+        opt = self._get(optname)
         if opt:
             curval = opt.value
             t = type(curval)
-            if v is None and curval is not None:
-                v = t()           # empty value
-            elif isinstance(v, str) and t is bool: # special case for bool options
-                v = v and (v[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
-            elif type(v) is t:    # if right type, no conversion
+            if value is None and curval is not None:
+                value = t()           # empty value
+            elif isinstance(value, str) and t is bool: # special case for bool options
+                value = value and (value[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
+            elif type(value) is t:    # if right type, no conversion
                 pass
             elif curval is None:  # if None, do not apply type conversion
                 pass
             else:
-                v = t(v)
+                value = t(value)
 
-            if curval != v and self._get(k, 'global').replayable:
+            if curval != value and self._get(optname, 'global').replayable:
                 if obj != 'global' and type(obj) is not type:  # options set on init aren't recorded
-                    vd.setOption(k, v, obj)
+                    vd.setOption(optname, value, obj)
         else:
             curval = None
-            vd.warning('setting unknown option %s' % k)
+            vd.warning('setting unknown option %s' % optname)
 
-        return self._set(k, v, obj)
+        return self._set(optname, value, obj)
 
-    def unset(self, k, obj='override'):
+    def unset(self, optname, obj='override'):
         'Remove setting value for given context.'
-        self._opts.unset(k, obj)
+        self._opts.unset(optname, obj)
 
-    def setdefault(self, k, v, helpstr):
-        return self._set(k, v, 'global', helpstr=helpstr)
+    def setdefault(self, optname, value, helpstr):
+        return self._set(optname, value, 'global', helpstr=helpstr)
 
     def getall(self, prefix=''):
+        'Return dictionary of name:value for all options beginning with `prefix` (with `prefix` removed from the name).'
         return { optname[len(prefix):] : options[optname]
                     for optname in options.keys()
                         if optname.startswith(prefix) }
 
-    def __getattr__(self, k):      # options.foo
-        return self.__getitem__(k)
+    def __getattr__(self, optname):      # options.foo
+        '''Access an option through options.optname.
 
-    def __setattr__(self, k, v):   # options.foo = v
-        self.__setitem__(k, v)
+        Return the value of the given option `optname` in the options context.
+        This is the preferred style for getting a single option value.
+        '''
+        return self.__getitem__(optname)
 
-    def __getitem__(self, k):      # options[k]
-        opt = self._get(k, obj=self._obj)
+    def __setattr__(self, optname, value):   # options.foo = value
+        self.__setitem__(optname, value)
+
+    def __getitem__(self, optname):      # options[optname]
+        opt = self._get(optname, obj=self._obj)
         if not opt:
-            raise ValueError('no option "%s"' % k)
+            raise ValueError('no option "%s"' % optname)
         return opt.value
 
-    def __setitem__(self, k, v):   # options[k] = v
-        self.set(k, v, obj=self._obj)
+    def __setitem__(self, optname, value):   # options[optname] = value
+        self.set(optname, value, obj=self._obj)
 
 
 vd.commands = SettingsMgr()
@@ -226,6 +241,14 @@ options = vd.options  # legacy
 
 @VisiData.global_api
 def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
+    '''
+    Declare a new option.
+   - `name`: name of option
+   - `default`: default value when no other override exists
+   - `helpstr`: short description of option (as shown in the Options Sheet)
+   - `replay`: indicates if changes to the option should be stored in the Command Log
+   - `sheettype`: None if the option is not meaningfully sheet-specific, to make it automatically global on CLI
+    '''
     opt = options.setdefault(name, default, helpstr)
     opt.replayable = replay
     opt.sheettype=sheettype

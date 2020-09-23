@@ -88,7 +88,7 @@ class OptionsSheet(Sheet):
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
             ),
-        Column('default', getter=lambda col,row: options.get(row.name, 'global')),
+        Column('default', getter=lambda col,row: options.getdefault(row.name)),
         Column('description', width=40, getter=lambda col,row: options._get(row.name, 'global').helpstr),
         ColumnAttr('replayable'),
     )
@@ -101,7 +101,7 @@ class OptionsSheet(Sheet):
         return options.getonly(optname, self.source, '')
 
     def editOption(self, row):
-        currentValue = options.get(row.name, self.source)
+        currentValue = options.getobj(row.name, self.source)
         vd.addUndo(options.set, row.name, currentValue, self.source)
         if isinstance(row.value, bool):
             options.set(row.name, not currentValue, self.source)

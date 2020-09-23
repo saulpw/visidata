@@ -37,8 +37,8 @@ __version__ = '1.0'
 BaseSheet.addCommand('0', 'hello-world', 'status("Hello world!")')
 ~~~
 
-This should be fairly self-explanatory: the Python code `status("Hello world!")` is executed when `0` is pressed.
-See the sections on [Commands]() and [Status]() below.
+This should be fairly self-explanatory: the Python code `status("Hello world!")` is executed when <kbd>0</kbd>` is pressed.
+See the sections on [Commands]() and [Status]().
 
 Notes:
 
@@ -86,15 +86,19 @@ In general, plugins should use `sheet.options` to get option values, and `FooShe
 
 #### Options API
 
-- `options.__getattr__` and `options.__setattr__` (used above as `options.disp_hello`)
+:# options.__getattr__
+:# options.__setattr__
 
-This is the preferred style for getting or setting single option values.
+- These are used above as `options.disp_hello`.
+- This is the preferred style for getting or setting single option values.
 
 - `options.get(optname[, default])`
+:# options.get
 
 Returns the value of the given optname option in the options context.  `default` is only returned if the option is not defined (instead of raising an Exception).
 
 - `options.set(optname, value)`
+:# options.set
 
 Overrides the value for the optname in the options context.
 
@@ -105,23 +109,19 @@ Return dictionary of name:value for all options beginning with `foo_` (with the 
 The dict returned by `options('foo_')` is designed to be used as kwargs to other loaders, so that their options can be passed through VisiData transparently.
 For example, `csv.reader(fp, **sheet.options('csv_'))` will pass all csv options transparently to the builtin Python `csv` module.
 
-- `vd.option(optname, default, helpstr, replay=False)`: Declare a new option.
-   - `optname`: name of option
+:# vd.option
+
+Notes:
         - All option names are in a global namespace.
         - The maximum option name length should be 20.
-        - Use "`_`" for a word separator.
+        - Use `_` (underscore) for a word separator.
         - Theme option names should start with `disp_` for a displayed string and `color_` for a color option (see [Colors]()).
         - Otherwise, option names within a plugin should all start with the same short module abbreviation, like "`mod_`".
         - Consider whether some subset of options can be passed straight through to the underlying Python library via kwargs (maximum power with minimal effort).
 
-   - `default`: default value of option with no other override
-        - When setting the option, the type of the default is respected.  Strings and other types will be converted (`Exception` raised if conversion fails).
+        - When setting the option, strings and other types will be converted to the `default` type.
         - A default value of None allows any type.
-
-   - `helpstr`: short description of option
-        - shown in **Options Sheet** (`Shift+O`)
-
-   - `replay` (keyword arg, bool, default False) indicates if changes to the option should be stored in the **Command Log**.
+        (`Exception` raised if conversion fails).
         - If the option affects loading, transforming, or saving, then set `replay` to True.
         - In general, if an option affects the saved output, it should be replayed.
 
