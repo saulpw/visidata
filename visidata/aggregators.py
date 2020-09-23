@@ -154,7 +154,7 @@ def aggregator_choices(vd):
        {'key': agg, 'desc': v[0].helpstr if isinstance(v, list) else v.helpstr} for agg, v in vd.aggregators.items()
     ]
 
-addGlobals(globals())
+vd.addGlobals(globals())
 
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'add aggregator to current column')

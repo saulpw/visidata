@@ -1,4 +1,4 @@
-from visidata import vd, TableSheet, asyncthread, addGlobals, ColumnItem, Column, ColumnAttr, Progress
+from visidata import vd, TableSheet, asyncthread, ColumnItem, Column, ColumnAttr, Progress
 from urllib.parse import urlparse
 
 

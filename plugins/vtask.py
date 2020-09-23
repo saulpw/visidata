@@ -101,4 +101,4 @@ def main_vtask():
     run(TodoSheet('todos', source=Path('~/.task')))
 
 
-addGlobals(globals())
+vd.addGlobals(globals())

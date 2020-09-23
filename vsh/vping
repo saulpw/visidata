@@ -159,7 +159,7 @@ def main_vping():
     run()
 
 
-addGlobals(globals())
+vd.addGlobals(globals())
 
 PingSheet.addCommand('T', 'traceroute-summary', 'vd.push(StatsSheet("traceroute_"+sheet.name, source=sheet))', 'push traceroute sheet with summary pingtimes')
 

@@ -1,4 +1,4 @@
-from visidata import Path, RepeatFile, getGlobals, options, vd
+from visidata import Path, RepeatFile, options, vd
 
 content_filetypes = {
     'tab-separated-values': 'tsv'  # thanks @lindner
@@ -13,7 +13,7 @@ def openurl_http(path, filetype=None):
     # if filetype not given, auto-detect with hacky mime-type parse
     if not filetype:
         ext = path.suffix[1:].lower()
-        openfunc = getGlobals().get(f'open_{ext}')
+        openfunc = vd.getGlobals().get(f'open_{ext}')
 
         if openfunc:
             filetype = ext

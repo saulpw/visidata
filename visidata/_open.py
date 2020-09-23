@@ -42,7 +42,7 @@ def openPath(vd, p, filetype=None):
     'Call open_ext(Path) or openurl_scheme(Path, filetype).  Return constructed but unloaded sheet of appropriate type.'
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
-        return getGlobals()[openfunc](p, filetype=filetype)
+        return vd.getGlobals()[openfunc](p, filetype=filetype)
 
     if not filetype:
         if p.is_dir():
@@ -56,11 +56,11 @@ def openPath(vd, p, filetype=None):
 
     filetype = filetype.lower()
 
-    openfunc = getGlobals().get('open_' + filetype)
+    openfunc = vd.getGlobals().get('open_' + filetype)
     if not openfunc:
         vd.warning('unknown "%s" filetype' % filetype)
         filetype = 'txt'
-        openfunc = getGlobals().get('open_txt')
+        openfunc = vd.getGlobals().get('open_txt')
 
     vd.status('opening %s as %s' % (p.given, filetype))
     return openfunc(p)

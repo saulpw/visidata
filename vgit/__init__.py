@@ -10,4 +10,4 @@ from .amend import *
 from .grep import *
 from .overview import *
 
-addGlobals(globals())
+vd.addGlobals(globals())

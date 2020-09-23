@@ -66,7 +66,7 @@ class PluginsSheet(JsonLinesSheet):
         for r in Progress(self.rows):
             for funcname in (r.provides or '').split():
                 func = lambda *args, **kwargs: vd.fail('this requires the %s plugin' % r.name)
-                addGlobals({funcname: func})
+                vd.addGlobals({funcname: func})
                 setattr(vd, funcname, func)
 
 

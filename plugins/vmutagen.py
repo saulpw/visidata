@@ -23,4 +23,4 @@ def MutagenColumns():
 DirSheet.addCommand('^[m', 'addcol-mutagen', 'for c in MutagenColumns(): addColumn(c)')
 
 
-addGlobals(globals())
+vd.addGlobals(globals())

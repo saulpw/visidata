@@ -1,7 +1,7 @@
 from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
-from visidata import getGlobals, TsvSheet, Path, Option
+from visidata import TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
@@ -37,7 +37,7 @@ class ColumnsSheet(Sheet):
             ColumnAttr('height', type=int),
             ColumnAttr('hoffset', type=int, width=0),
             ColumnAttr('voffset', type=int, width=0),
-            ColumnEnum('type', getGlobals(), default=anytype),
+            ColumnEnum('type', vd.getGlobals(), default=anytype),
             ColumnAttr('fmtstr'),
             ValueColumn('value', width=options.default_width),
             Column('expr', getter=lambda col,row: getattr(row, 'expr', ''),

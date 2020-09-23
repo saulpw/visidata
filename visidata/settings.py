@@ -6,7 +6,7 @@ import importlib
 import os
 
 import visidata
-from visidata import VisiData, BaseSheet, vd, getGlobals, addGlobals
+from visidata import VisiData, BaseSheet, vd
 
 
 # [settingname] -> { objname(Sheet-instance/Sheet-type/'override'/'global'): Option/Command/longname }
@@ -258,6 +258,31 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
 @BaseSheet.class_api
 @classmethod
 def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
+    '''<SheetType>.addCommand(...) add a new command to SheetType.
+  - `binding`
+     - a string of keystrokes, including **prefixes**.
+        - `vd.allPrefixes` is list of "prefixes", or keystrokes that don't trigger keybinding lookups.
+        - combinations of prefixes are allowed, but only in the specified order: `g` must come before `z`, which must come before `ALT`.
+        - `ALT` is a "prefix", because it's actually `^[` or ESC; and Python curses represents Alt+X (Meta+X on some keyboards) as `^[x`.  So the binding is `ALT+'X'`
+     - Use `^X` for Ctrl+X.
+     - Many other keycodes will be returned from the curses library as ascii strings.
+     - To discover what to use for some unknown key, press that key in VisiData and use the keystroke shown in the status bar.
+     - Primarily, plugin authors and users should use 0-9, KEY_F*, ALT+ for custom keybindings; these are purposefully left available for user keybindings.
+     - Consider not providing a default at all, for infrequently used commands.  Instead give it a memorable name, and/or a unique helpstr which you can search for the [command list]() (`g Ctrl+H`) with `g/`.
+
+  - `longname`
+     - use existing structure if possible:
+        - 'addcol-' for commands that add a column;
+        - 'open-' for commands that push a new sheet;
+        - 'go-' for commands that move the cursor;
+        - etc
+
+  - `execstr`
+     - a Python statement to be `exec()`'ed when the command is executed.
+
+  - `helpstr`
+    Shown in **Commands Sheet**.
+    '''
     vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
     if keystrokes:
         vd.bindkeys.set(keystrokes, longname, cls)
@@ -275,6 +300,7 @@ globalCommand = BaseSheet.addCommand
 @BaseSheet.class_api
 @classmethod
 def bindkey(cls, keystrokes, longname):
+    '<SheetType.bindkey(..) Bind `longname` as the command to run when `keystrokes` are pressed on the given `<SheetType>`.'
     oldlongname = vd.bindkeys._get(keystrokes, cls)
     if oldlongname:
         vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))
@@ -283,6 +309,8 @@ def bindkey(cls, keystrokes, longname):
 @BaseSheet.class_api
 @classmethod
 def unbindkey(cls, keystrokes):
+    '''Unbind `keystrokes` on a `<SheetType>`.
+    May be necessary to avoid a warning when overriding a binding on the same exact class.'''
     vd.bindkeys.unset(keystrokes, cls)
 
 @BaseSheet.api
@@ -313,7 +341,7 @@ def loadConfigFile(fnrc, _globals=None):
         except Exception as e:
             vd.exceptionCaught(e)
 
-    addGlobals(_globals)
+    vd.addGlobals(_globals)
 
 
 def addOptions(parser):
@@ -339,12 +367,12 @@ def loadConfigAndPlugins(vd, args):
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
     for modname in (args.imports or options.imports or '').split():
         try:
-            addGlobals(importlib.import_module(modname).__dict__)
+            vd.addGlobals(importlib.import_module(modname).__dict__)
         except ModuleNotFoundError:
             continue
 
     # user customisations in config file in standard location
-    loadConfigFile(options.config, getGlobals())
+    loadConfigFile(options.config, vd.getGlobals())
 
 
 BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(Path(options.config)))', 'open options.config as text sheet')

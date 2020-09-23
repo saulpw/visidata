@@ -13,11 +13,13 @@ class EscapeException(BaseException):
 
 
 def addGlobals(g):
-    'importers can call `addGlobals(globals())` to have their globals accessible to execstrings'
+    '''Update the VisiData globals dict with items from `g`, which is a mapping of names to functions.
+    Importers can call `addGlobals(globals())` to have their globals accessible to execstrings.'''
     globals().update(g)
 
 
 def getGlobals():
+    'Return the VisiData globals dict.'
     return globals()
 
 from builtins import *
@@ -29,6 +31,8 @@ from .extensible import *
 from .vdobj import *
 
 vd = VisiData()
+vd.addGlobals = addGlobals
+vd.getGlobals = getGlobals
 
 from .basesheet import *
 from .settings import *
@@ -133,4 +137,4 @@ from math import *
 
 vd.finalInit()
 
-addGlobals(globals())
+vd.addGlobals(globals())

@@ -5,7 +5,7 @@ import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
 from visidata import (options, theme, isNumeric, Column, option, namedlist, SettableColumn,
-TypedExceptionWrapper, getGlobals, BaseSheet, UNLOADED,
+TypedExceptionWrapper, BaseSheet, UNLOADED,
 vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 
 
@@ -322,7 +322,7 @@ class TableSheet(BaseSheet):
         else:
             contexts = None
 
-        return eval(expr, getGlobals(), contexts)
+        return eval(expr, vd.getGlobals(), contexts)
 
     def rowid(self, row):
         'Return a fast, unique, and stable hash of the given row object.  Must be fast.  Overrideable.'

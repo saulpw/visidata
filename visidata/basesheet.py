@@ -1,7 +1,7 @@
 import os
 
 import visidata
-from visidata import Extensible, VisiData, getGlobals, vd, EscapeException
+from visidata import Extensible, VisiData, vd, EscapeException
 from unittest import mock
 
 
@@ -108,7 +108,8 @@ class BaseSheet(Extensible):
         return self._scr.getmaxyx()[1] if self._scr else 80
 
     def execCommand(self, cmd, args='', vdglobals=None, keystrokes=None):
-        "Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Returns True if user cancelled."
+        """Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Return True if user cancelled.
+        `cmd` can be a longname, a keystroke, or a Command object."""
         cmd = self.getCommand(cmd or keystrokes)
 
         if not cmd:
@@ -120,7 +121,7 @@ class BaseSheet(Extensible):
         err = ''
 
         if vdglobals is None:
-            vdglobals = getGlobals()
+            vdglobals = vd.getGlobals()
 
         self.sheet = self
 
@@ -199,7 +200,7 @@ class BaseSheet(Extensible):
             vd.exceptionCaught(e)
 
     def evalexpr(self, expr, row=None):
-        return eval(expr, getGlobals(), None)
+        return eval(expr, vd.getGlobals(), None)
 
 
 @VisiData.api

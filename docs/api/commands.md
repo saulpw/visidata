@@ -43,8 +43,9 @@ Notes:
 
 ### API
 
-- `<SheetType>.addCommand(binding, longname, execstr, helpstr)`: add a new command.
+:# BaseSheet.addCommand
 
+  - classmethod; call with a SheetType or a Sheet
   - `binding`
      - a string of keystrokes, including **prefixes**.
         - `vd.allPrefixes` is list of "prefixes", or keystrokes that don't trigger keybinding lookups.
@@ -69,24 +70,22 @@ Notes:
   - `helpstr`
     Shown in **Commands Sheet**.
 
-- `<SheetType>.bindkey(keystrokes, longname)`
+:# BaseSheet.bindkey
 
 Bind `longname` as the command to run when `keystrokes` are pressed on the given `<SheetType>`.
 
-- `<SheetType>.unbindkey(keystrokes)`
+:# BaseSheet.unbindkey
 
 Unbind `keystrokes` on a `<SheetType>`.
 May be necessary to avoid a warning when overriding a binding on the same exact class.
 
-- `BaseSheet.execCommand(cmd)`
-
+:# BaseSheet.execCommand
 Execute `cmd` in the context of the sheet.  `cmd` can be a longname, a keystroke, or a Command object.
 
-- `vd.addGlobals(g)`
-
+:# vd.addGlobals
 Update the visidata globals dict with items from `g`, which is a mapping of names to functions.
 
-- `vd.getGlobals()`
+:# vd.getGlobals
 
 Return the visidata globals dict.
 

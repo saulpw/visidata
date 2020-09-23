@@ -71,7 +71,7 @@ shellHistory = ShellHistorySheet('history')
 
 
 def main():
-    addGlobals(globals())
+    vd.addGlobals(globals())
     run(shellHistory)
     os._exit(0)
 

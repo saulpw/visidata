@@ -2,7 +2,7 @@
 Uses data from fixer.io
 '''
 
-from visidata import option, options, urlcache, addGlobals
+from visidata import option, options, urlcache, vd
 import functools
 import json
 
@@ -48,4 +48,4 @@ def USD(s):
     amtstr, currcode = s.split(' ')
     return float(amtstr) * currency_multiplier(currcode, 'USD')
 
-addGlobals(globals())
+vd.addGlobals(globals())

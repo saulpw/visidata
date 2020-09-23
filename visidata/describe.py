@@ -30,7 +30,7 @@ class DescribeSheet(ColumnsSheet):
     columns = [
             ColumnAttr('sheet', 'sheet', width=0),
             ColumnAttr('column', 'name'),
-            ColumnEnum('type', getGlobals(), width=0, default=anytype),
+            ColumnEnum('type', vd.getGlobals(), width=0, default=anytype),
             DescribeColumn('errors', type=vlen),
             DescribeColumn('nulls',  type=vlen),
             DescribeColumn('distinct',type=vlen),
