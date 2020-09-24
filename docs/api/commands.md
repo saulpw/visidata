@@ -127,18 +127,18 @@ Nouns:
 ### Examples
 
 ~~~
-def hello_world(sheet):
+def show_hello(sheet):
     vd.status(sheet.options.disp_hello)
 
 # `sheet` members and `vd` members are available in the execstr scope
-BaseSheet.addCommand(None, 'hello-world', 'hello_world()', 'show a warm greeting')
+BaseSheet.addCommand(None, 'show-hello', 'show_hello()', 'show a warm greeting')
 
 # bind Shift+H, Ctrl+H, and Alt+H to this command
-BaseSheet.bindkey('H', 'hello-world')
-BaseSheet.bindkey('^H', 'hello-world')
-BaseSheet.bindkey(ALT+'h', 'hello-world')
+BaseSheet.bindkey('H', 'show-hello')
+BaseSheet.bindkey('^H', 'show-hello')
+BaseSheet.bindkey(ALT+'h', 'show-hello')
 
 # unbind keystrokes defined by subclasses, or else they will be overridden
-Sheet.unbindkey('H', 'hello-world')
-Sheet.unbindkey('^H', 'hello-world')
+Sheet.unbindkey('H', 'show-hello')
+Sheet.unbindkey('^H', 'show-hello')
 ~~~

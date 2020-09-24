@@ -149,7 +149,7 @@ class OptionsObject:
             return d.get(self._opts.objname(obj), None)
 
     def get(self, optname, default=None):
-        'Return the value of the given optname option in the options context. `default` is only returned if the option is not defined (instead of raising an Exception).'
+        'Return the value of the given optname option in the options context. `default` is only returned if the option is not defined.  An Exception is never raised.'
         d = self._get(optname, None)
         if d:
             return d.value
@@ -205,20 +205,17 @@ class OptionsObject:
         return self._set(optname, value, 'global', helpstr=helpstr)
 
     def getall(self, prefix=''):
-        'Return dictionary of name:value for all options beginning with `prefix` (with `prefix` removed from the name).'
+        'Return dictionary of all options beginning with `prefix` (with `prefix` removed from the name).'
         return { optname[len(prefix):] : options[optname]
                     for optname in options.keys()
                         if optname.startswith(prefix) }
 
     def __getattr__(self, optname):      # options.foo
-        '''Access an option through options.optname.
-
-        Return the value of the given option `optname` in the options context.
-        This is the preferred style for getting a single option value.
-        '''
+        'Return value of option `optname` for stored options context.'
         return self.__getitem__(optname)
 
     def __setattr__(self, optname, value):   # options.foo = value
+        'Set value of option `optname` for stored options context.'
         self.__setitem__(optname, value)
 
     def __getitem__(self, optname):      # options[optname]

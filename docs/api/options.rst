@@ -1,66 +1,16 @@
-VisiData is designed to be **extensible**.
-Anything that can be done with Python (which is basically everything) can be exposed in a VisiData interface with a minimal amount of code.
-
-VisiData is also designed to be **modular**.
-Many of its features can exist in isolation, and can be enabled or disabled independently, without affecting other features.
-Modules should degrade or fail gracefully if they depend on another module which is not loaded.
-
-Plugins
-========
-
-A VisiData plugin is just a small Python module that extends base VisiData's functionality.
-Most features can be self-contained in their own .py file, so that the feature is enabled or disabled by ``import``-ing that .py file or not.
-
-`User docs: Installing a Plugin </docs/plugins/>`__
-
-Plugin file structure
-----------------------
-
-A plugin is usually a single .py file, installed in the ``$HOME/.visidata/plugins/`` directory on the same computer as visidata.
-``import`` statements for all enabled plugins go into ``$HOME/.visidata/plugins/__init__.py``.
-Plugins can be installed and uninstalled in the `Plugins Sheet <>`__, which maintains the entries in this ``__init__.py`` file.
-At startup, VisiData automatically imports this ``plugins`` package.
-
-Plugins often start as a small snippet in ``.visidatarc``, and then migrate the code to a separate file to share with other people.
-The actual code in either case should be identical.
-
-Complete "Hello world" plugin example
---------------------------------------
-
-This code can be placed in ``~/.visidatarc``:
-
-::
-
-    '''This plugin adds the ``hello-world`` command to all sheets, bound to '0' by default.
-    Pressing ``0`` will show "Hello world!" on the status line.'''
-
-    __author__ = 'Jo Baz <jobaz@example.com>'
-    __version__ = '1.0'
-
-    BaseSheet.addCommand('0', 'hello-world', 'status("Hello world!")')
-
-
-This should be fairly self-explanatory: the Python code ``status("Hello world!")`` is executed when <kbd>0</kbd> is pressed.
-See the sections on `Commands <>`__ and `Status <>`__.
-
-Notes:
-
-- Always include at least the author and version metadata elements.
-- By convention most strings in vd are single-quoted; within an `execstr <>`__, inner strings are double-quoted.  This style is preferred to backslash escaping quotes: ``'foo("inner")'`` vs ``'foo(\'inner\')'``
-
 Options
 ========
 
-Adding to the hello-world example, the text could be made configurable:
+Adding to the [hello world]() example, the displayed text could be made configurable with an option:
 
 ::
 
-    option('disp_hello', 'Hello world!', 'string to display for hello-world command')
+    vd.option('disp_hello', 'Hello world!', 'string to display for hello-world command')
 
     BaseSheet.addCommand('0', 'hello-world', 'status(options.disp_hello)')
 
 
-Now the user can set the option to modify which text is displayed during their session when they press ``0``.  For example, on the CLI:
+Now the user can set the option to modify which text is displayed during their session when they press :kbd:`0`.  For example, on the CLI:
 
 ::
 
@@ -74,32 +24,31 @@ The user can override it for every session by setting it in their ``.visidatarc`
 
 
 Options Context
-----------------
+~~~~~~~~~~~~~~~
 
 Options can have different values depending on the context in which they're used.
-For instance, one TSV sheet needs its ``delimiter`` set to "``|``", while another TSV sheet in the same session needs to use the default (TAB) instead.
+For instance, one TSV sheet needs its ``delimiter`` set to "``|``", while another TSV sheet in the same session needs to use the default ("``\t``", or TAB) instead.
 
 Options can be overridden globally, or for all sheets of a specific type, or only for one specific sheet.
 
-- The options contexts can be referenced directly:
+The options contexts can be referenced directly:
 
-    - (sheet override) ``sheet.options`` to get or set options within the context of a specific sheet;
-    - (class override) ``<SheetType>.class_options`` to set options for a particular type of Sheet (and all of its subclasses);
-    - (default) ``vd.options`` to get or set options "globally" with no other context.
+    - ``sheet.options`` to get or set options within the context of a specific sheet (**sheet override**)
+    - ``<SheetType>.class_options`` to set (but not get) options for a particular type of Sheet (**class override**)
+    - ``vd.options`` (or plain ``options``) to set options "globally" with no other context (**default**)
+         - or to *get* options in the context of the **top sheet**
 
 When fetching an option value, VisiData will look for settings from option contexts in the above order, before returning the default value in the option definition itself.
 
 In general, plugins should use ``sheet.options`` to get option values, and ``FooSheet.class_options`` to override values for the plugin-specific sheet type.
 
-Options API
-~~~~~~~~~~~~
-
 .. autofunction:: visidata.options.__getattr__
+
+This is the preferred style for getting a single option value.
 
 .. autofunction:: visidata.options.__setattr__
 
-- These are used above as ``options.disp_hello``.
-- This is the preferred style for getting or setting single option values.
+This is the preferred style for setting an option value.
 
 .. autofunction:: visidata.options.get
 
@@ -107,8 +56,8 @@ Options API
 
 .. autofunction:: visidata.options.getall
 
-The dict returned by ``options('foo_')`` is designed to be used as kwargs to other loaders, so that their options can be passed through VisiData transparently.
-For example, ``csv.reader(fp, **sheet.options('csv_'))`` will pass all csv options transparently to the builtin Python ``csv`` module.
+The dict returned by ``options.getall('foo_')`` is designed to be used as kwargs to other loaders, so that their options can be passed through VisiData transparently.
+For example, ``csv.reader(fp, **sheet.options.getall('csv_'))`` will pass all csv options transparently to the builtin Python ``csv`` module.
 
 .. autofunction:: visidata.vd.option
 
@@ -122,25 +71,15 @@ Notes:
 * Consider whether some subset of options can be passed straight through to the underlying Python library via kwargs (maximum power with minimal effort).
 
 * When setting the option, strings and other types will be converted to the ``default`` type.
-* A default value of None allows any type. (``Exception`` raised if conversion fails).
+* A default value of None allows any type. (``Exception`` is raised if conversion fails).
 * If the option affects loading, transforming, or saving, then set ``replay`` to True.
-* In general, if an option affects the saved output, it should be replayed.
 
 Examples
 ~~~~~~~~~
 
 ::
 
-    vd.option('mod_optname', 'default value', 'One line description of option effects', replay=True)
-
-    # option set globally
-    vd.options.color_current_row = 'reverse green'
-
-    # option set on sheet only
-    sheet.options.color_current_row = 'bold blue'
-
-    # option set for all DirSheets
-    DirSheet.class_options.color_current_row = 'underline'
+    vd.option('disp_hello', 'Hello world!', 'string to display for hello-world')
 
     # option without regard to a current sheet (global override only)
     vd.options.disp_hello = 'こんにちは世界'
@@ -148,11 +87,18 @@ Examples
     # show the option value given the context of a specific sheet
     vd.status(sheet.options.disp_hello)
 
+    # option set on specific sheet only
+    sheet.options.color_current_row = 'bold blue'
+
+    # option set for all DirSheets
+    DirSheet.class_options.color_current_row = 'reverse green'
+
+
 
 Performance notes
 ------------------
 
-- Options are comparatively slow, so their usage should stay out of inner loops.  Factor into a local variable in an outer block.
+- Getting option values is a comparatively slow operation.  Factor option getting out of inner loops, and into a local variable in an outer block.  An option value can only change between commands anyway.
 
 See Also:
 ----------
