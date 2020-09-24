@@ -92,17 +92,15 @@ In general, plugins should use `sheet.options` to get option values, and `FooShe
 - These are used above as `options.disp_hello`.
 - This is the preferred style for getting or setting single option values.
 
-- `options.get(optname[, default])`
 :# options.get
 
 Returns the value of the given optname option in the options context.  `default` is only returned if the option is not defined (instead of raising an Exception).
 
-- `options.set(optname, value)`
 :# options.set
 
 Overrides the value for the optname in the options context.
 
-- `options.getall('foo_')`
+:# options.getall
 
 Return dictionary of name:value for all options beginning with `foo_` (with the prefix removed from the name).
 

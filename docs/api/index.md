@@ -2,6 +2,15 @@
 ### VisiData Version: v2.0
 ### Date: 2020-09
 
+0. Notes
+- In general, method names without underscores (usually camelCase) are public API
+- method names with leading underscore are private to file.
+- method names with embedded underscore are private to visidata internals.
+
+Function signatures are do not include the leading self argument, whether vd or sheet or col or otherwise.  is listed 
+
+
+
 1. Customizing
   - Options
   - Commands
@@ -15,7 +24,8 @@
   - Compute
      - Cell, Value, DisplayValue
      - Types
-     - Aggregators
+     - Null
+     - Errors
   - Expressions
 
 4. Interface
@@ -25,13 +35,15 @@
   - Layout
   - Input/Edit
   - Status
-  - Errors
 
 5. User Concepts
   - Keys
   - Selection
   - Undo
   - Command Log and Replay
+
+  - Aggregators
+  - Sorting
 
 6. Modifying Data
   - calc vs. get
@@ -53,4 +65,13 @@ include options.md
 include commands.md
 include extensible.md
 include loaders.md
+include core.md
+include compute.md
+include expr.md
+include interface.md
+include data.md
+include modify.md
+include plot.md
+include perf.md
+include misc.md
 

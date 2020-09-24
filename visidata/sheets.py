@@ -879,7 +879,7 @@ class SequenceSheet(Sheet):
 
 
 class IndexSheet(Sheet):
-    rowtype = 'sheets'
+    rowtype = 'sheets'  # rowdef: Sheet
     precious = False
 
     columns = [

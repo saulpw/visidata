@@ -99,7 +99,7 @@ For more control over the whole loading process, BaseSheet.reload() can be overr
 
 - `@asyncthread` launches the decorated function in its own thread.
 - `rows` must be reset to a new object.  **Never call `rows.clear()`**.
-- In a loader, always add rows using [`addRow()`](), and columns using [`addColumn()`]().
+- Always add rows using [`addRow()`]().
 
 ### Supporting asynchronous loaders
 
@@ -149,8 +149,8 @@ Each sheet has a unique list of `columns`. Each `Column` provides a different vi
         ]
 ~~~
 
-In general, set `columns` as a class member.  If the columns aren't known until the data is being loaded,
-**Sheet**'s `__init__()` will check if `self.columns` was set and add each column at the earliest opportunity.
+In general, set `columns` as a class member containing a list of static columns.
+If the columns aren't known until data is loaded, reload/iterload can add new columns using [`addColumn()`]().
 
 A few snippets:
 
@@ -217,17 +217,19 @@ For a more realistic example, see the [annotated viewtsv](/docs/viewtsv) or any 
 
 ## Savers
 
-A full-duplex loader requires a **saver**.  The saver iterates over all `rows` and `visibleCols`, calling `getValue`, `getDisplayValue` or `getTypedValue`, and saves the results in the format of that filetype. Savers should be decorated with `@VisiData.ap
-i` in order to make them available through the `vd` object's scope.
+A full-duplex loader requires a **saver**.  The saver iterates over all `rows` and `visibleCols`, calling `getValue`, `getDisplayValue` or `getTypedValue`, and saves the results in the format of that filetype. Savers should be decorated with `@VisiData.api` in order to make them available through the `vd` object's scope.
 
 ~~~
     @VisiData.api
-    def save_foo(vd, path, sheet):
+    def save_foo(vd, path, *sheets):
         with path.open_text(mode='w') as fp:
             for i, row in enumerate(Progress(sheet.rows)):
                 for col in sheet.visibleCols:
                     foolib.write(fp, i, col.name, col.getValue(row))
 ~~~
+
+- `path` is a `visidata.Path()` object representing the file being written to
+- `*sheets` is a list of 1 or more sheets to be saved
 
 The saver should preserve the column names and translate their types into foolib semantics, but other attributes on the Columns should generally not be saved.
 
@@ -244,3 +246,17 @@ If the URL is just a means to get to another filetype, then it can call `openSou
     def openurl_foo(p, filetype=None):
         return openSource(FooPath(p.url), filetype=filetype)
 ~~~
+
+# `visidata.Path`
+
+- `Path.given`
+- `Path.stat()`
+- `Path.exists()`
+- `Path.open_text()`
+- `Path.read_text()`
+- `Path.open_bytes()`
+- `Path.read_bytes()`
+- `Path.open()`
+- `Path.is_url()`
+- `Path.scheme`
+- `Path.with_name()`
