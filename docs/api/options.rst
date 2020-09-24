@@ -1,4 +1,3 @@
-
 VisiData is designed to be **extensible**.
 Anything that can be done with Python (which is basically everything) can be exposed in a VisiData interface with a minimal amount of code.
 
@@ -10,7 +9,7 @@ Plugins
 ========
 
 A VisiData plugin is just a small Python module that extends base VisiData's functionality.
-Most features can be self-contained in their own .py file, so that the feature is enabled or disabled by ``import``ing that .py file or not.
+Most features can be self-contained in their own .py file, so that the feature is enabled or disabled by ``import``-ing that .py file or not.
 
 `User docs: Installing a Plugin </docs/plugins/>`__
 
@@ -25,7 +24,8 @@ At startup, VisiData automatically imports this ``plugins`` package.
 Plugins often start as a small snippet in ``.visidatarc``, and then migrate the code to a separate file to share with other people.
 The actual code in either case should be identical.
 
-### Complete "Hello world" plugin example
+Complete "Hello world" plugin example
+--------------------------------------
 
 This code can be placed in ``~/.visidatarc``:
 
@@ -66,12 +66,10 @@ Now the user can set the option to modify which text is displayed during their s
 
     vd --disp-hello="¡Hola mundo!"
 
-
 The user can override it for every session by setting it in their ``.visidatarc``, or another plugin could set the option itself:
 
 ::
     options.disp_hello = 'Bonjour monde!'
-
 
 Options Context
 ~~~~~~~~~~~~~~~~
@@ -96,42 +94,35 @@ Options API
 
 .. autofunction:: visidata.options.__getattr__
 
-:# options.__getattr__
-:# options.__setattr__
+.. autofunction:: visidata.options.__setattr__
 
 - These are used above as ``options.disp_hello``.
 - This is the preferred style for getting or setting single option values.
 
-:# options.get
+.. autofunction:: visidata.options.get
 
-Returns the value of the given optname option in the options context.  ``default`` is only returned if the option is not defined (instead of raising an Exception).
+.. autofunction:: visidata.options.set
 
-:# options.set
-
-Overrides the value for the optname in the options context.
-
-:# options.getall
-
-Return dictionary of name:value for all options beginning with ``foo_`` (with the prefix removed from the name).
+.. autofunction:: visidata.options.getall
 
 The dict returned by ``options('foo_')`` is designed to be used as kwargs to other loaders, so that their options can be passed through VisiData transparently.
 For example, ``csv.reader(fp, **sheet.options('csv_'))`` will pass all csv options transparently to the builtin Python ``csv`` module.
 
-:# vd.option
+.. autofunction:: visidata.vd.option
 
 Notes:
-        - All option names are in a global namespace.
-        - The maximum option name length should be 20.
-        - Use ``_`` (underscore) for a word separator.
-        - Theme option names should start with ``disp_`` for a displayed string and ``color_`` for a color option (see `Colors <>`__).
-        - Otherwise, option names within a plugin should all start with the same short module abbreviation, like "``mod_``".
-        - Consider whether some subset of options can be passed straight through to the underlying Python library via kwargs (maximum power with minimal effort).
 
-        - When setting the option, strings and other types will be converted to the ``default`` type.
-        - A default value of None allows any type.
-        (``Exception`` raised if conversion fails).
-        - If the option affects loading, transforming, or saving, then set ``replay`` to True.
-        - In general, if an option affects the saved output, it should be replayed.
+* All option names are in a global namespace.
+* The maximum option name length should be 20.
+* Use ``_`` (underscore) for a word separator.
+* Theme option names should start with ``disp_`` for a displayed string and ``color_`` for a color option (see `Colors <>`__).
+* Otherwise, option names within a plugin should all start with the same short module abbreviation, like "``mod_``".
+* Consider whether some subset of options can be passed straight through to the underlying Python library via kwargs (maximum power with minimal effort).
+
+* When setting the option, strings and other types will be converted to the ``default`` type.
+* A default value of None allows any type. (``Exception`` raised if conversion fails).
+* If the option affects loading, transforming, or saving, then set ``replay`` to True.
+* In general, if an option affects the saved output, it should be replayed.
 
 Examples
 ~~~~~~~~~
@@ -161,7 +152,8 @@ Performance notes
 
 - Options are comparatively slow, so their usage should stay out of inner loops.  Factor into a local variable in an outer block.
 
-### See Also:
+See Also:
+----------
 
 - ``options-global`` (``Shift+O``) for **Options Sheet** sheet with no context.
 - ``options-sheet`` (``z Shift+O``) for **Options Sheet** with this sheet's context.
