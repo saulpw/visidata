@@ -12,9 +12,8 @@ Welcome to VisiData's documentation!
    :name: mastertoc
    :titlesonly:
 
-
-    options
-    commands
-    extensible
-    loaders
+   options
+   commands
+   extensible
+   loaders
 
