@@ -69,10 +69,12 @@ Now the user can set the option to modify which text is displayed during their s
 The user can override it for every session by setting it in their ``.visidatarc``, or another plugin could set the option itself:
 
 ::
+
     options.disp_hello = 'Bonjour monde!'
 
+
 Options Context
-~~~~~~~~~~~~~~~~
+----------------
 
 Options can have different values depending on the context in which they're used.
 For instance, one TSV sheet needs its ``delimiter`` set to "``|``", while another TSV sheet in the same session needs to use the default (TAB) instead.
