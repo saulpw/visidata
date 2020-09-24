@@ -86,6 +86,8 @@ In general, plugins should use `sheet.options` to get option values, and `FooShe
 
 #### Options API
 
+.. autofunction:: visidata.options.__getattr__
+
 :# options.__getattr__
 :# options.__setattr__
 
