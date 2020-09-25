@@ -60,6 +60,16 @@ Notes:
    commands
    extensible
    loaders
+   core
+   compute
+   expr
+   interface
+   data
+   modify
+   plot
+   perf
+   misc
+
 
 0. Notes
 - In general, method names without underscores (usually camelCase) are public API
@@ -121,18 +131,4 @@ Function signatures are do not include the leading self argument, whether vd or 
 
 10. Releasing a Plugin
 
-
-include options.md
-include commands.md
-include extensible.md
-include loaders.md
-include core.md
-include compute.md
-include expr.md
-include interface.md
-include data.md
-include modify.md
-include plot.md
-include perf.md
-include misc.md
 

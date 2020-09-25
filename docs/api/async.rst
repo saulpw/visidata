@@ -1,0 +1,3 @@
+-  \`BaseSheet.progressMade
+-  \`BaseSheet.progressPct
+-  \`BaseSheet.progressTotal

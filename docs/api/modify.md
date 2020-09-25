@@ -1,2 +1,0 @@
-
-- `Sheet.deleteBy()`
