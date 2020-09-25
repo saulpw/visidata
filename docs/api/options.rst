@@ -42,19 +42,19 @@ When fetching an option value, VisiData will look for settings from option conte
 
 In general, plugins should use ``sheet.options`` to get option values, and ``FooSheet.class_options`` to override values for the plugin-specific sheet type.
 
-.. autofunction:: visidata.options.__getattr__
+.. autofunction:: visidata.vd.options.__getattr__
 
 This is the preferred style for getting a single option value.
 
-.. autofunction:: visidata.options.__setattr__
+.. autofunction:: visidata.vd.options.__setattr__
 
 This is the preferred style for setting an option value.
 
-.. autofunction:: visidata.options.get
+.. autofunction:: visidata.vd.options.get
 
-.. autofunction:: visidata.options.set
+.. autofunction:: visidata.vd.options.set
 
-.. autofunction:: visidata.options.getall
+.. autofunction:: visidata.vd.options.getall
 
 The dict returned by ``options.getall('foo_')`` is designed to be used as kwargs to other loaders, so that their options can be passed through VisiData transparently.
 For example, ``csv.reader(fp, **sheet.options.getall('csv_'))`` will pass all csv options transparently to the builtin Python ``csv`` module.
