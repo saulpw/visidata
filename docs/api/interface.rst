@@ -1,16 +1,20 @@
 Interface
 =========
 
-.. autofunction:: visidata.SuspendCurses
-.. autofunction:: visidata.BaseSheet.draw
-.. autofunction:: visidata.VisiData.drawall
-.. autofunction:: visidata.VisiData.redraw
+Terminal
+--------
 
-.. autofunction:: visidata.BaseSheet.refresh
-
-.. autofunction:: visidata.BaseSheet.checkCursor
 .. autofunction:: visidata.BaseSheet.windowWidth
 .. autofunction:: visidata.BaseSheet.windowHeight
+.. autofunction:: visidata.BaseSheet.refresh
+.. autofunction:: visidata.VisiData.redraw
+.. autofunction:: visidata.BaseSheet.draw
+.. autofunction:: visidata.VisiData.drawall
+.. autofunction:: visidata.SuspendCurses
+
+Cursor
+------
+
 .. autofunction:: visidata.Sheet.topRowIndex
 .. autofunction:: visidata.Sheet.cursorCol
 .. autofunction:: visidata.Sheet.cursorColIndex
@@ -25,22 +29,27 @@ Interface
 .. autofunction:: visidata.Sheet.moveToCol
 .. autofunction:: visidata.Sheet.moveToRow
 
+.. autofunction:: visidata.BaseSheet.checkCursor
+
+Layout
+------
 .. autofunction:: visidata.Sheet.calcColLayout
 
-.. autofunction:: visidata.Sheet.addColorizer
-.. autofunction:: visidata.Sheet.removeColorizer
-.. autofunction:: visidata.vd.editline
-.. autofunction:: visidata.vd.editText
-.. autofunction:: visidata.vd.input
-.. autofunction:: visidata.vd.confirm
-.. autofunction:: visidata.vd.launchEditor
 
 Input/Edit
 ----------
 
+.. autofunction:: visidata.vd.input
+.. autofunction:: visidata.vd.confirm
+.. autofunction:: visidata.vd.launchEditor
+.. autofunction:: visidata.vd.editline
+.. autofunction:: visidata.vd.editText
 .. autofunction:: visidata.Sheet.editCell
 
-
+Colors
+------
+.. autofunction:: visidata.Sheet.addColorizer
+.. autofunction:: visidata.Sheet.removeColorizer
 
 Status
 ------

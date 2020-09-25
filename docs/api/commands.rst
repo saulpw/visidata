@@ -115,18 +115,20 @@ on the given ``<SheetType>``.
 warning when overriding a binding on the same exact class.
 
 .. autofunction:: visidata.BaseSheet.execCommand
+
 Execute ``cmd`` in the context of the sheet.
 ``cmd`` can be a longname, a keystroke, or a Command object.
 
-:# vd.addGlobals Update the visidata globals dict with items from ``g``,
-which is a mapping of names to functions.
+.. autofunction:: visidata.addGlobals
 
-:# vd.getGlobals
+Update the visidata globals dict with items from ``g``, which is a mapping of names to functions.
+
+.. autofunction:: visidata.getGlobals
 
 Return the visidata globals dict.
 
 Command longname design guidelines
-----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1) 3 words max, 2 words if possible. should be short and fit on a keymap
    (verb - object - input)
@@ -141,23 +143,28 @@ Command longname design guidelines
 
 Verbs:
 
--  open: push new sheet
--  jump: push existing sheet
--  dup: push copy of sheet
--  show: display on status
--  go: move the cursor
--  scroll: change the visible screen area without changing the cursor
--  addcol: add new column to this sheet
--  setcol: set selected cells in this column
--  search: search one or more columns
--  searchr: search reverse
--  select/unselect/stoggle: add/remove rows from selected rows
--  syscopy/syspaste: copy/paste to system clipboard
--  sysopen: open with $EDITOR or other external program
+-  ``open``: push new sheet
+-  ``jump``: push existing sheet
+-  ``dup``: push copy of sheet
+-  ``show``: display on status
+-  ``go``: move the cursor
+-  ``scroll``: change the visible screen area without changing the cursor
+-  ``addcol``: add new column to this sheet
+-  ``setcol``: set selected cells in this column
+-  ``search``: search one or more columns
+-  ``searchr``: search reverse
+-  ``select/unselect/stoggle``: add/remove rows from selected rows
+-  ``syscopy/syspaste``: copy/paste to system clipboard
+-  ``sysopen``: open with $EDITOR or other external program
 
-Nouns: - -expr: python expression - -regex: python regex - -all: all
-sheets or all visible columns - -col: cursorCol - -cols: all visible
-columns - -cells: this column, selected rows - -selected: selected rows
+Nouns:
+- ``-expr``: python expression
+- ``-regex``: python regex
+- ``-all``: all sheets or all visible columns
+- ``-col``: cursorCol
+- ``-cols``: all visible columns
+- ``-cells``: this column, selected rows
+- ``-selected``: selected rows
 
 Examples
 ~~~~~~~~

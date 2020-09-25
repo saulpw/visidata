@@ -1,5 +1,9 @@
-.. autofunction:: visidata.BaseSheet.progressMade
+=========================
+Threads and Performance
+=========================
 
-.. autofunction:: visidata.BaseSheet.progressPct
+.. data:: visidata.BaseSheet.progressMade
 
-.. autofunction:: visidata.BaseSheet.progressTotal
+.. data:: visidata.BaseSheet.progressPct
+
+.. data:: visidata.BaseSheet.progressTotal

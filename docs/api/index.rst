@@ -39,22 +39,24 @@ Complete "Hello world" plugin example
 This code can be placed in ``~/.visidatarc``:
 
 ::
+
     BaseSheet.addCommand('0', 'hello-world', 'status("Hello world!")')
 
 
-This should be fairly self-explanatory: the Python code ``status("Hello world!")`` is executed when <kbd>0</kbd> is pressed.
-See the sections on `Commands <>`__ and `Status <>`__.
+This should be fairly self-explanatory: the Python code ``status("Hello world!")`` is executed when :kbd:`0` is pressed.
 
-Notes:
+Style Conventions
+^^^^^^^^^^^^^^^^^^
 
-- Always include at least the author and version metadata elements.
-- By convention most strings in vd are single-quoted; within an `execstr <>`__, inner strings are double-quoted.  This style is preferred to backslash escaping quotes: ``'foo("inner")'`` vs ``'foo(\'inner\')'``
+- Method names with leading underscore are private to file.
+- Method names with embedded underscore are private but available to visidata internals.
+- Method names without underscores (usually camelCase) are public API.
+- Most strings in vd are single-quoted; within an *execstr*, inner strings are double-quoted.  This style is preferred to backslash escaping quotes: ``'foo("inner")'`` vs ``'foo(\'inner\')'``
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Table of contents
    :name: mastertoc
-   :titlesonly:
 
    options
    commands
@@ -62,73 +64,8 @@ Notes:
    loaders
    core
    compute
-   expr
    interface
    data
    modify
-   plot
-   perf
-   misc
-
-
-0. Notes
-- In general, method names without underscores (usually camelCase) are public API
-- method names with leading underscore are private to file.
-- method names with embedded underscore are private to visidata internals.
-
-Function signatures are do not include the leading self argument, whether vd or sheet or col or otherwise.  is listed 
-
-
-
-1. Customizing
-  - Options
-  - Commands
-  - Extensible
-
-2. Loading and Saving
-  - writing a loader
-
-3. Core
-  - VisiData, Sheet, Column
-  - Compute
-     - Cell, Value, DisplayValue
-     - Types
-     - Null
-     - Errors
-  - Expressions
-
-4. Interface
-  - Terminal
-     - Colors
-  - Cursor
-  - Layout
-  - Input/Edit
-  - Status
-
-5. User Concepts
-  - Keys
-  - Selection
-  - Undo
-  - Command Log and Replay
-
-  - Aggregators
-  - Sorting
-
-6. Modifying Data
-  - calc vs. get
-  - put vs. set
-  - commit
-
-7. Plotting
-  - Canvas, Graph
-
-8. Performance
-  - Async
-  - Caches
-
-9. Miscellaneous
-  - fetching external resources
-
-10. Releasing a Plugin
-
-
+   async
+   release

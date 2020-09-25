@@ -255,7 +255,8 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
 @BaseSheet.class_api
 @classmethod
 def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
-    '''<SheetType>.addCommand(...) add a new command to SheetType.
+    '''
+<SheetType>.addCommand(...) add a new command to SheetType.
   - `binding`
      - a string of keystrokes, including **prefixes**.
         - `vd.allPrefixes` is list of "prefixes", or keystrokes that don't trigger keybinding lookups.

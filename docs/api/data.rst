@@ -1,3 +1,6 @@
+Data Misc
+==========
+
 Key Columns
 -----------
 
@@ -23,6 +26,12 @@ Selected Rows
 .. autofunction:: visidata.Sheet.deleteSelected
 .. autofunction:: visidata.Sheet.selectByIdx
 .. autofunction:: visidata.Sheet.unselectByIdx
+
+Undo
+-------
+
+Command Log and Replay
+-----------------------
 
 Sorting
 -------
