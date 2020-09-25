@@ -4,8 +4,8 @@ Interface
 Terminal
 --------
 
-.. autofunction:: visidata.BaseSheet.windowWidth
-.. autofunction:: visidata.BaseSheet.windowHeight
+.. autodata:: visidata.BaseSheet.windowWidth
+.. autodata:: visidata.BaseSheet.windowHeight
 .. autofunction:: visidata.BaseSheet.refresh
 .. autofunction:: visidata.VisiData.redraw
 .. autofunction:: visidata.BaseSheet.draw
@@ -15,14 +15,14 @@ Terminal
 Cursor
 ------
 
-.. autofunction:: visidata.Sheet.topRowIndex
-.. autofunction:: visidata.Sheet.cursorCol
-.. autofunction:: visidata.Sheet.cursorColIndex
-.. autofunction:: visidata.Sheet.cursorRowIndex
-.. autofunction:: visidata.Sheet.cursorCell
-.. autofunction:: visidata.Sheet.cursorDisplay
-.. autofunction:: visidata.Sheet.cursorTypedValue
-.. autofunction:: visidata.Sheet.cursorValue
+.. autodata:: visidata.Sheet.topRowIndex
+.. autodata:: visidata.Sheet.cursorCol
+.. autodata:: visidata.Sheet.cursorColIndex
+.. autodata:: visidata.Sheet.cursorRowIndex
+.. autodata:: visidata.Sheet.cursorCell
+.. autodata:: visidata.Sheet.cursorDisplay
+.. autodata:: visidata.Sheet.cursorTypedValue
+.. autodata:: visidata.Sheet.cursorValue
 .. autofunction:: visidata.Sheet.cursorDown
 .. autofunction:: visidata.Sheet.cursorRight
 .. autofunction:: visidata.Sheet.moveToNextRow
@@ -60,4 +60,4 @@ Status
 
 .. autofunction:: visidata.BaseSheet.leftStatus
 .. autofunction:: visidata.vd.rightStatus
-.. autofunction:: visidata.BaseSheet.statusLine
+.. autodata:: visidata.BaseSheet.statusLine
