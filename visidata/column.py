@@ -31,14 +31,14 @@ __all__ = [
     'getattrdeep',
     'setattrdeep',
     'getitemdef',
-    'ColumnAttr',
-    'ColumnItem',
+    'ColumnAttr', 'AttrColumn',
+    'ColumnItem', 'ItemColumn',
     'SettableColumn',
     'SubColumnFunc',
     'SubColumnItem',
     'SubColumnAttr',
-    'ColumnEnum',
-    'ColumnExpr',
+    'ColumnEnum', 'EnumColumn',
+    'ColumnExpr', 'ExprColumn',
     'DisplayWrapper',
 ]
 
@@ -484,3 +484,10 @@ class SettableColumn(Column):
 
     def calcValue(self, row):
         return self.cache.get(self.sheet.rowid(row), None)
+
+
+# synonyms
+ItemColumn = ColumnItem
+AttrColumn = ColumnAttr
+ExprColumn = ColumnExpr
+EnumColumn = ColumnEnum

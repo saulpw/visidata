@@ -1,0 +1,16 @@
+dl.function dt, dl.data dt {
+    margin-top: 1.5em;
+    margin-bottom: .5em;
+    padding: .25em;
+    background-color: #e0e0e0;
+}
+
+body .document {
+    width: 1200px;
+}
+
+kbd {
+  border-radius: 3px;
+  padding: 1px 3px 0;
+  border: 1px solid black;
+}
