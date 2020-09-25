@@ -322,17 +322,22 @@ object that knows how to fetch the URL:
         def openurl_foo(p, filetype=None):
             return openSource(FooPath(p.url), filetype=filetype)
 
-``visidata.Path``
+visidata.Path
 =================
 
-.. autofunction:: visidata.Path.given
-.. autofunction:: visidata.Path.stat
+``visidata.Path`` is a wrapper around pathlib.Path that can also handle non-filesystem files (URLs, stdin, files within archives).
+
+The ``given`` property is new to visidata.Path.
+Other functions listed here are wrappers around the equivalent pathlib.Path functions, with specialized functionality as needed for non-filesystem files.
+All other accesses are forwarded to the inner pathlib.Path object, but will probably not work for non-filesystem files.
+
+.. autodata:: visidata.Path.given
+
 .. autofunction:: visidata.Path.exists
+.. autofunction:: visidata.Path.open
 .. autofunction:: visidata.Path.open_text
 .. autofunction:: visidata.Path.read_text
 .. autofunction:: visidata.Path.open_bytes
 .. autofunction:: visidata.Path.read_bytes
-.. autofunction:: visidata.Path.open
-.. autofunction:: visidata.Path.is_url
-.. autofunction:: visidata.Path.scheme
+.. autofunction:: visidata.Path.stat
 .. autofunction:: visidata.Path.with_name

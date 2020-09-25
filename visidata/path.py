@@ -3,6 +3,7 @@ import os.path
 import sys
 import pathlib
 from urllib.parse import urlparse, urlunparse
+from functools import wraps
 
 from visidata import *
 
@@ -45,6 +46,7 @@ class Path(os.PathLike):
 
     @property
     def given(self):
+        'The path as given to the constructor.'
         return self._given
 
     @given.setter
@@ -92,6 +94,7 @@ class Path(os.PathLike):
         return Path(self._path.__truediv__(a))
 
     def open_text(self, mode='rt'):
+        'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
 
         if self.rfile:
@@ -116,14 +119,22 @@ class Path(os.PathLike):
 
         return self.open(mode=mode, encoding=options.encoding, errors=options.encoding_errors)
 
-    def read_text(self, *args):
+    @wraps(pathlib.Path.read_text)
+    def read_text(self, *args, **kwargs):
+        'Open the file in text mode and return its entire decoded contents.'
+        if 'encoding' not in kwargs:
+            kwargs['encoding'] = self.options.encoding
+        if 'encoding_errors' not in kwargs:
+            kwargs['encoding_errors'] = self.options.encoding_errors
+
         if self.lines:
             return RepeatFile(iter_lines=self.lines).read()
         elif self.fp:
             return self.fp.read()
         else:
-            return self._path.read_text(*args)
+            return self._path.read_text(*args, **kwargs)
 
+    @wraps(pathlib.Path.open)
     def open(self, *args, **kwargs):
         fn = self
         if self.compression == 'gz':
@@ -146,15 +157,18 @@ class Path(os.PathLike):
                     yield line.rstrip('\n')
 
     def open_bytes(self, mode='rb'):
+        'Open the file pointed by this path and return a file object in binary mode.'
         if 'b' not in mode:
             mode += 'b'
         return self.open(mode=mode)
 
     def read_bytes(self):
+        'Return the entire binary contents of the pointed-to file as a bytes object.'
         with self.open(mode='rb') as fp:
             return fp.read()
 
     def is_url(self):
+        'Return True if the given path appears to be a URL.'
         return '://' in self.given
 
     def __str__(self):
@@ -162,25 +176,31 @@ class Path(os.PathLike):
             return self.given
         return str(self._path)
 
+    @wraps(pathlib.Path.stat)
     @functools.lru_cache()
     def stat(self, force=False):
+        'Return Path.stat() if relevant.'
         try:
             if not self.is_url():
                 return self._path.stat()
         except Exception as e:
             return None
 
+    @wraps(pathlib.Path.exists)
     def exists(self):
+        'Return True if the path can be opened.'
         if self.fp or self.is_url():
             return True
         return self._path.exists()
 
     @property
     def scheme(self):
+        'The URL scheme component, if path is a URL.'
         if self.is_url():
             return urlparse(self.given).scheme
 
     def with_name(self, name):
+        'Return a sibling Path with *name* as a filename in the same directory.'
         if self.is_url():
             urlparts = list(urlparse(self.given))
             urlparts[2] = '/'.join(Path(urlparts[2])._parts[1:-1] + [name])
