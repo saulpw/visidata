@@ -325,14 +325,14 @@ object that knows how to fetch the URL:
 ``visidata.Path``
 =================
 
--  ``Path.given``
--  ``Path.stat()``
--  ``Path.exists()``
--  ``Path.open_text()``
--  ``Path.read_text()``
--  ``Path.open_bytes()``
--  ``Path.read_bytes()``
--  ``Path.open()``
--  ``Path.is_url()``
--  ``Path.scheme``
--  ``Path.with_name()``
+.. autofunction:: visidata.Path.given
+.. autofunction:: visidata.Path.stat
+.. autofunction:: visidata.Path.exists
+.. autofunction:: visidata.Path.open_text
+.. autofunction:: visidata.Path.read_text
+.. autofunction:: visidata.Path.open_bytes
+.. autofunction:: visidata.Path.read_bytes
+.. autofunction:: visidata.Path.open
+.. autofunction:: visidata.Path.is_url
+.. autofunction:: visidata.Path.scheme
+.. autofunction:: visidata.Path.with_name

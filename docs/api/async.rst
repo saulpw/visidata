@@ -1,3 +1,5 @@
--  \`BaseSheet.progressMade
--  \`BaseSheet.progressPct
--  \`BaseSheet.progressTotal
+.. autofunction:: visidata.BaseSheet.progressMade
+
+.. autofunction:: visidata.BaseSheet.progressPct
+
+.. autofunction:: visidata.BaseSheet.progressTotal

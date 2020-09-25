@@ -60,7 +60,7 @@ Notes:
 API
 ~~~
 
-:# BaseSheet.addCommand
+.. autofunction:: visidata.BaseSheet.addCommand
 
 -  classmethod; call with a SheetType or a Sheet
 -  ``binding``
@@ -105,17 +105,17 @@ API
 
 -  ``helpstr`` Shown in **Commands Sheet**.
 
-:# BaseSheet.bindkey
+.. autofunction:: visidata.BaseSheet.bindkey
 
 Bind ``longname`` as the command to run when ``keystrokes`` are pressed
 on the given ``<SheetType>``.
 
-:# BaseSheet.unbindkey
+.. autofunction:: visidata.BaseSheet.unbindkey
 
-Unbind ``keystrokes`` on a ``<SheetType>``. May be necessary to avoid a
 warning when overriding a binding on the same exact class.
 
-:# BaseSheet.execCommand Execute ``cmd`` in the context of the sheet.
+.. autofunction:: visidata.BaseSheet.execCommand
+Execute ``cmd`` in the context of the sheet.
 ``cmd`` can be a longname, a keystroke, or a Command object.
 
 :# vd.addGlobals Update the visidata globals dict with items from ``g``,

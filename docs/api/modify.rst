@@ -1,1 +1,1 @@
--  ``Sheet.deleteBy()``
+.. autofunction:: visidata.Sheet.deleteBy

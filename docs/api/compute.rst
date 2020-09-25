@@ -1,36 +1,36 @@
 Cell, Value, DisplayValue
 -------------------------
 
--  ``Column.setCache()``
--  ``Column.getCell()``
--  ``Column.getDisplayValue()``
--  ``Column.format()``
--  ``Column.setValue()``
--  ``Column.setValues()``
+.. autofunction:: visidata.Column.setCache
+.. autofunction:: visidata.Column.getCell
+.. autofunction:: visidata.Column.getDisplayValue
+.. autofunction:: visidata.Column.format
+.. autofunction:: visidata.Column.setValue
+.. autofunction:: visidata.Column.setValues
 
--  ``Column.calcValue()``
--  ``Column.getValue()``
+.. autofunction:: visidata.Column.calcValue
+.. autofunction:: visidata.Column.getValue
 
 Types
 -----
 
--  ``Column.getTypedValue()``
--  ``Column.setValuesTyped()``
+.. autofunction:: visidata.Column.getTypedValue
+.. autofunction:: visidata.Column.setValuesTyped
 
 Null
 ----
 
--  ``VisiData.isNullFunc()``
+.. autofunction:: visidata.VisiData.isNullFunc
 
 Errors
 ------
 
--  ``Column.isError()``
--  ``Column.putValue()``
--  ``Column.setValuesFromExpr()``
--  ``Column.recalc()``
+.. autofunction:: visidata.Column.isError
+.. autofunction:: visidata.Column.putValue
+.. autofunction:: visidata.Column.setValuesFromExpr
+.. autofunction:: visidata.Column.recalc
 
 Expressions
 -----------
 
--  ``BaseSheet.evalexpr()``
+.. autofunction:: visidata.BaseSheet.evalexpr
