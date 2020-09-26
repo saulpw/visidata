@@ -52,7 +52,7 @@ with open(fncli, 'w') as cliOut:
                 cli_optname=opt.name.replace('_', '-')
                 cli_type=type(opt.value).__name__
                 optlen = len(cli_optname)+len(cli_type)+1
-                if cli_type != 'bool' or visidata.options.getdefault(opt.name) == True:
+                if cli_type != 'bool' or visidata.options.getdefault(opt.name):
                     cliOut.write(options_cli_skel.format(cli_optname=cli_optname,
                                                     optname = opt.name,
                                                     type=cli_type+" "*(padding-optlen),

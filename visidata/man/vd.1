@@ -794,10 +794,12 @@ a value to be counted as null
 enable undo/redo
 .It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
 max number of cache entries in each cached column
-.It Sy --force-valid-colnames No "      False"
-clean column names to be valid Python identifiers
+.It Sy --clean-names No "               False"
+clean column/sheet names to be valid Python identifiers
 .It Sy --default-width Ns = Ns Ar "int         " No "20"
 default column width
+.It Sy --default-height Ns = Ns Ar "int        " No "10"
+default column height
 .It Sy --textwrap-cells Ns = Ns Ar "bool       " No "True"
 wordwrap text for multiline rows
 .It Sy --cmd-after-edit Ns = Ns Ar "str        " No "go-down"
@@ -919,6 +921,8 @@ save the final visible sheet to output at the end of replay
 longnames to preplay before replay
 .It Sy --imports Ns = Ns Ar "NoneType          " No "None"
 imports to preload before .visidatarc (command-line only)
+.It Sy --incr-base Ns = Ns Ar "float           " No "1.0"
+start value for column increments
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
