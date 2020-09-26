@@ -123,9 +123,9 @@ class Path(os.PathLike):
     def read_text(self, *args, **kwargs):
         'Open the file in text mode and return its entire decoded contents.'
         if 'encoding' not in kwargs:
-            kwargs['encoding'] = self.options.encoding
-        if 'encoding_errors' not in kwargs:
-            kwargs['encoding_errors'] = self.options.encoding_errors
+            kwargs['encoding'] = options.encoding
+        if 'errors' not in kwargs:
+            kwargs['errors'] = kwargs.get('encoding_errors', options.encoding_errors)
 
         if self.lines:
             return RepeatFile(iter_lines=self.lines).read()
