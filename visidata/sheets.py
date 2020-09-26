@@ -850,7 +850,7 @@ class SequenceSheet(Sheet):
 
     def optlines(self, it, optname):
         'Generate next options.<optname> elements from iterator with exceptions wrapped.'
-        for i in range(options.get(optname, self)):
+        for i in range(options.getobj(optname, self)):
             try:
                 yield next(it)
             except StopIteration:
