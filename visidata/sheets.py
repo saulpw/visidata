@@ -462,13 +462,13 @@ class TableSheet(BaseSheet):
 
     def setKeys(self, cols):
         vd.addUndo(undoAttrFunc(cols, 'keycol'))
+        lastkeycol = 0
+        if self.keyCols:
+            lastkeycol = max(c.keycol for c in self.keyCols)
         for col in cols:
-            lastkeycol = 0
-
-            if self.keyCols:
-                lastkeycol = max(c.keycol for c in self.keyCols)
-
             col.keycol = lastkeycol+1
+            lastkeycol += 1
+            vd.status(col.keycol)
 
     def unsetKeys(self, cols):
         vd.addUndo(undoAttrFunc(cols, 'keycol'))

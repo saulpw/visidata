@@ -186,8 +186,8 @@ BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(someSelectedRows)', 'toggle selected rows as key columns on source sheet')
-ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(someSelectedRows)', 'unset selected rows as key columns on source sheet')
+ColumnsSheet.addCommand('g!', 'key-selected', 'for c in someSelectedRows: c.sheet.setKeys(c)', 'toggle selected rows as key columns on source sheet')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in someSelectedRows: c.sheet.unsetKeys(someSelectedRows)', 'unset selected rows as key columns on source sheet')
 
 ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()', 'hide selected columns on source sheet')
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
