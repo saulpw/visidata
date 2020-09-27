@@ -119,7 +119,8 @@ def deleteBy(self, func, commit=False):
         else:
             ndeleted += 1
 
-    vd.addUndo(setattr, self, 'rows', oldrows)
+    if not commit:
+        vd.addUndo(setattr, self, 'rows', oldrows)
 
     vd.status('deleted %s %s' % (ndeleted, self.rowtype))
 
