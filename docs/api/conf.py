@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'VisiData'
-copyright = '2020, Saul Pwanson'
+copyright = '2016-2020, Saul Pwanson'
 author = 'Saul Pwanson'
 
 # The full version, including alpha/beta/rc tags

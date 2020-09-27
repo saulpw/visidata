@@ -70,6 +70,7 @@ def isLoggableSheet(sheet):
 
 @Sheet.api
 def moveToRow(vs, rowstr):
+    'Move cursor to row given by *rowstr*, which can be either the row number or keystr.'
     rowidx = vs.getRowIndexFromStr(rowstr)
     if rowidx is None:
         return False
@@ -97,6 +98,7 @@ def getRowIndexFromStr(vs, rowstr):
 
 @Sheet.api
 def moveToCol(vs, colstr):
+    'Move cursor to column given by *colstr*, which can be either the column number or column name.'
     try:
         vcolidx = int(colstr)
     except ValueError:

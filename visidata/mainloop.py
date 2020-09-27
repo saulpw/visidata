@@ -20,8 +20,8 @@ class ReturnValue(BaseException):
 
 
 @VisiData.api
-def draw(self, scr, sheet):
-    'Redraw full screen.'
+def draw_sheet(self, scr, sheet):
+    'Erase *scr* and draw *sheet* on it, including status bars.'
 
     scr.erase()  # clear screen before every re-draw
 
@@ -72,10 +72,11 @@ def setWindows(vd, scr):
         return True
 
 @VisiData.api
-def drawall(vd):
-    vd.draw(vd.win1, vd.sheets[0])
+def draw_all(vd):
+    'Draw all sheets in all windows.'
+    vd.draw_sheet(vd.win1, vd.sheets[0])
     if vd.win2 and len(vd.sheets) > 1:
-        vd.draw(vd.win2, vd.sheets[1])
+        vd.draw_sheet(vd.win2, vd.sheets[1])
     else:
         vd.win2.erase()
         vd.win2.refresh()
@@ -114,7 +115,7 @@ def mainloop(self, scr):
         sheet.ensureLoaded()
         vd.setWindows(scr)
 
-        self.drawall()
+        self.draw_all()
 
         keystroke = self.getkeystroke(scr, sheet)
 

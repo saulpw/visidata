@@ -14,15 +14,15 @@ VisiData is also designed to be **modular**.
 Many of its features can exist in isolation, and can be enabled or disabled independently, without affecting other features.
 Modules should degrade or fail gracefully if they depend on another module which is not loaded.
 
-As a basic example, 
-For instance, this code can be placed in ``~/.visidatarc``:
+As a simple example, this code can be placed in ``~/.visidatarc``:
 
 ::
 
     BaseSheet.addCommand('1', 'hello-world', 'status("Hello world!")')
 
-This is fairly straight-forward:  when :kbd:`1` is pressed, the command called ``hello-world`` with the Python code ``status("Hello world!")`` is executed, and this prints the string "Hello world!" in the status bar.
+This extends VisiData so that when :kbd:`1` is pressed on any sheet, the command called ``hello-world`` with the Python code ``status("Hello world!")`` is executed, and this prints the string "Hello world!" on the status bar.
 
+----
 
 .. toctree::
    :maxdepth: 1

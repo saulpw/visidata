@@ -13,54 +13,38 @@ module which has not been imported.
 the ``Extensible`` base class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Python classes usually declare and implement all methods and members in
-the class definition, which exists in a single source file. A modular
-feature, in contrast, is self-contained within a separate source file.
+Python classes usually declare and implement all methods and members in the class definition, which exists in a single source file. A modular feature, in contrast, is self-contained within a separate source file.
 
-Core functionality can still be changed, as Python supports
-'monkey-patching' (the ability for modules loaded after startup to add
-or change functionality on existing classes).
+Core functionality can still be changed, as Python supports 'monkey-patching' (the ability for modules loaded after startup to add or change functionality on existing classes).
 
-To make this a bit easier, the core classes in
-VisiData--\ ``BaseSheet``, ``Column``, and ``VisiData`` (the ``vd``
-singleton)--inherit from the ``Extensible`` class, which provides some
-helper functions and decorators to make monkey-patching easier and more
-consistent.
-
+To make this a bit easier, the core classes in VisiData inherit from the ``Extensible`` class, which provides some helper functions and decorators to make monkey-patching easier and more consistent.
 All of their subclasses are then also naturally Extensible.
 
-``Sheet`` (alias for ``TableSheet``, a subclass of BaseSheet, and the
-most basic tabular sheet type) is used in the following examples, but
-any other Extensible class would work similarly.
+``TableSheet`` is used in the following examples, but any Extensible class would work similarly.
 
 ``@Extensible.api``
 ^^^^^^^^^^^^^^^^^^^
 
-This decorator defines a member function on the specific class:
+This decorator defines a member function on a specific class.
 
-::
-
-    @Sheet.api
-    def foobar(sheet, ...):
-        ...
-
-Because this is a member function, the first parameter is the instance
-itself. If this function were defined in the class, the first parameter
-would be named ``self`` by Python convention. When members are defined
-in other files, it is better to use a specific local object name instead
-of ``self``:
-
--  VisiData: ``vd``
--  Sheet: ``sheet``
--  Column: ``col``
+Because this is a member function, the first parameter is the instance itself.
+If this function were defined in the class, the first parameter would be named ``self`` by Python convention.
+When members are defined in other files, it is better to use a specific local object name instead of ``self``.
+Use ``sheet`` for any Sheet type, ``col`` for any Column type, and ``vd`` for VisiData (which will shadow the global ``vd`` object, but as it is a singleton, this will be identical).
 
 ::
 
         @VisiData.api
-        def example1(vd, ...):
+        def vd_func(vd, ...):
+            pass
+
+        @Sheet.api
+        def sheet_func(sheet, ...):
+            pass
 
         @Column.api
-        def example2(col, ...):
+        def col_func(col, ...):
+            pass
 
 ``Extensible.api`` can be used either to add new member functions, or to
 override existing members. To call the original function, use
@@ -86,8 +70,8 @@ override existing members. To call the original function, use
 
 This is used internally but may not be all that useful for plugin and
 module authors. Note that ``@classmethod`` must still be provided. **The
-order of multiple decorators is crucial, and the ``@Extensible.api``
-decorator must always be first.**
+order of multiple decorators is crucial: ``@<class>.api``
+decorator must come before @classmethod.**
 
 ``@Extensible.property``
 ^^^^^^^^^^^^^^^^^^^^^^^^

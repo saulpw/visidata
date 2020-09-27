@@ -8,8 +8,8 @@ Key Columns
 .. autofunction:: visidata.Sheet.unsetKeys
 .. autofunction:: visidata.Sheet.rowkey
 .. autofunction:: visidata.Sheet.keystr
-.. autofunction:: visidata.Sheet.keyCols
-.. autofunction:: visidata.Sheet.nonKeyVisibleCols
+.. autodata:: visidata.Sheet.keyCols
+.. autodata:: visidata.Sheet.nonKeyVisibleCols
 
 Selected Rows
 -------------
@@ -17,9 +17,9 @@ Selected Rows
 .. autofunction:: visidata.Sheet.selectRow
 .. autofunction:: visidata.Sheet.unselectRow
 .. autofunction:: visidata.Sheet.isSelected
-.. autofunction:: visidata.Sheet.nSelected
-.. autofunction:: visidata.Sheet.selectedRows
-.. autofunction:: visidata.Sheet.someSelectedRows
+.. autodata:: visidata.Sheet.nSelected
+.. autodata:: visidata.Sheet.selectedRows
+.. autodata:: visidata.Sheet.someSelectedRows
 .. autofunction:: visidata.Sheet.select
 .. autofunction:: visidata.Sheet.unselect
 .. autofunction:: visidata.Sheet.clearSelected

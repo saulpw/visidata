@@ -20,7 +20,7 @@ When calling functions on ``vd`` or ``sheet`` outside of a Command *execstr*, th
 
     BaseSheet.addCommand(None, 'show-hello', 'show_hello()')
 
-The current **Sheet** and the **VisiData** object are both in scope for `execstrs <commands#execstr>`__, so within an *execstr*, the ``sheet.`` or ``vd`` may be omitted:
+The current **Sheet** and the **VisiData** object are both in scope for `execstrs <commands#execstr>`__, so within an *execstr*, the ``sheet.`` or ``vd`` may be omitted, as in the hello world example:
 
 ::
 

@@ -381,7 +381,7 @@ class TableSheet(BaseSheet):
 
     @property
     def cursorColIndex(self):
-        'Index of current column into `columns`. Linear search; prefer `cursorCol` or `cursorVisibleColIndex`.'
+        'Index of current column into `Sheet.columns`. Linear search; prefer `cursorCol` or `cursorVisibleColIndex`.'
         return self.columns.index(self.cursorCol)
 
     @property
@@ -980,7 +980,7 @@ def quit(vd, *sheets):
         vd.confirm("quit last sheet? ")
     for vs in sheets:
         if options.getonly('quitguard', vs, False):
-            vd.drawall()
+            vd.draw_all()
             vd.confirm(f'quit guarded sheet "{vs.name}?" ')
         vd.remove(vs)
 

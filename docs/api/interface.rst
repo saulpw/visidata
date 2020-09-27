@@ -9,20 +9,29 @@ Terminal
 .. autofunction:: visidata.BaseSheet.refresh
 .. autofunction:: visidata.VisiData.redraw
 .. autofunction:: visidata.BaseSheet.draw
-.. autofunction:: visidata.VisiData.drawall
-.. autofunction:: visidata.SuspendCurses
+.. autoclass:: visidata.SuspendCurses
 
 Cursor
 ------
 
-.. autodata:: visidata.Sheet.topRowIndex
+.. data:: visidata.TableSheet.cursorVisibleColIndex
+
+Column cursor as an index into ``TableSheet.visibleCols``.  Settable.
+
+.. data:: visidata.Sheet.cursorRowIndex
+
+Row cursor as an index into ``TableSheet.rows``.  Settable.
+
+.. data:: visidata.Sheet.topRowIndex
+
+Top row on the screen, as an index into ``TableSheet.rows``.  Settable.
+
 .. autodata:: visidata.Sheet.cursorCol
 .. autodata:: visidata.Sheet.cursorColIndex
-.. autodata:: visidata.Sheet.cursorRowIndex
-.. autodata:: visidata.Sheet.cursorCell
-.. autodata:: visidata.Sheet.cursorDisplay
-.. autodata:: visidata.Sheet.cursorTypedValue
 .. autodata:: visidata.Sheet.cursorValue
+.. autodata:: visidata.Sheet.cursorTypedValue
+.. autodata:: visidata.Sheet.cursorDisplay
+
 .. autofunction:: visidata.Sheet.cursorDown
 .. autofunction:: visidata.Sheet.cursorRight
 .. autofunction:: visidata.Sheet.moveToNextRow
@@ -60,4 +69,4 @@ Status
 
 .. autofunction:: visidata.BaseSheet.leftStatus
 .. autofunction:: visidata.vd.rightStatus
-.. autodata:: visidata.BaseSheet.statusLine
+.. autodata:: visidata.TableSheet.statusLine
