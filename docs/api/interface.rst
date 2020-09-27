@@ -40,25 +40,14 @@ Top row on the screen, as an index into ``TableSheet.rows``.  Settable.
 
 .. autofunction:: visidata.BaseSheet.checkCursor
 
-Layout
-------
-.. autofunction:: visidata.Sheet.calcColLayout
-
-
 Input/Edit
 ----------
 
 .. autofunction:: visidata.vd.input
 .. autofunction:: visidata.vd.confirm
 .. autofunction:: visidata.vd.launchEditor
-.. autofunction:: visidata.vd.editline
 .. autofunction:: visidata.vd.editText
 .. autofunction:: visidata.Sheet.editCell
-
-Colors
-------
-.. autofunction:: visidata.Sheet.addColorizer
-.. autofunction:: visidata.Sheet.removeColorizer
 
 Status
 ------
@@ -67,6 +56,23 @@ Status
 .. autofunction:: visidata.vd.warning
 .. autofunction:: visidata.vd.fail
 
-.. autofunction:: visidata.BaseSheet.leftStatus
-.. autofunction:: visidata.vd.rightStatus
-.. autodata:: visidata.TableSheet.statusLine
+Colors
+------
+.. data:: visidata.TableSheet.colorizers
+
+class member which specifies a list of Colorizers for this class.; similar to TableSheet.columns, to be 
+
+Do not manually update this list to add colorizers on a specific sheet.
+Instead use addColorizer and removeColorizer.
+
+.. autofunction:: visidata.TableSheet.addColorizer
+.. autofunction:: visidata.TableSheet.removeColorizer
+
+Colorizers
+^^^^^^^^^^
+
+.. autoclass:: visidata.RowColorizer
+.. autoclass:: visidata.ColumnColorizer
+.. autoclass:: visidata.CellColorizer
+
+The TableSheet allows whole cells to be colorized according to a Python function.

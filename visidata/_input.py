@@ -234,7 +234,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
 
 @VisiData.api
 def editText(vd, y, x, w, record=True, display=True, **kwargs):
-    'Wrap editline; if record=True, get input from the cmdlog in batch mode, save input to the cmdlog if display=True.'
+    'Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string.'
     v = None
     if record and vd.cmdlog:
         v = vd.getLastArgs()
@@ -283,8 +283,10 @@ def inputsingle(vd, prompt, record=True):
 def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     '''Display prompt and return line of user input.
 
-        type: list of previous items, or a string indicating the type of input.
-        defaultLast:  on empty input, if True, return last history item
+        - *type*: list of previous items, or a string indicating the type of input.
+        - *defaultLast*:  on empty input, if True, return last history item.
+        - *history*: list of strings to use for input history.
+        - *kwargs*: passthrough options to editText.
     '''
     if type:
         if isinstance(type, str):
@@ -315,6 +317,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
 
 @VisiData.global_api
 def confirm(vd, prompt, exc=EscapeException):
+    'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
     yn = vd.input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
         msg = 'disconfirmed: ' + prompt
@@ -336,7 +339,12 @@ class CompleteKey:
 
 @Sheet.api
 def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
-    'Call `editText` at its place on the screen.  Returns the new value, properly typed'
+    '''Call vd.editText for the cell at (*rowidx*, *vcolidx*).  Return the new value, properly typed.
+
+       - Negative *rowidx* indicates the column name in the header.
+       - *value* if given, is the starting input; otherwise it starts with the cell value or column name as appropriate.
+       - *kwargs*: passthrough args to editText and editline.
+       '''
 
     if vcolidx is None:
         vcolidx = self.cursorVisibleColIndex

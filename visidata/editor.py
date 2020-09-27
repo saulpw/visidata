@@ -20,6 +20,7 @@ class SuspendCurses:
 
 @visidata.VisiData.global_api
 def launchEditor(vd, *args):
+    'Launch $EDITOR with *args* as arguments.'
     editor = os.environ.get('EDITOR') or vd.fail('$EDITOR not set')
     args = [editor] + list(args)
     with SuspendCurses():
@@ -28,6 +29,7 @@ def launchEditor(vd, *args):
 
 @visidata.VisiData.global_api
 def launchExternalEditor(vd, v, linenum=0):
+    'Launch $EDITOR to edit string *v* starting on line *linenum*.'
     import tempfile
     with tempfile.NamedTemporaryFile() as temp:
         with open(temp.name, 'w') as fp:
@@ -36,6 +38,7 @@ def launchExternalEditor(vd, v, linenum=0):
 
 
 def launchExternalEditorPath(path, linenum=0):
+        'Launch $EDITOR to edit *path* starting on line *linenum*.'
         if linenum:
             launchEditor(path, '+%s' % linenum)
         else:

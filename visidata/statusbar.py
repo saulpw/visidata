@@ -35,7 +35,7 @@ def statusHistory(vd):
 
 @VisiData.global_api
 def status(self, *args, priority=0):
-    'Add status message to be shown until next action.'
+    'Display message on status until next action.'
     if not args:
         return True
 
@@ -53,21 +53,24 @@ def status(self, *args, priority=0):
 
 @VisiData.global_api
 def error(vd, *args):
-    'Log an error and raise an exception.'
+    'Abort with ExpectedException, and display message on status as an error.'
     vd.status(*args, priority=3)
     raise ExpectedException(args[0] if args else '')
 
 @VisiData.global_api
 def fail(vd, *args):
+    'Abort with ExpectedException, and display message on status as a warning.'
     vd.status(*args, priority=2)
     raise ExpectedException(args[0] if args else '')
 
 @VisiData.global_api
 def warning(vd, *args):
+    'Display message on status as a warning.'
     vd.status(*args, priority=1)
 
 @VisiData.global_api
 def debug(vd, *args, **kwargs):
+    'Display message on status if options.debug is set.'
     if options.debug:
         return vd.status(*args, **kwargs)
 
@@ -86,7 +89,7 @@ def composeStatus(msgparts, n):
 
 @BaseSheet.api
 def leftStatus(sheet):
-    'Compose left side of status bar for this sheet (overridable).'
+    'Return left side of status bar for this sheet. Overridable.'
     return options.disp_status_fmt.format(sheet=sheet, vd=vd)
 
 
@@ -149,7 +152,7 @@ def drawLeftStatus(vd, scr, vs):
 
 @VisiData.api
 def rightStatus(vd, sheet):
-    'Compose right side of status bar.'
+    'Return right side of status bar.  Overrideable.'
     return options.disp_rstatus_fmt.format(sheet=sheet, vd=vd)
 
 

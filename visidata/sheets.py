@@ -195,9 +195,11 @@ class TableSheet(BaseSheet):
         self._rowLayout.clear()
 
     def addColorizer(self, c):
+        'Add Colorizer *c* to the list of colorizers for this sheet.'
         self._colorizers.append(c)
 
     def removeColorizer(self, c):
+        'Remove Colorizer *c* from the list of colorizers for this sheet.'
         self._colorizers.remove(c)
 
     @drawcache_property
@@ -416,7 +418,7 @@ class TableSheet(BaseSheet):
 
     @property
     def statusLine(self):
-        'String of row and column stats.'
+        'Position of cursor and bounds of current sheet.'
         rowinfo = 'row %d (%d selected)' % (self.cursorRowIndex, self.nSelected)
         colinfo = 'col %d (%d visible)' % (self.cursorColIndex, len(self.visibleCols))
         return '%s  %s' % (rowinfo, colinfo)
