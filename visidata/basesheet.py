@@ -161,7 +161,8 @@ class BaseSheet(Extensible):
     @name.setter
     def name(self, name):
         'Set name without spaces.'
-        vd.addUndo(setattr, self, '_name', self._name)
+        if self._name:
+            vd.addUndo(setattr, self, '_name', self._name)
         self._name = visidata.maybe_clean(str(name), self)
 
     def recalc(self):
