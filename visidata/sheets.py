@@ -470,7 +470,6 @@ class TableSheet(BaseSheet):
         for col in cols:
             col.keycol = lastkeycol+1
             lastkeycol += 1
-            vd.status(col.keycol)
 
     def unsetKeys(self, cols):
         vd.addUndo(undoAttrFunc(cols, 'keycol'))
