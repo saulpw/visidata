@@ -61,6 +61,7 @@ def SIFormatter(fmtstr, val):
 
 
 class VisiDataType:
+    'Register *typetype* in the typemap.'
     def __init__(self, typetype=None, icon=None, fmtstr='', formatter=numericFormatter, key='', name=None):
         self.typetype = typetype or anytype # int or float or other constructor
         self.name = name or getattr(typetype, '__name__', str(typetype))

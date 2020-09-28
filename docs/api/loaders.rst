@@ -293,7 +293,7 @@ make them available through the ``vd`` object's scope.
             with path.open_text(mode='w') as fp:
                 for i, row in enumerate(Progress(sheet.rows)):
                     for col in sheet.visibleCols:
-                        foolib.write(fp, i, col.name, col.getValue(row))
+                        foolib.write(fp, i, col.name, col.getDisplayValue(row))
 
 -  ``path`` is a ``visidata.Path()`` object representing the file being
    written to
@@ -302,6 +302,8 @@ make them available through the ``vd`` object's scope.
 The saver should preserve the column names and translate their types
 into foolib semantics, but other attributes on the Columns should
 generally not be saved.
+
+Savers which can handle typed values should use Column.getTypedValue, and displayable savers (html, markdown, csv) should use Column.getDisplayValue (which takes into account the column's *fmtstr*).
 
 Building a loader for a URL schemetype
 --------------------------------------

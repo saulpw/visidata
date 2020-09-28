@@ -158,7 +158,7 @@ class Column(Extensible):
         self._fmtstr = v
 
     def format(self, typedval):
-        'Return displayable string of `typedval` according to `Column.fmtstr`'
+        'Return displayable string of *typedval* according to Column.fmtstr.'
         if typedval is None:
             return None
 
@@ -185,6 +185,7 @@ class Column(Extensible):
         return self.width <= 0
 
     def calcValue(self, row):
+        'Calculate and return value for *row* in this column.'
         return (self.getter)(self, row)
 
     def getTypedValue(self, row):
@@ -192,7 +193,11 @@ class Column(Extensible):
         return wrapply(self.type, wrapply(self.getValue, row))
 
     def setCache(self, cache):
-        'cache=False: always call CalcValue; True: maintain cache of options.col_cache_size; "async": maintain an infinite cache and launch threads'
+        '''Set cache behavior for this column to *cache*:
+
+           - False (default): getValue never caches; calcValue is always called.
+           - True: getValue maintains a cache of options.col_cache_size.
+           - "async": getValue launches thread for every uncached result, maintains cache of infinite size.  Returns invalid value until cache filled.'''
         self.cache = cache
         self._cachedValues = collections.OrderedDict() if self.cache else None
 
@@ -209,7 +214,7 @@ class Column(Extensible):
         return ret
 
     def getValue(self, row):
-        'Memoize calcValue with key sheet.rowid(row)'
+        'Return value for *row* in this column.  Cache value based on sheet.rowid(row).'
 
         if self.sheet.defer:
             try:
@@ -298,21 +303,22 @@ class Column(Extensible):
         return dw
 
     def getDisplayValue(self, row):
+        'Return string displayed in this column for given *row*.'
         return self.getCell(row).display
 
-    def putValue(self, row, value):
-        'Set our column value on row.  defaults to .setter; override in Column subclass. no type checking'
-        return self.setter(self, row, value)
+    def putValue(self, row, val):
+        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overrideable (by default call .setter(row, va)).'
+        return self.setter(self, row, val)
 
     def setValue(self, row, val):
-        'For defer columns, override to provide a caching layer above putValue'
+        'Change value for *row* in this column to *val*.  Call putValue immediately if parent sheet.defer is False, otherwise cache until later putChanges.'
         if self.sheet.defer:
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
 
     def setValueSafe(self, row, value):
-        'setValue and ignore exceptions'
+        'setValue and ignore exceptions.'
         try:
             return self.setValue(row, value)
         except Exception as e:
@@ -320,7 +326,7 @@ class Column(Extensible):
 
     @asyncthread
     def setValues(self, rows, *values):
-        'Set our column value for given list of rows to `value`.'
+        'Set values in this column for given *rows* to *values*, recycling values as needed to fill rows.'
         vd.addUndoSetValues([self], rows)
         for r, v in zip(rows, itertools.cycle(values)):
             self.setValueSafe(r, v)

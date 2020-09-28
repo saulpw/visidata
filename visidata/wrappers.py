@@ -11,6 +11,7 @@ option('null_value', None, 'a value to be counted as null', replay=True)
 
 @BaseSheet.api
 def isNullFunc(sheet):
+    'Return func(value) which returns whether or not *value* is null.'
     nullv = sheet.options.null_value
     if nullv is None:
         return lambda v: v is None or isinstance(v, TypedWrapper)
