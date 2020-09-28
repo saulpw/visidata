@@ -7,6 +7,7 @@ from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem
 from visidata import (options, theme, isNumeric, Column, option, namedlist, SettableColumn,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
 vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
+import visidata
 
 
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
@@ -468,8 +469,11 @@ class TableSheet(BaseSheet):
         if self.keyCols:
             lastkeycol = max(c.keycol for c in self.keyCols)
         for col in cols:
-            col.keycol = lastkeycol+1
-            lastkeycol += 1
+            if not col.keycol:
+                col.keycol = lastkeycol+1
+                lastkeycol += 1
+        # clears the keyCols cache
+        visidata.Extensible.clear_all_caches()
 
     def unsetKeys(self, cols):
         vd.addUndo(undoAttrFunc(cols, 'keycol'))
