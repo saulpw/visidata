@@ -94,8 +94,8 @@ class _vjsonEncoder(json.JSONEncoder):
         super().__init__(sort_keys=options.json_sort_keys, **kwargs)
         self.safe_error = options.safe_error
 
-    def default(self, cell):
-        return cell.value
+    def default(self, obj):
+        return obj.value if isinstance(obj, Cell) else str(obj)
 
 
 def _rowdict(cols, row):
