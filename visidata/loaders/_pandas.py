@@ -117,9 +117,7 @@ class PandasSheet(Sheet):
             df = readfunc(str(self.source), **options.getall('pandas_'+filetype+'_'))
 
         # reset the index here
-        if type(df.index) is pd.Int64Index:
-            df.index = pd.RangeIndex(len(df.index))
-        elif type(df.index) is not pd.RangeIndex:
+        if type(df.index) is not pd.RangeIndex:
             df = df.reset_index()
 
         self.columns = []
