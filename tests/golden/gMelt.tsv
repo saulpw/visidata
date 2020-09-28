@@ -1,99 +1,99 @@
-SKU	Date	Customer	Variable	Currency	Cost
-FOOD213	7/3/2018 1:47p	Robert Armstrong	Unit	$	12.95
-FOOD213	7/3/2018 1:47p	Robert Armstrong	Total	$	$51.8
-FOOD121	7/3/2018 3:32p	Kyle Kennedy	Unit	$	4.22
-FOOD121	7/3/2018 3:32p	Kyle Kennedy	Total	$	$4.22
-FOOD121	7/5/2018 4:15p	Douglas "Dougie" Powers	Unit	$	4.22
-FOOD121	7/5/2018 4:15p	Douglas "Dougie" Powers	Total	$	$4.22
-FOOD122	7/6/2018 12:15p	桜 高橋 (Sakura Takahashi)	Unit	$	1.29
-FOOD122	7/6/2018 12:15p	桜 高橋 (Sakura Takahashi)	Total	$	157¥
-NSCT201	7/10/2018 10:28a	David Attenborough	Unit	$	.05
-NSCT201	7/10/2018 10:28a	David Attenborough	Total	$	$1.5
-CAT060	7/10/2018 5:23p	Susan Ashworth	Unit	$	720.42
-CAT060	7/10/2018 5:23p	Susan Ashworth	Total	$	$720.42
-FOOD130	7/10/2018 5:23p	Susan Ashworth	Unit	$	14.94
-FOOD130	7/10/2018 5:23p	Susan Ashworth	Total	$	$14.94
-NSCT523	7/13/2018 10:26a	Wil Wheaton	Unit	AUD$	39.95
-NSCT523	7/13/2018 10:26a	Wil Wheaton	Total	$	$39.95
-FOOD216	7/13/2018 3:49p	Robert Armstrong	Unit	$	12.95
-FOOD216	7/13/2018 3:49p	Robert Armstrong	Total	$	$51.8
-FOOD217	7/17/2018 9:01a	Robert Armstrong	Unit	$	12.95
-FOOD217	7/17/2018 9:01a	Robert Armstrong	Total	$	$51.8
-LAGO342	7/17/2018 11:30a	Helen Halestorm	Unit	$	32.94
-LAGO342	7/17/2018 11:30a	Helen Halestorm	Total	$	$65.88
-FOOD122	7/18/2018 12:16p	桜 高橋 (Sakura Takahashi)	Unit	$	1.29
-FOOD122	7/18/2018 12:16p	桜 高橋 (Sakura Takahashi)	Total	$	157¥
-FOOD170	7/19/2018 10:28a	Rubeus Hagrid	Unit	EUR	44.95
-FOOD170	7/19/2018 10:28a	Rubeus Hagrid	Total	$	$224.75
-FOOD167	7/20/2018 2:13p	Jon Arbuckle	Unit	$	3.95
-FOOD167	7/20/2018 2:13p	Jon Arbuckle	Total	$	$197.5
-FOOD215	7/23/2018 1:41p	Robert Armstrong	Unit	$	12.95
-FOOD215	7/23/2018 1:41p	Robert Armstrong	Total	$	$51.8
-TOY235	7/23/2018 4:23p	Douglas "Dougie" Powers	Unit	$	16.12
-TOY235	7/23/2018 4:23p	Douglas "Dougie" Powers	Total	$	$16.12
-FOOD122	7/24/2018 12:16p	桜 高橋 (Sakura Takahashi)	Unit	$	1.29
-FOOD122	7/24/2018 12:16p	桜 高橋 (Sakura Takahashi)	Total	$	157¥
-FOOD420	7/26/2018 4:39p	Douglas "Dougie" Powers	Unit	PES	15.70
-FOOD420	7/26/2018 4:39p	Douglas "Dougie" Powers	Total	$	$15.7
-FOOD122	7/27/2018 12:16p	桜 高橋 (Sakura Takahashi)	Unit	$	1.29
-FOOD122	7/27/2018 12:16p	桜 高橋 (Sakura Takahashi)	Total	$	157¥
-RETURN	7/30/2018 12:17p	桜 高橋 (Sakura Takahashi)	Unit	$	1.29
-RETURN	7/30/2018 12:17p	桜 高橋 (Sakura Takahashi)	Total	$	157¥
-CAT060	7/31/2018 5:42p	Rubeus Hagrid	Unit	$	720.42
-CAT060	7/31/2018 5:42p	Rubeus Hagrid	Total	$	$3602.1
-FOOD360	8/1/2018 2:44p	David Attenborough	Unit	$	5.72
-FOOD360	8/1/2018 2:44p	David Attenborough	Total	$	$22.88
-CAT110	8/2/2018 5:12p	Susan Ashworth	Unit	$	1,309.68
-CAT110	8/2/2018 5:12p	Susan Ashworth	Total	$	$1309.68
-FOOD130	8/2/2018 5:12p	Susan Ashworth	Unit	$	14.94
-FOOD130	8/2/2018 5:12p	Susan Ashworth	Total	$	$44.82
-FOOD212	8/6/2018 10:21a	Robert Armstrong	Unit	$	12.95
-FOOD212	8/6/2018 10:21a	Robert Armstrong	Total	$	$51.8
-REPT082	8/7/2018 4:12p	Juan Johnson	Unit	$	89.95
-REPT082	8/7/2018 4:12p	Juan Johnson	Total	$	$89.95
-RDNT443	8/7/2018 4:12p	Juan Johnson	Unit	$	1.49
-RDNT443	8/7/2018 4:12p	Juan Johnson	Total	$	$1.49
-FOOD211	8/10/2018 4:31p	Robert Armstrong	Unit	$	12.95
-FOOD211	8/10/2018 4:31p	Robert Armstrong	Total	$	$51.8
-RDNT443	8/13/2018 2:07p	Monica Johnson	Unit	$	1.49
-RDNT443	8/13/2018 2:07p	Monica Johnson	Total	$	$1.49
-FOOD146	8/13/2018 2:08p	María Fernández	Unit	$	2.00
-FOOD146	8/13/2018 2:08p	María Fernández	Total	$	$4.0
-RETURN	8/15/2018 11:57a	Mr. Praline	Unit	$	2300.00
-RETURN	8/15/2018 11:57a	Mr. Praline	Total	$	-$2300.0
-FOOD121	8/15/2018 3:48p	Kyle Kennedy	Unit	$	4.22
-FOOD121	8/15/2018 3:48p	Kyle Kennedy	Total	$	$8.44
-RETURN	8/16/2018 11:50a	Helen Halestorm	Unit	$	0
-RETURN	8/16/2018 11:50a	Helen Halestorm	Total	$	$0.0
-DOG010	8/16/2018 4:00p	Kyle Kennedy	Unit	$	2,495.99
-DOG010	8/16/2018 4:00p	Kyle Kennedy	Total	$	$2495.99
-BIRD160	8/16/2018 5:15p	Michael Smith	Unit	$	#ERR
-BIRD160	8/16/2018 5:15p	Michael Smith	Total	$	$31.85
-NSCT201	8/17/2018 9:26a	Rubeus Hagrid	Unit	$	.05
-NSCT201	8/17/2018 9:26a	Rubeus Hagrid	Total	$	$0.25
-RETURN	8/20/2018 9:36a	Kyle Kennedy	Unit	$	1,247.99
-RETURN	8/20/2018 9:36a	Kyle Kennedy	Total	$	-$1247.99
-NSCT201	8/20/2018 3:31p	Monica Johnson	Unit	$	.05
-NSCT201	8/20/2018 3:31p	Monica Johnson	Total	$	$1.5
-NSCT084	8/20/2018 5:12p	David Attenborough	Unit	$	.17
-NSCT084	8/20/2018 5:12p	David Attenborough	Total	$	$5.10
-FOOD214	8/21/2018 12:13p	Robert Armstrong	Unit	$	12.95
-FOOD214	8/21/2018 12:13p	Robert Armstrong	Total	$	$51.8
-BIRD160	8/22/2018 9:38a	David Attenborough	Unit	$	#ERR
-BIRD160	8/22/2018 9:38a	David Attenborough	Total	$	$29.95
-FOOD170	8/22/2018 2:13p	Jon Arbuckle	Unit	$	44.95
-FOOD170	8/22/2018 2:13p	Jon Arbuckle	Total	$	$44.95
-FOOD218	8/24/2018 11:42a	Robert Armstrong	Unit	$	12.95
-FOOD218	8/24/2018 11:42a	Robert Armstrong	Total	$	$51.8
-NSCT443	8/27/2018 3:05p	Monica Johnson	Unit	$	1.99
-NSCT443	8/27/2018 3:05p	Monica Johnson	Total	$	$1.99
-CAT020	8/28/2018 5:32p	Susan Ashworth	Unit	$	1,964.53
-CAT020	8/28/2018 5:32p	Susan Ashworth	Total	$	$1964.53
-FOOD130	8/28/2018 5:32p	Susan Ashworth	Unit	$	14.94
-FOOD130	8/28/2018 5:32p	Susan Ashworth	Total	$	$29.88
-FOOD219	8/29/2018 10:07a	Robert Armstrong	Unit	$	12.95
-FOOD219	8/29/2018 10:07a	Robert Armstrong	Total	$	$51.8
-FOOD219	8/31/2018 12:00a	Robert Armstrong	Unit	$	12.95
-FOOD219	8/31/2018 12:00a	Robert Armstrong	Total	$	$1864.8
-REPT217	8/31/2018 5:57p	Juan Johnson	Unit	$	99.95
-REPT217	8/31/2018 5:57p	Juan Johnson	Total	$	$99.95
+Date	Customer	SKU	Variable	Currency	Cost
+7/3/2018 1:47p	Robert Armstrong	FOOD213	Unit	$	12.95
+7/3/2018 1:47p	Robert Armstrong	FOOD213	Total	$	$51.8
+7/3/2018 3:32p	Kyle Kennedy	FOOD121	Unit	$	4.22
+7/3/2018 3:32p	Kyle Kennedy	FOOD121	Total	$	$4.22
+7/5/2018 4:15p	Douglas "Dougie" Powers	FOOD121	Unit	$	4.22
+7/5/2018 4:15p	Douglas "Dougie" Powers	FOOD121	Total	$	$4.22
+7/6/2018 12:15p	桜 高橋 (Sakura Takahashi)	FOOD122	Unit	$	1.29
+7/6/2018 12:15p	桜 高橋 (Sakura Takahashi)	FOOD122	Total	$	157¥
+7/10/2018 10:28a	David Attenborough	NSCT201	Unit	$	.05
+7/10/2018 10:28a	David Attenborough	NSCT201	Total	$	$1.5
+7/10/2018 5:23p	Susan Ashworth	CAT060	Unit	$	720.42
+7/10/2018 5:23p	Susan Ashworth	CAT060	Total	$	$720.42
+7/10/2018 5:23p	Susan Ashworth	FOOD130	Unit	$	14.94
+7/10/2018 5:23p	Susan Ashworth	FOOD130	Total	$	$14.94
+7/13/2018 10:26a	Wil Wheaton	NSCT523	Unit	AUD$	39.95
+7/13/2018 10:26a	Wil Wheaton	NSCT523	Total	$	$39.95
+7/13/2018 3:49p	Robert Armstrong	FOOD216	Unit	$	12.95
+7/13/2018 3:49p	Robert Armstrong	FOOD216	Total	$	$51.8
+7/17/2018 9:01a	Robert Armstrong	FOOD217	Unit	$	12.95
+7/17/2018 9:01a	Robert Armstrong	FOOD217	Total	$	$51.8
+7/17/2018 11:30a	Helen Halestorm	LAGO342	Unit	$	32.94
+7/17/2018 11:30a	Helen Halestorm	LAGO342	Total	$	$65.88
+7/18/2018 12:16p	桜 高橋 (Sakura Takahashi)	FOOD122	Unit	$	1.29
+7/18/2018 12:16p	桜 高橋 (Sakura Takahashi)	FOOD122	Total	$	157¥
+7/19/2018 10:28a	Rubeus Hagrid	FOOD170	Unit	EUR	44.95
+7/19/2018 10:28a	Rubeus Hagrid	FOOD170	Total	$	$224.75
+7/20/2018 2:13p	Jon Arbuckle	FOOD167	Unit	$	3.95
+7/20/2018 2:13p	Jon Arbuckle	FOOD167	Total	$	$197.5
+7/23/2018 1:41p	Robert Armstrong	FOOD215	Unit	$	12.95
+7/23/2018 1:41p	Robert Armstrong	FOOD215	Total	$	$51.8
+7/23/2018 4:23p	Douglas "Dougie" Powers	TOY235	Unit	$	16.12
+7/23/2018 4:23p	Douglas "Dougie" Powers	TOY235	Total	$	$16.12
+7/24/2018 12:16p	桜 高橋 (Sakura Takahashi)	FOOD122	Unit	$	1.29
+7/24/2018 12:16p	桜 高橋 (Sakura Takahashi)	FOOD122	Total	$	157¥
+7/26/2018 4:39p	Douglas "Dougie" Powers	FOOD420	Unit	PES	15.70
+7/26/2018 4:39p	Douglas "Dougie" Powers	FOOD420	Total	$	$15.7
+7/27/2018 12:16p	桜 高橋 (Sakura Takahashi)	FOOD122	Unit	$	1.29
+7/27/2018 12:16p	桜 高橋 (Sakura Takahashi)	FOOD122	Total	$	157¥
+7/30/2018 12:17p	桜 高橋 (Sakura Takahashi)	RETURN	Unit	$	1.29
+7/30/2018 12:17p	桜 高橋 (Sakura Takahashi)	RETURN	Total	$	157¥
+7/31/2018 5:42p	Rubeus Hagrid	CAT060	Unit	$	720.42
+7/31/2018 5:42p	Rubeus Hagrid	CAT060	Total	$	$3602.1
+8/1/2018 2:44p	David Attenborough	FOOD360	Unit	$	5.72
+8/1/2018 2:44p	David Attenborough	FOOD360	Total	$	$22.88
+8/2/2018 5:12p	Susan Ashworth	CAT110	Unit	$	1,309.68
+8/2/2018 5:12p	Susan Ashworth	CAT110	Total	$	$1309.68
+8/2/2018 5:12p	Susan Ashworth	FOOD130	Unit	$	14.94
+8/2/2018 5:12p	Susan Ashworth	FOOD130	Total	$	$44.82
+8/6/2018 10:21a	Robert Armstrong	FOOD212	Unit	$	12.95
+8/6/2018 10:21a	Robert Armstrong	FOOD212	Total	$	$51.8
+8/7/2018 4:12p	Juan Johnson	REPT082	Unit	$	89.95
+8/7/2018 4:12p	Juan Johnson	REPT082	Total	$	$89.95
+8/7/2018 4:12p	Juan Johnson	RDNT443	Unit	$	1.49
+8/7/2018 4:12p	Juan Johnson	RDNT443	Total	$	$1.49
+8/10/2018 4:31p	Robert Armstrong	FOOD211	Unit	$	12.95
+8/10/2018 4:31p	Robert Armstrong	FOOD211	Total	$	$51.8
+8/13/2018 2:07p	Monica Johnson	RDNT443	Unit	$	1.49
+8/13/2018 2:07p	Monica Johnson	RDNT443	Total	$	$1.49
+8/13/2018 2:08p	María Fernández	FOOD146	Unit	$	2.00
+8/13/2018 2:08p	María Fernández	FOOD146	Total	$	$4.0
+8/15/2018 11:57a	Mr. Praline	RETURN	Unit	$	2300.00
+8/15/2018 11:57a	Mr. Praline	RETURN	Total	$	-$2300.0
+8/15/2018 3:48p	Kyle Kennedy	FOOD121	Unit	$	4.22
+8/15/2018 3:48p	Kyle Kennedy	FOOD121	Total	$	$8.44
+8/16/2018 11:50a	Helen Halestorm	RETURN	Unit	$	0
+8/16/2018 11:50a	Helen Halestorm	RETURN	Total	$	$0.0
+8/16/2018 4:00p	Kyle Kennedy	DOG010	Unit	$	2,495.99
+8/16/2018 4:00p	Kyle Kennedy	DOG010	Total	$	$2495.99
+8/16/2018 5:15p	Michael Smith	BIRD160	Unit	$	#ERR
+8/16/2018 5:15p	Michael Smith	BIRD160	Total	$	$31.85
+8/17/2018 9:26a	Rubeus Hagrid	NSCT201	Unit	$	.05
+8/17/2018 9:26a	Rubeus Hagrid	NSCT201	Total	$	$0.25
+8/20/2018 9:36a	Kyle Kennedy	RETURN	Unit	$	1,247.99
+8/20/2018 9:36a	Kyle Kennedy	RETURN	Total	$	-$1247.99
+8/20/2018 3:31p	Monica Johnson	NSCT201	Unit	$	.05
+8/20/2018 3:31p	Monica Johnson	NSCT201	Total	$	$1.5
+8/20/2018 5:12p	David Attenborough	NSCT084	Unit	$	.17
+8/20/2018 5:12p	David Attenborough	NSCT084	Total	$	$5.10
+8/21/2018 12:13p	Robert Armstrong	FOOD214	Unit	$	12.95
+8/21/2018 12:13p	Robert Armstrong	FOOD214	Total	$	$51.8
+8/22/2018 9:38a	David Attenborough	BIRD160	Unit	$	#ERR
+8/22/2018 9:38a	David Attenborough	BIRD160	Total	$	$29.95
+8/22/2018 2:13p	Jon Arbuckle	FOOD170	Unit	$	44.95
+8/22/2018 2:13p	Jon Arbuckle	FOOD170	Total	$	$44.95
+8/24/2018 11:42a	Robert Armstrong	FOOD218	Unit	$	12.95
+8/24/2018 11:42a	Robert Armstrong	FOOD218	Total	$	$51.8
+8/27/2018 3:05p	Monica Johnson	NSCT443	Unit	$	1.99
+8/27/2018 3:05p	Monica Johnson	NSCT443	Total	$	$1.99
+8/28/2018 5:32p	Susan Ashworth	CAT020	Unit	$	1,964.53
+8/28/2018 5:32p	Susan Ashworth	CAT020	Total	$	$1964.53
+8/28/2018 5:32p	Susan Ashworth	FOOD130	Unit	$	14.94
+8/28/2018 5:32p	Susan Ashworth	FOOD130	Total	$	$29.88
+8/29/2018 10:07a	Robert Armstrong	FOOD219	Unit	$	12.95
+8/29/2018 10:07a	Robert Armstrong	FOOD219	Total	$	$51.8
+8/31/2018 12:00a	Robert Armstrong	FOOD219	Unit	$	12.95
+8/31/2018 12:00a	Robert Armstrong	FOOD219	Total	$	$1864.8
+8/31/2018 5:57p	Juan Johnson	REPT217	Unit	$	99.95
+8/31/2018 5:57p	Juan Johnson	REPT217	Total	$	$99.95
