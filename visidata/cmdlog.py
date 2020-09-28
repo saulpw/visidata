@@ -420,6 +420,8 @@ def cmdlog(vd):
 def modifyCommand(vd):
     if vd.activeCommand is not None and isLoggableCommand(vd.activeCommand.longname):
         return vd.activeCommand
+    if not vd.cmdlog.rows:
+        return None
     return vd.cmdlog.rows[-1]
 
 
