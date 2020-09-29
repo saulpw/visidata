@@ -6,7 +6,7 @@ Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
 @Sheet.api
 def orderBy(sheet, *cols, reverse=False):
-    'Add cols to the internal ordering. No cols (or first col None) remove any previous ordering. call sort() if the ordering changes.'
+    'Add *cols* to internal ordering.  Pass *reverse* = True to order these *cols* descending.  Pass empty *cols* (or cols[0] of None) to remove the ordering.  Does not sort the sheet.'
     if options.undo:
         vd.addUndo(setattr, sheet, '_ordering', copy(sheet._ordering))
         if sheet._ordering:
@@ -40,7 +40,7 @@ class Reversor:
 @Sheet.api
 @asyncthread
 def sort(self):
-    'Sort rows according to the current self._ordering.'
+    'Sort rows according to the current internal ordering.'
     try:
         with Progress(gerund='sorting', total=self.nRows) as prog:
             def sortkey(r):

@@ -9,7 +9,7 @@ option('undo', True, 'enable undo/redo')
 
 @VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
-    'On undo of latest command, call undofunc()'
+    'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
     if options.undo:
         # occurs when VisiData is just starting up
         if vd.activeCommand is UNLOADED:

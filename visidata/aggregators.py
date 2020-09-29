@@ -8,7 +8,7 @@ from visidata import *
 
 @Column.api
 def getValueRows(self, rows):
-    'Generate (val, row) for the given `rows` at this Column, excluding errors and nulls.'
+    'Generate (value, row) for each row in *rows* at this column, excluding null and error values.'
     f = self.sheet.isNullFunc()
 
     for r in Progress(rows, 'calculating'):
@@ -21,6 +21,7 @@ def getValueRows(self, rows):
 
 @Column.api
 def getValues(self, rows):
+    'Generate (value, row) for each row in *rows* at this column, excluding null and error values.'
     for v, r in self.getValueRows(rows):
         yield v
 
@@ -121,7 +122,7 @@ ColumnsSheet.columns += [
 
 @Sheet.api
 def addAggregators(sheet, cols, aggrnames):
-    'add aggregator for each aggrname to each of cols'
+    'Add each aggregator in list of *aggrnames* to each of *cols*.'
     for aggrname in aggrnames:
         aggrs = vd.aggregators.get(aggrname)
         aggrs = aggrs if isinstance(aggrs, list) else [aggrs]

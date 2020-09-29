@@ -82,6 +82,14 @@ The Sheet class
 .. autofunction:: visidata.TableSheet.openCell
 .. autofunction:: visidata.TableSheet.iterrows
 
+
+   - rows are not hashable and can't be looked up easily by content without linear (and expensive) search.
+   - But id(obj) is a hashable integer which is guaranteed to be unique and constant for this object during its lifetime.
+   - We store id(row) as the keys in a dict pointing to the row itself (is this convenience used?)
+   - this makes selection/unselection and checking for selection, have the same cost as set add/remove/check
+   - select/unselect/stoggle all are now O(n log n), whereas they could have been O(n) if selection were in e.g. a parallel array, or an attribute on the row.
+
+
 Sheet class hierarchy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
