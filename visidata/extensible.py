@@ -43,6 +43,7 @@ class Extensible:
     @classmethod
     def property(cls, func):
         @property
+        @wraps(func)
         def dofunc(self):
             return func(self)
         setattr(cls, func.__name__, dofunc)
