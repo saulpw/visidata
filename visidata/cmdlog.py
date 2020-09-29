@@ -20,7 +20,7 @@ mouse suspend redraw no-op help syscopy syspaste sysopen profile toggle'''.split
 option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
 option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 
-vd.activeCommand = None
+vd.activeCommand = UNLOADED
 
 def open_vd(p):
     return CommandLog(p.name, source=p, precious=True)
@@ -362,7 +362,7 @@ def getLastArgs(vd):
 def setLastArgs(vd, args):
         'Set user input on last command, if not already set.'
         # only set if not already set (second input usually confirmation)
-        if vd.activeCommand is not None:
+        if (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED):
             if not vd.activeCommand.input:
                 vd.activeCommand.input = args
 

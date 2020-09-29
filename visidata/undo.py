@@ -1,8 +1,7 @@
 import itertools
 from copy import copy
 
-from visidata import vd, options, VisiData, BaseSheet, option
-import visidata
+from visidata import vd, options, VisiData, BaseSheet, option, UNLOADED
 
 BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
@@ -13,7 +12,7 @@ def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call undofunc()'
     if options.undo:
         # occurs when VisiData is just starting up
-        if not vd.sheet or isinstance(vd.sheet, visidata.CommandLog):
+        if vd.activeCommand is UNLOADED:
             return
         r = vd.modifyCommand
         # some special commands, like open-file, do not have an undofuncs set
