@@ -149,7 +149,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
                 b += incr
             while s[b].isalnum() and b >= a:
                 b += incr
-            return min(max(b, 0), len(s))
+            return min(max(b, -1), len(s))
         else:
             while not s[a].isalnum() and a < b:  # first skip non-word chars
                 a += incr
