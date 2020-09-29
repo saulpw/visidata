@@ -5,13 +5,13 @@ Sheet.init('_selectedRows', dict)  # rowid(row) -> row
 
 @Sheet.api
 def isSelected(self, row):
-    'True if given row is selected. O(log n).'
+    'Return True if *row* is selected. O(log nSelected).'
     return self.rowid(row) in self._selectedRows
 
 @Sheet.api
 @asyncthread
 def toggle(self, rows):
-    'Toggle selection of given `rows`.'
+    'Toggle selection of given *rows*.  Async.'
     self.addUndoSelection()
     for r in Progress(rows, 'toggling', total=len(self.rows)):
         if not self.unselectRow(r):
@@ -19,12 +19,12 @@ def toggle(self, rows):
 
 @Sheet.api
 def selectRow(self, row):
-    'Select given row. O(log n)'
+    'Select *row*.  O(log n).  Overrideable.'
     self._selectedRows[self.rowid(row)] = row
 
 @Sheet.api
 def unselectRow(self, row):
-    'Unselect given row, return True if selected; else return False. O(log n)'
+    'Unselect *row*. Return True if row was previously selected. O(log n).  Overrideable.'
     if self.rowid(row) in self._selectedRows:
         del self._selectedRows[self.rowid(row)]
         return True
@@ -33,14 +33,14 @@ def unselectRow(self, row):
 
 @Sheet.api
 def clearSelected(self):
-    'Removes all selected rows from selection, without calling unselectRow.  Override for sheet-specific selection implementation.'
+    'Unselect all selected rows, without calling unselectRow for each one.  O(1).  Override for sheet-specific selection implementation.'
     self.addUndoSelection()
     self._selectedRows.clear()
 
 @Sheet.api
 @asyncthread
 def select(self, rows, status=True, progress=True):
-    "Bulk select given rows. Don't show progress if progress=False; don't show status if status=False."
+    "Select list of *rows*. Async. Don't show progress if progress=False; don't show status if status=False."
     self.addUndoSelection()
     before = self.nSelected
     if options.bulk_select_clear:
@@ -57,7 +57,7 @@ def select(self, rows, status=True, progress=True):
 @Sheet.api
 @asyncthread
 def unselect(self, rows, status=True, progress=True):
-    "Unselect given rows. Don't show progress if progress=False; don't show status if status=False."
+    "Unselect list of *rows*. Async. Don't show progress if progress=False; don't show status if status=False."
     self.addUndoSelection()
     before = self.nSelected
     for r in (Progress(rows, 'unselecting') if progress else rows):
@@ -67,17 +67,17 @@ def unselect(self, rows, status=True, progress=True):
 
 @Sheet.api
 def selectByIdx(self, rowIdxs):
-    'Select given row indexes, without progress bar.'
+    'Select list of row indexes, without progress bar.'
     self.select((self.rows[i] for i in rowIdxs), progress=False)
 
 @Sheet.api
 def unselectByIdx(self, rowIdxs):
-    'Unselect given row indexes, without progress bar.'
+    'Unselect list of row indexes, without progress bar.'
     self.unselect((self.rows[i] for i in rowIdxs), progress=False)
 
 @Sheet.api
 def gatherBy(self, func, gerund='gathering'):
-    'Generate only rows for which the given func returns True.'
+    'Generate rows for which *func* returns True.  O(nRows).'
     for i in Progress(rotateRange(self.nRows, self.cursorRowIndex-1), total=self.nRows, gerund=gerund):
         try:
             r = self.rows[i]
@@ -88,26 +88,27 @@ def gatherBy(self, func, gerund='gathering'):
 
 @Sheet.property
 def selectedRows(self):
-    'List of selected rows in sheet order. [O(nRows*log(nSelected))]'
+    'List of selected rows in sheet order. O(nRows*log(nSelected))'
     if self.nSelected <= 1:
         return Fanout(self._selectedRows.values())
     return Fanout((r for r in self.rows if self.rowid(r) in self._selectedRows))
 
 @Sheet.property
 def someSelectedRows(self):
+    'List of selected rows in sheet order.  Fail if no rows are selected.'
     if self.nSelected == 0:
         vd.fail('no rows selected')
     return self.selectedRows
 
 @Sheet.property
 def nSelected(self):
-    'Number of selected rows.'
+    'Number of selected rows. O(k).'
     return len(self._selectedRows)
 
 @Sheet.api
 @asyncthread
 def deleteSelected(self):
-    'Delete all selected rows.'
+    'Delete all selected rows.  Async.'
     ndeleted = self.deleteBy(self.isSelected)
     nselected = self.nSelected
     self.clearSelected()

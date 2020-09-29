@@ -76,3 +76,46 @@ Colorizers
 .. autoclass:: visidata.CellColorizer
 
 The TableSheet allows whole cells to be colorized according to a Python function.
+
+
+- *prec*: precedence
+- *coloropt*: name of color option, or None
+- *func*: a func(sheet, col, row, value) called for each cell.
+
+``func(sheet, col, row, value)`` is a lambda function which should return a True value for the properties when coloropt should be applied. If coloropt is None, func() should return a coloropt (or None) instead.
+
+Using colors in other curses contexts
+=====================================
+
+If you want to get the attribute associated with a particular color/attribute combination.
+ciolors
+colors.color_
+
+A color string contain a list of space-delimeated words that represent colors. Upon startup, VisiData's `ColorMaker` will try to compute these color strings by parsing each part as a [color](https://github.com/saulpw/visidata/blob/develop/visidata/color.py#L72) (red green yellow blue magenta cyan white, or a number if 256 colors available) or [attribute](https://github.com/saulpw/visidata/blob/develop/visidata/color.py#L76) (normal blink bold dim reverse standout underline). A 256-color palette is not guaranteed, however, and in that case a color like `238` would not exist.
+
+With default colors, it is recommended that the second term be a basic color, to be used as a fallback. If the `238` is found, then it's used preferentially. (Attributes however are always applied).
+
+Upon startup, a `ColorMaker` object is created. For each `theme()`, it translates the color strings into curses attributes. The setup `ColorMaker` is then importable in VisiData as `colors`. It contains a key for each color option name associated with its converted curses attribute (e.g. colors.color_graph_hidden or colors['color_graph_hidden']).
+
+
+#### `RowColorizer`, `CellColorizer`, `ColumnColorizer`
+
+A colorizer object is a simple named tuple, which VisiData employs to do property based coloring. Colorizers come in the form of `RowColorizer` (colors entire rows), `CellColorizer` (colors a single cell), and `ColumnColorizer` (colors an entire column).
+
+Each of the named tuples contain the keys for 'precedence',  'coloropt', and 'func'.
+
+Curses can combine multiple non-color attributes, but can only display a single color. Precedence is a number which indicates the priority a color has (e.g. if a row is selected, we want the selection color to trump the default color). A higher precedence color overrides a lower. `coloropt` is the color option name (like 'color_graph_hidden')
+
+
+Set `colorizers` as a class member, and then add the `*Colorizers` to it in a list.
+
+Examples
+^^^^^^^^
+
+::
+
+    class DescribeSheet(ColumnsSheet):
+        colorizers = [
+            RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r in r.sheet.keyCols),
+        ]
+

@@ -328,7 +328,7 @@ class TableSheet(BaseSheet):
         return eval(expr, vd.getGlobals(), contexts)
 
     def rowid(self, row):
-        'Return a fast, unique, and stable hash of the given row object.  Must be fast.  Overrideable.'
+        'Return a unique and stable hash of the given row object.  Must be fast.  Overrideable.'
         return id(row)
 
     @property
@@ -379,7 +379,7 @@ class TableSheet(BaseSheet):
 
     @drawcache_property
     def keyCols(self):
-        'Cached list of visible key columns (Columns with .key=True)'
+        'List of visible key columns.'
         return sorted([c for c in self.columns if c.keycol and not c.hidden], key=lambda c:c.keycol)
 
     @property
@@ -389,7 +389,7 @@ class TableSheet(BaseSheet):
 
     @property
     def nonKeyVisibleCols(self):
-        'All columns which are not keysList of unhidden non-key columns.'
+        'List of visible non-key columns.'
         return [c for c in self.columns if not c.hidden and c not in self.keyCols]
 
     @property
@@ -464,6 +464,7 @@ class TableSheet(BaseSheet):
             c.name = '\n'.join(str(c.getDisplayValue(r)) for r in rows)
 
     def setKeys(self, cols):
+        'Make all *cols* into key columns.'
         vd.addUndo(undoAttrFunc(cols, 'keycol'))
         lastkeycol = 0
         if self.keyCols:
@@ -476,6 +477,7 @@ class TableSheet(BaseSheet):
         visidata.Extensible.clear_all_caches()
 
     def unsetKeys(self, cols):
+        'Make all *cols* non-key columns.'
         vd.addUndo(undoAttrFunc(cols, 'keycol'))
         for col in cols:
             col.keycol = 0
@@ -488,10 +490,11 @@ class TableSheet(BaseSheet):
                 self.setKeys([col])
 
     def rowkey(self, row):
-        'returns a tuple of the key for the given row'
+        'Return tuple of the key for *row*.'
         return tuple(c.getTypedValue(row) for c in self.keyCols)
 
     def keystr(self, row):
+        'Return string of the key for *row*.'
         return ','.join(map(str, self.rowkey(row)))
 
     def checkCursor(self):
