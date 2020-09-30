@@ -43,6 +43,7 @@ def moveKeyCol(sheet, fromKeyColIdx, toKeyColIdx):
     'Move key column to another key column position in sheet.'
     if not (1 <= toKeyColIdx <= len(sheet.keyCols)):
         vd.warning('already at edge')
+        return fromKeyColIdx-1
 
     for col in sheet.keyCols:
         if col.keycol == fromKeyColIdx:
@@ -60,25 +61,28 @@ def moveKeyCol(sheet, fromKeyColIdx, toKeyColIdx):
 
 def moveVisibleCol(sheet, fromVisColIdx, toVisColIdx):
     'Move visible column to another visible index in sheet.'
+    # a regular column cannot move to the left of keycols
+    vd.status(toVisColIdx)
     if 0 <= toVisColIdx < sheet.nVisibleCols:
         fromVisColIdx = min(max(fromVisColIdx, 0), sheet.nVisibleCols-1)
         fromColIdx = sheet.columns.index(sheet.visibleCols[fromVisColIdx])
-        # a regular column cannot move to the left of keycols
         if toVisColIdx < len(sheet.keyCols):
             vd.warning('already at edge')
+            return fromVisColIdx
         else:
             toColIdx = sheet.columns.index(sheet.visibleCols[toVisColIdx])
         moveListItem(sheet.columns, fromColIdx, toColIdx)
         return toVisColIdx
     else:
         vd.warning('already at edge')
+        return fromVisColIdx
 
 
 Sheet.addCommand('H', 'slide-left', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex-1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, cursorCol.keycol-1)', 'slide current column left')
 Sheet.addCommand('L', 'slide-right', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex+1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, cursorCol.keycol+1)', 'slide current column right')
 Sheet.addCommand('J', 'slide-down', 'sheet.cursorRowIndex = slide_row(cursorRowIndex, cursorRowIndex+1)', 'slide current row down')
 Sheet.addCommand('K', 'slide-up', 'sheet.cursorRowIndex = slide_row(cursorRowIndex, cursorRowIndex-1)', 'slide current row up')
-Sheet.addCommand('gH', 'slide-leftmost', 'slide_col(cursorVisibleColIndex, 0) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, 1)', 'slide current column all the way to the left of sheet')
+Sheet.addCommand('gH', 'slide-leftmost', 'slide_col(cursorVisibleColIndex, columns.index(sheet.nonKeyVisibleCols[0])) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, 1)', 'slide current column all the way to the left of sheet')
 Sheet.addCommand('gL', 'slide-rightmost', 'slide_col(cursorVisibleColIndex, nVisibleCols-1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, len(keyCols))', 'slide current column all the way to the right of sheet')
 Sheet.addCommand('gJ', 'slide-bottom', 'slide_row(cursorRowIndex, nRows)', 'slide current row all the way to the bottom of sheet')
 Sheet.addCommand('gK', 'slide-top', 'slide_row(cursorRowIndex, 0)', 'slide current row to top of sheet')
