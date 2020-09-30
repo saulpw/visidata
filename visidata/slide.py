@@ -42,7 +42,7 @@ def onRelease(sheet, vcolidx, rowidx, destx, desty):
 def moveKeyCol(sheet, fromKeyColIdx, toKeyColIdx):
     'Move key column to another key column position in sheet.'
     if not (1 <= toKeyColIdx <= len(sheet.keyCols)):
-        vd.fail('already at edge')
+        vd.warning('already at edge')
 
     for col in sheet.keyCols:
         if col.keycol == fromKeyColIdx:
@@ -65,13 +65,13 @@ def moveVisibleCol(sheet, fromVisColIdx, toVisColIdx):
         fromColIdx = sheet.columns.index(sheet.visibleCols[fromVisColIdx])
         # a regular column cannot move to the left of keycols
         if toVisColIdx < len(sheet.keyCols):
-            vd.fail('already at edge')
+            vd.warning('already at edge')
         else:
             toColIdx = sheet.columns.index(sheet.visibleCols[toVisColIdx])
         moveListItem(sheet.columns, fromColIdx, toColIdx)
         return toVisColIdx
     else:
-        vd.fail('already at edge')
+        vd.warning('already at edge')
 
 
 Sheet.addCommand('H', 'slide-left', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex-1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, cursorCol.keycol-1)', 'slide current column left')
