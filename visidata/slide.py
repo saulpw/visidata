@@ -62,7 +62,6 @@ def moveKeyCol(sheet, fromKeyColIdx, toKeyColIdx):
 def moveVisibleCol(sheet, fromVisColIdx, toVisColIdx):
     'Move visible column to another visible index in sheet.'
     # a regular column cannot move to the left of keycols
-    vd.status(toVisColIdx)
     if 0 <= toVisColIdx < sheet.nVisibleCols:
         fromVisColIdx = min(max(fromVisColIdx, 0), sheet.nVisibleCols-1)
         fromColIdx = sheet.columns.index(sheet.visibleCols[fromVisColIdx])
