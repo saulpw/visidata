@@ -57,6 +57,7 @@ class _Progress:
         return self
 
     def addProgress(self, n):
+        'Increase the progress count by *n*.'
         self.made += n
         return True
 
@@ -71,8 +72,15 @@ class _Progress:
                 self.made += 1
 
 @VisiData.global_api
-def Progress(vd, *args, **kwargs):
-    return _Progress(*args, **kwargs)
+def Progress(vd, iterable=None, gerund="", total=None, sheet=None):
+    '''Maintain progress count as either an iterable wrapper, or a context manager.
+
+        - *iterable*: wrapped iterable if used as an iterator.
+        - *gerund*: status text shown while this Progress is active.
+        - *total*: total count expected
+        - *sheet*: specific sheet to associate this progress with.  Default is sheet from current thread.
+        '''
+    return _Progress(iterable=iterable, gerund=gerund, total=total, sheet=sheet)
 
 @asyncthread
 def _async_deepcopy(vs, newlist, oldlist):
@@ -88,7 +96,7 @@ def async_deepcopy(vs, rowlist):
 
 @VisiData.global_api
 def cancelThread(vd, *threads, exception=EscapeException):
-    'Raise exception on another thread.'
+    'Raise *exception* in one or more *threads*.'
     for t in threads:
         ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(t.ident), ctypes.py_object(exception))
 
@@ -183,7 +191,7 @@ def threadsSheet(self):
 
 @VisiData.api
 def execAsync(self, func, *args, sheet=None, **kwargs):
-    'Execute `func(*args, **kwargs)` in a separate thread.'
+    'Execute ``func(*args, **kwargs)`` in a separate thread.'
 
     thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
     self.threads.append(_annotate_thread(thread))
@@ -218,8 +226,8 @@ def _toplevelTryFunc(func, *args, status=status, **kwargs):
         t.sheet.currentThreads.remove(t)
 
 def asyncsingle(func):
-    '''Decorator for an @asyncthread singleton.  Calls `func(...)` in a separate thread, canceling any previous thread for this function.
-    Upon sync(), an unfinished `func(...)` will not block current thread progression.
+    '''Function decorator like `@asyncthread` but as a singleton.  When called, `func(...)` spawns a new thread, and cancels any previous thread still running *func*.
+    ``vd.sync()`` does not wait for unfinished asyncsingle threads.
     '''
     @functools.wraps(func)
     def _execAsync(*args, **kwargs):
@@ -255,7 +263,7 @@ def checkForFinishedThreads(self):
 
 @VisiData.api
 def sync(self, *joiningThreads):
-    'Wait for joiningThreads to finish. If no joiningThreads specified, wait for all but current thread and interface thread to finish.'
+    'Wait for one or more *joiningThreads* to finish. If no *joiningThreads* specified, wait for all but current thread and interface thread to finish.'
     joiningThreads = set(joiningThreads)
     while True:
         deads = set()  # dead threads

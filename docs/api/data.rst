@@ -54,9 +54,3 @@ Sorting
 .. autofunction:: visidata.Sheet.orderBy
 .. autofunction:: visidata.Sheet.sort
 
-Aggregators
-------------------------
-
-.. autofunction:: visidata.Sheet.addAggregators
-.. autofunction:: visidata.Column.getValueRows
-.. autofunction:: visidata.Column.getValues

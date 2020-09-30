@@ -15,8 +15,12 @@ Instead, apps and plugins should call getValue and setValue, which provide a cac
 .. autofunction:: visidata.Column.putValue
 
 .. autofunction:: visidata.Column.getValue
+.. autofunction:: visidata.Column.getValueRows
+.. autofunction:: visidata.Column.getValues
 .. autofunction:: visidata.Column.getTypedValue
 .. autofunction:: visidata.Column.getDisplayValue
+
+.. autofunction:: visidata.Sheet.addAggregators
 .. autofunction:: visidata.Column.format
 
 .. autofunction:: visidata.Column.setValue

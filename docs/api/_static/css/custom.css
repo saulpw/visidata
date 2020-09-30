@@ -14,3 +14,7 @@ kbd {
   padding: 1px 3px 0;
   border: 1px solid black;
 }
+
+kbd kbd {
+  border: 0px;
+}
