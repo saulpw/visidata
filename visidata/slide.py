@@ -64,8 +64,8 @@ def moveVisibleCol(sheet, fromVisColIdx, toVisColIdx):
         fromVisColIdx = min(max(fromVisColIdx, 0), sheet.nVisibleCols-1)
         fromColIdx = sheet.columns.index(sheet.visibleCols[fromVisColIdx])
         # a regular column cannot move to the left of keycols
-        if toVisColIdx <= sheet.nKeys:
-            toColIdx = sheet.columns.index(sheet.nonKeyVisibleCols[toVisColIdx])
+        if toVisColIdx < len(sheet.keyCols):
+            vd.fail('already at edge')
         else:
             toColIdx = sheet.columns.index(sheet.visibleCols[toVisColIdx])
         moveListItem(sheet.columns, fromColIdx, toColIdx)
