@@ -9,6 +9,7 @@ max_threads = 2
 
 @Column.api
 def isError(col, row):
+    'Return True if the computed and typed value in this column for *row* is an error.'
     try:
         v = col.getValue(row)
         if v is not None:

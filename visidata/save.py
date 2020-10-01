@@ -85,7 +85,7 @@ def save_cols(vd, cols):
 
 @VisiData.global_api
 def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
-    'Save all vsheets to givenpath'
+    'Save all *vsheets* to *givenpath*.'
 
     filetype = givenpath.ext or options.save_filetype
 

@@ -1,5 +1,5 @@
 API Extensions
----------------------
+===============
 
 One of VisiData's core design goals is *extensibility*. Many of the
 features can exist in isolation, and can be enabled or disabled
@@ -11,7 +11,7 @@ Modules should degrade or fail gracefully if they depend on another
 module which has not been imported.
 
 the ``Extensible`` base class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 Python classes usually declare and implement all methods and members in the class definition, which exists in a single source file. A modular feature, in contrast, is self-contained within a separate source file.
 
@@ -159,3 +159,29 @@ If it uses a sheet, use ``@Sheet.api`` with ``sheet``. Otherwise, use
 
 Classes and functions which don't use ``vd`` or ``sheet`` at all are
 candidates for the list of bare globals in ``__all__``.
+
+
+The ``vd`` singleton
+-----------------------------
+
+The VisiData class is a singleton object, containing all of VisiData's global functions and state for the current session.
+This object should always be available as ``vd``.
+
+Calling conventions
+~~~~~~~~~~~~~~~~~~~
+
+When calling functions on ``vd`` or ``sheet`` outside of a Command *execstr*, they should be properly qualified:
+
+::
+
+    @Sheet.api
+    def show_hello(sheet):
+        vd.status(sheet.options.disp_hello)
+
+    BaseSheet.addCommand(None, 'show-hello', 'show_hello()')
+
+The current **Sheet** and the **VisiData** object are both in scope for `execstrs <commands#execstr>`__, so within an *execstr*, the ``sheet.`` or ``vd`` may be omitted, as in the hello world example:
+
+::
+
+    BaseSheet.addCommand(None, 'show-hello', 'status(options.disp_hello)')

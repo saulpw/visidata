@@ -117,7 +117,7 @@ class Column(Extensible):
         return self.__copy__()  # no separate deepcopy
 
     def recalc(self, sheet=None):
-        'reset column cache, attach to sheet, and reify name'
+        'Reset column cache, attach column to *sheet*, and reify column name.'
         if self._cachedValues:
             self._cachedValues.clear()
         if sheet:

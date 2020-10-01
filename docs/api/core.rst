@@ -1,57 +1,28 @@
-
 Sheets
 ====================================
 
-The ``vd`` singleton
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The VisiData class is a singleton object, containing all of VisiData's global functions and state for the current session.
-This object should always be available as ``vd``.
-
-Calling conventions
-~~~~~~~~~~~~~~~~~~~
-
-When calling functions on ``vd`` or ``sheet`` outside of a Command *execstr*, they should be properly qualified:
-
-::
-
-    @Sheet.api
-    def show_hello(sheet):
-        vd.status(sheet.options.disp_hello)
-
-    BaseSheet.addCommand(None, 'show-hello', 'show_hello()')
-
-The current **Sheet** and the **VisiData** object are both in scope for `execstrs <commands#execstr>`__, so within an *execstr*, the ``sheet.`` or ``vd`` may be omitted, as in the hello world example:
-
-::
-
-    BaseSheet.addCommand(None, 'show-hello', 'status(options.disp_hello)')
-
-
-Opening, Loading, and Saving Sheets
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: visidata.vd.openPath
-.. autofunction:: visidata.vd.openSource
-.. autofunction:: visidata.BaseSheet.reload
-.. autofunction:: visidata.Sheet.iterload
-
-.. autofunction:: visidata.BaseSheet.ensureLoaded
-
-.. autofunction:: visidata.vd.saveSheets
-
-The Sheet Stack
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 .. data:: visidata.vd.sheets
+
+The list of active sheets, generally treated as a stack.  The first item (0) is always the top displayed sheet.
+
 .. autofunction:: visidata.vd.getSheet
 .. autofunction:: visidata.vd.push
 .. autofunction:: visidata.vd.replace
 .. autofunction:: visidata.vd.remove
 .. autofunction:: visidata.vd.quit
 
+.. autofunction:: visidata.vd.openPath
+.. autofunction:: visidata.vd.openSource
+
+.. autofunction:: visidata.vd.saveSheets
+
 The Sheet class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: visidata.BaseSheet.reload
+.. autofunction:: visidata.Sheet.iterload
+
+.. autofunction:: visidata.BaseSheet.ensureLoaded
 
 .. data:: visidata.BaseSheet.name
 
@@ -91,12 +62,13 @@ The Sheet class
 Sheet class hierarchy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: visidata.BaseSheet
-.. class:: visidata.TableSheet
-.. class:: visidata.IndexSheet
-.. class:: visidata.TextSheet
-.. class:: visidata.SequenceSheet
-.. class:: visidata.PyobjSheet
+.. autoclass:: visidata.BaseSheet
+.. autoclass:: visidata.TableSheet
+.. autoclass:: visidata.IndexSheet
+.. autoclass:: visidata.TextSheet
+.. autoclass:: visidata.SequenceSheet
+.. autoclass:: visidata.PyobjSheet
 
-    - can be passed any python object; special subclasses for list of objects, namedtuples, or dicts
+.. note::
 
+    ``PyobjSheet`` can be passed any Python object and will return specialized subclasses for lists of objects, namedtuples, and dicts.

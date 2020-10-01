@@ -15,7 +15,6 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 .. data:: visidata.Column.type
 .. data:: visidata.Column.width
 .. data:: visidata.Column.fmtstr
-.. data:: visidata.Column.expr
 
 .. autoattribute:: visidata.Column.hidden
 

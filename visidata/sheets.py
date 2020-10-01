@@ -946,6 +946,7 @@ def replace(vd, vs):
 
 @VisiData.global_api
 def remove(vd, vs):
+    'Remove *vs* from sheets stack forcibly.'
     if vs in vd.sheets:
         vd.sheets.remove(vs)
         if vs in vd.allSheets:
@@ -957,7 +958,7 @@ def remove(vd, vs):
 
 @VisiData.global_api
 def push(vd, vs):
-    'Move given sheet `vs` to index 0 of list `sheets`.'
+    'Push Sheet *vs* onto ``vd.sheets`` stack.  Remove from other position if already on sheets stack.'
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
 
@@ -984,6 +985,7 @@ def sheetsSheet(vd):
 
 @VisiData.api
 def quit(vd, *sheets):
+    'Remove *sheets* from sheets stack, asking for confirmation if options.quitguard set (either global or sheet-specific).'
     if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'override', False):
         vd.confirm("quit last sheet? ")
     for vs in sheets:

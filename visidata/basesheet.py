@@ -223,12 +223,13 @@ def sheet(self):
 
 @VisiData.api
 def getSheet(vd, sheetname):
+    'Return Sheet named *sheetname*.  *sheetname* may also be a sheet number, indexing into ``vd.sheets``.'
     if isinstance(sheetname, BaseSheet):
         return sheetname
     matchingSheets = [x for x in vd.sheets if x.name == sheetname]
     if matchingSheets:
         if len(matchingSheets) > 1:
-            vd.status('more than one sheet named "%s"' % sheetname)
+            vd.warning('more than one sheet named "%s"' % sheetname)
         return matchingSheets[0]
 
     try:
