@@ -306,9 +306,9 @@ def openCell(sheet, col, row):
     return PyobjSheet(name, source=col.getTypedValue(row))
 
 
-globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalexpr(expr, None)))', 'evaluate Python expression and open result as Python object')
+globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, None)))', 'evaluate Python expression and open result as Python object')
 globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope')
-globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalexpr(expr, cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
+globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 
 Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); vd.push(PyobjSheet("%s[%s]" % (sheet.name, cursorRowIndex), source=cursorRow))', 'open current row as Python object')
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); vd.push(PyobjSheet("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), source=cursorValue))', 'open current cell as Python object')

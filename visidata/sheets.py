@@ -319,7 +319,7 @@ class TableSheet(BaseSheet):
     def __repr__(self):
         return self.name
 
-    def evalexpr(self, expr, row=None):
+    def evalExpr(self, expr, row=None):
         if row:
             contexts = vd._evalcontexts.setdefault((self, self.rowid(row)), LazyComputeRow(self, row))
         else:

@@ -30,3 +30,6 @@ prev-sheet	jump-prev		y
 editline()	vd.editline()	same	y
 *-replay	replay-*	longname	y
 replay_sync	replaySync	same	
+Column.format	Column.formatValue	same	y
+Column.setWidth	Column.width property		y
+evalexpr	evalExpr		

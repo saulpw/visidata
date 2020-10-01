@@ -169,7 +169,7 @@ class Column(Extensible):
     def fmtstr(self, v):
         self._fmtstr = v
 
-    def format(self, typedval):
+    def formatValue(self, typedval):
         'Return displayable string of *typedval* according to ``Column.fmtstr``.'
         if typedval is None:
             return None
@@ -182,6 +182,7 @@ class Column(Extensible):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
         return vd.getType(self.type).formatter(self.fmtstr, typedval)
+    format=formatValue
 
     def hide(self, hide=True):
         if hide:
@@ -475,7 +476,7 @@ class ExprColumn(Column):
 
     def calcValue(self, row):
         t0 = time.perf_counter()
-        r = self.sheet.evalexpr(self.compiledExpr, row)
+        r = self.sheet.evalExpr(self.compiledExpr, row)
         t1 = time.perf_counter()
         self.ncalcs += 1
         self.maxtime = max(self.maxtime, t1-t0)

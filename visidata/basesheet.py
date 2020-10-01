@@ -201,7 +201,7 @@ class BaseSheet(Extensible):
         except Exception as e:
             vd.exceptionCaught(e)
 
-    def evalexpr(self, expr, row=None):
+    def evalExpr(self, expr, row=None):
         'Evaluate Python expression *expr* in the context of *row*.'
         return eval(expr, vd.getGlobals(), None)
 

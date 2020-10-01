@@ -23,12 +23,13 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 .. autofunction:: visidata.Column.putValue
 
 .. autofunction:: visidata.Column.getValue
-.. autofunction:: visidata.Column.getValueRows
-.. autofunction:: visidata.Column.getValues
 .. autofunction:: visidata.Column.getTypedValue
 .. autofunction:: visidata.Column.getDisplayValue
+.. autofunction:: visidata.Column.formatValue
 
-.. autofunction:: visidata.Column.format
+.. autofunction:: visidata.Column.getValueRows
+.. autofunction:: visidata.Column.getValues
+
 
 .. autofunction:: visidata.Column.setValue
 .. autofunction:: visidata.Column.setValues
@@ -37,7 +38,7 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 
 .. autofunction:: visidata.Column.setCache
 
-.. autofunction:: visidata.BaseSheet.evalexpr
+.. autofunction:: visidata.BaseSheet.evalExpr
 .. autofunction:: visidata.Column.recalc
 .. autofunction:: visidata.TableSheet.recalc
 .. autofunction:: visidata.Column.isError

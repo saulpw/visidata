@@ -62,7 +62,7 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
 def search_expr(sheet, expr, reverse=False):
     for i in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=reverse):
         try:
-            if sheet.evalexpr(expr, sheet.rows[i]):
+            if sheet.evalExpr(expr, sheet.rows[i]):
                 sheet.cursorRowIndex=i
                 return
         except Exception as e:
