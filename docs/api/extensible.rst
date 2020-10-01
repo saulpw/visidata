@@ -1,4 +1,4 @@
-Plugins
+API Extensions
 ---------------------
 
 One of VisiData's core design goals is *extensibility*. Many of the

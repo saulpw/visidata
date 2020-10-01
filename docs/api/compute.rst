@@ -17,9 +17,7 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 .. data:: visidata.Column.fmtstr
 .. data:: visidata.Column.expr
 
-.. autofunction:: visidata.Column.setWidth()
-
-.. autodata:: visidata.Column.hidden
+.. autoattribute:: visidata.Column.hidden
 
 .. autofunction:: visidata.Column.calcValue
 .. autofunction:: visidata.Column.putValue

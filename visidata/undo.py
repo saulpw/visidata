@@ -12,7 +12,7 @@ def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
     if options.undo:
         # occurs when VisiData is just starting up
-        if vd.activeCommand is UNLOADED:
+        if getattr(vd, 'activeCommand', UNLOADED) is UNLOADED:
             return
         r = vd.modifyCommand
         # some special commands, like open-file, do not have an undofuncs set

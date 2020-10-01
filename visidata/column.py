@@ -93,7 +93,7 @@ class Column(Extensible):
         self._type = type     # anytype/str/int/float/date/func
         self.getter = lambda col, row: row
         self.setter = lambda col, row, value: vd.fail(col.name+' column cannot be changed')
-        self.width = None     # == 0 if hidden, None if auto-compute next time
+        self._width = None    # == 0 if hidden, None if auto-compute next time
         self.hoffset = 0      # starting horizontal (char) offset of displayed column value
         self.voffset = 0      # starting vertical (line) offset of displayed column value
         self.height = 1       # max height, None/0 to auto-compute for each row
@@ -148,6 +148,18 @@ class Column(Extensible):
         if self._type != t:
             vd.addUndo(setattr, self, 'type', self._type)
         self._type = t
+
+    @property
+    def width(self):
+        'Width of column in characters.'
+        return self._width
+
+    @width.setter
+    def width(self, w):
+        if self.width != w:
+            if self.width == 0 or w == 0:  # hide/unhide
+                vd.addUndo(setattr, self, '_width', self.width)
+            self._width = w
 
     @property
     def fmtstr(self):

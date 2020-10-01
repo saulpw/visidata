@@ -4,8 +4,8 @@ from visidata import vd, Column, Sheet, options, Fanout
 def setWidth(self, w):
     if self.width != w:
         if self.width == 0 or w == 0:  # hide/unhide
-            vd.addUndo(setattr, self, 'width', self.width)
-    self.width = w
+            vd.addUndo(setattr, self, '_width', self.width)
+    self._width = w
 
 
 @Column.api
