@@ -380,7 +380,7 @@ def setattrdeep(obj, attr, val):
     setattr(obj, attrs[-1], val)
 
 
-def ColumnAttr(name='', attr=None, **kwargs):
+def AttrColumn(name='', attr=None, **kwargs):
     'Column using getattr/setattr of given attr.'
     return Column(name,
                   expr=attr if attr is not None else name,
@@ -394,7 +394,7 @@ def getitemdef(o, k, default=None):
     except Exception:
         return default
 
-def ColumnItem(name=None, key=None, **kwargs):
+def ItemColumn(name=None, key=None, **kwargs):
     'Column using getitem/setitem of given key.'
     return Column(name,
             expr=key if key is not None else name,
@@ -436,7 +436,7 @@ def SubColumnItem(idx, c, **kwargs):
         kwargs['name'] = c.name
     return SubColumnFunc(origcol=c, subfunc=getitemdef, expr=idx, **kwargs)
 
-class ColumnEnum(Column):
+class EnumColumn(Column):
     'types and aggregators. row.<name> should be kept to the values in the mapping m, and can be set by the a string key into the mapping.'
     def __init__(self, name, m, default=None, **kwargs):
         super().__init__(name, **kwargs)
@@ -453,7 +453,7 @@ class ColumnEnum(Column):
         setattr(row, self.name, value or self.default)
 
 
-class ColumnExpr(Column):
+class ExprColumn(Column):
     def __init__(self, name, cache=True, expr=None, **kwargs):
         super().__init__(name, cache=cache, **kwargs)
         self.expr = expr or name
@@ -493,7 +493,7 @@ class SettableColumn(Column):
 
 
 # synonyms
-ItemColumn = ColumnItem
-AttrColumn = ColumnAttr
-ExprColumn = ColumnExpr
-EnumColumn = ColumnEnum
+ColumnItem = ItemColumn
+ColumnAttr = AttrColumn
+ColumnExpr = ExprColumn
+ColumnEnum = EnumColumn

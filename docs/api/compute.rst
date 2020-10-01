@@ -45,6 +45,7 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 .. autofunction:: visidata.Column.isError
 
 .. autofunction:: visidata.Sheet.addAggregators
+
 If a Column should be cached, prefer to specify *cache* in the constructor instead of using setCache.
 
 - ``calcValue`` may be arbitrarily expensive or even asynchronous, so once the value is calculated, it is cached until ``Column.recalc()`` is called.
@@ -52,29 +53,21 @@ If a Column should be cached, prefer to specify *cache* in the constructor inste
 
 - ``delete-cell`` actually just calls setValue with None.
 
+
+Column Subclasses
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: visidata.ItemColumn
+.. autoclass:: visidata.AttrColumn
+.. autoclass:: visidata.ExprColumn
+.. autoclass:: visidata.SettableColumn
+.. autoclass:: visidata.SubColumnFunc
+
 Types
 ======
 
-Every column has a ``type``, which affects how it is parsed, displayed, grouped, sorted, and more.
-The classic VisiData column types are:
+The value returned by getValue could be many different things:
 
-|type    |description    |numeric  |command    |keystrokes    |mnemonic                             |
-|--------|---------------|---------|-----------|--------------|-------------------------------------|
-|str     |string         |         |type\-str  |~             |looks like a little piece of string  |
-|date    |date/time in any decipherable format|Y        |type\-date |@             |"at" sign                            |
-|int     |integer        |Y        |type\-int  |\#            |"number" sign                        |
-|float   |decimal        |Y        |type\-float|%             |"percent" sign                       |
-|currency|decimal with leading or trailing characters, and parsed according to locale|Y        |type\-currency|$             |"dollar" sign                        |
-|vlen    |size of a container, or length of a string|Y        |type\-vlen |z\#           |much like an "integer", but specifically for size|
-|anytype |default generic type|         |type\-anytype|z~            |even more generic than a string      |
-
-Note that all types except `anytype` and `str` are considered numeric.
-
-{mnemonic}
-The keybindings for settings types are in a row on the shifted top left keys on a US QWERTY keyboard.
-
-
-The core value behind any given cell could be:
    - a string
    - numerically typed
    - a list or dict
@@ -84,24 +77,71 @@ The core value behind any given cell could be:
    - a Thread (async pending)
    - any python object
 
-This core value may need to be converted to a consistent type, necessary for sorting, numeric binning, and more.
+This value may need to be parsed and/or converted to a consistent type.
+So, every column has a ``type`` member, which affects how it is parsed, displayed, grouped, sorted, and more.
 
 The default column type is ``anytype``, which lets the underlying value pass through unaltered; this is the only type for which a column can have typed values of arbitrary types.
 
-The user can set the type of a column, which is a function which takes the underlying value and returns a specific type.  This function should accept a string and do a reasonable conversion, like Python ``int`` and ``float`` do.
-And like those builtin types, this function should produce a reasonable baseline arithmetic identity when passed no parameters (or None).
 
-Applications should generally call getTypedValue, so that the value they get is consistently typed.
+The classic VisiData column types are:
 
-If the underlying value is None, the result will be a TypedWrapper, which provides the baseline value
-for purposes of comparison, but a stringified version of the underlying value for display.
-For a `calcValue` which raises or returns an Exception, getTypedValue will return a TypedExceptionWrapper with similar behavior.
+========  ==================  =========  =================  ============
+type      description         numeric    command            keystrokes
+========  ==================  =========  =================  ============
+anytype   pass-through                   ``type-anytype``   :kbd`z~`
+str       string                         ``type-str``       :kbd`~`
+date      date/time           Y          ``type-date``      :kbd`@`
+int       integer             Y          ``type-int``       :kbd`#`
+float     decimal             Y          ``type-float``     :kbd`%`
+currency  decimal with units  Y          ``type-currency``  :kbd`$`
+vlen      sequence length     Y          ``type-vlen``      :kbd`z#`
+========  ==================  =========  =================  ============
+
+The default keybindings for setting types are all on the shifted top left keys on a US QWERTY keyboard.
 
       - type.formatter(fmtstr, typedval)
 
 
+User-defined Types
+-------------------
+
+Fundamentally, a type is a function which takes the underlying value and returns an object of a specific type.
+This function should accept a string and do a reasonable conversion, like Python ``int`` and ``float`` do.
+And like those builtin types, this function should produce a reasonable baseline arithmetic identity when passed no parameters (or None).
+
+Applications should generally call getTypedValue, so that the value they get is consistently typed.
+
+If the underlying value is None, the result will be a ``TypedWrapper``, which provides the baseline value
+for purposes of comparison, but a stringified version of the underlying value for display.
+For a ``calcValue`` which raises or returns an Exception, ``getTypedValue`` will return a ``TypedExceptionWrapper`` with similar behavior.
+
+
+In the following, ``TYPE`` is the type (like ``int``, ``date``, etc), and ``typedval`` is an instance of that type.
+
+A VisiData type function or constructor must have certain properties:
+
+    - ``TYPE()`` must return a reasonable default value for *TYPE*.
+    - ``TYPE(typedval)`` must return an exact copy of *typedval*.
+    - ``TYPE(str)`` must convert from a reasonable string representation into *TYPE*.
+    - ``TYPE.__name__`` must be set to the official name of the type function or constructor.
+
+Objects returned by ``TYPE(...)`` must be:
+
+- comparable (for sorting)
+- hashable
+- formattable
+- roundable (if numeric, for binning)
+- idempotent (``TYPE(TYPE(v)) == TYPE(v)``)
+
+.. autoclass:: visidata.vdtype
+
+- ``.typetype``: actual type class *TYPE* above
+- ``.icon``: unicode character in column header
+- ``.fmtstr``: format string to use if fmtstr not given
+- ``.formatter(fmtstr, typedvalue)``: formatting function (by default `locale.format_string` if fmtstr given, else `str`)
+
 Nulls
--------
+======
 
 - The null values are Python ``None`` and options.null_value if set.
 
@@ -120,54 +160,3 @@ This option can be used to specify a null value in addition to Python `None`.  T
 .. autofunction:: visidata.BaseSheet.isNullFunc
 
 There is no direct isNull function, because the possible null values can change at runtime, and getting an option value is very expensive to do in a bulk operation.
-
-User-defined Types
-^^^^^^^^^^^^^^^^^^^
-
-``TYPE`` is the type (like `int`, `date`, etc), and ``typedval`` is an instance of that type.
-
-A VisiData type function or constructor must have certain properties:
-
-    - ``TYPE()`` must return a reasonable default value for *TYPE*.
-    - ``TYPE(typedval)`` must return an exact copy of *typedval*.
-    - ``TYPE(str)`` must convert from a reasonable string representation into *TYPE*.
-    - ``TYPE.__name__`` must be set to the official name of the type function or constructor.
-
-Objects returned by ``TYPE(...)`` must be:
-
-- comparable (for sorting)
-- hashable
-- formattable
-- roundable (if numeric, for binning)
-- idempotent (TYPE(TYPE(v)) == TYPE(v))
-
-.. autoclass:: visidata.vdtype
-
-- ``.typetype``: actual type class *TYPE* above
-- ``.icon``: unicode character in column header
-- ``.fmtstr``: format string to use if fmtstr not given
-- ``.formatter(fmtstr, typedvalue)``: formatting function (by default `locale.format_string` if fmtstr given, else `str`)
-
-Cells
-^^^^^
-
-.. autofunction:: visidata.Column.getCell
-
-Return the DisplayWrapper, the whole kit'n'caboodle used directly by Sheet.draw()
-
-.. autoclass:: visidata.DisplayWrapper
-
-- value: underlying value, before typing
-- display: formatted to be displayed directly in the cell (including space
-- note: one-character visual tag for the cell
-- notecolor: `color_foo` applied to the note
-- error: list of strings (a stack trace)
-
-Column Subclasses
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: visidata.ItemColumn
-.. autoclass:: visidata.AttrColumn
-.. autoclass:: visidata.ExprColumn
-.. autoclass:: visidata.SettableColumn
-.. autoclass:: visidata.SubColumnFunc
