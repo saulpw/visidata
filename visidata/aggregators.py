@@ -21,7 +21,7 @@ def getValueRows(self, rows):
 
 @Column.api
 def getValues(self, rows):
-    'Generate (value, row) for each row in *rows* at this column, excluding null and error values.'
+    'Generate value for each row in *rows* at this column, excluding null and error values.'
     for v, r in self.getValueRows(rows):
         yield v
 

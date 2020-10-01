@@ -31,12 +31,12 @@ This extends VisiData so that when :kbd:`1` is pressed on any sheet, the command
 
    options
    commands
-   extensible
    loaders
+   extensible
    core
    compute
    interface
-   data
    modify
+   data
    async
    plugins

@@ -1,5 +1,5 @@
 =========================
-Async Threads
+Performance
 =========================
 
 VisiData is not necessarily the fastest at processing large amounts of data, but great care has been taken to make sure that it remains *responsive*.

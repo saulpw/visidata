@@ -158,7 +158,7 @@ class Column(Extensible):
         self._fmtstr = v
 
     def format(self, typedval):
-        'Return displayable string of *typedval* according to Column.fmtstr.'
+        'Return displayable string of *typedval* according to ``Column.fmtstr``.'
         if typedval is None:
             return None
 
@@ -189,15 +189,15 @@ class Column(Extensible):
         return (self.getter)(self, row)
 
     def getTypedValue(self, row):
-        'Returns the properly-typed value for the given row at this column, or a TypedWrapper object.'
+        'Returns the properly-typed value for the given row at this column, or a TypedWrapper object in case of null or error.'
         return wrapply(self.type, wrapply(self.getValue, row))
 
     def setCache(self, cache):
         '''Set cache behavior for this column to *cache*:
 
-           - False (default): getValue never caches; calcValue is always called.
-           - True: getValue maintains a cache of options.col_cache_size.
-           - "async": getValue launches thread for every uncached result, maintains cache of infinite size.  Returns invalid value until cache filled.'''
+           - ``False`` (default): getValue never caches; calcValue is always called.
+           - ``True``: getValue maintains a cache of ``options.col_cache_size``.
+           - ``"async"``: ``getValue`` launches thread for every uncached result, maintains cache of infinite size.  Returns invalid value until cache entry available.'''
         self.cache = cache
         self._cachedValues = collections.OrderedDict() if self.cache else None
 
@@ -214,7 +214,7 @@ class Column(Extensible):
         return ret
 
     def getValue(self, row):
-        'Return value for *row* in this column.  Cache value based on sheet.rowid(row).'
+        'Return value for *row* in this column, calculating if not cached.'
 
         if self.sheet.defer:
             try:
@@ -307,11 +307,11 @@ class Column(Extensible):
         return self.getCell(row).display
 
     def putValue(self, row, val):
-        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overrideable (by default call .setter(row, va)).'
+        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overrideable; by default calls ``.setter(row, val)``.'
         return self.setter(self, row, val)
 
     def setValue(self, row, val):
-        'Change value for *row* in this column to *val*.  Call putValue immediately if parent sheet.defer is False, otherwise cache until later putChanges.'
+        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if parent ``sheet.defer`` is False, otherwise cache until later ``putChanges``.'
         if self.sheet.defer:
             self.cellChanged(row, val)
         else:
@@ -326,7 +326,7 @@ class Column(Extensible):
 
     @asyncthread
     def setValues(self, rows, *values):
-        'Set values in this column for given *rows* to *values*, recycling values as needed to fill rows.'
+        'Set values in this column for *rows* to *values*, recycling values as needed to fill *rows*.'
         vd.addUndoSetValues([self], rows)
         for r, v in zip(rows, itertools.cycle(values)):
             self.setValueSafe(r, v)
@@ -334,7 +334,7 @@ class Column(Extensible):
         return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
     def setValuesTyped(self, rows, *values):
-        'Set values on this column for rows, coerced to the column type.  will stop on first exception in type().'
+        'Set values on this column for *rows* to *values*, coerced to column type, recycling values as needed to fill *rows*.  Abort on type exception.'
         vd.addUndoSetValues([self], rows)
         for r, v in zip(rows, itertools.cycle(self.type(val) for val in values)):
             self.setValueSafe(r, v)

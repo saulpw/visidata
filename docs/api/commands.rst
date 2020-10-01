@@ -1,32 +1,25 @@
 Commands
 --------
 
-VisiData is *command-driven*, which means that it only does something
-when you tell it to. Otherwise, it just sits there, waiting for your
-next command.
+VisiData is **command-driven**, which means that it only does something when you tell it to.
+Otherwise, it just sits there, waiting for your next command.
 
-Every command is a discrete unit of behavior that does a defined task
-and runs to completion. Functions that could take longer than a couple
-hundred milliseconds, execute via [@asyncthread](), and provide
-`Progress <>`__ which is shown in the `righthand status <>`__.
+Every command is a discrete unit of behavior that does a defined task and runs to completion.
+Functions that could take longer than a couple hundred milliseconds should run in their own thread (see `Performance <performance>`__).
 
 Every command should be **reproducible**: given the same sheet, cursor
-position, and possibly `input <>`__ string, a command should yield
-identical output (with a few obvious exceptions, like ``random-rows``).
+position, and `input <interface#input>`__ string (if relevant), a command should yield
+identical output (with a few obvious exceptions, like `random-rows`).
 
-Any command which makes changes to the `saveable sheet <>`__ is appended
-to its `command log <>`__. Since all state changes must be initiated by
-a reproducible command, this command log can be `replayed <>`__.
-
-This command log is also used for certain other features, like
-undo/redo.
+Any command which makes changes to the `saveable sheet <>`__ is appended to its `command log <>`__.
+Since all state changes must be initiated by a reproducible command, this command log can be `replayed </docs/replay>`__.
 
 Adding new commands is a natural way to extend VisiData's functionality.
 
 Command Overview
 ~~~~~~~~~~~~~~~~
 
-Commands (and Keybindings) are managed in a similar way to options. The
+Commands and Keybindings are managed in a similar way to options. The
 same precedence hierarchy is used, so that commands can be created or
 overridden for a specific type of sheet, or even a specific sheet
 itself.

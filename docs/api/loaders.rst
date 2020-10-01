@@ -325,7 +325,7 @@ object that knows how to fetch the URL:
             return openSource(FooPath(p.url), filetype=filetype)
 
 visidata.Path
-=================
+---------------
 
 ``visidata.Path`` is a wrapper around pathlib.Path that can also handle non-filesystem files (URLs, stdin, files within archives).
 

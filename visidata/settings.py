@@ -172,7 +172,7 @@ class OptionsObject:
         return default
 
     def set(self, optname, value, obj='override'):
-        "Override the value for the optname in the options context or in obj's context, if given."
+        "Override *value* for *optname* in the options context, or in the *obj* context if given."
         opt = self._get(optname)
         if opt:
             curval = opt.value
@@ -215,7 +215,7 @@ class OptionsObject:
         return self.__getitem__(optname)
 
     def __setattr__(self, optname, value):   # options.foo = value
-        'Set value of option `optname` for stored options context.'
+        'Set *value* of option *optname* for stored options context.'
         self.__setitem__(optname, value)
 
     def __getitem__(self, optname):      # options[optname]
@@ -238,13 +238,13 @@ options = vd.options  # legacy
 
 @VisiData.global_api
 def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
-    '''
-    Declare a new option.
+    '''Declare a new option.
+
    - `name`: name of option
    - `default`: default value when no other override exists
    - `helpstr`: short description of option (as shown in the Options Sheet)
-   - `replay`: indicates if changes to the option should be stored in the Command Log
-   - `sheettype`: None if the option is not meaningfully sheet-specific, to make it automatically global on CLI
+   - `replay`: ``True`` if changes to the option should be stored in the Command Log
+   - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
     '''
     opt = options.setdefault(name, default, helpstr)
     opt.replayable = replay

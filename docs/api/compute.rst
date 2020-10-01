@@ -1,15 +1,25 @@
-=======================================================
-Values and Types and Errors and Nulls and Expressions
-=======================================================
+Columns
+====================================
 
-This is the heart of the VisiData calculation engine.
+Columns are the heart of the VisiData calculation engine.
+
 Each column can **calculate** a value from a row object; and it might also be able to **put** a different value into the row object (for a later calculate to re-derive).
 
 A Column subclass can override ``calcValue`` and ``putValue`` to define its fundamental interaction with the row object.
 This is often the only thing a Column subclass has to do.
 
 ``calcValue`` and ``putValue`` should generally not be called by application code.
-Instead, apps and plugins should call getValue and setValue, which provide a caching layer above calcValue and putValue.
+Instead, apps and plugins should call ``getValue`` and ``setValue``, which provide appropriate layers of caching.
+
+.. data:: visidata.Column.name
+.. data:: visidata.Column.type
+.. data:: visidata.Column.width
+.. data:: visidata.Column.fmtstr
+.. data:: visidata.Column.expr
+
+.. autofunction:: visidata.Column.setWidth()
+
+.. autodata:: visidata.Column.hidden
 
 .. autofunction:: visidata.Column.calcValue
 .. autofunction:: visidata.Column.putValue
@@ -20,7 +30,6 @@ Instead, apps and plugins should call getValue and setValue, which provide a cac
 .. autofunction:: visidata.Column.getTypedValue
 .. autofunction:: visidata.Column.getDisplayValue
 
-.. autofunction:: visidata.Sheet.addAggregators
 .. autofunction:: visidata.Column.format
 
 .. autofunction:: visidata.Column.setValue
@@ -33,10 +42,9 @@ Instead, apps and plugins should call getValue and setValue, which provide a cac
 .. autofunction:: visidata.BaseSheet.evalexpr
 .. autofunction:: visidata.Column.recalc
 .. autofunction:: visidata.TableSheet.recalc
-
-
 .. autofunction:: visidata.Column.isError
 
+.. autofunction:: visidata.Sheet.addAggregators
 If a Column should be cached, prefer to specify *cache* in the constructor instead of using setCache.
 
 - ``calcValue`` may be arbitrarily expensive or even asynchronous, so once the value is calculated, it is cached until ``Column.recalc()`` is called.
@@ -44,8 +52,8 @@ If a Column should be cached, prefer to specify *cache* in the constructor inste
 
 - ``delete-cell`` actually just calls setValue with None.
 
-Column Types
-^^^^^^^^^^^^^^^
+Types
+======
 
 Every column has a ``type``, which affects how it is parsed, displayed, grouped, sorted, and more.
 The classic VisiData column types are:
@@ -155,3 +163,11 @@ Return the DisplayWrapper, the whole kit'n'caboodle used directly by Sheet.draw(
 - notecolor: `color_foo` applied to the note
 - error: list of strings (a stack trace)
 
+Column Subclasses
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: visidata.ItemColumn
+.. autoclass:: visidata.AttrColumn
+.. autoclass:: visidata.ExprColumn
+.. autoclass:: visidata.SettableColumn
+.. autoclass:: visidata.SubColumnFunc

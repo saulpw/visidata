@@ -28,6 +28,7 @@ class CompleteExpr:
 @Column.api
 @asyncthread
 def setValuesFromExpr(self, rows, expr):
+    'Set values in this column for *rows* to the result of the Python expression *expr* applied to each row.'
     compiledExpr = compile(expr, '<expr>', 'eval')
     vd.addUndoSetValues([self], rows)
     for row in Progress(rows, 'setting'):

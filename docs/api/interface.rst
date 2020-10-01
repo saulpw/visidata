@@ -12,7 +12,7 @@ Terminal
 .. autoclass:: visidata.SuspendCurses
 
 Cursor
-------
+======
 
 .. data:: visidata.TableSheet.cursorVisibleColIndex
 
@@ -46,8 +46,6 @@ Input/Edit
 .. autofunction:: visidata.vd.input
 .. autofunction:: visidata.vd.confirm
 .. autofunction:: visidata.vd.launchEditor
-.. autofunction:: visidata.vd.editText
-.. autofunction:: visidata.Sheet.editCell
 
 Status
 ------
@@ -85,7 +83,7 @@ The TableSheet allows whole cells to be colorized according to a Python function
 ``func(sheet, col, row, value)`` is a lambda function which should return a True value for the properties when coloropt should be applied. If coloropt is None, func() should return a coloropt (or None) instead.
 
 Using colors in other curses contexts
-=====================================
+-------------------------------------
 
 If you want to get the attribute associated with a particular color/attribute combination.
 ciolors

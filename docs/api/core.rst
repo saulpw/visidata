@@ -1,4 +1,5 @@
-VisiData, Sheet, and Column objects
+
+Sheets
 ====================================
 
 The ``vd`` singleton
@@ -68,12 +69,9 @@ The Sheet class
 
 .. data:: visidata.TableSheet.rows
 .. data:: visidata.TableSheet.nRows
-.. autofunction:: visidata.TableSheet.addRow
 .. data:: visidata.TableSheet.visibleRows
 .. data:: visidata.TableSheet.nVisibleRows
 
-.. autofunction:: visidata.TableSheet.newRow
-.. autofunction:: visidata.TableSheet.addNewRows
 .. autofunction:: visidata.TableSheet.openRow
 
 .. autofunction:: visidata.TableSheet.gatherBy
@@ -102,24 +100,3 @@ Sheet class hierarchy
 
     - can be passed any python object; special subclasses for list of objects, namedtuples, or dicts
 
-Column
-~~~~~~~
-
-.. data:: visidata.Column.type
-.. data:: visidata.Column.width
-.. data:: visidata.Column.fmtstr
-.. data:: visidata.Column.expr
-
-.. autofunction:: visidata.Column.setWidth()
-
-.. autofunction:: visidata.Column.hide()
-.. data:: visidata.Column.hidden
-
-Column Subclasses
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: visidata.ItemColumn
-.. autoclass:: visidata.AttrColumn
-.. autoclass:: visidata.ExprColumn
-.. autoclass:: visidata.SettableColumn
-.. autoclass:: visidata.SubColumnFunc

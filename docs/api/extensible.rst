@@ -1,5 +1,5 @@
-Extensibility
--------------
+Plugins
+---------------------
 
 One of VisiData's core design goals is *extensibility*. Many of the
 features can exist in isolation, and can be enabled or disabled
