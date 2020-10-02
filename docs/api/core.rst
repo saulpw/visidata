@@ -1,74 +1,74 @@
 Sheets
 ====================================
 
-.. data:: visidata.vd.sheets
+BaseSheet is a base class defining the interface for Sheets of all kinds.
 
-The list of active sheets, generally treated as a stack.  The first item (0) is always the top displayed sheet.
-
-.. autofunction:: visidata.vd.getSheet
-.. autofunction:: visidata.vd.push
-.. autofunction:: visidata.vd.replace
-.. autofunction:: visidata.vd.remove
-.. autofunction:: visidata.vd.quit
-
-.. autofunction:: visidata.vd.openPath
-.. autofunction:: visidata.vd.openSource
-
-.. autofunction:: visidata.vd.saveSheets
-
-The Sheet class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: visidata.BaseSheet.reload
-.. autofunction:: visidata.Sheet.iterload
-
-.. autofunction:: visidata.BaseSheet.ensureLoaded
-
-.. data:: visidata.BaseSheet.name
-
-.. autofunction:: visidata.BaseSheet.__copy__
-.. autofunction:: visidata.BaseSheet.__len__
-.. data:: visidata.BaseSheet.cmdlog
-.. data:: visidata.BaseSheet.cmdlog_sheet
-
-.. data:: visidata.TableSheet.columns
-.. data:: visidata.TableSheet.nCols
-.. autofunction:: visidata.TableSheet.addColumn
-.. data:: visidata.TableSheet.visibleCols
-.. data:: visidata.TableSheet.nVisibleCols
-.. autofunction:: visidata.TableSheet.column
-
-.. data:: visidata.TableSheet.rows
-.. data:: visidata.TableSheet.nRows
-.. data:: visidata.TableSheet.visibleRows
-.. data:: visidata.TableSheet.nVisibleRows
-
-.. autofunction:: visidata.TableSheet.openRow
-
-.. autofunction:: visidata.TableSheet.gatherBy
-.. autofunction:: visidata.TableSheet.rowid
-
-.. autofunction:: visidata.TableSheet.openCell
-.. autofunction:: visidata.TableSheet.iterrows
-
-
-   - rows are not hashable and can't be looked up easily by content without linear (and expensive) search.
-   - But id(obj) is a hashable integer which is guaranteed to be unique and constant for this object during its lifetime.
-   - We store id(row) as the keys in a dict pointing to the row itself (is this convenience used?)
-   - this makes selection/unselection and checking for selection, have the same cost as set add/remove/check
-   - select/unselect/stoggle all are now O(n log n), whereas they could have been O(n) if selection were in e.g. a parallel array, or an attribute on the row.
-
-
-Sheet class hierarchy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sheets are generally specialized for their rowtype, and TableSheet, used for sheets with rows and columns, is the most common base class.
+(So common, that it was originally just called ``Sheet``.  For clarity, ``TableSheet`` is preferred, but ``Sheet`` is a valid alias that will never be deprecated.)
 
 .. autoclass:: visidata.BaseSheet
+.. autoattribute:: visidata.BaseSheet.name
+
+.. autofunction:: visidata.BaseSheet.__len__
+.. autofunction:: visidata.BaseSheet.__copy__
+
+.. autofunction:: visidata.BaseSheet.reload
+
+TableSheet
+~~~~~~~~~~~
+
 .. autoclass:: visidata.TableSheet
+.. data:: visidata.TableSheet.rows
+
+List of row objects on this sheet.
+
+.. data:: visidata.TableSheet.columns
+
+List of all Column objects on this sheet (including hidden columns).
+
+
+.. autoattribute:: visidata.TableSheet.nRows
+.. autoattribute:: visidata.TableSheet.nCols
+
+.. autoattribute:: visidata.TableSheet.visibleCols
+.. autoattribute:: visidata.TableSheet.nVisibleCols
+
+.. autofunction:: visidata.TableSheet.addColumn
+.. autofunction:: visidata.TableSheet.addRow
+
+.. autofunction:: visidata.TableSheet.iterload
+
+.. autofunction:: visidata.TableSheet.rowid
+.. autofunction:: visidata.TableSheet.column
+
+.. autofunction:: visidata.TableSheet.openRow
+.. autofunction:: visidata.TableSheet.openCell
+.. autofunction:: visidata.TableSheet.gatherBy
+
+Other Sheets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. autoclass:: visidata.IndexSheet
 .. autoclass:: visidata.TextSheet
 .. autoclass:: visidata.SequenceSheet
 .. autoclass:: visidata.PyobjSheet
 
-.. note::
+The Sheet Stack
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ``PyobjSheet`` can be passed any Python object and will return specialized subclasses for lists of objects, namedtuples, and dicts.
+The "sheet stack" is the list of active sheets (vvailable via :kbd:`Shift+S`).
+The top sheet (the displayed sheet) is the first item (``vd.sheets[0]``) in the list.
+
+.. data:: visidata.vd.sheets
+
+.. autofunction:: visidata.vd.push
+.. autofunction:: visidata.vd.replace
+.. autofunction:: visidata.vd.remove
+.. autofunction:: visidata.vd.quit
+
+.. autofunction:: visidata.vd.getSheet
+
+.. autofunction:: visidata.vd.openPath
+.. autofunction:: visidata.vd.openSource
+
+.. autofunction:: visidata.vd.saveSheets

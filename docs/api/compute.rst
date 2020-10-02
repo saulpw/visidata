@@ -147,11 +147,11 @@ Nulls
    a. aggregators: the denominator counts only non-null values
    b. the Describe Sheet: only null values count in the nulls column
    c. the `fill-nulls` command
-   d. the `melt' command only keeps non-null values
+   d. the `melt` command only keeps non-null values
    e. the `prev-null` and `next-null` commands (`z<` and `z>`)
 
 options.null_value
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 This option can be used to specify a null value in addition to Python `None`.  This value is typed, so can be set to ``''`` (empty string) or another string (like ``'NA'``), or a number like ``0`` or ``0.0``.
 

@@ -5,7 +5,7 @@ Sheet.init('_selectedRows', dict)  # rowid(row) -> row
 
 @Sheet.api
 def isSelected(self, row):
-    'Return True if *row* is selected. O(log nSelectedRows).'
+    'Return True if *row* is selected.'
     return self.rowid(row) in self._selectedRows
 
 @Sheet.api
@@ -19,12 +19,12 @@ def toggle(self, rows):
 
 @Sheet.api
 def selectRow(self, row):
-    'Select *row*.  O(log n).  Overrideable.'
+    'Select *row*.  Overrideable.'
     self._selectedRows[self.rowid(row)] = row
 
 @Sheet.api
 def unselectRow(self, row):
-    'Unselect *row*. Return True if row was previously selected. O(log n).  Overrideable.'
+    'Unselect *row*.  Return True if row was previously selected.  Overrideable.'
     if self.rowid(row) in self._selectedRows:
         del self._selectedRows[self.rowid(row)]
         return True
@@ -33,7 +33,7 @@ def unselectRow(self, row):
 
 @Sheet.api
 def clearSelected(self):
-    'Unselect all selected rows, without calling unselectRow for each one.  O(1).  Override for sheet-specific selection implementation.'
+    'Unselect all selected rows, without calling unselectRow for each one.'
     self.addUndoSelection()
     self._selectedRows.clear()
 
@@ -77,7 +77,7 @@ def unselectByIdx(self, rowIdxs):
 
 @Sheet.api
 def gatherBy(self, func, gerund='gathering'):
-    'Generate rows for which *func* returns True.  O(nRows).'
+    'Generate rows for which *func* returns True, starting from the cursor.'
     for i in Progress(rotateRange(self.nRows, self.cursorRowIndex-1), total=self.nRows, gerund=gerund):
         try:
             r = self.rows[i]
@@ -88,7 +88,7 @@ def gatherBy(self, func, gerund='gathering'):
 
 @Sheet.property
 def selectedRows(self):
-    'List of selected rows in sheet order.   O(nRows*log(nSelectedRows))'
+    'List of selected rows in sheet order.'
     if self.nSelectedRows <= 1:
         return Fanout(self._selectedRows.values())
     return Fanout((r for r in self.rows if self.rowid(r) in self._selectedRows))
@@ -102,7 +102,7 @@ def someSelectedRows(self):
 
 @Sheet.property
 def nSelectedRows(self):
-    'Number of selected rows. O(1).'
+    'Number of selected rows.'
     return len(self._selectedRows)
 
 @Sheet.api

@@ -39,6 +39,7 @@ class LazyChainMap:
 
 
 class BaseSheet(Extensible):
+    'Base class for all sheet types.'
     _rowtype = object    # callable (no parms) that returns new empty item
     _coltype = None      # callable (no parms) that returns new settable view into that item
     rowtype = 'objects'  # one word, plural, describing the items
@@ -69,6 +70,7 @@ class BaseSheet(Extensible):
             return id(self) < id(other)
 
     def __copy__(self):
+        'Return shallow copy of sheet.'
         cls = self.__class__
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
@@ -80,6 +82,7 @@ class BaseSheet(Extensible):
         return True
 
     def __len__(self):
+        'Number of elements on this sheet.'
         return self.nRows
 
     def __str__(self):
@@ -87,7 +90,7 @@ class BaseSheet(Extensible):
 
     @property
     def nRows(self):
-        'Number of rows on this sheet.'
+        'Number of rows on this sheet.  Override in subclass.'
         return 0
 
     def __contains__(self, vs):
@@ -153,6 +156,7 @@ class BaseSheet(Extensible):
 
     @property
     def name(self):
+        'Name of this sheet.'
         try:
             return self._name
         except AttributeError:
@@ -179,11 +183,13 @@ class BaseSheet(Extensible):
         self._scr.refresh()
 
     def ensureLoaded(self):
+        'Call ``reload()`` if not already loaded.'
         if self.rows is UNLOADED:
             self.rows = []  # prevent auto-reload from running twice
             return self.reload()   # likely launches new thread
 
     def reload(self):
+        'Load sheet from *self.source*.  Override in subclass.'
         vd.error('no reload')
 
     @property
@@ -223,7 +229,7 @@ def sheet(self):
 
 @VisiData.api
 def getSheet(vd, sheetname):
-    'Return Sheet named *sheetname*.  *sheetname* may also be a sheet number, indexing into ``vd.sheets``.'
+    'Return Sheet from the sheet stack.  *sheetname* can be a sheet name or a sheet number indexing directly into ``vd.sheets``.'
     if isinstance(sheetname, BaseSheet):
         return sheetname
     matchingSheets = [x for x in vd.sheets if x.name == sheetname]

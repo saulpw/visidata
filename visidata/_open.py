@@ -39,7 +39,7 @@ def _completeFilename(val, state):
 
 @VisiData.api
 def openPath(vd, p, filetype=None):
-    'Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)`` as appropriate.  Return constructed but unloaded sheet of appropriate type.'
+    'Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.'
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
         return vd.getGlobals()[openfunc](p, filetype=filetype)

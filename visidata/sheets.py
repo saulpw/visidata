@@ -146,7 +146,7 @@ class BasicRow(collections.defaultdict):
         return True
 
 class TableSheet(BaseSheet):
-    'Base class for all tabular sheets.'
+    'Base class for sheets with row objects and column views.'
     _rowtype = lambda: BasicRow()
     _coltype = SettableColumn
 
@@ -235,6 +235,7 @@ class TableSheet(BaseSheet):
         return colors.resolve_colors(tuple(colorstack))
 
     def addRow(self, row, index=None):
+        'Insert *row* at *index*, or append at end of rows if *index* is None.'
         if index is None:
             self.rows.append(row)
         else:
@@ -251,7 +252,7 @@ class TableSheet(BaseSheet):
         return {col.name:col for col in self.columns[::-1]}
 
     def column(self, colname):
-        'Return first column whose Column.name matches colname.'
+        'Return first column whose name matches *colname*.'
         return self.colsByName.get(colname) or vd.fail('no column matching "%s"' % colname)
 
     def recalc(self):
@@ -261,7 +262,7 @@ class TableSheet(BaseSheet):
 
     @asyncthread
     def reload(self):
-        'Load rows and/or columns.  Override in subclass.'
+        'Load rows and/or columns from *self.source*.  Async.  Override in subclass.'
         self.rows = []
         with vd.Progress(gerund='loading', total=0):
             for r in self.iterload():
@@ -272,7 +273,7 @@ class TableSheet(BaseSheet):
             vd.sync(self.sort())
 
     def iterload(self):
-        'Override this generator for loading.'
+        'Generate rows from *self.source*.  Override in subclass.'
         if False:
             yield vd.fail('no iterload for this loader yet')
 
@@ -296,7 +297,7 @@ class TableSheet(BaseSheet):
 
 
     def __copy__(self):
-        'copy sheet design (no rows).  deepcopy columns so their attributes (width, type, name) may be adjusted independently.'
+        'Copy sheet design but remain unloaded. Deepcopy columns so their attributes (width, type, name) may be adjusted independently of the original.'
         ret = super().__copy__()
         ret.rows = UNLOADED
         ret.columns = [copy(c) for c in self.keyCols]
@@ -328,7 +329,7 @@ class TableSheet(BaseSheet):
         return eval(expr, vd.getGlobals(), contexts)
 
     def rowid(self, row):
-        'Return a unique and stable hash of the given row object.  Must be fast.  Overrideable.'
+        'Return a unique and stable hash of the *row* object.  Must be fast.  Overrideable.'
         return id(row)
 
     @property
@@ -364,7 +365,7 @@ class TableSheet(BaseSheet):
 
     @drawcache_property
     def visibleCols(self):  # non-hidden cols
-        'List of `Column` which are not hidden.'
+        'List of non-hidden columns in display order.'
         return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
 
     def visibleColAtX(self, x):
@@ -449,7 +450,7 @@ class TableSheet(BaseSheet):
         self.calcColLayout()
 
     def addColumn(self, col, index=None):
-        'Insert column at given index or after all columns.'
+        'Insert Column *col* into columns at *index*, or append to end of columns if *index* is None.'
         if col:
             vd.addUndo(self.columns.remove, col)
             if index is None:
@@ -836,7 +837,7 @@ Sheet = TableSheet  # deprecated in 2.0 but still widely used internally
 
 
 class SequenceSheet(Sheet):
-    'For sheets which use ColumnItem on rows that are Python sequences (list, namedtuple, etc).'
+    'Sheets with ColumnItem columns, and rows that are Python sequences (list, namedtuple, etc).'
     def setCols(self, headerrows):
         self.columns = []
         for i, colnamelines in enumerate(itertools.zip_longest(*headerrows, fillvalue='')):
@@ -887,6 +888,7 @@ class SequenceSheet(Sheet):
 
 
 class IndexSheet(Sheet):
+    'Base class for tabular sheets with rows that are Sheets.'
     rowtype = 'sheets'  # rowdef: Sheet
     precious = False
 
@@ -946,7 +948,7 @@ def replace(vd, vs):
 
 @VisiData.global_api
 def remove(vd, vs):
-    'Remove *vs* from sheets stack forcibly.'
+    'Remove *vs* from sheets stack, without asking for confirmation.'
     if vs in vd.sheets:
         vd.sheets.remove(vs)
         if vs in vd.allSheets:

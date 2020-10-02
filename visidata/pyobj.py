@@ -248,6 +248,7 @@ def docstring(obj, attr):
 
 # rowdef: attrname
 class PyobjSheet(PythonSheet):
+    'Generic Sheet for any Python object.  Return specialized subclasses for lists of objects, namedtuples, and dicts.'
     rowtype = 'attributes'
     columns = [
         Column('attribute'),
@@ -295,12 +296,14 @@ class PyobjSheet(PythonSheet):
 
 @TableSheet.api
 def openRow(sheet, row):
+    'Return Sheet diving into *row*.'
     k = sheet.keystr(row) or [sheet.cursorRowIndex]
     name = f'{sheet.name}[{k}]'
     return PyobjSheet(name, source=tuple(c.getTypedValue(row) for c in sheet.visibleCols))
 
 @TableSheet.api
 def openCell(sheet, col, row):
+    'Return Sheet diving into cell at *row* in *col*.'
     k = sheet.keystr(row) or [str(sheet.cursorRowIndex)]
     name = f'{sheet.name}.{col.name}[{k}]'
     return PyobjSheet(name, source=col.getTypedValue(row))
