@@ -23,7 +23,9 @@ Note that a thread spawned by calling a function on a different sheet will add t
 .. autoclass:: visidata.asyncthread
 
 .. autoclass:: visidata.vd.Progress
-.. autofunction:: visidata.vd.Progress.addProgress
+.. function:: visidata.vd.Progress.addProgress(n)
+
+    Increase the progress count by *n*.
 
 .. data:: visidata.vd.threads
 

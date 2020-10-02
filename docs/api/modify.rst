@@ -7,11 +7,11 @@ Modifying Data
 .. autofunction:: visidata.Sheet.preloadHook
 .. autofunction:: visidata.Sheet.putChanges
 .. autofunction:: visidata.Sheet.rowAdded
-.. autofunction:: visidata.Sheet.cellChanged
+.. autofunction:: visidata.Column.cellChanged
 .. autofunction:: visidata.Sheet.rowDeleted
 .. autofunction:: visidata.Sheet.isDeleted
 .. autofunction:: visidata.Sheet.isChanged
-.. autofunction:: visidata.Sheet.getSavedValue
+.. autofunction:: visidata.Column.getSavedValue
 .. autofunction:: visidata.Sheet.commitAdds
 .. autofunction:: visidata.Sheet.commitMods
 .. autofunction:: visidata.Sheet.commitDeletes
