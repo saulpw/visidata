@@ -101,7 +101,7 @@ The default keybindings for setting types are all on the shifted top left keys o
 
 
 User-defined Types
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Fundamentally, a type is a function which takes the underlying value and returns an object of a specific type.
 This function should accept a string and do a reasonable conversion, like Python ``int`` and ``float`` do.
