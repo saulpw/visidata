@@ -494,15 +494,16 @@ class ExprColumn(Column):
 
 
 class SettableColumn(Column):
-    ''
-    def __init__(self, *args, cache=None, **kwargs):
-        super().__init__(*args, cache=cache or {}, **kwargs)
+    'Column using *expr* to derive the value from each row.  Store values internally by rowid.'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._store = {}
 
     def putValue(self, row, value):
-        self.cache[self.sheet.rowid(row)] = value
+        self._store[self.sheet.rowid(row)] = value
 
     def calcValue(self, row):
-        return self.cache.get(self.sheet.rowid(row), None)
+        return self._store.get(self.sheet.rowid(row), None)
 
 
 # synonyms
