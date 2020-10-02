@@ -11,10 +11,10 @@ This is often the only thing a Column subclass has to do.
 ``calcValue`` and ``putValue`` should generally not be called by application code.
 Instead, apps and plugins should call ``getValue`` and ``setValue``, which provide appropriate layers of caching.
 
-.. data:: visidata.Column.name
-.. data:: visidata.Column.type
-.. data:: visidata.Column.width
-.. data:: visidata.Column.fmtstr
+.. autoattribute:: visidata.Column.name
+.. autoattribute:: visidata.Column.type
+.. autoattribute:: visidata.Column.width
+.. autoattribute:: visidata.Column.fmtstr
 
 .. autoattribute:: visidata.Column.hidden
 

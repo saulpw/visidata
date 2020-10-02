@@ -126,6 +126,7 @@ class Column(Extensible):
 
     @property
     def name(self):
+        'Name of this column.'
         return self._name or ''
 
     @name.setter
@@ -141,6 +142,7 @@ class Column(Extensible):
 
     @property
     def type(self):
+        'Type of this column.'
         return self._type
 
     @type.setter
@@ -151,7 +153,7 @@ class Column(Extensible):
 
     @property
     def width(self):
-        'Width of column in characters.'
+        'Width of this column in characters.  0 or negative means hidden.  None means not-yet-autocomputed.'
         return self._width
 
     @width.setter
@@ -163,6 +165,7 @@ class Column(Extensible):
 
     @property
     def fmtstr(self):
+        'Format string to use to display this column.'
         return self._fmtstr or vd.getType(self.type).fmtstr
 
     @fmtstr.setter
@@ -192,7 +195,7 @@ class Column(Extensible):
 
     @property
     def hidden(self):
-        'A column is hidden if its width <= 0. (width==None means not-yet-autocomputed).'
+        'Return True if width of this column is 0 or negative.'
         if self.width is None:
             return False
         return self.width <= 0
@@ -394,7 +397,7 @@ def setattrdeep(obj, attr, val):
 
 
 def AttrColumn(name='', attr=None, **kwargs):
-    'Column using getattr/setattr of given attr.'
+    'Column using getattr/setattr with *attr*.'
     return Column(name,
                   expr=attr if attr is not None else name,
                   getter=lambda col,row: getattrdeep(row, col.expr),
@@ -408,7 +411,7 @@ def getitemdef(o, k, default=None):
         return default
 
 def ItemColumn(name=None, key=None, **kwargs):
-    'Column using getitem/setitem of given key.'
+    'Column using getitem/setitem with *key*.'
     return Column(name,
             expr=key if key is not None else name,
             getter=lambda col,row: getitemdef(row, col.expr),
@@ -416,7 +419,7 @@ def ItemColumn(name=None, key=None, **kwargs):
             **kwargs)
 
 class SubColumnFunc(Column):
-    'calcValue/setValue do row=subfunc(row, self.expr) first'
+    'Column compositor; preprocess row with *subfunc*(row, *expr*) before passing to *origcol*.getValue and *origcol*.setValue.'
     def __init__(self, name='', origcol=None, expr=None, subfunc=getitemdef, **kwargs):
         super().__init__(name, type=origcol.type, width=origcol.width, expr=expr, **kwargs)
         self.origcol = origcol
@@ -467,7 +470,8 @@ class EnumColumn(Column):
 
 
 class ExprColumn(Column):
-    def __init__(self, name, cache=True, expr=None, **kwargs):
+    'Column using *expr* to derive the value from each row.  Cached by default.'
+    def __init__(self, name, expr=None, cache=True, **kwargs):
         super().__init__(name, cache=cache, **kwargs)
         self.expr = expr or name
         self.ncalcs = 0
