@@ -11,6 +11,7 @@ This is often the only thing a Column subclass has to do.
 ``calcValue`` and ``putValue`` should generally not be called by application code.
 Instead, apps and plugins should call ``getValue`` and ``setValue``, which provide appropriate layers of caching.
 
+.. autoclass:: visidata.Column
 .. autoattribute:: visidata.Column.name
 .. autoattribute:: visidata.Column.type
 .. autoattribute:: visidata.Column.width
@@ -83,22 +84,19 @@ The default column type is ``anytype``, which lets the underlying value pass thr
 
 The classic VisiData column types are:
 
-========  ==================  =========  =================  ============
-type      description         numeric    command            keystrokes
-========  ==================  =========  =================  ============
-anytype   pass-through                   ``type-anytype``   :kbd`z~`
-str       string                         ``type-str``       :kbd`~`
-date      date/time           Y          ``type-date``      :kbd`@`
-int       integer             Y          ``type-int``       :kbd`#`
-float     decimal             Y          ``type-float``     :kbd`%`
-currency  decimal with units  Y          ``type-currency``  :kbd`$`
-vlen      sequence length     Y          ``type-vlen``      :kbd`z#`
-========  ==================  =========  =================  ============
+============  ==================  =========  =================  ============
+type          description         numeric    command            keystrokes
+============  ==================  =========  =================  ============
+``anytype``   pass-through                   ``type-anytype``   :kbd:`z~`
+``str``       string                         ``type-str``       :kbd:`~`
+``date``      date/time           Y          ``type-date``      :kbd:`@`
+``int``       integer             Y          ``type-int``       :kbd:`#`
+``float``     decimal             Y          ``type-float``     :kbd:`%`
+``currency``  decimal with units  Y          ``type-currency``  :kbd:`$`
+``vlen``      sequence length     Y          ``type-vlen``      :kbd:`z#`
+============  ==================  =========  =================  ============
 
 The default keybindings for setting types are all on the shifted top left keys on a US QWERTY keyboard.
-
-      - type.formatter(fmtstr, typedval)
-
 
 User-defined Types
 ~~~~~~~~~~~~~~~~~~~
@@ -107,7 +105,7 @@ Fundamentally, a type is a function which takes the underlying value and returns
 This function should accept a string and do a reasonable conversion, like Python ``int`` and ``float`` do.
 And like those builtin types, this function should produce a reasonable baseline arithmetic identity when passed no parameters (or None).
 
-Applications should generally call getTypedValue, so that the value they get is consistently typed.
+Computations should generally call ``getTypedValue``, so that the values being used are consistently typed.
 
 If the underlying value is None, the result will be a ``TypedWrapper``, which provides the baseline value
 for purposes of comparison, but a stringified version of the underlying value for display.
@@ -125,36 +123,37 @@ A VisiData type function or constructor must have certain properties:
 
 Objects returned by ``TYPE(...)`` must be:
 
-- comparable (for sorting)
-- hashable
-- formattable
-- roundable (if numeric, for binning)
-- idempotent (``TYPE(TYPE(v)) == TYPE(v)``)
+    - comparable (for sorting)
+    - hashable
+    - formattable
+    - roundable (if numeric, for binning)
+    - idempotent (``TYPE(TYPE(v)) == TYPE(v)``)
 
-.. autoclass:: visidata.vdtype
-
-- ``.typetype``: actual type class *TYPE* above
-- ``.icon``: unicode character in column header
-- ``.fmtstr``: format string to use if fmtstr not given
-- ``.formatter(fmtstr, typedvalue)``: formatting function (by default `locale.format_string` if fmtstr given, else `str`)
+.. autoclass:: visidata.vd.addType
 
 Nulls
 ======
 
-- The null values are Python ``None`` and options.null_value if set.
-
-- Null values interact with:
+VisiData has a crude concept of null values.  These interact with:
    a. aggregators: the denominator counts only non-null values
    b. the Describe Sheet: only null values count in the nulls column
-   c. the `fill-nulls` command
-   d. the `melt` command only keeps non-null values
-   e. the `prev-null` and `next-null` commands (`z<` and `z>`)
+   c. the ``fill-nulls`` command
+   d. the ``melt`` command only keeps non-null values
+   e. the ``prev-null`` and ``next-null`` commands (:kbd:`z<` and :kbd:`z>`)
 
-options.null_value
--------------------
+- The null values are Python ``None`` and options.null_value if set.
 
-This option can be used to specify a null value in addition to Python `None`.  This value is typed, so can be set to ``''`` (empty string) or another string (like ``'NA'``), or a number like ``0`` or ``0.0``.
+.. note::
+
+    ``options.null_value`` can be used to specify a null value in addition to Python ``None``.
+    The CLI can only set this option to a string like ``''`` (empty string) or ``'NA'``.
+    The option can be set to a different type in ``.visidatarc`` or other code, though:
+
+    ::
+
+        options.null_value = 0.0
+        options.null_value = date("1980-01-01")
 
 .. autofunction:: visidata.BaseSheet.isNullFunc
 
-There is no direct isNull function, because the possible null values can change at runtime, and getting an option value is very expensive to do in a bulk operation.
+There is no direct isNull function, because the possible null values can change at runtime via the above option, and getting an option value is very expensive to do in a bulk operation.

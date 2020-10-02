@@ -70,10 +70,21 @@ class VisiDataType:
         self.formatter = formatter
         self.key = key
 
-        if typetype:
-            vd.typemap[typetype] = self
+@VisiData.api
+def addType(vd, typetype=None, icon=None, fmtstr='', formatter=numericFormatter, key='', name=None):
+    '''Add type to type map.
 
-vdtype = VisiDataType
+    - *typetype*: actual type class *TYPE* above
+    - *icon*: unicode character in column header
+    - *fmtstr*: format string to use if fmtstr not given
+    - *formatter*: formatting function to call as ``formatter(fmtstr, typedvalue)``
+    '''
+    t = VisiDataType(typetype=typetype, icon=icon, fmtstr=fmtstr, formatter=formatter, key=key, name=name)
+    if typetype:
+        vd.typemap[typetype] = t
+    return t
+
+vdtype = vd.addType
 
 # typemap [vtype] -> VisiDataType
 vd.typemap = {}
