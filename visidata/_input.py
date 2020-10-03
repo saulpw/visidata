@@ -281,7 +281,7 @@ def inputsingle(vd, prompt, record=True):
 
 @VisiData.api
 def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
-    '''Display prompt and return line of user input.
+    '''Display *prompt* and return line of user input.
 
         - *type*: list of previous items, or a string indicating the type of input.
         - *defaultLast*:  on empty input, if True, return last history item.

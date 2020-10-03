@@ -18,6 +18,5 @@ Modifying Data
 .. autofunction:: visidata.Sheet.getDeferredChanges
 .. autofunction:: visidata.Sheet.changestr
 .. autofunction:: visidata.Sheet.commit
-.. autofunction:: visidata.TableSheet.addRow
 .. autofunction:: visidata.TableSheet.newRow
 .. autofunction:: visidata.TableSheet.addNewRows

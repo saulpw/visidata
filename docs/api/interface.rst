@@ -1,15 +1,6 @@
 Interface
 =========
 
-Terminal
---------
-
-.. autodata:: visidata.BaseSheet.windowWidth
-.. autodata:: visidata.BaseSheet.windowHeight
-.. autofunction:: visidata.BaseSheet.refresh
-.. autofunction:: visidata.VisiData.redraw
-.. autofunction:: visidata.BaseSheet.draw
-.. autoclass:: visidata.SuspendCurses
 
 Cursor
 ======
@@ -26,11 +17,11 @@ Row cursor as an index into ``TableSheet.rows``.  Settable.
 
 Top row on the screen, as an index into ``TableSheet.rows``.  Settable.
 
-.. autodata:: visidata.Sheet.cursorCol
-.. autodata:: visidata.Sheet.cursorColIndex
-.. autodata:: visidata.Sheet.cursorValue
-.. autodata:: visidata.Sheet.cursorTypedValue
-.. autodata:: visidata.Sheet.cursorDisplay
+.. autoattribute:: visidata.Sheet.cursorCol
+.. autoattribute:: visidata.Sheet.cursorColIndex
+.. autoattribute:: visidata.Sheet.cursorValue
+.. autoattribute:: visidata.Sheet.cursorTypedValue
+.. autoattribute:: visidata.Sheet.cursorDisplay
 
 .. autofunction:: visidata.Sheet.cursorDown
 .. autofunction:: visidata.Sheet.cursorRight
@@ -56,6 +47,7 @@ Status
 
 Colors
 ------
+
 .. data:: visidata.TableSheet.colorizers
 
 class member which specifies a list of Colorizers for this class.; similar to TableSheet.columns, to be 
@@ -65,6 +57,33 @@ Instead use addColorizer and removeColorizer.
 
 .. autofunction:: visidata.TableSheet.addColorizer
 .. autofunction:: visidata.TableSheet.removeColorizer
+
+Drawing
+--------
+
+.. autoattribute:: visidata.BaseSheet.windowWidth
+.. autoattribute:: visidata.BaseSheet.windowHeight
+.. autofunction:: visidata.BaseSheet.refresh
+.. autofunction:: visidata.VisiData.redraw
+.. autofunction:: visidata.BaseSheet.draw
+.. autoclass:: visidata.SuspendCurses
+
+::
+
+    with SuspendCurses():
+    @VisiData.api
+    def launchPager(vd, *args):
+        'Launch $PAGER with *args* as arguments.'
+        args = [os.environ.get('PAGER') or vd.fail('$PAGER not set')] + list(args)
+        with SuspendCurses():
+            return subprocess.call(args)
+
+::
+
+    passwd = vd.input("password: ", display=False)
+
+    # initial value is the formatted value under the cursor
+    vd.status(vd.input("text to show: ", value=cursorDisplayValue))
 
 Colorizers
 ^^^^^^^^^^

@@ -33,8 +33,8 @@ List of all Column objects on this sheet (including hidden columns).
 .. autoattribute:: visidata.TableSheet.visibleCols
 .. autoattribute:: visidata.TableSheet.nVisibleCols
 
-.. autofunction:: visidata.TableSheet.addColumn
 .. autofunction:: visidata.TableSheet.addRow
+.. autofunction:: visidata.TableSheet.addColumn
 
 .. autofunction:: visidata.TableSheet.iterload
 

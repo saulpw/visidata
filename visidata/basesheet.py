@@ -102,12 +102,12 @@ class BaseSheet(Extensible):
 
     @property
     def windowHeight(self):
-        'Height of the current sheet, in terminal lines.'
+        'Height of the current sheet window, in terminal lines.'
         return self._scr.getmaxyx()[0] if self._scr else 25
 
     @property
     def windowWidth(self):
-        'Width of the current sheet, in single-width characters.'
+        'Width of the current sheet window, in single-width characters.'
         return self._scr.getmaxyx()[1] if self._scr else 80
 
     def execCommand(self, cmd, args='', vdglobals=None, keystrokes=None):
@@ -174,11 +174,11 @@ class BaseSheet(Extensible):
         pass
 
     def draw(self, scr):
-        'Draw the sheet on the curses window *scr*.  Overrideable.'
+        'Draw the sheet on the terminal window *scr*.  Overrideable.'
         vd.error('no draw')
 
     def refresh(self):
-        'Clear the curses screen and let the next draw cycle redraw everything.'
+        'Clear the terminal screen and let the next draw cycle redraw everything.'
         self._scr.clear()
         self._scr.refresh()
 
@@ -214,7 +214,7 @@ class BaseSheet(Extensible):
 
 @VisiData.api
 def redraw(vd):
-    'Clear the curses screen and let the next draw cycle recreate the windows and redraw everything.'
+    'Clear the terminal screen and let the next draw cycle recreate the windows and redraw everything.'
     vd.scrFull.clear()
     vd.win1.clear()
     vd.win2.clear()

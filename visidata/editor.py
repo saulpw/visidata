@@ -8,7 +8,7 @@ import visidata
 
 
 class SuspendCurses:
-    'Context Manager to temporarily leave curses mode.'
+    'Context manager to leave windowed mode on enter and restore it on exit.'
     def __enter__(self):
         curses.endwin()
 
