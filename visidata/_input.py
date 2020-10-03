@@ -284,9 +284,12 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     '''Display *prompt* and return line of user input.
 
         - *type*: list of previous items, or a string indicating the type of input.
-        - *defaultLast*:  on empty input, if True, return last history item.
         - *history*: list of strings to use for input history.
-        - *kwargs*: passthrough options to editText.
+        - *defaultLast*:  on empty input, if True, return last history item.
+        - *display*: pass False to not display input (for sensitive input, e.g. a password).
+        - *record*: pass False to not record input on cmdlog (for sensitive or inconsequential input).
+        - *completer*: ``completer(val, idx)`` is called on TAB to get next completed value.
+        - *updater*: ``updater(val)`` is called every keypress or timeout.
     '''
     if type:
         if isinstance(type, str):
