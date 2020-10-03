@@ -88,7 +88,7 @@ from .shell import *
 from .layout import *
 from .main import *
 from .help import *
-from .defermods import *
+from .modify import *
 import visidata.sort
 import visidata.unfurl
 import visidata.fill
