@@ -32,6 +32,7 @@ def preloadHook(sheet):
 
 @Sheet.api
 def rowAdded(self, row):
+    'Mark row as a deferred add-row'
     self._deferredAdds[self.rowid(row)] = row
     def _undoRowAdded(sheet, row):
         del sheet._deferredAdds[sheet.rowid(row)]
@@ -39,6 +40,7 @@ def rowAdded(self, row):
 
 @Column.api
 def cellChanged(col, row, val):
+    'Mark cell at row for col as a deferred edit-cell'
     oldval = col.getValue(row)
     if oldval != val:
         rowid = col.sheet.rowid(row)
@@ -62,6 +64,7 @@ def cellChanged(col, row, val):
 
 @Sheet.api
 def rowDeleted(self, row):
+    'Mark row as a deferred delete-row'
     self._deferredDels[self.rowid(row)] = row
     def _undoRowDeleted(sheet, row):
         del sheet._deferredDels[sheet.rowid(row)]
@@ -89,50 +92,52 @@ def addNewRows(sheet, n, idx):
 
 
 @Sheet.api
-def deleteBy(self, func, commit=False):
-    'Delete rows for which func(row) is true.  Returns number of deleted rows.'
-    oldrows = copy(self.rows)
-    oldidx = self.cursorRowIndex
+def deleteBy(sheet, func, commit=False):
+    'Delete rows on sheet for which func(row) is true.  Returns number of deleted rows.'
+    oldrows = copy(sheet.rows)
+    oldidx = sheet.cursorRowIndex
     ndeleted = 0
 
     row = None   # row to re-place cursor after
     # if commit is True, commit to delete, even if defer is True
-    if self.defer and not commit:
+    if sheet.defer and not commit:
         ndeleted = 0
-        for r in self.gatherBy(func, 'deleting'):
-            self.rowDeleted(r)
+        for r in sheet.gatherBy(func, 'deleting'):
+            sheet.rowDeleted(r)
             ndeleted += 1
         return ndeleted
 
     while oldidx < len(oldrows):
         if not func(oldrows[oldidx]):
-            row = self.rows[oldidx]
+            row = sheet.rows[oldidx]
             break
         oldidx += 1
 
-    self.rows.clear() # must delete from the existing rows object
+    sheet.rows.clear() # must delete from the existing rows object
     for r in Progress(oldrows, 'deleting'):
         if not func(r):
-            self.rows.append(r)
+            sheet.rows.append(r)
             if r is row:
-                self.cursorRowIndex = len(self.rows)-1
+                sheet.cursorRowIndex = len(sheet.rows)-1
         else:
             ndeleted += 1
 
     if not commit:
-        vd.addUndo(setattr, self, 'rows', oldrows)
+        vd.addUndo(setattr, sheet, 'rows', oldrows)
 
-    vd.status('deleted %s %s' % (ndeleted, self.rowtype))
+    vd.status('deleted %s %s' % (ndeleted, sheet.rowtype))
 
     return ndeleted
 
 
 @Sheet.api
-def isDeleted(self, r):
-    return self.rowid(r) in self._deferredDels
+def isDeleted(self, row):
+    'Return True if row has been deferred for deletion'
+    return self.rowid(row) in self._deferredDels
 
 @Sheet.api
 def isChanged(self, col, row):
+    'Return True if cell at row for col has been deferred for modification'
     try:
         row, rowmods = self._deferredMods[self.rowid(row)]
         newval = rowmods[col]
@@ -145,11 +150,13 @@ def isChanged(self, col, row):
 
 @Column.api
 def getSavedValue(col, row):
+    'Calculate and return value for *row* in this col.'
     return Column.calcValue(col, row)
 
 
 @Sheet.api
 def commitAdds(self):
+    'Return the number of rows that have been marked for deferred add-row. Clear the marking.'
     nadded = len(self._deferredAdds.values())
     if nadded:
         vd.status('added %s %s' % (nadded, self.rowtype))
@@ -158,6 +165,7 @@ def commitAdds(self):
 
 @Sheet.api
 def commitMods(self):
+    'Return the number of modifications (that are not deferred deletes or adds) that been marked for defer mod. Change value to mod for row in col. Clear the marking.'
     nmods = 0
     for row, rowmods in self._deferredMods.values():
         for col, val in rowmods.items():
@@ -172,6 +180,7 @@ def commitMods(self):
 
 @Sheet.api
 def commitDeletes(self):
+    'Return the number of rows that have been marked for deletion. Delete the rows. Clear the marking.'
     ndeleted = 0
 
     dest_row = None     # row to re-place cursor after
@@ -203,12 +212,12 @@ def deleteSourceRow(sheet, row):
 @asyncthread
 @Sheet.api
 def putChanges(sheet):
-    'Commit changes to path. adds are a diffset to apply to the last load from or commit to path. By default this overwrites completely, saving as filetype to path, with filetype from path ext.'
+    'Commit changes to sheet source. adds are a diffset to apply to the last load from or commit to sheet source. By default this overwrites completely, saving as filetype to source, with filetype from source ext.'
     sheet.commitAdds()
     sheet.commitMods()
     sheet.commitDeletes()
 
-    saveSheets(path, sheet, confirm_overwrite=False)
+    saveSheets(Path(sheet.source), sheet, confirm_overwrite=False)
 
     # clear after save, to ensure cstr (in commit()) is aware of deletes
     sheet._deferredDels.clear()
@@ -228,6 +237,7 @@ def getDeferredChanges(self):
 
 @Sheet.api
 def changestr(self, adds, mods, deletes):
+    'Return a str for status that outlines how many deferred changes are going to be committed.'
     cstr = ''
     if adds:
         cstr += 'add %d %s' % (len(adds), self.rowtype)
@@ -244,6 +254,7 @@ def changestr(self, adds, mods, deletes):
 
 @Sheet.api
 def commit(sheet, *rows):
+    'Commit all deferred adds, deletes, and mods in sheet to sheet.source on disk.'
     if not sheet.defer:
         vd.fail('commit-sheet is not enabled for this sheet type')
 

@@ -190,15 +190,6 @@ class DirSheet(Sheet):
     def restat(self):
         vstat.cache_clear()
 
-    @asyncthread
-    def putChanges(self):
-        self.commitAdds()
-        self.commitMods()
-        self.commitDeletes()
-
-        self._deferredDels.clear()
-        self.reload()
-
 
 class FileListSheet(DirSheet):
     _ordering = []

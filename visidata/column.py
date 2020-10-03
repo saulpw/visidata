@@ -205,7 +205,7 @@ class Column(Extensible):
         return (self.getter)(self, row)
 
     def getTypedValue(self, row):
-        'Returns the properly-typed value for the given row at this column, or a TypedWrapper object in case of null or error.'
+        'Return the properly-typed value for the given row at this column, or a TypedWrapper object in case of null or error.'
         return wrapply(self.type, wrapply(self.getValue, row))
 
     def setCache(self, cache):
