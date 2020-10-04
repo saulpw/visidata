@@ -50,8 +50,6 @@ Commands API
 
 .. autofunction:: visidata.BaseSheet.addCommand
 
-.. autoattribute:: visidata.vd.allPrefixes
-
 Keybindings
 ~~~~~~~~~~~~
 
@@ -62,11 +60,10 @@ Keybindings
    - Many other keycodes can be returned from the curses library as strings.
    - To discover what to use for some unknown key, press that key in VisiData and use the keystroke shown in the status bar.
 
+.. autoattribute:: visidata.vd.allPrefixes
 
-.. note::
-
-    ``vd.allPrefixes`` is a list of *prefixes* (keystrokes that don't trigger the end of a command sequence).
-    New prefixes can be added to this list, and then they can also be used as prefixes in keybindings.
+``vd.allPrefixes`` is a list of *prefixes* (keystrokes that don't trigger the end of a command sequence).
+New prefixes can be added to this list, and then they can also be used as prefixes in keybindings.
 
 .. note::
 
