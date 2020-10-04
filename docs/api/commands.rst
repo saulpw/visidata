@@ -76,8 +76,8 @@ Keybindings
 
     ``ALT`` is a just a handy constant for "``^[``", which represents :kbd:`Ctrl+[`, which maps to :kbd:`Esc` in the terminal.  Curses represents :kbd:`Alt+X` (:kbd:`Meta+X` on some keyboards) as :kdb:`Esc+X`. So to bind a command to :kbd:`Alt+X`, use ``ALT+'x'`` or ``'^[x'``.
 
+.. autofunction:: visidata.vd.bindkey
 .. autofunction:: visidata.BaseSheet.bindkey
-.. autofunction:: visidata.BaseSheet.unbindkey
 .. autofunction:: visidata.BaseSheet.execCommand
 .. autofunction:: visidata.addGlobals
 .. autofunction:: visidata.getGlobals
@@ -85,15 +85,15 @@ Keybindings
 Rules for command longnames
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1) 3 words max, 2 words if possible. should be short and fit on a keymap (verb - object - input)
+1) 3 words max, 2 words if possible.  A longname should be short and fit on a keymap.
 
-2) command classes should be unique in their first 3 chars and ideally mostly in their first 2.
+2) Command classes should be unique in their first 3 chars and ideally mostly in their first 2.
 
-3) command longnames should be intuitively understandable, or at least not jargony
+3) Command longnames should be intuitively understandable, or at least not jargony.
 
-4) longnames should evoke interface, when possible
+4) Longnames should evoke interface, when possible.
 
-5) use existing structure if possible:
+5) Use existing verb-object-input structure if possible:
 
 Verbs:
 
@@ -111,15 +111,20 @@ Verbs:
 -  ``syscopy/syspaste``: copy/paste to system clipboard
 -  ``sysopen``: open with $EDITOR or other external program
 
-Nouns:
+Objects:
 
-- ``-expr``: python expression
-- ``-regex``: python regex
 - ``-all``: all sheets or all visible columns
 - ``-col``: cursorCol
 - ``-cols``: all visible columns
 - ``-cells``: this column, selected rows
 - ``-selected``: selected rows
+
+Inputs:
+
+- ``-expr``: python expression
+- ``-regex``: python regex
+
+Many others are used, see the full command list for inspiration.
 
 Examples
 ~~~~~~~~
