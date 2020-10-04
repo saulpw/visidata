@@ -46,35 +46,58 @@ When getting an option value, VisiData will look for a sheet override first, the
 
 In general, plugins should use ``sheet.options`` to get option values, and ``FooSheet.class_options`` to override values for the plugin-specific sheet type.
 
+.. note::
+
+    Performance
+    ------------------
+
+    Because it allows so much flexibility, getting option values is a comparatively slow operation.  For tight loops, save the option into a local variable in an outer block.  An option value can only change between commands anyway.
+
+Options API
+~~~~~~~~~~~~~~~
+
 .. autofunction:: visidata.vd.options.__getattr__
 
 ``x = sheet.options.hello_world`` is the preferred style for getting a single option value.
 
 .. autofunction:: visidata.vd.options.__setattr__
 
-``sheet.options.hello_world = "ofo"`` is the preferred style for setting a single option value.
+``sheet.options.hello_world = "Привет мир"`` is the preferred style for setting a single option value.
 
 .. autofunction:: visidata.vd.options.get
 .. autofunction:: visidata.vd.options.set
 .. autofunction:: visidata.vd.options.getall
 
 The dict returned by ``options.getall('foo_')`` is designed to be used as kwargs to other loaders, so that their options can be passed through VisiData transparently.
-For example, ``csv.reader(fp, **sheet.options.getall('csv_'))`` will pass all csv options through to the builtin Python ``csv`` module.
+For example, to pass all csv options through to the builtin Python ``csv`` module:
+
+::
+
+    csv.reader(fp, **sheet.options.getall('csv_'))
 
 .. autofunction:: visidata.vd.option
 
-Notes:
+.. note::
 
-* All option names are in a global namespace.
-* The maximum option name length should be 20.
-* Use ``_`` (underscore) for a word separator.
-* Theme option names should start with ``disp_`` for a displayed string and ``color_`` for a color option (see `Colors <interface#colors>`__).
-* Otherwise, option names within a plugin should all start with the same short module abbreviation, like "``mod_``".
-* Consider whether some subset of options can be passed straight through to the underlying Python library via kwargs (maximum power with minimal effort).
+    If the option affects loading, transforming, or saving, then set *replay* to True.
 
-* When setting the option, strings and other types will be converted to the ``default`` type.
-* A default value of None allows any type. (``Exception`` is raised if conversion fails).
-* If the option affects loading, transforming, or saving, then set ``replay`` to True.
+Rules for naming options
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Options defined within a plugin should all start with the same short module abbreviation, like "``mod_``".
+- Except for theme option names, which should start with "``disp_``" for a displayed string and "``color_``" for a color option (see `Colors <interface#colors>`__).
+- Use common abbreviations instead of full words.
+- Use "``_``" (underscore) to separate words.
+- Keep the option name length under 20 characters.  Maximum of 3 words (2 separators).
+
+.. note::
+
+    * Consider whether some subset of options can be passed straight through to the underlying Python library via kwargs (maximum power with minimal effort).
+
+Option type
+^^^^^^^^^^^^
+
+When setting an option, strings and other types will be coerced to the type of the *default*.  An ``Exception`` is raised if conversion fails.  A *default* of ``None`` allows any type.
 
 Examples
 ~~~~~~~~~
@@ -94,16 +117,3 @@ Examples
 
     # option set for all DirSheets
     DirSheet.class_options.color_current_row = 'reverse green'
-
-
-
-Performance notes
-------------------
-
-- Getting option values is a comparatively slow operation.  Factor option getting out of inner loops, and into a local variable in an outer block.  An option value can only change between commands anyway.
-
-See Also:
-----------
-
-- ``options-global`` (``Shift+O``) for **Options Sheet** sheet with no context.
-- ``options-sheet`` (``z Shift+O``) for **Options Sheet** with this sheet's context.
