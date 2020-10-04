@@ -1,7 +1,7 @@
 Options
 ========
 
-Adding to the `hello world </>`__ example from the intro, the displayed text could be made configurable with an option:
+Adding to the :ref:`hello world<hello-world>` example from the intro, the displayed text could be made configurable with an option:
 
 ::
 

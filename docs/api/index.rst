@@ -14,6 +14,11 @@ VisiData is also designed to be **modular**.
 Many of its features can exist in isolation, and can be enabled or disabled independently, without affecting other features.
 Modules should degrade or fail gracefully if they depend on another module which is not loaded.
 
+.. _hello-world:
+
+Hello World
+===========
+
 As a simple example, this code can be placed in ``~/.visidatarc``:
 
 ::
