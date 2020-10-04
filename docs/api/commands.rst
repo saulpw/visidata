@@ -1,3 +1,5 @@
+.. _commands:
+
 Commands
 --------
 
@@ -24,6 +26,8 @@ The same precedence hierarchy is used, so that commands can be created or overri
 
 Since all Sheets ultimately inherit from ``BaseSheet``, a command on ``BaseSheet`` is effectively a global command.
 
+.. _command-context:
+
 Command Context
 ^^^^^^^^^^^^^^^
 
@@ -33,7 +37,7 @@ The *execstr* is a string of Python code passed to ``exec()`` when the command i
 
 -  the current ``sheet``
 -  the ``vd`` object
--  the ``visidata`` module (see ``addGlobals`` and ``getGlobals`` below)
+-  the ``visidata`` module (see ``addGlobals()`` and ``getGlobals()`` :ref:`below<other-commands>`)
 
 The ``vd`` and ``sheet`` symbols are available to specify explicitly.
 
@@ -72,6 +76,11 @@ New prefixes can be added to this list, and then they can also be used as prefix
 .. note::
 
     ``ALT`` is a just a handy constant for "``^[``", which represents :kbd:`Ctrl+[`, which maps to :kbd:`Esc` in the terminal.  Curses represents :kbd:`Alt+X` (:kbd:`Meta+X` on some keyboards) as :kbd:`Esc+X`. So to bind a command to :kbd:`Alt+X`, use ``ALT+'x'`` or ``'^[x'``.
+
+.. _other-commands:
+
+Other helpful functions
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: visidata.vd.bindkey
 .. autofunction:: visidata.BaseSheet.bindkey

@@ -57,6 +57,10 @@ override existing members. To call the original function, use
             # do something first
             addRow.__wrapped__(sheet, row)
 
+        ....
+
+        sheet.addRow(row)
+
 .. autofunction:: visidata.Extensible.class_api
 
 ``@class_api`` works much like ``@api``, but for class methods:
@@ -121,11 +125,11 @@ If *copy* is ``True``, then a copy is made of the member for the new instance.
 
 When a function is defined in a .py module in visidata, it is available as a global function in that module.
 
-VisiData does an effective ``from X import *`` for each plugin and modular feature, so that its package (or global) scope gets all of the exposed symbols.  See ``getGlobals()`` and ``addGlobals()`` <>`__.
+VisiData does an effective ``from X import *`` for each plugin and modular feature, so that its package (or global) scope gets all of the exposed symbols.  See :ref:`getGlobals() and addGlobals() <other-comamnds>`.
 
 Everything in a .py module is exported automatically, unless there is an ``__all__`` with a list of the names of the functions that should be exported, and it will export only those.
 
-Each VisiData feature and plugin should include an ``__all__``, either empty or with an explicit list of function names to be available to `commands <>`__ and `Expressions <>`__.
+Each VisiData feature and plugin should include an ``__all__``, either empty or with an explicit list of function names to be available to :ef:`commands <commands>` and `Expressions <>`__.
 
 What to extend: ``Sheet``, ``Column``, ``VisiData``, or globals?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,7 +164,7 @@ When calling functions on ``vd`` or ``sheet`` outside of a Command *execstr*, th
 
     BaseSheet.addCommand(None, 'show-hello', 'show_hello()')
 
-The current **Sheet** and the **VisiData** object are both in scope for `execstrs <commands#execstr>`__, so within an *execstr*, the ``sheet.`` or ``vd.`` may be omitted, as in the hello world example:
+The current **Sheet** and the **VisiData** object are both in scope for :ref:`execstrs <command-context>`, so within an *execstr*, the ``sheet.`` or ``vd.`` may be omitted, as in the hello world example:
 
 ::
 
