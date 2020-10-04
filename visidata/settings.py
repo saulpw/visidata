@@ -255,31 +255,11 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
 @BaseSheet.class_api
 @classmethod
 def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
-    '''
-<SheetType>.addCommand(...) add a new command to SheetType.
-  - `binding`
-     - a string of keystrokes, including **prefixes**.
-        - `vd.allPrefixes` is list of "prefixes", or keystrokes that don't trigger keybinding lookups.
-        - combinations of prefixes are allowed, but only in the specified order: `g` must come before `z`, which must come before `ALT`.
-        - `ALT` is a "prefix", because it's actually `^[` or ESC; and Python curses represents Alt+X (Meta+X on some keyboards) as `^[x`.  So the binding is `ALT+'X'`
-     - Use `^X` for Ctrl+X.
-     - Many other keycodes will be returned from the curses library as ascii strings.
-     - To discover what to use for some unknown key, press that key in VisiData and use the keystroke shown in the status bar.
-     - Primarily, plugin authors and users should use 0-9, KEY_F*, ALT+ for custom keybindings; these are purposefully left available for user keybindings.
-     - Consider not providing a default at all, for infrequently used commands.  Instead give it a memorable name, and/or a unique helpstr which you can search for the [command list]() (`g Ctrl+H`) with `g/`.
-
-  - `longname`
-     - use existing structure if possible:
-        - 'addcol-' for commands that add a column;
-        - 'open-' for commands that push a new sheet;
-        - 'go-' for commands that move the cursor;
-        - etc
-
-  - `execstr`
-     - a Python statement to be `exec()`'ed when the command is executed.
-
-  - `helpstr`
-    Shown in **Commands Sheet**.
+    '''Add a new command to *cls* sheet type.
+    - *keystrokes*: default keybinding, including **prefixes**.
+    - *longname*: name of the command.
+    - *execstr*: Python statement to pass to `exec()`'ed when the command is executed.
+    - *helpstr*: help string shown in the **Commands Sheet**.
     '''
     vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
     if keystrokes:

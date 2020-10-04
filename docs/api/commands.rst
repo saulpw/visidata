@@ -11,7 +11,7 @@ Every command should be **reproducible**: given the same sheet, cursor
 position, and `input <interface#input>`__ string (if relevant), a command should yield
 identical output (with a few obvious exceptions, like `random-rows`).
 
-Any command which makes changes to the `saveable sheet <>`__ is appended to its `command log <>`__.
+Any command which makes changes to a `saveable sheet <>`__ is appended to that sheet's `command log <>`__.
 Since all state changes must be initiated by a reproducible command, this command log can be `replayed </docs/replay>`__.
 
 Adding new commands is a natural way to extend VisiData's functionality.
@@ -19,120 +19,81 @@ Adding new commands is a natural way to extend VisiData's functionality.
 Command Overview
 ~~~~~~~~~~~~~~~~
 
-Commands and Keybindings are managed in a similar way to options. The
-same precedence hierarchy is used, so that commands can be created or
-overridden for a specific type of sheet, or even a specific sheet
-itself.
+Commands and Keybindings are managed in a similar way to options.
+The same precedence hierarchy is used, so that commands can be created or overridden for a specific type of sheet, or even a specific sheet itself.
 
-There are no 'global' commands; however, since all Sheets ultimately
-inherit from BaseSheet, a command on BaseSheet is effectively a global
-command.
+Since all Sheets ultimately inherit from ``BaseSheet``, a command on ``BaseSheet`` is effectively a global command.
 
 Command Context
 ^^^^^^^^^^^^^^^
 
-The "execstr" is a string of Python code to ``exec()`` when the command
-is run.
+The *execstr* is a string of Python code passed to ``exec()`` when the command is run.
 
 ``exec()`` looks up symbols in this order:
 
 -  the current ``sheet``
 -  the ``vd`` object
--  visidata module (see ``addGlobals`` and ``getGlobals`` below)
+-  the ``visidata`` module (see ``addGlobals`` and ``getGlobals`` below)
 
 The ``vd`` and ``sheet`` symbols are available to specify explicitly.
 
-Notes:
+.. note::
 
--  In an "execstr", setting attributes on vd and sheet requires an
-   explicit object; e.g., instead of ``cursorColIndex=2``, it must be
-   ``sheet.cursorColIndex=2``
--  Unqualified ``options`` in command execstr will use the
-   sheet-specific options context for the current sheet.
+    Unqualified ``options`` in a command execstr will use the sheet-specific options context for the current sheet.
 
-API
-~~~
+.. warning::
+
+   In an *execstr*, while you can **get** an attribute on ``vd`` or ``sheet`` without specifying the object, to **set** an attribute does require an explicit object.  e.g. instead of ``cursorColIndex=2``, it must be ``sheet.cursorColIndex=2``.
+
+Commands API
+~~~~~~~~~~~~
 
 .. autofunction:: visidata.BaseSheet.addCommand
 
--  classmethod; call with a SheetType or a Sheet
--  ``binding``
+.. autodata:: visidata.vd.allPrefixes
 
-   -  a string of keystrokes, including **prefixes**.
+Keybindings
+~~~~~~~~~~~~
 
-      -  ``vd.allPrefixes`` is list of "prefixes", or keystrokes that
-         don't trigger keybinding lookups.
-      -  combinations of prefixes are allowed, but only in the specified
-         order: ``g`` must come before ``z``, which must come before
-         ``ALT``.
-      -  ``ALT`` is a "prefix", because it's actually ``^[`` or ESC; and
-         Python curses represents Alt+X (Meta+X on some keyboards) as
-         ``^[x``. So the binding is ``ALT+'X'``
+   - Use ``^X`` for :kbd:`Ctrl+X`.
+   - Primarily, plugin authors and users should use ``0-9``, ``"KEY_F(1)"``, ``ALT+`` for custom keybindings; these are purposefully left available for user keybindings.
+   - Consider not providing a default at all, for infrequently used commands.
+   - Instead give it an easy and memorable longname, and/or a unique *helpstr* which can be searched for in the **Command Help** (:kbd:`g Ctrl+H`) with :kbd:`g/`.
+   - Many other keycodes can be returned from the curses library as strings.
+   - To discover what to use for some unknown key, press that key in VisiData and use the keystroke shown in the status bar.
 
-   -  Use ``^X`` for Ctrl+X.
-   -  Many other keycodes will be returned from the curses library as
-      ascii strings.
-   -  To discover what to use for some unknown key, press that key in
-      VisiData and use the keystroke shown in the status bar.
-   -  Primarily, plugin authors and users should use 0-9, KEY\_F\*, ALT+
-      for custom keybindings; these are purposefully left available for
-      user keybindings.
-   -  Consider not providing a default at all, for infrequently used
-      commands. Instead give it a memorable name, and/or a unique
-      helpstr which you can search for the `command list <>`__
-      (``g Ctrl+H``) with ``g/``.
 
--  ``longname``
+.. note::
 
-   -  use existing structure if possible:
+    ``vd.allPrefixes`` is a list of *prefixes* (keystrokes that don't trigger the end of a command sequence).
+    New prefixes can be added to this list, and then they can also be used as prefixes in keybindings.
 
-      -  'addcol-' for commands that add a column;
-      -  'open-' for commands that push a new sheet;
-      -  'go-' for commands that move the cursor;
-      -  etc
+.. note::
 
--  ``execstr``
+    Combinations of prefixes are allowed, but only in the specified order: ``g`` must come before ``z``, which must come before ``ALT``.
 
-   -  a Python statement to be ``exec()``'ed when the command is
-      executed.
+.. note::
 
--  ``helpstr`` Shown in **Commands Sheet**.
+    ``ALT`` is a just a handy constant for "``^[``", which represents :kbd:`Ctrl+[`, which maps to :kbd:`Esc` in the terminal.  Curses represents :kbd:`Alt+X` (:kbd:`Meta+X` on some keyboards) as :kdb:`Esc+X`. So to bind a command to :kbd:`Alt+X`, use ``ALT+'x'`` or ``'^[x'``.
 
 .. autofunction:: visidata.BaseSheet.bindkey
-
-Bind ``longname`` as the command to run when ``keystrokes`` are pressed
-on the given ``<SheetType>``.
-
 .. autofunction:: visidata.BaseSheet.unbindkey
-
-warning when overriding a binding on the same exact class.
-
 .. autofunction:: visidata.BaseSheet.execCommand
-
-Execute ``cmd`` in the context of the sheet.
-``cmd`` can be a longname, a keystroke, or a Command object.
-
 .. autofunction:: visidata.addGlobals
-
-Update the visidata globals dict with items from ``g``, which is a mapping of names to functions.
-
 .. autofunction:: visidata.getGlobals
 
-Return the visidata globals dict.
-
-Command longname design guidelines
+Rules for command longnames
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1) 3 words max, 2 words if possible. should be short and fit on a keymap
-   (verb - object - input)
+1) 3 words max, 2 words if possible. should be short and fit on a keymap (verb - object - input)
 
-2) command classes should be unique in their first 3 chars and ideally
-   mostly in their first 2.
+2) command classes should be unique in their first 3 chars and ideally mostly in their first 2.
 
-3) command longnames should be intuitively understandable, or at least
-   not jargony
+3) command longnames should be intuitively understandable, or at least not jargony
 
 4) longnames should evoke interface, when possible
+
+5) use existing structure if possible:
 
 Verbs:
 
@@ -151,6 +112,7 @@ Verbs:
 -  ``sysopen``: open with $EDITOR or other external program
 
 Nouns:
+
 - ``-expr``: python expression
 - ``-regex``: python regex
 - ``-all``: all sheets or all visible columns
