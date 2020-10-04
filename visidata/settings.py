@@ -256,6 +256,7 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
 @classmethod
 def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     '''Add a new command to *cls* sheet type.
+
     - *keystrokes*: default keybinding, including **prefixes**.
     - *longname*: name of the command.
     - *execstr*: Python statement to pass to `exec()`'ed when the command is executed.
@@ -278,7 +279,7 @@ globalCommand = BaseSheet.addCommand
 @BaseSheet.class_api
 @classmethod
 def bindkey(cls, keystrokes, longname):
-    '<SheetType.bindkey(..) Bind `longname` as the command to run when `keystrokes` are pressed on the given `<SheetType>`.'
+    '<SheetType>.bindkey(..) Bind `longname` as the command to run when `keystrokes` are pressed on the given **<SheetType>**.'
     oldlongname = vd.bindkeys._get(keystrokes, cls)
     if oldlongname:
         vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))

@@ -5,14 +5,14 @@ VisiData is **command-driven**, which means that it only does something when you
 Otherwise, it just sits there, waiting for your next command.
 
 Every command is a discrete unit of behavior that does a defined task and runs to completion.
-Functions that could take longer than a couple hundred milliseconds should run in their own thread (see `Performance <performance>`__).
+Functions that could take longer than a couple hundred milliseconds should run in their own thread (see :ref:`Performance <performance>`).
 
 Every command should be **reproducible**: given the same sheet, cursor
-position, and `input <interface#input>`__ string (if relevant), a command should yield
-identical output (with a few obvious exceptions, like `random-rows`).
+position, and :ref:`input <input>` string (if relevant), a command should yield
+identical output (with a few obvious exceptions, like :kbd:random-rows).
 
-Any command which makes changes to a `saveable sheet <>`__ is appended to that sheet's `command log <>`__.
-Since all state changes must be initiated by a reproducible command, this command log can be `replayed </docs/replay>`__.
+Any command which makes changes to a saveable sheet is appended to that sheet's **Command Log**.
+Since all state changes must be initiated by a reproducible command, this command log can be `replayed </docs/save-restore>`__.
 
 Adding new commands is a natural way to extend VisiData's functionality.
 
@@ -50,7 +50,7 @@ Commands API
 
 .. autofunction:: visidata.BaseSheet.addCommand
 
-.. autodata:: visidata.vd.allPrefixes
+.. autoattribute:: visidata.vd.allPrefixes
 
 Keybindings
 ~~~~~~~~~~~~
@@ -74,7 +74,7 @@ Keybindings
 
 .. note::
 
-    ``ALT`` is a just a handy constant for "``^[``", which represents :kbd:`Ctrl+[`, which maps to :kbd:`Esc` in the terminal.  Curses represents :kbd:`Alt+X` (:kbd:`Meta+X` on some keyboards) as :kdb:`Esc+X`. So to bind a command to :kbd:`Alt+X`, use ``ALT+'x'`` or ``'^[x'``.
+    ``ALT`` is a just a handy constant for "``^[``", which represents :kbd:`Ctrl+[`, which maps to :kbd:`Esc` in the terminal.  Curses represents :kbd:`Alt+X` (:kbd:`Meta+X` on some keyboards) as :kbd:`Esc+X`. So to bind a command to :kbd:`Alt+X`, use ``ALT+'x'`` or ``'^[x'``.
 
 .. autofunction:: visidata.vd.bindkey
 .. autofunction:: visidata.BaseSheet.bindkey

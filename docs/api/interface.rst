@@ -40,6 +40,8 @@ Row cursor as an index into ``TableSheet.rows``.  Settable.
 .. autofunction:: visidata.Sheet.moveToCol
 .. autofunction:: visidata.Sheet.moveToRow
 
+.. _input:
+
 Input
 ======
 
