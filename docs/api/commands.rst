@@ -11,7 +11,7 @@ Every command should be **reproducible**: given the same sheet, cursor
 position, and :ref:`input <input>` string (if relevant), a command should yield
 identical output (with a few obvious exceptions, like :kbd:random-rows).
 
-Any command which makes changes to a saveable sheet is appended to that sheet's **Command Log**.
+Any command which makes changes to a :ref:`saveable sheet<sheets>` is appended to that sheet's **Command Log**.
 Since all state changes must be initiated by a reproducible command, this command log can be `replayed </docs/save-restore>`__.
 
 Adding new commands is a natural way to extend VisiData's functionality.

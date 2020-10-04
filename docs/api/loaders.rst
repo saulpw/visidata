@@ -29,7 +29,7 @@ Step 1. ``open_<filetype>`` boilerplate
 
 This is used for filetype ``readme``, which is used for files with extension ``.readme``, or when specified manually with the ``filetype`` option like ``--filetype=readme`` on the command line.
 
-The ``open_<filetype>`` function usually looks exactly like this, with only the type of Sheet changed.
+The ``open_<filetype>`` function usually looks exactly like this, with only the type of :ref:`Sheet <sheets>` changed.
 
 The *p* argument is a :ref:`visidata.Path<vd-path>`.
 
