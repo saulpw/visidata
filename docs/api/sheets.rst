@@ -3,12 +3,19 @@
 Sheets
 ====================================
 
-BaseSheet is a base class defining the interface for Sheets of all kinds.
+A Sheet is a representation of some source, usually a Path.
+A path can be opened, returning a sheet, and/or a sheet can be saved to path.
 
-Sheets are generally specialized for their rowtype, and TableSheet, used for sheets with rows and columns, is the most common base class.
-(So common, that it was originally just called ``Sheet``.  For clarity, ``TableSheet`` is preferred, but ``Sheet`` is a valid alias that will never be deprecated.)
+.. autofunction:: visidata.vd.openPath
+.. autofunction:: visidata.vd.openSource
+
+.. autofunction:: visidata.vd.saveSheets
+
+Sheets API
+---------
 
 .. autoclass:: visidata.BaseSheet
+
 .. autoattribute:: visidata.BaseSheet.name
 
 .. autofunction:: visidata.BaseSheet.__len__
@@ -17,9 +24,13 @@ Sheets are generally specialized for their rowtype, and TableSheet, used for she
 .. autofunction:: visidata.BaseSheet.reload
 
 TableSheet
-~~~~~~~~~~~
+^^^^^^^^^^^
+
+Sheets are generally specialized for their rowtype, and TableSheet, used for sheets with rows and columns, is the most common base class.
+(So common, that it was originally just called ``Sheet``.  For clarity, ``TableSheet`` is preferred, but ``Sheet`` is a valid alias that will never be deprecated.)
 
 .. autoclass:: visidata.TableSheet
+
 .. data:: visidata.TableSheet.rows
 
 List of row objects on this sheet.
@@ -47,8 +58,10 @@ List of all Column objects on this sheet (including hidden columns).
 .. autofunction:: visidata.TableSheet.openCell
 .. autofunction:: visidata.TableSheet.gatherBy
 
-Other Sheets
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Other Common Sheet Types
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These can be used as base classes, or instantiated as they are, or used as templates for rows with similar structure,
 
 .. autoclass:: visidata.IndexSheet
 .. autoclass:: visidata.TextSheet
@@ -56,12 +69,12 @@ Other Sheets
 .. autoclass:: visidata.PyobjSheet
 
 The Sheet Stack
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The "sheet stack" is the list of active sheets (vvailable via :kbd:`Shift+S`).
-The top sheet (the displayed sheet) is the first item (``vd.sheets[0]``) in the list.
+-----------------
 
 .. data:: visidata.vd.sheets
+
+The "sheet stack", a list of active sheets (available as the **Sheets Sheet** via :kbd:`Shift+S`).
+The top sheet, or the displayed sheet, is the first item in the list (``vd.sheets[0]``).
 
 .. autofunction:: visidata.vd.push
 .. autofunction:: visidata.vd.replace
@@ -70,7 +83,3 @@ The top sheet (the displayed sheet) is the first item (``vd.sheets[0]``) in the 
 
 .. autofunction:: visidata.vd.getSheet
 
-.. autofunction:: visidata.vd.openPath
-.. autofunction:: visidata.vd.openSource
-
-.. autofunction:: visidata.vd.saveSheets

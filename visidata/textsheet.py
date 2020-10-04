@@ -14,7 +14,7 @@ option('save_filetype', 'tsv', 'specify default file type to save as', replay=Tr
 ## text viewer
 # rowdef: (linenum, str)
 class TextSheet(Sheet):
-    'Displays any iterable source, with linewrap if wrap set in init kwargs or options.'
+    'Displays any iterable source, with linewrap if ``options.wrap`` is set.'
     rowtype = 'lines'
     filetype = 'txt'
     columns = [

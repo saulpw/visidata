@@ -163,8 +163,8 @@ class TableSheet(BaseSheet):
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *names, **kwargs):
+        super().__init__(*names, **kwargs)
         self.rows = UNLOADED      # list of opaque row objects (UNLOADED before first reload)
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
@@ -273,7 +273,7 @@ class TableSheet(BaseSheet):
             vd.sync(self.sort())
 
     def iterload(self):
-        'Generate rows from *self.source*.  Override in subclass.'
+        'Generate rows from ``self.source``.  Override in subclass.'
         if False:
             yield vd.fail('no iterload for this loader yet')
 
@@ -837,7 +837,7 @@ Sheet = TableSheet  # deprecated in 2.0 but still widely used internally
 
 
 class SequenceSheet(Sheet):
-    'Sheets with ColumnItem columns, and rows that are Python sequences (list, namedtuple, etc).'
+    'Sheets with ``ColumnItem`` columns, and rows that are Python sequences (list, namedtuple, etc).'
     def setCols(self, headerrows):
         self.columns = []
         for i, colnamelines in enumerate(itertools.zip_longest(*headerrows, fillvalue='')):
