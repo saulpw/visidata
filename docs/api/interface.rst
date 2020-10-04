@@ -1,4 +1,16 @@
-Viewport
+Drawing
+========
+
+These functions should rarely be necessary to use.
+``BaseSheet.draw`` must be overridden on non-tabular sheets.
+
+.. autofunction:: visidata.BaseSheet.refresh
+.. autofunction:: visidata.vd.redraw
+.. autofunction:: visidata.BaseSheet.draw
+
+.. autoclass:: visidata.SuspendCurses
+
+Window
 ========
 
 .. autoattribute:: visidata.BaseSheet.windowWidth
@@ -6,11 +18,11 @@ Viewport
 
 .. data:: visidata.Sheet.topRowIndex
 
-Top row on the screen, as an index into ``TableSheet.rows``.  Settable.
+Top row in the window, as an index into ``TableSheet.rows``.  Settable.
 
 .. data:: visidata.Sheet.leftVisibleColIndex
 
-Leftmost column after key columns, as an index into ``TableSheet.visibleCols``.  Settable.
+Leftmost column in the window (after key columns), as an index into ``TableSheet.visibleCols``.  Settable.
 
 Cursor
 ======
@@ -58,30 +70,13 @@ Status
 .. autofunction:: visidata.vd.warning
 .. autofunction:: visidata.vd.fail
 
-Drawing
-========
-
-These functions should rarely be necessary to use.
-``BaseSheet.draw`` must be overridden on non-tabular sheets.
-
-.. autofunction:: visidata.BaseSheet.refresh
-.. autofunction:: visidata.vd.redraw
-.. autofunction:: visidata.BaseSheet.draw
-
-.. autoclass:: visidata.SuspendCurses
-
 Examples
 ^^^^^^^^
 
 ::
 
     with SuspendCurses():
-    @VisiData.api
-    def launchPager(vd, *args):
-        'Launch $PAGER with *args* as arguments.'
-        args = [os.environ.get('PAGER') or vd.fail('$PAGER not set')] + list(args)
-        with SuspendCurses():
-            return subprocess.call(args)
+        return subprocess.call('less', '/etc/passwd')
 
 ::
 

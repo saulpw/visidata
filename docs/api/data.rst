@@ -53,4 +53,3 @@ Sorting
 
 .. autofunction:: visidata.Sheet.orderBy
 .. autofunction:: visidata.Sheet.sort
-
