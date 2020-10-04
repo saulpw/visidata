@@ -1,39 +1,39 @@
 Loaders
 =======
 
+Creating a new loader for a data source is simple and straigthforward.
+
 Loader Checklist
 ----------------
 
-1. [] ``open_foo`` boilerplate
-2. [] FooSheet rowdef and reload/iterload
-3. [] FooSheet.columns
-4. [] Any FooSheet.addCommand(...) at the bottom of the .py
-5. [] Any vd.option() at the top of the .py
+1. [ ] ``open_foo`` boilerplate
+2. [ ] ``FooSheet`` subclass with rowtype and rowdef
+3. [ ] ``FooSheet`` reload or iterload
+4. [ ] ``FooSheet.columns``
+5. [ ] Any ``FooSheet.addCommand(...)`` at bottom of .py file
+6. [ ] Any ``vd.option()`` at top of .py file
 
 Hello Loader
 ------------
 
-The most basic loader reads in a text file:
+Here's a step-by-line breakdown of a basic loader, which reads in a text file as a series of lines.
+This same general structure and process should work for all loaders.
 
-Step 1. ``open_`` filetype boilerplate
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Step 1. ``open_<filetype>`` boilerplate
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
     def open_readme(p):
         return ReadmeSheet(p.name, source=p)
 
-This is used for filetype ``readme``, which is used for files with
-extension ``.readme``, or when specified manually with the ``filetype``
-option.
+This is used for filetype ``readme``, which is used for files with extension ``.readme``, or when specified manually with the ``filetype`` option like ``--filetype=readme`` on the command line.
 
-The ``open_<filetype>`` function almost always looks exactly like this,
-with only the type of Sheet changed. Of course, an existing `sheet
-type <>`__ can be used.
+The ``open_<filetype>`` function usually looks exactly like this, with only the type of Sheet changed.
 
-``p`` is a ```visidata.Path`` <>`__.
+The *p* argument is a :ref:`visidata.Path<vd-path>`.
 
-The actual loading happens in the Sheet:
+The actual loading happens in the Sheet.  An existing :ref:`sheet type<sheets>` can be used, or a new sheet type can be created.
 
 Step 2. Create a Sheet subclass
 -------------------------------
@@ -59,15 +59,13 @@ Step 2. Create a Sheet subclass
    rows on this sheet. This is important because nearly every other
    component of the sheet depends on this structure.
 
-Step 2. Load data into rows, and yield them one-by-one
+Step 3. Load data into rows, and yield them one-by-one
 ------------------------------------------------------
 
-``reload()`` is called when the Sheet is first pushed, and thereafter by
-the user with ``^R``. The default ``TableSheet.reload()`` iterates
-through the rows returned by ``iterload``, and takes care of a few
-common commonalities (like running async and resetting the ``rows``
-member), Each loader then defines an ``iterload``, which uses the Sheet
-``source`` to populate and then yield each row one-by-one.
+``reload()`` is called when the Sheet is first pushed, and thereafter by the user with :kbd:`Ctrl+R`.
+The default ``TableSheet.reload()`` iterates through the rows returned by ``iterload()``, and takes care of a few common tasks (like running async and resetting the ``rows`` member to a new list).
+
+Each loader for a tabular sheet should overload ``iterload()``, which uses the Sheet ``source`` to populate and then yield each row one-by-one.
 
 ::
 
@@ -78,45 +76,40 @@ member), Each loader then defines an ``iterload``, which uses the Sheet
             for line in self.source:
                 yield [line]
 
--  ``str`` is not actually a valid rowdef.
--  Each row must have a unique ``rowid``, which by default is the Python
-   ``id()`` of the row. Because Python interns common strings, strings
-   with the same value will have the same rowid. This breaks a lot of
-   features.
--  Also, as an immutable type, it would be annoyingly uneditable.
--  So it's wrapped it in a Python ``list``, which is guaranteed to be
-   mutable and unique.
+.. warning::
+   ``str`` by itself is not a valid rowdef.
 
--  ``source`` is a Path; the same as the source kwarg given in
-   ``open_readme``. In fact, any kwarg passed to a Sheet constructor
-   will be stored on the sheet in a member of the same name.
+   Each row must have a unique *rowid*, which by default is the Python ``id()`` of the row.
+   Because Python interns common strings, strings with the same value will have the same *id*.
+   This would break a lot of features, like row selection for instance.
 
--  ```visidata.Path`` <#visidata.path>`__ objects are Path-like but have
-   some additional features, like being iterable (yielding their
-   contents one line at a time).
--  This case is optimized to read the file a small amount at a time. Do
-   **not** use e.g. ``for line in p.read().splitlines()``, as that will
-   read the entire file before returning the first line. Always consider
-   if your code will work well with 1GB of data. Ideally test with a
-   too-large amount of data to make sure it degrades gracefully.
+   Also, as an immutable type, it would be annoying to not be able to modify it.
 
--  If the loader requires a third-party library, import it inside
-   iterload() or reload() (or ``open_`` if necessary). Do not import at
-   the toplevel or ``vd`` will fail to start if the library is not
-   installed.
+   So it needs to be wrapped in a Python ``list``, which is guaranteed to be unique, and also mutable.
 
-By default, a Sheet has one Column which just displays a string
-representation of the row. So the above example is a good starting point
-for any loader; just get the rows however they come most easily from the
-source, and launch vd with a sample dataset. Then use ``Ctrl+Y`` to
-explore the row as a Python object to find what properties you want to
-see.
+
+-  ``sheet.source`` is a :ref:`visidata.Path<vd-path>`; the same as the *source* kwarg given in ``open_readme``. In fact, any kwarg passed to a Sheet constructor will be stored on the sheet in an attribute of the same name.
+
+  .. note::
+
+    ```visidata.Path`` <#visidata.path>`__ objects are Path-like but have some additional features, like being iterable (yielding their contents one line at a time).
+
+   While there is a ``visidata.Path.read_text()`` function, do **not** use ``for line in p.read_text().splitlines()`` in a loader, as that will read the entire file before returning the first line.
+   A loader must be able to handle arbitrary amounts of data (including data too large to fit in memory), so this will not work.
+
+   ``Path.__iter__`` is optimized to read the file a small amount at a time, so ``for line in path`` is workable for a textual line-based file format.
+
+- If the loader requires a third-party library, import it inside ``iterload()`` or ``reload()`` (or ``open_<filetype>`` if necessary).
+  Do not import at the toplevel, or ``vd`` will fail to start when the library is not installed.
+
+By default, a Sheet has one Column which just displays a string representation of the row.
+So the above example is a good starting point for any loader; just get the rows however they come most easily from the source, and launch ``vd`` with a sample dataset in that format.
+Then use :kbd:`Ctrl+Y` to explore the resulting Python object, to find what attributes to show on the sheet.
 
 reload()
 ~~~~~~~~
 
-For more control over the whole loading process, BaseSheet.reload() can
-be overridden instead of using iterload():
+For more control over the whole loading process, ``BaseSheet.reload()`` can be overridden instead of ``iterload()``:
 
 ::
 
@@ -126,31 +119,26 @@ be overridden instead of using iterload():
             for line in self.source:
                 self.addRow([line])
 
--  ``@asyncthread`` launches the decorated function in its own thread.
--  ``rows`` must be reset to a new object. **Never call
-   ``rows.clear()``**.
--  Always add rows using ```addRow()`` <>`__.
+-  ``@asyncthread`` launches the decorated function in its own thread.  See :ref:`Performance<perf>`
+-  ``sheet.rows`` must always be reset to a new list.  **Never** call ``sheet.rows.clear()``.
+-  Always add rows using :ref:`addRow()<sheets>`.
 
 Supporting asynchronous loaders
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Large enough datasets will cause the interface to freeze. Fortunately,
-the stock ``reload`` and the ``iterload`` structure results in an
-`async </docs/async>`__ loader on default. Since rows are yielded **one
-at a time**, they become available as they are loaded, and ``reload``
-itself is decorated with an ``@asyncthread``, which causes it to be
-launched in a new thread.
+Loading a large dataset in the main thread will cause the interface to freeze.
+Fortunately, the stock ``reload`` and ``iterload`` structure results in an `async </docs/async>`__ loader on default.
+Since rows are yielded **one at a time**, they become available as they are loaded, and ``reload`` itself is decorated with an ``@asyncthread``, which causes it to be launched in a new thread.
 
-Further things to take into account: - All row iterators should be
-wrapped with ```Progress`` </docs/async#Progress>`__. This updates the
-**progress percentage** as it passes each element through. - Do not
-depend on the order of ``rows`` after they are added; e.g. do not
-reference ``rows[-1]``. The order of rows may change during an
-asynchronous loader. - Catch any ``Exception``\ s that might be raised
-while handling a specific row, and add them as the row instead. If
-``Exception`` handling is missing within iterload, rows will stop
-loading upon hitting an ``Exception``. Never use a bare ``except:``
-clause or the loader thread will not be cancelable with ``Ctrl+C``.
+- All row iterators should be wrapped with :ref:`Progress</docs/async#Progress>`.
+  This updates the **progress percentage** as it passes each element through.
+
+- Do not depend on the order of ``rows`` after they are added; e.g. do not reference ``rows[-1]``.  The order of rows may change during an asynchronous loader.
+
+- Catch any ``Exception`` that might be raised while handling a specific row, and add them as the row instead.
+  If ``Exception`` handling is missing within iterload, rows will stop loading upon hitting an ``Exception``.
+
+- Do not use a bare ``except:`` clause or the loader thread will not be cancelable with :kbd:`Ctrl+C`.
 
 Progress and Exception example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -167,16 +155,20 @@ Progress and Exception example
                         r = e
                     yield r
 
-Test the loader with a large dataset to make sure that:
+Testing for Loader Performance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Test the loader with a very large dataset to make sure that:
 
 -  the first rows appear immediately;
 -  the progress percentage is being updated;
--  the loader can be cancelled (with ``Ctrl+C``).
+-  the loader can be cancelled (with :kbd:`Ctrl+C`).
 
-3. Enumerate the Columns
-------------------------
 
-Each sheet has a unique list of ``columns``. Each ``Column`` provides a
+Step 4. Enumerate the Columns
+------------------------------
+
+Each sheet has a ``columns`` attribute with a unique list of ``Column`` objects. Each ``Column`` provides a
 different view into the row.
 
 ::
@@ -195,35 +187,26 @@ In general, set ``columns`` as a class member containing a list of
 static columns. If the columns aren't known until data is loaded,
 reload/iterload can add new columns using ```addColumn()`` <>`__.
 
-A few snippets:
-
--  columns from a list of names:
-   ``[ColumnItem(name, i) for i, name in enumerate(colnames)]``
--  columns from the first row, when rows are dicts:
-   ``[ColumnItem(k) for k in self.rows[0]]``
-
 Column properties
 ~~~~~~~~~~~~~~~~~
 
-Columns have a few properties, all except ``name`` are **optional**
+Columns have a few properties; all except ``name`` are **optional**
 arguments to the constructor:
 
--  **``name``**: should be a valid Python identifier and unique among
-   the column names on the sheet. (Otherwise the column cannot be used
-   in an expression.)
+-  *name*: should be a valid Python identifier and unique among the column names on the sheet.
+  (Otherwise the column cannot be used in an expression.)
 
--  **``type``**: can be ``str``, ``int``, ``float``, ``date``, or
-   ``currency``. By default it is ``anytype``, which passes the original
-   value through unmodified.
+-  *type*: can be ``str``, ``int``, ``float``, ``date``, or ``currency``.
+  By default it is ``anytype``, which passes the original value through unmodified.
 
--  **``width``**: the initial width for the column. ``0`` means hidden;
+-  *width*: the initial width for the column. ``0`` means hidden;
    ``None`` (default) means calculate on first draw.
 
 Column getters can be any function, but many loaders for are satisfied
-with a static list of ItemColumn (for a value in dict and list rowdefs)
-and/or AttrColumn (for a member or property directly on the row object).
+with a static list of ``ItemColumn`` (for values in dict and list rowdefs)
+and/or ``AttrColumn`` (for a members or properties directly on the row object).
 This is dependent on the loader function; some loaders may prefer to do
-less parsing to load faster, and then the Columns need to be
+less parsing to load faster, and then the Columns will need to be
 correspondingly more complicated.
 
 See the `Columns section <>`__ for a complete API.
@@ -231,10 +214,8 @@ See the `Columns section <>`__ for a complete API.
 Passthrough options
 ~~~~~~~~~~~~~~~~~~~
 
-Loaders which use a Python library (internal or external) are encouraged
-to pass all options to it through the ``options("foo_")``. For modules
-like csv which expose them as kwargs to some function or constructor,
-this is very easy:
+Loaders which use a Python library (internal or external) are encouraged to pass its kwargs using ``**options.getall("foo_")`` interface.
+For modules like csv which expose them as kwargs to some function or constructor, this is very easy:
 
 ::
 
@@ -243,10 +224,8 @@ this is very easy:
 Full Example
 ~~~~~~~~~~~~
 
-This would be a completely functional read-only viewer for the fictional
-foolib. For a more realistic example, see the `annotated
-viewtsv </docs/viewtsv>`__ or any of the `included
-loaders <https://github.com/saulpw/visidata/tree/stable/visidata/loaders>`__.
+This would be a completely functional read-only viewer for the fictional ``foolib``.
+For a more realistic example, see the `annotated viewtsv </docs/viewtsv>`__ or any of the `included loaders <https://github.com/saulpw/visidata/tree/stable/visidata/loaders>`__.
 
 ::
 
@@ -280,11 +259,9 @@ loaders <https://github.com/saulpw/visidata/tree/stable/visidata/loaders>`__.
 Savers
 ------
 
-A full-duplex loader requires a **saver**. The saver iterates over all
-``rows`` and ``visibleCols``, calling ``getValue``, ``getDisplayValue``
-or ``getTypedValue``, and saves the results in the format of that
-filetype. Savers should be decorated with ``@VisiData.api`` in order to
-make them available through the ``vd`` object's scope.
+A full-duplex loader requires a **saver**.
+The saver iterates over all ``rows`` and ``visibleCols``, calling ``getValue``, ``getDisplayValue`` or ``getTypedValue`` as the saving format allows, and saves the results in its format to the given *path*.
+Savers should be decorated with ``@VisiData.api`` in order to make them available through the ``vd`` object's scope.
 
 ::
 
@@ -295,15 +272,12 @@ make them available through the ``vd`` object's scope.
                     for col in sheet.visibleCols:
                         foolib.write(fp, i, col.name, col.getDisplayValue(row))
 
--  ``path`` is a ``visidata.Path()`` object representing the file being
-   written to
--  ``*sheets`` is a list of 1 or more sheets to be saved
+-  *path* is a ``visidata.Path()`` object referencing the file being written to.
+-  *sheets* is a list of 1 or more sheets to be saved.
 
-The saver should preserve the column names and translate their types
-into foolib semantics, but other attributes on the Columns should
-generally not be saved.
+The saver should preserve the column names and translate their types into ``foolib`` semantics, but other attributes on the Columns are generally not saved.
 
-Savers which can handle typed values should use Column.getTypedValue, and displayable savers (html, markdown, csv) should use Column.getDisplayValue (which takes into account the column's *fmtstr*).
+Savers which can handle typed values should use ``Column.getTypedValue``, and displayable savers (like html, markdown, csv) should use ``Column.getDisplayValue`` (which takes into account the column's *fmtstr*).
 
 Building a loader for a URL schemetype
 --------------------------------------
@@ -327,13 +301,13 @@ object that knows how to fetch the URL:
 visidata.Path
 ---------------
 
-``visidata.Path`` is a wrapper around pathlib.Path that can also handle non-filesystem files (URLs, stdin, files within archives).
+``visidata.Path`` is a wrapper around Python's builtin ``pathlib.Path`` that can also handle non-filesystem files (URLs, stdin, files within archives).
 
 The ``given`` property is new to visidata.Path.
-Other functions listed here are wrappers around the equivalent pathlib.Path functions, with specialized functionality as needed for non-filesystem files.
+Other functions listed here are wrappers around the equivalent ``pathlib.Path`` functions, with specialized functionality as needed for non-filesystem files.
 All other accesses are forwarded to the inner pathlib.Path object, but will probably not work for non-filesystem files.
 
-.. autodata:: visidata.Path.given
+.. autoattribute:: visidata.Path.given
 
 .. autofunction:: visidata.Path.exists
 .. autofunction:: visidata.Path.open

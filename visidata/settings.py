@@ -276,10 +276,15 @@ def _command(cls, binding, longname, helpstr, **kwargs):
 BaseSheet.command = classmethod(_command)
 globalCommand = BaseSheet.addCommand
 
+@VisiData.api
+def bindkey(vd, keystrokes, longname):
+    'Bind *keystrokes* to *longname* on BaseSheet and unbind more-specific bindings of keystrokes.'
+    vd.bindkeys[keystrokes] = {'BaseSheet': longname}
+
 @BaseSheet.class_api
 @classmethod
 def bindkey(cls, keystrokes, longname):
-    '<SheetType>.bindkey(..) Bind `longname` as the command to run when `keystrokes` are pressed on the given **<SheetType>**.'
+    'Bind *keystrokes* to *longname* on the *cls* sheet type.'
     oldlongname = vd.bindkeys._get(keystrokes, cls)
     if oldlongname:
         vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))
