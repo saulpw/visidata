@@ -49,6 +49,8 @@ Input
 .. autofunction:: visidata.vd.confirm
 .. autofunction:: visidata.vd.launchEditor
 
+.. _status:
+
 Status
 ======
 

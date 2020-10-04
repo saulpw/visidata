@@ -6,7 +6,7 @@ Creating a new loader for a data source is simple and straigthforward.
 Loader Checklist
 ----------------
 
-1. [ ] ``open_foo`` boilerplate
+1. [ ] ``open_filetype`` boilerplate
 2. [ ] ``FooSheet`` subclass with rowtype and rowdef
 3. [ ] ``FooSheet`` reload or iterload
 4. [ ] ``FooSheet.columns``
@@ -43,14 +43,14 @@ Step 2. Create a Sheet subclass
     class ReadmeSheet(TableSheet):
         rowtype = 'lines'   # rowdef: [str]
 
--  TableSheet (also just ``Sheet``) is the basic tabular sheet of rows
+-  TableSheet (and its alias ``Sheet``) is the basic tabular sheet of rows
    and columns. Most loader sheets will inherit from TableSheet, but
    some might inherit from more specialized sheets if they share
    functionality, or from ``BaseSheet`` if they are not tabular (like
    the ``Canvas``).
 
--  The ``rowtype`` member is only displayed on the `right-hand
-   status <>`__. It should be **plural**. If not given, it is
+-  The ``rowtype`` member is only displayed on the :ref:`right-hand
+   status <status>`. It should be **plural**. If not given, it is
    "``rows``". It's helpful to give the user an subconscious check of
    the kind of sheet being shown.
 
@@ -63,7 +63,7 @@ Step 3. Load data into rows, and yield them one-by-one
 ------------------------------------------------------
 
 ``reload()`` is called when the Sheet is first pushed, and thereafter by the user with :kbd:`Ctrl+R`.
-The default ``TableSheet.reload()`` iterates through the rows returned by ``iterload()``, and takes care of a few common tasks (like running async and resetting the ``rows`` member to a new list).
+The default ``TableSheet.reload()`` iterates through the rows returned by ``TableSheet.iterload()``, and takes care of a few common tasks (like running async and resetting the ``rows`` member to a new list).
 
 Each loader for a tabular sheet should overload ``iterload()``, which uses the Sheet ``source`` to populate and then yield each row one-by-one.
 
@@ -92,7 +92,7 @@ Each loader for a tabular sheet should overload ``iterload()``, which uses the S
 
   .. note::
 
-    ```visidata.Path`` <#visidata.path>`__ objects are Path-like but have some additional features, like being iterable (yielding their contents one line at a time).
+    `visidata.Path <vd-path>` objects are Path-like but have some additional features, like being iterable (yielding their contents one line at a time).
 
    While there is a ``visidata.Path.read_text()`` function, do **not** use ``for line in p.read_text().splitlines()`` in a loader, as that will read the entire file before returning the first line.
    A loader must be able to handle arbitrary amounts of data (including data too large to fit in memory), so this will not work.
@@ -119,7 +119,7 @@ For more control over the whole loading process, ``BaseSheet.reload()`` can be o
             for line in self.source:
                 self.addRow([line])
 
--  ``@asyncthread`` launches the decorated function in its own thread.  See :ref:`Performance<perf>`
+-  ``@asyncthread`` launches the decorated function in its own thread.  See :ref:`Performance<performance>`
 -  ``sheet.rows`` must always be reset to a new list.  **Never** call ``sheet.rows.clear()``.
 -  Always add rows using :ref:`addRow()<sheets>`.
 
@@ -127,10 +127,10 @@ Supporting asynchronous loaders
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Loading a large dataset in the main thread will cause the interface to freeze.
-Fortunately, the stock ``reload`` and ``iterload`` structure results in an `async </docs/async>`__ loader on default.
+Fortunately, the stock ``reload`` and ``iterload`` structure results in an :ref:`async <performance>` loader on default.
 Since rows are yielded **one at a time**, they become available as they are loaded, and ``reload`` itself is decorated with an ``@asyncthread``, which causes it to be launched in a new thread.
 
-- All row iterators should be wrapped with :ref:`Progress</docs/async#Progress>`.
+- All row iterators should be wrapped with :ref:`Progress<progress>`.
   This updates the **progress percentage** as it passes each element through.
 
 - Do not depend on the order of ``rows`` after they are added; e.g. do not reference ``rows[-1]``.  The order of rows may change during an asynchronous loader.
@@ -185,7 +185,20 @@ different view into the row.
 
 In general, set ``columns`` as a class member containing a list of
 static columns. If the columns aren't known until data is loaded,
-reload/iterload can add new columns using ```addColumn()`` <>`__.
+reload/iterload can add new columns using :ref:`addColumn() <tablesheet>`.
+
+If the rowdef is a ``list``, and the columns are dynamic, :ref:`SequenceSheet.reload() <other-sheets>` could handle the Column creation.
+
+::
+
+    class FooSheet(SequenceSheet):
+        rowtype = 'foobits'  # rowdef: a list, which is a sequence of values
+
+        def iterload(self):
+            with foolib.iterfoo(self.source.open_text() as f:
+                r = foolib.parse(bar)
+                yield r
+
 
 Column properties
 ~~~~~~~~~~~~~~~~~
@@ -194,13 +207,16 @@ Columns have a few properties; all except ``name`` are **optional**
 arguments to the constructor:
 
 -  *name*: should be a valid Python identifier and unique among the column names on the sheet.
-  (Otherwise the column cannot be used in an expression.)
+
+(Otherwise the column cannot be used in an expression.)
 
 -  *type*: can be ``str``, ``int``, ``float``, ``date``, or ``currency``.
-  By default it is ``anytype``, which passes the original value through unmodified.
+
+By default it is ``anytype``, which passes the original value through unmodified.
 
 -  *width*: the initial width for the column. ``0`` means hidden;
-   ``None`` (default) means calculate on first draw.
+
+``None`` (default) means calculate on first draw.
 
 Column getters can be any function, but many loaders for are satisfied
 with a static list of ``ItemColumn`` (for values in dict and list rowdefs)
@@ -209,7 +225,7 @@ This is dependent on the loader function; some loaders may prefer to do
 less parsing to load faster, and then the Columns will need to be
 correspondingly more complicated.
 
-See the `Columns section <>`__ for a complete API.
+See the :ref:`Columns section <columns>` for a complete API.
 
 Passthrough options
 ~~~~~~~~~~~~~~~~~~~
@@ -272,7 +288,7 @@ Savers should be decorated with ``@VisiData.api`` in order to make them availabl
                     for col in sheet.visibleCols:
                         foolib.write(fp, i, col.name, col.getDisplayValue(row))
 
--  *path* is a ``visidata.Path()`` object referencing the file being written to.
+-  *path* is a :ref:`visidata.Path() <vd-path>` object referencing the file being written to.
 -  *sheets* is a list of 1 or more sheets to be saved.
 
 The saver should preserve the column names and translate their types into ``foolib`` semantics, but other attributes on the Columns are generally not saved.
@@ -297,6 +313,8 @@ object that knows how to fetch the URL:
 
         def openurl_foo(p, filetype=None):
             return openSource(FooPath(p.url), filetype=filetype)
+
+.. _vd-path:
 
 visidata.Path
 ---------------

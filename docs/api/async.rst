@@ -49,6 +49,8 @@ A list of all threads started from commands on this sheet.
     An unqualified `except:` clause is bad practice (as always).
     When used in an async function, it will make the thread uncancelable.
 
+.. _progress:
+
 Progress counters
 ------------------
 

@@ -23,6 +23,8 @@ Sheets API
 
 .. autofunction:: visidata.BaseSheet.reload
 
+.. _tablesheet:
+
 TableSheet
 ^^^^^^^^^^^
 
@@ -57,6 +59,8 @@ List of all Column objects on this sheet (including hidden columns).
 .. autofunction:: visidata.TableSheet.openRow
 .. autofunction:: visidata.TableSheet.openCell
 .. autofunction:: visidata.TableSheet.gatherBy
+
+.. _other-sheets:
 
 Other Common Sheet Types
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
