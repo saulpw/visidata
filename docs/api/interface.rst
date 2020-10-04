@@ -86,6 +86,8 @@ Examples
     # initial value is the formatted value under the cursor
     vd.status(vd.input("text to show: ", value=cursorDisplayValue))
 
+.. _colors:
+
 Colors
 ======
 

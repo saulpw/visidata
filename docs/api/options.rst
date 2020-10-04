@@ -34,7 +34,7 @@ Options can be overridden globally, or for all sheets of a specific type, or onl
 
 The options context should be referenced directly when setting:
 
-    - ``sheet.options`` to *set* an option on a specific sheet (**sheet override**).
+    - ``sheet.options`` to *set* an option on a specific sheet instance (**sheet override**).
     - ``<SheetType>.class_options`` to *set* a option default for a particular type of Sheet (**class override**).
     - ``vd.options`` (or plain ``options``) to *set* a global option default (**global override**).
 
@@ -44,7 +44,7 @@ However, some options and situations are truly sheet-agnostic, and so ``vd.optio
 
 When getting an option value, VisiData will look for a sheet override first, then class overrides next (from most specific subclass all the way up to BaseSheet), then a global override, before returning the default value from the option definition itself.
 
-In general, plugins should use ``sheet.options`` to get option values, and ``FooSheet.class_options`` to override values for the plugin-specific sheet type.
+In general, plugins should use ``FooSheet.class_options`` to override values for the plugin-specific sheet type.
 
 .. note::
 
@@ -85,7 +85,7 @@ Rules for naming options
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Options defined within a plugin should all start with the same short module abbreviation, like "``mod_``".
-- Except for theme option names, which should start with "``disp_``" for a displayed string and "``color_``" for a color option (see `Colors <interface#colors>`__).
+- Except for theme option names, which should start with "``disp_``" for a displayed string and "``color_``" for a color option (see :ref:`Colors<colors>`).
 - Use common abbreviations instead of full words.
 - Use "``_``" (underscore) to separate words.
 - Keep the option name length under 20 characters.  Maximum of 3 words (2 separators).

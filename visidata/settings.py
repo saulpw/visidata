@@ -242,8 +242,8 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
 
    - `name`: name of option
    - `default`: default value when no other override exists
-   - `helpstr`: short description of option (as shown in the Options Sheet)
-   - `replay`: ``True`` if changes to the option should be stored in the Command Log
+   - `helpstr`: short description of option (as shown in the **Options Sheet**)
+   - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
     '''
     opt = options.setdefault(name, default, helpstr)
