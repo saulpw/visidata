@@ -10,7 +10,8 @@ Adding to the :ref:`hello world<hello-world>` example from the intro, the displa
     BaseSheet.addCommand('1', 'hello-world', 'status(options.disp_hello)')
 
 
-Now the user can set the option to modify which text is displayed during their session when they press :kbd:`1`.  For example, on the CLI (note that the underscores can be converted to hyphens here):
+Now the user can set the option to modify which text is displayed during their session when they press :kbd:`1`.
+For example, on the command line (note that the underscores can be converted to hyphens):
 
 ::
 
@@ -31,13 +32,15 @@ For instance, one TSV sheet might need its ``delimiter`` set to "``|``", while a
 
 Options can be overridden globally, or for all sheets of a specific type, or only for one specific sheet.
 
-The options contexts can be referenced directly:
+The options context should be referenced directly when setting:
 
-    - ``<SheetType>.class_options`` to *set* options for a particular type of Sheet (**class override**)
-    - ``sheet.options`` to *set* options within the context of a specific sheet (**sheet override**)
-    - ``sheet.options`` to *get* options within the context of the **specific sheet**
-    - ``vd.options`` (or plain ``options``) to *set* options "globally" with no other context (**global override**)
-    - ``vd.options`` (or plain ``options``) to *get* options use the context of the **top sheet**
+    - ``sheet.options`` to *set* an option on a specific sheet (**sheet override**).
+    - ``<SheetType>.class_options`` to *set* a option default for a particular type of Sheet (**class override**).
+    - ``vd.options`` (or plain ``options``) to *set* a global option default (**global override**).
+
+Use ``sheet.options`` to *get* an option within the context of a specific sheet.
+This is strongly preferred, so the user can override the option setting on a sheet-specific basis.
+However, some options and situations are truly sheet-agnostic, and so ``vd.options`` (or plain ``options``) to *get* an option using the context of the **top sheet**.
 
 When getting an option value, VisiData will look for a sheet override first, then class overrides next (from most specific subclass all the way up to BaseSheet), then a global override, before returning the default value from the option definition itself.
 
