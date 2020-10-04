@@ -43,7 +43,7 @@ _defaggr = Aggregator
 
 @VisiData.global_api
 def aggregator(vd, name, func, helpstr='', *args, type=None):
-    'Define simple aggregator `name` that calls func(values)'
+    'Define simple aggregator *name* that calls ``func(values, *args)`` to aggregate *values*.  Use *type* to force the default type of the aggregated column.'
     def _func(col, rows):  # wrap builtins so they can have a .type
         vals = list(col.getValues(rows))
         try:

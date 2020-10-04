@@ -256,13 +256,13 @@ class TableSheet(BaseSheet):
         return self.colsByName.get(colname) or vd.fail('no column matching "%s"' % colname)
 
     def recalc(self):
-        'Clear caches and set col.sheet to this sheet for all columns.'
+        'Clear caches and set the ``sheet`` attribute on all columns.'
         for c in self.columns:
             c.recalc(self)
 
     @asyncthread
     def reload(self):
-        'Load rows and/or columns from *self.source*.  Async.  Override in subclass.'
+        'Load rows and/or columns from ``self.source``.  Async.  Override in subclass.'
         self.rows = []
         with vd.Progress(gerund='loading', total=0):
             for r in self.iterload():

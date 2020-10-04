@@ -3,7 +3,7 @@
 Columns
 ====================================
 
-Columns are the heart of the VisiData calculation engine.
+Columns are the heart of the VisiData computation engine.
 
 Each column can **calculate** a value from a row object; and it might also be able to **put** a different value into the row object (for a later calculate to re-derive).
 
@@ -38,16 +38,10 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 .. autofunction:: visidata.Column.setValuesTyped
 .. autofunction:: visidata.Column.setValuesFromExpr
 
-.. autofunction:: visidata.Column.setCache
-
 .. autofunction:: visidata.BaseSheet.evalExpr
 .. autofunction:: visidata.Column.recalc
 .. autofunction:: visidata.TableSheet.recalc
 .. autofunction:: visidata.Column.isError
-
-.. autofunction:: visidata.Sheet.addAggregators
-
-If a Column should be cached, prefer to specify *cache* in the constructor instead of using setCache.
 
 - ``calcValue`` may be arbitrarily expensive or even asynchronous, so once the value is calculated, it is cached until ``Column.recalc()`` is called.
 - ``putValue`` may modify the source data directly (for instance, if the row object represents a row in a database table).  VisiData will *never* modify source data without an explicit ``save`` command.  So applications (and all other code) must call ``setValue`` to change the value of any cell.
@@ -79,10 +73,10 @@ The value returned by getValue could be many different things:
    - any python object
 
 This value may need to be parsed and/or converted to a consistent type.
-So, every column has a ``type`` member, which affects how it is parsed, displayed, grouped, sorted, and more.
+So, every column has a ``type`` attribute, which affects how it is parsed, displayed, grouped, sorted, and more.
 
-The default column type is ``anytype``, which lets the underlying value pass through unaltered; this is the only type for which a column can have typed values of arbitrary types.
-
+The default column type is ``anytype``, which lets the underlying value pass through unaltered.
+This is the only ``type`` for which ``Column.getTypedValue`` can return arbitrary types.
 
 The classic VisiData column types are:
 
@@ -98,19 +92,18 @@ type          description         numeric    command            keystrokes
 ``vlen``      sequence length     Y          ``type-vlen``      :kbd:`z#`
 ============  ==================  =========  =================  ============
 
-The default keybindings for setting types are all on the shifted top left keys on a US QWERTY keyboard.
+The default keybindings for setting types are all on the shifted top left keys on a US keyboard.
 
 User-defined Types
 ~~~~~~~~~~~~~~~~~~~
 
 Fundamentally, a type is a function which takes the underlying value and returns an object of a specific type.
 This function should accept a string and do a reasonable conversion, like Python ``int`` and ``float`` do.
-And like those builtin types, this function should produce a reasonable baseline arithmetic identity when passed no parameters (or None).
+And like those builtin types, this function should produce a reasonable baseline zero (arithmetic identity) when passed no parameters or None.
 
 Computations should generally call ``getTypedValue``, so that the values being used are consistently typed.
 
-If the underlying value is None, the result will be a ``TypedWrapper``, which provides the baseline value
-for purposes of comparison, but a stringified version of the underlying value for display.
+If the underlying value is None, the result will be a ``TypedWrapper``, which provides the baseline zero value for purposes of comparison, but a stringified version of the underlying value for display.
 For a ``calcValue`` which raises or returns an Exception, ``getTypedValue`` will return a ``TypedExceptionWrapper`` with similar behavior.
 
 
@@ -134,7 +127,7 @@ Objects returned by ``TYPE(...)`` must be:
 .. autoclass:: visidata.vd.addType
 
 Nulls
-======
+~~~~~~
 
 VisiData has a crude concept of null values.  These interact with:
    a. aggregators: the denominator counts only non-null values
@@ -159,3 +152,25 @@ VisiData has a crude concept of null values.  These interact with:
 .. autofunction:: visidata.BaseSheet.isNullFunc
 
 There is no direct isNull function, because the possible null values can change at runtime via the above option, and getting an option value is very expensive to do in a bulk operation.
+
+Aggregators
+===========
+
+Aggregators allow you to gather the rows within a single column, and interpret them using descriptive statistics.
+VisiData comes pre-loaded with a default set like mean, stdev, and sum.
+
+.. autofunction:: visidata.Sheet.addAggregators
+
+.. autofunction:: visidata.vd.aggregator
+
+The `type` parameter is optional. It allows you to define the default type of the aggregated column.
+
+Example
+~~~~~~~
+
+Add aggregator for :ref:`numpy's internal rate of return <https://numpy.org/devdocs/reference/generated/numpy.irr.html>`__ module:
+
+```
+import numpy as np
+vd.aggregator('irr', np.irr, type=float)
+```

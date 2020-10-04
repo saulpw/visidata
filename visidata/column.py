@@ -85,6 +85,20 @@ default_colnames = _default_colnames()
 
 class Column(Extensible):
     def __init__(self, name=None, *, type=anytype, cache=False, **kwargs):
+        '''Base class for all column types.
+        - *name*: name of this column.
+        - *type*: ``anytype str int float date`` or other type-like conversion function.
+        - *cache*: cache behavior
+           - ``False`` (default): getValue never caches; calcValue is always called.
+           - ``True``: getValue maintains a cache of ``options.col_cache_size``.
+           - ``"async"``: ``getValue`` launches thread for every uncached result, returns invalid value until cache entry available.
+        - *width*: == 0 if hidden, None if auto-compute next time.
+        - *height*: max height, None/0 to auto-compute for each row.
+        - *fmtstr*: format string as applied by column type.
+        - *getter*: default calcValue calls ``getter(col, row)``.
+        - *setter*: default putValue calls ``setter(col, row, val)``.
+        - *kwargs*: other attributes to be set on this column.
+        '''
         self.sheet = None     # owning Sheet, set in .recalc() via Sheet.addColumn
         if name is None:
             name = next(default_colnames)
@@ -498,7 +512,7 @@ class ExprColumn(Column):
 
 
 class SettableColumn(Column):
-    'Column using *expr* to derive the value from each row.  Store values internally by rowid.'
+    'Column using rowid to store and retrieve values internally.'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._store = {}
