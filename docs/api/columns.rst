@@ -48,6 +48,15 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 
 - ``delete-cell`` actually just calls setValue with None.
 
+Columns are added to Sheets with :ref:`addColumn <enumerate-columns>`.
+
+Examples
+~~~~~~~~~
+
+.. note::
+
+    Here is an example for using addColumn, calcValue, setValue
+
 
 Column Subclasses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,6 +135,13 @@ Objects returned by ``TYPE(...)`` must be:
 
 .. autoclass:: visidata.vd.addType
 
+Examples
+~~~~~~~~~
+
+.. note::
+
+    Include here an example of creating a new type
+
 Nulls
 ~~~~~~
 
@@ -168,9 +184,9 @@ The `type` parameter is optional. It allows you to define the default type of th
 Example
 ~~~~~~~
 
-Add aggregator for :ref:`numpy's internal rate of return <https://numpy.org/devdocs/reference/generated/numpy.irr.html>`__ module:
+Add aggregator for `numpy's internal rate of return <https://numpy.org/doc/stable/reference/generated/numpy.irr.html>`__ module:
 
-```
-import numpy as np
-vd.aggregator('irr', np.irr, type=float)
-```
+::
+
+    import numpy as np
+    vd.aggregator('irr', np.irr, type=float)
