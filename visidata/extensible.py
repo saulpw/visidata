@@ -8,7 +8,7 @@ class Extensible:
 
     @classmethod
     def init(cls, membername, initfunc=lambda: None, copy=False):
-        'Add `self.attr=T()` to cls.__init__.  Usage: cls.init("attr", T[, copy=True])'
+        'Append equivalent of ``self.<membername> = initfunc()`` to ``<cls>.__init__``.'
         oldinit = cls.__init__
         def newinit(self, *args, **kwargs):
             oldinit(self, *args, **kwargs)
@@ -51,7 +51,7 @@ class Extensible:
 
     @classmethod
     def lazy_property(cls, func):
-        'Return func() on first access and cache result; return cached result thereafter.'
+        'Return ``func()`` on first access and cache result; return cached result thereafter.'
         @property
         @wraps(func)
         def get_if_not(self):
@@ -64,7 +64,7 @@ class Extensible:
 
     @classmethod
     def cached_property(cls, func):
-        'Return func() on first access, and cache result; return cached result until clearCaches().'
+        'Return ``func()`` on first access, and cache result; return cached result until ``clearCaches()``.'
         @property
         @wraps(func)
         @lru_cache(maxsize=None)
