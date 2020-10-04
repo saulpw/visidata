@@ -3,7 +3,7 @@
 Sheets
 ====================================
 
-A Sheet is a representation of some source, usually a Path.
+A Sheet is a representation of some source, usually a :ref:`Path <vd-path>`.
 A path can be opened, returning a sheet, and/or a sheet can be saved to path.
 
 .. autofunction:: visidata.vd.openPath
@@ -12,14 +12,16 @@ A path can be opened, returning a sheet, and/or a sheet can be saved to path.
 .. autofunction:: visidata.vd.saveSheets
 
 Sheets API
----------
+-----------
 
 .. autoclass:: visidata.BaseSheet
 
 .. autoattribute:: visidata.BaseSheet.name
 
 .. autofunction:: visidata.BaseSheet.__len__
-.. autofunction:: visidata.BaseSheet.__copy__
+.. function:: visidata.BaseSheet.__copy__(self)
+
+    Return shallow copy of sheet.
 
 .. autofunction:: visidata.BaseSheet.reload
 
@@ -65,7 +67,7 @@ List of all Column objects on this sheet (including hidden columns).
 Other Common Sheet Types
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-These can be used as base classes, or instantiated as they are, or used as templates for rows with similar structure,
+These can be used as base classes, or instantiated as they are, or :ref:`used as templates <enumerate-columns>` for rows with similar structure,
 
 .. autoclass:: visidata.IndexSheet
 .. autoclass:: visidata.TextSheet
@@ -79,6 +81,10 @@ The Sheet Stack
 
 The "sheet stack", a list of active sheets (available as the **Sheets Sheet** via :kbd:`Shift+S`).
 The top sheet, or the displayed sheet, is the first item in the list (``vd.sheets[0]``).
+
+.. data:: visidata.vd.sheet
+
+The top sheet on the sheet stack.
 
 .. autofunction:: visidata.vd.push
 .. autofunction:: visidata.vd.replace

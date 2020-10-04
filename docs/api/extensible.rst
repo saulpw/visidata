@@ -121,15 +121,15 @@ empty dict. To provide an initial non-object value:
 By default, when an instance of the class is copied, a member specified with this ``init()`` is reset to a newly constructed value (by calling the constructor again).
 If *copy* is ``True``, then a copy is made of the member for the new instance.
 
-.. autofunction:: visidata.Extensible.global_api
+.. autofunction:: visidata.vd.global_api
 
 When a function is defined in a .py module in visidata, it is available as a global function in that module.
 
-VisiData does an effective ``from X import *`` for each plugin and modular feature, so that its package (or global) scope gets all of the exposed symbols.  See :ref:`getGlobals() and addGlobals() <other-comamnds>`.
+VisiData does an effective ``from X import *`` for each plugin and modular feature, so that its package (or global) scope gets all of the exposed symbols.  See :ref:`getGlobals() and addGlobals() <other-commands>`.
 
 Everything in a .py module is exported automatically, unless there is an ``__all__`` with a list of the names of the functions that should be exported, and it will export only those.
 
-Each VisiData feature and plugin should include an ``__all__``, either empty or with an explicit list of function names to be available to :ef:`commands <commands>` and `Expressions <>`__.
+Each VisiData feature and plugin should include an ``__all__``, either empty or with an explicit list of function names to be available to :ref:`commands <commands>` and `Expressions <>`__.
 
 What to extend: ``Sheet``, ``Column``, ``VisiData``, or globals?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

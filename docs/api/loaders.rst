@@ -164,6 +164,7 @@ Test the loader with a very large dataset to make sure that:
 -  the progress percentage is being updated;
 -  the loader can be cancelled (with :kbd:`Ctrl+C`).
 
+.. _enumerate-columns:
 
 Step 4. Enumerate the Columns
 ------------------------------
