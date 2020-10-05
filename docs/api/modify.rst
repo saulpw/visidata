@@ -2,19 +2,32 @@
 Modifying Data
 ===============
 
-Foundation of Modify
-=====================
 
-There are three frames for data modification within VisiData:
+When adding rows, deleting rows, or modifying cell values, **always use the functions documented in this API**.
+Use ``addRow()`` to add a row, ``deleteBy()`` or ``deleteSelected()`` to delete a row, and the ``setValue()`` family of functions to modify values.
+Even though ``setValue`` will call ``putValue`` and that may be defined by the plugin itself, do not modify rows manually.
+This also means that rows should not be added or removed from ``sheet.rows`` directly.
 
-* adding rows
-* deleting rows
-* modifying cell values
+Always use these functions, as they do some important bookkeeping for features like deferred modifications.
 
 .. autofunction:: visidata.TableSheet.newRow
 .. autofunction:: visidata.TableSheet.addNewRows
-.. autofunction:: visidata.Sheet.editCell
-.. autofunction:: visidata.Sheet.deleteBy
+.. autofunction:: visidata.TableSheet.editCell
+.. autofunction:: visidata.TableSheet.deleteBy
+
+Deferred Modification
+======================
+
+On sheets where ``putValue`` changes the source directly, like **SQLite** and **DirSheet**, it would be undesirable for modifications to happen immediately.
+For these cases, the modifications are cached, shown visually on the sheet in a different color, and deferred until they are committed with an explicit ``commit-sheet`` (bound to :kbd:`z Ctrl+S`).
+
+Sheet types can add this deferring behavior by setting their ``defer`` attribute to ``True`` (either on the class type or on the individual sheet instance), but they may have to implement their own ``Sheet.putChanges``.
+
+.. autofunction:: visidata.Column.getSourceValue
+
+.. autofunction:: visidata.TableSheet.commit
+.. autofunction:: visidata.TableSheet.getDeferredChanges
+.. autofunction:: visidata.TableSheet.putChanges
 
 Undo
 -------
@@ -34,33 +47,6 @@ Undo functions, however, should use ``Column.setValue``, so it doesn't add an un
 
 .. autofunction:: visidata.addUndo
 
-
-Deferred Modification
-======================
-
-On sheets where ``putValue`` changes the source directly, like **SQLite** and **DirSheet**, it would be undesirable for modifications to happen immediately.
-For these cases, the modifications are cached, shown visually on the sheet in a different color, and deferred until they are committed with an explicit ``commit-sheet`` (bound to :kbd:`z Ctrl+S`).
-
-Sheet types can add this deferring behavior by setting their ``defer`` attribute to ``True`` (either on the class type or on the individual sheet instance), but they may have to implement their own ``Sheet.putChanges``.
-
-.. autofunction:: visidata.Sheet.preloadHook
-.. autofunction:: visidata.Column.getSavedValue
-
-.. autofunction:: visidata.Sheet.rowAdded
-.. autofunction:: visidata.Sheet.rowDeleted
-.. autofunction:: visidata.Column.cellChanged
-
-.. autofunction:: visidata.Sheet.isDeleted
-.. autofunction:: visidata.Sheet.isChanged
-
-.. autofunction:: visidata.Sheet.commitAdds
-.. autofunction:: visidata.Sheet.commitDeletes
-.. autofunction:: visidata.Sheet.commitMods
-
-.. autofunction:: visidata.Sheet.commit
-.. autofunction:: visidata.Sheet.getDeferredChanges
-.. autofunction:: visidata.Sheet.changestr
-.. autofunction:: visidata.Sheet.putChanges
 
 Example
 --------

@@ -147,7 +147,3 @@ Examples
     BaseSheet.bindkey('H', 'show-hello')
     BaseSheet.bindkey('^H', 'show-hello')
     BaseSheet.bindkey(ALT+'h', 'show-hello')
-
-    # unbind keystrokes defined by subclasses, or else they will be overridden
-    Sheet.unbindkey('H', 'show-hello')
-    Sheet.unbindkey('^H', 'show-hello')

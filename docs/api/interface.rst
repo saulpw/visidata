@@ -16,16 +16,17 @@ Window
 .. autoattribute:: visidata.BaseSheet.windowWidth
 .. autoattribute:: visidata.BaseSheet.windowHeight
 
-.. data:: visidata.Sheet.topRowIndex
+.. data:: visidata.TableSheet.topRowIndex
 
 Top row in the window, as an index into ``TableSheet.rows``.  Settable.
 
-.. data:: visidata.Sheet.leftVisibleColIndex
+.. data:: visidata.TableSheet.leftVisibleColIndex
 
 Leftmost column in the window (after key columns), as an index into ``TableSheet.visibleCols``.  Settable.
 
 Cursor
 ======
+
 Every Sheet has a cursor, which makes it easy to interact individual elements and slices of data.
 
 A ``TableSheet`` has a row cursor and a column cursor, which overlap on a single cell.
@@ -34,23 +35,23 @@ A ``TableSheet`` has a row cursor and a column cursor, which overlap on a single
 
 Column cursor, as an index into ``TableSheet.visibleCols``.  Settable.
 
-.. data:: visidata.Sheet.cursorRowIndex
+.. data:: visidata.TableSheet.cursorRowIndex
 
 Row cursor as an index into ``TableSheet.rows``.  Settable.
 
 .. autofunction:: visidata.BaseSheet.checkCursor
 
-.. autoattribute:: visidata.Sheet.cursorCol
-.. autoattribute:: visidata.Sheet.cursorColIndex
-.. autoattribute:: visidata.Sheet.cursorValue
-.. autoattribute:: visidata.Sheet.cursorTypedValue
-.. autoattribute:: visidata.Sheet.cursorDisplay
+.. autoattribute:: visidata.TableSheet.cursorCol
+.. autoattribute:: visidata.TableSheet.cursorColIndex
+.. autoattribute:: visidata.TableSheet.cursorValue
+.. autoattribute:: visidata.TableSheet.cursorTypedValue
+.. autoattribute:: visidata.TableSheet.cursorDisplay
 
-.. autofunction:: visidata.Sheet.cursorDown
-.. autofunction:: visidata.Sheet.cursorRight
-.. autofunction:: visidata.Sheet.moveToNextRow
-.. autofunction:: visidata.Sheet.moveToCol
-.. autofunction:: visidata.Sheet.moveToRow
+.. autofunction:: visidata.TableSheet.cursorDown
+.. autofunction:: visidata.TableSheet.cursorRight
+.. autofunction:: visidata.TableSheet.moveToNextRow
+.. autofunction:: visidata.TableSheet.moveToCol
+.. autofunction:: visidata.TableSheet.moveToRow
 
 .. _input:
 
@@ -130,7 +131,7 @@ Examples
             RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r in r.sheet.keyCols),
         ]
 
-    class OptionsSheet(Sheet):
+    class OptionsSheet(TableSheet):
         colorizers = [
             # colors cells
             CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[1:3] and r.name.startswith('color_') else None)

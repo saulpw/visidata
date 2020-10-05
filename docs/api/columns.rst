@@ -175,7 +175,7 @@ Aggregators
 Aggregators allow you to gather the rows within a single column, and interpret them using descriptive statistics.
 VisiData comes pre-loaded with a default set like mean, stdev, and sum.
 
-.. autofunction:: visidata.Sheet.addAggregators
+.. autofunction:: visidata.TableSheet.addAggregators
 
 .. autofunction:: visidata.vd.aggregator
 

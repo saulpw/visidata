@@ -97,15 +97,15 @@ a member with a call to that class' ``init()``:
 
 ::
 
-    Sheet.init('foo', dict)
+    TableSheet.init('foo', dict)
 
-This monkey-patches ``Sheet.__init__`` to add the instance member
-``foo`` to every Sheet on construction, and to initialize it with an
+This monkey-patches ``TableSheet.__init__`` to add the instance member
+``foo`` to every TableSheet on construction, and to initialize it with an
 empty dict. To provide an initial non-object value:
 
 ::
 
-    Sheet.init('bar', lambda: 42)
+    TableSheet.init('bar', lambda: 42)
 
 .. note::
 

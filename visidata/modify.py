@@ -132,12 +132,12 @@ def deleteBy(sheet, func, commit=False):
 
 @Sheet.api
 def isDeleted(self, row):
-    'Return True if row has been deferred for deletion'
+    'Return True if *row* has been deferred for deletion.'
     return self.rowid(row) in self._deferredDels
 
 @Sheet.api
 def isChanged(self, col, row):
-    'Return True if cell at row for col has been deferred for modification'
+    'Return True if cell at *row* for *col* has been deferred for modification.'
     try:
         row, rowmods = self._deferredMods[self.rowid(row)]
         newval = rowmods[col]
@@ -149,8 +149,8 @@ def isChanged(self, col, row):
         return False
 
 @Column.api
-def getSavedValue(col, row):
-    'Calculate and return value for *row* in this *col*.'
+def getSourceValue(col, row):
+    'For deferred sheets, return value for *row* in this *col* as it would be in the source, without any deferred modifications applied.'
     return Column.calcValue(col, row)
 
 
@@ -212,7 +212,7 @@ def deleteSourceRow(sheet, row):
 @asyncthread
 @Sheet.api
 def putChanges(sheet):
-    'Commit changes to sheet source. adds are a diffset to apply to the last load from or commit to sheet source. By default this overwrites completely, saving as filetype to source, with filetype from source ext.'
+    'Commit changes to ``sheet.source``. May overwrite source completely without confirmation.  Overrideable.'
     sheet.commitAdds()
     sheet.commitMods()
     sheet.commitDeletes()
@@ -223,17 +223,24 @@ def putChanges(sheet):
     sheet._deferredDels.clear()
 
 @Sheet.api
-def getDeferredChanges(self):
-    'Return adds:dict(rowid:row), mods:dict(rowid:(row, dict(col:val))), dels:dict(rowid: row)'
+def getDeferredChanges(sheet):
+    '''Return changes made to deferred sheets that have not been committed, as a tuple (added_rows, modified_rows, deleted_rows).  *modified_rows* does not include any *added_rows* or *deleted_rows*.
+
+        - *added_rows*: { rowid:row, ... }
+        - *modified_rows*: { rowid: (row, { col:val, ... }), ... }
+        - *deleted_rows*: { rowid: row }
+
+    *rowid* is from ``Sheet.rowid(row)``. *col* is an actual Column object.
+    '''
 
     # only report mods if they aren't adds or deletes
     mods = {} # [rowid] -> (row, dict(col:val))
-    for row, rowmods in self._deferredMods.values():
-        rowid = self.rowid(row)
-        if rowid not in self._deferredAdds and rowid not in self._deferredDels:
-            mods[rowid] = (row, {col:val for col, val in rowmods.items() if self.isChanged(col, row)})
+    for row, rowmods in sheet._deferredMods.values():
+        rowid = sheet.rowid(row)
+        if rowid not in sheet._deferredAdds and rowid not in sheet._deferredDels:
+            mods[rowid] = (row, {col:val for col, val in rowmods.items() if sheet.isChanged(col, row)})
 
-    return self._deferredAdds, mods, self._deferredDels
+    return sheet._deferredAdds, mods, sheet._deferredDels
 
 @Sheet.api
 def changestr(self, adds, mods, deletes):
@@ -254,7 +261,7 @@ def changestr(self, adds, mods, deletes):
 
 @Sheet.api
 def commit(sheet, *rows):
-    'Commit all deferred adds, deletes, and mods in sheet to sheet.source on disk.'
+    'Commit all deferred changes on this sheet to original ``sheet.source``.'
     if not sheet.defer:
         vd.fail('commit-sheet is not enabled for this sheet type')
 
