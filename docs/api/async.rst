@@ -1,7 +1,7 @@
 .. _performance:
 
 =========================
-Performance
+Threads
 =========================
 
 VisiData is not necessarily the fastest at processing large amounts of data, but great care has been taken to make sure that it remains *responsive*.
@@ -11,7 +11,7 @@ To this end, VisiData has a main interface thread for display and input, and cre
 In fact, anything that iterates through all rows (there may be millions) or all columns (there may be thousands), should probably be in its own thread.
 
 ``@asyncthread``
------------------
+~~~~~~~~~~~~~~~~
 
 Use the ``@asyncthread`` decorator on a function to spawn a new thread for each call to that function.
 The return value is the spawned thread (which can often be ignored by the caller), and the return value of the original function is effectively lost.
@@ -24,11 +24,6 @@ Note that a thread spawned by calling a function on a different sheet will add t
 
 .. autoclass:: visidata.asyncthread
 
-.. autoclass:: visidata.vd.Progress
-.. function:: visidata.vd.Progress.addProgress(n)
-
-    Increase the progress count by *n*.
-
 .. data:: visidata.vd.threads
 
 A list of all threads.
@@ -38,24 +33,34 @@ A list of all threads.
 A list of all threads started from commands on this sheet.
 
 .. autofunction:: visidata.vd.execAsync
-.. autofunction:: visidata.vd.cancelThread
 .. autofunction:: visidata.vd.sync
+.. autofunction:: visidata.vd.cancelThread
 
 .. note::
 
     ``vd.cancelThread(*threads)`` sends each thread an ``EscapeException``, which percolates up the stack to be caught by the thread entry point.
-    EscapeException inherits from BaseException instead of Exception, so that functions can still have catchall try-blocks with ``except Exception:``, without catching explicit user cancellations.
+    ``EscapeException`` inherits from Python's ``BaseException`` instead of ``Exception``, so that functions can still have catchall try-blocks with ``except Exception:``, without catching explicit user cancellations.
 
-    An unqualified `except:` clause is bad practice (as always).
+    An unqualified ``except:`` clause is bad practice (as always).
     When used in an async function, it will make the thread uncancelable.
 
 .. _progress:
 
 Progress counters
-------------------
+~~~~~~~~~~~~~~~~~~
 
 To provide the progress meter in the right status bar, every function that could iterate over a large collection of objects (usually rows or columns) or loop a large number of times, should use an ``Progress`` object somewhere to track its progress.
-Many internal functions include Progress (including ``Path.read``), so an async function may not need its own, but it can still be helpful to provide a more precise *gerund*.
+
+.. note::
+
+    Many internal functions will contribute their own ``Progress`` counters (including ``visidata.Path.read``), so an async function may not need its own, but it can still be helpful to provide a more precise *gerund* to show to the user.
+
+.. autoclass:: visidata.vd.Progress
+
+.. function:: visidata.vd.Progress.addProgress(n)
+
+    Increase the progress count by *n*.
+
 
 Progress as iterable
 ^^^^^^^^^^^^^^^^^^^^^
@@ -68,13 +73,13 @@ When iterating over a potentially large sequence:
 
 This is equivalent to ``for item in iterable``.  The `gerund` specifies the action being performed.
 
-- This only displays if used in another thread, and has no effect otherwise; so any linear action should have ``Progress``, even if it is not ``@asyncthread``.
+- These ``Progress`` only display if used in another thread, and has no effect otherwise.  So any iteration over rows and columns should have ``Progress``, even if it is not ``@asyncthread``.
 - Use ``Progress`` around the innermost iterations for maximum precision in the progress meter.
-- But this incurs a small amount of overhead, so if a tight loop needs every last optimization, use it with an outer iterator instead (if there is one).
-- Multiple Progress objects used in parallel will stack properly.
-- Multiple Progress objects used serially will make the progress indicator reset (which is better than having no indicator at all).
+- But this incurs a small amount of overhead, so if a tight loop needs every last optimization, use it with an outer iterator instead.
+- Multiple ``Progress`` objects used in parallel will stack properly.
+- Multiple ``Progress`` objects used serially will make the progress indicator reset (which is better than having no indicator at all).
 
-If ``iterable`` does not know its own length, then pass the length or an approximation as the ``total`` keyword argument:
+If *iterable* does not know its own length, then pass the length or an approximation as the *total* keyword argument:
 
 ::
 
@@ -102,7 +107,7 @@ To manage ``Progress`` without wrapping an iterable, use it as a context manager
 
 
 Threads Sheet
-=========================
+~~~~~~~~~~~~~~
 
 The Threads Sheet is useful for analyzing the performance of long-running async commands.
 
@@ -113,8 +118,8 @@ Threads which take very little time (currently less than 10ms) are removed, to r
 - Press :kbd:`Enter` (*open-row*) on a thread to view its performance profile (if ``options.profile`` was set when the thread started).
 
 Profiling
----------
+^^^^^^^^^
 
 The performance profile sheet in VisiData is the output from ``pstats.Stats.print_stats()``.
 
-- :kbd:`z Ctrl+S` on the performance profile will call ``dump_stats()`` and save the profile data to the given filename, for analysis with e.g. [pyprof2calltree]() and [kcachegrind]().
+- :kbd:`z Ctrl+S` on the performance profile will call ``dump_stats()`` and save the profile data to the given filename, for analysis with e.g. `pyprof2calltree <https://libraries.io/pypi/pyprof2calltree>`__ and `kcachegrind <https://kcachegrind.github.io/html/Home.html>`__.

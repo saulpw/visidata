@@ -57,8 +57,8 @@ Commands API
 Keybindings
 ~~~~~~~~~~~~
 
-   - Use ``^X`` for :kbd:`Ctrl+X`.
-   - Primarily, plugin authors and users should use ``0-9``, ``"KEY_F(1)"``, ``ALT+`` for custom keybindings; these are purposefully left available for user keybindings.
+   - Use "``^X``" for :kbd:`Ctrl+X`.
+   - Primarily, plugin authors and users should use ``0-9``, "``KEY_F(1)``", ``ALT+`` for custom keybindings; these are purposefully left available for user keybindings.
    - Consider not providing a default at all, for infrequently used commands.
    - Instead give it an easy and memorable longname, and/or a unique *helpstr* which can be searched for in the **Command Help** (:kbd:`g Ctrl+H`) with :kbd:`g/`.
    - Many other keycodes can be returned from the curses library as strings.

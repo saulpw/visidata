@@ -40,7 +40,7 @@ The options context should be referenced directly when setting:
 
 Use ``sheet.options`` to *get* an option within the context of a specific sheet.
 This is strongly preferred, so the user can override the option setting on a sheet-specific basis.
-However, some options and situations are truly sheet-agnostic, and so ``vd.options`` (or plain ``options``) to *get* an option using the context of the **top sheet**.
+However, some options and situations are truly sheet-agnostic, and so ``vd.options`` (or plain ``options``) will *get* an option using the context of the **top sheet**.
 
 When getting an option value, VisiData will look for a sheet override first, then class overrides next (from most specific subclass all the way up to BaseSheet), then a global override, before returning the default value from the option definition itself.
 

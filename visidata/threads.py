@@ -77,7 +77,7 @@ def Progress(vd, iterable=None, gerund="", total=None, sheet=None):
 
         - *iterable*: wrapped iterable if used as an iterator.
         - *gerund*: status text shown while this Progress is active.
-        - *total*: total count expected
+        - *total*: total count expected.
         - *sheet*: specific sheet to associate this progress with.  Default is sheet from current thread.
         '''
     return _Progress(iterable=iterable, gerund=gerund, total=total, sheet=sheet)
