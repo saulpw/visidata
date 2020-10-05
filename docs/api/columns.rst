@@ -50,12 +50,21 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 
 Columns are added to Sheets with :ref:`addColumn <enumerate-columns>`.
 
-Examples
+Example
 ~~~~~~~~~
 
-.. note::
+::
 
-    Here is an example for using addColumn, calcValue, setValue
+    class SpecialColumn(Column):
+        'Column for special fields on special rows.'
+        def calcValue(self, row):
+            return row.special()[self.expr]
+
+        def putValue(self, row, val):
+            row.special()[self.expr] = val
+
+    c = SpecialColumn('field1', expr='field1_key')
+    sheet.addColumn(c)
 
 
 Column Subclasses
@@ -133,14 +142,19 @@ Objects returned by ``TYPE(...)`` must be:
     - roundable (if numeric, for binning)
     - idempotent (``TYPE(TYPE(v)) == TYPE(v)``)
 
+Types API
+~~~~~~~~~~~
+
 .. autoclass:: visidata.vd.addType
+.. autofunction:: visidata.isNumeric
 
 Examples
 ~~~~~~~~~
 
-.. note::
+    # Add an ip_address type.
+    vd.addType(ipaddress.ip_address, icon=':', formatter=lambda fmt,ip: str(ip))
 
-    Include here an example of creating a new type
+    TableSheet.addCommand(None, 'type-ipaddr', 'cursorCol.type=ipaddress.ip_address', 'set type of current column to IP address'
 
 Nulls
 ~~~~~~

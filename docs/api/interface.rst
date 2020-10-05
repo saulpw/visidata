@@ -59,6 +59,9 @@ Input
 ======
 
 .. autofunction:: visidata.vd.input
+.. autofunction:: visidata.vd.choose
+.. autofunction:: visidata.vd.chooseOne
+.. autofunction:: visidata.vd.chooseMany
 .. autofunction:: visidata.vd.confirm
 .. autofunction:: visidata.vd.launchEditor
 
@@ -70,6 +73,8 @@ Status
 .. autofunction:: visidata.vd.status
 .. autofunction:: visidata.vd.warning
 .. autofunction:: visidata.vd.fail
+.. autofunction:: visidata.vd.exceptionCaught
+.. autoclass:: visidata.ExpectedException
 
 Examples
 ^^^^^^^^
@@ -77,7 +82,10 @@ Examples
 ::
 
     with SuspendCurses():
-        return subprocess.call('less', '/etc/passwd')
+        try:
+            return subprocess.call('less', '/etc/passwd')
+        except Exception as e:
+            vd.exceptionCaught(e)
 
 ::
 
