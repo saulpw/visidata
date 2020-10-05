@@ -10,7 +10,10 @@ Most features can be self-contained in their own .py file, so that the feature i
 A plugin is usually a single .py file, installed on the same computer as visidata.
 Plugins can be installed and uninstalled in the :ref:`Plugins Sheet </docs/plugins>`.
 
-To publish a plugin, create a public repo with a .py file, and a manifest.jsonl file with the following json fields.
+Plugins often start as a small snippet in ``.visidatarc``, and then the code is migrated to a separate file when it gets too large to share with other people via a short code snippet.
+The actual code in either case should be identical.
+
+To publish a plugin, create a public repo with a .py file, and a ``manifest.jsonl`` file with the following json fields.
 
 - *name*: short name of the plugin (like ``vfake``).  Less than 20 characters.
 - *description*: a "one line" searchable description of the core features.  Less than 1000 characters.
@@ -24,10 +27,6 @@ To publish a plugin, create a public repo with a .py file, and a manifest.jsonl 
 - *sha256*: SHA256 hash of plugin .py of most recent release.
 
 Multiple plugins can be defined in the same manifest; one line per plugin in the repository.
-
-Plugins often start as a small snippet in ``.visidatarc``, and then migrate the code to a separate file to share with other people.
-The actual code in either case should be identical.
-
 
 .. note::
 
@@ -44,8 +43,6 @@ Complete "Hello world" plugin example
 
 ::
 
-    hello.py
-
     '''This plugin adds the ``hello-world`` command to all sheets.
     Press ``0`` to show display options.disp_hello on the status line.'''
 
@@ -56,9 +53,10 @@ Complete "Hello world" plugin example
 
     BaseSheet.addCommand('0', 'hello-world', 'status(options.disp_hello)')
 
-::
+manifest.jsonl
+^^^^^^^^^^^^^^^^
 
-    manifest.jsonl
+::
 
     {
      "name": "helloworld",

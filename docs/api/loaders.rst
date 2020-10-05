@@ -3,15 +3,10 @@ Loaders
 
 Creating a new loader for a data source is simple and straigthforward.
 
-Loader Checklist
-----------------
-
-1. [ ] ``open_filetype`` boilerplate
-2. [ ] ``FooSheet`` subclass with rowtype and rowdef
-3. [ ] ``FooSheet`` reload or iterload
-4. [ ] ``FooSheet.columns``
-5. [ ] Any ``FooSheet.addCommand(...)`` at bottom of .py file
-6. [ ] Any ``vd.option()`` at top of .py file
+1. ``open_filetype`` boilerplate
+2. ``FooSheet`` subclass with rowtype and rowdef
+3. ``FooSheet`` reload or iterload
+4. ``FooSheet.columns``
 
 Hello Loader
 ------------
@@ -289,7 +284,7 @@ Savers should be decorated with ``@VisiData.api`` in order to make them availabl
                     for col in sheet.visibleCols:
                         foolib.write(fp, i, col.name, col.getDisplayValue(row))
 
--  *path* is a :ref:`visidata.Path() <vd-path>` object referencing the file being written to.
+-  *path* is a :ref:`visidata.Path <vd-path>` object referencing the file being written to.
 -  *sheets* is a list of 1 or more sheets to be saved.
 
 The saver should preserve the column names and translate their types into ``foolib`` semantics, but other attributes on the Columns are generally not saved.
@@ -322,9 +317,9 @@ visidata.Path
 
 ``visidata.Path`` is a wrapper around Python's builtin ``pathlib.Path`` that can also handle non-filesystem files (URLs, stdin, files within archives).
 
-The ``given`` property is new to visidata.Path.
+The ``given`` attribute is new to ``visidata.Path``.
 Other functions listed here are wrappers around the equivalent ``pathlib.Path`` functions, with specialized functionality as needed for non-filesystem files.
-All other accesses are forwarded to the inner pathlib.Path object, but will probably not work for non-filesystem files.
+All other accesses are forwarded to the inner ``pathlib.Path`` object, but will probably not work for non-filesystem files.
 
 .. autoattribute:: visidata.Path.given
 
