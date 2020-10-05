@@ -10,4 +10,4 @@ export PYTHONPATH="$SRC"
 BUILD="$SRC"/_build
 mkdir -p "$BUILD"
 
-sphinx-build -b html "$SRC" "$BUILD"
+sphinx-build -b html "$SRC"/docs/api "$BUILD"
