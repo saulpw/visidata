@@ -344,9 +344,9 @@ class CompleteKey:
 def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     '''Call vd.editText for the cell at (*rowidx*, *vcolidx*).  Return the new value, properly typed.
 
-       - Negative *rowidx* indicates the column name in the header.
-       - *value* if given, is the starting input; otherwise it starts with the cell value or column name as appropriate.
-       - *kwargs*: passthrough args to editText and editline.
+       - *rowidx*: numeric index into ``self.rows``.  If negative, indicates the column name in the header.
+       - *value*: if given, the starting input; otherwise the starting input is the cell value or column name as appropriate.
+       - *kwargs*: passthrough args to ``vd.editText``.
        '''
 
     if vcolidx is None:

@@ -6,7 +6,7 @@ Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
 @Sheet.api
 def orderBy(sheet, *cols, reverse=False):
-    'Add *cols* to internal ordering.  Pass *reverse* = True to order these *cols* descending.  Pass empty *cols* (or cols[0] of None) to remove the ordering.  Does not sort the sheet.'
+    'Add *cols* to internal ordering.  Pass *reverse* as True to order these *cols* descending.  Pass empty *cols* (or cols[0] of None) to clear internal ordering.  Does not sort the sheet.'
     if options.undo:
         vd.addUndo(setattr, sheet, '_ordering', copy(sheet._ordering))
         if sheet._ordering:

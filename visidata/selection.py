@@ -19,12 +19,12 @@ def toggle(self, rows):
 
 @Sheet.api
 def selectRow(self, row):
-    'Select *row*.  Overrideable.'
+    'Add *row* to set of selected rows.  Overrideable.'
     self._selectedRows[self.rowid(row)] = row
 
 @Sheet.api
 def unselectRow(self, row):
-    'Unselect *row*.  Return True if row was previously selected.  Overrideable.'
+    'Remove *row* from set of selected rows.  Return True if row was previously selected.  Overrideable.'
     if self.rowid(row) in self._selectedRows:
         del self._selectedRows[self.rowid(row)]
         return True
@@ -33,14 +33,14 @@ def unselectRow(self, row):
 
 @Sheet.api
 def clearSelected(self):
-    'Unselect all selected rows, without calling unselectRow for each one.'
+    'Clear set of selected rows, without calling ``unselectRow`` for each one.'
     self.addUndoSelection()
     self._selectedRows.clear()
 
 @Sheet.api
 @asyncthread
 def select(self, rows, status=True, progress=True):
-    "Select list of *rows*. Async. Don't show progress if progress=False; don't show status if status=False."
+    "Add *rows* to set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False."
     self.addUndoSelection()
     before = self.nSelectedRows
     if options.bulk_select_clear:
@@ -57,7 +57,7 @@ def select(self, rows, status=True, progress=True):
 @Sheet.api
 @asyncthread
 def unselect(self, rows, status=True, progress=True):
-    "Unselect list of *rows*. Async. Don't show progress if progress=False; don't show status if status=False."
+    "Remove *rows* from set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False."
     self.addUndoSelection()
     before = self.nSelectedRows
     for r in (Progress(rows, 'unselecting') if progress else rows):
@@ -67,12 +67,12 @@ def unselect(self, rows, status=True, progress=True):
 
 @Sheet.api
 def selectByIdx(self, rowIdxs):
-    'Select list of row indexes.  Async.'
+    'Add rows indicated by row indexes in *rowIdxs* to set of selected rows.  Async.'
     self.select((self.rows[i] for i in rowIdxs), progress=False)
 
 @Sheet.api
 def unselectByIdx(self, rowIdxs):
-    'Unselect list of row indexes.  Async.'
+    'Remove rows indicated by row indexes in *rowIdxs* from set of selected rows.  Async.'
     self.unselect((self.rows[i] for i in rowIdxs), progress=False)
 
 @Sheet.api

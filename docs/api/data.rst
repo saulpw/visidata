@@ -1,34 +1,34 @@
 Key Columns
 -----------
 
-.. autofunction:: visidata.Sheet.setKeys
-.. autofunction:: visidata.Sheet.unsetKeys
-.. autofunction:: visidata.Sheet.rowkey
-.. autofunction:: visidata.Sheet.keystr
-.. autoattribute:: visidata.Sheet.keyCols
-.. autoattribute:: visidata.Sheet.nonKeyVisibleCols
+.. autofunction:: visidata.TableSheet.setKeys
+.. autofunction:: visidata.TableSheet.unsetKeys
+.. autofunction:: visidata.TableSheet.rowkey
+.. autofunction:: visidata.TableSheet.keystr
+.. autoattribute:: visidata.TableSheet.keyCols
+.. autoattribute:: visidata.TableSheet.nonKeyVisibleCols
 
 Selected Rows
 -------------
 
-Each Sheet has a set of "selected rows", which is a strict subset of the rows on the sheet.
+Each TableSheet has a set of *selected rows*, which is a strict subset of the rows on the sheet.
 
-.. autoattribute:: visidata.Sheet.selectedRows
-.. autoattribute:: visidata.Sheet.someSelectedRows
-.. autoattribute:: visidata.Sheet.nSelectedRows
+.. autoattribute:: visidata.TableSheet.selectedRows
+.. autoattribute:: visidata.TableSheet.someSelectedRows
+.. autoattribute:: visidata.TableSheet.nSelectedRows
 
-.. autofunction:: visidata.Sheet.selectRow
-.. autofunction:: visidata.Sheet.unselectRow
-.. autofunction:: visidata.Sheet.isSelected
+.. autofunction:: visidata.TableSheet.selectRow
+.. autofunction:: visidata.TableSheet.unselectRow
+.. autofunction:: visidata.TableSheet.isSelected
 
-.. autofunction:: visidata.Sheet.clearSelected
+.. autofunction:: visidata.TableSheet.clearSelected
 
-.. autofunction:: visidata.Sheet.selectByIdx
-.. autofunction:: visidata.Sheet.unselectByIdx
+.. autofunction:: visidata.TableSheet.selectByIdx
+.. autofunction:: visidata.TableSheet.unselectByIdx
 
-.. autofunction:: visidata.Sheet.select
-.. autofunction:: visidata.Sheet.unselect
-.. autofunction:: visidata.Sheet.deleteSelected
+.. autofunction:: visidata.TableSheet.select
+.. autofunction:: visidata.TableSheet.unselect
+.. autofunction:: visidata.TableSheet.deleteSelected
 
 
 .. note::
@@ -40,16 +40,11 @@ Each Sheet has a set of "selected rows", which is a strict subset of the rows on
 
     ``selectedRows`` feels like a list, but it's actually a property that iterates over all rows to generate the selected rows in sheet order.
     With large datasets, collecting the list of selected rows itself can take a large time, regardless of the number of rows that are actually selected.
-    So instead of using selectedRows in the execstr, call an @asyncthread @Sheet.api function which uses sheet.selectedRows.
+    So instead of using selectedRows in the execstr, call an ``@asyncthread`` ``@TableSheet.api`` function which uses sheet.selectedRows.
     Use it as a parameter immediately or save it to a local variable on the first usage, to avoid unnecessary work.
-
-Undo
--------
-
-.. autofunction:: visidata.addUndo
 
 Sorting
 -------
 
-.. autofunction:: visidata.Sheet.orderBy
-.. autofunction:: visidata.Sheet.sort
+.. autofunction:: visidata.TableSheet.orderBy
+.. autofunction:: visidata.TableSheet.sort

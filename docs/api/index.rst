@@ -40,8 +40,8 @@ This extends VisiData so that when :kbd:`1` is pressed on any sheet, the command
    extensible
    sheets
    columns
-   interface
    modify
+   interface
    data
    async
    plugins

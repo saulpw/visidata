@@ -243,6 +243,7 @@ class TableSheet(BaseSheet):
         return row
 
     def newRow(self):
+        'Return new blank row compatible with this sheet.  Overrideable.'
         return type(self)._rowtype()
 
     @drawcache_property
@@ -999,7 +1000,7 @@ def quit(vd, *sheets):
 
 @BaseSheet.api
 def preloadHook(sheet):
-    'Override to setup for reload()'
+    'Override to setup for reload().'
     pass
 
 

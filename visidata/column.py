@@ -343,7 +343,7 @@ class Column(Extensible):
         return self.setter(self, row, val)
 
     def setValue(self, row, val):
-        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if parent ``sheet.defer`` is False, otherwise cache until later ``putChanges``.'
+        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if parent ``sheet.defer`` is False, otherwise cache until later ``putChanges``.  Caller must add undo function.'
         if self.sheet.defer:
             self.cellChanged(row, val)
         else:

@@ -74,7 +74,7 @@ def rowDeleted(self, row):
 @Sheet.api
 @asyncthread
 def addNewRows(sheet, n, idx):
-    'Add n new rows after row at idx.'
+    'Add *n* new rows after row at *idx*.'
     addedRows = {}
     for i in Progress(range(n), 'adding'):
         row = sheet.newRow()
@@ -93,7 +93,7 @@ def addNewRows(sheet, n, idx):
 
 @Sheet.api
 def deleteBy(sheet, func, commit=False):
-    'Delete rows on sheet for which func(row) is true.  Returns number of deleted rows.'
+    'Delete rows on sheet for which ``func(row)`` returns true.  Return number of rows deleted.  If sheet.defer is set and *commit* is True, remove rows immediately without deferring.'
     oldrows = copy(sheet.rows)
     oldidx = sheet.cursorRowIndex
     ndeleted = 0
@@ -150,7 +150,7 @@ def isChanged(self, col, row):
 
 @Column.api
 def getSavedValue(col, row):
-    'Calculate and return value for *row* in this col.'
+    'Calculate and return value for *row* in this *col*.'
     return Column.calcValue(col, row)
 
 
