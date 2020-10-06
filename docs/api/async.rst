@@ -1,4 +1,4 @@
-.. _performance:
+.. _threads:
 
 =========================
 Threads

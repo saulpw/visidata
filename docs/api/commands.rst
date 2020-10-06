@@ -7,11 +7,9 @@ VisiData is **command-driven**, which means that it only does something when you
 Otherwise, it just sits there, waiting for your next command.
 
 Every command is a discrete unit of behavior that does a defined task and runs to completion.
-Functions that could take longer than a couple hundred milliseconds should run in their own thread (see :ref:`Performance <performance>`).
+Functions that could take longer than a couple hundred milliseconds should run in their own thread (see :ref:`Threads <threads>`).
 
-Every command should be **reproducible**: given the same sheet, cursor
-position, and :ref:`input <input>` string (if relevant), a command should yield
-identical output (with a few obvious exceptions, like :kbd:random-rows).
+Every command should be **reproducible**: given the same sheet, cursor position, and :ref:`input <input>` string (if relevant), a command should yield identical output (with a few obvious exceptions, like :kbd:random-rows).
 
 Any command which makes changes to a :ref:`saveable sheet<sheets>` is appended to that sheet's **Command Log**.
 Since all state changes must be initiated by a reproducible command, this command log can be `replayed </docs/save-restore>`__.

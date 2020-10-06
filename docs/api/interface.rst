@@ -117,9 +117,12 @@ Instead use addColorizer and removeColorizer.
 .. autoclass:: visidata.ColumnColorizer
 .. autoclass:: visidata.CellColorizer
 
-- *prec*: precedence; higher numbers take precedence.
-- *coloropt*: name of color option, or None.
+- *precedence*: use color from colorizer with the greatest *precedence* value.
+- *coloropt*: name of color option, or ``None``.
 - *func*: ``func(sheet, col, row, value)`` is called for each cell as it is being rendered. Return True when *coloropt* should be applied to the cell.  If *coloropt* is None, ``func(...)`` can return the relevant coloropt (or None) instead.
+
+Attributes (underline, bold, reverse) combine, regardless of *precedence*.
+
 
 .. note::
 
@@ -127,6 +130,8 @@ Instead use addColorizer and removeColorizer.
     For a header, *row* will be None; for a separator, *col* will be None.
     So a RowColorizer needs to include a check that *row* is valid, a ColumnColorizer needs to check that *col* is valid, and a cell colorizer needs to check both.
     A simple check for non-False (see Examples) is sufficient.
+
+
 
 Examples
 ^^^^^^^^

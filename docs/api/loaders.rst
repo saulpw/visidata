@@ -114,7 +114,7 @@ For more control over the whole loading process, ``BaseSheet.reload()`` can be o
             for line in self.source:
                 self.addRow([line])
 
--  ``@asyncthread`` launches the decorated function in its own thread.  See :ref:`Performance<performance>`
+-  ``@asyncthread`` launches the decorated function in its own thread.  See :ref:`Threads<threads>`
 -  ``sheet.rows`` must always be reset to a new list.  **Never** call ``sheet.rows.clear()``.
 -  Always add rows using :ref:`addRow()<sheets>`.
 
@@ -122,16 +122,15 @@ Supporting asynchronous loaders
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Loading a large dataset in the main thread will cause the interface to freeze.
-Fortunately, the stock ``reload`` and ``iterload`` structure results in an :ref:`async <performance>` loader on default.
+However, the basic TableSheet ``reload`` and ``iterload`` structure results in an :ref:`asynchronous <threads>` loader by default.
 Since rows are yielded **one at a time**, they become available as they are loaded, and ``reload`` itself is decorated with an ``@asyncthread``, which causes it to be launched in a new thread.
 
 - All row iterators should be wrapped with :ref:`Progress<progress>`.
-  This updates the **progress percentage** as it passes each element through.
+  This updates the progress percentage as it passes each element through.
 
 - Do not depend on the order of ``rows`` after they are added; e.g. do not reference ``rows[-1]``.  The order of rows may change during an asynchronous loader.
 
-- Catch any ``Exception`` that might be raised while handling a specific row, and add them as the row instead.
-  If ``Exception`` handling is missing within iterload, rows will stop loading upon hitting an ``Exception``.
+- Catch any ``Exception`` that might be raised while handling a specific row, and add them as the row instead.  Uncaught exceptions will cause the loader thread to abort.
 
 - Do not use a bare ``except:`` clause or the loader thread will not be cancelable with :kbd:`Ctrl+C`.
 
@@ -196,30 +195,17 @@ If the rowdef is a ``list``, and the columns are dynamic, :ref:`SequenceSheet.re
                 yield r
 
 
-Column properties
+Column attributes
 ~~~~~~~~~~~~~~~~~
 
-Columns have a few properties; all except ``name`` are **optional**
-arguments to the constructor:
+Columns have several attributes; all except *name* are **optional** arguments to the constructor:
 
--  *name*: should be a valid Python identifier and unique among the column names on the sheet.
+-  *name*: should be a valid Python identifier and unique among the column names on the sheet.  (Otherwise the column cannot be used in an expression.)
+-  *type*: can be ``str``, ``int``, ``float``, ``date``, ``currency``, or a custom type.  By default it is ``anytype``, which passes the original value through unmodified.
+-  *width*: the initial width for the column. ``0`` means hidden; ``None`` (default) means calculate on first draw.
 
-(Otherwise the column cannot be used in an expression.)
-
--  *type*: can be ``str``, ``int``, ``float``, ``date``, or ``currency``.
-
-By default it is ``anytype``, which passes the original value through unmodified.
-
--  *width*: the initial width for the column. ``0`` means hidden;
-
-``None`` (default) means calculate on first draw.
-
-Column getters can be any function, but many loaders for are satisfied
-with a static list of ``ItemColumn`` (for values in dict and list rowdefs)
-and/or ``AttrColumn`` (for a members or properties directly on the row object).
-This is dependent on the loader function; some loaders may prefer to do
-less parsing to load faster, and then the Columns will need to be
-correspondingly more complicated.
+Column getters can be any function, but many loaders are satisfied with a static list of ``ItemColumn`` (for values in dict and list rowdefs) and/or ``AttrColumn`` (for a members or attributes directly on the row object).
+This is dependent on the loader function; some loaders may prefer to do less parsing to load faster, and then the Columns will need to be correspondingly more complicated.
 
 See the :ref:`Columns section <columns>` for a complete API.
 
@@ -227,7 +213,7 @@ Passthrough options
 ~~~~~~~~~~~~~~~~~~~
 
 Loaders which use a Python library (internal or external) are encouraged to pass its kwargs using ``**options.getall("foo_")`` interface.
-For modules like csv which expose them as kwargs to some function or constructor, this is very easy:
+For modules like ``csv`` which expose them as kwargs to some function or constructor, this is very easy:
 
 ::
 
@@ -236,84 +222,78 @@ For modules like csv which expose them as kwargs to some function or constructor
 Full Example
 ~~~~~~~~~~~~
 
-This would be a completely functional read-only viewer for the fictional ``foolib``.
-For a more realistic example, see the `annotated viewtsv </docs/viewtsv>`__ or any of the `included loaders <https://github.com/saulpw/visidata/tree/stable/visidata/loaders>`__.
+This is a completely functional loader for the ``sas7bdat`` (SAS dataset file) format, thanks to Jared Hobbs' `sas7bdat package <https://bitbucket.org/jaredhobbs/sas7bdat>`__.
 
 ::
 
-        from visidata import *
+    from visidata import Sheet, ItemColumn, Progress
 
-        vd.option('foo_scale', 100, 'amount to scale baz')
+    def open_sas7bdat(p):
+        return SasSheet(p.name, source=p)
 
+    class SasSheet(Sheet):
+        def iterload(self):
+            import sas7bdat
+            SASTypes = { 'string': str, 'number': float, }
 
-        class FooSheet(Sheet):
-            rowtype = 'foobits'  # rowdef: foolib.Bar object
-            columns = [
-                ColumnAttr('name'),  # foolib.Bar.name
-                Column('bar', getter=lambda col,row: row.inside[2],
-                              setter=lambda col,row,val: row.set_bar(val)),
-                Column('baz', type=int, getter=lambda col,row: row.inside[1]*options.foo_scale)
-            ]
+            self.dat = sas7bdat.SAS7BDAT(str(self.source),
+                                         skip_header=True,
+                                         log_level=logging.CRITICAL)
 
-            def iterload(self):
-                import foolib
+            self.columns = []
+            for col in self.dat.columns:
+                self.addColumn(ItemColumn(col.name.decode('utf-8'),
+                                         col.col_id,
+                                         type=SASTypes.get(col.type, anytype)))
 
-                for bar in Progress(foolib.iterfoo(self.source.open_text())):
-                    try:
-                        r = foolib.parse(bar, **options.getall('foo_'))
-                    except Exception as e:
-                        r = e
-                    yield r
-
-
-        FooSheet.addCommand(ALT+'b', 'reset-bar', 'cursorRow.set_bar(0)')
+            with self.dat as fp:
+                yield from Progress(fp, total=self.dat.properties.row_count)
 
 Savers
-------
+=======
 
 A full-duplex loader requires a **saver**.
 The saver iterates over all ``rows`` and ``visibleCols``, calling ``getValue``, ``getDisplayValue`` or ``getTypedValue`` as the saving format allows, and saves the results in its format to the given *path*.
 Savers should be decorated with ``@VisiData.api`` in order to make them available through the ``vd`` object's scope.
 
-::
+.. autofunction:: visidata.vd.save_txt
 
-        @VisiData.api
-        def save_foo(vd, path, *sheets):
-            with path.open_text(mode='w') as fp:
-                for i, row in enumerate(Progress(sheet.rows)):
-                    for col in sheet.visibleCols:
-                        foolib.write(fp, i, col.name, col.getDisplayValue(row))
-
--  *path* is a :ref:`visidata.Path <vd-path>` object referencing the file being written to.
+-  *p* is a :ref:`visidata.Path <vd-path>` object referencing the file being written to.
 -  *sheets* is a list of 1 or more sheets to be saved.
 
 The saver should preserve the column names and translate their types into ``foolib`` semantics, but other attributes on the Columns are generally not saved.
 
 Savers which can handle typed values should use ``Column.getTypedValue``, and displayable savers (like html, markdown, csv) should use ``Column.getDisplayValue`` (which takes into account the column's *fmtstr*).
 
-Building a loader for a URL schemetype
---------------------------------------
+Example
+^^^^^^^
 
-When VisiData tries to open a URL with schemetype of ``foo`` (i.e.
-starting with ``foo://``), it calls ``openurl_foo(urlpath, filetype)``.
-``urlpath`` is a ``UrlPath`` object, with attributes for each of the
-elements of the parsed URL.
-
-``openurl_foo`` should return a Sheet or call ``error()``. If the URL
-indicates a particular type of Sheet (like ``magnet://``), then it
-should construct that Sheet itself. If the URL is just a means to get to
-another filetype, then it can call ``openSource`` with a Path-like
-object that knows how to fetch the URL:
+With this example, saving as filetype ``table`` will call the `tabulate library <https://github.com/astanin/python-tabulate>`__ to save the data in any number of text formats, specified by the ``tbl_tablefmt`` option.
+(Several built-in savers use ``tabulate`` also, but those savers work a little differently, as each tablefmt is available as a direct save filetype.)
 
 ::
 
-        def openurl_foo(p, filetype=None):
-            return openSource(FooPath(p.url), filetype=filetype)
+    vd.option('tbl_tablefmt', 'simple', 'file format to save with "table" filetype')
+
+    def get_rows(sheet, cols):
+        for row in Progress(sheet.rows):
+            yield [ col.getDisplayValue(row) for col in cols ]
+
+    @VisiData.api
+    def save_table(path, *sheets):
+        import tabulate
+
+        with path.open_text(mode='w') as fp:
+            for vs in sheets:
+                fp.write(tabulate.tabulate(
+                    get_rows(vs, vs.visibleCols),
+                    headers=[ col.name for col in vs.visibleCols ],
+                    **options.getall('tbl_')))
 
 .. _vd-path:
 
 visidata.Path
----------------
+=============
 
 ``visidata.Path`` is a wrapper around Python's builtin ``pathlib.Path`` that can also handle non-filesystem files (URLs, stdin, files within archives).
 
@@ -331,3 +311,22 @@ All other accesses are forwarded to the inner ``pathlib.Path`` object, but will 
 .. autofunction:: visidata.Path.read_bytes
 .. autofunction:: visidata.Path.stat
 .. autofunction:: visidata.Path.with_name
+
+URL Scheme Loaders
+---------------------------------------
+
+When VisiData tries to open a URL with schemetype of ``foo`` (i.e.
+starting with ``foo://``), it calls ``openurl_foo(urlpath, filetype)``.
+``urlpath`` is a ``UrlPath`` object, with attributes for each of the
+elements of the parsed URL.
+
+``openurl_foo`` should return a Sheet or call ``error()``. If the URL
+indicates a particular type of Sheet (like ``magnet://``), then it
+should construct that Sheet itself. If the URL is just a means to get to
+another filetype, then it can call ``openSource`` with a Path-like
+object that knows how to fetch the URL:
+
+::
+
+        def openurl_foo(p, filetype=None):
+            return openSource(FooPath(p.url), filetype=filetype)
