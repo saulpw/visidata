@@ -2,13 +2,81 @@
 
 # v2.-5 (XXXX-XX-XX)
 
+## Additions and Improvements
+    - [aggregators] allow custom aggregators in plugins/visidatarc (thanks @geekscrapy for the feature request #651)
+    - [loaders xlsx] automatically clean sheet name when saving; warn if sheet name changes (thanks @geekscrapy for the request #594)
+    - [columns] unhide height attribute by default (thanks @frosencrantz for feature request #660)
+    - add .vcf (VCard) loader
+    - [sqlite] remove name of db from an **SqliteSheet**'s name, only tablename
+
+## Options
+    - add `options.incr_base` (thanks @chocolateboy for the suggestion #647)
+    - (former) `options.force_valid_colnames` renamed to `options.clean_names`
+        - applies to **Sheets** and **Columns** now (thanks @geekscrapy for the request #594)
+    - for --X=Y, do not replace - with _ in Y (thanks @forensicdave for bug report #657)
+    - add `options.default_height` for visibility toggle (thanks @frosencrantz for feature request #660)
+
+## Command changes and additions
+        - (former) setcol-range (`gz=`) renamed to `setcol-iter`
+        - (former) `addcol-range-step` (`i`) renamed to `addcol-incr-step`
+        - (former) `setcol-range` (`gi`) renamed to `setcol-incr`
+        - (former) `addcol-range-step` (`zi`) renamed to `addcol-incr-step`
+        - (former) `setcol-range-step` (`gzi`) renamed to `setcol-incr-step`
+        - add `scroll-cells-*` to scroll display of cells while remaining in a Column; bind to [g]z{hjkl}
+        - (former) unbind z{hjkl} from `scroll-col` (thanks @geekscrapy for feature request #662)
+        - add `type-floatsi` bound to `z%` (#661)
+        - `reload-selected` now reloads all **Sheets** if none selected (thanks @geekscrapy for PR #685)
+
+## Bugfixes
+    - [DirSheet] use changed ext as filetype when loading files (thanks @frosencrantz for bug report #645)
+    - [slide] several major improvements to column sliding; key column sliding now works (thanks much to @geekscrapy for bug hunting #640)
+    - [open-row] **Sheets Sheet** should be removed from stack upon `open-row` (thanks @cwarden for the bug report)
+    - [cli] re-add --version (thanks @mlawren for bug report #674)
+    - [open-config] fix `gO` (thanks @geekscrapy for bug report #676)
+    - [splitwin] handle swap case for single sheet (thanks @geekscrapy for bug report #679)
+    - [loaders xlsx] handle `None` column names for all **Sequence Sheet** loaders (thanks @jsvine for bug report #680)
+    - [settings] retrieve from cache for top sheet if obj is None (thanks @aborruso for the bug report #675)
+    - [settings] check if option is set on specific sheet before falling back to override
+    - [describe] have **DescribeSheet** use source column's sheet's `options.null_value` to calculate its null column (thanks @aborruso for the bug report #675)
+    - [undo] ensure that undos for complex commands (like `expand-cols`) are set more frequently (thanks @frosencrantz for the bug report #668)
+        - it is still possible to find race conditions if the user presses commands fast enough, however they should happen far less frequently
+    - [vlen] fix numeric binning for `vlen()` (thanks @frosencrantz for bug report #690)
+    - [pivot] fix pivot case where no aggregator is set
+    - [pyobj] fix filtering for **PyobjSheet**
+    - [DirSheet] fix sorting for directory column of **DirSheet** (thanks @frosencrantz for bug report #691)
+    - [json] fix bug saving cells with nested date values (thanks @ajkerrigan for PR #709)
+    - [input] fix Ctrl+W bug when erasing word at beginning of line
+    - [plugins] import `.visidata/plugins` by default
+    - [pandas] use a safer `reset_index()` to avoid losing data when updating a pandas index (thanks @ajkerrigan for PR #710)
+    - [threads] disable `add-row` on **ThreadsSheet** (thanks @geekscrapy for bug report #713)
+
 ## deprecated
-- complete removal of `status` and `statuses` from deprecated
+    - complete removal of `status` and `statuses` from deprecated (thanks @frosencrantz for bug report #621)
+        - longnames are now `open-status` and `show-status`
+
+## API and Interface
+    - `Sheet(*names, **kwargs)` autojoins list of name parts
+    - `openSource()`, `aggregator()`, and `aggregators` are now part of vdobj
+    - `set_option` is now `setOption`
+    - move `isError` to `Column.isError`
+    - deprecate `load_pyobj`, now **PyobjSheet**
+    - add `.getall('foo_')` which returns all options prefixed with `'foo_'`; deprecated `options('foo_')`
+    - `nSelected` is now `nSelectedRows`
+    - make `Column.width` property, so setting is same as `Column.setWidth`
+    - `evalexpr` is now `evalExpr`
+    - `format` is now `formatValue`
+    - `SettableColumn.cache` is now `._store`
+    - `vdtype()` is now `vd.addType()`
+
+## Plugins
+    - update sparkline (thanks @layertwo #696)
+
+## Dev niceties
+    - Fully automate dev setup with Gitpod.io (thanks @ajkerrigan for PR #673)
 
 ## Additions and Improvements
-- .vcf (VCard) loader
 
-# v2.-4 (XXXX-XX-XX)
+# v2.-4 (2020-07-27)
 
 ## Additions and Improvements
     - [cmdlog] allow sheet-specific set-option for replay
