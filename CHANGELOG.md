@@ -8,6 +8,7 @@
     - [columns] unhide height attribute by default (thanks @frosencrantz for feature request #660)
     - add .vcf (VCard) loader
     - [sqlite] remove name of db from an **SqliteSheet**'s name, only tablename
+    - [syspaste] make `syspaste-` replayable and undoable (note that `syspaste-` value will be recorded in **CommandLog**
 
 ## Options
     - add `options.incr_base` (thanks @chocolateboy for the suggestion #647)
