@@ -1,13 +1,3 @@
-Key Columns
------------
-
-.. autofunction:: visidata.TableSheet.setKeys
-.. autofunction:: visidata.TableSheet.unsetKeys
-.. autofunction:: visidata.TableSheet.rowkey
-.. autofunction:: visidata.TableSheet.keystr
-.. autoattribute:: visidata.TableSheet.keyCols
-.. autoattribute:: visidata.TableSheet.nonKeyVisibleCols
-
 Selected Rows
 -------------
 
