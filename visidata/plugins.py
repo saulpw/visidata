@@ -104,7 +104,7 @@ class PluginsSheet(JsonLinesSheet):
 
         if plugin.pydeps:
             p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
-                                '--target', str(Path(options.visidata_dir)/"plugin-deps"),
+                                '--target', str(Path(options.visidata_dir)/"plugins-deps"),
                               ]+plugin.pydeps.split(),
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
