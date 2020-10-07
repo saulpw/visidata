@@ -8,7 +8,8 @@
     - [columns] unhide height attribute by default (thanks @frosencrantz for feature request #660)
     - add .vcf (VCard) loader
     - [sqlite] remove name of db from an **SqliteSheet**'s name, only tablename
-    - [syspaste] make `syspaste-` replayable and undoable (note that `syspaste-` value will be recorded in **CommandLog**
+    - [syspaste] make `syspaste-` replayable and undoable (note that `syspaste-` value will be recorded in **CommandLog**)
+    - [savers] many text saver filetypes via tabulate library (thanks @jsvine for original vdtabulate plugin)
 
 ## Options
     - add `options.incr_base` (thanks @chocolateboy for the suggestion #647)
@@ -16,6 +17,7 @@
         - applies to **Sheets** and **Columns** now (thanks @geekscrapy for the request #594)
     - for --X=Y, do not replace - with _ in Y (thanks @forensicdave for bug report #657)
     - add `options.default_height` for visibility toggle (thanks @frosencrantz for feature request #660)
+  - add support for `--` option-ending option on CLI.
 
 ## Command changes and additions
         - (former) setcol-range (`gz=`) renamed to `setcol-iter`

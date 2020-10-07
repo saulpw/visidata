@@ -99,10 +99,17 @@ def main_vd():
     current_args = {}
     global_args = {}
     flGlobal = False
+    optsdone = False
 
     while i < len(sys.argv):
         arg = sys.argv[i]
-        if arg in ['-v', '--version']:
+        if optsdone:
+            # copied from final else: clause below
+            inputs.append((arg, copy(current_args)))
+            fmtargs.append(arg)
+        elif arg in ['--']:
+            optsdone = True
+        elif arg in ['-v', '--version']:
             print(__version_info__)
             return 0
         elif arg == '-':
