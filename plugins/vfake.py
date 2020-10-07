@@ -4,7 +4,8 @@ import json
 
 from visidata import vd, Column, Sheet, option, options, asyncthread, Progress
 
-__version__ = '1.0'
+__author__ = 'Saul Pwanson <vd@saul.pw>'
+__version__ = '1.1'
 
 option('locale', 'en_US', 'default locale to use for Faker', replay=True)
 option('vfake_extra_providers', None, 'list of additional Provider classes to load via add_provider()', replay=True)
@@ -22,13 +23,15 @@ def addFakerProviders(fake, providers):
     providers: List of provider classes to add
     '''
     import faker
-    invalid_provider_warning = 'vfake: "{}" does not look like a Faker Provider class, skipping add'
+    if isinstance(providers, str):
+        providers = [ getattr(faker.providers, p) for p in providers.split() ]
+
     if not isinstance(providers, list):
-        vd.error('options.vfake_extra_providers must be a list')
-        return
+        vd.fail('options.vfake_extra_providers must be a list')
+
     for provider in providers:
         if not issubclass(provider, faker.providers.BaseProvider):
-            vd.warning(invalid_provider_warning.format(provider.__name__))
+            vd.warning('vfake: "{}" not a Faker Provider'.format(provider.__name__))
             continue
         fake.add_provider(provider)
 
@@ -36,17 +39,17 @@ def addFakerProviders(fake, providers):
 @asyncthread
 def setValuesFromFaker(col, faketype, rows):
     import faker
-    fake = faker.Faker(options.locale)
-    if options.vfake_extra_providers:
-        addFakerProviders(fake, options.vfake_extra_providers)
-    fakefunc = getattr(fake, faketype, None) or vd.error('no such faker function')
+    fake = faker.Faker(col.sheet.options.locale)
+    if col.sheet.options.vfake_extra_providers:
+        addFakerProviders(fake, col.sheet.options.vfake_extra_providers)
+    fakefunc = getattr(fake, faketype, None) or vd.fail(f'no such faker "{faketype}')
 
     fakeMap = {}
     fakeMap[None] = None
-    fakeMap[options.null_value] = options.null_value
+    fakeMap[col.sheet.options.null_value] = col.sheet.options.null_value
 
     vd.addUndoSetValues([col], rows)
-    salt = options.vfake_salt
+    salt = col.sheet.options.vfake_salt
 
     for r in Progress(rows):
         v = col.getValue(r)

@@ -15,21 +15,21 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __version__ = '0.9'
 
 import os
-from visidata import DirSheet, option, options, SuspendCurses, fail
+from visidata import vd, DirSheet, SuspendCurses
 
-option('mimetype', '', 'mimetype to be used with mailcap')
+vd.option('mimetype', '', 'mimetype to be used with mailcap')
 
 @DirSheet.api
 def run_mailcap(sheet, p, key):
     import mailcap
     import mimetypes
 
-    mimetype = options.mimetype
+    mimetype = sheet.options.mimetype
     if not mimetype:
         mimetype, encoding = mimetypes.guess_type(str(p))
 
     if not mimetype:
-        fail('no mimetype given and no guess')
+        vd.fail('no mimetype given and no guess')
 
     caps = mailcap.getcaps()
 
