@@ -85,6 +85,7 @@ def undoAttrCopyFunc(objs, attrname):
 
 @VisiData.api
 def addUndoSetValues(vd, cols, rows):
+    'Add undo function to reset values for *rows* in *cols*.'
     oldvals = [(c, r, c.getValue(r)) for c,r in itertools.product(cols, vd.Progress(rows, gerund='doing'))]
     def _undo():
         for c, r, v in oldvals:

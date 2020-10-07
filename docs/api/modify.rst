@@ -45,7 +45,8 @@ Therefore, commands should always use ``Column.setValues``, unless for some spec
 Undo functions, however, should use ``Column.setValue``, so it doesn't add an undo function for the undo itself.
 (Redo is handled by replaying the previous command, not by undoing the undo).
 
-.. autofunction:: visidata.addUndo
+.. autofunction:: visidata.vd.addUndo
+.. autofunction:: visidata.vd.addUndoSetValues
 
 
 Example
