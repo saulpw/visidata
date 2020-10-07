@@ -22,5 +22,7 @@ namestand           # graphviz
 datapackage         # frictionless .json
 pdfminer.six        # pdf
 vobject             # vcf
+tabulate            # tabulate saver
+wcwidth             # tabulate saver with unicode
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb

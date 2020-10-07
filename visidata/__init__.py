@@ -126,6 +126,7 @@ from .loaders.pdf import *
 from .loaders.pandas_freqtbl import *
 from .loaders.xword import *
 from .loaders.vcf import *
+from .loaders.tabulate import *
 
 from .plugins import *
 
