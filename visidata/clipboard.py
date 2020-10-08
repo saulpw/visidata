@@ -185,7 +185,7 @@ Sheet.addCommand('gd', 'delete-selected', 'copyRows(selectedRows); deleteSelecte
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(selectedRows)', 'yank (copy) selected rows to clipboard')
 
 Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to clipboard')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0])', 'set contents of current cell to last clipboard value')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0]) if vd.clipcells else warning("no cells to paste")', 'set contents of current cell to last clipboard value')
 Sheet.addCommand('zd', 'delete-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
 Sheet.addCommand('gzd', 'delete-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in selectedRows); cursorCol.setValues(selectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
 
