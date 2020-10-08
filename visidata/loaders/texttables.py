@@ -14,6 +14,7 @@ try:
                         headers=[ col.name for col in vs.visibleCols ],
                         tablefmt=fmt))
 
-        setattr(vd, 'save_'+fmt, save_table)
+        if not getattr(vd, 'save_'+fmt, None):
+            setattr(vd, 'save_'+fmt, save_table)
 except ModuleNotFoundError:
     pass
