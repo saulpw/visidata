@@ -15,5 +15,5 @@ try:
                         tablefmt=fmt))
 
         setattr(vd, 'save_'+fmt, save_table)
-except Exception:
+except ModuleNotFoundError:
     pass
