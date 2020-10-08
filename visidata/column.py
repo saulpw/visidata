@@ -486,9 +486,9 @@ class EnumColumn(Column):
 
 
 class ExprColumn(Column):
-    'Column using *expr* to derive the value from each row.  Cached by default.'
-    def __init__(self, name, expr=None, cache=True, **kwargs):
-        super().__init__(name, cache=cache, **kwargs)
+    'Column using *expr* to derive the value from each row.'
+    def __init__(self, name, expr=None, **kwargs):
+        super().__init__(name, **kwargs)
         self.expr = expr or name
         self.ncalcs = 0
         self.totaltime = 0

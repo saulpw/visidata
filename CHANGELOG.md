@@ -10,6 +10,7 @@
     - [sqlite] remove name of db from an **SqliteSheet**'s name, only tablename
     - [syspaste] make `syspaste-` replayable and undoable (note that `syspaste-` value will be recorded in **CommandLog**)
     - [savers] many text saver filetypes via tabulate library (thanks @jsvine for original vdtabulate plugin)
+    - [calc] ExprColumn no longer cached by default
 
 ## Options
     - add `options.incr_base` (thanks @chocolateboy for the suggestion #647)
