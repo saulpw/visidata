@@ -3,7 +3,7 @@ from visidata import vd, Progress
 
 try:
     import tabulate
-    for fmt in tabulate_formats:
+    for fmt in tabulate.tabulate_formats:
         def save_table(path, *sheets):
             import tabulate
 
