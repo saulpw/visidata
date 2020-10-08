@@ -113,6 +113,8 @@ Instead use addColorizer and removeColorizer.
 .. autofunction:: visidata.TableSheet.addColorizer
 .. autofunction:: visidata.TableSheet.removeColorizer
 
+.. autoclass:: visidata.DisplayWrapper
+
 .. autoclass:: visidata.RowColorizer
 .. autoclass:: visidata.ColumnColorizer
 .. autoclass:: visidata.CellColorizer
@@ -121,8 +123,9 @@ Instead use addColorizer and removeColorizer.
 - *coloropt*: name of color option, or ``None``.
 - *func*: ``func(sheet, col, row, value)`` is called for each cell as it is being rendered. Return True when *coloropt* should be applied to the cell.  If *coloropt* is None, ``func(...)`` can return the relevant coloropt (or None) instead.
 
-Attributes (underline, bold, reverse) combine, regardless of *precedence*.
+- Attributes (underline, bold, reverse) combine, regardless of *precedence*.  Only colors will override other.
 
+- The *value* passed to the Colorizer *func* is a ``DisplayWrapper``, which encapsulates the entirety of a displayed cell.  Use ``val.value`` to get the typed value (or None), or ``val.display`` for the displayed string.
 
 .. note::
 
