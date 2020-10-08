@@ -141,7 +141,7 @@ class VisiDataSheet(IndexSheet):
             ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl+P', 'status messages from current session'),
             ('threadsSheet', 'threads', 'open-threads', 'Ctrl+T', 'threads and profiling'),
             ('vdmenu', 'visidata_menu', 'open-vd', 'Shift+V', 'VisiData menu (this sheet)'),
-            ('pluginsSheet', 'plugins', 'open-plugins', '', 'plugins bazaar'),
+            ('pluginsSheet', 'plugins', 'open-plugins', '', 'VisiData community plugins'),
             ]:
             vs = getattr(vd, vdattr)
             vs.description = desc

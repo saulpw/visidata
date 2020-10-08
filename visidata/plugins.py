@@ -11,7 +11,7 @@ option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of p
 
 @VisiData.lazy_property
 def pluginsSheet(p):
-    return PluginsSheet('plugins_bazaar')
+    return PluginsSheet('plugins_global')
 
 def _plugin_path(plugin):
     return Path(os.path.join(options.visidata_dir, "plugins", plugin.name+".py"))

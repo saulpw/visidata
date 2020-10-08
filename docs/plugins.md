@@ -42,7 +42,7 @@ To install a plugin, and its dependencies, from within VisiData:
 
 **or**
 
-1. Launch the **vdmen** with `vd` on the commandline (do not provide a source). Press `Enter` on the row referencing the *plugins bazaar*.
+1. Launch the **vdmen** with `vd` on the commandline (do not provide a source). Press `Enter` on the row referencing the *plugins sheet*.
 2. To download and install a plugin, move the cursor to its row and press `a` (add).
 3. To uninstall a plugin, move the cursor to its row and press `d` (delete).
 
