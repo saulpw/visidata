@@ -150,7 +150,7 @@ class PluginsSheet(JsonLinesSheet):
             os.unlink(_plugin_path(plugin))
             sys.modules.pop(_plugin_import_name(plugin))
             importlib.invalidate_caches()
-            vd.warning('{0} plugin uninstalled'.format(plugin[0]))
+            vd.warning('{0} plugin uninstalled'.format(plugin['name']))
         except FileNotFoundError:
             vd.warning("no plugins/__init__.py found")
 
