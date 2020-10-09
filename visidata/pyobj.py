@@ -305,7 +305,7 @@ def openRow(sheet, row):
 def openCell(sheet, col, row):
     'Return Sheet diving into cell at *row* in *col*.'
     k = sheet.keystr(row) or [str(sheet.cursorRowIndex)]
-    name = f'{sheet.name}.{col.name}[{k}]'
+    name = f'{sheet.name}[{k}].{col.name}'
     return PyobjSheet(name, source=col.getTypedValue(row))
 
 
