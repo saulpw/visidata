@@ -68,10 +68,12 @@ class RecIndexSheet(IndexSheet):
                     sheet.name = rest
                 elif desc in 'mandatory allowed':
                     for colname in rest.split():
-                        sheet.addColumn(ItemColumn(colname))
+                        if colname not in sheet.colnames:
+                            sheet.addColumn(ItemColumn(colname))
                 elif desc in ['key', 'unique']:
                     for i, colname in enumerate(rest.split()):
-                        sheet.addColumn(ItemColumn(colname, keycol=i+1))
+                        if colname not in sheet.colnames:
+                            sheet.addColumn(ItemColumn(colname, keycol=i+1))
                 elif desc in ['sort']:
                     sheet.orderBy([sheet.column(colname) for colname in rest.split()])
                 elif desc in ['type', 'typedef']:
