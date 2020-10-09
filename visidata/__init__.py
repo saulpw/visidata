@@ -127,6 +127,7 @@ from .loaders.pandas_freqtbl import *
 from .loaders.xword import *
 from .loaders.vcf import *
 from .loaders.texttables import *
+from .loaders.rec import *
 
 from .plugins import *
 
