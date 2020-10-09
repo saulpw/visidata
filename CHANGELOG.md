@@ -11,6 +11,8 @@
     - [syspaste] make `syspaste-` replayable and undoable (note that `syspaste-` value will be recorded in **CommandLog**)
     - [savers] many text saver filetypes via tabulate library (thanks @jsvine for original vdtabulate plugin)
     - [calc] ExprColumn no longer cached by default
+    - [loaders rec] add new .rec file loader and multisheet saver (recutils)
+    - [savers] implemented multisheet saver for both json and jsonl
 
 ## Options
     - add `options.incr_base` (thanks @chocolateboy for the suggestion #647)
@@ -74,6 +76,7 @@
 
 ## Plugins
     - update sparkline (thanks @layertwo #696)
+    - plugin dependencies now install into `plugins-deps` (former plugin-deps)
 
 ## Dev niceties
     - Fully automate dev setup with Gitpod.io (thanks @ajkerrigan for PR #673)
