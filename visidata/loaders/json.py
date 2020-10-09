@@ -108,18 +108,24 @@ def _rowdict(cols, row):
 
 
 @VisiData.api
-def save_json(vd, p, vs):
+def save_json(vd, p, *vsheets):
     with p.open_text(mode='w') as fp:
-        vcols = vs.visibleCols
+        if len(vsheets) == 1:
+            vs = vsheets[0]
+            it = [_rowdict(vs.visibleCols, row) for row in vs.iterrows()]
+        else:
+            it = {vs.name: [_rowdict(vs.visibleCols, row) for row in vs.iterrows()] for vs in vsheets}
+
         jsonenc = _vjsonEncoder(indent=options.json_indent)
         with Progress(gerund='saving'):
-            for chunk in jsonenc.iterencode([_rowdict(vcols, row) for row in vs.iterrows()]):
+            for chunk in jsonenc.iterencode(it):
                 fp.write(chunk)
 
 
 @VisiData.api
-def save_jsonl(vd, p, vs):
+def save_jsonl(vd, p, *vsheets):
     with p.open_text(mode='w') as fp:
+      for vs in vsheets:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
         with Progress(gerund='saving'):
