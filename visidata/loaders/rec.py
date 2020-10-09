@@ -1,9 +1,10 @@
 from visidata import *
 
+@VisiData.api
 def open_rec(p):
     return RecIndexSheet(p.name, source=p)
 
-def get_multiline(line, fp):
+def decode_multiline(line, fp):
     'Parse *line* and lookahead into *fp* as iterator for continuing lines.  Return (multiline, next_line) where *multiline* can contain newlines and *next_line is the line after the combined *multiline*.  Handle "\\" at end and "+" at beginning of lines.  *next_line* will be None iff iterator is exhausted.'
     while True:
         try:
@@ -20,6 +21,10 @@ def get_multiline(line, fp):
         else:
             return line, next_line
 
+def encode_multiline(s):
+    return '\n+ '.join(s.splitlines())
+
+
 def get_kv(line):
     return re.split(r':[ \t]?', line, maxsplit=1)
 
@@ -35,13 +40,12 @@ class RecIndexSheet(IndexSheet):
         sheet = None
         row = None
         newRecord = True
-        name = None
         next_line = ''
         comments = []
 
         fp = iter(self.source)
         while next_line is not None:
-            line, next_line = get_multiline(next_line, fp)
+            line, next_line = decode_multiline(next_line, fp)
             line = line.lstrip()
 
             if not line:  # end of record separator
@@ -102,3 +106,23 @@ class RecIndexSheet(IndexSheet):
 
         for sheet in Progress(self.rows):
             sheet.sort()
+
+
+@VisiData.api
+def save_rec(vd, p, *vsheets):
+    with p.open_text(mode='w') as fp:
+        for vs in vsheets:
+            comments = getattr(vs, 'comments', [])
+            if comments:
+                fp.write('# ' + '\n# '.join(comments) + '\n')
+            fp.write('%rec: ' + vs.name + '\n')
+            fp.write('\n')
+            for col in vs.visibleCols:
+                if col.keycol:
+                    fp.write('%key: ' + col.name + '\n')
+            for row in Progress(vs.rows):
+                for col in vs.visibleCols:
+                    fp.write(col.name+': '+encode_multiline(col.getDisplayValue(row))+'\n')
+
+                fp.write('\n')
+            fp.write('\n')
