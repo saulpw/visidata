@@ -38,6 +38,7 @@ class GraphSheet(InvertedCanvas):
     def __init__(self, *names, **kwargs):
         super().__init__(*names, **kwargs)
 
+        self.xcols or vd.fail('at least one key col necessary for x-axis')
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
 
     @asyncthread
@@ -147,7 +148,7 @@ class GraphSheet(InvertedCanvas):
         self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', colors.color_graph_axis)
 
 
-Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=[cursorCol]))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
+Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols([cursorCol])))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
 Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
 
 # swap directions of up/down
