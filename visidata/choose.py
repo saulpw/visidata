@@ -11,7 +11,7 @@ def chooseOne(vd, L):
 
 @VisiData.api
 def choose(vd, choices, n=None):
-    'Return one of `choices` elements (if list) or values (if dict).'
+    'Return *n* (default 1) of *choices* elements (if list) or values (if dict).'
     ret = vd.chooseMany(choices) or vd.fail('no choice made')
     if n and len(ret) > n:
         vd.fail('can only choose %s' % n)
@@ -28,8 +28,7 @@ class ChoiceSheet(ListOfDictSheet):
 
 @VisiData.api
 def chooseMany(vd, choices):
-    '''choices is a list of dicts; each dict must have a unique "key" whose value has no spaces.  Return a list of 1 or more keys, as chosen by the user.
-    Handle replay correctly.'''
+    '''*choices* is a list of dicts; each dict must have a unique "key" whose value has no spaces.  Return a list of 1 or more keys, as chosen by the user.  Handle replay correctly.'''
     if vd.cmdlog:
         v = vd.getLastArgs()
         if v is not None:
