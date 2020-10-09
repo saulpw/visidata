@@ -110,8 +110,8 @@ TableSheet.addCommand('zm', 'unmark-row', 'vd.unmark(sheet, [cursorRow], vd.mark
 TableSheet.addCommand('gm', 'mark-selected', 'vd.mark(sheet, selectedRows, vd.marks.inputmark())', '')
 TableSheet.addCommand('gzm', 'unmark-selected', 'vd.unmark(sheet, selectedRows, vd.marks.inputmark())', '')
 
-TableSheet.addCommand('zs', 'select-marks', 'select(gatherBy(lambda r,mark=vd.marks.inputmark(): vd.marks.isMarked(r, mark)))', '')
-TableSheet.addCommand('zt', 'toggle-marks', 'toggle(gatherBy(lambda r,mark=vd.marks.inputmark(): vd.marks.isMarked(r, mark)))', '')
-TableSheet.addCommand('zu', 'unselect-marks', 'unselect(gatherBy(lambda r,mark=vd.marks.inputmark(): vd.marks.isMarked(r, mark)))', '')
+TableSheet.addCommand('zs', 'select-marks', 'select(gatherBy(lambda r,mark=vd.marks.inputmark(): vd.marks.isMarked(r, mark)), progress=False)', '')
+TableSheet.addCommand('zt', 'toggle-marks', 'toggle(gatherBy(lambda r,mark=vd.marks.inputmark(): vd.marks.isMarked(r, mark)), progress=False)', '')
+TableSheet.addCommand('zu', 'unselect-marks', 'unselect(gatherBy(lambda r,mark=vd.marks.inputmark(): vd.marks.isMarked(r, mark)), progress=False)', '')
 
 TableSheet.addCommand('', 'open-marks', 'vd.push(vd.marks)', '')
