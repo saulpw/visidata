@@ -32,7 +32,7 @@ def prev(sheet, row):
 
 
 @Sheet.api
-def addcol_rowindex(sheet, newcol, vcolidx):
+def addcol_rowindex(sheet, newcol):
     oldAddRow = sheet.addRow
     def rownum_addRow(sheet, col, row, index=None):
         if index is None:
@@ -43,7 +43,7 @@ def addcol_rowindex(sheet, newcol, vcolidx):
 
     # wrapper addRow to keep the index up to date
     sheet.addRow = wraps(oldAddRow)(partial(rownum_addRow, sheet, newcol))
-    sheet.addColumn(newcol, index=vcolidx+1)
+    sheet.addColumnAtCursor(newcol)
 
     # spawn a little thread to calc the rowindex
     sheet.calcRowIndex(newcol._rowindex)
@@ -58,18 +58,18 @@ def addcol_delta(sheet, vcolidx):
                    _rowindex={},    # [rowid(row)] -> rowidx
                    expr="{0}-prev(row).{0}".format(col.name))
 
-    sheet.addcol_rowindex(newcol, vcolidx)
+    sheet.addcol_rowindex(newcol)
     return newcol
 
 @Sheet.api
-def addcol_rownum(sheet, vcolidx):
+def addcol_rownum(sheet):
     newcol = Column("rownum",
                type=int,
                _rowindex={},    # [rowid(row)] -> rowidx
                getter=lambda col,row: col._rowindex.get(col.sheet.rowid(row)))
 
-    sheet.addcol_rowindex(newcol, vcolidx)
+    sheet.addcol_rowindex(newcol)
     return newcol
 
-Sheet.addCommand(None, 'addcol-rownum', 'addcol_rownum(cursorColIndex)', helpstr='add column with original row ordering')
-Sheet.addCommand(None, 'addcol-delta', 'addcol_delta(cursorColIndex)', helpstr='add column with delta of current column')
+Sheet.addCommand(None, 'addcol-rownum', 'addcol_rownum()', helpstr='add column with original row ordering')
+Sheet.addCommand(None, 'addcol-delta', 'addcol_delta()', helpstr='add column with delta of current column')

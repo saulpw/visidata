@@ -8,9 +8,8 @@ def resetCache(col):
 
 
 @Sheet.api
-def StaticColumn(sheet, col, pos):
+def StaticColumn(sheet, col):
     frozencol = SettableColumn(col.name+'_frozen', width=col.width, type=col.type, fmtstr=col._fmtstr)
-    sheet.addColumn(frozencol, pos)
 
     @asyncthread
     def calcRows_async(frozencol, rows, col):
@@ -50,7 +49,7 @@ class StaticSheet(Sheet):
                     row.append(None)
 
 
-Sheet.addCommand("'", 'freeze-col', 'StaticColumn(cursorCol, cursorColIndex+1)', 'add a frozen copy of current column with all cells evaluated')
+Sheet.addCommand("'", 'freeze-col', 'sheet.addColumnAtCursor(StaticColumn(cursorCol))', 'add a frozen copy of current column with all cells evaluated')
 Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated')
 Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()', 'add/reset cache for current column')
 Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()', 'add/reset cache for all visible columns')

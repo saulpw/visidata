@@ -423,7 +423,7 @@ class TableSheet(BaseSheet):
     def statusLine(self):
         'Position of cursor and bounds of current sheet.'
         rowinfo = 'row %d (%d selected)' % (self.cursorRowIndex, self.nSelectedRows)
-        colinfo = 'col %d (%d visible)' % (self.cursorColIndex, len(self.visibleCols))
+        colinfo = 'col %d (%d visible)' % (self.cursorVisibleColIndex, len(self.visibleCols))
         return '%s  %s' % (rowinfo, colinfo)
 
     @property
@@ -450,16 +450,20 @@ class TableSheet(BaseSheet):
         self.cursorVisibleColIndex += n
         self.calcColLayout()
 
-    def addColumn(self, col, index=None):
+    def addColumn(self, *cols, index=None):
         'Insert Column *col* into columns at *index*, or append to end of columns if *index* is None.'
-        if col:
+        for i, col in enumerate(cols):
             vd.addUndo(self.columns.remove, col)
             if index is None:
                 index = len(self.columns)
             col.recalc(self)
-            self.columns.insert(index, col)
+            self.columns.insert(index+i, col)
             Sheet.visibleCols.fget.cache_clear()
-            return col
+
+        return cols[0]
+
+    def addColumnAtCursor(self, *cols):
+        return self.addColumn(*cols, index=0 if self.cursorCol.keycol else self.columns.index(self.cursorCol))
 
     def setColNames(self, rows):
         for c in self.visibleCols:

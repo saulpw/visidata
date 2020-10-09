@@ -42,7 +42,6 @@ Row cursor as an index into ``TableSheet.rows``.  Settable.
 .. autofunction:: visidata.BaseSheet.checkCursor
 
 .. autoattribute:: visidata.TableSheet.cursorCol
-.. autoattribute:: visidata.TableSheet.cursorColIndex
 .. autoattribute:: visidata.TableSheet.cursorValue
 .. autoattribute:: visidata.TableSheet.cursorTypedValue
 .. autoattribute:: visidata.TableSheet.cursorDisplay

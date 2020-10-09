@@ -42,10 +42,10 @@ class UnfurledSheet(Sheet):
 
 
 @Sheet.api
-def unfurl_col(sheet, col, col_index):
+def unfurl_col(sheet, col):
     clean_id = clean_to_id(col.name)
     vs = UnfurledSheet(f"{sheet.name}_{clean_id}_unfurled", source=sheet, source_col=col)
     return vs
 
 
-Sheet.addCommand("zM", "unfurl-col", "vd.push(unfurl_col(cursorCol, cursorColIndex))", "row-wise expand current column of lists (e.g. [2]) or dicts (e.g. {3}) within that column")
+Sheet.addCommand("zM", "unfurl-col", "vd.push(unfurl_col(cursorCol))", "row-wise expand current column of lists (e.g. [2]) or dicts (e.g. {3}) within that column")

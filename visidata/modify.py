@@ -279,7 +279,7 @@ def commit(sheet, *rows):
 
 Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
 Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
-Sheet.addCommand('za', 'addcol-new', 'addColumn(SettableColumn(), cursorColIndex+1); cursorRight(1)', 'append an empty column')
-Sheet.addCommand('gza', 'addcol-bulk', 'for c in range(int(input("add columns: "))): addColumn(SettableColumn(), cursorColIndex+c+1)', 'append N empty columns')
+Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn()); cursorRight(1)', 'append an empty column')
+Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: ")))))', 'append N empty columns')
 
 Sheet.addCommand('z^S', 'commit-sheet', 'commit()')

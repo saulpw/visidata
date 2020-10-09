@@ -45,7 +45,7 @@ The ``vd`` and ``sheet`` symbols are available to specify explicitly.
 
 .. warning::
 
-   In an *execstr*, while you can **get** an attribute on ``vd`` or ``sheet`` without specifying the object, to **set** an attribute does require an explicit object.  e.g. instead of ``cursorColIndex=2``, it must be ``sheet.cursorColIndex=2``.
+   In an *execstr*, while you can **get** an attribute on ``vd`` or ``sheet`` without specifying the object, to **set** an attribute does require an explicit object.  e.g. instead of ``cursorRowIndex=2``, it must be ``sheet.cursorRowIndex=2``.
 
 Commands API
 ~~~~~~~~~~~~

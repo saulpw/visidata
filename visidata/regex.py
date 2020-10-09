@@ -30,7 +30,7 @@ def makeRegexMatcher(regex, origcol):
     return _regexMatcher
 
 @asyncthread
-def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
+def addRegexColumns(regexMaker, vs, origcol, regexstr):
     regexstr or vd.fail('regex required')
 
     regex = re.compile(regexstr, vs.regex_flags())
@@ -43,6 +43,7 @@ def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
     else:
         exampleRows = vs.rows
 
+    cols = []
     ncols = 0  # number of new columns added already
     for r in Progress(exampleRows + [vs.cursorRow]):
         try:
@@ -52,12 +53,12 @@ def addRegexColumns(regexMaker, vs, colIndex, origcol, regexstr):
         except Exception as e:
             vd.exceptionCaught(e)
 
-        for _ in range(len(m)-ncols):
-            c = Column(origcol.name+'_re'+str(ncols),
-                            getter=lambda col,row,i=ncols,func=func: func(row)[i],
-                            origCol=origcol)
-            vs.addColumn(c, index=colIndex+ncols+1)
-            ncols += 1
+        for _ in range(len(m)-len(cols)):
+            cols.append(Column(origcol.name+'_re'+str(len(cols)),
+                            getter=lambda col,row,i=len(cols),func=func: func(row)[i],
+                            origCol=origcol))
+
+    vs.addColumnAtCursor(*cols)
 
 
 def regexTransform(origcol, instr):
@@ -99,8 +100,8 @@ def regex_flags(sheet):
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
 
-Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorColIndex, cursorCol, input("split regex: ", type="regex-split"))', 'add new columns from regex split; number of columns determined by example row at cursor')
-Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorColIndex, cursorCol, input("match regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row')
-Sheet.addCommand('*', 'addcol-subst', 'addColumn(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))), cursorColIndex+1)', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)')
+Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, sheet, cursorCol, input("split regex: ", type="regex-split"))', 'add new columns from regex split; number of columns determined by example row at cursor')
+Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, sheet, cursorCol, input("match regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row')
+Sheet.addCommand('*', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)')
 Sheet.addCommand('g*', 'setcol-subst', 'setSubst([cursorCol], selectedRows)', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)')
 Sheet.addCommand('gz*', 'setcol-subst-all', 'setSubst(visibleCols, selectedRows)', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)')

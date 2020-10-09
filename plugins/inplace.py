@@ -1,4 +1,4 @@
-from visidata import Column, vd, VisiData, options, ColumnExpr, CompleteExpr, fail, EscapeException, Sheet
+from visidata import Column, vd, ColumnExpr, CompleteExpr, EscapeException, Sheet
 
 
 @Column.api
@@ -21,10 +21,10 @@ def expr(self, expr):
         self._expr = None
 
 
-@VisiData.api
-def addcol_expr(vd, sheet, colidx):
+@Sheet.api
+def addcol_expr(sheet):
     try:
-        c = sheet.addColumn(ColumnExpr("", width=options.default_width), index=colidx)
+        c = sheet.addColumnAtCursor(ColumnExpr("", width=sheet.options.default_width))
         oldidx = sheet.cursorVisibleColIndex
         sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
 
@@ -32,7 +32,7 @@ def addcol_expr(vd, sheet, colidx):
                                 completer=CompleteExpr(sheet),
                                 updater=lambda val,col=c: col.updateExpr(val))
 
-        c.expr = expr or fail("no expr")
+        c.expr = expr or vd.fail("no expr")
         c.name = expr
         c.width = None
     except (Exception, EscapeException):
@@ -41,5 +41,5 @@ def addcol_expr(vd, sheet, colidx):
         raise
 
 
-Sheet.addCommand(None, 'addcol-expr', 'addcol_expr(sheet, cursorColIndex+1)')
-Sheet.addCommand(None, 'addcol-new', 'c=addColumn(SettableColumn(width=options.default_width), cursorColIndex+1); draw(vd.scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None')
+Sheet.addCommand(None, 'addcol-expr', 'sheet.addcol_expr()')
+Sheet.addCommand(None, 'addcol-new', 'c=addColumnAtIndex(SettableColumn(width=options.default_width)); draw(vd.scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None')
