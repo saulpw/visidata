@@ -128,6 +128,7 @@ from .loaders.xword import *
 from .loaders.vcf import *
 from .loaders.texttables import *
 from .loaders.rec import *
+from .loaders.eml import *
 
 from .plugins import *
 

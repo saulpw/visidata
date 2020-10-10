@@ -13,6 +13,7 @@
     - [calc] ExprColumn no longer cached by default
     - [loaders rec] add new .rec file loader and multisheet saver (recutils)
     - [savers] implemented multisheet saver for both json and jsonl
+    - [loaders eml] add new .eml file loader for email files with attachments
 
 ## Options
     - add `options.incr_base` (thanks @chocolateboy for the suggestion #647)
