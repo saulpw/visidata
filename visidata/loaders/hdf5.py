@@ -27,12 +27,12 @@ class Hdf5ObjSheet(Sheet):
         elif isinstance(source, h5py.Dataset):
             if len(source.shape) == 1:
                 for i, colname in enumerate(source.dtype.names or [0]):
-                    self.addColumn(ColumnItem(colname, colname), i)
+                    self.addColumn(ColumnItem(colname, colname), index=i)
                 yield from source  # copy
             elif len(source.shape) == 2:  # matrix
                 ncols = source.shape[1]
                 for i in range(ncols):
-                    self.addColumns(ColumnItem('', i, width=8), i)
+                    self.addColumns(ColumnItem('', i, width=8), index=i)
                 self.recalc()
                 yield from source  # copy
             else:
