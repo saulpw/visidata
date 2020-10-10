@@ -1,12 +1,12 @@
 from copy import copy
-from visidata import vd, asyncthread, Progress, Sheet, options
+from visidata import vd, asyncthread, Progress, Sheet, options, UNLOADED
 
 Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
 
 @Sheet.api
 def orderBy(sheet, *cols, reverse=False):
-    'Add *cols* to internal ordering.  Pass *reverse* as True to order these *cols* descending.  Pass empty *cols* (or cols[0] of None) to clear internal ordering.  Does not sort the sheet.'
+    'Add *cols* to internal ordering and re-sort the rows accordingly.  Pass *reverse* as True to order these *cols* descending.  Pass empty *cols* (or cols[0] of None) to clear internal ordering.'
     if options.undo:
         vd.addUndo(setattr, sheet, '_ordering', copy(sheet._ordering))
         if sheet._ordering:
@@ -41,6 +41,8 @@ class Reversor:
 @asyncthread
 def sort(self):
     'Sort rows according to the current internal ordering.'
+    if self.rows is UNLOADED:
+        return
     try:
         with Progress(gerund='sorting', total=self.nRows) as prog:
             def sortkey(r):
