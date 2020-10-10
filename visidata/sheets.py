@@ -464,7 +464,7 @@ class TableSheet(BaseSheet):
 
     def addColumnAtCursor(self, *cols):
         'Insert all *cols* into columns after cursor.  Return first column.'
-        return self.addColumn(*cols, index=0 if self.cursorCol.keycol else self.columns.index(self.cursorCol))
+        return self.addColumn(*cols, index=0 if self.cursorCol.keycol else self.columns.index(self.cursorCol)+1)
 
     def setColNames(self, rows):
         for c in self.visibleCols:
