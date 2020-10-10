@@ -451,7 +451,7 @@ class TableSheet(BaseSheet):
         self.calcColLayout()
 
     def addColumn(self, *cols, index=None):
-        'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.'
+        'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.'
         for i, col in enumerate(cols):
             vd.addUndo(self.columns.remove, col)
             if index is None:
@@ -463,6 +463,7 @@ class TableSheet(BaseSheet):
         return cols[0]
 
     def addColumnAtCursor(self, *cols):
+        'Insert all *cols* into columns after cursor.  Return first column.'
         return self.addColumn(*cols, index=0 if self.cursorCol.keycol else self.columns.index(self.cursorCol))
 
     def setColNames(self, rows):

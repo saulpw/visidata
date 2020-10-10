@@ -10,6 +10,7 @@ def resetCache(col):
 @Sheet.api
 def StaticColumn(sheet, col):
     frozencol = SettableColumn(col.name+'_frozen', width=col.width, type=col.type, fmtstr=col._fmtstr)
+    frozencol.recalc(sheet)
 
     @asyncthread
     def calcRows_async(frozencol, rows, col):
