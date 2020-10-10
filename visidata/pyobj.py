@@ -90,7 +90,7 @@ def _addExpandedColumns(col, rows, idx):
     expandedCols = _createExpandedColumns(nonNulls[0], col, nonNulls)
 
     for i, c in enumerate(expandedCols):
-        col.sheet.addColumn(c, idx+i+1)
+        col.sheet.addColumn(c, index=idx+i+1)
     if expandedCols:
         col.hide()
     return expandedCols
