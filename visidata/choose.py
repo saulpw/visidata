@@ -77,3 +77,4 @@ def chooseMany(vd, choices):
 
 
 ChoiceSheet.addCommand(ENTER, 'choose-rows', 'makeChoice(selectedRows or [cursorRow])')
+ChoiceSheet.addCommand('g'+ENTER, 'choose-rows-selected', 'makeChoice(someSelectedRows)')
