@@ -120,7 +120,7 @@ class HistoryState:
 
 # history: earliest entry first
 @VisiData.api
-def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None):
+def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None, bindings={}):
   'A better curses line editing widget.'
   with EnableCursor():
     ESC='^['
@@ -213,6 +213,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == 'kDN5':                         pass
         elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
         elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
+        elif ch in bindings:                       v, i = bindings[ch](v, i)
         elif len(ch) > 1:                          pass
         else:
             if first_action:
@@ -290,6 +291,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         - *record*: pass False to not record input on cmdlog (for sensitive or inconsequential input).
         - *completer*: ``completer(val, idx)`` is called on TAB to get next completed value.
         - *updater*: ``updater(val)`` is called every keypress or timeout.
+        - *bindings*: dict of keystroke to func(v, i) that returns updated (v, i)
     '''
     if type:
         if isinstance(type, str):
