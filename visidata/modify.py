@@ -52,7 +52,7 @@ def cellChanged(col, row, val):
         rowmods[col] = val
 
         def _undoCellChanged(col, row, oldval):
-            if oldval == col.getSavedValue(row):
+            if oldval == col.getSourceValue(row):
                 # if we have reached the original value, remove from defermods entirely
                 del col.sheet._deferredMods[col.sheet.rowid(row)]
             else:
@@ -141,7 +141,7 @@ def isChanged(self, col, row):
     try:
         row, rowmods = self._deferredMods[self.rowid(row)]
         newval = rowmods[col]
-        curval = col.getSavedValue(row)
+        curval = col.getSourceValue(row)
         return col.type(newval) != col.type(curval)
     except KeyError:
         return False
