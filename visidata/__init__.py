@@ -93,6 +93,7 @@ import visidata.sort
 import visidata.unfurl
 import visidata.fill
 import visidata.incr
+import visidata.customdate
 
 from .loaders.csv import *
 from .loaders.archive import *
