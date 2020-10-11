@@ -51,6 +51,6 @@ This extends VisiData so that when :kbd:`1` is pressed on any sheet, the command
 Toplevel functions
 ===================
 
-:: autofunction visidata.vd.view
-:: autofunction visidata.vd.view_pandas
-:: autofunction visidata.vd.run
+.. autofunction visidata.vd.view
+.. autofunction visidata.vd.view_pandas
+.. autofunction visidata.vd.run
