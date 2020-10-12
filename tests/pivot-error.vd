@@ -1,5 +1,6 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/test.jsonl	o	
+test		numeric_binning	set-option	False		
 test	key1		type-date		@	
 test	qty		type-int		#	
 test	amt		type-float		%	

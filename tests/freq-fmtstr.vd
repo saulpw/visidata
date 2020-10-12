@@ -1,5 +1,6 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/benchmark.csv	o	
+		numeric_binning	set-option	False		
 benchmark	Date		type-date		@	
 benchmark			columns-sheet		C	
 benchmark_columns	fmtstr	キDate	edit-cell	%Y-%m	e	
