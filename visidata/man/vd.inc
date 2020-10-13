@@ -369,9 +369,9 @@ open
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column
 .It Ic " &"
-.No concatenate top two sheets in Sy Sheets Stack No
+.No concatenate top two sheets in Sy Sheets Stack
 .It Ic "g&"
-.No concatenate all sheets in Sy Sheets Stack No
+.No concatenate all sheets in Sy Sheets Stack
 .Pp
 .El
 .Ss Data Visualization
@@ -654,7 +654,7 @@ abort async threads for current/selected sheets(s)
 .It Ic zO
 .No edit sheet options (apply to Sy current sheet No only)
 .It Ic gO
-.No open Sy options.config No as Sy TextSheet No
+.No open Sy options.config No as Sy TextSheet
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
