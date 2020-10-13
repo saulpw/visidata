@@ -12,7 +12,7 @@ A terminal interface for exploring and arranging tabular data.
 - Python 3.6+
 - python-dateutil
 - other modules may be required for opening particular data sources
-    - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](https://visidata.org/man/#loaders) in the vd manpage
+    - see [requirements.txt](https://github.com/saulpw/visidata/blob/stable/requirements.txt) or the [supported sources](https://visidata.org/formats) in the vd manpage
 
 ## Getting started
 
@@ -51,7 +51,6 @@ Use `-f <filetype>` to force a particular filetype.
 
 * [Intro to VisiData Tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
 * Quick reference: `Ctrl+H` within `vd` will open the [man page](https://visidata.org/man), which has a list of all commands and options.
-* [keyboard list of commands](https://visidata.org/docs/kblayout)
 * [/docs](https://visidata.org/docs) contains a collection of howto recipes.
 
 ### Help and Support
@@ -61,10 +60,8 @@ If you have a question, issue, or suggestion regarding VisiData, please [create 
 Here are some concrete ways you can help make VisiData even more awesome:
 
 * Write a blogpost (or tweet or whatever) about a VisiData command or feature you use frequently, and share it with us!
-* Expand VisiData to support .xyz proprietary data format.  Creating a loader [is really straightforward](http://visidata.org/docs/loaders/).
-* Pandas users can [help improve the PandasSheet](https://github.com/saulpw/visidata/labels/pandas) with optimizations and pandas-specific integration.
+* Expand VisiData to support .xyz proprietary data format.  Creating a loader [is really straightforward](https://www.visidata.org/docs/api/loaders.html).
 * Create and maintain [new installation packages](https://github.com/saulpw/visidata/labels/packaging).
-* Drive one of the tasks on the [maybe someday list](https://github.com/saulpw/visidata/issues?q=is%3Aissue+%5Bwishlist%5D+).
 * Acknowledge the realities of late-stage capitalism and [give regular old money](https://www.patreon.com/saulpw).
 
 ## Other applications within the VisiData ecosystem

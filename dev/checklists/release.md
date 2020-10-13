@@ -78,7 +78,7 @@
    d. from git clone
 
    ```
-   pip3 install --extra-index-url https://test.pypi.org/project visidata
+   pip3 install -i https://test.pypi.org/simple/ visidata
    ```
 
 9. Merge `develop` to stable
