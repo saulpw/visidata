@@ -136,7 +136,7 @@ class VisiDataSheet(IndexSheet):
             ('allSheetsSheet', 'sheets_all', 'sheets-all', 'g Shift+S', 'all sheets this session'),
             ('allColumnsSheet', 'all_columns', 'columns-all', 'g Shift+C', 'all columns from all sheets'),
             ('cmdlog', 'cmdlog', 'cmdlog-all', 'g Shift+D', 'log of all commands this session'),
-            ('globalOptionsSheet', 'options_global', 'open-global', 'g Shift+O', 'default option values applying to every sheet'),
+            ('globalOptionsSheet', 'options_global', 'open-global', 'Shift+O', 'default option values applying to every sheet'),
             ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl+E', 'stacktrace of most recent error'),
             ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl+P', 'status messages from current session'),
             ('threadsSheet', 'threads', 'open-threads', 'Ctrl+T', 'threads and profiling'),
