@@ -4,7 +4,7 @@ from visidata import vd, Progress
 try:
     import tabulate
     for fmt in tabulate.tabulate_formats:
-        def save_table(path, *sheets):
+        def save_table(path, *sheets, fmt=fmt):
             import tabulate
 
             with path.open_text(mode='w') as fp:
