@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.-5 (XXXX-XX-XX)
+# v2.0 (2020-10-12)
 
 ## Additions and Improvements
     - [aggregators] allow custom aggregators in plugins/visidatarc (thanks @geekscrapy for the feature request #651)
@@ -21,7 +21,11 @@
         - applies to **Sheets** and **Columns** now (thanks @geekscrapy for the request #594)
     - for --X=Y, do not replace - with _ in Y (thanks @forensicdave for bug report #657)
     - add `options.default_height` for visibility toggle (thanks @frosencrantz for feature request #660)
-  - add support for `--` option-ending option on CLI.
+    - add support for `--` option-ending option on CLI.
+    - [input] default now `fancy_chooser` = True
+        - when fancy_chooser enabled, aggregators and jointype are chosen with a ChoiceSheet.
+        - `s` to select, `Enter` to choose current row, `g Enter` to choose selected rows, `q` to not choose any
+    - numeric_binning is now True by default (enables numeric binning on **PivotSheet** and **FreqTable** for numeric columns
 
 ## Command changes and additions
         - (former) setcol-range (`gz=`) renamed to `setcol-iter`
@@ -33,6 +37,7 @@
         - (former) unbind z{hjkl} from `scroll-col` (thanks @geekscrapy for feature request #662)
         - add `type-floatsi` bound to `z%` (#661)
         - `reload-selected` now reloads all **Sheets** if none selected (thanks @geekscrapy for PR #685)
+        - add customdate with fixed fmtstr for parsing (use `z@` and input a fmtstr compatible with strptime (thanks @suntzuisafterU for feature request #677)
 
 ## Bugfixes
     - [DirSheet] use changed ext as filetype when loading files (thanks @frosencrantz for bug report #645)
@@ -60,6 +65,7 @@
 ## deprecated
     - complete removal of `status` and `statuses` from deprecated (thanks @frosencrantz for bug report #621)
         - longnames are now `open-status` and `show-status`
+    - remove `cursorColIndex`
 
 ## API and Interface
     - `Sheet(*names, **kwargs)` autojoins list of name parts
@@ -74,6 +80,7 @@
     - `format` is now `formatValue`
     - `SettableColumn.cache` is now `._store`
     - `vdtype()` is now `vd.addType()`
+    - add `addColumnAtCursor` (thanks @geekscrapy for bug report #714)
 
 ## Plugins
     - update sparkline (thanks @layertwo #696)
