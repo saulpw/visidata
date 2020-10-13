@@ -1,5 +1,10 @@
 # VisiData version history
 
+# v2.0.1 (2020-10-13)
+
+## Bugfixes
+    - Fix printing of motd to status
+
 # v2.0 (2020-10-12)
 
 ## Additions and Improvements
