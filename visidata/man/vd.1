@@ -873,13 +873,13 @@ error string to use while saving
 command to copy stdin to system clipboard
 .It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No ""
 command to get contents of system clipboard
-.It Sy --fancy-chooser No "             False"
+.It Sy --fancy-chooser Ns = Ns Ar "bool        " No "True"
 a nicer selection interface for aggregators and jointype
 .It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
 numeric aggregators to calculate on Describe sheet
 .It Sy --histogram-bins Ns = Ns Ar "int        " No "0"
 number of bins for histogram of numeric columns
-.It Sy --numeric-binning No "           False"
+.It Sy --numeric-binning Ns = Ns Ar "bool      " No "True"
 bin numeric columns into ranges
 .It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
 time to wait between replayed commands, in seconds
@@ -919,7 +919,7 @@ replay in batch mode (with no interface and all status sent to stdout)
 save the final visible sheet to output at the end of replay
 .It Sy --preplay Ns = Ns Ar "str               " No ""
 longnames to preplay before replay
-.It Sy --imports Ns = Ns Ar "NoneType          " No "None"
+.It Sy --imports Ns = Ns Ar "str               " No "plugins"
 imports to preload before .visidatarc (command-line only)
 .It Sy --incr-base Ns = Ns Ar "float           " No "1.0"
 start value for column increments
