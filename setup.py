@@ -7,7 +7,7 @@ __version__ = '2.0'
 
 setup(name='visidata',
       version=__version__,
-      description='curses interface for exploring and arranging tabular data',
+      description='terminal interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
       author='Saul Pwanson',

@@ -89,7 +89,6 @@
 ## Dev niceties
     - Fully automate dev setup with Gitpod.io (thanks @ajkerrigan for PR #673)
 
-## Additions and Improvements
 
 # v2.-4 (2020-07-27)
 
