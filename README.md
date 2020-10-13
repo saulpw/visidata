@@ -8,7 +8,7 @@ A terminal interface for exploring and arranging tabular data.
 
 ## Dependencies
 
-- Linux or OS/X
+- Linux, OS/X or Windows
 - Python 3.6+
 - python-dateutil
 - other modules may be required for opening particular data sources
@@ -42,7 +42,7 @@ Please see [/install](https://visidata.org/install) for detailed instructions, a
     $ vd [<options>] <input> ...
     $ <command> | vd [<options>]
 
-VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more (see the [list of supported sources](https://visidata.org/man#sources)).
+VisiData supports tsv, csv, xlsx, hdf5, sqlite, json and more (see the [list of supported sources](https://visidata.org/formats)).
 
 Use `-f <filetype>` to force a particular filetype.
 
