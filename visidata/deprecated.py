@@ -1,4 +1,4 @@
-from visidata import VisiData
+from visidata import Column, PyobjSheet, VisiData, vd
 import visidata
 
 alias = visidata.BaseSheet.bindkey
@@ -6,11 +6,15 @@ alias = visidata.BaseSheet.bindkey
 def deprecated(ver, instead=''):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            # ideally would include a stacktrace
+            import traceback
+
+            for line in reversed(traceback.extract_stack(limit=6)[:-1]):
+                vd.warning(f'    file {line.filename} at line {line.lineno} in {line.name}')
+            vd.warning(f'Deprecated call traceback (most recent last):')
             msg = f'{func.__name__} deprecated since v{ver}'
             if instead:
                 msg += f'; use {instead}'
-            visidata.warning(msg)
+            vd.warning(msg)
             return func(*args, **kwargs)
         return wrapper
     return decorator
@@ -30,7 +34,7 @@ def copyToClipboard(value):
 
 @deprecated('1.6')
 def replayableOption(optname, default, helpstr):
-    option(optname, default, helpstr, replay=True)
+    vd.option(optname, default, helpstr, replay=True)
 
 @deprecated('1.6')
 def SubrowColumn(*args, **kwargs):
