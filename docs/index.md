@@ -1,14 +1,5 @@
 # VisiData Documentation
 
-## How the documentation is organised
-
-Inspired by [Daniele Procida](https://www.divio.com/blog/documentation/), the documentation is structured into the following categories:
-* Tutorials take you on a guided tour of features in VisiData. This is the recommended place to start if you are new.
-* Reference guides contain a comprehensive overview of all out-of-box available commands and options.
-* How-to guides are recipes. They will guide you through the steps of common workflows in VisiData.
-* [The VisiData book]() is a high-level overview of fundamental concepts and provides background information on VisiData design decisions.
-
-
 ## Getting started
 
 * [VisiData video demo](https://youtu.be/N1CBDTgGtOU)
