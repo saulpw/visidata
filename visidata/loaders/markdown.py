@@ -1,9 +1,12 @@
 from visidata import *
 
-def markdown_escape(s):
+def markdown_escape(s, style='orgmode'):
+    if style == 'jira':
+        return s
+
     ret = ''
     for ch in s:
-        if ch in '\`*_{}[]()>#+-.!':
+        if ch in '\\`*_{}[]()>#+-.!':
             ret += '\\'+ch
         else:
             ret += ch
@@ -15,19 +18,40 @@ def markdown_colhdr(col):
     else:
         return '-' * (col.width or options.default_width)
 
-def save_md(p, *vsheets):
+def write_md(p, *vsheets, md_style='orgmode'):
     'pipe tables compatible with org-mode'
+
+    if md_style == 'jira':
+        delim = '||'
+    else:
+        delim = '|'
+
     with p.open_text(mode='w') as fp:
         for vs in vsheets:
             if len(vsheets) > 1:
                 fp.write('# %s\n\n' % vs.name)
-            fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.name)) for col in vs.visibleCols) + '|\n')
-            fp.write('|' + '+'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
 
-            for row in Progress(vs.rows, 'saving'):
-                fp.write('|' + '|'.join('%-*s' % (col.width or options.default_width, markdown_escape(col.getDisplayValue(row))) for col in vs.visibleCols) + '|\n')
+            fp.write(delim + delim.join('%-*s' % (col.width or options.default_width, markdown_escape(col.name, md_style)) for col in vs.visibleCols) + '|\n')
+            if md_style == 'orgmode':
+                fp.write('|' + '|'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
+
+            with Progress(gerund='saving'):
+                for dispvals in vs.iterdispvals(format=True):
+                    s = '|'
+                    for col, val in dispvals.items():
+                        s += '%-*s|' % (col.width or options.default_width, markdown_escape(val, md_style))
+                    s += '\n'
+                    fp.write(s)
             fp.write('\n')
 
-    status('%s save finished' % p)
+    vd.status('%s save finished' % p)
 
-multisave_md = save_md
+
+@VisiData.api
+def save_md(vd, p, *sheets):
+    write_md(p, *sheets, md_style='orgmode')
+
+
+@VisiData.api
+def save_jira(vd, p, *sheets):
+    write_md(p, *sheets, md_style='jira')

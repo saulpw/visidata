@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Quantity		type-int		#	
+benchmark			select-expr	Quantity > 4	z|	
+benchmark	Quantity		aggregate-col	mean	+	
+benchmark			freq-summary		zF	

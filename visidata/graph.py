@@ -2,8 +2,6 @@ from visidata import *
 
 option('color_graph_axis', 'bold', 'color for graph axis labels')
 
-Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, [cursorCol]))')
-Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name+"_graph", sheet, rows, keyCols, numericCols(nonKeyVisibleCols)))')
 
 
 def numericCols(cols):
@@ -34,28 +32,14 @@ class InvertedCanvas(Canvas):
         p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouse.y)/self.yScaler
         return p
 
-# swap directions of up/down
-InvertedCanvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h')
-InvertedCanvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h')
-InvertedCanvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymax')
-InvertedCanvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymin')
-InvertedCanvas.addCommand(None, 'next-page', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()')
-InvertedCanvas.addCommand(None, 'prev-page', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()')
-
-InvertedCanvas.addCommand(None, 'go-down-small', 'sheet.cursorBox.ymin -= canvasCharHeight')
-InvertedCanvas.addCommand(None, 'go-up-small', 'sheet.cursorBox.ymin += canvasCharHeight')
-
-InvertedCanvas.addCommand(None, 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight')
-InvertedCanvas.addCommand(None, 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight')
-
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
-    def __init__(self, name, sheet, rows, xcols, ycols, **kwargs):
-        super().__init__(name, sheet, sourceRows=rows, **kwargs)
+    def __init__(self, *names, **kwargs):
+        super().__init__(*names, **kwargs)
 
-        self.xcols = xcols
-        self.ycols = [ycol for ycol in ycols if isNumeric(ycol)] or fail('%s is non-numeric' % '/'.join(yc.name for yc in ycols))
+        self.xcols or vd.fail('at least one key col necessary for x-axis')
+        self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
 
     @asyncthread
     def reload(self):
@@ -64,7 +48,7 @@ class GraphSheet(InvertedCanvas):
 
         self.reset()
 
-        status('loading data points')
+        vd.status('loading data points')
         catcols = [c for c in self.xcols if not isNumeric(c)]
         numcols = numericCols(self.xcols)
         for ycol in self.ycols:
@@ -85,27 +69,50 @@ class GraphSheet(InvertedCanvas):
                         raise
 
 
-        status('loaded %d points (%d errors)' % (nplotted, nerrors))
+        vd.status('loaded %d points (%d errors)' % (nplotted, nerrors))
 
-        self.setZoom(1.0)
+        self.xzoomlevel=self.yzoomlevel=1.0
+        self.resetBounds()
         self.refresh()
 
-    def setZoom(self, zoomlevel=None):
-        super().setZoom(zoomlevel)
+    def resetBounds(self):
+        super().resetBounds()
         self.createLabels()
 
-    def add_y_axis_label(self, frac):
-        amt = self.visibleBox.ymin + frac*self.visibleBox.h
+    def moveToRow(self, rowstr):
+        ymin, ymax = map(float, map(self.parseY, rowstr.split()))
+        self.cursorBox.ymin = ymin
+        self.cursorBox.h = ymax-ymin
+        return True
+
+    def moveToCol(self, colstr):
+        xmin, xmax = map(float, map(self.parseX, colstr.split()))
+        self.cursorBox.xmin = xmin
+        self.cursorBox.w = xmax-xmin
+        return True
+
+    def formatX(self, amt):
+        return ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
+
+    def formatY(self, amt):
         srccol = self.ycols[0]
-        txt = srccol.format(srccol.type(amt))
+        return srccol.format(srccol.type(amt))
+
+    def parseX(self, txt):
+        return self.xcols[0].type(txt)
+
+    def parseY(self, txt):
+        return self.ycols[0].type(txt)
+
+    def add_y_axis_label(self, frac):
+        txt = self.formatY(self.visibleBox.ymin + frac*self.visibleBox.h)
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors.color_graph_axis
         self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
 
     def add_x_axis_label(self, frac):
-        amt = self.visibleBox.xmin + frac*self.visibleBox.w
-        txt = ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
+        txt = self.formatX(self.visibleBox.xmin + frac*self.visibleBox.w)
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors.color_graph_axis
@@ -137,4 +144,39 @@ class GraphSheet(InvertedCanvas):
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
-        self.plotlabel(0, self.plotviewBox.ymax+4, '%*s»' % (int(self.leftMarginPixels/2-2), xname), colors.color_graph_axis)
+        xname, _ = clipstr(xname, self.leftMarginPixels//2-2)
+        self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', colors.color_graph_axis)
+
+
+Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols([cursorCol])))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
+Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
+
+# swap directions of up/down
+InvertedCanvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up by its height')
+InvertedCanvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down by its height')
+InvertedCanvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymax', 'move cursor to top edge of visible canvas')
+InvertedCanvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymin', 'move cursor to bottom edge of visible canvas')
+InvertedCanvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; sheet.refresh()', 'move cursor down to next visible page')
+InvertedCanvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; sheet.refresh()', 'move cursor up to previous visible page')
+
+InvertedCanvas.addCommand(None, 'go-down-small', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor down one character')
+InvertedCanvas.addCommand(None, 'go-up-small', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor up one character')
+
+InvertedCanvas.addCommand(None, 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height by one character')
+InvertedCanvas.addCommand(None, 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height by one character')
+
+
+@GraphSheet.api
+def set_y(sheet, s):
+    ymin, ymax = map(float, map(sheet.parseY, s.split()))
+    sheet.zoomTo(BoundingBox(sheet.visibleBox.xmin, ymin, sheet.visibleBox.xmax, ymax))
+    sheet.refresh()
+
+@GraphSheet.api
+def set_x(sheet, s):
+    xmin, xmax = map(float, map(sheet.parseX, s.split()))
+    sheet.zoomTo(BoundingBox(xmin, sheet.visibleBox.ymin, xmax, sheet.visibleBox.ymax))
+    sheet.refresh()
+
+Canvas.addCommand('y', 'resize-y-input', 'sheet.set_y(input("set ymin ymax="))', 'set ymin/ymax on graph axes')
+Canvas.addCommand('x', 'resize-x-input', 'sheet.set_x(input("set xmin xmax="))', 'set xmin/xmax on graph axes')

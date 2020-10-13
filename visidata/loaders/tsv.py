@@ -3,164 +3,95 @@ import contextlib
 import itertools
 import collections
 
-from visidata import asyncthread, options, Progress, status, ColumnItem, Sheet, FileExistsError, getType, exceptionCaught
-from visidata.namedlist import namedlist
+from visidata import asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, option, VisiData
+from visidata import namedlist, filesize
 
-
-def getlines(fp, maxlines=None):
-    i = 0
-    while True:
-        if maxlines is not None and i >= maxlines:
-            break
-
-        try:
-            L = next(fp)
-        except StopIteration:
-            break
-
-        L = L.rstrip('\n')
-        if L:
-            yield L
-        i += 1
+option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
+option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
+option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
+option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
 
 def open_tsv(p):
     return TsvSheet(p.name, source=p)
 
+def splitter(fp, delim='\n'):
+    'Generates one line/row/record at a time from fp, separated by delim'
 
-# rowdef: namedlist
-class TsvSheet(Sheet):
-    _rowtype = None
+    buf = ''
+    while True:
+        nextbuf = fp.read(512)
+        if not nextbuf:
+            break
+        buf += nextbuf
 
-    @asyncthread
-    def reload(self):
-        self.reload_sync()
+        *rows, buf = buf.split(delim)
+        yield from rows
 
-    def reload_sync(self):
-        'Perform synchronous loading of TSV file, discarding header lines.'
-        header_lines = options.get('header', self)
-        delim = options.get('delimiter', self)
+    yield from buf.rstrip(delim).split(delim)
+
+
+# rowdef: list
+class TsvSheet(SequenceSheet):
+    def iterload(self):
+        delim = self.options.delimiter
+        rowdelim = self.options.row_delimiter
 
         with self.source.open_text() as fp:
-            # get one line anyway to determine number of columns
-            lines = list(getlines(fp, int(header_lines) or 1))
-            headers = [L.split(delim) for L in lines]
+            with Progress(total=filesize(self.source)) as prog:
+                for line in splitter(fp, rowdelim):
+                    if not line:
+                        continue
 
-            if header_lines <= 0:
-                self.columns = [ColumnItem('', i) for i in range(len(headers[0]))]
-            else:
-                self.columns = [
-                    ColumnItem('\\n'.join(x), i)
-                        for i, x in enumerate(zip(*headers[:header_lines]))
-                    ]
+                    prog.addProgress(len(line))
+                    row = list(line.split(delim))
 
-            lines = lines[header_lines:]  # in case of header_lines == 0
-            self._rowtype = namedlist('tsvobj', [c.name for c in self.columns])
-
-            self.recalc()
-            self.rows = []
-
-            with Progress(total=self.source.filesize) as prog:
-                for L in itertools.chain(lines, getlines(fp)):
-                    row = L.split(delim)
-                    ncols = self._rowtype.length()  # current number of cols
-                    if len(row) > ncols:
-                        # add unnamed columns to the type not found in the header
-                        newcols = [ColumnItem('', len(row)+i, width=8) for i in range(len(row)-ncols)]
-                        self._rowtype = namedlist(self._rowtype.__name__, list(self._rowtype._fields) + ['_' for c in newcols])
-                        for c in newcols:
-                            self.addColumn(c)
-                    elif len(row) < ncols:
+                    if len(row) < self.nVisibleCols:
                         # extend rows that are missing entries
-                        row.extend([None]*(ncols-len(row)))
+                        row.extend([None]*(self.nVisibleCols-len(row)))
 
-                    self.addRow(self._rowtype(row))
-                    prog.addProgress(len(L))
+                    yield row
 
-    def newRow(self):
-        return self._rowtype()
 
-def tsv_trdict(vs):
-    'returns string.translate dictionary for replacing tabs and newlines'
-    if options.safety_first:
-        delim = options.get('delimiter', vs)
-        return {ord(delim): options.get('tsv_safe_tab', vs), # \t
-            10: options.get('tsv_safe_newline', vs),  # \n
-            13: options.get('tsv_safe_newline', vs),  # \r
-            }
-    return {}
+def load_tsv(fn):
+    vs = open_tsv(Path(fn))
+    yield from vs.iterload()
 
-def save_tsv_header(p, vs):
-    'Write tsv header for Sheet `vs` to Path `p`.'
-    trdict = tsv_trdict(vs)
-    delim = options.delimiter
+
+@VisiData.api
+def save_tsv(vd, p, vs):
+    'Write sheet to file `fn` as TSV.'
+    unitsep = vs.options.delimiter
+    rowsep = vs.options.row_delimiter
+    trdict = vs.safe_trdict()
 
     with p.open_text(mode='w') as fp:
-        colhdr = delim.join(col.name.translate(trdict) for col in vs.visibleCols) + '\n'
-        if colhdr.strip():  # is anything but whitespace
-            fp.write(colhdr)
+        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
+        fp.write(colhdr)
 
+        for dispvals in vs.iterdispvals(format=True):
+            fp.write(unitsep.join(dispvals.values()))
+            fp.write(rowsep)
 
-def genAllValues(rows, cols, trdict={}, format=True):
-    transformers = collections.OrderedDict()  # list of transformers for each column in order
-    for col in cols:
-        transformers[col] = [ col.type ]
-        if format:
-            transformers[col].append(
-                lambda v,fmtfunc=getType(col.type).formatter,fmtstr=col.fmtstr: fmtfunc(fmtstr, '' if v is None else v)
-            )
-        if trdict:
-            transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
-
-    options_safe_error = options.safe_error
-    for r in Progress(rows):
-        dispvals = []
-        for col, transforms in transformers.items():
-            try:
-                dispval = col.getValue(r)
-            except Exception as e:
-                exceptionCaught(e)
-                dispval = options_safe_error or str(e)
-
-            try:
-                for t in transforms:
-                    if dispval is None:
-                        dispval = ''
-                        break
-                    dispval = t(dispval)
-            except Exception as e:
-                dispval = str(dispval)
-
-            dispvals.append(dispval)
-
-        yield dispvals
-
-
-@asyncthread
-def save_tsv(p, vs):
-    'Write sheet to file `fn` as TSV.'
-    delim = options.get('delimiter', vs)
-    trdict = tsv_trdict(vs)
-
-    save_tsv_header(p, vs)
-
-    with p.open_text(mode='a') as fp:
-        for dispvals in genAllValues(vs.rows, vs.visibleCols, trdict, format=True):
-            fp.write(delim.join(dispvals))
-            fp.write('\n')
-
-    status('%s save finished' % p)
+    vd.status('%s save finished' % p)
 
 
 def append_tsv_row(vs, row):
     'Append `row` to vs.source, creating file with correct headers if necessary. For internal use only.'
     if not vs.source.exists():
         with contextlib.suppress(FileExistsError):
-            parentdir = vs.source.parent.resolve()
+            parentdir = vs.source.parent
             if parentdir:
                 os.makedirs(parentdir)
 
-        save_tsv_header(vs.source, vs)
+        # Write tsv header for Sheet `vs` to Path `p`
+        trdict = vs.safe_trdict()
+        unitsep = options.delimiter
+
+        with vs.source.open_text(mode='w') as fp:
+            colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
+            if colhdr.strip():  # is anything but whitespace
+                fp.write(colhdr)
 
     with vs.source.open_text(mode='a') as fp:
         fp.write('\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')

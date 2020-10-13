@@ -1,5 +1,9 @@
 from visidata import *
 
+__all__ = ['openurl_postgres', 'openurl_rds', 'PgTable', 'PgTablesSheet']
+
+option('postgres_schema', 'public', 'The desired schema for the Postgres database')
+
 def codeToType(type_code, colname):
     import psycopg2
     try:
@@ -9,13 +13,34 @@ def codeToType(type_code, colname):
         if 'STRING' in tname:
             return str
     except KeyError:
-        status('unknown postgres type_code %s for %s' % (type_code, colname))
+        vd.status('unknown postgres type_code %s for %s' % (type_code, colname))
     return anytype
+
+
+def openurl_rds(url, filetype=None):
+    import boto3
+    import psycopg2
+
+    rds = boto3.client('rds')
+    url = urlparse(url.given)
+
+    _, region, dbname = url.path.split('/')
+    token = rds.generate_db_auth_token(url.hostname, url.port, url.username, region)
+
+    conn = psycopg2.connect(
+                user=url.username,
+                dbname=dbname,
+                host=url.hostname,
+                port=url.port,
+                password=token)
+
+    return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
 
 def openurl_postgres(url, filetype=None):
     import psycopg2
 
+    url = urlparse(url.given)
     dbname = url.path[1:]
     conn = psycopg2.connect(
                 user=url.username,
@@ -32,6 +57,7 @@ class SQL:
         self.conn = conn
 
     def cur(self, qstr):
+        import string
         randomname = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
         cur = self.conn.cursor(randomname)
         cur.execute(qstr)
@@ -44,13 +70,10 @@ class SQL:
             cur.close()
 
 
-def cursorToColumns(cur):
-    cols = []
+def cursorToColumns(cur, sheet):
+    sheet.columns = []
     for i, coldesc in enumerate(cur.description):
-        c = ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name))
-        cols.append(c)
-    return cols
-
+        sheet.addColumn(ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name)))
 
 
 # rowdef: (table_name, ncols)
@@ -58,7 +81,14 @@ class PgTablesSheet(Sheet):
     rowtype = 'tables'
 
     def reload(self):
-        qstr = "SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.columns WHERE table_schema = 'public' GROUP BY table_name"
+        schema = options.postgres_schema
+        qstr = f'''
+            SELECT relname table_name, column_count.ncols, reltuples::bigint est_nrows
+                FROM pg_class, pg_namespace, (
+                    SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.COLUMNS WHERE table_schema = '{schema}' GROUP BY table_name
+                    ) AS column_count
+                WHERE  pg_class.relnamespace = pg_namespace.oid AND pg_namespace.nspname = '{schema}' AND column_count.table_name = relname;
+        '''
 
         with self.sql.cur(qstr) as cur:
             self.nrowsPerTable = {}
@@ -68,26 +98,15 @@ class PgTablesSheet(Sheet):
             r = cur.fetchone()
             if r:
                 self.addRow(r)
-            self.columns = cursorToColumns(cur)
+            cursorToColumns(cur, self)
             self.setKeys(self.columns[0:1])  # table_name is the key
-            self.addColumn(Column('nrows', type=int, getter=lambda col,row: col.sheet.getRowCount(row[0])))
 
             for r in cur:
                 self.addRow(r)
 
-    def setRowCount(self, cur):
-        result = cur.fetchall()
-        tablename = result[0][0]
-        self.nrowsPerTable[tablename] = result[0][1]
+    def openRow(self, row):
+        return PgTable(self.name+"."+row[0], source=row[0], sql=self.sql)
 
-    def getRowCount(self, tablename):
-        if tablename not in self.nrowsPerTable:
-            thread = self.sql.query_async("SELECT '%s', COUNT(*) FROM %s" % (tablename, tablename), callback=self.setRowCount)
-            self.nrowsPerTable[tablename] = thread
-
-        return self.nrowsPerTable[tablename]
-
-PgTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PgTable(name+"."+cursorRow[0], source=cursorRow[0], sql=sql))')
 
 # rowdef: tuple of values as returned by fetchone()
 class PgTable(Sheet):
@@ -98,9 +117,6 @@ class PgTable(Sheet):
             r = cur.fetchone()
             if r:
                 self.addRow(r)
-            self.columns = cursorToColumns(cur)
+            cursorToColumns(cur, self)
             for r in cur:
                 self.addRow(r)
-
-
-addGlobals(globals())

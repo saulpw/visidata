@@ -3,18 +3,30 @@
 
 # Loading data
 
-## How to specify a source
+## Specifying a source file
 
-In VisiData, a [loader](/docs/loaders) is a module which directs how VisiData structures and engages with a particular data source. [These sources](/man#loaders) are currently supported.
-
-On default, the file extension determines which loader is used. Unknown filetypes are loaded as **Text sheets**.
+The first way to open a dataset in VisiData, specify it directly after invoking `vd`.
 
 ~~~
-vd sample.tsv
+vd filename.ext
+~~~
+
+Alternatively, you can pipe or redirect data in through stdin.
+
+~~~
 ps aux | vd
+vd - < sample.tsv
 ~~~
 
-To force a particular loader, pass `-f` with the filetype or format name.
+Finally, you can launch the [DirSheet](), navigate to the file you wish to load, and press `Enter`.
+
+~~~
+vd .
+~~~
+
+In VisiData, a [loader](/docs/loaders) is a module which directs how VisiData structures and engages with a particular data source. [These sources](/formats) are currently supported.
+
+On default, the file extension determines which loader is used. Unknown filetypes are loaded as **Text sheets**. To force a particular loader, pass `-f` with the filetype or format name.
 
 ~~~
 vd -f sqlite bar.db
@@ -23,7 +35,7 @@ ls -l | vd -f fixed
 
 ---
 
-## How to load any source supported by pandas
+## Loading sources supported by pandas
 
 VisiData has an adapter for pandas. To load a file format which is supported by pandas, execute `vd -f pandas data.foo`. This will call `pandas.read_foo()`.
 
@@ -39,7 +51,7 @@ Note that if you are using Python v3.7, then you will need to manually install p
 
 ---
 
-## How to open an R data frame with VisiData
+## Opening an R data frame with VisiData
 
 [@paulklemm](https://github.com/paulklemm) has wonderfully developed a small `R` package which bridges the gap between `R` and VisiData.
 
@@ -63,7 +75,7 @@ For more more details, questions, and feedback, check out the [rvisidata reposit
 
 ---
 
-## How to load multiple datasets simultaneously
+## Loading multiple datasets simultaneously
 
 Multiple files can be passed as inputs through the commandline.
 
@@ -77,9 +89,9 @@ To load files from within a VisiData session, press `o` and enter a filepath.
 
 ---
 
-## How to access other loaded or derived sheets:
+## Accessing other loaded or derived sheets
 
-1. Press `S` to open the **Sheets sheet**.
+1. Press `Shift+S` to open the **Sheets sheet**.
 2. Move the cursor to the row containing the desired sheet.
 3. Press `Enter` to jump to the sheet referenced in that current cursor row.
 
@@ -91,7 +103,7 @@ To load files from within a VisiData session, press `o` and enter a filepath.
 vd -b countries.fixed -o countries.tsv
 ~~~
 
-**Note**: Not all filetypes which are supported as loaders are also supported as savers. See the [manpage](/man#loaders) for the supported output formats.
+**Note**: Not all filetypes which are supported as loaders are also supported as savers. See the [formats page](/formats#output) for the supported output formats.
 
 
 ---

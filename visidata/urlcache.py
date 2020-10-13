@@ -1,29 +1,35 @@
 import os
 import os.path
 import time
-import urllib.request
+from urllib.request import Request, urlopen
 import urllib.parse
 
-from visidata import __version_info__, Path, options
+from visidata import Path, options, modtime
 
 
-def urlcache(url, cachesecs=24*60*60):
-    'Returns Path object to local cache of url contents.'
+def urlcache(url, days=1, text=True, headers={}):
+    'Return Path object to local cache of url contents.'
     p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
     if p.exists():
-        secs = time.time() - p.stat().st_mtime
-        if secs < cachesecs:
+        secs = time.time() - modtime(p)
+        if secs < days*24*60*60:
             return p
 
     if not p.parent.exists():
-        os.makedirs(p.parent.resolve(), exist_ok=True)
+        os.makedirs(p.parent, exist_ok=True)
 
-    assert p.parent.is_dir(), p.parent
+    req = Request(url)
+    for k, v in headers.items():
+        req.add_header(k, v)
 
-    req = urllib.request.Request(url, headers={'User-Agent': __version_info__})
-    with urllib.request.urlopen(req) as fp:
-        ret = fp.read().decode('utf-8').strip()
-        with p.open_text(mode='w') as fpout:
-            fpout.write(ret)
+    with urlopen(req) as fp:
+        ret = fp.read()
+        if text:
+            ret = ret.decode('utf-8').strip()
+            with p.open_text(mode='w') as fpout:
+                fpout.write(ret)
+        else:
+            with p.open_bytes(mode='w') as fpout:
+                fpout.write(ret)
 
     return p

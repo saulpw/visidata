@@ -1,0 +1,9 @@
+sheet	col	row	longname	input	keystrokes	comment
+		name_joiner	set-option	+		
+			open-file	sample_data/sample.tsv	o	
+sample			columns-sheet		C	open Columns Sheet: edit column properties for current sheet
+sample_columns		キRegion	select-row		s	select current row
+sample_columns		キRep	select-row		s	select current row
+sample_columns			join-cols		&	add column from concatenating selected source columns
+sample_columns			sheets-stack		S	open Sheets Stack: join or jump between the active sheets on the current stack
+sheets		キsample	open-row		^J	open sheet with copies of rows referenced in current row

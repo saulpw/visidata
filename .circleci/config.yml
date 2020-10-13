@@ -14,6 +14,7 @@ jobs:
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/share
       - run: sudo chown -R circleci:circleci /usr/local/lib
+      - run: locale
       - run:
           name: dependencies
           command: |

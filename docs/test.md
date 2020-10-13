@@ -18,17 +18,17 @@ or
 To build a `.vd` file:
 
 1. Go through all of the steps of the workflow, ending on the sheet with the final result.
-2. Press `D` to view the `CommandLog Sheet`
+2. Press `Shift+D` to view the `CommandLog Sheet`
 3. Edit the commandlog to minimize the number of commands.  Cells may be parameterized like `{foo}`, to be specified on the commandline:
 
     $ vd cmdlog.vd --foo=value
 
 4. Save the cmdlog using one of the following options:
 
-    a. Press `D` to open the `commanDlog Sheet`, and press `^S` to save it with a `.vd` suffix.
+    a. Press `Shift+D` to open the `commanDlog Sheet`, and press `Ctrl+S` to save it with a `.vd` suffix.
 
     *or*
 
-    b. Press `^D` to save the current cmdlog to a `fn.vd` file, regardless of the current VisiData context.
+    b. Press `Ctrl+D` to save the current cmdlog to a `fn.vd` file, regardless of the current VisiData context.
 
 ---

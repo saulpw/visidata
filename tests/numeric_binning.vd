@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+	override	numeric_binning	set-option	True		
+benchmark	Quantity		type-int		#	
+benchmark	Quantity		freq-col		F	
+benchmark_Quantity_freq	count		sort-desc		]	

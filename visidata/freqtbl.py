@@ -1,171 +1,92 @@
 import math
+import collections
 
 from visidata import *
 
-Sheet.addCommand('F', 'freq-col', 'vd.push(SheetFreqTable(sheet, cursorCol))')
-Sheet.addCommand('gF', 'freq-keys', 'vd.push(SheetFreqTable(sheet, *keyCols))')
-globalCommand('zF', 'freq-rows', 'vd.push(SheetFreqTable(sheet, Column("Total", getter=lambda col,row: "Total")))')
 
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
-#option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
-#option('histogram_even_interval', False, 'if histogram bins should have even distribution of rows')
-
-ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(SheetFreqTable(source[0], cursorRow))')
-
-def valueNames(vals):
-    return '-'.join(str(v) for v in vals)
+option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
+option('numeric_binning', True, 'bin numeric columns into ranges', replay=True)
 
 
-# rowdef: (keys, source_rows)
-class SheetFreqTable(Sheet):
+def valueNames(discrete_vals, numeric_vals):
+    ret = [ '+'.join(str(x) for x in discrete_vals) ]
+    if numeric_vals != (0, 0):
+        ret.append('%s-%s' % numeric_vals)
+
+    return '+'.join(ret)
+
+
+class FreqTableSheet(PivotSheet):
     'Generate frequency-table sheet on currently selected column.'
-    rowtype = 'bins'
-    def __init__(self, sheet, *columns):
-        fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in columns))
-        super().__init__(fqcolname, source=sheet)
-        self.origCols = columns
-        self.largest = 100
+    rowtype = 'bins'  # rowdef FreqRow(keys, sourcerows)
 
-        self.columns = [
-            Column(c.name, type=c.type if c.type in typemap else anytype, width=c.width, fmtstr=c.fmtstr,
-                        getter=lambda col,row,i=i: row[0][i],
-                        setter=lambda col,row,v,i=i,origCol=c: setitem(row[0], i, v) and origCol.setValues(row[1], v))
-                for i, c in enumerate(self.origCols)
-        ]
-        self.setKeys(self.columns)  # origCols are now key columns
-        nkeys = len(self.keyCols)
-
-        self.columns.extend([
-            Column('count', type=int, getter=lambda col,row: len(row[1]), sql='COUNT(*)'),
-            Column('percent', type=float, getter=lambda col,row: len(row[1])*100/col.sheet.source.nRows, sql=''),
-            Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row[1])//col.sheet.largest), width=options.disp_histolen+2, sql=''),
-        ])
-
-        aggregatedCols = [Column(aggregator.__name__+'_'+c.name,
-                                 type=aggregator.type or c.type,
-                                 getter=lambda col,row,origcol=c,aggr=aggregator: aggr(origcol, row[1]),
-                                 sql='%s(%s)' % (aggregator, c.name) )
-                             for c in self.source.visibleCols
-                                for aggregator in getattr(c, 'aggregators', [])
-                         ]
-        self.columns.extend(aggregatedCols)
-
-        if aggregatedCols:  # hide percent/histogram if aggregations added
-            for c in self.columns[nkeys+1:nkeys+3]:
-                c.hide()
-
-        self.groupby = columns
-        self.orderby = [(self.columns[nkeys], -1)]  # count desc
+    def __init__(self, sheet, *groupByCols):
+        fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in groupByCols))
+        super().__init__(fqcolname, groupByCols, [], source=sheet)
+        self.largest = 1
 
     def selectRow(self, row):
-        self.source.select(row[1])     # select all entries in the bin on the source sheet
+        self.source.select(row.sourcerows)     # select all entries in the bin on the source sheet
         return super().selectRow(row)  # then select the bin itself on this sheet
 
     def unselectRow(self, row):
-        self.source.unselect(row[1])
+        self.source.unselect(row.sourcerows)
         return super().unselectRow(row)
 
-    def numericBinning(self):
-        nbins = options.histogram_bins or int(len(self.source.rows) ** (1./2))
-
-        origCol = self.origCols[0]
-        self.columns[0].type = str
-
-        # separate rows with errors at the column from those without errors
-        errorbin = []
-        allbin = []
-        for row in Progress(self.source.rows, 'binning'):
-            try:
-                v = origCol.getTypedValue(row)
-                allbin.append((v, row))
-            except Exception as e:
-                errorbin.append((e, row))
-
-        # find bin pivots from non-error values
-        binPivots = []
-        sortedValues = sorted(allbin, key=lambda x: x[0])
-
-        if options.histogram_even_interval:
-            binsize = len(sortedValues)/nbins
-            pivotIdx = 0
-            for i in range(math.ceil(len(sortedValues)/binsize)):
-                firstVal = sortedValues[int(pivotIdx)][0]
-                binPivots.append(firstVal)
-                pivotIdx += binsize
-
-        else:
-            minval, maxval = sortedValues[0][0], sortedValues[-1][0]
-            binWidth = (maxval - minval)/nbins
-            binPivots = list((minval + binWidth*i) for i in range(0, nbins))
-
-        binPivots.append(None)
-
-        # put rows into bins (as self.rows) based on values
-        binMinIdx = 0
-        binMin = 0
-
-        for binMax in binPivots[1:-1]:
-            binrows = []
-            for i, (v, row) in enumerate(sortedValues[binMinIdx:]):
-                if binMax != binPivots[-2] and v > binMax:
-                    break
-                binrows.append(row)
-
-            binMaxDispVal = origCol.format(binMax)
-            binMinDispVal = origCol.format(binMin)
-            if binMinIdx == 0:
-                binName = '<=%s' % binMaxDispVal
-            elif binMax == binPivots[-2]:
-                binName = '>=%s' % binMinDispVal
-            else:
-                binName = '%s-%s' % (binMinDispVal, binMaxDispVal)
-
-            self.addRow((binName, binrows))
-            binMinIdx += i
-            binMin = binMax
-
-        if errorbin:
-            self.rows.insert(0, ('errors', errorbin))
-
-        ntallied = sum(len(x[1]) for x in self.rows)
-        assert ntallied == len(self.source.rows), (ntallied, len(self.source.rows))
-
-    def discreteBinning(self):
-        rowidx = {}
-        for r in Progress(self.source.rows, 'binning'):
-            keys = list(forward(c.getTypedValue(r)) for c in self.origCols)
-
-            # wrapply will pass-through a key-able TypedWrapper
-            formatted_keys = tuple(wrapply(c.format, c.getTypedValue(r)) for c in self.origCols)
-            histrow = rowidx.get(formatted_keys)
-            if histrow is None:
-                histrow = (keys, [])
-                rowidx[formatted_keys] = histrow
-                self.addRow(histrow)
-            histrow[1].append(r)
-            self.largest = max(self.largest, len(histrow[1]))
-
-        self.rows.sort(key=lambda r: len(r[1]), reverse=True)  # sort by num reverse
-
+    def updateLargest(self, grouprow):
+        self.largest = max(self.largest, len(grouprow.sourcerows))
 
     @asyncthread
     def reload(self):
-        'Generate histrow for each row and then reverse-sort by length.'
-        self.rows = []
+        'Generate frequency table then reverse-sort by length.'
+        super().initCols()
 
-#        if len(self.origCols) == 1 and self.origCols[0].type in (int, float, currency):
-#            self.numericBinning()
-#        else:
-        self.discreteBinning()
+        # add default bonus columns
+        for c in [
+                    ColumnAttr('count', 'sourcerows', type=vlen),
+                    Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows),
+                    Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//col.sheet.largest), width=options.disp_histolen+2),
+                    ]:
+            self.addColumn(c)
 
-        # automatically add cache to all columns now that everything is binned
-        for c in self.nonKeyVisibleCols:
-            c._cachedValues = collections.OrderedDict()
+        # two more threads
+        vd.sync(self.addAggregateCols(),
+                self.groupRows(self.updateLargest))
 
-SheetFreqTable.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)')
-SheetFreqTable.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)')
-SheetFreqTable.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)')
+        if self.nCols > len(self.groupByCols)+3:  # hide percent/histogram if aggregations added
+            self.column('percent').hide()
+            self.column('histogram').hide()
 
-SheetFreqTable.addCommand(ENTER, 'dup-row', 'vs = copy(source); vs.name += "_"+valueNames(cursorRow[0]); vs.rows=copy(cursorRow[1]); vd.push(vs)')
-#        Command('v', 'options.histogram_even_interval = not options.histogram_even_interval; reload()', 'toggle histogram_even_interval option')
+        if not [c for c in self.groupByCols if isNumeric(c)]:
+            self.orderBy(self.column('count'), reverse=True)
+
+    def openRow(self, row):
+        'open copy of source sheet with rows that are grouped in current row'
+        if row.sourcerows:
+            vs = copy(self.source)
+            vs.name += "_"+valueNames(row.discrete_keys, row.numeric_key)
+            vs.rows=copy(row.sourcerows)
+            return vs
+        vd.warning("no source rows")
+
+    def openCell(self, col, row):
+        return Sheet.openCell(self, col, row)
+
+
+class FreqTableSheetSummary(FreqTableSheet):
+    'Append a PivotGroupRow to FreqTable with only selectedRows.'
+    @asyncthread
+    def reload(self):
+        FreqTableSheet.reload.__wrapped__(self)
+        self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
+
+Sheet.addCommand('F', 'freq-col', 'vd.push(FreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
+Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
+Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", sheet=sheet, getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
+
+ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
+
+FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
+FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)', 'open copy of source sheet with rows that are grouped in selected rows')

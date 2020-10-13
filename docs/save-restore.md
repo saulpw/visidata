@@ -14,11 +14,11 @@ To save and restore a session in VisiData:
 
 1. Save the cmdlog using *one* of the following options:
 
-    a. Press `^D` to save the cmdlog to a `fn.vd` file.
+    a. Press `Ctrl+D` to save the cmdlog to a `fn.vd` file.
 
     *or*
 
-    b. Press `D` to view the `CommandLog Sheet`, then press `^S` and save it with a `.vd` suffix.
+    b. Press `Shift+D` to view the `CommandLog Sheet`, then press `Ctrl+S` and save it with a `.vd` suffix.
 
 2. Press `gq` to quit VisiData.
 3. Replay the cmdlog, on the commandline: `vd -p fn.vd`.

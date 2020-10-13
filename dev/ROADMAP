@@ -1,119 +1,35 @@
 # Roadmap to 2.0
 
-## 1. Stable, Documented Internal Python API
+## API
 
-- to reuse internal VisiData components in non-VisiData TUIs
-- to create external plugins/apps for use within VisiData (see below)
-- api.tsv
-- proper sandbox for exec (for some plugin safety)
+The primary goal of 2.0 is a stable, documented Python API that can be used to create an broad ecosystem of loaders, plugins, and apps.
 
-## 2. Plugin api/package manager
+The Book of VisiData will describe the api and all functions and objects available to plugins and command execstrs.
 
-- deprecate vdtui.py as single file dropin TUI
-   - same functionality will be available as visidata.vdtui
-- in-app downloadable/installable snippets
+## Split panes
 
-## 3. Split panes
-
-- horizontal or vertical split
-- no more than two panes
++ horizontal split
 - one pane can be dependent on the other; e.g. move cursor in one, see preview update in other
++ use for choosing aggregators, command help, other choose()
 
-## 4. Undo #141
+- DirSheet file preview #309
 
-- single-level undo
+## add jsonl as more robust system format
++ add .vdj format (visidata cmdlog as jsonl)
++ migrate plugins.tsv to be jsonl format
 
-## 5. Simple non-python installers
-
-- .dmg for macos
-- .exe for windows
-- both include full Python install
-
-## 6. save code to get to current sheet/row/cell
-
-- remove superfluous sheets
-- output .sql or .py code
-- or as jupyter-style notebook
-
-## 7. Mouse-ability
-
-- allow user to disable mouse for system copy/paste
-- clickable column headers to set type/name, click-drag to move columns/rows
-- clickable status items (including motd)
-- info mode: mouse hover describes interface components and/or shows relevant commands
-
-## 8. Integrate DeferredSet to all sheets
+## Minor features, refactors, cleanup
 
 - 'modified' indicator on status bar, also enables quitguard
-+ sqlite: allow in-memory edits, ^S to commit
-  - index sheet: include rows/cols; allow to be cutnpasted
-  + solve "load in other thread" problem
+- remove all asserts; replace with error() on case-by-case basis
 
-## 9. Loaders and Savers
+- [options] allow list or dict of enum values for default
+- [options] for options that have been renamed, add aliases for compatibility
+    - e.g. `tsv_delimiter` and `tsv_row_delimiter` become 'proper' options with 'delimiter', 'delim', and 'd' becoming aliases
 
-+ parquet #112
-- .mdb, .accdb
-- google sheets
-- save canvas to .svg (canvassave_svg)
-- multisave_hdf5
+# Features
 
-## 10. Other additions
+- Memory sheet; can give things names and use in expressions.
+   - 'show' commands are copied there by default.
 
-- 'v' hide cols which have errors on cursor row
-   - or should 'v' be 'toggle-visibility' on all sheets?
-- [ColumnsSheet] show subcolumns and their parent column (for expand/contract)
-- [cmdlog] add timestamp?
-
-- graveyard sheet improvements
-   - start/drop datetimes
-   - number of derivative sheets (two columns, for immediate children and to any depth)
-   - number of commands executed on that sheet (as a list so they can be viewed separately)
-
-- error history with error objects
-- error sheet showing row-form traceback
-   - ^O to edit
-
-- numeric binning for freq column and pivot table
-- rowmax aggregator ( rowmax(field) gets whole row)
-- add row number in hidden column on data sheets so that original (load) order can be restored
-- handle timezone for datetime
-- options should allow list or dict of enum values
-- column helpstr (esp for non-data sheets)
-- macro parameterization
-- g^D bug report
-- zip/unzip from dirsheet
-- status rework: use logging module?  use multiple lines on overflow?
-- proper dive on json
-- tech debt: remove all asserts; possibly replace with error()
-
-- add "/flags" to regex commands for per-instance regex flags
-- SI() units converter
-- new command: apply action/macro to each selected row
-- add "transforms list" to column (type is last transform)
-
-
-# Other applications with a vd-like interface
-
-- [vgit](http://github.com/saulpw/vgit) (currently v0.2)
-    like magit but for vim/visidata/python users
-- [vsh](http://github.com/saulpw/vsh) (unreleased)
-   - vtop (includes kill/killall/ps)
-   - vls (rm/mv/cp/mount/find/grep/mkdir/rmdir/ln/touch)
-   - vnet (netstat)
-   - vping
-   - vproc (explore /proc filesystem with some added goodies)
-- vsql: interacts with remote sql databases; no loading required
-   - save commandlog as .sql
-- vpy (python explorer/debugger)
-   - save commandlog as python code
-- vchat
-- [vdgalcon](http://github.com/saulpw/vdgalcon)
-- vscrape
-   - convenient interface to REST and other APIs
-   - point at a website and collect datasets, tables, textual data
-   - add jq-style selectors
-- vstats
-   - save commandlog as ipynb, markdown, or html
-- vdbg
-- vaws
-- `vd --server` pops up a local web server, for a visidata-like web interface to local files
+- [columns] add helpstr for all specialized-sheet columns

@@ -1,0 +1,35 @@
+oldname	newname	signature	done
+option	vd.option()	same	y
+theme	option	same	declared
+globalCommand	BaseSheet.addCommand()	same	y
+bindkey	BaseSheet.bindkey()	same	y
+Sheet	TableSheet	same	y
+Sheet.rowLayout	TableSheet._rowLayout	same	y
+Sheet.visibleColLayout	TableSheet._visibleColLayout	same	y
+options.set('optname', val, Sheet)	TableSheet.options.optname = val	diff	y
+vd.sheetsSheet	vd.sheets	vd.remove, .push, .replace, etc all on sheets	
+next-search	search-next	deprecated aliases can persist	y
+rotate_range	rotateRange	helper functions should be camelCase	y
+exceptionCaught	vd.exceptionCaught()		y
+Canvas.reset			
+_rowtype()		idea: rowmaker	
+exec_keystrokes	-		y
+exec_command	execCommand		y
+CommandLog.currentActiveRow	vd.activeCommand		y
+ESC	ALT		y
+cached_property	lazy_property	same	y
+openSource	vd.openSource	same	y
+vd.filetype('ext', ExtSheet)	open_ext		y
+dive-row	open-row		y
+addRows	addNewRows		y
+statuses (longname)	open-statuses		y
+status (longname)	show-status		y
+vd.clear_caches	vd.clearCaches()		y
+getDefaultSaveName	Sheet.getDefaultSaveName	same	y
+prev-sheet	jump-prev		y
+editline()	vd.editline()	same	y
+*-replay	replay-*	longname	y
+replay_sync	replaySync	same	
+Column.format	Column.formatValue	same	y
+Column.setWidth	Column.width property		y
+evalexpr	evalExpr		

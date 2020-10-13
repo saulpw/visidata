@@ -1,6 +1,7 @@
 sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/benchmark.csv	o	
-benchmark	Customer		key-col		!	
-benchmark	Quantity		type-int		#	
-benchmark	Quantity		aggregate-col	sum	+	
-benchmark	Item		pivot		W	
+			open-file	sample_data/sample.tsv	o	
+sample	Rep		key-col		!	
+sample	Units		type-int		#	
+sample	Units		aggregate-col	sum	+	
+sample	Units		aggregate-col	mean	+	
+sample	Item		pivot		W	

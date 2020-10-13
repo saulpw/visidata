@@ -1,10 +1,11 @@
 from visidata import *
 
+# requires pyshp
+
 
 def open_shp(p):
     return ShapeSheet(p.name, source=p)
 
-# pyshp doesn't care about file extensions
 open_dbf = open_shp
 
 shptypes = {
@@ -28,16 +29,20 @@ class ShapeSheet(Sheet):
     columns = [
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import shapefile
-        sf = shapefile.Reader(self.source.resolve())
-        self.columns = copy(ShapeSheet.columns)
-        for i, (fname, ftype, fieldlen, declen) in enumerate(sf.fields[1:]):  # skip DeletionFlag
+        self.sf = shapefile.Reader(str(self.source))
+        self.reloadCols()
+        for shaperec in Progress(self.sf.iterShapeRecords(), total=self.sf.numRecords):
+            yield shaperec
+
+    def reloadCols(self):
+        self.columns = []
+        for c in ShapeSheet.columns:
+            self.addColumn(copy(c))
+
+        for i, (fname, ftype, fieldlen, declen) in enumerate(self.sf.fields[1:]):  # skip DeletionFlag
             self.addColumn(Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen)))
-        self.rows = []
-        for shaperec in Progress(sf.iterShapeRecords(), total=sf.numRecords):
-            self.addRow(shaperec)
 
 class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
@@ -57,7 +62,7 @@ class ShapeMap(InvertedCanvas):
                 x, y = row.shape.points[0]
                 self.point(x, y, self.plotColor(k), row)
             else:
-                status('notimpl shapeType %s' % row.shape.shapeType)
+                vd.status('notimpl shapeType %s' % row.shape.shapeType)
 
             x1, y1, x2, y2 = row.shape.bbox
             textx, texty = (x1+x2)/2, (y1+y2)/2
@@ -66,14 +71,9 @@ class ShapeMap(InvertedCanvas):
 
         self.refresh()
 
-ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))')
-ShapeSheet.addCommand('g.', 'plot-selected', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=selectedRows or rows, textCol=cursorCol))')
-ShapeMap.addCommand('^S', 'save-geojson', 'save_geojson(Path(input("json to save: ", value=name+".geojson")), sheet)')
-
-
-def save_geojson(p, vs):
-    assert isinstance(vs, Canvas), 'need Canvas to save geojson'
-
+@VisiData.api
+def save_geojson(vd, p, vs):
+    isinstance(vs, Canvas) or vd.fail("must save geojson from canvas sheet")
     features = []
     for coords, attr, row in Progress(vs.polylines, 'saving'):
         feat = {
@@ -95,3 +95,6 @@ def save_geojson(p, vs):
     with p.open_text(mode='w') as fp:
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)
+
+ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
+ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')

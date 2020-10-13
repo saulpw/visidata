@@ -1,19 +1,16 @@
 from visidata import *
 
+def open_png(p):
+    return PNGSheet(p.name, source=p)
 
 @functools.lru_cache(256)
 def rgb_to_attr(r,g,b,a):
     if a == 0: return 0
-    if r > g and r > b: return colors['red'].attr
-    if g > r and g > b: return colors['green'].attr
-    if b > r and b > g: return colors['blue'].attr
-    if a == 255: return colors['white'].attr
+    if r > g and r > b: return colors['red']
+    if g > r and g > b: return colors['green']
+    if b > r and b > g: return colors['blue']
+    if a == 255: return colors['white']
     return 0
-
-
-def open_png(p):
-    return PNGSheet(p.name, source=p)
-
 
 class PNGSheet(Sheet):
     rowtype = 'pixels'  # rowdef: tuple(x, y, r, g, b, a)
@@ -24,16 +21,15 @@ class PNGSheet(Sheet):
     def newRow(self):
         return list((None, None, 0, 0, 0, 0))
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import png
         r = png.Reader(bytes=self.source.read_bytes())
         self.width, self.height, pixels, md = r.asRGBA()
-        self.rows = []
         for y, row in enumerate(pixels):
             for i in range(0, len(row)-1, 4):
                 r,g,b,a = row[i:i+4]
-                self.addRow([i//4, y, r, g, b, a])
+                yield [i//4, y, r, g, b, a]
+
 
 class PNGDrawing(Canvas):
     aspectRatio = 1.0
@@ -64,17 +60,11 @@ class PNGDrawing(Canvas):
             self.point(x, y, rgb_to_attr(r,g,b,a), row)
         self.refresh()
 
-PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))')
-PNGDrawing.addCommand('.', 'dive-source', 'vd.push(source)')
 
-@asyncthread
-def save_png(p, vs):
-    if isinstance(vs, PNGSheet):
-        pass
-    elif isinstance(vs, PNGDrawing):
-        vs = vs.source
-    else:
-        error('sheet must be from png loader (for now)')
+@VisiData.api
+def save_png(vd, p, vs):
+    if isinstance(vs, Canvas):
+        return save_png(p, vs.source)
 
     palette = collections.OrderedDict()
     palette[(0,0,0,0)] = 0   # invisible black is 0
@@ -88,11 +78,13 @@ def save_png(p, vs):
             colornum = palette[color] = len(palette)
         pixels[y][x] = colornum
 
-    status('saving %sx%sx%s' % (vs.width, vs.height, len(palette)))
+    vd.status('saving %sx%sx%s' % (vs.width, vs.height, len(palette)))
 
     import png
-    with open(p.resolve(), 'wb') as fp:
+    with open(p, 'wb') as fp:
         w = png.Writer(vs.width, vs.height, palette=list(palette.keys()))
         w.write(fp, pixels)
 
-    status('saved')
+    vd.status('saved')
+
+PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')

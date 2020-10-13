@@ -1,16 +1,12 @@
-Customer	Quantity_sum_BFF Oh My Gravy! Beef & Salmon 2.8oz	Quantity_sum_Food, Adult Cat - 3.5 oz	Quantity_sum_Food, Adult Cat 3.5 oz	Quantity_sum_Food, Senior Wet Cat - 3 oz	Quantity_sum_Food, Salamander	Quantity_sum_Cat, Korat (Felis catus)	Quantity_sum_Food, Kitten 3kg	Quantity_sum_Monster, Rust (Monstrus gygaxus)	Quantity_sum_BFF Oh My Gravy! Chicken & Shrimp 2.8oz	Quantity_sum_BFF Oh My Gravy! Duck & Tuna 2.8oz	Quantity_sum_Rabbit (Oryctolagus cuniculus)	Quantity_sum_Food, Dog - 5kg	Quantity_sum_Food, Premium Wet Cat - 3.5 oz	Quantity_sum_BFF Oh My Gravy! Lamb & Tuna 2.8oz	Quantity_sum_Laser Pointer	Quantity_sum_Food, Shark - 10 kg	Quantity_sum_Food, Dragon - 50kg	Quantity_sum_Food, Rhinocerous - 50kg	Quantity_sum_Cat, Maine Coon (Felix catus)	Quantity_sum_BFF Oh My Gravy! Beef & Chicken 2.8oz	Quantity_sum_Kingsnake, California (Lampropeltis getula)	Quantity_sum_Mouse, Pinky (Mus musculus)	Quantity_sum_BFF Oh My Gravy! Chicken & Turkey 2.8oz	Quantity_sum_Forti Diet Prohealth Mouse/Rat 3lbs	Quantity_sum_Parrot, Norwegian Blue (Mopsitta tanta)	Quantity_sum_Dog, Golden Retriever (Canis lupus familiaris)	Quantity_sum_Parakeet, Blue (Melopsittacus undulatus)	Quantity_sum_Food, Spider	Quantity_sum_Crickets, Adult Live (Gryllus assimilis)	Quantity_sum_Food, Pangolin	Quantity_sum_BFF Oh My Gravy! Duck & Salmon 2.8oz	Quantity_sum_Food, Quoll	Quantity_sum_Food, Adult Dog - 5kg	Quantity_sum_BFF Oh My Gravy! Chicken & Salmon 2.8oz	Quantity_sum_Mealworms, Large (Tenebrio molitor) 100ct	Quantity_sum_Cat, Scottish Fold (Felis catus)	Quantity_sum_BFF Oh My Gravy! Chicken & Pumpkin 2.8oz	Quantity_sum_Lizard, Spinytail (Uromastyx ornatus)	Total_Quantity_sum	Total_count
-Robert Armstrong	4	0	0	0	0	0	0	0	4	4	0	0	0	4	0	0	0	0	0	4	0	0	4	0	0	0	0	0	0	0	4	0	0	4	0	0	148	0	180	10
-Kyle Kennedy	0	3	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	0	0	0	0	0	0	0	0	0	0	0	0	5	4
-Douglas "Dougie" Powers	0	0	1	0	0	0	0	0	0	0	0	0	0	0	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	3	3
-桜 高橋 (Sakura Takahashi)	0	0	0	25	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	25	5
-David Attenborough	0	0	0	0	30	0	0	0	0	0	0	0	0	0	0	0	0	4	0	0	0	0	0	0	0	0	0	0	0	30	0	1	0	0	0	0	0	0	65	4
-Susan Ashworth	0	0	0	0	0	1	6	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	9	6
-Wil Wheaton	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1
-Helen Halestorm	0	0	0	0	0	0	0	0	0	0	8	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	8	2
-Rubeus Hagrid	0	0	0	0	0	0	0	0	0	0	0	5	0	0	0	0	5	0	0	0	0	0	0	0	0	0	0	5	0	0	0	0	0	0	0	0	0	0	15	3
-Jon Arbuckle	0	0	0	0	0	0	0	0	0	0	0	0	50	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	51	2
-Juan Johnson	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	3	3
-Monica Johnson	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	30	0	0	0	0	0	1	0	0	0	32	3
-María Fernández	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	0	0	0	0	0	0	0	0	0	0	0	0	0	0	2	1
-Mr. Praline	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1
-Michael Smith	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	1	1
+Rep	sum_Pencil	mean_Pencil	sum_Binder	mean_Binder	sum_Pen	mean_Pen	sum_Desk	mean_Desk	sum_Pen Set	mean_Pen Set
+Jones	130	65.00	124	41.33	64	64.00	0		78	39.00
+Kivell	0		50	50.00	0		5	5.00	138	69.00
+Jardine	126	63.00	105	52.50	0		0		50	50.00
+Gill	60	30.00	126	63.00	27	27.00	0		0	
+Sorvino	56	56.00	7	7.00	76	76.00	3	3.00	0	
+Andrews	155	51.67	28	28.00	0		0		0	
+Thompson	32	32.00	57	57.00	0		0		0	
+Morgan	90	90.00	28	28.00	0		0		55	55.00
+Howard	0		29	29.00	96	96.00	0		0	
+Parent	0		81	81.00	15	15.00	0		74	74.00
+Smith	67	67.00	87	87.00	0		2	2.00	0	

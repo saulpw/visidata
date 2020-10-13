@@ -1,20 +1,41 @@
-# User Documentation
+# VisiData Documentation
 
-* [Intro to VisiData tutorial](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
+## How the documentation is organised
+
+Inspired by [Daniele Procida](https://www.divio.com/blog/documentation/), the documentation is structured into the following categories:
+* Tutorials take you on a guided tour of features in VisiData. This is the recommended place to start if you are new.
+* Reference guides contain a comprehensive overview of all out-of-box available commands and options.
+* How-to guides are recipes. They will guide you through the steps of common workflows in VisiData.
+* [The VisiData book]() is a high-level overview of fundamental concepts and provides background information on VisiData design decisions.
+
+
+## Getting started
+
+* [VisiData video demo](https://youtu.be/N1CBDTgGtOU)
+* [Installation](/install)
+
+## Tutorials
+
+* Beginner: [An Introduction to VisiData](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
+* Beginner: [Guida VisiData](https://github.com/ondata/guidaVisiData/tree/master/testo) by [Andrea Borruso](https://medium.com/@aborruso) (onData association)
+* Intermediate/Advanced (English): [VisiData case study videos](https://www.youtube.com/watch?v=yhunJc8Nu4g&list=PLxu7QdBkC7drrAGfYzatPGVHIpv4Et46W&index=4) by creator [Saul Pwanson](http://saul.pw)
+
+## References
+
 * [quick reference guide](/man)
-    * comprehensive overview of all available commands and options
+    * all available commands and options
     * also available as a manpage via `man vd` and from inside VisiData with `Ctrl+H`
 * [keyboard layout of commands](/docs/kblayout)
 
-###### 'How to' recipes
+## 'How to' recipes
 
 * [Loading Data](/docs/loading)
-    * How to specify a source
-    * How to load any source supported by pandas
-    * How to open an R data frame with VisiData
-    * How to load multiple datasets simultaneously
-    * How to access other loaded or derived sheets
-    * How to convert a dataset from one supported filetype into another
+    * [Specifying a source file](/docs/loading#specifying-a-source-file)
+    * [Loading sources supported by pandas](/docs/loading#loading-sources-supported-by-pandas)
+    * [Opening an R data frame with VisiData](/docs/loading#opening-an-r-data-frame-with-visidata)
+    * [Loading multiple datasets simultaneously](/docs/loading#loading-multiple-datasets-simultaneously)
+    * [Accessing other loaded or derived sheets](/docs/loading#accessing-other-loaded-or-derived-sheets)
+    * [Converting a dataset from one supported filetype into another](/docs/loading#convert)
 * [Navigation](/docs/navigate)
     * How to rapidly scroll through a sheet
     * How to search within a sheet
@@ -30,6 +51,7 @@
     * How to hide (remove) and unhide columns
     * How to specify column types
     * How to split a column
+    * How to expand columns that contain nested data
     * How to create derivative columns
     * How to configure multiple columns
 * [Editing contents](/docs/edit)
@@ -59,14 +81,15 @@
     * How to configure VisiData (dev)
     * How to have configurations persist
     * How to configure commands
+* [Plugins - extending VisiData functionality](/docs/plugins)
+* [Developing a loader](/docs/loaders)
+* [STDOUT pipe/redirect](/docs/pipes)
 
 # For developers
 
 VisiData can interact with data from any source or in any format.
 
 * [guide to contributing](/contributing)
-* [how to develop a loader](/docs/loaders)
 * [viewtsv annotated](/docs/viewtsv)
 * [async](/docs/async)
 * [graphics reference](/docs/graphics)
-

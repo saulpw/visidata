@@ -8,5 +8,5 @@ benchmark	SKU		select-col-regex	FOOD	|
 benchmark			dup-selected		"	
 benchmark_selectedref	Quantity		aggregate-col	mean	+	
 benchmark_selectedref	SKU		freq-col		F	
-benchmark_selectedref_SKU_freq	mean_Quantity		type-int		#	
-benchmark_selectedref_SKU_freq	mean_Quantity		sort-desc		]	
+benchmark_selectedref_SKU_freq	Quantity_mean		type-int		#	
+benchmark_selectedref_SKU_freq	Quantity_mean		sort-desc		]	

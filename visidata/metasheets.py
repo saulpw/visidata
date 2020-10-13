@@ -1,44 +1,21 @@
-from visidata import globalCommand, Sheet, Column, options, vd, anytype, ENTER, asyncthread, option
+from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
-from visidata import getGlobals, TsvSheet, Path, bindkeys, commands, composeStatus, Option
-
-globalCommand('^P', 'statuses', 'vd.push(StatusSheet("statusHistory"))')
-globalCommand('gC', 'columns-all', 'vd.push(ColumnsSheet("all_columns", source=vd.sheets))')
-globalCommand('S', 'sheets', 'vd.push(vd.sheetsSheet)')
-globalCommand('gS', 'sheets-graveyard', 'vd.push(vd.graveyardSheet).reload()')
-
-globalCommand('zO', 'options-sheet', 'vd.push(getOptionsSheet(sheet)).reload()')
-globalCommand('O', 'options-global', 'vd.push(vd.optionsSheet)')
-Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))')
-globalCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))')
+from visidata import TsvSheet, Path, Option
+from visidata import undoAttrFunc, VisiData, vlen
 
 option('visibility', 0, 'visibility level (0=low, 1=high)')
 
-def getOptionsSheet(sheet):
-    optsheet = getattr(sheet, 'optionsSheet', None)
-    if not optsheet:
-        sheet.optionsSheet = OptionsSheet(sheet.name+"_options", source=sheet)
-
-    return sheet.optionsSheet
+vd_system_sep = '\t'
 
 
-class StatusSheet(Sheet):
-    precious = False
-    rowtype = 'statuses'  # rowdef: (priority, args, nrepeats)
-    columns = [
-        ColumnItem('priority', 0, type=int, width=0),
-        ColumnItem('nrepeats', 2, type=int, width=0),
-        ColumnItem('args', 1, width=0),
-        Column('message', getter=lambda col,row: composeStatus(row[1], row[2])),
-    ]
-    colorizers = [
-        RowColorizer(1, 'color_error', lambda s,c,r,v: r and r[0] == 3),
-        RowColorizer(1, 'color_warning', lambda s,c,r,v: r and r[0] in [1,2]),
-    ]
+@BaseSheet.lazy_property
+def optionsSheet(sheet):
+    return OptionsSheet(sheet.name+"_options", source=sheet)
 
-    def reload(self):
-        self.rows = vd.statusHistory[::-1]
+@VisiData.lazy_property
+def globalOptionsSheet(vd):
+    return OptionsSheet('global_options', source='override')
 
 
 class ColumnsSheet(Sheet):
@@ -57,11 +34,17 @@ class ColumnsSheet(Sheet):
             ColumnAttr('sheet', type=str),
             ColumnAttr('name', width=options.default_width),
             ColumnAttr('width', type=int),
-            ColumnEnum('type', getGlobals(), default=anytype),
+            ColumnAttr('height', type=int),
+            ColumnAttr('hoffset', type=int, width=0),
+            ColumnAttr('voffset', type=int, width=0),
+            ColumnEnum('type', vd.getGlobals(), default=anytype),
             ColumnAttr('fmtstr'),
             ValueColumn('value', width=options.default_width),
             Column('expr', getter=lambda col,row: getattr(row, 'expr', ''),
                            setter=lambda col,row,val: setattr(row, 'expr', val)),
+            ColumnAttr('ncalcs', type=int, width=0, cache=False),
+            ColumnAttr('maxtime', type=float, width=0, cache=False),
+            ColumnAttr('totaltime', type=float, width=0, cache=False),
     ]
     nKeys = 2
     colorizers = [
@@ -78,79 +61,21 @@ class ColumnsSheet(Sheet):
 
     def newRow(self):
         c = type(self.source[0])._coltype()
-        c.sheet = self.source[0]
+        c.recalc(self.source[0])
         return c
 
-ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.width = c.getMaxWidth(source.visibleRows)')
-ColumnsSheet.addCommand('&', 'join-cols', 'rows.insert(cursorRowIndex, combineColumns(selectedRows or fail("no columns selected to concatenate")))')
+class MetaSheet(Sheet):
+    pass
 
+class VisiDataMetaSheet(TsvSheet):
+    pass
 
-class SheetsSheet(Sheet):
-    rowtype = 'sheets'
-    precious = False
-    columns = [
-        ColumnAttr('name', width=30),
-        ColumnAttr('nRows', type=int),
-        ColumnAttr('nCols', type=int),
-        ColumnAttr('nVisibleCols', type=int),
-        ColumnAttr('cursorDisplay'),
-        ColumnAttr('keyColNames'),
-        ColumnAttr('source'),
-        ColumnAttr('progressPct'),
-    ]
-    nKeys = 1
-
-    def newRow(self):
-        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
-
-    def reload(self):
-        self.rows = self.source
-
-SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(dest)')
-SheetsSheet.addCommand('g'+ENTER, 'open-rows', 'for vs in selectedRows: vd.push(vs)')
-SheetsSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()')
-SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows or rows[1:]))')
-SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows or rows[1:]))')
-
-# source: vd.allSheets (with BaseSheet as weakref keys)
-class GraveyardSheet(SheetsSheet):
-    rowtype = 'undead sheets'  # rowdef: BaseSheet
-    def reload(self):
-        self.rows = list(vs for vs in self.source.keys() if vs not in vd().sheets)
-
-
-class HelpSheet(Sheet):
-    'Show all commands available to the source sheet.'
-    rowtype = 'commands'
-    precious = False
-
-    columns = [
-        ColumnAttr('sheet'),
-        ColumnAttr('longname'),
-        Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname)),
-        Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
-        ColumnAttr('execstr', width=0),
-        ColumnAttr('logged', 'replayable', width=0),
-    ]
-    nKeys = 2
-    @asyncthread
-    def reload(self):
-        from pkg_resources import resource_filename
-        cmdlist = TsvSheet('cmdlist', source=Path(resource_filename(__name__, 'commands.tsv')))
-        cmdlist.reload_sync()
-        self.cmddict = {}
-        for cmdrow in cmdlist.rows:
-            self.cmddict[(cmdrow.sheet, cmdrow.longname)] = cmdrow
-
-        self.revbinds = {
-            longname:keystrokes
-                for (keystrokes, _), longname in bindkeys.iter(self.source)
-                    if keystrokes not in self.revbinds
-        }
-        self.rows = []
-        for (k, o), v in commands.iter(self.source):
-            self.addRow(v)
-            v.sheet = o
+# commandline must not override these for internal sheets
+VisiDataMetaSheet.class_options.delimiter = vd_system_sep
+VisiDataMetaSheet.class_options.header = 1
+VisiDataMetaSheet.class_options.skip = 0
+VisiDataMetaSheet.class_options.row_delimiter = '\n'
+VisiDataMetaSheet.class_options.encoding = 'utf-8'
 
 
 class OptionsSheet(Sheet):
@@ -161,9 +86,10 @@ class OptionsSheet(Sheet):
         ColumnAttr('option', 'name'),
         Column('value',
             getter=lambda col,row: col.sheet.diffOption(row.name),
-            setter=lambda col,row,val: options.set(row.name, val, col.sheet.source)),
-        Column('default', getter=lambda col,row: options.get(row.name, 'global')),
-        Column('description', getter=lambda col,row: options._get(row.name, 'global').helpstr),
+            setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
+            ),
+        Column('default', getter=lambda col,row: options.getdefault(row.name)),
+        Column('description', width=40, getter=lambda col,row: options._get(row.name, 'global').helpstr),
         ColumnAttr('replayable'),
     )
     colorizers = [
@@ -172,15 +98,15 @@ class OptionsSheet(Sheet):
     nKeys = 1
 
     def diffOption(self, optname):
-        val = options.get(optname, self.source)
-        default = options.get(optname, 'global')
-        return val if val != default else ''
+        return options.getonly(optname, self.source, '')
 
     def editOption(self, row):
+        currentValue = options.getobj(row.name, self.source)
+        vd.addUndo(options.set, row.name, currentValue, self.source)
         if isinstance(row.value, bool):
-            options.set(row.name, not options.get(row.name, self.source), self.source)
+            options.set(row.name, not currentValue, self.source)
         else:
-            options.set(row.name, self.editCell(1), self.source)
+            options.set(row.name, self.editCell(1, value=currentValue), self.source)
 
     def reload(self):
         self.rows = []
@@ -189,30 +115,92 @@ class OptionsSheet(Sheet):
             self.addRow(opt)
         self.columns[1].name = 'global_value' if self.source == 'override' else 'sheet_value'
 
-OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)')
 
-bindkeys.set('e', 'edit-option', OptionsSheet)
-bindkeys.set(ENTER, 'edit-option', OptionsSheet)
+class VisiDataSheet(IndexSheet):
+    rowtype = 'metasheets'
+    precious = False
+    columns = [
+        ColumnAttr('items', 'nRows', type=int),
+        ColumnAttr('name', width=0),
+        ColumnAttr('description', width=50),
+        ColumnAttr('command', 'longname', width=0),
+        ColumnAttr('shortcut', 'shortcut_en', width=11),
+    ]
+    nKeys = 0
 
-vd.optionsSheet = OptionsSheet('global_options', source='override')
+    def reload(self):
+        self.rows = []
+        for vdattr, sheetname, longname, shortcut, desc in [
+            ('currentDirSheet', '.', 'open-dir-current', '', 'DirSheet for the current directory'),
+            ('sheetsSheet', 'sheets', 'sheets-stack', 'Shift+S', 'current sheet stack'),
+            ('allSheetsSheet', 'sheets_all', 'sheets-all', 'g Shift+S', 'all sheets this session'),
+            ('allColumnsSheet', 'all_columns', 'columns-all', 'g Shift+C', 'all columns from all sheets'),
+            ('cmdlog', 'cmdlog', 'cmdlog-all', 'g Shift+D', 'log of all commands this session'),
+            ('globalOptionsSheet', 'options_global', 'open-global', 'Shift+O', 'default option values applying to every sheet'),
+            ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl+E', 'stacktrace of most recent error'),
+            ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl+P', 'status messages from current session'),
+            ('threadsSheet', 'threads', 'open-threads', 'Ctrl+T', 'threads and profiling'),
+            ('vdmenu', 'visidata_menu', 'open-vd', 'Shift+V', 'VisiData menu (this sheet)'),
+            ('pluginsSheet', 'plugins', 'open-plugins', '', 'VisiData community plugins'),
+            ]:
+            vs = getattr(vd, vdattr)
+            vs.description = desc
+            vs.shortcut_en = shortcut
+            vs.longname = longname
+            if vs is not self:
+                vs.ensureLoaded()
+            self.addRow(vs)
 
-vd.sheetsSheet = SheetsSheet("sheets", source=vd().sheets)
-vd.graveyardSheet = GraveyardSheet("sheets_graveyard", source=vd().allSheets)
+
+@VisiData.lazy_property
+def vdmenu(vd):
+    return VisiDataSheet('visidata_menu', source=vd)
+
+@VisiData.property
+def allColumnsSheet(vd):
+    return ColumnsSheet("all_columns", source=list(vd.sheets))
 
 
-def combineColumns(cols):
-    'Return Column object formed by joining fields in given columns.'
-    return Column("+".join(c.name for c in cols),
-                  getter=lambda col,row,cols=cols,ch=' ': ch.join(c.getDisplayValue(row) for c in cols))
+@ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')
+def join_cols(sheet):
+    cols = sheet.someSelectedRows
+    destSheet = cols[0].sheet
+
+    if len(set(c.sheet for c in cols)) > 1:
+        vd.fail('joined columns must come from the same source sheet')
+
+    c = Column(options.name_joiner.join(c.name for c in cols),
+                getter=lambda col,row,cols=cols,ch=options.value_joiner: ch.join(c.getDisplayValue(row) for c in cols))
+
+    vd.status(f"added {c.name} to {destSheet}")
+    destSheet.addColumn(c, index=sheet.cursorRowIndex)
+
+
+# copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
+globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets')
+globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')
+
+BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)', 'open VisiData menu: browse list of core sheets')
+BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open Options Sheet: edit sheet options (apply to current sheet only)')
+
+Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'setKeys(selectedRows or [cursorRow])')
-ColumnsSheet.addCommand('gz!', 'key-off-selected', 'unsetKeys(selectedRows or [cursorRow])')
-ColumnsSheet.addCommand('g-', 'hide-selected', 'for c in selectedRows or [cursorRow]: c.hide()')
-ColumnsSheet.addCommand('g%', 'type-float-selected', 'for c in selectedRows or [cursorRow]: c.type = float')
-ColumnsSheet.addCommand('g#', 'type-int-selected', 'for c in selectedRows or [cursorRow]: c.type = int')
-ColumnsSheet.addCommand('gz#', 'type-len-selected', 'for c in selectedRows or [cursorRow]: c.type = len')
-ColumnsSheet.addCommand('g@', 'type-date-selected', 'for c in selectedRows or [cursorRow]: c.type = date')
-ColumnsSheet.addCommand('g$', 'type-currency-selected', 'for c in selectedRows or [cursorRow]: c.type = currency')
-ColumnsSheet.addCommand('g~', 'type-string-selected', 'for c in selectedRows or [cursorRow]: c.type = str')
-ColumnsSheet.addCommand('gz~', 'type-any-selected', 'for c in selectedRows or [cursorRow]: c.type = anytype')
+ColumnsSheet.addCommand('g!', 'key-selected', 'for c in someSelectedRows: c.sheet.setKeys([c])', 'toggle selected rows as key columns on source sheet')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in someSelectedRows: c.sheet.unsetKeys([c])', 'unset selected rows as key columns on source sheet')
+
+ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()', 'hide selected columns on source sheet')
+ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
+
+ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
+ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')
+ColumnsSheet.addCommand('gz#', 'type-len-selected', 'someSelectedRows.type=vlen', 'set type of selected columns to len')
+ColumnsSheet.addCommand('g@', 'type-date-selected', 'someSelectedRows.type=date', 'set type of selected columns to date')
+ColumnsSheet.addCommand('g$', 'type-currency-selected', 'someSelectedRows.type=currency', 'set type of selected columns to currency')
+ColumnsSheet.addCommand('g~', 'type-string-selected', 'someSelectedRows.type=str', 'set type of selected columns to str')
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anytype', 'set type of selected columns to anytype')
+
+OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit option at current row')
+OptionsSheet.bindkey('e', 'edit-option')
+OptionsSheet.bindkey(ENTER, 'edit-option')
+MetaSheet.class_options.header = 0

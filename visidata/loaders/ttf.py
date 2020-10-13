@@ -6,7 +6,6 @@ def open_ttf(p):
 
 open_otf = open_ttf
 
-
 class TTFTablesSheet(Sheet):
     rowtype = 'font tables'
     columns = [
@@ -20,45 +19,43 @@ class TTFTablesSheet(Sheet):
         Column('isUnicode', getter=lambda col,row: row.isUnicode()),
     ]
 
-    @asyncthread
-    def reload(self):
+    def openRow(self, row):
+        return TTFGlyphsSheet(self.name+'_glyphs', source=self, sourceRows=[row], ttf=self.ttf)
+
+    def iterload(self):
         import fontTools.ttLib
 
-        self.ttf = fontTools.ttLib.TTFont(self.source.resolve(), 0, allowVID=0, ignoreDecompileErrors=True, fontNumber=-1)
-        self.rows = []
+        self.ttf = fontTools.ttLib.TTFont(str(self.source), 0, allowVID=0, ignoreDecompileErrors=True, fontNumber=-1)
         for cmap in self.ttf["cmap"].tables:
-            self.addRow(cmap)
+            yield cmap
 
 
 class TTFGlyphsSheet(Sheet):
     rowtype = 'glyphs'  # rowdef: (codepoint, glyphid, fontTools.ttLib.ttFont._TTGlyphGlyf)
     columns = [
-        ColumnItem('codepoint', 0, type=int, fmtstr='{:0X}'),
+        ColumnItem('codepoint', 0, type=int, fmtstr='%0X'),
         ColumnItem('glyphid', 1),
-        SubrowColumn('height', ColumnAttr('height', type=int), 2),
-        SubrowColumn('width', ColumnAttr('width', type=int), 2),
-        SubrowColumn('lsb', ColumnAttr('lsb'), 2),
-        SubrowColumn('tsb', ColumnAttr('tsb'), 2),
+        SubColumnItem(2, ColumnAttr('height', type=int)),
+        SubColumnItem(2, ColumnAttr('width', type=int)),
+        SubColumnItem(2, ColumnAttr('lsb')),
+        SubColumnItem(2, ColumnAttr('tsb')),
     ]
 
-    @asyncthread
-    def reload(self):
-        self.rows = []
+    def openRow(self, row):
+        return makePen(self.name+"_"+row[1], source=row[2], glyphSet=self.ttf.getGlyphSet())
+
+    def iterload(self):
         glyphs = self.ttf.getGlyphSet()
         for cmap in self.sourceRows:
             for codepoint, glyphid in Progress(cmap.cmap.items(), total=len(cmap.cmap)):
-                self.addRow((codepoint, glyphid, glyphs[glyphid]))
-
-
-TTFTablesSheet.addCommand(ENTER, 'dive-row', 'vd.push(TTFGlyphsSheet(name+str(cursorRowIndex), source=sheet, sourceRows=[cursorRow], ttf=ttf))')
-TTFGlyphsSheet.addCommand('.', 'plot-row', 'vd.push(makePen(name+"_"+cursorRow[1], source=cursorRow[2], glyphSet=ttf.getGlyphSet()))')
+                yield (codepoint, glyphid, glyphs[glyphid])
 
 
 def makePen(*args, **kwargs):
     try:
         from fontTools.pens.basePen import BasePen
     except ImportError as e:
-        error('fonttools not installed')
+        vd.error('fonttools not installed')
 
     class GlyphPen(InvertedCanvas, BasePen):
         aspectRatio = 1.0
@@ -77,7 +74,7 @@ def makePen(*args, **kwargs):
             self._moveTo(xy)
 
         def _curveToOne(self, xy1, xy2, xy3):
-            error('NotImplemented')
+            vd.error('NotImplemented')
 
         def _qCurveToOne(self, xy1, xy2):
             self.qcurve([self.lastxy, xy1, xy2], self.attr)
@@ -89,3 +86,6 @@ def makePen(*args, **kwargs):
             self.refresh()
 
     return GlyphPen(*args, **kwargs)
+
+
+#TTFGlyphsSheet.bindkey('.', 'open-row')

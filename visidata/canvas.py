@@ -133,16 +133,17 @@ def anySelected(vs, rows):
 #  - needs to refresh from source on resize
 class Plotter(BaseSheet):
     'pixel-addressable display of entire terminal with (x,y) integer pixel coordinates'
-    columns=[Column('')]  # to eliminate errors outside of draw()
+    columns=[Column('_')]  # to eliminate errors outside of draw()
     rowtype='pixels'
-    def __init__(self, name='plotter', **kwargs):
-        super().__init__(name, **kwargs)
+    def __init__(self, *names, **kwargs):
+        super().__init__(*names, **kwargs)
         self.labels = []  # (x, y, text, attr, row)
         self.hiddenAttrs = set()
         self.needsRefresh = False
-        self.resetCanvasDimensions(vd.windowHeight, vd.windowWidth)
+        self.resetCanvasDimensions(self.windowHeight, self.windowWidth)
 
-    def __len__(self):
+    @property
+    def nRows(self):
         return (self.plotwidth* self.plotheight)
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):
@@ -163,8 +164,8 @@ class Plotter(BaseSheet):
     def plotlabel(self, x, y, text, attr=0, row=None):
         self.labels.append((x, y, text, attr, row))
 
-    def plotlegend(self, i, txt, attr=0):
-        self.plotlabel(self.plotwidth-30, i*4, txt, attr)
+    def plotlegend(self, i, txt, attr=0, width=15):
+        self.plotlabel(self.plotwidth-width*2, i*4, txt, attr)
 
     @property
     def plotterCursorBox(self):
@@ -187,12 +188,12 @@ class Plotter(BaseSheet):
     def getPixelAttrMost(self, x, y):
         'most common attr at this pixel.'
         r = self.pixels[y][x]
-        c = sorted((len(rows), attr, rows) for attr, rows in list(r.items()) if attr and attr not in self.hiddenAttrs)
+        c = [(len(rows), attr, rows) for attr, rows in list(r.items()) if attr and attr not in self.hiddenAttrs]
         if not c:
             return 0
-        _, attr, rows = c[-1]
+        _, attr, rows = max(c)
         if isinstance(self.source, BaseSheet) and anySelected(self.source, rows):
-            attr = CursesAttr(attr, 8).update_attr(colors.color_graph_selected, 10).attr
+            attr = update_attr(ColorAttr(attr, 0, 8, attr), colors.color_graph_selected, 10).attr
         return attr
 
     def hideAttr(self, attr, hide=True):
@@ -206,11 +207,11 @@ class Plotter(BaseSheet):
         'return list of deduped rows within bbox'
         ret = {}
         for y in range(bbox.ymin, bbox.ymax+1):
-            for x in range(bbox.xmin, bbox.xmax+1):
+            for x in range(bbox.xmin, min(len(self.pixels[y]), bbox.xmax+1)):
                 for attr, rows in self.pixels[y][x].items():
                     if attr not in self.hiddenAttrs:
                         for r in rows:
-                            ret[id(r)] = r
+                            ret[self.source.rowid(r)] = r
         return list(ret.values())
 
     def draw(self, scr):
@@ -219,11 +220,10 @@ class Plotter(BaseSheet):
         if self.needsRefresh:
             self.render(windowHeight, windowWidth)
 
-        scr.erase()
-
         if self.pixels:
             cursorBBox = self.plotterCursorBox
             getPixelAttr = self.getPixelAttrRandom if options.disp_pixel_random else self.getPixelAttrMost
+
             for char_y in range(0, self.plotheight//4):
                 for char_x in range(0, self.plotwidth//2):
                     block_attrs = [
@@ -251,7 +251,7 @@ class Plotter(BaseSheet):
 
                     if cursorBBox.contains(char_x*2, char_y*4) or \
                        cursorBBox.contains(char_x*2+1, char_y*4+3):
-                        attr = CursesAttr(attr).update_attr(colors.color_current_row).attr
+                        attr = update_attr(ColorAttr(attr, 0, 0, attr), colors.color_current_row).attr
 
                     if attr:
                         scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)
@@ -294,27 +294,26 @@ class Plotter(BaseSheet):
                         char_x, char_y, txt, attr, row = o
                         clipdraw(scr, char_y, char_x, txt, attr, len(txt))
 
-Plotter.addCommand('^L', 'redraw', 'refresh()')
-Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels')
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
 class Canvas(Plotter):
     'zoomable/scrollable virtual canvas with (x,y) coordinates in arbitrary units'
     rowtype = 'plots'
-    aspectRatio = 0.0
     leftMarginPixels = 10*2
     rightMarginPixels = 4*2
     topMarginPixels = 0
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
-    def __init__(self, name='canvas', source=None, **kwargs):
-        super().__init__(name, source=source, **kwargs)
+    def __init__(self, *names, **kwargs):
+        super().__init__(*names, **kwargs)
 
         self.canvasBox = None   # bounding box of entire canvas, in canvas units
         self.visibleBox = None  # bounding box of visible canvas, in canvas units
         self.cursorBox = None   # bounding box of cursor, in canvas units
 
-        self.zoomlevel = 1.0
+        self.aspectRatio = 0.0
+        self.xzoomlevel = 1.0
+        self.yzoomlevel = 1.0
         self.needsRefresh = False
 
         self.polylines = []   # list of ([(canvas_x, canvas_y), ...], attr, row)
@@ -324,15 +323,17 @@ class Canvas(Plotter):
         self.plotAttrs = {}   # key: attr  (all keys, for speed)
         self.reset()
 
-    def __len__(self):
+    @property
+    def nRows(self):
         return len(self.polylines)
 
     def reset(self):
         'clear everything in preparation for a fresh reload()'
         self.polylines.clear()
         self.legends.clear()
+        self.legendwidth = 0
         self.plotAttrs.clear()
-        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))].attr for colorname in options.plot_colors.split())
+        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in options.plot_colors.split())
 
     def plotColor(self, k):
         attr = self.plotAttrs.get(k, None)
@@ -344,6 +345,7 @@ class Canvas(Plotter):
                 attr = self.unusedAttrs[0]
                 legend = '[other]'
 
+            self.legendwidth = max(self.legendwidth, len(legend))
             self.legends[legend] = attr
             self.plotAttrs[k] = attr
             self.plotlegends()
@@ -491,16 +493,17 @@ class Canvas(Plotter):
     def zoomTo(self, bbox):
         'set visible area to bbox, maintaining aspectRatio if applicable'
         self.fixPoint(self.plotviewBox.xymin, bbox.xymin)
-        self.zoomlevel=max(bbox.w/self.canvasBox.w, bbox.h/self.canvasBox.h)
+        self.xzoomlevel=bbox.w/self.canvasBox.w
+        self.yzoomlevel=bbox.h/self.canvasBox.h
 
-    def setZoom(self, zoomlevel=None):
-        if zoomlevel:
-            self.zoomlevel = zoomlevel
+    def incrZoom(self, incr):
+        self.xzoomlevel *= incr
+        self.yzoomlevel *= incr
 
         self.resetBounds()
-        self.plotlegends()
 
     def resetBounds(self):
+        'create canvasBox and cursorBox if necessary, and set visibleBox w/h according to zoomlevels.  then redisplay labels.'
         if not self.canvasBox:
             xmin, ymin, xmax, ymax = None, None, None, None
             for vertexes, attr, row in self.polylines:
@@ -523,17 +526,19 @@ class Canvas(Plotter):
         if not self.cursorBox:
             self.cursorBox = Box(self.visibleBox.xmin, self.visibleBox.ymin, self.canvasCharWidth, self.canvasCharHeight)
 
+        self.plotlegends()
+
     def plotlegends(self):
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
-            self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr)) #, 'toggle display of "%s"' % legend)
+            self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr), 'toggle display of "%s"' % legend)
             if attr in self.hiddenAttrs:
                 attr = colors.color_graph_hidden
-            self.plotlegend(i, '%s:%s'%(i+1,legend), attr)
+            self.plotlegend(i, '%s:%s'%(i+1,legend), attr, width=self.legendwidth+4)
 
     def checkCursor(self):
         'override Sheet.checkCursor'
-        if self.cursorBox:
+        if self.visibleBox and self.cursorBox:
             if self.cursorBox.h < self.canvasCharHeight:
                 self.cursorBox.h = self.canvasCharHeight*3/4
             if self.cursorBox.w < self.canvasCharWidth:
@@ -543,18 +548,18 @@ class Canvas(Plotter):
 
     @property
     def xScaler(self):
-        xratio = self.plotviewBox.w/(self.canvasBox.w*self.zoomlevel)
+        xratio = self.plotviewBox.w/(self.canvasBox.w*self.xzoomlevel)
         if self.aspectRatio:
-            yratio = self.plotviewBox.h/(self.canvasBox.h*self.zoomlevel)
+            yratio = self.plotviewBox.h/(self.canvasBox.h*self.yzoomlevel)
             return self.aspectRatio*min(xratio, yratio)
         else:
             return xratio
 
     @property
     def yScaler(self):
-        yratio = self.plotviewBox.h/(self.canvasBox.h*self.zoomlevel)
+        yratio = self.plotviewBox.h/(self.canvasBox.h*self.yzoomlevel)
         if self.aspectRatio:
-            xratio = self.plotviewBox.w/(self.canvasBox.w*self.zoomlevel)
+            xratio = self.plotviewBox.w/(self.canvasBox.w*self.xzoomlevel)
             return min(xratio, yratio)
         else:
             return yratio
@@ -594,7 +599,8 @@ class Canvas(Plotter):
     def render_sync(self):
         'plots points and lines and text onto the Plotter'
 
-        self.setZoom()
+        self.resetBounds()
+
         bb = self.visibleBox
         xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax
         xfactor, yfactor = self.xScaler, self.yScaler
@@ -625,58 +631,68 @@ class Canvas(Plotter):
         for x, y, text, attr, row in Progress(self.gridlabels, 'labeling'):
             self.plotlabel(self.scaleX(x), self.scaleY(y), text, attr, row)
 
-Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w')
-Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w')
-Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin -= cursorBox.h')
-Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin += cursorBox.h')
-Canvas.addCommand(None, 'go-leftmost', 'sheet.cursorBox.xmin = visibleBox.xmin')
-Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w')
-Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymin')
-Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymax')
+    @asyncthread
+    def deleteSourceRows(self, rows):
+        rows = list(rows)
+        self.source.copyRows(rows)
+        self.source.deleteBy(lambda r,rows=rows: r in rows)
+        self.reload()
 
-Canvas.addCommand(None, 'next-page', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()')
-Canvas.addCommand(None, 'prev-page', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()')
 
-Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth')
-Canvas.addCommand('zl', 'go-right-small', 'sheet.cursorBox.xmin += canvasCharWidth')
-Canvas.addCommand('zj', 'go-down-small', 'sheet.cursorBox.ymin += canvasCharHeight')
-Canvas.addCommand('zk', 'go-up-small', 'sheet.cursorBox.ymin -= canvasCharHeight')
+Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels option')
 
-Canvas.addCommand('gH', 'resize-cursor-halfwide', 'sheet.cursorBox.w /= 2')
-Canvas.addCommand('gL', 'resize-cursor-doublewide', 'sheet.cursorBox.w *= 2')
-Canvas.addCommand('gJ','resize-cursor-halfheight', 'sheet.cursorBox.h /= 2')
-Canvas.addCommand('gK', 'resize-cursor-doubleheight', 'sheet.cursorBox.h *= 2')
+Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w', 'move cursor left by its width')
+Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w', 'move cursor right by its width' )
+Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor up by its height')
+Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor down by its height')
+Canvas.addCommand(None, 'go-leftmost', 'sheet.cursorBox.xmin = visibleBox.xmin', 'move cursor to left edge of visible canvas')
+Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w', 'move cursor to right edge of visible canvas')
+Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymin', 'move cursor to top edge of visible canvas')
+Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymax', 'move cursor to bottom edge of visible canvas')
 
-Canvas.addCommand('H', 'resize-cursor-thinner', 'sheet.cursorBox.w -= canvasCharWidth')
-Canvas.addCommand('L', 'resize-cursor-wider', 'sheet.cursorBox.w += canvasCharWidth')
-Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight')
-Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight')
-Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)')
+Canvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()', 'move cursor down to next visible page')
+Canvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()', 'move cursor up to previous visible page')
 
-Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotviewBox.center, tmp)')
-Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotviewBox.center, tmp)')
-Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; setZoom(1.0); refresh()')
-Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()')
+Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth', 'move cursor left one character')
+Canvas.addCommand('zl', 'go-right-small', 'sheet.cursorBox.xmin += canvasCharWidth', 'move cursor right one character')
+Canvas.addCommand('zj', 'go-down-small', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor down one character')
+Canvas.addCommand('zk', 'go-up-small', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor up one character')
+
+Canvas.addCommand('gH', 'resize-cursor-halfwide', 'sheet.cursorBox.w /= 2', 'halve cursor width')
+Canvas.addCommand('gL', 'resize-cursor-doublewide', 'sheet.cursorBox.w *= 2', 'double cursor width')
+Canvas.addCommand('gJ','resize-cursor-halfheight', 'sheet.cursorBox.h /= 2', 'halve cursor height')
+Canvas.addCommand('gK', 'resize-cursor-doubleheight', 'sheet.cursorBox.h *= 2', 'double cursor height')
+
+Canvas.addCommand('H', 'resize-cursor-thinner', 'sheet.cursorBox.w -= canvasCharWidth', 'decrease cursor width by one character')
+Canvas.addCommand('L', 'resize-cursor-wider', 'sheet.cursorBox.w += canvasCharWidth', 'increase cursor width by one character')
+Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharHeight', 'increase cursor height by one character')
+Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height by one character')
+Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)', 'set visible bounds to cursor')
+
+Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; incrZoom(options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
+Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; incrZoom(1.0/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
+Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; refresh()', 'zoom to fit full extent')
+Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio')
 
 # set cursor box with left click
-Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'sheet.cursorBox = Box(*canvasMouse.xy)')
-Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)')
+Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'sheet.cursorBox = Box(*canvasMouse.xy)', 'start cursor box with left mouse button press')
+Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)', 'end cursor box with left mouse button release')
 
-Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse')
-Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint)')
+Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move')
+Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint)', 'mark canvas anchor point')
 
-Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; setZoom(zoomlevel/options.zoom_incr); fixPoint(plotterMouse, tmp)')
-Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; setZoom(zoomlevel*options.zoom_incr); fixPoint(plotterMouse, tmp)')
+Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; incrZoom(1.0/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel')
+Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; incrZoom(options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel')
+Canvas.bindkey('2097152', 'zoomout-mouse')
 
-Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))')
-Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))')
-Canvas.addCommand('u', 'unselect-cursor', 'source.unselect(list(rowsWithin(plotterCursorBox)))')
-Canvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)')
-Canvas.addCommand('d', 'delete-cursor', 'source.delete(list(rowsWithin(plotterCursorBox))); reload()')
+Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')
+Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor')
+Canvas.addCommand('u', 'unselect-cursor', 'source.unselect(list(rowsWithin(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor')
+Canvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)', 'open sheet of source rows contained within canvas cursor')
+Canvas.addCommand('d', 'delete-cursor', 'deleteSourceRows(rowsWithin(plotterCursorBox))', 'delete rows on source sheet contained within canvas cursor')
 
-
-Canvas.addCommand('gs', 'select-visible', 'source.select(list(rowsWithin(plotterVisibleBox)))')
-Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotterVisibleBox)))')
-Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))')
-Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)')
-Canvas.addCommand('gd', 'delete-visible', 'source.delete(list(rowsWithin(plotterVisibleBox))); reload()')
+Canvas.addCommand('gs', 'select-visible', 'source.select(list(rowsWithin(plotterVisibleBox)))', 'select rows on source sheet visible on screen')
+Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotterVisibleBox)))', 'toggle selection of rows on source sheet visible on screen')
+Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect rows on source sheet visible on screen')
+Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen')
+Canvas.addCommand('gd', 'delete-visible', 'deleteSourceRows(rowsWithin(plotterVisibleBox))', 'delete rows on source sheet visible on screen')

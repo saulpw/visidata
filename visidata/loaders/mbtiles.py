@@ -5,7 +5,7 @@ import gzip
 import sqlite3
 
 def open_pbf(p):
-    return PbfSheet(p.name, tile_data=p.read_bytes())
+    return PbfSheet(p.name, source=p)
 
 def open_mbtiles(p):
     return MbtilesSheet(p.name, source=p)
@@ -23,6 +23,9 @@ def getFeatures(tile_data):
             yield layername, feat
 
 
+def tilename(row):
+    return ",".join(str(x) for x in row)
+
 
 class MbtilesSheet(Sheet):
     columns = [
@@ -31,13 +34,10 @@ class MbtilesSheet(Sheet):
         ColumnItem('tile_row', 2),
     ]
 
-    def tilename(self, row):
-        return ",".join(str(x) for x in row)
-
     def getTile(self, zoom_level, tile_col, tile_row):
         import mapbox_vector_tile
 
-        con = sqlite3.connect(self.source.resolve())
+        con = sqlite3.connect(str(self.source))
         tile_data = con.execute('''
        SELECT tile_data FROM tiles
            WHERE zoom_level = ?
@@ -46,20 +46,26 @@ class MbtilesSheet(Sheet):
 
         return mapbox_vector_tile.decode(gzip.decompress(tile_data))
 
-    @asyncthread
-    def reload(self):
-        con = sqlite3.connect(self.source.resolve())
+    def iterload(self):
+        con = sqlite3.connect(str(self.source))
 
         self.metadata = dict(con.execute('SELECT name, value FROM metadata').fetchall())
 
         tiles = con.execute('SELECT zoom_level, tile_column, tile_row FROM tiles')
-        for r in Progress(tiles.fetchall()):
-            self.addRow(r)
+        yield from Progress(tiles.fetchall())
 
+    def getPlot(self, *rows):
+        if len(rows) == 1:
+            name = self.name+'_'+tilename(rows[0])
+        else:
+            name = self.name+'_selected'
 
-MbtilesSheet.addCommand(ENTER, 'dive-row', 'vd.push(PbfSheet(tilename(cursorRow), source=sheet, sourceRow=cursorRow))')
-MbtilesSheet.addCommand('.', 'plot-row', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn, sourceRows=list(getFeatures(getTile(*cursorRow))))))')
-#MbtilesSheet.addCommand('g.', '', 'tn=tilename(cursorRow); vd.push(PbfCanvas(tn+"_map", source=PbfSheet(tn), sourceRows=sum((list(getFeatures(getTile(*r))) for r in selectedRows or rows), [])))', 'plot selected tiles'),
+        sourceRows = sum((list(getFeatures(self.getTile(*r))) for r in rows), [])
+        return PbfCanvas(name+"_map", source=PbfSheet(name, source=self), sourceRows=sourceRows)
+
+    def openRow(self, row):
+        'load table referenced in current row into memory'
+        return PbfSheet(tilename(row), source=self, sourceRow=row)
 
 
 class PbfSheet(Sheet):
@@ -70,12 +76,11 @@ class PbfSheet(Sheet):
         Column('geometry_coords_depth', getter=lambda col,row: getListDepth(row[1]['geometry']['coordinates']), width=0),
     ]
     nKeys = 1  # layer
-    @asyncthread
-    def reload(self):
+
+    def iterload(self):
         props = set()  # property names
-        self.rows = []
         for r in getFeatures(self.source.getTile(*self.sourceRow)):
-            self.rows.append(r)
+            yield r
             props.update(r[1]['properties'].keys())
 
         for key in props:
@@ -126,5 +131,7 @@ class PbfCanvas(InvertedCanvas):
         self.refresh()
 
 
-PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))')
-PbfSheet.addCommand('g.', 'plot-selected', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=selectedRows or rows, textCol=cursorCol))')
+PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot blocks in current row')
+PbfSheet.addCommand('g.', 'plot-rows', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot selected blocks')
+MbtilesSheet.addCommand('.', 'plot-row', 'vd.push(getPlot(cursorRow))', 'plot tiles in current row')
+MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles'),

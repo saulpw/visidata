@@ -1,0 +1,116 @@
+# CHANGELOG
+
+## 0.4
+
+- opening page:
+  - GitStatus if vgit run in/on worktree with .git at toplevel
+  - GitOverview with any descendent .gits
+  - currently does not open GitStatus worktree below toplevel
+-  unbind ignore-file and ignore-wildcard
+- g/ from anywhere does 'git grep'.
+  - ENTER to go to git blame (needs love),
+  - ^O to open in $EDITOR
+- 
+## 0.3
+
+
+- log all git commands which vgit executes to gitcmd.log
+- git log sheet
+    - `Shift-C` amends the selected commit to contain the currently staged changes
+    - `r` resets the shown branch HEAD to the selected commit
+
+## v0.2 (2017-08-23)
+- vgit auto pushes a full sheet of statuses if the status is more than 3 lines
+- add async to some git commands
+- global keystrokes
+    - `R` pushes the remotes sheet
+    - `P`ushes the local refs to the currently set remote refs
+    - `X` pushes the list of git commands executed
+    - `H` pushes the git log sheet (history) for the current branch
+    - `Ctrl-s`tashes uncommited changes
+    - `Ctrl-p`ops the most recent stashed change and drops it
+    - `A`bort the current in-progress action
+    - `T` pushes the stashes sheet
+    - `L` pushes the blame sheet
+- git status sheet
+    - provides information about the working tree
+    - `r` to unstage a file (instead of `w`)
+    - `i` to add a file to toplevel .gitignore
+   - `gi` to add an input line to toplevel .gitignore
+   - `V` opens selected file
+   - `g<ENTER>` pushes hunks sheet for selected files (or all files, if none selected)
+   - `z<ENTER>` pushes hunks sheet for the staged diffs for the selected file
+   - `zg<ENTER>` pushes hunks sheet for the staged diffs for selected files (or all files, if none selected)
+- git branches sheet
+    - displays information about branches and enables their modification
+    - add upstream diff column
+    - add `merge_base` column
+    - `m`erge the selected branch into the current branch
+    - `e` renames a branch
+    - `<ENTER>` pushes the log sheet of the selected branch
+- git stashes sheet
+    - allows viewing of current stashed commits
+    - `<ENTER>` shows the selected stashed change
+    - `a`pplies a stashed change without removing it from the stash
+    - `Ctrl-p` applies a stashed change and drops it
+    - `d`rops a stashed change
+    - `b` creates a new branch from the stashed change
+- git log sheet
+    - allows viewing of the git commit history for the selected branch
+    - `c` cherry-picks the selected commit onto the current branch
+    - `<ENTER>` shows the diff for the selected commit
+- hunks sheet
+    - allows the viewing of hunks for a file (pieces of diffs)
+    - `V`iew the raw patch for this hunk
+    - `d` or `r` undo this hunk
+- diff viewer for selected hunks sheet
+    - opens a view for the diff of a hunk
+    - `y`, `a` or `2` stage a hunk to the index and move on to the next hunk
+    - `r` or `1` remove this hunk from the diff
+    - `n` or `<ENTER>`to skip this hunk without staging
+    - `d` deletes a line from a patch
+- git options sheet
+    - for editing git configuration
+    - `d` unsets this config value
+    - `gd` unsets all selected config values
+    - `ge` edits this option for all selected rows
+    - `a`dd new option
+- git remotes sheet
+    - allows viewing and managing of remote urls
+    - `d`elete remote
+    - `a`dd new remote
+
+## v0.1 (2017-08-02) -- Initial Release
+- git status sheet
+    - provides information about the working tree
+    - `a` to stage a file for addition
+    - `m` to rename a file
+    - `d` to stage a file for deletion
+    - `w` to unstage a file
+    - `c` to checkout a file
+    - `C` to commit all staged changes
+    - `ga`/`gd` adds/removes all selected files
+    - `g/` performs a search through all files
+    - `ENTER` pushes a hunks sheet for a file
+    - `x` execute an arbitrary git command
+    - `f` will add a --force flag to the next git command
+    - `B` pushes the git branches sheet
+    - `O` pushes the git options sheet
+- hunks sheet
+    - allows the viewing of hunks for a file (pieces of diffs)
+    - `ENTER` on a hunk allows the viewing of its diffs
+    - `gENTER` allows the viewing of diffs for all of the selected hunks (or all hunks, if none selected)
+    - `a` stages a hunk
+- diff viewer for selected hunks sheet
+    - opens a view for the diff of a hunk
+    - `a` to stage a hunk
+    - `ENTER` to skip this hunk without staging
+    - viewer exits when all hunks have been added or skipped
+- git branches sheet
+    - displays information about branches and enables their modification
+    - `c` to checkout a branch
+    - `a` to create a new branch
+    - `d` to remove a branch
+- git options sheet
+    - for editing git configuration
+    - `e` to edit an option

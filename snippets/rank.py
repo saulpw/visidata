@@ -1,4 +1,12 @@
-Sheet.addCommand(None, 'rank', 'addColumn(RankColumn(cursorCol), index=cursorVisibleColIndex+1)')
+'''
+Adds `rank` command (no default binding) to add new rank column based on current column in sorted order.
+Values are cached on the column, use `cache-col` command to reset.
+
+To enable, add `from plugins.rank import *` to .visidatarc.
+'''
+
+from visidata import Column, Sheet, asyncthread
+
 
 class RankColumn(Column):
     def __init__(self, col, **kwargs):
@@ -8,7 +16,7 @@ class RankColumn(Column):
         self.resetCache()
 
     def calcValue(self, row):
-        return self.srcValues.get(id(row), None)
+        return self.srcValues.get(self.sheet.rowid(row), None)
 
     @asyncthread
     def resetCache(self):
@@ -22,4 +30,7 @@ class RankColumn(Column):
                 prevval = v
                 previ = i+1
 
-            self.srcValues[id(r)] = previ
+            self.srcValues[self.origCol.sheet.rowid(r)] = previ
+
+
+Sheet.addCommand(None, 'rank', 'addColumn(RankColumn(cursorCol), index=cursorVisibleColIndex+1)')

@@ -1,5 +1,5 @@
-.Dd January 12, 2019
-.Dt vd \&1 "Quick Reference Guide" 
+.Dd July 23, 2020
+.Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
 .\" Long option with arg: .Lo f filetype format
@@ -27,10 +27,15 @@
 .Op Cm -w Ar waitsecs
 .Op Cm --batch
 .Op Cm -o Ar output
-.Op Ar field Ns Cm = Ns Ar value No ...
+.Op Ar field Ns Cm = Ns Ar value
+.
+.Nm vd
+.Op Ar options
+.Op Ar input No ...
+.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .
 .Sh DESCRIPTION
-.Nm VisiData No is a multipurpose tool built on the Sy vdtui No platform that can be used to explore, clean, edit, and restructure data.
+.Nm VisiData No is an easy-to-use multipurpose tool to explore, clean, edit, and restructure data.
 Rows can be selected, filtered, and grouped; columns can be rearranged, transformed, and derived via regex or Python expressions; and workflows can be saved, documented, and replayed.
 .
 .Ss REPLAY MODE
@@ -57,46 +62,58 @@ replay in batch mode (with no interface)
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Sy ^U
 pause/resume replay
-.It Sy Tab
+.It Sy ^N
 execute next row in replaying sheet
 .It Sy ^K
 cancel current replay
 .El
 .
 .Ss GLOBAL COMMANDS
-In most cases, commands that affect selected rows will affect all rows if no rows are selected.
+.No All keystrokes are case sensitive. The Sy ^ No prefix is shorthand for Sy Ctrl Ns .
 .Pp
-.Ss Keystrokes for the Cautious
+.Ss Keystrokes to start off with
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
-.It Ic " ^H"
-view this man page
-.It Ic "z^H"
-view sheet of commands and keybindings
 .It Ic " ^Q"
 abort program immediately
 .It Ic " ^C"
 cancel user input or abort all async threads on current sheet
-.It Ic " q"
+.It Ic "g^C"
+abort all secondary threads
+.It Ic "  q"
 quit current sheet
-.It Ic "gq"
+.It Ic " gq"
 quit all sheets (clean exit)
+.Pp
+.It Ic " ^H"
+view this man page
+.It Ic "z^H"
+view sheet of command longnames and keybindings
+.It Ic "Space" Ar longname
+.No execute command by its Ar longname
+.Pp
+.It Ic "  U"
+.No undo the most recent modification ( requires enabled Sy options.undo Ns )
+.It Ic "  R"
+.No redo the most recent undo ( requires enabled Sy options.undo Ns )
 .El
 .Ss "Cursor Movement"
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
 .It Ic "Arrow PgUp Home"
-move as expected
+go as expected
 .It Ic " h   j   k   l"
-move left/down/up/right
+go left/down/up/right
 .It Ic "gh  gj  gk  gl"
-move all the way to the left/bottom/top/right of sheet
+go all the way to the left/bottom/top/right of sheet
 .It Ic "     G  gg"
-move all the way to the bottom/top of sheet
+go all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
+.It Ic "zz"
+scroll current row to center of screen
 .Pp
-.It Ic "^^" No (Ctrl-^)
+.It Ic "^^" No (Ctrl+^)
 jump to previous sheet (swaps with current sheet)
 .Pp
 .It Ic  " /   ?" Ar regex
@@ -106,30 +123,32 @@ jump to previous sheet (swaps with current sheet)
 .It Ic  "z/  z?" Ar expr
 .No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
-move to next/previous match from last search
+go to next/previous match from last regex search
 .Pp
 .It Ic  " <   >"
-move up/down to next value in current column
+go up/down current column to next value
 .It Ic  "z<  z>"
-move up/down to next null in current column
+go up/down current column to next null value
 .It Ic " {   }"
-move up/down to next selected row
+go up/down current column to next selected row
 .
 .El
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .Pp
 .It Ic " c" Ar regex
-.No move to next column with name matching Ar regex
+.No go to next column with name matching Ar regex
 .It Ic " r" Ar regex
-.No move to next row with key matching Ar regex
+.No go to next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No move to column/row Ar number No (0-based)
+.No go to column/row Ar number No (0-based)
 .Pp
 .It Ic " H   J   K   L"
 slide current row/column left/down/up/right
 .It Ic "gH  gJ  gK  gL"
 slide current row/column all the way to the left/bottom/top/right of sheet
+.It Ic "zH  zJ  zK  zK" Ar number
+.No slide current row/column Ar number No positions to the left/down/up/right
 .Pp
 .It Ic "zh  zj  zk  zl"
 scroll one left/down/up/right
@@ -139,12 +158,14 @@ scroll one left/down/up/right
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " _" Ns " (underscore)"
-adjust width of current column
-.It Ic "g_"
-adjust width of all visible columns
-.It Ic "z_" Ar number
+.It Ic "  _" Ns " (underscore)"
+toggle width of current column between full and default width
+.It Ic " g_"
+toggle widths of all visible columns between full and default width
+.It Ic " z_" Ar number
 .No adjust width of current column to Ar number
+.It Ic "gz_" Ar number
+adjust widths of all visible columns to Ar number
 .Pp
 .It Ic " -" Ns " (hyphen)"
 hide current column
@@ -173,22 +194,32 @@ set name of all visible columns to combined contents of current column for selec
 .It Ic "gz=" Ar expr
 .No set current column for selected rows to the items in result of Python sequence Ar expr
 .It Ic " z=" Ar expr
-.No evaluate Python expression on current row and show result on status line
+.No evaluate Python expression on current row and set current cell with result of Python Ar expr
+.Pp
+.It "  i" (iota)
+.No add column with incremental values
+.It " gi"
+.No set current column for selected rows to incremental values
+.It " zi" Ar step
+.No add column with values at increment Ar step
+.It "gzi" Ar step
+.No set current column for selected rows at increment Ar step
 .El
+.Pp
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic " '" Ns " (tick)"
 add a frozen copy of current column with all cells evaluated
 .It Ic "g'"
 open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
-reset cache for current/all visible column(s)
+add/reset cache for current/all visible column(s)
 .Pp
 .It Ic " \&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic " \&;" Ar regex
 .No add new columns from capture groups of Ar regex No (also requires example row)
 .It Ic "z" Ns Ic "\&;" Ar expr
-.No add new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
+.No create new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
 .It Ic " *" Ar regex Ns Sy / Ns Ar subst
 .No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .It Ic "g*  gz*" Ar regex Ns Sy / Ns Ar subst
@@ -200,6 +231,8 @@ reset cache for current/all visible column(s)
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic " )"
 unexpand current column; restore original column and remove other columns at this level
+.It Ic "zM"
+.No row-wise expand current column of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) within that column
 .El
 .Ss Row Selection
 .
@@ -210,9 +243,9 @@ select/toggle/unselect current row
 .It Ic " gs  gt  gu"
 select/toggle/unselect all rows
 .It Ic " zs  zt  zu"
-select/toggle/unselect rows from top to cursor
+select/toggle/unselect all rows from top to cursor
 .It Ic "gzs gzt gzu"
-select/toggle/unselect rows from cursor to bottom
+select/toggle/unselect all rows from cursor to bottom
 .It Ic " |   \e\ " Ns Ar regex
 .No select/unselect rows matching Ar regex No in current column
 .It Ic "g|  g\e\ " Ns Ar regex
@@ -231,10 +264,14 @@ select rows matching current row in all visible columns
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic " [   ]"
-sort ascending/descending by current column
-.It Ic "g[  g]"
-sort ascending/descending by all key columns
+.It Ic "  [    ]"
+sort ascending/descending by current column; replace any existing sort criteria
+.It Ic " g[   g]"
+sort ascending/descending by all key columns; replace any existing sort criteria
+.It Ic " z[   z]"
+sort ascending/descending by current column; add to existing sort criteria
+.It Ic "gz[  gz]"
+sort ascending/descending by all key columns; add to existing sort criteria
 .It Ic " \&""
 open duplicate sheet with only selected rows
 .It Ic "g\&""
@@ -246,7 +283,7 @@ open duplicate sheet with deepcopy of selected rows
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a   za"
-append a blank row/column
+append a blank row/column; appended columns cannot be copied to clipboard
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
@@ -260,7 +297,7 @@ delete (cut) contents of current column for current/selected row(s) and move to 
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
-set contents of current column for current/selected row(s) to last clipboard value
+set cells of current column for current/selected row(s) to last clipboard value
 .It Ic "  Y   gY"
 .No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic " zY  gzY"
@@ -285,15 +322,19 @@ open external $EDITOR to edit contents
 .It Ic ^R
 reload initial value
 .It Ic "^A  ^E"
-move to beginning/end of line
+go to beginning/end of line
 .It Ic "^B  ^F"
-move back/forward one character
+go back/forward one character
+.It Ic "^←  ^→" No (arrow)
+go back/forward one word
 .It Ic "^H  ^D"
 delete previous/current character
 .It Ic ^T
 transpose previous and current characters
 .It Ic "^U  ^K"
 clear from cursor to beginning/end of line
+.It Ic "^Y"
+paste from cell clipboard
 .It Ic "Backspace  Del"
 delete previous/current character
 .It Ic Insert
@@ -315,21 +356,22 @@ open
 .It ""
 .No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
 .It Ic "z^S" Ar filename
-.No save key columns and current column only to Ar filename No in format determined by extension (default .tsv)
+.No save current column only to Ar filename No in format determined by extension (default .tsv)
 .It Ic "^D" Ar filename.vd
 .No save Sy CommandLog No to Ar filename.vd No file
-.It Ic "A" Ar number
-.No open new blank sheet with Ar number No columns
-.It Ic "R" Ar number
-pushes sheet with random population subset of
-.Ar number No rows
+.It Ic "A"
+.No open new blank sheet with one column
 .It Ic "T"
-open new sheet with rows and columns transposed
+.No open new sheet that has rows and columns of current sheet transposed
 .Pp
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column
+.It Ic " &"
+.No concatenate top two sheets in Sy Sheets Stack No
+.It Ic "g&"
+.No concatenate all sheets in Sy Sheets Stack No
 .Pp
 .El
 .Ss Data Visualization
@@ -348,6 +390,12 @@ open new sheet with rows and columns transposed
 increase/decrease zoom level, centered on cursor
 .It Ic " _" No (underscore)
 zoom to fit full extent
+.It Ic "z_" No (underscore)
+set aspect ratio
+.It Ic " x" Ar xmin xmax
+.No set Ar xmin Ns / Ns Ar xmax No on graph
+.It Ic " y" Ar ymin ymax
+.No set Ar ymin Ns / Ns Ar ymax No on graph
 .It Ic " s   t   u"
 select/toggle/unselect rows on source sheet contained within canvas cursor
 .It Ic "gs  gt  gu"
@@ -373,23 +421,34 @@ set canvas cursor
 .It Ic "right click-drag"
 scroll canvas
 .El
+.Ss Split Screen
+.Bl -tag -width XXXXXXXXXXXXX -compact
+.It Ic " Z"
+.No split screen in half, so that second sheet on the stack is visible in a second pane
+.It Ic "zZ"
+.No split screen, and queries for height of second pane
+.El
+.Ss "  Split Window specific Commands"
+.Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "gZ"
+.No close an already split screen, current pane full screens
+.It Ic "Tab"
+.No jump to other pane
+.It Ic "^^" No (Ctrl+^)
+.No swap which sheet is in current pane
+.Pp
+.El
 .Ss Other Commands
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "Q"
 .No quit current sheet and remove it from the Sy CommandLog
-.It Ic "V"
-view contents of current cell in a new TextSheet
-.It Ic "  v"
-toggle sheet-specific visibility (text wrap on TextSheet, legends/axes on Graph)
+.It Ic "v"
+toggle sheet-specific visibility (multi-line rows on Sheet, legends/axes on Graph)
 .Pp
-.It Ic "Space" Ar longname
-.No execute command by its Ar longname
 .Pp
-.It Ic " ^E"
-view traceback for most recent error
-.It Ic "g^E"
-view traceback for most recent errors
+.It Ic " ^E  g^E"
+view traceback for most recent error(s)
 .It Ic "z^E"
 view traceback for error in current cell
 .Pp
@@ -416,7 +475,7 @@ open current row/cell/sheet as Python object
 .It Ic " ^X" Ar expr
 .No evaluate Python Ar expr No and opens result as Python object
 .It Ic "z^X" Ar expr
-.No evaluate Python Ar expr No on current row and shows result on status line
+.No evaluate Python Ar expr Ns , in context of current row, and open result as Python object
 .It Ic "g^X" Ar stmt
 .No execute Python Ar stmt No in the global scope
 .El
@@ -424,7 +483,11 @@ open current row/cell/sheet as Python object
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
 .It Sy " \&."
-.Sy Directory Sheet No "            browse and modify properties of files in a directory"
+.Sy VisiDataMenu No (Shift+V) "     browse list of core sheets"
+.It Sy " \&."
+.Sy Directory Sheet No "            browse properties of files in a directory"
+.It Sy " \&."
+.Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -436,11 +499,11 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Commandlog No (Shift+D) "       modify and save commands for replay"
 .It Sy " \&."
-.Sy Error Sheet No (^E) "           view last error"
+.Sy Error Sheet No (Ctrl+E) "           view last error"
 .It Sy " \&."
-.Sy Status History No (^P) "        view history of status messages"
+.Sy Status History No (Ctrl+P) "        view history of status messages"
 .It Sy " \&."
-.Sy Threads Sheet No (^T) "         view, cancel, and profile asynchronous threads"
+.Sy Threads Sheet No (Ctrl+T) "         view, cancel, and profile asynchronous threads"
 .Pp
 .It Sy Derived Sheets
 .It Sy " \&."
@@ -451,27 +514,59 @@ open current row/cell/sheet as Python object
 .Sy Pivot Table No (Shift+W) "      group rows by key and summarize current column"
 .It Sy " \&."
 .Sy Melted Sheet No (Shift+M) "     unpivot non-key columns into variable/value columns"
+.It Sy " \&."
+.Sy Transposed Sheet No (Shift+T) "  open new sheet with rows and columns transposed"
 .El
 .
 .Ss INTERNAL SHEETS
-.Ss Directory Sheet
+.Ss VisiDataMenu (Shift+V)
 .Bl -inset -compact
 .It (sheet-specific commands)
-.It Modifying any cell changes the in-memory value. Changes are only applied to the filesystem with Ic ^S
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Enter
+.No load sheet in current row
+.El
+.Ss Directory Sheet
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Space Ar open-dir-current
+.No open the Sy Directory Sheet No for the current directory
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  gEnter"
 open current/selected file(s) as new sheet(s)
 .It Ic " ^O  g^O"
 open current/selected file(s) in external $EDITOR
-.It Ic " d   gd"
-schedule current/selected file(s) for deletion
 .It Ic " ^R  z^R  gz^R"
-reload information for all/current/selected file(s), undoing any pending changes
-.It Ic "z^S   ^S"
-apply all deferred changes to current/all file(s)
+reload information for all/current/selected file(s)
 .El
 .
+.Ss Plugins Sheet
+.Bl -inset -compact
+.It Browse through a list of available plugins. VisiData needs to be restarted before plugin activation takes effect. Installation may require internet access.
+.El
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Space Ar open-plugins
+.No open the Sy Plugins Sheet
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "a"
+install and activate current plugin
+.It Ic "d"
+deactivate current plugin
+.El
 .Ss METASHEETS
 .Ss Columns Sheet (Shift+C)
 .Bl -inset -compact
@@ -482,7 +577,7 @@ apply all deferred changes to current/all file(s)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gC
-.No open Sy Columns Sheet No for all visible columns on all sheets
+.No open Sy Columns Sheet No with all visible columns from all sheets
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -504,11 +599,14 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .
 .Ss Sheets Sheet (Shift+S)
 .Bl -inset -compact
+.It open Sy Sheets Stack Ns , which contains only the active sheets on the current stack
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gS
-.No open Sy Sheets Graveyard No which includes references to closed sheets
+.No open Sy Sheets Sheet Ns , which contains all sheets from current session, active and inactive
+.It Ic "Alt" Ar number
+.No jump to sheet Ar number Ns
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -516,12 +614,12 @@ set type of selected columns on source sheet to str/int/float/currency/date/len
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
 jump to sheet referenced in current row
+.It Ic "gEnter"
+push selected sheets to top of sheet stack
 .It Ic " a"
 add row to reference a new blank sheet
-.It Ic "gC"
-.No open Sy Columns Sheet No with all columns from selected sheets
-.It Ic "gI"
-.No open Sy Describe Sheet No with all columns from selected sheets
+.It Ic "gC  gI"
+.No open Sy Columns Sheet Ns / Ns Sy Describe Sheet No with all visible columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
 .It Ic "z^C  gz^C"
@@ -529,11 +627,11 @@ abort async threads for current/selected sheets(s)
 .It Ic " &" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
-.Bl -tag -width x -compact -offset XXXXXXXXXXXXXXXXXXXX 
+.Bl -tag -width x -compact -offset XXXXXXXXXXXXXXXXXXXX
 .It Sy "\&."
 .Sy inner No " keep only rows which match keys on all sheets"
 .It Sy "\&."
-.Sy outer No "  keep all rows from first selected sheet"
+.Sy outer No " keep all rows from first selected sheet"
 .It Sy "\&."
 .Sy full No "  keep all rows from all sheets (union)"
 .It Sy "\&."
@@ -542,6 +640,8 @@ abort async threads for current/selected sheets(s)
 .Sy append No "keep all rows from all sheets (concatenation)"
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
+.It Sy "\&."
+.Sy merge No " mostly keep all rows from first selected sheet, except prioritise cells with non-null/non-error values"
 .El
 .
 .Ss Options Sheet (Shift+O)
@@ -552,11 +652,11 @@ abort async threads for current/selected sheets(s)
 .It Ic Shift+O
 .No edit global options (apply to Sy all sheets Ns )
 .It Ic zO
-.No edit sheet options (apply to Sy this sheet No only)
+.No edit sheet options (apply to Sy current sheet No only)
 .It Ic gO
-.No open Sy ~/.visidatarc
+.No open Sy options.config No as Sy TextSheet No
 .El
-.Bl -inset -compact 
+.Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -569,8 +669,12 @@ edit option at current row
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic  D
+.No open current sheet's Sy CommandLog No with all other loose ends removed; includes commands from parent sheets
 .It Ic gD
-.No open Sy Directory Sheet No for Sy options.visidata_dir No (default: Sy ~/.visidata/ Ns ), which contains saved commandlogs and macros
+.No open global Sy CommandLog No for all commands executed in the current session
+.It Ic zD
+.No open current sheet's Sy CommandLog No with the parent sheets commands' removed
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -582,10 +686,6 @@ replay command in current row
 replay contents of entire CommandLog
 .It Ic " ^C"
 abort replay
-.It Ic "z^S" Ar keystroke
-.No save selected rows to macro mapped to Ar keystroke
-.It ""
-.No Macros are saved to Sy .visidata/macro/command-longname.vd Ns . The list of macros is saved at Sy .visidata/macros.vd No (keystroke, filename).
 .El
 .
 .Ss DERIVED SHEETS
@@ -598,7 +698,7 @@ abort replay
 .It Ic gF
 open Frequency Table, grouped by all key columns on source sheet
 .It Ic zF
-open one-line summary for selected rows
+open one-line summary for all rows and selected rows
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -606,12 +706,13 @@ open one-line summary for selected rows
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " s   t   u"
 select/toggle/unselect these entries in source sheet
-.It Ic " Enter"
-open sheet of source rows that are grouped in current cell
+.It Ic " Enter  gEnter"
+open copy of source sheet with rows that are grouped in current cell / selected rows
 .El
 .
 .Ss Describe Sheet (Shift+I)
 .Bl -inset -compact
+.It A Sy Describe Sheet No contains descriptive statistics for all visible columns.
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -645,12 +746,12 @@ open sheet of source rows aggregated in current pivot cell
 .El
 .Ss Melted Sheet (Shift+M)
 .Bl -inset -compact
-.It Open melted sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows.
+.It Open Melted Sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows.
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "gM" Ar regex
-.No open melted sheet (unpivot), with key columns retained and Ar regex No capture groups determining how the non-key columns will be reduced to Variable-Value rows.
+.No open Melted Sheet (unpivot), with key columns retained and Ar regex No capture groups determining how the non-key columns will be reduced to Variable-Value rows.
 .El
 .Ss Python Object Sheet (^X ^Y g^Y z^Y)
 .Bl -inset -compact
@@ -659,8 +760,6 @@ open sheet of source rows aggregated in current pivot cell
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " Enter"
 dive further into Python object
-.It Ic " e"
-edit contents of current cell
 .It Ic " v"
 toggle show/hide for methods and hidden properties
 .It Ic "gv  zv"
@@ -669,7 +768,11 @@ show/hide methods and hidden properties
 .
 .Sh COMMANDLINE OPTIONS
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.
+.It Cm -P Ns = Ns Ar longname
+.No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
+.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
+.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
+.Pp
 .Lo f filetype filetype
 .No "tsv               "
 set loader to use for
@@ -680,9 +783,6 @@ instead of file extension
 .No "True              "
 overwrite existing files without confirmation
 .
-.It Cm --diff Ns = Ns Ar base
-.No "None              "
-.No add colorizer for all sheets against Ar base
 .
 .El
 .so vd-cli.inc
@@ -712,6 +812,17 @@ overwrite existing files without confirmation
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
 .No parse the output of ls -l into usable data
 .Pp
+.Dl Ic ls | vd | lpr
+.No interactively select a list of filenames to send to the printer
+.Pp
+.Dl Ic vd newfile.tsv
+.No open a blank sheet named Ar newfile No if file does not exist
+.Pp
+.Dl Ic vd sample.xlsx +:sheet1:2:3
+.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3 No
+.Pp
+.Dl Ic vd -P open-plugins
+.No preplay longname Sy open-plugins No before starting the session
 .Sh FILES
 At the start of every session,
 .Sy VisiData No looks for Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents if it exists.
@@ -719,7 +830,7 @@ For example:
 .Bd -literal
    options.min_memory_mb=100  # stop processing without 100MB free
 
-   bindkey('0', 'go-leftmost')   # alias '0' to move to first column, like vim
+   bindkey('0', 'go-leftmost')   # alias '0' to go to first column, like vim
 
    def median(values):
        L = sorted(values)
@@ -736,15 +847,15 @@ These are the supported sources:
 .Bl -inset -compact -offset xxx
 .It Sy tsv No (tab-separated value)
 .Bl -inset -compact -offset xxx
-.It Plain and simple.  Nm VisiData No writes tsv format by default.  See the Sy --delimiter No option.
+.It Plain and simple.  Nm VisiData No writes tsv format by default.  See the Sy --tsv-delimiter No option.
 .El
 .El
 .Pp
 .Bl -inset -compact -offset xxx
 .It Sy csv No (comma-separated value)
 .Bl -inset -compact -offset xxx
-.It .csv files are a scourge upon the earth, and still regrettably common.  
-.It See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.  
+.It .csv files are a scourge upon the earth, and still regrettably common.
+.It See the Sy --csv-dialect Ns , Sy --csv-delimiter Ns , Sy --csv-quotechar Ns , and Sy --csv-skipinitialspace No options.
 .It Accepted dialects are Ic excel-tab Ns , Ic unix Ns , and Ic excel Ns .
 .El
 .El
@@ -757,7 +868,7 @@ These are the supported sources:
 .El
 .Pp
 .Bl -inset -compact -offset xxx
-.It Sy json No (single object) and Sy jsonl No (one object per line).
+.It Sy json No (single object) and Sy jsonl Ns / Ns Sy ndjson Ns / Ns Sy ldjson No (one object per line).
 .Bl -inset -compact -offset xxx
 .It Cells containing lists (e.g. Sy [3] Ns ) or dicts ( Ns Sy {3} Ns ) can be expanded into new columns with Sy "\&(" No and unexpanded with Sy "\&)" Ns .
 .El
@@ -765,10 +876,12 @@ These are the supported sources:
 .Pp
 .Bl -inset -compact -offset xxx
 .It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
+.Bl -inset -compact -offset xxx
+.It Uses the safe YAML loader, which supports the most common uses of YAML.
 .El
 .Pp
 .Bl -inset -compact -offset xxx
-.It Sy pcap No ( requires Sy xpkt Ns , Sy dnslib Ns )
+.It Sy pcap No ( requires Sy dpkt Ns , Sy dnslib Ns )
 .Bl -inset -compact -offset xxx
 .It View and investigate captured network traffic in a tabular format.
 .El
@@ -808,7 +921,7 @@ The following URL schemes are supported:
 .It Sy " v"
 show only columns in current row attributes
 .It Sy za
-add column for xml attributes
+add column for xml attribute
 .El
 .It Sy xpt No (SAS; requires Sy xport Ns )
 .It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
@@ -831,6 +944,8 @@ These are the supported savers:
 .It Sy tsv No (tab-separated value)
 .It Sy csv No (comma-separated value)
 .It Sy json No (one object with all rows)
+.It Sy jsonl Ns / Ns Sy ndjson Ns / Ns Sy ldjson No (one object per line/row)
+.It Sy sqlite No (multisave capable)
 .Bl -inset -compact -offset xxx
 .It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
 .It Sy .shp No files can be saved as Sy geoJSON Ns .

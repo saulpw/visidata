@@ -2,13 +2,21 @@
 
 1. Merge `stable` to `develop` (if necessary)
 
+2. Verify that VisiData is up-to-date:
+    * vdmenu
+    * plugins.jsonl
+
 2. Verify that documentation/docstrings are up-to-date on features and functionality
 
     a. manpage;
 
-    b. visidata.org;
+    b. visidata.org; (formats?)
 
     c. CHANGELOG;
+
+    d. patrons.tsv;
+
+    e. contributors.tsv
 
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 
@@ -28,7 +36,7 @@
 
    c. update version number on README and front page of website (update dates here too);
 
-   d. bump version in `__version__` in source code (bin/vd, visidata/vdtui.py) and setup.py;
+   d. bump version in `__version__` in source code (visidata/main.py, visidata/__init__.py) and setup.py;
 
 6. Run dev/mkman.sh to build the manpage and updated website
 
@@ -70,7 +78,7 @@
    d. from git clone
 
    ```
-   pip3 install --extra-index-url https://test.pypi.org/project visidata
+   pip3 install -i https://test.pypi.org/simple/ visidata
    ```
 
 9. Merge `develop` to stable

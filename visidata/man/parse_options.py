@@ -3,7 +3,6 @@
 # Usage: $0 visidata-cli.inc visidata-opts.inc
 
 import sys
-import vdtui
 import visidata
 
 
@@ -46,25 +45,25 @@ with open(fncli, 'w') as cliOut:
             if opt.name[:5] in ['color', 'disp_']:
                 options_menu = options_menu_skel.format(optname=opt.name,
                                                         type=type(opt.value).__name__,
-                                                        default=visidata.options.get(opt.name, 'global'),
+                                                        default=visidata.options.getdefault(opt.name),
                                                         description=opt.helpstr)
                 menuOut.write(options_menu)
             else:
                 cli_optname=opt.name.replace('_', '-')
                 cli_type=type(opt.value).__name__
                 optlen = len(cli_optname)+len(cli_type)+1
-                if cli_type != 'bool' or visidata.options.get(opt.name, 'global' == True):
+                if cli_type != 'bool' or visidata.options.getdefault(opt.name):
                     cliOut.write(options_cli_skel.format(cli_optname=cli_optname,
                                                     optname = opt.name,
                                                     type=cli_type+" "*(padding-optlen),
-                                                    default=visidata.options.get(opt.name, 'global'),
+                                                    default=visidata.options.getdefault(opt.name),
                                                      description=opt.helpstr))
                 else:
 
                     cliOut.write(options_cli_skel_bool.format(cli_optname=cli_optname,
                                                     optname = opt.name,
                                                     type=cli_type+" "*(padding-optlen),
-                                                    default=" "*(padding-optlen+5)+str(visidata.options.get(opt.name, 'global')),
+                                                    default=" "*(padding-optlen+5)+str(visidata.options.getobj(opt.name, 'global')),
                                                      description=opt.helpstr))
 
         menuOut.write('.El')

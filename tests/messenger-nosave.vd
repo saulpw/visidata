@@ -1,5 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
+	override	confirm_overwrite	set-option	False		^S errors in batchmode, if trying to save over an existing file
 			open-file	sample_data/messenger.pcap	o	
 messenger	srchost		key-col		!	
 messenger	dsthost		key-col		!	
-messenger			save-sheet	tests/golden/messenger-nosave.dot	^S	

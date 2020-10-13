@@ -1,0 +1,11 @@
+sheet	col	row	longname	input	keystrokes	comment
+	override	confirm_overwrite	set-option	False		^S errors in batchmode, if trying to save over an existing file
+			open-file	sample_data/test.jsonl	o	
+test			columns-sheet		C	
+test_columns	name		sort-asc		[	
+test_columns			quit-sheet		q	
+test	amt		key-col		!	
+test	key1		key-col		!	
+test			sort-keys-asc		g[	
+test	amt		key-col		!	
+test	key1		key-col		!	

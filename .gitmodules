@@ -1,0 +1,10 @@
+[submodule "deps/dateutil"]
+	path = deps/dateutil
+	url = https://github.com/dateutil/dateutil.git
+[submodule "deps/pyxlsb"]
+	path = deps/pyxlsb
+	url = https://github.com/saulpw/pyxlsb.git
+[submodule "deps/sh"]
+	path = deps/sh
+	url = https://github.com/saulpw/sh.git
+

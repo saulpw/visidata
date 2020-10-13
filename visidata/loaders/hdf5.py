@@ -1,36 +1,51 @@
 from visidata import *
 
-class SheetH5Obj(Sheet):
+def open_h5(p):
+    return Hdf5ObjSheet(p.name, source=p)
+
+open_hdf5 = open_h5
+
+class Hdf5ObjSheet(Sheet):
     'Support sheets in HDF5 format.'
-    def reload(self):
+    def iterload(self):
         import h5py
-        if isinstance(self.source, h5py.Group):
-            self.rowtype = 'objects'
+        source = self.source
+        if isinstance(self.source, Path):
+            source = h5py.File(str(self.source), 'r')
+
+        self.columns = []
+        if isinstance(source, h5py.Group):
+            self.rowtype = 'sheets'
             self.columns = [
-                Column(self.source.name, type=str, getter=lambda col,row: row.name.split('/')[-1]),
-                Column('type', type=str, getter=lambda col,row: type(row).__name__),
-                Column('nItems', type=int, getter=lambda col,row: len(row)),
+                Column(source.name, type=str, getter=lambda col,row: row.source.name.split('/')[-1], keycol=1),
+                Column('type', type=str, getter=lambda col,row: type(row.source).__name__),
+                Column('nItems', type=int, getter=lambda col,row: len(row.source)),
             ]
-            self.rows = [ self.source[objname] for objname in self.source.keys() ]
-        elif isinstance(self.source, h5py.Dataset):
-            if len(self.source.shape) == 1:
-                self.columns = [ColumnItem(colname, colname) for colname in self.source.dtype.names or [0]]
-                self.rows = self.source[:]  # copy
-            elif len(self.source.shape) == 2:  # matrix
-                self.columns = ArrayColumns(self.source.shape[1])
-                self.rows = self.source[:]  # copy
+            self.recalc()
+            for k, v in source.items():
+                yield Hdf5ObjSheet(self.name, k, source=v)
+        elif isinstance(source, h5py.Dataset):
+            if len(source.shape) == 1:
+                for i, colname in enumerate(source.dtype.names or [0]):
+                    self.addColumn(ColumnItem(colname, colname), index=i)
+                yield from source  # copy
+            elif len(source.shape) == 2:  # matrix
+                ncols = source.shape[1]
+                for i in range(ncols):
+                    self.addColumns(ColumnItem('', i, width=8), index=i)
+                self.recalc()
+                yield from source  # copy
             else:
-                status('too many dimensions in shape %s' % str(self.source.shape))
+                vd.status('too many dimensions in shape %s' % str(source.shape))
         else:
-            status('unknown h5 object type %s' % type(self.source))
-        self.recalc()
+            vd.status('unknown h5 object type %s' % type(source))
 
-SheetH5Obj.addCommand(ENTER, 'dive-row', 'vd.push(SheetH5Obj(joinSheetnames(name,cursorRow.name), source=cursorRow))')
-SheetH5Obj.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", cursorRow.attrs))')
 
-class open_hdf5(SheetH5Obj):
-    def __init__(self, p):
-        import h5py
-        super().__init__(p.name, source=h5py.File(str(p), 'r'))
+    def openRow(self, row):
+        if isinstance(row, BaseSheet):
+            return row
+        if isinstance(row, h5py.Object):
+            return H5ObjSheet(row)
 
-open_h5 = open_hdf5
+
+Hdf5ObjSheet.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", source=cursorRow.attrs))', 'open metadata sheet for object referenced in current row')

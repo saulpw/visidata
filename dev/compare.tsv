@@ -1,0 +1,12 @@
+product	max rows	max cols	filter rows by regex	undo/redo	terminal	expression language	plugins	license	replayable	graphing	bulk modifies
+Microsoft Excel	1048576	16384									
+Apple Numbers	65535	255 (silently truncates)									
+Tableau											
+Libre Office	1048576	16384									
+csvkit											
+posix utils											
+iJupyter											
+numbers											
+rstudio											
+sc-im											
+VisiData											

@@ -1,0 +1,26 @@
+[
+    {
+        "season": 1,
+        "episode": 0,
+        "rating": 7,
+        "votes": 1415
+    },
+    {
+        "season": 1,
+        "episode": 1,
+        "rating": 8,
+        "votes": 3441
+    },
+    {
+        "season": 1,
+        "episode": 2,
+        "rating": 8,
+        "votes": 2973
+    },
+    {
+        "season": 1,
+        "episode": 3,
+        "rating": 7,
+        "votes": 2994
+    }
+]

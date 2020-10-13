@@ -1,4 +1,13 @@
-# requires gender-guesser
+'''gender(first_name): return predicted gender.  Requires gender-guesser library.
+
+Possible values:
+- "unknown" (name not found)
+- "andy" (androgynous)
+- "male"
+- "female"
+- "mostly_male"
+- "mostly_female"
+'''
 
 import functools
 

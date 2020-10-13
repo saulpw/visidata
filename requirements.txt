@@ -1,13 +1,13 @@
 python-dateutil     # date type
 
 # optional requirements
-pandas==0.25.1      # dta (Stata)
+pandas==1.0.3       # dta (Stata)
 requests            # http
 lxml                # html/xml
 openpyxl            # xlsx
 xlrd                # xls
 h5py                # hdf5
-psycopg2            # postgres
+psycopg2-binary     # postgres
 pyshp               # shapefiles
 mapbox-vector-tile  # mbtiles
 pypng               # png
@@ -15,7 +15,14 @@ fonttools           # ttf/otf
 sas7bdat            # sas7bdat (SAS)
 xport               # xpt (SAS)
 savReaderWriter     # sav (SPSS)
-PyYAML              # yaml/yml
+PyYAML>=5.1         # yaml/yml
 dpkt                # pcap
 dnslib              # pcap
 namestand           # graphviz
+datapackage         # frictionless .json
+pdfminer.six        # pdf
+vobject             # vcf
+tabulate            # tabulate saver
+wcwidth             # tabulate saver with unicode
+
+-e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb

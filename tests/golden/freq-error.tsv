@@ -1,7 +1,7 @@
-key1	count	sum_qty	avg_qty*amt
+key1	count	qty_sum	qty*amt_avg
 2018-10-20	1	0	
 2018-07-27	3	320	292.48
 2017-12-25	1	16	4.80
 2016-01-01	2	3	6.00
 date(None)	2	36	139.20
-Expecting ':' delimiter: line 1 column 34 (char 33)	1	0	
+#ERR	1	0	

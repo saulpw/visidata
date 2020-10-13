@@ -9,7 +9,7 @@
 
 set -e
 
-VD=~/git/visidata
+VD=$(dirname $0)/..
 MAN=$VD/visidata/man
 BUILD=$VD/_build   # should be tmpdir
 

@@ -1,4 +1,4 @@
-Key	A	B	C	D
-2	c1	d1	a2	b2
-2	e1	f1	a2	b2
-3			c2	d2
+Key	C	D	A	B
+2	a2	b2	c1	d1
+2	a2	b2	e1	f1
+3	c2	d2		

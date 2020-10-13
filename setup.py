@@ -3,25 +3,29 @@
 from setuptools import setup
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 #from visidata import __version__
-__version__ = '1.5.2'
+__version__ = '2.0'
 
 setup(name='visidata',
       version=__version__,
-      install_requires=['python-dateutil'],
       description='curses interface for exploring and arranging tabular data',
       long_description=open('README.md').read(),
+      long_description_content_type='text/markdown',
       author='Saul Pwanson',
-      python_requires='>=3.4',
+      python_requires='>=3.6',
       author_email='visidata@saul.pw',
       url='https://visidata.org',
       download_url='https://github.com/saulpw/visidata/tarball/' + __version__,
       scripts=['bin/vd'],
+      entry_points={'console_scripts': [
+          'visidata=visidata.main:vd_cli'
+        ],
+      },
       py_modules = ['visidata'],
-      packages=['visidata',  'visidata.loaders'],
+      install_requires=['python-dateutil'],
+      packages=['visidata',  'visidata.loaders', 'visidata.tests'],
       include_package_data=True,
       data_files = [('share/man/man1', ['visidata/man/vd.1'])],
-      package_data={'visidata': ['man/vd.1'],
-          'visidata': ['commands.tsv']},
+      package_data={'visidata': ['man/vd.1']},
       license='GPLv3',
       classifiers=[
           'Development Status :: 5 - Production/Stable',

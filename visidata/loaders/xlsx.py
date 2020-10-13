@@ -1,12 +1,12 @@
-
 from visidata import *
 
+
 def open_xlsx(p):
-    vs = xlsxContents(p)
-    return vs
+    return XlsxIndexSheet(p.name, source=p)
 
+open_xls = open_xlsx
 
-class xlsxContents(Sheet):
+class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'
     rowtype = 'sheets'  # rowdef: xlsxSheet
     columns = [
@@ -17,47 +17,23 @@ class xlsxContents(Sheet):
     ]
     nKeys = 1
 
-    def __init__(self, path):
-        super().__init__(path.name, source=path)
-        self.workbook = None
-
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import openpyxl
-        self.workbook = openpyxl.load_workbook(self.source.resolve(), data_only=True, read_only=True)
-        self.rows = []
+        self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
         for sheetname in self.workbook.sheetnames:
-            vs = xlsxSheet(joinSheetnames(self.name, sheetname), source=self.workbook[sheetname])
+            vs = XlsxSheet(self.name, sheetname, source=self.workbook[sheetname])
             vs.reload()
-            self.rows.append(vs)
+            yield vs
 
-xlsxContents.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
-class xlsxSheet(Sheet):
-    @asyncthread
-    def reload(self):
+class XlsxSheet(SequenceSheet):
+    def iterload(self):
         worksheet = self.source
-
-        self.columns = []
-        self.rows = []
-
-        rows = worksheet.iter_rows()
-        hdrs = [list(wrapply(getattr, cell, 'value')
-                   for cell in next(rows))
-                       for i in range(options.header)
-               ]
-        colnames = ['\n'.join(str(hdr[i]) for i in range(len(hdr))) for hdr in zip(*hdrs)]
-        for i, colname in enumerate(colnames):
-            self.addColumn(ColumnItem(colname, i))
-
-        for r in Progress(rows, total=worksheet.max_row or 0):
-            row = list(wrapply(getattr, cell, 'value') for cell in r)
-            for i in range(len(self.columns), len(row)):  # no-op if already done
-                self.addColumn(ColumnItem(None, i, width=8))
-            self.addRow(row)
+        for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
+            yield list(wrapply(getattr, cell, 'value') for cell in row)
 
 
-class open_xls(Sheet):
+class XlsIndexSheet(IndexSheet):
     'Load XLS file (in Excel format).'
     rowtype = 'sheets'  # rowdef: xlsSheet
     columns = [
@@ -67,37 +43,75 @@ class open_xls(Sheet):
         ColumnAttr('nCols', type=int),
     ]
     nKeys = 1
-    def __init__(self, path):
-        super().__init__(path.name, source=path)
-        self.workbook = None
-
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import xlrd
-        self.workbook = xlrd.open_workbook(self.source.resolve())
-        self.rows = []
+        self.workbook = xlrd.open_workbook(str(self.source))
         for sheetname in self.workbook.sheet_names():
-            vs = xlsSheet(joinSheetnames(self.name, sheetname), source=self.workbook.sheet_by_name(sheetname))
+            vs = XlsSheet(self.name, sheetname, source=self.workbook.sheet_by_name(sheetname))
             vs.reload()
-            self.rows.append(vs)
+            yield vs
 
-open_xls.addCommand(ENTER, 'dive-row', 'vd.push(cursorRow)')
 
-class xlsSheet(Sheet):
-    @asyncthread
-    def reload(self):
+class XlsSheet(SequenceSheet):
+    def iterload(self):
         worksheet = self.source
-        self.columns = []
-        if options.header:
-            hdrs = [list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
-                        for rownum in range(options.header)]
-            colnames = ['\\n'.join(str(hdr[i]) for i in range(len(hdr))) for hdr in zip(*hdrs)]
-        else:
-            colnames = ['']*worksheet.ncols
+        for rownum in Progress(range(worksheet.nrows)):
+            yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
-        for i, colname in enumerate(colnames):
-            self.addColumn(ColumnItem(colname, i))
+def xls_name(name):
+    # sheet name can not be longer than 31 characters
+    xname = clean_name(name)[:31]
+    if xname != name:
+        vd.warning(f'{name} saved as {xname}')
+    return xname
 
-        self.rows = []
-        for rownum in Progress(range(options.header, worksheet.nrows)):
-            self.addRow(list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols)))
+
+@VisiData.api
+def save_xlsx(vd, p, *sheets):
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    wb.remove_sheet(wb['Sheet'])
+
+    for vs in sheets:
+        ws = wb.create_sheet(title=xls_name(vs.name))
+
+        headers = [col.name for col in vs.visibleCols]
+        ws.append(headers)
+
+        for dispvals in vs.iterdispvals(format=False):
+
+            row = []
+            for col, v in dispvals.items():
+                if col.type == date:
+                    v = datetime.datetime.fromtimestamp(int(v.timestamp()))
+                elif not isNumeric(col):
+                    v = str(v)
+                row.append(v)
+
+            ws.append(row)
+
+    wb.active = ws
+
+    wb.save(filename=p)
+    vd.status(f'{p} save finished')
+
+
+@VisiData.api
+def save_xls(vd, p, *sheets):
+    import xlwt
+
+    wb = xlwt.Workbook()
+
+    for vs in sheets:
+        ws1 = wb.add_sheet(xls_name(vs.name))
+        for col_i, col in enumerate(vs.visibleCols):
+            ws1.write(0, col_i, col.name)
+
+        for r_i, dispvals in enumerate(vs.iterdispvals(format=True)):
+            r_i += 1
+            for c_i, v in enumerate(dispvals.values()):
+                ws1.write(r_i, c_i, v)
+
+    wb.save(p)
+    vd.status(f'{p} save finished')

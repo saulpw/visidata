@@ -1,20 +1,13 @@
 from visidata import *
 
+
 def open_xml(p):
-    from lxml import etree, objectify
-    root = etree.parse(p.open_text())
-    objectify.deannotate(root, cleanup_namespaces=True)
-    return XmlSheet(p.name, source=root)
+    return XmlSheet(p.name, source=p)
+
 open_svg = open_xml
 
-
-@asyncthread
-def save_xml(p, vs):
-    vs.source.write(p.resolve(), encoding=options.encoding, standalone=False, pretty_print=True)
-save_svg = save_xml
-
-
 def unns(k):
+    'de-namespace key k'
     if '}' in k:
         return k[k.find('}')+1:]
     return k
@@ -25,6 +18,7 @@ def AttribColumn(name, k, **kwargs):
                         setter=lambda c,r,v,k=k: setitem(r.attrib, k, v), **kwargs)
 
 
+# source is Path or xml.Element; root is xml.Element
 class XmlSheet(Sheet):
     rowtype = 'elements'   # rowdef: lxml.xml.Element
 
@@ -32,9 +26,9 @@ class XmlSheet(Sheet):
         ColumnAttr('sourceline', type=int, width=0),
         ColumnAttr('prefix', width=0),
         ColumnAttr('nstag', 'tag', width=0),
-        Column('path', width=0, getter=lambda c,r: c.sheet.source.getpath(r)),
+        Column('path', width=0, getter=lambda c,r: c.sheet.root.getpath(r)),
         Column('tag', getter=lambda c,r: unns(r.tag)),
-        Column('children', type=len, getter=lambda c,r: r.getchildren()),
+        Column('children', type=vlen, getter=lambda c,r: r.getchildren()),
         ColumnAttr('text'),
         ColumnAttr('tail', width=0),
     ]
@@ -48,20 +42,31 @@ class XmlSheet(Sheet):
             if nstag:
                 c.hide(nstag not in row.attrib)
 
-    def reload(self):
+    def iterload(self):
+        if isinstance(self.source, Path):
+            from lxml import etree, objectify
+            self.root = etree.parse(self.source.open_text())
+            objectify.deannotate(self.root, cleanup_namespaces=True)
+        else: #        elif isinstance(self.source, XmlElement):
+            self.root = self.source
+
         self.attribcols = {}
-        self.columns = copy(XmlSheet.columns)
-        self.rows = []
+        self.columns = []
+        for c in XmlSheet.columns:
+            self.addColumn(copy(c))
 
-        if getattr(self.source, 'iterancestors', None):
-            for elem in list(self.source.iterancestors())[::-1]:
-                self.addRow(elem)
+        if getattr(self.root, 'iterancestors', None):
+            for elem in Progress(list(self.root.iterancestors())[::-1]):
+                yield elem
 
-        for elem in self.source.iter():
-            self.addRow(elem)
+        for elem in self.root.iter():
+            yield elem
+
+    def openRow(self, row):
+        return XmlSheet("%s_%s" % (unns(row.tag), row.attrib.get("id")), source=row)
 
     def addRow(self, elem):
-        self.rows.append(elem)
+        super().addRow(elem)
         for k in elem.attrib:
             if k not in self.attribcols:
                 c = AttribColumn(unns(k), k)
@@ -69,7 +74,14 @@ class XmlSheet(Sheet):
                 self.attribcols[k] = c
                 c.nstag = k
 
-XmlSheet.addCommand('za', 'add-column', 'attr=input("add attribute: "); addColumn(AttribColumn(attr, attr), cursorColIndex+1)')
-XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)')
-XmlSheet.addCommand(ENTER, 'dive-row', 'r=cursorRow; vd.push(XmlSheet("%s_%s" % (unns(r.tag), r.attrib.get("id")), source=r))')
 
+@VisiData.api
+def save_xml(vd, p, vs):
+    isinstance(XmlSheet) or vd.fail('must save xml from XmlSheet')
+    vs.root.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
+
+VisiData.save_svg = VisiData.save_xml
+
+
+XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumnAtCursor(AttribColumn(attr, attr))', 'add column for xml attribute')
+XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)', 'show only columns in current row attributes')

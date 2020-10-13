@@ -1,6 +1,6 @@
-sheet	col	row	keystrokes	input	comment
-			o	sample_data/y77d-th95.json.gz	open input in VisiData
-y77d-th95		0	gz(	0	expand all visible columns of containers to given depth (0=fully)
-y77d-th95			C		open Columns Sheet
-y77d-th95_columns	name		[		sort ascending by current column
-y77d-th95_columns			q		quit current sheet
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/y77d-th95.json.gz	o	open input in VisiData
+y77d-th95		0	expand-cols-depth	0	gz(	expand all visible columns of containers to given depth (0=fully)
+y77d-th95			columns-sheet		C	open Columns Sheet
+y77d-th95_columns	name		sort-asc		[	sort ascending by current column
+y77d-th95_columns			quit-sheet		q	quit current sheet

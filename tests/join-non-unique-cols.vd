@@ -1,0 +1,17 @@
+sheet	col	row	longname	input	keystrokes	comment
+	SqliteSheet	header	set-option	0		
+	UsvSheet	delimiter	set-option	␞		
+	UsvSheet	row_delimiter	set-option	␟		
+			open-file	sample_data/sample.tsv	o	
+			open-file	sample_data/benchmark.csv	o	
+sample	OrderDate		rename-col	Date	^	
+sample	Date		key-col		!	
+benchmark	Date		key-col		!	
+benchmark			sheets-stack		S	
+sheets		キbenchmark	select-row		s	
+sheets		キsample	select-row		s	
+sheets			join-sheets	outer	&	
+benchmark+sample			columns-sheet		C	
+benchmark+sample_columns	name		sort-desc		]	
+benchmark+sample_columns			sheets-stack		S	
+sheets		キbenchmark+sample	open-row		^J	

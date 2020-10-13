@@ -1,6 +1,7 @@
 __pycache__
 .tox/
 .idea/
+.vscode/
 visidata.egg-info/
 *v_env*
 *~
@@ -8,3 +9,5 @@ visidata.egg-info/
 *.swo
 *dist
 *_build
+tags
+/tests/log/

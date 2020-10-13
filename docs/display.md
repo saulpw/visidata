@@ -87,9 +87,7 @@ Here is an extremely simple sheet that shows a list of all global variables with
 
 
 Notes:
-- `Sheet.__init__(name, *sources, **kwargs)` sets the name and sources, as well as adding kwargs as extra attributes for convenience.
-- source = sources[0]
-   - having an internal concept of source/sources is maybe too complicated.  It does allow a dependency graph to be made, which might come in useful when we start doing code generation.
+- `Sheet.__init__(*names, **kwargs)` joins the names with `options.name_joiner`, and other kwargs besides `source` may be provided for convenience.
 - columns are set in reload, because they require the sheet's context, for the source dict, to be bound to the lambda.  [Future: setter=lambda col,row,val: col.sheet.source[row] ]
 - The structure of the row objects is so important that I have taken to including a 'rowdef' comment above every sheet, describing what kind of object each row is.
 - The getters are passed into the Column init kwargs directly.  The default getter is the identity function, so the 'key' getter is actually unnecessary.
@@ -97,24 +95,22 @@ Notes:
    - rows could be list(self.source.items()); but then when an item changes, this sheet would not change until reload (^R)
    - could take generic dict; use source
 
-## class VisiData and vd()
+## class VisiData and vd
 
-The VisiData singleton (accessible via `vd()` or `sheet.vd`) maintains:
+The VisiData singleton (accessible via `vd` or `sheet.vd`) maintains:
 
-- `scr`: the curses screen object
+- `scrFull`: the curses screen object
 - `sheets`: a list; `sheets[0]` is the actively displayed sheet
 
-`vd().windowWidth` and `vd().windowHeight` are the current window dimensions.
+`vd.screenWidth` and `vd.screenHeight` are the dimensions of the current terminal screen.  (`sheet.windowWidth` and `sheet.windowHeight` are the dimensions of that sheet's specific window, including status line).
 
-## run()
+## visidata.run() and vd.mainloop()
 
-`VisiData.run(scr)` is the main display loop.  It calls `draw()` on the top sheet, left and right statuses, and handles commands, until there are no more sheets.  This times out every `curses_timeout`; everything is recomputed every frame if not cached.  This keeps the interface 'live'.
+`VisiData.mainloop(scr)` is the main display loop.  It calls `draw()` on the top sheet, left and right statuses, and handles commands, until there are no more sheets.
 
 VisiData exits when this function returns.
 
-This function must be called with the curses screen object.  Applications should instead call the module-level `run(*sheets)` with the sheets they want pushed initially, and VisiData will initialize curses to its liking.
-
-[should the two run() functions have different names?]
+This function must be called with the curses screen object.  Applications should call the module-level `run(*sheets)` with the sheets they want pushed initially, and VisiData will initialize curses to its liking.
 
 ## Sheet.draw(scr)
 
@@ -124,12 +120,12 @@ Handles drawing everything on the screen but the status bars.
    - `Sheet.leftVisibleColIndex`: leftmost visible non-key column
 
 and computes:
-   - `Sheet.visibleColLayout` (dict of vcolidx to (onscreen x, w)); only for onscreen columns
+   - `Sheet._visibleColLayout` (dict of vcolidx to (onscreen x, w)); only for onscreen columns
    - `Sheet.rightVisibleColIndex` (the rightmost visible column)
    - any None Column.width (sets to max width of values in onscreen rows)
 
-For symmetry, there is also `Sheet.rowLayout` (dict of rowidx to onscreen y), computed during draw().
-[allow variable height rows]
+For symmetry, there is also `Sheet._rowLayout` (dict of rowidx to onscreen y), computed during draw().
+This allows for multi-line rows.
 
 `Sheet.calcColLayout` should be called at least whenever a Column is added, deleted, or its width is changed.
 In practice, it is called at the beginning of every draw cycle anyway.
