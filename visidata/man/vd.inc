@@ -1,4 +1,4 @@
-.Dd July 23, 2020
+.Dd Oct 13, 2020
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -819,7 +819,7 @@ overwrite existing files without confirmation
 .No open a blank sheet named Ar newfile No if file does not exist
 .Pp
 .Dl Ic vd sample.xlsx +:sheet1:2:3
-.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3 No
+.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3
 .Pp
 .Dl Ic vd -P open-plugins
 .No preplay longname Sy open-plugins No before starting the session
@@ -878,6 +878,7 @@ These are the supported sources:
 .It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
 .Bl -inset -compact -offset xxx
 .It Uses the safe YAML loader, which supports the most common uses of YAML.
+.El
 .El
 .Pp
 .Bl -inset -compact -offset xxx
