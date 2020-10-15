@@ -1,5 +1,13 @@
 # VisiData version history
 
+# v2.?.? (????)
+
+    - [xlsx] add active column #726
+
+## Bugfixes
+
+    - [tabulate] fix savers to save in their own format #723
+
 # v2.0.1 (2020-10-13)
 
 ## Bugfixes
