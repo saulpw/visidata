@@ -14,6 +14,7 @@ class XlsxIndexSheet(IndexSheet):
         ColumnAttr('name', width=0),  # visidata Sheet name
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
+        Column('active', getter=lambda col,row: row.source is col.sheet.workbook.active),
     ]
     nKeys = 1
 
