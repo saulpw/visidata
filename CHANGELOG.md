@@ -3,6 +3,10 @@
 # v2.?.? (????)
 
     - [xlsx] add active column #726
+    - [select] differentiate select-equal- and select-exact- #734
+       - previous select-equal- matched type value
+       - now select-equal- matches display value
+       - add `z,` and `gz,` bindings for select-exact-cell/-row
 
 ## Bugfixes
 
