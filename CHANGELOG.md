@@ -7,6 +7,7 @@
        - previous select-equal- matched type value
        - now select-equal- matches display value
        - add `z,` and `gz,` bindings for select-exact-cell/-row
+    - [clipboard] clipboard commands now require some selected rows #681
 
 ## Bugfixes
 
