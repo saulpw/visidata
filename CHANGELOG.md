@@ -2,7 +2,7 @@
 
 # v2.?.? (????)
 
-    - [xlsx] add active column #726
+    - [xlsx] add active column (thanks @kbd for feature request #726)
     - [select] differentiate select-equal- and select-exact- #734
        - previous select-equal- matched type value
        - now select-equal- matches display value
@@ -11,7 +11,10 @@
 
 ## Bugfixes
 
-    - [tabulate] fix savers to save in their own format #723
+    - [api] expose visidata.view (thanks @alekibango for bug report #732)
+    - [loaders hdf5] misc bugfixes to hdf5 dataset loading (thanks @amotl for PR #728)
+    - [man] fix warnings with manpage (thanks @jsvine for the bug report #718)
+    - [tabulate] fix savers to save in their own format (thanks @frosencrantz for bug report #723)
 
 # v2.0.1 (2020-10-13)
 
