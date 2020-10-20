@@ -18,6 +18,7 @@
     - [man] fix warnings with manpage (thanks @jsvine for the bug report #718)
     - [tabulate] fix savers to save in their own format (thanks @frosencrantz for bug report #723)
     - [color] use `color_column_sep` for sep chars (thanks @geekscrapy for bug report)
+    - [windows] add Ctrl+M as alias for Ctrl+J #741 (thanks @bob-u for bug report #741)
 
 # v2.0.1 (2020-10-13)
 

@@ -311,18 +311,18 @@ def unbindkey(cls, keystrokes):
 
 @BaseSheet.api
 def getCommand(sheet, cmd):
-    'Return the Command for the given arg, which may be keystrokes, longname, or a Command itself, within the context of `sheet`.'
+    'Return the Command for the given *cmd*, which may be keystrokes, longname, or a Command itself, within the context of `sheet`.'
     if isinstance(cmd, Command):
         return cmd
 
-    longname = vd.bindkeys._get(cmd, obj=sheet)
-    try:
-        if longname:
-            return vd.commands._get(longname, obj=sheet) or vd.fail('no command "%s"' % longname)
-        else:
-            return vd.commands._get(cmd, obj=sheet) or vd.fail('no binding for %s' % cmd)
-    except Exception as exc:
-        return None
+    longname = cmd
+    while vd.bindkeys._get(longname, obj=sheet):
+        longname = vd.bindkeys._get(longname, obj=sheet)
+
+    if not longname:
+        vd.fail('no binding for %s' % cmd)
+
+    return vd.commands._get(longname, obj=sheet) or vd.fail('no command "%s"' % longname)
 
 
 def loadConfigFile(fnrc, _globals=None):
@@ -371,4 +371,5 @@ def loadConfigAndPlugins(vd, args):
     loadConfigFile(options.config, vd.getGlobals())
 
 
+BaseSheet.bindkey('^M', '^J')  # for windows ENTER
 BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(Path(options.config)))', 'open options.config as text sheet')
