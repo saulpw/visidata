@@ -180,7 +180,7 @@ class PandasSheet(Sheet):
         return is_selected
 
     @property
-    def nSelected(self):
+    def nSelectedRows(self):
         self._checkSelectedIndex()
         return self._selectedMask.sum()
 
