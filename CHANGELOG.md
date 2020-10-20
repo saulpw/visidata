@@ -8,6 +8,8 @@
        - now select-equal- matches display value
        - add `z,` and `gz,` bindings for select-exact-cell/-row
     - [clipboard] clipboard commands now require some selected rows #681
+    - [api] add options.unset()
+    - [commands] add unset-option command bound to `d` on OptionsSheet #733
 
 ## Bugfixes
 

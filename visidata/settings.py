@@ -140,7 +140,7 @@ class OptionsObject:
         return opt
 
     def _set(self, k, v, obj=None, helpstr=''):
-        self._cache.clear()  # invalidate entire cache on any set()
+        self._cache.clear()  # invalidate entire cache on any change
         return self._opts.set(k, Option(k, v, helpstr), obj)
 
     def is_set(self, k, obj=None):
@@ -149,7 +149,7 @@ class OptionsObject:
             return d.get(self._opts.objname(obj), None)
 
     def get(self, optname, default=None):
-        'Return the value of the given optname option in the options context. `default` is only returned if the option is not defined.  An Exception is never raised.'
+        'Return the value of the given *optname* option in the options context. *default* is only returned if the option is not defined.  An Exception is never raised.'
         d = self._get(optname, None)
         if d:
             return d.value
@@ -178,7 +178,7 @@ class OptionsObject:
             curval = opt.value
             t = type(curval)
             if value is None and curval is not None:
-                value = t()           # empty value
+                return self.unset(optname, obj=obj)
             elif isinstance(value, str) and t is bool: # special case for bool options
                 value = value and (value[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
             elif type(value) is t:    # if right type, no conversion
@@ -189,17 +189,29 @@ class OptionsObject:
                 value = t(value)
 
             if curval != value and self._get(optname, 'global').replayable:
-                if obj != 'global' and type(obj) is not type:  # options set on init aren't recorded
-                    vd.setOption(optname, value, obj)
+                if obj != 'global' and type(obj) is not type:  # global and class options set on init aren't recorded
+                    if vd.cmdlog:
+                        objname = self._opts.objname(obj)
+                        vd.cmdlog.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
+                                    keystrokes='', input=str(value),
+                                    longname='set-option'))
         else:
             curval = None
             vd.warning('setting unknown option %s' % optname)
 
         return self._set(optname, value, obj)
 
-    def unset(self, optname, obj='override'):
+    def unset(self, optname, obj=None):
         'Remove setting value for given context.'
-        self._opts.unset(optname, obj)
+        v = self._opts.unset(optname, obj)
+        opt = self._get(optname)
+        if vd.cmdlog and opt and opt.replayable:
+            objname = self._opts.objname(obj)
+            vd.cmdlog.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
+                            keystrokes='', input='',
+                            longname='unset-option'))
+        self._cache.clear()  # invalidate entire cache on any change
+        return v
 
     def setdefault(self, optname, value, helpstr):
         return self._set(optname, value, 'global', helpstr=helpstr)

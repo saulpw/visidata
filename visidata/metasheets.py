@@ -200,6 +200,7 @@ ColumnsSheet.addCommand('g$', 'type-currency-selected', 'someSelectedRows.type=c
 ColumnsSheet.addCommand('g~', 'type-string-selected', 'someSelectedRows.type=str', 'set type of selected columns to str')
 ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anytype', 'set type of selected columns to anytype')
 
+OptionsSheet.addCommand('d', 'unset-option', 'options.unset(cursorRow.name, str(source))', 'remove option override for this context')
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit option at current row')
 OptionsSheet.bindkey('e', 'edit-option')
 OptionsSheet.bindkey(ENTER, 'edit-option')

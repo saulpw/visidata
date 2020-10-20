@@ -280,12 +280,13 @@ def replayOne(vd, r):
             vs = None
 
         longname = getattr(r, 'longname', None)
-        if longname == 'set-option':
+        if longname in ['set-option', 'unset-option']:
             try:
-                if r.col:
-                    options.set(r.row, r.input, r.col)
+                context = vs if r.sheet and vs else vd
+                if longname == 'set-option':
+                    context.options.set(r.row, r.input, r.sheet or r.col)
                 else:
-                    options[r.row] = r.input
+                    context.options.unset(r.row, r.sheet or r.col)
 
                 escaped = False
             except Exception as e:
@@ -374,15 +375,6 @@ def setLastArgs(vd, args):
 def replayStatus(vd):
         x = options.disp_replay_pause if vd.paused else options.disp_replay_play
         return ' │ %s %s/%s' % (x, vd.currentReplay.cursorRowIndex, len(vd.currentReplay.rows))
-
-
-@VisiData.api
-def setOption(vd, optname, optval, obj=None):
-    if vd.cmdlog:
-        objname = options._opts.objname(obj)
-        vd.cmdlog.addRow(vd.cmdlog.newRow(col=objname, row=optname,
-                    keystrokes='', input=str(optval),
-                    longname='set-option'))
 
 
 @BaseSheet.property
