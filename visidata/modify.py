@@ -181,25 +181,7 @@ def commitMods(self):
 @Sheet.api
 def commitDeletes(self):
     'Return the number of rows that have been marked for deletion. Delete the rows. Clear the marking.'
-    ndeleted = 0
-
-    dest_row = None     # row to re-place cursor after
-    oldidx = self.cursorRowIndex
-    while oldidx < len(self.rows):
-        if not self.isDeleted(self.rows[oldidx]):
-            dest_row = self.rows[oldidx]
-            break
-        oldidx += 1
-
-    newidx = 0
-    for r in Progress(list(self.rows), gerund='deleting'):
-        if self.isDeleted(self.rows[newidx]):
-            self.deleteSourceRow(newidx)
-            ndeleted += 1
-        else:
-            if r is dest_row:
-                self.cursorRowIndex = newidx
-            newidx += 1
+    ndeleted = self.deleteBy(self.isDeleted, commit=True)
 
     if ndeleted:
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
