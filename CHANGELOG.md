@@ -17,6 +17,7 @@
     - [loaders hdf5] misc bugfixes to hdf5 dataset loading (thanks @amotl for PR #728)
     - [man] fix warnings with manpage (thanks @jsvine for the bug report #718)
     - [tabulate] fix savers to save in their own format (thanks @frosencrantz for bug report #723)
+    - [color] use `color_column_sep` for sep chars (thanks @geekscrapy for bug report)
 
 # v2.0.1 (2020-10-13)
 

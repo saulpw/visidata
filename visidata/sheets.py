@@ -825,7 +825,7 @@ class TableSheet(BaseSheet):
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
-                            scr.addstr(y, x+colwidth, sepchars, basecellcattr.attr)
+                            scr.addstr(y, x+colwidth, sepchars, sepcattr.attr)
 
             for notefunc in vd.rowNoters:
                 ch = notefunc(self, row)
