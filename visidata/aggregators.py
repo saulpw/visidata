@@ -96,7 +96,7 @@ def quantiles(q, helpstr):
     return [percentile(round(100*i/q), helpstr) for i in range(1, q)]
 
 vd.aggregator('min', min, 'minimum value')
-vd.aggregator('max', max, 'minimum value')
+vd.aggregator('max', max, 'maximum value')
 vd.aggregator('avg', mean, 'arithmetic mean of values', type=float)
 vd.aggregator('mean', mean, 'arithmetic mean of values', type=float)
 vd.aggregator('median', median, 'median of values')
