@@ -4,6 +4,5 @@ sheet	col	row	longname	input	keystrokes	comment
 benchmark	Date		type-date		@	
 benchmark			columns-sheet		C	
 benchmark_columns	fmtstr	キDate	edit-cell	%Y-%m	e	
-benchmark_columns			quit-sheet		q	
 benchmark	Date		freq-col		F	
 benchmark_Date_freq	histogram		hide-col		-	

@@ -284,9 +284,9 @@ def replayOne(vd, r):
             try:
                 context = vs if r.sheet and vs else vd
                 if longname == 'set-option':
-                    context.options.set(r.row, r.input, r.sheet or r.col)
+                    context.options.set(r.row, r.input, r.sheet or r.col or 'override')
                 else:
-                    context.options.unset(r.row, r.sheet or r.col)
+                    context.options.unset(r.row, r.sheet or r.col or 'override')
 
                 escaped = False
             except Exception as e:
