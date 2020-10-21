@@ -172,6 +172,6 @@ PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasFreqTableSheet(sheet, *
 PandasFreqTableSheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)', 'toggle selection of rows grouped in current row in source sheet')
 PandasFreqTableSheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)', 'select rows grouped in current row in source sheet')
 PandasFreqTableSheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', 'unselect rows grouped in current row in source sheet')
-PandasFreqTableSheet.addCommand(ENTER, 'dup-row', 'expand_source_rows(source, vd, cursorRow)', 'open copy of source sheet with rows that are grouped in current row')
+PandasFreqTableSheet.addCommand(ENTER, 'open-row', 'expand_source_rows(source, vd, cursorRow)', 'open copy of source sheet with rows that are grouped in current row')
 
 PandasFreqTableSheet.class_options.numeric_binning = False
