@@ -20,6 +20,8 @@ class AttrDict(dict):
         try:
             return self[k]
         except KeyError:
+            if k.startswith("__"):
+                raise AttributeError
             return None
 
     def __setattr__(self, k, v):
