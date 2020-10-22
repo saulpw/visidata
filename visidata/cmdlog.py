@@ -212,6 +212,10 @@ class CommandLog(_CommandLog, VisiDataMetaSheet):
     pass
 
 class CommandLogJsonl(_CommandLog, JsonLinesSheet):
+
+    def newRow(self):
+        return JsonLinesSheet.newRow(self)
+
     def iterload(self):
         for r in JsonLinesSheet.iterload(self):
             if isinstance(r, TypedWrapper):
