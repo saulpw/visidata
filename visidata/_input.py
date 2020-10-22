@@ -6,7 +6,7 @@ import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
 from visidata import vd, options, theme, colors
-from visidata import launchExternalEditor, suspend, ColumnItem, ENTER
+from visidata import launchExternalEditor, suspend, ColumnItem
 
 __all__ = ['confirm', 'CompleteKey']
 
@@ -124,7 +124,6 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
   'A better curses line editing widget.'
   with EnableCursor():
     ESC='^['
-    ENTER='^J'
     TAB='^I'
 
     history_state = HistoryState(history)
@@ -196,7 +195,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
         elif ch == TAB:                            v, i = complete_state.complete(v, i, +1)
         elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
-        elif ch == ENTER:                          break
+        elif ch in ['^J', '^M']:                   break  # ENTER to accept value
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
         elif ch == '^O':                           v = launchExternalEditor(v)
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
