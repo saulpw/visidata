@@ -30,8 +30,16 @@ def openurl_http(path, filetype=None):
     if not response.encoding:
         response.encoding = options.encoding
 
+    # Automatically paginate if a 'next' URL is given
+    def _iter_lines(path=path, response=response):
+        while response:
+            yield from response.iter_lines(decode_unicode=True)
+
+            src = response.links.get('next', {}).get('url', None)
+            response = requests.get(src, stream=True) if src else None
+
     # create resettable iterator over contents
-    fp = RepeatFile(iter_lines=response.iter_lines(decode_unicode=True))
+    fp = RepeatFile(iter_lines=_iter_lines())
 
     # call open_<filetype> with a usable Path
     return vd.openSource(Path(path.given, fp=fp), filetype=filetype)
