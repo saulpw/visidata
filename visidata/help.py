@@ -63,7 +63,8 @@ def openManPage(vd):
     from pkg_resources import resource_filename
     import os
     with SuspendCurses():
-        os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')]))
+        if os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')])) != 0:
+            vd.push(TextSheet('man_vd', source=Path(resource_filename(__name__, 'man/vd.txt'))))
 
 
 # in VisiData, ^H refers to the man page
