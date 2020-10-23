@@ -161,6 +161,7 @@ Types API
 Examples
 ~~~~~~~~~
 
+::
     # Add an ip_address type.
     vd.addType(ipaddress.ip_address, icon=':', formatter=lambda fmt,ip: str(ip))
 

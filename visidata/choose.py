@@ -5,13 +5,14 @@ from visidata import vd, option, options, VisiData, ListOfDictSheet, ENTER, Comp
 option('fancy_chooser', True, 'a nicer selection interface for aggregators and jointype')
 
 @VisiData.api
-def chooseOne(vd, L):
-    return vd.choose(L, 1)
+def chooseOne(vd, choices):
+    'Return one user-selected key from *choices*.'
+    return vd.choose(choices, 1)[0]
 
 
 @VisiData.api
 def choose(vd, choices, n=None):
-    'Return *n* (default 1) of *choices* elements (if list) or values (if dict).'
+    'Return a list of 1 to *n* "key" from elements of *choices* (see chooseMany).'
     ret = vd.chooseMany(choices) or vd.fail('no choice made')
     if n and len(ret) > n:
         vd.fail('can only choose %s' % n)
@@ -39,7 +40,7 @@ def chooseFancy(vd, choices):
 
 @VisiData.api
 def chooseMany(vd, choices):
-    '''*choices* is a list of dicts; each dict must have a unique "key" whose value has no spaces.  Return a list of 1 or more keys, as chosen by the user.  Handle replay correctly.'''
+    'Return a list of 1 or more keys from *choices*, which is a list of dicts.  Each element dict must have a unique "key", which must be typed directly by the user in non-fancy mode (therefore no spaces).  All other items in the dicts are also shown in fancy chooser mode.  Use previous choices from the replay input if available.  Add chosen keys (space-separated) to the cmdlog as input for the current command.'''
     if vd.cmdlog:
         v = vd.getLastArgs()
         if v is not None:
