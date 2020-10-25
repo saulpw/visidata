@@ -181,7 +181,7 @@ class PivotSheet(Sheet):
             if width == 0:
                 # only one value (and maybe errors)
                 numericBins = [(minval, maxval)]
-            elif numericCols[0].type in (int, vlen) and nbins > width:
+            elif numericCols[0].type in (int, vlen) and nbins > (maxval - minval):
                 # more bins than int vals, just use the vals
                 degenerateBinning = True
                 numericBins = [(minval+i, minval+i) for i in range(maxval-minval+1)]
