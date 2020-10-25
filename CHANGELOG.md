@@ -2,23 +2,30 @@
 
 # v2.?.? (????)
 
-    - [xlsx] add active column (thanks @kbd for feature request #726)
-    - [select] differentiate select-equal- and select-exact- #734
+    - [api] add options.unset()
+    - [clipboard] clipboard commands now require some selected rows #681
+    - [commands] add unset-option command bound to `d` on OptionsSheet #733
+    - [loaders http] have automatic API pagination (thanks @geekscrapy for feature request #480)
+    - [loaders xlsx] add active column (thanks @kbd for feature request #726)
+    - [search] `search-next` and `searchr-next` are now bound to n and N (was `next-search` and `search-prev`)
+    - [select] differentiate select-equal- and select-exact- (thanks @geekscrapy for feature request #734)
        - previous select-equal- matched type value
        - now select-equal- matches display value
        - add `z,` and `gz,` bindings for select-exact-cell/-row
-    - [clipboard] clipboard commands now require some selected rows #681
-    - [api] add options.unset()
-    - [commands] add unset-option command bound to `d` on OptionsSheet #733
 
 ## Bugfixes
 
     - [api] expose visidata.view (thanks @alekibango for bug report #732)
     - [loaders hdf5] misc bugfixes to hdf5 dataset loading (thanks @amotl for PR #728)
     - [man] fix warnings with manpage (thanks @jsvine for the bug report #718)
+    - [numeric binning] perform degenerate binning when number of bins greater than number of values
+        - (instead of when greater than width of bins)
     - [tabulate] fix savers to save in their own format (thanks @frosencrantz for bug report #723)
     - [color] use `color_column_sep` for sep chars (thanks @geekscrapy for bug report)
     - [windows] add Ctrl+M as alias for Ctrl+J #741 (thanks @bob-u for bug report #741)
+    - [windows man] package man/vd.txt as a fallback for when manis not available on os (thanks @bob-u for bug report #745)
+    - [loaders jsonl] fix copy-rows
+    - [loaders vdj] fix add-row
 
 # v2.0.1 (2020-10-13)
 
