@@ -7,7 +7,7 @@ option('fancy_chooser', True, 'a nicer selection interface for aggregators and j
 @VisiData.api
 def chooseOne(vd, choices):
     'Return one user-selected key from *choices*.'
-    return vd.choose(choices, 1)[0]
+    return vd.choose(choices, 1)
 
 
 @VisiData.api
