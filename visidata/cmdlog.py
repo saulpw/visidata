@@ -13,7 +13,7 @@ option('visidata_dir', '~/.visidata/', 'directory to load and store additional f
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
-replay cancel save-cmdlog
+replay cancel save-cmdlog macro
 go- search scroll prev next page start end zoom resize visibility
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 

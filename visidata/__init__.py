@@ -95,6 +95,7 @@ import visidata.fill
 import visidata.incr
 import visidata.customdate
 import visidata.misc
+from .macros import *
 
 from .loaders.csv import *
 from .loaders.archive import *
