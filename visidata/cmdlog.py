@@ -159,12 +159,10 @@ class _CommandLog:
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
             if contains(cmd.execstr, 'plotterCursorBox'):
-                assert not colname and not rowname
                 bb = sheet.cursorBox
                 colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
                 rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
             elif contains(cmd.execstr, 'plotterVisibleBox'):
-                assert not colname and not rowname
                 bb = sheet.visibleBox
                 colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
                 rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))

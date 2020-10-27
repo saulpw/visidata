@@ -13,8 +13,13 @@ class DataFrameRowSliceAdapter:
     def __init__(self, df, mask):
         import pandas as pd
         import numpy as np
-        assert isinstance(df, pd.DataFrame)
-        assert isinstance(mask, pd.Series) and df.shape[0] == mask.shape[0]
+        if not isinstance(df, pd.DataFrame):
+            vd.fail('%s is not a dataframe' % type(df).__name__)
+        if not isinstance(mask, pd.Series):
+            vd.fail('mask %s is not a Series' % type(mask).__name__)
+        if df.shape[0] != mask.shape[0]:
+            vd.fail('dataframe and mask have different shapes (%s vs %s)' % (df.shape[0], mask.shape[0]))
+
         self.df = df
         self.mask_bool = mask  # boolean mask
         self.mask_iloc = np.where(mask.values)[0]  # integer indexes corresponding to mask
@@ -145,7 +150,9 @@ class PandasFreqTableSheet(PivotSheet):
         for element in Progress(value_counts.index):
             if len(self.groupByCols) == 1:
                 element = (element,)
-            assert len(element) == len(self.groupByCols)
+            elif len(element) != len(self.groupByCols):
+                vd.fail('different number of index cols and groupby cols (%s vs %s)' % (len(element), len(self.groupByCols)))
+
             mask = df[self.groupByCols[0].name] == element[0]
             for i in range(1, len(self.groupByCols)):
                 mask = mask & (df[self.groupByCols[i].name] == element[i])

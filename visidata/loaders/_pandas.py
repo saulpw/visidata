@@ -17,7 +17,9 @@ class DataFrameAdapter:
 
     def __init__(self, df):
         import pandas as pd
-        assert isinstance(df, pd.DataFrame)
+        if not isinstance(df, pd.DataFrame):
+            vd.fail('%s is not a dataframe' % type(df).__name__)
+
         self.df = df
 
     def __len__(self):

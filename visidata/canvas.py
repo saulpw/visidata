@@ -417,8 +417,10 @@ class Canvas(Plotter):
         self.polylines.append((vertexes + [vertexes[0]], attr, row))
 
     def qcurve(self, vertexes, attr=0, row=None):
-        'quadratic curve from vertexes[0] to vertexes[2] with control point at vertexes[1]'
-        assert len(vertexes) == 3, len(vertexes)
+        'Draw quadratic curve from vertexes[0] to vertexes[2] with control point at vertexes[1]'
+        if len(vertexes) != 3:
+            vd.fail('need exactly 3 points for qcurve (got %d)' % len(vertexes))
+
         x1, y1 = vertexes[0]
         x2, y2 = vertexes[1]
         x3, y3 = vertexes[2]

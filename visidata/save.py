@@ -112,7 +112,8 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     except FileExistsError:
         pass
 
-    assert givenpath.is_dir(), filetype + ' cannot save multiple sheets to non-dir'
+    if not givenpath.is_dir():
+        vd.fail(f'cannot save multiple {filetype} sheets to non-dir')
 
     # get save function to call
     for vs in vsheets:
