@@ -1,35 +1,61 @@
-# Roadmap to 2.0
+# Roadmap for 2.x
 
-## API
+1. holdovers from 2.0
+  - [canvas] API docs
+  - [options] option enums
+  - [options] user-defined option aliases
+  - [splitpane] File preview in directory view
+  - [defermods] 'modified since last save' indicator on status bar
+  - [scroll cell] zh/zl Left hand side of a cell with content hidden doesn't show ellipsis #751
 
-The primary goal of 2.0 is a stable, documented Python API that can be used to create an broad ecosystem of loaders, plugins, and apps.
+2. Persistence
+  - input history  #736 #468
+  - key indexes for better joining and lookups
 
-The Book of VisiData will describe the api and all functions and objects available to plugins and command execstrs.
+3. Interface discoverability for commands  #247 #742
+  - clickable menu canvas
+  - more clickable affordances all around
+  - clickable motd
+  - possibly add popup modals
 
-## Split panes
+4. more expressive expressions
+  - Memory sheet; can give things names and use in expressions.  #392
+  - access column values from execstr #655
+  - shortcut name for current column #659
 
-+ horizontal split
-- one pane can be dependent on the other; e.g. move cursor in one, see preview update in other
-+ use for choosing aggregators, command help, other choose()
+5. better asynchronicity
+  - async thread pool
+  - streaming architecture  #366 #656
 
-- DirSheet file preview #309
+6. Loaders/Savers
+  - frictionless saver #237
+  - RSS reader #157
+  - toml loader #735
+  - HexSheet for unknown/binary files #548
+  - .ods loader (LibreOffice/OpenOffice spreadsheet) #473
 
-## add jsonl as more robust system format
-+ add .vdj format (visidata cmdlog as jsonl)
-+ migrate plugins.tsv to be jsonl format
+  - jsonl load and save round-trip (minimal diff) #429
 
-## Minor features, refactors, cleanup
+## other features
 
-- 'modified' indicator on status bar, also enables quitguard
-- remove all asserts; replace with error() on case-by-case basis
+a) generate non-terminal graphs (ggplot)
+b) automatic reload into time series
+c) intra-cell coloring (for search results, markup)
 
-- [options] allow list or dict of enum values for default
-- [options] for options that have been renamed, add aliases for compatibility
-    - e.g. `tsv_delimiter` and `tsv_row_delimiter` become 'proper' options with 'delimiter', 'delim', and 'd' becoming aliases
 
-# Features
+# major plugin projects
 
-- Memory sheet; can give things names and use in expressions.
-   - 'show' commands are copied there by default.
+1. fully operational SQL viewer/editor
 
-- [columns] add helpstr for all specialized-sheet columns
+  - #282: Select starting table in postgres from command-line
+  - #579: [Postgres] Allow inserting / deleting rows
+  - #522: [postgres] parms in options
+  - #586: SQL query data
+  - #727: [postgres] Transaction error when viewing table
+  - #729: Integrate generic SQL loader
+
+2. web scraping
+
+  - #480: HTTP API pagination loader
+  - #465: Ability to load from the contents of a cell.
+  - #505: [html] Provide way to access non-table elements
