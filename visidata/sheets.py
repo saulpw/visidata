@@ -56,7 +56,8 @@ theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
 theme('disp_endmid_sep', '║', '') # ╽╿┃
 theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 theme('disp_selected_note', '•', '') #
-
+theme('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
+theme('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
 theme('color_default', 'normal', 'the default color')
 theme('color_default_hdr', 'bold', 'color of the column headers')
 theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
@@ -611,7 +612,14 @@ class TableSheet(BaseSheet):
 
         hdrs = col.name.split('\n')
         for i in range(h):
-            name = ' '  # save room at front for LeftMore
+            name = ' '  # save room at front for LeftMore or sorted arrow
+            for j, (sortcol, sortdir) in enumerate(self._ordering):
+                if col is sortcol:
+                    try:
+                        name = self.options.disp_sort_desc[j] if sortdir else self.options.disp_sort_asc[j]
+                    except IndexError:
+                        pass
+
             if h-i-1 < len(hdrs):
                 name += hdrs[::-1][h-i-1]
 

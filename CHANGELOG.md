@@ -12,6 +12,7 @@
        - previous select-equal- matched type value
        - now select-equal- matches display value
        - add `z,` and `gz,` bindings for select-exact-cell/-row
+    - [display] sort indication #582
 
 ## Bugfixes
 
