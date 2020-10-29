@@ -114,7 +114,12 @@ def save_json(vd, p, *vsheets):
         else:
             it = {vs.name: [_rowdict(vs.visibleCols, row) for row in vs.iterrows()] for vs in vsheets}
 
-        jsonenc = _vjsonEncoder(indent=options.json_indent)
+        try:
+            indent = int(options.json_indent)
+        except Exception:
+            indent = options.json_indent
+
+        jsonenc = _vjsonEncoder(indent=indent)
         with Progress(gerund='saving'):
             for chunk in jsonenc.iterencode(it):
                 fp.write(chunk)
