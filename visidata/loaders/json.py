@@ -9,13 +9,13 @@ option('json_sort_keys', False, 'sort object keys when saving to json')
 option('default_colname', '', 'column name to use for non-dict rows')
 
 
-def open_json(p):
+def open_jsonobj(p):
     return JsonSheet(p.name, source=p)
 
 def open_jsonl(p):
-    return JsonLinesSheet(p.name, source=p)
+    return JsonSheet(p.name, source=p)
 
-open_ndjson = open_ldjson = open_jsonl
+open_ndjson = open_ldjson = open_json = open_jsonl
 
 
 class JsonSheet(PythonSheet):
@@ -23,18 +23,28 @@ class JsonSheet(PythonSheet):
         self.colnames = {}  # [colname] -> Column
         self.columns = []
 
-        try:
-            with self.source.open_text() as fp:
-                ret = json.load(fp, object_pairs_hook=OrderedDict)
+        with self.source.open_text() as fp:
+            for L in fp:
+                try:
+                    ret = json.loads(L, object_pairs_hook=OrderedDict)
+                    if isinstance(ret, list):
+                        yield from Progress(ret)
+                    else:
+                        yield ret
 
-            if isinstance(ret, list):
-                yield from Progress(ret)
-            else:
-                yield ret
+                except ValueError as e:
+                    if self.rows:   # if any rows have been added already
+                        e.stacktrace = stacktrace()
+                        yield TypedExceptionWrapper(json.loads, L, exception=e)  # an error on one line
+                    else:
+                        with self.source.open_text() as fp:
+                            ret = json.load(fp, object_pairs_hook=OrderedDict)
+                            if isinstance(ret, list):
+                                yield from Progress(ret)
+                            else:
+                                yield ret
+                        break
 
-        except ValueError as e:
-            vd.status('trying jsonl')
-            yield from JsonLinesSheet.iterload(self)
 
     def addRow(self, row, index=None):
         # Wrap non-dict rows in a dummy object with a predictable key name.
@@ -56,19 +66,7 @@ class JsonSheet(PythonSheet):
     def newRow(self):
         return {}
 
-
-class JsonLinesSheet(JsonSheet):
-    def iterload(self):
-        self.colnames = {}  # [colname] -> Column
-        self.columns = []
-        with self.source.open_text() as fp:
-            for L in fp:
-                try:
-                    yield json.loads(L, object_pairs_hook=OrderedDict)
-                except Exception as e:
-                    e.stacktrace = stacktrace()
-                    yield TypedExceptionWrapper(json.loads, L, exception=e)
-
+JsonLinesSheet=JsonSheet
 
 ## saving json and jsonl
 
