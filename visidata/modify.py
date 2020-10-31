@@ -120,6 +120,7 @@ def deleteBy(sheet, func, commit=False):
             if r is row:
                 sheet.cursorRowIndex = len(sheet.rows)-1
         else:
+            sheet.deleteSourceRow(r)
             ndeleted += 1
 
     if not commit:

@@ -146,9 +146,8 @@ class DirSheet(Sheet):
         else:
             path.unlink()
 
-    def deleteSourceRow(self, rowidx):
-        self.removeFile(self.rows[rowidx])
-        self.rows.pop(rowidx)
+    def deleteSourceRow(self, r):
+        self.removeFile(r)
 
     def iterload(self):
         def _walkfiles(p):
@@ -187,6 +186,15 @@ class DirSheet(Sheet):
 
     def restat(self):
         vstat.cache_clear()
+
+    @asyncthread
+    def putChanges(self):
+        self.commitAdds()
+        self.commitMods()
+        self.commitDeletes()
+
+        self._deferredDels.clear()
+        self.reload()
 
 
 class FileListSheet(DirSheet):
