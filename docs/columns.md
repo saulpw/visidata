@@ -1,5 +1,5 @@
-- Update: 2020-06-17
-- Version: VisiData 2.0
+- Update: 2020-10-01
+- Version: VisiData 2.0.1
 
 # Columns
 
@@ -9,7 +9,7 @@ Commands(s)     Operation
 ------------    -----------
 `!`             pins the current column on the left as a key column
  `H`  `L`       slides the current column **one position** to the left/right
-`gH` `gL`       slides the current column **all the way** to the left/right of the sheet
+`gH` `gL`       slides the current column **all the way** to the left/right of its section
 
 ---
 
@@ -28,6 +28,10 @@ Commands(s)     Operation
 5. Press `q` to return to the source sheet.
 
 ###### How to unhide columns
+
+1. Press `gv` to unhide all columns on current sheet.
+
+**or**
 
 1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
@@ -134,6 +138,21 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 - `:` adds new columns derived from splitting the current column at positions defined by a *regex pattern*. The current row will be used to infer the number of columns that will be created.
 - `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. This command also requires an example row.
 - `*` followed by *regex*`/`*substring* replaces the text which matches the capture groups in *regex* with the contents of *substring*. *substring* may include backreferences (*\1* etc).
+
+## [How do I substitute text in my column]
+
+The `*` command can be used to do content transformations of cells. The `g*` variant transforms in-place, instead of creating a new column.
+
+The following example uses [benchmarks.csv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/benchmarks.csv).
+
+**Question** Transform the **SKU** values of *food* to *nutri*.
+
+1. Move cursor to **SKU** column.
+2. Press `gs` to select all rows.
+3. Type `g*` folowed by *food/nutri*.
+
+- tests/transform-cols.vd
+
 
 ---
 

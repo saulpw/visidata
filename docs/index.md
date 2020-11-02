@@ -80,8 +80,6 @@
 # For developers
 
 VisiData can interact with data from any source or in any format.
-
+* [VisiData API Guide](/docs/api)
 * [guide to contributing](/contributing)
 * [viewtsv annotated](/docs/viewtsv)
-* [async](/docs/async)
-* [graphics reference](/docs/graphics)
