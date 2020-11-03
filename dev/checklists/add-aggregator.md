@@ -1,0 +1,4 @@
+- API for adding aggregators can be found [here](https://www.visidata.org/docs/api/columns.html#aggregators). A description is necessary.
+- [ ] Review whether new aggregator should be included in **DescribeSheet**. If so, add it to `describe_aggrs`.
+- [ ] Check if aggregator replaces an existing **DescribeSheet** column, remove it from the **DescribeSheet**, if so.
+- [ ] add the aggregator to visidata:docs/group.md
