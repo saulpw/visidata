@@ -311,6 +311,8 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
 
     if ret:
         if isinstance(type, str):
+            if self.lastInputs[type] and self.lastInputs[type][-1] == ret:
+                return ret
             self.lastInputs[type].append(ret)
     elif defaultLast:
         history or vd.fail("no previous input")
