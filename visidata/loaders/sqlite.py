@@ -84,7 +84,7 @@ class SqliteSheet(Sheet):
                 sql += ', '.join('%s=?' % c.name for c, _ in rowmods.items())
                 sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
                 self.execute(conn, sql,
-                            parms=values(row, [c for c, _ in rowmods.items()]) + list(c.getSavedValue(row) for c in wherecols))
+                            parms=values(row, [c for c, _ in rowmods.items()]) + list(Column.calcValue(c, row) for c in wherecols))
 
             for r in dels.values():
                 sql = 'DELETE FROM "%s" ' % self.tableName
