@@ -945,6 +945,8 @@ class SheetsSheet(IndexSheet):
     def reload(self):
         self.rows = self.source
 
+    def sort(self):
+        self.rows[1:] = sorted(self.rows[1:], key=self.sortkey)
 
 @VisiData.property
 @drawcache
