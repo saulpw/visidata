@@ -17,6 +17,7 @@
     * all available commands and options
     * also available as a manpage via `man vd` and from inside VisiData with `Ctrl+H`
 * [quick reference guide for 1.5.2](/docs/v1.5.2/man)
+* [VisiData Cheat Sheet](https://jsvine.github.io/visidata-cheat-sheet/en/)
 * [keyboard layout of commands](/docs/kblayout)
 
 ## 'How to' recipes
