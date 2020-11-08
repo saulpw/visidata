@@ -41,6 +41,9 @@ Multiple plugins can be defined in the same manifest; one line per plugin in the
 Complete "Hello world" plugin example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+hello.py
+^^^^^^^^^^^^^^^^
+
 ::
 
     '''This plugin adds the ``hello-world`` command to all sheets.
