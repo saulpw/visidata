@@ -49,7 +49,7 @@ def sortkey(self, r, prog=None):
 
         if prog:
             prog.addProgress(1)
-        return ret
+    return ret
 
 @Sheet.api
 @asyncthread
