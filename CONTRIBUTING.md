@@ -16,7 +16,7 @@ We also need people to mention VisiData in their forums and communities that rel
 Don't spam or do a drive-by promotion; these are largely ineffective and will often be received negatively.
 Endorsements have more weight from people who actively post about other relevant topics; we don't want to become the "VisiData Brigade".
 
-Finally, if you are on "Web 2.social", you can post a [tweet](https://twitter.com/visidata) or a [tutorial]() or a [demo](https://www.youtube.com/watch?v=N1CBDTgGtOU) or a [host a workshop](), or anything else you think might make people interested in exploring the wonderful world of VisiData.
+Finally, if you are on "Web 2.social", you can post a [tweet](https://twitter.com/visidata) or a [tutorial]() or a [demo](https://www.youtube.com/watch?v=N1CBDTgGtOU) or [host a workshop](https://www.meetup.com/pt-BR/Journocoders/events/258035880/), or anything else you think might make people interested in exploring the wonderful world of VisiData.
 
 ## Support on Patreon
 
@@ -24,7 +24,9 @@ If VisiData saves you time on a regular basis, and especially if VisiData makes 
 
 ## Start a Project Using VisiData
 
-If you know Python and want to augment it to suit your own workflow, you can create a loader or a plugin.  Here are some great examples:
+If you know Python and want to augment it to suit your own workflow, you can create a loader or a plugin.  In support of this, I have written [a detailed api guide for VisiData](https://www.visidata.org/docs/api/).
+
+Here are some great examples:
 
     - [jsvine's custom visidata plugins](https://github.com/jsvine/visidata-plugins)
     - [layertwo's pcap loader](https://github.com/saulpw/visidata/blob/develop/visidata/loaders/pcap.py)
