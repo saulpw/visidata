@@ -39,7 +39,7 @@ def status(self, *args, priority=0):
     if not args:
         return True
 
-    k = (priority, args)
+    k = (priority, tuple(map(str, args)))
     self.statuses[k] = self.statuses.get(k, 0) + 1
 
     if self.statusHistory:
