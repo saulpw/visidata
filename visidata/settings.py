@@ -326,6 +326,8 @@ def getCommand(sheet, cmd):
 
 
 def loadConfigFile(fnrc, _globals=None):
+    if not fnrc:
+        return
     p = visidata.Path(fnrc)
     if _globals is None:
         _globals = globals()
@@ -354,8 +356,8 @@ def addOptions(parser):
 @VisiData.api
 def loadConfigAndPlugins(vd, args):
     # set visidata_dir and config manually before loading config file, so visidata_dir can be set from cli or from $VD_DIR
-    options.visidata_dir = args.visidata_dir or os.getenv('VD_DIR', '') or options.visidata_dir
-    options.config = args.config or os.getenv('VD_CONFIG', '') or options.config
+    options.visidata_dir = args.visidata_dir if args.visidata_dir is not None else os.getenv('VD_DIR', '') or options.visidata_dir
+    options.config = args.config if args.config is not None else os.getenv('VD_CONFIG', '') or options.config
 
     sys.path.append(str(visidata.Path(options.visidata_dir)))
     sys.path.append(str(visidata.Path(options.visidata_dir)/"plugins-deps"))
