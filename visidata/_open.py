@@ -56,7 +56,7 @@ def openPath(vd, p, filetype=None):
 
     filetype = filetype.lower()
 
-    openfunc = vd.getGlobals().get('open_' + filetype)
+    openfunc = getattr(vd, 'open_' + filetype, vd.getGlobals().get('open_' + filetype))
     if not openfunc:
         vd.warning('unknown "%s" filetype' % filetype)
         filetype = 'txt'
