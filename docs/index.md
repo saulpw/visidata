@@ -75,7 +75,7 @@
     * How to have configurations persist
     * How to configure commands
 * [Plugins - extending VisiData functionality](/docs/plugins)
-* [Developing a loader](/docs/loaders)
+* [Developing a loader](/docs/api/loaders)
 * [STDOUT pipe/redirect](/docs/pipes)
 
 # For developers
