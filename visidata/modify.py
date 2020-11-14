@@ -252,9 +252,6 @@ def commit(sheet, *rows):
     cstr = sheet.changestr(adds, mods, deletes)
     path = sheet.source
 
-    if not cstr:
-        vd.fail('no diffs')
-
     if options.confirm_overwrite:
         confirm('really %s? ' % cstr)
 
