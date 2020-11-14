@@ -5,7 +5,7 @@ A terminal interface for exploring and arranging tabular data.
 
 ![Frequency table](http://visidata.org/freq-move-row.gif)
 
-VisiData supports tsv, csv, sqlite, json, xlsx (Excel), hdf5, and [many other formats](https://visidata.org/formats)).
+VisiData supports tsv, csv, sqlite, json, xlsx (Excel), hdf5, and [many other formats](https://visidata.org/formats).
 
 ## Platform requirements
 
@@ -30,7 +30,7 @@ See [visidata.org/install](https://visidata.org/install) for detailed instructio
     $ vd <input>
     $ <command> | vd
 
-Press `Ctrl+Q` to quit.
+Press `Ctrl+Q` to quit at any time.
 
 Hundreds of other commands and options are also available; see the documentation.
 
