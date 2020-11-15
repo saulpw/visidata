@@ -26,8 +26,8 @@ If VisiData saves you time on a regular basis, and especially if VisiData makes 
 
 If you know Python and want to augment it to suit your own workflow, you can create a loader or a plugin.  Here are some great examples:
 
-    - [jsvine's custom visidata plugins](https://github.com/jsvine/visidata-plugins)
-    - [layertwo's pcap loader](https://github.com/saulpw/visidata/blob/develop/visidata/loaders/pcap.py)
+  - [jsvine's custom visidata plugins](https://github.com/jsvine/visidata-plugins)
+  - [layertwo's pcap loader](https://github.com/saulpw/visidata/blob/develop/visidata/loaders/pcap.py)
 
 Without fail, these projects lead to discovering bugs and help flesh out the API, which result in design improvements in VisiData.
 Importantly, each issue found this way comes with real world motivations, so it is easy to explain your reasoning behind proposals and core feature requests.
@@ -63,8 +63,8 @@ Updates or additions to the core code should be proposed via an [Github Issue](h
 
 VisiData has two main branches:
 
-    - [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (what is in pypi/brew/apt).
-    - [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
+  - [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (what is in pypi/brew/apt).
+  - [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
 
 All pull requests should be submitted against `develop`.
 
