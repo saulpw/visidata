@@ -252,8 +252,8 @@ def commit(sheet, *rows):
     cstr = sheet.changestr(adds, mods, deletes)
     path = sheet.source
 
-    if options.confirm_overwrite:
-        confirm('really %s? ' % cstr)
+    if sheet.options.confirm_overwrite:
+        vd.confirm('really %s? ' % cstr)
 
     sheet.putChanges()
 

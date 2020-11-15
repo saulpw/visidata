@@ -41,7 +41,7 @@
 a) generate non-terminal graphs (ggplot)
 b) automatic reload into time series
 c) intra-cell coloring (for search results, markup)
-
+d) Shift+Arrow in cell edit to accept and move cursor that direction, keeping in edit mode
 
 # major plugin projects
 
@@ -54,7 +54,7 @@ c) intra-cell coloring (for search results, markup)
   - #727: [postgres] Transaction error when viewing table
   - #729: Integrate generic SQL loader
 
-2. web scraping
+2. web scraper
 
   - #480: HTTP API pagination loader
   - #465: Ability to load from the contents of a cell.

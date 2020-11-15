@@ -59,15 +59,15 @@ def duptty():
     return stdin, stdout
 
 option_aliases = {}
-def optalias(abbr, name):
-    option_aliases[abbr] = name
+def optalias(abbr, name, val=None):
+    option_aliases[abbr] = (name, val)
 
 
 optalias('f', 'filetype')
 optalias('p', 'play')
 optalias('b', 'batch')
 optalias('P', 'preplay')
-optalias('y', 'confirm_overwrite')
+optalias('y', 'confirm_overwrite', False)
 optalias('o', 'output')
 optalias('w', 'replay_wait')
 optalias('d', 'delimiter')
@@ -130,7 +130,7 @@ def main_vd():
                 pass
 
             optname = optname.replace('-', '_')
-            optname = option_aliases.get(optname, optname)
+            optname, optval = option_aliases.get(optname, (optname, optval))
 
             if optval is None:
                 opt = options._get(optname)
