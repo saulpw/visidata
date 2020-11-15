@@ -93,7 +93,7 @@ class SqliteSheet(Sheet):
                 if res.rowcount != res.arraysize:
                     vd.warning('not all rows updated') # f'{res.rowcount}/{res.arraysize} rows updated'
 
-            for r in dels.values():
+            for row in dels.values():
                 sql = 'DELETE FROM "%s" ' % self.tableName
                 sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
                 wherevals=list(Column.calcValue(c, row) for c in wherecols)
