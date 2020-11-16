@@ -167,7 +167,7 @@ def main_vd():
 
         elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
-            k, v = arg.split('=')
+            k, v = arg.split('=', maxsplit=1)
             fmtkwargs[k] = v
         else:
             inputs.append((arg, copy(current_args)))
