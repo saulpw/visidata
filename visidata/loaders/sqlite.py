@@ -77,7 +77,7 @@ class SqliteSheet(Sheet):
                 cols = self.visibleCols
                 sql = 'INSERT INTO "%s" ' % self.tableName
                 sql += '(%s)' % ','.join(c.name for c in cols)
-                sql += 'VALUES (%s)' % ','.join('?' for c in cols)
+                sql += ' VALUES (%s)' % ','.join('?' for c in cols)
                 res = self.execute(conn, sql, parms=values(r, cols))
                 if res.rowcount != res.arraysize:
                     vd.warning('not all rows inserted') # f'{res.rowcount}/{res.arraysize} rows inserted'
