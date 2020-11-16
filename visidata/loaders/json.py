@@ -26,6 +26,8 @@ class JsonSheet(PythonSheet):
         with self.source.open_text() as fp:
             for L in fp:
                 try:
+                    if L.startswith('#'): # skip commented lines
+                        continue
                     ret = json.loads(L, object_pairs_hook=OrderedDict)
                     if isinstance(ret, list):
                         yield from Progress(ret)
