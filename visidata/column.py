@@ -164,7 +164,7 @@ class Column(Extensible):
     @type.setter
     def type(self, t):
         if self._type != t:
-            vd.addUndo(setattr, self, 'type', self._type)
+            vd.addUndo(setattr, self, '_type', self.type)
         self._type = t
 
     @property
