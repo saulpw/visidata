@@ -17,7 +17,6 @@ option('default_width', 20, 'default column width', replay=True)   # TODO: make 
 option('default_height', 10, 'default column height')
 option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
-option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
 option('quitguard', False, 'confirm before quitting last sheet')
 option('debug', False, 'exit on error and display stacktrace')
 option('skip', 0, 'skip N rows before header', replay=True)
@@ -1045,7 +1044,7 @@ Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor positio
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
 
-Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.execCommand(options.cmd_after_edit)', 'edit contents of current cell')
+Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex))', 'edit contents of current cell')
 Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', 'set contents of current column for selected rows to same input')
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open duplicate sheet with only selected rows'),

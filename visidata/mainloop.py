@@ -117,6 +117,10 @@ def mainloop(self, scr):
 
         self.draw_all()
 
+        if vd._nextCommands:
+            sheet.execCommand(vd._nextCommands.pop(0), keystrokes=self.keystrokes)
+            continue
+
         keystroke = self.getkeystroke(scr, sheet)
 
         if not keystroke and prefixWaiting and ESC in self.keystrokes:  # timeout ESC

@@ -41,7 +41,6 @@
 a) generate non-terminal graphs (ggplot)
 b) automatic reload into time series
 c) intra-cell coloring (for search results, markup)
-d) Shift+Arrow in cell edit to accept and move cursor that direction, keeping in edit mode
 
 # major plugin projects
 

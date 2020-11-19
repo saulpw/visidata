@@ -16,6 +16,22 @@ theme('disp_unprintable', '·', 'substitute character for unprintables')
 
 VisiData.init('lastInputs', lambda: collections.defaultdict(list))  # [input_type] -> list of prevInputs
 
+class AcceptInput(Exception):
+    '*args[0]* is the input to be accepted'
+
+visidata.vd._nextCommands = []
+
+@VisiData.api
+def queueCommand(vd, longname): #, input=None, sheet=None, col=None, row=None):
+    vd._nextCommands.append(longname)
+
+def acceptThenFunc(*longnames):
+    def _acceptthen(v, i):
+        for longname in longnames:
+            vd.queueCommand(longname)
+        raise AcceptInput(v)
+    return _acceptthen
+
 # editline helpers
 
 class EnableCursor:
@@ -240,7 +256,10 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         v = vd.getLastArgs()
 
     if v is None:
-        v = vd.editline(vd.sheets[0]._scr, y, x, w, display=display, **kwargs)
+        try:
+            v = vd.editline(vd.sheets[0]._scr, y, x, w, display=display, **kwargs)
+        except AcceptInput as e:
+            v = e.args[0]
 
         # clear keyboard buffer to neutralize multi-line pastes (issue#585)
         curses.flushinp()
@@ -370,11 +389,25 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         y, h = self._rowLayout.get(rowidx, (0, 0))
         value = value or col.getDisplayValue(self.rows[self.cursorRowIndex])
 
+    bindings={
+        'kUP':        acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'KEY_SR':     acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'kDN':        acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'KEY_SF':     acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'KEY_SRIGHT': acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'KEY_SLEFT':  acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
+    }
+
+    bindings.update(kwargs.get('bindings', {}))
+    kwargs['bindings'] = bindings
+
     editargs = dict(value=value,
                     fillchar=options.disp_edit_fill,
                     truncchar=options.disp_truncator)
+
     editargs.update(kwargs)  # update with user-specified args
     r = vd.editText(y, x, w, **editargs)
+
     if rowidx >= 0:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised
 
