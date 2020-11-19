@@ -70,3 +70,25 @@ class FixedWidthColumnsSheet(SequenceSheet):
 
     def setCols(self, headerlines):
         self.headerlines = headerlines
+
+
+@VisiData.api
+def save_fixed(vd, p, *vsheets):
+    with p.open_text(mode='w') as fp:
+        for sheet in vsheets:
+            if len(vsheets) > 1:
+                fp.write('%s\n\n' % vs.name)
+
+            # headers
+            for col in sheet.visibleCols:
+                fp.write('{0:{width}}'.format(col.name, width=col.width))
+            fp.write('\n')
+
+            # rows
+            with Progress(gerund='saving'):
+                for dispvals in sheet.iterdispvals(format=True):
+                    for col, val in dispvals.items():
+                        fp.write('{0:{align}{width}}'.format(val, width=col.width, align='>' if isNumeric(col) else '<'))
+                    fp.write('\n')
+
+            vd.status('%s save finished' % p)
