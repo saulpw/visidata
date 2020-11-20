@@ -295,11 +295,12 @@ def replayOne(vd, r):
                 vd.exceptionCaught(e)
                 escaped = True
         else:
-            vd.moveToReplayContext(r, vs)
             if vs:
                 vd.push(vs)
             else:
                 vs = vd.sheets[0]  # use top sheet by default
+
+            vd.moveToReplayContext(r, vs)
 
             if r.comment:
                 vd.status(r.comment)
