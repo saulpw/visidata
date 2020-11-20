@@ -1,10 +1,10 @@
 'Full terminal interface for TaskWarrior (task).'
 
 import tasklib
-from visidata import *
+from visidata import vd, Sheet, ColumnItem, Column, date, vlen, CellColorizer, ENTER, VisiData, Path
 
-options.disp_date_fmt = '%Y-%m-%d %H:%M'
-theme('color_task_changed', 'reverse yellow', 'color when vtask is changed')
+vd.options.disp_date_fmt = '%Y-%m-%d %H:%M'
+vd.option('color_task_changed', 'reverse yellow', 'color when vtask is changed')
 
 
 def editTask(task):
@@ -97,8 +97,9 @@ TodoSheet.addCommand(ENTER, '', 'vd.push(TaskAnnotationsSheet("cursorRow.descrip
 TaskAnnotationsSheet.addCommand('a', 'add-task-note', 'source.add_annotation(input("note: ")); reload()')
 TaskAnnotationsSheet.addCommand('d', 'delete-task-note', 'source.remove_annotation(cursorRow); reload()')
 
-def main_vtask():
-    run(TodoSheet('todos', source=Path('~/.task')))
+@VisiData.lazy_property
+def default_vtask(vd):
+    return TodoSheet('todos', source=Path('~/.task'))
 
 
 vd.addGlobals(globals())

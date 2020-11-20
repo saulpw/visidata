@@ -156,6 +156,10 @@ class VisiDataSheet(IndexSheet):
 def vdmenu(vd):
     return VisiDataSheet('visidata_menu', source=vd)
 
+@VisiData.lazy_property
+def default_vd(vd):
+    return vd.vdmenu
+
 @VisiData.property
 def allColumnsSheet(vd):
     return ColumnsSheet("all_columns", source=list(vd.sheets))

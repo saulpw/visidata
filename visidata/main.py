@@ -221,7 +221,7 @@ def main_vd():
     vd.sheets.extend(sources)  # purposefully do not load everything
 
     if not vd.sheets and not args.play and not args.batch:
-        vd.push(vd.vdmenu)
+        vd.push(getattr(vd, 'default_'+Path(sys.argv[0]).name))
 
     if not args.play:
         if args.batch:
