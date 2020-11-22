@@ -189,7 +189,35 @@ Note that by default the expansion logic will look for nested columns in **up to
 
 ## [How to create derivative columns](#derived) {#derived}
 
-The `=` command takes a Python expression as input, evaluates the expression, and creates a new column from the result. Column names can be supplied as variables, in order to have the expression performed on the column cell-by-cell. VisiData supports `Tab` autocompletion of column names.
+The `=` command takes a Python expression as input and creates a new column, where each cell evaluates the expression in the context of its row.
+
+These variables and functions are available in the scope of an expression:
+
+- **Column names** evaluate to the typed value of the cell in the named column for the same row.
+- **`vd`** attributes and methods; use `Ctrl+X vd` to view the vd object, or [see the API]().
+- **`Sheet`** attributes and methods; use `g Ctrl+Y` to view the sheet object (or see the API).
+- **Global** functions and variables (add your own in your .visidatarc).
+- **modules** that have been `import`ed in Python
+  - if you need a module that hasn't already been imported at runtime, use `g Ctrl+X import <modname>`.
+
+- **`sheet`**: the current sheet (a TableSheet object)
+- **`col`**: the current column (as a Column object; use for Column metadata)
+- **`row`**: the current row (a Python object of the internal rowtype)
+
+Additional attributes can be added to sheets and columns.
+
+`col` deliberately returns a Column object, but any other Column object is interpreted as the value within that column for the same row.
+
+For example, this customizes addcol-expr to set the `curcol` attribute on the new ExprColumn to a snapshot of the current cursor column (at the time the expression column is added):
+
+```
+Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ExprColumn(inputExpr("new column expr="), curcol=cursorCol))', 'create
+ new column from Python expression, with column names as variables')
+```
+
+Then, an expression can use `curcol` as though it referred to the value in the saved column.
+
+`Tab` autocompletion when inputting an expression will cycle through valid column names only.
 
 The following examples use the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 

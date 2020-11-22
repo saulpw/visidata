@@ -95,11 +95,11 @@ class RecursiveExprException(Exception):
 
 class LazyComputeRow:
     'Calculate column values as needed.'
-    def __init__(self, sheet, row):
+    def __init__(self, sheet, row, col=None):
         self.row = row
         self.sheet = sheet
         if not hasattr(self.sheet, '_lcm'):
-            self.sheet._lcm = LazyChainMap(sheet, vd)
+            self.sheet._lcm = LazyChainMap(sheet, vd, col)
         else:
             self.sheet._lcm.clear()  # reset locals on lcm
 
@@ -107,7 +107,7 @@ class LazyComputeRow:
         self._keys = [c.name for c in self.sheet.columns]
 
     def keys(self):
-        return self._keys + self.sheet._lcm.keys() + ['row', 'sheet']
+        return self._keys + self.sheet._lcm.keys() + ['row', 'sheet', 'col']
 
     def __str__(self):
         return str(self.as_dict())
@@ -122,22 +122,26 @@ class LazyComputeRow:
         try:
             i = self._keys.index(colid)
             c = self.sheet.columns[i]
-
-            if c in self._usedcols:
-                raise RecursiveExprException()
-            self._usedcols.add(c)
-            ret = c.getTypedValue(self.row)
-            self._usedcols.remove(c)
-            return ret
         except ValueError:
             try:
-                return self.sheet._lcm[colid]
+                c = self.sheet._lcm[colid]
             except (KeyError, AttributeError):
-                if colid == 'row':
-                    return self.row
-                elif colid == 'sheet':
-                    return self.sheet
-                raise KeyError(colid)
+                if colid == 'sheet': return self.sheet
+                elif colid == 'row': c = self.row
+                elif colid == 'col': c = self.col
+                else:
+                    raise KeyError(colid)
+
+        if not isinstance(c, Column):  # columns calc in the context of the row of the cell being calc'ed
+            return c
+
+        if c in self._usedcols:
+            raise RecursiveExprException()
+
+        self._usedcols.add(c)
+        ret = c.getTypedValue(self.row)
+        self._usedcols.remove(c)
+        return ret
 
 class BasicRow(collections.defaultdict):
     def __init__(self):
@@ -321,9 +325,10 @@ class TableSheet(BaseSheet):
     def __repr__(self):
         return self.name
 
-    def evalExpr(self, expr, row=None):
+    def evalExpr(self, expr, row=None, col=None):
         if row:
-            contexts = vd._evalcontexts.setdefault((self, self.rowid(row)), LazyComputeRow(self, row))
+            # contexts are cached by sheet/rowid for duration of drawcycle
+            contexts = vd._evalcontexts.setdefault((self, self.rowid(row)), LazyComputeRow(self, row, col=col))
         else:
             contexts = None
 

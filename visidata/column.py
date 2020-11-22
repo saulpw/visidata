@@ -496,7 +496,7 @@ class ExprColumn(Column):
 
     def calcValue(self, row):
         t0 = time.perf_counter()
-        r = self.sheet.evalExpr(self.compiledExpr, row)
+        r = self.sheet.evalExpr(self.compiledExpr, row, col=self)
         t1 = time.perf_counter()
         self.ncalcs += 1
         self.maxtime = max(self.maxtime, t1-t0)

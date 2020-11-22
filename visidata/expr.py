@@ -1,4 +1,4 @@
-from visidata import Progress, Sheet, Column, asyncthread, vd, ColumnExpr
+from visidata import Progress, Sheet, Column, asyncthread, vd, ExprColumn
 
 
 class CompleteExpr:
@@ -46,7 +46,7 @@ def inputExpr(self, prompt, *args, **kwargs):
     return vd.input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
 
 
-Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ColumnExpr(inputExpr("new column expr=")))', 'create new column from Python expression, with column names as variables')
+Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ExprColumn(inputExpr("new column expr="), curcol=cursorCol))', 'create new column from Python expression, with column names as variables')
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows, inputExpr("set selected="))', 'set current column for selected rows to result of Python expression')
 Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), cursorRow))', 'evaluate Python expression on current row and set current cell with result of Python expression')
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
