@@ -144,6 +144,10 @@ def save_sqlite(vd, p, *vsheets):
     }
 
     for vs in vsheets:
+        vs.ensureLoaded()
+    vd.sync()
+
+    for vs in vsheets:
         tblname = clean_to_id(vs.name)
         sqlcols = []
         for col in vs.visibleCols:
