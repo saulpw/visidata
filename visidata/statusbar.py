@@ -177,7 +177,7 @@ def drawRightStatus(vd, scr, vs):
             gerund = vs.progresses[0].gerund
         else:
             gerund = 'processing'
-        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_status'))
+        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_working'))
 
     if active and vd.currentReplay:
         statcolors.insert(0, (vd.replayStatus, 'color_status_replay'))
