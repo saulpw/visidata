@@ -151,7 +151,11 @@ def mainloop(self, scr):
 
                     keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
 
-                    f = self.getMouse(scr, x, y, keystroke)
+                    if y > vd.windowConfig['n']:
+                        f = self.getMouse(vd.winBottom, x, y-vd.windowConfig['n'], keystroke)
+                    else:
+                        f = self.getMouse(vd.winTop, x, y, keystroke)
+
                     if f:
                         if isinstance(f, str):
                             for cmd in f.split():
