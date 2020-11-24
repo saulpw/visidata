@@ -21,6 +21,6 @@ For additional reading, see our detailed guide on [writing loaders for VisiData]
 
 ## Documenting the loader (to be done once the loader is shippable)
 
-10) add a section on the loader to the "supported sources" of the manpage.
+10) add or change an entry in dev/formats.jsonl for the filetype.
     - include its non-Python3 stdlib dependency requirements (if any)
-    - provide a short overview of how the loader allows users to engage with the data
+    - provide a short overview of additional features/commands offered for this data type (if any)
