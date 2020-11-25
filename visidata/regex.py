@@ -26,7 +26,7 @@ def makeRegexMatcher(regex, origcol):
     def _regexMatcher(row):
         m = regex.search(origcol.getDisplayValue(row))
         if m:
-            return m.groups()
+            return m.groupdict() if m.groupdict() else m.groups()
     return _regexMatcher
 
 @asyncthread
@@ -43,7 +43,7 @@ def addRegexColumns(regexMaker, vs, origcol, regexstr):
     else:
         exampleRows = vs.rows
 
-    cols = []
+    cols = {}
     ncols = 0  # number of new columns added already
     for r in Progress(exampleRows + [vs.cursorRow]):
         try:
@@ -53,12 +53,22 @@ def addRegexColumns(regexMaker, vs, origcol, regexstr):
         except Exception as e:
             vd.exceptionCaught(e)
 
-        for _ in range(len(m)-len(cols)):
-            cols.append(Column(origcol.name+'_re'+str(len(cols)),
-                            getter=lambda col,row,i=len(cols),func=func: func(row)[i],
-                            origCol=origcol))
+        if isinstance(m, dict):
+            for name in m:
+                if name in cols:
+                    continue
+                cols[name] = Column(origcol.name+'_'+str(name),
+                                    getter=lambda col,row,name=name,func=func: func(row)[name],
+                                    origCol=origcol)
+        elif isinstance(m, (tuple, list)):
+            for _ in range(len(m)-len(cols)):
+                cols[len(cols)] = Column(origcol.name+'_re'+str(len(cols)),
+                                         getter=lambda col,row,i=len(cols),func=func: func(row)[i],
+                                         origCol=origcol)
+        else:
+            raise TypeError("addRegexColumns() expects a dict, list, or tuple from regexMaker, but got a "+type(m).__name__)
 
-    vs.addColumnAtCursor(*cols)
+    vs.addColumnAtCursor(*cols.values())
 
 
 def regexTransform(origcol, instr):
