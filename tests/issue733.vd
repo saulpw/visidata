@@ -1,0 +1,5 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		type-date		@	set type of current column to date
+benchmark		disp_date_fmt	set-option	%Y		
+benchmark		disp_date_fmt	unset-option			
