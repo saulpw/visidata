@@ -136,7 +136,7 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 ###
 
 - `:` adds new columns derived from splitting the current column at positions defined by a *regex pattern*. The current row will be used to infer the number of columns that will be created.
-- `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. This command also requires an example row.
+- `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. The new columns are named using the capture group index, or if named capture groups are used, the capture group names. This command also requires an example row.
 - `*` followed by *regex*`/`*substring* replaces the text which matches the capture groups in *regex* with the contents of *substring*. *substring* may include backreferences (*\1* etc).
 
 ## [How do I substitute text in my column]
