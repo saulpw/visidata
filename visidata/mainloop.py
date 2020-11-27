@@ -74,6 +74,8 @@ def setWindows(vd, scr):
 @VisiData.api
 def draw_all(vd):
     'Draw all sheets in all windows.'
+    if not vd.sheets:
+        return
     vd.draw_sheet(vd.win1, vd.sheets[0])
     if vd.win2 and len(vd.sheets) > 1:
         vd.draw_sheet(vd.win2, vd.sheets[1])
@@ -104,11 +106,10 @@ def mainloop(self, scr):
 
     self.keystrokes = ''
     while True:
-        if not self.sheets:
-            # if no more sheets, exit
+        if not self.sheets and self.currentReplay is None:
             return
 
-        sheet = self.sheets[0]
+        sheet = self.activeSheet
         threading.current_thread().sheet = sheet
         vd.drawThread = threading.current_thread()
 
@@ -200,7 +201,6 @@ def mainloop(self, scr):
                 scr.timeout(-1)
             else:
                 scr.timeout(curses_timeout)
-
 
 def setupcolors(stdscr, f, *args):
     curses.raw()    # get control keys instead of signals

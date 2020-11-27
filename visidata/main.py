@@ -33,7 +33,7 @@ def eval_vd(logpath, *args, **kwargs):
     src = Path(logpath.given, fp=io.StringIO(log), filesize=len(log))
     vs = vd.openSource(src, filetype=src.ext)
     vs.name += '_vd'
-    vd.push(vs)
+    vs.reload()
     vs.vd = vd
     return vs
 
@@ -275,6 +275,7 @@ def main_vd():
             if vd.replay_sync(vs):  # error
                 return 1
         else:
+            vd.currentReplay = vs
             vd.replay(vs)
             run()
 

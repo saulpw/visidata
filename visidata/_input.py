@@ -317,7 +317,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         else:
             history = type
 
-    sheet = self.sheets[0]
+    sheet = self.activeSheet
     rstatuslen = self.drawRightStatus(sheet._scr, sheet)
     attr = 0
     promptlen = clipdraw(sheet._scr, sheet.windowHeight-1, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)

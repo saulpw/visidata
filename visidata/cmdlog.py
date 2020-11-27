@@ -271,6 +271,11 @@ def delay(vd, factor=1):
         acquired = vd.semaphore.acquire(timeout=options.replay_wait*factor if not vd.paused else None)
         return acquired or not vd.paused
 
+@VisiData.property
+def activeSheet(vd):
+    'Return top sheet on sheets stack, or cmdlog sheets stack empty.'
+    return vd.sheets[0] if vd.sheets else vd.cmdlog
+
 
 @VisiData.api
 def replayOne(vd, r):
@@ -298,7 +303,7 @@ def replayOne(vd, r):
             if vs:
                 vd.push(vs)
             else:
-                vs = vd.sheets[0]  # use top sheet by default
+                vs = vd.activeSheet
 
             vd.moveToReplayContext(r, vs)
 
@@ -341,7 +346,7 @@ def replay_sync(vd, cmdlog, live=False):
                 cmdlog.cursorRowIndex += 1
                 prog.addProgress(1)
 
-                vd.sheets[0].ensureLoaded()
+                vd.activeSheet.ensureLoaded()
                 vd.sync()
                 while not vd.delay():
                     pass
