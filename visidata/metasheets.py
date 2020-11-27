@@ -33,6 +33,7 @@ class ColumnsSheet(Sheet):
     columns = [
             ColumnAttr('sheet', type=str),
             ColumnAttr('name', width=options.default_width),
+            ColumnAttr('keycol', type=int, width=0),
             ColumnAttr('width', type=int),
             ColumnAttr('height', type=int),
             ColumnAttr('hoffset', type=int, width=0),
