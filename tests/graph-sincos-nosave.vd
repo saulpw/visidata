@@ -1,5 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
-graph-sincos-nosave_vd			add-sheet	1	A	open new blank sheet with number columns
+			add-sheet	1	A	open new blank sheet with number columns
 unnamed			add-rows	360	ga	add N blank rows
 unnamed			select-rows		gs	
 unnamed	0		setcol-iter	range(360)	gz=	set selected rows in this column to the values in the given Python sequence expression
