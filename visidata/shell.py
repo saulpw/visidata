@@ -65,7 +65,7 @@ class ColumnShell(Column):
                 else:
                     args.append(arg)
 
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
             vd.exceptionCaught(e)
@@ -203,9 +203,17 @@ class FileListSheet(DirSheet):
         for fn in self.source.open_text():
             yield Path(fn.rstrip())
 
+
+@VisiData.api
+def inputShell(vd):
+    cmd = vd.input("sh$ ", type="sh")
+    if '$' not in cmd:
+        vd.warning('no $column in command')
+    return cmd
+
 globalCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
-Sheet.addCommand('z;', 'addcol-sh', 'cmd=input("sh$ ", type="sh"); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
+Sheet.addCommand('z;', 'addcol-sh', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
 
 DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
