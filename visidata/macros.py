@@ -9,7 +9,7 @@ def macrosheet(vd):
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
     macrosheet = vd.loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or vd.error('error loading macros')
 
-    real_macrosheet = IndexSheet('user_macros', rows=[])
+    real_macrosheet = IndexSheet('user_macros', rows=[], source=macrosheet)
     for ks, fn in macrosheet.rows:
         vs = vd.loadInternalSheet(CommandLog, Path(fn))
         vd.status(f"setting {ks}")
@@ -34,16 +34,19 @@ def saveMacro(self, rows, ks):
         macropath = Path(fnSuffix(options.visidata_dir+"macro"))
         vd.save_vd(macropath, vs)
         setMacro(ks, vs)
-        append_tsv_row(vd.macrosheet, (ks, macropath))
+        append_tsv_row(vd.macrosheet.source, (ks, macropath))
 
 @CommandLog.api
 @wraps(CommandLog.afterExecSheet)
 def afterExecSheet(cmdlog, sheet, escaped, err):
-    cmdlog.afterExecSheet.__wrapped__(cmdlog, sheet, escaped, err)
     if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED):
         cmd = copy(vd.activeCommand)
         cmd.row = cmd.col = cmd.sheet = ''
         vd.macroMode.addRow(cmd)
+
+    # the following needs to happen at the end, bc
+    # once cmdlog.afterExecSheet.__wrapped__ runs, vd.activeCommand resets to None
+    cmdlog.afterExecSheet.__wrapped__(cmdlog, sheet, escaped, err)
 
 @CommandLog.api
 def startMacro(cmdlog):
