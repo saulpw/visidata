@@ -17,9 +17,9 @@ def StaticColumn(sheet, col):
         # no need to undo, addColumn undo is enough
         for r in Progress(rows, 'calculating'):
             try:
-                frozencol.setValue(r, col.getTypedValue(r))
+                frozencol.putValue(r, col.getTypedValue(r))
             except Exception as e:
-                frozencol.setValue(r, e)
+                frozencol.putValue(r, e)
 
     calcRows_async(frozencol, sheet.rows, col)
     return frozencol
