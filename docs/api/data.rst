@@ -4,7 +4,7 @@ Selected Rows
 Each TableSheet has a set of *selected rows*, which is a strict subset of the rows on the sheet.
 
 .. autoattribute:: visidata.TableSheet.selectedRows
-.. autoattribute:: visidata.TableSheet.someSelectedRows
+.. autoattribute:: visidata.TableSheet.onlySelectedRows
 .. autoattribute:: visidata.TableSheet.nSelectedRows
 
 .. autofunction:: visidata.TableSheet.selectRow
