@@ -1,7 +1,7 @@
 import collections
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme, MissingAttrFormatter
 
 
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
@@ -153,7 +153,7 @@ def drawLeftStatus(vd, scr, vs):
 @VisiData.api
 def rightStatus(vd, sheet):
     'Return right side of status bar.  Overrideable.'
-    return options.disp_rstatus_fmt.format(sheet=sheet, vd=vd)
+    return MissingAttrFormatter().format(sheet.options.disp_rstatus_fmt, sheet=sheet, vd=vd)
 
 
 @VisiData.api
