@@ -1,5 +1,6 @@
 from visidata import vd, Sheet, Progress, option, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy
 option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
+option('some_selected_rows', False, 'if no rows selected, if True, someSelectedRows returns all rows; if False, fails')
 
 Sheet.init('_selectedRows', dict)  # rowid(row) -> row
 
@@ -94,11 +95,23 @@ def selectedRows(self):
     return Fanout((r for r in self.rows if self.rowid(r) in self._selectedRows))
 
 @Sheet.property
-def someSelectedRows(self):
+def onlySelectedRows(self):
     'List of selected rows in sheet order.  Fail if no rows are selected.'
     if self.nSelectedRows == 0:
         vd.fail('no rows selected')
     return self.selectedRows
+
+@Sheet.property
+def someSelectedRows(self):
+    '''Return a list of rows:
+        (a) in batch mode, always return selectedRows
+        (b) in interactive mode, if options.some_selected_rows is True, return selectedRows or all rows if none selected
+        (c) in interactive mode, if options.some_selected_rows is False, return selectedRows or fail if none selected'''
+    if options.batch:
+        return self.selectedRows
+    if options.some_selected_rows:
+        return self.selectedRows or self.rows
+    return self.onlySelectedRows
 
 @Sheet.property
 def nSelectedRows(self):
