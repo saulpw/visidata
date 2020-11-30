@@ -127,6 +127,10 @@ class PandasSheet(Sheet):
         if type(df.index) is not pd.RangeIndex:
             df = df.reset_index()
 
+        # VisiData assumes string column names but pandas does not. Forcing string
+        # columns at load-time avoids various errors later.
+        df.columns = df.columns.astype(str)
+
         self.columns = []
         for col in (c for c in df.columns if not c.startswith("__vd_")):
             self.addColumn(Column(
