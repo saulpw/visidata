@@ -97,7 +97,7 @@ class PandasFreqTableSheet(PivotSheet):
         # that operates similarly to pd.cut.
         super().initCols()
 
-        df = self.source.rows.df
+        df = self.source.df.copy()
 
         # Implementation (special case): for one row, this degenerates
         # to .value_counts(); however this does not order in a stable manner.
