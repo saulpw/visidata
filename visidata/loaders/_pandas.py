@@ -117,10 +117,19 @@ class PandasSheet(Sheet):
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
             df = readfunc(str(self.source), **options.getall('pandas_'+filetype+'_'))
+        else:
+            try:
+                df = pd.DataFrame(self.source)
+            except ValueError as err:
+                vd.fail('error building pandas DataFrame from source data: %s' % err)
 
         # reset the index here
         if type(df.index) is not pd.RangeIndex:
             df = df.reset_index()
+
+        # VisiData assumes string column names but pandas does not. Forcing string
+        # columns at load-time avoids various errors later.
+        df.columns = df.columns.astype(str)
 
         self.columns = []
         for col in (c for c in df.columns if not c.startswith("__vd_")):
