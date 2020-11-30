@@ -679,6 +679,7 @@ class TableSheet(BaseSheet):
             'colsep': options.disp_column_sep,
             'keysep': options.disp_keycol_sep,
             'selectednote': options.disp_selected_note,
+            'disp_truncator': options.disp_truncator,
         }
 
         self._rowLayout = {}  # [rowidx] -> (y, height)
@@ -723,9 +724,9 @@ class TableSheet(BaseSheet):
             endbotsep='',
             colsep='',
             keysep='',
-            selectednote=''
+            selectednote='',
+            disp_truncator=''
        ):
-
             # sepattr is the attr between cell/columns
             sepcattr = update_attr(rowcattr, colors.color_column_sep, 1)
 
@@ -833,7 +834,8 @@ class TableSheet(BaseSheet):
                                 else:
                                     sepchars = midsep
 
-                        clipdraw(scr, y, x, (disp_column_fill if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-(1 if note else 0))
+                        pre = disp_truncator if hoffset != 0 else disp_column_fill
+                        clipdraw(scr, y, x, (pre if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-(1 if note else 0))
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
