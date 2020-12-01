@@ -123,6 +123,10 @@ class LazyComputeRow:
         try:
             i = self._keys.index(colid)
             c = self.sheet.columns[i]
+            if c is self.col:
+                j = self._keys[i+1:].index(colid)
+                c = self.sheet.columns[i+j+1]
+
         except ValueError:
             try:
                 c = self.sheet._lcm[colid]
