@@ -97,6 +97,7 @@ class LazyComputeRow:
     'Calculate column values as needed.'
     def __init__(self, sheet, row, col=None):
         self.row = row
+        self.col = col
         self.sheet = sheet
         if not hasattr(self.sheet, '_lcm'):
             self.sheet._lcm = LazyChainMap(sheet, vd, col)
