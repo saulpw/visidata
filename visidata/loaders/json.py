@@ -28,7 +28,7 @@ class JsonSheet(PythonSheet):
                 try:
                     if L.startswith('#'): # skip commented lines
                         continue
-                    ret = json.loads(L, object_pairs_hook=OrderedDict)
+                    ret = json.loads(L)
                     if isinstance(ret, list):
                         yield from Progress(ret)
                     else:
@@ -40,7 +40,7 @@ class JsonSheet(PythonSheet):
                         yield TypedExceptionWrapper(json.loads, L, exception=e)  # an error on one line
                     else:
                         with self.source.open_text() as fp:
-                            ret = json.load(fp, object_pairs_hook=OrderedDict)
+                            ret = json.load(fp)
                             if isinstance(ret, list):
                                 yield from Progress(ret)
                             else:
