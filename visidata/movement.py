@@ -172,8 +172,8 @@ Sheet.addCommand('zh', 'scroll-cells-left', 'cursorCol.hoffset -= cursorCol.visi
 Sheet.addCommand('gzl', 'scroll-cells-rightmost', 'cursorCol.hoffset = -cursorCol.visibleWidth+2', 'scroll display of current column to the end')
 Sheet.addCommand('gzh', 'scroll-cells-leftmost', 'cursorCol.hoffset = 0', 'scroll display of current column to the beginning')
 
-Sheet.addCommand('zj', 'scroll-cells-down', 'cursorCol.voffset += 1', 'scroll display of current column down one line')
-Sheet.addCommand('zk', 'scroll-cells-up', 'cursorCol.voffset -= 1', 'scroll display of current column up one line')
+Sheet.addCommand('zj', 'scroll-cells-down', 'cursorCol.voffset += 1 if cursorCol.height > 1 else fail("multiline column needed for scrolling")', 'scroll display of current column down one line')
+Sheet.addCommand('zk', 'scroll-cells-up', 'cursorCol.voffset -= 1 if cursorCol.height > 1 else fail("multiline column needed for scrolling")', 'scroll display of current column up one line')
 Sheet.addCommand('gzj', 'scroll-cells-bottom', 'cursorCol.voffset = -1', 'scroll display of current column to the bottom')
 Sheet.addCommand('gzk', 'scroll-cells-top', 'cursorCol.voffset = 0', 'scroll display of current column to the top')
 
