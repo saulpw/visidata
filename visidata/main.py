@@ -188,7 +188,7 @@ def main_vd():
             options.set(k, v, obj='override')
 
     # fetch motd and plugins *after* options parsing/setting
-    visidata.PluginsSheet().reload()
+    vd.pluginsSheet.ensureLoaded()
     domotd()
 
     if args.batch:
