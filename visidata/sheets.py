@@ -333,7 +333,7 @@ class TableSheet(BaseSheet):
     def evalExpr(self, expr, row=None, col=None):
         if row:
             # contexts are cached by sheet/rowid for duration of drawcycle
-            contexts = vd._evalcontexts.setdefault((self, self.rowid(row)), LazyComputeRow(self, row, col=col))
+            contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col=col))
         else:
             contexts = None
 
