@@ -36,7 +36,7 @@ def setValuesFromExpr(self, rows, expr):
     compiledExpr = compile(expr, '<expr>', 'eval')
     vd.addUndoSetValues([self], rows)
     for row in Progress(rows, 'setting'):
-        self.setValueSafe(row, self.sheet.evalExpr(compiledExpr, row))
+        self.setValueSafe(row, self.sheet.evalExpr(compiledExpr, row, col=self))
     self.recalc()
     vd.status('set %d values = %s' % (len(rows), expr))
 
@@ -48,7 +48,7 @@ def inputExpr(self, prompt, *args, **kwargs):
 
 Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ExprColumn(inputExpr("new column expr="), curcol=cursorCol))', 'create new column from Python expression, with column names as variables')
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(selectedRows, inputExpr("set selected="))', 'set current column for selected rows to result of Python expression')
-Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), cursorRow))', 'evaluate Python expression on current row and set current cell with result of Python expression')
+Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), cursorRow, col=cursorCol))', 'evaluate Python expression on current row and set current cell with result of Python expression')
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(selectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(selectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
 
 Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
