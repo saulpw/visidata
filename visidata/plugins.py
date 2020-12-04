@@ -46,9 +46,18 @@ def _checkHash(data, sha):
     import hashlib
     return hashlib.sha256(data.strip().encode('utf-8')).hexdigest() == sha
 
+def _pluginColorizer(s,c,r,v):
+    if not r: return None
+    ver = _loadedVersion(r)
+    if not ver: return None
+    if ver != r.latest_ver: return 'color_warning'
+    return 'color_working'
 
 class PluginsSheet(JsonLinesSheet):
-    rowtype = "plugins"
+    rowtype = "plugins"  # rowdef: AttrDict of json dict
+    colorizers = [
+        CellColorizer(3, None, _pluginColorizer)
+    ]
 
     def iterload(self):
         for r in JsonLinesSheet.iterload(self):
