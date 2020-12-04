@@ -319,7 +319,19 @@ class TableSheet(BaseSheet):
 
     @property
     def bottomRowIndex(self):
-        return max(self._rowLayout.keys())
+        return max(self._rowLayout.keys()) if self._rowLayout else self.topRowIndex+self.nScreenRows
+
+    @bottomRowIndex.setter
+    def bottomRowIndex(self, newidx):
+        'Set topRowIndex, by getting height of *newidx* row and going backwards until more than nScreenRows is allocated.'
+        nrows = 0
+        i = 0
+        while nrows < self.nScreenRows and newidx-i >= 0:
+            h = self.calc_height(self.rows[newidx-i])
+            nrows += h
+            i += 1
+
+        self._topRowIndex = newidx-i+2
 
     def __deepcopy__(self, memo):
         'same as __copy__'
@@ -535,14 +547,10 @@ class TableSheet(BaseSheet):
         # check bounds, scroll if necessary
         if self.topRowIndex > self.cursorRowIndex:
             self.topRowIndex = self.cursorRowIndex
-        else:
-            if self.topRowIndex < self.cursorRowIndex-self.nScreenRows+1:
-                self.topRowIndex = self.cursorRowIndex-self.nScreenRows+1
-            elif self._rowLayout: # only check this if topRowIndex has not been set (which clears _rowLayout)
-                bottomRowIndex = self.bottomRowIndex
-                y, h = self._rowLayout[bottomRowIndex]
-                if self.cursorRowIndex > bottomRowIndex and y+h > self.nScreenRows:
-                    self._topRowIndex += bottomRowIndex-self.cursorRowIndex+2
+        elif self.bottomRowIndex < self.cursorRowIndex:
+            self.bottomRowIndex = self.cursorRowIndex
+        elif self.bottomRowIndex == self.cursorRowIndex and self._rowLayout and self._rowLayout[self.bottomRowIndex][1] > 1:
+            self.bottomRowIndex = self.cursorRowIndex
 
         if self.cursorCol and self.cursorCol.keycol:
             return
@@ -708,12 +716,46 @@ class TableSheet(BaseSheet):
 
             rowcattr = self._colorize(None, row)
 
-            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y, **drawparams)
+            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y-1, **drawparams)
 
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.windowWidth-2, options.disp_more_right, colors.color_column_sep)
 
         scr.refresh()
+
+    def calc_height(self, row, displines=None, isNull=None):
+            if displines is None:
+                displines = {}  # [vcolidx] -> list of lines in that cell
+
+            for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
+                if x < self.windowWidth:  # only draw inside window
+                    vcols = self.visibleCols
+                    if vcolidx >= len(vcols):
+                        continue
+                    col = vcols[vcolidx]
+                    cellval = col.getCell(row)
+                    if colwidth > 1 and isNumeric(col):
+                        cellval.display = cellval.display.rjust(colwidth-2)
+
+                    try:
+                        if isNull and isNull(cellval.value):
+                            cellval.note = options.disp_note_none
+                            cellval.notecolor = 'color_note_type'
+                    except (TypeError, ValueError):
+                        pass
+
+                    if col.voffset or col.height > 1:
+                        lines = splitcell(cellval.display, width=colwidth-2)
+                    else:
+                        lines = [cellval.display]
+                    displines[vcolidx] = (col, cellval, lines)
+
+            heights = [0]
+            for col, cellval, lines in displines.values():
+                h = len(lines)   # of this cell
+                heights.append(min(col.height, h))
+
+            return max(heights)
 
     def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight,
             isNull='',
@@ -743,37 +785,7 @@ class TableSheet(BaseSheet):
                 basecellcattr = rowcattr
 
             displines = {}  # [vcolidx] -> list of lines in that cell
-
-            for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
-                if x < self.windowWidth:  # only draw inside window
-                    vcols = self.visibleCols
-                    if vcolidx >= len(vcols):
-                        continue
-                    col = vcols[vcolidx]
-                    cellval = col.getCell(row)
-                    if colwidth > 1 and isNumeric(col):
-                        cellval.display = cellval.display.rjust(colwidth-2)
-
-                    try:
-                        if isNull(cellval.value):
-                            cellval.note = options.disp_note_none
-                            cellval.notecolor = 'color_note_type'
-                    except (TypeError, ValueError):
-                        pass
-
-                    if col.voffset or col.height > 1:
-                        lines = splitcell(cellval.display, width=colwidth-2)
-                    else:
-                        lines = [cellval.display]
-                    displines[vcolidx] = (col, cellval, lines)
-
-            heights = [0]
-            for col, cellval, lines in displines.values():
-                h = len(lines)   # of this cell
-                heights.append(min(col.height, h))
-
-            height = min(max(heights), maxheight) or 1  # display even empty rows
-
+            height = min(self.calc_height(row, displines), maxheight) or 1  # display even empty rows
             self._rowLayout[rowidx] = (ybase, height)
 
             for vcolidx, (col, cellval, lines) in displines.items():
