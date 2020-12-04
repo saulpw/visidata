@@ -52,7 +52,7 @@ class DisplayWrapper:
         self.error = error      # list of strings for stacktrace
 
     def __bool__(self):
-        return self.value
+        return bool(self.value)
 
     def __eq__(self, other):
         return self.value == other
