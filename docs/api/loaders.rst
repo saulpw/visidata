@@ -1,6 +1,10 @@
 Loaders
 =======
 
+.. note::
+
+    You are welcome to submit new loaders to core VisiData, or as plugins. Please, see our `checklists for contribution <https://visidata.org/docs/contributing-to-visidata>`__.
+
 Creating a new loader for a data source is simple and straigthforward.
 
 1. ``open_filetype`` boilerplate
