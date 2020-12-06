@@ -84,7 +84,11 @@ def push_pyobj(name, pyobj):
     else:
         vd.error("cannot push '%s' as pyobj" % type(pyobj).__name__)
 
-visidata.addGlobals({'load_pyobj': load_pyobj})
+@deprecated('2.1', 'vd.isNumeric instead')
+def isNumeric(col):
+    return vd.isNumeric(col)
+
+visidata.addGlobals({'load_pyobj': load_pyobj, 'isNumeric': isNumeric})
 
 # The longnames on the left are deprecated for 2.0
 

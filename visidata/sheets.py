@@ -4,7 +4,7 @@ from copy import copy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (options, theme, isNumeric, Column, option, namedlist, SettableColumn,
+from visidata import (options, theme, Column, option, namedlist, SettableColumn,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
 vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 import visidata
@@ -734,7 +734,7 @@ class TableSheet(BaseSheet):
                         continue
                     col = vcols[vcolidx]
                     cellval = col.getCell(row)
-                    if colwidth > 1 and isNumeric(col):
+                    if colwidth > 1 and vd.isNumeric(col):
                         cellval.display = cellval.display.rjust(colwidth-2)
 
                     try:

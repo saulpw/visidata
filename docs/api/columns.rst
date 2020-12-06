@@ -156,7 +156,7 @@ Types API
 ~~~~~~~~~~~
 
 .. autoclass:: visidata.vd.addType
-.. autofunction:: visidata.isNumeric
+.. autofunction:: visidata.vd.isNumeric
 
 Examples
 ~~~~~~~~~

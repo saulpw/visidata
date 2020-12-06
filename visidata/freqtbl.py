@@ -59,7 +59,7 @@ class FreqTableSheet(PivotSheet):
             self.column('percent').hide()
             self.column('histogram').hide()
 
-        if not [c for c in self.groupByCols if isNumeric(c)]:
+        if not [c for c in self.groupByCols if vd.isNumeric(c)]:
             self.orderBy(self.column('count'), reverse=True)
 
     def openRow(self, row):

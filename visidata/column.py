@@ -7,7 +7,6 @@ import re
 import time
 
 from visidata import option, options, anytype, stacktrace, vd
-from visidata import isNumeric
 from visidata import asyncthread, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc

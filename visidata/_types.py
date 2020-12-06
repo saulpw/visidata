@@ -117,7 +117,8 @@ vdtype(float, '%')
 vdtype(dict, '')
 vdtype(list, '')
 
-def isNumeric(col):
+@VisiData.api
+def isNumeric(vd, col):
     return col.type in (int,vlen,float,currency,date,floatsi)
 
 ##

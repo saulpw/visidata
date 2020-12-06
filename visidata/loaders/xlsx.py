@@ -89,7 +89,7 @@ def save_xlsx(vd, p, *sheets):
             for col, v in dispvals.items():
                 if col.type == date:
                     v = datetime.datetime.fromtimestamp(int(v.timestamp()))
-                elif not isNumeric(col):
+                elif not vd.isNumeric(col):
                     v = str(v)
                 row.append(v)
 
