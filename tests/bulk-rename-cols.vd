@@ -1,4 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/sample.tsv	o	
 sample			columns-sheet		C	open Columns Sheet: edit column properties for current sheet
+sample_columns			select-rows		gs	
 sample_columns	name		setcol-expr	f"feature_{name}"	g=	set current column for selected rows to result of Python expression
