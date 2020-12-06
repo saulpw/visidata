@@ -1,4 +1,4 @@
-from visidata import VisiData
+from visidata import VisiData, vd
 import visidata
 
 alias = visidata.BaseSheet.bindkey
@@ -6,11 +6,15 @@ alias = visidata.BaseSheet.bindkey
 def deprecated(ver, instead=''):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            # ideally would include a stacktrace
+            import traceback
+
+            for line in reversed(traceback.extract_stack(limit=6)[:-1]):
+                vd.warning(f'    file {line.filename} at line {line.lineno} in {line.name}')
+            vd.warning(f'Deprecated call traceback (most recent last):')
             msg = f'{func.__name__} deprecated since v{ver}'
             if instead:
                 msg += f'; use {instead}'
-            visidata.warning(msg)
+            vd.warning(msg)
             return func(*args, **kwargs)
         return wrapper
     return decorator
@@ -30,7 +34,7 @@ def copyToClipboard(value):
 
 @deprecated('1.6')
 def replayableOption(optname, default, helpstr):
-    option(optname, default, helpstr, replay=True)
+    vd.option(optname, default, helpstr, replay=True)
 
 @deprecated('1.6')
 def SubrowColumn(*args, **kwargs):
@@ -38,7 +42,7 @@ def SubrowColumn(*args, **kwargs):
 
 @deprecated('1.6')
 def DeferredSetColumn(*args, **kwargs):
-    return Column(*args, defer=True, **kwargs)
+    return visidata.Column(*args, defer=True, **kwargs)
 
 @deprecated('2.0')
 def bindkey_override(keystrokes, longname):
@@ -58,7 +62,7 @@ visidata.Sheet.exec_command = deprecated('2.0')(visidata.Sheet.execCommand)
 @VisiData.api
 def filetype(vd, ext, constructor):
     'Add constructor to handle the given file type/extension.'
-    globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p,name, source=p, filetype=ext))
+    globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p.name, source=p, filetype=ext))
 
 @deprecated('2.0', 'Sheet(namepart1, namepart2, ...)')
 @VisiData.global_api
@@ -69,12 +73,12 @@ def joinSheetnames(vd, *sheetnames):
 @deprecated('2.0', 'PyobjSheet')
 @VisiData.global_api
 def load_pyobj(*names, **kwargs):
-    return PyobjSheet(*names, **kwargs)
+    return visidata.PyobjSheet(*names, **kwargs)
 
 @deprecated('2.0', 'PyobjSheet')
 @VisiData.global_api
 def push_pyobj(name, pyobj):
-    vs = PyobjSheet(name, source=pyobj)
+    vs = visidata.PyobjSheet(name, source=pyobj)
     if vs:
         return vd.push(vs)
     else:
