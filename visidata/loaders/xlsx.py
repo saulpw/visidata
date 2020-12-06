@@ -1,10 +1,11 @@
 from visidata import *
 
 
+def open_xls(p):
+    return XlsIndexSheet(p.name, source=p)
+
 def open_xlsx(p):
     return XlsxIndexSheet(p.name, source=p)
-
-open_xls = open_xlsx
 
 class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'
