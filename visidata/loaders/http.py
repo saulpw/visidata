@@ -1,7 +1,8 @@
 from visidata import Path, RepeatFile, options, vd
 
 content_filetypes = {
-    'tab-separated-values': 'tsv'  # thanks @lindner
+    'tab-separated-values': 'tsv',  # thanks @lindner
+    'json': 'json'
 }
 
 
