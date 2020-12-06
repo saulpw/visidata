@@ -5,8 +5,7 @@ option('color_graph_axis', 'bold', 'color for graph axis labels')
 
 
 def numericCols(cols):
-    # isNumeric from describe.py
-    return [c for c in cols if isNumeric(c)]
+    return [c for c in cols if vd.isNumeric(c)]
 
 
 class InvertedCanvas(Canvas):
@@ -49,7 +48,7 @@ class GraphSheet(InvertedCanvas):
         self.reset()
 
         vd.status('loading data points')
-        catcols = [c for c in self.xcols if not isNumeric(c)]
+        catcols = [c for c in self.xcols if not vd.isNumeric(c)]
         numcols = numericCols(self.xcols)
         for ycol in self.ycols:
             for rownum, row in enumerate(Progress(self.sourceRows, 'plotting')):  # rows being plotted from source
@@ -92,7 +91,7 @@ class GraphSheet(InvertedCanvas):
         return True
 
     def formatX(self, amt):
-        return ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if isNumeric(xcol))
+        return ','.join(xcol.format(xcol.type(amt)) for xcol in self.xcols if vd.isNumeric(xcol))
 
     def formatY(self, amt):
         srccol = self.ycols[0]
@@ -143,7 +142,7 @@ class GraphSheet(InvertedCanvas):
         # TODO: if 0 line is within visible bounds, explicitly draw the axis
         # TODO: grid lines corresponding to axis labels
 
-        xname = ','.join(xcol.name for xcol in self.xcols if isNumeric(xcol)) or 'row#'
+        xname = ','.join(xcol.name for xcol in self.xcols if vd.isNumeric(xcol)) or 'row#'
         xname, _ = clipstr(xname, self.leftMarginPixels//2-2)
         self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', colors.color_graph_axis)
 

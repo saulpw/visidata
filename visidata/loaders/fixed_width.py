@@ -88,7 +88,7 @@ def save_fixed(vd, p, *vsheets):
             with Progress(gerund='saving'):
                 for dispvals in sheet.iterdispvals(format=True):
                     for col, val in dispvals.items():
-                        fp.write('{0:{align}{width}}'.format(val, width=col.width, align='>' if isNumeric(col) else '<'))
+                        fp.write('{0:{align}{width}}'.format(val, width=col.width, align='>' if vd.isNumeric(col) else '<'))
                     fp.write('\n')
 
             vd.status('%s save finished' % p)
