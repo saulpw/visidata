@@ -188,7 +188,7 @@ set name of current column to combined contents of current cell in selected rows
 set name of all visible columns to combined contents of current column for selected rows (or current row)
 .Pp
 .It Ic "  =" Ar expr
-.No create new column from Python Ar expr Ns , with column names as variables
+.No create new column from Python Ar expr Ns , with column names, and attributes, as variables
 .It Ic " g=" Ar expr
 .No set current column for selected rows to result of Python Ar expr
 .It Ic "gz=" Ar expr
@@ -253,9 +253,11 @@ select/toggle/unselect all rows from cursor to bottom
 .It Ic "z|  z\e\ " Ns Ar expr
 .No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
-select rows matching current cell in current column
+select rows matching typed value of current cell in current column
 .It Ic "g\&,"
-select rows matching current row in all visible columns
+select rows matching typed value of current row in all visible columns
+.It Ic "z\&, gz\&,"
+select rows matching display value of current cell/row in current column/all visible columns
 .
 .El
 .
@@ -343,6 +345,8 @@ toggle insert mode
 set contents to previous/next in history
 .It Ic "Tab  Shift+Tab"
 autocomplete input (when available)
+.It Ic "Shift+Arrow"
+.No move cursor in direction of Sy Arrow No and re-enter edit mode
 .
 .El
 .
@@ -466,6 +470,10 @@ show cursor position and bounds of current sheet on status line
 show version and copyright information on status line
 .It Ic " ^P"
 .No open Sy Status History
+.It "m" Ar keystroke
+.No first, begin recording macro; second, prompt for Ar keystroke No, and complete recording. Macro can then be executed everytime provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
+.It "gm"
+.No open an index of all existing macros. Can be directly viewed with Sy Enter Ns , and then modified with Sy ^S Ns .
 .
 .El
 .Pp
@@ -591,8 +599,8 @@ toggle/unset selected columns as key columns on source sheet
 add Ar aggregator No to selected source columns
 .It Ic "g-" No (hyphen)
 hide selected columns on source sheet
-.It Ic "g~ g# g% g$ g@  gz#"
-set type of selected columns on source sheet to str/int/float/currency/date/len
+.It Ic "g~ g# g% g$ g@ gz# z%"
+set type of selected columns on source sheet to str/int/float/currency/date/len/floatsi
 .It Ic " Enter"
 .No open a Sy Frequency Table No sheet grouped by column referenced in current row
 .El
@@ -624,6 +632,8 @@ add row to reference a new blank sheet
 .No reload all selected sheets
 .It Ic "z^C  gz^C"
 abort async threads for current/selected sheets(s)
+.It Ic "g^S"
+save selected or all sheets
 .It Ic " &" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
@@ -662,6 +672,8 @@ abort async threads for current/selected sheets(s)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  e"
 edit option at current row
+.It Ic "d"
+remove option override for this context
 .El
 .
 .Ss CommandLog (Shift+D)
@@ -802,8 +814,6 @@ default column width
 default column height
 .It Sy --textwrap-cells Ns = Ns Ar "bool       " No "True"
 wordwrap text for multiline rows
-.It Sy --cmd-after-edit Ns = Ns Ar "str        " No "go-down"
-command longname to execute after successful edit
 .It Sy --quitguard No "                 False"
 confirm before quitting last sheet
 .It Sy --debug No "                     False"
@@ -844,6 +854,8 @@ encoding passed to codecs.open
 encoding_errors passed to codecs.open
 .It Sy --bulk-select-clear No "         False"
 clear selected rows before new bulk selections
+.It Sy --some-selected-rows No "        False"
+if no rows selected, if True, someSelectedRows returns all rows; if False, fails
 .It Sy --delimiter Ns = Ns Ar "str             " No "	"
 field delimiter to use for tsv/usv filetype
 .It Sy --row-delimiter Ns = Ns Ar "str         " No "
@@ -879,7 +891,7 @@ a nicer selection interface for aggregators and jointype
 numeric aggregators to calculate on Describe sheet
 .It Sy --histogram-bins Ns = Ns Ar "int        " No "0"
 number of bins for histogram of numeric columns
-.It Sy --numeric-binning Ns = Ns Ar "bool      " No "True"
+.It Sy --numeric-binning No "           False"
 bin numeric columns into ranges
 .It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
 time to wait between replayed commands, in seconds
@@ -950,6 +962,8 @@ table header when saving to html
 (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
 .It Sy --graphviz-edge-labels Ns = Ns Ar "bool " No "True"
 whether to include edge labels on graphviz diagrams
+.It Sy --pdf-tables No "                False"
+parse PDF for tables instead of pages of text
 .It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/plugins.jsonl"
 source of plugins sheet
 .El
@@ -1017,6 +1031,10 @@ separator between key columns and rest of columns
 
 .It Sy "disp_selected_note " No "\[u2022]"
 
+.It Sy "disp_sort_asc      " No "\[u2191]\[u219F]\[u21DE]\[u21E1]\[u21E7]\[u21D1]"
+characters for ascending sort
+.It Sy "disp_sort_desc     " No "\[u2193]\[u21A1]\[u21DF]\[u21E3]\[u21E9]\[u21D3]"
+characters for descending sort
 .It Sy "color_default      " No "normal"
 the default color
 .It Sy "color_default_hdr  " No "bold"

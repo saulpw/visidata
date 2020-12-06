@@ -14,6 +14,7 @@
     - [commands] add unset-option command bound to `d` on OptionsSheet #733
     - [config] `--config=''` now ignores visidatarc (thanks @rswgnu for feature request #777)
     - [defer] commit changes, even if no deferred changes
+    - [deprecated] add traceback warnings for deprecated calls (thanks @ajkerrigan for PR #724)
     - [display] add sort indication #582
     - [display] show ellipsis on left side with non-zero hoffset (thanks @frosencrantz for feature request #751)
     - [expr] allow column attributes as variables (thanks @frosencrantz for feature request #659)
@@ -25,8 +26,7 @@
         - this makes JSON saving non-deterministic in Python 3.6, as the order of fields output is dependent on the order within the dict
             - (this is the default behaviour for dicts in Python 3.7+)
     - [loaders json] try loading as jsonl before json (inverted)
-        - jsonl is a streamable format, so this way it doesn't have to wait for the entire contents to be loaded
-        before failing to parse as json and then trying to parse as jsonl
+        - jsonl is a streamable format, so this way it doesn't have to wait for the entire contents to be loaded before failing to parse as json and then trying to parse as jsonl
         - fixes api loading with http so that contents of each response are added as they happen
         - unfurl toplevel lists
         - functionally now jsonl and json are identical
@@ -105,7 +105,7 @@
     - [tabulate] fix savers to save in their own format (thanks @frosencrantz for bug report #723)
     - [typing] fix indefinite hang for typing (thanks @lxcode for issue #794)
     - [windows] add Ctrl+M as alias for Ctrl+J #741 (thanks @bob-u for bug report #741)
-    - [windows man] package man/vd.txt as a fallback for when manis not available on os (thanks @bob-u for bug report #745)
+    - [windows man] package man/vd.txt as a fallback for when man is not available on os (thanks @bob-u for bug report #745)
 
 ## Plugins
 - add conll loader to **PluginsSheet** (thanks @polm)

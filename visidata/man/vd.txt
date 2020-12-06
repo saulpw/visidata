@@ -108,8 +108,8 @@ DESCRIPTION
      gz^              set name of all visible columns to combined contents of
                       current column for selected rows (or current row)
 
-       = expr         create new column from Python expr, with column names as
-                      variables
+       = expr         create new column from Python expr, with column names,
+                      and attributes, as variables
       g= expr         set current column for selected rows to result of Python
                       expr
      gz= expr         set current column for selected rows to the items in
@@ -160,8 +160,12 @@ DESCRIPTION
                       column
      z|  z\ expr      select/unselect rows matching Python expr in any visible
                       column
-      , (comma)       select rows matching current cell in current column
-     g,               select rows matching current row in all visible columns
+      , (comma)       select rows matching typed value of current cell in cur‐
+                      rent column
+     g,               select rows matching typed value of current row in all
+                      visible columns
+     z, gz,           select rows matching display value of current cell/row
+                      in current column/all visible columns
 
    Row Sorting/Filtering
        [    ]         sort ascending/descending by current column; replace any
@@ -215,6 +219,8 @@ DESCRIPTION
         Insert           toggle insert mode
         Up  Down         set contents to previous/next in history
         Tab  Shift+Tab   autocomplete input (when available)
+        Shift+Arrow      move cursor in direction of Arrow and re-enter edit
+                         mode
 
    Data Toolkit
       o input         open input in VisiData
@@ -296,6 +302,13 @@ DESCRIPTION
                       tus line
       ^V              show version and copyright information on status line
       ^P              open Status History
+     m keystroke      first, begin recording macro; second, prompt for
+                      keystroke No, and complete recording. Macro can then be
+                      executed everytime provided keystroke is used. Will
+                      override existing keybinding. Macros will run on current
+                      row, column, sheet.
+     gm               open an index of all existing macros. Can be directly
+                      viewed with Enter, and then modified with ^S.
 
       ^Y  z^Y  g^Y    open current row/cell/sheet as Python object
       ^X expr         evaluate Python expr and opens result as Python object
@@ -370,9 +383,9 @@ DESCRIPTION
                          source sheet
         g+ aggregator    add Ar aggregator No to selected source columns
         g- (hyphen)      hide selected columns on source sheet
-        g~ g# g% g$ g@  gz#
+        g~ g# g% g$ g@ gz# z%
                          set type of selected columns on source sheet to
-                         str/int/float/currency/date/len
+                         str/int/float/currency/date/len/floatsi
          Enter           open a Frequency Table sheet grouped by column
                          referenced in current row
 
@@ -391,6 +404,7 @@ DESCRIPTION
                          columns from selected sheets
         g^R              reload all selected sheets
         z^C  gz^C        abort async threads for current/selected sheets(s)
+        g^S              save selected or all sheets
          & jointype      merge selected sheets with visible columns from all,
                          keeping rows according to jointype:
                          .  inner  keep only rows which match keys on all
@@ -414,6 +428,7 @@ DESCRIPTION
         gO               open options.config as TextSheet
      (sheet-specific commands)
         Enter  e         edit option at current row
+        d                remove option override for this context
 
    CommandLog (Shift+D)
      (global commands)
@@ -507,9 +522,6 @@ COMMANDLINE OPTIONS
      --default-height=int         10                 default column height
      --textwrap-cells=bool        True               wordwrap text for multi‐
                                                      line rows
-     --cmd-after-edit=str         go-down            command longname to exe‐
-                                                     cute after successful
-                                                     edit
      --quitguard                  False              confirm before quitting
                                                      last sheet
      --debug                      False              exit on error and display
@@ -551,6 +563,10 @@ COMMANDLINE OPTIONS
                                                      codecs.open
      --bulk-select-clear          False              clear selected rows be‐
                                                      fore new bulk selections
+     --some-selected-rows         False              if no rows selected, if
+                                                     True, someSelectedRows
+                                                     returns all rows; if
+                                                     False, fails
      --delimiter=str                                 field delimiter to use
                                                      for tsv/usv filetype
      --row-delimiter=str                             " row delimiter to use
@@ -589,7 +605,7 @@ COMMANDLINE OPTIONS
                                                      sheet
      --histogram-bins=int         0                  number of bins for his‐
                                                      togram of numeric columns
-     --numeric-binning=bool       True               bin numeric columns into
+     --numeric-binning            False              bin numeric columns into
                                                      ranges
      --replay-wait=float          0.0                time to wait between re‐
                                                      played commands, in sec‐
@@ -672,6 +688,8 @@ COMMANDLINE OPTIONS
      --graphviz-edge-labels=bool  True               whether to include edge
                                                      labels on graphviz dia‐
                                                      grams
+     --pdf-tables                 False              parse PDF for tables in‐
+                                                     stead of pages of text
      --plugins-url=str            https://visidata.org/plugins/plugins.jsonl
                                                      source of plugins sheet
 
@@ -722,6 +740,8 @@ COMMANDLINE OPTIONS
      disp_endmid_sep     ║
      disp_endbot_sep     ║
      disp_selected_note  •
+     disp_sort_asc       ↑↟⇞⇡⇧⇑              characters for ascending sort
+     disp_sort_desc      ↓↡⇟⇣⇩⇓              characters for descending sort
      color_default       normal              the default color
      color_default_hdr   bold                color of the column headers
      color_bottom_hdr    underline           color of the bottom header row

@@ -188,7 +188,7 @@ set name of current column to combined contents of current cell in selected rows
 set name of all visible columns to combined contents of current column for selected rows (or current row)
 .Pp
 .It Ic "  =" Ar expr
-.No create new column from Python Ar expr Ns , with column names as variables
+.No create new column from Python Ar expr Ns , with column names, and attributes, as variables
 .It Ic " g=" Ar expr
 .No set current column for selected rows to result of Python Ar expr
 .It Ic "gz=" Ar expr
@@ -253,9 +253,11 @@ select/toggle/unselect all rows from cursor to bottom
 .It Ic "z|  z\e\ " Ns Ar expr
 .No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
-select rows matching current cell in current column
+select rows matching typed value of current cell in current column
 .It Ic "g\&,"
-select rows matching current row in all visible columns
+select rows matching typed value of current row in all visible columns
+.It Ic "z\&, gz\&,"
+select rows matching display value of current cell/row in current column/all visible columns
 .
 .El
 .
@@ -343,6 +345,8 @@ toggle insert mode
 set contents to previous/next in history
 .It Ic "Tab  Shift+Tab"
 autocomplete input (when available)
+.It Ic "Shift+Arrow"
+.No move cursor in direction of Sy Arrow No and re-enter edit mode
 .
 .El
 .
@@ -466,6 +470,10 @@ show cursor position and bounds of current sheet on status line
 show version and copyright information on status line
 .It Ic " ^P"
 .No open Sy Status History
+.It "m" Ar keystroke
+.No first, begin recording macro; second, prompt for Ar keystroke No, and complete recording. Macro can then be executed everytime provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
+.It "gm"
+.No open an index of all existing macros. Can be directly viewed with Sy Enter Ns , and then modified with Sy ^S Ns .
 .
 .El
 .Pp
@@ -591,8 +599,8 @@ toggle/unset selected columns as key columns on source sheet
 add Ar aggregator No to selected source columns
 .It Ic "g-" No (hyphen)
 hide selected columns on source sheet
-.It Ic "g~ g# g% g$ g@  gz#"
-set type of selected columns on source sheet to str/int/float/currency/date/len
+.It Ic "g~ g# g% g$ g@ gz# z%"
+set type of selected columns on source sheet to str/int/float/currency/date/len/floatsi
 .It Ic " Enter"
 .No open a Sy Frequency Table No sheet grouped by column referenced in current row
 .El
@@ -624,6 +632,8 @@ add row to reference a new blank sheet
 .No reload all selected sheets
 .It Ic "z^C  gz^C"
 abort async threads for current/selected sheets(s)
+.It Ic "g^S"
+save selected or all sheets
 .It Ic " &" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
@@ -662,6 +672,8 @@ abort async threads for current/selected sheets(s)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  e"
 edit option at current row
+.It Ic "d"
+remove option override for this context
 .El
 .
 .Ss CommandLog (Shift+D)
