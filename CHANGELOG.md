@@ -115,12 +115,13 @@
 - if `options.some_selected_rows` is True, `setcol-expr`, `setcol-iter`, `setcol-subst`, `setcol-subst`, `setcol-subst-all` will return all rows, if none selected
 
 ## API
-- [columns[ add Column.visibleWidth
+- [columns] add Column.visibleWidth
 - [open] additionally search for `open_filetype` within the vd scope
 - [select] rename `someSelectedRows` to `onlySelectedRows`
 - [select] add new `someSelectedRows` and `options.some_selected_rows` (thanks maufdez for feature request #767)
     - if options is True, and no rows are selected, `someSelectedRows` will return all rows
 - [status] allow non-hashable status msgs by deduping based on stringified contents
+- [isNumeric] isNumeric is part of vdobj
 
 # v2.0.1 (2020-10-13)
 

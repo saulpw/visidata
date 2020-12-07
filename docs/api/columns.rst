@@ -17,6 +17,9 @@ Instead, apps and plugins should call ``getValue`` and ``setValue``, which provi
 .. autoattribute:: visidata.Column.name
 .. autoattribute:: visidata.Column.type
 .. autoattribute:: visidata.Column.width
+.. autoattribute:: visidata.Column.visibleWidth
+.. versionadded:: 2.1
+
 .. autoattribute:: visidata.Column.fmtstr
 
 .. autoattribute:: visidata.Column.hidden
@@ -157,6 +160,10 @@ Types API
 
 .. autoclass:: visidata.vd.addType
 .. autofunction:: visidata.vd.isNumeric
+.. versionadded:: 2.1
+.. autofunction:: visidata.isNumeric
+.. deprecated:: 2.1
+    Use ``vd.isNumeric`` instead.
 
 Examples
 ~~~~~~~~~
