@@ -96,8 +96,7 @@ def selectedRows(self):
 
 @Sheet.property
 def onlySelectedRows(self):
-    '''List of selected rows in sheet order.  Fail if no rows are selected.
-    .. versionchanged:: 2.1'''
+    'List of selected rows in sheet order.  Fail if no rows are selected.'
     if self.nSelectedRows == 0:
         vd.fail('no rows selected')
     return self.selectedRows
@@ -107,8 +106,7 @@ def someSelectedRows(self):
     '''Return a list of rows:
         (a) in batch mode, always return selectedRows
         (b) in interactive mode, if options.some_selected_rows is True, return selectedRows or all rows if none selected
-        (c) in interactive mode, if options.some_selected_rows is False, return selectedRows or fail if none selected
-        .. versionchanged:: 2.1'''
+        (c) in interactive mode, if options.some_selected_rows is False, return selectedRows or fail if none selected'''
     if options.batch:
         return self.selectedRows
     if options.some_selected_rows:

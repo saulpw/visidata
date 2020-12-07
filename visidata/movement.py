@@ -90,9 +90,7 @@ def nextColRegex(sheet, colregex):
 
 @Column.property
 def visibleWidth(self):
-    '''Width of column as is displayed in terminal
-
-    .. versionadded:: 2.1'''
+    'Width of column as is displayed in terminal'
     vcolidx = self.sheet.visibleCols.index(self)
     return self.sheet._visibleColLayout[vcolidx][1]
 

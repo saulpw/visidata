@@ -119,7 +119,6 @@ vdtype(list, '')
 
 @VisiData.api
 def isNumeric(vd, col):
-    '.. versionadded:: 2.1'
     return col.type in (int,vlen,float,currency,date,floatsi)
 
 ##
