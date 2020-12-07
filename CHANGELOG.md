@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.1 (????)
+# v2.1 (2020-12-06)
 
     - [add] add bulk rows and cols leave cursor on first added (like add singles)
     - [add] add colname input to `addcol-new`
