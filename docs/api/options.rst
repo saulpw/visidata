@@ -67,6 +67,7 @@ Options API
 .. autofunction:: visidata.vd.options.get
 .. autofunction:: visidata.vd.options.set
 .. autofunction:: visidata.vd.options.unset
+.. versionadded:: 2.1
 .. autofunction:: visidata.vd.options.getall
 
 The dict returned by ``options.getall('foo_')`` is designed to be used as kwargs to other loaders, so that their options can be passed through VisiData transparently.

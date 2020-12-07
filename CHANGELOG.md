@@ -20,7 +20,6 @@
     - [expr] allow column attributes as variables (thanks @frosencrantz for feature request #659)
     - [freq] change `numeric_binning` back to False by default
     - [input] Shift+Arrow within `edit-cell` to move cursor and re-enter edit mode
-    - [loaders clickhouse] add clickhouse loader
     - [loaders http] have automatic API pagination (thanks @geekscrapy for feature request #480)
     - [loaders json] improve loading speedup 50% (thanks @lxcode for investigating and pointing this out #765)
         - this makes JSON saving non-deterministic in Python 3.6, as the order of fields output is dependent on the order within the dict
@@ -110,6 +109,7 @@
 ## Plugins
 - add conll loader to **PluginsSheet** (thanks @polm)
 - remove livesearch
+- add clickhouse loader
 
 ## Commands
 - if `options.some_selected_rows` is True, `setcol-expr`, `setcol-iter`, `setcol-subst`, `setcol-subst`, `setcol-subst-all` will return all rows, if none selected
